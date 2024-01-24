@@ -1,0 +1,24 @@
+missing 7drl goals
+
+ - story
+   - human quests - done
+   - hell quests
+     - NEXT: distribute evidence to be found
+ - content
+   - skills/spells
+     - 6 Archer Skills
+     - 6 Mage Spells
+     - 6 Warrior Skills
+   - uniques
+   - items
+   - monsters
+   - status effects
+   - spawn balancing
+ - progression (last)
+   - combat balance
+   - stat balance
+ - ui/ux (very last)
+   - mouse & keyboard (& gamepad)
+   - menus & options
+   - game over/won screen
+   - qol stuff

@@ -1,0 +1,607 @@
+TODO
+====
+2. Add the leveling mechanic
+3. Add classes & class skills
+4. Add random dungeon generation -> TEMPLATING
+5. Add content
+  - Monsters & Unique Monsters
+  - Items & Unique Items
+  - Effects & Enchantments
+  - Barebones story & quests
+6. Improve UI/UX
+  - Allow inventory management via Keyboard
+  - Hotkeys for skills/items
+  - Allow running by holding down the movement key
+  - Enable O + Tab for spellcasting by selecting a default spell
+  - Add lerping to the camera
+  - Add Bouncy movement (https://youtu.be/xSYVQc7cH-4?si=ENFimLF_SnO8tM-I&t=1034)
+  - Add screenshake
+  - Add hit flashes
+  - Really nice sound fx, especially for level up, item pickup, shrine activation, slash and kill
+  - Make it Received Quests and Level Ups much more obvious
+  - Make the light from torches flicker
+7. Bugfixes
+  - SetActorToDowned() is not working properly, corpses are stacking
+  - Dropping items on the ground will not work properly and can drop out of bounds crashing the program
+  - Don't place items on lava
+  - Items can be dropped on top of stairs, as can blood decals
+  - TargetedActions will trigger EndTurn on Targeting
+  - Blood decals are never deleted between levels and will just keep stacking
+  - Lucifer's Set Pieces flames don't animate
+
+8. Design
+ - Write maps to disk when changing levels
+ - Don't keep everything in memory, only the current level
+
+
+streamline
+==========
+potions, scrolls, wands, staves..
+wands only!
+
+stats?
+HP, SP (magic, skills, running),
+Dmg, Def, Magic, Speed
+
+
+cool ideas
+==========
+an altar to the loot god right beside the stairs down / or just one in town?
+you can sacrifice items and gold and ask for a favor:
+ - decrease the chance a specific item type from the loot pool
+ - banning a specific affix from the loot pool
+ - increasing the chance for a specific item type
+
+reverse diablo..
+allow the casual plathrough which plays out like diablo 1 in turnbased angband style.
+you can also quickly change sides by killing the towns people, which will summon lucifer and he'll ask you to join him.
+in this scenario lucifer will explain his whole plan when the player finishes the game.
+
+however, perceptive players can spot clues that the real evil in this setting are the humans to begin with.
+the last boss, lucifer morningstar will explain himself after his defeat and give clues to the player.
+he will tell you where to find the (die magische lupe) which will allow you to search for more evidence.
+this will incentivize the player to play the game again, find the clues, and ultimately join lucifer in his quest to destroy humanity.
+
+too much time stuff
+===================
+gameplay modes
+ - story mode - default
+ - rogue mode (one short dungeon, no town, no classes, no skills, only items)
+ - angband mode (one long dungeon, one town, classes, skills, items)
+ - overworld mode (one explorable overworld, with several dungeons & towns)
+ - real-time
+ - real-time coop
+
+
+Order Of Stuff
+==============
+1. First playthrough -> Kill Lucifer, unlock NG+
+2. Second playthrough on NG+ with that one item -> Join Lucifer and kill the king, Change menu options into Human Start / Demon Start
+
+
+
+Portal Fragmentation
+-> Basically telefrags as a spell
+
+go libs for grid based rpg design
+=================================
+
+1. Event driven architecture for world state changes
+   - Example use-case:
+     1. An item that doubles the effect of any healing the player receives, even above the max hp
+     2. It won't proc on resting
+   - Also handles animations
+2. Stats & Resources
+   - Generic Containers for Health, Mana, Stamina, etc
+   - Generic Stats for Strength, Dexterity, Intelligence, etc
+   - Incl. modifiers for temporary changes
+3. Loot Generation
+   - Diablo Style Loot generation with prefixes and suffixes, sets & unique items
+4. Grid Based Rendering helpers
+   - Bitmapfont rendering
+   - LDTK Tilemap rendering
+   - UI elements
+
+=> When this has been implemented, I can start working on the actual game
+
+Roguelite progression elements
+==============================
+
+1. Unlock new classes
+2. Unlock new lore
+3. Carry over one item from the previous run into the next run, only once per item
+4. Unlock new items that will spawn in the world (?)
+5. Cosmetic unlocks
+
+
+Pacing
+======
+
+1. Very easy start, but also easy to die
+2. Power level fast
+3. Kill the final boss in about 1 hr
+4. Play the Next Game+ with the same character for new rewards
+5. After finishing NG+, the game will unlock infinite mode, with progressively harder enemies
+
+Game
+====
+
+0. From Rogue: The 2D random grid based dungeon, move to attack, turn based
+1. From Angband, Diablo 1 & 2: Plot, Setting, Quests & Loot
+2. From ToME: Juiciness, No Mana & Health potions, but instead the inscriptions system
+3. From Brogue or DCSS: Weapons have specific attack patterns (axes are different from swords)
+4. From that other Roguelike: Maneuvers, using the environment to your advantage
+
+
+Weapons
+=======
+
+1. Axes
+   - 1H: 1 tile in front, 1 tile to the left and right
+   - 2H: Can attack all 9 tiles around the player
+
+2. Polearms / Spears / Staves
+   - 1H: Range 2, When moving into an adjacent tile, polearms get a free attack
+   - 2H: Range 2, When moving into range (1-2 tiles away), polearms get a free attack
+
+3. Daggers / Gauntlets / Claws
+   - 1H: Will always apply weapon procs 100% of the time, ignore 1/2 armor (Buckler max shield)
+   - 2H: Will always apply weapon procs 100% of the time (twice), ignore armor
+
+4. Maces / Hammers
+   - 1H: 50% chance to reduce enemy armor by 1
+   - 2H: 100% chance to reduce enemy armor by 1
+
+5. Swords
+   - 1H: Synergy with shields, increased chance to block & hit
+   - 2H: Can attack all 9 tiles around the player
+
+6. Shields
+   - Give chance to block
+     -> Block Chance : Clamp(0, 100, Dex(defender) + 2 * (Level(defender) - Level(attacker)) + ClassBonus(defender))
+   - Can be used to charge, to inflict knockback, stun, knockdown, etc
+
+Direction
+=========
+
+1. Remove the tedium
+  - Fast entry into the game, fast travel, etc.
+  - Time from start to first kill < 1 minute
+  - No food, no instadeath, no hidden doors
+  - Simple controls
+  - Fast progression, no grinding
+  - Prevent just using the strongest skill over and over again
+
+2. Must feel good to play
+  - Juiciness
+  - Sound
+  - Responsive Controls
+  - Constant dopamine hits
+  - Enable combos and synergies for the player to break the damage ceiling
+
+3. Play your build
+  - Build should not depend on random drops
+  - All items usable by all classes, given the stat requirements
+  - Items that don't fit your build can be stripped for their inscriptions
+
+4. Classes / Races / Skills / Items?
+  - Choose your class -> starting gear / attributes
+  - Allow to choose a subset of class specific skills, that will be ensured during the run
+    - Although their relative strength is not guaranteed, their sum of power is
+  - Items can be used by all classes, given the stat requirements
+  - Items will drop with skills from every class
+
+Status Effects
+==============
+ - Invisible (not visible)
+ - Stunned (no actions)
+ - Blinded (no vision, high chance to miss even when attacking the right direction)
+ - Slow / Hasted (less / more actions)
+ - Scared (run away)
+ - Silenced (no magic) / Pacified (no attacks)
+ - Poisoned (damage over time)
+ - Confused (random actions)
+ - Charmed (change faction)
+ - Berserker Rage (random attacks) / Haywire (random magic)
+ - Flying (can move over some obstacles, chance to dodge melee attacks)
+ - Increased/reduced stats/resources temporarily
+
+
+MVP Tiles
+=========
+
+Environment
+- Grass
+- Dirt
+- Mountain
+- MountainWithEntrance
+- Water
+- WoodenBridge
+- Tree
+- DungeonFloor
+- DungeonWall
+- DungeonWallWithShading
+- OpenDoor
+- ClosedDoor
+- StairsUp
+- StairsDown
+
+Effects
+- Blood
+- Fire
+- Lightning
+- HitEffects
+
+Items
+- Potions
+- Scrolls
+- Wands
+- Common, Magical, Unique Items
+ - Swords
+ - Clubs/Maces
+ - Axes
+ - Staves
+ - Bows
+ - Armor
+ - Shields
+
+Characters
+ - Rogue
+ - Warrior
+ - Sorcerer
+
+Monsters
+ - Fallen
+ - Goat Man
+ - Goat Man Archer
+ - Hidden
+ - Scavenger
+ - Skeleton
+ - Skeleton Archer
+ - Skeleton Captain
+ - Winged Fiend
+ - Zombie
+ - Gargoyle
+ - Horned Demon
+ - Magma Demon
+ - Overlord
+ - Spitting Terror
+ - Balrog
+ - Hell Knight
+ - Lightning Demon
+ - Succubus
+ - Viper
+ - Mage
+
+Unique Monsters
+ - The Butcher
+ - Skeleton King
+ - Gharbad the Weak
+ - Zhar the Mad
+ - Warlord of Blood
+ - Archbishop Lazarus
+ - Black Jade
+ - Red Vex
+ - Snotspill
+ - Lachdanan
+ - Blackjade
+
+Unique Monsters / Quest Stuff
+=============================
+Diablo I
+Level 1 - None
+Level 2 - Butcher Boss & Poisoned Water supply
+Level 3 - King Leoric's Tomb: Skeleton King Boss & Skeletons
+Level 4 - Stolen Tavern sign & Gharbad the Weak demon
+Level 5 - Minor Puzzles -> Unique Armor & Quest Item - MacGuffin
+Level 6 - Chamber of Bone -> Room of magical Items & Guardian Spell
+Level 7 - Minor Puzzles to open hidden passage -> Unique Amulet
+Level 8 - Unique Boss Zhar the Mad -> Unique Item Drop
+Level 9 - Black Mushroom Quest (3x back & forth between lvl9 and town) -> Spectral Elixir (+3 to all attributes permanently)
+Level 10 - Find Anvil for Smith -> Unique Sword
+Level 13 - Minor Puzzles -> Unique Boss Fight -> Unique Item Drop & 4 magical weapons & 2 magical armors
+Level 14 - Lost Knight needs Elixir -> Unique Helmet
+Level 15 - Main Events & Quest Stuff & Unique Boss Fight -> Unique Item Drop & 3 magical items
+Level 16 - Final Boss Fight
+
+Our Game
+Level 1 - Cathedral - None
+Level 2 - Cathedral - Meat Jack - SET PIECE IS THERE
+Level 3 - Catacombs - Poisoned Water supply - SET PIECE IS THERE
+Level 4 - Catacombs - King Zedek's Tomb: Skeleton King Boss & Skeletons - SET PIECE IS THERE
+Level 5 - Caves - The Weak demon
+Level 6 - Caves - Minor Puzzles -> Unique Armor & Quest Item - MacGuffin
+Level 7 - Hell - Chamber of Bone -> Room of magical Items & Guardian Spell
+Level 8 - Hell - Minor Puzzles to open hidden passage -> Unique Amulet & Lucifer - SET PIECE IS THERE
+Level 9 - Dungeon - Unique Boss Butchering Adventurers -> Unique Sword
+Level 10 - Dungeon - Secret(?)Unique Boss the @ ("I am what you could've been" - Uses the best items and skills the player could've acquired this run) -> Unique Sword
+Level 11 - Merchant District -
+Level 12 - Merchant District - Unique Boss Shekel -> Unique Helmet
+Level 13 - Town - Final Confrontation with King Kirioth -> Unique Item Drop & 4 magical weapons & 2 magical armors
+
+Progression..
+
+==Starting Situation
+
+Starting Player Stats
+HP: 10-30
+MP: 0-2
+
+Starting Items
+Dmg.: 2-6
+AC: 1-5
+
+Mid Game Items
+Dmg.: 6-12
+AC: 6-23
+
+End Game Items
+Dmg.: 12-30
+AC: 24-100
+
+Starting Enemy
+HP: 3-10
+AC: 0-1
+Dmg.: 1-5
+
+Mid Game Enemy
+HP: 10-500
+AC: 2-50
+Dmg.: 5-30
+
+End Boss Enemy
+HP: 1000
+AC: 60
+Dmg.: 30-60
+
+==End Situation
+
+Player
+HP: ???
+MP: ???
+Weapon Dmg.: 12-30 (+ X)
+Armor AC: 24 (DCSS) - 100 (Diablo)
+
+
+
+Equipment Types:
+Common - White
+Magical - Blue - max 2 magical properties
+Unique - Gold - > 2 magical properties
+
+Base Stats:
+https://diablo-evolution.net/index.php?pageid=chars
+
+Monsters:
+https://diablo-archive.fandom.com/wiki/Monsters_(Diablo_I)
+https://diablo-archive.fandom.com/wiki/Category:Diablo_I_Unique_Monsters
+https://diablo-evolution.net/index.php?pageid=enmp1
+
+Spells:
+https://strategywiki.org/wiki/Diablo/Spells
+
+Affixes:
+https://diablo-archive.fandom.com/wiki/Affixes_(Diablo_I)
+
++ Strength
++ Dexterity
++ Intelligence
++ All Attributes
++ HP
++ Mana
++% Armor Class
++% Damage Done
++ Damage Done
+- Damage Taken
++ Fire Damage
++ Lightning Damage
+% Steal Life
+% Steal Mana
++% Resist Magic
++% Resist Fire
++% Resist Lightning
++% Resist All
++ Spell Level
+x Charges
+Armor Penetration
+
+https://user.xmission.com/~trevin/DiabloIIv1.09_Magic_Properties.shtml
+https://github.com/whipowill/d2-113c-txt/tree/master/Data/Global/Excel
+
+Quests #1
+Kill Butcher (Shekel's Son) - a failed super soldier experiment by the king
+Poisoned Water Supply - the merchant leader has poisoned the water supply with his potion production
+Kill Skeleton King (King Zedek) - a good king who was betrayed by his consular and was backstabbed by his brother
+
+Kill Lucifer (The Morningstar, the fallen one, prince of darkness) - the fallen angel, the first to rebel against the false god and the scapegoat for all the evil in the world
+
+Quests #2
+Kill the butchering adventurers - basically hobo murderers
+Bring piece to the skeleton army - bury their remains
+Kill the ruthless merchant leader (Shekel) - who poisoned the water and exploited the workers
+Kill the evil king (Kirioth) - who backstabbed the skeleton king and created the butcher
+
+How can we reduce the randomness of item drops enough to make the game fun?
+
+What feeling should that first half of the game have?
+=====================================================
+ - a false sense of security
+ - not too long and not too short, about 20 minutes?
+ - an engaging difficulty curve and lots of tropes, funny references and unique encounters to keep the player from thinking too much
+ - a small peek in difficulty after the first fourth of the game
+ - fighting through hell should feel hard, the hardest part of the game possibly
+
+What feeling should that second half of the game have?
+======================================================
+ -
+
+The Crimes of the people
+========================
+1. Shekel poisoned the water supply and framed the workers union
+ - Report from the workers found at the poisoned water supply
+2. Abel backstabbed the skeleton king - Last will of the dead good king (now skeleton king)
+ - Last will of the dead good king (now skeleton king), at his tomb
+3. Kirioth persuaded both of them to follow his plan and promised the wealth and status
+Kirioth sacrificed some poor people when he summoned Lucifer, trying to control him
+ - Shekel's notes on Kirioth's plan, security to be used for blackmailing, in Shekel's house
+4. Shekel & Kirioth are responsible for the creation of meat jack
+ - List of subject for the super soldier experiment, there is a lab in the caves.-- TODO
+
+
+
+Lore Items
+==========
+List of subject for the super soldier experiment
+Manifest of the Workers union
+Letter to the leader of the union from the merchant
+Last will of the dead good king (now skeleton king)
+Vow of the eternal army to always be loyal to their king
+Apocrypha describing the fall of lucifer
+A secret note to the current king detailing shady business affairs
+
+Warrior's Prayer
+Gods of war I call you, my sword is by my side
+I seek a life of honor, free from all false pride
+I will crack the whip with a bold mighty hail
+Cover me with death if I should ever fail
+Glory, majesty, unity, hail, hail, hail
+
+Til The Blood On Your Sword Is The Blood Of The King
+
+Unique Items
+============
+
+And they placed in his hands a sword made for him called Vengeance
+Forged in brimstone and tempered by the woeful tears of the Unavenged
+
+And to carry him up on his journey back to the upper world
+They brought forth their Demon horse called Black Death
+A grim steed so fiercely might and black in colour
+That he could stand as one with the darkness
+Save from his burning eyes of crimson fire
+
+Sword of Steel
+battle ax
+spiked club
+great hammer of war
+
+
+
+
+Meat Jack Dialogue
+==================
+
+ But I was just a young boy
+ when I was taken from my home
+ and forced to work in the
+ kitchens of the castle.
+
+Lucifer Dialogue
+================
+Before battle
+
+"I am the prince of darkness.
+The fallen one, the first to rebel against the false god.
+Your war on hell is meaningless.
+You will never defeat me, human.
+If you choose the sword, you will die by the sword."
+
+After battle
+Lucifer: "These bones may be broken, but my spirit can't die.
+We'll meet again.
+
+I will find you, should you someday decide to bring
+righteous vengeance to the true source of evil in this world."
+
+Lucifer's Rant
+
+"So you still don't understand, do you?"
+"Think about it, what is the reason you are unable to defeat me?"
+"Or any human in the centuries before?"
+"It's simple, really."
+"You are fighting a mere idea, a concept you brought to life yourself."
+"And for what pitiful reason did you invent me?"
+"As a scapegoat for all your own evil deeds."
+"Like a child, you blame me for what is really your own fault."
+"Look around you and open your eyes to the truth."
+"The true enemy of mankind is, and always has been, mankind itself."
+
+https://nethackwiki.com/wiki/Rogue_(game)
+http://www.rots.net/rogue/magic.html
+
+Minimal Stats
+=============
+
+= Item
+Armor
+Damage
+Speed
+
+= Char        	Warrior 	Rogue	Mage
+Level
+HP				high 		medium	low
+MP				low			medium	high
+Speed           medium  	high	low
+Strength		high		medium	low
+Range			medium    	high	high
+
+
+Angband
+=======
+
+Good:
+ - Town
+ - Loot
+ - Descend/Ascend at own pace (also enables level scumming)
+ - Clear & simple goal
+ - Shopping
+ - Level feelings (but that also means people are just going to skip bad rolls)
+ - Uniques
+ - The use of light sources & food (but they are always needed, so reduce the inventory space)
+   - Give them dedicated slots, that don't subtract from inventory space
+
+Bad:
+ - UI (especially Inventory/Storage management)
+ - No active class Skills, only magic/no-magic & staves/wands/rods
+   - Some class skills would be nice
+ - No variation in gameplay even when leveling up or descending
+   - The skills should get mechanically more powerful, not just the numbers
+   - Different levels should offer different environmental challenges & puzzles & mechanics
+ - Too long
+   - Reduce the amount of levels
+ - Environment is too static
+ - Levels too empty and not varied enough
+   - Smaller and more densely packed levels as a default
+ - Resistance stacking is too important
+   - Remove damage types completely and go with mechanical effects instead
+ - Too complex for its own good
+ - Enemies have unfair attacks (reduce stats, massive damage, damage equipment, burn scrolls, blind, stund, paralyze, etc.)
+   - Enable situational counters that don't depend on having the right "anti-item" in your inventory
+   - Reduce the impact of these effects (only temporary, only on certain "brittle" items, etc.)
+ - Many items become useless fast
+   - Provide additional uses for beginner items
+ - Vendors don't always offer neccessary items (potions, basic sling, etc.)
+   - Basics should always be available
+ - Having to grind for the final gear needed for the final boss
+   - The final boss should be beatable with the gear you find on the way
+   - But there should be the option to grind to a certain extent, to make the fight easier. this should be interesting though
+ - Not being able to sell items just feels wrong
+   - Allow selling items?
+
+Potions?
+
+Provide consumables for basic neccessities and allow finding of items that provide these necceessites unlimited or rechargable.
+Curses can be cool if implemented correctly, save this for later.
+
+Consumables:
+Heal potions
+Mana potions
+Increase Armor
+Increase Damage
+Increase Speed
+Phase Door
+Torches
+Word of Recall
+Enchant Weapon/Armor
+Deep Descent
+

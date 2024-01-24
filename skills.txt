@@ -1,0 +1,107 @@
+= Archer
+All Archer skills apply the current ranged attack speed.
+
+Scale damage with Char Level?
+Hit chance?
+
+== Archer Combos
+Debilitating Shot -> Needs to proc after every-time an actor was hit by the archer's ranged attack
+				     We'll just add a hook that removes itself after one attack
+Multi-Shot -> Needs to proc right before the archer triggers any ranged attack
+		      it will also convert a targetedAction into an untargetedAction
+
+Multi-shot + Normal Attack
+Multi-shot + Trick Shot
+Multi-shot + Arrow Rain
+Multi-shot + Man Stopper
+Multi-shot + Jumpstart
+
+Debilitating Shot + Normal Attack
+Debilitating Shot + Trick Shot
+Debilitating Shot + Arrow Rain
+Debilitating Shot + Man Stopper
+Debilitating Shot + Jumpstart
+
+Multi-shot + Debilitating Shot + Normal Attack
+Multi-shot + Debilitating Shot + Trick Shot
+Multi-shot + Debilitating Shot + Arrow Rain
+Multi-shot + Debilitating Shot + Man Stopper
+Multi-shot + Debilitating Shot + Jumpstart
+
+
+== Multi-Shot (Sustained)
+Scale Shot count with skill level (2-6)
+While active, all ranged attacks/skills will shoot multiple arrows,
+but cannot be aimed individually.
+The mana cost is increased when using other skills
+and multiplied by the number of arrows fired.
+
+== Arrow Rain
+Scale area of effect with skill level (3x3 - 5x5)
+Hits random targets in the area of effect.
+Guaranteed to hit all immobile targets.
+
+== Trick Shot
+Scale penetration count with skill level (2-Inf.)
+Scale bounce count with skill level (2-6)
+
+One Arrow will penetrate all enemies in a line,
+bounce off any walls, and penetrate all enemies in a line again.
+
+== Debilitating Shot (Untargeted, One-off)
+Scale duration with skill level (2-6)
+Chance to inflict stunned/slowed/confusion/rage/blinded/damage over time
+Will always cause immobilized when used against an enemy adjacent to a wall.
+Doesn't spend a whole turn. Very quick action.
+
+Your next ranged attack/skill will cause a debuff.
+
+== Man Stopper
+Scale knockback distance with skill level (1-5)
+Knockback any enemy hit.
+Enemies colliding with walls take more damage.
+
+== Jumpstart
+Scale jump distance with skill level (1-5)
+Requires:
+ - Player has moved towards enemy and is now adjacent to him
+ - There is free space behind the enemy
+
+Jump over the enemy and shoot him in the back for increased damage.
+If you start the jump adjacent to a wall, the enemy will be pushed into that position.
+
+= Warrior
+All Warrior skills apply the current melee attack speed.
+
+== Crush
+Scale damage with skill level (20%-200%)
+Deal damage to up to two enemies in a line.
+Enemies adjacent to walls take more damage.
+
+== Shout
+Alerts all enemies on the map to your presence.
+Causes fear in all visible enemies.
+
+== Swing
+
+== Whirlwind of Doom
+Scale distance with skill level (1-5)
+Will move the player in a straight line, dealing damage to all enemies in the way.
+Enemies adjacent to walls take more damage.
+
+Triumph of steel
+Call to Odin
+
+== Earth Shaker
+Scale area with skill level (1-5)
+Rush forward to a specified location, deal damage to all enemies in a specified area and push them back.
+Enemies adjacent to walls take more damage.
+
+Mage
+
+Spells
+    Black Clouds
+    Burning rain
+    Great thunder
+    Eternal vow
+    Bat out of hell

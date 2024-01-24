@@ -1,0 +1,14 @@
+%rec: default
+#DefaultFont: assets/fonts/exocet-blizzard-light.ttf
+
+AutoPickup: true
+AudioEnabled: true
+KeepPlayerCentered: true
+ActorBobbingEnabled: true
+CardinalMovementOnly: false
+DrawTilesBehindActors: false
+DrawTilesBehindItems: false
+DefaultFont: assets/fonts/exocet-blizzard-light.ttf
+DefaultFontSize: 18
+WindowWidth: 1280
+WindowHeight: 800
