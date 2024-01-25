@@ -101,7 +101,7 @@ func (d OnEquipHook) After(action Action, engine Engine) []Action {
 	}
 	//actor := changeEquipmentAction.GetAttacker()
 	/*if actor == state.GetPlayer() {
-	      return OneAction(NewEndPlayerTurnAction(d, changeEquipmentAction.GetDelayInAut()))
+	      return OneAction(NewEndPlayerTurnAction(d, changeEquipmentAction.GetTimeNeededInAut()))
 	  }
 	*/
 	return nil

@@ -29,12 +29,14 @@ type UntargetedAction struct {
 	turnsUntilRemoval      int
 	icon                   int32
 	description            string
+	timeNeededInAut        int
 }
 
 func NewUntargetedAction(name UntargetedActionName, icon int32) *UntargetedAction {
 	return &UntargetedAction{
 		name: name,
 		icon: icon,
+		timeNeededInAut: 10,
 	}
 }
 
@@ -111,18 +113,27 @@ func (a *UntargetedAction) GetDescription() string {
 	return a.description
 }
 
+func (a *UntargetedAction) GetTimeNeededInAut() int {
+	return a.timeNeededInAut
+}
+
+func (a *UntargetedAction) SetNoTimeNeeded() {
+	a.timeNeededInAut = 0
+}
+
 type TargetHighlight struct {
 	Pos   geometry.Point
 	Color color.Color
 }
 type TargetedActionName string
 type TargetedAction struct {
-	getTargetRules TargetRulesProvider
-	hitPattern     AoEResolver
-	onSelected     SelectionHandler
-	name           TargetedActionName
-	icon           int32
-	description    string
+	getTargetRules  TargetRulesProvider
+	hitPattern      AoEResolver
+	onSelected      SelectionHandler
+	name            TargetedActionName
+	icon            int32
+	description     string
+	timeNeededInAut int
 }
 
 func NewTargetedAction(name TargetedActionName, hitPattern AoEResolver, onSelected SelectionHandler, getTargetRules TargetRulesProvider) *TargetedAction {
@@ -131,6 +142,7 @@ func NewTargetedAction(name TargetedActionName, hitPattern AoEResolver, onSelect
 		onSelected:     onSelected,
 		name:           name,
 		getTargetRules: getTargetRules,
+		timeNeededInAut: 10,
 	}
 }
 func (t *TargetedAction) Counter() int {
@@ -176,8 +188,8 @@ func (t *TargetedAction) GetTargetingRules(actor *Actor, currentMap *gridmap.Gri
 	return t.getTargetRules(actor, t.hitPattern, currentMap)
 }
 
-func (t *TargetedAction) GetDelayInAut() int {
-	return 10
+func (t *TargetedAction) GetTimeNeededInAut() int {
+	return t.timeNeededInAut
 }
 
 func (t *TargetedAction) GetDescription() string {

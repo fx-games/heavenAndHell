@@ -8,6 +8,7 @@ ActorBobbingEnabled: true
 CardinalMovementOnly: false
 DrawTilesBehindActors: false
 DrawTilesBehindItems: false
+DrawTilesBehindObjects: false
 DefaultFont: assets/fonts/exocet-blizzard-light.ttf
 DefaultFontSize: 18
 WindowWidth: 1280

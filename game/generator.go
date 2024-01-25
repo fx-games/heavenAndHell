@@ -156,7 +156,7 @@ func (g *GameInstance) addStairs(emptyMap *gridmap.GridMap[*common.Actor, common
 		dungeonLevel := levelDef.DungeonLevel
 		if dungeonLevel == 1 {
 			emptyMap.AddTransitionAt(mapEntryPosition, gridmap.Transition{
-				TargetMap:      "Town",
+				TargetMap:      string(LevelNameTown),
 				TargetLocation: "to_cathedral",
 			})
 		} else {

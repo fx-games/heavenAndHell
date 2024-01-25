@@ -26,8 +26,10 @@ type Configuration struct {
 	AutoPickup            bool
 	CardinalMovementOnly  bool
 	KeepPlayerCentered    bool
+
 	DrawTilesBehindActors bool
 	DrawTilesBehindItems  bool
+	DrawTilesBehindObjects bool
 }
 
 func (c Configuration) ToRecord() recfile.Record {
@@ -47,6 +49,10 @@ func (c Configuration) ToRecord() recfile.Record {
 		{
 			Name:  "DrawTilesBehindItems",
 			Value: recfile.BoolStr(c.DrawTilesBehindItems),
+		},
+		{
+			Name:  "DrawTilesBehindObjects",
+			Value: recfile.BoolStr(c.DrawTilesBehindObjects),
 		},
 		{
 			Name:  "DefaultFont",
@@ -112,6 +118,7 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		KeepPlayerCentered:        configMap.GetBoolOrTrue("KeepPlayerCentered"),
 		DrawTilesBehindActors: configMap.GetBoolOrFalse("DrawTilesBehindActors"),
 		DrawTilesBehindItems:  configMap.GetBoolOrFalse("DrawTilesBehindItems"),
+		DrawTilesBehindObjects: configMap.GetBoolOrFalse("DrawTilesBehindObjects"),
 		WindowSize: geometry.Point{ //1280, Y: 800
 			X: configMap.GetIntOrDefault("WindowWidth", 1280),
 			Y: configMap.GetIntOrDefault("WindowHeight", 800),

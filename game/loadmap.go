@@ -44,6 +44,8 @@ func (g *GameInstance) NewGridMapFromLDTK(mapName string) (*gridmap.GridMap[*com
 			signText := entity.PropertyByIdentifier("Text").AsString()
 			textLines := strings.Split(signText, "\n")
 			g.addSignFromEntity(loadedMap, textLines, pos)
+		} else if typeOfEntity == "Door" {
+			loadedMap.AddObject(common.NewDoor(common.IconOpenDoor, common.IconClosedDoor), pos)
 		}
 
 	}

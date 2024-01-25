@@ -15,6 +15,9 @@ const (
 	SlotNameTwoHandedWeapon
 	SlotNameArmorTorso
 	SlotNameArmorHead
+	SlotNameArmorFeet
+	SlotNameArmorHands
+	SlotNameArmorBack
 	SlotNameQuickSlot1
 	SlotNameQuickSlot2
 	SlotNameQuickSlot3

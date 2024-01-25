@@ -20,6 +20,7 @@ type BasicLabel struct {
 	shouldClose    bool
 	borderPadding  geometry.Point
 	bounds         geometry.Rect
+	canBeClosed    bool
 }
 
 func (i *BasicLabel) OnCommand(command CommandType) bool {
@@ -36,11 +37,11 @@ func (i *BasicLabel) OnCommand(command CommandType) bool {
 
 func (i *BasicLabel) OnMouseClicked(button ebiten.MouseButton, x int, y int) bool {
 	mousePos := geometry.Point{X: x, Y: y}
-	if !i.bounds.Contains(mousePos) {
-		return false
+	if i.canBeClosed && (!i.bounds.Contains(mousePos) || button == ebiten.MouseButtonRight) {
+		i.shouldClose = true
+		return true
 	}
-	i.shouldClose = true
-	return true
+	return false
 }
 
 type Tooltip interface {
@@ -261,4 +262,8 @@ func (i *BasicLabel) SetBorderPadding(borderPadding geometry.Point) {
 
 func (i *BasicLabel) SetCentered() {
 	i.centered = true
+}
+
+func (i *BasicLabel) SetCanBeClosed(value bool) {
+	i.canBeClosed = value
 }

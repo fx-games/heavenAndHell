@@ -40,6 +40,9 @@ func addRandomArmor(state actions.WorldState, source *rand.Rand, emptyMap *gridm
 		NewArmor,
 		NewHelmet,
 		NewShield,
+		NewBoots,
+		NewCape,
+		NewGloves,
 	}
 	creationFunction := createFunctions[source.Intn(len(createFunctions))]
 	item := creationFunction(state, source, dungeonLevel)
@@ -72,6 +75,57 @@ func NewHelmet(state actions.WorldState, source *rand.Rand, qLevel int) *GameIte
 		BaseArmor:  2,
 		Durability: stats.NewResource(0, flatFunc(20), 20),
 		Type:       common.ArmorTypeHelmet,
+	}
+
+	baseItem.SetArmorComponent(armorPart)
+	return &GameItem{
+		BaseItem: baseItem,
+	}
+}
+
+func NewGloves(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
+	baseItem := common.NewBaseItem(state.GetPlayer, "a pair of gloves", common.IconItemGloves1, common.SlotNameArmorHands, 150)
+	baseItem.SetCategory(common.ItemCategoryArmor)
+	baseItem.SetQualityLevel(1)
+
+	armorPart := &common.ArmorStats{
+		BaseArmor:  2,
+		Durability: stats.NewResource(0, flatFunc(20), 20),
+		Type:       common.ArmorTypeGloves,
+	}
+
+	baseItem.SetArmorComponent(armorPart)
+	return &GameItem{
+		BaseItem: baseItem,
+	}
+}
+
+func NewBoots(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
+	baseItem := common.NewBaseItem(state.GetPlayer, "a pair of boots", common.IconItemBoots1, common.SlotNameArmorFeet, 150)
+	baseItem.SetCategory(common.ItemCategoryArmor)
+	baseItem.SetQualityLevel(1)
+
+	armorPart := &common.ArmorStats{
+		BaseArmor:  2,
+		Durability: stats.NewResource(0, flatFunc(20), 20),
+		Type:       common.ArmorTypeBoots,
+	}
+
+	baseItem.SetArmorComponent(armorPart)
+	return &GameItem{
+		BaseItem: baseItem,
+	}
+}
+
+func NewCape(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
+	baseItem := common.NewBaseItem(state.GetPlayer, "a cape", common.IconItemCape1, common.SlotNameArmorBack, 150)
+	baseItem.SetCategory(common.ItemCategoryArmor)
+	baseItem.SetQualityLevel(1)
+
+	armorPart := &common.ArmorStats{
+		BaseArmor:  2,
+		Durability: stats.NewResource(0, flatFunc(20), 20),
+		Type:       common.ArmorTypeCape,
 	}
 
 	baseItem.SetArmorComponent(armorPart)

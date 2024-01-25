@@ -19,6 +19,11 @@ type State struct {
 	townMapSpawn        geometry.Point
 	deepestDungeonLevel int
 	flags               *Flags
+	playerStashInTown   *Inventory
+}
+
+func (s *State) GetPlayerStashInTown() *Inventory {
+	return s.playerStashInTown
 }
 
 func NewState() State {
@@ -27,6 +32,7 @@ func NewState() State {
 		deepestDungeonLevel: 1,
 		townMaps:            make(map[string]*gridmap.GridMap[*Actor, Item, Object]),
 		flags:               NewFlags(),
+		playerStashInTown:   NewInventory(32),
 	}
 }
 

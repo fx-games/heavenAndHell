@@ -23,7 +23,7 @@ func addRandomAccessory(state actions.WorldState, source *rand.Rand, emptyMap *g
 }
 
 func NewStarGlass(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "the star-glass", common.IconItemTorch, common.SlotNameLightSource, 150)
+	baseItem := common.NewBaseItem(state.GetPlayer, "the star-glass", common.IconItemStarGlass, common.SlotNameLightSource, 150)
 	baseItem.SetCategory(common.ItemCategoryLightSource)
 	baseItem.SetQualityLevel(5)
 
@@ -41,7 +41,7 @@ func NewStarGlass(state actions.WorldState, source *rand.Rand, qLevel int) *Game
 }
 func NewLantern(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
 	charges := 7500
-	baseItem := common.NewBaseItem(state.GetPlayer, "a lantern", common.IconItemTorch, common.SlotNameLightSource, 150)
+	baseItem := common.NewBaseItem(state.GetPlayer, "a lantern", common.IconItemLantern, common.SlotNameLightSource, 150)
 	baseItem.SetCategory(common.ItemCategoryLightSource)
 	baseItem.SetQualityLevel(1)
 	// real torch

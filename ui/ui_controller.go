@@ -107,17 +107,18 @@ func (u *UIController) OnCommand(command CommandType) bool {
 func (u *UIController) OnMouseClicked(button ebiten.MouseButton, screenX int, screenY int) bool {
 	u.isMouseCapturedByUI = false
 
+	if u.IsUIVisible() && u.GetTopModal().OnMouseClicked(button, screenX, screenY) {
+		return true
+	}
+
 	for _, overlay := range u.overlays {
 		if handled := overlay.OnMouseClicked(button, screenX, screenY); handled {
 			u.isMouseCapturedByUI = true
-			return handled
+			return true
 		}
 	}
 
-	if !u.IsUIVisible() {
-		return false
-	}
-	return u.GetTopModal().OnMouseClicked(button, screenX, screenY)
+	return false
 }
 
 func (u *UIController) OnMouseMoved(screenX int, screenY int) (bool, Tooltip) {
@@ -186,6 +187,7 @@ func (u *UIController) OpenTextWindow(buffer []util.LabelText) *BasicLabel {
 		return nil
 	}
 	textWindow := NewCenteredTextLabel(u)
+	textWindow.SetCanBeClosed(true)
 	textWindow.SetText(buffer)
 	textWindow.SetBorderPadding(geometry.Point{X: 15, Y: 15})
 	u.PushWidget(textWindow)
@@ -196,6 +198,15 @@ func (u *UIController) OpenInventoryOverlay(pos, tileSize geometry.Point, dataSo
 	inventory.SetShowEmptySlots(true)
 	inventory.SetShowCounter(true)
 	u.PushOverlay(inventory)
+	return inventory
+}
+
+func (u *UIController) OpenInventoryModal(pos, tileSize geometry.Point, dataSource IconDataSource) *IconOverlay {
+	inventory := NewIconOverlay(u, pos, tileSize, dataSource)
+	inventory.SetShowEmptySlots(true)
+	inventory.SetShowCounter(true)
+	inventory.SetCanBeClosed(true)
+	u.PushWidget(inventory)
 	return inventory
 }
 

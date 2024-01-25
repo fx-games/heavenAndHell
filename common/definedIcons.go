@@ -138,6 +138,8 @@ const (
 
 	IconItemScroll int32 = 139
 	IconItemTorch int32 = 352
+	IconItemLantern int32 = 247
+	IconItemStarGlass int32 = 248
 
 	IconItemRing1   int32 = 129
 	IconItemRing2   int32 = 130
@@ -174,6 +176,36 @@ const (
 	IconItemHelmet          int32 = 211
 	IconItemMagicHelmet     int32 = 212
 	IconItemUniqueHelmet    int32 = 213
+
+
+	IconItemBoots1 	 int32 = 355
+	IconItemBoots2 	 int32 = 356
+	IconItemBoots3 	 int32 = 357
+	IconItemBoots4 	 int32 = 358
+	IconItemBoots5 	 int32 = 359
+	IconItemBoots6 	 int32 = 360
+	IconItemBoots7 	 int32 = 361
+	IconItemBoots8 	 int32 = 362
+	IconItemBoots9 	 int32 = 363
+
+	IconItemGloves1 	 int32 = 383
+	IconItemGloves2 	 int32 = 384
+	IconItemGloves3 	 int32 = 385
+	IconItemGloves4 	 int32 = 386
+	IconItemGloves5 	 int32 = 387
+	IconItemGloves6 	 int32 = 388
+	IconItemGloves7 	 int32 = 389
+	IconItemGloves8 	 int32 = 390
+	IconItemGloves9 int32 = 391
+
+	IconItemCape1 	 int32 = 412
+	IconItemCape2 	 int32 = 413
+	IconItemCape3 	 int32 = 414
+	IconItemCape4 	 int32 = 415
+	IconItemCape5 	 int32 = 416
+	IconItemCape6 	 int32 = 417
+	IconItemCape7 	 int32 = 418
+	IconItemCape8	 int32 = 419
 
 	IconItemShield       int32 = 205
 	IconItemMagicShield  int32 = 206

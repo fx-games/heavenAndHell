@@ -13,6 +13,7 @@ type VendorType string
 
 const (
 	VendorTypeNone    VendorType = ""
+	VendorTypeGeneral VendorType = "VendorGeneral"
 	VendorTypeWands   VendorType = "VendorWands"
 	VendorTypeArmor   VendorType = "VendorArmor"
 	VendorTypeWeapons VendorType = "VendorWeapons"
@@ -630,4 +631,17 @@ func (a *Actor) VisionRange() int {
 
 func (a *Actor) SetCorpseIcon(corpse int32) {
 	a.corpseIcon = corpse
+}
+
+func (a *Actor) CanUseItems() bool {
+	if !a.IsAlive() {
+		return false
+	}
+	if a.HasStatusEffect(StatusStunned) {
+		return false
+	}
+	if a.HasStatusEffect(StatusBerserk) {
+		return false
+	}
+	return true
 }

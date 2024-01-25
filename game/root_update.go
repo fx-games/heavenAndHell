@@ -5,6 +5,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"image/color"
 	"rpg/actions"
+	"rpg/common"
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/ui"
@@ -21,9 +22,10 @@ func (g *GameInstance) Update() error {
 		//lerpedColor := util.LerpColor(color.White, g.globalFlashColor, percentage)
 		g.tileRenderer.SetGlobalScaleColor(colorAsScaledFloat(g.globalFlashColor, 10.0))
 		g.globalFlashColorTicksLeft--
-		if g.globalFlashColorTicksLeft == 0 {
-			g.tileRenderer.SetGlobalScaleColor([4]float32{1, 1, 1, 1})
-		}
+	} else if g.state.GetPlayer().HasStatusEffect(common.StatusBerserk) {
+		g.tileRenderer.SetGlobalScaleColor([4]float32{1.0, 0.5, 0.5, 1})
+	} else {
+		g.tileRenderer.SetGlobalScaleColor([4]float32{1, 1, 1, 1})
 	}
 
 	g.handleMouseInput()
@@ -66,7 +68,7 @@ func (g *GameInstance) handleKeyboardInput() {
 	//  - pick up item
 	//  - quick travel
 
-	g.overrideDontAttackFriendly = ebiten.IsKeyPressed(ebiten.KeyShift)
+	g.shiftIsBeingPressedThisTick = ebiten.IsKeyPressed(ebiten.KeyShift)
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF1) {
 		g.showHelpText()
@@ -250,7 +252,7 @@ func (g *GameInstance) goOneLevelUp() {
 	}
 	currentMap := g.state.GetMap()
 	mapName := currentMap.GetName()
-	if mapName == "Town" {
+	if mapName == string(LevelNameTown) {
 		return
 	}
 

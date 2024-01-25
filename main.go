@@ -39,7 +39,7 @@ func main() {
 		ScreenSize:     userConfig.WindowSize,
 		TileScale:      4.0,
 		LDTKMapFile:    "assets/maps.ldtk",
-		FirstLevelName: "Town",
+		FirstLevelName: string(game.LevelNameTown),
 		FontInfos:      FontInfo{
 			TTFFile: userConfig.DefaultFont,
 			TTFSize: userConfig.DefaultFontSize,

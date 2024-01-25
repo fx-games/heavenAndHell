@@ -24,6 +24,7 @@ func (g *GameInstance) addRandomScroll(source *rand.Rand, emptyMap *gridmap.Grid
 
 func (g *GameInstance) NewHiddenNote(itemName string, messagText []util.LabelText, onRead func()) *GameItem {
     readAction := g.getReadMessage(messagText, onRead)
+    readAction.SetNoTimeNeeded()
     scroll := g.NewScroll(readAction)
     scroll.SetName(itemName)
     scroll.SetUnlimitedCharges()

@@ -269,7 +269,7 @@ func getLevelDefinition(randomSource *rand.Rand, dungeonLevel int) LevelDefiniti
 			{
 				LocationName: "to_town",
 				Target: gridmap.Transition{
-					TargetMap:      "Town",
+					TargetMap: string(LevelNameTown),
 					TargetLocation: "to_catacombs",
 				},
 				IsUp: true,
@@ -279,7 +279,7 @@ func getLevelDefinition(randomSource *rand.Rand, dungeonLevel int) LevelDefiniti
 			{
 				LocationName: "to_town",
 				Target: gridmap.Transition{
-					TargetMap:      "Town",
+					TargetMap:      string(LevelNameTown),
 					TargetLocation: "to_caves",
 				},
 				IsUp: true,

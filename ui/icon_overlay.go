@@ -1,8 +1,8 @@
 package ui
 
 import (
-    "github.com/hajimehoshi/ebiten/v2"
-    "image/color"
+	"github.com/hajimehoshi/ebiten/v2"
+	"image/color"
 	"rpg/common"
 	"rpg/geometry"
 	"rpg/util"
@@ -38,6 +38,9 @@ type IconOverlay struct {
 	isActive                    bool
 	offsetFromBottomRightCorner geometry.Point
 	tileSize                    geometry.Point
+	onClose                     func()
+	shouldClose                 bool
+	canBeClosed                 bool
 }
 
 func NewIconOverlay(uiController *UIController, offsetFromBottomRightCorner, tileSize geometry.Point, dataSource IconDataSource) *IconOverlay {
@@ -89,10 +92,19 @@ func (o *IconOverlay) Layout() {
 }
 
 func (o *IconOverlay) OnCommand(command CommandType) bool {
+	if command == PlayerCommandCancel {
+		o.Close()
+		return true
+	}
 	return false
 }
 
 func (o *IconOverlay) OnMouseClicked(button ebiten.MouseButton, x int, y int) bool {
+	if button == ebiten.MouseButtonRight && o.canBeClosed {
+		o.Close()
+		return true
+	}
+
 	o.selectedIndex = -1
 	point := geometry.Point{X: x, Y: y}
 	if !o.bounds.Contains(point) {
@@ -132,7 +144,7 @@ func (o *IconOverlay) OnMouseWheel(x int, y int, dy float64) bool {
 }
 
 func (o *IconOverlay) ShouldClose() bool {
-	return false
+	return o.shouldClose
 }
 
 func (o *IconOverlay) Draw() {
@@ -267,4 +279,30 @@ func (o *IconOverlay) layoutLabel(controller *UIController, label *BasicLabel) {
 		X: o.topLeft.X, Y: o.topLeft.Y - label.posInfo.YOffsetForFirstLine - label.posInfo.SizeInPixels.Y + 4,
 	}
 	//        b.layoutFromTopLeftPos(topLeftPositionAsOffsetFromTopRight)
+}
+
+func (o *IconOverlay) GetOnSelectedHandler() func(uiItem UIElement) {
+	return o.onSelection
+}
+
+func (o *IconOverlay) SetOnSelectedHandler(handler func(uiItem UIElement)) {
+	o.onSelection = handler
+}
+
+func (o *IconOverlay) SetOnCloseHandler(onClose func()) {
+	o.onClose = onClose
+}
+
+func (o *IconOverlay) SetCanBeClosed(canBeClosed bool) {
+	o.canBeClosed = canBeClosed
+}
+
+func (o *IconOverlay) Close() {
+	if o.shouldClose == true {
+		return
+	}
+	o.shouldClose = true
+	if o.onClose != nil {
+		o.onClose()
+	}
 }

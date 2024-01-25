@@ -20,11 +20,19 @@ func (g *GameInstance) getTextForNamedNPC(vendor *common.Actor) ([]util.LabelTex
 		"kirioth": g.getTextForKirioth,
 		"shekel":  g.getTextForShekel,
 		"abel":    g.getTextForAbel,
+		"mary":    g.getTextForMary,
 	}
 	if getTextMapForActor, ok := textMap[vendor.GetInternalName()]; ok {
 		return g.getTextFromTriggers(getTextMapForActor())
 	}
 	return []util.LabelText{common.LabelTextFromString("Hello, I am " + vendor.Name())}, nil
+}
+func (g *GameInstance) getTextForMary() []TriggeredDialogue {
+	dialogueTriggers := []TriggeredDialogue{
+		// first quest for the human town
+		{"game_started", "mary_welcome", nil},
+	}
+	return dialogueTriggers
 }
 
 func (g *GameInstance) getTextForKirioth() []TriggeredDialogue {

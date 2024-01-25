@@ -41,7 +41,7 @@ func (g *GameInstance) NewTargetedActionFromName(name common.TargetedActionName)
 		return g.getBlinkAction(name)
 	case ActionNameMindPush:
 		return g.getForcePushAction(name)
-	case ActionNameImmobilize: return g.getForceApplyStatusEffect(name, common.StatusImmobile)
+	case ActionNameImmobilize: return g.getForceApplyStatusEffect(name, common.StatusImmobile, 3)
 	case ActionNameDebilitatingShot: return g.getDebilitatingShot(name)
 	case ActionNameFireRay: return g.getFireRay(name)
 	case ActionNameFireBresen: return g.getFireBresen(name)
@@ -111,8 +111,8 @@ func (g *GameInstance) getBlinkAction(name common.TargetedActionName) *common.Ta
 	blinkAction.SetIcon(223)
 	return blinkAction
 }
-func (g *GameInstance) getForceApplyStatusEffect(name common.TargetedActionName, effect common.StatusEffect) *common.TargetedAction {
-	applyStatus := common.NewTargetedAction(name, OneTargetTile, g.applyStatusEffect(effect), NewDirectTargetingRules)
+func (g *GameInstance) getForceApplyStatusEffect(name common.TargetedActionName, effect common.StatusEffect, turnCount int) *common.TargetedAction {
+	applyStatus := common.NewTargetedAction(name, OneTargetTile, g.applyStatusEffectToSelection(effect, turnCount), NewDirectTargetingRules)
 	applyStatus.SetIcon(223)
 	return applyStatus
 }
@@ -121,11 +121,11 @@ func (g *GameInstance) getDebilitatingShot(name common.TargetedActionName) *comm
 	applyStatus.SetIcon(223)
 	return applyStatus
 }
-func (g *GameInstance) applyStatusEffect(effect common.StatusEffect) common.SelectionHandler {
+func (g *GameInstance) applyStatusEffectToSelection(effect common.StatusEffect, turnCount int) common.SelectionHandler {
 	return func(attacker *common.Actor, target geometry.Point, hitPositions []geometry.Point) {
 		currentMap := g.state.GetMap()
 		currentMap.ApplyToActorsAt(hitPositions, func(actor *common.Actor) {
-			actor.AddStatusEffect(effect, 3)
+			g.actionBroker.Execute(actions.NewApplyStatusAction(actions.NewActorCause("ApplyStatus", g.state.GetPlayer()), actor, effect, turnCount))
 		})
 	}
 }

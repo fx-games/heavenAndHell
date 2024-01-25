@@ -21,8 +21,6 @@ type GameItem interface {
 	GetItemHooks() []ItemActionHook
 }
 
-
-
 type Cause interface {
 	Action() ActionName
 	GetActor() *common.Actor
@@ -31,6 +29,7 @@ type Cause interface {
 
 type WorldState interface {
 	GetPlayer() *common.Actor
+	GetPlayerStashInTown() *common.Inventory
 	GetMap() *gridmap.GridMap[*common.Actor, common.Item, common.Object]
 	PlayerTookTurn(autUsed int)
 	GetVisibility() *common.Visibility
@@ -56,13 +55,14 @@ type Engine interface {
 	FlashScreen(color color.Color, delay float64)
 	IsPlayerInTown() bool
 	GetPlayerVisionRange() int
+	AddItemToMapWithDistribution(item common.Item, pos geometry.Point)
 }
 type Action interface {
 	Cause() Cause
 	Name() ActionName
 	Execute(engine Engine) []Action
 	GetAnimations() []common.Animation
-    GetDelayInAut() int
+	GetDelayInAut() int
 }
 
 func OneAction(action Action) []Action {
@@ -113,9 +113,10 @@ const (
 	ActionNameUseItem         ActionName = "ActionNameUseItem"
 	ActionNameFireball        ActionName = "ActionNameFireball"
 
-	ActionNameDie        ActionName = "ActionNameDie"
-	ActionNameEndTurn    ActionName = "ActionNameEndTurn"
-	ActionNameTransition ActionName = "ActionNameTransition"
+	ActionNameDie               ActionName = "ActionNameDie"
+	ActionNameApplyStatusEffect ActionName = "ActionNameApplyStatusEffect"
+	ActionNameEndTurn           ActionName = "ActionNameEndTurn"
+	ActionNameTransition        ActionName = "ActionNameTransition"
 )
 
 type BaseActionHook struct {
@@ -162,11 +163,11 @@ func OneAnimation(animation common.Animation) []common.Animation {
 	return []common.Animation{animation}
 }
 
-
 type BaseAnimation struct {
-	startThisTick    func() bool
-	hasStarted       bool
+	startThisTick func() bool
+	hasStarted    bool
 }
+
 func (b *BaseAnimation) shouldRunNow() bool {
 	if !b.hasStarted && b.startThisTick != nil && !b.startThisTick() {
 		return false

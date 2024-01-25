@@ -38,10 +38,12 @@ func (t ArmorType) ToString() string {
 		return "Helmet"
 	case ArmorTypeCuirass:
 		return "Cuirass"
-	case ArmorTypeGauntlets:
-		return "Gauntlets"
-	case ArmorTypeGreaves:
-		return "Greaves"
+	case ArmorTypeGloves:
+		return "Gloves"
+	case ArmorTypeBoots:
+		return "Boots"
+	case ArmorTypeCape:
+		return "Cape"
 	case ArmorTypeAmulet:
 		return "Amulet"
 	case ArmorTypeRing:
@@ -55,9 +57,9 @@ func (t ArmorType) ToString() string {
 const (
 	ArmorTypeHelmet ArmorType = iota
 	ArmorTypeCuirass
-
-	ArmorTypeGauntlets
-	ArmorTypeGreaves
+	ArmorTypeBoots
+	ArmorTypeGloves
+	ArmorTypeCape
 	ArmorTypeAmulet
 	ArmorTypeRing
 	ArmorTypeShield

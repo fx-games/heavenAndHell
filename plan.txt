@@ -3,6 +3,7 @@ TODO
 2. Add the leveling mechanic
 3. Add classes & class skills
 4. Add random dungeon generation -> TEMPLATING
+add a stash in town
 5. Add content
   - Monsters & Unique Monsters
   - Items & Unique Items
@@ -19,14 +20,11 @@ TODO
   - Add hit flashes
   - Really nice sound fx, especially for level up, item pickup, shrine activation, slash and kill
   - Make it Received Quests and Level Ups much more obvious
-  - Make the light from torches flicker
 7. Bugfixes
   - SetActorToDowned() is not working properly, corpses are stacking
   - Dropping items on the ground will not work properly and can drop out of bounds crashing the program
   - Don't place items on lava
   - Items can be dropped on top of stairs, as can blood decals
-  - TargetedActions will trigger EndTurn on Targeting
-  - Blood decals are never deleted between levels and will just keep stacking
   - Lucifer's Set Pieces flames don't animate
 
 8. Design

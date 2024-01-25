@@ -147,7 +147,7 @@ func NewAttributeHolder() AttributeHolder {
 			MaxHealth: 10,
 			MaxMana:   10,
 
-			VisionRange:      8,
+			VisionRange:      20,
 			LightRadius: 	  0,
 			ArmorPenetration: 0,
 		},

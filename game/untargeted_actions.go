@@ -17,10 +17,11 @@ import (
 
 const (
 	ActionNameHealHealthAndMana common.UntargetedActionName = "Full Healing"
-	ActionNameHealHealth        common.UntargetedActionName = "Healing"
-	ActionNameHealMana       common.UntargetedActionName = "Restore Mana"
+	ActionNameHealHealth common.UntargetedActionName = "Healing"
+	ActionNameBerserk    common.UntargetedActionName = "Berserker Rage"
+	ActionNameHealMana   common.UntargetedActionName = "Restore Mana"
 	ActionNameTeleport   common.UntargetedActionName = "Phase Door"
-	ActionNameBuffDamage common.UntargetedActionName = "Rage"
+	ActionNameBuffDamage common.UntargetedActionName = "Slicing"
 	ActionNameRecall     common.UntargetedActionName = "Word of Recall"
 	ActionNameBless         common.UntargetedActionName = "Blessing"
 	ActionNameMultiShot        common.UntargetedActionName = "Multi-shot"
@@ -60,7 +61,6 @@ func (g *GameInstance) getHealHealthAndMana() *common.UntargetedAction {
 		healManaAction := actions.NewChangeRessourceAction(actions.NewActorCause("Full Heal", user), user, stats.Mana, user.GetStats().GetAttribute(stats.MaxMana))
 		g.actionBroker.Execute(healHealthAction)
 		g.actionBroker.Execute(healManaAction)
-		g.updateStatsLabel()
 	})
 	return action
 }
@@ -78,18 +78,19 @@ func (g *GameInstance) getHealHealthBy(amount int) *common.UntargetedAction {
 	action.SetEffect(func(user *common.Actor) {
 		healHealthAction := actions.NewChangeRessourceAction(actions.NewActorCause("Heal", user), user, stats.Health, amount)
 		g.actionBroker.Execute(healHealthAction)
-		g.updateStatsLabel()
+		g.Log("You feel better")
 	})
 	action.SetDescription(fmt.Sprintf("Heal %d health", amount))
 	return action
 }
+
 
 func (g *GameInstance) getHealManaBy(amount int) *common.UntargetedAction {
 	action := common.NewUntargetedAction(ActionNameHealMana, 34)
 	action.SetEffect(func(user *common.Actor) {
 		healHealthAction := actions.NewChangeRessourceAction(actions.NewActorCause("Mana Surge", user), user, stats.Mana, amount)
 		g.actionBroker.Execute(healHealthAction)
-		g.updateStatsLabel()
+		g.Log("You feel a surge of mana")
 	})
 	action.SetDescription(fmt.Sprintf("Heal %d mana", amount))
 	return action
@@ -125,7 +126,7 @@ func (g *GameInstance) getRandomTelefragAction() *common.UntargetedAction {
 		for _, visPos := range user.GetFOV().Visibles {
 			if currentMap.IsActorAt(visPos) {
 				actorAt := currentMap.ActorAt(visPos)
-				if (actorAt.IsHostileTo(user) || g.overrideDontAttackFriendly) && actorAt.IsAlive() && actorAt != user {
+				if (actorAt.IsHostileTo(user) || g.shiftIsBeingPressedThisTick) && actorAt.IsAlive() && actorAt != user {
 					visEnemies = append(visEnemies, actorAt)
 				}
 			}
@@ -316,7 +317,7 @@ func (g *GameInstance) getVisibleEnemiesByDistance(user *common.Actor) []*common
 			continue
 		}
 		actor := currentMap.ActorAt(visPos)
-		if (actor.IsHostileTo(user) || g.overrideDontAttackFriendly) && actor.IsAlive() && user != actor {
+		if (actor.IsHostileTo(user) || g.shiftIsBeingPressedThisTick) && actor.IsAlive() && user != actor {
 			nearbyEnemies = append(nearbyEnemies, actor)
 		}
 	}

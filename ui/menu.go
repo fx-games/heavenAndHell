@@ -57,8 +57,9 @@ func (i *BasicMenu) OnCommand(command CommandType) bool {
 }
 
 func (i *BasicMenu) OnMouseClicked(button ebiten.MouseButton, x int, y int) bool {
-	if !i.bounds.Contains(geometry.Point{X: x, Y: y}) {
-		return false
+	if button == ebiten.MouseButtonRight {
+		i.close()
+		return true
 	}
 	i.OnMouseMoved(x, y)
 	i.confirmSelection()
@@ -67,6 +68,7 @@ func (i *BasicMenu) OnMouseClicked(button ebiten.MouseButton, x int, y int) bool
 
 func (i *BasicMenu) OnMouseMoved(x int, y int) (bool, Tooltip) {
 	mousePos := geometry.Point{X: x, Y: y}
+
 	if !i.bounds.Contains(mousePos) {
 		return false, NoTooltip{}
 	}
@@ -155,7 +157,9 @@ func (i *BasicMenu) layoutCentered() {
 	topLeft := geometry.Point{X: (screenSize.X - i.posInfo.SizeInPixels.X) / 2, Y: (screenSize.Y - i.posInfo.SizeInPixels.Y) / 2}
 	i.topLeft = topLeft
 	i.itemBounds = i.calcItemBounds()
-	i.bounds = geometry.NewRect(i.topLeft.X, i.topLeft.Y, i.topLeft.X+i.posInfo.SizeInPixels.X, i.topLeft.Y+i.posInfo.SizeInPixels.Y)
+	halfPadding := i.borderPadding.Div(2)
+	halfPadX, halfPadY := halfPadding.X, halfPadding.Y
+	i.bounds = geometry.NewRect(i.topLeft.X-halfPadX, i.topLeft.Y-halfPadY, i.topLeft.X+i.posInfo.SizeInPixels.X+halfPadX, i.topLeft.Y+i.posInfo.SizeInPixels.Y+halfPadY)
 }
 
 func (i *BasicMenu) SetItems(items []util.MenuItem) {
@@ -203,6 +207,7 @@ func (i *BasicMenu) close() {
 func (i *BasicMenu) calcItemBounds() []geometry.Rect {
 	itemBounds := make([]geometry.Rect, len(i.items))
 	drawY := i.topLeft.Y
+	padding := i.borderPadding.Div(2)
 	for lineIndex, line := range i.items {
 		if line.Text == "" {
 			drawY += i.posInfo.YOffsetForFirstLine + i.posInfo.LineDist
@@ -211,7 +216,7 @@ func (i *BasicMenu) calcItemBounds() []geometry.Rect {
 		itemSize := i.posInfo.ItemSizes[lineIndex]
 		_, sizeY := itemSize.X, itemSize.Y
 		// let's simplify this and use the whole width of the menu
-		itemBounds[lineIndex] = geometry.NewRect(i.topLeft.X, drawY, i.topLeft.X+i.posInfo.SizeInPixels.X, drawY+sizeY)
+		itemBounds[lineIndex] = geometry.NewRect(i.topLeft.X-padding.X, drawY, i.topLeft.X+i.posInfo.SizeInPixels.X+i.borderPadding.X, drawY+sizeY)
 		drawY += sizeY + i.posInfo.LineDist
 	}
 	return itemBounds
