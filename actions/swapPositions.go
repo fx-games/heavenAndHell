@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"fmt"
 	"rpg/common"
 )
 
@@ -48,7 +47,6 @@ func (d *SwapPositionsAction) Execute(engine Engine) []Action {
 		d.actorOne.SetDrawPosition(d.actorOne.MapPosition().ToPointF())
 		d.actorTwo.SetDrawPosition(d.actorTwo.MapPosition().ToPointF())
 	}
-	println(fmt.Sprintf("Actors %s and %s swapped positions", d.actorOne.Name(), d.actorTwo.Name()))
 	return nil
 }
 

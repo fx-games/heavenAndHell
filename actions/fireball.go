@@ -9,25 +9,34 @@ import (
 
 type DamageSpellAction struct {
 	BaseAction
-	damageFactor      float64
-	damageAmount      int
-	hitPositions      []geometry.Point
-	baseDamage        int
-	caster            *common.Actor
-	actionDescription ActionName
-	targetPos         geometry.Point
+	damageFactor         float64
+	damageAmount         int
+	hitPositions         []geometry.Point
+	baseDamage           int
+	caster               *common.Actor
+	actionDescription    ActionName
+	targetPos            geometry.Point
+	flightIcon           int32
+	flightIconFrameCount int
 }
 
-func NewFireballAction(cause Cause, caster *common.Actor, damagePerTile int, targetPos geometry.Point, hitPositions []geometry.Point) *DamageSpellAction {
+func NewDamageSpellAction(cause Cause, caster *common.Actor, damagePerTile int, targetPos geometry.Point, hitPositions []geometry.Point) *DamageSpellAction {
 	return &DamageSpellAction{
-		BaseAction:        BaseAction{cause: cause, name: ActionNameFireball},
-		hitPositions:      hitPositions,
-		targetPos:         targetPos,
-		baseDamage:        damagePerTile,
-		damageFactor:      1.0,
-		caster:            caster,
-		actionDescription: "Fireball",
+		BaseAction:           BaseAction{cause: cause, name: ActionNameFireball},
+		hitPositions:         hitPositions,
+		targetPos:            targetPos,
+		baseDamage:           damagePerTile,
+		damageFactor:         1.0,
+		caster:               caster,
+		actionDescription:    "Fireball",
+		flightIcon:           int32(common.IconEffectFireSmall),
+		flightIconFrameCount: 2,
 	}
+}
+
+func (d *DamageSpellAction) SetFlightIcon(icon int32, frameCount int) {
+	d.flightIcon = icon
+	d.flightIconFrameCount = frameCount
 }
 func (d *DamageSpellAction) Execute(engine Engine) []Action {
 	d.damageAmount = int(float64(d.baseDamage) * d.damageFactor)
@@ -51,7 +60,8 @@ func (d *DamageSpellAction) Execute(engine Engine) []Action {
 }
 
 func (d *DamageSpellAction) GetAnimations() []common.Animation {
-	return OneAnimation(NewFireballAnimation(d.caster, d.targetPos, d.hitPositions))
+	animation := NewFireballAnimation(d.caster, d.targetPos, d.flightIcon, d.flightIconFrameCount, d.hitPositions)
+	return OneAnimation(animation)
 }
 
 func (d *DamageSpellAction) GetDamageFactor() float64 {

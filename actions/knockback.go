@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"fmt"
 	"rpg/common"
 	"rpg/geometry"
 	"rpg/stats"
@@ -89,7 +88,6 @@ func (d *KnockbackAction) Execute(engine Engine) []Action {
 	var actions []Action
 	if !gameMap.IsCurrentlyPassable(d.obstaclePos) {
 		// problem.. this will trigger at the same tick as the knockback animation begins..
-		println(fmt.Sprintf("Actor %s hit obstacle at %s", actor.Name(), d.obstaclePos))
 		actionPushed := NewChangeRessourceAction(d.Cause(), actor, stats.Health, -5)
 		actionPushed.SetAnimationStartPredicate(func() bool {
 			return d.isNotAnimated() || d.animation.IsDone()

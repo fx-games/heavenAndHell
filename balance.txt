@@ -1,0 +1,129 @@
+Early should start relatively easy, but you cannot be totally careless.
+There need to be options available to you to get out of a bad situation,
+or approach a problem differently.
+
+Starting enemies should be less deadly.
+
+Make the bat move erratically.
+
+Make the skeletons without weapons less aggressive.
+
+Give the player a minimal regeneration effect per turn?
+
+So, I was chased by three enemies to the stairs, and now they were camping down there.
+What options should I have?
+ - Wait for them to disperse -> Save what turn we left off on, simulate dispersion after a random delay of turns
+ - Enter the dungeon at another location -> Scroll of entrance, will teleport to you to a random location inside the dungeon, choosing from the levels you have seen + 1
+ - Use an AoE effect to affect them all (Spell, Potion, etc.) -> Oil flask
+ - Lure them away from the stairs -> Potion of attract monster
+ - Buff yourself -> Potion of strength, potion of speed, potion of regeneration, scroll of blessing
+ - Turn them against each other -> Scroll of confusion, scroll of fear, scroll of charm
+
+How the end fight should feel:
+ - Boss and player trade mighty blows
+ - Typical play should need about 15-20 hits to kill the boss
+ - It should be hard to win
+
+End Boss Enemy
+HP: 1000
+AC: 60-100		-> 50% damage reduction
+Dmg.: 30-60
+
+To kill this boss in 20 hits, a player needs about 100 damage per hit. (20*100 = 2000 / 2 = 1000).
+So the player needs an endgame weapon (40 damage plus stat damage bonus (about 10),
+and a damage multiplier of 2 to pull this off.
+
+During this time the enemy will deal between 600 and 1200 damage (assuming no damage multipliers and one hit per turn).
+Assuming the player has 200 AC and thus 66% damage reduction, this will be between 200 and 400 damage.
+
+## Core Stats & Caps
+
+Quality/Danger System:
+ - Depth Levels: 12
+ - Items & Monsters are assigned a typical depth level
+ - They can also have a min and max level, which is the lowest/highest level they can appear at
+ - They can still appear "out-of-depth" (OoD) with a specific chance per monster/item
+
+Progression:
+ - Level 1->2: 100 XP
+ - Each level needs 250 XP more than the previous level
+ - Level 29->30: ~7k XP
+ - Total XP at level 30: ~104k XP
+
+XP Rewards (QR = Quest Rewards, MR = Monster Rewards):
+ - Total XP in Area 1: 1900
+   - QR: 1425, MR: 475
+ - Total XP in Area 2: 8000
+   - QR: 6000, MR: 2000
+ - Total XP in Area 3: 14250
+   - QR: 10688, MR: 3562
+ - Total XP in Area 4: 20500
+   - QR: 15375, MR: 5125
+ - Total XP in Area 5: 59750
+   - MR: 59750
+
+Expected typical player stats when facing the end boss:
+Max Level ~ 30
+Max XP ~ 100k
+Max AC ~ 200 (66% damage reduction)
+Max HP ~ 200 (mages) - 400 (warriors)
+Max Dmg. per Hit ~ 50 (mages) - 100 (warriors)
+
+Stat Progression And Role
+Starting Stats:
+
+Warrior: 20 Str, 5 Dex, 5 Int
+Mage: 5 Str, 5 Dex, 20 Int
+Archer: 5 Str, 20 Dex, 5 Int
+
+On level up: Gain 1 point to spend on any stat
+Total Points available: 29
+Maximum Stat: 20 + 29 = 49
+Max. Damage Bonus from Stats: 49 * 0.25 = 12.25
+
+Everyone needs strength
+Str - x0.25 damage bonus per point - melee & hp
+Dex - x0.25 damage bonus per point - ranged & evasion
+Int - x0.25 damage bonus per point - magic & mana
+
+
+Item Ranges
+Enchantments: from -10 to +10
+
+
+AC Ratings
+ - Torso - Max. 40
+ - Head - Max. 20
+ - Hands - Max. 10
+ - Ring - Max. 0
+ - Amulets - Max. 0
+ - Feet - Max. 10
+ - Back - Max. 10
+ - Shield - Max. 30
+
+Some End Game Uniques
+ - Veil of Darkness - Unique cloak [+10, +0]
+ - Black Hands - Unique gloves [+10, +0]
+ - Boots of the Shadow Dancer - Unique boots [+10, +0]
+ - Ancient Nightmare's Hood - Unique helmet [+10, +0]
+ - Plate Mail of the Dark Lord - Unique plate mail [+40, +0]
+ - Never-ending Night - Unique ring [+0, +0]
+ - Eternal Darkness - Unique ring [+0, +0]
+ - Amulet of Shadows - Unique amulet [+0, +0]
+ - Shadow's Embrace - Unique amulet [+0, +0]
+ - Wall of Thorns - Unique shield [+30, +0]
+ - Helmet of the Black Knight - Unique helmet [+10, +0]
+ - Soul Reaver - Unique scythe (20-40, +0)
+
+
+Armor Class (Diminishing returns):
+1    -> 1% damage reduction
+50   -> 33% damage reduction
+100  -> 50% damage reduction
+200  -> 66% damage reduction -> practical max
+----------------------------
+1000 -> 90% damage reduction
+
+Damage Ranges of Weapons:
+Dagger: 1-4
+Endgame: 10-40

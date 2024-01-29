@@ -11,7 +11,7 @@ type InputReceiver interface {
 
 type TextInputReceiver interface {
 	InputReceiver
-	OnKeyPressed(key ebiten.Key)
+	OnKeyPressed(key ebiten.Key, tick bool)
 	SetTick(tick uint64)
 }
 type MouseEvent int

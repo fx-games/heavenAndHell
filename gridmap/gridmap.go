@@ -757,6 +757,17 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetFilteredNeighborsForMoveme
 	return result
 }
 
+func (m *GridMap[ActorType, ItemType, ObjectType]) GetFilteredDirectionsForMovement(filter func(geometry.Point) bool) []geometry.Point {
+	neighbors := geometry.Neighbors{}
+	var result []geometry.Point
+	if m.cardinalMovementOnly {
+		result = neighbors.Cardinal(geometry.Point{}, filter)
+	} else {
+		result = neighbors.All(geometry.Point{}, filter)
+	}
+	return result
+}
+
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetFreeCardinalNeighbors(pos geometry.Point) []geometry.Point {
 	neighbors := geometry.Neighbors{}
 	freeNeighbors := neighbors.Cardinal(pos, func(p geometry.Point) bool {

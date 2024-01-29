@@ -17,10 +17,17 @@ type ProjectileDirectionAnimation struct {
 	start    geometry.Point
 	end      geometry.Point
 	attacker *common.Actor
+	onCancel func()
+	onFinish func()
 }
 
 func (m *ProjectileDirectionAnimation) Cancel() {
-
+	if m.onCancel != nil {
+		m.onCancel()
+	}
+	if m.onFinish != nil {
+		m.onFinish()
+	}
 }
 
 func NewProjectileDirectionAnimation(attacker *common.Actor, start, end geometry.Point, secondsPerTile float64, startFrame int32, frameCount int) *ProjectileDirectionAnimation {
@@ -47,13 +54,33 @@ func (m *ProjectileDirectionAnimation) Tick() {
 		return
 	}
 	m.ticksAlive++
+	if m.IsDone() {
+		if m.onFinish != nil {
+			m.onFinish()
+		}
+	}
 }
 func (m *ProjectileDirectionAnimation) Draw(renderer common.TileRenderer) {
 	if m.IsDone() {
 		return
 	}
-	icon := m.firstTile + util.GetLoopingFrameFromTick(m.ticksAlive, 0.1, m.frameCount)
+	icon := m.firstTile
+	if m.frameCount > 1 {
+		icon += util.GetLoopingFrameFromTick(m.ticksAlive, 0.1, m.frameCount)
+	}
 	percentage := float64(m.ticksAlive) / float64(m.ticksNeeded)
 	lerpedPos := util.LerpPointF(m.start.ToPointF(), m.end.ToPointF(), percentage)
 	renderer.DrawOnMapF(lerpedPos, icon, color.White)
+}
+
+func (m *ProjectileDirectionAnimation) SetIcon(icon int32) {
+	m.firstTile = icon
+}
+
+func (m *ProjectileDirectionAnimation) SetOnCancel(onCancel func()) {
+	m.onCancel = onCancel
+}
+
+func (m *ProjectileDirectionAnimation) SetOnFinish(onFinish func()) {
+	m.onFinish = onFinish
 }

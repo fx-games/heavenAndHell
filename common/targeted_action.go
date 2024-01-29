@@ -30,6 +30,7 @@ type UntargetedAction struct {
 	icon                   int32
 	description            string
 	timeNeededInAut        int
+	monetaryValue          int
 }
 
 func NewUntargetedAction(name UntargetedActionName, icon int32) *UntargetedAction {
@@ -38,6 +39,10 @@ func NewUntargetedAction(name UntargetedActionName, icon int32) *UntargetedActio
 		icon: icon,
 		timeNeededInAut: 10,
 	}
+}
+
+func (a *UntargetedAction) SetMonetaryValue(value int) {
+	a.monetaryValue = value
 }
 
 func (a *UntargetedAction) GetTooltipLines() []util.LabelText {
@@ -70,6 +75,9 @@ func (a *UntargetedAction) IsDelayed() bool {
 }
 
 func (a *UntargetedAction) Name() string {
+	return string(a.name)
+}
+func (a *UntargetedAction) String() string {
 	return string(a.name)
 }
 
@@ -121,6 +129,10 @@ func (a *UntargetedAction) SetNoTimeNeeded() {
 	a.timeNeededInAut = 0
 }
 
+func (a *UntargetedAction) GetMonetaryValue() int {
+	return a.monetaryValue
+}
+
 type TargetHighlight struct {
 	Pos   geometry.Point
 	Color color.Color
@@ -134,6 +146,7 @@ type TargetedAction struct {
 	icon            int32
 	description     string
 	timeNeededInAut int
+	monetaryValue   int
 }
 
 func NewTargetedAction(name TargetedActionName, hitPattern AoEResolver, onSelected SelectionHandler, getTargetRules TargetRulesProvider) *TargetedAction {
@@ -145,10 +158,17 @@ func NewTargetedAction(name TargetedActionName, hitPattern AoEResolver, onSelect
 		timeNeededInAut: 10,
 	}
 }
+
+func (t *TargetedAction) SetMonetaryValue(value int) {
+	t.monetaryValue = value
+}
 func (t *TargetedAction) Counter() int {
 	return 0
 }
 func (t *TargetedAction) Name() string {
+	return string(t.name)
+}
+func (t *TargetedAction) String() string {
 	return string(t.name)
 }
 
@@ -194,4 +214,8 @@ func (t *TargetedAction) GetTimeNeededInAut() int {
 
 func (t *TargetedAction) GetDescription() string {
 	return t.description
+}
+
+func (t *TargetedAction) GetMonetaryValue() int {
+	return t.monetaryValue
 }

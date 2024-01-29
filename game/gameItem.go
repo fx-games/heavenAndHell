@@ -19,12 +19,67 @@ type GameItem struct {
 	nameOnlyInTooltip bool
 }
 
-
-
 func (i *GameItem) SetCharges(charges int) {
 	i.actionCharges = charges
 }
+func (i *GameItem) CanStackWith(other common.Item) bool {
+	if !i.BaseItem.CanStackWith(other) {
+		return false
+	}
+	asGameItem, ok := other.(*GameItem)
+	if !ok {
+		return false
+	}
+	if i.GetCharges() != asGameItem.GetCharges() {
+		return false
+	}
+	if i.GetUntargetedAction() != nil && asGameItem.GetUntargetedAction() != nil {
+		if i.GetUntargetedAction().Name() != asGameItem.GetUntargetedAction().Name() {
+			return false
+		}
+	} else if !(i.GetUntargetedAction() == nil && asGameItem.GetUntargetedAction() == nil) {
+		return false
+	}
 
+	if i.GetTargetedAction() != nil && asGameItem.GetTargetedAction() != nil {
+		if i.GetTargetedAction().Name() != asGameItem.GetTargetedAction().Name() {
+			return false
+		}
+	} else if !(i.GetTargetedAction() == nil && asGameItem.GetTargetedAction() == nil) {
+		return false
+	}
+	return true
+}
+
+func (g *GameInstance) GetContextActionsForItem(item *GameItem) []util.MenuItem {
+	// TODO:-..
+	var menuForActions []util.MenuItem
+	if item.HasUntargetedAction() {
+		menuForActions = append(menuForActions, util.MenuItem{
+			MainText: item.GetUntargetedAction().Name(),
+			Action: func() {
+				g.activateItemActionForPlayer(item)
+			},
+		})
+	}
+	if item.HasTargetedAction() {
+		menuForActions = append(menuForActions, util.MenuItem{
+			MainText: item.GetTargetedAction().Name(),
+			Action: func() {
+				g.activateItemActionForPlayer(item)
+			},
+		})
+	}
+	if item.IsThrowable() {
+		menuForActions = append(menuForActions, util.MenuItem{
+			MainText: "Throw",
+			Action: func() {
+				g.playerThrow(item)
+			},
+		})
+	}
+	return menuForActions
+}
 func (i *GameItem) SetUnlimitedCharges() {
 	i.actionCharges = -1
 }
@@ -207,4 +262,41 @@ func flatFunc(i int) func() int {
 	return func() int {
 		return i
 	}
+}
+
+func (i *GameItem) BandStyleName() string {
+	name := i.Name()
+	if i.IsWeapon() {
+		weaponValues := i.GetWeaponStats().NameParts()
+		name = fmt.Sprintf("%s %s", name, weaponValues)
+	}
+
+	if i.IsArmor() {
+		armorValues := i.GetArmorStats().NameParts()
+		name = fmt.Sprintf("%s %s", name, armorValues)
+	}
+
+	if i.IsLightSource() && !i.HasInfiniteCharges(){
+		name = fmt.Sprintf("%s (%d turns)", name, i.GetCharges())
+	}
+
+	return name
+}
+
+func (i *GameItem) PlusName() string {
+	name := i.Name()
+	if i.IsWeapon() && i.IsArmor() {
+		weaponPlus := fmt.Sprintf("+%d", i.GetWeaponStats().Plus)
+		armorPlus := fmt.Sprintf("+%d", i.GetArmorStats().Plus)
+		return fmt.Sprintf("%s %s %s", name, weaponPlus, armorPlus)
+	}
+	if i.IsWeapon() {
+		weaponPlus := fmt.Sprintf("+%d", i.GetWeaponStats().Plus)
+		return fmt.Sprintf("%s %s", name, weaponPlus)
+	}
+	if i.IsArmor() {
+		armorPlus := fmt.Sprintf("+%d", i.GetArmorStats().Plus)
+		return fmt.Sprintf("%s %s", name, armorPlus)
+	}
+	return name
 }

@@ -1,7 +1,5 @@
 package actions
 
-import "fmt"
-
 type MultiplyOnHealHook struct {
 	BaseActionHook
 	forSource  ActionName
@@ -25,7 +23,6 @@ func (d *MultiplyOnHealHook) Before(action Action, state WorldState) (Action, Wo
 	if healAction.Cause().Action() == d.forSource {
 		healAction.SetChangeFactor(healAction.GetChangeFactor() * d.multiplier)
 		d.executionCount++
-		println(fmt.Sprintf("(%s) Multiplier %f applied", healAction.Name(), d.multiplier))
 	}
 	return healAction, state
 }

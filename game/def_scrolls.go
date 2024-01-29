@@ -50,16 +50,21 @@ Deep Descent
 */
 
 func (g *GameInstance) NewScrollPhaseDoor() *GameItem {
-    return g.NewScroll(g.getRandomTeleportAction())
+    action := g.getRandomTeleportAction()
+    action.SetMonetaryValue(50)
+    return g.NewScroll(action)
 }
 
 func (g *GameInstance) NewScrollWordOfRecall() *GameItem {
-    return g.NewScroll( g.getPlayerRecallAction())
+    action := g.getPlayerRecallAction()
+    action.SetMonetaryValue(75)
+    return g.NewScroll(action)
 }
 
 func (g *GameInstance) NewScrollBlessing() *GameItem {
     interval := util.Tuple[int, int]{Item1: 6, Item2: 8}
     action := common.NewUntargetedAction(ActionNameBless, 39)
+    action.SetMonetaryValue(180)
     action.SetEffect(func(user *common.Actor) {
         modifier := AddToBaseAttribute(g.randomSource, stats.BaseArmorClass, interval)
         timedModifier := NewTimedModifier(string(ActionNameBless), user, modifier, 8)
@@ -70,27 +75,54 @@ func (g *GameInstance) NewScrollBlessing() *GameItem {
     return g.NewScroll(action)
 }
 
+func (g *GameInstance) NewScrollEnchantWeapon() *GameItem {
+    action := common.NewUntargetedAction(ActionNameEnchantWeapon, 40)
+    action.SetMonetaryValue(4000)
+    action.SetEffect(func(user *common.Actor) {
+        isWeapon := func(element common.Item) bool { return element.IsWeapon() }
+        selected := func(itemKey rune) {
+            inventory := g.GetWorldState().GetPlayer().GetInventory()
+            selectedItem := inventory.GetItemByLetter(itemKey)
+            weaponStats := selectedItem.GetWeaponStats()
+            weaponStats.Plus += 1
+            g.Log(fmt.Sprintf("Your [:darkText]%s[:white] glows [:blue]blue[:white] for a moment.", selectedItem.Name()))
+        }
+        g.openListInventoryForSelection(isWeapon, selected)
+    })
+    action.SetDescription("Increase weapon damage by 1")
+    return g.NewScroll(action)
+}
+
+func (g *GameInstance) NewScrollEnchantArmor() *GameItem {
+    action := common.NewUntargetedAction(ActionNameEnchantArmor, 40)
+    action.SetMonetaryValue(4000)
+    action.SetEffect(func(user *common.Actor) {
+        isArmor := func(element common.Item) bool { return element.IsArmor() }
+        selected := func(itemKey rune) {
+            inventory := g.GetWorldState().GetPlayer().GetInventory()
+            selectedItem := inventory.GetItemByLetter(itemKey)
+            weaponStats := selectedItem.GetArmorStats()
+            weaponStats.Plus += 1
+            g.Log(fmt.Sprintf("Your [:darkText]%s[:white] glows [:blue]blue[:white] for a moment.", selectedItem.Name()))
+        }
+        g.openListInventoryForSelection(isArmor, selected)
+    })
+    action.SetDescription("Increase armor class by 1")
+    return g.NewScroll(action)
+}
+
 func (g *GameInstance) NewScroll(untargetedAction *common.UntargetedAction) *GameItem {
     itemName := fmt.Sprintf("a scroll of %s", untargetedAction.Name())
-    baseItem := common.NewBaseItem(g.GetWorldState().GetPlayer, itemName, common.IconItemScroll, common.SlotNameNotEquippable, 150)
+    baseItem := common.NewBaseItem(g.GetWorldState().GetPlayer, itemName, common.IconItemScroll)
     baseItem.SetCategory(common.ItemCategoryScroll)
     baseItem.SetQualityLevel(1)
 
-    menuForActions := make([]util.MenuItem, 0)
     gameItem := &GameItem{
         BaseItem:         baseItem,
         untargetedAction: untargetedAction,
         actionCharges:    1,
         destroyAfterUse: true,
     }
-    menuForActions = append(menuForActions, util.MenuItem{
-        Text: untargetedAction.Name(),
-        Action: func() {
-            g.activateItemActionForPlayer(gameItem)
-        },
-    })
-    baseItem.SetContextActions(menuForActions)
-
     return gameItem
 }
 

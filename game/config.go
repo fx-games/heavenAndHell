@@ -17,19 +17,33 @@ func isTownLevel(levelName string) bool {
 	return levelName == string(LevelNameTown) || levelName == string(LevelNameTownHell)
 }
 
-type Configuration struct {
-	AudioEnabled          bool
-	ActorBobbingEnabled   bool
-	WindowSize            geometry.Point
-	DefaultFont           string
-	DefaultFontSize       float64
-	AutoPickup            bool
-	CardinalMovementOnly  bool
-	KeepPlayerCentered    bool
+type ItemNamingScheme string
 
-	DrawTilesBehindActors bool
-	DrawTilesBehindItems  bool
-	DrawTilesBehindObjects bool
+const (
+	ItemNamingSchemeShort ItemNamingScheme = "Short"
+	ItemNamingSchemeEnchantments ItemNamingScheme = "Enchantments"
+	ItemNamingSchemeBandStyle ItemNamingScheme = "BandStyle"
+)
+
+type Configuration struct {
+    AudioEnabled         bool
+    ActorBobbingEnabled  bool
+    WindowSize           geometry.Point
+    DefaultFont          string
+    DefaultFontSize      float64
+    AutoPickup           bool
+    CardinalMovementOnly bool
+    KeepPlayerCentered   bool
+
+	ItemNamesInShop ItemNamingScheme
+
+    DrawTilesBehindActors  bool
+    DrawTilesBehindItems   bool
+    DrawTilesBehindObjects bool
+    ServeStats             bool
+	ServeInventory         bool
+	ServeLog			   bool
+	ServeEquipment         bool
 }
 
 func (c Configuration) ToRecord() recfile.Record {
@@ -82,6 +96,26 @@ func (c Configuration) ToRecord() recfile.Record {
 			Name:  "KeepPlayerCentered",
 			Value: recfile.BoolStr(c.KeepPlayerCentered),
 		},
+		{
+			Name:  "ServeStats",
+			Value: recfile.BoolStr(c.ServeStats),
+		},
+		{
+			Name:  "ServeInventory",
+			Value: recfile.BoolStr(c.ServeInventory),
+		},
+		{
+			Name:  "ServeEquipment",
+			Value: recfile.BoolStr(c.ServeEquipment),
+		},
+		{
+			Name:  "ServeLog",
+			Value: recfile.BoolStr(c.ServeLog),
+		},
+		{
+			Name:  "ItemNamesInShop",
+			Value: string(c.ItemNamesInShop),
+		},
 	}
 }
 
@@ -119,6 +153,11 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		DrawTilesBehindActors: configMap.GetBoolOrFalse("DrawTilesBehindActors"),
 		DrawTilesBehindItems:  configMap.GetBoolOrFalse("DrawTilesBehindItems"),
 		DrawTilesBehindObjects: configMap.GetBoolOrFalse("DrawTilesBehindObjects"),
+		ServeStats:             configMap.GetBoolOrFalse("ServeStats"),
+		ServeInventory:         configMap.GetBoolOrFalse("ServeInventory"),
+		ServeEquipment:         configMap.GetBoolOrFalse("ServeEquipment"),
+		ServeLog:               configMap.GetBoolOrFalse("ServeLog"),
+		ItemNamesInShop:        ItemNamingScheme(configMap.GetStringOrDefault("ItemNamesInShop", string(ItemNamingSchemeEnchantments))),
 		WindowSize: geometry.Point{ //1280, Y: 800
 			X: configMap.GetIntOrDefault("WindowWidth", 1280),
 			Y: configMap.GetIntOrDefault("WindowHeight", 800),

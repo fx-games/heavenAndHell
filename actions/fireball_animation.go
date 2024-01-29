@@ -9,6 +9,8 @@ type FireballAnimation struct {
 	projectileAnimation *ProjectileDirectionAnimation
 	hitAnimations       []common.Animation
 	caster              *common.Actor
+	flightIcon          int32
+	flightIconFrameCount     int
 }
 
 func (m *FireballAnimation) GetActor() *common.Actor {
@@ -18,8 +20,7 @@ func (m *FireballAnimation) Cancel() {
 
 }
 
-func NewFireballAnimation(caster *common.Actor, destination geometry.Point, hitPositions []geometry.Point) *FireballAnimation {
-	flightIcon := int32(common.IconEffectFireSmall)
+func NewFireballAnimation(caster *common.Actor, destination geometry.Point, flightIcon int32, flightIconFrameCount int, hitPositions []geometry.Point) *FireballAnimation {
 	hitIcon := int32(common.IconEffectFireBig)
 	durationOfHit := 0.4
 	secondsPerTile := 0.02

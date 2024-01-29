@@ -6,7 +6,6 @@ import (
 	"rpg/common"
 	"rpg/geometry"
 	"rpg/gridmap"
-	"rpg/util"
 )
 
 func (g *GameInstance) addRandomWand(source *rand.Rand, emptyMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], dungeonLevel int, pos geometry.Point) {
@@ -77,77 +76,33 @@ func (g *GameInstance) NewFiniteUntargetedWand(untargetedAction *common.Untarget
 func (g *GameInstance) NewEtherealUntargetedWand(untargetedAction *common.UntargetedAction) *GameItem {
 	return g.NewUntargetedWand(untargetedAction, 5, true)
 }
-func (g *GameInstance) NewTwinWand(action *common.TargetedAction, untargetedAction *common.UntargetedAction) *GameItem {
-	itemName := fmt.Sprintf("a wand of %s and %s", action.Name(), untargetedAction.Name())
-	baseItem := common.NewBaseItem(g.GetWorldState().GetPlayer, itemName, common.IconItemWand, common.SlotNameNotEquippable, 150)
-	baseItem.SetCategory(common.ItemCategoryWand)
-	baseItem.SetQualityLevel(1)
 
-	menuForActions := make([]util.MenuItem, 0)
-	gameItem := &GameItem{
-		BaseItem:         baseItem,
-		targetedAction:   action,
-		untargetedAction: untargetedAction,
-		actionCharges:    5,
-	}
-	menuForActions = append(menuForActions, util.MenuItem{
-		Text: action.Name(),
-		Action: func() {
-			g.activateItemActionForPlayer(gameItem)
-		},
-	})
-	menuForActions = append(menuForActions, util.MenuItem{
-		Text: untargetedAction.Name(),
-		Action: func() {
-			g.activateItemActionForPlayer(gameItem)
-		},
-	})
-	baseItem.SetContextActions(menuForActions)
-
-	return gameItem
-}
 func (g *GameInstance) NewTargetedWand(targetedAction *common.TargetedAction, charges int, destroyAfterUse bool) *GameItem {
 	itemName := fmt.Sprintf("a wand of %s", targetedAction.Name())
-	baseItem := common.NewBaseItem(g.GetWorldState().GetPlayer, itemName, common.IconItemWand, common.SlotNameNotEquippable, 150)
+	baseItem := common.NewBaseItem(g.GetWorldState().GetPlayer, itemName, common.IconItemWand)
 	baseItem.SetCategory(common.ItemCategoryWand)
 	baseItem.SetQualityLevel(1)
 
-	menuForActions := make([]util.MenuItem, 0)
 	gameItem := &GameItem{
 		BaseItem:        baseItem,
 		targetedAction:  targetedAction,
 		actionCharges:   charges,
 		destroyAfterUse: destroyAfterUse,
 	}
-	menuForActions = append(menuForActions, util.MenuItem{
-		Text: targetedAction.Name(),
-		Action: func() {
-			g.activateItemActionForPlayer(gameItem)
-		},
-	})
-	baseItem.SetContextActions(menuForActions)
 	return gameItem
 }
 func (g *GameInstance) NewUntargetedWand(untargetedAction *common.UntargetedAction, charges int, destroyAfterUse bool) *GameItem {
 	itemName := fmt.Sprintf("a wand of %s", untargetedAction.Name())
-	baseItem := common.NewBaseItem(g.GetWorldState().GetPlayer, itemName, common.IconItemWand, common.SlotNameNotEquippable, 150)
+	baseItem := common.NewBaseItem(g.GetWorldState().GetPlayer, itemName, common.IconItemWand)
 	baseItem.SetCategory(common.ItemCategoryWand)
 	baseItem.SetQualityLevel(1)
 
-	menuForActions := make([]util.MenuItem, 0)
 	gameItem := &GameItem{
 		BaseItem:         baseItem,
 		untargetedAction: untargetedAction,
 		actionCharges:    charges,
 		destroyAfterUse:  destroyAfterUse,
 	}
-	menuForActions = append(menuForActions, util.MenuItem{
-		Text: untargetedAction.Name(),
-		Action: func() {
-			g.activateItemActionForPlayer(gameItem)
-		},
-	})
-	baseItem.SetContextActions(menuForActions)
 
 	return gameItem
 }

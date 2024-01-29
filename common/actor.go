@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"image/color"
 	"math/rand"
 	"rpg/geometry"
 	"rpg/stats"
@@ -239,18 +240,21 @@ func (a *Actor) GetDamageInterval(attackType AttackType) stats.Interval {
 	// base damage bonus, defaults to zero, usually from equipment providing a bonus to damage
 	baseDamage := a.GetStats().GetAttribute(stats.BaseDamage)
 
-	var minDmg, maxDmg int
+	minDmg := baseDamage + (statBonus/4)
+	maxDmg := baseDamage + (statBonus/4)
+	weaponPlus := 0
 	if hasWeapons {
 		for _, w := range weapons { // damage is summed for all equipped weapons
 			// weapon damage interval comes from the weapon itself
 			// plus the base damage bonus
 			// plus the stat bonus divided by 4
-			minDmg = baseDamage + (statBonus/4) + w.GetWeaponStats().Damage.Min()
-			maxDmg = baseDamage + (statBonus/4) + w.GetWeaponStats().Damage.Max()
+			weaponPlus += w.GetWeaponStats().Plus
+			minDmg += w.GetWeaponStats().Damage.Min() + weaponPlus
+			maxDmg += w.GetWeaponStats().Damage.Max() + weaponPlus
 		}
 	} else { // unarmed receives the stat bonus 1:1 as damage, -1..+1
-		minDmg = max(1, baseDamage + statBonus - 1)
-		maxDmg = baseDamage+statBonus +1
+		minDmg = max(1, baseDamage + (statBonus/4))
+		maxDmg = baseDamage+(statBonus/4) + 2
 	}
 
 	// last step is applying the enhanced damage factor, which is a multiplier
@@ -271,12 +275,12 @@ func (a *Actor) GetInfoText() []string {
 	tableLines := []string{
 		fmt.Sprintf("HP: %s", a.GetStats().GetRessource(stats.Health).ToString()),
 		fmt.Sprintf("MP: %s", a.GetStats().GetRessource(stats.Mana).ToString()),
-		fmt.Sprintf("STR: %d", a.GetStats().GetAttribute(stats.Strength)),
-		fmt.Sprintf("DEX: %d", a.GetStats().GetAttribute(stats.Dexterity)),
-		fmt.Sprintf("INT: %d", a.GetStats().GetAttribute(stats.Intelligence)),
+		fmt.Sprintf("Str: %d", a.GetStats().GetAttribute(stats.Strength)),
+		fmt.Sprintf("Dex: %d", a.GetStats().GetAttribute(stats.Dexterity)),
+		fmt.Sprintf("Int: %d", a.GetStats().GetAttribute(stats.Intelligence)),
 		fmt.Sprintf("ADR: %d%%", int(a.GetArmorDamageReduction(0)*100)),
-		fmt.Sprintf("energy: %d", a.GetEnergy()),
-		fmt.Sprintf("movement speed: %d", a.GetMoveSpeed()),
+		fmt.Sprintf("Energy: %d", a.GetEnergy()),
+		fmt.Sprintf("Movement speed: %d", a.GetMoveSpeed()),
 	}
 
 	armor := a.GetEquipment().GetArmor()
@@ -301,8 +305,8 @@ func (a *Actor) GetInfoText() []string {
 		meleeInfo = append(meleeInfo, " bare hands")
 	}
 	meleeInfo = append(meleeInfo, []string{
-		fmt.Sprintf("melee damage: %s", a.GetDamageInterval(MeleeAttack).ToString()),
-		fmt.Sprintf("melee speed: %d", a.GetAttackSpeed(MeleeAttack)),
+		fmt.Sprintf("Melee damage: %s", a.GetDamageInterval(MeleeAttack).ToString()),
+		fmt.Sprintf("Melee speed: %d", a.GetAttackSpeed(MeleeAttack)),
 	}...)
 	tableLines = append(tableLines, meleeInfo...)
 
@@ -317,8 +321,8 @@ func (a *Actor) GetInfoText() []string {
 			}
 
 			rangedInfo = append(rangedInfo, []string{
-				fmt.Sprintf("ranged damage: %s", a.GetDamageInterval(RangedAttack).ToString()),
-				fmt.Sprintf("ranged speed: %d", a.GetAttackSpeed(RangedAttack)),
+				fmt.Sprintf("Ranged damage: %s", a.GetDamageInterval(RangedAttack).ToString()),
+				fmt.Sprintf("Ranged speed: %d", a.GetAttackSpeed(RangedAttack)),
 			}...)
 		}
 		tableLines = append(tableLines, rangedInfo...)
@@ -340,7 +344,7 @@ func (a *Actor) GetInfoText() []string {
 
 	nameInfo := []string{a.name}
 	if a.IsVendor() {
-		nameInfo = append(nameInfo, "VENDOR", "")
+		nameInfo = append(nameInfo, "Vendor", "")
 	} else {
 		nameInfo = append(nameInfo, "")
 	}
@@ -409,7 +413,7 @@ func (a *Actor) GetArmorClass() int {
 	baseArmorClassMultiplier := a.stats.GetAttributeAsFloat(stats.EnhancedArmorClassFactor)
 	armor := baseArmorClass
 	for _, item := range a.GetEquipment().GetArmor() {
-		armor += item.GetArmorStats().BaseArmor
+		armor += item.GetArmorStats().GetArmorClass()
 	}
 	armor = int(float64(armor) * baseArmorClassMultiplier)
 	return armor
@@ -445,6 +449,7 @@ func (a *Actor) SetVendorType(vendorType VendorType) {
 
 func (a *Actor) SetNeutral() {
 	a.isHostile = false
+	a.state = ActorStateIdle
 }
 
 func (a *Actor) SetHostile() {
@@ -514,11 +519,11 @@ func (a *Actor) BeforeTurn() {
 
 func (a *Actor) regenerateBasicResources() {
 	statsForActor := a.GetStats()
-	hpRegenFactor := statsForActor.GetAttributeAsFloat(stats.HealthRegenerationFactor)
-	mpRegenFactor := statsForActor.GetAttributeAsFloat(stats.ManaRegenerationFactor)
+	hpRegenPerTurn := statsForActor.GetAttributeAsFloat(stats.HealthRegeneration)
+	mpRegenPerTurn := statsForActor.GetAttributeAsFloat(stats.ManaRegeneration)
 
-	statsForActor.GetRessource(stats.Health).IncreaseByPercentOfMax(hpRegenFactor)
-	statsForActor.GetRessource(stats.Mana).IncreaseByPercentOfMax(mpRegenFactor)
+	statsForActor.GetRessource(stats.Health).IncreaseByFloat(hpRegenPerTurn)
+	statsForActor.GetRessource(stats.Mana).IncreaseByFloat(mpRegenPerTurn)
 }
 func (a *Actor) handleStatusEffects() {
 	for flagName, value := range a.statusEffects.AllEntries() {
@@ -633,6 +638,36 @@ func (a *Actor) SetCorpseIcon(corpse int32) {
 	a.corpseIcon = corpse
 }
 
+func (a *Actor) GetStealableItems() []Item {
+	var stealableItems []Item
+	for _, item := range a.GetInventory().Items() {
+		if !a.GetEquipment().IsEquipped(item) {
+			stealableItems = append(stealableItems, item)
+		}
+	}
+	return stealableItems
+}
+
+func (a *Actor) CanAutoMove() bool {
+	if !a.IsAlive() {
+		return false
+	}
+	if a.HasStatusEffect(StatusStunned) {
+		return false
+	}
+	if a.HasStatusEffect(StatusBerserk) {
+		return false
+	}
+	if a.HasStatusEffect(StatusConfused) {
+		return false
+	}
+	if a.HasStatusEffect(StatusImmobile) {
+		return false
+	}
+	return true
+}
+
+
 func (a *Actor) CanUseItems() bool {
 	if !a.IsAlive() {
 		return false
@@ -644,4 +679,122 @@ func (a *Actor) CanUseItems() bool {
 		return false
 	}
 	return true
+}
+
+func (a *Actor) GetFullStats() []util.LabelText {
+	ourStats := a.GetStats()
+	var hpColor color.Color
+	var manaColor color.Color
+	defaultColor := DarkTextColor
+	hpColor = defaultColor
+	manaColor = defaultColor
+	colorFromModifierType := func(mType stats.ModifierImpact) color.Color {
+		switch mType {
+		case stats.ModifierImpactPositive:
+			return PositiveHighlightColor
+		case stats.ModifierImpactNegative:
+			return NegativeHighlightColor
+		default:
+			return defaultColor
+		}
+	}
+	if ourStats.GetRessource(stats.Health).IsLessThanPercent(0.25) {
+		hpColor = color.RGBA{R: 255, G: 30, B: 30, A: 255}
+	} else if ourStats.GetRessource(stats.Health).IsLessThanPercent(0.5) {
+		hpColor = color.RGBA{R: 255, G: 150, B: 30, A: 255}
+	} else if ourStats.GetRessource(stats.Health).IsLessThanPercent(0.75) {
+		hpColor = color.RGBA{R: 255, G: 255, B: 30, A: 255}
+	}
+
+	if ourStats.GetRessource(stats.Mana).IsLessThanPercent(0.25) {
+		manaColor = color.RGBA{R: 255, G: 30, B: 30, A: 255}
+	} else if ourStats.GetRessource(stats.Mana).IsLessThanPercent(0.5) {
+		manaColor = color.RGBA{R: 255, G: 150, B: 30, A: 255}
+	} else if ourStats.GetRessource(stats.Mana).IsLessThanPercent(0.75) {
+		manaColor = color.RGBA{R: 255, G: 255, B: 30, A: 255}
+	}
+	levelColor := defaultColor
+	if a.CanLevelUp() {
+		levelColor = LightTextColor
+	}
+
+	fullStats := []util.LabelText{
+		{
+			Text:      fmt.Sprintf("Level: %d", ourStats.GetAttribute(stats.Level)),
+			TextColor: levelColor,
+		},
+		{
+			Text:      fmt.Sprintf("Exp: %d", ourStats.GetAttribute(stats.Experience)),
+			TextColor: levelColor,
+		},
+		{
+			Text:      fmt.Sprintf("Next: %d", a.GetXPForLevel(ourStats.GetAttribute(stats.Level)+1)),
+			TextColor: levelColor,
+		},
+		{
+			Text:      fmt.Sprintf("Gold: %d", a.GetStats().GetAttribute(stats.Gold)),
+			TextColor: defaultColor,
+		},
+		{
+			Text:      fmt.Sprintf("HP: %s", ourStats.GetRessource(stats.Health).ToString()),
+			TextColor: hpColor,
+		},
+		{
+			Text:      fmt.Sprintf("MP: %s", ourStats.GetRessource(stats.Mana).ToString()),
+			TextColor: manaColor,
+		},
+		{
+			Text:      fmt.Sprintf("Str: %d", ourStats.GetAttribute(stats.Strength)),
+			TextColor: colorFromModifierType(ourStats.GetModifierType(stats.Strength)),
+		},
+		{
+			Text:      fmt.Sprintf("Int: %d", ourStats.GetAttribute(stats.Intelligence)),
+			TextColor: colorFromModifierType(ourStats.GetModifierType(stats.Intelligence)),
+		},
+		{
+			Text:      fmt.Sprintf("Dex: %d", ourStats.GetAttribute(stats.Dexterity)),
+			TextColor: colorFromModifierType(ourStats.GetModifierType(stats.Dexterity)),
+		},
+		{
+			Text:      fmt.Sprintf("AC: %d", a.GetArmorClass()),
+			TextColor: defaultColor,
+		},
+		{
+			Text:      fmt.Sprintf("ADR: %d%%", int(a.GetArmorDamageReduction(0)*100)),
+			TextColor: defaultColor,
+		},
+		{
+			Text:      fmt.Sprintf("Melee dmg: %s", a.GetDamageInterval(MeleeAttack).ToString()),
+			TextColor: defaultColor,
+		},
+		{
+			Text:      fmt.Sprintf("Ranged dmg: %s", a.GetDamageInterval(RangedAttack).ToString()),
+			TextColor: defaultColor,
+		},
+		{
+			Text:      fmt.Sprintf("Dmg mult: %d%%", int(a.GetStats().GetAttributeAsFloat(stats.EnhancedDamageFactor)*100)),
+			TextColor: defaultColor,
+		},
+		{
+			Text:      fmt.Sprintf("AC mult: %d%%", int(a.GetStats().GetAttributeAsFloat(stats.EnhancedArmorClassFactor)*100)),
+			TextColor: defaultColor,
+		},
+		{
+			Text:      fmt.Sprintf("HP regen: %.1f", a.GetStats().GetAttributeAsFloat(stats.HealthRegeneration)),
+			TextColor: defaultColor,
+		},
+		{
+			Text:      fmt.Sprintf("MP regen: %.1f", a.GetStats().GetAttributeAsFloat(stats.ManaRegeneration)),
+			TextColor: defaultColor,
+		},
+		{
+			Text:      fmt.Sprintf("HP steal: %d", int(a.GetStats().GetAttributeAsFloat(stats.LifeStealFactor)*100)),
+			TextColor: defaultColor,
+		},
+		{
+			Text:      fmt.Sprintf("MP steal: %d%%", int(a.GetStats().GetAttributeAsFloat(stats.ManaStealFactor)*100)),
+			TextColor: defaultColor,
+		},
+	}
+	return fullStats
 }

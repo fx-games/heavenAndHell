@@ -1,6 +1,7 @@
 package game
 
 import (
+	"rpg/actions"
 	"rpg/common"
 	"rpg/geometry"
 	"rpg/gridmap"
@@ -24,6 +25,65 @@ AC: 60-100
 Dmg.: 30-60
 
  */
+
+/*
+Morias balrog
+
+{"Balrog",                    0xFF1F0002L, 0x0081C743L, 0x5004, 55000L,  0, 40, 125, 13, 'B', { 75, 40}, {104,  78, 214,   0}, 100}
+*/
+
+/*
+Moria Skills
+Poison
+Aggravation
+
+DCSS Skills
+Reach (attack from 2 tiles)
+Constrict (Immobilize & DOT)
+Apply Barbs Status (Moving causes damage)
+Knockback
+
+
+Monster Skills of Rogue
+
+Invisibility
+Mimic Loot
+Steal Item / Gold
+Reduce Dmg./AC
+Drain Mana
+Steal Life
+Steal Mana
+Confuse
+Stun
+Damage Equipment
+Breath Fire
+Immobilize
+Flying
+Evade
+
+New Skills from Brogue
+Flit - Flit is an intrinsic ability that allows a monster to occasionally move multiple spaces in a single turn. 33% of its moves are made in a random direction, as though confused. However, the 'flitted' movement is always a move, never an attack. Almost all monsters that fly also flit. (An exception is Furies)
+Aquatic
+Suicide Attack with gas Cloud/Explosion/Pit creation
+Summon spectral blades/other
+Protect allies
+Haste allies
+Heal self / allies
+Slow other
+Lightning
+Cloning
+Never sleeps
+Spell reflection
+Hallucination
+Inanimate
+Immune to weapons
+Corrosive
+Cause weakness
+Grabs hold
+Blink
+Surrounded by damaging cloud
+Quick regeneration
+*/
 func (g *GameInstance) addRandomEnemy(emptyMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], dungeonLevel int, pos geometry.Point) {
 	source := g.randomSource
 
@@ -39,6 +99,7 @@ func (g *GameInstance) addRandomEnemy(emptyMap *gridmap.GridMap[*common.Actor, c
 			g.NewSkeletonWarrior,
 			g.NewSkeletonArcher,
 			g.NewFallen,
+			g.NewThiefPossessed,
 		},
 		3: {
 			g.NewBat,
@@ -54,6 +115,7 @@ func (g *GameInstance) addRandomEnemy(emptyMap *gridmap.GridMap[*common.Actor, c
 			g.NewSkeletonSorcerer,
 			g.NewSkeletonCaptain,
 			g.NewFallen,
+			g.NewThiefPossessed,
 		},
 		5: {
 			g.NewFallen,
@@ -66,6 +128,7 @@ func (g *GameInstance) addRandomEnemy(emptyMap *gridmap.GridMap[*common.Actor, c
 			g.NewCavelingWithAxes,
 			g.NewCavelingWithBigAxe,
 			g.NewCaveBear,
+			g.NewThiefPossessed,
 		},
 		7: {
 			g.NewFiend,
@@ -76,6 +139,7 @@ func (g *GameInstance) addRandomEnemy(emptyMap *gridmap.GridMap[*common.Actor, c
 			g.NewFiendHornedWithGlaive,
 			g.NewFiendHornedBig,
 			g.NewFiendHornedWithWhip,
+			g.NewThiefPossessed,
 		},
 		9: {
 			g.NewRogueBat,
@@ -109,7 +173,7 @@ func (g *GameInstance) NewBat(dungeonLevel int) *common.Actor {
 	actor.SetBaseSpeed(12)
 	actorStats := actor.GetStats()
 	actorStats.SetAttribute(stats.Experience, 15)
-	actorStats.SetAttribute(stats.Strength, 1)
+	actorStats.SetAttribute(stats.Strength, 5+dungeonLevel)
 	return actor
 }
 
@@ -123,7 +187,7 @@ func (g *GameInstance) NewSkeleton(dungeonLevel int) *common.Actor {
 	actor.SetBaseSpeed(9)
 	actorStats := actor.GetStats()
 	actorStats.SetAttribute(stats.Experience, 10)
-	actorStats.SetAttribute(stats.Strength, 2)
+	actorStats.SetAttribute(stats.Strength, 7+dungeonLevel)
 	return actor
 }
 
@@ -141,8 +205,7 @@ func (g *GameInstance) NewSkeletonArcher(dungeonLevel int) *common.Actor {
 	actorStats.SetAttribute(stats.Dexterity, 6)
 
 	weapon := NewBow(g.GetWorldState(), g.randomSource, dungeonLevel)
-	actor.GetInventory().Add(weapon)
-	actor.GetEquipment().Equip(weapon)
+	g.giveAndEquipItemToActor(actor, weapon)
 	return actor
 }
 
@@ -160,8 +223,7 @@ func (g *GameInstance) NewSkeletonWarrior(dungeonLevel int) *common.Actor {
 	actorStats.SetAttribute(stats.Dexterity, 6)
 
 	weapon := NewSword(g.GetWorldState(), g.randomSource, dungeonLevel)
-	actor.GetInventory().Add(weapon)
-	actor.GetEquipment().Equip(weapon)
+	g.giveAndEquipItemToActor(actor, weapon)
 	return actor
 }
 func (g *GameInstance) NewSkeletonCaptain(dungeonLevel int) *common.Actor {
@@ -181,12 +243,10 @@ func (g *GameInstance) NewSkeletonCaptain(dungeonLevel int) *common.Actor {
 	actorStats.SetAttribute(stats.Dexterity, 12)
 
 	weapon := NewSword(g.GetWorldState(), g.randomSource, dungeonLevel)
-	actor.GetInventory().Add(weapon)
-	actor.GetEquipment().Equip(weapon)
+	g.giveAndEquipItemToActor(actor, weapon)
 
 	helmet := NewHelmet(g.GetWorldState(), g.randomSource, dungeonLevel)
-	actor.GetInventory().Add(helmet)
-	actor.GetEquipment().Equip(helmet)
+	g.giveAndEquipItemToActor(actor, helmet)
 
 	return actor
 }
@@ -237,8 +297,7 @@ func (g *GameInstance) NewCavelingWithWeapon(dungeonLevel int) *common.Actor {
 	actorStats.SetAttribute(stats.Strength, 6)
 
 	weapon := NewSword(g.GetWorldState(), g.randomSource, dungeonLevel)
-	actor.GetInventory().Add(weapon)
-	actor.GetEquipment().Equip(weapon)
+	g.giveAndEquipItemToActor(actor, weapon)
 	return actor
 }
 
@@ -255,8 +314,7 @@ func (g *GameInstance) NewCavelingWithAxes(dungeonLevel int) *common.Actor {
 	actorStats.SetAttribute(stats.Strength, 6)
 
 	weapon := NewSword(g.GetWorldState(), g.randomSource, dungeonLevel)
-	actor.GetInventory().Add(weapon)
-	actor.GetEquipment().Equip(weapon)
+	g.giveAndEquipItemToActor(actor, weapon)
 	return actor
 }
 func (g *GameInstance) NewCavelingWithBigAxe(dungeonLevel int) *common.Actor {
@@ -272,8 +330,7 @@ func (g *GameInstance) NewCavelingWithBigAxe(dungeonLevel int) *common.Actor {
 	actorStats.SetAttribute(stats.Strength, 6)
 
 	weapon := NewSword(g.GetWorldState(), g.randomSource, dungeonLevel)
-	actor.GetInventory().Add(weapon)
-	actor.GetEquipment().Equip(weapon)
+	g.giveAndEquipItemToActor(actor, weapon)
 	return actor
 }
 
@@ -304,7 +361,7 @@ func (g *GameInstance) NewFallen(dungeonLevel int) *common.Actor {
 	actor.SetBaseSpeed(8)
 	actorStats := actor.GetStats()
 	actorStats.SetAttribute(stats.Experience, 8)
-	actorStats.SetAttribute(stats.Strength, 2)
+	actorStats.SetAttribute(stats.Strength, 6+dungeonLevel)
 	return actor
 }
 
@@ -323,8 +380,7 @@ func (g *GameInstance) NewFallenWarrior(dungeonLevel int) *common.Actor {
 	actorStats.SetAttribute(stats.Dexterity, 6)
 
 	weapon := NewSword(g.GetWorldState(), g.randomSource, dungeonLevel)
-	actor.GetInventory().Add(weapon)
-	actor.GetEquipment().Equip(weapon)
+	g.giveAndEquipItemToActor(actor, weapon)
 	return actor
 }
 
@@ -343,8 +399,7 @@ func (g *GameInstance) NewFallenArcher(dungeonLevel int) *common.Actor {
 
 
 	weapon := NewBow(g.GetWorldState(), g.randomSource, dungeonLevel)
-	actor.GetInventory().Add(weapon)
-	actor.GetEquipment().Equip(weapon)
+	g.giveAndEquipItemToActor(actor, weapon)
 	return actor
 }
 
@@ -424,8 +479,7 @@ func (g *GameInstance) NewFiendHornedWithKnife(dungeonLevel int) *common.Actor {
 
 
 	weapon := NewSword(g.GetWorldState(), g.randomSource, dungeonLevel)
-	actor.GetInventory().Add(weapon)
-	actor.GetEquipment().Equip(weapon)
+	g.giveAndEquipItemToActor(actor, weapon)
 
 	return actor
 }
@@ -448,8 +502,7 @@ func (g *GameInstance) NewFiendHornedWithWhip(dungeonLevel int) *common.Actor {
 
 
 	weapon := NewSword(g.GetWorldState(), g.randomSource, dungeonLevel)
-	actor.GetInventory().Add(weapon)
-	actor.GetEquipment().Equip(weapon)
+	g.giveAndEquipItemToActor(actor, weapon)
 
 	return actor
 }
@@ -472,8 +525,7 @@ func (g *GameInstance) NewFiendHornedWithGlaive(dungeonLevel int) *common.Actor 
 
 
 	weapon := NewSword(g.GetWorldState(), g.randomSource, dungeonLevel)
-	actor.GetInventory().Add(weapon)
-	actor.GetEquipment().Equip(weapon)
+	g.giveAndEquipItemToActor(actor, weapon)
 
 	return actor
 }
@@ -622,4 +674,30 @@ func (g *GameInstance) NewRogueSnake(dungeonLevel int) *common.Actor {
 
 
 	return actor
+}
+
+func (g *GameInstance) NewThiefPossessed(dungeonLevel int) *common.Actor {
+	actor := common.NewActor(common.IconMonsterThiefPossessed)
+	//index := len(emptyMap.Actors())
+	actor.SetName("a possessed thief")
+	actor.SetInternalName("thief_possessed")
+	actor.SetDeathStringFormats([]string{"%s dies.", "%s has stolen his last piece of gold."})
+	actor.SetHostile()
+	actor.SetBaseSpeed(10)
+	actorStats := actor.GetStats()
+	actorStats.SetAttribute(stats.Experience, 12)
+	actorStats.SetAttribute(stats.Strength, 10)
+	actorStats.SetAttribute(stats.Dexterity, 6)
+
+	weapon := NewSword(g.GetWorldState(), g.randomSource, dungeonLevel)
+	g.giveAndEquipItemToActor(actor, weapon)
+
+	stealAction := g.NewTargetedActionFromName(ActionNameStealItemAndTeleport)
+	actor.SetTargetedSkills([]*common.TargetedAction{stealAction})
+	return actor
+}
+
+func (g *GameInstance) giveAndEquipItemToActor(actor *common.Actor, item *GameItem) {
+	actor.GetInventory().Add(item)
+	g.actionBroker.Execute(actions.NewEquipItemAction(actions.AbstractCause("Equip"), actor, item))
 }

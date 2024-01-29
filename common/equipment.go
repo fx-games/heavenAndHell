@@ -2,11 +2,61 @@ package common
 
 type SlotName int
 
+func (n SlotName) ToString() string {
+	switch n {
+	case SlotNameMainHand:
+		return "Wielding"
+	case SlotNameMissileLauncher:
+		return "Shooting"
+	case SlotNameOffHand:
+		return "Off Hand"
+	case SlotNameLightSource:
+		return "Light source"
+	case SlotNameOneHandedWeapon:
+		return "One Handed Weapon"
+	case SlotNameAmulet:
+		return "Around neck"
+	case SlotNameRing:
+		return "Ring"
+	case SlotNameRingRight:
+		return "On right hand"
+	case SlotNameRingLeft:
+		return "On left hand"
+	case SlotNameTwoHandedWeapon:
+		return "Two Handed Weapon"
+	case SlotNameArmorTorso:
+		return "On body"
+	case SlotNameArmorHead:
+		return "On head"
+	case SlotNameArmorFeet:
+		return "On feet"
+	case SlotNameArmorHands:
+		return "On hands"
+	case SlotNameArmorBack:
+		return "On back"
+	case SlotNameQuiver: return "Quivered"
+	case SlotNameQuickSlot1:
+		return "Quick Slot 1"
+	case SlotNameQuickSlot2:
+		return "Quick Slot 2"
+	case SlotNameQuickSlot3:
+		return "Quick Slot 3"
+	case SlotNameQuickSlot4:
+		return "Quick Slot 4"
+	case SlotNameQuickSlot5:
+		return "Quick Slot 5"
+	}
+	return "Unknown"
+}
+
+
 const (
 	SlotNameNotEquippable SlotName = iota
-	SlotNameLightSource
 	SlotNameMainHand
+    SlotNameMissileLauncher
+	SlotNameQuiver
 	SlotNameOffHand
+	SlotNameLightSource
 	SlotNameOneHandedWeapon
 	SlotNameAmulet
 	SlotNameRing
@@ -49,6 +99,15 @@ func (e *Equipment) IsEquipped(item Item) bool {
 			return true
 		}
 	}
+
+	if slotName == SlotNameRing {
+		if slotItem, exists := e.slots[SlotNameRingLeft]; exists && slotItem == item {
+			return true
+		}
+		if slotItem, exists := e.slots[SlotNameRingRight]; exists && slotItem == item {
+			return true
+		}
+	}
 	if slotItem, exists := e.slots[slotName]; exists && slotItem == item {
 		return true
 	}
@@ -74,6 +133,17 @@ func (e *Equipment) Equip(item Item) {
 		}
 	}
 
+	if slotName == SlotNameRing {
+		if _, exists := e.slots[SlotNameRingLeft]; !exists {
+			e.slots[SlotNameRingLeft] = item
+			return
+		}
+		if _, exists := e.slots[SlotNameRingRight]; !exists {
+			e.slots[SlotNameRingRight] = item
+			return
+		}
+	}
+
 	e.slots[slotName] = item
 }
 
@@ -89,6 +159,16 @@ func (e *Equipment) UnEquip(item Item) {
 		}
 		if slotItem, exists := e.slots[SlotNameOffHand]; exists && slotItem == item {
 			e.UnEquipBySlot(SlotNameOffHand)
+			return
+		}
+	}
+	if slotName == SlotNameRing {
+		if slotItem, exists := e.slots[SlotNameRingLeft]; exists && slotItem == item {
+			e.UnEquipBySlot(SlotNameRingLeft)
+			return
+		}
+		if slotItem, exists := e.slots[SlotNameRingRight]; exists && slotItem == item {
+			e.UnEquipBySlot(SlotNameRingRight)
 			return
 		}
 	}
@@ -154,19 +234,21 @@ func (e *Equipment) GetItemsToReplace(item Item) []Item {
 			return items
 		}
 	}
+	if item.SlotName() == SlotNameRing {
+		if e.isOneSlotAvailable(SlotNameRingLeft, SlotNameRingRight) {
+			return items
+		} else {
+			items = appendIfNotNil(items, e.slots[SlotNameRingLeft])
+			return items
+		}
+	}
 	items = appendIfNotNil(items, e.slots[item.SlotName()])
 	return items
 }
 
 func (e *Equipment) isOneSlotAvailable(slotOne SlotName, slotTwo SlotName) bool {
-	itemAtSlot, slotOneExists := e.slots[slotOne]
-	if slotOneExists && itemAtSlot.SlotName() == SlotNameTwoHandedWeapon {
-		return false
-	}
-	itemAtSlotTwo, slotTwoExists := e.slots[slotTwo]
-	if slotTwoExists && itemAtSlotTwo.SlotName() == SlotNameTwoHandedWeapon {
-		return false
-	}
+	_, slotOneExists := e.slots[slotOne]
+	_, slotTwoExists := e.slots[slotTwo]
 	return !slotOneExists || !slotTwoExists
 }
 
@@ -178,9 +260,8 @@ func appendIfNotNil(items []Item, item Item) []Item {
 }
 
 func (e *Equipment) HasRangedWeaponEquipped() bool {
-	slotMain := e.GetBySlot(SlotNameMainHand)
-	slotOff := e.GetBySlot(SlotNameOffHand)
-	return (slotMain != nil && slotMain.IsRangedWeapon()) || (slotOff != nil && slotOff.IsRangedWeapon())
+	slotMain := e.GetBySlot(SlotNameMissileLauncher)
+	return slotMain != nil && slotMain.IsRangedWeapon()
 }
 
 func (e *Equipment) HasMeleeWeaponEquipped() bool {
@@ -196,4 +277,34 @@ func (e *Equipment) HasLightSourceEquipped() bool {
 
 func (e *Equipment) GetLightSource() Item {
 	return e.GetBySlot(SlotNameLightSource)
+}
+
+func (e *Equipment) AllItems() []Item {
+	var items []Item
+	for _, item := range e.slots {
+		items = append(items, item)
+	}
+	return items
+}
+
+func (e *Equipment) GetSlot(item Item) SlotName {
+	for slot, slotItem := range e.slots {
+		if slotItem == item {
+			return slot
+		}
+	}
+	return SlotNameNotEquippable
+}
+
+func (e *Equipment) HasThrowableQuivered() bool {
+	slot := e.GetBySlot(SlotNameQuiver)
+	return slot != nil && slot.IsThrowable()
+}
+
+func (e *Equipment) GetNextQuiveredThrowable() Item {
+	slot := e.GetBySlot(SlotNameQuiver)
+	if slot == nil {
+		return nil
+	}
+	return slot
 }

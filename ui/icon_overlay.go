@@ -41,6 +41,8 @@ type IconOverlay struct {
 	onClose                     func()
 	shouldClose                 bool
 	canBeClosed                 bool
+	infoLabelHandler            func(UIElement) string
+	onCancel                    func()
 }
 
 func NewIconOverlay(uiController *UIController, offsetFromBottomRightCorner, tileSize geometry.Point, dataSource IconDataSource) *IconOverlay {
@@ -56,6 +58,10 @@ func NewIconOverlay(uiController *UIController, offsetFromBottomRightCorner, til
 	i.infoLabel = NewCustomLabel(uiController, i.layoutLabel)
 	i.Layout()
 	return i
+}
+
+func (o *IconOverlay) SetInfoLabelHandler(handler func(UIElement) string) {
+	o.infoLabelHandler = handler
 }
 
 func (o *IconOverlay) Layout() {
@@ -93,6 +99,9 @@ func (o *IconOverlay) Layout() {
 
 func (o *IconOverlay) OnCommand(command CommandType) bool {
 	if command == PlayerCommandCancel {
+		if o.onCancel != nil {
+			o.onCancel()
+		}
 		o.Close()
 		return true
 	}
@@ -100,9 +109,14 @@ func (o *IconOverlay) OnCommand(command CommandType) bool {
 }
 
 func (o *IconOverlay) OnMouseClicked(button ebiten.MouseButton, x int, y int) bool {
-	if button == ebiten.MouseButtonRight && o.canBeClosed {
-		o.Close()
-		return true
+	if button == ebiten.MouseButtonRight {
+		if o.onCancel != nil {
+			o.onCancel()
+		}
+		if o.canBeClosed {
+			o.Close()
+			return true
+		}
 	}
 
 	o.selectedIndex = -1
@@ -127,9 +141,15 @@ func (o *IconOverlay) OnMouseMoved(x int, y int) (bool, Tooltip) {
 	if !isValid {
 		return true, NoTooltip{}
 	}
+	infoLabelText := item.Name()
+
+	if o.infoLabelHandler != nil {
+		infoLabelText = o.infoLabelHandler(item)
+	}
+
 	o.infoLabel.SetText([]util.LabelText{
 		{
-			Text:      item.Name(),
+			Text:      infoLabelText,
 			TextColor: color.White,
 		},
 	})
@@ -197,9 +217,9 @@ func (o *IconOverlay) Draw() {
 					Y: itemPosition.Y + (tileSize.Y / 2),
 				}
 				borderWidth := tileSize.X //max(tileSize.X / 2, cWidth)
-				borderHeight := max(tileSize.Y / 2, cHeight)
+				borderHeight := max(tileSize.Y / 2, int(cHeight))
 				renderer.DrawColoredRect(borderTopLeft, geometry.Point{X: borderWidth, Y: borderHeight}, blackTransparent)
-				renderer.DrawTTFOnScreen(drawPos.X, drawPos.Y, counterString, color.White)
+				renderer.DrawTTFOnScreen(float64(drawPos.X), float64(drawPos.Y), counterString, color.White)
 			}
 		}
 	}
@@ -274,7 +294,7 @@ func (o *IconOverlay) SetShowCounter(value bool) {
 }
 
 func (o *IconOverlay) layoutLabel(controller *UIController, label *BasicLabel) {
-	label.posInfo = SizeNeededForText(controller.GetRenderer(), label.textLines, 0)
+	label.posInfo = SizeNeededForText(controller.GetRenderer().MeasureString, label.textLines, 0)
 	label.topLeft = geometry.Point{
 		X: o.topLeft.X, Y: o.topLeft.Y - label.posInfo.YOffsetForFirstLine - label.posInfo.SizeInPixels.Y + 4,
 	}
@@ -298,11 +318,15 @@ func (o *IconOverlay) SetCanBeClosed(canBeClosed bool) {
 }
 
 func (o *IconOverlay) Close() {
-	if o.shouldClose == true {
+	if o.shouldClose == true || !o.canBeClosed {
 		return
 	}
 	o.shouldClose = true
 	if o.onClose != nil {
 		o.onClose()
 	}
+}
+
+func (o *IconOverlay) SetOnCancelHandler(cancelHandler func()) {
+	o.onCancel = cancelHandler
 }

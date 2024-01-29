@@ -74,7 +74,7 @@ func (d *OnKillHook) onKill(engine Engine, killer, victim *common.Actor) []Actio
 
 	awardXP := int(float64(victimXP) * multiplier)
 
-	awardGold := rand.Intn(victimXP)
+	awardGold := rand.Intn(victimXP) + victimXP + rand.Intn(awardXP) + awardXP
 
 	// should technically be its own action, if we wanted to hook this..
 	killer.GetStats().IncrementBy(stats.Experience, awardXP)

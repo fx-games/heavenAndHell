@@ -1,15 +1,27 @@
 %rec: default
 #DefaultFont: assets/fonts/exocet-blizzard-light.ttf
+#DefaultFont: assets/fonts/Ac437_EagleSpCGA_Alt3.ttf
+#DefaultFontSize: 16
+
+#DefaultFont: assets/fonts/Mx437_IBM_PS-55_re.ttf
+#DefaultFontSize: 29
+
+#ItemNamesInShop: Short|Enchantments|BandStyle
 
 AutoPickup: true
-AudioEnabled: true
+AudioEnabled: false
 KeepPlayerCentered: true
 ActorBobbingEnabled: true
 CardinalMovementOnly: false
 DrawTilesBehindActors: false
 DrawTilesBehindItems: false
 DrawTilesBehindObjects: false
-DefaultFont: assets/fonts/exocet-blizzard-light.ttf
-DefaultFontSize: 18
+ServeStats: true
+ServeLog: true
+ServeInventory: true
+ServeEquipment: true
+DefaultFont: assets/fonts/Ac437_EagleSpCGA_Alt3.ttf
+DefaultFontSize: 16
 WindowWidth: 1280
 WindowHeight: 800
+ItemNamesInShop: BandStyle

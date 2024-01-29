@@ -56,6 +56,7 @@ type Engine interface {
 	IsPlayerInTown() bool
 	GetPlayerVisionRange() int
 	AddItemToMapWithDistribution(item common.Item, pos geometry.Point)
+    OnPlayerDied()
 }
 type Action interface {
 	Cause() Cause
@@ -102,11 +103,14 @@ type ActionName string
 const (
 	ActionNameMeleeAttack     ActionName = "ActionNameMeleeAttack"
 	ActionNameRangedAttack    ActionName = "ActionNameRangedAttack"
+	ActionNameThrow    ActionName = "ActionNameThrow"
 	ActionNameMove            ActionName = "ActionNameMove"
+	ActionNameMoveItem            ActionName = "ActionNameMoveItem"
 	ActionNameSwap            ActionName = "ActionNameSwap"
 	ActionNameChangeEquipment ActionName = "ActionNameChangeEquipment"
 	ActionNameChangeRessource ActionName = "ActionNameChangeHealth"
 	ActionNamePickup          ActionName = "ActionNamePickup"
+	ActionNameStealItem       ActionName = "ActionNameStealItem"
 	ActionNameDrop            ActionName = "ActionNameDrop"
 	ActionNameOpenDoor        ActionName = "ActionNameOpenDoor"
 	ActionNameSpawnObject     ActionName = "ActionNameSpawnObject"
@@ -135,8 +139,17 @@ func (d *BaseActionHook) After(action Action, engine Engine) []Action {
 	return nil
 }
 
+func logDodged(engine Engine, attacker, defender *common.Actor) {
+	state := engine.GetWorldState()
+	if attacker == state.GetPlayer() {
+		engine.Log(fmt.Sprintf("Your attack misses %s", defender.Name()))
+	} else if defender == state.GetPlayer() {
+		engine.Log(fmt.Sprintf("%s misses you", attacker.Name()))
+	} else {
+		engine.Log(fmt.Sprintf("%s misses %s", attacker.Name(), defender.Name()))
+	}
+}
 func logAttack(engine Engine, attacker, defender *common.Actor, damageAmount int) {
-	println(fmt.Sprintf("Attack: %s -> %s, damage: %d", attacker.Name(), defender.Name(), damageAmount))
 	state := engine.GetWorldState()
 	if attacker == state.GetPlayer() {
 		if damageAmount > 0 {

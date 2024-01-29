@@ -18,6 +18,15 @@ func NewInterval(min, max int) Interval {
 	}
 }
 
+func NewIntervalFromString(str string) Interval {
+	var minDamg, maxDamg int
+	fmt.Sscanf(str, "%d-%d", &minDamg, &maxDamg)
+	return Interval{
+		min: minDamg,
+		max: maxDamg,
+	}
+}
+
 func (i Interval) Min() int {
 	return i.min
 }
@@ -37,7 +46,9 @@ func (i Interval) LinearRandom() int {
 func (i Interval) PyramidRandom() int {
 	return (i.LinearRandom() + i.LinearRandom()) / 2
 }
-
+func (i Interval) Median() int {
+	return (i.min + i.max) / 2
+}
 func (i Interval) ToString() string {
 	if i.min == i.max {
 		return fmt.Sprintf("%d", i.min)
@@ -78,4 +89,8 @@ func (i Interval) Add(other Interval) Interval {
 		min: i.min + other.min,
 		max: i.max + other.max,
 	}
+}
+
+func (i Interval) NotZero() bool {
+	return i.min != 0 || i.max != 0
 }

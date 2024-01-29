@@ -13,32 +13,44 @@ import (
 
 func (g *GameInstance) Update() error {
 
-	g.audioPlayer.Update()
+	if g.shouldQuitGame {
+		return ebiten.Termination
+	}
 
 	g.worldTicks++
 
-	if g.globalFlashColorTicksLeft > 0 {
-		//percentage := float64(g.globalFlashColorTicksLeft) / float64(g.globalFlashColorTicksStart)
-		//lerpedColor := util.LerpColor(color.White, g.globalFlashColor, percentage)
-		g.tileRenderer.SetGlobalScaleColor(colorAsScaledFloat(g.globalFlashColor, 10.0))
-		g.globalFlashColorTicksLeft--
-	} else if g.state.GetPlayer().HasStatusEffect(common.StatusBerserk) {
-		g.tileRenderer.SetGlobalScaleColor([4]float32{1.0, 0.5, 0.5, 1})
-	} else {
-		g.tileRenderer.SetGlobalScaleColor([4]float32{1, 1, 1, 1})
+	player := g.state.GetPlayer()
+
+	if !g.consoleMode {
+		g.audioPlayer.Update()
+
+		if g.globalFlashColorTicksLeft > 0 {
+			//percentage := float64(g.globalFlashColorTicksLeft) / float64(g.globalFlashColorTicksStart)
+			//lerpedColor := util.LerpColor(color.White, g.globalFlashColor, percentage)
+			g.tileRenderer.SetGlobalScaleColor(colorAsScaledFloat(g.globalFlashColor, 10.0))
+			g.globalFlashColorTicksLeft--
+		} else if player.HasStatusEffect(common.StatusBerserk) {
+			g.tileRenderer.SetGlobalScaleColor([4]float32{1.0, 0.5, 0.5, 1})
+		} else {
+			g.tileRenderer.SetGlobalScaleColor([4]float32{1, 1, 1, 1})
+		}
+
+		g.handleMouseInput()
+
+		g.handleKeyboardInput()
+
+		g.uiController.Tick()
 	}
-
-	g.handleMouseInput()
-
-	g.handleKeyboardInput()
 
 	g.actionBroker.Tick()
 
-	if !g.setToExactFit && g.configuration.KeepPlayerCentered {
-		g.mapRenderer.CenterOnFloat(g.state.GetPlayer().DrawPosition())
-	}
 
-	g.uiController.Tick()
+	if !player.IsAlive() {
+		return nil
+	}
+	if !g.consoleMode && !g.setToExactFit && g.configuration.KeepPlayerCentered {
+		g.mapRenderer.CenterOnFloat(player.DrawPosition())
+	}
 
 	for _, actor := range g.state.GetMap().Actors() {
 		actor.Tick()
@@ -72,22 +84,34 @@ func (g *GameInstance) handleKeyboardInput() {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF1) {
 		g.showHelpText()
+		return
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 		g.uiCancelAll()
+		return
 	}
-	if g.uiController.IsUIVisible() {
+	if g.uiController.IsUIModalVisible() {
 		if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
 			g.uiController.OnCommand(ui.PlayerCommandUp)
+			return
 		} else if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
 			g.uiController.OnCommand(ui.PlayerCommandDown)
+			return
 		} else if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
 			g.uiController.OnCommand(ui.PlayerCommandLeft)
+			return
 		} else if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
 			g.uiController.OnCommand(ui.PlayerCommandRight)
+			return
 		}
 		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 			g.uiController.OnCommand(ui.PlayerCommandConfirm)
+			return
+		}
+		var keys []ebiten.Key
+		keys = inpututil.AppendJustPressedKeys(keys)
+		for _, key := range keys {
+			g.uiController.OnKeyPressed(key, g.shiftIsBeingPressedThisTick)
 		}
 		return
 	}
@@ -99,6 +123,9 @@ func (g *GameInstance) handleKeyboardInput() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
 		g.aimedRangedAttack()
 	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyV) {
+		g.aimedThrow()
+	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		g.quickRangedAttack()
 	}
@@ -106,7 +133,7 @@ func (g *GameInstance) handleKeyboardInput() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyL) {
 		g.showLog()
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyV) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
 		g.showJournal()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyX) {
@@ -121,9 +148,7 @@ func (g *GameInstance) handleKeyboardInput() {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyI) {
-		if !g.inventory.IsActive() && g.inventory.HasItems() {
-			g.inventory.Activate()
-		}
+		g.openListInventory()
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyC) {
@@ -153,15 +178,17 @@ func (g *GameInstance) handleKeyboardInput() {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyT) {
-		g.playerTravelToRecallLocation()
+		g.recallAtEndOfTurn()
+		g.actionBroker.Execute(actions.NewEndPlayerTurnAction(actions.AbstractCause("Travel"), 10))
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyU) {
 		level := g.getCurrentDungeonLevel()
-		g.instantlyTravelTo(gridmap.Transition{
+		g.transitionTo(gridmap.Transition{
 			TargetMap:      levelName(level + 1),
 			TargetLocation: "ladder_up",
 		})
+		g.actionBroker.Execute(actions.NewEndPlayerTurnAction(actions.AbstractCause("Travel"), 10))
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyO) {
@@ -196,13 +223,13 @@ func (g *GameInstance) handleKeyboardInput() {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
-		g.manualMovePlayer(geometry.Point{X: 0, Y: -1})
+		g.ManualMovePlayer(geometry.Point{X: 0, Y: -1})
 	} else if inpututil.IsKeyJustPressed(ebiten.KeyS) {
-		g.manualMovePlayer(geometry.Point{X: 0, Y: 1})
+		g.ManualMovePlayer(geometry.Point{X: 0, Y: 1})
 	} else if inpututil.IsKeyJustPressed(ebiten.KeyA) {
-		g.manualMovePlayer(geometry.Point{X: -1, Y: 0})
+		g.ManualMovePlayer(geometry.Point{X: -1, Y: 0})
 	} else if inpututil.IsKeyJustPressed(ebiten.KeyD) {
-		g.manualMovePlayer(geometry.Point{X: 1, Y: 0})
+		g.ManualMovePlayer(geometry.Point{X: 1, Y: 0})
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyM) {
@@ -219,7 +246,7 @@ func (g *GameInstance) uiCancelAll() {
 		g.CancelTargeting()
 		return
 	}
-	if g.uiController.IsUIVisible() {
+	if g.uiController.IsUIModalVisible() {
 		g.uiController.OnCommand(ui.PlayerCommandCancel)
 		return
 	}
@@ -231,6 +258,10 @@ func (g *GameInstance) uiCancelAll() {
 }
 
 func (g *GameInstance) startAutoExplore() {
+	if !g.state.GetPlayer().CanAutoMove() {
+		g.Log("You can't explore right now")
+		return
+	}
 	target, hasTarget := g.getNextAutoExploreTarget()
 	if g.autoExplore {
 		g.stopAutoMove()
@@ -299,7 +330,7 @@ func (g *GameInstance) quickRangedAttack() {
 	if g.targeter != nil {
 		g.targeter.OnCommand(ui.PlayerCommandConfirm)
 	} else {
-		g.BeginRangedTargeting()
+		g.BeginRangedTargeting(g.playerRangedAttack)
 		if g.targeter.HasValidTarget() {
 			g.targeter.OnCommand(ui.PlayerCommandConfirm)
 		} else {
@@ -320,9 +351,36 @@ func (g *GameInstance) aimedRangedAttack() {
 	if g.targeter != nil {
 		g.targeter.OnCommand(ui.PlayerCommandConfirm)
 	} else {
-		g.BeginRangedTargeting()
+		g.BeginRangedTargeting(g.playerRangedAttack) // execute ranged attack action and end turn)
 	}
 	return
+}
+
+func (g *GameInstance) aimedThrow() {
+	if !g.state.GetPlayer().IsAlive() {
+		return
+	}
+	if g.targeter != nil {
+		g.targeter.OnCommand(ui.PlayerCommandConfirm)
+		return
+	}
+	equipment := g.state.GetPlayer().GetEquipment()
+	inventory := g.state.GetPlayer().GetInventory()
+	if !equipment.HasThrowableQuivered() {
+		throwFilter := func(element common.Item) bool {
+			return element.IsThrowable()
+		}
+		onSelected := func(itemKey rune) {
+			thrownItem := inventory.GetItemByLetter(itemKey)
+			throwComponent := thrownItem.GetThrowStats()
+			g.BeginThrowTargeting(throwComponent.HitZone, g.playerThrow(thrownItem))
+		}
+		g.openListInventoryForSelection(throwFilter, onSelected)
+	} else {
+		thrownItem := equipment.GetNextQuiveredThrowable()
+		throwComponent := thrownItem.GetThrowStats()
+		g.BeginThrowTargeting(throwComponent.HitZone, g.playerThrow(thrownItem))
+	}
 }
 
 func (g *GameInstance) handleMouseInput() {
@@ -367,7 +425,11 @@ func (g *GameInstance) handleMouseInput() {
 	}
 	if mouseButton != noButton {
 		handledByUI := g.uiController.OnMouseClicked(mouseButton, mousePosInPixelsX, mousePosInPixelsY)
-		if !g.state.GetMap().Contains(g.mousePosOnMap) {
+		if handledByUI {
+			return
+		}
+		visibleMap := g.mapRenderer.GetVisibleMap()
+		if !g.state.GetMap().Contains(g.mousePosOnMap) || !visibleMap.Contains(g.mousePosOnMap) {
 			return
 		}
 		if g.targeter != nil {

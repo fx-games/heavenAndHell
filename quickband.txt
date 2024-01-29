@@ -1,0 +1,37 @@
+Weapon Shop
+
+5 Daggers (1d4) (+0, +0)		9g
+4 Sabres (1d7) (+0, +0)			50g
+a Broad Sword (2d5) (+4, +1)	767g
+a Long Sword (2d5) (+0, +0) 	814g
+a Long Sword (2d5) (+3, +2)		304g
+a Long Bow (x3) (+0, +0)		122g
+a Light Crossbow (x3) (+6, +5)	1260g
+Ammo
+Blade of Chaos (6d5) (+0, +0)	4000g
+
+Potion Shop
+17 Potions of Heroism
+5 Potions of Heroism {25% off}
+41 Potions of Cure Light Wounds
+15 Potions of Cure Critical Wounds
+6 Potions of Restore Life Levels
+16 Scrolls of Identify
+4 Scrolls of Remove Curse
+
+
+Chain Mail (-2) [14, +3]				1096g
+Chain Mail (-2) [14, +2]
+Chain Mail (-2) [14, +0]
+Hard Leather Armour (-1) [6, +0] 		156g
+Hard Studded Leather (-1) [7, +0]		120g
+Hard Studded Leather (-1) [7, +2]		420g
+Leather Scale Mail (-1) [11, +0]		470g
+a small Metal Shield [3, +2]			260g
+Iron Helm [5, +0]						80g
+A Pair of Soft Leather Boots [2, +4]	7g
+Power Dragon Scale Mail [40, +0]		300000g
+Shield of Deflection	[10]			10000g
+
+Angband will increase your HP by a hit dice roll every level up.
+It adds a retroactive bonus for the constitution stat.

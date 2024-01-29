@@ -31,6 +31,27 @@ add a stash in town
  - Write maps to disk when changing levels
  - Don't keep everything in memory, only the current level
 
+9. Philosophy
+ - Embrace the grind, but make it short and sweet
+ - Should not be possible to achieve a status of invincibility
+   -> Cap the max level & stats (incl. modified stats)
+   -> Cap the max power of magical items
+   -> Cap the max number of magical items that can be found
+
+ - Instead working towards a clear end goal
+ - Disallow infinite accumulation of resources
+   -> Give a bit of leeway in newly generated resources, but make it still limited
+      -> Idea: Instead of permanently adding to the pool of items, allow some kind of re-rolling with
+      -> Sacrifice loot worth a certain amount of gold to regenerate a level with up that amount of gold worth of loot
+         -> You can try your luck if you feel your equipment is not good enough, but every time you do, you lose a bit of net worth
+
+      -> By sacrificing a magical item, you can open a portal to a new random level, which can contain new resources, but never more magical items than you sacrificed
+         -> Would punish the player when he doesn't find magic items at all
+      -> You can also sacrifice gold, which would result in a level with less or equal loot value than sacrificed, but will include one magical item
+
+      -> DCSS does this by just having static levels that don't regenerate at all
+      -> Other RLs usually have a food clock for this
+      -> Angband does not have this
 
 streamline
 ==========
@@ -40,6 +61,14 @@ wands only!
 stats?
 HP, SP (magic, skills, running),
 Dmg, Def, Magic, Speed
+
+Minimal Moria Feature Set
+Take rogue:
+ - Random Dungeon, items, monsters
+Add:
+ - Town with vendors (Buying / Selling)
+ - Stash in Town
+ - Boss battle
 
 
 cool ideas
@@ -585,6 +614,7 @@ Bad:
    - But there should be the option to grind to a certain extent, to make the fight easier. this should be interesting though
  - Not being able to sell items just feels wrong
    - Allow selling items?
+ - Boring Enemies
 
 Potions?
 

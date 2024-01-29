@@ -1,6 +1,8 @@
 package common
 
-import "fmt"
+import (
+	"fmt"
+)
 
 
 
@@ -46,4 +48,12 @@ func (f *Flags) AllEntries() map[string]int {
 
 func (f *Flags) SetToValue(key string, value int) {
 	f.flags[key] = value
+}
+
+func (f *Flags) Set(enabled string, value bool) {
+	if value {
+		f.SetTrue(enabled)
+	} else {
+		f.SetFalse(enabled)
+	}
 }

@@ -6,8 +6,16 @@ import (
 	"rpg/geometry"
 	"rpg/stats"
 	"rpg/util"
+	"strings"
 )
 
+type ThrowStats struct {
+	Damage        stats.Interval
+	Requirements  map[stats.Name]int
+	OnHitEffect   func(attacker *Actor, hitLocation geometry.Point)
+	ChanceToBreak float64
+	HitZone       AoEResolver
+}
 type WeaponStats struct {
 	Damage                      stats.Interval
 	Requirements                map[stats.Name]int
@@ -15,6 +23,7 @@ type WeaponStats struct {
 	Type                        WeaponType
 	AttackSpeedFactor           float64
 	MeleeRange                  int
+	Plus 						int	// Plus is enchantment that gets added to damage
 	DamagePerLocationPrediction func(attackerPos, targetPos geometry.Point, damage stats.Interval, weaponCount int) []LocationDamagePrediction
 }
 
@@ -22,6 +31,7 @@ func (s WeaponStats) ToString(forActor *Actor) []util.LabelText {
 	baseInfo := []util.LabelText{
 		LabelTextFromString(fmt.Sprintf("Type: %s", s.Type.ToString())),
 		LabelTextFromString(fmt.Sprintf("Damage: %s", s.Damage.ToString())),
+		LabelTextFromString(fmt.Sprintf("Enchantment: +%d", s.Plus)),
 		LabelTextFromString(fmt.Sprintf("Durability: %s", s.Durability.ToString())),
 		LabelTextFromString(fmt.Sprintf("Attack Speed: %.2f", s.AttackSpeedFactor)),
 	}
@@ -81,11 +91,16 @@ func (s WeaponStats) GetDamagePerLocationPrediction(attackerPos, targetPos geome
 	return s.DamagePerLocationPrediction(attackerPos, targetPos, damage, weaponCount)
 }
 func (s WeaponStats) IsMeleeWeapon() bool {
-	return s.Type == WeaponTypeSword || s.Type == WeaponTypeAxe || s.Type == WeaponTypeMace || s.Type == WeaponTypeStaff
+	return s.Type == WeaponTypeSword || s.Type == WeaponTypeAxe || s.Type == WeaponTypeMace || s.Type == WeaponTypeStaff || s.Type == WeaponTypeScythe
 }
 
 func (s WeaponStats) IsRangedWeapon() bool {
 	return s.Type == WeaponTypeBow
+}
+
+func (s WeaponStats) NameParts() string {
+	// angband style (3, +3)
+	return fmt.Sprintf("(%d-%d, +%d)", s.Damage.Min(), s.Damage.Max(), s.Plus)
 }
 
 type WeaponType int
@@ -107,6 +122,19 @@ func (t WeaponType) ToString() string {
 	}
 }
 
+func (t WeaponType) GetInventorySlot() SlotName {
+	switch t {
+	case WeaponTypeSword, WeaponTypeAxe, WeaponTypeMace:
+		return SlotNameOneHandedWeapon
+	case WeaponTypeStaff, WeaponTypeScythe:
+		return SlotNameTwoHandedWeapon
+	case WeaponTypeBow:
+		return SlotNameMissileLauncher
+	default:
+		return SlotNameNotEquippable
+	}
+}
+
 /*
 - Swords
 - Clubs/Maces
@@ -115,10 +143,34 @@ func (t WeaponType) ToString() string {
 - Bows
 */
 const (
-	WeaponTypeSword WeaponType = iota
+	WeaponTypeNone WeaponType = iota
+	WeaponTypeSword
 	WeaponTypeAxe
 	WeaponTypeMace
 	WeaponTypeStaff
 	WeaponTypeBow
 	WeaponTypeShield
+	WeaponTypeScythe
 )
+
+func WeaponTypeFromString(str string) WeaponType {
+	str = strings.ToLower(str)
+	switch str {
+	case "sword":
+		return WeaponTypeSword
+	case "axe":
+		return WeaponTypeAxe
+	case "mace":
+		return WeaponTypeMace
+	case "staff":
+		return WeaponTypeStaff
+	case "bow":
+		return WeaponTypeBow
+	case "shield":
+		return WeaponTypeShield
+	case "scythe":
+		return WeaponTypeScythe
+	default:
+		return WeaponTypeSword
+	}
+}

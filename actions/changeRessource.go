@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"fmt"
 	"math/rand"
 	"rpg/common"
 	"rpg/stats"
@@ -41,7 +40,6 @@ func (d *ChangeRessourceAction) Execute(engine Engine) []Action {
 	}
 
 	d.animations = d.prepareAnimations(engine)
-	println(fmt.Sprintf("(%s - %s) Changed %s by %d", d.cause.Action(), d.Name(), receiver.Name(), d.changedByAmount))
 	return nil
 }
 

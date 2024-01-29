@@ -1,9 +1,5 @@
 package game
 
-import (
-	"fmt"
-)
-
 type TimedBeing interface {
 	AddEnergy(energy int)
 	RemoveEnergy(used int)
@@ -35,10 +31,19 @@ func (t *TimeKeeper) SetTimed(timedBeings []TimedBeing) {
 func (t *TimeKeeper) PlayerTakesTurn(playerAutUsed int) {
 	t.autCounter += uint64(playerAutUsed)
 	t.turnCounter++
-	println(fmt.Sprintf("Player takes turn %d using %d aut", t.turnCounter, playerAutUsed))
+	//println(fmt.Sprintf("Player takes turn %d using %d aut", t.turnCounter, playerAutUsed))
 	//for _, actor := range t.timed {
 	// PROBLEM: We are technically doing a recursive call of this function here.
 	// Each time an after hook executes during our turn that then triggers another turn..
+
+	// PROBLEM: Delayed teleport will trigger during this loop and a map change will occur,
+	// which in turn will overwrite the list we are currently iterating over.
+
+	// The solution, the map change should be queued and executed after the turn is over.
+	// Hmmm... This should also occur when something dies, or when something is spawned.
+	// Nope, death won't remove things from the list directly.. we do it here in the loop.
+	// Any other events that could potentially change the list of active beings?
+
 	for i := len(t.timed) - 1; i >= 0; i-- {
 		timedBeing := t.timed[i]
 		if !timedBeing.IsAlive() {

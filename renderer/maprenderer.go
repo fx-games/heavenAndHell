@@ -128,7 +128,7 @@ func (r *MapRenderer) DrawStringOnMapWithOffset(mapPos, screenOffset geometry.Po
 		return
 	}
 	x, y := r.mapToScreen(mapPos)
-	r.gridRenderer.DrawTTFOnScreen(int(x+float64(screenOffset.X)), int(y+float64(screenOffset.Y)), text, textColor)
+	r.gridRenderer.DrawTTFOnScreen(x+float64(screenOffset.X), y+float64(screenOffset.Y), text, textColor)
 }
 func (r *MapRenderer) CenterOn(pos geometry.Point) {
 	r.mapWindow.CenterOn(pos)

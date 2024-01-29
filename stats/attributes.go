@@ -25,9 +25,9 @@ const (
 	MoveSpeedFactor          Name = "Move Speed"
 	LifeStealFactor          Name = "Life Steal"
 	ManaStealFactor          Name = "Mana Steal"
-	ManaRegenerationFactor   Name = "Mana Regeneration"
-	HealthRegenerationFactor Name = "Health Regeneration"
-	EnhancedDamageFactor     Name = "Enhanced Damage"
+	ManaRegeneration     Name = "Mana Regeneration"
+	HealthRegeneration   Name = "Health Regeneration"
+	EnhancedDamageFactor Name = "Enhanced Damage"
 	EnhancedArmorClassFactor Name = "Armor Class Multiplier"
 
 	ArmorPenetration Name = "Armor Penetration"
@@ -141,8 +141,8 @@ func NewAttributeHolder() AttributeHolder {
 			LifeStealFactor: 0,
 			ManaStealFactor: 0,
 
-			HealthRegenerationFactor: 0.0,//0.01,
-			ManaRegenerationFactor:   0.0,//0.01,
+			HealthRegeneration: 0.0, //0.01,
+			ManaRegeneration:   0.0, //0.01,
 
 			MaxHealth: 10,
 			MaxMana:   10,

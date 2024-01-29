@@ -19,11 +19,15 @@ const (
 	ActionNameHealHealthAndMana common.UntargetedActionName = "Full Healing"
 	ActionNameHealHealth common.UntargetedActionName = "Healing"
 	ActionNameBerserk    common.UntargetedActionName = "Berserker Rage"
+	ActionNameConfuse	common.UntargetedActionName = "Confusion"
 	ActionNameHealMana   common.UntargetedActionName = "Restore Mana"
 	ActionNameTeleport   common.UntargetedActionName = "Phase Door"
 	ActionNameBuffDamage common.UntargetedActionName = "Slicing"
+	ActionNameBuffSpeed common.UntargetedActionName = "Haste"
 	ActionNameRecall     common.UntargetedActionName = "Word of Recall"
 	ActionNameBless         common.UntargetedActionName = "Blessing"
+	ActionNameEnchantWeapon common.UntargetedActionName = "Enchant Weapon"
+	ActionNameEnchantArmor  common.UntargetedActionName = "Enchant Armor"
 	ActionNameMultiShot        common.UntargetedActionName = "Multi-shot"
 	ActionNameTelefrag          common.UntargetedActionName = "Telefrag"
 	ActionNameReadMessage       common.UntargetedActionName = "Read Message"
@@ -141,9 +145,11 @@ func (g *GameInstance) getRandomTelefragAction() *common.UntargetedAction {
 		moveAction := actions.NewMoveAction(actions.NewActorCause("Telefrag", user), user, location, isPlayer)
 		moveAction.DisableAnimation()
 
-		g.cancelAutoMove()
-		g.CancelTargeting()
-		g.actionBroker.CancelAllAnimations()
+		if user == g.state.GetPlayer() {
+			g.cancelAutoMove()
+			g.CancelTargeting()
+			g.actionBroker.CancelAllAnimations()
+		}
 
 		changeHealthAmount := -randomEnemy.GetStats().GetRessource(stats.Health).Value()
 		killAction := actions.NewChangeRessourceAction(actions.NewActorCause("Telefrag", user), randomEnemy, stats.Health, changeHealthAmount)
@@ -170,9 +176,11 @@ func (g *GameInstance) getDelayedRandomTeleportAction() *common.UntargetedAction
 		moveAction := actions.NewMoveAction(actions.NewActorCause("Teleport", user), user, location, isPlayer)
 		moveAction.DisableAnimation()
 
-		g.cancelAutoMove()
-		g.CancelTargeting()
-		g.actionBroker.CancelAllAnimations()
+		if user == g.state.GetPlayer() {
+			g.cancelAutoMove()
+			g.CancelTargeting()
+			g.actionBroker.CancelAllAnimations()
+		}
 
 		g.actionBroker.QueueForExecution(moveAction)
 	})
@@ -194,9 +202,11 @@ func (g *GameInstance) getRandomTeleportAction() *common.UntargetedAction {
 		moveAction := actions.NewMoveAction(actions.NewActorCause("Teleport", user), user, location, isPlayer)
 		moveAction.DisableAnimation()
 
-		g.cancelAutoMove()
-		g.CancelTargeting()
-		g.actionBroker.CancelAllAnimations()
+		if user == g.state.GetPlayer() {
+			g.cancelAutoMove()
+			g.CancelTargeting()
+			g.actionBroker.CancelAllAnimations()
+		}
 
 		g.actionBroker.QueueForExecution(moveAction)
 	})
@@ -205,8 +215,9 @@ func (g *GameInstance) getRandomTeleportAction() *common.UntargetedAction {
 
 func (g *GameInstance) getPlayerRecallAction() *common.UntargetedAction {
 	action := common.NewUntargetedAction(ActionNameRecall, 39)
+	action.SetDelay(4)
 	action.SetEffect(func(user *common.Actor) {
-		g.playerTravelToRecallLocation()
+		g.recallAtEndOfTurn()
 	})
 	return action
 }
@@ -231,6 +242,9 @@ func (t *TimedModifier) TintColor() color.Color {
 	return color.White
 }
 func (t *TimedModifier) Name() string {
+	return t.name
+}
+func (t *TimedModifier) String() string {
 	return t.name
 }
 func (t *TimedModifier) InventoryIcon() int32 {

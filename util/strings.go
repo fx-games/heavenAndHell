@@ -20,6 +20,9 @@ func RightPad(s string, pLen int) string {
 	return s + strings.Repeat(" ", pLen-len(s))
 }
 
+func LeftPad(s string, pLen int) string {
+	return strings.Repeat(" ", pLen-len(s)) + s
+}
 func RightPadCount(s string, count int) string {
 	return s + strings.Repeat(" ", count)
 }

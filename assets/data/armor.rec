@@ -1,0 +1,166 @@
+%rec: default
+
+# required for armor: name, icon, dlvl, armor_type, armor_class
+
+## Typical Torso Armor
+## Start to mid-end level armor
+
+name: Soft Leather Armour
+category: armor
+armor_type: Cuirass
+armor_class: 4
+icon: 227
+dlvl: 1
+
+name: Hard Leather Armour
+category: armor
+armor_type: Cuirass
+armor_class: 6
+icon: 227
+dlvl: 1
+
+name: Hard Studded Leather
+category: armor
+armor_type: Cuirass
+armor_class: 7
+icon: 228
+dlvl: 1
+
+name: Leather Scale Mail
+category: armor
+armor_type: Cuirass
+armor_class: 11
+icon: 229
+dlvl: 1
+
+name: Metal Scale Mail
+category: armor
+armor_type: Cuirass
+armor_class: 13
+icon: 198
+dlvl: 3
+
+name: Rusty Chain Mail
+category: armor
+armor_type: Cuirass
+armor_class: 14
+icon: 196
+dlvl: 3
+
+name: Chain Mail
+category: armor
+armor_type: Cuirass
+armor_class: 14
+icon: 230
+dlvl: 3
+
+name: Double Chain Mail
+category: armor
+armor_type: Cuirass
+armor_class: 16
+icon: 230
+dlvl: 5
+
+name: Augmented Chain Mail
+category: armor
+armor_type: Cuirass
+armor_class: 16
+icon: 230
+dlvl: 5
+
+name: Bar Chain Mail
+category: armor
+armor_type: Cuirass
+armor_class: 18
+icon: 197
+dlvl: 5
+
+name: Metal Brigandine Armour
+category: armor
+armor_type: Cuirass
+armor_class: 19
+icon: 199
+dlvl: 7
+
+name: Partial Plate Armour
+category: armor
+armor_type: Cuirass
+armor_class: 22
+icon: 199
+dlvl: 7
+
+name: Metal Lamellar Armour
+category: armor
+armor_type: Cuirass
+armor_class: 23
+icon: 199
+dlvl: 8
+
+name: Full Plate Armour
+category: armor
+armor_type: Cuirass
+armor_class: 25
+icon: 199
+dlvl: 8
+
+name: Ribbed Plate Armour
+category: armor
+armor_type: Cuirass
+armor_class: 28
+icon: 201
+dlvl: 9
+
+
+## Shields
+# required for weapon: name, icon, dlvl, weapon_type, weapon_damage, weapon_speed
+
+name: Small Leather Shield
+category: armor
+armor_type: shield
+armor_class: 2
+weapon_type: shield
+weapon_damage: 1-4
+weapon_speed: 0.9
+icon: 204
+dlvl: 1
+
+
+name: Small Metal Shield
+category: armor
+armor_type: shield
+armor_class: 3
+weapon_type: shield
+weapon_damage: 1-6
+weapon_speed: 1.0
+icon: 203
+dlvl: 1
+
+
+name: Large Rusted Shield
+category: armor
+armor_type: shield
+armor_class: 4
+weapon_type: shield
+weapon_damage: 1-6
+weapon_speed: 1.0
+icon: 206
+dlvl: 1
+
+name: Large Metal Shield
+category: armor
+armor_type: shield
+armor_class: 5
+weapon_type: shield
+weapon_damage: 1-8
+weapon_speed: 1.1
+icon: 205
+dlvl: 1
+
+## Helmets
+
+name: Hard Leather Cap
+category: armor
+armor_type: helmet
+armor_class: 2
+icon: 231
+dlvl: 1

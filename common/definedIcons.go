@@ -134,12 +134,27 @@ const (
 	IconItemPotionPink int32 = 331
 	IconItemPotionBrown int32 = 326
 	IconItemPotionWhite int32 = 328
+	IconItemFlaskOfOil int32 = 246
+
+	IconCloakDark int32 = 411
+	IconGlovesDark int32 = 439
+	IconBootsDark int32 = 440
+	IconArmorDark int32 = 441
+	IconHoodDark int32 = 467
+	IconRingDark int32 = 468
+	IconHelmetDark int32 = 469
+	IconShieldDarkThorns int32 = 495
+	IconAmuletDark int32 = 496
+	IconScytheDark int32 = 497
+	IconMalletGolden int32 = 498
 
 
 	IconItemScroll int32 = 139
 	IconItemTorch int32 = 352
 	IconItemLantern int32 = 247
 	IconItemStarGlass int32 = 248
+
+	IconItemMorningStar int32 = 274
 
 	IconItemRing1   int32 = 129
 	IconItemRing2   int32 = 130
@@ -149,6 +164,7 @@ const (
 	IconItemAmulet3 int32 = 134
 
 	IconItemSword       int32 = 144
+	IconItemDagger      int32 = 233
 	IconItemMagicSword  int32 = 146
 	IconItemUniqueSword int32 = 147
 
@@ -168,6 +184,11 @@ const (
 	IconItemMagicBow    int32 = 150
 	IconItemUniqueBow   int32 = 151
 
+	IconItemDart int32 = 232
+
+	IconItemLeatherArmor1       int32 = 227
+	IconItemLeatherArmor2       int32 = 228
+	IconItemLeatherArmor3       int32 = 229
 	IconItemChainMail       int32 = 196
 	IconItemUniqueChainMail int32 = 197
 	IconItemArmor           int32 = 199
@@ -242,6 +263,9 @@ const (
 	IconMonsterHornedWithWhip int32 = 544
 	IconMonsterHornedBig      int32 = 543
 
+
+	IconMonsterThiefPossessed int32 = 463
+	IconMonsterThiefGoblin int32 = 491
 
 
 	IconMonsterGoatMan         int32 = 95

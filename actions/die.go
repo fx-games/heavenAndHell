@@ -25,17 +25,19 @@ func (d *DieAction) Execute(engine Engine) []Action {
 	state := engine.GetWorldState()
 	gameMap := state.GetMap() // read state
 	actor := d.actor
-	corpsePos := d.getCorpsePos(gameMap, actor.MapPosition())
-	gameMap.RemoveActor(actor)
-	if actor.HasCorpse() {
-		gameMap.AddDownedActor(actor, corpsePos) // write state
-	}
 	if actor == state.GetPlayer() {
 		engine.Log(fmt.Sprintf("You die. CoD: %s", d.cause.ToString()))
+		engine.OnPlayerDied()
 	} else {
+		corpsePos := d.getCorpsePos(gameMap, actor.MapPosition())
+		gameMap.RemoveActor(actor)
+		if actor.HasCorpse() {
+			gameMap.AddDownedActor(actor, corpsePos) // write state
+		}
 		engine.Log(fmt.Sprintf(actor.GetDeathStringFormat(), actor.Name()))
 		//engine.UpdateMiniMap()
 	}
+
 
 	return nil
 }

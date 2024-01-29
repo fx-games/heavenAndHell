@@ -55,11 +55,48 @@ func ColorFromName(name string) color.Color {
 		return DarkTextColor
 	case "lightText":
 		return LightTextColor
+	case "magic":
+		return MagicHighlightColor
+	case "rare":
+		return RareHighlightColor
+	case "set":
+		return SetHighlightColor
+	case "unique":
+		return UniqueHighlightColor
+	case "positive":
+		return PositiveHighlightColor
+	case "negative":
+		return NegativeHighlightColor
 	default:
 		return color.White
 	}
 }
-
+func ColorCodeFromColor(color color.Color) string {
+	switch color {
+	case Red:
+		return "[:red]"
+	case Blue:
+		return "[:blue]"
+	case Green:
+		return "[:green]"
+	case Yellow:
+		return "[:yellow]"
+	case DarkTextColor:
+		return "[:darkText]"
+	case LightTextColor:
+		return "[:lightText]"
+	case MagicHighlightColor:
+		return "[:magic]"
+	case RareHighlightColor:
+		return "[:rare]"
+	case SetHighlightColor:
+		return "[:set]"
+	case UniqueHighlightColor:
+		return "[:unique]"
+	default:
+		return "[:white]"
+	}
+}
 func RemoveColorCodes(colorCodedText string) string {
 	// color codes look like this [:red] [:blue] [:green] [:yellow] [:white] [:24,54,222]
 	regexPattern := `\[:([\w,]+)\]`

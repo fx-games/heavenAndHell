@@ -5,19 +5,20 @@ import (
 )
 
 type MenuItem struct {
-	Text               string
-	TextWithColorCodes string
-	UseColorCodes      bool
-	Action             func()
-	TextColor          color.Color
-	CharIcon           int32
+	MainText               string
+	MainTextWithColorCodes string
+	MainTextColor color.Color
+
+	UseColorCodes          bool
+	Action        func()
+	CharIcon      int32
 	TooltipText        []LabelText
 	ActionLeft         func() string
 	ActionRight        func() string
 }
 
 func (m MenuItem) String() string {
-	return m.Text
+	return m.MainText
 }
 
 type LabelText struct {

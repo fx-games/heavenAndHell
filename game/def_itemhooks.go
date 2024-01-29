@@ -87,7 +87,7 @@ func fireBallOnRangedAttack(context *actions.ItemContext, action actions.Action,
 	targetPos := rangedAction.GetTargetPos()
 
 	cause := actions.NewActorCause(actions.ActionNameRangedAttack, attacker)
-	return actions.OneAction(actions.NewFireballAction(cause, rangedAction.GetAttacker(), 8, targetPos, rangedTargetRules.GetHitpositions(targetPos)))
+	return actions.OneAction(actions.NewDamageSpellAction(cause, rangedAction.GetAttacker(), 8, targetPos, rangedTargetRules.GetHitpositions(targetPos)))
 }
 
 // stat change on kill

@@ -32,7 +32,7 @@ func (g *GameInstance) addLootToMap(emptyMap *gridmap.GridMap[*common.Actor, com
 	case diceRoll >= 0 && diceRoll < 10:
 		addedItem = addRandomWeapon(state, source, emptyMap, itemLevel, pos)
 	case diceRoll >= 10 && diceRoll < 20:
-		addedItem = addRandomArmor(state, source, emptyMap, itemLevel, pos)
+		addedItem = g.addRandomArmor(emptyMap, itemLevel, pos)
 	case diceRoll >= 20 && diceRoll < 30:
 		addedItem = addRandomAccessory(state, source, emptyMap, itemLevel, pos)
 	case diceRoll >= 30 && diceRoll < 40:

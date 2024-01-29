@@ -20,6 +20,10 @@ type SustainedAction struct {
 	user *common.Actor
 }
 
+func (a *SustainedAction) String() string {
+	return a.name
+}
+
 func (a *SustainedAction) Counter() int {
 	return -1
 }

@@ -12,4 +12,5 @@ type UIElement interface {
 	InventoryIcon() int32
 	TintColor() color.Color
 	Counter() int
+	String() string
 }

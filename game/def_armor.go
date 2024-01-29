@@ -2,6 +2,8 @@ package game
 
 import (
 	"math/rand"
+	"os"
+	"path"
 	"rpg/actions"
 	"rpg/common"
 	"rpg/geometry"
@@ -32,25 +34,65 @@ Armor Rating	Damage Reduction in %
 100	0.50
 200	0.67
 1000	0.91
+*/
+func (g *GameInstance) NewRandomArmorPiece(dungeonLevel int) *GameItem {
+	// hacky read file here..
+	file, _ := os.Open(path.Join("assets", "data", "armor.rec"))
+	g.armorDefinitions = ReadItemDefinitions(file)
 
- */
+	armorDefinitions := g.armorDefinitions
 
-func addRandomArmor(state actions.WorldState, source *rand.Rand, emptyMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], dungeonLevel int, pos geometry.Point) *GameItem {
-	createFunctions := []func(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem{
-		NewArmor,
-		NewHelmet,
-		NewShield,
-		NewBoots,
-		NewCape,
-		NewGloves,
+	// filter for dungeon level
+	var filteredArmorDefinitions []ItemDefinition
+	armorTypeMap := make(map[common.ArmorType][]ItemDefinition)
+	for _, armorDefinition := range armorDefinitions {
+
+		if !armorDefinition.CanAppearAt(g.randomSource, dungeonLevel) {
+			continue
+		}
+		
+		filteredArmorDefinitions = append(filteredArmorDefinitions, armorDefinition)
+		armorTypeMap[armorDefinition.Armor.ArmorType] = append(armorTypeMap[armorDefinition.Armor.ArmorType], armorDefinition)
 	}
-	creationFunction := createFunctions[source.Intn(len(createFunctions))]
-	item := creationFunction(state, source, dungeonLevel)
-	emptyMap.AddItem(item, pos)
-	return item
+
+	// group by armor type
+	availableArmorTypes := make([]common.ArmorType, 0)
+	for armoreType, _ := range armorTypeMap {
+		availableArmorTypes = append(availableArmorTypes, armoreType)
+	}
+
+	// pick random armor type
+	armorType := availableArmorTypes[g.randomSource.Intn(len(availableArmorTypes))]
+
+	// pick random armor definition
+	armorDefinition := armorTypeMap[armorType][g.randomSource.Intn(len(armorTypeMap[armorType]))]
+
+	// create item
+	return g.NewItemFromDefinition(armorDefinition)
 }
-func NewArmor(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "a chain mail", common.IconItemChainMail, common.SlotNameArmorTorso, 150)
+func (g *GameInstance) addRandomArmor(emptyMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], dungeonLevel int, pos geometry.Point) *GameItem {
+	armorPiece := g.NewRandomArmorPiece(dungeonLevel)
+	emptyMap.AddItem(armorPiece, pos)
+	return armorPiece
+}
+func NewLeatherArmor(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
+	baseItem := common.NewBaseItem(state.GetPlayer, "a leather armor", common.IconItemLeatherArmor1)
+	baseItem.SetCategory(common.ItemCategoryArmor)
+	baseItem.SetQualityLevel(1)
+
+	armorPart := &common.ArmorStats{
+		BaseArmor:  5,
+		Durability: stats.NewResource(0, flatFunc(20), 20),
+		Type:       common.ArmorTypeCuirass,
+	}
+
+	baseItem.SetArmorComponent(armorPart)
+	return &GameItem{
+		BaseItem: baseItem,
+	}
+}
+func NewChainMail(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
+	baseItem := common.NewBaseItem(state.GetPlayer, "a chain mail", common.IconItemChainMail)
 	baseItem.SetCategory(common.ItemCategoryArmor)
 	baseItem.SetQualityLevel(1)
 
@@ -67,7 +109,7 @@ func NewArmor(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem
 }
 
 func NewHelmet(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "a helmet", common.IconItemHelmet, common.SlotNameArmorHead, 150)
+	baseItem := common.NewBaseItem(state.GetPlayer, "a helmet", common.IconItemHelmet)
 	baseItem.SetCategory(common.ItemCategoryArmor)
 	baseItem.SetQualityLevel(1)
 
@@ -84,7 +126,7 @@ func NewHelmet(state actions.WorldState, source *rand.Rand, qLevel int) *GameIte
 }
 
 func NewGloves(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "a pair of gloves", common.IconItemGloves1, common.SlotNameArmorHands, 150)
+	baseItem := common.NewBaseItem(state.GetPlayer, "a pair of gloves", common.IconItemGloves1)
 	baseItem.SetCategory(common.ItemCategoryArmor)
 	baseItem.SetQualityLevel(1)
 
@@ -101,7 +143,7 @@ func NewGloves(state actions.WorldState, source *rand.Rand, qLevel int) *GameIte
 }
 
 func NewBoots(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "a pair of boots", common.IconItemBoots1, common.SlotNameArmorFeet, 150)
+	baseItem := common.NewBaseItem(state.GetPlayer, "a pair of boots", common.IconItemBoots1)
 	baseItem.SetCategory(common.ItemCategoryArmor)
 	baseItem.SetQualityLevel(1)
 
@@ -118,7 +160,7 @@ func NewBoots(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem
 }
 
 func NewCape(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "a cape", common.IconItemCape1, common.SlotNameArmorBack, 150)
+	baseItem := common.NewBaseItem(state.GetPlayer, "a cape", common.IconItemCape1)
 	baseItem.SetCategory(common.ItemCategoryArmor)
 	baseItem.SetQualityLevel(1)
 
@@ -135,7 +177,7 @@ func NewCape(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem 
 }
 
 func NewShield(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "a shield", common.IconItemShield, common.SlotNameOneHandedWeapon, 150)
+	baseItem := common.NewBaseItem(state.GetPlayer, "a shield", common.IconItemShield)
 	baseItem.SetCategory(common.ItemCategoryArmor)
 	baseItem.SetQualityLevel(1)
 

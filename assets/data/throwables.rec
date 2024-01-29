@@ -1,0 +1,33 @@
+%rec: default
+
+#throw_hit_zone: target_only |  dijkstra_aoe
+#throw_on_hit_effect: confuse
+
+#throw_hit_zone, throw_damage, throw_chance_to_break, throw_on_hit_effect
+name: a dart
+category: throwable
+throw_hit_zone: target_only
+throw_damage: 1-4
+throw_chance_to_break: 0.2
+icon: 232
+dlvl: 1
+
+name: a dart of confusion
+category: throwable
+throw_hit_zone: target_only
+throw_damage: 1-4
+throw_chance_to_break: 0.2
+throw_on_hit_effect: confuse
+icon: 232
+dlvl: 1
+
+# a more complicated example..tooltip should be auto-generated from this information, too
+name: a flask of oil
+category: potion
+throw_hit_zone: dijkstra_aoe(1)
+throw_damage: 1-4
+throw_chance_to_break: 1.0
+throw_on_hit_effect: flat_damage(6)
+rule: throw_effect_needs_light_source
+icon: 246
+dlvl: 1

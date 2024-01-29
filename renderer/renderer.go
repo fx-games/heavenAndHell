@@ -56,9 +56,11 @@ func (g *TileRenderer) SetDefaultColors(borderColor, fillColor color.Color) {
 	g.defaultBorderColor = borderColor
 	g.defaultFillColor = fillColor
 }
-func (g *TileRenderer) MeasureString(textToMeasure string) (int, int) {
-	bounds, _ := font.BoundString(g.ttfFont, textToMeasure)
-	return int(float64((bounds.Max.X - bounds.Min.X).Round()) / g.deviceScale()), int(float64((bounds.Max.Y - bounds.Min.Y).Round()) / g.deviceScale())
+func (g *TileRenderer) MeasureString(textToMeasure string) (float64, float64) {
+	_, advance := font.BoundString(g.ttfFont, textToMeasure)
+	height := g.ttfFont.Metrics().Ascent + g.ttfFont.Metrics().Descent
+	//return float64((bounds.Max.X - bounds.Min.X).Round()) / g.deviceScale(), float64((bounds.Max.Y - bounds.Min.Y).Round()) / g.deviceScale()
+	return float64((advance).Ceil()) / g.deviceScale(), float64((height).Round()) / g.deviceScale()
 }
 func (g *TileRenderer) SetDefaultAtlas(atlas TextureAtlas) {
 	g.defaultAtlas = atlas
@@ -297,33 +299,32 @@ func (g *TileRenderer) DrawTile(screenX float64, screenY float64, atlas TextureA
 func (g *TileRenderer) DrawDefaultScaleCharOnScreen(screenX, screenY float64, char rune, textColor color.Color) {
 	g.DrawCharOnScreen(int(screenX), int(screenY), char, g.fontScale, textColor)
 }
-func (g *TileRenderer) DrawTTFOnScreen(screenX, screenY int, textToDraw string, textColor color.Color) {
-	screenX = int(float64(screenX) * g.deviceScale())
-	screenY = int(float64(screenY) * g.deviceScale())
-	text.Draw(g.currentRenderTarget, textToDraw, g.ttfFont, screenX, screenY, textColor)
+func (g *TileRenderer) DrawTTFOnScreen(screenX, screenY float64, textToDraw string, textColor color.Color) {
+	screenX = screenX * g.deviceScale()
+	screenY = screenY * g.deviceScale()
+	text.Draw(g.currentRenderTarget, textToDraw, g.ttfFont, int(screenX), int(screenY), textColor)
 }
 
 type ColoredTextPart struct {
 	Text    string
 	Color   color.Color
-	xOffset int
+	xOffset float64
 }
 
-func (g *TileRenderer) DrawTTFOnScreenWithColorCodes(screenX, screenY int, textToDraw string) {
-	screenX = int(float64(screenX) * g.deviceScale())
-	screenY = int(float64(screenY) * g.deviceScale())
+func (g *TileRenderer) DrawTTFOnScreenWithColorCodes(screenX, screenY float64, textToDraw string) {
+	drawOptions := &ebiten.DrawImageOptions{}
+	screenXF := screenX * g.deviceScale()
+	screenYF := screenY * g.deviceScale()
 	var textParts []ColoredTextPart
 	textParts = g.parseColorCodedText(textToDraw)
-	for partIndex, textPart := range textParts {
-		var spaceWidth int
-		if partIndex == 0 {
-			spaceWidth = 0
-		} else {
-			adv, _ := g.ttfFont.GlyphAdvance(' ')
-			spaceWidth = int(float64(adv.Round()) / g.deviceScale())
-		}
-		offset := int((float64(textPart.xOffset + spaceWidth)) * g.deviceScale())
-		text.Draw(g.currentRenderTarget, textPart.Text, g.ttfFont, screenX+offset, screenY, textPart.Color)
+	for _, textPart := range textParts {
+		offset := textPart.xOffset * (g.deviceScale())
+		drawOptions.GeoM.Reset()
+		drawOptions.GeoM.Translate(screenXF+offset, screenYF)
+		drawOptions.ColorScale.Reset()
+		drawOptions.ColorScale.ScaleWithColor(textPart.Color)
+		text.DrawWithOptions(g.currentRenderTarget, textPart.Text, g.ttfFont, drawOptions)
+		//text.Draw(g.currentRenderTarget, textPart.Text, g.ttfFont, screenX+offset, screenY, textPart.Color)
 	}
 
 }
@@ -374,6 +375,8 @@ func (g *TileRenderer) GetFontGridSize() geometry.Point {
 }
 
 func (g *TileRenderer) parseColorCodedText(draw string) []ColoredTextPart {
+	advance, _ := g.ttfFont.GlyphAdvance(' ')
+	advanceWidth := float64(advance.Round()) / g.deviceScale()
 	var textParts []ColoredTextPart
 	// color codes look like this [:red] [:blue] [:green] [:yellow] [:white] [:24,54,222]
 	regexPattern := `\[:([\w,]+)\]`
@@ -389,8 +392,12 @@ func (g *TileRenderer) parseColorCodedText(draw string) []ColoredTextPart {
 		// prepend [:white]
 		colorCodes = append([][]string{{":white", "white"}}, colorCodes...)
 	}
-	xOffset := 0
+	xOffset := 0.0
 	for i, textPart := range stringParts {
+		textPart = strings.TrimSpace(textPart)
+		if textPart == "" {
+			continue
+		}
 		tWidth, _ := g.MeasureString(textPart)
 		matchingColor := g.toColor(colorCodes, i)
 		textParts = append(textParts, ColoredTextPart{
@@ -398,7 +405,7 @@ func (g *TileRenderer) parseColorCodedText(draw string) []ColoredTextPart {
 			Color:   matchingColor,
 			xOffset: xOffset,
 		})
-		xOffset += tWidth
+		xOffset += tWidth + advanceWidth
 	}
 	return textParts
 }

@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"math/rand"
 	"rpg/common"
 	"rpg/geometry"
 	"rpg/stats"
@@ -62,6 +63,19 @@ func (d *MeleeAttackAction) Execute(engine Engine) []Action {
 	attackResults := d.SimulateAttack(engine)
 
 	for defender, damageInterval := range attackResults {
+
+		evasionChance := 0.0
+		if defender.HasStatusEffect(common.StatusFlying) {
+			evasionChance = 0.25
+		}
+
+		if rand.Float64() < evasionChance {
+			// dodged the attack
+			logDodged(engine, d.attacker, defender)
+			// play miss audio cue?
+			continue
+		}
+
 		damage := damageInterval.PyramidRandom()
 		logAttack(engine, d.attacker, defender, damage)
 		d.totalDamageDealt += damage

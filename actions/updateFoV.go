@@ -65,7 +65,9 @@ func updatePlayerKnowledge(engine Engine) {
 	}
 	vis.Set(currentlyVisible)
 	for newActor, _ := range cameIntoView {
-		engine.Log(fmt.Sprintf("%s comes into view", newActor.Name()))
+		if newActor.IsHostile() {
+			engine.Log(fmt.Sprintf("%s comes into view", newActor.Name()))
+		}
 		if newActor.IsHostile() {
 			newActor.SetState(common.ActorStateAttacking)
 		}
@@ -74,7 +76,9 @@ func updatePlayerKnowledge(engine Engine) {
 		}
 	}
 	for oldActor, _ := range wentOutOfView {
-		engine.Log(fmt.Sprintf("%s leaves your field of view", oldActor.Name()))
+		if oldActor.IsHostile() {
+			engine.Log(fmt.Sprintf("%s leaves your field of view", oldActor.Name()))
+		}
 	}
 }
 

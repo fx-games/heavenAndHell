@@ -33,7 +33,7 @@ func NewBasicMenu(uiController *UIController) *BasicMenu {
 		borderPadding:  geometry.Point{X: 40, Y: 40},
 	}
 	b.layoutFunc = func() {
-		b.posInfo = SizeNeededForText(b.uiController.GetRenderer(), b.items, 10)
+		b.posInfo = SizeNeededForText(b.uiController.GetRenderer().MeasureString, b.items, 10)
 		b.layoutCentered()
 	}
 	return b
@@ -68,6 +68,7 @@ func (i *BasicMenu) OnMouseClicked(button ebiten.MouseButton, x int, y int) bool
 
 func (i *BasicMenu) OnMouseMoved(x int, y int) (bool, Tooltip) {
 	mousePos := geometry.Point{X: x, Y: y}
+	i.selectedIndex = -1
 
 	if !i.bounds.Contains(mousePos) {
 		return false, NoTooltip{}
@@ -116,7 +117,7 @@ func (i *BasicMenu) drawStringArray(lines []util.MenuItem) {
 	//tWidth, tHeight := uiRenderer.MeasureString(linesAsOneString)
 	drawY := i.topLeft.Y + i.posInfo.YOffsetForFirstLine
 	for lineIndex, line := range lines {
-		if line.Text == "" {
+		if line.MainText == "" {
 			drawY += i.posInfo.YOffsetForFirstLine + i.posInfo.LineDist
 			continue
 		}
@@ -128,15 +129,15 @@ func (i *BasicMenu) drawStringArray(lines []util.MenuItem) {
 		}
 
 		if line.UseColorCodes {
-			textWithColorCodes := line.TextWithColorCodes
+			textWithColorCodes := line.MainTextWithColorCodes
 			if lineIndex == i.selectedIndex {
 				textWithColorCodes = "[:lightText]" + textWithColorCodes
 			} else {
 				textWithColorCodes = "[:darkText]" + textWithColorCodes
 			}
-			uiRenderer.DrawTTFOnScreenWithColorCodes(drawX, drawY, textWithColorCodes)
+			uiRenderer.DrawTTFOnScreenWithColorCodes(float64(drawX), float64(drawY), textWithColorCodes)
 		} else {
-			drawColor := line.TextColor
+			drawColor := line.MainTextColor
 			if drawColor == nil {
 				drawColor = common.DarkTextColor
 			}
@@ -144,7 +145,7 @@ func (i *BasicMenu) drawStringArray(lines []util.MenuItem) {
 				drawColor = common.LightTextColor
 			}
 
-			uiRenderer.DrawTTFOnScreen(drawX, drawY, line.Text, drawColor)
+			uiRenderer.DrawTTFOnScreen(float64(drawX), float64(drawY), line.MainText, drawColor)
 		}
 
 		drawY += sizeY + i.posInfo.LineDist
@@ -209,7 +210,7 @@ func (i *BasicMenu) calcItemBounds() []geometry.Rect {
 	drawY := i.topLeft.Y
 	padding := i.borderPadding.Div(2)
 	for lineIndex, line := range i.items {
-		if line.Text == "" {
+		if line.MainText == "" {
 			drawY += i.posInfo.YOffsetForFirstLine + i.posInfo.LineDist
 			continue
 		}
@@ -220,4 +221,8 @@ func (i *BasicMenu) calcItemBounds() []geometry.Rect {
 		drawY += sizeY + i.posInfo.LineDist
 	}
 	return itemBounds
+}
+
+func (i *BasicMenu) SetCentered(centered bool) {
+	i.centeredText = centered
 }

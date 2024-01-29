@@ -6,6 +6,7 @@ import (
     "image/color"
 	"rpg/geometry"
 	"rpg/util"
+	"strings"
 )
 
 type BasicLabel struct {
@@ -110,13 +111,13 @@ func (i *BasicLabel) drawStringArray(lines []util.LabelText) {
 			drawX = i.topLeft.X + (i.posInfo.SizeInPixels.X-sizeX)/2
 		}
 		if line.UseColorCodes {
-			uiRenderer.DrawTTFOnScreenWithColorCodes(drawX, drawY, line.TextWithColorCodes)
+			uiRenderer.DrawTTFOnScreenWithColorCodes(float64(drawX), float64(drawY), line.TextWithColorCodes)
 		} else {
 			drawColor := line.TextColor
 			if drawColor == nil {
 				drawColor = color.White
 			}
-			uiRenderer.DrawTTFOnScreen(drawX, drawY, line.Text, drawColor)
+			uiRenderer.DrawTTFOnScreen(float64(drawX), float64(drawY), line.Text, drawColor)
 		}
 		drawY += sizeY + i.posInfo.LineDist
 	}
@@ -139,16 +140,18 @@ func (i PositionInfo) ToString() string {
 	return fmt.Sprintf("SizeInPixels: %v, YOffsetForFirstLine: %v", i.SizeInPixels, i.YOffsetForFirstLine)
 }
 
-func SizeNeededForText[T fmt.Stringer](renderer UIRenderer, text []T, lineDist int) PositionInfo {
+func SizeNeededForText[T fmt.Stringer](measureString func(line string) (float64,float64), text []T, lineDist int) PositionInfo {
 	maxLength := 0
 	totalHeight := 0
 	yOffFirstLine := 0
 	//previousHeight := 0
 	var itemSizes []geometry.Point
 	for i, line := range text {
-		width, height := renderer.MeasureString(line.String())
+		w, h := measureString(line.String())
+		width := int(w)
+		height := int(h)
 		itemSizes = append(itemSizes, geometry.Point{X: width, Y: height})
-		if line.String() == "" {
+		if strings.TrimSpace(line.String()) == "" {
 			height = yOffFirstLine
 		}
 		if i == 0 {
@@ -175,7 +178,7 @@ func NewTextLabel(uiController *UIController, topLeftPositionAsOffsetFromTopRigh
 		drawBackground: false,
 	}
 	b.layoutFunc = func() {
-		b.posInfo = SizeNeededForText(b.uiController.GetRenderer(), b.textLines, 10)
+		b.posInfo = SizeNeededForText(b.uiController.GetRenderer().MeasureString, b.textLines, 10)
 		b.layoutFromTopLeftPos(topLeftPositionAsOffsetFromTopRight)
 		b.bounds = geometry.NewRect(b.topLeft.X, b.topLeft.Y, b.topLeft.X+b.posInfo.SizeInPixels.X, b.topLeft.Y+b.posInfo.SizeInPixels.Y)
 	}
@@ -188,7 +191,7 @@ func NewCenteredTextLabel(uiController *UIController) *BasicLabel {
 		drawBackground: true,
 	}
 	b.layoutFunc = func() {
-		b.posInfo = SizeNeededForText(b.uiController.GetRenderer(), b.textLines, 10)
+		b.posInfo = SizeNeededForText(b.uiController.GetRenderer().MeasureString, b.textLines, 10)
 		b.layoutCentered()
 		b.bounds = geometry.NewRect(b.topLeft.X, b.topLeft.Y, b.topLeft.X+b.posInfo.SizeInPixels.X, b.topLeft.Y+b.posInfo.SizeInPixels.Y)
 	}
@@ -215,7 +218,7 @@ func NewTextTooltip(uiController *UIController, textLines []util.LabelText, mous
 		drawBackground: true,
 	}
 	b.layoutFunc = func() {
-		b.posInfo = SizeNeededForText(b.uiController.GetRenderer(), b.textLines, 10)
+		b.posInfo = SizeNeededForText(b.uiController.GetRenderer().MeasureString, b.textLines, 10)
 		b.layoutFromMousePos(mousePosOnScreen)
 		b.bounds = geometry.NewRect(b.topLeft.X, b.topLeft.Y, b.topLeft.X+b.posInfo.SizeInPixels.X, b.topLeft.Y+b.posInfo.SizeInPixels.Y)
 	}
@@ -234,7 +237,7 @@ func (i *BasicLabel) layoutFromMousePos(mousePosOnScreen geometry.Point) {
 	posInfo := i.posInfo
 	uiController := i.uiController
 
-	paddingX := 300
+	paddingX := uiController.GetUIBarWidth() + 20
 	paddingY := 50
 	topLeftX = mousePosOnScreen.X - posInfo.SizeInPixels.X/2
 	topLeftY = mousePosOnScreen.Y - posInfo.SizeInPixels.Y - paddingY
@@ -242,6 +245,11 @@ func (i *BasicLabel) layoutFromMousePos(mousePosOnScreen geometry.Point) {
 	// if the tooltip would be offscreen, move it to the left
 	if topLeftX+posInfo.SizeInPixels.X > uiController.GetScreenSize().X-paddingX {
 		topLeftX = uiController.GetScreenSize().X - posInfo.SizeInPixels.X - paddingX
+	}
+
+	// if it is above the screen, move it down
+	if topLeftY < 0 {
+		topLeftY = 10
 	}
 	i.topLeft = geometry.Point{X: topLeftX, Y: topLeftY}
 }

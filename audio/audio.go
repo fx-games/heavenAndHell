@@ -42,8 +42,11 @@ type Player struct {
 	sfxVolume       float64
 	masterVolume    float64
 	files           fs.ReadDirFS
+	disablePlayback bool
 }
-
+func (ap *Player) SetDisablePlayback(disable bool) {
+	ap.disablePlayback = disable
+}
 func (ap *Player) GetMasterVolume() float64 {
 	return ap.masterVolume
 }
@@ -229,6 +232,9 @@ type Handle interface {
 }
 
 func (ap *Player) StartLoop(cue string) Handle {
+	if ap.disablePlayback {
+		return &NullHandle{}
+	}
 	if sound, ok := ap.availableSounds[cue]; ok {
 		if !sound.IsLoaded() && !sound.Load(ap) {
 			return &NullHandle{}
@@ -242,6 +248,9 @@ func (ap *Player) StartLoop(cue string) Handle {
 }
 
 func (ap *Player) StartLoopStream(cue string) Handle {
+	if ap.disablePlayback {
+		return &NullHandle{}
+	}
 	if sound, ok := ap.availableSounds[cue]; ok {
 		sound.IsLooping = true
 		player := sound.OpenStream(ap)
@@ -271,6 +280,9 @@ func (ap *Player) addActiveSound(sound *Sound, player *audio.Player, callback fu
 	ap.activeSounds[sound.Cue] = append(ap.activeSounds[sound.Cue], &ActiveSound{player: player, callback: callback})
 }
 func (ap *Player) PlayCue(cue string) Handle {
+	if ap.disablePlayback {
+		return &NullHandle{}
+	}
 	if sound, ok := ap.availableSounds[cue]; ok {
 		if !sound.IsLoaded() && !sound.Load(ap) {
 			return &NullHandle{}
@@ -283,6 +295,9 @@ func (ap *Player) PlayCue(cue string) Handle {
 }
 
 func (ap *Player) PlayCueWhenFree(cue string) {
+	if ap.disablePlayback {
+		return
+	}
 	if !ap.IsSoundEffectPlaying() {
 		ap.PlayCue(cue)
 	}
@@ -290,6 +305,9 @@ func (ap *Player) PlayCueWhenFree(cue string) {
 }
 
 func (ap *Player) PlayCueWithCallback(cue string, callback func()) Handle {
+	if ap.disablePlayback {
+		return &NullHandle{}
+	}
 	if sound, ok := ap.availableSounds[cue]; ok {
 		if !sound.IsLoaded() && !sound.Load(ap) {
 			return &NullHandle{}
@@ -309,6 +327,9 @@ func (ap *Player) IsCuePlaying(cue string) bool {
 }
 
 func (ap *Player) Update() {
+	if ap.disablePlayback {
+		return
+	}
 	isSoundEffectPlaying := false
 	for cue, sounds := range ap.activeSounds {
 		soundDef := ap.availableSounds[cue]

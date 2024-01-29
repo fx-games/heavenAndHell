@@ -8,6 +8,7 @@ import (
 	"rpg/stats"
 	"rpg/util"
 	"slices"
+	"strings"
 )
 
 type ItemRarity int
@@ -20,17 +21,65 @@ const (
 
 type ItemCategory int
 
-const (
+const ( // defines the sort order of the inventory
 	ItemCategoryPotion ItemCategory = iota
 	ItemCategoryScroll
 	ItemCategoryWand
+	ItemCategoryLightSource
 	ItemCategoryWeapon
 	ItemCategoryArmor
-	ItemCategoryLightSource
+	ItemCategoryAccessory
+	ItemCategoryThrowable
 	ItemCategoryOther
 )
 
+func ItemCategoryFromString(str string) ItemCategory {
+	str = strings.ToLower(str)
+	switch str {
+	case "potion":
+		return ItemCategoryPotion
+	case "scroll":
+		return ItemCategoryScroll
+	case "wand":
+		return ItemCategoryWand
+	case "light":
+		return ItemCategoryLightSource
+	case "weapon":
+		return ItemCategoryWeapon
+	case "armor":
+		return ItemCategoryArmor
+	case "accessory":
+		return ItemCategoryAccessory
+	case "throwable":
+		return ItemCategoryThrowable
+	}
+	return ItemCategoryOther
+}
+
 type ArmorType int
+
+func ArmorTypeFromString(str string) ArmorType {
+	str = strings.ToLower(str)
+	switch str {
+	case "helmet":
+		return ArmorTypeHelmet
+	case "cuirass":
+		return ArmorTypeCuirass
+	case "gloves":
+		return ArmorTypeGloves
+	case "boots":
+		return ArmorTypeBoots
+	case "cape":
+		return ArmorTypeCape
+	case "amulet":
+		return ArmorTypeAmulet
+	case "ring":
+		return ArmorTypeRing
+	case "shield":
+		return ArmorTypeShield
+	}
+	return ArmorTypeNone
+}
 
 func (t ArmorType) ToString() string {
 	switch t {
@@ -54,8 +103,33 @@ func (t ArmorType) ToString() string {
 	return "Unknown"
 }
 
+func (t ArmorType) GetInventorySlot() SlotName {
+	switch t {
+	case ArmorTypeHelmet:
+		return SlotNameArmorHead
+	case ArmorTypeCuirass:
+		return SlotNameArmorTorso
+	case ArmorTypeGloves:
+		return SlotNameArmorHands
+	case ArmorTypeBoots:
+		return SlotNameArmorFeet
+	case ArmorTypeCape:
+		return SlotNameArmorBack
+	case ArmorTypeAmulet:
+		return SlotNameAmulet
+	case ArmorTypeRing:
+		return SlotNameRing
+	case ArmorTypeShield:
+		return SlotNameOffHand
+	case ArmorTypeNone:
+		return SlotNameNotEquippable
+	}
+	return SlotNameNotEquippable
+}
+
 const (
-	ArmorTypeHelmet ArmorType = iota
+	ArmorTypeNone ArmorType = iota
+	ArmorTypeHelmet
 	ArmorTypeCuirass
 	ArmorTypeBoots
 	ArmorTypeGloves
@@ -69,14 +143,25 @@ type ArmorStats struct {
 	BaseArmor  int
 	Type       ArmorType
 	Durability *stats.Resource
+	Plus       int
 }
 
 func (s ArmorStats) ToString(player *Actor) []util.LabelText {
 	return []util.LabelText{
 		util.LabelText{Text: fmt.Sprintf("Armor Type: %s", s.Type.ToString())},
-		util.LabelText{Text: fmt.Sprintf("Armor Class: %d", s.BaseArmor)},
+		util.LabelText{Text: fmt.Sprintf("Armor Class: %d", s.GetArmorClass())},
+		util.LabelText{Text: fmt.Sprintf("Enchantment: +%d", s.Plus)},
 		util.LabelText{Text: fmt.Sprintf("Durability: %s", s.Durability.ToString())},
 	}
+}
+
+func (s ArmorStats) NameParts() string {
+	// angband style [3, +3]
+	return fmt.Sprintf("[%d, +%d]", s.BaseArmor, s.Plus)
+}
+
+func (s ArmorStats) GetArmorClass() int {
+	return s.BaseArmor + s.Plus
 }
 type LightStats struct {
 	LightColor        color.RGBA
@@ -84,8 +169,10 @@ type LightStats struct {
 	FlickerFrameDelay float64
 }
 
+
 type Item interface {
 	Name() string
+	BandStyleName() string
 	MapPosition() geometry.Point
 	SetMapPosition(geometry.Point)
 
@@ -93,11 +180,10 @@ type Item interface {
 	InventoryIcon() int32
 	TintColor() color.Color
 
-	GetContextActions(worldState State) []util.MenuItem
-
 	GetWeaponStats() *WeaponStats
 	GetArmorStats() *ArmorStats
 	GetLightStats() *LightStats
+	GetThrowStats() *ThrowStats
 
 	IsWeapon() bool
 	IsArmor() bool
@@ -117,10 +203,15 @@ type Item interface {
 	IsDroppedByPlayer() bool
 	IsHidden() bool
 	Show()
-
+	String() string
 	IsModifyingLight() bool
 	IsLightSource() bool
+	PlusName() string
+	IsThrowable() bool
+	SetDrawnToScreen(shouldBeDrawn bool)
+	IsDrawn() bool
 }
+
 
 type BaseItem struct {
 	name string
@@ -128,31 +219,37 @@ type BaseItem struct {
 	pos  geometry.Point
 	icon int32
 
-	weaponComponent   *WeaponStats
-	armorComponent    *ArmorStats
-	lightComponent    *LightStats
+	weaponComponent *WeaponStats
+	armorComponent  *ArmorStats
+	lightComponent  *LightStats
+	throwComponent  *ThrowStats
 
-	slot              SlotName
-	buyPrice          int
 	qualityLevel      int
 	equippedModifiers []*stats.Modifier
-	contextActions    []util.MenuItem
 	getPlayer         func() *Actor
 	category          ItemCategory
 	rarity            ItemRarity
 
 	droppedByPlayer bool
 	isHidden        bool
+	shouldBeDrawn   bool
 }
 
-func NewBaseItem(getPlayerRef func() *Actor, name string, icon int32, slot SlotName, buyPrice int) *BaseItem {
+func NewBaseItem(getPlayerRef func() *Actor, name string, icon int32) *BaseItem {
 	return &BaseItem{
 		getPlayer: getPlayerRef,
 		name:      name,
 		icon:      icon,
-		slot:      slot,
-		buyPrice:  buyPrice,
+		shouldBeDrawn: true,
 	}
+}
+
+func (i *BaseItem) SetDrawnToScreen(shouldBeDrawn bool) {
+	i.shouldBeDrawn = shouldBeDrawn
+}
+
+func (i *BaseItem) IsDrawn() bool {
+	return i.shouldBeDrawn
 }
 func (i *BaseItem) IsModifyingLight() bool {
 	for _, modifier := range i.equippedModifiers {
@@ -202,7 +299,7 @@ func (i *BaseItem) Counter() int {
 	return -1
 }
 func (i *BaseItem) BuyPrice() int {
-	return i.buyPrice
+	return i.qualityLevel * 200 // TODO: calculate price based on item stats
 }
 func (i *BaseItem) InventoryIcon() int32 {
 	return i.icon
@@ -213,11 +310,29 @@ func (i *BaseItem) GetLightStats() *LightStats {
 }
 
 func (i *BaseItem) TintColor() color.Color {
+	commonColor := White
+	if i.IsLightSource() {
+		commonColor = Yellow
+	}
+
+	switch i.rarity {
+	case ItemRarityCommon:
+		return commonColor
+	case ItemRarityMagic:
+		return MagicHighlightColor
+	case ItemRarityUnique:
+		return UniqueHighlightColor
+	}
+
 	return color.White
 }
 
 func (i *BaseItem) Name() string {
-	return i.name
+	name := i.name
+	return name
+}
+func (i *BaseItem) String() string {
+	return i.Name()
 }
 
 func (i *BaseItem) IsWeapon() bool {
@@ -237,7 +352,11 @@ func (i *BaseItem) IsRangedWeapon() bool {
 }
 func (i *BaseItem) CanStackWith(other Item) bool {
 	// only non-equippable items can stack
-	if i.SlotName() != SlotNameNotEquippable || other.SlotName() != SlotNameNotEquippable {
+	if i.SlotName() != other.SlotName() {
+		return false
+	}
+
+	if i.SlotName() != SlotNameNotEquippable && i.SlotName() != SlotNameQuiver {
 		return false
 	}
 
@@ -257,7 +376,22 @@ func (i *BaseItem) CanStackWith(other Item) bool {
 }
 
 func (i *BaseItem) SlotName() SlotName {
-	return i.slot
+	if i.IsRangedWeapon() {
+		return SlotNameMissileLauncher
+	}
+	if i.IsArmor() {
+		return i.armorComponent.Type.GetInventorySlot()
+	}
+	if i.IsWeapon() {
+		return i.weaponComponent.Type.GetInventorySlot()
+	}
+	if i.IsThrowable() {
+		return SlotNameQuiver
+	}
+	if i.IsLightSource() {
+		return SlotNameLightSource
+	}
+	return SlotNameNotEquippable
 }
 
 func (i *BaseItem) MapPosition() geometry.Point {
@@ -272,9 +406,6 @@ func (i *BaseItem) SetMapPosition(pos geometry.Point) {
 	i.pos = pos
 }
 
-func (i *BaseItem) GetContextActions(worldState State) []util.MenuItem {
-	return i.contextActions
-}
 
 func (i *BaseItem) GetWeaponStats() *WeaponStats {
 	return i.weaponComponent
@@ -322,8 +453,9 @@ func (i *BaseItem) SetArmorComponent(component *ArmorStats) {
 	i.armorComponent = component
 }
 
-func (i *BaseItem) SetContextActions(actions []util.MenuItem) {
-	i.contextActions = actions
+
+func (i *BaseItem) GetThrowStats() *ThrowStats {
+	return i.throwComponent
 }
 
 func (i *BaseItem) GetWeaponStatsAsString() []util.LabelText {
@@ -339,4 +471,12 @@ func (i *BaseItem) SetCategory(category ItemCategory) {
 
 func (i *BaseItem) IsLightSource() bool {
 	return i.lightComponent != nil
+}
+
+func (i *BaseItem) SetThrowComponent(throwComponent *ThrowStats) {
+	i.throwComponent = throwComponent
+}
+
+func (i *BaseItem) IsThrowable() bool {
+	return i.throwComponent != nil
 }

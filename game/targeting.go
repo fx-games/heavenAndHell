@@ -7,49 +7,6 @@ import (
 	"rpg/gridmap"
 	"rpg/ui"
 )
-type DirectTargetingRules struct {
-	isOnMap      func(dest geometry.Point) bool
-	attacker     *common.Actor
-	hitPositions func(origin geometry.Point, target geometry.Point) []geometry.Point
-	isValid      func(target geometry.Point) bool
-}
-
-func (d DirectTargetingRules) GetAttacker() *common.Actor {
-	return d.attacker
-}
-
-func (d DirectTargetingRules) GetOrigin() geometry.Point {
-	return d.attacker.MapPosition()
-}
-
-func (d DirectTargetingRules) IsVisiblePositionOnMap(target geometry.Point) bool {
-	return d.isOnMap(target) && d.attacker.CanSee(target)
-}
-
-func (d DirectTargetingRules) IsValidTarget(target geometry.Point) bool {
-	return d.IsVisiblePositionOnMap(target) && d.isValid(target)
-}
-
-func (d DirectTargetingRules) GetPreSelectedTarget() geometry.Point {
-	return d.GetOrigin().Add(geometry.Point{Y: 5})
-}
-
-func (d DirectTargetingRules) GetHighlightsForTarget(target geometry.Point) []common.TargetHighlight {
-	highlights := make([]common.TargetHighlight, 0)
-	origin := d.GetOrigin()
-
-	for _, pos := range d.hitPositions(origin, target) {
-		highlights = append(highlights, common.TargetHighlight{
-			Pos:   pos,
-			Color: color.RGBA{R: 255, G: 80, B: 80, A: 255},
-		})
-	}
-	return highlights
-}
-
-func (d DirectTargetingRules) GetHitpositions(target geometry.Point) []geometry.Point {
-	return d.hitPositions(d.GetOrigin(), target)
-}
 
 
 type Targeter struct {
@@ -258,13 +215,83 @@ func NewRangedAttackTargetingRules(attacker *common.Actor, hitPositions common.A
 	}
 }
 
+
+type DirectTargetingRules struct {
+	isOnMap      func(dest geometry.Point) bool
+	attacker     *common.Actor
+	hitPositions func(origin geometry.Point, target geometry.Point) []geometry.Point
+	isValid      func(target geometry.Point) bool
+	moveDist     func(origin, target geometry.Point) int
+	maxRange     int
+}
+
 func NewDirectTargetingRules(attacker *common.Actor, hitPositions common.AoEResolver, currentMap *gridmap.GridMap[*common.Actor, common.Item, common.Object]) common.TargetRules {
 	return &DirectTargetingRules{
 		isOnMap:      currentMap.Contains,
 		attacker:     attacker,
 		hitPositions: hitPositions,
+		moveDist: currentMap.MoveDistance,
+		maxRange: 0,
 		isValid: func(target geometry.Point) bool {
 			return currentMap.IsTileWalkable(target)
 		},
 	}
+}
+
+func NewMeleeTargetingRules(attacker *common.Actor, hitPositions common.AoEResolver, currentMap *gridmap.GridMap[*common.Actor, common.Item, common.Object]) common.TargetRules {
+	return &DirectTargetingRules{
+		isOnMap:      currentMap.Contains,
+		attacker:     attacker,
+		hitPositions: hitPositions,
+		moveDist: currentMap.MoveDistance,
+		maxRange: 1,
+		isValid: func(target geometry.Point) bool {
+			return currentMap.IsTileWalkable(target)
+		},
+	}
+}
+
+func (d DirectTargetingRules) GetAttacker() *common.Actor {
+	return d.attacker
+}
+
+func (d DirectTargetingRules) GetOrigin() geometry.Point {
+	return d.attacker.MapPosition()
+}
+
+func (d DirectTargetingRules) IsVisiblePositionOnMap(target geometry.Point) bool {
+	return d.isOnMap(target) && d.attacker.CanSee(target)
+}
+
+func (d DirectTargetingRules) IsValidTarget(target geometry.Point) bool {
+	if !(d.IsVisiblePositionOnMap(target) && d.isValid(target)) {
+		return false
+	}
+	if d.maxRange > 0 {
+		if d.moveDist(d.GetOrigin(), target) > d.maxRange {
+			return false
+		}
+	}
+	return true
+}
+
+func (d DirectTargetingRules) GetPreSelectedTarget() geometry.Point {
+	return d.GetOrigin().Add(geometry.Point{Y: 5})
+}
+
+func (d DirectTargetingRules) GetHighlightsForTarget(target geometry.Point) []common.TargetHighlight {
+	highlights := make([]common.TargetHighlight, 0)
+	origin := d.GetOrigin()
+
+	for _, pos := range d.hitPositions(origin, target) {
+		highlights = append(highlights, common.TargetHighlight{
+			Pos:   pos,
+			Color: color.RGBA{R: 255, G: 80, B: 80, A: 255},
+		})
+	}
+	return highlights
+}
+
+func (d DirectTargetingRules) GetHitpositions(target geometry.Point) []geometry.Point {
+	return d.hitPositions(d.GetOrigin(), target)
 }

@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
 	"rpg/geometry"
@@ -26,12 +27,12 @@ type UIRenderer interface {
 	DrawOnFontGrid(gridX int, gridY int, icon int32)
 	GetFontScale() float64
 	GetFontGridSize() geometry.Point
-	DrawTTFOnScreen(screenX int, screenY int, line string, color color.Color)
-	MeasureString(line string) (int, int)
+	DrawTTFOnScreen(screenX float64, screenY float64, line string, color color.Color)
+	MeasureString(line string) (float64, float64)
 	DrawDefaultBorder(topLeftScreen geometry.Point, size geometry.Point)
 	DrawColoredBorder(topLeftScreen geometry.Point, size geometry.Point, fillColor, borderColor color.Color)
 	DrawColoredRect(topLeftScreen geometry.Point, size geometry.Point, fillColor color.Color)
-	DrawTTFOnScreenWithColorCodes(screenX int, screenY int, textWithColorCodes string)
+	DrawTTFOnScreenWithColorCodes(screenX float64, screenY float64, textWithColorCodes string)
 	DrawImageOnScreen(screenX int, screenY int, size geometry.Point, image *ebiten.Image)
 }
 
@@ -51,19 +52,19 @@ type UIController struct {
 	currentTooltip           Tooltip
 	ticksUntilTooltipAppears uint64
 	screenSize               geometry.Point
+	uiBarWidth               int
+	elevatedOverlay          UIWidget
 }
 
-func (u *UIController) GetAutoFitRectWithExtraSpace(text []util.LabelText, padding geometry.Point) (geometry.Point, PositionInfo) {
-	screenSize := u.GetScreenSize()
+func GetAutoFitRectWithExtraSpace[T fmt.Stringer](text []T, screenSize, padding geometry.Point, measureString func(line string) (float64,float64)) (geometry.Point, PositionInfo) {
+	posInfo := SizeNeededForText(measureString, text, 5)
+	posInfo.SizeInPixels.X += padding.X
+	posInfo.SizeInPixels.Y += padding.Y
 
-	posInfo := SizeNeededForText(u.tileRenderer, text, 5)
-	width := posInfo.SizeInPixels.X + padding.X
-	height := posInfo.SizeInPixels.Y + padding.Y
-
-	startX := (screenSize.X - width) / 2
+	startX := (screenSize.X - posInfo.SizeInPixels.X) / 2
 	//endX := startX + width
 
-	startY := (screenSize.Y - height) / 2
+	startY := (screenSize.Y - posInfo.SizeInPixels.Y) / 2
 	//endY := startY + height
 
 	topLeft := geometry.Point{X: startX, Y: startY}
@@ -86,7 +87,7 @@ func (u *UIController) GetTopModal() UIWidget {
 	return u.modal
 }
 
-func (u *UIController) IsUIVisible() bool {
+func (u *UIController) IsUIModalVisible() bool {
 	return u.modal != nil
 }
 func (u *UIController) PushWidget(widget UIWidget) {
@@ -98,16 +99,21 @@ func (u *UIController) PopWidget() {
 }
 
 func (u *UIController) OnCommand(command CommandType) bool {
-	if !u.IsUIVisible() {
-		return false
+	if u.IsUIModalVisible() && u.GetTopModal().OnCommand(command) {
+		return true
 	}
-	return u.GetTopModal().OnCommand(command)
+	for _, overlay := range u.overlays {
+		if handled := overlay.OnCommand(command); handled {
+			return true
+		}
+	}
+	return false
 }
 
 func (u *UIController) OnMouseClicked(button ebiten.MouseButton, screenX int, screenY int) bool {
 	u.isMouseCapturedByUI = false
 
-	if u.IsUIVisible() && u.GetTopModal().OnMouseClicked(button, screenX, screenY) {
+	if u.IsUIModalVisible() && u.GetTopModal().OnMouseClicked(button, screenX, screenY) {
 		return true
 	}
 
@@ -131,7 +137,7 @@ func (u *UIController) OnMouseMoved(screenX int, screenY int) (bool, Tooltip) {
 		}
 	}
 
-	if !u.IsUIVisible() {
+	if !u.IsUIModalVisible() {
 		return false, NoTooltip{}
 	}
 
@@ -145,20 +151,35 @@ func (u *UIController) IsMouseCapturedByUI() bool {
 }
 
 func (u *UIController) OnMouseWheel(x int, y int, dy float64) bool {
-	if !u.IsUIVisible() {
+	if !u.IsUIModalVisible() {
 		return false
 	}
 	return u.GetTopModal().OnMouseWheel(x, y, dy)
 }
 
 func (u *UIController) Draw() {
+
 	defer u.drawTooltip()
 	for _, overlay := range u.overlays {
+		if overlay == u.elevatedOverlay {
+			continue
+		}
 		overlay.Draw()
 	}
-	if !u.IsUIVisible() {
+	if !u.IsUIModalVisible() && u.elevatedOverlay == nil {
 		return
 	}
+	renderer := u.GetRenderer()
+	renderer.DrawColoredRect(geometry.Point{X: 0, Y: 0}, u.screenSize, color.RGBA{A: 140})
+
+	if u.elevatedOverlay != nil {
+		u.elevatedOverlay.Draw()
+	}
+
+	if !u.IsUIModalVisible() {
+		return
+	}
+
 	if u.GetTopModal().ShouldClose() {
 		u.PopWidget()
 	} else {
@@ -210,6 +231,12 @@ func (u *UIController) OpenInventoryModal(pos, tileSize geometry.Point, dataSour
 	return inventory
 }
 
+func (u *UIController) OpenInventoryListModal(tileSize geometry.Point, dataSource ListDataSource) *IconList {
+	inventory := NewIconList(u, tileSize, dataSource)
+	u.PushWidget(inventory)
+	return inventory
+}
+
 func (u *UIController) OpenSkillsOverlay(pos, tileSize geometry.Point, dataSource IconDataSource) *IconOverlay {
 	skills := NewIconOverlay(u, pos, tileSize, dataSource)
 	skills.SetShowEmptySlots(false)
@@ -231,8 +258,9 @@ func (u *UIController) AddButton(offsetFromTopRightCorner, tileSize geometry.Poi
 	return button
 }
 
-func (u *UIController) AddBlackBackgroundBorder(distanceFromRightScreenBorder int) *ColoredRect {
-	background := NewColoredRect(u, distanceFromRightScreenBorder)
+func (u *UIController) SetUIBarWidth(uiBarWidth int) *ColoredRect {
+	u.uiBarWidth = uiBarWidth
+	background := NewColoredRect(u, uiBarWidth)
 	background.SetFillColor(color.Black)
 	u.PrependOverlay(background)
 	return background
@@ -294,4 +322,37 @@ func (u *UIController) OnScreenSizeChanged(newScreenSize geometry.Point) {
 
 func (u *UIController) ClearAllOverlays() {
 	u.overlays = []UIWidget{}
+}
+
+func (u *UIController) HasOverlays() bool {
+	return len(u.overlays) > 0
+}
+
+func (u *UIController) GetUIBarWidth() int {
+	return u.uiBarWidth
+}
+
+func (u *UIController) OnKeyPressed(key ebiten.Key, shiftPressed bool) {
+	if !u.IsUIModalVisible() {
+		return
+	}
+	if keyListener, isKeylistener := u.GetTopModal().(Keylistener); isKeylistener {
+		keyListener.OnKeyPressed(key, shiftPressed)
+	}
+}
+
+func (u *UIController) OpenShopMenu(items []ShopMenuItem, playerGold int) *ShopMenu {
+	menu := NewShopMenu(u)
+	u.PushWidget(menu)
+	menu.SetHeader("You have:", fmt.Sprintf("%d gold", playerGold))
+	menu.SetItems(items, []Alignment{AlignmentLeft, AlignmentRight})
+	return menu
+}
+
+func (u *UIController) ElevateOverlay(overlay UIWidget) {
+	u.elevatedOverlay = overlay
+}
+
+func (u *UIController) StopElevation() {
+	u.elevatedOverlay = nil
 }

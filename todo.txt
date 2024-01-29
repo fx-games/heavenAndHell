@@ -4,6 +4,10 @@ missing 7drl goals
    - human quests - done
    - hell quests
      - NEXT: distribute evidence to be found
+     - cutscenes with lucifer
+     - transition to hell town
+ - hell town quests
+ - final confrontation
  - content
    - skills/spells
      - 6 Archer Skills
@@ -17,6 +21,7 @@ missing 7drl goals
  - progression (last)
    - combat balance
    - stat balance
+   - grinding system (sacrifice loot for a new random level)
  - ui/ux (very last)
    - mouse & keyboard (& gamepad)
    - menus & options

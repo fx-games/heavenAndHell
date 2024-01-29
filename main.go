@@ -6,17 +6,18 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	_ "image/png"
-	"io"
 	"log"
 	"math/rand"
 	"os"
 	"rpg/common"
+	"rpg/console"
 	"rpg/dungen"
 	"rpg/game"
-	"rpg/geometry"
 	"rpg/ldtk_go"
+	"rpg/util"
 	"runtime/pprof"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -34,13 +35,12 @@ func main() {
 	defer pprof.StopCPUProfile()
 
 	userConfig := game.NewConfigurationFromRecFile("config.rec")
-	startInfos := StartInfo{
+	startInfos := game.StartInfo{
 		Title:          "RPG",
 		ScreenSize:     userConfig.WindowSize,
 		TileScale:      4.0,
 		LDTKMapFile:    "assets/maps.ldtk",
-		FirstLevelName: string(game.LevelNameTown),
-		FontInfos:      FontInfo{
+		FontInfos:      game.FontInfo{
 			TTFFile: userConfig.DefaultFont,
 			TTFSize: userConfig.DefaultFontSize,
 		},
@@ -53,7 +53,12 @@ func main() {
 		UserConfiguration: userConfig,
 	}
 
-	startTileGame(startInfos)
+	theGame := game.NewGameInstance(startInfos)
+	if len(os.Args) > 1 && strings.ToLower(os.Args[1]) == "ascii" {
+		runGameWithConsole(theGame)
+	} else {
+		runGameWithEbiten(theGame)
+	}
 }
 
 func maptest() {
@@ -80,37 +85,22 @@ func maptest() {
 
 }
 
-func startTileGame(startInfos StartInfo) {
+func runGameWithConsole(game *game.GameInstance) {
+	game.SetConsoleMode(true)
+	con := console.NewConsole(game)
 
-	// init game
-	deviceIndependentScreenSize := startInfos.ScreenSize
-	tileScaleFactor := startInfos.TileScale
-	theGame := game.NewGameInstance(startInfos.Title, deviceIndependentScreenSize, tileScaleFactor)
-
-	// load ttf font
-	theGame.SetTTFFont(mustLoad(os.Open(startInfos.FontInfos.TTFFile)), startInfos.FontInfos.TTFSize)
-
-	// load map
-	SetMapFromLDTK(theGame, startInfos.LDTKMapFile, startInfos.FirstLevelName, startInfos.TileMapAnimations)
-
-	theGame.InitGame(startInfos.UserConfiguration)
-
-	runGameWithEbiten(theGame)
-}
-func SetMapFromLDTK(theGame *game.GameInstance, ldtkFilename string, firstLevelName string, animations map[int32]game.TilemapAnimInfo) {
-	ldtkMapProject, _ := ldtk_go.Open(ldtkFilename)
-	theGame.SetLDTKProject(ldtkMapProject)
-
-	townMap, atlas := theGame.NewGridMapFromLDTK(firstLevelName)
-	theGame.SetWorldTexture(atlas)
-	theGame.SetTileMapAnimations(animations)
-	theGame.SetMap(townMap)
-}
-func mustLoad(open *os.File, err error) io.ReaderAt {
-	if err != nil {
-		panic(err)
+	loopConfig := util.LoopConfig{
+		TargetFPS:        5,
+		IdleThreshold:    1,
+		CurrentTimeFunc:  func() float64 {return float64(time.Now().UnixNano()) * 1e-9},
+		ProcessInputFunc: con.HandleInput,
+		UpdateFunc:       con.Update,
+		RenderFunc:       con.Draw,
 	}
-	return open
+
+	loop := util.CreateLoop(loopConfig)
+
+	loop()
 }
 
 // runGameWithEbiten will start the infinitely running game loop
@@ -121,26 +111,12 @@ func runGameWithEbiten(game *game.GameInstance) {
 	ebiten.SetWindowTitle(game.GetTitle())
 	ebiten.SetWindowSize(screenSize.X, screenSize.Y)
 	ebiten.SetScreenClearedEveryFrame(true)
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	ebiten.SetWindowSizeLimits(640, 480, -1, -1)
 
 	if err := ebiten.RunGameWithOptions(game, &ebiten.RunGameOptions{
 		GraphicsLibrary: ebiten.GraphicsLibraryOpenGL,
 	}); err != nil && !errors.Is(err, ebiten.Termination) {
 		log.Fatal(err)
 	}
-}
-
-type FontInfo struct {
-	TTFFile          string
-	TTFSize          float64
-}
-
-type StartInfo struct {
-	FontInfos         FontInfo
-	ScreenSize        geometry.Point
-	TileScale         float64
-	Title             string
-	LDTKMapFile       string
-	FirstLevelName    string
-	TileMapAnimations map[int32]game.TilemapAnimInfo
-	UserConfiguration game.Configuration
 }
