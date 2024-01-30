@@ -1,0 +1,11 @@
+name,internal_name,icon,dlvl,targeting,hit_zone,effect
+Steal Item,steal_item,223,1,melee,target_only,steal_item
+Mind Push,mind_push,223,1,direct,target_only,mind_push
+Fireball,fireball,223,1,ranged,dijkstra_aoe(3),fireball
+Fire Ray,fire_ray,223,1,ranged,ray_aoe(7),project_fire
+Fire Bresen,fire_bresen,223,1,ranged,bresenham_aoe(7),project_fire
+Fire Wall,fire_wall,223,1,direct,wall_aoe(5),project_fire
+Steal Item and Teleport,steal_item_vanish,223,1,melee,target_only,steal_item_teleport
+Blink,blink,223,1,direct,target_only,blink
+Confuse,confuse_target,223,1,direct,target_only,"apply(confused, 5)"
+Immobilize,immobilize_target,223,1,direct,target_only,"apply(immobile, 5)"

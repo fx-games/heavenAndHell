@@ -308,3 +308,13 @@ func (e *Equipment) GetNextQuiveredThrowable() Item {
 	}
 	return slot
 }
+
+func (e *Equipment) HasWeaponEquipped() bool {
+	slot := e.GetBySlot(SlotNameMainHand)
+	return slot != nil && slot.IsWeapon()
+}
+
+func (e *Equipment) HasArmorEquipped() bool {
+	slot := e.GetBySlot(SlotNameArmorTorso)
+	return slot != nil && slot.IsArmor()
+}

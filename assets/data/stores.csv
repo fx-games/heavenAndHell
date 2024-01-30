@@ -1,0 +1,2 @@
+internal_name,purse,max_items,turnover_items,sometimes_count,always,sometimes
+store_general,10000,12,2,0-4,cloak|torch|flask_of_oil,healing_potion|mana_potion

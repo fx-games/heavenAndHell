@@ -1,11 +1,21 @@
 %rec: default
+#FIELDS: name internal_name icon dlvl cost charges max_level out_of_depth_chance min_level_for_ood category armor_type armor_class weapon_type weapon_damage weapon_speed throw_hit_zone throw_damage throw_chance_to_break throw_on_hit_effect light_color light_flicker_pattern light_flicker_frame_delay equip_modifier untargeted_action targeted_action
 
 # required for armor: name, icon, dlvl, armor_type, armor_class
 
 ## Typical Torso Armor
 ## Start to mid-end level armor
 
+name: Cloak
+internal_name: cloak
+category: armor
+armor_type: cloak
+armor_class: 1
+icon: 232
+dlvl: 1
+
 name: Soft Leather Armour
+internal_name: soft_leather_armour
 category: armor
 armor_type: Cuirass
 armor_class: 4
@@ -13,6 +23,7 @@ icon: 227
 dlvl: 1
 
 name: Hard Leather Armour
+internal_name: hard_leather_armour
 category: armor
 armor_type: Cuirass
 armor_class: 6
@@ -20,6 +31,7 @@ icon: 227
 dlvl: 1
 
 name: Hard Studded Leather
+internal_name: hard_studded_leather
 category: armor
 armor_type: Cuirass
 armor_class: 7
@@ -27,6 +39,7 @@ icon: 228
 dlvl: 1
 
 name: Leather Scale Mail
+internal_name: leather_scale_mail
 category: armor
 armor_type: Cuirass
 armor_class: 11
@@ -34,6 +47,7 @@ icon: 229
 dlvl: 1
 
 name: Metal Scale Mail
+internal_name: metal_scale_mail
 category: armor
 armor_type: Cuirass
 armor_class: 13
@@ -41,6 +55,7 @@ icon: 198
 dlvl: 3
 
 name: Rusty Chain Mail
+internal_name: rusty_chain_mail
 category: armor
 armor_type: Cuirass
 armor_class: 14
@@ -48,6 +63,7 @@ icon: 196
 dlvl: 3
 
 name: Chain Mail
+internal_name: chain_mail
 category: armor
 armor_type: Cuirass
 armor_class: 14
@@ -55,6 +71,7 @@ icon: 230
 dlvl: 3
 
 name: Double Chain Mail
+internal_name: double_chain_mail
 category: armor
 armor_type: Cuirass
 armor_class: 16
@@ -62,6 +79,7 @@ icon: 230
 dlvl: 5
 
 name: Augmented Chain Mail
+internal_name: augmented_chain_mail
 category: armor
 armor_type: Cuirass
 armor_class: 16
@@ -69,6 +87,7 @@ icon: 230
 dlvl: 5
 
 name: Bar Chain Mail
+internal_name: bar_chain_mail
 category: armor
 armor_type: Cuirass
 armor_class: 18
@@ -76,6 +95,7 @@ icon: 197
 dlvl: 5
 
 name: Metal Brigandine Armour
+internal_name: metal_brigandine_armour
 category: armor
 armor_type: Cuirass
 armor_class: 19
@@ -83,6 +103,7 @@ icon: 199
 dlvl: 7
 
 name: Partial Plate Armour
+internal_name: partial_plate_armour
 category: armor
 armor_type: Cuirass
 armor_class: 22
@@ -90,6 +111,7 @@ icon: 199
 dlvl: 7
 
 name: Metal Lamellar Armour
+internal_name: metal_lamellar_armour
 category: armor
 armor_type: Cuirass
 armor_class: 23
@@ -97,6 +119,7 @@ icon: 199
 dlvl: 8
 
 name: Full Plate Armour
+internal_name: full_plate_armour
 category: armor
 armor_type: Cuirass
 armor_class: 25
@@ -104,6 +127,7 @@ icon: 199
 dlvl: 8
 
 name: Ribbed Plate Armour
+internal_name: ribbed_plate_armour
 category: armor
 armor_type: Cuirass
 armor_class: 28
@@ -115,6 +139,7 @@ dlvl: 9
 # required for weapon: name, icon, dlvl, weapon_type, weapon_damage, weapon_speed
 
 name: Small Leather Shield
+internal_name: small_leather_shield
 category: armor
 armor_type: shield
 armor_class: 2
@@ -126,6 +151,7 @@ dlvl: 1
 
 
 name: Small Metal Shield
+internal_name: small_metal_shield
 category: armor
 armor_type: shield
 armor_class: 3
@@ -137,6 +163,7 @@ dlvl: 1
 
 
 name: Large Rusted Shield
+internal_name: large_rusted_shield
 category: armor
 armor_type: shield
 armor_class: 4
@@ -147,6 +174,7 @@ icon: 206
 dlvl: 1
 
 name: Large Metal Shield
+internal_name: large_metal_shield
 category: armor
 armor_type: shield
 armor_class: 5
@@ -159,6 +187,7 @@ dlvl: 1
 ## Helmets
 
 name: Hard Leather Cap
+internal_name: hard_leather_cap
 category: armor
 armor_type: helmet
 armor_class: 2

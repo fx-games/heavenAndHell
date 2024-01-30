@@ -140,7 +140,7 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		defaultConfig.SaveToRecFile(recFilename)
 		return defaultConfig
 	}
-	configMap := records[0].ToMap()
+	configMap := records[0].ToMap(",")
 
 	return Configuration{
 		AudioEnabled:        configMap.GetBoolOrFalse("AudioEnabled"),

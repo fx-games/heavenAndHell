@@ -8,7 +8,7 @@ import (
 )
 
 type AoEResolver func(origin, target geometry.Point) []geometry.Point
-type SelectionHandler func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point)
+type HitEffect func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point)
 type TargetRulesProvider func(attacker *Actor, hitPositions AoEResolver, currentMap *gridmap.GridMap[*Actor, Item, Object]) TargetRules
 
 type TargetRules interface {
@@ -22,7 +22,7 @@ type TargetRules interface {
 type UntargetedActionName string
 type UntargetedAction struct {
 	*BaseTimedBeing
-	name                   UntargetedActionName
+	name                   string
 	activationDelayInTurns int
 	effect                 func(user *Actor)
 	user                   *Actor
@@ -33,7 +33,7 @@ type UntargetedAction struct {
 	monetaryValue          int
 }
 
-func NewUntargetedAction(name UntargetedActionName, icon int32) *UntargetedAction {
+func NewUntargetedAction(name string, icon int32) *UntargetedAction {
 	return &UntargetedAction{
 		name: name,
 		icon: icon,
@@ -141,40 +141,41 @@ type TargetedActionName string
 type TargetedAction struct {
 	getTargetRules  TargetRulesProvider
 	hitPattern      AoEResolver
-	onSelected      SelectionHandler
-	name            TargetedActionName
+	onSelected      HitEffect
+	displayName     string
 	icon            int32
 	description     string
 	timeNeededInAut int
-	monetaryValue   int
+	dungeonLevel    int
+	internalName    string
 }
 
-func NewTargetedAction(name TargetedActionName, hitPattern AoEResolver, onSelected SelectionHandler, getTargetRules TargetRulesProvider) *TargetedAction {
+func NewTargetedAction(name string, hitPattern AoEResolver, onSelected HitEffect, getTargetRules TargetRulesProvider) *TargetedAction {
 	return &TargetedAction{
-		hitPattern:     hitPattern,
-		onSelected:     onSelected,
-		name:           name,
-		getTargetRules: getTargetRules,
+		hitPattern:      hitPattern,
+		onSelected:      onSelected,
+		displayName:     name,
+		getTargetRules:  getTargetRules,
 		timeNeededInAut: 10,
 	}
 }
 
-func (t *TargetedAction) SetMonetaryValue(value int) {
-	t.monetaryValue = value
+func (t *TargetedAction) SetDungeonLevel(value int) {
+	t.dungeonLevel = value
 }
 func (t *TargetedAction) Counter() int {
 	return 0
 }
 func (t *TargetedAction) Name() string {
-	return string(t.name)
+	return string(t.displayName)
 }
 func (t *TargetedAction) String() string {
-	return string(t.name)
+	return string(t.displayName)
 }
 
 func (t *TargetedAction) GetTooltipLines() []util.LabelText {
 	return []util.LabelText{
-		{Text: string(t.name), TextColor: color.White},
+		{Text: string(t.displayName), TextColor: color.White},
 	}
 }
 
@@ -217,5 +218,9 @@ func (t *TargetedAction) GetDescription() string {
 }
 
 func (t *TargetedAction) GetMonetaryValue() int {
-	return t.monetaryValue
+	return t.dungeonLevel
+}
+
+func (t *TargetedAction) SetInternalName(name string) {
+	t.internalName = name
 }

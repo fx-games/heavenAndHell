@@ -9,7 +9,7 @@ import (
 )
 
 func (g *GameInstance) addRandomShrine(source *rand.Rand, emptyMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], dungeonLevel int, pos geometry.Point) {
-	actionForShrine := g.GetRandomUntargetedAction(source, dungeonLevel)
+	actionForShrine := g.GetRandomUntargetedAction(dungeonLevel)
 	newShrine := common.NewBumpObject("a shrine", common.IconShrine, func(actor *common.Actor, startAnimating func() bool) {
 		actionForShrine.SetCurrentUser(actor) // TODO: should this trigger an animation, then it should listen to startAnimating
 		actionForShrine.Invoke(actor)

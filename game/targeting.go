@@ -11,7 +11,7 @@ import (
 
 type Targeter struct {
 	rules             common.TargetRules
-	onTargetSelected  common.SelectionHandler
+	onTargetSelected  common.HitEffect
 	currentTarget     geometry.Point
 	currentHighlights []common.TargetHighlight
 	renderer          *HybridRenderer
@@ -128,7 +128,7 @@ func (t *Targeter) HasValidTarget() bool {
 	return t.rules.IsValidTarget(t.currentTarget)
 }
 
-func NewTargeter(renderer *HybridRenderer, rules common.TargetRules, onTargetSelected common.SelectionHandler) *Targeter {
+func NewTargeter(renderer *HybridRenderer, rules common.TargetRules, onTargetSelected common.HitEffect) *Targeter {
 	return &Targeter{
 		rules:             rules,
 		renderer:          renderer,

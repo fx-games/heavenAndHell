@@ -63,7 +63,8 @@ func (d *ThrowAction) Execute(engine Engine) []Action {
 		}
 	}
 	if throwInfo.OnHitEffect != nil { // apply generic effect at target location
-		throwInfo.OnHitEffect(d.attacker, d.targetPos)
+		hitLocations := throwInfo.HitZone(d.attacker.MapPosition(), d.targetPos)
+		throwInfo.OnHitEffect(d.attacker, d.targetPos, hitLocations)
 	}
 
 	return actions

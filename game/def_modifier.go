@@ -22,7 +22,9 @@ MultiplyArmor,
 
 */
 
-/* We need
+/*
+	We need
+
 + Strength (-10 to +30) - DONE
 + Dexterity (-10 to +30) - DONE
 + Intelligence (-10 to +30) - DONE
@@ -57,22 +59,28 @@ Thorns (damage to attacker) - DONE
 Each attack does x0-6 damage. Usually 2x. (Not against unique monsters)
 2x damage to monsters, 1x damage to self
 */
-
-func NewModifiersForItem(source *rand.Rand, itemLevel int, count int) []*stats.Modifier {
-	modifierFunctions := []func(source *rand.Rand, level int) *stats.Modifier{
-		AddToBaseHealth,
-		AddToBaseMana,
-		AddToBaseStrength,
-		AddToBaseDexterity,
-		AddToBaseIntelligence,
-		AddToBaseVisionRange,
-		AddToBaseArmorPenetration,
-		AddToBaseDamage,
-		StealHealth,
-		StealMana,
-		MultiplyDamage,
-		MultiplyArmor,
+func (g *GameInstance) GetAllModifiers() map[string]func(source *rand.Rand, level int) *stats.Modifier {
+	modifierFunctions := map[string]func(source *rand.Rand, level int) *stats.Modifier{
+		"health":            AddToBaseHealth,
+		"mana":              AddToBaseMana,
+		"strength":          AddToBaseStrength,
+		"dexterity":         AddToBaseDexterity,
+		"intelligence":      AddToBaseIntelligence,
+		"vision_range":      AddToBaseVisionRange,
+		"armor_penetration": AddToBaseArmorPenetration,
+		"damage":            AddToBaseDamage,
+		"armor_class":       AddToArmorClass,
+		"steal_health":      StealHealth,
+		"steal_mana":        StealMana,
+		"damage_multiplier": MultiplyDamage,
+		"armor_multiplier":  MultiplyArmor,
+		"light_radius": 	 AddToBaseLightRadius,
+		"health_regen": 	 AddToHealthRegen,
 	}
+	return modifierFunctions
+}
+func (g *GameInstance) NewModifiersForItem(source *rand.Rand, itemLevel int, count int) []*stats.Modifier {
+	modifierFunctions := valuesOf(g.GetAllModifiers())
 	if count > len(modifierFunctions) {
 		count = len(modifierFunctions)
 	}
@@ -84,6 +92,23 @@ func NewModifiersForItem(source *rand.Rand, itemLevel int, count int) []*stats.M
 	return modifiers
 }
 
+func (g *GameInstance) NewModifierFromNameWithRandomRange(modName string, dungeonLevel int) *stats.Modifier {
+	source := g.randomSource
+	modifierFunctions := g.GetAllModifiers()
+	modifierFunction := modifierFunctions[modName]
+	return modifierFunction(source, dungeonLevel)
+}
+
+func (g *GameInstance) NewModifierFromNameWithFixedBonus(modName string, value float64) *stats.Modifier {
+	source := g.randomSource
+	modifierFunctions := g.GetAllModifiers()
+	modifierFunction := modifierFunctions[modName]
+	modifier := modifierFunction(source, 1)
+	modifier.Value = value
+	return modifier
+}
+
+
 func StealHealth(source *rand.Rand, level int) *stats.Modifier {
 	interval := util.NewTuple(0.03, 0.05)
 	return StealBaseResource(source, stats.LifeStealFactor, interval)
@@ -91,6 +116,40 @@ func StealHealth(source *rand.Rand, level int) *stats.Modifier {
 func StealMana(source *rand.Rand, level int) *stats.Modifier {
 	interval := util.NewTuple(0.03, 0.05)
 	return StealBaseResource(source, stats.ManaStealFactor, interval)
+}
+
+func AddToArmorClass(source *rand.Rand, level int) *stats.Modifier {
+	levelTable := []ModRow[int, int]{
+		{1, util.NewTuple(2, 4)},
+		{1, util.NewTuple(5, 8)},
+	}
+	interval := chooseIntervalFromTable(source, level, levelTable)
+	acAdded := randIntervalValue(source, interval)
+	mod := &stats.Modifier{
+		Name:           "of protection",
+		Attribute:      stats.BaseArmorClass,
+		Value:          float64(acAdded),
+		Mode:           stats.ModifyAdditive,
+		IsPercentBased: false,
+	}
+
+	return mod
+}
+func AddToHealthRegen(source *rand.Rand, level int) *stats.Modifier {
+	levelTable := []ModRow[int, int]{
+		{1, util.NewTuple(-2, -1)},
+		{1, util.NewTuple(1, 2)},
+	}
+	interval := chooseIntervalFromTable(source, level, levelTable)
+
+	mod := &stats.Modifier{
+		Name:           "of regeneration",
+		Attribute:      stats.HealthRegeneration,
+		Value:          randIntervalValue(source, interval),
+		Mode:           stats.ModifyAdditive,
+		IsPercentBased: false,
+	}
+	return mod
 }
 func AddToBaseHealth(source *rand.Rand, level int) *stats.Modifier {
 	levelTable := []ModRow[int, int]{
@@ -212,7 +271,7 @@ func StealBaseResource(source *rand.Rand, randomAttribute stats.Name, minMax uti
 	if intervalMin == intervalMax {
 		bonusValue = float64(intervalMin)
 	} else {
-		bonusValue = float64(source.Float64()*(intervalMax-intervalMin)+intervalMin)
+		bonusValue = float64(source.Float64()*(intervalMax-intervalMin) + intervalMin)
 	}
 	modifier := &stats.Modifier{
 		Attribute:      randomAttribute,
@@ -233,7 +292,7 @@ func MultiplyDamageOrArmor(source *rand.Rand, randomAttribute stats.Name, minMax
 	if intervalMin == intervalMax {
 		bonusValue = float64(intervalMin)
 	} else {
-		bonusValue = float64(source.Float64()*(intervalMax-intervalMin)+intervalMin)
+		bonusValue = float64(source.Float64()*(intervalMax-intervalMin) + intervalMin)
 	}
 	bonusValue += 1.0
 
@@ -268,15 +327,7 @@ func AddToBaseResource(source *rand.Rand, randomAttribute stats.Name, minMax uti
 	return modifier
 }
 func AddToBaseAttribute(source *rand.Rand, randomAttribute stats.Name, minMax util.Tuple[int, int]) *stats.Modifier {
-	intervalMin := minMax.Item1
-	intervalMax := minMax.Item2
-
-	var bonusValue float64
-	if intervalMin == intervalMax {
-		bonusValue = float64(intervalMin)
-	} else {
-		bonusValue = float64(source.Intn(intervalMax-intervalMin) + intervalMin)
-	}
+	bonusValue := randIntervalValue(source, minMax)
 
 	modifier := &stats.Modifier{
 		Attribute:      randomAttribute,
@@ -287,6 +338,19 @@ func AddToBaseAttribute(source *rand.Rand, randomAttribute stats.Name, minMax ut
 	}
 
 	return modifier
+}
+
+func randIntervalValue(source *rand.Rand, minMax util.Tuple[int, int]) float64 {
+	intervalMin := minMax.Item1
+	intervalMax := minMax.Item2
+
+	var bonusValue float64
+	if intervalMin == intervalMax {
+		bonusValue = float64(intervalMin)
+	} else {
+		bonusValue = float64(source.Intn(intervalMax-intervalMin) + intervalMin)
+	}
+	return bonusValue
 }
 
 type ModRow[T1 any, T2 any] struct {
@@ -311,4 +375,11 @@ func chooseIntervalFromTable[T1 any, T2 any](source *rand.Rand, level int, level
 	}
 	interval := allowedIntervals[source.Intn(len(allowedIntervals))]
 	return interval
+}
+func valuesOf(modifiers map[string]func(source *rand.Rand, level int) *stats.Modifier) []func(source *rand.Rand, level int) *stats.Modifier {
+	result := make([]func(source *rand.Rand, level int) *stats.Modifier, 0)
+	for _, value := range modifiers {
+		result = append(result, value)
+	}
+	return result
 }

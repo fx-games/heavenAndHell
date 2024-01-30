@@ -1,0 +1,13 @@
+%rec: default
+#FIELDS: internal_name purse max_items turnover_items sometimes_count always sometimes
+
+internal_name: store_general
+purse: 10000
+max_items: 12
+turnover_items: 2
+sometimes_count: 0-4
+always: cloak
+always: torch
+always: flask_of_oil
+sometimes: healing_potion
+sometimes: mana_potion

@@ -1,0 +1,51 @@
+%rec: default
+#FIELDS: name internal_name icon dlvl cost charges max_level out_of_depth_chance min_level_for_ood category armor_type armor_class weapon_type weapon_damage weapon_speed throw_hit_zone throw_damage throw_chance_to_break throw_on_hit_effect light_color light_flicker_pattern light_flicker_frame_delay equip_modifier untargeted_action targeted_action
+
+name: healing potion
+internal_name: healing_potion
+category: potion
+icon: 332
+dlvl: 1
+cost: 50
+untargeted_action: heal_health
+
+name: mana potion
+internal_name: mana_potion
+category: potion
+icon: 329
+dlvl: 1
+cost: 50
+untargeted_action: heal_mana
+
+name: berserk potion
+internal_name: berserk_potion
+category: potion
+icon: 324
+dlvl: 1
+cost: 50
+untargeted_action: apply_berserk_self
+
+name: confuse potion
+internal_name: confuse_potion
+category: potion
+icon: 325
+dlvl: 1
+cost: 50
+untargeted_action: apply_confuse_self
+
+name: speed potion
+internal_name: speed_potion
+category: potion
+icon: 333
+dlvl: 1
+cost: 50
+untargeted_action: buff_speed
+
+name: strength potion
+internal_name: strength_potion
+category: potion
+icon: 334
+dlvl: 1
+cost: 50
+untargeted_action: buff_damage
+

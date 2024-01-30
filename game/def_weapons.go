@@ -1,8 +1,7 @@
 package game
 
 import (
-	"math/rand"
-	"rpg/actions"
+	"fmt"
 	"rpg/common"
 	"rpg/geometry"
 	"rpg/gridmap"
@@ -23,173 +22,48 @@ Dmg.: 12-30
 AC: 24-100
 
  */
-func addRandomWeapon(state actions.WorldState, source *rand.Rand, emptyMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], dungeonLevel int, pos geometry.Point) *GameItem {
-	createWeaponFunctions := []func(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem{
-		NewSword,
-		NewAxe,
-		NewMace,
-		NewBow,
-		NewStaff,
-	}
-	creationFunction := createWeaponFunctions[source.Intn(len(createWeaponFunctions))]
-	item := creationFunction(state, source, dungeonLevel)
-	emptyMap.AddItem(item, pos)
-	return item
-}
-func NewDagger(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "a dagger", common.IconItemDagger)
-	baseItem.SetCategory(common.ItemCategoryWeapon)
-	baseItem.SetQualityLevel(qLevel)
-
-	weaponPart := &common.WeaponStats{
-		Damage:            stats.NewInterval(1, 4),
-		Durability:        stats.NewResource(0, flatFunc(20), 20),
-		Type:              common.WeaponTypeSword,
-		MeleeRange:        1,
-		AttackSpeedFactor: 1,
-	}
-
-	baseItem.SetWeaponComponent(weaponPart)
-
-	throwPart := &common.ThrowStats{
-		Damage:            stats.NewInterval(1, 4),
-		HitZone: OneTargetTile,
-		ChanceToBreak: 0.25,
-	}
-	baseItem.SetThrowComponent(throwPart)
-
-	return &GameItem{
-		BaseItem: baseItem,
-	}
-}
-func NewSword(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "a sword", common.IconItemSword)
-	baseItem.SetCategory(common.ItemCategoryWeapon)
-	baseItem.SetQualityLevel(qLevel)
-
-	weaponPart := &common.WeaponStats{
-		Damage:            stats.NewInterval(2, 6),
-		Durability:        stats.NewResource(0, flatFunc(20), 20),
-		Type:              common.WeaponTypeSword,
-		MeleeRange:        1,
-		AttackSpeedFactor: 1,
-	}
-
-	baseItem.SetWeaponComponent(weaponPart)
-
-	throwPart := &common.ThrowStats{
-		Damage:            stats.NewInterval(1, 5),
-		HitZone: OneTargetTile,
-		ChanceToBreak: 0.4,
-	}
-	baseItem.SetThrowComponent(throwPart)
-
-	return &GameItem{
-		BaseItem: baseItem,
-	}
-}
-func NewMace(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "a mace", common.IconItemMace)
-	baseItem.SetCategory(common.ItemCategoryWeapon)
-	baseItem.SetQualityLevel(1)
-
-	weaponPart := &common.WeaponStats{
-		Damage:                      stats.NewInterval(1, 6),
-		Durability:                  stats.NewResource(0, flatFunc(20), 20),
-		Type:                        common.WeaponTypeAxe,
-		MeleeRange:                  1,
-		AttackSpeedFactor:           1,
-		DamagePerLocationPrediction: getSmallAxeDamageLocations(state),
-	}
-	baseItem.SetWeaponComponent(weaponPart)
-
-	throwPart := &common.ThrowStats{
-		Damage:            stats.NewInterval(2, 4),
-		HitZone: OneTargetTile,
-		ChanceToBreak: 0.1,
-	}
-	baseItem.SetThrowComponent(throwPart)
-	return &GameItem{
-		BaseItem: baseItem,
-	}
-}
-func NewAxe(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "a hand axe", common.IconItemAxe)
-	baseItem.SetCategory(common.ItemCategoryWeapon)
-	baseItem.SetQualityLevel(1)
-
-	weaponPart := &common.WeaponStats{
-		Damage:                      stats.NewInterval(1, 6),
-		Durability:                  stats.NewResource(0, flatFunc(20), 20),
-		Type:                        common.WeaponTypeAxe,
-		MeleeRange:                  1,
-		AttackSpeedFactor:           1,
-		DamagePerLocationPrediction: getSmallAxeDamageLocations(state),
-	}
-	baseItem.SetWeaponComponent(weaponPart)
-
-	throwPart := &common.ThrowStats{
-		Damage:            stats.NewInterval(2, 5),
-		HitZone: OneTargetTile,
-		ChanceToBreak: 0.25,
-	}
-	baseItem.SetThrowComponent(throwPart)
-	return &GameItem{
-		BaseItem: baseItem,
-	}
+func (g *GameInstance) addRandomWeapon(emptyMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], dungeonLevel int, pos geometry.Point) *GameItem {
+	randomWeapon := g.NewRandomWeapon(dungeonLevel)
+	emptyMap.AddItem(randomWeapon, pos)
+	return randomWeapon
 }
 
-func NewStaff(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "a quarterstaff", common.IconItemStaff)
-	baseItem.SetCategory(common.ItemCategoryWeapon)
-	baseItem.SetQualityLevel(1)
 
-	weaponPart := &common.WeaponStats{
-		Damage:                      stats.NewInterval(1, 6),
-		Durability:                  stats.NewResource(0, flatFunc(20), 20),
-		Type:                        common.WeaponTypeStaff,
-		MeleeRange:                  1,
-		AttackSpeedFactor:           1,
-		DamagePerLocationPrediction: getSmallAxeDamageLocations(state),
+func (g *GameInstance) NewRandomWeapon(dungeonLevel int) *GameItem {
+	// get defs
+	itemDefinitions := g.GetItemDefinitions()
+
+	// filter for dungeon level
+	var filtered []ItemDefinition
+	weaponTypeMap := make(map[common.WeaponType][]ItemDefinition)
+	for _, itemDef := range itemDefinitions {
+
+		if !itemDef.IsWeapon() || !itemDef.CanAppearAt(g.randomSource, dungeonLevel) {
+			continue
+		}
+
+		filtered = append(filtered, itemDef)
+		weaponTypeMap[itemDef.Weapon.WeaponType] = append(weaponTypeMap[itemDef.Weapon.WeaponType], itemDef)
 	}
 
-	throwPart := &common.ThrowStats{
-		Damage:            stats.NewInterval(1, 2),
-		HitZone: OneTargetTile,
-		ChanceToBreak: 0.6,
+	if len(filtered) == 0 {
+		g.ErrLog(fmt.Sprintf("no armor found for dungeon level %d", dungeonLevel))
+		return nil
 	}
-	baseItem.SetThrowComponent(throwPart)
-
-	baseItem.SetWeaponComponent(weaponPart)
-	return &GameItem{
-		BaseItem: baseItem,
+	// group by type
+	availableTypes := make([]common.WeaponType, 0)
+	for wType, _ := range weaponTypeMap {
+		availableTypes = append(availableTypes, wType)
 	}
-}
 
-func NewBow(state actions.WorldState, source *rand.Rand, qLevel int) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "a bow", common.IconItemBow)
-	baseItem.SetCategory(common.ItemCategoryWeapon)
-	baseItem.SetQualityLevel(1)
+	// pick random type
+	weaponType := availableTypes[g.randomSource.Intn(len(availableTypes))]
 
-	weaponPart := &common.WeaponStats{
-		Damage:            stats.NewInterval(1, 6),
-		Durability:        stats.NewResource(0, flatFunc(20), 20),
-		Type:              common.WeaponTypeBow,
-		AttackSpeedFactor: 1,
-	}
-	baseItem.SetWeaponComponent(weaponPart)
+	// pick random definition
+	armorDefinition := weaponTypeMap[weaponType][g.randomSource.Intn(len(weaponTypeMap[weaponType]))]
 
-
-	throwPart := &common.ThrowStats{
-		Damage:            stats.NewInterval(1, 2),
-		HitZone: OneTargetTile,
-		ChanceToBreak: 0.6,
-	}
-	baseItem.SetThrowComponent(throwPart)
-
-	return &GameItem{
-		BaseItem: baseItem,
-	}
+	// create item
+	return g.NewItemFromDefinition(armorDefinition, dungeonLevel)
 }
 
 func (g *GameInstance) NewConfuseDart() *GameItem {
@@ -215,7 +89,7 @@ func (g *GameInstance) NewDart() *GameItem {
 	return dart
 }
 
-func NewDart(getPlayer func()*common.Actor, onHit func(attacker *common.Actor, hitLocation geometry.Point)) *GameItem {
+func NewDart(getPlayer func()*common.Actor, onHit common.HitEffect) *GameItem {
 	baseItem := common.NewBaseItem(getPlayer, "a dart", common.IconItemDart)
 	baseItem.SetCategory(common.ItemCategoryThrowable)
 	baseItem.SetQualityLevel(1)

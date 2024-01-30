@@ -1,0 +1,43 @@
+%rec: default
+#FIELDS: name internal_name icon dlvl cost charges max_level out_of_depth_chance min_level_for_ood category armor_type armor_class weapon_type weapon_damage weapon_speed throw_hit_zone throw_damage throw_chance_to_break throw_on_hit_effect light_color light_flicker_pattern light_flicker_frame_delay equip_modifier untargeted_action targeted_action
+
+name: Scroll of Phase Door
+internal_name: scroll_of_random_teleport
+category: scroll
+icon: 139
+dlvl: 1
+cost: 50
+untargeted_action: random_near_teleport
+
+name: Scroll of Word of Recall
+internal_name: scroll_of_recall
+category: scroll
+icon: 139
+dlvl: 1
+cost: 75
+untargeted_action: recall
+
+name: Scroll of Blessing
+internal_name: scroll_of_blessing
+category: scroll
+icon: 139
+dlvl: 1
+cost: 180
+untargeted_action: buff_armor
+
+name: Scroll of Enchant Weapon
+internal_name: scroll_of_enchant_weapon
+category: scroll
+icon: 139
+dlvl: 1
+cost: 4000
+untargeted_action: enchant_weapon
+
+name: Scroll of Enchant Armor
+internal_name: scroll_of_enchant_armor
+category: scroll
+icon: 139
+dlvl: 1
+cost: 4000
+untargeted_action: enchant_armor
+

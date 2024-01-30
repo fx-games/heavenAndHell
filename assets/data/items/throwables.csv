@@ -1,0 +1,4 @@
+name,internal_name,icon,dlvl,cost,charges,max_level,out_of_depth_chance,min_level_for_ood,category,armor_type,armor_class,weapon_type,weapon_damage,weapon_speed,throw_hit_zone,throw_damage,throw_chance_to_break,throw_on_hit_effect,light_color,light_flicker_pattern,light_flicker_frame_delay,equip_modifier,untargeted_action,targeted_action
+a dart,dart,232,1,,,,,,throwable,,,,,,target_only,1-4,0.2,,,,,,,
+a dart of confusion,dart_confusion,232,1,,,,,,throwable,,,,,,target_only,1-4,0.2,"apply(confused, 4)",,,,,,
+a flask of oil,flask_of_oil,246,1,,,,,,potion,,,,,,dijkstra_aoe(1),1-4,1.0,fire_zone,,,,,,

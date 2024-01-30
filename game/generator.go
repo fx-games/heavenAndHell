@@ -58,9 +58,14 @@ func (g *GameInstance) generateMap(targetMap string, mapTemplates *ldtk_go.Proje
 		rollForEnemy := randomSource.Intn(100)
 		//println(fmt.Sprintf("pos: %v, rollForEnemy: %d, distToEntrance: %d", pos, rollForEnemy, distToEntrance))
 		if rollForEnemy < 5 && distToStairs > 7 && emptyMap.CanPlaceActorHere(pos) {
-			g.addRandomEnemy(emptyMap, dungeonLevel, pos)
+			enemy := g.NewRandomEnemy(dungeonLevel)
+			enemy.SetDrawPosition(pos.ToPointF())
+			emptyMap.AddActor(enemy, pos)
 		} else if randomSource.Intn(100) < 1 && distToStairs > 7 && emptyMap.CanPlaceItemHere(pos) {
-			g.addLootToMap(emptyMap, dungeonLevel, pos)
+			lootItem := g.generateLoot(dungeonLevel)
+			if lootItem != nil {
+				emptyMap.AddItem(lootItem, pos)
+			}
 		}
 	}
 

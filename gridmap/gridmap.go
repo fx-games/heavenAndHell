@@ -1581,7 +1581,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) CanPlaceActorHere(pos geometr
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) CanPlaceItemHere(pos geometry.Point) bool {
-	return m.IsWalkable(pos) && !m.IsItemAt(pos)
+	return m.IsWalkable(pos) && !m.IsItemAt(pos) && m.IsSpecialAt(pos, SpecialTileNone)
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) SetMetaString(info []string) {

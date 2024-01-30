@@ -1,0 +1,78 @@
+%rec: default
+#FIELDS: internal_name icon dlvl name
+
+internal_name: heal_health_mana_full
+icon: 333
+dlvl: 1
+name: Heal Health and Mana
+
+internal_name: heal_health
+icon: 332
+dlvl: 1
+name: Heal Health
+
+internal_name: apply_berserk_self
+icon: 135
+dlvl: 1
+name: Berserk
+
+internal_name: apply_confuse_self
+icon: 30
+dlvl: 1
+name: Confuse
+
+internal_name: heal_mana
+icon: 329
+dlvl: 1
+name: Heal Mana
+
+internal_name: random_near_teleport
+icon: 194
+dlvl: 1
+name: Phase Door
+
+internal_name: buff_damage
+icon: 114
+dlvl: 1
+name: Buff Damage
+
+internal_name: buff_speed
+icon: 167
+dlvl: 1
+name: Buff Speed
+
+internal_name: recall
+icon: 223
+dlvl: 1
+name: Recall
+
+internal_name: buff_armor
+icon: 116
+dlvl: 1
+name: Bless
+
+internal_name: enchant_weapon
+icon: 139
+dlvl: 1
+name: Enchant Weapon
+
+internal_name: enchant_armor
+icon: 139
+dlvl: 1
+name: Enchant Armor
+
+internal_name: multi_shot
+icon: 44
+dlvl: 1
+name: Multi Shot
+
+internal_name: telefrag
+icon: 223
+dlvl: 1
+name: Telefrag
+
+internal_name: read_message
+icon: 111
+dlvl: 1
+name: Read Message
+

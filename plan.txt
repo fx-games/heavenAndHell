@@ -24,7 +24,6 @@ add a stash in town
   - SetActorToDowned() is not working properly, corpses are stacking
   - Dropping items on the ground will not work properly and can drop out of bounds crashing the program
   - Don't place items on lava
-  - Items can be dropped on top of stairs, as can blood decals
   - Lucifer's Set Pieces flames don't animate
 
 8. Design

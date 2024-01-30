@@ -1,0 +1,377 @@
+%rec: default
+#FIELDS: dlvl name icon internal_name base_speed base_health stats_experience stats_strength stats_dexterity stats_intelligence equipment targeted_skill untargeted_skill death_string
+
+## New declaration format
+
+dlvl: 1
+name: a skeleton
+icon: 397
+internal_name: skeleton
+base_speed: 9
+base_health: 10
+stats_experience: 10
+stats_strength: 7
+stats_dexterity: 6
+death_string: %s crumbles to dust.
+death_string: %s falls apart.
+
+dlvl: 2
+name: a skeleton archer
+icon: 401
+internal_name: skeleton_archer
+base_speed: 9
+base_health: 10
+stats_experience: 12
+stats_strength: 2
+stats_dexterity: 6
+equipment: short_bow
+death_string: %s crumbles to dust.
+death_string: %s falls apart.
+
+dlvl: 2
+name: a skeleton warrior
+icon: 397
+internal_name: skeleton_warrior
+base_speed: 9
+base_health: 10
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+equipment: dagger
+death_string: %s crumbles to dust.
+death_string: %s falls apart.
+
+dlvl: 2
+name: a skeleton captain
+icon: 400
+internal_name: skeleton_captain
+base_speed: 9
+base_health: 10
+stats_experience: 20
+stats_strength: 12
+stats_dexterity: 6
+equipment: dagger
+equipment: hard_leather_cap
+death_string: %s crumbles to dust.
+death_string: %s falls apart.
+
+dlvl: 1
+name: a bat
+icon: 93
+internal_name: bat
+base_speed: 12
+base_health: 10
+stats_experience: 15
+stats_strength: 5
+death_string: %s crumbles to dust.
+death_string: %s falls apart.
+
+dlvl: 1
+name: a cave bear
+icon: 538
+internal_name: caveling_bear
+base_speed: 10
+base_health: 10
+stats_experience: 8
+stats_strength: 14
+death_string: %s dies a bloody death.
+death_string: %s bites the dust.
+
+dlvl: 1
+name: a caveling
+icon: 542
+internal_name: caveling
+base_speed: 10
+base_health: 10
+stats_experience: 8
+stats_strength: 6
+death_string: %s dies a bloody death.
+death_string: %s bites the dust.
+
+dlvl: 1
+name: an imp
+icon: 426
+internal_name: fallen
+base_speed: 8
+base_health: 10
+stats_experience: 8
+stats_strength: 6
+death_string: %s stops existing.
+death_string: %s bursts into pieces.
+
+dlvl: 1
+name: a fiend
+icon: 548
+internal_name: fiend
+base_speed: 10
+base_health: 10
+stats_experience: 20
+stats_strength: 12
+stats_dexterity: 12
+death_string: %s bursts into flames.
+death_string: %s violently explodes.
+
+dlvl: 1
+name: a horned fiend
+icon: 547
+internal_name: fiend_horned
+base_speed: 10
+base_health: 10
+stats_experience: 20
+stats_strength: 12
+stats_dexterity: 12
+death_string: %s bursts into flames.
+death_string: %s violently explodes.
+
+dlvl: 1
+name: a horned fiend with knife
+icon: 546
+internal_name: fiend_armed
+base_speed: 10
+base_health: 10
+stats_experience: 20
+stats_strength: 12
+stats_dexterity: 12
+equipment: dagger
+death_string: %s bursts into flames.
+death_string: %s violently explodes.
+
+dlvl: 1
+name: a horned fiend with whip
+icon: 544
+internal_name: fiend_whip
+base_speed: 10
+base_health: 10
+stats_experience: 20
+stats_strength: 12
+stats_dexterity: 12
+equipment: dagger
+death_string: %s bursts into flames.
+death_string: %s violently explodes.
+
+
+dlvl: 1
+name: a horned fiend with glaive
+icon: 545
+internal_name: fiend_glaive
+base_speed: 10
+base_health: 10
+stats_experience: 20
+stats_strength: 12
+stats_dexterity: 12
+equipment: dagger
+death_string: %s bursts into flames.
+death_string: %s violently explodes.
+
+dlvl: 1
+name: a horned fiend big
+icon: 543
+internal_name: fiend_big
+base_speed: 10
+base_health: 10
+stats_experience: 20
+stats_strength: 12
+stats_dexterity: 12
+death_string: %s bursts into flames.
+death_string: %s violently explodes.
+
+dlvl: 1
+name: a fallen warrior
+icon: 427
+internal_name: fallen_warrior
+base_speed: 8
+base_health: 10
+stats_experience: 12
+stats_strength: 8
+stats_dexterity: 6
+equipment: dagger
+death_string: %s stops existing.
+death_string: %s bursts into pieces.
+
+dlvl: 1
+name: a fallen archer
+icon: 425
+internal_name: fallen_archer
+base_speed: 8
+base_health: 10
+stats_experience: 12
+stats_strength: 8
+stats_dexterity: 8
+equipment: short_bow
+death_string: %s stops existing.
+death_string: %s bursts into pieces.
+
+dlvl: 1
+name: a fallen shaman
+icon: 426
+internal_name: fallen_shaman
+base_speed: 8
+base_health: 10
+stats_experience: 12
+stats_strength: 8
+stats_dexterity: 8
+stats_intelligence: 8
+targeted_skill: fire_bresen
+death_string: %s stops existing.
+death_string: %s bursts into pieces.
+
+dlvl: 1
+name: a caveling with weapon
+icon: 541
+internal_name: caveling_armed
+base_speed: 10
+base_health: 10
+stats_experience: 8
+stats_strength: 6
+equipment: dagger
+death_string: %s dies a bloody death.
+death_string: %s bites the dust.
+
+dlvl: 1
+name: a caveling with axes
+icon: 540
+internal_name: caveling_axe
+base_speed: 10
+base_health: 10
+stats_experience: 8
+stats_strength: 6
+equipment: dagger
+death_string: %s dies a bloody death.
+death_string: %s bites the dust.
+
+dlvl: 1
+name: a caveling with big axe
+icon: 539
+internal_name: caveling_big_axe
+base_speed: 10
+base_health: 10
+stats_experience: 8
+stats_strength: 6
+equipment: dagger
+death_string: %s dies a bloody death.
+death_string: %s bites the dust.
+
+dlvl: 1
+name: a possessed thief
+icon: 463
+internal_name: thief_possessed
+base_speed: 10
+base_health: 10
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+equipment: dagger
+targeted_skill: steal_item_vanish
+death_string: %s dies.
+death_string: %s has stolen his last piece of gold.
+
+dlvl: 1
+name: a skeleton sorcerer
+icon: 402
+internal_name: skeleton_sorcerer
+base_speed: 9
+base_health: 10
+stats_experience: 15
+stats_strength: 2
+stats_dexterity: 6
+stats_intelligence: 6
+targeted_skill: mind_push
+death_string: %s crumbles to dust.
+death_string: %s falls apart.
+
+dlvl: 1
+name: a kestrel
+icon: 576
+internal_name: rogue_kestrel
+base_speed: 10
+base_health: 10
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+death_string: %s dies.
+
+dlvl: 1
+name: a bat
+icon: 567
+internal_name: rogue_bat
+base_speed: 10
+base_health: 10
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+death_string: %s dies.
+
+dlvl: 1
+name: an emu
+icon: 570
+internal_name: rogue_emu
+base_speed: 10
+base_health: 10
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+death_string: %s dies.
+
+dlvl: 1
+name: a jackal
+icon: 575
+internal_name: rogue_jackal
+base_speed: 10
+base_health: 10
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+death_string: %s dies.
+
+dlvl: 1
+name: an orc
+icon: 580
+internal_name: rogue_orc
+base_speed: 10
+base_health: 10
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+death_string: %s dies.
+
+dlvl: 1
+name: a snake
+icon: 584
+internal_name: rogue_snake
+base_speed: 10
+base_health: 10
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+death_string: %s dies.
+
+dlvl: 1
+name: a thief
+icon: 491
+internal_name: thief_goblin
+base_speed: 10
+base_health: 10
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+death_string: %s dies.
+
+dlvl: 1
+name: a goatman
+icon: 95
+internal_name: goatman
+base_speed: 10
+base_health: 10
+stats_experience: 12
+stats_strength: 10
+death_string: %s dies.
+
+dlvl: 1
+name: a goatman archer
+icon: 95
+internal_name: goatman_archer
+base_speed: 10
+base_health: 10
+stats_experience: 12
+stats_strength: 10
+death_string: %s dies.

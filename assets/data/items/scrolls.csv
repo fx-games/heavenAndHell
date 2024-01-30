@@ -1,0 +1,6 @@
+name,internal_name,icon,dlvl,cost,charges,max_level,out_of_depth_chance,min_level_for_ood,category,armor_type,armor_class,weapon_type,weapon_damage,weapon_speed,throw_hit_zone,throw_damage,throw_chance_to_break,throw_on_hit_effect,light_color,light_flicker_pattern,light_flicker_frame_delay,equip_modifier,untargeted_action,targeted_action
+Scroll of Phase Door,scroll_of_random_teleport,139,1,50,,,,,scroll,,,,,,,,,,,,,,random_near_teleport,
+Scroll of Word of Recall,scroll_of_recall,139,1,75,,,,,scroll,,,,,,,,,,,,,,recall,
+Scroll of Blessing,scroll_of_blessing,139,1,180,,,,,scroll,,,,,,,,,,,,,,buff_armor,
+Scroll of Enchant Weapon,scroll_of_enchant_weapon,139,1,4000,,,,,scroll,,,,,,,,,,,,,,enchant_weapon,
+Scroll of Enchant Armor,scroll_of_enchant_armor,139,1,4000,,,,,scroll,,,,,,,,,,,,,,enchant_armor,

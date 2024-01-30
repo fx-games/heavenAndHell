@@ -9,13 +9,16 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path"
 	"rpg/common"
 	"rpg/console"
 	"rpg/dungen"
 	"rpg/game"
 	"rpg/ldtk_go"
+	"rpg/recfile"
 	"rpg/util"
 	"runtime/pprof"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -54,11 +57,43 @@ func main() {
 	}
 
 	theGame := game.NewGameInstance(startInfos)
-	if len(os.Args) > 1 && strings.ToLower(os.Args[1]) == "ascii" {
-		runGameWithConsole(theGame)
+	if len(os.Args) > 1 {
+		argCmd := strings.ToLower(os.Args[1])
+		switch argCmd {
+		case "loot":
+			genLoot(theGame)
+		case "ascii":
+			runGameWithConsole(theGame)
+		case "csv_dump":
+			dumpGameData()
+		case "validate":
+			return
+		}
 	} else {
 		runGameWithEbiten(theGame)
 	}
+}
+
+func genLoot(theGame *game.GameInstance) {
+	if len(os.Args) < 3 {
+		fmt.Println("usage: loot <dungeon_level>")
+		return
+	}
+	dungeonLevel, _ := strconv.Atoi(os.Args[2])
+	items := theGame.GenerateLoot(dungeonLevel, 10)
+	for _, item := range items {
+		fmt.Println(item.BandStyleName())
+	}
+}
+
+func dumpGameData() {
+	file, _ := os.Open(path.Join("assets", "data", "enemies", "enemies.rec"))
+	records := recfile.Read(file)
+	file.Close()
+
+	outFile, _ := os.Create(path.Join("assets", "data", "enemies", "enemies.csv"))
+	fieldNames := []string{"dlvl", "name", "icon", "internal_name", "base_speed", "base_health", "stats_experience", "stats_strength", "stats_dexterity", "stats_intelligence", "equipment", "targeted_skill", "death_string"}
+	recfile.WriteCSV(outFile, fieldNames, records)
 }
 
 func maptest() {

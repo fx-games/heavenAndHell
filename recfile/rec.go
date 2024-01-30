@@ -2,6 +2,7 @@ package recfile
 
 import (
 	"bufio"
+	"encoding/csv"
 	"fmt"
 	"io"
 	"regexp"
@@ -105,10 +106,15 @@ func (d DataMap) GetIntOrDefault(key string, defaultValue int) int {
 	return defaultValue
 }
 
-func (r Record) ToMap() DataMap {
+func (r Record) ToMap(listSeperator string) DataMap {
 	m := make(map[string]string, len(r))
 	for _, field := range r {
-		m[field.Name] = field.Value
+		if _, exists := m[field.Name]; exists {
+			// append
+			m[field.Name] += listSeperator + field.Value
+		} else {
+			m[field.Name] = field.Value
+		}
 	}
 	return m
 }
@@ -118,6 +124,21 @@ func (r Record) ToValueList() []string {
 	for i, field := range r {
 		result[i] = field.Value
 	}
+	return result
+}
+
+func (r Record) ToFixedSizeValueList(fieldNamesInOrder []string) []string {
+	var result []string
+	asMap := r.ToMap("|")
+
+	for _, fieldName := range fieldNamesInOrder {
+		if value, ok := asMap[fieldName]; ok {
+			result = append(result, value)
+		} else {
+			result = append(result, "")
+		}
+	}
+
 	return result
 }
 
@@ -227,7 +248,15 @@ func ReadMulti(input io.Reader) map[string][]Record {
 func Write(file io.StringWriter, records []Record) error {
 	return WriteMulti(file, map[string][]Record{"default": records})
 }
-
+func WriteCSV(output io.Writer, fieldNames []string, records []Record) {
+	csvWriter := csv.NewWriter(output)
+	csvWriter.Write(fieldNames)
+	for _, record := range records {
+		asValues := record.ToFixedSizeValueList(fieldNames)
+		csvWriter.Write(asValues)
+	}
+	csvWriter.Flush()
+}
 func WriteMulti(file io.StringWriter, recordsInCategories map[string][]Record) error {
 	sanitizeFieldname := func(s string) string {
 		saneFieldname := strings.ReplaceAll(s, " ", "_")

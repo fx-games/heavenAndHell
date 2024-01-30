@@ -2,13 +2,11 @@ package game
 
 import (
 	"fmt"
-	"math/rand"
 	"rpg/common"
-	"rpg/geometry"
-	"rpg/gridmap"
 )
 
-func (g *GameInstance) addRandomWand(source *rand.Rand, emptyMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], dungeonLevel int, pos geometry.Point) {
+func (g *GameInstance) NewRandomWand(dungeonLevel int) *GameItem {
+	source := g.randomSource
 	var newConsumable *GameItem
 	roll := source.Intn(100)
 	if roll < 50 {
@@ -33,7 +31,7 @@ func (g *GameInstance) addRandomWand(source *rand.Rand, emptyMap *gridmap.GridMa
 			g.NewEtherealUntargetedWand,
 			g.NewInfiniteUntargetedWand,
 		}
-		randomUntargetedAction := g.GetRandomUntargetedAction(source, dungeonLevel)
+		randomUntargetedAction := g.GetRandomUntargetedAction(dungeonLevel)
 		wandTypeRoll := source.Intn(100)
 		wandTypeIndex := 2
 		if wandTypeRoll < 45 {
@@ -52,7 +50,7 @@ func (g *GameInstance) addRandomWand(source *rand.Rand, emptyMap *gridmap.GridMa
 	   }
 	*/
 
-	emptyMap.AddItem(newConsumable, pos)
+	return newConsumable
 }
 
 func (g *GameInstance) NewInfiniteTargetedWand(targetedAction *common.TargetedAction) *GameItem {

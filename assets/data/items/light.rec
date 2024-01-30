@@ -1,0 +1,52 @@
+%rec: default
+#FIELDS: name internal_name icon dlvl cost charges max_level out_of_depth_chance min_level_for_ood category armor_type armor_class weapon_type weapon_damage weapon_speed throw_hit_zone throw_damage throw_chance_to_break throw_on_hit_effect light_color light_flicker_pattern light_flicker_frame_delay equip_modifier untargeted_action targeted_action
+
+name: a torch
+internal_name: torch
+icon: 352
+dlvl: 1
+cost: 2
+charges: 2500
+category: light
+throw_damage: 1-2
+equip_modifier: light_radius(1)
+light_color: 255 223 117
+light_flicker_pattern: fire
+light_flicker_frame_delay: 0.125
+
+name: a lantern
+internal_name: lantern
+icon: 247
+dlvl: 1
+cost: 10
+charges: 5000
+category: light
+equip_modifier: light_radius(2)
+light_color: 255 223 117
+light_flicker_pattern: fire
+light_flicker_frame_delay: 0.125
+
+name: a star-glass
+internal_name: light_star_glass
+icon: 248
+dlvl: 1
+cost: 100
+charges: -1
+category: light
+equip_modifier: light_radius(3)
+light_color: 5 250 255
+light_flicker_pattern: smooth
+light_flicker_frame_delay: 0.125
+
+name: the Morning Star
+internal_name: light_morning_star
+icon: 274
+dlvl: 1
+cost: 100
+charges: -1
+category: light
+equip_modifier: light_radius(12)
+light_color: 255 248 207
+light_flicker_pattern: smooth
+light_flicker_frame_delay: 0.500
+

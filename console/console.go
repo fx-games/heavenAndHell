@@ -23,15 +23,23 @@ func drawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string
 	}
 }
 
+type UIState int
+
+const (
+	Default UIState = iota
+	Inventory
+)
+
 type Console struct {
 	game       *game.GameInstance
 	shouldQuit bool
 	lightStyle tcell.Style
 	darkStyle  tcell.Style
 	screen     tcell.Screen
+	state      UIState
 }
 
-func (c Console) HandleInput() (quit bool) {
+func (c *Console) HandleInput() (quit bool) {
 	ev := c.screen.PollEvent()
 	if ev == nil {
 		return true
@@ -51,6 +59,12 @@ func (c Console) HandleInput() (quit bool) {
 			c.game.ManualMovePlayer(geometry.Point{X: -1, Y: 0})
 		} else if typedRune == 'd' {
 			c.game.ManualMovePlayer(geometry.Point{X: 1, Y: 0})
+		} else if typedRune == 'i' {
+			if c.state == Inventory {
+				c.state = Default
+			} else {
+				c.state = Inventory
+			}
 		} else if typedRune == 'q' {
 			c.shouldQuit = true
 			c.screen.Fini()
@@ -59,11 +73,11 @@ func (c Console) HandleInput() (quit bool) {
 	return c.shouldQuit
 }
 
-func (c Console) putRune(x, y int, style tcell.Style, r rune) {
+func (c *Console) putRune(x, y int, style tcell.Style, r rune) {
 	c.screen.SetContent(x, y, r, nil, style)
 }
 
-func (c Console) Update(dt float64) {
+func (c *Console) Update(dt float64) {
 	// Poll event
 	gameErr := c.game.Update()
 	if gameErr != nil {
@@ -71,7 +85,7 @@ func (c Console) Update(dt float64) {
 	}
 }
 
-func (c Console) Draw() {
+func (c *Console) Draw() {
 	screen := c.screen
 	player := c.game.GetWorldState().GetPlayer()
 	sWidth, sHeight := screen.Size()
@@ -118,7 +132,24 @@ func (c Console) Draw() {
 		}
 	}
 
+	// Draw inventory
+	if c.state == Inventory {
+		c.drawInventory()
+	}
+
 	screen.Show()
+}
+
+func (c *Console) drawInventory() {
+	screen := c.screen
+	player := c.game.GetWorldState().GetPlayer()
+	sWidth, sHeight := screen.Size()
+	inventory := player.GetInventory()
+
+
+	for i, item := range inventory.AsColorCodedStrings() {
+		drawText(screen, 0, i, sWidth, sHeight, c.lightStyle, item)
+	}
 }
 
 func NewConsole(game *game.GameInstance) *Console {

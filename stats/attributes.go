@@ -4,43 +4,48 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"strings"
 )
+
+func StatFromString(statName string) Name {
+	return Name(strings.ToLower(statName))
+}
 
 type Name string
 
 const (
 	// clasic roguelike attributes (SID)
-	Strength     Name = "Strength"
-	Intelligence Name = "Intelligence"
-	Dexterity    Name = "Dexterity"
+	Strength     Name = "strength"
+	Intelligence Name = "intelligence"
+	Dexterity    Name = "dexterity"
 
 	// baseline for the game
-	Level                    Name = "Level"
-	Experience               Name = "Experience"
-	Gold                     Name = "Gold"
-	BaseSpeed                Name = "Speed"
-	BaseDamage               Name = "Damage"
-	BaseArmorClass           Name = "Armor Class"
-	AttackSpeedFactor        Name = "Attack Speed"
-	MoveSpeedFactor          Name = "Move Speed"
-	LifeStealFactor          Name = "Life Steal"
-	ManaStealFactor          Name = "Mana Steal"
-	ManaRegeneration     Name = "Mana Regeneration"
-	HealthRegeneration   Name = "Health Regeneration"
-	EnhancedDamageFactor Name = "Enhanced Damage"
-	EnhancedArmorClassFactor Name = "Armor Class Multiplier"
+	Level                    Name = "level"
+	Experience               Name = "experience"
+	Gold                     Name = "gold"
+	BaseSpeed                Name = "speed"
+	BaseDamage               Name = "damage"
+	BaseArmorClass           Name = "armor_class"
+	AttackSpeedFactor        Name = "attack_speed"
+	MoveSpeedFactor          Name = "move_speed"
+	LifeStealFactor          Name = "life_steal"
+	ManaStealFactor          Name = "mana_steal"
+	ManaRegeneration     Name = "mana_regeneration"
+	HealthRegeneration   Name = "health_regeneration"
+	EnhancedDamageFactor Name = "enhanced_damage"
+	EnhancedArmorClassFactor Name = "armor_class_multiplier"
 
-	ArmorPenetration Name = "Armor Penetration"
+	ArmorPenetration Name = "armor_penetration"
 
-	MaxHealth Name = "MaxHealth"
-	MaxMana   Name = "MaxMana"
+	MaxHealth Name = "max_health"
+	MaxMana   Name = "max_mana"
 
-	Health Name = "Health"
-	Mana   Name = "Mana"
+	Health Name = "health"
+	Mana   Name = "mana"
 
-	VisionRange Name = "VisionRange"
+	VisionRange Name = "vision_range"
 
-	LightRadius Name = "LightRadius"
+	LightRadius Name = "light_radius"
 )
 
 func GetAllAttributeNames() []Name {
@@ -255,6 +260,10 @@ func (a *AttributeHolder) Decrement(name Name) {
 }
 
 func (a *AttributeHolder) SetAttribute(attributeName Name, value int) {
+	if _, ok := a.attributes[attributeName]; !ok {
+		println("attribute not found", attributeName)
+		return
+	}
 	a.attributes[attributeName] = float64(value)
 }
 

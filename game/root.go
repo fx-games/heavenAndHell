@@ -105,9 +105,14 @@ type GameInstance struct {
 	startInfo        StartInfo
 	executeAfterTurn []func()
 	debugModeEnabled bool
-	armorDefinitions []ItemDefinition
 	consoleMode      bool
 	onMapChange      func()
+
+	enemyDefinitions      map[string]EnemyDefinition
+	itemDefinitions       map[string]ItemDefinition
+	untargetedDefinitions map[string]UntargetedActionDefinition
+	targetedDefinitions   map[string]TargetedActionDefinition
+	vendorDefinitions     map[string]VendorDefinition
 }
 
 func (g *GameInstance) SetConsoleMode(consoleMode bool) {
@@ -129,6 +134,10 @@ func getDropPos(gameMap *gridmap.GridMap[*common.Actor, common.Item, common.Obje
 			if actorAt.IsVendor() {
 				return false
 			}
+		}
+		cell := gameMap.GetCell(pos)
+		if cell.TileType.Special != gridmap.SpecialTileNone {
+			return false
 		}
 		return gameMap.Contains(pos) && gameMap.IsWalkable(pos) && !gameMap.IsItemAt(pos) && !gameMap.IsObjectAt(pos)
 	}
@@ -729,6 +738,8 @@ func (g *GameInstance) resetGame() {
 	g.initTileRenderer()
 	g.initTimeKeeper()
 
+	g.LoadGameData()
+
 	g.logBuffer = make([]string, 0)
 
 	g.deviceIndependentScreenSize = g.startInfo.ScreenSize
@@ -830,27 +841,13 @@ func (g *GameInstance) resetGame() {
 
 func (g *GameInstance) spawnDebugItems() {
 	masterSword := NewMasterSword(g.GetWorldState())
-	sword := NewSword(g.GetWorldState(), g.randomSource, 1)
 
 	g.spawnItem(geometry.Point{X: 15, Y: 10}, masterSword)
-	g.spawnItem(geometry.Point{X: 17, Y: 10}, sword)
 
-	g.spawnItem(geometry.Point{X: 15, Y: 14}, NewChainMail(g.GetWorldState(), g.randomSource, 1))
-
-	g.spawnItem(geometry.Point{X: 15, Y: 16}, NewBow(g.GetWorldState(), g.randomSource, 1))
-
-	g.spawnItem(geometry.Point{X: 15, Y: 20}, g.NewEtherealTargetedWand(g.getFireballAction(ActionNameFireball)))
-
-	g.spawnItem(geometry.Point{X: 15, Y: 21}, g.NewInfiniteUntargetedWand(g.getMultiShot(5)))
-
-	g.spawnItem(geometry.Point{X: 16, Y: 20}, g.NewFiniteUntargetedWand(g.getHealHealthAndMana()))
-
-	g.spawnItem(geometry.Point{X: 14, Y: 18}, NewHelmet(g.GetWorldState(), g.randomSource, 1))
+	g.spawnItem(geometry.Point{X: 15, Y: 21}, g.NewInfiniteUntargetedWand(g.NewUntargetedActionFromName("multi_shot")))
 
 	g.spawnItem(geometry.Point{X: 14, Y: 17}, g.NewHiddenNote("a letter from hell", NewDialogueTextFromFile("note_lucifer.txt"), nil))
 
-	// LETTER TO MAMMON
-	g.spawnItem(geometry.Point{X: 14, Y: 16}, NewAmulet(g.GetWorldState(), g.randomSource, 1))
 }
 
 func (g *GameInstance) setupUI() {
@@ -986,9 +983,9 @@ func (g *GameInstance) spawnPlayer(mapPos geometry.Point) {
 	g.state.GetMap().AddActor(player, mapPos)
 	g.initPlayerSkillsForArcher(player)
 
-	g.giveAndEquipItemToActor(player, NewTorch(g.GetWorldState(), g.randomSource, 1))
-	g.giveAndEquipItemToActor(player, NewDagger(g.GetWorldState(), g.randomSource, 1))
-	g.giveAndEquipItemToActor(player, NewLeatherArmor(g.GetWorldState(), g.randomSource, 1))
+	g.giveAndEquipItemToActor(player, g.NewItemFromDefinitionName("torch", 1))
+	g.giveAndEquipItemToActor(player, g.NewItemFromDefinitionName("dagger", 1))
+	g.giveAndEquipItemToActor(player, g.NewItemFromDefinitionName("soft_leather_armour", 1))
 
 	player.GetStats().SetAttribute(stats.Gold, 200)
 }
@@ -1186,8 +1183,11 @@ func (g *GameInstance) SetMap(loadedMap *gridmap.GridMap[*common.Actor, common.I
 	g.onMapChanged(oldMapName, loadedMap.GetName())
 }
 func (g *GameInstance) AddBloodDecalAt(mapPos geometry.Point) {
-	icon := int32(-1)
 	currentMap := g.state.GetMap()
+	if !currentMap.IsWalkable(mapPos) || currentMap.IsObjectAt(mapPos) || currentMap.GetCell(mapPos).TileType.Special != gridmap.SpecialTileNone {
+		return
+	}
+	icon := int32(-1)
 	if existingDecal, exists := currentMap.GetDecal(mapPos); exists {
 		if existingDecal == common.IconDecalBlood5 {
 			return
@@ -1459,112 +1459,6 @@ func (g *GameInstance) setTileScale(targetScale float64) {
 	g.Log(fmt.Sprintf("Set tile scale to %.2f", targetScale))
 }
 
-func DijkstraAoE(currentMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], maxDistance int) func(origin, target geometry.Point) []geometry.Point {
-	return func(origin, target geometry.Point) []geometry.Point {
-		return toList(currentMap.GetDijkstraMapWithActorsNotBlocking(target, maxDistance))
-	}
-}
-
-func RayAoE(currentMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], maxDistance int) func(originGrid, targetGrid geometry.Point) []geometry.Point {
-	return func(originGrid, targetGrid geometry.Point) []geometry.Point {
-		var result []geometry.Point
-		origin := originGrid.ToCenteredPointF()
-		target := targetGrid.ToCenteredPointF()
-
-		rayDirection := target.Sub(origin)
-		hitInfo := currentMap.RayCast(origin, rayDirection, func(pos geometry.Point) bool {
-			return !currentMap.IsWalkable(pos)
-		})
-
-		distCounter := 0
-		for _, arrayPos := range hitInfo.TraversedGridCells {
-			mapPos := geometry.Point{X: int(arrayPos[0]), Y: int(arrayPos[1])}
-			if mapPos == originGrid {
-				continue
-			}
-			result = append(result, mapPos)
-			distCounter++
-			if distCounter >= maxDistance {
-				break
-			}
-		}
-		return result
-	}
-}
-
-func BresenhamAoE(currentMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], maxDistance int) func(originGrid, targetGrid geometry.Point) []geometry.Point {
-	return func(originGrid, targetGrid geometry.Point) []geometry.Point {
-		var result []geometry.Point
-		traversedGridCells := currentMap.BresenhamLine(originGrid, targetGrid, func(pos geometry.Point) bool {
-			return !currentMap.IsWalkable(pos)
-		})
-
-		distCounter := 0
-		for _, mapPos := range traversedGridCells {
-			if mapPos == originGrid {
-				continue
-			}
-			result = append(result, mapPos)
-			distCounter++
-			if distCounter >= maxDistance {
-				break
-			}
-		}
-		return result
-	}
-}
-
-func WallAoE(currentMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], wallParts int) func(origin, target geometry.Point) []geometry.Point {
-	return func(origin, target geometry.Point) []geometry.Point {
-		//                   x
-		//                   x
-		// player --> @      X <-- Target was here
-		//                   x
-		//                   x
-
-		// we want a wall of fire on either the X or Y axis, above or below the below
-		// depending on where he selected the target to be
-		var result []geometry.Point
-
-		directionToTarget := target.Sub(origin)
-		halfParts := wallParts / 2
-		// find the largest component of the direction vector to determine the axis
-
-		if math.Abs(float64(directionToTarget.X)) > math.Abs(float64(directionToTarget.Y)) {
-			// X axis
-			// we want to place the wall left or right of the target
-			// so check the direction of the X component
-			if directionToTarget.X > 0 {
-				// right
-				for i := -halfParts; i <= halfParts; i++ {
-					result = append(result, target.Add(geometry.Point{X: 0, Y: i}))
-				}
-			} else {
-				// left
-				for i := -halfParts; i <= halfParts; i++ {
-					result = append(result, target.Add(geometry.Point{X: 0, Y: i}))
-				}
-			}
-		} else {
-			// Y axis
-			// we want to place the wall above or below the target
-			// so check the direction of the Y component
-			if directionToTarget.Y > 0 {
-				// below
-				for i := -halfParts; i <= halfParts; i++ {
-					result = append(result, target.Add(geometry.Point{X: i, Y: 0}))
-				}
-			} else {
-				// above
-				for i := -halfParts; i <= halfParts; i++ {
-					result = append(result, target.Add(geometry.Point{X: i, Y: 0}))
-				}
-			}
-		}
-
-		return result
-	}
-}
 
 func (g *GameInstance) BeginActionTargeting(action *common.TargetedAction) {
 	if !g.state.GetPlayer().IsAlive() {
@@ -1824,7 +1718,7 @@ func (g *GameInstance) showDebugMenu() {
 				stash.Add(NewWallOfThorns(g.GetWorldState()))
 				stash.Add(NewSoulReaver(g.GetWorldState()))
 				stash.Add(NewMalleusMaleficarum(g.GetWorldState()))
-				stash.Add(NewMorningStar(g.GetWorldState(), g.randomSource, 10))
+				stash.Add(g.NewItemFromDefinitionName("light_morning_star", 10))
 			},
 		},
 		{
@@ -1926,8 +1820,8 @@ func (g *GameInstance) showDebugMenu() {
 
 				inv := g.state.GetPlayer().GetInventory()
 				for i := 0; i < 10; i++ {
-					inv.Add(g.NewHealingPotion())
-					inv.Add(g.NewManaPotion())
+					inv.Add(g.NewItemFromDefinitionName("healing_potion", 1))
+					inv.Add(g.NewItemFromDefinitionName("mana_potion", 1))
 				}
 				g.updateStatsLabel()
 			},
@@ -2683,58 +2577,19 @@ func (g *GameInstance) setupHellTownTransitions(currentMap *gridmap.GridMap[*com
 }
 
 func (g *GameInstance) ensureVendorInventory(actor *common.Actor) {
-	randomSource := g.randomSource
 	inventory := actor.GetInventory()
 	if !inventory.IsEmpty() {
 		return
 	}
 	var inventoryItems []common.Item
-	switch actor.GetVendorType() {
-	case common.VendorTypeWands:
-		inventoryItems = []common.Item{
-			g.NewHealingPotion(),
-			g.NewManaPotion(),
-			g.NewStrengthPotion(),
-			g.NewBerserkPotion(),
-			g.NewConfusePotion(),
-			g.NewSpeedPotion(),
-			g.NewScrollBlessing(),
-			g.NewScrollEnchantArmor(),
-			g.NewScrollEnchantWeapon(),
-			g.NewScrollPhaseDoor(),
-			g.NewScrollWordOfRecall(),
-			g.NewFiniteTargetedWand(g.getFireballAction(ActionNameFireball)),
-		}
-	case common.VendorTypeWeapons:
-		inventoryItems = []common.Item{
-			NewSword(g.GetWorldState(), randomSource, 1),
-			NewAxe(g.GetWorldState(), randomSource, 1),
-			NewBow(g.GetWorldState(), randomSource, 1),
-			g.NewDart(),
-			g.NewConfuseDart(),
-		}
-	case common.VendorTypeArmor:
-		inventoryItems = []common.Item{
-			NewLeatherArmor(g.GetWorldState(), randomSource, 1),
-			NewChainMail(g.GetWorldState(), randomSource, 1),
-			NewHelmet(g.GetWorldState(), randomSource, 1),
-			NewBoots(g.GetWorldState(), randomSource, 1),
-			NewCape(g.GetWorldState(), randomSource, 1),
-			NewGloves(g.GetWorldState(), randomSource, 1),
-		}
-	case common.VendorTypeGeneral:
-		inventoryItems = []common.Item{
-			NewTorch(g.GetWorldState(), randomSource, 1),
-			NewLantern(g.GetWorldState(), randomSource, 1),
-			NewStarGlass(g.GetWorldState(), randomSource, 1),
-			NewAmulet(g.GetWorldState(), randomSource, 1),
-			NewRing(g.GetWorldState(), randomSource, 1),
-			NewRingOfRegeneration(g.GetWorldState(), randomSource, 1),
-			NewRingOfProtection(g.GetWorldState(), randomSource, 1),
-			NewRingOfDamage(g.GetWorldState(), randomSource, 1),
-			g.NewFlaskOfOil(),
-		}
+	definition, exists := g.vendorDefinitions[string(actor.GetVendorType())]
+	if !exists {
+		g.ErrLog(fmt.Sprintf("No store definition for %s", actor.GetVendorType()))
+		return
 	}
+
+	inventoryItems = g.getVendorInventoryFromDefinition(definition)
+
 	for _, item := range inventoryItems {
 		inventory.Add(item)
 	}
@@ -2756,16 +2611,16 @@ func (g *GameInstance) initPlayerSkillsForArcher(player *common.Actor) {
 	targeted = append(targeted,
 		//	g.NewTargetedActionFromName(ActionNameFireball),
 		//	g.NewTargetedActionFromName(ActionNameFirewall),
-		g.NewTargetedActionFromName(ActionNameBlink),
-		g.NewTargetedActionFromName(ActionNameMindPush),
-		g.NewTargetedActionFromName(ActionNameImmobilize),
-		g.NewTargetedActionFromName(ActionNameFireRay),
-		g.NewTargetedActionFromName(ActionNameFireBresen),
+		g.NewTargetedActionFromName(string(ActionNameBlink)),
+		g.NewTargetedActionFromName(string(ActionNameMindPush)),
+		g.NewTargetedActionFromName(string(ActionNameImmobilize)),
+		g.NewTargetedActionFromName(string(ActionNameFireRay)),
+		g.NewTargetedActionFromName(string(ActionNameFireBresen)),
 	)
 	player.SetTargetedSkills(targeted)
 
 	untargeted := []*common.UntargetedAction{
-		g.getMultiShot(5),
+		g.NewUntargetedActionFromName("multi_shot"),
 	}
 	player.SetUntargetedSkills(untargeted)
 }
@@ -3415,6 +3270,243 @@ func (g *GameInstance) sendEquipmentToWindowClient() {
 
 func (g *GameInstance) SetOnMapChange(onMapChange func()) {
 	g.onMapChange = onMapChange
+}
+
+func (g *GameInstance) ErrLog(errorMessage string) {
+	// write to stderr
+	fmt.Fprintf(os.Stderr, errorMessage + "\n")
+}
+
+func (g *GameInstance) LoadGameData() {
+	itemDefs := make(map[string]ItemDefinition)
+	itemDir := path.Join("assets", "data", "items")
+	enemyDir := path.Join("assets", "data", "enemies")
+	effectsDir := path.Join("assets", "data", "effects")
+
+
+	join := path.Join(itemDir, "armor.rec")
+	file, _ := os.Open(join)
+	armorDefs := ReadItemDefinitions(file)
+	println(fmt.Sprintf("Loaded %d armor definitions", len(armorDefs)))
+	itemDefs = merge(itemDefs, armorDefs)
+	file.Close()
+
+	file, _ = os.Open(path.Join(itemDir, "weapons.rec"))
+	weaponDefs := ReadItemDefinitions(file)
+	println(fmt.Sprintf("Loaded %d weapon definitions", len(weaponDefs)))
+	itemDefs = merge(itemDefs, weaponDefs)
+	file.Close()
+
+	file, _ = os.Open(path.Join(itemDir, "throwables.rec"))
+	throwableDefs := ReadItemDefinitions(file)
+	println(fmt.Sprintf("Loaded %d throwable definitions", len(throwableDefs)))
+	itemDefs = merge(itemDefs, throwableDefs)
+	file.Close()
+
+	file, _ = os.Open(path.Join(itemDir, "accessory.rec"))
+	accessoryDefs := ReadItemDefinitions(file)
+	println(fmt.Sprintf("Loaded %d accessory definitions", len(accessoryDefs)))
+	itemDefs = merge(itemDefs, accessoryDefs)
+	file.Close()
+
+	file, _ = os.Open(path.Join(itemDir, "light.rec"))
+	lightDefs := ReadItemDefinitions(file)
+	println(fmt.Sprintf("Loaded %d light definitions", len(lightDefs)))
+	itemDefs = merge(itemDefs, lightDefs)
+	file.Close()
+
+	file, _ = os.Open(path.Join(itemDir, "potions.rec"))
+	potionDefs := ReadItemDefinitions(file)
+	println(fmt.Sprintf("Loaded %d potion definitions", len(potionDefs)))
+	itemDefs = merge(itemDefs, potionDefs)
+	file.Close()
+
+	file, _ = os.Open(path.Join(itemDir, "scrolls.rec"))
+	scrollDefs := ReadItemDefinitions(file)
+	println(fmt.Sprintf("Loaded %d scroll definitions", len(scrollDefs)))
+	itemDefs = merge(itemDefs, scrollDefs)
+	file.Close()
+
+	g.itemDefinitions = itemDefs
+
+	file, _ = os.Open(path.Join(enemyDir, "enemies.rec"))
+	enemyDefs := ReadEnemyDefinitions(file)
+	println(fmt.Sprintf("Loaded %d enemy definitions", len(enemyDefs)))
+	file.Close()
+
+	g.enemyDefinitions = enemyDefs
+
+	file, _ = os.Open(path.Join(effectsDir, "untargeted.rec"))
+	untargetedDefs := ReadUntargetedDefinitions(file)
+	println(fmt.Sprintf("Loaded %d untargeted effect definitions", len(untargetedDefs)))
+	file.Close()
+
+	g.untargetedDefinitions = untargetedDefs
+
+
+	file, _ = os.Open(path.Join(effectsDir, "targeted.rec"))
+	targetedDefs := ReadTargetedDefinitions(file)
+	println(fmt.Sprintf("Loaded %d targeted effect definitions", len(targetedDefs)))
+	file.Close()
+
+	g.targetedDefinitions = targetedDefs
+
+
+
+	file, _ = os.Open(path.Join("assets", "data", "stores.rec"))
+	vendorDefs := ReadVendorDefinitions(file)
+	println(fmt.Sprintf("Loaded %d store definitions", len(vendorDefs)))
+	file.Close()
+
+	g.vendorDefinitions = vendorDefs
+
+	g.validateDefinitions()
+}
+
+func (g *GameInstance) validateDefinitions() {
+	modifiersAvailable := g.GetAllModifiers()
+	hitZonesAvailable := g.GetAllHitZones()
+	hitEffectsAvailable := g.GetAllHitEffects()
+	targetRulesAvailable := g.GetAllTargetingRules()
+	untargetedEffectsAvailable := g.GetAllUntargetedEffects()
+
+	for _, itemDef := range g.itemDefinitions {
+		if !itemDef.InventoryCategory.IsValid() {
+			g.ErrLog(fmt.Sprintf("Item %s has invalid category %d", itemDef.Name, itemDef.InventoryCategory))
+		}
+		if _, targetedExists := g.targetedDefinitions[itemDef.TargetedAction]; itemDef.TargetedAction != "" && !targetedExists {
+			g.ErrLog(fmt.Sprintf("Item %s has invalid targeted action %s", itemDef.Name, itemDef.TargetedAction))
+		}
+		if _, untargetedExists := g.untargetedDefinitions[itemDef.UntargetedAction]; itemDef.UntargetedAction != "" && !untargetedExists {
+			g.ErrLog(fmt.Sprintf("Item %s has invalid untargeted action %s", itemDef.Name, itemDef.UntargetedAction))
+		}
+		for _, modifier := range itemDef.Modifiers {
+			if util.LooksLikeAFunction(modifier) {
+				modifier, _ = util.GetNameAndArgs(modifier)
+			}
+			if _, exists := modifiersAvailable[modifier]; !exists {
+				g.ErrLog(fmt.Sprintf("Item %s has invalid modifier %s", itemDef.Name, modifier))
+			}
+		}
+		if itemDef.IsThrow() && itemDef.Throw.IsValid() {
+			hitZone := itemDef.Throw.HitZone
+			if util.LooksLikeAFunction(hitZone) {
+				hitZone, _ = util.GetNameAndArgs(hitZone)
+			}
+			if _, exists := hitZonesAvailable[hitZone]; hitZone != "" && !exists {
+				g.ErrLog(fmt.Sprintf("Item %s has invalid throw hit zone %s", itemDef.Name, itemDef.Throw.HitZone))
+			}
+			hitEffect := itemDef.Throw.OnHitEffect
+			if util.LooksLikeAFunction(hitEffect) {
+				hitEffect, _ = util.GetNameAndArgs(hitEffect)
+			}
+			if _, exists := hitEffectsAvailable[hitEffect]; hitEffect != "" && !exists {
+				g.ErrLog(fmt.Sprintf("Item %s has invalid throw hit effect %s", itemDef.Name, itemDef.Throw.OnHitEffect))
+			}
+		}
+	}
+
+	for _, targetedDef := range g.targetedDefinitions {
+		hitZone := targetedDef.HitZone
+		if util.LooksLikeAFunction(hitZone) {
+			hitZone, _ = util.GetNameAndArgs(hitZone)
+		}
+		if _, exists := hitZonesAvailable[hitZone]; !exists {
+			g.ErrLog(fmt.Sprintf("Targeted effect %s has invalid hit zone %s", targetedDef.Name, hitZone))
+		}
+		hitEffect := targetedDef.OnHitEffect
+		if util.LooksLikeAFunction(hitEffect) {
+			hitEffect, _ = util.GetNameAndArgs(hitEffect)
+		}
+		if _, exists := hitEffectsAvailable[hitEffect]; !exists {
+			g.ErrLog(fmt.Sprintf("Targeted effect %s has invalid hit effect %s", targetedDef.Name, hitEffect))
+		}
+		if _, exists := targetRulesAvailable[targetedDef.Targeting]; !exists {
+			g.ErrLog(fmt.Sprintf("Targeted effect %s has invalid target rule %s", targetedDef.Name, targetedDef.Targeting))
+		}
+	}
+
+	for _, untargetedDef := range g.untargetedDefinitions {
+		if _, exists := untargetedEffectsAvailable[untargetedDef.InternalName]; !exists {
+			g.ErrLog(fmt.Sprintf("Untargeted effect %s is unknown", untargetedDef.InternalName))
+		}
+	}
+
+	for _, enemyDef := range g.enemyDefinitions {
+		for _, itemName := range enemyDef.Equipment {
+			if _, exists := g.itemDefinitions[itemName]; !exists {
+				g.ErrLog(fmt.Sprintf("Enemy %s has invalid equipment %s", enemyDef.Name, itemName))
+			}
+		}
+		for _, targetedName := range enemyDef.TargetedSkills {
+			if _, exists := g.targetedDefinitions[targetedName]; !exists {
+				g.ErrLog(fmt.Sprintf("Enemy %s has invalid targeted skill %s", enemyDef.Name, targetedName))
+			}
+		}
+		for _, untargetedName := range enemyDef.UntargetedSkills {
+			if _, exists := g.untargetedDefinitions[untargetedName]; !exists {
+				g.ErrLog(fmt.Sprintf("Enemy %s has invalid untargeted skill %s", enemyDef.Name, untargetedName))
+			}
+		}
+	}
+
+	for _, vendorDef := range g.vendorDefinitions {
+		for _, itemName := range vendorDef.Always {
+			if _, exists := g.itemDefinitions[itemName]; !exists {
+				g.ErrLog(fmt.Sprintf("Store %s has invalid always item %s", vendorDef.InternalName, itemName))
+			}
+		}
+		for _, itemName := range vendorDef.Sometimes {
+			if _, exists := g.itemDefinitions[itemName]; !exists {
+				g.ErrLog(fmt.Sprintf("Store %s has invalid sometimes item %s", vendorDef.InternalName, itemName))
+			}
+		}
+	}
+}
+func (g *GameInstance) GenerateLoot(dungeonLevel int, count int) []*GameItem {
+	var result []*GameItem
+	for i := 0; i < count; i++ {
+		result = append(result, g.generateLoot(dungeonLevel))
+	}
+	return result
+}
+
+func (g *GameInstance) getVendorInventoryFromDefinition(definition VendorDefinition) []common.Item {
+	itemsNeeded := definition.MaxItems
+	sometimesCount := definition.SometimesCount.LinearRandom()
+	alwaysCount := itemsNeeded - sometimesCount
+
+	var result []common.Item
+
+	for i := 0; i < alwaysCount; i++ {
+		// choose a random item
+		randomIndex := g.randomSource.Intn(len(definition.Always))
+		itemName := definition.Always[randomIndex]
+		dungeonLevel := g.randomSource.Intn(4) + 1
+		item := g.NewItemFromDefinitionName(itemName, dungeonLevel)
+		result = append(result, item)
+	}
+
+	for i := 0; i < sometimesCount; i++ {
+		// choose a random item
+		randomIndex := g.randomSource.Intn(len(definition.Sometimes))
+		itemName := definition.Sometimes[randomIndex]
+		dungeonLevel := g.randomSource.Intn(4) + 1
+		item := g.NewItemFromDefinitionName(itemName, dungeonLevel)
+		result = append(result, item)
+	}
+
+	return result
+}
+
+func merge(defs map[string]ItemDefinition, other map[string]ItemDefinition) map[string]ItemDefinition {
+	for key, value := range other {
+		if _, ok := defs[key]; ok {
+			println("duplicate key", key)
+		}
+		defs[key] = value
+	}
+	return defs
 }
 
 func OneTargetTile(origin, target geometry.Point) []geometry.Point {

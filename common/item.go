@@ -21,8 +21,47 @@ const (
 
 type ItemCategory int
 
+func (c ItemCategory) HasAlwaysOneCharge() bool {
+	switch c {
+	case ItemCategoryPotion:
+		return true
+	case ItemCategoryScroll:
+		return true
+	}
+	return false
+}
+
+func (c ItemCategory) IsValid() bool {
+	if c == ItemCategoryInvalid {
+		return false
+	}
+	switch c {
+	case ItemCategoryPotion:
+		fallthrough
+	case ItemCategoryScroll:
+		fallthrough
+	case ItemCategoryWand:
+		fallthrough
+	case ItemCategoryLightSource:
+		fallthrough
+	case ItemCategoryWeapon:
+		fallthrough
+	case ItemCategoryArmor:
+		fallthrough
+	case ItemCategoryAccessory:
+		fallthrough
+	case ItemCategoryThrowable:
+		fallthrough
+	case ItemCategoryOther:
+		return true
+	default:
+		return false
+	}
+}
+
 const ( // defines the sort order of the inventory
-	ItemCategoryPotion ItemCategory = iota
+	ItemCategoryInvalid  ItemCategory = iota -1
+	ItemCategoryPotion
 	ItemCategoryScroll
 	ItemCategoryWand
 	ItemCategoryLightSource
@@ -53,7 +92,8 @@ func ItemCategoryFromString(str string) ItemCategory {
 	case "throwable":
 		return ItemCategoryThrowable
 	}
-	return ItemCategoryOther
+
+	return -1
 }
 
 type ArmorType int
@@ -233,6 +273,7 @@ type BaseItem struct {
 	droppedByPlayer bool
 	isHidden        bool
 	shouldBeDrawn   bool
+	baseCost        int
 }
 
 func NewBaseItem(getPlayerRef func() *Actor, name string, icon int32) *BaseItem {
@@ -479,4 +520,8 @@ func (i *BaseItem) SetThrowComponent(throwComponent *ThrowStats) {
 
 func (i *BaseItem) IsThrowable() bool {
 	return i.throwComponent != nil
+}
+
+func (i *BaseItem) SetBaseCost(cost int) {
+	i.baseCost = cost
 }

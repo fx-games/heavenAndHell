@@ -45,7 +45,8 @@ func (g *GameInstance) getTextForKirioth() []TriggeredDialogue {
 		// TODO: REWARDS ARE STATE CHANGES AND SHOULD THEREFORE BE AN ACTION..
 		g.state.GetFlags().SetTrue("quest_rewarded:meat_jack")
 
-		rewardItem := NewSword(g.GetWorldState(), g.randomSource, 2)
+		rewardItem := g.NewRandomWeapon(4)
+
 		g.state.GetPlayer().GetInventory().Add(rewardItem)
 
 		rewardXP := 1000
@@ -62,7 +63,7 @@ func (g *GameInstance) getTextForKirioth() []TriggeredDialogue {
 	addLuciferQuestReward := func() {
 		g.state.GetFlags().SetTrue("quest_rewarded:lucifer")
 
-		rewardItem := NewSword(g.GetWorldState(), g.randomSource, 2)
+		rewardItem := g.NewRandomWeapon(10)
 		g.state.GetPlayer().GetInventory().Add(rewardItem)
 
 		rewardXP := 1000
@@ -96,7 +97,7 @@ func (g *GameInstance) getTextForShekel() []TriggeredDialogue {
 	addSkeletonKingQuestReward := func() {
 		g.state.GetFlags().SetTrue("quest_rewarded:skeleton_king")
 
-		rewardItem := NewSword(g.GetWorldState(), g.randomSource, 2)
+		rewardItem := g.NewRandomWeapon(6)
 		g.state.GetPlayer().GetInventory().Add(rewardItem)
 
 		rewardXP := 1000
@@ -122,7 +123,7 @@ func (g *GameInstance) getTextForAbel() []TriggeredDialogue {
 	addPoisonQuestReward := func() {
 		g.state.GetFlags().SetTrue("quest_rewarded:poisoned_water")
 
-		rewardItem := NewSword(g.GetWorldState(), g.randomSource, 2)
+		rewardItem := g.NewRandomWeapon(6)
 		g.state.GetPlayer().GetInventory().Add(rewardItem)
 
 		rewardXP := 1000

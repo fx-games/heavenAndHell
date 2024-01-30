@@ -14,10 +14,10 @@ type VendorType string
 
 const (
 	VendorTypeNone    VendorType = ""
-	VendorTypeGeneral VendorType = "VendorGeneral"
-	VendorTypeWands   VendorType = "VendorWands"
-	VendorTypeArmor   VendorType = "VendorArmor"
-	VendorTypeWeapons VendorType = "VendorWeapons"
+	VendorTypeGeneral VendorType = "store_general"
+	VendorTypeWands   VendorType = "store_alchemy"
+	VendorTypeArmor   VendorType = "store_armor"
+	VendorTypeWeapons VendorType = "store_weapons"
 )
 
 type Actor struct {

@@ -12,7 +12,7 @@ import (
 type ThrowStats struct {
 	Damage        stats.Interval
 	Requirements  map[stats.Name]int
-	OnHitEffect   func(attacker *Actor, hitLocation geometry.Point)
+	OnHitEffect   HitEffect
 	ChanceToBreak float64
 	HitZone       AoEResolver
 }

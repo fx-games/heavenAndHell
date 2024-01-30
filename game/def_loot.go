@@ -3,8 +3,6 @@ package game
 import (
 	"math/rand"
 	"rpg/common"
-	"rpg/geometry"
-	"rpg/gridmap"
 )
 
 /*
@@ -23,27 +21,27 @@ choose enchantments where 1/2 * ilvl <= qlvl <= ilvl
 
 For items on the ground,
 */
-func (g *GameInstance) addLootToMap(emptyMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], itemLevel int, pos geometry.Point) {
+func (g *GameInstance) generateLoot(dungeonLevel int) *GameItem {
 	source := g.randomSource
 	diceRoll := source.Intn(100)
-	state := g.GetWorldState()
 	var addedItem *GameItem
 	switch {
 	case diceRoll >= 0 && diceRoll < 10:
-		addedItem = addRandomWeapon(state, source, emptyMap, itemLevel, pos)
+		addedItem = g.NewRandomWeapon(dungeonLevel)
 	case diceRoll >= 10 && diceRoll < 20:
-		addedItem = g.addRandomArmor(emptyMap, itemLevel, pos)
+		addedItem = g.NewRandomArmorPiece(dungeonLevel)
 	case diceRoll >= 20 && diceRoll < 30:
-		addedItem = addRandomAccessory(state, source, emptyMap, itemLevel, pos)
+		addedItem = g.NewRandomAccessory(dungeonLevel)
 	case diceRoll >= 30 && diceRoll < 40:
-		g.addRandomLightSource(source, emptyMap, itemLevel, pos)
+		addedItem = g.NewRandomLightSource(dungeonLevel)
 	case diceRoll >= 40 && diceRoll < 60:
-		g.addRandomWand(source, emptyMap, itemLevel, pos)
-	case diceRoll >= 60 && diceRoll < 80: g.addRandomPotion(source, emptyMap, itemLevel, pos)
+		addedItem = g.NewRandomWand(dungeonLevel)
+	case diceRoll >= 60 && diceRoll < 80:
+		addedItem = g.NewRandomPotion(dungeonLevel)
 	case diceRoll >= 80 && diceRoll < 100:
-		g.addRandomScroll(source, emptyMap, itemLevel, pos)
+		addedItem = g.NewRandomScroll(dungeonLevel)
 	}
-	if addedItem != nil {
+	if addedItem != nil && addedItem.IsEquippable() {
 		rarityRoll := source.Intn(100)
 		rarity := common.ItemRarityCommon
 		if rarityRoll >= 80 && rarityRoll < 95 {
@@ -52,10 +50,11 @@ func (g *GameInstance) addLootToMap(emptyMap *gridmap.GridMap[*common.Actor, com
 			rarity = common.ItemRarityUnique
 		}
 
-		setRarityAndEnchantments(source, addedItem, rarity, itemLevel)
+		g.setRarityAndEnchantments(source, addedItem, rarity, dungeonLevel)
 	}
+	return addedItem
 }
-func setRarityAndEnchantments(source *rand.Rand, item *GameItem, rarity common.ItemRarity, itemLevel int) {
+func (g *GameInstance) setRarityAndEnchantments(source *rand.Rand, item *GameItem, rarity common.ItemRarity, itemLevel int) {
 	enchantmentCount := 0
 	if rarity == common.ItemRarityCommon {
 		return
@@ -70,7 +69,7 @@ func setRarityAndEnchantments(source *rand.Rand, item *GameItem, rarity common.I
 	modifierCount, hookCount := randomSplit(source, enchantmentCount)
 
 	if modifierCount > 0 {
-		mods := NewModifiersForItem(source, itemLevel, modifierCount)
+		mods := g.NewModifiersForItem(source, itemLevel, modifierCount)
 		item.SetEquippedModifiers(mods)
 	}
 
