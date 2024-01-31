@@ -1,8 +1,6 @@
 %rec: default
 #FIELDS: dlvl name icon internal_name base_speed base_health stats_experience stats_strength stats_dexterity stats_intelligence equipment targeted_skill untargeted_skill death_string
 
-## New declaration format
-
 dlvl: 1
 name: a skeleton
 icon: 397
@@ -148,7 +146,6 @@ stats_dexterity: 12
 equipment: dagger
 death_string: %s bursts into flames.
 death_string: %s violently explodes.
-
 
 dlvl: 1
 name: a horned fiend with glaive
@@ -375,3 +372,4 @@ base_health: 10
 stats_experience: 12
 stats_strength: 10
 death_string: %s dies.
+

@@ -1,7 +1,6 @@
 %rec: default
 #FIELDS: name internal_name icon dlvl targeting hit_zone effect
 
-
 name: Steal Item
 internal_name: steal_item
 icon: 223

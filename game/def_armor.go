@@ -55,8 +55,8 @@ func (g *GameInstance) NewRandomArmorPiece(dungeonLevel int) *GameItem {
 	}
 	// group by armor type
 	availableArmorTypes := make([]common.ArmorType, 0)
-	for armoreType, _ := range armorTypeMap {
-		availableArmorTypes = append(availableArmorTypes, armoreType)
+	for armorType, _ := range armorTypeMap {
+		availableArmorTypes = append(availableArmorTypes, armorType)
 	}
 
 	// pick random armor type

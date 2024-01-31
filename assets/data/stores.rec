@@ -11,3 +11,4 @@ always: torch
 always: flask_of_oil
 sometimes: healing_potion
 sometimes: mana_potion
+

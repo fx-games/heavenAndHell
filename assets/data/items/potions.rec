@@ -3,49 +3,49 @@
 
 name: healing potion
 internal_name: healing_potion
-category: potion
 icon: 332
 dlvl: 1
 cost: 50
+category: potion
 untargeted_action: heal_health
 
 name: mana potion
 internal_name: mana_potion
-category: potion
 icon: 329
 dlvl: 1
 cost: 50
+category: potion
 untargeted_action: heal_mana
 
 name: berserk potion
 internal_name: berserk_potion
-category: potion
 icon: 324
 dlvl: 1
 cost: 50
+category: potion
 untargeted_action: apply_berserk_self
 
 name: confuse potion
 internal_name: confuse_potion
-category: potion
 icon: 325
 dlvl: 1
 cost: 50
+category: potion
 untargeted_action: apply_confuse_self
 
 name: speed potion
 internal_name: speed_potion
-category: potion
 icon: 333
 dlvl: 1
 cost: 50
+category: potion
 untargeted_action: buff_speed
 
 name: strength potion
 internal_name: strength_potion
-category: potion
 icon: 334
 dlvl: 1
 cost: 50
+category: potion
 untargeted_action: buff_damage
 

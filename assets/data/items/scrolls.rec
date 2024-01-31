@@ -3,41 +3,41 @@
 
 name: Scroll of Phase Door
 internal_name: scroll_of_random_teleport
-category: scroll
 icon: 139
 dlvl: 1
 cost: 50
+category: scroll
 untargeted_action: random_near_teleport
 
 name: Scroll of Word of Recall
 internal_name: scroll_of_recall
-category: scroll
 icon: 139
 dlvl: 1
 cost: 75
+category: scroll
 untargeted_action: recall
 
 name: Scroll of Blessing
 internal_name: scroll_of_blessing
-category: scroll
 icon: 139
 dlvl: 1
 cost: 180
+category: scroll
 untargeted_action: buff_armor
 
 name: Scroll of Enchant Weapon
 internal_name: scroll_of_enchant_weapon
-category: scroll
 icon: 139
 dlvl: 1
 cost: 4000
+category: scroll
 untargeted_action: enchant_weapon
 
 name: Scroll of Enchant Armor
 internal_name: scroll_of_enchant_armor
-category: scroll
 icon: 139
 dlvl: 1
 cost: 4000
+category: scroll
 untargeted_action: enchant_armor
 

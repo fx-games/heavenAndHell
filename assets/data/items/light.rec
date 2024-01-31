@@ -9,10 +9,10 @@ cost: 2
 charges: 2500
 category: light
 throw_damage: 1-2
-equip_modifier: light_radius(1)
 light_color: 255 223 117
 light_flicker_pattern: fire
 light_flicker_frame_delay: 0.125
+equip_modifier: light_radius(1)
 
 name: a lantern
 internal_name: lantern
@@ -21,10 +21,10 @@ dlvl: 1
 cost: 10
 charges: 5000
 category: light
-equip_modifier: light_radius(2)
 light_color: 255 223 117
 light_flicker_pattern: fire
 light_flicker_frame_delay: 0.125
+equip_modifier: light_radius(2)
 
 name: a star-glass
 internal_name: light_star_glass
@@ -33,10 +33,10 @@ dlvl: 1
 cost: 100
 charges: -1
 category: light
-equip_modifier: light_radius(3)
 light_color: 5 250 255
 light_flicker_pattern: smooth
 light_flicker_frame_delay: 0.125
+equip_modifier: light_radius(3)
 
 name: the Morning Star
 internal_name: light_morning_star
@@ -45,8 +45,8 @@ dlvl: 1
 cost: 100
 charges: -1
 category: light
-equip_modifier: light_radius(12)
 light_color: 255 248 207
 light_flicker_pattern: smooth
 light_flicker_frame_delay: 0.500
+equip_modifier: light_radius(12)
 
