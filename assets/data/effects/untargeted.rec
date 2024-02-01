@@ -1,6 +1,12 @@
 %rec: default
 #FIELDS: internal_name icon dlvl name
 
+internal_name: replicate_with
+icon: 194
+dlvl: 1
+name: Clone Self
+activation_condition: can_replicate
+
 internal_name: heal_health_mana_full
 icon: 333
 dlvl: 1

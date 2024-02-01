@@ -32,17 +32,17 @@ const (
 
 type Console struct {
 	game       *game.GameInstance
-	shouldQuit bool
+	terminationCode int
 	lightStyle tcell.Style
 	darkStyle  tcell.Style
 	screen     tcell.Screen
 	state      UIState
 }
 
-func (c *Console) HandleInput() (quit bool) {
+func (c *Console) HandleInput() (terminationCode int) {
 	ev := c.screen.PollEvent()
 	if ev == nil {
-		return true
+		return 1
 	}
 	switch typedEvent := ev.(type) {
 	case *tcell.EventResize:
@@ -66,11 +66,14 @@ func (c *Console) HandleInput() (quit bool) {
 				c.state = Inventory
 			}
 		} else if typedRune == 'q' {
-			c.shouldQuit = true
+			c.terminationCode = 1
+			c.screen.Fini()
+		} else if typedRune == 'p' {
+			c.terminationCode = 2
 			c.screen.Fini()
 		}
 	}
-	return c.shouldQuit
+	return c.terminationCode
 }
 
 func (c *Console) putRune(x, y int, style tcell.Style, r rune) {
@@ -81,7 +84,7 @@ func (c *Console) Update(dt float64) {
 	// Poll event
 	gameErr := c.game.Update()
 	if gameErr != nil {
-		c.shouldQuit = true
+		c.terminationCode = 1
 	}
 }
 

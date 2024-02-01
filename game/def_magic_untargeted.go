@@ -16,18 +16,27 @@ import (
 )
 
 type UntargetedActionDefinition struct {
-	Name            string
-	InternalName    string
-	Icon            int32
-	DungeonLevel    int
-	ActivationDelay int
+	Name                string
+	InternalName        string
+	Icon                int32
+	DungeonLevel        int
+	ActivationDelay     int
+	ActivationCondition string
 }
 
-func ReadUntargetedDefinitions(file io.Reader) map[string]UntargetedActionDefinition {
+func ReadUntargetedDefinitions(file io.Reader, logErr func(string)) map[string]UntargetedActionDefinition {
 	records := recfile.Read(file)
 	untargetedDefs := make(map[string]UntargetedActionDefinition, len(records))
 	for _, record := range records {
 		def := NewUntargetedFromRecord(record)
+		if def.InternalName == "" {
+			logErr(fmt.Sprintf("Untargeted action definition has no internal name: %v", def))
+			continue
+		}
+		if _, exists := untargetedDefs[def.InternalName]; exists {
+			logErr(fmt.Sprintf("Duplicate untargeted action definition: %s", def.InternalName))
+			continue
+		}
 		untargetedDefs[def.InternalName] = def
 	}
 	return untargetedDefs
@@ -43,10 +52,12 @@ func NewUntargetedFromRecord(record recfile.Record) UntargetedActionDefinition {
 			definition.InternalName = field.Value
 		case "icon":
 			definition.Icon = field.AsInt32()
-		case "dungeon_level":
+		case "dlvl":
 			definition.DungeonLevel = field.AsInt()
 		case "activation_delay":
 			definition.ActivationDelay = field.AsInt()
+		case "activation_condition":
+			definition.ActivationCondition = field.Value
 		}
 	}
 	return definition
@@ -69,7 +80,8 @@ const (
 	ActionNameEnchantArmor      common.UntargetedActionName = "enchant_armor"
 	ActionNameMultiShot         common.UntargetedActionName = "multi_shot"
 	ActionNameTelefrag          common.UntargetedActionName = "telefrag"
-	ActionNameReadMessage       common.UntargetedActionName = "read_message"
+	ActionNameReadMessage common.UntargetedActionName = "read_message"
+	ActionNameReplicate   common.UntargetedActionName = "replicate_with"
 )
 
 func (g *GameInstance) NewUntargetedActionFromName(name string) *common.UntargetedAction {
@@ -106,6 +118,11 @@ func (g *GameInstance) NewUntargetedActionFromDefinition(def UntargetedActionDef
 		return nil
 	}
 	action.SetEffect(effectFromName)
+
+	if def.ActivationCondition != "" {
+		action.SetCondition(g.NewConditionFromString(def.ActivationCondition))
+	}
+
 	return action
 }
 
@@ -116,16 +133,17 @@ func (g *GameInstance) GetAllUntargetedEffects() map[string]func(user *common.Ac
 		string(ActionNameBerserk):           g.getBerserkSelfAction(util.Tuple[int,int]{Item1: 3, Item2: 6}, 3),
 		string(ActionNameConfuse):           g.getApplyStatusAction(common.StatusConfused, "You feel confused", 6),
 		string(ActionNameHealMana):          g.getHealManaBy(10),
-		string(ActionNameTeleport):          g.getRandomTeleportAction,
-		string(ActionNameBuffSpeed):         g.getSpeedBuff(2, 8),
-		string(ActionNameBuffDamage):        g.getDamageBuff(util.Tuple[int,int]{Item1: 3, Item2: 6}, 8),
-		string(ActionNameRecall):            g.getPlayerRecallAction,
-		string(ActionNameBless):             g.getBlessing(util.Tuple[int,int]{Item1: 6, Item2: 8}),
-		string(ActionNameEnchantWeapon):     g.getEnchantWeapon,
-		string(ActionNameEnchantArmor):      g.getEnchantArmor,
-		string(ActionNameMultiShot):         g.getMultiShot(5),
-		string(ActionNameTelefrag):          g.getRandomTelefragAction,
-		string(ActionNameReadMessage):       g.getReadMessage([]util.LabelText{{Text: "TODO: Read message", TextColor: color.White}}, nil),
+		string(ActionNameTeleport):      g.getRandomTeleportAction,
+		string(ActionNameBuffSpeed):     g.getSpeedBuff(2, 8),
+		string(ActionNameBuffDamage):    g.getDamageBuff(util.Tuple[int,int]{Item1: 3, Item2: 6}, 8),
+		string(ActionNameRecall):        g.getPlayerRecallAction,
+		string(ActionNameBless):         g.getBlessing(util.Tuple[int,int]{Item1: 6, Item2: 8}),
+		string(ActionNameEnchantWeapon): g.getEnchantWeapon,
+		string(ActionNameEnchantArmor):  g.getEnchantArmor,
+		string(ActionNameMultiShot):     g.getMultiShot(5),
+		string(ActionNameTelefrag):      g.getRandomTelefragAction,
+		string(ActionNameReadMessage):   g.getReadMessage([]util.LabelText{{Text: "TODO: Read message", TextColor: color.White}}, nil),
+		string(ActionNameReplicate):     g.getReplicate,
 	}
 }
 
@@ -136,6 +154,29 @@ func (g *GameInstance) UntargetedEffectFromName(name string) func(user *common.A
 	}
 	g.ErrLog(fmt.Sprintf("no untargeted effect found for name %s", name))
 	return nil
+}
+
+
+func (g *GameInstance) getReplicate(user *common.Actor) {
+	currentMap := g.state.GetMap()
+	origin := user.MapPosition()
+	// find position for spawning
+	freePositions := currentMap.GetFreeCellsForDistribution(origin, 1, func(p geometry.Point) bool {
+		return currentMap.IsCurrentlyPassable(p)
+	})
+
+	if len(freePositions) == 0 { // no space on map
+		return
+	}
+
+	clonePosition := freePositions[0]
+
+	// spawn clone
+	clonedActor := user.Clone()
+	clonedActor.SetDrawPosition(clonePosition.ToPointF())
+	currentMap.AddActor(clonedActor, clonePosition)
+	g.timekeeper.AddTimed(clonedActor)
+	g.Log(fmt.Sprintf("A new %s is born!", clonedActor.Name()))
 }
 
 func (g *GameInstance) getReadMessage(textForMessage []util.LabelText, onRead func()) func(user *common.Actor) {
@@ -482,4 +523,55 @@ func (g *GameInstance) getVisibleEnemiesByDistance(user *common.Actor) []*common
 		return cmp.Compare(distI, distJ)
 	})
 	return nearbyEnemies
+}
+
+
+
+func  (g *GameInstance) NewConditionFromString(condition string) func(user *common.Actor) bool {
+	if condition == "can_replicate" {
+		return g.canReplicate
+	}
+	g.ErrLog(fmt.Sprintf("no condition found for name %s", condition))
+	return func(user *common.Actor) bool { return true }
+}
+
+func (g *GameInstance) canReplicate(user *common.Actor) bool {
+	currentMap := g.state.GetMap()
+
+	copyCount := 0
+	// check for map limit
+	for _, actor := range currentMap.Actors() {
+		if actor.GetInternalName() == user.GetInternalName() {
+			copyCount++
+		}
+	}
+
+	if copyCount >= 60 { // currently hardcoded
+		return false
+	}
+
+	origin := user.MapPosition()
+	cloneNeighbors := currentMap.GetFilteredNeighbors(origin, func(p geometry.Point) bool {
+		if !currentMap.Contains(p) || !currentMap.IsActorAt(p) {
+			return false
+		}
+		actorAt := currentMap.ActorAt(p)
+		return actorAt.GetInternalName() == user.GetInternalName()
+	})
+
+	if len(cloneNeighbors) != 1 {
+		// conditions for replication not met
+		return false
+	}
+
+	// find position for spawning
+	freePositions := currentMap.GetFreeCellsForDistribution(origin, 1, func(p geometry.Point) bool {
+		return currentMap.IsCurrentlyPassable(p)
+	})
+
+	if len(freePositions) == 0 { // no space on map
+		return false
+	}
+
+	return true
 }

@@ -19,6 +19,19 @@ type GameItem struct {
 	nameOnlyInTooltip bool
 }
 
+func (i *GameItem) Clone() common.Item {
+	return &GameItem{
+		BaseItem:          i.BaseItem.Clone(),
+		forcedTooltip:     i.forcedTooltip,
+		itemHooks:         i.itemHooks,
+		targetedAction:    i.targetedAction,
+		untargetedAction:  i.untargetedAction.Clone(),
+		actionCharges:     i.actionCharges,
+		destroyAfterUse:   i.destroyAfterUse,
+		nameOnlyInTooltip: i.nameOnlyInTooltip,
+	}
+}
+
 func (i *GameItem) SetCharges(charges int) {
 	i.actionCharges = charges
 }

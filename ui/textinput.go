@@ -139,7 +139,7 @@ func (t *TextInput) Draw() {
 func (t *TextInput) ActionCancel() {
 	t.onCancel()
 }
-func (t *TextInput) OnKeyPressed(key ebiten.Key, tick bool) {
+func (t *TextInput) OnKeyPressed(key ebiten.Key, shiftPressed bool) {
 	if t.shouldClose {
 		return
 	}

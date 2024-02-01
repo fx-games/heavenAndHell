@@ -1,6 +1,7 @@
 package game
 
 import (
+	"errors"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"image/color"
@@ -10,11 +11,15 @@ import (
 	"rpg/gridmap"
 	"rpg/ui"
 )
-
+var ContinueWithAscii = errors.New("ContinueWithAscii")
 func (g *GameInstance) Update() error {
 
 	if g.shouldQuitGame {
 		return ebiten.Termination
+	}
+
+	if g.quitToAscii {
+		return ContinueWithAscii
 	}
 
 	g.worldTicks++
@@ -111,6 +116,9 @@ func (g *GameInstance) handleKeyboardInput() {
 		var keys []ebiten.Key
 		keys = inpututil.AppendJustPressedKeys(keys)
 		for _, key := range keys {
+			if key == ebiten.KeyShift || key == ebiten.KeyControl || key == ebiten.KeyAlt {
+				continue
+			}
 			g.uiController.OnKeyPressed(key, g.shiftIsBeingPressedThisTick)
 		}
 		return
@@ -371,6 +379,7 @@ func (g *GameInstance) aimedThrow() {
 			return element.IsThrowable()
 		}
 		onSelected := func(itemKey rune) {
+			g.uiController.PopAll()
 			thrownItem := inventory.GetItemByLetter(itemKey)
 			throwComponent := thrownItem.GetThrowStats()
 			g.BeginThrowTargeting(throwComponent.HitZone, g.playerThrow(thrownItem))

@@ -898,6 +898,12 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) SetExplored(pos geometry.Poin
 	m.cells[pos.X+pos.Y*m.mapWidth].IsExplored = true
 }
 
+func (m *GridMap[ActorType, ItemType, ObjectType]) SetLit(pos geometry.Point, value bool) {
+	if !m.Contains(pos) {
+		return
+	}
+	m.cells[pos.X+pos.Y*m.mapWidth].IsLit = value
+}
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetAllSpecialTilePositions(tile SpecialTileType) []geometry.Point {
 	result := make([]geometry.Point, 0)
 	for index, c := range m.cells {
@@ -1334,11 +1340,14 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) AddItem(item ItemType, spawnP
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) UpdateFieldOfView(fov *geometry.FOV, fovPosition geometry.Point, visionRange int) {
 	visionRangeSquared := visionRange * visionRange
-
+	sourceIsLit := m.IsTileLit(fovPosition)
 	var fovRange = geometry.NewRect(-visionRange, -visionRange, visionRange+1, visionRange+1)
 	fov.SetRange(fovRange.Add(fovPosition).Intersect(geometry.NewRect(0, 0, m.mapWidth, m.mapHeight)))
 
 	fov.SSCVisionMap(fovPosition, visionRange, func(p geometry.Point) bool {
+		if sourceIsLit && !m.IsTileLit(p) {
+			return false
+		}
 		return m.IsTransparent(p) && geometry.DistanceSquared(p, fovPosition) <= visionRangeSquared
 	}, false)
 }
@@ -1665,6 +1674,11 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetWidth() int {
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetHeight() int {
 	return m.mapHeight
 }
+
+func (m *GridMap[ActorType, ItemType, ObjectType]) IsTileLit(pos geometry.Point) bool {
+	return m.GetCell(pos).IsLit
+}
+
 
 func GetLocationsInRadius(origin geometry.Point, radius float64, keep func(point geometry.Point) bool) []geometry.Point {
 	result := make([]geometry.Point, 0)

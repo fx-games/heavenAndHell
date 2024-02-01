@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"strconv"
+	"strings"
 )
 
 type Interval struct {
@@ -19,6 +21,13 @@ func NewInterval(min, max int) Interval {
 }
 
 func NewIntervalFromString(str string) Interval {
+	if !strings.Contains(str, "-") {
+		minDamg, _ := strconv.Atoi(str)
+		return Interval{
+			min: minDamg,
+			max: minDamg,
+		}
+	}
 	var minDamg, maxDamg int
 	fmt.Sscanf(str, "%d-%d", &minDamg, &maxDamg)
 	return Interval{

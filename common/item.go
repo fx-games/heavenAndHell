@@ -203,10 +203,27 @@ func (s ArmorStats) NameParts() string {
 func (s ArmorStats) GetArmorClass() int {
 	return s.BaseArmor + s.Plus
 }
+
+func (s ArmorStats) Clone() *ArmorStats {
+	return &ArmorStats{
+		BaseArmor:  s.BaseArmor,
+		Type:       s.Type,
+		Durability: stats.NewResource(s.Durability.Min(), s.Durability.GetMax, s.Durability.Value()),
+		Plus:       s.Plus,
+	}
+}
 type LightStats struct {
 	LightColor        color.RGBA
 	FlickerPattern    []float64
 	FlickerFrameDelay float64
+}
+
+func (s LightStats) Clone() *LightStats {
+	return &LightStats{
+		LightColor:        s.LightColor,
+		FlickerPattern:    s.FlickerPattern,
+		FlickerFrameDelay: s.FlickerFrameDelay,
+	}
 }
 
 
@@ -250,6 +267,7 @@ type Item interface {
 	IsThrowable() bool
 	SetDrawnToScreen(shouldBeDrawn bool)
 	IsDrawn() bool
+	Clone() Item
 }
 
 
@@ -417,6 +435,9 @@ func (i *BaseItem) CanStackWith(other Item) bool {
 }
 
 func (i *BaseItem) SlotName() SlotName {
+	if i.IsLightSource() {
+		return SlotNameLightSource
+	}
 	if i.IsRangedWeapon() {
 		return SlotNameMissileLauncher
 	}
@@ -428,9 +449,6 @@ func (i *BaseItem) SlotName() SlotName {
 	}
 	if i.IsThrowable() {
 		return SlotNameQuiver
-	}
-	if i.IsLightSource() {
-		return SlotNameLightSource
 	}
 	return SlotNameNotEquippable
 }
@@ -524,4 +542,38 @@ func (i *BaseItem) IsThrowable() bool {
 
 func (i *BaseItem) SetBaseCost(cost int) {
 	i.baseCost = cost
+}
+
+func (i *BaseItem) Clone() *BaseItem {
+	clone := &BaseItem{
+		name:              i.name,
+		pos:               i.pos,
+		icon:              i.icon,
+		weaponComponent:   nil,
+		armorComponent:    nil,
+		lightComponent:    nil,
+		throwComponent:    nil,
+		qualityLevel:      i.qualityLevel,
+		equippedModifiers: i.equippedModifiers,
+		getPlayer:         i.getPlayer,
+		category:          i.category,
+		rarity:            i.rarity,
+		droppedByPlayer:   false,
+		isHidden:          i.isHidden,
+		shouldBeDrawn:     i.shouldBeDrawn,
+		baseCost:          i.baseCost,
+	}
+	if i.weaponComponent != nil {
+		clone.weaponComponent = i.weaponComponent.Clone()
+	}
+	if i.armorComponent != nil {
+		clone.armorComponent = i.armorComponent.Clone()
+	}
+	if i.lightComponent != nil {
+		clone.lightComponent = i.lightComponent.Clone()
+	}
+	if i.throwComponent != nil {
+		clone.throwComponent = i.throwComponent.Clone()
+	}
+	return clone
 }

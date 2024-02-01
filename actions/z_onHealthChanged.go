@@ -30,9 +30,12 @@ func (d OnHealthChangedHook) After(action Action, engine Engine) []Action {
 	actorFromAction := changeRessource.GetActor()
 
 	if changeRessource.GetRessourceName() == stats.Health && changeRessource.GetChangeAmount() < 0 {
-		actor := actorFromAction
+
+		actorFromAction.SetHostile()
+		actorFromAction.SetState(common.ActorStateAttacking)
+
 		state := engine.GetWorldState()
-		if actor.IsVendor() {
+		if actorFromAction.IsVendor() {
 			for _, otherActor := range state.GetMap().Actors() {
 				if otherActor.IsVendor() {
 					otherActor.SetHostile()

@@ -780,6 +780,14 @@ func (a *Actor) GetFullStats() []util.LabelText {
 			TextColor: defaultColor,
 		},
 		{
+			Text: fmt.Sprintf("Vision: %d", a.GetStats().GetAttribute(stats.VisionRange)),
+			TextColor: defaultColor,
+		},
+		{
+			Text:      fmt.Sprintf("Light: %d", a.GetStats().GetAttribute(stats.LightRadius)),
+			TextColor: defaultColor,
+		},
+		{
 			Text:      fmt.Sprintf("HP regen: %.1f", a.GetStats().GetAttributeAsFloat(stats.HealthRegeneration)),
 			TextColor: defaultColor,
 		},
@@ -797,4 +805,42 @@ func (a *Actor) GetFullStats() []util.LabelText {
 		},
 	}
 	return fullStats
+}
+
+func (a *Actor) Clone() *Actor {
+	actorStats := stats.NewAttributeHolder()
+	visionRange := actorStats.GetAttribute(stats.VisionRange)
+	clonedActor := &Actor{
+		mapPosition:         a.mapPosition,
+		drawPosition:        a.drawPosition,
+		icon:                a.icon,
+		fov:                 geometry.NewFOV(geometry.NewRect(-visionRange, -visionRange, visionRange, visionRange)),
+		name:                a.name,
+		inventory:           a.inventory.Clone(),
+		equipment:           NewEquipment(),
+		statusEffects:       NewFlags(),
+		stats:               a.stats.Clone(),
+		timeEnergy:          a.timeEnergy,
+		state:               a.state,
+		isVendorOfType:      a.isVendorOfType,
+		isHostile:           a.isHostile,
+		//speechMap:           a.sp, TODO?
+		isUnique:            a.isUnique,
+		internalName:        a.internalName,
+		disableCorpse:       a.disableCorpse,
+		deathStringFormats:  a.deathStringFormats,
+		targetedSkills:      a.targetedSkills,
+		untargetedSkills:    a.untargetedSkills,
+		corpseIcon:          a.corpseIcon,
+	}
+	// TODO equip weapons..
+	return clonedActor
+}
+
+func (a *Actor) SetAggroRange(aggroRange int) {
+	a.stats.SetAttribute(stats.AggroRange, aggroRange)
+}
+
+func (a *Actor) GetAggroRange() int {
+	return a.stats.GetAttribute(stats.AggroRange)
 }

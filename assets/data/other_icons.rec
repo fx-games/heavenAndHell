@@ -1,0 +1,573 @@
+%rec: default
+#FIELDS: 
+
+internal_name: IconNone
+icon: -1
+
+internal_name: IconWhite
+icon: 18
+
+internal_name: IconTargeting
+icon: 220
+
+internal_name: IconGrass
+icon: 0
+
+internal_name: IconDirt
+icon: 1
+
+internal_name: IconMountain
+icon: 7
+
+internal_name: IconMountainWithEntrance
+icon: 8
+
+internal_name: IconWater
+icon: 28
+
+internal_name: IconWoodenBridge
+icon: 63
+
+internal_name: IconTreeDark
+icon: 5
+
+internal_name: IconTreeLight
+icon: 4
+
+internal_name: IconDungeonOfDoomFloorModern
+icon: 157
+
+internal_name: IconDungeonOfDoomWallModern
+icon: 158
+
+internal_name: IconDungeonOfDoomDoorModern
+icon: 241
+
+internal_name: IconDungeonOfDoomFloor
+icon: 242
+
+internal_name: IconDungeonOfDoomWallHoriz
+icon: 269
+
+internal_name: IconDungeonOfDoomWallVert
+icon: 297
+
+internal_name: IconDungeonOfDoomDoor
+icon: 240
+
+internal_name: IconDungeonOfDoomCorridorWall
+icon: 243
+
+internal_name: IconDungeonOfDoomCorridorFloor
+icon: 268
+
+internal_name: IconCathedralFloor
+icon: 64
+
+internal_name: IconCatacombsFloor
+icon: 86
+
+internal_name: IconCatacombsWall
+icon: 84
+
+internal_name: IconCatacombsWallWithShading
+icon: 85
+
+internal_name: IconDungeonFloorAlternative1
+icon: 14
+
+internal_name: IconDungeonRedEarthFloor
+icon: 186
+
+internal_name: IconDungeonRockyWall
+icon: 9
+
+internal_name: IconCathedralWall
+icon: 56
+
+internal_name: IconCathedralWallWithShading
+icon: 58
+
+internal_name: IconOpenDoor
+icon: 70
+
+internal_name: IconClosedDoor
+icon: 69
+
+internal_name: IconStairsUp
+icon: 74
+
+internal_name: IconStairsDown
+icon: 73
+
+internal_name: IconShrine
+icon: 75
+
+internal_name: IconSign
+icon: 154
+
+internal_name: IconDecalBlood1
+icon: 189
+
+internal_name: IconDecalBlood2
+icon: 190
+
+internal_name: IconDecalBlood3
+icon: 191
+
+internal_name: IconDecalBlood4
+icon: 192
+
+internal_name: IconDecalBlood5
+icon: 193
+
+internal_name: IconEffectLightning
+icon: 37
+
+internal_name: IconEffectFireSmall
+icon: 109
+
+internal_name: IconEffectFireBig
+icon: 32
+
+internal_name: IconEffectHit
+icon: 43
+
+internal_name: IconItemPotionCrimson
+icon: 161
+
+internal_name: IconItemPotionRed
+icon: 332
+
+internal_name: IconItemPotionBlue
+icon: 329
+
+internal_name: IconItemPotionDarkBlue
+icon: 327
+
+internal_name: IconItemPotionGreen
+icon: 330
+
+internal_name: IconItemPotionDarkGreen
+icon: 335
+
+internal_name: IconItemPotionYellow
+icon: 334
+
+internal_name: IconItemPotionOrange
+icon: 333
+
+internal_name: IconItemPotionPink
+icon: 331
+
+internal_name: IconItemPotionBrown
+icon: 326
+
+internal_name: IconItemPotionWhite
+icon: 328
+
+internal_name: IconItemFlaskOfOil
+icon: 246
+
+internal_name: IconCloakDark
+icon: 411
+
+internal_name: IconGlovesDark
+icon: 439
+
+internal_name: IconBootsDark
+icon: 440
+
+internal_name: IconArmorDark
+icon: 441
+
+internal_name: IconHoodDark
+icon: 467
+
+internal_name: IconRingDark
+icon: 468
+
+internal_name: IconHelmetDark
+icon: 469
+
+internal_name: IconShieldDarkThorns
+icon: 495
+
+internal_name: IconAmuletDark
+icon: 496
+
+internal_name: IconScytheDark
+icon: 497
+
+internal_name: IconMalletGolden
+icon: 498
+
+internal_name: IconItemScroll
+icon: 139
+
+internal_name: IconItemTorch
+icon: 352
+
+internal_name: IconItemLantern
+icon: 247
+
+internal_name: IconItemStarGlass
+icon: 248
+
+internal_name: IconItemMorningStar
+icon: 274
+
+internal_name: IconItemRing1
+icon: 129
+
+internal_name: IconItemRing2
+icon: 130
+
+internal_name: IconItemRing3
+icon: 131
+
+internal_name: IconItemAmulet1
+icon: 132
+
+internal_name: IconItemAmulet2
+icon: 133
+
+internal_name: IconItemAmulet3
+icon: 134
+
+internal_name: IconItemSword
+icon: 144
+
+internal_name: IconItemDagger
+icon: 233
+
+internal_name: IconItemMagicSword
+icon: 146
+
+internal_name: IconItemUniqueSword
+icon: 147
+
+internal_name: IconItemMace
+icon: 168
+
+internal_name: IconItemMagicMace
+icon: 169
+
+internal_name: IconItemUniqueMace
+icon: 170
+
+internal_name: IconItemAxe
+icon: 171
+
+internal_name: IconItemMagicAxe
+icon: 172
+
+internal_name: IconItemUniqueAxe
+icon: 173
+
+internal_name: IconItemStaff
+icon: 141
+
+internal_name: IconItemMagicStaff
+icon: 143
+
+internal_name: IconItemUniqueStaff
+icon: 140
+
+internal_name: IconItemWand
+icon: 124
+
+internal_name: IconItemBow
+icon: 149
+
+internal_name: IconItemMagicBow
+icon: 150
+
+internal_name: IconItemUniqueBow
+icon: 151
+
+internal_name: IconItemDart
+icon: 232
+
+internal_name: IconItemLeatherArmor1
+icon: 227
+
+internal_name: IconItemLeatherArmor2
+icon: 228
+
+internal_name: IconItemLeatherArmor3
+icon: 229
+
+internal_name: IconItemChainMail
+icon: 196
+
+internal_name: IconItemUniqueChainMail
+icon: 197
+
+internal_name: IconItemArmor
+icon: 199
+
+internal_name: IconItemMagicArmor
+icon: 198
+
+internal_name: IconItemUniqueArmor
+icon: 201
+
+internal_name: IconItemHelmet
+icon: 211
+
+internal_name: IconItemMagicHelmet
+icon: 212
+
+internal_name: IconItemUniqueHelmet
+icon: 213
+
+internal_name: IconItemBoots1
+icon: 355
+
+internal_name: IconItemBoots2
+icon: 356
+
+internal_name: IconItemBoots3
+icon: 357
+
+internal_name: IconItemBoots4
+icon: 358
+
+internal_name: IconItemBoots5
+icon: 359
+
+internal_name: IconItemBoots6
+icon: 360
+
+internal_name: IconItemBoots7
+icon: 361
+
+internal_name: IconItemBoots8
+icon: 362
+
+internal_name: IconItemBoots9
+icon: 363
+
+internal_name: IconItemGloves1
+icon: 383
+
+internal_name: IconItemGloves2
+icon: 384
+
+internal_name: IconItemGloves3
+icon: 385
+
+internal_name: IconItemGloves4
+icon: 386
+
+internal_name: IconItemGloves5
+icon: 387
+
+internal_name: IconItemGloves6
+icon: 388
+
+internal_name: IconItemGloves7
+icon: 389
+
+internal_name: IconItemGloves8
+icon: 390
+
+internal_name: IconItemGloves9
+icon: 391
+
+internal_name: IconItemCape1
+icon: 412
+
+internal_name: IconItemCape2
+icon: 413
+
+internal_name: IconItemCape3
+icon: 414
+
+internal_name: IconItemCape4
+icon: 415
+
+internal_name: IconItemCape5
+icon: 416
+
+internal_name: IconItemCape6
+icon: 417
+
+internal_name: IconItemCape7
+icon: 418
+
+internal_name: IconItemCape8
+icon: 419
+
+internal_name: IconItemShield
+icon: 205
+
+internal_name: IconItemMagicShield
+icon: 206
+
+internal_name: IconItemUniqueShield
+icon: 207
+
+internal_name: IconCharacterRogueMale
+icon: 19
+
+internal_name: IconCharacterRogueFemale
+icon: 47
+
+internal_name: IconCharacterWarriorMale
+icon: 20
+
+internal_name: IconCharacterWarriorFemale
+icon: 48
+
+internal_name: IconCharacterSorcererMale
+icon: 21
+
+internal_name: IconCharacterSorcererFemale
+icon: 49
+
+internal_name: IconMonsterBat
+icon: 93
+
+internal_name: IconMonsterSkeleton
+icon: 89
+
+internal_name: IconMonsterSkeletonWarrior
+icon: 0
+
+internal_name: IconMonsterSkeletonArcher
+icon: 0
+
+internal_name: IconMonsterSkeletonSorcerer
+icon: 0
+
+internal_name: IconMonsterSkeletonCaptain
+icon: 0
+
+internal_name: IconMonsterFallen
+icon: 0
+
+internal_name: IconMonsterFallenWarrior
+icon: 0
+
+internal_name: IconMonsterFallenArcher
+icon: 0
+
+internal_name: IconMonsterFallenShaman
+icon: 0
+
+internal_name: IconMonsterCaveling
+icon: 542
+
+internal_name: IconMonsterCavelingWithWeapon
+icon: 541
+
+internal_name: IconMonsterCaveImpWithAxes
+icon: 540
+
+internal_name: IconMonsterCaveImpWithBigAxe
+icon: 539
+
+internal_name: IconMonsterCaveBear
+icon: 538
+
+internal_name: IconMonsterFiend
+icon: 548
+
+internal_name: IconMonsterHornedFiend
+icon: 547
+
+internal_name: IconMonsterHornedWithKnife
+icon: 546
+
+internal_name: IconMonsterHornedWithGlaive
+icon: 545
+
+internal_name: IconMonsterHornedWithWhip
+icon: 544
+
+internal_name: IconMonsterHornedBig
+icon: 543
+
+internal_name: IconMonsterThiefPossessed
+icon: 463
+
+internal_name: IconMonsterThiefGoblin
+icon: 491
+
+internal_name: IconMonsterGoatMan
+icon: 95
+
+internal_name: IconMonsterGoatManArcher
+icon: 95
+
+internal_name: IconMonsterHidden
+icon: 99
+
+internal_name: IconMonsterScavenger
+icon: 96
+
+internal_name: IconMonsterWingedFiend
+icon: 105
+
+internal_name: IconUniqueMeatJack
+icon: 258
+
+internal_name: IconUniqueKingZedek
+icon: 259
+
+internal_name: IconUniqueRogue
+icon: 315
+
+internal_name: IconUniqueRogueDog
+icon: 343
+
+internal_name: IconUniqueLucifer
+icon: 261
+
+internal_name: IconUniqueEvilShekel
+icon: 287
+
+internal_name: IconUniqueEvilKirioth
+icon: 288
+
+internal_name: IconUniqueAdventurerKnight
+icon: 286
+
+internal_name: IconUniqueAdventurerPriest
+icon: 314
+
+internal_name: IconUniqueAdventurerBarbarian
+icon: 342
+
+internal_name: IconUniqueAdventurerArcher
+icon: 370
+
+internal_name: IconCorpseFallen
+icon: 135
+
+internal_name: IconRogueBat
+icon: 567
+
+internal_name: IconRogueEmu
+icon: 570
+
+internal_name: IconRogueJackal
+icon: 575
+
+internal_name: IconRogueKestrel
+icon: 576
+
+internal_name: IconRogueOrc
+icon: 580
+
+internal_name: IconRogueSnake
+icon: 584
+
+internal_name: IconCorpse
+icon: 135
+
+internal_name: IconRogueCorpse
+icon: 592
+

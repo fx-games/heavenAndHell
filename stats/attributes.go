@@ -43,6 +43,8 @@ const (
 	Health Name = "health"
 	Mana   Name = "mana"
 
+	AggroRange Name = "aggro_range"
+
 	VisionRange Name = "vision_range"
 
 	LightRadius Name = "light_radius"
@@ -155,6 +157,8 @@ func NewAttributeHolder() AttributeHolder {
 			VisionRange:      20,
 			LightRadius: 	  0,
 			ArmorPenetration: 0,
+
+			AggroRange: 0, // No range limit by default, means aggro on sight
 		},
 
 		modifiers: make(map[Name][]*Modifier),
@@ -277,4 +281,18 @@ func (a *AttributeHolder) IncrementRessourceBy(name Name, amount int) {
 
 func (a *AttributeHolder) DecrementBy(name Name, amount int) {
 	a.attributes[name] -= float64(amount)
+}
+
+func (a *AttributeHolder) Clone() AttributeHolder {
+	clone := NewAttributeHolder()
+	for k, v := range a.attributes {
+		clone.attributes[k] = v
+	}
+	for k, v := range a.resources {
+		clone.resources[k] = v.Clone()
+	}
+	for k, v := range a.modifiers {
+		clone.modifiers[k] = v
+	}
+	return clone
 }

@@ -8,6 +8,7 @@ import (
 	"rpg/common"
 	"rpg/recfile"
 	"rpg/stats"
+	"rpg/util"
 	"strings"
 )
 
@@ -27,6 +28,9 @@ type EnemyDefinition struct {
 
 	TargetedSkills     []string
 	UntargetedSkills   []string
+	GroupSpawn 		   []string
+
+	AggroRange         int
 }
 
 func (d EnemyDefinition) CanAppearAt(randomSource *rand.Rand, dungeonLevel int) bool {
@@ -42,7 +46,7 @@ func (d EnemyDefinition) CanAppearAt(randomSource *rand.Rand, dungeonLevel int) 
 	return regularAppearance || oodAppearance
 }
 
-func (g *GameInstance) NewRandomEnemy(dungeonLevel int) *common.Actor {
+func (g *GameInstance) NewRandomEnemy(dungeonLevel int) (*common.Actor, []EnemyDefinition) {
 	// get defs
 	enemyDefinitions := g.enemyDefinitions
 
@@ -57,20 +61,46 @@ func (g *GameInstance) NewRandomEnemy(dungeonLevel int) *common.Actor {
 
     if len(filteredEnemies) == 0 {
         g.ErrLog(fmt.Sprintf("no enemies found for dungeon level %d", dungeonLevel))
-        return nil
+		return nil, nil
     }
 	// pick random enemy definition
 	enemyDef := filteredEnemies[g.randomSource.Intn(len(filteredEnemies))]
 
+	// wants to spawn as a group?
+	var groupDefs []EnemyDefinition
+	if len(enemyDef.GroupSpawn) > 0 {
+		for _, otherDef := range enemyDef.GroupSpawn {
+			otherDefName := otherDef
+			spawnCount := 1
+			if util.LooksLikeAFunction(otherDef) {
+				oDefName, args := util.GetNameAndArgs(otherDef)
+				otherDefName = oDefName
+				spawnCount = stats.NewIntervalFromString(args.Get(0)).LinearRandom()
+			}
+			for i := 0; i < spawnCount; i++ {
+				if otherEnemyDef, exists := enemyDefinitions[otherDefName]; exists {
+					groupDefs = append(groupDefs, otherEnemyDef)
+				}
+			}
+		}
+	}
 	// create enemy
-	return g.NewEnemyFromDefinition(enemyDef, dungeonLevel)
+	return g.NewEnemyFromDefinition(enemyDef, dungeonLevel), groupDefs
 }
 
-func ReadEnemyDefinitions(file io.Reader) map[string]EnemyDefinition {
+func ReadEnemyDefinitions(file io.Reader, logErr func(string)) map[string]EnemyDefinition {
 	records := recfile.Read(file)
 	enemyDefs := make(map[string]EnemyDefinition, len(records))
 	for _, record := range records {
 		def := NewEnemyDefinitionFromRecord(record)
+		if def.InternalName == "" {
+			logErr(fmt.Sprintf("Enemy definition has no internal name: %v", def))
+			continue
+		}
+		if _, exists := enemyDefs[def.InternalName]; exists {
+			logErr(fmt.Sprintf("Duplicate enemy definition: %s", def.InternalName))
+			continue
+		}
 		enemyDefs[def.InternalName] = def
 	}
 	return enemyDefs
@@ -88,11 +118,10 @@ func NewEnemyDefinitionFromRecord(record recfile.Record) EnemyDefinition {
 			enemyDefinition.Stats[statName] = field.AsInt()
 			continue
 		}
-
 		switch field.Name {
 		case "icon":
 			enemyDefinition.Icon = field.AsInt32()
-		case "dungeon_level":
+		case "dlvl":
 			enemyDefinition.DLvl = field.AsInt()
 		case "name":
 			enemyDefinition.Name = field.Value
@@ -110,6 +139,10 @@ func NewEnemyDefinitionFromRecord(record recfile.Record) EnemyDefinition {
 			enemyDefinition.TargetedSkills = append(enemyDefinition.TargetedSkills, field.Value)
 		case "untargeted_skill":
 			enemyDefinition.UntargetedSkills = append(enemyDefinition.UntargetedSkills, field.Value)
+		case "group_spawn":
+			enemyDefinition.GroupSpawn = append(enemyDefinition.GroupSpawn, field.Value)
+		case "aggro_range":
+			enemyDefinition.AggroRange = field.AsInt()
 		}
 	}
 	return enemyDefinition
@@ -158,6 +191,7 @@ func (g *GameInstance) NewEnemyFromDefinition(enemyDef EnemyDefinition, dungeonL
 		}
 	}
 	actor.SetUntargetedSkills(untargetedSkills)
+	actor.SetAggroRange(enemyDef.AggroRange)
 
 	return actor
 }

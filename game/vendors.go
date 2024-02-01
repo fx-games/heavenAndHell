@@ -8,8 +8,8 @@ import (
 
 type VendorDefinition struct {
     InternalName string
-    Purse int
-    MaxItems int
+    Purse         int
+    ItemCount     stats.Interval
     TurnoverItems int
     SometimesCount stats.Interval
     Always []string
@@ -35,8 +35,8 @@ func NewVendorFromRecord(record recfile.Record) VendorDefinition {
             def.InternalName = field.Value
         case "purse":
             def.Purse = field.AsInt()
-        case "max_items":
-            def.MaxItems = field.AsInt()
+        case "item_count":
+            def.ItemCount = stats.NewIntervalFromString(field.Value)
         case "turnover_items":
             def.TurnoverItems = field.AsInt()
         case "sometimes_count":

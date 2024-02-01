@@ -56,8 +56,8 @@ type UIController struct {
 	elevatedOverlay          UIWidget
 }
 
-func GetAutoFitRectWithExtraSpace[T fmt.Stringer](text []T, screenSize, padding geometry.Point, measureString func(line string) (float64,float64)) (geometry.Point, PositionInfo) {
-	posInfo := SizeNeededForText(measureString, text, 5)
+func GetAutoFitRectWithExtraSpace[T fmt.Stringer](text []T, screenSize geometry.Point, lineDist int, padding geometry.Point, measureString func(line string) (float64,float64)) (geometry.Point, PositionInfo) {
+	posInfo := SizeNeededForText(measureString, text, lineDist)
 	posInfo.SizeInPixels.X += padding.X
 	posInfo.SizeInPixels.Y += padding.Y
 
@@ -341,8 +341,8 @@ func (u *UIController) OnKeyPressed(key ebiten.Key, shiftPressed bool) {
 	}
 }
 
-func (u *UIController) OpenShopMenu(items []ShopMenuItem, playerGold int) *ShopMenu {
-	menu := NewShopMenu(u)
+func (u *UIController) OpenShopMenu(items []ShopMenuItem, iconTileSize geometry.Point, playerGold int) *ShopMenu {
+	menu := NewShopMenu(u, iconTileSize)
 	u.PushWidget(menu)
 	menu.SetHeader("You have:", fmt.Sprintf("%d gold", playerGold))
 	menu.SetItems(items, []Alignment{AlignmentLeft, AlignmentRight})

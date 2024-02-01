@@ -102,6 +102,7 @@ type GameInstance struct {
 	serverEquipment  *TextServer
 	serverLog        *TextServer
 	shouldQuitGame   bool
+	quitToAscii      bool
 	startInfo        StartInfo
 	executeAfterTurn []func()
 	debugModeEnabled bool
@@ -117,7 +118,7 @@ type GameInstance struct {
 
 func (g *GameInstance) SetConsoleMode(consoleMode bool) {
 	g.consoleMode = consoleMode
-	g.audioPlayer.SetDisablePlayback(true)
+	g.audioPlayer.SetDisablePlayback(consoleMode)
 }
 func (g *GameInstance) GetTicks() uint64 {
 	return g.worldTicks
@@ -159,6 +160,9 @@ func (g *GameInstance) GetPlayerVisionRange() int {
 
 	playerInDungeon := !g.IsPlayerInTown()
 	if playerInDungeon {
+		if g.state.GetMap().IsTileLit(actor.MapPosition()) {
+			return visionRange
+		}
 		equipment := actor.GetEquipment()
 		if equipment.HasLightSourceEquipped() {
 			lightRadius := actor.GetStats().GetAttribute(stats.LightRadius) // used in dungeons (=darkness)
@@ -480,10 +484,8 @@ func (g *GameInstance) openPlayerStashInTown() {
 	stashInv := g.uiController.OpenInventoryModal(offsetFromBottomRightCorner, tileSize, dataSource)
 	g.uiController.ElevateOverlay(g.inventory)
 
-
 	oldHandler := g.inventory.GetOnSelectedHandler()
 	g.inventory.SetOnSelectedHandler(toStashHandler)
-
 
 	onClose := func() { // revert inventory..
 		g.uiController.StopElevation()
@@ -543,7 +545,7 @@ func (g *GameInstance) beginPlayerSellingTo(vendor *common.Actor) {
 		})
 	}
 
-	g.uiController.OpenShopMenu(sellItems, player.GetStats().GetAttribute(stats.Gold))
+	g.uiController.OpenShopMenu(sellItems, g.worldTexture.GetTileSize(), player.GetStats().GetAttribute(stats.Gold))
 }
 
 func (g *GameInstance) openShopFor(npc *common.Actor) {
@@ -555,8 +557,10 @@ func (g *GameInstance) openShopFor(npc *common.Actor) {
 	player := g.state.GetPlayer()
 	goldAmount := player.GetStats().GetAttribute(stats.Gold)
 	var menuItems []ui.ShopMenuItem
-	for itemIndex, i := range npcInventory.Items() {
-		item := i.(*GameItem)
+	inventoryStacks := npcInventory.StackedItems()
+	common.SortInventory(inventoryStacks)
+	for itemIndex, i := range inventoryStacks {
+		item := i[0].(*GameItem)
 		cost := item.BuyPrice()
 		cannotPayForItem := cost > goldAmount
 		colorCodeForPrice := "darkText"
@@ -569,6 +573,9 @@ func (g *GameInstance) openShopFor(npc *common.Actor) {
 		} else if g.configuration.ItemNamesInShop == ItemNamingSchemeBandStyle {
 			itemName = item.BandStyleName()
 		}
+		if len(i) > 1 {
+			itemName = fmt.Sprintf("%s (x%d)", itemName, len(i))
+		}
 		nameString := fmt.Sprintf("%s", itemName)
 		nameStringWithColor := fmt.Sprintf("%s", itemName)
 		priceString := fmt.Sprintf("%d", cost)
@@ -577,6 +584,8 @@ func (g *GameInstance) openShopFor(npc *common.Actor) {
 		shortCut := rune('a') + rune(itemIndex)
 		menuItems = append(menuItems, ui.ShopMenuItem{
 			ShortCut: shortCut,
+			Tooltip:  item.GetTooltipLines(),
+			Icon:     item.InventoryIcon(),
 			TextColumns: []util.LabelText{
 				{
 					Text:               nameString,
@@ -606,7 +615,7 @@ func (g *GameInstance) openShopFor(npc *common.Actor) {
 			},
 		})
 	}
-	shopMenu := g.uiController.OpenShopMenu(menuItems, goldAmount)
+	shopMenu := g.uiController.OpenShopMenu(menuItems, g.worldTexture.GetTileSize(), goldAmount)
 	shopMenu.OnMouseMoved(g.mousePosInPixels.X, g.mousePosInPixels.Y)
 }
 
@@ -861,7 +870,18 @@ func (g *GameInstance) setupUI() {
 	g.uiController.SetUIBarWidth(g.uiBarWidth)
 	xOffset := g.uiBarWidth - paddingLeftAndRight
 
-	g.levelUpButton = g.addLevelUpButton(geometry.Point{X: xOffset, Y: 100})
+	g.statsLabel = g.addStatsLabel(geometry.Point{X: xOffset, Y: paddingLeftAndRight})
+	g.statsLabel.SetText(toLabelText([]string{ // hacky way to measure the right bounding box..
+		"Level 1",
+		"MoreInfo",
+		"Health: 999",
+		"Mana: 999",
+		"Gold: 999",
+	}))
+	statsBounds := g.statsLabel.GetBounds()
+	levelUpButtonY := statsBounds.Max.Y + paddingLeftAndRight *2
+
+	g.levelUpButton = g.addLevelUpButton(geometry.Point{X: xOffset, Y: levelUpButtonY})
 	buttonBounds := g.levelUpButton.GetBounds()
 
 	g.skills = g.addSkillsOverlay(geometry.Point{X: paddingLeftAndRight, Y: 180})
@@ -870,8 +890,6 @@ func (g *GameInstance) setupUI() {
 	topYForMap := buttonBounds.Max.Y + paddingLeftAndRight
 	bottomYForMap := skillBounds.Min.Y - paddingLeftAndRight
 	maxHeightForMap := bottomYForMap - topYForMap
-
-	g.statsLabel = g.addStatsLabel(geometry.Point{X: xOffset, Y: paddingLeftAndRight})
 
 	g.miniMap = g.addMiniMap(geometry.Point{X: g.uiBarWidth, Y: topYForMap}, maxHeightForMap, paddingLeftAndRight)
 
@@ -1302,6 +1320,15 @@ func (g *GameInstance) applyLighting(mapPos geometry.Point, drawColor color.RGBA
 		lightPercentage = 0.95
 	}
 
+	currentMap := g.state.GetMap()
+
+	isPlayerLit := currentMap.IsTileLit(g.state.GetPlayer().MapPosition())
+
+	if currentMap.IsTileLit(mapPos) && currentMap.IsExplored(mapPos) {
+		dungeonLitRoomLightPercentage := 0.75
+		return multiplyColor(drawColor, dungeonLitRoomLightPercentage)
+	}
+
 	if distanceToPlayer > maxDistance || !g.state.GetPlayer().CanSee(mapPos) {
 		drawColor = multiplyColor(drawColor, darkPercentage)
 	} else {
@@ -1310,7 +1337,7 @@ func (g *GameInstance) applyLighting(mapPos geometry.Point, drawColor color.RGBA
 		//light := 255 // 1.0 -> 100% of original value
 		//dark := 20   // 0.0 -> 12,75% of original value
 		percentagOfValue := darkPercentage + ((lightPercentage - darkPercentage) * percentageLightness)
-		if !g.isDaylight() {
+		if !g.isDaylight() && !isPlayerLit {
 			drawColor = g.mixLightSourceColor(drawColor, color.RGBA{127, 127, 127, 255})
 		}
 		drawColor = multiplyColor(drawColor, percentagOfValue)
@@ -1458,7 +1485,6 @@ func (g *GameInstance) setTileScale(targetScale float64) {
 	g.tileScale = targetScale
 	g.Log(fmt.Sprintf("Set tile scale to %.2f", targetScale))
 }
-
 
 func (g *GameInstance) BeginActionTargeting(action *common.TargetedAction) {
 	if !g.state.GetPlayer().IsAlive() {
@@ -1697,6 +1723,12 @@ func (g *GameInstance) showDebugMenu() {
 			},
 		},
 		{
+			MainText: "Drop to ASCII Mode",
+			Action: func() {
+				g.quitToAscii = true
+			},
+		},
+		{
 			MainText: "Map Info",
 			Action: func() {
 				g.uiController.OpenTextWindow(toLabelText(g.state.GetMap().GetMetaString()))
@@ -1919,6 +1951,10 @@ func (g *GameInstance) updateStatsLabel() {
 			Text:      fmt.Sprintf("MP: %s", playerStats.GetRessource(stats.Mana).ToString()),
 			TextColor: manaColor,
 		},
+		{
+			Text:      fmt.Sprintf("Gold: %d", playerStats.GetAttribute(stats.Gold)),
+			TextColor: common.DarkTextColor,
+		},
 	}
 	statLines := append(mapNameParts, statusParts...)
 
@@ -1964,22 +2000,15 @@ func (g *GameInstance) openListInventory() *ui.IconList {
 }
 
 func (g *GameInstance) openListInventoryForSelection(filter func(element common.Item) bool, onSelected func(invItemKey rune)) *ui.IconList {
-	isEquipped := func(uiItem ui.UIElement) bool {
-		player := g.state.GetPlayer()
-		itemStack := uiItem.(common.InventoryStack)
-		firstItem := itemStack[0]
-		return player.GetEquipment().IsEquipped(firstItem)
-	}
-
 	dataSource := ui.ListDataSource{
-		IsHighlighted: isEquipped,
-		GetElements: func() []ui.UIElement {
+		GetElements: func() []ui.IconListElement {
 			inventory := g.state.GetPlayer().GetInventory()
-			return sortStacksForTextUI(inventory.StackedItemsWithFilter(filter), inventory.GetLetterForItemStack)
-		},
-		OnSelection: func(r rune) {
-			g.uiController.PopAll()
-			onSelected(r)
+			typed := sortStacksForTextUITyped(inventory.StackedItemsWithFilter(filter), inventory.GetLetterForItemStack, onSelected)
+			var result []ui.IconListElement
+			for _, item := range typed {
+				result = append(result, item)
+			}
+			return result
 		},
 	}
 	g.uiController.PopAll()
@@ -2007,13 +2036,25 @@ func sortStacksForUI(stacks []common.InventoryStack) []ui.UIElement {
 
 type TextualStack struct {
 	common.InventoryStack
-	letter rune
+	letter   rune
+	selected func()
 }
 
-func NewTextualStack(stack common.InventoryStack, letter rune) *TextualStack {
+func (t *TextualStack) Shortcut() rune {
+	return t.letter
+}
+
+func (t *TextualStack) OnSelected() {
+	t.selected()
+}
+
+func NewTextualStack(stack common.InventoryStack, letter rune, selected func(invItemKey rune)) *TextualStack {
 	return &TextualStack{
 		InventoryStack: stack,
 		letter:         letter,
+		selected: func() {
+			selected(letter)
+		},
 	}
 }
 
@@ -2024,11 +2065,12 @@ func (t *TextualStack) Name() string {
 func (t *TextualStack) String() string {
 	return t.Name()
 }
-func sortStacksForTextUI(stacks []common.InventoryStack, getLetterForStack func(stack common.InventoryStack) rune) []ui.UIElement {
-	items := make([]ui.UIElement, 0)
+
+func sortStacksForTextUITyped(stacks []common.InventoryStack, getLetterForStack func(stack common.InventoryStack) rune, selected func(invItemKey rune)) []*TextualStack {
+	items := make([]*TextualStack, 0)
 	common.SortInventory(stacks)
 	for _, itemStack := range stacks {
-		items = append(items, NewTextualStack(itemStack, getLetterForStack(itemStack)))
+		items = append(items, NewTextualStack(itemStack, getLetterForStack(itemStack), selected))
 	}
 	return items
 }
@@ -2197,18 +2239,38 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 	}
 
 	if actor.GetState() == common.ActorStateAttacking && g.state.GetPlayer().IsAlive() {
-
 		// can use a skill?
+		playerPosition := g.state.GetPlayer().MapPosition()
+
+		untargetedSkills := actor.GetUntargetedSkills()
+		if len(untargetedSkills) > 0 {
+			for _, skill := range untargetedSkills {
+				if !skill.CanActivate(actor) {
+					continue
+				}
+				skillUseChance := g.randomSource.Intn(10) == 0
+				if !skillUseChance {
+					continue
+				}
+				return skill.GetTimeNeededInAut(), func() {
+					skill.Invoke(actor)
+				}
+			}
+		}
 
 		targetedSkills := actor.GetTargetedSkills()
-		playerPosition := g.state.GetPlayer().MapPosition()
 		if len(targetedSkills) > 0 {
 			for _, skill := range targetedSkills {
+				skillUseChance := g.randomSource.Intn(10) == 0
+				if !skillUseChance {
+					continue
+				}
 				targetingRules := skill.GetTargetingRules(actor, g.GetWorldState().GetMap())
-				if targetingRules.IsValidTarget(playerPosition) {
-					return skill.GetTimeNeededInAut(), func() {
-						skill.Execute(actor, actor.MapPosition(), playerPosition)
-					}
+				if !targetingRules.IsValidTarget(playerPosition) {
+					continue
+				}
+				return skill.GetTimeNeededInAut(), func() {
+					skill.Execute(actor, actor.MapPosition(), playerPosition)
 				}
 			}
 		}
@@ -3019,10 +3081,10 @@ func (g *GameInstance) getMiniMapColor(mapPos geometry.Point, tileColor *[4]byte
 		if currentMap.IsSpecialAt(mapPos, gridmap.SpecialTileWater) {
 			if !g.state.GetFlags().IsSet(fmt.Sprintf("all_clear:%s", SpecialLevelPoisonedWaterSupply)) {
 				//199, G: 251, B: 161
-				*tileColor = [4]byte{199/2, 251/2, 161/2, 255}
+				*tileColor = [4]byte{199 / 2, 251 / 2, 161 / 2, 255}
 				return
 			}
-			*tileColor = [4]byte{86/2, 112/2, 194/2, 255}
+			*tileColor = [4]byte{86 / 2, 112 / 2, 194 / 2, 255}
 			return
 		}
 		if currentMap.IsWalkable(mapPos) {
@@ -3194,7 +3256,6 @@ func (g *GameInstance) onLuciferDeath() {
 	g.spawnItemInTown("true_sight_potion", g.NewPotionOfTrueSight())
 }
 
-
 func (g *GameInstance) IsStoryModeEnabled() bool {
 	return g.GetWorldState().GetFlags().IsSet(string(FlagStoryModeEnabled))
 }
@@ -3274,7 +3335,7 @@ func (g *GameInstance) SetOnMapChange(onMapChange func()) {
 
 func (g *GameInstance) ErrLog(errorMessage string) {
 	// write to stderr
-	fmt.Fprintf(os.Stderr, errorMessage + "\n")
+	fmt.Fprintf(os.Stderr, errorMessage+"\n")
 }
 
 func (g *GameInstance) LoadGameData() {
@@ -3283,46 +3344,45 @@ func (g *GameInstance) LoadGameData() {
 	enemyDir := path.Join("assets", "data", "enemies")
 	effectsDir := path.Join("assets", "data", "effects")
 
-
 	join := path.Join(itemDir, "armor.rec")
 	file, _ := os.Open(join)
-	armorDefs := ReadItemDefinitions(file)
+	armorDefs := ReadItemDefinitions(file, g.ErrLog)
 	println(fmt.Sprintf("Loaded %d armor definitions", len(armorDefs)))
 	itemDefs = merge(itemDefs, armorDefs)
 	file.Close()
 
 	file, _ = os.Open(path.Join(itemDir, "weapons.rec"))
-	weaponDefs := ReadItemDefinitions(file)
+	weaponDefs := ReadItemDefinitions(file, g.ErrLog)
 	println(fmt.Sprintf("Loaded %d weapon definitions", len(weaponDefs)))
 	itemDefs = merge(itemDefs, weaponDefs)
 	file.Close()
 
 	file, _ = os.Open(path.Join(itemDir, "throwables.rec"))
-	throwableDefs := ReadItemDefinitions(file)
+	throwableDefs := ReadItemDefinitions(file, g.ErrLog)
 	println(fmt.Sprintf("Loaded %d throwable definitions", len(throwableDefs)))
 	itemDefs = merge(itemDefs, throwableDefs)
 	file.Close()
 
 	file, _ = os.Open(path.Join(itemDir, "accessory.rec"))
-	accessoryDefs := ReadItemDefinitions(file)
+	accessoryDefs := ReadItemDefinitions(file, g.ErrLog)
 	println(fmt.Sprintf("Loaded %d accessory definitions", len(accessoryDefs)))
 	itemDefs = merge(itemDefs, accessoryDefs)
 	file.Close()
 
 	file, _ = os.Open(path.Join(itemDir, "light.rec"))
-	lightDefs := ReadItemDefinitions(file)
+	lightDefs := ReadItemDefinitions(file, g.ErrLog)
 	println(fmt.Sprintf("Loaded %d light definitions", len(lightDefs)))
 	itemDefs = merge(itemDefs, lightDefs)
 	file.Close()
 
 	file, _ = os.Open(path.Join(itemDir, "potions.rec"))
-	potionDefs := ReadItemDefinitions(file)
+	potionDefs := ReadItemDefinitions(file, g.ErrLog)
 	println(fmt.Sprintf("Loaded %d potion definitions", len(potionDefs)))
 	itemDefs = merge(itemDefs, potionDefs)
 	file.Close()
 
 	file, _ = os.Open(path.Join(itemDir, "scrolls.rec"))
-	scrollDefs := ReadItemDefinitions(file)
+	scrollDefs := ReadItemDefinitions(file, g.ErrLog)
 	println(fmt.Sprintf("Loaded %d scroll definitions", len(scrollDefs)))
 	itemDefs = merge(itemDefs, scrollDefs)
 	file.Close()
@@ -3330,28 +3390,25 @@ func (g *GameInstance) LoadGameData() {
 	g.itemDefinitions = itemDefs
 
 	file, _ = os.Open(path.Join(enemyDir, "enemies.rec"))
-	enemyDefs := ReadEnemyDefinitions(file)
+	enemyDefs := ReadEnemyDefinitions(file, g.ErrLog)
 	println(fmt.Sprintf("Loaded %d enemy definitions", len(enemyDefs)))
 	file.Close()
 
 	g.enemyDefinitions = enemyDefs
 
 	file, _ = os.Open(path.Join(effectsDir, "untargeted.rec"))
-	untargetedDefs := ReadUntargetedDefinitions(file)
+	untargetedDefs := ReadUntargetedDefinitions(file, g.ErrLog)
 	println(fmt.Sprintf("Loaded %d untargeted effect definitions", len(untargetedDefs)))
 	file.Close()
 
 	g.untargetedDefinitions = untargetedDefs
 
-
 	file, _ = os.Open(path.Join(effectsDir, "targeted.rec"))
-	targetedDefs := ReadTargetedDefinitions(file)
+	targetedDefs := ReadTargetedDefinitions(file, g.ErrLog)
 	println(fmt.Sprintf("Loaded %d targeted effect definitions", len(targetedDefs)))
 	file.Close()
 
 	g.targetedDefinitions = targetedDefs
-
-
 
 	file, _ = os.Open(path.Join("assets", "data", "stores.rec"))
 	vendorDefs := ReadVendorDefinitions(file)
@@ -3472,9 +3529,15 @@ func (g *GameInstance) GenerateLoot(dungeonLevel int, count int) []*GameItem {
 }
 
 func (g *GameInstance) getVendorInventoryFromDefinition(definition VendorDefinition) []common.Item {
-	itemsNeeded := definition.MaxItems
-	sometimesCount := definition.SometimesCount.LinearRandom()
-	alwaysCount := itemsNeeded - sometimesCount
+	itemsNeeded := definition.ItemCount.LinearRandom()
+	sometimesCount := 0
+	alwaysCount := 0
+	if len(definition.Sometimes) > 0 {
+		sometimesCount = min(itemsNeeded, definition.SometimesCount.LinearRandom())
+	}
+	if len(definition.Always) > 0 {
+		alwaysCount = itemsNeeded - sometimesCount
+	}
 
 	var result []common.Item
 

@@ -87,11 +87,19 @@ func (g *GameInstance) NewTargetedActionFromName(name string) *common.TargetedAc
 	g.ErrLog(fmt.Sprintf("Unknown targeted action: %s", name))
 	return nil
 }
-func ReadTargetedDefinitions(file io.Reader) map[string]TargetedActionDefinition {
+func ReadTargetedDefinitions(file io.Reader, logErr func(string)) map[string]TargetedActionDefinition {
 	records := recfile.Read(file)
 	targetedDefs := make(map[string]TargetedActionDefinition, len(records))
 	for _, record := range records {
 		def := NewTargetedFromRecord(record)
+		if def.InternalName == "" {
+			logErr(fmt.Sprintf("Targeted action definition has no internal name: %v", def))
+			continue
+		}
+		if _, exists := targetedDefs[def.InternalName]; exists {
+			logErr(fmt.Sprintf("Duplicate targeted action definition: %s", def.InternalName))
+			continue
+		}
 		targetedDefs[def.InternalName] = def
 	}
 	return targetedDefs
@@ -107,7 +115,7 @@ func NewTargetedFromRecord(record recfile.Record) TargetedActionDefinition {
 			def.InternalName = field.Value
 		case "icon":
 			def.Icon = field.AsInt32()
-		case "dungeon_level":
+		case "dlvl":
 			def.DungeonLevel = field.AsInt()
 		case "hit_zone":
 			def.HitZone = field.Value

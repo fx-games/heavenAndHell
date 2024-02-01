@@ -16,6 +16,16 @@ type ThrowStats struct {
 	ChanceToBreak float64
 	HitZone       AoEResolver
 }
+
+func (s ThrowStats) Clone() *ThrowStats {
+	return &ThrowStats{
+		Damage:        s.Damage,
+		Requirements:  s.Requirements,
+		OnHitEffect:   s.OnHitEffect,
+		ChanceToBreak: s.ChanceToBreak,
+		HitZone:       s.HitZone,
+	}
+}
 type WeaponStats struct {
 	Damage                      stats.Interval
 	Requirements                map[stats.Name]int
@@ -103,6 +113,18 @@ func (s WeaponStats) NameParts() string {
 	return fmt.Sprintf("(%d-%d, +%d)", s.Damage.Min(), s.Damage.Max(), s.Plus)
 }
 
+func (s WeaponStats) Clone() *WeaponStats {
+	return &WeaponStats{
+		Damage:                      s.Damage,
+		Requirements:                s.Requirements,
+		Durability:                  stats.NewResource(s.Durability.Min(), s.Durability.GetMax, s.Durability.Value()),
+		Type:                        s.Type,
+		AttackSpeedFactor:           s.AttackSpeedFactor,
+		MeleeRange:                  s.MeleeRange,
+		DamagePerLocationPrediction: s.DamagePerLocationPrediction,
+	}
+}
+
 type WeaponType int
 
 func (t WeaponType) ToString() string {
@@ -113,10 +135,20 @@ func (t WeaponType) ToString() string {
 		return "Axe"
 	case WeaponTypeBow:
 		return "Bow"
+	case WeaponTypeCrossBow:
+		return "Crossbow"
 	case WeaponTypeMace:
 		return "Mace"
 	case WeaponTypeStaff:
 		return "Staff"
+	case WeaponTypeShield:
+		return "Shield"
+	case WeaponTypeScythe:
+		return "Scythe"
+	case WeaponTypeSpear:
+		return "Spear"
+	case WeaponTypeWhip:
+		return "Whip"
 	default:
 		return "Unknown"
 	}
@@ -124,10 +156,12 @@ func (t WeaponType) ToString() string {
 
 func (t WeaponType) GetInventorySlot() SlotName {
 	switch t {
-	case WeaponTypeSword, WeaponTypeAxe, WeaponTypeMace:
+	case WeaponTypeSword, WeaponTypeAxe, WeaponTypeMace, WeaponTypeWhip:
 		return SlotNameOneHandedWeapon
-	case WeaponTypeStaff, WeaponTypeScythe:
+	case WeaponTypeStaff, WeaponTypeScythe, WeaponTypeSpear:
 		return SlotNameTwoHandedWeapon
+	case WeaponTypeShield:
+		return SlotNameOffHand
 	case WeaponTypeBow:
 		return SlotNameMissileLauncher
 	default:
@@ -148,9 +182,12 @@ const (
 	WeaponTypeAxe
 	WeaponTypeMace
 	WeaponTypeStaff
+	WeaponTypeSpear
 	WeaponTypeBow
+	WeaponTypeCrossBow
 	WeaponTypeShield
 	WeaponTypeScythe
+	WeaponTypeWhip
 )
 
 func WeaponTypeFromString(str string) WeaponType {
@@ -166,11 +203,17 @@ func WeaponTypeFromString(str string) WeaponType {
 		return WeaponTypeStaff
 	case "bow":
 		return WeaponTypeBow
+	case "crossbow":
+		return WeaponTypeCrossBow
 	case "shield":
 		return WeaponTypeShield
 	case "scythe":
 		return WeaponTypeScythe
+	case "spear":
+		return WeaponTypeSpear
+	case "whip":
+		return WeaponTypeWhip
 	default:
-		return WeaponTypeSword
+		return WeaponTypeNone
 	}
 }

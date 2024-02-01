@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"image/color"
 	"io"
 	"math/rand"
@@ -97,7 +98,7 @@ func (d ItemDefinition) IsScroll() bool {
 
 type ArmorDefinition struct {
 	ArmorType  common.ArmorType
-	ArmorClass int
+	ArmorClass stats.Interval
 }
 
 func (d ArmorDefinition) IsValid() bool {
@@ -128,11 +129,27 @@ func (d ThrowDefinition) IsValid() bool {
 func (g *GameInstance) GetItemDefinitions() map[string]ItemDefinition {
 	return g.itemDefinitions
 }
-func ReadItemDefinitions(file io.Reader) map[string]ItemDefinition {
+func ReadItemDefinitions(file io.Reader, logErr func(errString string)) map[string]ItemDefinition {
 	records := recfile.Read(file)
 	itemDefinitions := make(map[string]ItemDefinition, len(records))
 	for _, record := range records {
 		definition := NewItemDefinitionFromRecord(record)
+		if definition.InternalName == "" {
+			logErr(fmt.Sprintf("Item definition has no internal name: %v", definition))
+			continue
+		}
+		if _, exists := itemDefinitions[definition.InternalName]; exists {
+			logErr(fmt.Sprintf("Duplicate item definition: %s", definition.InternalName))
+			continue
+		}
+		if definition.Armor.ArmorClass.NotZero() && definition.Armor.ArmorType == common.ArmorTypeNone {
+			logErr(fmt.Sprintf("Armor definition has invalid armor type: %v", definition))
+			continue
+		}
+		if definition.Weapon.Damage.NotZero() && definition.Weapon.WeaponType == common.WeaponTypeNone {
+			logErr(fmt.Sprintf("Weapon definition has invalid weapon type: %v", definition))
+			continue
+		}
 		itemDefinitions[definition.InternalName] = definition
 	}
 	return itemDefinitions
@@ -169,7 +186,7 @@ func NewItemDefinitionFromRecord(record recfile.Record) ItemDefinition {
 		case "armor_type":
 			itemDefinition.Armor.ArmorType = common.ArmorTypeFromString(field.Value)
 		case "armor_class":
-			itemDefinition.Armor.ArmorClass = field.AsInt()
+			itemDefinition.Armor.ArmorClass = stats.NewIntervalFromString(field.Value)
 		case "weapon_type":
 			itemDefinition.Weapon.WeaponType = common.WeaponTypeFromString(field.Value)
 		case "weapon_damage":
@@ -207,7 +224,7 @@ func (g *GameInstance) NewItemFromDefinition(itemDefinition ItemDefinition, dung
 
 	if itemDefinition.Armor.IsValid() {
 		armorPart := &common.ArmorStats{
-			BaseArmor:  itemDefinition.Armor.ArmorClass,
+			BaseArmor:  itemDefinition.Armor.ArmorClass.LinearRandom(),
 			Durability: stats.NewResource(0, flatFunc(20), 20),
 			Type:       itemDefinition.Armor.ArmorType,
 		}

@@ -25,7 +25,9 @@ func (d *UpdateFoVAction) Execute(engine Engine) []Action {
 	currentMap := state.GetMap()
 
 	visionRange := engine.GetPlayerVisionRange()
+
 	currentMap.UpdateFieldOfView(actor.GetFOV(), actor.MapPosition(), visionRange)
+
 	updatePlayerKnowledge(engine)
 
 	if actor == state.GetPlayer() {
@@ -67,9 +69,12 @@ func updatePlayerKnowledge(engine Engine) {
 	for newActor, _ := range cameIntoView {
 		if newActor.IsHostile() {
 			engine.Log(fmt.Sprintf("%s comes into view", newActor.Name()))
-		}
-		if newActor.IsHostile() {
-			newActor.SetState(common.ActorStateAttacking)
+			aggroRange := newActor.GetAggroRange()
+
+			distToPlayer := currentMap.MoveDistance(player.MapPosition(), newActor.MapPosition())
+			if aggroRange == 0 || distToPlayer <= aggroRange {
+				newActor.SetState(common.ActorStateAttacking)
+			}
 		}
 		if newActor.HasSpeech(common.SpeechTriggerSight) {
 			engine.Say(newActor, common.SpeechTriggerSight)

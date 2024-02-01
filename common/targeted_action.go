@@ -31,6 +31,7 @@ type UntargetedAction struct {
 	description            string
 	timeNeededInAut        int
 	monetaryValue          int
+	condition              func(user *Actor) bool
 }
 
 func NewUntargetedAction(name string, icon int32) *UntargetedAction {
@@ -131,6 +132,31 @@ func (a *UntargetedAction) SetNoTimeNeeded() {
 
 func (a *UntargetedAction) GetMonetaryValue() int {
 	return a.monetaryValue
+}
+
+func (a *UntargetedAction) Clone() *UntargetedAction {
+	return &UntargetedAction{
+		name:                   a.name,
+		activationDelayInTurns: a.activationDelayInTurns,
+		effect:                 a.effect,
+		user:                   a.user,
+		turnsUntilRemoval:      a.turnsUntilRemoval,
+		icon:                   a.icon,
+		description:            a.description,
+		timeNeededInAut:        a.timeNeededInAut,
+		monetaryValue:          a.monetaryValue,
+	}
+}
+
+func (a *UntargetedAction) CanActivate(user *Actor) bool {
+	if a.condition == nil {
+		return true
+	}
+	return a.condition(user)
+}
+
+func (a *UntargetedAction) SetCondition(condition func(user *Actor) bool) {
+	a.condition = condition
 }
 
 type TargetHighlight struct {

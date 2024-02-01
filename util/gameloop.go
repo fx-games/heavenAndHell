@@ -21,7 +21,7 @@ type LoopConfig struct {
     //
     // This function will not be called if the elapsed time since the previous
     // frame has exceeded IdleThreshold (ie. if window is minimized, etc.).
-    ProcessInputFunc func() (quit bool)
+    ProcessInputFunc func() (terminationCode int)
 
     // UpdateFunc is a callback that is called within the game loop. It is
     // called after ProcessInputFunc and it should contain logic that updates
@@ -42,7 +42,7 @@ type LoopConfig struct {
 }
 
 // Create will create a game loop based on a given configuration.
-func CreateLoop(c LoopConfig) func() {
+func CreateLoop(c LoopConfig, terminationCode *int) func() {
     secsPerUpdate := 1 / float64(c.TargetFPS)
     var current, elapsed float64
 
@@ -50,7 +50,7 @@ func CreateLoop(c LoopConfig) func() {
         previous := c.CurrentTimeFunc()
         lag := 0.0
 
-        for quit := false; !quit; {
+        for *terminationCode = 0; *terminationCode == 0; {
             current = c.CurrentTimeFunc()
             elapsed = current - previous
             previous = current
@@ -61,7 +61,7 @@ func CreateLoop(c LoopConfig) func() {
 
             lag += elapsed
 
-            quit = c.ProcessInputFunc()
+            *terminationCode = c.ProcessInputFunc()
 
             for lag >= secsPerUpdate {
                 c.UpdateFunc(secsPerUpdate)

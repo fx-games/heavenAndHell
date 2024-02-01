@@ -9,6 +9,7 @@ import (
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/ldtk_go"
+	"rpg/util"
 	"slices"
 	"sort"
 	"strconv"
@@ -58,9 +59,10 @@ func (g *GameInstance) generateMap(targetMap string, mapTemplates *ldtk_go.Proje
 		rollForEnemy := randomSource.Intn(100)
 		//println(fmt.Sprintf("pos: %v, rollForEnemy: %d, distToEntrance: %d", pos, rollForEnemy, distToEntrance))
 		if rollForEnemy < 5 && distToStairs > 7 && emptyMap.CanPlaceActorHere(pos) {
-			enemy := g.NewRandomEnemy(dungeonLevel)
+			enemy, companions := g.NewRandomEnemy(dungeonLevel)
 			enemy.SetDrawPosition(pos.ToPointF())
 			emptyMap.AddActor(enemy, pos)
+			g.spawnCompanions(emptyMap, enemy, companions, dungeonLevel)
 		} else if randomSource.Intn(100) < 1 && distToStairs > 7 && emptyMap.CanPlaceItemHere(pos) {
 			lootItem := g.generateLoot(dungeonLevel)
 			if lootItem != nil {
@@ -95,8 +97,18 @@ func (g *GameInstance) addShrine(emptyMap *gridmap.GridMap[*common.Actor, common
 }
 
 func (g *GameInstance) decorateRooms(emptyMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], generatedLayout *dungen.DungeonMap, dungeonLevel int) []geometry.Point {
+	maxLitPercentage := 0.8
+	litRoomPercentage := util.Clamp(0, maxLitPercentage, 1.0 - (float64(dungeonLevel) / float64(MAX_LEVELS)))
+
+	allRooms := generatedLayout.AllRooms()
+	roomCount := len(allRooms)
+	randomIndices := g.randomSource.Perm(roomCount)
+
 	var poiPositions []geometry.Point
-	for _, room := range generatedLayout.AllRooms() {
+	roomsWeLit := 0
+	roomsWeWantLit := int(math.Ceil(float64(roomCount) * litRoomPercentage))
+	for _, randomIndex := range randomIndices {
+		room := allRooms[randomIndex]
 		roomPoIs := room.GetPOIPositions()
 		if len(roomPoIs) > 0 {
 			poiPositions = append(poiPositions, roomPoIs...)
@@ -106,6 +118,17 @@ func (g *GameInstance) decorateRooms(emptyMap *gridmap.GridMap[*common.Actor, co
 			deco := g.getDecorationLevel(decoLevel)
 			g.decorateRoomFromTemplate(emptyMap, deco, room)
 			emptyMap.AddToMetaInfo(fmt.Sprintf("DecoRoom: %s", deco.Identifier))
+		}
+		if roomsWeLit < roomsWeWantLit {
+			roomsWeLit++
+			for _, pos := range room.GetAbsoluteRoomTiles() {
+				emptyMap.SetLit(pos, true)
+				for _, neighbour := range emptyMap.GetFilteredNeighbors(pos, func(pos geometry.Point) bool {
+					return emptyMap.Contains(pos)
+				}) {
+					emptyMap.SetLit(neighbour, true)
+				}
+			}
 		}
 	}
 	return poiPositions
@@ -323,4 +346,21 @@ func levelFromName(targetMap string) int {
 func levelName(level int) string {
 	//!gen_dungeon_level_1
 	return fmt.Sprintf("!gen_dungeon_level_%d", level)
+}
+
+
+
+func (g *GameInstance) spawnCompanions(emptyMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], leader *common.Actor, companions []EnemyDefinition, dungeonLevel int) {
+	origin := leader.MapPosition()
+	companyCount := len(companions)
+
+	freePositions := emptyMap.GetFreeCellsForDistribution(origin, companyCount, func(pos geometry.Point) bool {
+		return emptyMap.CanPlaceActorHere(pos)
+	})
+	spawnCount := min(len(freePositions), companyCount)
+	for i := 0; i < spawnCount; i++ {
+		spawnPos := freePositions[i]
+		companion := g.NewEnemyFromDefinition(companions[i], dungeonLevel)
+		emptyMap.AddActor(companion, spawnPos)
+	}
 }

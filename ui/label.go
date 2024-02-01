@@ -268,10 +268,18 @@ func (i *BasicLabel) SetBorderPadding(borderPadding geometry.Point) {
 	i.borderPadding = borderPadding
 }
 
+func (i *BasicLabel) GetBorderPadding() geometry.Point {
+	return i.borderPadding
+}
+
 func (i *BasicLabel) SetCentered() {
 	i.centered = true
 }
 
 func (i *BasicLabel) SetCanBeClosed(value bool) {
 	i.canBeClosed = value
+}
+
+func (i *BasicLabel) GetBounds() geometry.Rect {
+	return i.bounds
 }

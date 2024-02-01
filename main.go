@@ -120,10 +120,11 @@ func maptest() {
 
 }
 
-func runGameWithConsole(game *game.GameInstance) {
-	game.SetConsoleMode(true)
-	con := console.NewConsole(game)
+func runGameWithConsole(theGame *game.GameInstance) {
+	theGame.SetConsoleMode(true)
+	con := console.NewConsole(theGame)
 
+	terminationCode := 0
 	loopConfig := util.LoopConfig{
 		TargetFPS:        5,
 		IdleThreshold:    1,
@@ -133,25 +134,36 @@ func runGameWithConsole(game *game.GameInstance) {
 		RenderFunc:       con.Draw,
 	}
 
-	loop := util.CreateLoop(loopConfig)
-
+	loop := util.CreateLoop(loopConfig, &terminationCode)
 	loop()
+
+	if terminationCode == 2 {
+		theGame.SetConsoleMode(false)
+		defer runGameWithEbiten(theGame)
+	}
 }
 
 // runGameWithEbiten will start the infinitely running game loop
 // game will receive the update and draw calls
-func runGameWithEbiten(game *game.GameInstance) {
-	screenSize := game.GetDeviceIndependentScreenSize()
+func runGameWithEbiten(theGame *game.GameInstance) {
+	screenSize := theGame.GetDeviceIndependentScreenSize()
 
-	ebiten.SetWindowTitle(game.GetTitle())
+	ebiten.SetWindowTitle(theGame.GetTitle())
 	ebiten.SetWindowSize(screenSize.X, screenSize.Y)
 	ebiten.SetScreenClearedEveryFrame(true)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetWindowSizeLimits(640, 480, -1, -1)
+	ebiten.SetWindowClosingHandled(false)
 
-	if err := ebiten.RunGameWithOptions(game, &ebiten.RunGameOptions{
+	err := ebiten.RunGameWithOptions(theGame, &ebiten.RunGameOptions{
 		GraphicsLibrary: ebiten.GraphicsLibraryOpenGL,
-	}); err != nil && !errors.Is(err, ebiten.Termination) {
-		log.Fatal(err)
+	})
+
+	if err != nil {
+		if errors.Is(err, game.ContinueWithAscii) {
+			defer runGameWithConsole(theGame)
+		} else if !errors.Is(err, ebiten.Termination) {
+			log.Fatal(err)
+		}
 	}
 }

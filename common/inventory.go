@@ -180,6 +180,18 @@ func (i *Inventory) HasLightSource() bool {
 	return false
 }
 
+func (i *Inventory) IsValidLetter(r rune) bool {
+	return i.GetItemByLetter(r) != nil
+}
+
+func (i *Inventory) Clone() *Inventory {
+	clonedInv := NewInventory(i.maxItemStacks)
+	for _, item := range i.items {
+		clonedInv.Add(item.Clone())
+	}
+	return clonedInv
+}
+
 func SortInventory(stacks []InventoryStack) {
 	slices.SortStableFunc(stacks, func(i, j InventoryStack) int {
 		itemI := i[0]
@@ -193,11 +205,30 @@ func SortInventory(stacks []InventoryStack) {
 			case ItemCategoryWeapon:
 				weaponPartOne := itemI.GetWeaponStats()
 				weaponPartTwo := itemJ.GetWeaponStats()
-				return cmp.Compare(weaponPartOne.Type, weaponPartTwo.Type)
+				if weaponPartTwo.Type != weaponPartOne.Type {
+					return cmp.Compare(weaponPartOne.Type, weaponPartTwo.Type)
+				}
+				if weaponPartOne.Damage.Max() != weaponPartTwo.Damage.Max() {
+					return cmp.Compare(weaponPartOne.Damage.Max(), weaponPartTwo.Damage.Max())
+				}
+				if weaponPartOne.Damage.Min() != weaponPartTwo.Damage.Min() {
+					return cmp.Compare(weaponPartOne.Damage.Min(), weaponPartTwo.Damage.Min())
+				}
+				if weaponPartOne.Plus != weaponPartTwo.Plus {
+					return cmp.Compare(weaponPartOne.Plus, weaponPartTwo.Plus)
+				}
 			case ItemCategoryArmor:
 				armorPartOne := itemI.GetArmorStats()
 				armorPartTwo := itemJ.GetArmorStats()
-				return cmp.Compare(armorPartOne.Type, armorPartTwo.Type)
+				if armorPartTwo.Type != armorPartOne.Type {
+					return cmp.Compare(armorPartOne.Type, armorPartTwo.Type)
+				}
+				if armorPartOne.BaseArmor != armorPartTwo.BaseArmor {
+					return cmp.Compare(armorPartOne.BaseArmor, armorPartTwo.BaseArmor)
+				}
+				if armorPartOne.Plus != armorPartTwo.Plus {
+					return cmp.Compare(armorPartOne.Plus, armorPartTwo.Plus)
+				}
 			case ItemCategoryWand:
 				fallthrough
 			case ItemCategoryPotion:
@@ -208,5 +239,6 @@ func SortInventory(stacks []InventoryStack) {
 				return cmp.Compare(itemI.Name(), itemJ.Name())
 			}
 		}
+		return cmp.Compare(itemI.Name(), itemJ.Name())
 	})
 }

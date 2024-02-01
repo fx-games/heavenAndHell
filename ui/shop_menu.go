@@ -25,8 +25,10 @@ type PositionInfoForShops struct {
 
 type ShopMenuItem struct {
 	TextColumns []util.LabelText
+	Tooltip     []util.LabelText
 	Action      func()
 	ShortCut    rune
+	Icon        int32
 }
 
 type ShopMenu struct {
@@ -45,21 +47,24 @@ type ShopMenu struct {
 	alignInfo            []Alignment
 	colDistance          int
 	lineDistance         int
-	headerTextLeft	     string
+	headerTextLeft       string
 	headerTextRight      string
 	headerTextRightWidth float64
+	tileSize             geometry.Point
+	iconScale            float64
 }
 
-func NewShopMenu(uiController *UIController) *ShopMenu {
+func NewShopMenu(uiController *UIController, iconTileSize geometry.Point) *ShopMenu {
 	b := &ShopMenu{
-		uiController:   uiController,
-		closeOnSelect:  true,
-		borderPadding:  geometry.Point{X: 40, Y: 40},
-		colDistance:  10,
-		lineDistance: 10,
+		uiController:  uiController,
+		closeOnSelect: true,
+		borderPadding: geometry.Point{X: 40, Y: 40},
+		colDistance:   10,
+		lineDistance:  10,
+		tileSize:      iconTileSize,
 	}
 	b.layoutFunc = func() {
-		b.posInfo = SizeNeededForMenu(b.uiController.GetRenderer().MeasureString, b.items, b.alignInfo, b.lineDistance, b.colDistance)
+		b.posInfo = b.sizeNeededForMenu(b.uiController.GetRenderer().MeasureString, b.items, b.alignInfo, b.lineDistance, b.colDistance)
 		b.layoutCentered()
 	}
 	return b
@@ -98,7 +103,16 @@ func (i *ShopMenu) OnCommand(command CommandType) bool {
 	}
 	return false
 }
-
+func (i *ShopMenu) OnKeyPressed(key ebiten.Key, shiftPressed bool) {
+	itemRune := keyToInventoryRune(key, shiftPressed)
+	for index, item := range i.items {
+		if item.ShortCut == itemRune {
+			i.selectedIndex = index
+			i.confirmSelection()
+			return
+		}
+	}
+}
 func (i *ShopMenu) OnMouseClicked(button ebiten.MouseButton, x int, y int) bool {
 	if button == ebiten.MouseButtonRight {
 		i.close()
@@ -122,7 +136,7 @@ func (i *ShopMenu) OnMouseMoved(x int, y int) (bool, Tooltip) {
 	for index := 0; index < len(i.items); index++ {
 		if float64(mousePos.Y) >= lowerY && float64(mousePos.Y) <= upperY {
 			i.selectedIndex = index
-			return true, NoTooltip{}
+			return true, NewTextTooltip(i.uiController, i.items[index].Tooltip, geometry.Point{X: x, Y: y})
 		}
 
 		lowerY = upperY + float64(i.posInfo.LineDist)
@@ -146,13 +160,11 @@ func (i *ShopMenu) Layout() {
 func (i *ShopMenu) Draw() {
 	uiRenderer := i.uiController.GetRenderer()
 
-
 	borderTopLeft := i.topLeft.Sub(i.borderPadding.Div(2))
 	borderSize := i.posInfo.SizeInPixels.Add(i.borderPadding)
 	uiRenderer.DrawDefaultBorder(borderTopLeft, borderSize)
 
 	i.drawStringArray(i.items)
-
 
 	if i.headerTextLeft == "" && i.headerTextRight == "" {
 		return
@@ -165,7 +177,7 @@ func (i *ShopMenu) Draw() {
 	headerBorderSize := headerSize.Add(i.borderPadding)
 	uiRenderer.DrawDefaultBorder(headerBorderTopLeft, headerBorderSize)
 
-	uiRenderer.DrawTTFOnScreen(float64(topLeftHeader.X) +1, float64(topLeftHeader.Y)+i.posInfo.LineHeight+1, i.headerTextLeft, common.DarkTextColor)
+	uiRenderer.DrawTTFOnScreen(float64(topLeftHeader.X)+1, float64(topLeftHeader.Y)+i.posInfo.LineHeight+1, i.headerTextLeft, common.DarkTextColor)
 	// right align
 	headerTextRightX := float64(i.topLeft.X) + float64(i.posInfo.SizeInPixels.X) - i.headerTextRightWidth
 
@@ -185,10 +197,18 @@ func (i *ShopMenu) drawStringArray(lines []ShopMenuItem) {
 	drawY := float64(i.topLeft.Y) + float64(i.posInfo.LineHeight) + 1
 
 	for lineIndex, line := range lines {
-		uiRenderer.DrawTTFOnScreen(float64(i.topLeft.X)+1, drawY, fmt.Sprintf("%c)", line.ShortCut), common.DarkTextColor)
+
+		lineStartX := i.topLeft.X + 1
+		iconDrawY := drawY - float64(i.tileSize.Y)*i.iconScale
+		uiRenderer.DrawOnScreenWithScale(lineStartX, int(iconDrawY), line.Icon, i.iconScale)
+
+		colOffset := i.posInfo.ColumnXOffsets[1]
+		letterDrawX := 1.0 + float64(i.topLeft.X) + float64(colOffset)
+
+		uiRenderer.DrawTTFOnScreen(letterDrawX, drawY, fmt.Sprintf("%c)", line.ShortCut), common.DarkTextColor)
 		for ci, column := range line.TextColumns {
-			columnIndex := ci + 1 // +1 for the letter shortcut column
-			colOffset := i.posInfo.ColumnXOffsets[columnIndex]
+			columnIndex := ci + 2 // +2 for the icon + letter shortcut column
+			colOffset = i.posInfo.ColumnXOffsets[columnIndex]
 
 			drawX := 1.0
 			if i.alignInfo[ci] == AlignmentRight {
@@ -273,7 +293,9 @@ func (i *ShopMenu) close() {
 	i.shouldClose = true
 }
 
-func SizeNeededForMenu(measureString func(line string) (float64, float64), items []ShopMenuItem, alignments []Alignment, lineDistance int, colDistance int) PositionInfoForShops {
+func (i *ShopMenu) sizeNeededForMenu(measureString func(line string) (float64, float64), items []ShopMenuItem, alignments []Alignment, lineDistance int, colDistance int) PositionInfoForShops {
+
+
 	// we'll start by calculating the width needed for each column and the height needed for each row
 	alignments = append([]Alignment{AlignmentLeft}, alignments...)
 	columnCount := len(items[0].TextColumns) + 1 // +1 for the letter shortcut column
@@ -303,8 +325,24 @@ func SizeNeededForMenu(measureString func(line string) (float64, float64), items
 		}
 	}
 
+	/* Start Add ICON */
+	tileHeight := i.tileSize.Y
+	// make the tileheight the same as the line height
+	i.iconScale = float64(rowHeight) / float64(tileHeight)
+	iconWidth := int(float64(i.tileSize.X) * i.iconScale)
+
+	columnCount++
+	columnWidths = append([]int{iconWidth}, columnWidths...)
+	alignments = append([]Alignment{AlignmentLeft}, alignments...)
+
+	for lineIndex, item := range itemWidths {
+		itemWidths[lineIndex] = append([]float64{float64(iconWidth)}, item...)
+	}
+	/* End Add ICON */
+
 	totalHeight := (len(items)-1)*lineDistance + int(float64(len(items))*rowHeight) + (lineDistance / 2)
 	totalWidth := (columnCount - 1) * colDistance
+
 	for _, columnWidth := range columnWidths {
 		totalWidth += columnWidth
 	}

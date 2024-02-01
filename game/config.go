@@ -6,6 +6,8 @@ import (
 	"rpg/recfile"
 )
 
+const MAX_LEVELS = 12
+
 type LevelName string
 
 const (

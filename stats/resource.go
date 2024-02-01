@@ -81,3 +81,11 @@ func (r *Resource) IncreaseByFloat(amount float64) {
 	r.value += amount
 	r.ensureRange()
 }
+
+func (r *Resource) Clone() *Resource {
+	return NewResource(r.min, r.getMax, r.Value())
+}
+
+func (r *Resource) Min() int {
+	return r.min
+}

@@ -74,7 +74,7 @@ func addActorFromEntity(ldtkMapProject *ldtk_go.Project, loadedMap *gridmap.Grid
 	}
 
 	npcTypeProp := entity.PropertyByIdentifier("Type").AsString()
-	if strings.HasPrefix(npcTypeProp, "Vendor") {
+	if strings.HasPrefix(npcTypeProp, "Store") {
 		actor.SetVendorType(common.VendorType(strings.ToLower(npcTypeProp)))
 		actor.SetNoCorpse()
 		actor.SetDeathStringFormats([]string{

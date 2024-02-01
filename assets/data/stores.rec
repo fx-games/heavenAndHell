@@ -1,9 +1,9 @@
 %rec: default
-#FIELDS: internal_name purse max_items turnover_items sometimes_count always sometimes
+#FIELDS: internal_name purse item_count turnover_items sometimes_count always sometimes
 
 internal_name: store_general
 purse: 10000
-max_items: 12
+item_count: 12
 turnover_items: 2
 sometimes_count: 0-4
 always: cloak
@@ -12,3 +12,64 @@ always: flask_of_oil
 sometimes: healing_potion
 sometimes: mana_potion
 
+internal_name: store_armor
+purse: 10000
+item_count: 6-18
+turnover_items: 2
+sometimes_count: 18
+sometimes: robe
+sometimes: cloak
+sometimes: soft_leather_boots
+sometimes: soft_leather_armour
+sometimes: leather_scale_mail
+sometimes: chain_mail
+sometimes: leather_gloves
+sometimes: hard_leather_cap
+sometimes: fur_cloak
+sometimes: ceremonial_robe
+sometimes: metal_cap
+sometimes: iron_helm
+sometimes: gauntlets
+sometimes: hard_leather_boots
+sometimes: iron_boots
+sometimes: buckler
+sometimes: small_leather_shield
+
+internal_name: store_weapons
+purse: 10000
+item_count: 6-18
+turnover_items: 2
+sometimes_count: 18
+sometimes: dagger
+sometimes: main_gauche
+sometimes: whip
+sometimes: spear
+sometimes: rapier
+sometimes: small_sword
+sometimes: sabre
+sometimes: short_sword
+sometimes: mace
+sometimes: tulwar
+sometimes: quarterstaff
+sometimes: ball_and_chain
+sometimes: war_hammer
+sometimes: broad_sword
+sometimes: long_sword
+sometimes: bastard_sword
+sometimes: broad_axe
+sometimes: battle_axe
+sometimes: short_bow
+sometimes: long_bow
+sometimes: light_crossbow
+
+internal_name: store_alchemy
+purse: 10000
+item_count: 12
+turnover_items: 2
+sometimes_count: 0-4
+always: scroll_of_recall
+always: scroll_of_random_teleport
+always: healing_potion
+sometimes: mana_potion
+sometimes: scroll_of_blessing
+sometimes: speed_potion

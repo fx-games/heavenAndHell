@@ -265,7 +265,7 @@ func NewPlateMailOfTheDarkLord(state actions.WorldState) *GameItem {
 	armorPart := &common.ArmorStats{
 		BaseArmor: 40,
 		Plus: 0,
-		Type: common.ArmorTypeHelmet,
+		Type: common.ArmorTypeCuirass,
 		Durability: stats.NewResource(0, flatFunc(20), 20),
 	}
 

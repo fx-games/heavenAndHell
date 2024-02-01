@@ -29,9 +29,9 @@ func (d *DieAction) Execute(engine Engine) []Action {
 		engine.Log(fmt.Sprintf("You die. CoD: %s", d.cause.ToString()))
 		engine.OnPlayerDied()
 	} else {
-		corpsePos := d.getCorpsePos(gameMap, actor.MapPosition())
 		gameMap.RemoveActor(actor)
 		if actor.HasCorpse() {
+			corpsePos := d.getCorpsePos(gameMap, actor.MapPosition())
 			gameMap.AddDownedActor(actor, corpsePos) // write state
 		}
 		engine.Log(fmt.Sprintf(actor.GetDeathStringFormat(), actor.Name()))
@@ -49,6 +49,9 @@ func (d *DieAction) getCorpsePos(gameMap *gridmap.GridMap[*common.Actor, common.
 		return actorPos
 	}
 	freeCells := gameMap.GetFreeCellsForDistribution(actorPos, 1, isFree)
+	if len(freeCells) == 0 {
+		return actorPos
+	}
 	dropPos := freeCells[0]
 	return dropPos
 }
