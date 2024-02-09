@@ -6,6 +6,7 @@ internal_name: dart
 icon: 232
 dlvl: 1
 category: throwable
+cost: 5
 throw_hit_zone: target_only
 throw_damage: 1-4
 throw_chance_to_break: 0.2
@@ -14,6 +15,7 @@ name: a dart of confusion
 internal_name: dart_confusion
 icon: 232
 dlvl: 1
+cost: 25
 category: throwable
 throw_hit_zone: target_only
 throw_damage: 1-4
@@ -24,6 +26,7 @@ name: a flask of oil
 internal_name: flask_of_oil
 icon: 246
 dlvl: 1
+cost: 12
 category: potion
 throw_hit_zone: dijkstra_aoe(1)
 throw_damage: 1-4

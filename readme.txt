@@ -24,5 +24,6 @@ Features:
 Press "F1" during play for help.
 
 Some mechanical intricacies:
- - No to-hit chance. By default, all attacks connect. Exceptions are mode for special abilities (eg. flying/dodging)
+ - No to-hit chance. By default, all attacks connect. Exceptions are made for special abilities (eg. flying/dodging)
  - No resistances/damage types. Damage is mitigated by armor.
+ - No ammo pickups. Ranged weapons are assumed to always have ammo.

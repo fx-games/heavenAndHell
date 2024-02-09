@@ -1,13 +1,12 @@
 package game
 
 import (
-	"rpg/actions"
 	"rpg/common"
 	"rpg/geometry"
 	"rpg/stats"
 )
 
-func getBigAxeDamageLocations(state actions.WorldState) func(attackerPos, targetPos geometry.Point, totalDamageForAllWeapons stats.Interval, weaponCount int) []common.LocationDamagePrediction {
+func getBigAxeDamageLocations(state *common.State) func(attackerPos, targetPos geometry.Point, totalDamageForAllWeapons stats.Interval, weaponCount int) []common.LocationDamagePrediction {
 	return func(attackerPos, targetPos geometry.Point, totalDamageForAllWeapons stats.Interval, weaponCount int) []common.LocationDamagePrediction {
 		currentMap := state.GetMap()
 
@@ -32,7 +31,7 @@ func getBigAxeDamageLocations(state actions.WorldState) func(attackerPos, target
 	}
 }
 
-func getSmallAxeDamageLocations(state actions.WorldState) func(attackerPos, targetPos geometry.Point, totalDamageForAllWeapons stats.Interval, weaponCount int) []common.LocationDamagePrediction {
+func getSmallAxeDamageLocations(state *common.State) func(attackerPos, targetPos geometry.Point, totalDamageForAllWeapons stats.Interval, weaponCount int) []common.LocationDamagePrediction {
 	return func(attackerPos, targetPos geometry.Point, totalDamageForAllWeapons stats.Interval, weaponCount int) []common.LocationDamagePrediction {
 		damage := totalDamageForAllWeapons.Div(weaponCount)
 		currentMap := state.GetMap()

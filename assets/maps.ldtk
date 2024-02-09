@@ -11,7 +11,7 @@
 	"iid": "0aad30e0-8990-11ee-aa96-5fbb691582f7",
 	"jsonVersion": "1.4.1",
 	"appBuildId": 471015,
-	"nextUid": 142,
+	"nextUid": 145,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "Free",
@@ -928,7 +928,7 @@
 			"savedSelections": [],
 			"cachedPixelData": {
 				"opaqueTiles": "0000000000000001111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001111100000000000000000000000010110000000000000000000000000000000000011100000000000000101000000001110000000000000000000000000111000000000000000000000000011110000000000000000000000001111000000000000000000000000111100000000000000000000000011110000000000000000000000001111000000000000000000000000111100000000000000000000000011110000000000000000000000001100000000000000000000000000000011000000000000000000000000001100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-				"averageColors": "23640742236417316364474227b787316731573177424742a536b536b536f779f324f426fcefba97a99bc98aa866b855bcb8ccbcb989b7693fff3fff27b727b75e914e915a45774237422fc22fc22abd1abd5b133b133b132b1315951595bc86abbcbaaaaa9aa855bdc9cbccb99aa7696abd3abd688a7731a13351333742752185367536753675367536b5314521a57b457b3bce3bce4abd9545b5355abd9bab9cbbbc76a9896eed5cdf59acb4359cab4e913fdd4a454abd37b7357b5a455e91ab7779ad8a878c64ac888c998b898d84357b5b134fdd457b457b3e913e91ada7474257b74abd3abd7abd3abd3abd3abd2abd2abd6baa399a3b64a978a868d954bb643b87379b39647a537a8475756abd3abd2a455364cd856a6367676846647659795bab59565c865788497857536b88789c589c7c75b531f313f212facdfb61f5236b5566a6695566586c963fdd3fdd4a9b46794c98589b5a345da7267528442b85a88aa789ab762a457d927a71bd828b71f2351944f335f6321b131b132b135b139b133fdd3fdd97689c758899878a86858d948734757a7954a67aa668a954a879a99aa953c789c7337cab6fdd2fdd4fdd7fdd3fdd1fdd7fdd1fdd3fdd3fddf878f878f778584469558733966900002a9a4aacb4334944a646a646b6465a455ffff9411ffff0000000000068687c944a9a4bde6fff3ffff878f568f878000000000000ad889cddaa45ab240000000000000000000000005fff1fff2fff3e935e937e936dbb775575767a677a667457f778f878f878000000000000ba239cbbcd96000000000000000000000000000000003fff3a443b6438543ea8378b9a56946497329ebb0000f568f669f669f43600000000cd965cef5ccd5ccd5b35000000000000000000006b886ab96a8766576ccc699b6ab96b886b776c866eb768a7f78bf78bf78af78b00000000ac887fff7ecc00000000000000000000000000005a7300000000a834b743a955ba65a632a553b99bbb52ac85f668f436f78af66800000000ba96000000000000000000000000000000000000000000000000864489548879856986458aac893388a78c86f68bf77af78af68b00008ccdabbbaa9a9aab9cbcb99900000000000000000000000000000000b446b955b679b742b99bb576b955bc86b953f558f558f668f6680000ab539a449a66a5549ebaab44bd769845aa46000000000000000000008447a3358458000000000000000000000000f89cf89cf78bf78b00009644b9569cb8a765998aa9868c768cda9dca9ba78c988a87abaa0000a32544469446000000000000000000000000f78bf78bf78bf78b0000b523b955c9b6c444c78ac474aa54bab8cba9b896a765a665bbaa0000b44776574448385600000000000000000000f225f8557b767b76e644e644b3230000000000000000000000000000000000000000000000000000000000000000000000000000000000006a6669667b767b76f965f965c864b865986697667753aa45aa44ba689a568a338a34bab8abb7a9b98bb700000000000000000000000000007855785577447744f754f8547fff8fff6fff7fff7fff6fff7fff7fff5fff6fff7fff6fff7fff8fff7fff7fff8fff7fff7fff5fff7fff7fff7fff7fff6fff6fff3fff000000000000000000000000000000000000000000000000000000000000000000000000296728562b882bac2aab00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000399a3957387a3b793c98000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004866586558657877787800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000498a599b599b799b799b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+				"averageColors": "23640742236417316364474227b787316731573177424742a536b536b536f779f324f426fcefba97a99bc966a866b855bcb8ccbcb989b7693fff3fff27b727b75e914e915a45774237422fc22fc22abd1abd5b133b133b132b1315951595bc76a98abb86a989a855bdc9cbccb99aa7696abd3abd688a7731a13351333742752185367536753675367536b5314521a57b457b3bce3bce4abd9545b5355abd9bab9cbbbc76a9896eed5cdf59acb4359cab4e913fdd4a454abd37b7357b5a455e91ab7779ad8a878c64ac888c998b898d84357b5b134fdd457b457b3e913e91ada7474257b74abd3abd7abd3abd3abd3abd2abd2abd6baa399a3b64a978a868d954bb643b87379b39647a537a8475756abd3abd2a455364cd856a6367676846647659795bab59565c865788497857536b88789c589c7c75b531f313f212facdfb61f5236b5566a6695566586c963fdd3fdd4a9b46794c98589b5a345da7267528442b85a88aa789ab762a457d927a71bd828b71f2351944f335f6321b131b132b135b139b133fdd3fdd97689c758899878a86858d948734757a7954a67aa668a954a879a99aa953c789c7337cab6fdd2fdd4fdd7fdd3fdd1fdd7fdd1fdd3fdd3fddf878f878f778584469558733966900002a9a4aacb4334944a646a646b6465a455ffff9411ffff0000000000068687c944a9a4bde6fff3ffff878f568f878000000000000ad889cddaa45ab240000000000000000000000005fff1fff2fff3e935e937e936dbb775575767a677a667457f778f878f878000000000000ba239cbbcd96000000000000000000000000000000003fff3a443b6438543ea8378b9a56946497329ebb0000f568f669f669f43600000000cd965cef5ccd5ccd5b35000000000000000000006b886ab96a8766576ccc699b6ab96b886b776c866eb768a7f78bf78bf78af78b00000000ac887fff7ecc00000000000000000000000000005a735743789ba834b743a955ba65a632a553b99bbb52ac85f668f436f78af66800000000ba96000000000000000000000000000000000000000000000000864489548879856986458aac893388a78c86f68bf77af78af68b00008ccdabbbaa9a9aab9cbcb99900000000000000000000000000000000b446b955b679b742b99bb576b955bc86b953f558f558f668f6680000ab539a449a66a5549ebaab44bd769845aa46000000000000000000008447a3358458000000000000000000000000f89cf89cf78bf78b00009644b9569cb8a765998aa9868c768cda9dca9ba78c988a87abaa0000a32544469446000000000000000000000000f78bf78bf78bf78b0000b523b955c9b6c444c78ac474aa54bab8cba9b896a765a665bbaa0000b44776574448385600000000000000000000f225f8557b767b76e644e644b3230000000000000000000000000000000000000000000000000000000000000000000000000000000000006a6669667b767b76f965f965c864b865986697667753aa45aa44ba689a568a338a34bab8abb7a9b98bb700000000000000000000000000007855785577447744f754f8547fff8fff6fff7fff7fff6fff7fff7fff5fff6fff7fff6fff7fff8fff7fff7fff8fff7fff7fff5fff7fff7fff7fff7fff6fff6fff3fff0000000000005abd5d966d86289b488b5bab699a3b884c985c896b894689b854baacbc97296728562b882bac2aab0000000000000000000049785978586759786b886a756caa47736a8757463843494459436a334734a789aa89a88b399a3957387a3b793c9800000000000000000000000000000000000000005a743a65578a3a885a4339794aab599a699b497aaa75acbbab994866586558657877787800000000000000000000000000000000000000002d833b543a8a29443b95c89cca87ba76a833a657000000000000498a599b599b799b799b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000575659635bbc5dde8aac00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 			}
 		}
 	], "enums": [
@@ -1162,6 +1162,41 @@
 			"allowedRefsEntityUid": null,
 			"allowedRefTags": [],
 			"tilesetUid": null
+		},
+		{
+			"identifier": "CanBeLit",
+			"doc": null,
+			"__type": "Bool",
+			"uid": 142,
+			"type": "F_Bool",
+			"isArray": false,
+			"canBeNull": false,
+			"arrayMinLength": null,
+			"arrayMaxLength": null,
+			"editorDisplayMode": "Hidden",
+			"editorDisplayScale": 1,
+			"editorDisplayPos": "Above",
+			"editorLinkStyle": "StraightArrow",
+			"editorDisplayColor": null,
+			"editorAlwaysShow": false,
+			"editorShowInWorld": true,
+			"editorCutLongValues": true,
+			"editorTextSuffix": null,
+			"editorTextPrefix": null,
+			"useForSmartColor": false,
+			"min": null,
+			"max": null,
+			"regex": null,
+			"acceptFileTypes": null,
+			"defaultOverride": null,
+			"textLanguageMode": null,
+			"symmetricalRef": false,
+			"autoChainRef": true,
+			"allowOutOfLevelRef": true,
+			"allowedRefs": "OnlySame",
+			"allowedRefsEntityUid": null,
+			"allowedRefTags": [],
+			"tilesetUid": null
 		}
 	] },
 	"levels": [
@@ -1193,7 +1228,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -3119,7 +3155,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -3390,7 +3427,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -3629,7 +3667,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -3831,28 +3870,15 @@
 						{ "px": [56,48], "src": [64,16], "f": 0, "t": 64, "d": [73], "a": 1 },
 						{ "px": [64,48], "src": [64,16], "f": 0, "t": 64, "d": [74], "a": 1 },
 						{ "px": [72,48], "src": [64,16], "f": 0, "t": 64, "d": [75], "a": 1 },
-						{ "px": [16,56], "src": [216,64], "f": 0, "t": 251, "d": [79], "a": 1 },
-						{ "px": [24,56], "src": [216,64], "f": 0, "t": 251, "d": [80], "a": 1 },
 						{ "px": [32,56], "src": [64,16], "f": 0, "t": 64, "d": [81], "a": 1 },
 						{ "px": [40,56], "src": [64,16], "f": 0, "t": 64, "d": [82], "a": 1 },
 						{ "px": [48,56], "src": [64,16], "f": 0, "t": 64, "d": [83], "a": 1 },
-						{ "px": [56,56], "src": [216,64], "f": 0, "t": 251, "d": [84], "a": 1 },
-						{ "px": [64,56], "src": [216,64], "f": 0, "t": 251, "d": [85], "a": 1 },
-						{ "px": [16,64], "src": [216,64], "f": 0, "t": 251, "d": [90], "a": 1 },
-						{ "px": [24,64], "src": [216,64], "f": 0, "t": 251, "d": [91], "a": 1 },
 						{ "px": [32,64], "src": [64,16], "f": 0, "t": 64, "d": [92], "a": 1 },
 						{ "px": [40,64], "src": [64,16], "f": 0, "t": 64, "d": [93], "a": 1 },
 						{ "px": [48,64], "src": [64,16], "f": 0, "t": 64, "d": [94], "a": 1 },
-						{ "px": [56,64], "src": [216,64], "f": 0, "t": 251, "d": [95], "a": 1 },
-						{ "px": [64,64], "src": [216,64], "f": 0, "t": 251, "d": [96], "a": 1 },
-						{ "px": [16,72], "src": [216,64], "f": 0, "t": 251, "d": [101], "a": 1 },
-						{ "px": [24,72], "src": [216,64], "f": 0, "t": 251, "d": [102], "a": 1 },
 						{ "px": [32,72], "src": [64,16], "f": 0, "t": 64, "d": [103], "a": 1 },
 						{ "px": [40,72], "src": [64,16], "f": 0, "t": 64, "d": [104], "a": 1 },
-						{ "px": [48,72], "src": [64,16], "f": 0, "t": 64, "d": [105], "a": 1 },
-						{ "px": [56,72], "src": [216,64], "f": 0, "t": 251, "d": [106], "a": 1 },
-						{ "px": [64,72], "src": [216,64], "f": 0, "t": 251, "d": [107], "a": 1 },
-						{ "px": [24,80], "src": [216,64], "f": 0, "t": 251, "d": [113], "a": 1 }
+						{ "px": [48,72], "src": [64,16], "f": 0, "t": 64, "d": [105], "a": 1 }
 					],
 					"entityInstances": []
 				}
@@ -3884,7 +3910,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -4130,7 +4157,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -4389,7 +4417,8 @@
 					"params": ["Deco_for_poisoned_water"]
 				}] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -4581,7 +4610,8 @@
 				}] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [null] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -4776,7 +4806,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -4970,7 +5001,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -5139,7 +5171,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -5316,7 +5349,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -5517,7 +5551,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -5722,7 +5757,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -5995,7 +6031,8 @@
 					"params": ["Hell_deco_one"]
 				}] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -6252,7 +6289,8 @@
 					"params": ["Hell_lucifer_deco"]
 				}] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -6500,7 +6538,8 @@
 				}] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [null] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -6767,7 +6806,8 @@
 				}] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [null] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -6958,7 +6998,8 @@
 				}] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [null] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -7149,7 +7190,8 @@
 				}] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [null] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -7337,7 +7379,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -7500,7 +7543,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -7670,7 +7714,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -7833,7 +7878,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -7992,7 +8038,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -8172,7 +8219,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -8427,7 +8475,11 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": true, "__tile": null, "defUid": 142, "realEditorValues": [{
+					"id": "V_Bool",
+					"params": [ true ]
+				}] }
 			],
 			"layerInstances": [
 				{
@@ -8637,7 +8689,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -8818,7 +8871,8 @@
 					"params": ["Deco_for_king_zedek"]
 				}] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -8980,7 +9034,8 @@
 				}] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [null] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -9155,7 +9210,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -9343,7 +9399,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -9535,7 +9592,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -9709,7 +9767,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -9868,7 +9927,8 @@
 				}] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -10113,7 +10173,8 @@
 				}] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -10358,7 +10419,8 @@
 				}] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -10603,7 +10665,11 @@
 					"params": ["Meat_jack_room"]
 				}] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 1, "__tile": null, "defUid": 92, "realEditorValues": [{ "id": "V_Int", "params": [1] }] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 1, "__tile": null, "defUid": 92, "realEditorValues": [{ "id": "V_Int", "params": [1] }] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": true, "__tile": null, "defUid": 142, "realEditorValues": [{
+					"id": "V_Bool",
+					"params": [ true ]
+				}] }
 			],
 			"layerInstances": [
 				{
@@ -10826,7 +10892,11 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [null] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 1, "__tile": null, "defUid": 92, "realEditorValues": [{ "id": "V_Int", "params": [1] }] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 1, "__tile": null, "defUid": 92, "realEditorValues": [{ "id": "V_Int", "params": [1] }] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": true, "__tile": null, "defUid": 142, "realEditorValues": [{
+					"id": "V_Bool",
+					"params": [ true ]
+				}] }
 			],
 			"layerInstances": [
 				{
@@ -11065,7 +11135,11 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [null] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 1, "__tile": null, "defUid": 92, "realEditorValues": [{ "id": "V_Int", "params": [1] }] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 1, "__tile": null, "defUid": 92, "realEditorValues": [{ "id": "V_Int", "params": [1] }] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": true, "__tile": null, "defUid": 142, "realEditorValues": [{
+					"id": "V_Bool",
+					"params": [ true ]
+				}] }
 			],
 			"layerInstances": [
 				{
@@ -11304,7 +11378,11 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [null] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 1, "__tile": null, "defUid": 92, "realEditorValues": [{ "id": "V_Int", "params": [1] }] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 1, "__tile": null, "defUid": 92, "realEditorValues": [{ "id": "V_Int", "params": [1] }] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": true, "__tile": null, "defUid": 142, "realEditorValues": [{
+					"id": "V_Bool",
+					"params": [ true ]
+				}] }
 			],
 			"layerInstances": [
 				{
@@ -11543,7 +11621,11 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 1, "__tile": null, "defUid": 91, "realEditorValues": [{ "id": "V_Int", "params": [1] }] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": true, "__tile": null, "defUid": 142, "realEditorValues": [{
+					"id": "V_Bool",
+					"params": [ true ]
+				}] }
 			],
 			"layerInstances": [
 				{
@@ -11761,7 +11843,6 @@
 						{ "px": [8,56], "src": [64,16], "f": 0, "t": 64, "d": [134], "a": 1 },
 						{ "px": [16,56], "src": [64,16], "f": 0, "t": 64, "d": [135], "a": 1 },
 						{ "px": [24,56], "src": [64,16], "f": 0, "t": 64, "d": [136], "a": 1 },
-						{ "px": [112,56], "src": [216,64], "f": 0, "t": 251, "d": [147], "a": 1 },
 						{ "px": [120,56], "src": [64,16], "f": 0, "t": 64, "d": [148], "a": 1 },
 						{ "px": [128,56], "src": [64,16], "f": 0, "t": 64, "d": [149], "a": 1 },
 						{ "px": [136,56], "src": [64,16], "f": 0, "t": 64, "d": [150], "a": 1 },
@@ -11774,10 +11855,6 @@
 						{ "px": [8,72], "src": [64,16], "f": 0, "t": 64, "d": [172], "a": 1 },
 						{ "px": [16,72], "src": [64,16], "f": 0, "t": 64, "d": [173], "a": 1 },
 						{ "px": [24,72], "src": [64,16], "f": 0, "t": 64, "d": [174], "a": 1 },
-						{ "px": [72,72], "src": [216,64], "f": 0, "t": 251, "d": [180], "a": 1 },
-						{ "px": [80,72], "src": [216,64], "f": 0, "t": 251, "d": [181], "a": 1 },
-						{ "px": [88,72], "src": [216,64], "f": 0, "t": 251, "d": [182], "a": 1 },
-						{ "px": [96,72], "src": [216,64], "f": 0, "t": 251, "d": [183], "a": 1 },
 						{ "px": [120,72], "src": [64,16], "f": 0, "t": 64, "d": [186], "a": 1 },
 						{ "px": [128,72], "src": [64,16], "f": 0, "t": 64, "d": [187], "a": 1 },
 						{ "px": [136,72], "src": [64,16], "f": 0, "t": 64, "d": [188], "a": 1 },
@@ -11858,7 +11935,11 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 1, "__tile": null, "defUid": 91, "realEditorValues": [{ "id": "V_Int", "params": [1] }] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": true, "__tile": null, "defUid": 142, "realEditorValues": [{
+					"id": "V_Bool",
+					"params": [ true ]
+				}] }
 			],
 			"layerInstances": [
 				{
@@ -12076,7 +12157,6 @@
 						{ "px": [8,56], "src": [64,16], "f": 0, "t": 64, "d": [134], "a": 1 },
 						{ "px": [16,56], "src": [8,16], "f": 0, "t": 57, "d": [135], "a": 1 },
 						{ "px": [24,56], "src": [64,16], "f": 0, "t": 64, "d": [136], "a": 1 },
-						{ "px": [112,56], "src": [216,64], "f": 0, "t": 251, "d": [147], "a": 1 },
 						{ "px": [120,56], "src": [64,16], "f": 0, "t": 64, "d": [148], "a": 1 },
 						{ "px": [128,56], "src": [8,16], "f": 0, "t": 57, "d": [149], "a": 1 },
 						{ "px": [136,56], "src": [64,16], "f": 0, "t": 64, "d": [150], "a": 1 },
@@ -12089,10 +12169,6 @@
 						{ "px": [8,72], "src": [64,16], "f": 0, "t": 64, "d": [172], "a": 1 },
 						{ "px": [16,72], "src": [64,16], "f": 0, "t": 64, "d": [173], "a": 1 },
 						{ "px": [24,72], "src": [64,16], "f": 0, "t": 64, "d": [174], "a": 1 },
-						{ "px": [72,72], "src": [216,64], "f": 0, "t": 251, "d": [180], "a": 1 },
-						{ "px": [80,72], "src": [216,64], "f": 0, "t": 251, "d": [181], "a": 1 },
-						{ "px": [88,72], "src": [216,64], "f": 0, "t": 251, "d": [182], "a": 1 },
-						{ "px": [96,72], "src": [216,64], "f": 0, "t": 251, "d": [183], "a": 1 },
 						{ "px": [120,72], "src": [64,16], "f": 0, "t": 64, "d": [186], "a": 1 },
 						{ "px": [128,72], "src": [64,16], "f": 0, "t": 64, "d": [187], "a": 1 },
 						{ "px": [136,72], "src": [64,16], "f": 0, "t": 64, "d": [188], "a": 1 },
@@ -12173,7 +12249,11 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 1, "__tile": null, "defUid": 91, "realEditorValues": [{ "id": "V_Int", "params": [1] }] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": true, "__tile": null, "defUid": 142, "realEditorValues": [{
+					"id": "V_Bool",
+					"params": [ true ]
+				}] }
 			],
 			"layerInstances": [
 				{
@@ -12401,9 +12481,6 @@
 						{ "px": [8,72], "src": [64,16], "f": 0, "t": 64, "d": [172], "a": 1 },
 						{ "px": [16,72], "src": [64,16], "f": 0, "t": 64, "d": [173], "a": 1 },
 						{ "px": [24,72], "src": [64,16], "f": 0, "t": 64, "d": [174], "a": 1 },
-						{ "px": [80,72], "src": [216,64], "f": 0, "t": 251, "d": [181], "a": 1 },
-						{ "px": [88,72], "src": [216,64], "f": 0, "t": 251, "d": [182], "a": 1 },
-						{ "px": [96,72], "src": [216,64], "f": 0, "t": 251, "d": [183], "a": 1 },
 						{ "px": [120,72], "src": [64,16], "f": 0, "t": 64, "d": [186], "a": 1 },
 						{ "px": [128,72], "src": [64,16], "f": 0, "t": 64, "d": [187], "a": 1 },
 						{ "px": [136,72], "src": [64,16], "f": 0, "t": 64, "d": [188], "a": 1 },
@@ -12485,7 +12562,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -14805,7 +14883,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [null] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -15016,7 +15095,8 @@
 					"params": ["Deco_for_rogue"]
 				}] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [null] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -15224,7 +15304,8 @@
 				}] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [null] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -15480,7 +15561,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [null] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -15676,7 +15758,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [null] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -15872,7 +15955,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [null] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -16023,7 +16107,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [null] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -16193,7 +16278,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [null] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{
@@ -16339,7 +16425,8 @@
 				{ "__identifier": "IsDecoration", "__type": "Bool", "__value": false, "__tile": null, "defUid": 60, "realEditorValues": [] },
 				{ "__identifier": "UsesDecoration", "__type": "String", "__value": null, "__tile": null, "defUid": 80, "realEditorValues": [] },
 				{ "__identifier": "SlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 91, "realEditorValues": [null] },
-				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] }
+				{ "__identifier": "PlugsIntoSlotID", "__type": "Int", "__value": 0, "__tile": null, "defUid": 92, "realEditorValues": [null] },
+				{ "__identifier": "CanBeLit", "__type": "Bool", "__value": false, "__tile": null, "defUid": 142, "realEditorValues": [] }
 			],
 			"layerInstances": [
 				{

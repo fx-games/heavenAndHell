@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"rpg/util"
 	"strconv"
 	"strings"
 )
@@ -49,7 +50,7 @@ func (i Interval) LinearRandom() int {
 		return i.min
 	}
 	// 2..6 (2,3,4,5,6) -> 6-2 = 4 -> Intn(4+1) -> 0..4 -> +2 -> 2..6
-	return rand.Intn(i.max-i.min + 1) + i.min
+	return rand.Intn(i.max-i.min+1) + i.min
 }
 
 func (i Interval) PyramidRandom() int {
@@ -102,4 +103,8 @@ func (i Interval) Add(other Interval) Interval {
 
 func (i Interval) NotZero() bool {
 	return i.min != 0 || i.max != 0
+}
+
+func (i Interval) AsTuple() util.Tuple[int, int] {
+	return util.Tuple[int, int]{Item1: i.min, Item2: i.max}
 }

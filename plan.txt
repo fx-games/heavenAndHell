@@ -25,6 +25,7 @@ add a stash in town
   - Dropping items on the ground will not work properly and can drop out of bounds crashing the program
   - Don't place items on lava
   - Lucifer's Set Pieces flames don't animate
+  - Uniques should only drop once
 
 8. Design
  - Write maps to disk when changing levels
@@ -77,6 +78,17 @@ you can sacrifice items and gold and ask for a favor:
  - decrease the chance a specific item type from the loot pool
  - banning a specific affix from the loot pool
  - increasing the chance for a specific item type
+
+add another consistent source of xp, besides killing monsters:
+ - exploration
+ - finding treasure
+ - identifying items
+
+monster behaviour variance
+ - line of sight: will not chase after losing sight
+ - greedy: will take any treasure a fleeing player drops instead of chasing
+ - hungry: will eat any food a fleeing player drops instead of chasing
+ - burning oil will stop a monster from chasing
 
 reverse diablo..
 allow the casual plathrough which plays out like diablo 1 in turnbased angband style.

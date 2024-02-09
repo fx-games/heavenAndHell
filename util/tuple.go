@@ -16,8 +16,6 @@ func (t Tuple[T1, T2]) GetItem2() T2 {
 	return t.Item2
 }
 
-
-
 type Tuple3[T1 any, T2 any, T3 any] struct {
 	Item1 T1
 	Item2 T2
@@ -38,6 +36,3 @@ func (t Tuple3[T1, T2, T3]) GetItem2() T2 {
 func (t Tuple3[T1, T2, T3]) GetItem3() T3 {
 	return t.Item3
 }
-
-
-

@@ -42,11 +42,17 @@ func (a Arguments) GetFloat(i int) float64 {
 	return result
 }
 
+func (a Arguments) IsEmpty() bool {
+	return len(a) == 0
+}
+
 func LooksLikeAFunction(line string) bool {
 	regexpPattern := regexp.MustCompile(`([A-Za-z_]+)\((.*)\)`)
 	return regexpPattern.MatchString(line)
 }
-
+func NewArgumentsFromString(args string) Arguments {
+	return trimAll(strings.Split(args, "|"))
+}
 func GetNameAndArgs(line string) (string, Arguments) {
 	regexpPattern := regexp.MustCompile(`([A-Za-z_]+)\((.*)\)`)
 	matches := regexpPattern.FindStringSubmatch(line)
@@ -58,11 +64,9 @@ func GetNameAndArgs(line string) (string, Arguments) {
 	if argString == "" {
 		return name, Arguments{}
 	}
-	args := trimAll(strings.Split(argString, ","))
+	args := trimAll(strings.Split(argString, "|"))
 	return name, args
 }
-
-
 
 func trimAll(split []string) []string {
 	for i, s := range split {
@@ -215,10 +219,10 @@ func (p *Logic) StringResolve(stringArgs []string) []func() any {
 	for i, arg := range stringArgs {
 		value := arg
 		/*
-		if arg == "$PLAYER" {
-			args[i] = func() any { return p.Player }
-		} else
-		 */
+			if arg == "$PLAYER" {
+				args[i] = func() any { return p.Player }
+			} else
+		*/
 		if strings.HasPrefix(value, "$") {
 			args[i] = p.Variables[value]
 		} else {

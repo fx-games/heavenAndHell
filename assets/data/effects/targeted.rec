@@ -55,7 +55,7 @@ icon: 223
 dlvl: 1
 targeting: melee
 hit_zone: target_only
-effect: steal_item_teleport
+effect: steal_item_teleport(12)
 
 name: Blink
 internal_name: blink
@@ -71,7 +71,7 @@ icon: 223
 dlvl: 1
 targeting: direct
 hit_zone: target_only
-effect: apply(confused, 5)
+effect: apply(confused | 5)
 
 name: Immobilize
 internal_name: immobilize_target
@@ -79,5 +79,5 @@ icon: 223
 dlvl: 1
 targeting: direct
 hit_zone: target_only
-effect: apply(immobile, 5)
+effect: apply(immobile | 5)
 

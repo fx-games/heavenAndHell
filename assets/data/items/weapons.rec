@@ -126,7 +126,7 @@ dlvl: 1
 cost: 130
 category: weapon
 weapon_type: mace
-weapon_damage: 2-4
+weapon_damage: 2-8
 weapon_speed: 1.0
 throw_damage: 2-4
 throw_chance_to_break: 0.25
@@ -150,7 +150,7 @@ dlvl: 1
 cost: 200
 category: weapon
 weapon_type: sword
-weapon_damage: 2-4
+weapon_damage: 2-8
 weapon_speed: 1.0
 throw_damage: 2-4
 throw_chance_to_break: 0.25
@@ -164,6 +164,8 @@ category: weapon
 weapon_type: staff
 weapon_damage: 1-9
 weapon_speed: 1.0
+armor_type: defensive_weapon
+armor_class: 2
 throw_damage: 1-9
 throw_chance_to_break: 0.25
 
@@ -174,7 +176,7 @@ dlvl: 1
 cost: 200
 category: weapon
 weapon_type: mace
-weapon_damage: 2-4
+weapon_damage: 2-8
 weapon_speed: 1.0
 throw_damage: 2-4
 throw_chance_to_break: 0.25

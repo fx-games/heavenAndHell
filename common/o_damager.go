@@ -1,6 +1,7 @@
 package common
 
 import (
+	"rpg/defs"
 	"rpg/geometry"
 	"rpg/util"
 )
@@ -82,7 +83,7 @@ func NewFire(damagePerTurn int) *DamageDealingObject {
 		BaseTimedBeing:    NewBaseTimedBeing(),
 		turnsUntilRemoval: 3,
 		damagePerTurn:     damagePerTurn,
-		icon:              IconEffectFireSmall,
+		icon:              defs.IconEffectFireSmall,
 		frameCount:        2,
 	}
 }

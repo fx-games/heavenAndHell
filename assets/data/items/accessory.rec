@@ -3,7 +3,7 @@
 
 name: a ring of regeneration
 internal_name: ring_of_regeneration
-icon: item_ring2
+icon: 129
 dlvl: 1
 cost: 100
 category: accessory
@@ -11,7 +11,7 @@ equip_modifier: health_regen(1)
 
 name: a ring of damage
 internal_name: ring_of_damage
-icon: item_ring2
+icon: 130
 dlvl: 1
 cost: 100
 category: accessory
@@ -19,7 +19,7 @@ equip_modifier: damage(5)
 
 name: a ring of protection
 internal_name: ring_of_protection
-icon: item_ring2
+icon: 131
 dlvl: 1
 cost: 100
 category: accessory
@@ -27,7 +27,7 @@ equip_modifier: armor_class(4)
 
 name: an amulet
 internal_name: amulet
-icon: item_amulet2
+icon: 132
 dlvl: 1
 cost: 100
 category: accessory

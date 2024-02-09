@@ -26,6 +26,7 @@ type DungeonRoom struct {
 	usedDecorationLevelName string
 	slotId                  int
 	plugsIntoSlotId         int
+	canBeLit                bool
 }
 
 func (r *DungeonRoom) GetFreeConnectionsWithRotatedDirection() map[geometry.Point]RoomConnection {
@@ -314,6 +315,7 @@ func (r *DungeonRoom) Clone() *DungeonRoom {
 		poiPositions:            make([]geometry.Point, 0),
 		slotId:                  r.slotId,
 		plugsIntoSlotId:         r.plugsIntoSlotId,
+		canBeLit:                r.canBeLit,
 	}
 	for point, _ := range r.floorTiles {
 		newRoom.floorTiles[point] = true
@@ -531,6 +533,14 @@ func (r *DungeonRoom) GetPlugsIntoSlotId() int {
 
 func (r *DungeonRoom) GetFloorTileCount() int {
 	return len(r.floorTiles)
+}
+
+func (r *DungeonRoom) SetCanBeLit(lit bool) {
+	r.canBeLit = lit
+}
+
+func (r *DungeonRoom) CanBeLit() bool {
+	return r.canBeLit
 }
 func NewDungeonRoomFromTemplate(templateName string) *DungeonRoom {
 	rectRoom := &DungeonRoom{

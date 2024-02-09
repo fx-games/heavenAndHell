@@ -4,13 +4,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"image"
 	"image/color"
-	"io"
 	"log"
-	"os"
 	"rpg/geometry"
+	"rpg/util"
 )
+
 type CellDrawInfo struct {
-	Icon int32
+	Icon  int32
 	Color color.Color
 	Atlas TextureAtlas
 }
@@ -33,17 +33,9 @@ func NewTextureAtlas(imageFilename string, tileSizeX, tileSizeY int) TextureAtla
 }
 
 func mustLoadImage(filename string) image.Image {
-	img, _, err := image.Decode(mustOpen(filename))
+	img, _, err := image.Decode(util.MustOpenReader(filename))
 	if err != nil {
 		log.Fatal(err)
 	}
 	return img
-}
-
-func mustOpen(filename string) io.ReadCloser {
-	f, err := os.Open(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return f
 }

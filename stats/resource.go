@@ -1,6 +1,9 @@
 package stats
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 type Resource struct {
 	min    int
@@ -17,11 +20,11 @@ func NewResource(min int, getMax func() int, value int) *Resource {
 }
 
 func (r *Resource) IsAtMin() bool {
-	return r.Value() == r.min
+	return math.Ceil(r.value) <= float64(r.min)
 }
 
 func (r *Resource) IsAtMax() bool {
-	return r.Value() == r.getMax()
+	return math.Floor(r.value) >= float64(r.getMax())
 }
 
 func (r *Resource) Value() int {
@@ -39,19 +42,19 @@ func (r *Resource) Decrease(amount int) {
 }
 
 func (r *Resource) ensureRange() {
-	if r.Value() > r.getMax() {
+	if r.value > float64(r.getMax()) {
 		r.value = float64(r.getMax())
-	} else if r.Value() < r.min {
+	} else if r.value < float64(r.min) {
 		r.value = float64(r.min)
 	}
 }
 
 func (r *Resource) IsPositive() bool {
-	return r.Value() > 0
+	return r.value > 0
 }
 
 func (r *Resource) ToString() string {
-	return fmt.Sprintf("%d/%d", r.Value(), r.getMax())
+	return fmt.Sprintf("%0.f/%d", math.Ceil(r.value), r.getMax())
 }
 
 func (r *Resource) GetMax() int {

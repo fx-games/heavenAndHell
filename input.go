@@ -3,9 +3,8 @@ package main
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"rpg/actions"
 	"rpg/geometry"
-	"rpg/ui"
+	"rpg/gui"
 	"rpg/util"
 )
 
@@ -41,47 +40,38 @@ type Command interface {
 	CommandType() InputCommand
 }
 
-func getPlayerAction(gameCommand Command, state actions.WorldState) actions.Action {
-	// possible actions
-	// untargeted_action()
-	// movement(direction)
-	// targeted_action(target_pos)
-
-	return nil
-}
-
-func handleKeyboardInput(actionReceiver ui.InputReceiver) bool {
+func handleKeyboardInput(actionReceiver gui.InputReceiver) bool {
 	if util.IsBeingPressedRepeatedly(ebiten.KeyArrowRight) || util.IsBeingPressedRepeatedly(ebiten.KeyNumpad6) {
-		return actionReceiver.OnCommand(ui.PlayerCommandRight)
+		return actionReceiver.OnCommand(gui.PlayerCommandRight)
 	}
 	if util.IsBeingPressedRepeatedly(ebiten.KeyArrowLeft) || util.IsBeingPressedRepeatedly(ebiten.KeyNumpad4) {
-		return actionReceiver.OnCommand(ui.PlayerCommandLeft)
+		return actionReceiver.OnCommand(gui.PlayerCommandLeft)
 	}
 	if util.IsBeingPressedRepeatedly(ebiten.KeyArrowUp) || util.IsBeingPressedRepeatedly(ebiten.KeyNumpad8) {
-		return actionReceiver.OnCommand(ui.PlayerCommandUp)
+		return actionReceiver.OnCommand(gui.PlayerCommandUp)
 	}
 	if util.IsBeingPressedRepeatedly(ebiten.KeyArrowDown) || util.IsBeingPressedRepeatedly(ebiten.KeyNumpad2) {
-		return actionReceiver.OnCommand(ui.PlayerCommandDown)
+		return actionReceiver.OnCommand(gui.PlayerCommandDown)
 	}
 	if util.IsBeingPressedRepeatedly(ebiten.KeyNumpad9) {
-		return actionReceiver.OnCommand(ui.PlayerCommandUpRight)
+		return actionReceiver.OnCommand(gui.PlayerCommandUpRight)
 	}
 	if util.IsBeingPressedRepeatedly(ebiten.KeyNumpad7) {
-		return actionReceiver.OnCommand(ui.PlayerCommandUpLeft)
+		return actionReceiver.OnCommand(gui.PlayerCommandUpLeft)
 	}
 	if util.IsBeingPressedRepeatedly(ebiten.KeyNumpad3) {
-		return actionReceiver.OnCommand(ui.PlayerCommandDownRight)
+		return actionReceiver.OnCommand(gui.PlayerCommandDownRight)
 	}
 	if util.IsBeingPressedRepeatedly(ebiten.KeyNumpad1) {
-		return actionReceiver.OnCommand(ui.PlayerCommandDownLeft)
+		return actionReceiver.OnCommand(gui.PlayerCommandDownLeft)
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		return actionReceiver.OnCommand(ui.PlayerCommandConfirm)
+		return actionReceiver.OnCommand(gui.PlayerCommandConfirm)
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) || inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
-		return actionReceiver.OnCommand(ui.PlayerCommandCancel)
+		return actionReceiver.OnCommand(gui.PlayerCommandCancel)
 	}
 
 	return false

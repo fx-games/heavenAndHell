@@ -38,6 +38,10 @@ Assuming the player has 200 AC and thus 66% damage reduction, this will be betwe
 
 ## Core Stats & Caps
 
+STR - Melee Damage, HP
+DEX - Ranged Damage, Stamina f. running & physical exhaustion
+INT - Magic Damage, Mana / Lore? / Shop Prices? / Better RNG?
+
 Quality/Danger System:
  - Depth Levels: 12
  - Items & Monsters are assigned a typical depth level

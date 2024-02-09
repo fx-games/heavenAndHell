@@ -12,13 +12,13 @@ const (
 )
 
 type HitInfo2D struct {
-	Distance               float64           // Length of the ray until the collision point
-	HitSide                CardinalDirection // The side of the obstacle that was hit
-	CollisionPosition [2]float64           // The exact coordinates of the collision point
-	ColliderGridPosition   [2]int64          // The grid position of the obstacle that was hit
-	LastFreeGridPosition   [2]int64          // The last free grid position before the collision
-	WallPart               float64 // The part of the wall that was hit (0.0 (left-most) to 1.0 (right-most))
-	TraversedGridCells     [][2]int64
+	Distance             float64           // Length of the ray until the collision point
+	HitSide              CardinalDirection // The side of the obstacle that was hit
+	CollisionPosition    [2]float64        // The exact coordinates of the collision point
+	ColliderGridPosition [2]int64          // The grid position of the obstacle that was hit
+	LastFreeGridPosition [2]int64          // The last free grid position before the collision
+	WallPart             float64           // The part of the wall that was hit (0.0 (left-most) to 1.0 (right-most))
+	TraversedGridCells   [][2]int64
 }
 
 // Raycast2D casts a ray from the given start position into the given direction.
@@ -157,7 +157,6 @@ func Raycast2D(startX, startY, directionX, directionY float64, shouldStopRay fun
 	}
 }
 
-
 func ReflectingRaycast2D(startX, startY, startDirectionX, startDirectionY float64, allowedReflectionCount int, shouldReflectRay func(x, y int64) bool) []HitInfo2D {
 	var result []HitInfo2D
 
@@ -178,7 +177,6 @@ func ReflectingRaycast2D(startX, startY, startDirectionX, startDirectionY float6
 			directionX = -directionX
 		}
 	}
-
 
 	return result
 }

@@ -1,3 +1,30 @@
+basics.. once again..
+ - movement (repeat key missing)
+ - move to attack (missing damage number anims)
+ - pickup/drop item - GOOD ENOUGH!
+ - equip/unequip item - GOOD ENOUGH!
+ - item modifiers - GOOD ENOUGH!
+ - item use/drink/read
+ - untargeted spells (with item)
+   - enchant armor scroll still buggy (allows multiple enchants)
+ - targeted spells (with item)
+ - status effects
+ - level up - missing
+ - combat calculations
+ - ranged combat (ranged weapon doesn't increase ranged damage)
+ - throw item (targeting looks weird)
+ - shops
+   - inventory
+   - buy/sell
+ - auto explore (doesn't pick up items)
+ - auto attack
+ - auto pickup
+ - rest
+ - transition maps
+ - show inventory (tooltips missing)
+ - show equipment
+ - change class (not working)
+
 missing 7drl goals
 
  - story
@@ -27,3 +54,94 @@ missing 7drl goals
    - menus & options
    - game over/won screen
    - qol stuff
+
+
+
+
+
+
+
+
+   package game
+
+   /*
+
+   Starting Enemy
+   HP: 3-10
+   AC: 0-1
+   Dmg.: 1-5
+
+   Mid Game Enemy
+   HP: 10-500
+   AC: 2-50
+   Dmg.: 5-30
+
+   End Boss Enemy
+   HP: 1000
+   AC: 60-100
+   Dmg.: 30-60
+
+   */
+
+   /*
+   Morias balrog
+
+   {"Balrog",                    0xFF1F0002L, 0x0081C743L, 0x5004, 55000L,  0, 40, 125, 13, 'B', { 75, 40}, {104,  78, 214,   0}, 100}
+   */
+
+   /*
+   Moria Skills
+   Poison
+   Aggravation
+
+   DCSS Skills
+   Reach (attack from 2 tiles)
+   Constrict (Immobilize & DOT)
+   Apply Barbs Status (Moving causes damage)
+   Knockback
+
+
+   Monster Skills of Rogue
+
+   Invisibility
+   Mimic Loot
+   Steal Item / Gold
+   Reduce Dmg./AC
+   Drain Mana
+   Steal Life
+   Steal Mana
+   Confuse
+   Stun
+   Damage Equipment
+   Breath Fire
+   Immobilize
+   Flying
+   Evade
+
+   New Skills from Brogue
+   Flit - Flit is an intrinsic ability that allows a monster to occasionally move multiple spaces in a single turn. 33% of its moves are made in a random direction, as though confused. However, the 'flitted' movement is always a move, never an attack. Almost all monsters that fly also flit. (An exception is Furies)
+   Aquatic
+   Suicide Attack with gas Cloud/Explosion/Pit creation
+   Summon spectral blades/other
+   Protect allies
+   Haste allies
+   Heal self / allies
+   Slow other
+   Lightning
+   Cloning
+   Never sleeps
+   Spell reflection
+   Hallucination
+   Inanimate
+   Immune to weapons
+   Corrosive
+   Cause weakness
+   Grabs hold
+   Blink
+   Surrounded by damaging cloud
+   Quick regeneration
+   */
+
+
+
+

@@ -162,13 +162,13 @@ type GridMap[ActorType interface {
 	comparable
 	MapObjectWithProperties[ActorType]
 }] struct {
-	name      string
+	name            string
 	cells           []MapCell[ActorType, ItemType, ObjectType]
 	allActors       []ActorType
 	allDownedActors []ActorType
-	removedActors []ActorType
-	allItems   []ItemType
-	allObjects []ObjectType
+	removedActors   []ActorType
+	allItems        []ItemType
+	allObjects      []ObjectType
 
 	decals map[geometry.Point]int32
 
@@ -179,8 +179,8 @@ type GridMap[ActorType interface {
 
 	pathfinder  *geometry.PathRange
 	listOfZones []*ZoneInfo
-	zoneMap []*ZoneInfo
-	player  ActorType
+	zoneMap     []*ZoneInfo
+	player      ActorType
 
 	timeOfDay time.Time
 
@@ -200,6 +200,7 @@ type GridMap[ActorType interface {
 
 	cardinalMovementOnly bool
 }
+
 func (m *GridMap[ActorType, ItemType, ObjectType]) SetCardinalMovementOnly(cardinalMovementOnly bool) {
 	m.cardinalMovementOnly = cardinalMovementOnly
 }
@@ -593,7 +594,7 @@ func NewEmptyMap[ActorType interface {
 		namedRects:      make(map[string]geometry.Rect),
 		namedTrigger:    make(map[string]Trigger),
 		namedPaths:      make(map[string][]geometry.Point),
-		decals: 		make(map[geometry.Point]int32),
+		decals:          make(map[geometry.Point]int32),
 	}
 	m.Fill(MapCell[ActorType, ItemType, ObjectType]{
 		TileType: Tile{
@@ -1679,7 +1680,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsTileLit(pos geometry.Point)
 	return m.GetCell(pos).IsLit
 }
 
-
 func GetLocationsInRadius(origin geometry.Point, radius float64, keep func(point geometry.Point) bool) []geometry.Point {
 	result := make([]geometry.Point, 0)
 	for y := origin.Y - int(radius); y <= origin.Y+int(radius); y++ {
@@ -1692,4 +1692,3 @@ func GetLocationsInRadius(origin geometry.Point, radius float64, keep func(point
 	}
 	return result
 }
-

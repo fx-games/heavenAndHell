@@ -2,102 +2,102 @@ package game
 
 import (
 	"fmt"
-	"rpg/actions"
 	"rpg/common"
+	"rpg/defs"
 	"rpg/stats"
 	"rpg/util"
 )
-type FlagName string
 
-const (
-	FlagHasTrueSight FlagName = "has_true_sight"
-	FlagStoryModeEnabled FlagName = "story_mode_enabled"
-)
-func (g *GameInstance) NewPotionOfTrueSight() *GameItem {
-	baseItem := common.NewBaseItem(g.GetWorldState().GetPlayer, "Lucifer's gift", common.IconItemPotionCrimson)
-	baseItem.SetCategory(common.ItemCategoryPotion)
+func (g *GameInstance) NewPotionOfTrueSight() *common.Item {
+	baseItem := common.NewItem(g.GetWorldState().GetPlayer, "Lucifer's gift", defs.IconItemPotionCrimson)
+	baseItem.SetCategory(defs.ItemCategoryPotion)
+	baseItem.SetRarity(common.ItemRarityUnique)
 	baseItem.SetQualityLevel(10)
-
-	gameItem := &GameItem{
-		BaseItem:         baseItem,
-		actionCharges:    1,
-		destroyAfterUse: true,
-	}
+	baseItem.SetCharges(1)
+	baseItem.SetDestroyAfterUse(true)
 	drinkAction := common.NewUntargetedAction("Drink", 34)
-	drinkAction.SetEffect(func(user *common.Actor) {
+	effect := func(user *common.Actor) {
 		g.GetWorldState().GetPlayer().GetStats().IncrementBy(stats.VisionRange, 7)
 		g.GetWorldState().GetPlayer().GetStats().IncrementBy(stats.LightRadius, 7)
-		g.GetWorldState().GetPlayer().GetInventory().Remove(gameItem)
-		g.GetWorldState().GetFlags().SetTrue(string(FlagHasTrueSight))
-		g.actionBroker.Execute(actions.NewUpdateFoVAction(actions.AbstractCause("TrueSightActivated"), g.state.GetPlayer()))
+		g.GetWorldState().GetPlayer().GetInventory().Remove(baseItem)
+		g.GetWorldState().GetFlags().SetTrue(string(common.FlagHasTrueSight))
+		g.actionBroker.Execute(common.NewUpdateFoVAction(common.AbstractCause("TrueSightActivated"), g.state.GetPlayer()))
 
 		g.state.GetFlags().SetTrue("quest_received:evidence_one")
 		g.state.GetFlags().SetTrue("quest_received:evidence_two")
 		g.state.GetFlags().SetTrue("quest_received:evidence_three")
 		g.state.GetFlags().SetTrue("quest_received:evidence_four")
-		g.Log(fmt.Sprintf("Quest received [:darkText]'%s'", "Find evidence against humanity"))
+		g.PlayerMessage(fmt.Sprintf("Quest received [:darkText]'%s'", "Find evidence against humanity"))
+	}
+
+	drinkAction.SetEffect(&common.UntargetedEffect{
+		Effect: effect,
 	})
 
-	gameItem.SetTooltip([]util.LabelText{
-		common.LabelTextFromString(""),
-		common.LabelTextFromString("Can this be real? Can it be trusted?"),
-		common.LabelTextFromString("Only one way to find out..."),
+	baseItem.SetTooltip([]util.LabelText{
+		util.LabelTextFromString(""),
+		util.LabelTextFromString("Can this be real? Can it be trusted?"),
+		util.LabelTextFromString("Only one way to find out..."),
 	})
-	return gameItem
+	return baseItem
 }
+
 /*
 1. Shekel poisoned the water supply and framed the workers union
- - Report from the workers found at the poisoned water supply
+  - Report from the workers found at the poisoned water supply
+
 2. Abel backstabbed the skeleton king - Last will of the dead good king (now skeleton king)
- - Last will of the dead good king (now skeleton king), at his tomb
+  - Last will of the dead good king (now skeleton king), at his tomb
+
 3. Kirioth persuaded both of them to follow his plan and promised the wealth and status
 Kirioth sacrificed some poor people when he summoned Lucifer, trying to control him
- - Shekel's notes on Kirioth's plan, security to be used for blackmailing, in Shekel's house
+  - Shekel's notes on Kirioth's plan, security to be used for blackmailing, in Shekel's house
+
 4. Shekel & Kirioth are responsible for the creation of meat jack
- - List of subject for the super soldier experiment, there is a lab in the caves.-- TODO*
- */
-func (g *GameInstance) NewEvidenceOne() *GameItem {
-	setFlag := func() {g.state.GetFlags().SetTrue("found:evidence_one")}
+  - List of subject for the super soldier experiment, there is a lab in the caves.-- TODO*
+*/
+func (g *GameInstance) NewEvidenceOne() *common.Item {
+	setFlag := func() { g.state.GetFlags().SetTrue("found:evidence_one") }
 	title := "Purity report"
 	textFile := "note_evidence_one.txt"
-	note := g.NewHiddenNote(title, NewDialogueTextFromFile(textFile), setFlag)
+	note := g.factory.NewHiddenNote(title, common.NewDialogueTextFromFile(textFile), setFlag)
 	return note
 }
 
-func (g *GameInstance) NewEvidenceTwo() *GameItem {
-	setFlag := func() {g.state.GetFlags().SetTrue("found:evidence_two")}
+func (g *GameInstance) NewEvidenceTwo() *common.Item {
+	setFlag := func() { g.state.GetFlags().SetTrue("found:evidence_two") }
 	title := "King Zedek's last will"
 	textFile := "note_evidence_two.txt"
-	note := g.NewHiddenNote(title, NewDialogueTextFromFile(textFile), setFlag)
+	note := g.factory.NewHiddenNote(title, common.NewDialogueTextFromFile(textFile), setFlag)
 	return note
 }
 
-func (g *GameInstance) NewEvidenceThree() *GameItem {
-	setFlag := func() {g.state.GetFlags().SetTrue("found:evidence_three")}
+func (g *GameInstance) NewEvidenceThree() *common.Item {
+	setFlag := func() { g.state.GetFlags().SetTrue("found:evidence_three") }
 	title := "Kirioth's schemes"
 	textFile := "note_evidence_three.txt"
-	note := g.NewHiddenNote(title, NewDialogueTextFromFile(textFile), setFlag)
+	note := g.factory.NewHiddenNote(title, common.NewDialogueTextFromFile(textFile), setFlag)
 	return note
 }
 
-func (g *GameInstance) NewEvidenceFour() *GameItem {
-	setFlag := func() {g.state.GetFlags().SetTrue("found:evidence_four")}
+func (g *GameInstance) NewEvidenceFour() *common.Item {
+	setFlag := func() { g.state.GetFlags().SetTrue("found:evidence_four") }
 	title := "From K. to S."
 	textFile := "note_evidence_four.txt"
-	note := g.NewHiddenNote(title, NewDialogueTextFromFile(textFile), setFlag)
+	note := g.factory.NewHiddenNote(title, common.NewDialogueTextFromFile(textFile), setFlag)
 	return note
 }
 
-func NewMasterSword(state actions.WorldState) *GameItem {
+func NewMasterSword(state *common.State) *common.Item {
 	// spell on attack
-	baseItem := common.NewBaseItem(state.GetPlayer, "a master sword", common.IconItemUniqueSword)
-	baseItem.SetCategory(common.ItemCategoryWeapon)
+	baseItem := common.NewItem(state.GetPlayer, "a master sword", defs.IconItemUniqueSword)
+	baseItem.SetCategory(defs.ItemCategoryWeapon)
 	baseItem.SetQualityLevel(1)
 	baseItem.SetRarity(common.ItemRarityUnique)
 	weaponPart := &common.WeaponStats{
 		Damage:            stats.NewInterval(1, 6),
 		Durability:        stats.NewResource(0, flatFunc(20), 20),
-		Type:              common.WeaponTypeSword,
+		Type:              defs.WeaponTypeSword,
 		MeleeRange:        1,
 		AttackSpeedFactor: 1,
 		Requirements: map[stats.Name]int{
@@ -151,16 +151,8 @@ func NewMasterSword(state actions.WorldState) *GameItem {
 	// - Requirements -60%
 	// - Resistance / Immunity to Status Effect X
 	// - Resistance / Immunity / Absorption to Damage Type X
-	masterSword := &GameItem{
-		BaseItem: baseItem,
-		itemHooks: []actions.ItemActionHook{ // these need to be registered during onEquip, at the same time the ItemContext must be set
-			returnDamageOnHit(),
-			randomlyTripleDamageOnMelee(),
-		},
-	}
-	return masterSword
+	return baseItem
 }
-
 
 /*
 Some End Game Uniques
@@ -174,211 +166,188 @@ Some End Game Uniques
  - Amulet of Shadows - Unique amulet [+0, +0]
  - Shadow's Embrace - Unique amulet [+0, +0]
  - Wall of Thorns - Unique shield [+30, +0]
- */
+*/
 
-func NewVeilOfDarkness(state actions.WorldState) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "Veil of Darkness", common.IconCloakDark)
-	baseItem.SetCategory(common.ItemCategoryArmor)
+func NewVeilOfDarkness(state *common.State) *common.Item {
+	baseItem := common.NewItem(state.GetPlayer, "Veil of Darkness", defs.IconCloakDark)
+	baseItem.SetCategory(defs.ItemCategoryArmor)
 	baseItem.SetQualityLevel(10)
 	baseItem.SetRarity(common.ItemRarityUnique)
 
 	armorPart := &common.ArmorStats{
-		BaseArmor: 10,
-		Plus: 0,
-		Type: common.ArmorTypeCape,
+		BaseArmor:  10,
+		Plus:       0,
+		Type:       defs.ArmorTypeCape,
 		Durability: stats.NewResource(0, flatFunc(20), 20),
 	}
 
 	baseItem.SetArmorComponent(armorPart)
 
-	return &GameItem{
-		BaseItem: baseItem,
-	}
+	return baseItem
 }
 
-func NewBootsOfTheShadowDancer(state actions.WorldState) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "Boots of the Shadow Dancer", common.IconBootsDark)
-	baseItem.SetCategory(common.ItemCategoryArmor)
+func NewBootsOfTheShadowDancer(state *common.State) *common.Item {
+	baseItem := common.NewItem(state.GetPlayer, "Boots of the Shadow Dancer", defs.IconBootsDark)
+	baseItem.SetCategory(defs.ItemCategoryArmor)
 	baseItem.SetQualityLevel(10)
 	baseItem.SetRarity(common.ItemRarityUnique)
 
 	armorPart := &common.ArmorStats{
-		BaseArmor: 10,
-		Plus: 0,
-		Type: common.ArmorTypeBoots,
+		BaseArmor:  10,
+		Plus:       0,
+		Type:       defs.ArmorTypeBoots,
 		Durability: stats.NewResource(0, flatFunc(20), 20),
 	}
 
 	baseItem.SetArmorComponent(armorPart)
 
-	return &GameItem{
-		BaseItem: baseItem,
-	}
+	return baseItem
 }
 
-func NewBlackHands(state actions.WorldState) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "Black Hands", common.IconGlovesDark)
-	baseItem.SetCategory(common.ItemCategoryArmor)
+func NewBlackHands(state *common.State) *common.Item {
+	baseItem := common.NewItem(state.GetPlayer, "Black Hands", defs.IconGlovesDark)
+	baseItem.SetCategory(defs.ItemCategoryArmor)
 	baseItem.SetQualityLevel(10)
 	baseItem.SetRarity(common.ItemRarityUnique)
 
 	armorPart := &common.ArmorStats{
-		BaseArmor: 10,
-		Plus: 0,
-		Type: common.ArmorTypeGloves,
+		BaseArmor:  10,
+		Plus:       0,
+		Type:       defs.ArmorTypeGloves,
 		Durability: stats.NewResource(0, flatFunc(20), 20),
 	}
 
 	baseItem.SetArmorComponent(armorPart)
 
-	return &GameItem{
-		BaseItem: baseItem,
-	}
+	return baseItem
 }
 
-func NewAncientNightmaresHood(state actions.WorldState) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "Ancient Nightmare's Hood", common.IconHoodDark)
-	baseItem.SetCategory(common.ItemCategoryArmor)
+func NewAncientNightmaresHood(state *common.State) *common.Item {
+	baseItem := common.NewItem(state.GetPlayer, "Ancient Nightmare's Hood", defs.IconHoodDark)
+	baseItem.SetCategory(defs.ItemCategoryArmor)
 	baseItem.SetQualityLevel(10)
 	baseItem.SetRarity(common.ItemRarityUnique)
 
 	armorPart := &common.ArmorStats{
-		BaseArmor: 10,
-		Plus: 0,
-		Type: common.ArmorTypeHelmet,
+		BaseArmor:  10,
+		Plus:       0,
+		Type:       defs.ArmorTypeHelmet,
 		Durability: stats.NewResource(0, flatFunc(20), 20),
 	}
 
 	baseItem.SetArmorComponent(armorPart)
 
-	return &GameItem{
-		BaseItem: baseItem,
-	}
+	return baseItem
 }
 
-func NewPlateMailOfTheDarkLord(state actions.WorldState) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "Plate Mail of the Dark Lord", common.IconArmorDark)
-	baseItem.SetCategory(common.ItemCategoryArmor)
+func NewPlateMailOfTheDarkLord(state *common.State) *common.Item {
+	baseItem := common.NewItem(state.GetPlayer, "Plate Mail of the Dark Lord", defs.IconArmorDark)
+	baseItem.SetCategory(defs.ItemCategoryArmor)
 	baseItem.SetQualityLevel(10)
 	baseItem.SetRarity(common.ItemRarityUnique)
 
 	armorPart := &common.ArmorStats{
-		BaseArmor: 40,
-		Plus: 0,
-		Type: common.ArmorTypeCuirass,
+		BaseArmor:  40,
+		Plus:       0,
+		Type:       defs.ArmorTypeCuirass,
 		Durability: stats.NewResource(0, flatFunc(20), 20),
 	}
 
 	baseItem.SetArmorComponent(armorPart)
 
-	return &GameItem{
-		BaseItem: baseItem,
-	}
+	return baseItem
 }
 
-func NewWallOfThorns(state actions.WorldState) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "Wall of Thorns", common.IconShieldDarkThorns)
-	baseItem.SetCategory(common.ItemCategoryArmor)
+func NewWallOfThorns(state *common.State) *common.Item {
+	baseItem := common.NewItem(state.GetPlayer, "Wall of Thorns", defs.IconShieldDarkThorns)
+	baseItem.SetCategory(defs.ItemCategoryArmor)
 	baseItem.SetQualityLevel(10)
 	baseItem.SetRarity(common.ItemRarityUnique)
 
 	armorPart := &common.ArmorStats{
-		BaseArmor: 30,
-		Plus: 0,
-		Type: common.ArmorTypeShield,
+		BaseArmor:  30,
+		Plus:       0,
+		Type:       defs.ArmorTypeShield,
 		Durability: stats.NewResource(0, flatFunc(20), 20),
 	}
 
 	baseItem.SetArmorComponent(armorPart)
 
-	return &GameItem{
-		BaseItem: baseItem,
-		itemHooks: []actions.ItemActionHook{
-			returnDamageOnHit(),
-		},
-	}
+	return baseItem
 }
 
-func NewAmuletOfShadows(state actions.WorldState) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "Amulet of Shadows", common.IconAmuletDark)
-	baseItem.SetCategory(common.ItemCategoryAccessory)
+func NewAmuletOfShadows(state *common.State) *common.Item {
+	baseItem := common.NewItem(state.GetPlayer, "Amulet of Shadows", defs.IconAmuletDark)
+	baseItem.SetCategory(defs.ItemCategoryAccessory)
 	baseItem.SetQualityLevel(10)
 
 	armorPart := &common.ArmorStats{
 		BaseArmor:  0,
 		Durability: stats.NewResource(0, flatFunc(20), 20),
-		Type:       common.ArmorTypeAmulet,
+		Type:       defs.ArmorTypeAmulet,
 	}
 
 	baseItem.SetArmorComponent(armorPart)
-	return &GameItem{
-		BaseItem: baseItem,
-	}
+	return baseItem
 }
 
-func NewShadowsEmbrace(state actions.WorldState) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "Shadow's Embrace", common.IconAmuletDark)
-	baseItem.SetCategory(common.ItemCategoryAccessory)
+func NewShadowsEmbrace(state *common.State) *common.Item {
+	baseItem := common.NewItem(state.GetPlayer, "Shadow's Embrace", defs.IconAmuletDark)
+	baseItem.SetCategory(defs.ItemCategoryAccessory)
 	baseItem.SetQualityLevel(10)
 
 	armorPart := &common.ArmorStats{
 		BaseArmor:  0,
 		Durability: stats.NewResource(0, flatFunc(20), 20),
-		Type:       common.ArmorTypeAmulet,
+		Type:       defs.ArmorTypeAmulet,
 	}
 
 	baseItem.SetArmorComponent(armorPart)
-	return &GameItem{
-		BaseItem: baseItem,
-	}
+	return baseItem
 }
 
-func NewEternalDarkness(state actions.WorldState) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "Eternal Darkness", common.IconRingDark)
-	baseItem.SetCategory(common.ItemCategoryAccessory)
+func NewEternalDarkness(state *common.State) *common.Item {
+	baseItem := common.NewItem(state.GetPlayer, "Eternal Darkness", defs.IconRingDark)
+	baseItem.SetCategory(defs.ItemCategoryAccessory)
 	baseItem.SetQualityLevel(10)
 
 	armorPart := &common.ArmorStats{
 		BaseArmor:  0,
 		Durability: stats.NewResource(0, flatFunc(20), 20),
-		Type:       common.ArmorTypeRing,
+		Type:       defs.ArmorTypeRing,
 	}
 
 	baseItem.SetArmorComponent(armorPart)
 
-	return &GameItem{
-		BaseItem: baseItem,
-	}
+	return baseItem
 }
 
-func NewNeverEndingNight(state actions.WorldState) *GameItem {
-	baseItem := common.NewBaseItem(state.GetPlayer, "Never-ending Night", common.IconRingDark)
-	baseItem.SetCategory(common.ItemCategoryAccessory)
+func NewNeverEndingNight(state *common.State) *common.Item {
+	baseItem := common.NewItem(state.GetPlayer, "Never-ending Night", defs.IconRingDark)
+	baseItem.SetCategory(defs.ItemCategoryAccessory)
 	baseItem.SetQualityLevel(10)
 
 	armorPart := &common.ArmorStats{
 		BaseArmor:  0,
 		Durability: stats.NewResource(0, flatFunc(20), 20),
-		Type:       common.ArmorTypeRing,
+		Type:       defs.ArmorTypeRing,
 	}
 
 	baseItem.SetArmorComponent(armorPart)
 
-	return &GameItem{
-		BaseItem: baseItem,
-	}
+	return baseItem
 }
 
-func NewSoulReaver(state actions.WorldState) *GameItem {
+func NewSoulReaver(state *common.State) *common.Item {
 	// spell on attack
-	baseItem := common.NewBaseItem(state.GetPlayer, "Soul Reaver", common.IconScytheDark)
-	baseItem.SetCategory(common.ItemCategoryWeapon)
+	baseItem := common.NewItem(state.GetPlayer, "Soul Reaver", defs.IconScytheDark)
+	baseItem.SetCategory(defs.ItemCategoryWeapon)
 	baseItem.SetQualityLevel(10)
 	baseItem.SetRarity(common.ItemRarityUnique)
 	weaponPart := &common.WeaponStats{
 		Damage:            stats.NewInterval(20, 35),
 		Durability:        stats.NewResource(0, flatFunc(50), 50),
-		Type:              common.WeaponTypeScythe,
+		Type:              defs.WeaponTypeScythe,
 		MeleeRange:        1,
 		AttackSpeedFactor: 0.9,
 		Requirements: map[stats.Name]int{
@@ -404,25 +373,19 @@ func NewSoulReaver(state actions.WorldState) *GameItem {
 
 	baseItem.SetEquippedModifiers(modifiers)
 
-	masterSword := &GameItem{
-		BaseItem: baseItem,
-		itemHooks: []actions.ItemActionHook{ // these need to be registered during onEquip, at the same time the ItemContext must be set
-			randomlyTripleDamageOnMelee(),
-		},
-	}
-	return masterSword
+	return baseItem
 }
 
-func NewMalleusMaleficarum(state actions.WorldState) *GameItem {
+func NewMalleusMaleficarum(state *common.State) *common.Item {
 	// spell on attack
-	baseItem := common.NewBaseItem(state.GetPlayer, "Malleus Maleficarum", common.IconMalletGolden)
-	baseItem.SetCategory(common.ItemCategoryWeapon)
+	baseItem := common.NewItem(state.GetPlayer, "Malleus Maleficarum", defs.IconMalletGolden)
+	baseItem.SetCategory(defs.ItemCategoryWeapon)
 	baseItem.SetQualityLevel(10)
 	baseItem.SetRarity(common.ItemRarityUnique)
 	weaponPart := &common.WeaponStats{
 		Damage:            stats.NewInterval(15, 45),
 		Durability:        stats.NewResource(0, flatFunc(35), 35),
-		Type:              common.WeaponTypeMace,
+		Type:              defs.WeaponTypeMace,
 		MeleeRange:        1,
 		AttackSpeedFactor: 0.9,
 		Requirements: map[stats.Name]int{
@@ -448,11 +411,11 @@ func NewMalleusMaleficarum(state actions.WorldState) *GameItem {
 
 	baseItem.SetEquippedModifiers(modifiers)
 
-	masterSword := &GameItem{
-		BaseItem: baseItem,
-		itemHooks: []actions.ItemActionHook{ // these need to be registered during onEquip, at the same time the ItemContext must be set
-			randomlyTripleDamageOnMelee(),
-		},
+	return baseItem
+}
+
+func flatFunc(i int) func() int {
+	return func() int {
+		return i
 	}
-	return masterSword
 }

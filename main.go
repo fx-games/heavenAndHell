@@ -5,17 +5,19 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
+	"image/color"
 	_ "image/png"
 	"log"
 	"math/rand"
 	"os"
-	"path"
 	"rpg/common"
 	"rpg/console"
+	"rpg/defs"
 	"rpg/dungen"
 	"rpg/game"
-	"rpg/ldtk_go"
-	"rpg/recfile"
+	"rpg/gui"
+	"rpg/ldtk"
+	"rpg/renderer"
 	"rpg/util"
 	"runtime/pprof"
 	"strconv"
@@ -37,26 +39,19 @@ func main() {
 	}
 	defer pprof.StopCPUProfile()
 
-	userConfig := game.NewConfigurationFromRecFile("config.rec")
+	userConfig := common.NewConfigurationFromRecFile("config.rec")
 	startInfos := game.StartInfo{
-		Title:          "RPG",
-		ScreenSize:     userConfig.WindowSize,
-		TileScale:      4.0,
-		LDTKMapFile:    "assets/maps.ldtk",
-		FontInfos:      game.FontInfo{
+		Title:       "RPG",
+		ScreenSize:  userConfig.WindowSize,
+		TileScale:   4.0,
+		LDTKMapFile: "assets/maps.ldtk",
+		FontInfos: game.FontInfo{
 			TTFFile: userConfig.DefaultFont,
 			TTFSize: userConfig.DefaultFontSize,
 		},
-
-		TileMapAnimations: map[int32]game.TilemapAnimInfo{
-			28:                         {FrameCount: 2, DelayInSeconds: 1.5},
-			32:                         {FrameCount: 2, DelayInSeconds: 0.2},
-			common.IconEffectFireSmall: {FrameCount: 2, DelayInSeconds: 0.2},
-		},
 		UserConfiguration: userConfig,
 	}
-
-	theGame := game.NewGameInstance(startInfos)
+	theGame := game.NewGameInstance(startInfos, NewDummyUI())
 	if len(os.Args) > 1 {
 		argCmd := strings.ToLower(os.Args[1])
 		switch argCmd {
@@ -64,14 +59,43 @@ func main() {
 			genLoot(theGame)
 		case "ascii":
 			runGameWithConsole(theGame)
-		case "csv_dump":
-			dumpGameData()
+		case "list":
+			dumpGameData(theGame.GetGameData())
+		case "create":
+			startCreator(theGame.GetGameData())
 		case "validate":
 			return
 		}
 	} else {
-		runGameWithEbiten(theGame)
+		tileRenderer := renderer.NewTileRenderer(startInfos.TileScale)
+		tileRenderer.SetColorFromName(common.ColorFromName)
+		tileRenderer.SetDefaultAtlas(theGame.GetWorldState().GetWorldTexture())
+		tileRenderer.SetDefaultColors(common.DarkTextColor, color.Black)
+		tileRenderer.SetWhiteTile(defs.IconWhite)
+		uiContext := gui.UIContext{
+			GameState:    theGame.GetWorldState(),
+			PlayerAction: theGame.GetActions(),
+			AudioPlayer:  theGame.GetAudio(),
+			ResetGame:    theGame.ResetGame,
+			Animator:     theGame.GetActionBroker(),
+			DebugActions: common.DebugActions{},
+		}
+		tileMapAnimations := map[int32]gui.TilemapAnimInfo{
+			28:                       {FrameCount: 2, DelayInSeconds: 1.5},
+			32:                       {FrameCount: 2, DelayInSeconds: 0.2},
+			defs.IconEffectFireSmall: {FrameCount: 2, DelayInSeconds: 0.2},
+		}
+		uiController := gui.NewUIController(tileRenderer, uiContext, userConfig)
+		uiController.SetTileMapAnimations(tileMapAnimations)
+		uiController.SetTTFFont(util.MustOpen(startInfos.FontInfos.TTFFile), startInfos.FontInfos.TTFSize)
+		theGame.SetAndInitUserInterface(uiController)
+		runGameWithEbiten(uiController)
 	}
+}
+
+func startCreator(data defs.DataContainer) {
+	creator := NewCreator(data)
+	creator.Run()
 }
 
 func genLoot(theGame *game.GameInstance) {
@@ -86,20 +110,21 @@ func genLoot(theGame *game.GameInstance) {
 	}
 }
 
-func dumpGameData() {
-	file, _ := os.Open(path.Join("assets", "data", "enemies", "enemies.rec"))
-	records := recfile.Read(file)
-	file.Close()
+func dumpGameData(gameData defs.DataContainer) {
+	println("Defined Items:")
+	for key, _ := range gameData.ItemDefinitions {
+		println(fmt.Sprintf("  %s", key))
+	}
 
-	outFile, _ := os.Create(path.Join("assets", "data", "enemies", "enemies.csv"))
-	fieldNames := []string{"dlvl", "name", "icon", "internal_name", "base_speed", "base_health", "stats_experience", "stats_strength", "stats_dexterity", "stats_intelligence", "equipment", "targeted_skill", "death_string"}
-	recfile.WriteCSV(outFile, fieldNames, records)
+	println("Defined Enemies:")
+	for key, _ := range gameData.EnemyDefinitions {
+		println(fmt.Sprintf("  %s", key))
+	}
 }
 
 func maptest() {
 
-	ldtkMapProject, _ := ldtk_go.Open("assets/maps.ldtk")
-
+	ldtkMapProject, _ := ldtk.Open("assets/maps.ldtk")
 	testSource := rand.New(rand.NewSource(42))
 	dunGen := dungen.NewAccretionGenerator(testSource)
 	// dunGen.SetDebugSteps(true)
@@ -128,7 +153,7 @@ func runGameWithConsole(theGame *game.GameInstance) {
 	loopConfig := util.LoopConfig{
 		TargetFPS:        5,
 		IdleThreshold:    1,
-		CurrentTimeFunc:  func() float64 {return float64(time.Now().UnixNano()) * 1e-9},
+		CurrentTimeFunc:  func() float64 { return float64(time.Now().UnixNano()) * 1e-9 },
 		ProcessInputFunc: con.HandleInput,
 		UpdateFunc:       con.Update,
 		RenderFunc:       con.Draw,
@@ -136,19 +161,14 @@ func runGameWithConsole(theGame *game.GameInstance) {
 
 	loop := util.CreateLoop(loopConfig, &terminationCode)
 	loop()
-
-	if terminationCode == 2 {
-		theGame.SetConsoleMode(false)
-		defer runGameWithEbiten(theGame)
-	}
 }
 
 // runGameWithEbiten will start the infinitely running game loop
 // game will receive the update and draw calls
-func runGameWithEbiten(theGame *game.GameInstance) {
+func runGameWithEbiten(theGame *gui.UIController) {
 	screenSize := theGame.GetDeviceIndependentScreenSize()
 
-	ebiten.SetWindowTitle(theGame.GetTitle())
+	ebiten.SetWindowTitle("roguelike")
 	ebiten.SetWindowSize(screenSize.X, screenSize.Y)
 	ebiten.SetScreenClearedEveryFrame(true)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
@@ -158,12 +178,7 @@ func runGameWithEbiten(theGame *game.GameInstance) {
 	err := ebiten.RunGameWithOptions(theGame, &ebiten.RunGameOptions{
 		GraphicsLibrary: ebiten.GraphicsLibraryOpenGL,
 	})
-
-	if err != nil {
-		if errors.Is(err, game.ContinueWithAscii) {
-			defer runGameWithConsole(theGame)
-		} else if !errors.Is(err, ebiten.Termination) {
-			log.Fatal(err)
-		}
+	if err != nil && !errors.Is(err, ebiten.Termination) {
+		log.Fatal(err)
 	}
 }

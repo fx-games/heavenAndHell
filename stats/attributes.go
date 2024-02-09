@@ -2,6 +2,8 @@ package stats
 
 import (
 	"fmt"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"image/color"
 	"math"
 	"strings"
@@ -30,9 +32,9 @@ const (
 	MoveSpeedFactor          Name = "move_speed"
 	LifeStealFactor          Name = "life_steal"
 	ManaStealFactor          Name = "mana_steal"
-	ManaRegeneration     Name = "mana_regeneration"
-	HealthRegeneration   Name = "health_regeneration"
-	EnhancedDamageFactor Name = "enhanced_damage"
+	ManaRegeneration         Name = "mana_regeneration"
+	HealthRegeneration       Name = "health_regeneration"
+	EnhancedDamageFactor     Name = "enhanced_damage"
 	EnhancedArmorClassFactor Name = "armor_class_multiplier"
 
 	ArmorPenetration Name = "armor_penetration"
@@ -98,6 +100,9 @@ type Modifier struct {
 }
 
 func (m Modifier) ToString() string {
+	attributeName := strings.Replace(string(m.Attribute), "_", " ", -1)
+	caser := cases.Title(language.English)
+	niceName := caser.String(attributeName)
 	if m.Mode == ModifyAdditive {
 		sign := "+"
 		if m.Value < 0 {
@@ -105,24 +110,25 @@ func (m Modifier) ToString() string {
 		}
 		if m.IsPercentBased {
 			intValue := int(math.Ceil(m.Value * 100))
-			return fmt.Sprintf("%s%d%% %s", sign, intValue, m.Attribute)
+			return fmt.Sprintf("%s%d%% %s", sign, intValue, niceName)
 		}
 		intValue := int(m.Value)
-		return fmt.Sprintf("%s%d %s", sign, intValue, m.Attribute)
+		return fmt.Sprintf("%s%d %s", sign, intValue, niceName)
 	}
 	// m.Mode == ModifyMultiplicative
 	if m.Value < 1 {
 		minusInPercent := int(math.Ceil((1.0 - m.Value) * 100))
-		return fmt.Sprintf("-%d%% %s", minusInPercent, m.Attribute)
+		return fmt.Sprintf("-%d%% %s", minusInPercent, niceName)
 	}
 	plusPercent := int(math.Ceil((m.Value - 1) * 100))
-	return fmt.Sprintf("+%d%% %s", plusPercent, m.Attribute)
+	return fmt.Sprintf("+%d%% %s", plusPercent, niceName)
 }
 
 type AttributeHolder struct {
 	attributes map[Name]float64
 	resources  map[Name]*Resource
 	modifiers  map[Name][]*Modifier
+	onChanged  func()
 }
 
 func NewAttributeHolder() AttributeHolder {
@@ -136,9 +142,9 @@ func NewAttributeHolder() AttributeHolder {
 
 			Gold: 0,
 
-			BaseSpeed:                10, // we now would need an attack speed and a movement speed modifier
-			BaseArmorClass: 		  0,
-			BaseDamage:               0,
+			BaseSpeed:      10, // we now would need an attack speed and a movement speed modifier
+			BaseArmorClass: 0,
+			BaseDamage:     0,
 
 			AttackSpeedFactor:        1,
 			MoveSpeedFactor:          1,
@@ -155,7 +161,7 @@ func NewAttributeHolder() AttributeHolder {
 			MaxMana:   10,
 
 			VisionRange:      20,
-			LightRadius: 	  0,
+			LightRadius:      0,
 			ArmorPenetration: 0,
 
 			AggroRange: 0, // No range limit by default, means aggro on sight
@@ -165,13 +171,13 @@ func NewAttributeHolder() AttributeHolder {
 	}
 
 	resources := map[Name]*Resource{
-		Health: NewResource(-10, holder.getMaxForRessource(MaxHealth), 10),
-		Mana:   NewResource(0, holder.getMaxForRessource(MaxMana), 0),
+		Health: NewResource(-10, holder.getMaxForResource(MaxHealth), 10),
+		Mana:   NewResource(0, holder.getMaxForResource(MaxMana), 0),
 	}
 	holder.resources = resources
 	return holder
 }
-func (a *AttributeHolder) getMaxForRessource(attr Name) func() int {
+func (a *AttributeHolder) getMaxForResource(attr Name) func() int {
 	return func() int {
 		return a.GetAttribute(attr)
 	}
@@ -217,7 +223,7 @@ func (a *AttributeHolder) GetAttributeAsFloat(attr Name) float64 {
 	return a.getModifiedValue(attr, a.GetAttributeBaseValue(attr))
 }
 
-func (a *AttributeHolder) GetRessource(name Name) *Resource {
+func (a *AttributeHolder) GetResource(name Name) *Resource {
 	return a.resources[name]
 }
 
@@ -245,6 +251,7 @@ func (a *AttributeHolder) GetAllModifiersForAttribute(name Name) []*Modifier {
 func (a *AttributeHolder) AddModifier(modifier *Modifier) {
 	attr := modifier.Attribute
 	a.modifiers[attr] = append(a.modifiers[attr], modifier)
+	a.statsChanged()
 }
 func (a *AttributeHolder) RemoveModifier(modifier *Modifier) {
 	attr := modifier.Attribute
@@ -254,13 +261,16 @@ func (a *AttributeHolder) RemoveModifier(modifier *Modifier) {
 			return
 		}
 	}
+	a.statsChanged()
 }
 func (a *AttributeHolder) Increment(attributeName Name) {
 	a.attributes[attributeName]++
+	a.statsChanged()
 }
 
 func (a *AttributeHolder) Decrement(name Name) {
 	a.attributes[name]--
+	a.statsChanged()
 }
 
 func (a *AttributeHolder) SetAttribute(attributeName Name, value int) {
@@ -269,18 +279,31 @@ func (a *AttributeHolder) SetAttribute(attributeName Name, value int) {
 		return
 	}
 	a.attributes[attributeName] = float64(value)
+	a.statsChanged()
+}
+
+func (a *AttributeHolder) SetAttributeAsFloat(attr Name, value float64) {
+	if _, ok := a.attributes[attr]; !ok {
+		println("attribute not found", attr)
+		return
+	}
+	a.attributes[attr] = value
+	a.statsChanged()
 }
 
 func (a *AttributeHolder) IncrementBy(attributeName Name, amount int) {
 	a.attributes[attributeName] += float64(amount)
+	a.statsChanged()
 }
 
-func (a *AttributeHolder) IncrementRessourceBy(name Name, amount int) {
+func (a *AttributeHolder) IncrementResourceBy(name Name, amount int) {
 	a.resources[name].Increase(amount)
+	a.statsChanged()
 }
 
 func (a *AttributeHolder) DecrementBy(name Name, amount int) {
 	a.attributes[name] -= float64(amount)
+	a.statsChanged()
 }
 
 func (a *AttributeHolder) Clone() AttributeHolder {
@@ -295,4 +318,14 @@ func (a *AttributeHolder) Clone() AttributeHolder {
 		clone.modifiers[k] = v
 	}
 	return clone
+}
+
+func (a *AttributeHolder) SetOnChangeHandler(onChanged func()) {
+	a.onChanged = onChanged
+}
+
+func (a *AttributeHolder) statsChanged() {
+	if a.onChanged != nil {
+		a.onChanged()
+	}
 }

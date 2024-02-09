@@ -1,0 +1,754 @@
+package common
+
+import (
+	"fmt"
+	"image/color"
+	"math/rand"
+	"regexp"
+	"rpg/defs"
+	"rpg/stats"
+	"rpg/util"
+	"strconv"
+)
+
+// Will turn definitions into actual game objects
+type Factory struct {
+	definitions  defs.DataContainer
+	actionBroker ActionBroker
+	randomSource *rand.Rand
+	state        *State
+	gui          UserInterface
+
+	giveAndEquipItemToActor func(actor *Actor, item *Item)
+	addToTimeKeeper         func(being TimedBeing)
+	logError                func(msg string)
+	queueAfterTurn          func(func())
+}
+
+type FactoryContext struct {
+	Definitions  defs.DataContainer
+	ActionBroker ActionBroker
+	RandomSource *rand.Rand
+	State        *State
+
+	AddToTimeKeeper         func(being TimedBeing)
+	GiveAndEquipItemToActor func(actor *Actor, item *Item)
+	Msg                     func(msg string)
+}
+
+func NewFactory(context FactoryContext) *Factory {
+	return &Factory{
+		definitions:             context.Definitions,
+		randomSource:            context.RandomSource,
+		state:                   context.State,
+		giveAndEquipItemToActor: context.GiveAndEquipItemToActor,
+		actionBroker:            context.ActionBroker,
+		addToTimeKeeper:         context.AddToTimeKeeper,
+		logError:                context.Msg,
+	}
+}
+func (g *Factory) NewRandomEnemy(dungeonLevel int) (*Actor, []defs.EnemyDefinition) {
+	// get defs
+	enemyDefinitions := g.definitions.EnemyDefinitions
+
+	// filter for dungeon level
+	var filteredEnemies []defs.EnemyDefinition
+	for _, enemyDef := range enemyDefinitions {
+		if !enemyDef.CanAppearAt(g.randomSource, dungeonLevel) {
+			continue
+		}
+		filteredEnemies = append(filteredEnemies, enemyDef)
+	}
+
+	if len(filteredEnemies) == 0 {
+		g.logError(fmt.Sprintf("no enemies found for dungeon level %d", dungeonLevel))
+		return nil, nil
+	}
+	// pick random enemy definition
+	enemyDef := filteredEnemies[g.randomSource.Intn(len(filteredEnemies))]
+
+	// wants to spawn as a group?
+	var groupDefs []defs.EnemyDefinition
+	if len(enemyDef.GroupSpawn) > 0 {
+		for _, otherDef := range enemyDef.GroupSpawn {
+			otherDefName := otherDef
+			spawnCount := 1
+			if util.LooksLikeAFunction(otherDef) {
+				oDefName, args := util.GetNameAndArgs(otherDef)
+				otherDefName = oDefName
+				spawnCount = stats.NewIntervalFromString(args.Get(0)).LinearRandom()
+			}
+			for i := 0; i < spawnCount; i++ {
+				if otherEnemyDef, exists := enemyDefinitions[otherDefName]; exists {
+					groupDefs = append(groupDefs, otherEnemyDef)
+				}
+			}
+		}
+	}
+	// create enemy
+	return g.NewEnemyFromDefinition(enemyDef, dungeonLevel), groupDefs
+}
+
+func (g *Factory) NewEnemyFromDefinition(enemyDef defs.EnemyDefinition, dungeonLevel int) *Actor {
+	actor := NewActor(enemyDef.Icon)
+	//index := len(emptyMap.Actors())
+	actor.SetName(enemyDef.Name)
+	actor.SetInternalName(enemyDef.InternalName)
+	actor.SetDeathStringFormats(enemyDef.DeathStringFormats)
+	actor.SetHostile()
+	actor.SetBaseSpeed(enemyDef.BaseSpeed)
+	actorStats := actor.GetStats()
+
+	actorStats.SetAttribute(stats.MaxHealth, enemyDef.ResourceHealth)
+	actorStats.GetResource(stats.Health).SetToMax()
+
+	for statName, statValue := range enemyDef.Stats {
+		actorStats.SetAttribute(stats.StatFromString(statName), statValue)
+	}
+
+	for _, itemName := range enemyDef.Equipment {
+		item := g.NewItemFromDefinitionName(itemName, dungeonLevel)
+		if item == nil {
+			g.logError(fmt.Sprintf("could not find item definition %s", itemName))
+			continue
+		}
+		g.giveAndEquipItemToActor(actor, item)
+	}
+
+	var targetedSkills []*TargetedAction
+	for _, skillName := range enemyDef.TargetedSkills {
+		skillAction := g.NewTargetedActionFromName(skillName)
+		if skillAction != nil {
+			targetedSkills = append(targetedSkills, skillAction)
+		}
+	}
+	actor.SetTargetedSkills(targetedSkills)
+
+	var untargetedSkills []*UntargetedAction
+	for _, skillName := range enemyDef.UntargetedSkills {
+		skillAction := g.NewUntargetedActionFromName(skillName)
+		if skillAction != nil {
+			untargetedSkills = append(untargetedSkills, skillAction)
+		}
+	}
+	actor.SetUntargetedSkills(untargetedSkills)
+	actor.SetAggroRange(enemyDef.AggroRange)
+
+	return actor
+}
+
+func (g *Factory) GenerateLoot(dungeonLevel int) *Item {
+	source := g.randomSource
+	diceRoll := source.Intn(100)
+	var addedItem *Item
+	switch {
+	case diceRoll >= 0 && diceRoll < 10:
+		addedItem = g.NewRandomWeapon(dungeonLevel)
+	case diceRoll >= 10 && diceRoll < 20:
+		addedItem = g.NewRandomArmorPiece(dungeonLevel)
+	case diceRoll >= 20 && diceRoll < 30:
+		addedItem = g.NewRandomAccessory(dungeonLevel)
+	case diceRoll >= 30 && diceRoll < 40:
+		addedItem = g.NewRandomLightSource(dungeonLevel)
+	case diceRoll >= 40 && diceRoll < 60:
+		addedItem = g.NewRandomWand(dungeonLevel)
+	case diceRoll >= 60 && diceRoll < 80:
+		addedItem = g.NewRandomPotion(dungeonLevel)
+	case diceRoll >= 80 && diceRoll < 100:
+		addedItem = g.NewRandomScroll(dungeonLevel)
+	}
+	if addedItem != nil && addedItem.IsEquippable() {
+		rarityRoll := source.Intn(100)
+		rarity := ItemRarityCommon
+		if rarityRoll >= 80 && rarityRoll < 95 {
+			rarity = ItemRarityMagic
+		} else if rarityRoll >= 95 {
+			rarity = ItemRarityUnique
+		}
+
+		g.setRarityAndEnchantments(source, addedItem, rarity, dungeonLevel)
+	}
+	return addedItem
+}
+func (g *Factory) setRarityAndEnchantments(source *rand.Rand, item *Item, rarity ItemRarity, itemLevel int) {
+	enchantmentCount := 0
+	if rarity == ItemRarityCommon {
+		return
+	}
+	// TODO: this should actually change the icon of the item
+	if rarity == ItemRarityMagic {
+		enchantmentCount = source.Intn(1) + 1
+	}
+	if rarity == ItemRarityUnique {
+		enchantmentCount = source.Intn(5) + 1
+	}
+	modifierCount, hookCount := randomSplit(source, enchantmentCount)
+
+	if modifierCount > 0 {
+		mods := defs.NewModifiersForItem(source, itemLevel, modifierCount)
+		item.SetEquippedModifiers(mods)
+	}
+
+	if hookCount > 0 {
+		itemHooks := NewHooksForItem(source, itemLevel, hookCount)
+		item.SetItemHooks(itemHooks)
+	}
+}
+
+func randomSplit(source *rand.Rand, value int) (int, int) {
+	firstPart := source.Intn(value + 1)
+	restPart := value - firstPart
+	return firstPart, restPart
+}
+
+func (g *Factory) NewRandomWeapon(dungeonLevel int) *Item {
+	// get defs
+	itemDefinitions := g.definitions.ItemDefinitions
+
+	// filter for dungeon level
+	var filtered []defs.ItemDefinition
+	weaponTypeMap := make(map[defs.WeaponType][]defs.ItemDefinition)
+	for _, itemDef := range itemDefinitions {
+
+		if !itemDef.IsWeapon() || !itemDef.CanAppearAt(g.randomSource, dungeonLevel) {
+			continue
+		}
+
+		filtered = append(filtered, itemDef)
+		weaponTypeMap[itemDef.Weapon.WeaponType] = append(weaponTypeMap[itemDef.Weapon.WeaponType], itemDef)
+	}
+
+	if len(filtered) == 0 {
+		g.logError(fmt.Sprintf("no armor found for dungeon level %d", dungeonLevel))
+		return nil
+	}
+	// group by type
+	availableTypes := make([]defs.WeaponType, 0)
+	for wType, _ := range weaponTypeMap {
+		availableTypes = append(availableTypes, wType)
+	}
+
+	// pick random type
+	weaponType := availableTypes[g.randomSource.Intn(len(availableTypes))]
+
+	// pick random definition
+	armorDefinition := weaponTypeMap[weaponType][g.randomSource.Intn(len(weaponTypeMap[weaponType]))]
+
+	// create item
+	return g.NewItemFromDefinition(armorDefinition, dungeonLevel)
+}
+
+func (g *Factory) NewItemFromDefinition(itemDefinition defs.ItemDefinition, dungeonLevel int) *Item {
+	state := g.state
+	baseItem := NewItem(state.GetPlayer, itemDefinition.Name, itemDefinition.Icon)
+	baseItem.SetBaseCost(itemDefinition.Cost)
+	baseItem.SetCategory(itemDefinition.InventoryCategory)
+	baseItem.SetQualityLevel(itemDefinition.DLvl)
+
+	if itemDefinition.Armor.IsValid() {
+		armorPart := &ArmorStats{
+			BaseArmor:  itemDefinition.Armor.ArmorClass.LinearRandom(),
+			Durability: stats.NewResource(0, flatFunc(20), 20),
+			Type:       itemDefinition.Armor.ArmorType,
+		}
+		baseItem.SetArmorComponent(armorPart)
+	}
+
+	if itemDefinition.Weapon.IsValid() {
+		weaponPart := &WeaponStats{
+			Damage:            itemDefinition.Weapon.Damage,
+			Durability:        stats.NewResource(0, flatFunc(20), 20),
+			Type:              itemDefinition.Weapon.WeaponType,
+			MeleeRange:        1,
+			AttackSpeedFactor: itemDefinition.Weapon.Speed,
+		}
+		baseItem.SetWeaponComponent(weaponPart)
+	}
+
+	if itemDefinition.Throw.IsValid() {
+		hitZone := HitZoneFromString(state.GetMap(), itemDefinition.Throw.HitZone)
+		if hitZone != nil {
+			throwPart := &ThrowStats{
+				Damage:        itemDefinition.Throw.Damage,
+				HitZone:       hitZone,
+				ChanceToBreak: itemDefinition.Throw.ChanceToBreak,
+				OnHitEffect:   g.NewOnHitEffectFromString(itemDefinition.Throw.OnHitEffect),
+			}
+			baseItem.SetThrowComponent(throwPart)
+		}
+	}
+
+	if itemDefinition.Light.IsValid() {
+		lightPart := &LightStats{
+			LightColor:        GetColorFromRGBString(itemDefinition.Light.LightColor),
+			FlickerPattern:    GetFlickerPatternFromName(itemDefinition.Light.FlickerPattern),
+			FlickerFrameDelay: itemDefinition.Light.FlickerFrameDelay,
+		}
+		baseItem.SetLightComponent(lightPart)
+	}
+
+	for _, modifierName := range itemDefinition.Modifiers {
+		var mod *stats.Modifier
+		if util.LooksLikeAFunction(modifierName) {
+			modName, args := util.GetNameAndArgs(modifierName)
+			modValue := args.GetFloat(0)
+			mod = defs.NewModifierFromNameWithFixedBonus(modName, modValue)
+		} else {
+			mod = defs.NewModifierFromNameWithRandomRange(modifierName, dungeonLevel)
+		}
+		if mod != nil {
+			baseItem.AddEquippedModifier(mod)
+		}
+	}
+	charges := itemDefinition.Charges
+	destroyAfterUse := false
+
+	if itemDefinition.InventoryCategory.HasAlwaysOneCharge() {
+		charges = 1
+		destroyAfterUse = true
+	}
+
+	var untargetedAction *UntargetedAction
+	if itemDefinition.UntargetedAction != "" {
+		untargetedAction = g.NewUntargetedActionFromName(itemDefinition.UntargetedAction)
+	}
+
+	var targetedAction *TargetedAction
+	if itemDefinition.TargetedAction != "" {
+		targetedAction = g.NewTargetedActionFromName(itemDefinition.TargetedAction)
+	}
+
+	baseItem.SetCharges(charges)
+	baseItem.SetDestroyAfterUse(destroyAfterUse)
+	baseItem.SetUntargetedAction(untargetedAction)
+	baseItem.SetTargetedAction(targetedAction)
+	return baseItem
+}
+
+func GetColorFromRGBString(lightColor string) color.RGBA {
+	// looks like "234 12 124"
+	regexpPattern := regexp.MustCompile(`([0-9]{1,3}) +([0-9]{1,3}) +([0-9]{1,3})`)
+	matches := regexpPattern.FindStringSubmatch(lightColor)
+	if matches == nil {
+		return color.RGBA{}
+	}
+	r, _ := strconv.Atoi(matches[1])
+	g, _ := strconv.Atoi(matches[2])
+	b, _ := strconv.Atoi(matches[3])
+	return color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 255}
+}
+
+func (g *Factory) NewRandomLightSource(dungeonLevel int) *Item {
+	// get defs
+	itemDefinitions := g.definitions.ItemDefinitions
+
+	// filter for dungeon level
+	var filtered []defs.ItemDefinition
+	for _, itemDef := range itemDefinitions {
+
+		if !itemDef.IsLightSource() || !itemDef.CanAppearAt(g.randomSource, dungeonLevel) {
+			continue
+		}
+
+		filtered = append(filtered, itemDef)
+	}
+
+	if len(filtered) == 0 {
+		g.logError(fmt.Sprintf("no light source found for dungeon level %d", dungeonLevel))
+		return nil
+	}
+	// pick random type
+	accessory := filtered[g.randomSource.Intn(len(filtered))]
+	return g.NewItemFromDefinition(accessory, dungeonLevel)
+}
+
+func GetFlickerPatternFromName(pattern string) []float64 {
+	switch pattern {
+	case "fire":
+		return defs.GetFireFlickerPattern()
+	case "smooth":
+		return defs.GetSmoothFlickerPattern()
+	}
+	return nil
+}
+
+func (g *Factory) NewItemFromDefinitionName(itemString string, dungeonLevel int) *Item {
+	if def, exists := g.definitions.ItemDefinitions[itemString]; exists {
+		return g.NewItemFromDefinition(def, dungeonLevel)
+	}
+	return nil
+}
+
+func (g *Factory) NewTargetedActionFromName(name string) *TargetedAction {
+	if def, exists := g.definitions.TargetedDefinitions[name]; exists {
+		return g.NewTargetedActionFromDefinition(def)
+	}
+	g.logError(fmt.Sprintf("Unknown targeted action: %s", name))
+	return nil
+}
+
+func (g *Factory) NewTargetedActionFromDefinition(definition defs.TargetedActionDefinition) *TargetedAction {
+
+	targetedAction := NewTargetedAction(
+		definition.Name,
+		HitZoneFromString(g.state.GetMap(), definition.HitZone),
+		g.NewOnHitEffectFromString(definition.OnHitEffect),
+		NewTargetingRulesFromString(definition.Targeting),
+	)
+
+	targetedAction.SetInternalName(definition.InternalName)
+	targetedAction.SetDungeonLevel(definition.DungeonLevel)
+	targetedAction.SetIcon(definition.Icon)
+	return targetedAction
+}
+
+func (g *Factory) GetAllHitEffects() map[string]func(args util.Arguments) *HitEffect {
+	return map[string]func(args util.Arguments) *HitEffect{
+		"apply":               g.applyStatusEffectToSelection,
+		"confuse":             g.confuseOnHitProc,
+		"fireball":            g.throwFireball,
+		"project_fire":        g.projectFire,
+		"fire_zone":           g.fireZone,
+		"steal_item":          g.stealItem,
+		"steal_item_teleport": g.stealItemAndTeleport,
+		"mind_push":           g.mindPush,
+		"blink":               g.blink,
+	}
+}
+func (g *Factory) NewOnHitEffectFromString(effectName string) *HitEffect {
+	if effectName == "" {
+		return nil
+	}
+	var args util.Arguments
+	if util.LooksLikeAFunction(effectName) {
+		effectName, args = util.GetNameAndArgs(effectName)
+	}
+	allHitEffects := g.GetAllHitEffects()
+	if _, ok := allHitEffects[effectName]; ok {
+		return allHitEffects[effectName](args)
+	}
+	if effectName != "" {
+		g.logError(fmt.Sprintf("Unknown on hit effect: %s", effectName))
+	}
+	return nil
+}
+
+func (g *Factory) NewRandomArmorPiece(dungeonLevel int) *Item {
+	// get defs
+	itemDefinitions := g.definitions.ItemDefinitions
+
+	// filter for dungeon level
+	var filteredArmorDefinitions []defs.ItemDefinition
+	armorTypeMap := make(map[defs.ArmorType][]defs.ItemDefinition)
+	for _, itemDef := range itemDefinitions {
+
+		if !itemDef.IsArmor() || !itemDef.CanAppearAt(g.randomSource, dungeonLevel) {
+			continue
+		}
+
+		filteredArmorDefinitions = append(filteredArmorDefinitions, itemDef)
+		armorTypeMap[itemDef.Armor.ArmorType] = append(armorTypeMap[itemDef.Armor.ArmorType], itemDef)
+	}
+
+	if len(filteredArmorDefinitions) == 0 {
+		g.logError(fmt.Sprintf("no armor found for dungeon level %d", dungeonLevel))
+		return nil
+	}
+	// group by armor type
+	availableArmorTypes := make([]defs.ArmorType, 0)
+	for armorType, _ := range armorTypeMap {
+		availableArmorTypes = append(availableArmorTypes, armorType)
+	}
+
+	// pick random armor type
+	armorType := availableArmorTypes[g.randomSource.Intn(len(availableArmorTypes))]
+
+	// pick random armor definition
+	armorDefinition := armorTypeMap[armorType][g.randomSource.Intn(len(armorTypeMap[armorType]))]
+
+	// create item
+	return g.NewItemFromDefinition(armorDefinition, dungeonLevel)
+}
+
+func (g *Factory) NewRandomAccessory(dungeonLevel int) *Item {
+	// get defs
+	itemDefinitions := g.definitions.ItemDefinitions
+
+	// filter for dungeon level
+	var filtered []defs.ItemDefinition
+	for _, itemDef := range itemDefinitions {
+
+		if !itemDef.IsAccessory() || !itemDef.CanAppearAt(g.randomSource, dungeonLevel) {
+			continue
+		}
+
+		filtered = append(filtered, itemDef)
+	}
+
+	if len(filtered) == 0 {
+		g.logError(fmt.Sprintf("no accessory found for dungeon level %d", dungeonLevel))
+		return nil
+	}
+	// pick random type
+	accessory := filtered[g.randomSource.Intn(len(filtered))]
+	return g.NewItemFromDefinition(accessory, dungeonLevel)
+}
+
+func (g *Factory) NewRandomWand(dungeonLevel int) *Item {
+	source := g.randomSource
+	var newConsumable *Item
+	roll := source.Intn(100)
+	if roll < 50 {
+		wandType := []func(targetedAction *TargetedAction) *Item{
+			g.NewFiniteTargetedWand,
+			g.NewEtherealTargetedWand,
+			g.NewInfiniteTargetedWand,
+		}
+		randomTargetedAction := g.GetRandomTargetedAction(source, dungeonLevel)
+		wandTypeRoll := source.Intn(100)
+		wandTypeIndex := 2
+		if wandTypeRoll < 45 {
+			wandTypeIndex = 0
+		} else if wandTypeRoll < 90 {
+			wandTypeIndex = 1
+		}
+		randomTargetableFunc := wandType[wandTypeIndex]
+		newConsumable = randomTargetableFunc(randomTargetedAction)
+	} else {
+		wandType := []func(untargetedAction *UntargetedAction) *Item{
+			g.NewFiniteUntargetedWand,
+			g.NewEtherealUntargetedWand,
+			g.NewInfiniteUntargetedWand,
+		}
+		randomUntargetedAction := g.GetRandomUntargetedAction(dungeonLevel, defs.ForWand)
+		wandTypeRoll := source.Intn(100)
+		wandTypeIndex := 2
+		if wandTypeRoll < 45 {
+			wandTypeIndex = 0
+		} else if wandTypeRoll < 90 {
+			wandTypeIndex = 1
+		}
+		randomUntargetableFunc := wandType[wandTypeIndex]
+		newConsumable = randomUntargetableFunc(randomUntargetedAction)
+	}
+	/* scrapped for now, reasons: need an extra UI step (menu), name too long for UI display
+	   else {
+	       randomTargetedAction := g.GetRandomTargetedAction(source, dungeonLevel)
+	       randomUntargetedAction := g.GetRandomUntargetedAction(source, dungeonLevel)
+	       newConsumable = g.NewTwinWand(randomTargetedAction, randomUntargetedAction)
+	   }
+	*/
+
+	return newConsumable
+}
+
+func (g *Factory) NewInfiniteTargetedWand(targetedAction *TargetedAction) *Item {
+	return g.NewTargetedWand(targetedAction, -1, false)
+}
+
+func (g *Factory) NewFiniteTargetedWand(targetedAction *TargetedAction) *Item {
+	return g.NewTargetedWand(targetedAction, 3, false)
+}
+func (g *Factory) NewEtherealTargetedWand(targetedAction *TargetedAction) *Item {
+	return g.NewTargetedWand(targetedAction, 5, true)
+}
+func (g *Factory) NewInfiniteUntargetedWand(untargetedAction *UntargetedAction) *Item {
+	return g.NewUntargetedWand(untargetedAction, -1, false)
+}
+
+func (g *Factory) NewFiniteUntargetedWand(untargetedAction *UntargetedAction) *Item {
+	return g.NewUntargetedWand(untargetedAction, 3, false)
+}
+
+func (g *Factory) NewEtherealUntargetedWand(untargetedAction *UntargetedAction) *Item {
+	return g.NewUntargetedWand(untargetedAction, 5, true)
+}
+
+func (g *Factory) NewTargetedWand(targetedAction *TargetedAction, charges int, destroyAfterUse bool) *Item {
+	itemName := fmt.Sprintf("a wand of %s", targetedAction.Name())
+	baseItem := NewItem(g.state.GetPlayer, itemName, defs.IconItemWand)
+	baseItem.SetCategory(defs.ItemCategoryWand)
+	baseItem.SetQualityLevel(1)
+	baseItem.SetCharges(charges)
+	baseItem.SetDestroyAfterUse(destroyAfterUse)
+	baseItem.SetTargetedAction(targetedAction)
+
+	return baseItem
+}
+func (g *Factory) NewUntargetedWand(untargetedAction *UntargetedAction, charges int, destroyAfterUse bool) *Item {
+	itemName := fmt.Sprintf("a wand of %s", untargetedAction.Name())
+	baseItem := NewItem(g.state.GetPlayer, itemName, defs.IconItemWand)
+	baseItem.SetCategory(defs.ItemCategoryWand)
+	baseItem.SetQualityLevel(1)
+	baseItem.SetCharges(charges)
+	baseItem.SetDestroyAfterUse(destroyAfterUse)
+	baseItem.SetUntargetedAction(untargetedAction)
+
+	return baseItem
+}
+func (g *Factory) GetRandomUntargetedAction(dungeonLevel int, actionUsage defs.ActionUsage) *UntargetedAction {
+	possibleActions := make([]*UntargetedAction, 0)
+	for _, def := range g.definitions.UntargetedDefinitions {
+		if def.DungeonLevel <= dungeonLevel && def.AllowedUsage.Allows(actionUsage) {
+			possibleActions = append(possibleActions, g.NewUntargetedActionFromDefinition(def, def.DefaultArgs))
+		}
+	}
+
+	if len(possibleActions) > 0 {
+		return possibleActions[rand.Intn(len(possibleActions))]
+	}
+	g.logError(fmt.Sprintf("no untargeted action found for dungeon level %d", dungeonLevel))
+
+	return nil
+}
+
+func (g *Factory) NewUntargetedActionFromDefinition(def defs.UntargetedActionDefinition, args util.Arguments) *UntargetedAction {
+	action := NewUntargetedAction(def.Name, def.Icon)
+	action.SetDelay(def.ActivationDelay)
+	effectFromName := g.UntargetedEffectFromName(def.InternalName, args)
+	if effectFromName == nil {
+		g.logError(fmt.Sprintf("no untargeted effect found for name %s", def.InternalName))
+		return nil
+	}
+	action.SetEffect(effectFromName)
+
+	if def.ActivationCondition != "" {
+		action.SetCondition(g.NewConditionFromString(def.ActivationCondition))
+	}
+
+	return action
+}
+func (g *Factory) UntargetedEffectFromName(name string, args util.Arguments) *UntargetedEffect {
+	allEffects := g.GetAllUntargetedEffects()
+	if effect, exists := allEffects[name]; exists {
+		untargetedEffect := effect(args)
+		return &untargetedEffect
+	}
+	g.logError(fmt.Sprintf("no untargeted effect found for name %s", name))
+	return nil
+}
+
+func (g *Factory) GetAllUntargetedEffects() map[string]func(args util.Arguments) UntargetedEffect {
+	return map[string]func(args util.Arguments) UntargetedEffect{
+		string(ActionNameHealHealthAndMana): g.getHealHealthAndMana,
+		string(ActionNameHealHealth):        g.getHealHealthBy,
+		string(ActionNameBerserk):           g.getBerserkSelfAction,
+		string(ActionNameApplyStatusEffect): g.getApplyStatusAction,
+		string(ActionNameHealMana):          g.getHealManaBy,
+		string(ActionNameTeleport):          g.getRandomTeleportAction,
+		string(ActionNameBuffSpeed):         g.getSpeedBuff,
+		string(ActionNameBuffDamage):        g.getDamageBuff,
+		string(ActionNameRecall):            g.getPlayerRecallAction,
+		string(ActionNameBless):             g.getBlessing,
+		string(ActionNameEnchantWeapon):     g.getEnchantWeapon,
+		string(ActionNameEnchantArmor):      g.getEnchantArmor,
+		string(ActionNameMultiShot):         g.getMultiShot,
+		string(ActionNameTelefrag):          g.getRandomTelefragAction,
+		string(ActionNameReplicate):         g.getReplicate,
+	}
+}
+
+func (g *Factory) NewRandomPotion(dungeonLevel int) *Item {
+	// get defs
+	itemDefinitions := g.definitions.ItemDefinitions
+
+	// filter for dungeon level
+	var filtered []defs.ItemDefinition
+	for _, itemDef := range itemDefinitions {
+
+		if !itemDef.IsPotion() || !itemDef.CanAppearAt(g.randomSource, dungeonLevel) {
+			continue
+		}
+
+		filtered = append(filtered, itemDef)
+	}
+
+	if len(filtered) == 0 {
+		g.logError(fmt.Sprintf("no potion found for dungeon level %d", dungeonLevel))
+		return nil
+	}
+
+	// pick random definition
+	definition := filtered[g.randomSource.Intn(len(filtered))]
+
+	// create item
+	return g.NewItemFromDefinition(definition, dungeonLevel)
+}
+
+func (g *Factory) NewPotion(untargetedAction *UntargetedAction) *Item {
+	name := fmt.Sprintf("a potion of %s", untargetedAction.Name())
+	baseItem := NewItem(g.state.GetPlayer, name, defs.IconItemPotionRed)
+	baseItem.SetCategory(defs.ItemCategoryPotion)
+	baseItem.SetQualityLevel(1)
+	baseItem.SetCharges(1)
+	baseItem.SetDestroyAfterUse(true)
+	baseItem.SetUntargetedAction(untargetedAction)
+	return baseItem
+}
+
+func (g *Factory) NewRandomScroll(dungeonLevel int) *Item {
+	// get defs
+	itemDefinitions := g.definitions.ItemDefinitions
+
+	// filter for dungeon level
+	var filtered []defs.ItemDefinition
+	for _, itemDef := range itemDefinitions {
+
+		if !itemDef.IsScroll() || !itemDef.CanAppearAt(g.randomSource, dungeonLevel) {
+			continue
+		}
+
+		filtered = append(filtered, itemDef)
+	}
+
+	if len(filtered) == 0 {
+		g.logError(fmt.Sprintf("no scroll found for dungeon level %d", dungeonLevel))
+		return nil
+	}
+
+	// pick random definition
+	definition := filtered[g.randomSource.Intn(len(filtered))]
+
+	// create item
+	return g.NewItemFromDefinition(definition, dungeonLevel)
+}
+
+func (g *Factory) NewHiddenNote(itemName string, messagText []util.LabelText, onRead func()) *Item {
+	action := NewUntargetedAction("read", defs.IconItemScroll)
+	//action.SetDescription(fmt.Sprintf("TODO: Description for %s", def.Name))
+
+	effect := g.getReadMessage(messagText, onRead)
+	action.SetEffect(&effect)
+	action.SetNoTimeNeeded()
+
+	scroll := g.NewScroll(action)
+	scroll.SetName(itemName)
+	scroll.SetUnlimitedCharges()
+	scroll.ShowNameOnlyInTooltip()
+	scroll.Hide()
+	return scroll
+}
+func (g *Factory) NewScroll(untargetedAction *UntargetedAction) *Item {
+	itemName := fmt.Sprintf("a scroll of %s", untargetedAction.Name())
+	baseItem := NewItem(g.state.GetPlayer, itemName, defs.IconItemScroll)
+	baseItem.SetCategory(defs.ItemCategoryScroll)
+	baseItem.SetQualityLevel(1)
+	baseItem.SetCharges(1)
+	baseItem.SetDestroyAfterUse(true)
+	baseItem.SetUntargetedAction(untargetedAction)
+	return baseItem
+}
+
+func (g *Factory) NewSign(inscription []string) *BumpObject {
+	return NewBumpObject("a sign", defs.IconSign, func(actor *Actor, startAnimating func() bool) {
+		g.gui.OpenTextWindow(util.ToLabelText(inscription))
+	})
+}
+
+func (g *Factory) SetQueueAfterTurn(afterTurn func(call func())) {
+	g.queueAfterTurn = afterTurn
+}
+
+func (g *Factory) SetUserInterface(ui UserInterface) {
+	g.gui = ui
+}

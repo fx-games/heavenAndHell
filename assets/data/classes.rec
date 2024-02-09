@@ -1,0 +1,52 @@
+%rec: default
+#FIELDS: internal_name name icon gold item stats_health stats_mana stats_strength stats_dexterity stats_intelligence untargeted_skill targeted_skill
+
+internal_name: warrior
+name: Warrior
+icon: 20
+gold: 200
+item: main_gauche
+item: torch
+item: hard_leather_armour
+resource_health: 20
+resource_mana: 1
+stats_health_regeneration: 0.15
+stats_mana_regeneration: 0.15
+stats_strength: 15
+stats_dexterity: 10
+stats_intelligence: 5
+
+
+internal_name: archer
+name: Archer
+icon: 19
+gold: 200
+item: short_bow
+item: torch
+item: soft_leather_armour
+resource_health: 15
+resource_mana: 1
+stats_health_regeneration: 0.15
+stats_mana_regeneration: 0.15
+stats_strength: 10
+stats_dexterity: 15
+stats_intelligence: 5
+untargeted_skill: multi_shot
+targeted_skill: blink
+
+internal_name: mage
+name: Mage
+icon: 21
+gold: 200
+item: dagger
+item: torch
+item: robe
+resource_health: 10
+resource_mana: 4
+stats_health_regeneration: 0.15
+stats_mana_regeneration: 0.15
+stats_strength: 5
+stats_dexterity: 5
+stats_intelligence: 20
+untargeted_skill: heal_health
+targeted_skill: fire_wall

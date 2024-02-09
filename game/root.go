@@ -4,26 +4,19 @@ import (
 	"cmp"
 	"fmt"
 	"github.com/flopp/go-findfont"
-	"github.com/hajimehoshi/ebiten/v2"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
 	"image/color"
-	"io"
 	"io/fs"
 	"math"
 	"math/rand"
 	"os"
 	"path"
-	"rpg/actions"
 	"rpg/audio"
 	"rpg/common"
-	"rpg/dungen"
+	"rpg/defs"
 	"rpg/geometry"
 	"rpg/gridmap"
-	"rpg/ldtk_go"
-	"rpg/renderer"
+	"rpg/ldtk"
 	"rpg/stats"
-	"rpg/ui"
 	"rpg/util"
 	"slices"
 	"strings"
@@ -41,79 +34,66 @@ type StartInfo struct {
 	TileScale         float64
 	Title             string
 	LDTKMapFile       string
-	TileMapAnimations map[int32]TilemapAnimInfo
-	UserConfiguration Configuration
+	UserConfiguration common.Configuration
 }
 
 type GameInstance struct {
-	deviceDPIScale              float64
-	tileScale                   float64
+	// base infos / config
 	title                       string
 	deviceIndependentScreenSize geometry.Point
+	configuration               common.Configuration
+	startInfo                   StartInfo
 
-	tileRenderer *renderer.TileRenderer
+	// dependencies
+	uiController common.UserInterface
+	audioPlayer  *audio.Player
 
-	mapRenderer  *renderer.MapRenderer
-	worldTexture renderer.TextureAtlas
+	// world state
+	state        common.State
+	actionBroker *common.Broker // registered hooks
 
+	// random
+	randomSource *rand.Rand
+	worldTicks   uint64
+
+	// rendering
+
+	// input
 	mousePosInPixels geometry.Point
 	mousePosOnMap    geometry.Point
 
-	message           PrintMessage
-	tilemapAnimations map[int32]TilemapAnimInfo
+	// textserver
+	serverStats     *TextServer
+	serverInventory *TextServer
+	serverEquipment *TextServer
+	serverLog       *TextServer
 
-	worldTicks uint64
-
-	actionBroker *actions.Broker
-	uiController *ui.UIController
-
-	state             common.State
-	hybridRenderer    *HybridRenderer
-	targeter          *Targeter
-	logBuffer         []string
-	timekeeper        *TimeKeeper
-	audioPlayer       *audio.Player
-	playerDijkstraMap map[geometry.Point]int
-	inventory         *ui.IconOverlay
-	skills            *ui.IconOverlay
-	timer             *ui.IconOverlay
-	playerPath        []geometry.Point
+	// player state
+	isResting         bool
 	autoExplore       bool
-	configuration     Configuration
-	isFullScreen      bool
-	statsLabel        *ui.BasicLabel
-	levelUpButton     *ui.ButtonOverlay
-	randomSource      *rand.Rand
+	playerDijkstraMap map[geometry.Point]int
+	playerPath        []geometry.Point
 
-	globalFlashColorTicksLeft   int
-	globalFlashColorTicksStart  int
-	globalFlashColor            color.Color
-	ldtkProject                 *ldtk_go.Project
-	miniMap                     *ui.MinimapOverlay
-	disableFogOfWar             bool
-	debugLines                  []util.Tuple[geometry.Point, geometry.Point] // TODO: Move this into the renderer
-	debugCells                  []geometry.Point
-	shiftIsBeingPressedThisTick bool
-	uiBarWidth                  int
-	setToExactFit               bool
-
-	serverStats      *TextServer
-	serverInventory  *TextServer
-	serverEquipment  *TextServer
-	serverLog        *TextServer
+	// game state
 	shouldQuitGame   bool
 	quitToAscii      bool
-	startInfo        StartInfo
-	executeAfterTurn []func()
 	debugModeEnabled bool
 	consoleMode      bool
-	onMapChange      func()
 
-	enemyDefinitions      map[string]EnemyDefinition
-	itemDefinitions       map[string]ItemDefinition
-	untargetedDefinitions map[string]UntargetedActionDefinition
-	targetedDefinitions   map[string]TargetedActionDefinition
-	vendorDefinitions     map[string]VendorDefinition
+	// event handler
+	executeAfterTurn []func()
+
+	// data definitions
+	dataDefinitions defs.DataContainer
+
+	selectedClass defs.LoadoutDefinition
+
+	actions *Actions
+	factory *common.Factory
+
+	logHook     func(string)
+	logBuffer   []string
+	onMapChange func()
 }
 
 func (g *GameInstance) SetConsoleMode(consoleMode bool) {
@@ -123,503 +103,8 @@ func (g *GameInstance) SetConsoleMode(consoleMode bool) {
 func (g *GameInstance) GetTicks() uint64 {
 	return g.worldTicks
 }
-func (g *GameInstance) AddItemToMapWithDistribution(item common.Item, pos geometry.Point) {
-	currentMap := g.state.GetMap()
-	dropPos := getDropPos(currentMap, pos)
-	currentMap.AddItem(item, dropPos)
-}
-func getDropPos(gameMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], actorPos geometry.Point) geometry.Point {
-	isFree := func(pos geometry.Point) bool {
-		if gameMap.IsActorAt(pos) {
-			actorAt := gameMap.ActorAt(pos)
-			if actorAt.IsVendor() {
-				return false
-			}
-		}
-		cell := gameMap.GetCell(pos)
-		if cell.TileType.Special != gridmap.SpecialTileNone {
-			return false
-		}
-		return gameMap.Contains(pos) && gameMap.IsWalkable(pos) && !gameMap.IsItemAt(pos) && !gameMap.IsObjectAt(pos)
-	}
-	if isFree(actorPos) {
-		return actorPos
-	}
-	freeCells := gameMap.GetFreeCellsForDistribution(actorPos, 1, isFree)
-	if len(freeCells) == 0 {
-		println("ERR: No free cells for item drop")
-		return actorPos
-	}
-	dropPos := freeCells[0]
-	return dropPos
-}
 
-func (g *GameInstance) GetPlayerVisionRange() int {
-	actor := g.state.GetPlayer()
-	visionRange := actor.GetStats().GetAttribute(stats.VisionRange) // used in town (=day light)
-
-	playerInDungeon := !g.IsPlayerInTown()
-	if playerInDungeon {
-		if g.state.GetMap().IsTileLit(actor.MapPosition()) {
-			return visionRange
-		}
-		equipment := actor.GetEquipment()
-		if equipment.HasLightSourceEquipped() {
-			lightRadius := actor.GetStats().GetAttribute(stats.LightRadius) // used in dungeons (=darkness)
-			visionRange = lightRadius
-		} else {
-			visionRange = 0
-		}
-	} else if g.state.GetFlags().IsSet("town_changed_to_night") {
-		visionRange = visionRange / 2
-	}
-	return visionRange
-}
-
-func (g *GameInstance) IsPlayerInTown() bool {
-	mapName := g.state.GetMap().GetName()
-	return isTownLevel(mapName)
-}
-
-func (g *GameInstance) TriggerCellEffectsDuringMovementForActor(sourceAction actions.Action, actor *common.Actor, mapPos geometry.Point, startAnimating func() bool) {
-	if actor.HasStatusEffect(common.StatusFlying) {
-		return
-	}
-
-	currentMap := g.state.GetMap()
-	newPos := mapPos
-
-	if currentMap.IsObjectAt(newPos) {
-		objectAtLocation := currentMap.ObjectAt(newPos)
-		objectAtLocation.ActorWalkedOn(actor, startAnimating)
-	}
-
-	if currentMap.GetCell(newPos).TileType.Special == gridmap.SpecialTileDamaging {
-		action := actions.NewChangeRessourceAction(sourceAction.Cause(), actor, stats.Health, -3)
-		action.SetAnimationStartPredicate(startAnimating)
-		g.actionBroker.Execute(action)
-	}
-}
-
-func (g *GameInstance) Say(actor *common.Actor, trigger common.ActorSpeechTrigger) {
-	textLines := actor.GetSpeech(g.randomSource, trigger)
-	if len(textLines) == 0 {
-		return
-	}
-
-	if oldAnim, exists := g.actionBroker.GetAnimation(func(anim common.Animation) bool {
-		if speechAnim, isSpeechAnim := anim.(*actions.SpeechAnimation); isSpeechAnim {
-			return speechAnim.GetActor() == actor
-		}
-		return false
-	}); exists {
-		oldAnim.Cancel()
-	}
-
-	speechAnim := actions.NewSpeechAnimation(actor, textLines)
-	g.actionBroker.AddAnimation(speechAnim)
-
-	g.Log(fmt.Sprintf("%s says: %s", actor.Name(), strings.Join(textLines, "\n")))
-}
-
-func (g *GameInstance) UpdateMiniMap() {
-	g.mapRenderer.UpdateMiniMap()
-}
-
-func (g *GameInstance) FlashScreen(color color.Color, seconds float64) {
-	g.globalFlashColor = color
-	g.globalFlashColorTicksLeft = int(util.SecondsToTicks(seconds))
-	g.globalFlashColorTicksStart = int(util.SecondsToTicks(seconds))
-}
-func (g *GameInstance) MapTransition(to gridmap.Transition) {
-	if to.IsEmpty() {
-		return
-	}
-	g.timekeeper.ClearTrackedBeings(func(being TimedBeing) bool {
-		switch being.(type) {
-		case *common.Actor:
-			return true
-		default:
-			return false
-		}
-	})
-	g.cancelAutoMove()
-	g.actionBroker.CancelAllAnimations()
-
-	//oldPosOnOldMap := g.state.GetPlayer().MapPosition()
-	// remove player from current map
-	player := g.state.GetPlayer()
-	g.state.GetMap().RemoveActor(player)
-
-	// change map
-	targetMap := to.TargetMap
-	if isTownLevel(targetMap) {
-		if g.state.HasTownMap(targetMap) {
-			g.SetMap(g.state.GetTownMap(targetMap))
-		} else {
-			// load map
-			townMap, _ := g.NewGridMapFromLDTK(targetMap)
-			g.SetMap(townMap)
-		}
-	} else if g.state.HasDungeonMap(targetMap) {
-		g.SetMap(g.state.GetDungeonMap(targetMap))
-	} else {
-		// generate the map and set it
-		generatedMap := g.generateMap(targetMap, g.ldtkProject, levelFromName(targetMap))
-		g.state.SetDungeonMap(targetMap, generatedMap)
-		g.SetMap(generatedMap)
-	}
-	newlyLoadedMap := g.state.GetMap()
-	targetLocation := newlyLoadedMap.GetNamedLocation(to.TargetLocation)
-	freeTargetLocations := newlyLoadedMap.GetFreeCardinalNeighbors(targetLocation)
-
-	if len(freeTargetLocations) == 0 {
-		newlyLoadedMap.PrintStairsAndActors()
-		newlyLoadedMap.PrintWithHighlight(targetLocation)
-		panic(fmt.Sprintf("no space for player at %v", targetLocation))
-	}
-
-	freeTargetLocation := freeTargetLocations[rand.Intn(len(freeTargetLocations))]
-	// add player to new map
-	player.SetDrawPosition(freeTargetLocation.ToPointF())
-	newlyLoadedMap.AddActor(player, freeTargetLocation)
-	newlyLoadedMap.SetExplored(targetLocation)
-
-	for _, actor := range newlyLoadedMap.Actors() {
-		if actor == player {
-			continue
-		}
-		actor.RemoveEnergy(actor.GetEnergy())
-		g.timekeeper.AddTimed(actor)
-	}
-
-	//g.Log(fmt.Sprintf("Travel from (%d, %d) to (%d, %d)", oldPosOnOldMap.X, oldPosOnOldMap.Y, freeTargetLocation.X, freeTargetLocation.Y))
-}
-
-func (g *GameInstance) OpenNPCMenu(npc *common.Actor) {
-	vendorType := npc.GetVendorType()
-
-	if vendorType == common.VendorTypeWands {
-		g.state.GetPlayer().HealCompletely()
-		g.Log(fmt.Sprintf("You feel refreshed"))
-		g.updateStatsLabel()
-	}
-
-	options := g.getVendorOptions(npc)
-	if len(options) == 0 {
-		return
-	}
-
-	menu := g.uiController.OpenMenu(options)
-	menu.OnMouseMoved(g.mousePosInPixels.X, g.mousePosInPixels.Y)
-}
-func (g *GameInstance) getVendorOptions(vendor *common.Actor) []util.MenuItem {
-	vendorType := vendor.GetVendorType()
-	var menuItems []util.MenuItem
-
-	switch vendorType {
-	case common.VendorTypeWands:
-		menuItems = g.getWandVendorOptions(vendor)
-	case common.VendorTypeWeapons:
-		menuItems = g.getWeaponVendorOptions(vendor)
-	case common.VendorTypeArmor:
-		menuItems = g.getArmorVendorOptions(vendor)
-	case common.VendorTypeGeneral:
-		menuItems = g.getGeneralVendorOptions(vendor)
-	}
-	return menuItems
-}
-func (g *GameInstance) getWandVendorOptions(vendor *common.Actor) []util.MenuItem {
-
-	vendorOptions := []util.MenuItem{
-		{
-			MainText: "BUY",
-			Action: func() {
-				g.openShopFor(vendor)
-			},
-		},
-		{
-			MainText: "TRANSFER",
-			Action:   g.openTransferEnchantmentMenu,
-		},
-	}
-
-	if g.IsStoryModeEnabled() {
-		return append(g.getNPCTalkOption(vendor), vendorOptions...)
-	} else {
-		return vendorOptions
-	}
-}
-
-func (g *GameInstance) getGeneralVendorOptions(vendor *common.Actor) []util.MenuItem {
-	vendorOptions := []util.MenuItem{
-		{
-			MainText: "BUY",
-			Action: func() {
-				g.openShopFor(vendor)
-			},
-		},
-		{
-			MainText: "SELL",
-			Action: func() {
-				g.beginPlayerSellingTo(vendor)
-			},
-		},
-	}
-
-	if g.IsStoryModeEnabled() {
-		return append(g.getNPCTalkOption(vendor), vendorOptions...)
-	} else {
-		return vendorOptions
-	}
-}
-
-func (g *GameInstance) isInHellTown() bool {
-	return g.state.GetMap().GetName() == string(LevelNameTownHell)
-}
-
-func (g *GameInstance) getWeaponVendorOptions(vendor *common.Actor) []util.MenuItem {
-	vendorOptions := []util.MenuItem{
-		{
-			MainText: "BUY",
-			Action: func() {
-				g.openShopFor(vendor)
-			},
-		},
-	}
-
-	if g.IsStoryModeEnabled() {
-		return append(g.getNPCTalkOption(vendor), vendorOptions...)
-	} else {
-		return vendorOptions
-	}
-}
-
-func (g *GameInstance) getArmorVendorOptions(vendor *common.Actor) []util.MenuItem {
-	vendorOptions := []util.MenuItem{
-		{
-			MainText: "BUY",
-			Action: func() {
-				g.openShopFor(vendor)
-			},
-		},
-		{
-			MainText: "STASH",
-			Action:   g.openPlayerStashInTown,
-		},
-	}
-
-	if g.IsStoryModeEnabled() {
-		return append(g.getNPCTalkOption(vendor), vendorOptions...)
-	} else {
-		return vendorOptions
-	}
-}
-
-func (g *GameInstance) getNPCTalkOption(vendor *common.Actor) []util.MenuItem {
-	talkOption := []util.MenuItem{
-		{
-			MainText: "TALK",
-			Action: func() {
-				textForNPC, onShowFunc := g.getTextForNamedNPC(vendor)
-				g.uiController.OpenTextWindow(textForNPC)
-				if onShowFunc != nil {
-					onShowFunc()
-				}
-			},
-		},
-	}
-	return talkOption
-}
-func (g *GameInstance) openPlayerStashInTown() {
-	stashInTown := g.state.GetPlayerStashInTown()
-	playerInv := g.state.GetPlayer().GetInventory()
-	playerEquip := g.state.GetPlayer().GetEquipment()
-
-	toStashHandler := func(uiItem ui.UIElement) {
-		itemStack := uiItem.(common.InventoryStack)
-		firstItem := itemStack[0]
-		typedItem := firstItem.(*GameItem)
-		if playerEquip.IsEquipped(typedItem) { // unequip first..
-			g.actionBroker.Execute(actions.NewUnequipItemAction(actions.NewActorCause("Unequip", g.state.GetPlayer()), g.state.GetPlayer(), typedItem))
-		}
-		playerInv.Remove(typedItem)
-		if g.shiftIsBeingPressedThisTick {
-			typedItem.DroppedByPlayer()
-			g.AddItemToMapWithDistribution(typedItem, g.state.GetPlayer().MapPosition())
-		} else {
-			stashInTown.Add(typedItem)
-		}
-	}
-
-	dataSource := ui.IconDataSource{
-		IsHighlighted: func(element ui.UIElement) bool {
-			return false
-		},
-		GetElements: func() []ui.UIElement {
-			return sortStacksForUI(stashInTown.StackedItems())
-		},
-		OnSelection: func(uiItem ui.UIElement) {
-			itemStack := uiItem.(common.InventoryStack)
-			firstItem := itemStack[0]
-			typedItem := firstItem.(*GameItem)
-			stashInTown.Remove(typedItem)
-
-			if g.shiftIsBeingPressedThisTick { // drop
-				typedItem.DroppedByPlayer()
-				g.AddItemToMapWithDistribution(typedItem, g.state.GetPlayer().MapPosition())
-			} else { // move
-				playerInv.Add(typedItem)
-			}
-		},
-	}
-
-	tileSize := g.worldTexture.GetTileSize()
-
-	screenSize := g.GetDeviceIndependentScreenSize()
-	invBounds := g.inventory.GetBounds()
-	paddingX := 20
-	offsetFromBottomRightCorner := geometry.Point{X: screenSize.X - invBounds.Max.X + invBounds.Size().X + paddingX, Y: screenSize.Y - invBounds.Max.Y} //- invBounds.Size().X - paddingX, Y: invBounds.Min.Y}
-
-	stashInv := g.uiController.OpenInventoryModal(offsetFromBottomRightCorner, tileSize, dataSource)
-	g.uiController.ElevateOverlay(g.inventory)
-
-	oldHandler := g.inventory.GetOnSelectedHandler()
-	g.inventory.SetOnSelectedHandler(toStashHandler)
-
-	onClose := func() { // revert inventory..
-		g.uiController.StopElevation()
-		g.inventory.SetOnSelectedHandler(oldHandler)
-	}
-
-	stashInv.SetOnCloseHandler(onClose)
-
-	// on close of the stash modal, restore the onclick handler of the inventory..
-}
-
-func (g *GameInstance) beginPlayerSellingTo(vendor *common.Actor) {
-	player := g.state.GetPlayer()
-	playerInventory := player.GetInventory()
-	if playerInventory.IsEmpty() {
-		g.Log("You have nothing to sell")
-		return
-	}
-	var sellItems []ui.ShopMenuItem
-	for _, itemStack := range playerInventory.StackedItems() {
-		typedItem := itemStack[0].(*GameItem)
-		sellPrice := typedItem.BuyPrice() / 2
-
-		itemName := typedItem.Name()
-		if g.configuration.ItemNamesInShop == ItemNamingSchemeEnchantments {
-			itemName = typedItem.PlusName()
-		} else if g.configuration.ItemNamesInShop == ItemNamingSchemeBandStyle {
-			itemName = typedItem.BandStyleName()
-		}
-
-		sellItems = append(sellItems, ui.ShopMenuItem{
-			ShortCut: playerInventory.GetLetterForItemStack(itemStack),
-			TextColumns: []util.LabelText{
-				{
-					Text:               itemName,
-					TextWithColorCodes: itemName,
-					UseColorCodes:      true,
-				},
-				{
-					Text:               fmt.Sprintf("%d", sellPrice),
-					TextWithColorCodes: fmt.Sprintf("%d", sellPrice),
-					UseColorCodes:      true,
-				},
-			},
-			Action: func() {
-				playerEquip := player.GetEquipment()
-				if playerEquip.IsEquipped(typedItem) {
-					g.actionBroker.Execute(actions.NewUnequipItemAction(actions.AbstractCause("Unequip"), player, typedItem))
-				}
-				playerInventory.Remove(typedItem)
-				vendor.GetInventory().Add(typedItem)
-				player.GetStats().IncrementBy(stats.Gold, sellPrice)
-				g.sendInventoryToWindowClient()
-				g.Log(fmt.Sprintf("You sold [:darkText]%s[:white] for [:darkText]%d[:white] gold", typedItem.Name(), sellPrice))
-				g.beginPlayerSellingTo(vendor)
-			},
-		})
-	}
-
-	g.uiController.OpenShopMenu(sellItems, g.worldTexture.GetTileSize(), player.GetStats().GetAttribute(stats.Gold))
-}
-
-func (g *GameInstance) openShopFor(npc *common.Actor) {
-	g.uiController.PopAll()
-	npcInventory := npc.GetInventory()
-	if npcInventory.IsEmpty() {
-		return
-	}
-	player := g.state.GetPlayer()
-	goldAmount := player.GetStats().GetAttribute(stats.Gold)
-	var menuItems []ui.ShopMenuItem
-	inventoryStacks := npcInventory.StackedItems()
-	common.SortInventory(inventoryStacks)
-	for itemIndex, i := range inventoryStacks {
-		item := i[0].(*GameItem)
-		cost := item.BuyPrice()
-		cannotPayForItem := cost > goldAmount
-		colorCodeForPrice := "darkText"
-		if cannotPayForItem {
-			colorCodeForPrice = "negative"
-		}
-		itemName := item.Name()
-		if g.configuration.ItemNamesInShop == ItemNamingSchemeEnchantments {
-			itemName = item.PlusName()
-		} else if g.configuration.ItemNamesInShop == ItemNamingSchemeBandStyle {
-			itemName = item.BandStyleName()
-		}
-		if len(i) > 1 {
-			itemName = fmt.Sprintf("%s (x%d)", itemName, len(i))
-		}
-		nameString := fmt.Sprintf("%s", itemName)
-		nameStringWithColor := fmt.Sprintf("%s", itemName)
-		priceString := fmt.Sprintf("%d", cost)
-		priceStringWithColor := fmt.Sprintf("[:%s]%d", colorCodeForPrice, cost)
-		// shortcuts start with 0 => 'a'
-		shortCut := rune('a') + rune(itemIndex)
-		menuItems = append(menuItems, ui.ShopMenuItem{
-			ShortCut: shortCut,
-			Tooltip:  item.GetTooltipLines(),
-			Icon:     item.InventoryIcon(),
-			TextColumns: []util.LabelText{
-				{
-					Text:               nameString,
-					TextWithColorCodes: nameStringWithColor,
-					UseColorCodes:      true,
-				},
-				{
-					Text:               priceString,
-					TextWithColorCodes: priceStringWithColor,
-					UseColorCodes:      true,
-				},
-			},
-			Action: func() {
-				if cannotPayForItem {
-					g.Log("You don't have enough gold")
-					g.openShopFor(npc)
-					return
-				}
-				player.GetStats().DecrementBy(stats.Gold, cost)
-				npc.GetStats().IncrementBy(stats.Gold, cost)
-
-				npc.GetInventory().Remove(item)
-				player.GetInventory().Add(item)
-				g.Log(fmt.Sprintf("You bought [:darkText]%s[:white] for [:darkText]%d[:white] gold", item.Name(), cost))
-				g.sendInventoryToWindowClient()
-				g.openShopFor(npc)
-			},
-		})
-	}
-	shopMenu := g.uiController.OpenShopMenu(menuItems, g.worldTexture.GetTileSize(), goldAmount)
-	shopMenu.OnMouseMoved(g.mousePosInPixels.X, g.mousePosInPixels.Y)
-}
-
-func (g *GameInstance) GetActionBroker() *actions.Broker {
+func (g *GameInstance) GetActionBroker() *common.Broker {
 	return g.actionBroker
 }
 func (g *GameInstance) GetMoveTowardsPlayer(from geometry.Point) geometry.Point {
@@ -691,76 +176,130 @@ func (g *GameInstance) getMoveOnPlayerDijkstraMap(from geometry.Point, towardsPl
 
 	return nearestPos
 }
-func (g *GameInstance) SetPlayerDijkstraMap(dijkstraMap map[geometry.Point]int) {
-	g.playerDijkstraMap = dijkstraMap
-}
 
 func (g *GameInstance) GetAudio() *audio.Player {
 	return g.audioPlayer
 }
 
-func (g *GameInstance) GetCamera() common.Camera {
-	return g.mapRenderer
-}
-
-func NewGameInstance(startInfo StartInfo) *GameInstance {
+func NewGameInstance(startInfo StartInfo, uiController common.UserInterface) *GameInstance {
 	g := &GameInstance{
-		startInfo:      startInfo,
-		deviceDPIScale: ebiten.DeviceScaleFactor(),
-		randomSource:   rand.New(rand.NewSource(time.Now().UnixNano())),
-		audioPlayer:    audio.NewAudioPlayer(os.DirFS("assets").(fs.ReadDirFS), audio.SampleRate44100),
+		startInfo:    startInfo,
+		uiController: uiController,
+		randomSource: rand.New(rand.NewSource(time.Now().UnixNano())),
+		audioPlayer:  audio.NewAudioPlayer(os.DirFS("assets").(fs.ReadDirFS), audio.SampleRate44100),
 	}
-	g.resetGame()
+	println(fmt.Sprintf("GameInstance created.."))
+	println(fmt.Sprintf("Random source loaded.."))
+	println(fmt.Sprintf("Audio player loaded.."))
+	g.dataDefinitions = defs.LoadGameData(func(err string) {
+		println(err)
+	})
+	println(fmt.Sprintf("Data definitions loaded.."))
+	g.ResetGame(g.dataDefinitions.ClassDefinitions[0])
 	return g
 }
 
-func (g *GameInstance) initTileRenderer() {
-	tileRenderer := renderer.NewTileRenderer(g.GetDeviceScaleFactor, g.GetTileScaleFactor)
-	tileRenderer.SetColorFromName(common.ColorFromName)
-	tileRenderer.SetWhiteTile(common.IconWhite)
-	tileRenderer.SetDefaultColors(common.DarkYellow, color.Black)
-	g.SetTileRenderer(tileRenderer)
+func (g *GameInstance) hasEnergyForAction(being common.TimedBeing) (int, func()) {
+	switch typedBeing := being.(type) {
+	case *common.Actor:
+		return g.getAIAction(typedBeing)
+	case Turner:
+		return g.getTurnerAction(being.GetBaseSpeed(), being.GetEnergy(), typedBeing)
+	}
+	return 0, nil
+}
+func (g *GameInstance) giveAndEquipItemToActor(actor *common.Actor, item *common.Item) {
+	actor.GetInventory().Add(item)
+	g.actionBroker.Execute(common.NewEquipItemAction(common.AbstractCause("Game Start"), actor, item))
 }
 
-func (g *GameInstance) initActionBroker() {
-	g.actionBroker = actions.NewBroker(g)
+// getActionContext requires the following fields to be initialized:
+// g.audioPlayer, g.dataDefinitions, g.state
+func (g *GameInstance) getActionContext() common.ActionContext {
+	return common.ActionContext{
+		GameState:     g.GetWorldState(),
+		UserInterface: g.GetUserInterface,
+		AudioPlayer:   g.audioPlayer,
+		Data:          g.dataDefinitions,
+		Msg:           g.PlayerMessage,
+		Speak:         g.ActorSpeak,
+	}
 }
-func (g *GameInstance) initState() {
-	g.state = common.NewState()
-}
-func (g *GameInstance) initTimeKeeper() {
-	timeKeeper := NewTimeKeeper(func(being TimedBeing) (int, func()) {
-		switch typedBeing := being.(type) {
-		case *common.Actor:
-			return g.getAIAction(typedBeing)
-		case Turner:
-			return g.getTurnerAction(being.GetBaseSpeed(), being.GetEnergy(), typedBeing)
+
+func (g *GameInstance) ResetGame(playerStartDefinition defs.LoadoutDefinition) {
+	// we have loaded at this point:
+	// - random source
+	// - audio player
+	// - data definitions
+
+	// WE DO NOT HAVE A UI YET
+	if g.configuration.ServeLog {
+		g.SetLogHook(g.serverLog.Write)
+	}
+
+	ldtkFile := g.startInfo.LDTKMapFile
+	ldtkProject, _ := ldtk.Open(ldtkFile)
+
+	timeKeeper := common.NewTimeKeeper(g.hasEnergyForAction)
+	println(fmt.Sprintf("Timekeeper created.."))
+
+	g.state = common.NewState(ldtkProject)
+	g.state.SetPlayerMessage(g.PlayerMessage)
+	g.state.SetTimeKeeper(timeKeeper)
+
+	g.actionBroker = common.NewBroker(g.getActionContext())
+	g.actionBroker.RegisterHook(common.NewOnHealthChangedHook())
+
+	g.actionBroker.RegisterHook(common.NewMainOnMoveHook(g.configuration.AutoPickup)) // update fov, etc.
+	g.actionBroker.RegisterHook(common.NewMainOnMeleeHook())
+	g.actionBroker.RegisterHook(common.NewMainOnRangedHook())
+	g.actionBroker.RegisterHook(common.NewMainOnKillHook())
+	g.actionBroker.RegisterHook(common.NewOnDieHook("lucifer talking", func(itemContext *common.ItemContext, action common.Action, context common.ActionContext) []common.Action {
+		dieAction := action.(*common.DieAction)
+		dyingActor := dieAction.GetActor()
+		if dyingActor.GetInternalName() == "lucifer" {
+			g.onLuciferDeath()
 		}
-		return 0, nil
+		return nil
+	}))
+
+	g.actionBroker.RegisterHook(common.NewMainOnDropHook())
+	g.actionBroker.RegisterHook(common.NewMainOnEquipHook())
+
+	g.factory = common.NewFactory(common.FactoryContext{
+		Definitions:             g.dataDefinitions,
+		RandomSource:            g.randomSource,
+		State:                   g.GetWorldState(),
+		ActionBroker:            g.actionBroker,
+		AddToTimeKeeper:         timeKeeper.AddTimed,
+		GiveAndEquipItemToActor: g.giveAndEquipItemToActor,
+		Msg:                     g.PlayerMessage,
 	})
-	g.SetTimeKeeper(timeKeeper)
-}
+	g.factory.SetQueueAfterTurn(g.queueAfterTurn)
 
-func (g *GameInstance) resetGame() {
-	g.initState()
-	g.initActionBroker()
-	g.initTileRenderer()
-	g.initTimeKeeper()
+	g.createPlayer(playerStartDefinition)
 
-	g.LoadGameData()
+	mapGen := common.NewMapGenerator(g.randomSource)
+	mapGen.SetFactory(g.factory)
+	mapGen.SetLdtkProject(ldtkProject)
 
-	g.logBuffer = make([]string, 0)
+	// set references
+	g.state.SetMapGenerator(mapGen)
+
+	g.actions = NewActions(PlayerActionsContext{
+		Player:          g.state.GetPlayer(),
+		ActionBroker:    g.actionBroker,
+		State:           g.GetWorldState(),
+		UI:              g.GetUserInterface,
+		AddToTimeKeeper: g.state.GetTimeKeeper().AddTimed,
+		Msg:             g.PlayerMessage,
+		Animator:        g.actionBroker,
+		Speak:           g.ActorSpeak,
+	})
+
+	g.selectedClass = playerStartDefinition
 
 	g.deviceIndependentScreenSize = g.startInfo.ScreenSize
-	g.tileScale = g.startInfo.TileScale
-	g.ldtkProject, _ = ldtk_go.Open(g.startInfo.LDTKMapFile)
-	g.SetTTFFont(util.MustLoad(os.Open(g.startInfo.FontInfos.TTFFile)), g.startInfo.FontInfos.TTFSize)
-
-	firstLevel := LevelNameTown
-	townMap, atlas := g.NewGridMapFromLDTK(string(firstLevel))
-	g.SetWorldTexture(atlas)
-	g.SetTileMapAnimations(g.startInfo.TileMapAnimations)
-	g.SetMap(townMap)
 
 	g.configuration = g.startInfo.UserConfiguration
 
@@ -777,41 +316,22 @@ func (g *GameInstance) resetGame() {
 		g.serverEquipment = NewTextServer("rogue_equipment", 4)
 	}
 
-	g.state.SetLogger(g.Log)
+	g.state.SetPlayerMessage(g.PlayerMessage)
 	g.state.SetPlayerTurnHandler(g.onPlayerTurnTaken)
-	g.state.SetActorSpawnHandler(func(actor *common.Actor) { g.timekeeper.AddTimed(actor) })
 	g.state.InitVisibility()
-	g.timekeeper.SetOnRemoveTimed(g.afterTimedRemoved)
+	g.state.SetAnimator(g.actionBroker)
+	g.state.SetActionBroker(g.actionBroker)
+	g.state.SetOnMapChanged(g.onMapChanged)
+	g.state.SetFactory(g.factory)
 
-	g.actionBroker.RegisterHook(actions.NewOnHealthChangedHook())
-
-	g.actionBroker.RegisterHook(actions.NewMainOnMoveHook(g.configuration.AutoPickup)) // update fov, etc.
-	g.actionBroker.RegisterHook(actions.NewMainOnMeleeHook())
-	g.actionBroker.RegisterHook(actions.NewMainOnRangedHook())
-	g.actionBroker.RegisterHook(actions.NewMainOnKillHook())
-	g.actionBroker.RegisterHook(actions.NewOnDieHook("lucifer talking", func(itemContext *actions.ItemContext, action actions.Action, engine actions.Engine) []actions.Action {
-		dieAction := action.(*actions.DieAction)
-		dyingActor := dieAction.GetActor()
-		if dyingActor.GetInternalName() == "lucifer" {
-			g.onLuciferDeath()
-		}
-		return nil
-	}))
-
-	g.actionBroker.RegisterHook(actions.NewMainOnDropHook())
-	g.actionBroker.RegisterHook(actions.NewMainOnEquipHook())
-
+	g.state.MapTransition(gridmap.Transition{
+		TargetMap:      string(defs.LevelNameTown),
+		TargetLocation: "spawn",
+	})
 	townSpawn := g.state.GetMap().GetNamedLocation("spawn")
 	g.state.SetTownSpawn(townSpawn)
-	g.spawnPlayer(townSpawn)
 
-	// add actors to timekeeper turn system
-	for _, actor := range g.state.GetMap().Actors() {
-		if actor == g.state.GetPlayer() {
-			continue
-		}
-		g.timekeeper.AddTimed(actor)
-	}
+	//g.spawnActorOnMap(g.state.GetPlayer(), townSpawn, playerStartDefinition)
 
 	// load audio
 	if g.configuration.AudioEnabled {
@@ -842,73 +362,75 @@ func (g *GameInstance) resetGame() {
 	}
 
 	g.state.GetFlags().SetTrue("game_started")
-	g.updateStatsLabel()
-	g.UpdateMiniMap()
 
-	g.state.GetFlags().SetTrue(string(FlagStoryModeEnabled))
+	g.actionBroker.Execute(common.NewUpdateFoVAction(common.AbstractCause("Game Start"), g.state.GetPlayer()))
+
+	g.uiController.UpdateStatsLabel()
+
+	g.state.GetFlags().SetTrue(string(common.FlagStoryModeEnabled))
+}
+
+// SetAndInitUserInterface will be called after the game has finished initialization
+// So we have to inform every component about the ui
+func (g *GameInstance) SetAndInitUserInterface(ui common.UserInterface) {
+	g.uiController = ui
+	ui.SetPlayerMessage(g.PlayerMessage)
+	ui.OnMapChanged()
+	ui.SetDebugActions(common.DebugActions{
+		KillLevel:      g.killLevel,
+		GotoHellTown:   g.gotoHellTown,
+		OpenDebugMenu:  g.showDebugMenu,
+		GoOneLevelDown: g.actions.goOneLevelDown,
+		GoOneLevelUp:   g.actions.goOneLevelUp,
+	})
+	g.factory.SetUserInterface(ui)
+}
+func (g *GameInstance) queueAfterTurn(call func()) {
+	g.executeAfterTurn = append(g.executeAfterTurn, call)
+}
+func (g *GameInstance) ActorSpeak(actor *common.Actor, trigger common.ActorSpeechTrigger) {
+	textLines := actor.GetSpeech(g.randomSource, trigger)
+	if len(textLines) == 0 {
+		return
+	}
+
+	if oldAnim, exists := g.actionBroker.GetAnimation(func(anim common.Animation) bool {
+		if speechAnim, isSpeechAnim := anim.(*common.SpeechAnimation); isSpeechAnim {
+			return speechAnim.GetActor() == actor
+		}
+		return false
+	}); exists {
+		oldAnim.Cancel()
+	}
+
+	speechAnim := common.NewSpeechAnimation(actor, textLines)
+	g.actionBroker.AddAnimation(speechAnim)
+
+	g.uiController.Say(actor, textLines)
+	g.PlayerMessage(fmt.Sprintf("%s says: %s", actor.Name(), strings.Join(textLines, "\n")))
+}
+
+func (g *GameInstance) GetUserInterface() common.UserInterface {
+	return g.uiController
 }
 
 func (g *GameInstance) spawnDebugItems() {
 	masterSword := NewMasterSword(g.GetWorldState())
-
 	g.spawnItem(geometry.Point{X: 15, Y: 10}, masterSword)
-
-	g.spawnItem(geometry.Point{X: 15, Y: 21}, g.NewInfiniteUntargetedWand(g.NewUntargetedActionFromName("multi_shot")))
-
-	g.spawnItem(geometry.Point{X: 14, Y: 17}, g.NewHiddenNote("a letter from hell", NewDialogueTextFromFile("note_lucifer.txt"), nil))
-
 }
 
-func (g *GameInstance) setupUI() {
-	g.uiController = ui.NewUIController(g.hybridRenderer, g.GetDeviceIndependentScreenSize())
-
-	paddingLeftAndRight := 6
-	g.inventory = g.addInventoryOverlay(geometry.Point{X: paddingLeftAndRight, Y: 10})
-	inventoryBoxSize := g.inventory.GetBounds().Size()
-
-	g.uiBarWidth = inventoryBoxSize.X + (2 * paddingLeftAndRight)
-	g.uiController.SetUIBarWidth(g.uiBarWidth)
-	xOffset := g.uiBarWidth - paddingLeftAndRight
-
-	g.statsLabel = g.addStatsLabel(geometry.Point{X: xOffset, Y: paddingLeftAndRight})
-	g.statsLabel.SetText(toLabelText([]string{ // hacky way to measure the right bounding box..
-		"Level 1",
-		"MoreInfo",
-		"Health: 999",
-		"Mana: 999",
-		"Gold: 999",
-	}))
-	statsBounds := g.statsLabel.GetBounds()
-	levelUpButtonY := statsBounds.Max.Y + paddingLeftAndRight *2
-
-	g.levelUpButton = g.addLevelUpButton(geometry.Point{X: xOffset, Y: levelUpButtonY})
-	buttonBounds := g.levelUpButton.GetBounds()
-
-	g.skills = g.addSkillsOverlay(geometry.Point{X: paddingLeftAndRight, Y: 180})
-	skillBounds := g.skills.GetBounds()
-
-	topYForMap := buttonBounds.Max.Y + paddingLeftAndRight
-	bottomYForMap := skillBounds.Min.Y - paddingLeftAndRight
-	maxHeightForMap := bottomYForMap - topYForMap
-
-	g.miniMap = g.addMiniMap(geometry.Point{X: g.uiBarWidth, Y: topYForMap}, maxHeightForMap, paddingLeftAndRight)
-
-	g.timer = g.addTimerOverlay(geometry.Point{X: paddingLeftAndRight, Y: 360})
-
-	g.OnScreenSizeChanged()
-}
 func (g *GameInstance) handleLightSource() {
 	player := g.state.GetPlayer()
-	if player.GetEquipment().HasLightSourceEquipped() && !g.isDaylight() {
+	if player.GetEquipment().HasLightSourceEquipped() && !g.state.PlayerStandsInLitArea() {
 		lightSource := player.GetEquipment().GetLightSource()
-		asGameItem := lightSource.(*GameItem)
+		asGameItem := lightSource
 		asGameItem.UseCharge()
 	}
 }
 func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 	player := g.state.GetPlayer()
 
-	g.timekeeper.PlayerTakesTurn(autUsed)
+	g.state.GetTimeKeeper().PlayerTakesTurn(autUsed)
 
 	// execute after turn events, =?
 	for _, event := range g.executeAfterTurn {
@@ -916,801 +438,96 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 	}
 	g.executeAfterTurn = make([]func(), 0)
 
-	g.updateStatsLabel()
 	g.checkForLevelUp()
 
 	player.BeforeTurn()
 	g.handleLightSource()
 
-	g.UpdateMiniMap()
-
 	defer g.sendInventoryToWindowClient()
 	defer g.sendEquipmentToWindowClient()
 
-	if !g.setToExactFit && !g.configuration.KeepPlayerCentered {
-		distFromBorder := 4
-		playerPos := player.MapPosition()
-		visibleMap := g.mapRenderer.GetVisibleMap()
-		visibleMap = visibleMap.Shift(distFromBorder, distFromBorder, -distFromBorder, -distFromBorder)
-		if !visibleMap.Contains(playerPos) {
-			g.mapRenderer.CenterOnFloat(player.DrawPosition())
-		}
+	if g.isResting {
+		g.actions.RestUntilHealed()
+		return
 	}
-
-	// automatic player movement..
+	// automatic pickup & player movement..
 	if g.configuration.AutoPickup && g.state.GetMap().IsItemAt(player.MapPosition()) {
 		itemAtLocation := g.state.GetMap().ItemAt(player.MapPosition())
 		if itemAtLocation != nil && player.CanPickup() && !itemAtLocation.IsDroppedByPlayer() {
-			pickUpAction := actions.NewPickUpAction(actions.AbstractCause("AutoPickup"), player)
-			endTurnAction := actions.NewEndPlayerTurnAction(pickUpAction.Cause(), pickUpAction.GetDelayInAut())
+			pickUpAction := common.NewPickUpAction(common.AbstractCause("AutoPickup"), player)
+			endTurnAction := common.NewEndPlayerTurnAction(pickUpAction.Cause(), pickUpAction.GetDelayInAut())
 			g.actionBroker.Execute(pickUpAction)
 			g.actionBroker.Execute(endTurnAction)
 		}
 	} else {
-		g.nextStepOnPlayerPath()
+		g.actions.nextStepOnPlayerPath()
 	}
-}
 
-func (g *GameInstance) spawnFireAt(location geometry.Point) {
-	fire := common.NewFire(3)
-	onTurn := func() {
-		if !fire.IsAlive() {
-			g.removeObject(fire)
-			return
-		}
-		fire.DealDamage(nil)
-	}
-	fire.SetOnTurn(onTurn)
-	fire.SetDealDamage(g.procFireAtLocation)
-	g.timekeeper.AddTimed(fire)
-
-	g.spawnObject(location, fire)
-	g.procFireAtLocation(location, actions.AnimateNow())
+	g.uiController.OnPlayerTurnTaken()
 }
 
 func (g *GameInstance) procFireAtLocation(location geometry.Point, startAnimating func() bool) {
 	if g.state.GetMap().IsActorAt(location) {
 		actor := g.state.GetMap().ActorAt(location)
-		action := actions.NewChangeRessourceAction(actions.AbstractCause("Fire"), actor, stats.Health, -3)
+		action := common.NewChangeResourceAction(common.AbstractCause("Fire"), actor, stats.Health, -3)
 		action.SetAnimationStartPredicate(startAnimating)
 		g.actionBroker.Execute(action)
 	}
 }
-func (g *GameInstance) PickUpItem() {
-	player := g.state.GetPlayer()
-	if !player.IsAlive() || !player.CanPickup() {
-		return
-	}
-	if !g.state.GetMap().IsItemAt(player.MapPosition()) {
-		return
-	}
-	pickUpAction := actions.NewPickUpAction(actions.AbstractCause("PickUpAction"), player)
-	g.actionBroker.Execute(pickUpAction)
-	g.actionBroker.Execute(actions.NewEndPlayerTurnAction(pickUpAction.Cause(), pickUpAction.GetDelayInAut()))
+func (g *GameInstance) updateStatsDisplay() {
+	g.uiController.UpdateStatsLabel()
+	g.sendStatsToWindowClient()
+}
+func (g *GameInstance) spawnActorOnMap(actor *common.Actor, mapPos geometry.Point, playerStartDefinition defs.LoadoutDefinition) {
+	g.state.GetMap().AddActor(actor, mapPos)
+	actor.SetDrawPosition(mapPos.ToPointF())
 }
 
-func (g *GameInstance) CancelTargeting() {
-	g.targeter = nil
-}
-
-func (g *GameInstance) spawnPlayer(mapPos geometry.Point) {
-	player := common.NewActor(common.IconCharacterWarriorMale)
+func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition) *common.Actor {
+	player := common.NewActor(playerStartDefinition.Icon)
+	player.GetStats().SetOnChangeHandler(g.updateStatsDisplay)
 	player.SetName("Player")
-	player.SetDrawPosition(mapPos.ToPointF())
 	g.state.SetPlayer(player)
-	g.state.GetMap().AddActor(player, mapPos)
-	g.initPlayerSkillsForArcher(player)
 
-	g.giveAndEquipItemToActor(player, g.NewItemFromDefinitionName("torch", 1))
-	g.giveAndEquipItemToActor(player, g.NewItemFromDefinitionName("dagger", 1))
-	g.giveAndEquipItemToActor(player, g.NewItemFromDefinitionName("soft_leather_armour", 1))
+	// Innate Skills
+	g.initPlayerSkills(player, playerStartDefinition.TargetedSkills, playerStartDefinition.UntargetedSkills)
 
-	player.GetStats().SetAttribute(stats.Gold, 200)
+	// Starting gear
+	for _, itemName := range playerStartDefinition.Items {
+		item := g.factory.NewItemFromDefinitionName(itemName, 1)
+		g.giveAndEquipItemToActor(player, item)
+	}
+
+	playerStats := player.GetStats()
+	for attr, value := range playerStartDefinition.Attributes {
+		playerStats.SetAttributeAsFloat(stats.StatFromString(attr), value)
+	}
+	for resourceName, value := range playerStartDefinition.Resources {
+		maxAttributeName := "max_" + resourceName
+		playerStats.SetAttributeAsFloat(stats.StatFromString(maxAttributeName), value)
+		playerStats.GetResource(stats.StatFromString(resourceName)).SetToMax()
+	}
+	/*
+		g.giveAndEquipItemToActor(player, g.NewItemFromDefinitionName("torch", 1))
+		g.giveAndEquipItemToActor(player, g.NewItemFromDefinitionName("dagger", 1))
+		g.giveAndEquipItemToActor(player, g.NewItemFromDefinitionName("soft_leather_armour", 1))
+	*/
+	// Gold
+	playerStats.SetAttribute(stats.Gold, playerStartDefinition.Gold)
+	return player
 }
 
-func (g *GameInstance) spawnItem(mapPos geometry.Point, item common.Item) {
+func (g *GameInstance) spawnItem(mapPos geometry.Point, item *common.Item) {
 	g.state.GetMap().AddItem(item, mapPos)
 }
 
-func (g *GameInstance) spawnItemInTown(namedLocation string, item common.Item) {
-	townMap := g.state.GetTownMap(string(LevelNameTown))
+func (g *GameInstance) spawnItemInTown(namedLocation string, item *common.Item) {
+	townMap := g.state.GetTownMap(string(defs.LevelNameTown))
 	location := townMap.GetNamedLocation(namedLocation)
 	townMap.AddItem(item, location)
 }
-func (g *GameInstance) spawnObject(mapPos geometry.Point, object common.Object) {
-	g.state.GetMap().AddObject(object, mapPos)
-}
 
-func (g *GameInstance) showLog() {
-	buffer := g.logBuffer
-	if len(buffer) > 20 {
-		buffer = buffer[len(g.logBuffer)-20:]
-	}
-	g.uiController.OpenTextWindow(toGradientLabelText(buffer))
-	//logWindow.ScrollToBottom()
-}
-
-type QuestFlags struct {
-	Giver        string
-	Description  string
-	GivenFlag    string
-	GoalFlag     string
-	RewardedFlag string
-}
-
-func (g *GameInstance) showJournal() {
-	if !g.IsStoryModeEnabled() {
-		return
-	}
-	var entries []util.LabelText
-
-	flags := g.state.GetFlags()
-
-	flagPairs := []QuestFlags{
-		{"Kirioth (Town)", "Kill Meat Jack (Level 2 - Cathedral)", "quest_received:meat_jack", "killed:meat_jack", "quest_rewarded:meat_jack"},
-		{"Abel (Town)", "Clear the poisoned water (Catacombs)", "quest_received:poisoned_water", string("all_clear:" + SpecialLevelPoisonedWaterSupply), "quest_rewarded:poisoned_water"},
-		{"Shekel (Town)", "Kill King Zedek (Level 4 - Catacombs)", "quest_received:skeleton_king", "killed:skeleton_king", "quest_rewarded:skeleton_king"},
-		{"Kirioth (Town)", "Kill Lucifer (Level 8 - Hell)", "quest_received:lucifer", "killed:lucifer", "quest_rewarded:lucifer"},
-
-		{"Lucifer (Hell)", "Find evidence (Town)", "quest_received:evidence_one", "found:evidence_one", "quest_rewarded:evidence_one"},
-		{"Lucifer (Hell)", "Find evidence (Catacombs)", "quest_received:evidence_two", "found:evidence_two", "quest_rewarded:evidence_two"},
-		{"Lucifer (Hell)", "Find evidence (Water Supply)", "quest_received:evidence_three", "found:evidence_three", "quest_rewarded:evidence_three"},
-		{"Lucifer (Hell)", "Find evidence (Caves)", "quest_received:evidence_four", "found:evidence_four", "quest_rewarded:evidence_four"},
-	}
-	// meat jack flags
-	for _, flagPair := range flagPairs {
-		questName := flagPair.Description
-		returnMessage := fmt.Sprintf("Return to %s", flagPair.Giver)
-		questGivenFlag := flagPair.GivenFlag
-		questDoneFlag := flagPair.RewardedFlag
-		if flags.IsSet(questGivenFlag) {
-			if flags.IsSet(questDoneFlag) {
-				entries = append(entries, util.LabelText{
-					UseColorCodes:      true,
-					TextWithColorCodes: fmt.Sprintf("%s - [:green]DONE", questName),
-					Text:               fmt.Sprintf("%s - DONE", questName),
-					TextColor:          common.DarkTextColor,
-				})
-			} else if flags.IsSet(flagPair.GoalFlag) {
-				entries = append(entries, util.LabelText{
-					UseColorCodes:      true,
-					TextWithColorCodes: fmt.Sprintf("%s - [:yellow]IN PROGRESS", returnMessage),
-					Text:               fmt.Sprintf("%s - IN PROGRESS", returnMessage),
-					TextColor:          common.DarkTextColor,
-				})
-			} else {
-				entries = append(entries, util.LabelText{
-					UseColorCodes:      true,
-					TextWithColorCodes: fmt.Sprintf("%s - [:yellow]IN PROGRESS", questName),
-					Text:               fmt.Sprintf("%s - IN PROGRESS", questName),
-					TextColor:          common.DarkTextColor,
-				})
-			}
-		}
-	}
-	g.uiController.OpenTextWindow(entries)
-	//logWindow.ScrollToBottom()
-}
-
-func (g *GameInstance) showFlags() {
-	asStrings := g.state.GetFlags().AsStrings()
-	g.uiController.OpenTextWindow(toLabelText(asStrings))
-	//logWindow.ScrollToBottom()
-}
-
-func toGradientLabelText(buffer []string) []util.LabelText {
-	// we want each item to be less white than the one before
-	intensityFromIndex := func(index int) uint8 {
-		maxIntensity := uint8(255)
-		minIntensity := uint8(100)
-		maxIndex := len(buffer) - 1
-		percentage := 1.0 - (float64(index) / float64(maxIndex))
-		return uint8(float64(maxIntensity) - (float64(maxIntensity)-float64(minIntensity))*percentage)
-	}
-	var result []util.LabelText
-	for i, line := range buffer {
-		fadedBaseColor := color.RGBA{R: intensityFromIndex(i), G: intensityFromIndex(i), B: intensityFromIndex(i), A: 255}
-		baseColorCode := common.RGBAToColorCode(fadedBaseColor)
-		result = append(result, util.LabelText{
-			UseColorCodes:      true,
-			TextWithColorCodes: baseColorCode + line,
-			Text:               common.RemoveColorCodes(line),
-			TextColor:          fadedBaseColor,
-		})
-	}
-	return result
-}
-
-func toLabelText(buffer []string) []util.LabelText {
-	var result []util.LabelText
-	for _, line := range buffer {
-		result = append(result, common.LabelTextFromString(line))
-	}
-	return result
-}
-func toLabelTextWithColor(buffer []string, textColor color.Color) []util.LabelText {
-	var result []util.LabelText
-	for _, line := range buffer {
-		result = append(result, common.LabelTextFromString(line).WithColor(textColor))
-	}
-	return result
-}
-
-func (g *GameInstance) Log(text string) {
-	//println(text)
-	if g.configuration.ServeLog {
-		g.serverLog.Write(text)
-	}
-	if len(g.logBuffer) > 200 {
-		g.logBuffer = g.logBuffer[1:]
-	}
-	g.logBuffer = append(g.logBuffer, text)
-
-	g.message.text = text
-	ticks := util.SecondsToTicks(3)
-	g.message.ticksLeft = ticks
-	g.message.ticksStart = ticks
-}
-
-func (g *GameInstance) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	panic("should use layoutf")
-}
-
-func (g *GameInstance) LayoutF(outsideWidth, outsideHeight float64) (screenWidth, screenHeight float64) {
-	//g.deviceDPIScale = ebiten.DeviceScaleFactor()
-	intWidth := int(outsideWidth)
-	intHeight := int(outsideHeight)
-	if g.deviceIndependentScreenSize.X != intWidth || g.deviceIndependentScreenSize.Y != intHeight {
-		g.deviceIndependentScreenSize = geometry.Point{X: intWidth, Y: intHeight}
-		g.OnScreenSizeChanged()
-	}
-	return outsideWidth * g.deviceDPIScale, outsideHeight * g.deviceDPIScale
-}
-
-func (g *GameInstance) GetTileScaleFactor() float64 {
-	return g.tileScale
-}
-func (g *GameInstance) GetTitle() string {
-	return g.title
-}
-
-func (g *GameInstance) SetTileRenderer(tileRenderer *renderer.TileRenderer) {
-	g.tileRenderer = tileRenderer
-}
-
-func (g *GameInstance) SetMap(loadedMap *gridmap.GridMap[*common.Actor, common.Item, common.Object]) {
-	oldMapName := ""
-	oldMap := g.state.GetMap()
-	if oldMap != nil {
-		oldMapName = oldMap.GetName()
-	}
-	g.state.SetMap(loadedMap)
-	mapWindow := renderer.NewMapWindow(
-		g.GetDeviceIndependentScreenSize().Sub(geometry.Point{X: g.uiBarWidth, Y: 0}),
-		geometry.Point{X: loadedMap.GetWidth(), Y: loadedMap.GetHeight()},
-		g.worldTexture.GetTileSize(),
-		g.GetTileScaleFactor,
-		g.StaticMapLookup)
-
-	g.mapRenderer = renderer.NewMapRenderer(g.tileRenderer, mapWindow)
-	g.mapRenderer.SetMiniMapColorHandler(g.getMiniMapColor)
-	g.hybridRenderer = NewHybridRenderer(g.tileRenderer, g.mapRenderer)
-	g.hybridRenderer.SetDefaultAtlasForMap(g.worldTexture)
-
-	g.state.SetCamera(g.mapRenderer)
-	g.onMapChanged(oldMapName, loadedMap.GetName())
-}
-func (g *GameInstance) AddBloodDecalAt(mapPos geometry.Point) {
-	currentMap := g.state.GetMap()
-	if !currentMap.IsWalkable(mapPos) || currentMap.IsObjectAt(mapPos) || currentMap.GetCell(mapPos).TileType.Special != gridmap.SpecialTileNone {
-		return
-	}
-	icon := int32(-1)
-	if existingDecal, exists := currentMap.GetDecal(mapPos); exists {
-		if existingDecal == common.IconDecalBlood5 {
-			return
-		}
-		if existingDecal < common.IconDecalBlood1 || existingDecal > common.IconDecalBlood5 {
-			return
-		}
-		icon = existingDecal + 1
-	} else {
-		bloodDecals := []int32{common.IconDecalBlood1, common.IconDecalBlood2, common.IconDecalBlood3, common.IconDecalBlood4, common.IconDecalBlood5}
-		icon = bloodDecals[g.randomSource.Intn(len(bloodDecals))]
-	}
-	currentMap.AddDecal(mapPos, icon)
-}
-func prepend[T any](slice []T, s T) []T {
-	return append([]T{s}, slice...)
-}
-func (g *GameInstance) StaticMapLookup(x int, y int, tick uint64) []renderer.CellDrawInfo {
-	mapPos := geometry.Point{X: x, Y: y}
-	currentMap := g.state.GetMap()
-	if currentMap == nil || !currentMap.Contains(mapPos) {
-		return []renderer.CellDrawInfo{}
-	}
-
-	if !currentMap.IsExplored(mapPos) && !g.disableFogOfWar {
-		return []renderer.CellDrawInfo{}
-	}
-
-	var drawColor color.RGBA = color.RGBA{255, 255, 255, 255}
-	var worldTileColor color.RGBA = color.RGBA{255, 255, 255, 255}
-
-	tileAt := currentMap.GetCell(mapPos).TileType
-	if tileAt.Special == gridmap.SpecialTileWater {
-		worldTileColor = g.getWaterColor()
-	}
-	worldIcon := tileAt.Icon()
-	// animate the worldIcon
-	if g.state.GetPlayer().CanSee(mapPos) || g.disableFogOfWar {
-		if !g.configuration.DrawTilesBehindActors && currentMap.IsActorAt(mapPos) {
-			return []renderer.CellDrawInfo{}
-		}
-		if info, ok := g.tilemapAnimations[worldIcon]; ok {
-			// if it is, then calculate the current frame based on the tick
-			frameOffset := util.GetLoopingFrameFromTick(tick+1000-uint64(x*17)-uint64(y*19), info.DelayInSeconds, info.FrameCount)
-			worldIcon += frameOffset
-		}
-
-	}
-	// fake lighting
-	if !g.disableFogOfWar {
-		drawColor = g.applyLighting(mapPos, drawColor)
-		worldTileColor = g.applyLighting(mapPos, worldTileColor)
-	}
-
-	var drawInfo []renderer.CellDrawInfo
-
-	// 1. items
-	if itemAt, isItemAt := currentMap.TryGetItemAt(mapPos); isItemAt && itemAt.IsDrawn() && (!itemAt.IsHidden() || g.state.GetFlags().IsSet(string(FlagHasTrueSight))) {
-		itemIcon := itemAt.Icon(g.worldTicks)
-		drawItem := renderer.CellDrawInfo{
-			Atlas: g.worldTexture,
-			Icon:  itemIcon,
-			Color: drawColor,
-		}
-		drawInfo = prepend(drawInfo, drawItem)
-		if !g.configuration.DrawTilesBehindItems {
-			return drawInfo
-		}
-	}
-
-	// 2. objects
-	if currentMap.IsObjectAt(mapPos) {
-		objectAt := currentMap.ObjectAt(mapPos)
-		objIcon := objectAt.Icon(g.worldTicks)
-		drawObject := renderer.CellDrawInfo{
-			Atlas: g.worldTexture,
-			Icon:  objIcon,
-			Color: drawColor,
-		}
-		drawInfo = prepend(drawInfo, drawObject)
-		if !g.configuration.DrawTilesBehindObjects {
-			return drawInfo
-		}
-	}
-
-	// 2. decals
-	if decalIcon, exists := currentMap.GetDecal(mapPos); exists {
-		drawInfo = prepend(drawInfo, renderer.CellDrawInfo{
-			Atlas: g.worldTexture,
-			Icon:  decalIcon,
-			Color: color.White,
-		})
-	}
-
-	// 1. world
-	drawInfo = prepend(drawInfo, renderer.CellDrawInfo{
-		Atlas: g.worldTexture,
-		Icon:  worldIcon,
-		Color: worldTileColor,
-	})
-
-	return drawInfo
-}
-
-func (g *GameInstance) applyLighting(mapPos geometry.Point, drawColor color.RGBA) color.RGBA {
-	distanceToPlayer := geometry.Distance(g.state.GetPlayer().MapPosition(), mapPos)
-	maxDistance := float64(g.GetPlayerVisionRange() + 1)
-	darkPercentage := 0.16
-	lightPercentage := 1.0
-	if g.isDaylight() {
-		darkPercentage = 0.8
-		lightPercentage = 0.95
-	}
-
-	currentMap := g.state.GetMap()
-
-	isPlayerLit := currentMap.IsTileLit(g.state.GetPlayer().MapPosition())
-
-	if currentMap.IsTileLit(mapPos) && currentMap.IsExplored(mapPos) {
-		dungeonLitRoomLightPercentage := 0.75
-		return multiplyColor(drawColor, dungeonLitRoomLightPercentage)
-	}
-
-	if distanceToPlayer > maxDistance || !g.state.GetPlayer().CanSee(mapPos) {
-		drawColor = multiplyColor(drawColor, darkPercentage)
-	} else {
-		percentageLightness := float64(distanceToPlayer) / float64(maxDistance)
-		percentageLightness = 1.0 - util.EaseInExpo(percentageLightness)
-		//light := 255 // 1.0 -> 100% of original value
-		//dark := 20   // 0.0 -> 12,75% of original value
-		percentagOfValue := darkPercentage + ((lightPercentage - darkPercentage) * percentageLightness)
-		if !g.isDaylight() && !isPlayerLit {
-			drawColor = g.mixLightSourceColor(drawColor, color.RGBA{127, 127, 127, 255})
-		}
-		drawColor = multiplyColor(drawColor, percentagOfValue)
-	}
-	return drawColor
-}
-
-func (g *GameInstance) isDaylight() bool {
-	return g.IsPlayerInTown() && !g.state.GetFlags().IsSet("town_changed_to_night")
-}
-
-func (g *GameInstance) mixLightSourceColor(drawColor, noLightSource color.RGBA) color.RGBA {
-	equipment := g.GetWorldState().GetPlayer().GetEquipment()
-	if equipment.HasLightSourceEquipped() {
-		lightSource := equipment.GetLightSource().(*GameItem)
-		if lightSource.HasChargesLeft() {
-			lightStats := lightSource.GetLightStats()
-			lightColor := lightStats.LightColor
-			flickerPattern := lightStats.FlickerPattern
-			delay := lightStats.FlickerFrameDelay
-			flickerIndex := util.GetLoopingFrameFromTick(g.worldTicks, delay, len(flickerPattern))
-			lightColor = multiplyColor(lightColor, flickerPattern[flickerIndex])
-			drawColor = multiplyColors(drawColor, lightColor)
-		}
-	} else {
-		drawColor = multiplyColors(drawColor, noLightSource)
-	}
-	return drawColor
-}
-
-func multiplyColors(drawColor color.RGBA, lightColor color.RGBA) color.RGBA {
-	rVal, gVal, bVal, _ := drawColor.R, drawColor.G, drawColor.B, drawColor.A
-	rValN := uint8(float64(rVal) * (float64(lightColor.R) / 255.0))
-	gValN := uint8(float64(gVal) * (float64(lightColor.G) / 255.0))
-	bValN := uint8(float64(bVal) * (float64(lightColor.B) / 255.0))
-	//aValN := uint8(float64(aVal) * percentagOfValue)
-	drawColor = color.RGBA{R: rValN, G: gValN, B: bValN, A: 255}
-	return drawColor
-}
-
-func multiplyColor(drawColor color.RGBA, percentagOfValue float64) color.RGBA {
-	rVal, gVal, bVal, _ := drawColor.R, drawColor.G, drawColor.B, drawColor.A
-	rValN := uint8(float64(rVal) * percentagOfValue)
-	gValN := uint8(float64(gVal) * percentagOfValue)
-	bValN := uint8(float64(bVal) * percentagOfValue)
-	//aValN := uint8(float64(aVal) * percentagOfValue)
-	drawColor = color.RGBA{R: rValN, G: gValN, B: bValN, A: 255}
-	return drawColor
-}
-
-func (g *GameInstance) SetTileMapAnimations(mapping map[int32]TilemapAnimInfo) {
-	g.tilemapAnimations = mapping
-}
-
-func (g *GameInstance) SetWorldTexture(atlas renderer.TextureAtlas) {
-	g.worldTexture = atlas
-	g.tileRenderer.SetDefaultAtlas(atlas)
-}
-
-func (g *GameInstance) GetDeviceIndependentScreenSize() geometry.Point {
-	if g.isFullScreen {
-		w, h := ebiten.ScreenSizeInFullscreen()
-		return geometry.Point{X: w, Y: h}
-	}
-	return g.deviceIndependentScreenSize
-}
-
-func (g *GameInstance) GetDeviceScaleFactor() float64 {
-	return g.deviceDPIScale
-}
-func (g *GameInstance) OnScreenSizeChanged() {
-	newScreenSize := g.GetDeviceIndependentScreenSize()
-	g.uiController.OnScreenSizeChanged(newScreenSize)
-	screenSizeForMap := newScreenSize
-	if g.uiController.HasOverlays() {
-		screenSizeForMap = newScreenSize.Sub(geometry.Point{X: g.uiBarWidth, Y: 0})
-	}
-	g.mapRenderer.OnScreenSizeChanged(screenSizeForMap)
-	g.miniMap.Layout()
-	if g.setToExactFit {
-		g.disableScrolling()
-	}
-}
-func (g *GameInstance) SetMapZoom(sign int) {
-
-	change := 0.25 * float64(sign)
-	minScale := 0.25
-	maxScale := 16.0
-
-	currentScale := g.tileScale
-	if sign > 0 && g.setToExactFit {
-		// round to next 0.25
-		currentScale = math.Floor(currentScale*4) / 4
-		g.setToExactFit = false
-	}
-	targetScale := util.Clamp(minScale, maxScale, currentScale+change)
-
-	mapSize := g.state.GetMap().MapSize()
-	tileSize := g.worldTexture.GetTileSize()
-
-	targetMapSize := geometry.Point{
-		X: int(float64(mapSize.X) * float64(tileSize.X) * targetScale),
-		Y: int(float64(mapSize.Y) * float64(tileSize.Y) * targetScale),
-	}
-
-	windowSize := g.GetDeviceIndependentScreenSize()
-	if g.uiController.HasOverlays() {
-		windowSize = windowSize.Sub(geometry.Point{X: g.uiBarWidth, Y: 0})
-	}
-
-	centerMapPos := g.mapRenderer.GetVisibleMap().Center()
-
-	tooSmall := targetMapSize.X < windowSize.X && targetMapSize.Y < windowSize.Y
-	if tooSmall {
-		g.disableScrolling()
-		return
-	}
-
-	g.setTileScale(targetScale)
-
-	g.mapRenderer.CenterOn(centerMapPos)
-}
-
-func (g *GameInstance) disableScrolling() {
-	g.setToExactFit = true
-	mapSize := g.state.GetMap().MapSize()
-	tileSize := g.worldTexture.GetTileSize()
-
-	windowSize := g.GetDeviceIndependentScreenSize()
-	if g.uiController.HasOverlays() {
-		windowSize = windowSize.Sub(geometry.Point{X: g.uiBarWidth, Y: 0})
-	}
-	// calculate exact scale to fit
-	mapSizeW := float64(mapSize.X) * float64(tileSize.X)
-	mapSizeH := float64(mapSize.Y) * float64(tileSize.Y)
-	targetScaleH := float64(windowSize.X) / mapSizeW
-	targetScaleV := float64(windowSize.Y) / mapSizeH
-	targetScale := min(targetScaleH, targetScaleV)
-	g.mapRenderer.ResetScrolling()
-
-	g.setTileScale(targetScale)
-}
-
-func (g *GameInstance) setTileScale(targetScale float64) {
-	g.tileScale = targetScale
-	g.Log(fmt.Sprintf("Set tile scale to %.2f", targetScale))
-}
-
-func (g *GameInstance) BeginActionTargeting(action *common.TargetedAction) {
-	if !g.state.GetPlayer().IsAlive() {
-		return
-	}
-	g.cancelAutoMove()
-	g.uiController.PopAll()
-
-	rangedAttackRules := action.GetTargetingRules(g.state.GetPlayer(), g.state.GetMap())
-	g.targeter = NewTargeter(g.hybridRenderer, rangedAttackRules, func(attacker *common.Actor, target geometry.Point, hitPositions []geometry.Point) {
-		g.CancelTargeting()
-		g.actionBroker.CancelAllAnimations()
-		g.cancelAutoMove()
-		action.OnSelected(attacker, target, hitPositions)
-		autTaken := action.GetTimeNeededInAut()
-		if autTaken > 0 {
-			g.actionBroker.Execute(actions.NewEndPlayerTurnAction(actions.AbstractCause("EndPlayerTurnAction"), autTaken))
-		}
-	})
-}
-
-func (g *GameInstance) BeginThrowTargeting(hitZone common.AoEResolver, onSelected func(attacker *common.Actor, target geometry.Point)) {
-	if !g.state.GetPlayer().IsAlive() {
-		return
-	}
-	g.cancelAutoMove()
-	rangedAttackRules := NewRangedAttackTargetingRules(g.state.GetPlayer(), hitZone, g.state.GetMap())
-	g.targeter = NewTargeter(g.hybridRenderer, rangedAttackRules, func(attacker *common.Actor, target geometry.Point, hitPositions []geometry.Point) {
-		g.CancelTargeting()
-
-		origin := g.state.GetPlayer().MapPosition()
-		if origin == target {
-			g.Log("You can't attack yourself like that")
-			return
-		}
-		g.actionBroker.CancelAllAnimations()
-		g.cancelAutoMove()
-		onSelected(attacker, target)
-	})
-}
-
-func (g *GameInstance) BeginRangedTargeting(onSelected func(attacker *common.Actor, target geometry.Point)) {
-	if !g.state.GetPlayer().IsAlive() {
-		return
-	}
-	g.cancelAutoMove()
-	rangedAttackRules := NewRangedAttackTargetingRules(g.state.GetPlayer(), OneTargetTile, g.state.GetMap())
-	g.targeter = NewTargeter(g.hybridRenderer, rangedAttackRules, func(attacker *common.Actor, target geometry.Point, hitPositions []geometry.Point) {
-		g.CancelTargeting()
-
-		origin := g.state.GetPlayer().MapPosition()
-		if origin == target {
-			g.Log("You can't attack yourself like that")
-			return
-		}
-		g.actionBroker.CancelAllAnimations()
-		g.cancelAutoMove()
-		onSelected(attacker, target)
-	})
-}
-
-func (g *GameInstance) playerAutoAttack() {
-	if !g.state.GetPlayer().IsAlive() {
-		return
-	}
-	var visibleEnemies []*common.Actor
-
-	if g.shiftIsBeingPressedThisTick {
-		for actor, _ := range g.state.GetVisibility().GetVisibleActors() {
-			visibleEnemies = append(visibleEnemies, actor)
-		}
-	} else {
-		visibleEnemies = g.state.GetVisibility().GetVisibleEnemies()
-	}
-
-	if len(visibleEnemies) == 0 {
-		return
-	}
-
-	player := g.state.GetPlayer()
-	hasRanged := player.GetEquipment().HasRangedWeaponEquipped()
-	hasMelee := player.GetEquipment().HasMeleeWeaponEquipped()
-	slices.SortStableFunc(visibleEnemies, func(i, j *common.Actor) int {
-		distI := i.MapPosition().ManhattanDistanceTo(player.MapPosition())
-		distJ := j.MapPosition().ManhattanDistanceTo(player.MapPosition())
-		return cmp.Compare(distI, distJ)
-	})
-	currentMap := g.state.GetMap()
-	for _, nearestEnemy := range visibleEnemies {
-		dist := currentMap.MoveDistance(player.MapPosition(), nearestEnemy.MapPosition())
-		if dist <= 1 {
-			if hasMelee || !hasRanged {
-				g.playerMeleeAttack(player, nearestEnemy.MapPosition())
-				return
-			} else if hasRanged {
-				g.playerRangedAttack(player, nearestEnemy.MapPosition())
-				return
-			}
-		}
-
-		if hasRanged {
-			rangedRules := g.getRangedAttackRules(player)
-			if rangedRules.IsValidTarget(nearestEnemy.MapPosition()) {
-				g.playerRangedAttack(player, nearestEnemy.MapPosition())
-				return
-			}
-		}
-
-		// do melee
-		freeAttackPositions := currentMap.GetFilteredNeighborsForMovement(nearestEnemy.MapPosition(), func(point geometry.Point) bool {
-			return currentMap.IsCurrentlyPassable(point)
-		})
-
-		if len(freeAttackPositions) == 0 {
-			continue
-		}
-		distMap := make([]util.Tuple[geometry.Point, int], len(freeAttackPositions))
-		for _, freeAttackPosition := range freeAttackPositions {
-			distanceTo := currentMap.MoveDistance(player.MapPosition(), freeAttackPosition)
-			distMap = append(distMap, util.NewTuple(freeAttackPosition, distanceTo))
-		}
-		slices.SortStableFunc(distMap, func(i, j util.Tuple[geometry.Point, int]) int {
-			return cmp.Compare(i.GetItem2(), j.GetItem2())
-		})
-
-		for _, distTuple := range distMap {
-			targetPos := distTuple.GetItem1()
-			walkPath := currentMap.GetJPSPath(player.MapPosition(), targetPos, currentMap.CurrentlyPassableAndSafeForActor(player))
-			if len(walkPath) <= 1 {
-				continue
-			}
-			// remove first pos
-			walkPath = walkPath[1:]
-			firstStep := walkPath[0]
-
-			g.playerMoveOneStep(player, firstStep)
-			return
-		}
-	}
-
-}
-func (g *GameInstance) playerMoveOneStep(player *common.Actor, targetPos geometry.Point) {
-	moveAction := actions.NewMoveAction(actions.NewActorCause("Move", player), player, targetPos, true)
-	g.actionBroker.Execute(moveAction)
-	g.actionBroker.Execute(actions.NewEndPlayerTurnAction(moveAction.Cause(), moveAction.GetDelayInAut()))
-}
-func (g *GameInstance) playerMeleeAttack(player *common.Actor, targetPos geometry.Point) {
-	meleeAction := actions.NewMeleeAttackAction(actions.NewActorCause("Melee attack", player), player, targetPos)
-	g.actionBroker.Execute(meleeAction)
-	g.actionBroker.Execute(actions.NewEndPlayerTurnAction(meleeAction.Cause(), meleeAction.GetDelayInAut()))
-}
-func (g *GameInstance) playerRangedAttack(player *common.Actor, targetPos geometry.Point) {
-	rangedAttackAction := actions.NewRangedAttackAction(actions.NewActorCause("Ranged attack", player), player, targetPos)
-	g.actionBroker.Execute(rangedAttackAction)
-	g.actionBroker.Execute(actions.NewEndPlayerTurnAction(rangedAttackAction.Cause(), rangedAttackAction.GetDelayInAut()))
-}
-
-func (g *GameInstance) playerThrow(thrownItem common.Item) func(player *common.Actor, targetPos geometry.Point) {
-	return func(player *common.Actor, targetPos geometry.Point) {
-		throwAction := actions.NewThrowAction(actions.NewActorCause("Throw", player), player, thrownItem, targetPos)
-		g.actionBroker.Execute(throwAction)
-		g.actionBroker.Execute(actions.NewEndPlayerTurnAction(throwAction.Cause(), throwAction.GetDelayInAut()))
-	}
-}
-
-func (g *GameInstance) getRangedAttackRules(player *common.Actor) *RangedTargetingRules {
-	targetRules := NewRangedAttackTargetingRules(player, OneTargetTile, g.state.GetMap())
-	rangedAttackRules := targetRules.(*RangedTargetingRules)
-	return rangedAttackRules
-}
-func (g *GameInstance) ManualMovePlayer(direction geometry.Point) {
-	player := g.state.GetPlayer()
-	if !player.IsAlive() {
-		return
-	}
-	g.CancelTargeting()
-	g.cancelAutoMove()
-	//g.actionBroker.CancelAllAnimations()
-
-	if player.HasStatusEffect(common.StatusConfused) {
-		if g.randomSource.Intn(3) != 0 { // one in three chance to succeed with movement
-			// pick a different random direction..
-			possibleDirectionsRemaining := g.state.GetMap().GetFilteredDirectionsForMovement(func(dir geometry.Point) bool {
-				if dir == direction {
-					return false
-				}
-				return true
-			})
-			direction = possibleDirectionsRemaining[g.randomSource.Intn(len(possibleDirectionsRemaining))]
-		}
-	}
-
-	playerAction := actions.PlayerMoveToAttack(player, direction, g.shiftIsBeingPressedThisTick, g)
-	if playerAction == nil {
-		return
-	}
-
-	g.actionBroker.Execute(playerAction)
-	g.actionBroker.Execute(actions.NewEndPlayerTurnAction(playerAction.Cause(), playerAction.GetDelayInAut()))
-}
-
-func (g *GameInstance) SetFontWithScale(font renderer.BitmapFont, scale float64) {
-	g.tileRenderer.SetFont(font)
-	g.tileRenderer.SetFontScale(scale)
-}
-
-func (g *GameInstance) SetTTFFont(file io.ReaderAt, size float64) {
-	tt, err := opentype.ParseReaderAt(file)
-	if err != nil {
-		println(err.Error())
-		return
-	}
-	dpi := 72 * g.deviceDPIScale
-	fontFace, faceErr := opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    size,
-		DPI:     dpi,
-		Hinting: font.HintingVertical,
-	})
-	if faceErr != nil {
-		println(faceErr.Error())
-	}
-	//mplusBigFont = text.FaceWithLineHeight(mplusBigFont, 54) // adjust line height
-	g.tileRenderer.SetTTF(fontFace)
-}
-
-func (g *GameInstance) GetWorldState() actions.WorldState {
+func (g *GameInstance) GetWorldState() *common.State {
 	return &g.state
 }
 
@@ -1723,6 +540,12 @@ func (g *GameInstance) showDebugMenu() {
 			},
 		},
 		{
+			MainText: "Open class selection",
+			Action: func() {
+				g.uiController.OpenClassSelectionMenu()
+			},
+		},
+		{
 			MainText: "Drop to ASCII Mode",
 			Action: func() {
 				g.quitToAscii = true
@@ -1731,7 +554,7 @@ func (g *GameInstance) showDebugMenu() {
 		{
 			MainText: "Map Info",
 			Action: func() {
-				g.uiController.OpenTextWindow(toLabelText(g.state.GetMap().GetMetaString()))
+				g.uiController.OpenTextWindow(util.ToLabelText(g.state.GetMap().GetMetaString()))
 			},
 		},
 		{
@@ -1750,7 +573,16 @@ func (g *GameInstance) showDebugMenu() {
 				stash.Add(NewWallOfThorns(g.GetWorldState()))
 				stash.Add(NewSoulReaver(g.GetWorldState()))
 				stash.Add(NewMalleusMaleficarum(g.GetWorldState()))
-				stash.Add(g.NewItemFromDefinitionName("light_morning_star", 10))
+				stash.Add(g.factory.NewItemFromDefinitionName("light_morning_star", 10))
+			},
+		},
+		{
+			MainText: "Put Random Wands into Stash",
+			Action: func() {
+				stash := g.state.GetPlayerStashInTown()
+				for i := 0; i < 10; i++ {
+					stash.Add(g.factory.NewRandomWand(1))
+				}
 			},
 		},
 		{
@@ -1758,7 +590,7 @@ func (g *GameInstance) showDebugMenu() {
 			Action: func() {
 				stash := g.state.GetPlayerStashInTown()
 				for _, item := range stash.Items() {
-					gameItem := item.(*GameItem)
+					gameItem := item
 					if item.IsWeapon() {
 						gameItem.GetWeaponStats().Plus = 10
 					}
@@ -1769,23 +601,21 @@ func (g *GameInstance) showDebugMenu() {
 			},
 		},
 		{
-			MainText: "Toggle UI Overlays",
+			MainText: "Toggle UI Overlays", // should be an ui specific option
 			Action: func() {
 				if g.uiController.HasOverlays() {
-					g.uiController.ClearAllOverlays()
-					g.mapRenderer.OnScreenSizeChanged(g.GetDeviceIndependentScreenSize())
+					//g.uiController.ClearAllOverlays()
+					//g.mapRenderer.OnScreenSizeChanged(g.GetDeviceIndependentScreenSize())
 				} else {
-					g.setupUI()
+					//g.setupUI()
 				}
 			},
 		},
 		{
 			MainText: "Debug Map Info",
 			Action: func() {
-				screenSize := g.GetDeviceIndependentScreenSize()
-				visibleMap := g.mapRenderer.GetVisibleMap()
-				g.Log(fmt.Sprintf("Visible map: (%d, %d) - (%d, %d)", visibleMap.Min.X, visibleMap.Min.Y, visibleMap.Max.X, visibleMap.Max.Y))
-				g.Log(fmt.Sprintf("Screen size: (%d, %d)", screenSize.X, screenSize.Y))
+				visibleMap := g.uiController.GetVisibleMap()
+				g.PlayerMessage(fmt.Sprintf("Visible map: (%d, %d) - (%d, %d)", visibleMap.Min.X, visibleMap.Min.Y, visibleMap.Max.X, visibleMap.Max.Y))
 			},
 		},
 		{
@@ -1800,7 +630,7 @@ func (g *GameInstance) showDebugMenu() {
 				foundFonts := findfont.List()
 				for _, fontFile := range foundFonts {
 					if strings.HasSuffix(fontFile, ".ttf") {
-						g.Log(fontFile)
+						g.PlayerMessage(fontFile)
 					}
 				}
 			},
@@ -1820,42 +650,42 @@ func (g *GameInstance) showDebugMenu() {
 		{
 			MainText: "Trigger completion of poisoned water supply",
 			Action: func() {
-				g.state.GetFlags().SetTrue(string("all_clear:" + SpecialLevelPoisonedWaterSupply))
-				g.UpdateMiniMap()
+				g.state.GetFlags().SetTrue(string("all_clear:" + defs.SpecialLevelPoisonedWaterSupply))
 			},
 		},
 		{
 			MainText: "Toggle Story Mode",
 			Action: func() {
-				newState := !g.IsStoryModeEnabled()
-				g.GetWorldState().GetFlags().Set(string(FlagStoryModeEnabled), newState)
+				newState := !g.state.IsStoryModeEnabled()
+				g.GetWorldState().GetFlags().Set(string(common.FlagStoryModeEnabled), newState)
 				if newState {
-					g.Log("Story mode enabled")
+					g.PlayerMessage("Story mode enabled")
 				} else {
-					g.Log("Story mode disabled")
+					g.PlayerMessage("Story mode disabled")
 				}
 			},
 		},
 		{
 			MainText: "Open Stash",
-			Action:   g.openPlayerStashInTown,
+			Action:   g.uiController.OpenPlayerStashInTown,
 		},
 		{
 			MainText: "give stuff",
 			Action: func() {
 				playerStats := g.state.GetPlayer().GetStats()
 				playerStats.SetAttribute(stats.MaxHealth, 10000)
-				playerStats.GetRessource(stats.Health).Increase(10000)
+				playerStats.GetResource(stats.Health).Increase(10000)
 				playerStats.SetAttribute(stats.MaxMana, 10000)
-				playerStats.GetRessource(stats.Mana).Increase(10000)
+				playerStats.GetResource(stats.Mana).Increase(10000)
 				playerStats.SetAttribute(stats.Gold, 10000)
 
 				inv := g.state.GetPlayer().GetInventory()
 				for i := 0; i < 10; i++ {
-					inv.Add(g.NewItemFromDefinitionName("healing_potion", 1))
-					inv.Add(g.NewItemFromDefinitionName("mana_potion", 1))
+					inv.Add(g.factory.NewItemFromDefinitionName("healing_potion", 1))
+					inv.Add(g.factory.NewItemFromDefinitionName("mana_potion", 1))
+					inv.Add(g.factory.NewItemFromDefinitionName("speed_potion", 1))
 				}
-				g.updateStatsLabel()
+				g.uiController.UpdateStatsLabel()
 			},
 		},
 		{
@@ -1863,27 +693,7 @@ func (g *GameInstance) showDebugMenu() {
 			Action: func() {
 				playerStats := g.state.GetPlayer().GetStats()
 				playerStats.SetAttribute(stats.Experience, 10000)
-				g.updateStatsLabel()
-			},
-		},
-	})
-}
-
-func (g *GameInstance) OnPlayerDied() {
-	g.showGameOverMenu()
-}
-func (g *GameInstance) showGameOverMenu() {
-	g.uiController.OpenMenu([]util.MenuItem{
-		{
-			MainText: "Try again",
-			Action: func() {
-				g.resetGame()
-			},
-		},
-		{
-			MainText: "Quit",
-			Action: func() {
-				g.shouldQuitGame = true
+				g.uiController.UpdateStatsLabel()
 			},
 		},
 	})
@@ -1896,269 +706,9 @@ func (g *GameInstance) killLevel() {
 		if actor == g.state.GetPlayer() || !actor.IsAlive() || actor.IsUnique() {
 			continue
 		}
-		currentHP := actor.GetStats().GetRessource(stats.Health).Value() * 2
-		g.actionBroker.Execute(actions.NewChangeRessourceAction(actions.NewActorCause("Kill All", g.state.GetPlayer()), actor, stats.Health, -currentHP))
+		currentHP := actor.GetStats().GetResource(stats.Health).Value() * 2
+		g.actionBroker.Execute(common.NewChangeResourceAction(common.NewActorCause("Kill All", g.state.GetPlayer()), actor, stats.Health, -currentHP))
 	}
-}
-
-func (g *GameInstance) addStatsLabel(offset geometry.Point) *ui.BasicLabel {
-	label := g.uiController.AddLabel(offset)
-	return label
-}
-func (g *GameInstance) addLevelUpButton(offset geometry.Point) *ui.ButtonOverlay {
-	button := g.uiController.AddButton(offset, g.worldTexture.GetTileSize(), 141, g.openLevelUpMenu)
-	button.SetTooltip("Level up")
-	button.Hide()
-	return button
-}
-
-func (g *GameInstance) addMiniMap(offset geometry.Point, maxHeight int, horizontalPadding int) *ui.MinimapOverlay {
-	miniMap := g.uiController.AddMinimap(offset.Sub(geometry.Point{X: horizontalPadding}), maxHeight, offset.X-(horizontalPadding*2), g.mapRenderer.GetMiniMap())
-	miniMap.SetOnMapClickedHandler(g.onMapClicked)
-	return miniMap
-}
-func (g *GameInstance) updateStatsLabel() {
-	player := g.state.GetPlayer()
-	playerStats := player.GetStats()
-	var hpColor color.Color
-	var manaColor color.Color
-	hpColor = common.DarkTextColor
-	manaColor = common.DarkTextColor
-
-	if playerStats.GetRessource(stats.Health).IsLessThanPercent(0.25) {
-		hpColor = color.RGBA{R: 255, G: 30, B: 30, A: 255}
-	} else if playerStats.GetRessource(stats.Health).IsLessThanPercent(0.5) {
-		hpColor = color.RGBA{R: 255, G: 150, B: 30, A: 255}
-	} else if playerStats.GetRessource(stats.Health).IsLessThanPercent(0.75) {
-		hpColor = color.RGBA{R: 255, G: 255, B: 30, A: 255}
-	}
-
-	if playerStats.GetRessource(stats.Mana).IsLessThanPercent(0.25) {
-		manaColor = color.RGBA{R: 255, G: 30, B: 30, A: 255}
-	} else if playerStats.GetRessource(stats.Mana).IsLessThanPercent(0.5) {
-		manaColor = color.RGBA{R: 255, G: 150, B: 30, A: 255}
-	} else if playerStats.GetRessource(stats.Mana).IsLessThanPercent(0.75) {
-		manaColor = color.RGBA{R: 255, G: 255, B: 30, A: 255}
-	}
-	label := g.statsLabel
-	mapNameParts := toLabelTextWithColor(strings.Split(g.state.GetMap().GetDisplayName(), "\n"), common.DarkTextColor)
-	statusParts := []util.LabelText{
-		{
-			Text:      fmt.Sprintf("HP: %s", playerStats.GetRessource(stats.Health).ToString()),
-			TextColor: hpColor,
-		},
-		{
-			Text:      fmt.Sprintf("MP: %s", playerStats.GetRessource(stats.Mana).ToString()),
-			TextColor: manaColor,
-		},
-		{
-			Text:      fmt.Sprintf("Gold: %d", playerStats.GetAttribute(stats.Gold)),
-			TextColor: common.DarkTextColor,
-		},
-	}
-	statLines := append(mapNameParts, statusParts...)
-
-	label.SetText(statLines)
-	g.miniMap.Show()
-
-	g.sendStatsToWindowClient()
-}
-
-func (g *GameInstance) ShowFullStats() {
-	g.levelUpButton.Hide()
-	g.miniMap.Hide()
-	label := g.statsLabel
-
-	player := g.state.GetPlayer()
-	label.SetText(player.GetFullStats())
-}
-
-func (g *GameInstance) addInventoryOverlay(pixelEdgeFromBottomRight geometry.Point) *ui.IconOverlay {
-	isEquipped := func(uiItem ui.UIElement) bool {
-		player := g.state.GetPlayer()
-		itemStack := uiItem.(common.InventoryStack)
-		firstItem := itemStack[0]
-		return player.GetEquipment().IsEquipped(firstItem)
-	}
-
-	dataSource := ui.IconDataSource{
-		IsHighlighted: isEquipped,
-		GetElements: func() []ui.UIElement {
-			return sortStacksForUI(g.state.GetPlayer().GetInventory().StackedItems())
-		},
-		OnSelection: g.onItemInInventoryClicked,
-	}
-	tileSize := g.worldTexture.GetTileSize()
-	return g.uiController.OpenInventoryOverlay(pixelEdgeFromBottomRight, tileSize, dataSource)
-}
-func (g *GameInstance) openListInventory() *ui.IconList {
-	noFilter := func(element common.Item) bool { return true }
-	return g.openListInventoryForSelection(noFilter, func(invItemKey rune) {
-		inv := g.state.GetPlayer().GetInventory()
-		g.onItemInInventoryClicked(inv.GetItemByLetter(invItemKey))
-	})
-}
-
-func (g *GameInstance) openListInventoryForSelection(filter func(element common.Item) bool, onSelected func(invItemKey rune)) *ui.IconList {
-	dataSource := ui.ListDataSource{
-		GetElements: func() []ui.IconListElement {
-			inventory := g.state.GetPlayer().GetInventory()
-			typed := sortStacksForTextUITyped(inventory.StackedItemsWithFilter(filter), inventory.GetLetterForItemStack, onSelected)
-			var result []ui.IconListElement
-			for _, item := range typed {
-				result = append(result, item)
-			}
-			return result
-		},
-	}
-	g.uiController.PopAll()
-	return g.uiController.OpenInventoryListModal(g.worldTexture.GetTileSize(), dataSource)
-}
-
-func sortEquipForUI(equip *common.Equipment) []common.Item {
-	itemList := equip.AllItems()
-
-	slices.SortStableFunc(itemList, func(i, j common.Item) int {
-		slotNameI := equip.GetSlot(i)
-		slotNameJ := equip.GetSlot(j)
-		return cmp.Compare(slotNameI, slotNameJ)
-	})
-	return itemList
-}
-func sortStacksForUI(stacks []common.InventoryStack) []ui.UIElement {
-	items := make([]ui.UIElement, 0)
-	common.SortInventory(stacks)
-	for _, item := range stacks {
-		items = append(items, item)
-	}
-	return items
-}
-
-type TextualStack struct {
-	common.InventoryStack
-	letter   rune
-	selected func()
-}
-
-func (t *TextualStack) Shortcut() rune {
-	return t.letter
-}
-
-func (t *TextualStack) OnSelected() {
-	t.selected()
-}
-
-func NewTextualStack(stack common.InventoryStack, letter rune, selected func(invItemKey rune)) *TextualStack {
-	return &TextualStack{
-		InventoryStack: stack,
-		letter:         letter,
-		selected: func() {
-			selected(letter)
-		},
-	}
-}
-
-func (t *TextualStack) Name() string {
-	return fmt.Sprintf("%c) %s", t.letter, t.InventoryStack.BandStyleName())
-}
-
-func (t *TextualStack) String() string {
-	return t.Name()
-}
-
-func sortStacksForTextUITyped(stacks []common.InventoryStack, getLetterForStack func(stack common.InventoryStack) rune, selected func(invItemKey rune)) []*TextualStack {
-	items := make([]*TextualStack, 0)
-	common.SortInventory(stacks)
-	for _, itemStack := range stacks {
-		items = append(items, NewTextualStack(itemStack, getLetterForStack(itemStack), selected))
-	}
-	return items
-}
-func (g *GameInstance) addSkillsOverlay(pixelEdgeFromBottomRight geometry.Point) *ui.IconOverlay {
-	tileSize := g.worldTexture.GetTileSize()
-
-	getList := func() []ui.UIElement {
-		player := g.state.GetPlayer()
-		items := make([]ui.UIElement, 0)
-		for _, item := range g.GetActiveSkillsForUI(player) {
-			items = append(items, item)
-		}
-		for _, item := range g.GetSustainedSkills(player) {
-			items = append(items, item)
-		}
-		return items
-	}
-	isEquipped := func(item ui.UIElement) bool {
-		return false // TODO:
-	}
-
-	dataSource := ui.IconDataSource{
-		IsHighlighted: isEquipped,
-		GetElements:   getList,
-		OnSelection: func(element ui.UIElement) {
-			player := g.state.GetPlayer()
-			switch typedElement := element.(type) {
-			case *common.UntargetedAction:
-				g.activateUntargetedAction(player, typedElement)
-			case *common.TargetedAction:
-				g.BeginActionTargeting(typedElement)
-			case *SustainedAction:
-				//TODO?
-				//g.actionBroker.Execute(actions.NewToggleSustainedAction(actions.AbstractCause("ToggleSustainedAction"), player, typedElement))
-				typedElement.TryActivate(player)
-			}
-		},
-	}
-
-	return g.uiController.OpenSkillsOverlay(pixelEdgeFromBottomRight, tileSize, dataSource)
-}
-func (g *GameInstance) activateItemActionForPlayer(itemWithAction *GameItem) {
-	user := g.state.GetPlayer() // an AI actor needs to provide a target pos for targeted actions.. handle this elsewhere..
-	if !user.CanUseItems() || !itemWithAction.HasAction() {
-		return
-	}
-
-	if !itemWithAction.HasChargesLeft() {
-		g.Log(fmt.Sprintf("%s is out of charges", itemWithAction.Name()))
-		return
-	}
-
-	itemWithAction.UseCharge()
-
-	if !itemWithAction.HasChargesLeft() && itemWithAction.SelfDestructs() {
-		g.GetWorldState().GetPlayer().GetInventory().Remove(itemWithAction)
-	}
-
-	if itemWithAction.HasTargetedAction() {
-		g.BeginActionTargeting(itemWithAction.GetTargetedAction())
-	} else if itemWithAction.HasUntargetedAction() {
-		untargetedAction := itemWithAction.GetUntargetedAction()
-		g.activateUntargetedAction(user, untargetedAction)
-		autTaken := untargetedAction.GetTimeNeededInAut()
-		if autTaken > 0 {
-			g.actionBroker.Execute(actions.NewEndPlayerTurnAction(actions.AbstractCause("ActiveItemUse"), autTaken))
-		}
-	}
-}
-func (g *GameInstance) addTimerOverlay(pixelEdgeFromBottomRight geometry.Point) *ui.IconOverlay {
-	tileSize := g.worldTexture.GetTileSize()
-
-	isEquipped := func(item ui.UIElement) bool {
-		return false // TODO:
-	}
-
-	dataSource := ui.IconDataSource{
-		IsHighlighted: isEquipped,
-		GetElements:   g.getCurrentTimedEffects,
-		OnSelection: func(element ui.UIElement) {
-		},
-	}
-
-	return g.uiController.OpenTimerOverlay(pixelEdgeFromBottomRight, tileSize, dataSource)
-}
-
-func (g *GameInstance) SetTimeKeeper(keeper *TimeKeeper) {
-	g.timekeeper = keeper
 }
 
 // getAIAction returns the action to execute and the cost in AUT associated with it
@@ -2194,10 +744,10 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 	if isScared && canMove {
 		return autCostMove, func() {
 			targetPos := g.GetMoveAwayFromPlayer(actor.MapPosition())
-			if g.IsClosedDoorAt(targetPos) {
-				g.actionBroker.Execute(actions.NewOpenDoorAction(actions.AbstractCause("OpenDoor"), actor, targetPos))
+			if g.state.IsClosedDoorAt(targetPos) {
+				g.actionBroker.Execute(common.NewOpenDoorAction(common.AbstractCause("OpenDoor"), actor, targetPos))
 			}
-			g.actionBroker.Execute(actions.NewMoveAction(actions.AbstractCause("Movement"), actor, targetPos, false))
+			g.actionBroker.Execute(common.NewMoveAction(common.AbstractCause("Movement"), actor, targetPos, false))
 		}
 	}
 
@@ -2212,15 +762,15 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 				return
 			}
 			randomNeighbor := possibleNeighbors[g.randomSource.Intn(len(possibleNeighbors))]
-			if g.IsClosedDoorAt(randomNeighbor) {
-				g.actionBroker.Execute(actions.NewOpenDoorAction(actions.AbstractCause("OpenDoor"), actor, randomNeighbor))
+			if g.state.IsClosedDoorAt(randomNeighbor) {
+				g.actionBroker.Execute(common.NewOpenDoorAction(common.AbstractCause("OpenDoor"), actor, randomNeighbor))
 			}
 			if g.state.GetMap().IsActorAt(randomNeighbor) {
 				actorAt := g.state.GetMap().ActorAt(randomNeighbor)
 				// attack
-				g.actionBroker.Execute(actions.NewMeleeAttackAction(actions.AbstractCause("MeleeAttack"), actor, actorAt.MapPosition()))
+				g.actionBroker.Execute(common.NewMeleeAttackAction(common.AbstractCause("MeleeAttack"), actor, actorAt.MapPosition()))
 			} else {
-				g.actionBroker.Execute(actions.NewMoveAction(actions.AbstractCause("Movement"), actor, randomNeighbor, false))
+				g.actionBroker.Execute(common.NewMoveAction(common.AbstractCause("Movement"), actor, randomNeighbor, false))
 			}
 		}
 	}
@@ -2230,10 +780,10 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 		return autCostMove, func() {
 			freeNeighbor := g.state.GetMap().GetRandomFreeAndSafeNeighbor(g.randomSource, actor.MapPosition())
 			if freeNeighbor != actor.MapPosition() {
-				if g.IsClosedDoorAt(freeNeighbor) {
-					g.actionBroker.Execute(actions.NewOpenDoorAction(actions.AbstractCause("OpenDoor"), actor, freeNeighbor))
+				if g.state.IsClosedDoorAt(freeNeighbor) {
+					g.actionBroker.Execute(common.NewOpenDoorAction(common.AbstractCause("OpenDoor"), actor, freeNeighbor))
 				}
-				g.actionBroker.Execute(actions.NewMoveAction(actions.AbstractCause("Movement"), actor, freeNeighbor, false))
+				g.actionBroker.Execute(common.NewMoveAction(common.AbstractCause("Movement"), actor, freeNeighbor, false))
 			}
 		}
 	}
@@ -2279,22 +829,22 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 		canSeePlayer := actor.CanSee(playerPosition)
 		if canRangedAttack && canSeePlayer {
 			return autCostRangedAttack, func() {
-				g.actionBroker.Execute(actions.NewRangedAttackAction(actions.AbstractCause("RangedAttack"), actor, playerPosition))
+				g.actionBroker.Execute(common.NewRangedAttackAction(common.AbstractCause("RangedAttack"), actor, playerPosition))
 			}
 		}
 		var dist int
 		dist = g.state.GetMap().MoveDistance(actor.MapPosition(), playerPosition)
 		if dist <= 1 && canAttack {
 			return autCostMeleeAttack, func() {
-				g.actionBroker.Execute(actions.NewMeleeAttackAction(actions.AbstractCause("MeleeAttack"), actor, playerPosition))
+				g.actionBroker.Execute(common.NewMeleeAttackAction(common.AbstractCause("MeleeAttack"), actor, playerPosition))
 			}
 		} else if canMove {
 			return autCostMove, func() {
 				targetPos := g.GetMoveTowardsPlayer(actor.MapPosition())
-				if g.IsClosedDoorAt(targetPos) {
-					g.actionBroker.Execute(actions.NewOpenDoorAction(actions.AbstractCause("OpenDoor"), actor, targetPos))
+				if g.state.IsClosedDoorAt(targetPos) {
+					g.actionBroker.Execute(common.NewOpenDoorAction(common.AbstractCause("OpenDoor"), actor, targetPos))
 				}
-				g.actionBroker.Execute(actions.NewMoveAction(actions.AbstractCause("Movement"), actor, targetPos, false))
+				g.actionBroker.Execute(common.NewMoveAction(common.AbstractCause("Movement"), actor, targetPos, false))
 			}
 		}
 	}
@@ -2302,171 +852,7 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 	return 10, func() {}
 }
 
-func (g *GameInstance) onMapClicked(mouseButton ebiten.MouseButton, mapPos geometry.Point) {
-	if g.uiController.IsUIModalVisible() {
-		return
-	}
-	if g.debugModeEnabled {
-		g.Log(fmt.Sprintf("Click @ %s", mapPos.String()))
-	}
-	currentMap := g.state.GetMap()
-	if mouseButton == ebiten.MouseButtonRight && currentMap.IsActorAt(mapPos) && g.state.GetPlayer().CanSee(mapPos) {
-		g.showActorInfoAt(mapPos)
-	} else if mouseButton == ebiten.MouseButtonLeft && currentMap.IsExplored(mapPos) {
-		g.cancelAutoMove()
-		g.startPlayerAutoMovement(mapPos)
-	}
-}
-
-func (g *GameInstance) allowedForAutoExplore(point geometry.Point) bool {
-	currentMap := g.state.GetMap()
-	isWalkable := currentMap.CurrentlyPassableAndSafeForActor(g.state.GetPlayer())
-	return isWalkable(point) && !currentMap.IsStairsAt(point)
-}
-func (g *GameInstance) allowedForAutoMove(targetPos geometry.Point) func(point geometry.Point) bool {
-	return func(point geometry.Point) bool {
-		currentMap := g.state.GetMap()
-		isWalkable := currentMap.CurrentlyPassableAndSafeForActor(g.state.GetPlayer())
-		return isWalkable(point) || point == targetPos
-	}
-}
-
-func (g *GameInstance) startPlayerAutoMovement(targetPos geometry.Point) {
-	player := g.state.GetPlayer()
-	if !player.IsAlive() {
-		return
-	}
-	currentMap := g.state.GetMap()
-
-	// single step, like a manual move..
-	if currentMap.MoveDistance(player.MapPosition(), targetPos) == 1 {
-		// this seems to be an intended action..
-		direction := targetPos.Sub(player.MapPosition())
-		g.ManualMovePlayer(direction)
-		return
-	}
-
-	if len(g.GetWorldState().GetVisibility().GetVisibleEnemies()) > 0 {
-		// player is trying to move while enemies are visible..
-		g.Log("You can't run while enemies are visible")
-		return
-	}
-
-	if !player.CanAutoMove() {
-		g.Log("You can't move in a coordinated fashion right now")
-		return
-	}
-
-	playerPosition := player.MapPosition()
-
-	// check for item directly beneath us.. if so, pick it up
-	if g.configuration.AutoPickup {
-		if currentMap.IsItemAt(playerPosition) {
-			itemAt := currentMap.ItemAt(playerPosition)
-			if !itemAt.IsDroppedByPlayer() {
-				pickUpAction := actions.NewPickUpAction(actions.AbstractCause("PickUp"), player)
-				g.actionBroker.Execute(pickUpAction)
-				g.actionBroker.Execute(actions.NewEndPlayerTurnAction(pickUpAction.Cause(), pickUpAction.GetDelayInAut()))
-			}
-		}
-	}
-
-	var isWalkable func(point geometry.Point) bool
-	if g.autoExplore {
-		isWalkable = g.allowedForAutoExplore
-	} else {
-		isWalkable = g.allowedForAutoMove(targetPos)
-	}
-	pathToTarget := currentMap.GetJPSPath(playerPosition, targetPos, isWalkable)
-	if len(pathToTarget) <= 1 {
-		g.stopAutoMove()
-		return
-	}
-	g.actionBroker.CancelAllAnimations()
-	g.actionBroker.ClearQueuedActions(func(action actions.Action) bool {
-		if moveAction, ok := action.(*actions.MoveAction); ok {
-			return moveAction.GetActor() == player
-		}
-		return false
-	})
-	g.playerPath = pathToTarget[1:]
-	g.nextStepOnPlayerPath()
-}
-
-func (g *GameInstance) continuePlayerAutoMovement(targetPos geometry.Point) {
-	currentMap := g.state.GetMap()
-	var isWalkable func(point geometry.Point) bool
-	if g.autoExplore {
-		isWalkable = g.allowedForAutoExplore
-	} else {
-		isWalkable = g.allowedForAutoMove(targetPos)
-	}
-	pathToTarget := currentMap.GetJPSPath(g.state.GetPlayer().MapPosition(), targetPos, isWalkable)
-	if len(pathToTarget) <= 1 {
-		return
-	}
-	g.playerPath = pathToTarget[1:]
-	g.nextStepOnPlayerPath()
-}
-
-func (g *GameInstance) showActorInfoAt(mapPos geometry.Point) {
-	player := g.state.GetPlayer()
-	actor := g.state.GetMap().ActorAt(mapPos)
-	infoText := toLabelText(actor.GetInfoText())
-	if actor != player && actor.IsHostile() {
-		otherHasRanged := actor.GetEquipment().HasRangedWeaponEquipped()
-		playerHasRanged := player.GetEquipment().HasRangedWeaponEquipped()
-
-		enemyMelee := actions.NewMeleeAttackAction(actions.AbstractCause("Simulation"), actor, player.MapPosition())
-		damage := enemyMelee.SimulateAttack(g)
-		if damageInterval, ok := damage[player]; ok {
-			infoText = append(infoText, common.LabelTextFromString(""), common.LabelTextFromStringWithColor(fmt.Sprintf("Enemy typically hits for %d damage per melee attack,", damageInterval.Median()), common.Red))
-			infoText = append(infoText, common.LabelTextFromStringWithColor(fmt.Sprintf("that's %d%% of your current health,", damageInterval.Median()*100/player.GetStats().GetRessource(stats.Health).Value()), common.Red))
-			hitsForKill := int(math.Ceil(float64(player.GetStats().GetRessource(stats.Health).Value()) / float64(damageInterval.Max())))
-			infoText = append(infoText, common.LabelTextFromStringWithColor(fmt.Sprintf("and at worst could defeat you in %d hits.", hitsForKill), common.Red))
-		}
-
-		if otherHasRanged {
-			enemyRanged := actions.NewRangedAttackAction(actions.AbstractCause("Simulation"), actor, player.MapPosition())
-			damage = enemyRanged.SimulateAttack(g)
-			if damageInterval, ok := damage[player]; ok {
-				infoText = append(infoText, common.LabelTextFromString(""), common.LabelTextFromStringWithColor(fmt.Sprintf("Enemy typically hits for %d damage per ranged attack,", damageInterval.Median()), common.Red))
-				infoText = append(infoText, common.LabelTextFromStringWithColor(fmt.Sprintf("that's %d%% of your current health,", damageInterval.Median()*100/player.GetStats().GetRessource(stats.Health).Value()), common.Red))
-				hitsForKill := int(math.Ceil(float64(player.GetStats().GetRessource(stats.Health).Value()) / float64(damageInterval.Max())))
-				infoText = append(infoText, common.LabelTextFromStringWithColor(fmt.Sprintf("and at worst could defeat you in %d hits.", hitsForKill), common.Red))
-			}
-		}
-
-		playerMelee := actions.NewMeleeAttackAction(actions.AbstractCause("Simulation"), player, actor.MapPosition())
-		damage = playerMelee.SimulateAttack(g)
-		if damageInterval, ok := damage[actor]; ok {
-			infoText = append(infoText, common.LabelTextFromString(""), common.LabelTextFromStringWithColor(fmt.Sprintf("You typically hit for %s damage per melee attack,", damageInterval.ToString()), common.DarkGreen))
-			infoText = append(infoText, common.LabelTextFromStringWithColor(fmt.Sprintf("that's %d%% of the enemy's current health,", damageInterval.Median()*100/actor.GetStats().GetRessource(stats.Health).Value()), common.DarkGreen))
-			hitsForKill := int(math.Ceil(float64(actor.GetStats().GetRessource(stats.Health).Value()) / float64(damageInterval.Max())))
-			infoText = append(infoText, common.LabelTextFromStringWithColor(fmt.Sprintf("and at best could defeat the enemy in %d hits.", hitsForKill), common.DarkGreen))
-		}
-
-		if playerHasRanged {
-			playerRanged := actions.NewRangedAttackAction(actions.AbstractCause("Simulation"), player, actor.MapPosition())
-			damage = playerRanged.SimulateAttack(g)
-			if damageInterval, ok := damage[actor]; ok {
-				infoText = append(infoText, common.LabelTextFromString(""), common.LabelTextFromStringWithColor(fmt.Sprintf("You typically hit for %s damage per ranged attack,", damageInterval.ToString()), common.DarkGreen))
-				infoText = append(infoText, common.LabelTextFromStringWithColor(fmt.Sprintf("that's %d%% of the enemy's current health,", damageInterval.Median()*100/actor.GetStats().GetRessource(stats.Health).Value()), common.DarkGreen))
-				hitsForKill := int(math.Ceil(float64(actor.GetStats().GetRessource(stats.Health).Value()) / float64(damageInterval.Max())))
-				infoText = append(infoText, common.LabelTextFromStringWithColor(fmt.Sprintf("and at best could defeat the enemy in %d hits.", hitsForKill), common.DarkGreen))
-			}
-		}
-
-	}
-
-	g.uiController.OpenTextWindow(infoText)
-}
-
-type Enchantment interface {
-	ToString() string
-}
-
-func (g *GameInstance) TransferRandomEnchantment(source *GameItem, destination *GameItem) {
+func (g *GameInstance) TransferRandomEnchantment(source *common.Item, destination *common.Item) {
 	enchantments := source.GetAllEnchantments()
 
 	if len(enchantments) == 0 {
@@ -2480,78 +866,8 @@ func (g *GameInstance) TransferRandomEnchantment(source *GameItem, destination *
 	destination.AddEnchantment(randomEnchantment)
 }
 
-func (g *GameInstance) onItemInInventoryClicked(uiItem ui.UIElement) {
-	if !g.state.GetPlayer().IsAlive() {
-		return
-	}
-
-	// shift state
-	shiftPressed := ebiten.IsKeyPressed(ebiten.KeyShift)
-	typedItem := firstItemFromUIStack(uiItem)
-
-	player := g.state.GetPlayer()
-
-	wasEquipped := player.GetEquipment().IsEquipped(typedItem)
-	if shiftPressed { // drop
-		g.actionBroker.Execute(actions.NewDropAction(actions.AbstractCause("Drop"), player, typedItem))
-		g.actionBroker.Execute(actions.NewEndPlayerTurnAction(actions.AbstractCause("DroppedItem"), 5))
-		if wasEquipped {
-			g.ShowFullStats()
-		}
-		return
-	}
-
-	// equip
-	if typedItem.IsEquippable() {
-		if wasEquipped {
-			g.actionBroker.Execute(actions.NewUnequipItemAction(actions.AbstractCause("Unequip"), player, typedItem))
-			g.actionBroker.Execute(actions.NewEndPlayerTurnAction(actions.AbstractCause("EquipmentChange"), 10))
-		} else {
-			g.actionBroker.Execute(actions.NewEquipItemAction(actions.AbstractCause("Equip"), player, typedItem))
-			g.actionBroker.Execute(actions.NewEndPlayerTurnAction(actions.AbstractCause("EquipmentChange"), 10))
-		}
-		g.ShowFullStats()
-		return
-	}
-
-	// use
-	contextActions := g.GetContextActionsForItem(typedItem)
-	if len(contextActions) == 0 {
-		return // maybe open a description? or at least a menu with drop or sth?
-	}
-
-	if len(contextActions) == 1 {
-		actionFunc := contextActions[0].Action
-		actionFunc()
-		// hmm, this will trigger even if unsuc
-		return
-	}
-	g.uiController.OpenMenu(contextActions)
-}
-
-func firstItemFromUIStack(uiItem ui.UIElement) *GameItem {
-	var firstItem common.Item
-	if gameItem, isGameItem := uiItem.(*GameItem); isGameItem {
-		return gameItem
-	}
-
-	if textStack, isTextualStack := uiItem.(*TextualStack); isTextualStack {
-		firstItem = textStack.InventoryStack[0]
-	} else if itemStack, isItemStack := uiItem.(common.InventoryStack); isItemStack {
-		firstItem = itemStack[0]
-	}
-
-	typedItem := firstItem.(*GameItem)
-	return typedItem
-}
-
 func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
-	if g.uiController == nil || g.uiController.HasOverlays() {
-		// setup ui
-		g.setupUI()
-	}
-
-	if isTownLevel(newMapName) {
+	if defs.IsTownLevel(newMapName) {
 		currentMap := g.state.GetMap()
 		g.state.SetTownMap(currentMap)
 		for _, actor := range currentMap.Actors() {
@@ -2560,39 +876,35 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 			}
 			g.ensureVendorInventory(actor)
 		}
-		if newMapName == string(LevelNameTown) {
+		if newMapName == string(defs.LevelNameTown) {
 			g.setupTownTransitions(currentMap)
-		} else if newMapName == string(LevelNameTownHell) {
+		} else if newMapName == string(defs.LevelNameTownHell) {
 			g.setupHellTownTransitions(currentMap)
 		}
-
 	} else { // dungeon map
 		g.state.SetDungeonMap(newMapName, g.state.GetMap())
 	}
 
-	if isTownLevel(oldMapName) {
+	if defs.IsTownLevel(oldMapName) {
 		g.GetAudio().PlayCue("heavy_door")
 	}
 
-	player := g.state.GetPlayer()
-
-	if !g.setToExactFit && !g.configuration.KeepPlayerCentered && player != nil {
-		g.mapRenderer.CenterOnFloat(player.DrawPosition())
-	}
+	g.actions.updateFoV()
+	g.uiController.OnMapChanged()
 
 	if g.onMapChange != nil {
 		g.onMapChange()
 	}
 }
 
-func (g *GameInstance) setupTownTransitions(currentMap *gridmap.GridMap[*common.Actor, common.Item, common.Object]) {
+func (g *GameInstance) setupTownTransitions(currentMap *gridmap.GridMap[*common.Actor, *common.Item, common.Object]) {
 	entrancePos := currentMap.GetNamedLocation("to_cathedral")
 
 	entranceTile := currentMap.GetCell(entrancePos).TileType
 	currentMap.SetTile(entrancePos, entranceTile.WithSpecial(gridmap.SpecialTileStairsDown))
 
 	currentMap.AddTransitionAt(entrancePos, gridmap.Transition{
-		TargetMap:      levelName(1),
+		TargetMap:      defs.LevelNameFromDepth(1),
 		TargetLocation: "ladder_up",
 	})
 
@@ -2602,7 +914,7 @@ func (g *GameInstance) setupTownTransitions(currentMap *gridmap.GridMap[*common.
 	currentMap.SetTile(entrancePos, entranceTile.WithSpecial(gridmap.SpecialTileStairsDown))
 
 	currentMap.AddTransitionAt(entrancePos, gridmap.Transition{
-		TargetMap:      levelName(4),
+		TargetMap:      defs.LevelNameFromDepth(4),
 		TargetLocation: "to_town",
 	})
 
@@ -2612,18 +924,18 @@ func (g *GameInstance) setupTownTransitions(currentMap *gridmap.GridMap[*common.
 	currentMap.SetTile(entrancePos, entranceTile.WithSpecial(gridmap.SpecialTileStairsDown))
 
 	currentMap.AddTransitionAt(entrancePos, gridmap.Transition{
-		TargetMap:      levelName(6),
+		TargetMap:      defs.LevelNameFromDepth(6),
 		TargetLocation: "to_town",
 	})
 }
-func (g *GameInstance) setupHellTownTransitions(currentMap *gridmap.GridMap[*common.Actor, common.Item, common.Object]) {
+func (g *GameInstance) setupHellTownTransitions(currentMap *gridmap.GridMap[*common.Actor, *common.Item, common.Object]) {
 	caveEntrace := currentMap.GetNamedLocation("to_caves")
 
 	entranceTile := currentMap.GetCell(caveEntrace).TileType
 	currentMap.SetTile(caveEntrace, entranceTile.WithSpecial(gridmap.SpecialTileStairsDown))
 
 	currentMap.AddTransitionAt(caveEntrace, gridmap.Transition{
-		TargetMap:      levelName(6),
+		TargetMap:      defs.LevelNameFromDepth(6),
 		TargetLocation: "ladder_down",
 	})
 
@@ -2632,7 +944,7 @@ func (g *GameInstance) setupHellTownTransitions(currentMap *gridmap.GridMap[*com
 	currentMap.SetTile(dungeonEntrance, entranceTile.WithSpecial(gridmap.SpecialTileStairsDown))
 
 	currentMap.AddTransitionAt(dungeonEntrance, gridmap.Transition{
-		TargetMap:      levelName(9),
+		TargetMap:      defs.LevelNameFromDepth(9),
 		TargetLocation: "ladder_down",
 	})
 
@@ -2643,8 +955,8 @@ func (g *GameInstance) ensureVendorInventory(actor *common.Actor) {
 	if !inventory.IsEmpty() {
 		return
 	}
-	var inventoryItems []common.Item
-	definition, exists := g.vendorDefinitions[string(actor.GetVendorType())]
+	var inventoryItems []*common.Item
+	definition, exists := g.dataDefinitions.VendorDefinitions[string(actor.GetVendorType())]
 	if !exists {
 		g.ErrLog(fmt.Sprintf("No store definition for %s", actor.GetVendorType()))
 		return
@@ -2657,52 +969,17 @@ func (g *GameInstance) ensureVendorInventory(actor *common.Actor) {
 	}
 }
 
-func (g *GameInstance) GetActiveSkillsForUI(player *common.Actor) []ui.UIElement {
-	var activeSkills []ui.UIElement
-	for _, skill := range player.GetTargetedSkills() {
-		activeSkills = append(activeSkills, skill)
-	}
-	for _, skill := range player.GetUntargetedSkills() {
-		activeSkills = append(activeSkills, skill)
-	}
-	return activeSkills
-}
-
-func (g *GameInstance) initPlayerSkillsForArcher(player *common.Actor) {
+func (g *GameInstance) initPlayerSkills(player *common.Actor, targetedSkills []string, untargetedSkills []string) {
 	var targeted []*common.TargetedAction
-	targeted = append(targeted,
-		//	g.NewTargetedActionFromName(ActionNameFireball),
-		//	g.NewTargetedActionFromName(ActionNameFirewall),
-		g.NewTargetedActionFromName(string(ActionNameBlink)),
-		g.NewTargetedActionFromName(string(ActionNameMindPush)),
-		g.NewTargetedActionFromName(string(ActionNameImmobilize)),
-		g.NewTargetedActionFromName(string(ActionNameFireRay)),
-		g.NewTargetedActionFromName(string(ActionNameFireBresen)),
-	)
+	for _, skillName := range targetedSkills {
+		targeted = append(targeted, g.factory.NewTargetedActionFromName(skillName))
+	}
 	player.SetTargetedSkills(targeted)
-
-	untargeted := []*common.UntargetedAction{
-		g.NewUntargetedActionFromName("multi_shot"),
+	var untargeted []*common.UntargetedAction
+	for _, skillName := range untargetedSkills {
+		untargeted = append(untargeted, g.factory.NewUntargetedActionFromName(skillName))
 	}
 	player.SetUntargetedSkills(untargeted)
-}
-func (g *GameInstance) GetSustainedSkills(player *common.Actor) []*SustainedAction {
-
-	var activeSkills []*SustainedAction
-	/*
-	   for _, skillName := range activeSkillNames {
-	       skillLevel := player.GetStats().GetAttribute(skillName)
-	       if skillLevel == 0 {
-	           continue
-	       }
-
-	   }
-
-	*/
-	activeSkills = append(activeSkills,
-		g.getInnerFlame(),
-	)
-	return activeSkills
 }
 
 type Turner interface {
@@ -2715,222 +992,6 @@ func (g *GameInstance) getTurnerAction(baseSpeed int, energy int, being Turner) 
 		return 0, nil
 	}
 	return baseSpeed, being.Turn
-}
-
-func (g *GameInstance) removeObject(object common.Object) {
-	g.state.GetMap().RemoveObject(object)
-}
-
-func (g *GameInstance) openTransferEnchantmentMenu() {
-	// step one, choose an item
-	player := g.state.GetPlayer()
-	playerInventory := player.GetInventory()
-	if playerInventory.IsEmpty() {
-		g.Log(fmt.Sprintf("You have no items"))
-		return
-	}
-	itemsWithEnchantments := make([]common.Item, 0)
-	for _, item := range playerInventory.Items() {
-		gItem := item.(*GameItem)
-		if len(gItem.GetAllEnchantments()) > 0 {
-			itemsWithEnchantments = append(itemsWithEnchantments, item)
-		}
-	}
-	if len(itemsWithEnchantments) == 0 {
-		g.Log(fmt.Sprintf("You have no items with enchantments"))
-		return
-	}
-	var menuItems []util.MenuItem
-	for _, item := range itemsWithEnchantments {
-		gItem := item.(*GameItem)
-		menuItems = append(menuItems, util.MenuItem{
-			MainText: gItem.Name(),
-			Action: func() {
-				g.openChooseEnchantmentMenu(gItem)
-			},
-		})
-	}
-
-	g.uiController.OpenMenu(menuItems)
-}
-
-func (g *GameInstance) openChooseEnchantmentMenu(source *GameItem) {
-	var menuItems []util.MenuItem
-	for _, e := range source.GetAllEnchantments() {
-		enchantment := e
-		menuItems = append(menuItems, util.MenuItem{
-			MainText: enchantment.ToString(),
-			Action: func() {
-				g.openChooseTransferTargetMenu(source, enchantment)
-			},
-		})
-	}
-
-	g.uiController.OpenMenu(menuItems)
-}
-
-func (g *GameInstance) openChooseTransferTargetMenu(source *GameItem, enchantment Enchantment) {
-	player := g.state.GetPlayer()
-	playerInventory := player.GetInventory()
-	if playerInventory.IsEmpty() {
-		return
-	}
-	var menuItems []util.MenuItem
-	for _, item := range playerInventory.Items() {
-		gItem := item.(*GameItem)
-		if gItem == source {
-			continue
-		}
-
-		menuItems = append(menuItems, util.MenuItem{
-			MainText: gItem.Name(),
-			Action: func() {
-				g.transferEnchantment(source, gItem, enchantment)
-			},
-		})
-	}
-
-	g.uiController.OpenMenu(menuItems)
-}
-
-func (g *GameInstance) transferEnchantment(source *GameItem, item *GameItem, enchantment Enchantment) {
-	source.RemoveEnchantment(enchantment)
-	g.Log(fmt.Sprintf("%s lost %s", source.Name(), enchantment.ToString()))
-	item.AddEnchantment(enchantment)
-	g.Log(fmt.Sprintf("%s gained %s", item.Name(), enchantment.ToString()))
-	g.uiController.PopAll()
-}
-
-func (g *GameInstance) recallAtEndOfTurn() {
-	recallAction := func() {
-		currentMapName := g.state.GetMap().GetName()
-		isInTown := isTownLevel(currentMapName)
-
-		var dest gridmap.Transition
-
-		if isInTown {
-			dest = gridmap.Transition{
-				TargetMap:      levelName(g.state.GetLastDungeonLevel()),
-				TargetLocation: "ladder_up",
-			}
-		} else { // in dungeon
-			currentLevel := levelFromName(currentMapName)
-			if g.state.GetLastDungeonLevel() < currentLevel {
-				g.state.SetLastDungeonLevel(currentLevel)
-			}
-			dest = gridmap.Transition{TargetMap: string(LevelNameTown), TargetLocation: "spawn"}
-		}
-
-		g.transitionTo(dest)
-	}
-	g.executeAfterTurn = append(g.executeAfterTurn, recallAction)
-}
-
-func (g *GameInstance) transitionTo(dest gridmap.Transition) {
-	g.actionBroker.Execute(actions.NewTransitionAction(actions.AbstractCause("Quick Travel"), dest))
-	g.actionBroker.Execute(actions.NewUpdateFoVAction(actions.AbstractCause("Quick Travel"), g.state.GetPlayer()))
-	g.UpdateMiniMap()
-}
-func (g *GameInstance) nextStepOnPlayerPath() {
-	if !g.state.GetPlayer().IsAlive() {
-		g.stopAutoMove()
-		return
-	}
-	if len(g.playerPath) > 0 {
-		if g.state.GetVisibility().GetVisibleEnemyCount(func(actor *common.Actor) bool {
-			return actor.IsHostile() && actor.IsHostileTo(g.state.GetPlayer())
-		}) > 0 {
-			g.stopAutoMove()
-			g.Log("You can see an enemy")
-			return
-		}
-
-		// pop first element
-		nextStep := g.playerPath[0]
-
-		if g.state.GetMap().IsActorAt(nextStep) {
-			//actorAt := g.state.GetMap().ActorAt(nextStep)
-			g.stopAutoMove()
-			if !g.autoExplore { // never explore into another actor, only deliberately
-				direction := nextStep.Sub(g.state.GetPlayer().MapPosition())
-				g.ManualMovePlayer(direction)
-			}
-			return
-		}
-
-		if g.state.GetMap().IsObjectAt(nextStep) {
-			if g.IsClosedDoorAt(nextStep) {
-				openDoorAction := actions.NewOpenDoorAction(actions.AbstractCause("Player Movement"), g.state.GetPlayer(), nextStep)
-				g.actionBroker.QueueForExecution(openDoorAction)
-				g.actionBroker.QueueForExecution(actions.NewEndPlayerTurnAction(openDoorAction.Cause(), openDoorAction.GetDelayInAut()))
-				return
-			} else if !g.autoExplore {
-				objectAt := g.state.GetMap().ObjectAt(nextStep)
-				if !objectAt.IsWalkable(g.state.GetPlayer()) {
-					g.stopAutoMove()
-					g.Log(fmt.Sprintf("You bump into %s", objectAt.Name()))
-					objectAt.ActorBumpedInto(g.state.GetPlayer(), actions.AnimateNow())
-					return
-				}
-			}
-		}
-
-		if !g.state.GetMap().IsCurrentlyPassable(nextStep) {
-			g.stopAutoMove()
-			g.Log("You can't move there")
-			return
-		}
-
-		g.playerPath = g.playerPath[1:]
-		autoMoveAction := actions.NewMoveAction(actions.AbstractCause("Player Movement"), g.state.GetPlayer(), nextStep, true)
-		autoMoveAction.SetAnimationDelay(0.08)
-		g.actionBroker.QueueForExecution(autoMoveAction)
-		g.actionBroker.QueueForExecution(actions.NewEndPlayerTurnAction(autoMoveAction.Cause(), autoMoveAction.GetDelayInAut()))
-	} else if g.autoExplore {
-		if target, hasTarget := g.getNextAutoExploreTarget(); hasTarget {
-			g.continuePlayerAutoMovement(target)
-		} else {
-			g.Log("Nothing left to explore")
-			g.stopAutoMove()
-		}
-	}
-}
-
-func (g *GameInstance) getNextAutoExploreTarget() (geometry.Point, bool) {
-	player := g.state.GetPlayer()
-	playerInv := player.GetInventory()
-	playerPos := player.MapPosition()
-
-	if !playerInv.IsFull() && g.configuration.AutoPickup {
-		nearestItem := g.state.GetMap().GetNearestExploredItem(playerPos, func(item common.Item) bool {
-			return !item.IsDroppedByPlayer() && (!item.IsHidden() || g.state.GetFlags().IsSet(string(FlagHasTrueSight)))
-		})
-		if nearestItem != playerPos {
-			return nearestItem, true
-		}
-	}
-
-	unexplored := g.state.GetMap().GetNearestUnexploredWalkablePosition(playerPos)
-	if unexplored != playerPos {
-		return unexplored, true
-	}
-	return geometry.Point{}, false
-}
-
-func (g *GameInstance) cancelAutoMove() {
-	g.stopAutoMove()
-	g.actionBroker.CancelAllAnimations()
-
-}
-func (g *GameInstance) stopAutoMove() {
-	g.autoExplore = false
-	g.playerPath = nil
-	g.actionBroker.ClearQueuedActions(func(action actions.Action) bool {
-		if moveAction, ok := action.(*actions.MoveAction); ok {
-			return moveAction.GetActor() == g.state.GetPlayer()
-		}
-		return false
-	})
 }
 
 func (g *GameInstance) getDisplacePositionForActor(victimToDisplace *common.Actor, direction geometry.Point) geometry.Point {
@@ -2960,304 +1021,37 @@ func (g *GameInstance) getDisplacePositionForActor(victimToDisplace *common.Acto
 	return behindUs
 }
 
-func (g *GameInstance) afterTimedRemoved(thing TimedBeing) {
-	//TODO?
-}
-
-func (g *GameInstance) getCurrentTimedEffects() []ui.UIElement {
-	var result []ui.UIElement
-	for _, timedBeing := range g.timekeeper.GetBeingsByFilter(func(being TimedBeing) bool {
-		switch being.(type) {
-		case *common.Actor:
-			return false
-		case *SustainedAction:
-			return true
-		case *common.UntargetedAction:
-			return true
-		case *TimedModifier:
-			return true
-		default:
-			return false
-		}
-	}) {
-		result = append(result, timedBeing.(ui.UIElement))
-	}
-
-	for statusName, turnsLeft := range g.state.GetPlayer().GetStatusEffects().AllEntries() {
-		result = append(result, NewStatusEffectWidget(statusName, turnsLeft))
-	}
-	return result
-}
-
-func (g *GameInstance) openLevelUpMenu() {
-	player := g.state.GetPlayer()
-	if !player.CanLevelUp() {
-		return
-	}
-	g.levelUpButton.Hide()
-	g.ShowFullStats()
-	g.uiController.OpenMenu([]util.MenuItem{
-		{
-			MainText: "STR",
-			Action: func() {
-				player.LevelUp(stats.Strength)
-				if player.CanLevelUp() {
-					g.GetAudio().PlayCue("levelup")
-					g.openLevelUpMenu()
-				} else {
-					g.levelUpButton.Hide()
-					g.ShowFullStats()
-				}
-			},
-		},
-		{
-			MainText: "DEX",
-			Action: func() {
-				player.LevelUp(stats.Dexterity)
-				if player.CanLevelUp() {
-					g.GetAudio().PlayCue("levelup")
-					g.openLevelUpMenu()
-				} else {
-					g.levelUpButton.Hide()
-					g.ShowFullStats()
-				}
-			},
-		},
-		{
-			MainText: "INT",
-			Action: func() {
-				player.LevelUp(stats.Intelligence)
-				if player.CanLevelUp() {
-					g.GetAudio().PlayCue("levelup")
-					g.openLevelUpMenu()
-				} else {
-					g.levelUpButton.Hide()
-					g.ShowFullStats()
-				}
-			},
-		},
-	})
-}
-
 func (g *GameInstance) checkForLevelUp() {
 	if !g.state.GetPlayer().CanLevelUp() {
 		return
 	}
-	if g.levelUpButton.IsVisible() {
-		return
-	}
-	g.levelUpButton.Show()
 	g.GetAudio().PlayCue("levelup")
-}
-
-func (g *GameInstance) IsClosedDoorAt(pos geometry.Point) bool {
-	currentMap := g.GetWorldState().GetMap()
-	if !currentMap.IsObjectAt(pos) {
-		return false
-	}
-
-	objectAt := currentMap.ObjectAt(pos)
-	door, isDoorHere := objectAt.(*common.Door)
-	if !isDoorHere {
-		return false
-	}
-	return door.IsClosed()
-}
-func (g *GameInstance) getMiniMapColor(mapPos geometry.Point, tileColor *[4]byte) {
-	currentMap := g.state.GetMap()
-	if g.state.GetPlayer().MapPosition() == mapPos {
-		*tileColor = [4]byte{100, 255, 100, 255}
-		return
-	}
-	if !currentMap.IsExplored(mapPos) {
-		*tileColor = [4]byte{10, 10, 10, 255}
-		return
-	}
-	if currentMap.IsStairsAt(mapPos) {
-		*tileColor = [4]byte{235, 52, 229, 255}
-		return
-	}
-	if !g.state.GetPlayer().CanSee(mapPos) {
-		if currentMap.IsSpecialAt(mapPos, gridmap.SpecialTileWater) {
-			if !g.state.GetFlags().IsSet(fmt.Sprintf("all_clear:%s", SpecialLevelPoisonedWaterSupply)) {
-				//199, G: 251, B: 161
-				*tileColor = [4]byte{199 / 2, 251 / 2, 161 / 2, 255}
-				return
-			}
-			*tileColor = [4]byte{86 / 2, 112 / 2, 194 / 2, 255}
-			return
-		}
-		if currentMap.IsWalkable(mapPos) {
-			*tileColor = [4]byte{35, 30, 51, 255}
-		} else {
-			*tileColor = [4]byte{85, 95, 112, 255}
-		}
-		return
-	}
-	if currentMap.IsActorAt(mapPos) {
-		actorAt := currentMap.ActorAt(mapPos)
-		if actorAt.IsHostileTo(g.state.GetPlayer()) {
-			*tileColor = [4]byte{255, 0, 0, 255}
-			return
-		}
-		*tileColor = [4]byte{220, 120, 75, 255}
-		return
-	}
-
-	if currentMap.IsSpecialAt(mapPos, gridmap.SpecialTileWater) {
-		if !g.state.GetFlags().IsSet(fmt.Sprintf("all_clear:%s", SpecialLevelPoisonedWaterSupply)) {
-			//199, G: 251, B: 161
-			*tileColor = [4]byte{199, 251, 161, 255}
-			return
-		}
-		*tileColor = [4]byte{86, 112, 194, 255}
-		return
-	}
-
-	if currentMap.IsWalkable(mapPos) {
-		*tileColor = [4]byte{77, 60, 102, 255}
-	} else {
-		*tileColor = [4]byte{170, 191, 224, 255}
-	}
-}
-
-func (g *GameInstance) decorateRoomFromTemplate(emptyMap *gridmap.GridMap[*common.Actor, common.Item, common.Object], template *ldtk_go.Level, room *dungen.DungeonRoom) {
-	tileLayer := template.LayerByIdentifier("Tiles")
-	tileSet := g.ldtkProject.TilesetByIdentifier("World")
-	for _, tile := range tileLayer.Tiles {
-		if tile.ID < 0 || tile.ID > 223 {
-			continue
-		}
-		relativeMapPos, mapTile := MapTileFromLDTK(tileSet, tileLayer, tile)
-		position := room.ToAbsolutePosition(relativeMapPos)
-		if emptyMap.IsTileWalkable(position) && room.Contains(position) {
-			emptyMap.SetTile(position, mapTile)
-		}
-	}
-
-	entityLayer := template.LayerByIdentifier("Entities")
-	for _, entity := range entityLayer.Entities {
-		posX, posY := entityLayer.ToGridPosition(entity.Position[0], entity.Position[1])
-		relativeMapPos := geometry.Point{X: posX, Y: posY}
-		mapPos := room.ToAbsolutePosition(relativeMapPos)
-
-		if entity.Identifier != "NPC" { // only unique NPCs for now
-			continue
-		}
-		if emptyMap.IsCurrentlyPassable(mapPos) {
-			if !entity.PropertyByIdentifier("UniqueName").IsNull() {
-				uniqueName := entity.PropertyByIdentifier("UniqueName").AsString()
-				uniqueActor := NewUniqueEnemyFromName(uniqueName)
-				emptyMap.AddActor(uniqueActor, mapPos)
-			}
-		}
-
-	}
 }
 
 func (g *GameInstance) getCurrentDungeonLevel() int {
 	currentMapName := g.state.GetMap().GetName()
-	if isTownLevel(currentMapName) {
+	if defs.IsTownLevel(currentMapName) {
 		return 0
 	}
-	return levelFromName(currentMapName)
+	return common.LevelFromName(currentMapName)
 }
 
 func (g *GameInstance) gotoHellTown() {
 	dest := gridmap.Transition{TargetMap: "TownHell", TargetLocation: "spawn"}
-	g.transitionTo(dest)
-	g.actionBroker.Execute(actions.NewEndPlayerTurnAction(actions.AbstractCause("Travel"), 10))
-}
-
-func (g *GameInstance) getWaterColor() color.RGBA {
-	//all_clear:SpecialLevelPoisonedWaterSupply
-	//
-	poisonColor := color.RGBA{R: 199, G: 251, B: 161, A: 255}
-	cleanColor := color.RGBA{R: 86, G: 112, B: 194, A: 255}
-
-	if g.state.GetFlags().IsSet(fmt.Sprintf("all_clear:%s", SpecialLevelPoisonedWaterSupply)) {
-		return cleanColor
-	} else {
-		return poisonColor
-	}
-}
-
-func (g *GameInstance) showHelpText() {
-	textColor := common.DarkTextColor
-	var pickupText string
-	if g.configuration.AutoPickup {
-		pickupText = "Press 'g' to pick up items you dropped"
-	} else {
-		pickupText = "Press 'g' to pick up items"
-	}
-	g.uiController.OpenTextWindow([]util.LabelText{
-		{
-			Text:      "Welcome to heaven and hell!",
-			TextColor: textColor,
-		},
-		{Text: "", TextColor: textColor},
-		{
-			Text:      "Use the 'w/a/s/d' keys or Numpad to move around",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Bump into stuff and people to interact with them or attack them",
-			TextColor: textColor,
-		},
-		{Text: "", TextColor: textColor},
-		{
-			Text:      "Press 'q' to quickly fire at the nearest enemy with your ranged weapon",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'f' to aim at a specific enemy with your ranged weapon",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'o' to auto-explore",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'tab' to auto-attack the nearest enemy using your equipped weapon",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'i' to open your inventory",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'c' to show your stats",
-			TextColor: textColor,
-		},
-		{
-			Text:      pickupText,
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'l' to show the last lines of the message log",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'v' to show the quest log",
-			TextColor: textColor,
-		},
-	})
+	g.state.TransitionTo(dest)
+	g.actionBroker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("Travel"), 10))
 }
 
 func (g *GameInstance) onLuciferDeath() {
 	lines := []util.LabelText{
-		common.LabelTextFromStringWithColor("Lucifer", color.White),
-		common.LabelTextFromString(""),
+		util.LabelTextFromStringWithColor("Lucifer", color.White),
+		util.LabelTextFromString(""),
 	}
 
-	luciferLines := append(lines, NewDialogueTextFromFile("lucifer_death.txt")...)
+	luciferLines := append(lines, common.NewDialogueTextFromFile("lucifer_death.txt")...)
 	g.uiController.OpenTextWindow(luciferLines)
 
 	g.spawnItemInTown("true_sight_potion", g.NewPotionOfTrueSight())
-}
-
-func (g *GameInstance) IsStoryModeEnabled() bool {
-	return g.GetWorldState().GetFlags().IsSet(string(FlagStoryModeEnabled))
 }
 
 func (g *GameInstance) sendStatsToWindowClient() {
@@ -3328,7 +1122,16 @@ func (g *GameInstance) sendEquipmentToWindowClient() {
 	}
 	g.serverEquipment.Write(strings.Join(asStrings, "\n"))
 }
+func sortEquipForUI(equip *common.Equipment) []*common.Item {
+	itemList := equip.AllItems()
 
+	slices.SortStableFunc(itemList, func(i, j *common.Item) int {
+		slotNameI := equip.GetSlot(i)
+		slotNameJ := equip.GetSlot(j)
+		return cmp.Compare(slotNameI, slotNameJ)
+	})
+	return itemList
+}
 func (g *GameInstance) SetOnMapChange(onMapChange func()) {
 	g.onMapChange = onMapChange
 }
@@ -3338,197 +1141,19 @@ func (g *GameInstance) ErrLog(errorMessage string) {
 	fmt.Fprintf(os.Stderr, errorMessage+"\n")
 }
 
-func (g *GameInstance) LoadGameData() {
-	itemDefs := make(map[string]ItemDefinition)
-	itemDir := path.Join("assets", "data", "items")
-	enemyDir := path.Join("assets", "data", "enemies")
-	effectsDir := path.Join("assets", "data", "effects")
-
-	join := path.Join(itemDir, "armor.rec")
-	file, _ := os.Open(join)
-	armorDefs := ReadItemDefinitions(file, g.ErrLog)
-	println(fmt.Sprintf("Loaded %d armor definitions", len(armorDefs)))
-	itemDefs = merge(itemDefs, armorDefs)
-	file.Close()
-
-	file, _ = os.Open(path.Join(itemDir, "weapons.rec"))
-	weaponDefs := ReadItemDefinitions(file, g.ErrLog)
-	println(fmt.Sprintf("Loaded %d weapon definitions", len(weaponDefs)))
-	itemDefs = merge(itemDefs, weaponDefs)
-	file.Close()
-
-	file, _ = os.Open(path.Join(itemDir, "throwables.rec"))
-	throwableDefs := ReadItemDefinitions(file, g.ErrLog)
-	println(fmt.Sprintf("Loaded %d throwable definitions", len(throwableDefs)))
-	itemDefs = merge(itemDefs, throwableDefs)
-	file.Close()
-
-	file, _ = os.Open(path.Join(itemDir, "accessory.rec"))
-	accessoryDefs := ReadItemDefinitions(file, g.ErrLog)
-	println(fmt.Sprintf("Loaded %d accessory definitions", len(accessoryDefs)))
-	itemDefs = merge(itemDefs, accessoryDefs)
-	file.Close()
-
-	file, _ = os.Open(path.Join(itemDir, "light.rec"))
-	lightDefs := ReadItemDefinitions(file, g.ErrLog)
-	println(fmt.Sprintf("Loaded %d light definitions", len(lightDefs)))
-	itemDefs = merge(itemDefs, lightDefs)
-	file.Close()
-
-	file, _ = os.Open(path.Join(itemDir, "potions.rec"))
-	potionDefs := ReadItemDefinitions(file, g.ErrLog)
-	println(fmt.Sprintf("Loaded %d potion definitions", len(potionDefs)))
-	itemDefs = merge(itemDefs, potionDefs)
-	file.Close()
-
-	file, _ = os.Open(path.Join(itemDir, "scrolls.rec"))
-	scrollDefs := ReadItemDefinitions(file, g.ErrLog)
-	println(fmt.Sprintf("Loaded %d scroll definitions", len(scrollDefs)))
-	itemDefs = merge(itemDefs, scrollDefs)
-	file.Close()
-
-	g.itemDefinitions = itemDefs
-
-	file, _ = os.Open(path.Join(enemyDir, "enemies.rec"))
-	enemyDefs := ReadEnemyDefinitions(file, g.ErrLog)
-	println(fmt.Sprintf("Loaded %d enemy definitions", len(enemyDefs)))
-	file.Close()
-
-	g.enemyDefinitions = enemyDefs
-
-	file, _ = os.Open(path.Join(effectsDir, "untargeted.rec"))
-	untargetedDefs := ReadUntargetedDefinitions(file, g.ErrLog)
-	println(fmt.Sprintf("Loaded %d untargeted effect definitions", len(untargetedDefs)))
-	file.Close()
-
-	g.untargetedDefinitions = untargetedDefs
-
-	file, _ = os.Open(path.Join(effectsDir, "targeted.rec"))
-	targetedDefs := ReadTargetedDefinitions(file, g.ErrLog)
-	println(fmt.Sprintf("Loaded %d targeted effect definitions", len(targetedDefs)))
-	file.Close()
-
-	g.targetedDefinitions = targetedDefs
-
-	file, _ = os.Open(path.Join("assets", "data", "stores.rec"))
-	vendorDefs := ReadVendorDefinitions(file)
-	println(fmt.Sprintf("Loaded %d store definitions", len(vendorDefs)))
-	file.Close()
-
-	g.vendorDefinitions = vendorDefs
-
-	g.validateDefinitions()
+func (g *GameInstance) GetGameData() defs.DataContainer {
+	return g.dataDefinitions
 }
 
-func (g *GameInstance) validateDefinitions() {
-	modifiersAvailable := g.GetAllModifiers()
-	hitZonesAvailable := g.GetAllHitZones()
-	hitEffectsAvailable := g.GetAllHitEffects()
-	targetRulesAvailable := g.GetAllTargetingRules()
-	untargetedEffectsAvailable := g.GetAllUntargetedEffects()
-
-	for _, itemDef := range g.itemDefinitions {
-		if !itemDef.InventoryCategory.IsValid() {
-			g.ErrLog(fmt.Sprintf("Item %s has invalid category %d", itemDef.Name, itemDef.InventoryCategory))
-		}
-		if _, targetedExists := g.targetedDefinitions[itemDef.TargetedAction]; itemDef.TargetedAction != "" && !targetedExists {
-			g.ErrLog(fmt.Sprintf("Item %s has invalid targeted action %s", itemDef.Name, itemDef.TargetedAction))
-		}
-		if _, untargetedExists := g.untargetedDefinitions[itemDef.UntargetedAction]; itemDef.UntargetedAction != "" && !untargetedExists {
-			g.ErrLog(fmt.Sprintf("Item %s has invalid untargeted action %s", itemDef.Name, itemDef.UntargetedAction))
-		}
-		for _, modifier := range itemDef.Modifiers {
-			if util.LooksLikeAFunction(modifier) {
-				modifier, _ = util.GetNameAndArgs(modifier)
-			}
-			if _, exists := modifiersAvailable[modifier]; !exists {
-				g.ErrLog(fmt.Sprintf("Item %s has invalid modifier %s", itemDef.Name, modifier))
-			}
-		}
-		if itemDef.IsThrow() && itemDef.Throw.IsValid() {
-			hitZone := itemDef.Throw.HitZone
-			if util.LooksLikeAFunction(hitZone) {
-				hitZone, _ = util.GetNameAndArgs(hitZone)
-			}
-			if _, exists := hitZonesAvailable[hitZone]; hitZone != "" && !exists {
-				g.ErrLog(fmt.Sprintf("Item %s has invalid throw hit zone %s", itemDef.Name, itemDef.Throw.HitZone))
-			}
-			hitEffect := itemDef.Throw.OnHitEffect
-			if util.LooksLikeAFunction(hitEffect) {
-				hitEffect, _ = util.GetNameAndArgs(hitEffect)
-			}
-			if _, exists := hitEffectsAvailable[hitEffect]; hitEffect != "" && !exists {
-				g.ErrLog(fmt.Sprintf("Item %s has invalid throw hit effect %s", itemDef.Name, itemDef.Throw.OnHitEffect))
-			}
-		}
-	}
-
-	for _, targetedDef := range g.targetedDefinitions {
-		hitZone := targetedDef.HitZone
-		if util.LooksLikeAFunction(hitZone) {
-			hitZone, _ = util.GetNameAndArgs(hitZone)
-		}
-		if _, exists := hitZonesAvailable[hitZone]; !exists {
-			g.ErrLog(fmt.Sprintf("Targeted effect %s has invalid hit zone %s", targetedDef.Name, hitZone))
-		}
-		hitEffect := targetedDef.OnHitEffect
-		if util.LooksLikeAFunction(hitEffect) {
-			hitEffect, _ = util.GetNameAndArgs(hitEffect)
-		}
-		if _, exists := hitEffectsAvailable[hitEffect]; !exists {
-			g.ErrLog(fmt.Sprintf("Targeted effect %s has invalid hit effect %s", targetedDef.Name, hitEffect))
-		}
-		if _, exists := targetRulesAvailable[targetedDef.Targeting]; !exists {
-			g.ErrLog(fmt.Sprintf("Targeted effect %s has invalid target rule %s", targetedDef.Name, targetedDef.Targeting))
-		}
-	}
-
-	for _, untargetedDef := range g.untargetedDefinitions {
-		if _, exists := untargetedEffectsAvailable[untargetedDef.InternalName]; !exists {
-			g.ErrLog(fmt.Sprintf("Untargeted effect %s is unknown", untargetedDef.InternalName))
-		}
-	}
-
-	for _, enemyDef := range g.enemyDefinitions {
-		for _, itemName := range enemyDef.Equipment {
-			if _, exists := g.itemDefinitions[itemName]; !exists {
-				g.ErrLog(fmt.Sprintf("Enemy %s has invalid equipment %s", enemyDef.Name, itemName))
-			}
-		}
-		for _, targetedName := range enemyDef.TargetedSkills {
-			if _, exists := g.targetedDefinitions[targetedName]; !exists {
-				g.ErrLog(fmt.Sprintf("Enemy %s has invalid targeted skill %s", enemyDef.Name, targetedName))
-			}
-		}
-		for _, untargetedName := range enemyDef.UntargetedSkills {
-			if _, exists := g.untargetedDefinitions[untargetedName]; !exists {
-				g.ErrLog(fmt.Sprintf("Enemy %s has invalid untargeted skill %s", enemyDef.Name, untargetedName))
-			}
-		}
-	}
-
-	for _, vendorDef := range g.vendorDefinitions {
-		for _, itemName := range vendorDef.Always {
-			if _, exists := g.itemDefinitions[itemName]; !exists {
-				g.ErrLog(fmt.Sprintf("Store %s has invalid always item %s", vendorDef.InternalName, itemName))
-			}
-		}
-		for _, itemName := range vendorDef.Sometimes {
-			if _, exists := g.itemDefinitions[itemName]; !exists {
-				g.ErrLog(fmt.Sprintf("Store %s has invalid sometimes item %s", vendorDef.InternalName, itemName))
-			}
-		}
-	}
-}
-func (g *GameInstance) GenerateLoot(dungeonLevel int, count int) []*GameItem {
-	var result []*GameItem
+func (g *GameInstance) GenerateLoot(dungeonLevel int, count int) []*common.Item {
+	var result []*common.Item
 	for i := 0; i < count; i++ {
-		result = append(result, g.generateLoot(dungeonLevel))
+		result = append(result, g.factory.GenerateLoot(dungeonLevel))
 	}
 	return result
 }
 
-func (g *GameInstance) getVendorInventoryFromDefinition(definition VendorDefinition) []common.Item {
+func (g *GameInstance) getVendorInventoryFromDefinition(definition defs.VendorDefinition) []*common.Item {
 	itemsNeeded := definition.ItemCount.LinearRandom()
 	sometimesCount := 0
 	alwaysCount := 0
@@ -3539,14 +1164,14 @@ func (g *GameInstance) getVendorInventoryFromDefinition(definition VendorDefinit
 		alwaysCount = itemsNeeded - sometimesCount
 	}
 
-	var result []common.Item
+	var result []*common.Item
 
 	for i := 0; i < alwaysCount; i++ {
 		// choose a random item
 		randomIndex := g.randomSource.Intn(len(definition.Always))
 		itemName := definition.Always[randomIndex]
 		dungeonLevel := g.randomSource.Intn(4) + 1
-		item := g.NewItemFromDefinitionName(itemName, dungeonLevel)
+		item := g.factory.NewItemFromDefinitionName(itemName, dungeonLevel)
 		result = append(result, item)
 	}
 
@@ -3555,55 +1180,31 @@ func (g *GameInstance) getVendorInventoryFromDefinition(definition VendorDefinit
 		randomIndex := g.randomSource.Intn(len(definition.Sometimes))
 		itemName := definition.Sometimes[randomIndex]
 		dungeonLevel := g.randomSource.Intn(4) + 1
-		item := g.NewItemFromDefinitionName(itemName, dungeonLevel)
+		item := g.factory.NewItemFromDefinitionName(itemName, dungeonLevel)
 		result = append(result, item)
 	}
 
 	return result
 }
 
-func merge(defs map[string]ItemDefinition, other map[string]ItemDefinition) map[string]ItemDefinition {
-	for key, value := range other {
-		if _, ok := defs[key]; ok {
-			println("duplicate key", key)
-		}
-		defs[key] = value
-	}
-	return defs
+func (g *GameInstance) GetActions() common.PlayerActions {
+	return g.actions
 }
 
-func OneTargetTile(origin, target geometry.Point) []geometry.Point {
-	return []geometry.Point{target}
+func (g *GameInstance) PlayerMessage(message string) {
+	//println(text)
+	rawText := common.RemoveColorCodes(message)
+	if g.logHook != nil {
+		g.logHook(rawText)
+	}
+	if len(g.logBuffer) > 200 {
+		g.logBuffer = g.logBuffer[1:]
+	}
+	g.logBuffer = append(g.logBuffer, message)
+
+	g.GetUserInterface().ShowLogMessage(message)
 }
-func toList(blocking map[geometry.Point]int) []geometry.Point {
-	list := make([]geometry.Point, 0)
-	for pos := range blocking {
-		list = append(list, pos)
-	}
-	return list
-}
-func MapTileFromLDTK(tileSet *ldtk_go.Tileset, layer *ldtk_go.Layer, tile *ldtk_go.Tile) (geometry.Point, gridmap.Tile) {
-	posX, posY := layer.ToGridPosition(tile.Position[0], tile.Position[1])
-	pos := geometry.Point{X: posX, Y: posY}
-	enums := tileSet.EnumsForTile(tile.ID)
 
-	walkable := !enums.Contains("IsBlockingMovement")
-	transparent := !enums.Contains("IsBlockingView")
-	isDamaging := enums.Contains("IsDamaging")
-	isWater := enums.Contains("IsWater")
-	specialTile := gridmap.SpecialTileNone
-
-	if isWater {
-		specialTile = gridmap.SpecialTileWater
-	} else if isDamaging {
-		specialTile = gridmap.SpecialTileDamaging
-	}
-
-	tileType := gridmap.Tile{
-		DefinedIcon:   int32(tile.ID),
-		IsWalkable:    walkable,
-		IsTransparent: transparent,
-		Special:       specialTile,
-	}
-	return pos, tileType
+func (g *GameInstance) SetLogHook(hook func(string)) {
+	g.logHook = hook
 }

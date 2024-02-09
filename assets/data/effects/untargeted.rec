@@ -6,79 +6,96 @@ icon: 194
 dlvl: 1
 name: Clone Self
 activation_condition: can_replicate
+allowed_usage: wand | shrine
 
 internal_name: heal_health_mana_full
 icon: 333
 dlvl: 1
 name: Heal Health and Mana
+allowed_usage: wand | shrine
 
 internal_name: heal_health
 icon: 332
 dlvl: 1
 name: Heal Health
+default_args: 20
+allowed_usage: wand | shrine
 
 internal_name: apply_berserk_self
 icon: 135
 dlvl: 1
 name: Berserk
+default_args: 4-6 | 5
+allowed_usage: wand | shrine
 
-internal_name: apply_confuse_self
+internal_name: apply_status_self
 icon: 30
 dlvl: 1
-name: Confuse
+name: Apply Status Effect
 
 internal_name: heal_mana
 icon: 329
 dlvl: 1
 name: Heal Mana
+default_args: 20
+allowed_usage: wand | shrine
 
 internal_name: random_near_teleport
 icon: 194
 dlvl: 1
 name: Phase Door
+default_args: 7-14
+allowed_usage: wand | shrine
 
 internal_name: buff_damage
 icon: 114
 dlvl: 1
 name: Buff Damage
+default_args: 4-6 | 5
+allowed_usage: wand | shrine
 
 internal_name: buff_speed
 icon: 167
 dlvl: 1
 name: Buff Speed
+default_args: 4-6 | 5
+allowed_usage: wand | shrine
 
 internal_name: recall
 icon: 223
 dlvl: 1
 name: Recall
+allowed_usage: wand | shrine
 
 internal_name: buff_armor
 icon: 116
 dlvl: 1
 name: Bless
+default_args: 4-6 | 5
+allowed_usage: wand | shrine
 
 internal_name: enchant_weapon
 icon: 139
 dlvl: 1
 name: Enchant Weapon
+allowed_usage: wand | shrine
 
 internal_name: enchant_armor
 icon: 139
 dlvl: 1
 name: Enchant Armor
+allowed_usage: wand | shrine
 
 internal_name: multi_shot
 icon: 44
 dlvl: 1
 name: Multi Shot
+default_args: 3
+allowed_usage: wand | shrine
 
 internal_name: telefrag
 icon: 223
 dlvl: 1
 name: Telefrag
-
-internal_name: read_message
-icon: 111
-dlvl: 1
-name: Read Message
-
+default_args: 7-14
+allowed_usage: wand | shrine

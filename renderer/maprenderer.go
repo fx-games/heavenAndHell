@@ -14,6 +14,10 @@ type MapRenderer struct {
 	miniMapImage    *ebiten.Image
 }
 
+func (r *MapRenderer) MeasureString(text string) (float64, float64) {
+	return r.gridRenderer.MeasureString(text)
+}
+
 func NewMapRenderer(gridRenderer *TileRenderer, mapWindow *MapWindow) *MapRenderer {
 	m := &MapRenderer{
 		mapWindow:    mapWindow,
@@ -62,23 +66,40 @@ func (r *MapRenderer) Draw(tick uint64) {
 
 	for yStep := 0; yStep < tileCountY; yStep++ {
 		for xStep := 0; xStep < tileCountX; xStep++ {
-			x := float64(drawOffsetFromEdgeX) + float64(xStep)*float64(scaledTileSizeX)
-			y := float64(drawOffsetFromEdgeY) + float64(yStep)*float64(scaledTileSizeY)
-			drawInfos := r.mapWindow.GetTextureIndexAt(firstTileX+xStep, firstTileY+yStep, tick)
+			mapPosX := firstTileX + xStep
+			mapPosY := firstTileY + yStep
+			drawScreenX := float64(drawOffsetFromEdgeX) + float64(xStep)*float64(scaledTileSizeX)
+			drawScreenY := float64(drawOffsetFromEdgeY) + float64(yStep)*float64(scaledTileSizeY)
+			drawInfos := r.mapWindow.GetTextureIndexAt(mapPosX, mapPosY, tick)
 			for _, drawInfo := range drawInfos {
-				r.gridRenderer.DrawDefaultScaleTile(x, y, drawInfo.Atlas, drawInfo.Icon, drawInfo.Color)
+				r.gridRenderer.DrawDefaultScaleTile(drawScreenX, drawScreenY, drawInfo.Atlas, drawInfo.Icon, drawInfo.Color)
 			}
 		}
 	}
 }
-func (r *MapRenderer) DrawOnMap(mapPos geometry.Point, atlas TextureAtlas, icon int32, tintColor color.Color) {
+func (r *MapRenderer) DrawOnMapWithAtlas(mapPos geometry.Point, atlas TextureAtlas, icon int32, tintColor color.Color) {
 	if !r.mapWindow.IsMapCellVisible(mapPos) {
 		return
 	}
 	x, y := r.mapToScreen(mapPos)
 	r.gridRenderer.DrawDefaultScaleTile(x, y, atlas, icon, tintColor)
 }
-func (r *MapRenderer) DrawOnMapF(mapPos geometry.PointF, atlas TextureAtlas, icon int32, tintColor color.Color) {
+
+func (r *MapRenderer) DrawOnMap(mapPos geometry.Point, icon int32, tintColor color.Color) {
+	if !r.mapWindow.IsMapCellVisible(mapPos) {
+		return
+	}
+	x, y := r.mapToScreen(mapPos)
+	r.gridRenderer.DrawDefaultScaleTile(x, y, r.gridRenderer.defaultAtlas, icon, tintColor)
+}
+func (r *MapRenderer) DrawOnMapF(mapPos geometry.PointF, icon int32, tintColor color.Color) {
+	if !r.mapWindow.IsMapCellVisible(mapPos.ToPoint()) { // could be too rough..
+		return
+	}
+	x, y := r.mapFloatToScreen(mapPos)
+	r.gridRenderer.DrawDefaultScaleTile(x, y, r.gridRenderer.defaultAtlas, icon, tintColor)
+}
+func (r *MapRenderer) DrawOnMapFWithAtlas(mapPos geometry.PointF, atlas TextureAtlas, icon int32, tintColor color.Color) {
 	if !r.mapWindow.IsMapCellVisible(mapPos.ToPoint()) { // could be too rough..
 		return
 	}

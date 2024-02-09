@@ -1,6 +1,6 @@
 package util
 
 type RawMessage struct {
-    MsgType int
-    Msg     []byte
+	MsgType int
+	Msg     []byte
 }

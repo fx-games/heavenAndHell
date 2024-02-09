@@ -44,6 +44,7 @@ type Player struct {
 	files           fs.ReadDirFS
 	disablePlayback bool
 }
+
 func (ap *Player) SetDisablePlayback(disable bool) {
 	ap.disablePlayback = disable
 }

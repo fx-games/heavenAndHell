@@ -9,6 +9,7 @@ import (
 	"image/color"
 	"regexp"
 	"rpg/geometry"
+	"rpg/util"
 	"strconv"
 	"strings"
 )
@@ -23,8 +24,8 @@ import (
 
 type TileRenderer struct {
 	op          *ebiten.DrawImageOptions
-	deviceScale func() float64
-	tileScale   func() float64
+	deviceScale float64
+	tileScale   float64
 	fontScale   float64
 	font        BitmapFont
 
@@ -59,18 +60,18 @@ func (g *TileRenderer) SetDefaultColors(borderColor, fillColor color.Color) {
 func (g *TileRenderer) MeasureString(textToMeasure string) (float64, float64) {
 	_, advance := font.BoundString(g.ttfFont, textToMeasure)
 	height := g.ttfFont.Metrics().Ascent + g.ttfFont.Metrics().Descent
-	//return float64((bounds.Max.X - bounds.Min.X).Round()) / g.deviceScale(), float64((bounds.Max.Y - bounds.Min.Y).Round()) / g.deviceScale()
-	return float64((advance).Ceil()) / g.deviceScale(), float64((height).Round()) / g.deviceScale()
+	//return float64((bounds.Max.X - bounds.Min.X).Round()) / g.deviceScale, float64((bounds.Max.Y - bounds.Min.Y).Round()) / g.deviceScale
+	return float64((advance).Ceil()) / g.deviceScale, float64((height).Round()) / g.deviceScale
 }
 func (g *TileRenderer) SetDefaultAtlas(atlas TextureAtlas) {
 	g.defaultAtlas = atlas
 }
 
-func NewTileRenderer(deviceScaleFunc func() float64, tileScaleFunc func() float64) *TileRenderer {
+func NewTileRenderer(tileScale float64) *TileRenderer {
 	return &TileRenderer{
 		op:          &ebiten.DrawImageOptions{},
-		tileScale:   tileScaleFunc,
-		deviceScale: deviceScaleFunc,
+		tileScale:   tileScale,
+		deviceScale: 1.0,
 		fontScale:   1,
 		globalScaleColor: [4]float32{
 			1, 1, 1, 1,
@@ -80,14 +81,12 @@ func NewTileRenderer(deviceScaleFunc func() float64, tileScaleFunc func() float6
 func (g *TileRenderer) SetWhiteTile(index int32) {
 	g.whiteTile = index
 }
-func (g *TileRenderer) SetTileScale(scale func() float64) {
+func (g *TileRenderer) SetTileScale(scale float64) {
 	g.tileScale = scale
 }
-
-func (g *TileRenderer) SetDeviceScale(scale func() float64) {
+func (g *TileRenderer) SetDeviceScale(scale float64) {
 	g.deviceScale = scale
 }
-
 func (g *TileRenderer) SetFontScale(scale float64) {
 	g.fontScale = scale
 }
@@ -97,13 +96,13 @@ func (g *TileRenderer) SetFont(font BitmapFont) {
 }
 func (g *TileRenderer) DrawDefaultBorder(topLeftScreen geometry.Point, size geometry.Point) {
 
-	//scale := g.deviceScale()
+	//scale := g.deviceScale
 
-	drawX := float64(topLeftScreen.X) * g.deviceScale()
-	drawY := float64(topLeftScreen.Y) * g.deviceScale()
+	drawX := float64(topLeftScreen.X) * g.deviceScale
+	drawY := float64(topLeftScreen.Y) * g.deviceScale
 
-	targetWidth := float64(size.X) * g.deviceScale()
-	targetHeight := float64(size.Y) * g.deviceScale()
+	targetWidth := float64(size.X) * g.deviceScale
+	targetHeight := float64(size.Y) * g.deviceScale
 
 	tileSize := g.defaultAtlas.GetTileSize()
 
@@ -113,7 +112,7 @@ func (g *TileRenderer) DrawDefaultBorder(topLeftScreen geometry.Point, size geom
 	g.op.ColorScale.Reset()
 	g.op.ColorScale.ScaleWithColor(g.defaultBorderColor)
 	g.op.GeoM.Reset()
-	borderSize := 1 * g.deviceScale()
+	borderSize := 1 * g.deviceScale
 	widthWithBorder := targetWidth + (borderSize * 2)
 	heightWithBorder := targetHeight + (borderSize * 2)
 	scaleWithBorderX := widthWithBorder / float64(tileSize.X)
@@ -131,14 +130,14 @@ func (g *TileRenderer) DrawDefaultBorder(topLeftScreen geometry.Point, size geom
 	g.currentRenderTarget.DrawImage(ExtractSubImageFromAtlas(g.whiteTile, g.defaultAtlas), g.op)
 }
 func (g *TileRenderer) DrawImageOnScreen(screenX int, screenY int, size geometry.Point, image *ebiten.Image) {
-	drawX := float64(screenX) * g.deviceScale()
-	drawY := float64(screenY) * g.deviceScale()
+	drawX := float64(screenX) * g.deviceScale
+	drawY := float64(screenY) * g.deviceScale
 
 	targetWidth := float64(size.X)
 	targetHeight := float64(size.Y)
 
-	imgSizeX := float64(image.Bounds().Dx()) / g.deviceScale()
-	imgSizeY := float64(image.Bounds().Dy()) / g.deviceScale()
+	imgSizeX := float64(image.Bounds().Dx()) / g.deviceScale
+	imgSizeY := float64(image.Bounds().Dy()) / g.deviceScale
 
 	scaleX := targetWidth / float64(imgSizeX)
 	scaleY := targetHeight / float64(imgSizeY)
@@ -153,13 +152,13 @@ func (g *TileRenderer) DrawImageOnScreen(screenX int, screenY int, size geometry
 
 func (g *TileRenderer) DrawColoredBorder(topLeftScreen geometry.Point, size geometry.Point, fillColor, borderColor color.Color) {
 
-	//scale := g.deviceScale()
+	//scale := g.deviceScale
 
-	drawX := float64(topLeftScreen.X) * g.deviceScale()
-	drawY := float64(topLeftScreen.Y) * g.deviceScale()
+	drawX := float64(topLeftScreen.X) * g.deviceScale
+	drawY := float64(topLeftScreen.Y) * g.deviceScale
 
-	targetWidth := float64(size.X) * g.deviceScale()
-	targetHeight := float64(size.Y) * g.deviceScale()
+	targetWidth := float64(size.X) * g.deviceScale
+	targetHeight := float64(size.Y) * g.deviceScale
 
 	tileSize := g.defaultAtlas.GetTileSize()
 
@@ -168,7 +167,7 @@ func (g *TileRenderer) DrawColoredBorder(topLeftScreen geometry.Point, size geom
 
 	g.op.ColorScale.Reset()
 	g.op.ColorScale.ScaleWithColor(borderColor)
-	borderSize := 1 * g.deviceScale()
+	borderSize := 1 * g.deviceScale
 	widthWithBorder := targetWidth + (borderSize * 2)
 	heightWithBorder := targetHeight + (borderSize * 2)
 	scaleWithBorderX := widthWithBorder / float64(tileSize.X)
@@ -187,11 +186,11 @@ func (g *TileRenderer) DrawColoredBorder(topLeftScreen geometry.Point, size geom
 	g.currentRenderTarget.DrawImage(ExtractSubImageFromAtlas(g.whiteTile, g.defaultAtlas), g.op)
 }
 func (g *TileRenderer) DrawColoredRect(topLeftScreen geometry.Point, size geometry.Point, fillColor color.Color) {
-	drawX := float64(topLeftScreen.X) * g.deviceScale()
-	drawY := float64(topLeftScreen.Y) * g.deviceScale()
+	drawX := float64(topLeftScreen.X) * g.deviceScale
+	drawY := float64(topLeftScreen.Y) * g.deviceScale
 
-	targetWidth := float64(size.X) * g.deviceScale()
-	targetHeight := float64(size.Y) * g.deviceScale()
+	targetWidth := float64(size.X) * g.deviceScale
+	targetHeight := float64(size.Y) * g.deviceScale
 
 	tileSize := g.defaultAtlas.GetTileSize()
 
@@ -208,29 +207,29 @@ func (g *TileRenderer) DrawColoredRect(topLeftScreen geometry.Point, size geomet
 
 func (g *TileRenderer) DrawStringOnGrid(gridX int, gridY int, text string, color color.Color) {
 	tileSize := g.font.atlas.GetTileSize()
-	drawX := float64(gridX) * float64(tileSize.X) * g.deviceScale() * g.fontScale
-	drawY := float64(gridY) * float64(tileSize.Y) * g.deviceScale() * g.fontScale
+	drawX := float64(gridX) * float64(tileSize.X) * g.deviceScale * g.fontScale
+	drawY := float64(gridY) * float64(tileSize.Y) * g.deviceScale * g.fontScale
 	g.DrawString(int(drawX), int(drawY), text, color)
 }
 
 func (g *TileRenderer) DrawCharOnGrid(gridX int, gridY int, icon rune, color color.Color) {
 	tileSize := g.font.atlas.GetTileSize()
-	drawX := float64(gridX) * float64(tileSize.X) * g.deviceScale() * g.fontScale
-	drawY := float64(gridY) * float64(tileSize.Y) * g.deviceScale() * g.fontScale
+	drawX := float64(gridX) * float64(tileSize.X) * g.deviceScale * g.fontScale
+	drawY := float64(gridY) * float64(tileSize.Y) * g.deviceScale * g.fontScale
 	g.DrawDefaultScaleCharOnScreen(drawX, drawY, icon, color)
 }
 
 func (g *TileRenderer) DrawOnGrid(gridX int, gridY int, icon int32) {
 	tileSize := g.defaultAtlas.GetTileSize()
-	drawX := float64(gridX) * float64(tileSize.X) * g.deviceScale() * g.tileScale()
-	drawY := float64(gridY) * float64(tileSize.Y) * g.deviceScale() * g.tileScale()
+	drawX := float64(gridX) * float64(tileSize.X) * g.deviceScale * g.tileScale
+	drawY := float64(gridY) * float64(tileSize.Y) * g.deviceScale * g.tileScale
 	g.DrawDefaultScaleTile(drawX, drawY, g.defaultAtlas, icon, color.White)
 }
 
 func (g *TileRenderer) DrawOnFontGrid(gridX int, gridY int, icon int32) {
 	tileSize := g.font.atlas.GetTileSize()
-	drawX := float64(gridX) * float64(tileSize.X) * g.deviceScale() * g.fontScale
-	drawY := float64(gridY) * float64(tileSize.Y) * g.deviceScale() * g.fontScale
+	drawX := float64(gridX) * float64(tileSize.X) * g.deviceScale * g.fontScale
+	drawY := float64(gridY) * float64(tileSize.Y) * g.deviceScale * g.fontScale
 	g.DrawTileWithDefaultOrientation(drawX, drawY, g.defaultAtlas, icon, geometry.PointF{X: g.fontScale, Y: g.fontScale}, color.White)
 }
 
@@ -243,18 +242,18 @@ func (g *TileRenderer) DrawOnScreenWithScale(screenX int, screenY int, icon int3
 }
 
 func (g *TileRenderer) DrawDefaultScaleTile(screenX float64, screenY float64, atlas TextureAtlas, index int32, tintColor color.Color) {
-	g.DrawTileWithDefaultOrientation(screenX, screenY, atlas, index, geometry.PointF{X: g.tileScale(), Y: g.tileScale()}, tintColor)
+	g.DrawTileWithDefaultOrientation(screenX, screenY, atlas, index, geometry.PointF{X: g.tileScale, Y: g.tileScale}, tintColor)
 }
 func (g *TileRenderer) DrawDefaultScaleTileWithFlip(screenX float64, screenY float64, atlas TextureAtlas, index int32, tintColor color.Color, flipX bool) {
-	g.DrawTile(screenX, screenY, atlas, index, geometry.PointF{X: g.tileScale(), Y: g.tileScale()}, tintColor, flipX)
+	g.DrawTile(screenX, screenY, atlas, index, geometry.PointF{X: g.tileScale, Y: g.tileScale}, tintColor, flipX)
 }
 
 func (g *TileRenderer) DrawScaledTile(screenX float64, screenY float64, atlas TextureAtlas, index int32, scale geometry.PointF, tintColor color.Color) {
-	g.DrawTileWithDefaultOrientation(screenX, screenY, atlas, index, geometry.PointF{X: g.tileScale() * scale.X, Y: g.tileScale() * scale.Y}, tintColor)
+	g.DrawTileWithDefaultOrientation(screenX, screenY, atlas, index, geometry.PointF{X: g.tileScale * scale.X, Y: g.tileScale * scale.Y}, tintColor)
 }
 
 func (g *TileRenderer) DrawScaledTileWithFlip(screenX float64, screenY float64, atlas TextureAtlas, index int32, scale geometry.PointF, tintColor color.Color, flipX bool) {
-	g.DrawTile(screenX, screenY, atlas, index, geometry.PointF{X: g.tileScale() * scale.X, Y: g.tileScale() * scale.Y}, tintColor, flipX)
+	g.DrawTile(screenX, screenY, atlas, index, geometry.PointF{X: g.tileScale * scale.X, Y: g.tileScale * scale.Y}, tintColor, flipX)
 }
 func (g *TileRenderer) DrawTileWithDefaultOrientation(screenX float64, screenY float64, atlas TextureAtlas, index int32, scale geometry.PointF, tintColor color.Color) {
 	g.DrawTile(screenX, screenY, atlas, index, scale, tintColor, false)
@@ -285,40 +284,32 @@ func (g *TileRenderer) DrawTile(screenX float64, screenY float64, atlas TextureA
 	g.op.ColorScale.Scale(finalR, finalG, finalB, finalA)
 
 	g.op.GeoM.Reset()
-	tileScale := scale.Mul(g.deviceScale())
-	tx := screenX * g.deviceScale()
+	tileScale := scale.Mul(g.deviceScale)
+	tx := screenX * g.deviceScale
 	if flipX {
 		g.op.GeoM.Scale(-tileScale.X, tileScale.Y)
 		tx += float64(atlas.tileSizeX) * tileScale.X
 	} else {
 		g.op.GeoM.Scale(tileScale.X, tileScale.Y)
 	}
-	g.op.GeoM.Translate(tx, screenY*g.deviceScale())
+	g.op.GeoM.Translate(tx, screenY*g.deviceScale)
 	g.currentRenderTarget.DrawImage(ExtractSubImageFromAtlas(index, atlas), g.op)
 }
 func (g *TileRenderer) DrawDefaultScaleCharOnScreen(screenX, screenY float64, char rune, textColor color.Color) {
 	g.DrawCharOnScreen(int(screenX), int(screenY), char, g.fontScale, textColor)
 }
 func (g *TileRenderer) DrawTTFOnScreen(screenX, screenY float64, textToDraw string, textColor color.Color) {
-	screenX = screenX * g.deviceScale()
-	screenY = screenY * g.deviceScale()
+	screenX = screenX * g.deviceScale
+	screenY = screenY * g.deviceScale
 	text.Draw(g.currentRenderTarget, textToDraw, g.ttfFont, int(screenX), int(screenY), textColor)
 }
 
-type ColoredTextPart struct {
-	Text    string
-	Color   color.Color
-	xOffset float64
-}
-
-func (g *TileRenderer) DrawTTFOnScreenWithColorCodes(screenX, screenY float64, textToDraw string) {
+func (g *TileRenderer) DrawTTFOnScreenWithColorCodes(screenX, screenY float64, textToDraw []util.ColoredTextPart) {
 	drawOptions := &ebiten.DrawImageOptions{}
-	screenXF := screenX * g.deviceScale()
-	screenYF := screenY * g.deviceScale()
-	var textParts []ColoredTextPart
-	textParts = g.parseColorCodedText(textToDraw)
-	for _, textPart := range textParts {
-		offset := textPart.xOffset * (g.deviceScale())
+	screenXF := screenX * g.deviceScale
+	screenYF := screenY * g.deviceScale
+	for _, textPart := range textToDraw {
+		offset := textPart.XOffset * (g.deviceScale)
 		drawOptions.GeoM.Reset()
 		drawOptions.GeoM.Translate(screenXF+offset, screenYF)
 		drawOptions.ColorScale.Reset()
@@ -337,7 +328,7 @@ func (g *TileRenderer) DrawCharOnScreen(screenX, screenY int, char rune, scale f
 	if !ok {
 		return
 	}
-	fontScale := g.deviceScale() * scale
+	fontScale := g.deviceScale * scale
 	g.op.ColorScale.Reset()
 	//g.op.ColorScale.ScaleWithColor(textColor)
 	_, _, _, alphaByte := textColor.RGBA()
@@ -351,7 +342,7 @@ func (g *TileRenderer) DrawCharOnScreen(screenX, screenY int, char rune, scale f
 }
 
 func (g *TileRenderer) DrawString(screenX int, screenY int, text string, color color.Color) {
-	tileSizeX := float64(g.font.atlas.tileSizeX) * g.fontScale * g.deviceScale()
+	tileSizeX := float64(g.font.atlas.tileSizeX) * g.fontScale * g.deviceScale
 
 	for i, char := range text {
 		g.DrawDefaultScaleCharOnScreen(float64(screenX)+float64(i)*tileSizeX, float64(screenY), char, color)
@@ -359,7 +350,7 @@ func (g *TileRenderer) DrawString(screenX int, screenY int, text string, color c
 }
 
 func (g *TileRenderer) DrawMultiString(screenX int, screenY int, text []string, color color.Color) {
-	tileSizeY := float64(g.font.atlas.tileSizeY) * g.fontScale * g.deviceScale()
+	tileSizeY := float64(g.font.atlas.tileSizeY) * g.fontScale * g.deviceScale
 
 	for i, line := range text {
 		g.DrawString(screenX, screenY+int(float64(i)*tileSizeY), line, color)
@@ -374,10 +365,10 @@ func (g *TileRenderer) GetFontGridSize() geometry.Point {
 	return g.font.atlas.GetTileSize()
 }
 
-func (g *TileRenderer) parseColorCodedText(draw string) []ColoredTextPart {
+func (g *TileRenderer) ParseColorCodedText(draw string) []util.ColoredTextPart {
 	advance, _ := g.ttfFont.GlyphAdvance(' ')
-	advanceWidth := float64(advance.Round()) / g.deviceScale()
-	var textParts []ColoredTextPart
+	advanceWidth := float64(advance.Round()) / g.deviceScale
+	var textParts []util.ColoredTextPart
 	// color codes look like this [:red] [:blue] [:green] [:yellow] [:white] [:24,54,222]
 	regexPattern := `\[:([\w,]+)\]`
 	rp, _ := regexp.Compile(regexPattern)
@@ -398,12 +389,13 @@ func (g *TileRenderer) parseColorCodedText(draw string) []ColoredTextPart {
 		if textPart == "" {
 			continue
 		}
-		tWidth, _ := g.MeasureString(textPart)
+		tWidth, tHeight := g.MeasureString(textPart)
 		matchingColor := g.toColor(colorCodes, i)
-		textParts = append(textParts, ColoredTextPart{
+		textParts = append(textParts, util.ColoredTextPart{
 			Text:    textPart,
 			Color:   matchingColor,
-			xOffset: xOffset,
+			XOffset: xOffset,
+			Height:  tHeight,
 		})
 		xOffset += tWidth + advanceWidth
 	}
@@ -426,7 +418,7 @@ func (g *TileRenderer) toColor(matches [][]string, index int) color.Color {
 }
 
 func (g *TileRenderer) DebugLine(start geometry.Point, end geometry.Point) {
-	scale := float32(g.deviceScale())
+	scale := float32(g.deviceScale)
 	vector.StrokeLine(g.currentRenderTarget, float32(start.X)*scale, float32(start.Y)*scale, float32(end.X)*scale, float32(end.Y)*scale, 10, color.White, false)
 }
 

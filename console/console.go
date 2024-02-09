@@ -1,10 +1,10 @@
 package console
 
 import (
-    "github.com/gdamore/tcell"
-    "log"
-    "rpg/game"
-    "rpg/geometry"
+	"github.com/gdamore/tcell"
+	"log"
+	"rpg/game"
+	"rpg/geometry"
 )
 
 func drawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string) {
@@ -31,12 +31,12 @@ const (
 )
 
 type Console struct {
-	game       *game.GameInstance
+	game            *game.GameInstance
 	terminationCode int
-	lightStyle tcell.Style
-	darkStyle  tcell.Style
-	screen     tcell.Screen
-	state      UIState
+	lightStyle      tcell.Style
+	darkStyle       tcell.Style
+	screen          tcell.Screen
+	state           UIState
 }
 
 func (c *Console) HandleInput() (terminationCode int) {
@@ -52,13 +52,13 @@ func (c *Console) HandleInput() (terminationCode int) {
 		//mod, key, ch := typedEvent.Modifiers(), typedEvent.Key(), typedRune
 		//println(fmt.Sprintf("EventKey Modifiers: %d Key: %d Rune: %d", mod, key, ch))
 		if typedRune == 'w' {
-			c.game.ManualMovePlayer(geometry.Point{X: 0, Y: -1})
+			c.game.GetActions().ManualMovePlayer(geometry.Point{X: 0, Y: -1})
 		} else if typedRune == 's' {
-			c.game.ManualMovePlayer(geometry.Point{X: 0, Y: 1})
+			c.game.GetActions().ManualMovePlayer(geometry.Point{X: 0, Y: 1})
 		} else if typedRune == 'a' {
-			c.game.ManualMovePlayer(geometry.Point{X: -1, Y: 0})
+			c.game.GetActions().ManualMovePlayer(geometry.Point{X: -1, Y: 0})
 		} else if typedRune == 'd' {
-			c.game.ManualMovePlayer(geometry.Point{X: 1, Y: 0})
+			c.game.GetActions().ManualMovePlayer(geometry.Point{X: 1, Y: 0})
 		} else if typedRune == 'i' {
 			if c.state == Inventory {
 				c.state = Default
@@ -82,10 +82,13 @@ func (c *Console) putRune(x, y int, style tcell.Style, r rune) {
 
 func (c *Console) Update(dt float64) {
 	// Poll event
-	gameErr := c.game.Update()
-	if gameErr != nil {
-		c.terminationCode = 1
-	}
+	/*
+		gameErr := c.game.Update()
+		if gameErr != nil {
+			c.terminationCode = 1
+		}
+
+	*/
 }
 
 func (c *Console) Draw() {
@@ -98,10 +101,10 @@ func (c *Console) Draw() {
 	cellCountX := min(sWidth, currentMap.GetWidth())
 	cellCountY := min(sHeight, currentMap.GetHeight())
 	if sWidth < currentMap.GetWidth() {
-		startX = max(0, player.MapPosition().X - sWidth/2)
+		startX = max(0, player.MapPosition().X-sWidth/2)
 	}
 	if sHeight < currentMap.GetHeight() {
-		startY = max(0, player.MapPosition().Y - sHeight/2)
+		startY = max(0, player.MapPosition().Y-sHeight/2)
 	}
 
 	screen.Clear()
@@ -149,7 +152,6 @@ func (c *Console) drawInventory() {
 	sWidth, sHeight := screen.Size()
 	inventory := player.GetInventory()
 
-
 	for i, item := range inventory.AsColorCodedStrings() {
 		drawText(screen, 0, i, sWidth, sHeight, c.lightStyle, item)
 	}
@@ -169,7 +171,6 @@ func NewConsole(game *game.GameInstance) *Console {
 	s.SetStyle(lightStyle)
 	//s.EnableMouse()
 	s.Clear()
-
 
 	game.SetOnMapChange(func() {
 		s.Clear()

@@ -1,5 +1,4 @@
 %rec: default
-#FIELDS: 
 
 internal_name: IconNone
 icon: -1
@@ -431,31 +430,31 @@ internal_name: IconMonsterBat
 icon: 93
 
 internal_name: IconMonsterSkeleton
-icon: 89
+icon: 397
 
 internal_name: IconMonsterSkeletonWarrior
-icon: 0
+icon: 398
 
 internal_name: IconMonsterSkeletonArcher
-icon: 0
+icon: 401
 
 internal_name: IconMonsterSkeletonSorcerer
-icon: 0
+icon: 402
 
 internal_name: IconMonsterSkeletonCaptain
-icon: 0
+icon: 400
 
 internal_name: IconMonsterFallen
-icon: 0
+icon: 426
 
 internal_name: IconMonsterFallenWarrior
-icon: 0
+icon: 427
 
 internal_name: IconMonsterFallenArcher
-icon: 0
+icon: 425
 
 internal_name: IconMonsterFallenShaman
-icon: 0
+icon: 426
 
 internal_name: IconMonsterCaveling
 icon: 542

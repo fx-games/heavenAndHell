@@ -7,7 +7,7 @@ icon: 139
 dlvl: 1
 cost: 50
 category: scroll
-untargeted_action: random_near_teleport
+untargeted_action: random_near_teleport(7-14)
 
 name: Scroll of Word of Recall
 internal_name: scroll_of_recall
@@ -23,7 +23,7 @@ icon: 139
 dlvl: 1
 cost: 180
 category: scroll
-untargeted_action: buff_armor
+untargeted_action: buff_armor(7-14 | 6)
 
 name: Scroll of Enchant Weapon
 internal_name: scroll_of_enchant_weapon

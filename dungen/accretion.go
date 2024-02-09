@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"rpg/geometry"
-	"rpg/ldtk_go"
+	"rpg/ldtk"
 	"rpg/util"
 	"slices"
 	"strings"
@@ -322,7 +322,7 @@ func (g *AccretionGenerator) addMoreDoors(dMap *DungeonMap) {
 	})
 }
 
-func (g *AccretionGenerator) LoadTemplatesFrom(templates *ldtk_go.Project, prefix string) {
+func (g *AccretionGenerator) LoadTemplatesFrom(templates *ldtk.Project, prefix string) {
 	for _, level := range templates.Levels {
 		if strings.HasPrefix(level.Identifier, prefix) {
 			isDecoration := level.PropertyByIdentifier("IsDecoration").AsBool()
@@ -334,7 +334,7 @@ func (g *AccretionGenerator) LoadTemplatesFrom(templates *ldtk_go.Project, prefi
 	}
 }
 
-func (g *AccretionGenerator) addTemplateFromLevel(level *ldtk_go.Level) {
+func (g *AccretionGenerator) addTemplateFromLevel(level *ldtk.Level) {
 	wallId := 56
 	floorId := 64
 
@@ -375,6 +375,7 @@ func (g *AccretionGenerator) addTemplateFromLevel(level *ldtk_go.Level) {
 
 	slotId := level.PropertyByIdentifier("SlotID").AsInt()
 	plugsIn := level.PropertyByIdentifier("PlugsIntoSlotID").AsInt()
+	canBeLit := level.PropertyByIdentifier("CanBeLit").AsBool()
 	dRoom := NewDungeonRoomFromTemplate(level.Identifier)
 	dRoom.SetSlotId(slotId)
 	dRoom.SetPlugsIntoSlotId(plugsIn)
@@ -382,6 +383,7 @@ func (g *AccretionGenerator) addTemplateFromLevel(level *ldtk_go.Level) {
 	dRoom.SetIncludedWallTiles(wallTiles)
 	dRoom.SetPOIPositions(exposedPoints)
 	dRoom.SetConnections(connectors)
+	dRoom.SetCanBeLit(canBeLit)
 
 	if !level.PropertyByIdentifier("UsesDecoration").IsNull() {
 		dRoom.SetDecorationLevelName(level.PropertyByIdentifier("UsesDecoration").AsString())

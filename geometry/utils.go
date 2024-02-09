@@ -400,10 +400,10 @@ func MapTo[A, B any](xs []A, f func(A) B) []B {
 	return ys
 }
 func Log(msg string) {
-	// append to Log file
-	// deactivating Log for now
+	// append to ShowLogMessage file
+	// deactivating ShowLogMessage for now
 	/*
-		file, err := os.OpenFile("Log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		file, err := os.OpenFile("ShowLogMessage.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			panic(err)
 		}

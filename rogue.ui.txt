@@ -1,0 +1,36 @@
+Actions the player needs to do:
+
+ - Help - F1 / ?
+ - Move & Attack - Numpad
+   - Auto-explore & Auto-attack
+ - Identify Stuff - (l)ook
+ - Run - Shift + Direction
+ - Rest - numpad 5 / .
+ - Use stuff in the dungeon - int(e)ract + Direction
+   - Open doors / Close doors
+   - Disarm traps
+   - Ascend / Descend Stairs
+   - Pick up
+   - Kick doors
+
+ - Pick up by walking over it
+
+ - Equip/unequip items - E
+ - Throw items
+ - Shoot missiles
+
+ - Use Abilities/Items - (a)pply -> Choose ability/item
+   - Eat food
+   - Drink potions
+   - Read scrolls
+   - Use wands
+	   - With a target
+
+
+ - Targeting
+   - Auto-target
+   - Cycle through targets
+   - Remember last target
+   - Quick-Shot nearest target
+   - Directional quick-shot
+
