@@ -10,13 +10,14 @@ import (
 
 func (g *GameInstance) NewPotionOfTrueSight() *common.Item {
 	baseItem := common.NewItem(g.GetWorldState().GetPlayer, "Lucifer's gift", defs.IconItemPotionCrimson)
+	baseItem.SetInternalName("potion_of_true_sight")
 	baseItem.SetCategory(defs.ItemCategoryPotion)
 	baseItem.SetRarity(common.ItemRarityUnique)
 	baseItem.SetQualityLevel(10)
 	baseItem.SetCharges(1)
 	baseItem.SetDestroyAfterUse(true)
 	drinkAction := common.NewUntargetedAction("Drink", 34)
-	effect := func(user *common.Actor) {
+	effect := func(user *common.Actor, source common.EffectSource) {
 		g.GetWorldState().GetPlayer().GetStats().IncrementBy(stats.VisionRange, 7)
 		g.GetWorldState().GetPlayer().GetStats().IncrementBy(stats.LightRadius, 7)
 		g.GetWorldState().GetPlayer().GetInventory().Remove(baseItem)
@@ -91,11 +92,12 @@ func (g *GameInstance) NewEvidenceFour() *common.Item {
 func NewMasterSword(state *common.State) *common.Item {
 	// spell on attack
 	baseItem := common.NewItem(state.GetPlayer, "a master sword", defs.IconItemUniqueSword)
+	baseItem.SetInternalName("master_sword")
 	baseItem.SetCategory(defs.ItemCategoryWeapon)
 	baseItem.SetQualityLevel(1)
 	baseItem.SetRarity(common.ItemRarityUnique)
 	weaponPart := &common.WeaponStats{
-		Damage:            stats.NewInterval(1, 6),
+		Damage:            util.ParseDice("2d8+3"),
 		Durability:        stats.NewResource(0, flatFunc(20), 20),
 		Type:              defs.WeaponTypeSword,
 		MeleeRange:        1,
@@ -104,8 +106,6 @@ func NewMasterSword(state *common.State) *common.Item {
 			stats.Level:    3,
 			stats.Strength: 4,
 		},
-		// attack pattern for an axe..
-		DamagePerLocationPrediction: getBigAxeDamageLocations(state),
 	}
 
 	baseItem.SetWeaponComponent(weaponPart)
@@ -113,24 +113,24 @@ func NewMasterSword(state *common.State) *common.Item {
 	// stat modifiers
 	modifiers := []*stats.Modifier{
 		{
-			Name:      "of strength",
-			Attribute: stats.Strength,
-			Value:     5,
-			Mode:      stats.ModifyAdditive,
+			Description: "of strength",
+			Attribute:   stats.Strength,
+			Value:       5,
+			Mode:        stats.ModifyAdditive,
 		},
 		{
-			Name:           "speedy",
+			Description:    "speedy",
 			Attribute:      stats.AttackSpeedFactor,
 			Value:          1.2,
 			Mode:           stats.ModifyMultiplicative,
 			IsPercentBased: true,
 		},
 		{
-			Name:           "deadly",
-			Attribute:      stats.EnhancedDamageFactor,
-			Value:          0.2,
+			Description:    "deadly",
+			Attribute:      stats.DamageBonus,
+			Value:          1,
 			Mode:           stats.ModifyAdditive,
-			IsPercentBased: true,
+			IsPercentBased: false,
 		},
 	}
 
@@ -151,266 +151,6 @@ func NewMasterSword(state *common.State) *common.Item {
 	// - Requirements -60%
 	// - Resistance / Immunity to Status Effect X
 	// - Resistance / Immunity / Absorption to Damage Type X
-	return baseItem
-}
-
-/*
-Some End Game Uniques
- - Veil of Darkness - Unique cloak [+10, +0]
- - Black Hands - Unique gloves [+10, +0]
- - Boots of the Shadow Dancer - Unique boots [+10, +0]
- - Ancient Nightmare's Hood - Unique helmet [+10, +0]
- - Plate Mail of the Dark Lord - Unique plate mail [+40, +0]
- - Never-ending Night - Unique ring [+0, +0]
- - Eternal Darkness - Unique ring [+0, +0]
- - Amulet of Shadows - Unique amulet [+0, +0]
- - Shadow's Embrace - Unique amulet [+0, +0]
- - Wall of Thorns - Unique shield [+30, +0]
-*/
-
-func NewVeilOfDarkness(state *common.State) *common.Item {
-	baseItem := common.NewItem(state.GetPlayer, "Veil of Darkness", defs.IconCloakDark)
-	baseItem.SetCategory(defs.ItemCategoryArmor)
-	baseItem.SetQualityLevel(10)
-	baseItem.SetRarity(common.ItemRarityUnique)
-
-	armorPart := &common.ArmorStats{
-		BaseArmor:  10,
-		Plus:       0,
-		Type:       defs.ArmorTypeCape,
-		Durability: stats.NewResource(0, flatFunc(20), 20),
-	}
-
-	baseItem.SetArmorComponent(armorPart)
-
-	return baseItem
-}
-
-func NewBootsOfTheShadowDancer(state *common.State) *common.Item {
-	baseItem := common.NewItem(state.GetPlayer, "Boots of the Shadow Dancer", defs.IconBootsDark)
-	baseItem.SetCategory(defs.ItemCategoryArmor)
-	baseItem.SetQualityLevel(10)
-	baseItem.SetRarity(common.ItemRarityUnique)
-
-	armorPart := &common.ArmorStats{
-		BaseArmor:  10,
-		Plus:       0,
-		Type:       defs.ArmorTypeBoots,
-		Durability: stats.NewResource(0, flatFunc(20), 20),
-	}
-
-	baseItem.SetArmorComponent(armorPart)
-
-	return baseItem
-}
-
-func NewBlackHands(state *common.State) *common.Item {
-	baseItem := common.NewItem(state.GetPlayer, "Black Hands", defs.IconGlovesDark)
-	baseItem.SetCategory(defs.ItemCategoryArmor)
-	baseItem.SetQualityLevel(10)
-	baseItem.SetRarity(common.ItemRarityUnique)
-
-	armorPart := &common.ArmorStats{
-		BaseArmor:  10,
-		Plus:       0,
-		Type:       defs.ArmorTypeGloves,
-		Durability: stats.NewResource(0, flatFunc(20), 20),
-	}
-
-	baseItem.SetArmorComponent(armorPart)
-
-	return baseItem
-}
-
-func NewAncientNightmaresHood(state *common.State) *common.Item {
-	baseItem := common.NewItem(state.GetPlayer, "Ancient Nightmare's Hood", defs.IconHoodDark)
-	baseItem.SetCategory(defs.ItemCategoryArmor)
-	baseItem.SetQualityLevel(10)
-	baseItem.SetRarity(common.ItemRarityUnique)
-
-	armorPart := &common.ArmorStats{
-		BaseArmor:  10,
-		Plus:       0,
-		Type:       defs.ArmorTypeHelmet,
-		Durability: stats.NewResource(0, flatFunc(20), 20),
-	}
-
-	baseItem.SetArmorComponent(armorPart)
-
-	return baseItem
-}
-
-func NewPlateMailOfTheDarkLord(state *common.State) *common.Item {
-	baseItem := common.NewItem(state.GetPlayer, "Plate Mail of the Dark Lord", defs.IconArmorDark)
-	baseItem.SetCategory(defs.ItemCategoryArmor)
-	baseItem.SetQualityLevel(10)
-	baseItem.SetRarity(common.ItemRarityUnique)
-
-	armorPart := &common.ArmorStats{
-		BaseArmor:  40,
-		Plus:       0,
-		Type:       defs.ArmorTypeCuirass,
-		Durability: stats.NewResource(0, flatFunc(20), 20),
-	}
-
-	baseItem.SetArmorComponent(armorPart)
-
-	return baseItem
-}
-
-func NewWallOfThorns(state *common.State) *common.Item {
-	baseItem := common.NewItem(state.GetPlayer, "Wall of Thorns", defs.IconShieldDarkThorns)
-	baseItem.SetCategory(defs.ItemCategoryArmor)
-	baseItem.SetQualityLevel(10)
-	baseItem.SetRarity(common.ItemRarityUnique)
-
-	armorPart := &common.ArmorStats{
-		BaseArmor:  30,
-		Plus:       0,
-		Type:       defs.ArmorTypeShield,
-		Durability: stats.NewResource(0, flatFunc(20), 20),
-	}
-
-	baseItem.SetArmorComponent(armorPart)
-
-	return baseItem
-}
-
-func NewAmuletOfShadows(state *common.State) *common.Item {
-	baseItem := common.NewItem(state.GetPlayer, "Amulet of Shadows", defs.IconAmuletDark)
-	baseItem.SetCategory(defs.ItemCategoryAccessory)
-	baseItem.SetQualityLevel(10)
-
-	armorPart := &common.ArmorStats{
-		BaseArmor:  0,
-		Durability: stats.NewResource(0, flatFunc(20), 20),
-		Type:       defs.ArmorTypeAmulet,
-	}
-
-	baseItem.SetArmorComponent(armorPart)
-	return baseItem
-}
-
-func NewShadowsEmbrace(state *common.State) *common.Item {
-	baseItem := common.NewItem(state.GetPlayer, "Shadow's Embrace", defs.IconAmuletDark)
-	baseItem.SetCategory(defs.ItemCategoryAccessory)
-	baseItem.SetQualityLevel(10)
-
-	armorPart := &common.ArmorStats{
-		BaseArmor:  0,
-		Durability: stats.NewResource(0, flatFunc(20), 20),
-		Type:       defs.ArmorTypeAmulet,
-	}
-
-	baseItem.SetArmorComponent(armorPart)
-	return baseItem
-}
-
-func NewEternalDarkness(state *common.State) *common.Item {
-	baseItem := common.NewItem(state.GetPlayer, "Eternal Darkness", defs.IconRingDark)
-	baseItem.SetCategory(defs.ItemCategoryAccessory)
-	baseItem.SetQualityLevel(10)
-
-	armorPart := &common.ArmorStats{
-		BaseArmor:  0,
-		Durability: stats.NewResource(0, flatFunc(20), 20),
-		Type:       defs.ArmorTypeRing,
-	}
-
-	baseItem.SetArmorComponent(armorPart)
-
-	return baseItem
-}
-
-func NewNeverEndingNight(state *common.State) *common.Item {
-	baseItem := common.NewItem(state.GetPlayer, "Never-ending Night", defs.IconRingDark)
-	baseItem.SetCategory(defs.ItemCategoryAccessory)
-	baseItem.SetQualityLevel(10)
-
-	armorPart := &common.ArmorStats{
-		BaseArmor:  0,
-		Durability: stats.NewResource(0, flatFunc(20), 20),
-		Type:       defs.ArmorTypeRing,
-	}
-
-	baseItem.SetArmorComponent(armorPart)
-
-	return baseItem
-}
-
-func NewSoulReaver(state *common.State) *common.Item {
-	// spell on attack
-	baseItem := common.NewItem(state.GetPlayer, "Soul Reaver", defs.IconScytheDark)
-	baseItem.SetCategory(defs.ItemCategoryWeapon)
-	baseItem.SetQualityLevel(10)
-	baseItem.SetRarity(common.ItemRarityUnique)
-	weaponPart := &common.WeaponStats{
-		Damage:            stats.NewInterval(20, 35),
-		Durability:        stats.NewResource(0, flatFunc(50), 50),
-		Type:              defs.WeaponTypeScythe,
-		MeleeRange:        1,
-		AttackSpeedFactor: 0.9,
-		Requirements: map[stats.Name]int{
-			stats.Level:    15,
-			stats.Strength: 9,
-		},
-		// attack pattern for an axe..
-		DamagePerLocationPrediction: getBigAxeDamageLocations(state),
-	}
-
-	baseItem.SetWeaponComponent(weaponPart)
-
-	// stat modifiers
-	modifiers := []*stats.Modifier{
-		{
-			Name:           "deadly",
-			Attribute:      stats.EnhancedDamageFactor,
-			Value:          0.2,
-			Mode:           stats.ModifyAdditive,
-			IsPercentBased: true,
-		},
-	}
-
-	baseItem.SetEquippedModifiers(modifiers)
-
-	return baseItem
-}
-
-func NewMalleusMaleficarum(state *common.State) *common.Item {
-	// spell on attack
-	baseItem := common.NewItem(state.GetPlayer, "Malleus Maleficarum", defs.IconMalletGolden)
-	baseItem.SetCategory(defs.ItemCategoryWeapon)
-	baseItem.SetQualityLevel(10)
-	baseItem.SetRarity(common.ItemRarityUnique)
-	weaponPart := &common.WeaponStats{
-		Damage:            stats.NewInterval(15, 45),
-		Durability:        stats.NewResource(0, flatFunc(35), 35),
-		Type:              defs.WeaponTypeMace,
-		MeleeRange:        1,
-		AttackSpeedFactor: 0.9,
-		Requirements: map[stats.Name]int{
-			stats.Level:    15,
-			stats.Strength: 14,
-		},
-		// attack pattern for an axe..
-		DamagePerLocationPrediction: getBigAxeDamageLocations(state),
-	}
-
-	baseItem.SetWeaponComponent(weaponPart)
-
-	// stat modifiers
-	modifiers := []*stats.Modifier{
-		{
-			Name:           "deadly",
-			Attribute:      stats.EnhancedDamageFactor,
-			Value:          0.2,
-			Mode:           stats.ModifyAdditive,
-			IsPercentBased: true,
-		},
-	}
-
-	baseItem.SetEquippedModifiers(modifiers)
-
 	return baseItem
 }
 

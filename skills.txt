@@ -10,23 +10,39 @@ Debilitating Shot -> Needs to proc after every-time an actor was hit by the arch
 Multi-Shot -> Needs to proc right before the archer triggers any ranged attack
 		      it will also convert a targetedAction into an untargetedAction
 
+Initiating moves:
+ - None
+ - Jumpstart
+
+Target Variations:
+ - Normal Attack (one target)
+ - Multi-shot (multiple targets)
+
+AoE patterns how to apply missiles to the targets:
+ - Arrow Rain (ares of effect, hit from above)
+ - Trick Shot (penetrating, reflecting)
+
+Hit Effects:
+ - Debilitating
+ - Man Stopper
+
 Multi-shot + Normal Attack
 Multi-shot + Trick Shot
 Multi-shot + Arrow Rain
 Multi-shot + Man Stopper
-Multi-shot + Jumpstart
+Jumpstart + Multi-shot + Normal Attack
 
 Debilitating Shot + Normal Attack
 Debilitating Shot + Trick Shot
 Debilitating Shot + Arrow Rain
 Debilitating Shot + Man Stopper
-Debilitating Shot + Jumpstart
+Jumpstart + Debilitating Shot + Normal Attack
 
 Multi-shot + Debilitating Shot + Normal Attack
 Multi-shot + Debilitating Shot + Trick Shot
-Multi-shot + Debilitating Shot + Arrow Rain
+Multi-shot + Debilitating Shot +
 Multi-shot + Debilitating Shot + Man Stopper
-Multi-shot + Debilitating Shot + Jumpstart
+Jumpstart + Multi-shot + Arrow Rain + Debilitating Shot
 
 
 == Multi-Shot (Sustained)

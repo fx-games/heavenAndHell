@@ -14,6 +14,19 @@ const (
 	ItemNamingSchemeEnchantments ItemNamingScheme = "Enchantments"
 	ItemNamingSchemeBandStyle    ItemNamingScheme = "BandStyle"
 )
+type FontInfo struct {
+	TTFFile string
+	TTFSize float64
+}
+
+type StartInfo struct {
+	FontInfos         FontInfo
+	ScreenSize        geometry.Point
+	TileScale         float64
+	Title             string
+	LDTKMapFile       string
+	UserConfiguration Configuration
+}
 
 type Configuration struct {
 	AudioEnabled         bool

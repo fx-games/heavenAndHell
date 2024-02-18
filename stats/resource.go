@@ -31,8 +31,8 @@ func (r *Resource) Value() int {
 	return int(r.value)
 }
 
-func (r *Resource) Increase(amount int) {
-	r.value += float64(amount)
+func (r *Resource) Increase(amount float64) {
+	r.value += amount
 	r.ensureRange()
 }
 
@@ -91,4 +91,8 @@ func (r *Resource) Clone() *Resource {
 
 func (r *Resource) Min() int {
 	return r.min
+}
+
+func (r *Resource) AsPercentage() float64 {
+	return r.value / float64(r.getMax())
 }

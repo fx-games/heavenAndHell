@@ -46,6 +46,17 @@ func (a Arguments) IsEmpty() bool {
 	return len(a) == 0
 }
 
+func (a Arguments) GetIntOrDefault(index int, defaultValue int) int {
+	if index >= len(a) || index < 0 {
+		return defaultValue
+	}
+	result, err := strconv.Atoi(a[index])
+	if err != nil {
+		return defaultValue
+	}
+	return result
+}
+
 func LooksLikeAFunction(line string) bool {
 	regexpPattern := regexp.MustCompile(`([A-Za-z_]+)\((.*)\)`)
 	return regexpPattern.MatchString(line)

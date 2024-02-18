@@ -6,6 +6,7 @@ import (
 	"rpg/common"
 	"rpg/defs"
 	"rpg/geometry"
+	"rpg/stats"
 	"rpg/util"
 )
 
@@ -16,7 +17,7 @@ func (u *UIController) Draw(screen *ebiten.Image) {
 
 	u.drawActors()
 
-	u.context.Animator.Draw(u.mapRenderer) // should be some "animator"
+	u.context.Animator().Draw(u.mapRenderer) // should be some "animator"
 
 	if !u.IsMouseCapturedByUI() {
 		if u.targeter != nil {
@@ -43,7 +44,7 @@ func (u *UIController) Draw(screen *ebiten.Image) {
 
 func (u *UIController) drawActors() {
 	visibleMapOnScreen := u.mapRenderer.GetVisibleMap()
-	state := u.context.GameState
+	state := u.context.GameState()
 	playerFieldOfView := state.GetPlayer().GetFOV()
 
 	for _, downedActor := range state.GetMap().DownedActors() {
@@ -54,25 +55,37 @@ func (u *UIController) drawActors() {
 			continue
 		}
 		screenPos := u.mapRenderer.MapFloatToScreen(downedActor.DrawPosition())
-		u.tileRenderer.DrawDefaultScaleTile(float64(screenPos.X), float64(screenPos.Y), u.worldTexture, downedActor.Icon(u.worldTicks), u.context.GameState.ApplyLighting(downedActor.MapPosition(), common.White, u.worldTicks))
+		u.tileRenderer.DrawDefaultScaleTile(float64(screenPos.X), float64(screenPos.Y), u.worldTexture, downedActor.Icon(u.worldTicks), u.context.GameState().ApplyLighting(downedActor.MapPosition(), defs.White, u.worldTicks))
 	}
 
 	for _, actor := range state.GetMap().Actors() {
 		if !visibleMapOnScreen.Contains(actor.MapPosition()) || !playerFieldOfView.Visible(actor.MapPosition()) {
 			continue
 		}
+		if !actor.IsVisible() {
+			continue
+		}
 		var drawColor color.Color
-		drawColor = u.context.GameState.ApplyLighting(actor.MapPosition(), common.White, u.worldTicks)
+		drawColor = state.ApplyLighting(actor.MapPosition(), defs.White, u.worldTicks)
 
 		if actor.IsHurt() {
 			percentage := actor.GetHurtTicksAsPercentage() // goes from 1.0 to 0.0
-			drawColor = util.LerpColor(common.Red, color.White, percentage)
+			drawColor = util.LerpColor(defs.Red, color.White, percentage)
 		}
 		if u.configuration.ActorBobbingEnabled {
 			u.drawActorWithBobbingAnimation(actor, drawColor)
 		} else {
 			screenPos := u.mapRenderer.MapFloatToScreen(actor.DrawPosition())
 			u.tileRenderer.DrawDefaultScaleTileWithFlip(float64(screenPos.X), float64(screenPos.Y), u.worldTexture, actor.Icon(u.worldTicks), drawColor, actor.FlipX())
+		}
+	}
+
+	for _, actor := range state.GetMap().Actors() {
+		if !visibleMapOnScreen.Contains(actor.MapPosition()) || !playerFieldOfView.Visible(actor.MapPosition()) {
+			continue
+		}
+		if !actor.GetStats().GetResource(stats.Health).IsAtMax() {
+			u.drawHealthBar(actor)
 		}
 	}
 }

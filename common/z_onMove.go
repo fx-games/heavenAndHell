@@ -69,7 +69,7 @@ func (d OnMoveHook) logObjectsAtLocation(context ActionContext, pos geometry.Poi
 	state := context.GameState
 	if state.GetMap().IsItemAt(pos) {
 		item := state.GetMap().ItemAt(pos)
-		context.Msg(fmt.Sprintf("You see %s", item.Name()))
+		context.Msg(fmt.Sprintf("You see [:darkText]%s", item.Name()))
 		return item
 	}
 	return nil

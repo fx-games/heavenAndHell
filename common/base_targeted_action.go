@@ -2,6 +2,7 @@ package common
 
 import (
 	"image/color"
+	"rpg/defs"
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/util"
@@ -27,13 +28,13 @@ type TargetRules interface {
 	GetHighlightsForTarget(target geometry.Point) []TargetHighlight
 	GetHitpositions(target geometry.Point) []geometry.Point
 	GetAttacker() *Actor
+	GetInfoTextForTarget(pos geometry.Point) string
 }
 
 type TargetHighlight struct {
 	Pos   geometry.Point
 	Color color.Color
 }
-type TargetedActionName string
 type TargetedAction struct {
 	rulesProvider   *TargetRulesProvider
 	aoeResolver     *AoEResolver
@@ -114,13 +115,13 @@ func (t *TargetedAction) GetDescription() []util.LabelText {
 	var desc []util.LabelText
 	desc = append(desc, util.LabelTextFromString(""))
 	desc = append(desc, util.LabelTextFromString("Targeting"))
-	desc = append(desc, colorize(t.rulesProvider.Description, OffWhite)...)
+	desc = append(desc, colorize(t.rulesProvider.Description, defs.OffWhite)...)
 	desc = append(desc, util.LabelTextFromString(""))
 	desc = append(desc, util.LabelTextFromString("Area of Effect"))
-	desc = append(desc, colorize(t.aoeResolver.Description, OffWhite)...)
+	desc = append(desc, colorize(t.aoeResolver.Description, defs.OffWhite)...)
 	desc = append(desc, util.LabelTextFromString(""))
 	desc = append(desc, util.LabelTextFromString("Effect"))
-	desc = append(desc, colorize(t.onHitEffect.Description, OffWhite)...)
+	desc = append(desc, colorize(t.onHitEffect.Description, defs.OffWhite)...)
 	return desc
 }
 
@@ -137,4 +138,8 @@ func (t *TargetedAction) GetMonetaryValue() int {
 
 func (t *TargetedAction) SetInternalName(name string) {
 	t.internalName = name
+}
+
+func (t *TargetedAction) GetInternalName() string {
+	return t.internalName
 }

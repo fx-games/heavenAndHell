@@ -1,5 +1,5 @@
 %rec: default
-#FIELDS: name internal_name icon dlvl cost charges max_level out_of_depth_chance min_level_for_ood category armor_type armor_class weapon_type weapon_damage weapon_speed throw_hit_zone throw_damage throw_chance_to_break throw_on_hit_effect light_color light_flicker_pattern light_flicker_frame_delay equip_modifier untargeted_action targeted_action
+#FIELDS: name internal_name icon dlvl cost charges max_level out_of_depth_chance min_level_for_ood category armor_type armor_class weapon_type weapon_damage weapon_speed ranged_projectile_icon throw_hit_zone throw_damage throw_chance_to_break throw_on_hit_effect light_color light_flicker_pattern light_flicker_frame_delay equip_modifier untargeted_action targeted_action
 
 name: Dagger
 internal_name: dagger
@@ -8,7 +8,7 @@ dlvl: 1
 cost: 10
 category: weapon
 weapon_type: sword
-weapon_damage: 1-4
+weapon_damage: 1d4
 weapon_speed: 1.2
 throw_damage: 1-4
 throw_chance_to_break: 0.25
@@ -20,14 +20,14 @@ dlvl: 1
 cost: 25
 category: weapon
 weapon_type: sword
-weapon_damage: 1-5
+weapon_damage: 1d4+1
 weapon_speed: 1.1
 throw_damage: 1-5
 throw_chance_to_break: 0.25
 
 name: Whip
 internal_name: whip
-icon: 151
+icon: 718
 dlvl: 1
 cost: 30
 category: weapon
@@ -42,8 +42,10 @@ dlvl: 1
 cost: 36
 category: weapon
 weapon_type: spear
-weapon_damage: 1-6
+weapon_damage: 1d6+1
 weapon_speed: 1.0
+armor_type: defensive_weapon
+armor_class: 2
 throw_damage: 1-6
 throw_chance_to_break: 0.25
 
@@ -54,19 +56,7 @@ dlvl: 1
 cost: 42
 category: weapon
 weapon_type: sword
-weapon_damage: 1-6
-weapon_speed: 1.0
-throw_damage: 1-6
-throw_chance_to_break: 0.25
-
-name: Small Sword
-internal_name: small_sword
-icon: 145
-dlvl: 1
-cost: 48
-category: weapon
-weapon_type: sword
-weapon_damage: 1-6
+weapon_damage: 1d6
 weapon_speed: 1.0
 throw_damage: 1-6
 throw_chance_to_break: 0.25
@@ -78,7 +68,7 @@ dlvl: 1
 cost: 50
 category: weapon
 weapon_type: sword
-weapon_damage: 1-7
+weapon_damage: 1d7
 weapon_speed: 1.0
 throw_damage: 1-7
 throw_chance_to_break: 0.25
@@ -90,7 +80,7 @@ dlvl: 1
 cost: 85
 category: weapon
 weapon_type: sword
-weapon_damage: 1-7
+weapon_damage: 1d7
 weapon_speed: 1.0
 throw_damage: 1-7
 throw_chance_to_break: 0.25
@@ -102,7 +92,7 @@ dlvl: 1
 cost: 90
 category: weapon
 weapon_type: sword
-weapon_damage: 1-7
+weapon_damage: 1d5
 weapon_speed: 1.0
 throw_damage: 1-7
 throw_chance_to_break: 0.25
@@ -114,7 +104,7 @@ dlvl: 1
 cost: 120
 category: weapon
 weapon_type: spear
-weapon_damage: 1-8
+weapon_damage: 1d8
 weapon_speed: 1.0
 throw_damage: 1-8
 throw_chance_to_break: 0.25
@@ -126,7 +116,7 @@ dlvl: 1
 cost: 130
 category: weapon
 weapon_type: mace
-weapon_damage: 2-8
+weapon_damage: 2d4
 weapon_speed: 1.0
 throw_damage: 2-4
 throw_chance_to_break: 0.25
@@ -138,7 +128,7 @@ dlvl: 1
 cost: 130
 category: weapon
 weapon_type: mace
-weapon_damage: 5-40
+weapon_damage: 2d8
 weapon_speed: 1.0
 throw_damage: 2-6
 throw_chance_to_break: 0.25
@@ -150,19 +140,19 @@ dlvl: 1
 cost: 200
 category: weapon
 weapon_type: sword
-weapon_damage: 2-8
+weapon_damage: 2d4
 weapon_speed: 1.0
 throw_damage: 2-4
 throw_chance_to_break: 0.25
 
 name: Quarterstaff
 internal_name: quarterstaff
-icon: 137
+icon: 296
 dlvl: 1
 cost: 200
 category: weapon
 weapon_type: staff
-weapon_damage: 1-9
+weapon_damage: 1d10
 weapon_speed: 1.0
 armor_type: defensive_weapon
 armor_class: 2
@@ -176,7 +166,7 @@ dlvl: 1
 cost: 200
 category: weapon
 weapon_type: mace
-weapon_damage: 2-8
+weapon_damage: 2d4
 weapon_speed: 1.0
 throw_damage: 2-4
 throw_chance_to_break: 0.25
@@ -188,7 +178,7 @@ dlvl: 1
 cost: 250
 category: weapon
 weapon_type: mace
-weapon_damage: 3-9
+weapon_damage: 2d4+1
 weapon_speed: 1.1
 throw_damage: 1-8
 throw_chance_to_break: 0.25
@@ -200,7 +190,7 @@ dlvl: 1
 cost: 300
 category: weapon
 weapon_type: sword
-weapon_damage: 2-10
+weapon_damage: 2d6
 weapon_speed: 1.0
 throw_damage: 1-6
 throw_chance_to_break: 0.25
@@ -212,7 +202,7 @@ dlvl: 1
 cost: 300
 category: weapon
 weapon_type: sword
-weapon_damage: 2-10
+weapon_damage: 1d6+2
 weapon_speed: 1.0
 throw_damage: 1-6
 throw_chance_to_break: 0.25
@@ -224,7 +214,7 @@ dlvl: 1
 cost: 700
 category: weapon
 weapon_type: sword
-weapon_damage: 3-12
+weapon_damage: 2d4+2
 weapon_speed: 1.0
 throw_damage: 1-6
 throw_chance_to_break: 0.25
@@ -236,7 +226,7 @@ dlvl: 1
 cost: 4500
 category: weapon
 weapon_type: sword
-weapon_damage: 6-30
+weapon_damage: 3d6+1
 weapon_speed: 1.0
 throw_damage: 1-6
 throw_chance_to_break: 0.25
@@ -248,7 +238,7 @@ dlvl: 1
 cost: 1000
 category: weapon
 weapon_type: scythe
-weapon_damage: 5-15
+weapon_damage: 5d4
 weapon_speed: 0.9
 throw_damage: 1-8
 throw_chance_to_break: 0.7
@@ -260,10 +250,22 @@ dlvl: 1
 cost: 4000
 category: weapon
 weapon_type: scythe
-weapon_damage: 8-24
+weapon_damage: 6d4
 weapon_speed: 0.95
 throw_damage: 1-8
 throw_chance_to_break: 0.7
+
+name: Hand Axe
+internal_name: hand_axe
+icon: 696
+dlvl: 1
+cost: 350
+category: weapon
+weapon_type: axe
+weapon_damage: 1d6
+weapon_speed: 1.0
+throw_damage: 1-8
+throw_chance_to_break: 0.25
 
 name: Broad Axe
 internal_name: broad_axe
@@ -272,7 +274,7 @@ dlvl: 1
 cost: 350
 category: weapon
 weapon_type: axe
-weapon_damage: 2-12
+weapon_damage: 2d6
 weapon_speed: 1.0
 throw_damage: 1-8
 throw_chance_to_break: 0.25
@@ -284,10 +286,24 @@ dlvl: 1
 cost: 500
 category: weapon
 weapon_type: axe
-weapon_damage: 2-16
+weapon_damage: 2d8
 weapon_speed: 1.0
 throw_damage: 1-10
 throw_chance_to_break: 0.25
+
+name: Sling
+internal_name: sling
+icon: 692
+dlvl: 1
+cost: 35
+category: weapon
+weapon_type: sling
+weapon_damage: 1d4
+weapon_speed: 1.0
+ranged_projectile_icon: 693
+ranged_max_range: 8
+ranged_accuracy_at_min_range: 0.7
+ranged_accuracy_at_max_range: 0.3
 
 name: Short Bow
 internal_name: short_bow
@@ -296,8 +312,12 @@ dlvl: 1
 cost: 35
 category: weapon
 weapon_type: bow
-weapon_damage: 2-8
-weapon_speed: 1.2
+weapon_damage: 1d4
+weapon_speed: 1.1
+ranged_projectile_icon: 694
+ranged_max_range: 8
+ranged_accuracy_at_min_range: 0.8
+ranged_accuracy_at_max_range: 0.2
 throw_damage: 1-4
 throw_chance_to_break: 0.25
 
@@ -308,8 +328,12 @@ dlvl: 1
 cost: 110
 category: weapon
 weapon_type: bow
-weapon_damage: 3-12
-weapon_speed: 1.1
+weapon_damage: 1d4+1
+weapon_speed: 1.0
+ranged_projectile_icon: 694
+ranged_max_range: 20
+ranged_accuracy_at_min_range: 0.85
+ranged_accuracy_at_max_range: 0.25
 throw_damage: 1-4
 throw_chance_to_break: 0.25
 
@@ -320,8 +344,12 @@ dlvl: 1
 cost: 200
 category: weapon
 weapon_type: crossbow
-weapon_damage: 3-12
-weapon_speed: 1.0
+weapon_damage: 1d6
+weapon_speed: 0.9
+ranged_projectile_icon: 722
+ranged_max_range: 12
+ranged_accuracy_at_min_range: 0.9
+ranged_accuracy_at_max_range: 0.3
 throw_damage: 1-6
 throw_chance_to_break: 0.25
 
@@ -332,8 +360,12 @@ dlvl: 1
 cost: 200
 category: weapon
 weapon_type: crossbow
-weapon_damage: 4-16
-weapon_speed: 0.9
+weapon_damage: 1d8
+weapon_speed: 0.7
+ranged_projectile_icon: 722
+ranged_max_range: 24
+ranged_accuracy_at_min_range: 0.9
+ranged_accuracy_at_max_range: 0.3
 throw_damage: 1-6
 throw_chance_to_break: 0.25
 

@@ -1,0 +1,43 @@
+OSR Approach
+low-level
+low-fantasy
+low-power
+Dungeon Crawl with a hint of simulationism
+Player usually underpowered
+Straight up combat is usually a bad idea
+Offer lots of non-combat, non-magic solutions
+
+Give meaning to adventuring gear:
+ - Ropes over chasms and for climbing up/down
+ - Torches for light and fireplaces, throwing for exploration and combat
+
+
+Combat should be simple and transparent and doesn't have to be balanced.
+Instead, there should be options to deal with opponents without fighting.
+
+In any given situation, the player should have at least 3 options:
+ - Fight
+ - Flee
+ - Be tricky
+
+Stuff that should be possible
+ - Pushing a boulder to block a door
+ - Using a rope to get over a chasm
+ - Triggering a trap with a thrown item
+ - Trap a door
+ - Sacrificing a shield to block a heavy blow
+ - Ignite flammable floor with a torch
+ - Impale a monster with a closing portcullis
+ - Let the floor/ceiling collapse on a monster
+ - Manipulate a monster into fighting another monster
+   - Lure with food/noise/yourself/gold
+   - Charm with magic
+   - Parley with social skills
+   - Bribe with gold/items
+ - Push monster down a chasm/into a trap
+ - Running away
+ - Teleporting away
+ - Sneaking past
+ - Causing a distraction
+
+ENVIRONMENTAL DAMAGE!

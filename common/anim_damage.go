@@ -3,6 +3,7 @@ package common
 import (
 	"image/color"
 	"math"
+	"rpg/defs"
 	"rpg/geometry"
 	"rpg/util"
 	"strconv"
@@ -30,9 +31,9 @@ func NewDamageNumberAnimation(mapPosition geometry.Point, amount int) *DamageNum
 	ticksNeeded := util.SecondsToTicks(timeInSeconds)
 	var damageColor color.Color
 	if amount > 0 {
-		damageColor = PositiveHighlightColor
+		damageColor = defs.PositiveHighlightColor
 	} else {
-		damageColor = PureRed
+		damageColor = defs.PureRed
 	}
 
 	return &DamageNumberAnimation{

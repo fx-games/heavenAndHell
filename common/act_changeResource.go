@@ -10,15 +10,15 @@ import (
 type ChangeResourceAction struct {
 	BaseAction
 	changeFactor         float64
-	amount               int
+	amount               float64
 	actor                *Actor
-	changedByAmount      int
+	changedByAmount      float64
 	resourceName         stats.Name
 	shouldStartAnimation func() bool
 	animations           []Animation
 }
 
-func NewChangeResourceAction(cause Cause, actor *Actor, resourceName stats.Name, amount int) *ChangeResourceAction {
+func NewChangeResourceAction(cause Cause, actor *Actor, resourceName stats.Name, amount float64) *ChangeResourceAction {
 	return &ChangeResourceAction{
 		BaseAction:   BaseAction{cause: cause, name: ActionNameChangeResource},
 		actor:        actor,
@@ -29,7 +29,7 @@ func NewChangeResourceAction(cause Cause, actor *Actor, resourceName stats.Name,
 }
 func (d *ChangeResourceAction) Execute(context ActionContext) []Action {
 	receiver := d.actor
-	d.changedByAmount = int(float64(d.amount) * d.changeFactor)
+	d.changedByAmount = float64(d.amount) * d.changeFactor
 
 	receiver.GetStats().IncrementResourceBy(d.resourceName, d.changedByAmount)
 
@@ -60,11 +60,12 @@ func (d *ChangeResourceAction) GetAnimations() []Animation { // TODO: Not allowe
 func (d *ChangeResourceAction) prepareAnimations(context ActionContext) []Animation {
 	randomSource := rand.New(rand.NewSource(time.Now().UnixNano()))
 	var animations []Animation
-	if d.resourceName == stats.Health {
-		animation := NewDamageNumberAnimation(d.actor.MapPosition(), d.changedByAmount)
+	amount := int(d.changedByAmount)
+	if d.resourceName == stats.Health && amount != 0 {
+		animation := NewDamageNumberAnimation(d.actor.MapPosition(), amount)
 		animation.StartWhenTrue(d.shouldStartAnimation)
 		animations = append(animations, animation)
-		if d.changedByAmount < 0 {
+		if amount < 0 {
 			hitAnimation := NewHitAnimation(d.actor.MapPosition(), 0.2, 43, 2)
 			hitAnimation.StartWhenTrue(d.shouldStartAnimation)
 			hitAnimation.SetOnFinished(func() {
@@ -102,7 +103,7 @@ func (d *ChangeResourceAction) GetResourceName() stats.Name {
 	return d.resourceName
 }
 
-func (d *ChangeResourceAction) GetChangeAmount() int {
+func (d *ChangeResourceAction) GetChangeAmount() float64 {
 	return d.amount
 }
 

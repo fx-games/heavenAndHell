@@ -12,5 +12,6 @@
 ~/bin/rectool ./assets/data/effects/untargeted.rec ./assets/data/effects/untargeted.csv
 
 ~/bin/rectool ./assets/data/enemies/enemies.rec ./assets/data/enemies/enemies.csv
+~/bin/rectool ./assets/data/enemies/unique_enemies.rec ./assets/data/enemies/unique_enemies.csv
 
 ~/bin/rectool ./assets/data/stores.rec ./assets/data/stores.csv

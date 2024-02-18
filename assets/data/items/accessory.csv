@@ -1,5 +1,0 @@
-name,internal_name,icon,dlvl,cost,charges,max_level,out_of_depth_chance,min_level_for_ood,category,armor_type,armor_class,weapon_type,weapon_damage,weapon_speed,throw_hit_zone,throw_damage,throw_chance_to_break,throw_on_hit_effect,light_color,light_flicker_pattern,light_flicker_frame_delay,equip_modifier,untargeted_action,targeted_action
-a ring of regeneration,ring_of_regeneration,item_ring2,1,100,,,,,accessory,,,,,,,,,,,,,health_regen(1),,
-a ring of damage,ring_of_damage,item_ring2,1,100,,,,,accessory,,,,,,,,,,,,,damage(5),,
-a ring of protection,ring_of_protection,item_ring2,1,100,,,,,accessory,,,,,,,,,,,,,armor_class(4),,
-an amulet,amulet,item_amulet2,1,100,,,,,accessory,,,,,,,,,,,,,,,

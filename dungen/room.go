@@ -27,6 +27,7 @@ type DungeonRoom struct {
 	slotId                  int
 	plugsIntoSlotId         int
 	canBeLit                bool
+	bounds                  geometry.Rect
 }
 
 func (r *DungeonRoom) GetFreeConnectionsWithRotatedDirection() map[geometry.Point]RoomConnection {
@@ -251,6 +252,7 @@ func (r *DungeonRoom) findCenter() geometry.Point {
 func NewDungeonRoomFromRect(random *rand.Rand, bounds geometry.Rect) *DungeonRoom {
 	rectRoom := &DungeonRoom{
 		floorTiles:     roomTilesFromRect(bounds),
+		bounds:		 bounds,
 		connectedRooms: make(map[geometry.Point]*DungeonRoom),
 		availableConnections: map[geometry.Point]RoomConnection{
 			bounds.GetRandomPointOnEdge(random, geometry.North).Add(geometry.North.ToPoint()): {
@@ -541,6 +543,14 @@ func (r *DungeonRoom) SetCanBeLit(lit bool) {
 
 func (r *DungeonRoom) CanBeLit() bool {
 	return r.canBeLit
+}
+
+func (r *DungeonRoom) IsCornerPosition(posOne geometry.Point) bool {
+	shifted := posOne.Sub(r.roomPositionOffset)
+	if r.bounds.IsOnCorner(shifted) {
+		return true
+	}
+	return false
 }
 func NewDungeonRoomFromTemplate(templateName string) *DungeonRoom {
 	rectRoom := &DungeonRoom{

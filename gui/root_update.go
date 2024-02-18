@@ -17,7 +17,7 @@ func (u *UIController) Update() error {
 		u.ticksUntilTooltipAppears--
 		//println("decrementing tooltip ticks", u.ticksUntilTooltipAppears)
 	}
-	state := u.context.GameState
+	state := u.context.GameState()
 	player := state.GetPlayer()
 
 	u.context.AudioPlayer.Update()
@@ -37,7 +37,7 @@ func (u *UIController) Update() error {
 
 	u.handleKeyboardInput()
 
-	u.context.Animator.Tick() // this is animations
+	u.context.Animator().Tick() // this is animations
 
 	if !player.IsAlive() {
 		return nil

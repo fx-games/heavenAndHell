@@ -16,6 +16,7 @@ func MaxLen(text []string) int {
 	}
 	return maxLength
 }
+
 func RightPad(s string, pLen int) string {
 	return s + strings.Repeat(" ", pLen-len(s))
 }
@@ -212,4 +213,12 @@ func AutoLayoutPages(inputText string, width int, height int) [][]string {
 	currentPage = append(currentPage, currentLine)
 	allPages = append(allPages, currentPage)
 	return allPages
+}
+
+func GetShortCutForIndex(i int) rune {
+	if i < 9 {
+		return rune('1' + i)
+	}
+	// else start with a
+	return rune('A' + i - 9)
 }

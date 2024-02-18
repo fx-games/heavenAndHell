@@ -64,6 +64,7 @@ func (d *OnKillHook) After(action Action, context ActionContext) []Action {
 }
 
 func (d *OnKillHook) onKill(context ActionContext, killer, victim *Actor) []Action {
+	msg := context.Msg
 	victimLevel := victim.GetStats().GetAttribute(stats.Level)
 	victimXP := max(1, victim.GetStats().GetAttribute(stats.Experience))
 
@@ -79,9 +80,8 @@ func (d *OnKillHook) onKill(context ActionContext, killer, victim *Actor) []Acti
 	killer.GetStats().IncrementBy(stats.Experience, awardXP)
 	killer.GetStats().IncrementBy(stats.Gold, awardGold)
 	state := context.GameState
-	ui := context.UserInterface()
 	if killer == state.GetPlayer() {
-		ui.ShowLogMessage(fmt.Sprintf("You gain %d XP and %d gold", awardXP, awardGold))
+		msg(fmt.Sprintf("You gain %d XP and %d gold", awardXP, awardGold))
 		flags := state.GetFlags()
 
 		flags.Increment(fmt.Sprintf("killed:%s", victim.GetInternalName()))
@@ -95,7 +95,7 @@ func (d *OnKillHook) onKill(context ActionContext, killer, victim *Actor) []Acti
 			flags.SetTrue(fmt.Sprintf("all_clear:%s", currentMapName))
 		}
 	} else {
-		ui.ShowLogMessage(fmt.Sprintf("%s gains %d XP and %d gold", killer.Name(), awardXP, awardGold))
+		msg(fmt.Sprintf("%s gains %d XP and %d gold", killer.Name(), awardXP, awardGold))
 	}
 
 	return nil

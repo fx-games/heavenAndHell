@@ -108,3 +108,10 @@ func (i Interval) NotZero() bool {
 func (i Interval) AsTuple() util.Tuple[int, int] {
 	return util.Tuple[int, int]{Item1: i.min, Item2: i.max}
 }
+
+func (i Interval) SubValPositive(value int) Interval {
+	return Interval{
+		min: max(0, i.min - value),
+		max: max(0, i.max - value),
+	}
+}

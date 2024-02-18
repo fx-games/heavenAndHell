@@ -30,19 +30,19 @@ func (s ArmorStats) ToString(player *Actor) []util.LabelText {
 	return []util.LabelText{
 		util.LabelText{
 			Text:      fmt.Sprintf("Armor Type: %s", s.Type.ToString()),
-			TextColor: OffWhite,
+			TextColor: defs.OffWhite,
 		},
 		util.LabelText{
-			Text:      fmt.Sprintf("Armor Class: %d", s.GetArmorClass()),
-			TextColor: OffWhite,
+			Text:      fmt.Sprintf("Armor Class: %d", s.BaseArmor),
+			TextColor: defs.OffWhite,
 		},
 		util.LabelText{
 			Text:      fmt.Sprintf("Enchantment: +%d", s.Plus),
-			TextColor: OffWhite,
+			TextColor: defs.OffWhite,
 		},
 		util.LabelText{
 			Text:      fmt.Sprintf("Durability: %s", s.Durability.ToString()),
-			TextColor: OffWhite,
+			TextColor: defs.OffWhite,
 		},
 	}
 }
@@ -52,7 +52,7 @@ func (s ArmorStats) NameParts() string {
 	return fmt.Sprintf("[%d, +%d]", s.BaseArmor, s.Plus)
 }
 
-func (s ArmorStats) GetArmorClass() int {
+func (s ArmorStats) GetTotalArmorClass() int {
 	return s.BaseArmor + s.Plus
 }
 
@@ -63,6 +63,10 @@ func (s ArmorStats) Clone() *ArmorStats {
 		Durability: stats.NewResource(s.Durability.Min(), s.Durability.GetMax, s.Durability.Value()),
 		Plus:       s.Plus,
 	}
+}
+
+func (s ArmorStats) CanBeFurtherEnchanted() bool {
+	return s.Plus < 3
 }
 
 type LightStats struct {
@@ -108,6 +112,7 @@ type Item struct {
 	actionCharges     int
 	destroyAfterUse   bool
 	nameOnlyInTooltip bool
+	internalName      string
 }
 
 func NewItem(getPlayerRef func() *Actor, name string, icon int32) *Item {
@@ -185,21 +190,56 @@ func (i *Item) GetLightStats() *LightStats {
 }
 
 func (i *Item) TintColor() color.Color {
-	commonColor := White
-	if i.IsLightSource() {
-		commonColor = Yellow
-	}
-
 	switch i.rarity {
 	case ItemRarityCommon:
-		return commonColor
-	case ItemRarityMagic:
-		return MagicHighlightColor
+		return i.categoryColor()
+/*	case ItemRarityMagic:
+		return defs.MagicHighlightColor
+ */
 	case ItemRarityUnique:
-		return UniqueHighlightColor
+		return defs.InvColorUnique
+	}
+	return defs.InvColorMisc
+}
+
+func (i *Item) categoryColor() color.Color {
+	if i.IsLightSource() {
+		return defs.InvColorLightSource
 	}
 
-	return color.White
+	if i.IsRing() {
+		return defs.InvColorRing
+	}
+
+	if i.IsAmulet() {
+		return defs.InvColorAmulet
+	}
+
+	if i.IsPotion() {
+		return defs.InvColorPotion
+	}
+
+	if i.IsScroll() {
+		return defs.InvColorScroll
+	}
+
+	if i.IsWand() {
+		return defs.InvColorWand
+	}
+
+	if i.IsArmor() {
+		return defs.InvColorArmor
+	}
+
+	if i.IsRangedWeapon() {
+		return defs.InvColorRangedWeapon
+	}
+
+	if i.IsMeleeWeapon() {
+		return defs.InvColorMeleeWeapon
+	}
+
+	return defs.InvColorMisc
 }
 
 func (i *Item) Name() string {
@@ -241,6 +281,12 @@ func (i *Item) SlotName() defs.SlotName {
 	}
 	if i.IsThrowable() {
 		return defs.SlotNameQuiver
+	}
+	if i.IsRing() {
+		return defs.SlotNameRing
+	}
+	if i.IsAmulet() {
+		return defs.SlotNameAmulet
 	}
 	return defs.SlotNameNotEquippable
 }
@@ -447,7 +493,7 @@ func (i *Item) GetItemHooks() []ItemActionHook {
 	return i.itemHooks
 }
 func (i *Item) GetTooltipLines(func(string) []util.ColoredTextPart) []util.LabelText {
-	info := []util.LabelText{util.LabelTextFromStringWithColor(i.Name(), OffWhite)}
+	info := []util.LabelText{util.LabelTextFromStringWithColor(i.Name(), defs.OffWhite)}
 
 	if i.nameOnlyInTooltip {
 		return info
@@ -584,7 +630,7 @@ func (i *Item) AddItemhook(hookToAdd ItemActionHook) {
 }
 
 func (i *Item) IsEquippable() bool {
-	return i.SlotName() != defs.SlotNameNotEquippable
+	return i.IsArmor() || i.IsWeapon() || i.IsLightSource() || i.IsAccessory() || i.IsThrowable()
 }
 
 func (i *Item) HasTargetedAction() bool {
@@ -678,6 +724,67 @@ func (i *Item) SetUntargetedAction(action *UntargetedAction) {
 func (i *Item) SetTargetedAction(action *TargetedAction) {
 	i.targetedAction = action
 }
+
+func (i *Item) IsRing() bool {
+	return i.GetItemType() == defs.ItemCategoryRing
+}
+
+func (i *Item) IsAmulet() bool {
+	return i.GetItemType() == defs.ItemCategoryAmulet
+}
+
+func (i *Item) IsAccessory() bool {
+	return i.IsRing() || i.IsAmulet()
+}
+func (i *Item) IsPotion() bool {
+	return i.GetItemType() == defs.ItemCategoryPotion
+}
+
+func (i *Item) IsScroll() bool {
+	return i.GetItemType() == defs.ItemCategoryScroll
+}
+
+func (i *Item) IsWand() bool {
+	return i.GetItemType() == defs.ItemCategoryWand
+}
+
+func (i *Item) IsTwoHandedWeapon() bool {
+	return i.IsWeapon() && i.SlotName() == defs.SlotNameTwoHandedWeapon
+}
+
+func (i *Item) IsBow() bool {
+	return i.IsRangedWeapon() && i.GetWeaponStats().Type == defs.WeaponTypeBow
+}
+
+func (i *Item) IsCrossbow() bool {
+	return i.IsRangedWeapon() && i.GetWeaponStats().Type == defs.WeaponTypeCrossbow
+}
+
+func (i *Item) IsSlingshot() bool {
+	return i.IsRangedWeapon() && i.GetWeaponStats().Type == defs.WeaponTypeSling
+}
+
+func (i *Item) GetInternalName() string {
+	return i.internalName
+}
+
+func (i *Item) SetInternalName(name string) {
+	i.internalName = name
+}
+
+func (i *Item) IsShield() bool {
+	return i.IsArmor() && i.GetArmorStats().Type == defs.ArmorTypeShield
+}
+
+func (i *Item) Repair() {
+	if i.IsArmor() {
+		i.GetArmorStats().Durability.SetToMax()
+	}
+	if i.IsWeapon() {
+		i.GetWeaponStats().Durability.SetToMax()
+	}
+}
+
 
 type Enchantment interface {
 	ToString() string

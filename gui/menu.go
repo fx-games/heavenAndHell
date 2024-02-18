@@ -2,7 +2,7 @@ package gui
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	"rpg/common"
+	"rpg/defs"
 	"rpg/geometry"
 	"rpg/util"
 )
@@ -131,20 +131,20 @@ func (i *BasicMenu) drawStringArray(lines []util.MenuItem) {
 		if line.UseColorCodes {
 			textWithColorCodes := line.MainTextWithColorCodes
 			if lineIndex == i.selectedIndex {
-				textWithColorCodes[0].Color = common.LightTextColor
+				textWithColorCodes[0].Color = defs.LightTextColor
 				//textWithColorCodes = "[:lightText]" + textWithColorCodes
 			} else {
 				//textWithColorCodes = "[:darkText]" + textWithColorCodes
-				textWithColorCodes[0].Color = common.DarkTextColor
+				textWithColorCodes[0].Color = defs.DarkTextColor
 			}
 			uiRenderer.DrawTTFOnScreenWithColorCodes(float64(drawX), float64(drawY), textWithColorCodes)
 		} else {
 			drawColor := line.MainTextColor
 			if drawColor == nil {
-				drawColor = common.DarkTextColor
+				drawColor = defs.DarkTextColor
 			}
 			if lineIndex == i.selectedIndex {
-				drawColor = common.LightTextColor
+				drawColor = defs.LightTextColor
 			}
 
 			uiRenderer.DrawTTFOnScreen(float64(drawX), float64(drawY), line.MainText, drawColor)

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"image/color"
 	"rpg/geometry"
 	"rpg/gridmap"
@@ -13,6 +14,14 @@ type RangedTargetingRules struct {
 	nearestHostileActor func() geometry.Point
 	attacker            *Actor
 	aoe                 *AoEResolver
+	infoForTarget       func(geometry.Point) string
+}
+
+func (r RangedTargetingRules) GetInfoTextForTarget(pos geometry.Point) string {
+	if r.infoForTarget != nil {
+		return r.infoForTarget(pos)
+	}
+	return ""
 }
 
 func (r RangedTargetingRules) GetAttacker() *Actor {
@@ -54,6 +63,10 @@ func (r RangedTargetingRules) GetHighlightsForTarget(target geometry.Point) []Ta
 }
 
 func NewRangedAttackTargetingRules(args util.Arguments) *TargetRulesProvider {
+	hitChanceFunc := CalculateRangedWeaponHitChance
+	if args.Get(0) == "throw" {
+		hitChanceFunc = CalculateThrowHitChance
+	}
 	return &TargetRulesProvider{
 		GetTargetRules: func(attacker *Actor, hitPositions *AoEResolver, currentMap *gridmap.GridMap[*Actor, *Item, Object]) TargetRules {
 			return &RangedTargetingRules{
@@ -83,6 +96,14 @@ func NewRangedAttackTargetingRules(args util.Arguments) *TargetRulesProvider {
 					return nearestActor.MapPosition()
 				},
 				aoe: hitPositions,
+				infoForTarget: func(point geometry.Point) string {
+					if !currentMap.IsActorAt(point) {
+						return ""
+					}
+					defender := currentMap.GetActor(point)
+					hitChance := hitChanceFunc(attacker, defender)
+					return fmt.Sprintf("%.0f%%", hitChance*100)
+				},
 			}
 		},
 		Description: []util.LabelText{
@@ -98,6 +119,14 @@ type DirectTargetingRules struct {
 	isValid  func(target geometry.Point) bool
 	moveDist func(origin, target geometry.Point) int
 	maxRange int
+	infoForTarget func(geometry.Point) string
+}
+
+func (d DirectTargetingRules) GetInfoTextForTarget(pos geometry.Point) string {
+	if d.infoForTarget != nil {
+		return d.infoForTarget(pos)
+	}
+	return ""
 }
 
 func NewDirectTargetingRules(args util.Arguments) *TargetRulesProvider {
@@ -183,4 +212,116 @@ func (d DirectTargetingRules) GetHighlightsForTarget(target geometry.Point) []Ta
 
 func (d DirectTargetingRules) GetHitpositions(target geometry.Point) []geometry.Point {
 	return d.aoe.GetHitPositions(d.GetOrigin(), target)
+}
+
+
+type CustomTargetingRules struct {
+	attacker            *Actor
+	isOnMap             func(target geometry.Point) bool
+	nearestHostileActor func() geometry.Point
+	aoe                 *AoEResolver
+	isValidTarget       func(target geometry.Point) bool
+	highlights          func(origin, target geometry.Point, hitPositions []geometry.Point) []TargetHighlight
+}
+
+func (c CustomTargetingRules) IsVisiblePositionOnMap(target geometry.Point) bool {
+	return c.isOnMap(target)
+}
+
+func (c CustomTargetingRules) IsValidTarget(target geometry.Point) bool {
+	return c.isOnMap(target) && c.isValidTarget(target)
+}
+
+func (c CustomTargetingRules) GetPreSelectedTarget() geometry.Point {
+	return c.nearestHostileActor()
+}
+
+func (c CustomTargetingRules) GetHighlightsForTarget(target geometry.Point) []TargetHighlight {
+	origin := c.attacker.MapPosition()
+	return c.highlights(origin, target, c.GetHitpositions(target))
+}
+
+func (c CustomTargetingRules) GetHitpositions(target geometry.Point) []geometry.Point {
+	return c.aoe.GetHitPositions(c.attacker.MapPosition(), target)
+}
+
+func (c CustomTargetingRules) GetAttacker() *Actor {
+	return c.attacker
+}
+
+func (c CustomTargetingRules) GetInfoTextForTarget(pos geometry.Point) string {
+	return ""
+}
+
+func NewJumpStartTargetingRules(args util.Arguments) *TargetRulesProvider {
+	maxSprint := args.GetIntOrDefault(0, 5)
+	maxJump := args.GetIntOrDefault(1, 5)
+	return &TargetRulesProvider{
+		GetTargetRules: func(attacker *Actor, hitPositions *AoEResolver, currentMap *gridmap.GridMap[*Actor, *Item, Object]) TargetRules {
+			return &CustomTargetingRules{
+				attacker: attacker,
+				isOnMap: currentMap.Contains,
+				nearestHostileActor: GetPositionOfNearestEnemy(attacker, currentMap),
+				aoe:                 hitPositions,
+				isValidTarget: jumpStartValidTarget(currentMap, attacker, maxSprint, maxJump),
+				highlights: jumpStartHighlights(currentMap, maxSprint, maxJump),
+			}
+		},
+		Description: []util.LabelText{
+			util.LabelTextFromString("Jump start"),
+		},
+	}
+}
+
+func jumpStartHighlights(currentMap *gridmap.GridMap[*Actor, *Item, Object], maxSprint int, maxJump int) func(origin geometry.Point, target geometry.Point, positions []geometry.Point) []TargetHighlight {
+	return func(origin geometry.Point, target geometry.Point, positions []geometry.Point) []TargetHighlight {
+		jumpInfo := currentMap.JumpOverPositions(origin, target, maxSprint,maxJump)
+
+		if !jumpInfo.ActorFound || len(jumpInfo.Jump) == 0 {
+			return []TargetHighlight{}
+		}
+
+		highlights := make([]TargetHighlight,0,len(jumpInfo.Sprint)+2)
+		for _, pos := range jumpInfo.Sprint {
+			highlights = append(highlights, TargetHighlight{
+				Pos:   pos,
+				Color: color.RGBA{R: 80, G: 80, B: 255, A: 255},
+			})
+		}
+		if len(jumpInfo.Jump) > 0 {
+			highlights = append(highlights, TargetHighlight{
+				Pos:   jumpInfo.Jump[len(jumpInfo.Jump)-1],
+				Color: color.RGBA{R: 80, G: 255, B: 80, A: 255},
+			})
+		}
+
+		highlights = append(highlights, TargetHighlight{
+			Pos:   jumpInfo.JumpedPos,
+			Color: color.RGBA{R: 255, G: 80, B: 80, A: 255},
+		})
+		return highlights
+	}
+}
+
+
+func jumpStartValidTarget(currentMap *gridmap.GridMap[*Actor, *Item, Object], attacker *Actor, maxSprint int, maxJump int) func(target geometry.Point) bool {
+	return func(target geometry.Point) bool {
+		jumpInfo := currentMap.JumpOverPositions(attacker.MapPosition(), target, maxSprint, maxJump)
+		return jumpInfo.ActorFound && len(jumpInfo.Jump) > 0
+	}
+}
+
+func GetPositionOfNearestEnemy(attacker *Actor, currentMap *gridmap.GridMap[*Actor, *Item, Object]) func() geometry.Point {
+	return func() geometry.Point {
+		nearestActor := currentMap.GetNearestActor(attacker.MapPosition(), func(actor *Actor) bool {
+			if !actor.IsHostileTo(attacker) || !attacker.CanSee(actor.MapPosition()) || actor.IsVendor() {
+				return false
+			}
+			return true
+		})
+		if nearestActor == nil {
+			return attacker.MapPosition()
+		}
+		return nearestActor.MapPosition()
+	}
 }

@@ -25,28 +25,3 @@ light_color: 255 223 117
 light_flicker_pattern: fire
 light_flicker_frame_delay: 0.125
 equip_modifier: light_radius(2)
-
-name: The Star-Glass
-internal_name: light_star_glass
-icon: 248
-dlvl: 1
-cost: 100
-charges: -1
-category: light
-light_color: 5 250 255
-light_flicker_pattern: smooth
-light_flicker_frame_delay: 0.125
-equip_modifier: light_radius(4)
-
-name: The Morning Star
-internal_name: light_morning_star
-icon: 274
-dlvl: 1
-cost: 100
-charges: -1
-category: light
-light_color: 255 248 207
-light_flicker_pattern: smooth
-light_flicker_frame_delay: 0.500
-equip_modifier: light_radius(12)
-

@@ -1,37 +1,15 @@
 %rec: default
 #FIELDS: name internal_name icon dlvl cost charges max_level out_of_depth_chance min_level_for_ood category armor_type armor_class weapon_type weapon_damage weapon_speed throw_hit_zone throw_damage throw_chance_to_break throw_on_hit_effect light_color light_flicker_pattern light_flicker_frame_delay equip_modifier untargeted_action targeted_action
 
-name: Pair of Soft Leather Boots
-internal_name: soft_leather_boots
+name: Pair of Leather Boots
+internal_name: leather_boots
 icon: 355
 dlvl: 1
 cost: 7
 max_level: 4
 category: armor
 armor_type: boots
-armor_class: 2
-throw_damage: 1-2
-throw_chance_to_break: 0.05
-
-name: Pair of Hard Leather Boots
-internal_name: hard_leather_boots
-icon: 358
-dlvl: 2
-cost: 16
-category: armor
-armor_type: boots
-armor_class: 3
-throw_damage: 1-2
-throw_chance_to_break: 0.05
-
-name: Pair of Iron Shod Boots
-internal_name: iron_boots
-icon: 361
-dlvl: 3
-cost: 26
-category: armor
-armor_type: boots
-armor_class: 4
+armor_class: 1
 throw_damage: 1-2
 throw_chance_to_break: 0.05
 
@@ -42,7 +20,7 @@ dlvl: 3
 cost: 50
 category: armor
 armor_type: boots
-armor_class: 7
+armor_class: 2
 throw_damage: 1-2
 throw_chance_to_break: 0.05
 
@@ -63,7 +41,7 @@ dlvl: 4
 cost: 600
 category: armor
 armor_type: cape
-armor_class: 3
+armor_class: 1
 
 name: Elven Cloak
 internal_name: elven_cloak
@@ -72,7 +50,7 @@ dlvl: 4
 cost: 2000
 category: armor
 armor_type: cape
-armor_class: 6
+armor_class: 1
 
 name: Shadow Cloak
 internal_name: shadow_cloak
@@ -83,7 +61,7 @@ out_of_depth_chance: 0.1
 min_level_for_ood: 4
 category: armor
 armor_type: cape
-armor_class: 6
+armor_class: 1
 throw_damage: 0
 throw_chance_to_break: 0.05
 
@@ -95,7 +73,7 @@ cost: 5
 max_level: 3
 category: armor
 armor_type: cuirass
-armor_class: 2
+armor_class: 1
 
 name: Ceremonial Robe
 internal_name: ceremonial_robe
@@ -105,51 +83,52 @@ cost: 5
 max_level: 3
 category: armor
 armor_type: cuirass
-armor_class: 2
+armor_class: 1
 
-name: Soft Leather Armour
-internal_name: soft_leather_armour
+name: Partial Leather Armour
+internal_name: partial_leather_armour
 icon: 227
 dlvl: 1
 cost: 20
 max_level: 4
 category: armor
 armor_type: cuirass
-armor_class: 4
+armor_class: 1
 throw_damage: 1-2
 throw_chance_to_break: 0.05
 
-name: Hard Leather Armour
-internal_name: hard_leather_armour
-icon: 227
-dlvl: 2
-cost: 150
-category: armor
-armor_type: cuirass
-armor_class: 6
-throw_damage: 1-3
-throw_chance_to_break: 0.05
-
-name: Hard Studded Leather
-internal_name: hard_studded_leather
-icon: 228
-dlvl: 3
-cost: 200
-category: armor
-armor_type: cuirass
-armor_class: 7
-throw_damage: 1-3
-throw_chance_to_break: 0.05
-
-name: Leather Scale Mail
-internal_name: leather_scale_mail
+name: Full Leather Armour
+internal_name: full_leather_armour
 icon: 229
-dlvl: 4
-cost: 450
+dlvl: 1
+cost: 20
+max_level: 4
 category: armor
 armor_type: cuirass
-armor_class: 11
-throw_damage: 1-3
+armor_class: 2
+throw_damage: 1-2
+throw_chance_to_break: 0.05
+
+name: Leather Brigandine
+internal_name: leather_brigandine
+icon: 378
+dlvl: 4
+cost: 750
+category: armor
+armor_type: cuirass
+armor_class: 1
+throw_damage: 1
+throw_chance_to_break: 0.05
+
+name: Rusted Chain Mail
+internal_name: rusted_chain_mail
+icon: 196
+dlvl: 4
+cost: 550
+category: armor
+armor_type: cuirass
+armor_class: 2-3
+throw_damage: 2-3
 throw_chance_to_break: 0.05
 
 name: Chain Mail
@@ -159,117 +138,29 @@ dlvl: 4
 cost: 750
 category: armor
 armor_type: cuirass
-armor_class: 14
+armor_class: 3
 throw_damage: 2-3
 throw_chance_to_break: 0.05
 
-name: Metal Scale Mail
-internal_name: metal_scale_mail
-icon: 198
-dlvl: 5
-cost: 550
-category: armor
-armor_type: cuirass
-armor_class: 13
-throw_damage: 2-3
-throw_chance_to_break: 0.05
-
-name: Rusty Chain Mail
-internal_name: rusty_chain_mail
-icon: 196
-dlvl: 5
-cost: 550
-category: armor
-armor_type: cuirass
-armor_class: 14
-throw_damage: 2-3
-throw_chance_to_break: 0.05
-
-name: Augmented Chain Mail
-internal_name: augmented_chain_mail
-icon: 230
-dlvl: 6
-cost: 900
-category: armor
-armor_type: cuirass
-armor_class: 16
-throw_damage: 2-3
-throw_chance_to_break: 0.05
-
-name: Bar Chain Mail
-internal_name: bar_chain_mail
-icon: 197
-dlvl: 6
-cost: 950
-category: armor
-armor_type: cuirass
-armor_class: 18
-throw_damage: 2-3
-throw_chance_to_break: 0.05
-
-name: Double Chain Mail
-internal_name: double_chain_mail
-icon: 230
-dlvl: 7
-cost: 850
-category: armor
-armor_type: cuirass
-armor_class: 16
-throw_damage: 2-3
-throw_chance_to_break: 0.05
-
-name: Metal Brigandine Armour
-internal_name: metal_brigandine_armour
-icon: 199
-dlvl: 7
-cost: 1100
-category: armor
-armor_type: cuirass
-armor_class: 19
-throw_damage: 2-3
-throw_chance_to_break: 0.05
-
-name: Partial Plate Armour
-internal_name: partial_plate_armour
-icon: 199
-dlvl: 7
-cost: 1200
-category: armor
-armor_type: cuirass
-armor_class: 22
-throw_damage: 2-3
-throw_chance_to_break: 0.05
-
-name: Full Plate Armour
-internal_name: full_plate_armour
+name: Scale Mail
+internal_name: scale_mail
 icon: 199
 dlvl: 8
 cost: 1350
 category: armor
 armor_type: cuirass
-armor_class: 25
+armor_class: 4
 throw_damage: 2-3
 throw_chance_to_break: 0.05
 
-name: Metal Lamellar Armour
-internal_name: metal_lamellar_armour
-icon: 199
+name: Full Plate Armour
+internal_name: full_plate_armour
+icon: 198
 dlvl: 8
-cost: 1250
+cost: 1350
 category: armor
 armor_type: cuirass
-armor_class: 23
-throw_damage: 2-3
-throw_chance_to_break: 0.05
-
-name: Ribbed Plate Armour
-internal_name: ribbed_plate_armour
-icon: 201
-dlvl: 9
-cost: 1500
-category: armor
-armor_type: cuirass
-armor_class: 28
+armor_class: 5
 throw_damage: 2-3
 throw_chance_to_break: 0.05
 
@@ -303,7 +194,7 @@ dlvl: 5
 cost: 100
 category: armor
 armor_type: gloves
-armor_class: 5
+armor_class: 2
 throw_damage: 1-2
 throw_chance_to_break: 0.05
 
@@ -314,9 +205,31 @@ dlvl: 5
 cost: 500
 category: armor
 armor_type: gloves
-armor_class: 5-10
+armor_class: 1-2
 throw_damage: 1-2
 throw_chance_to_break: 0.05
+
+name: Hood
+internal_name: hood
+icon: 208
+dlvl: 5
+cost: 500
+category: armor
+armor_type: helmet
+armor_class: 1
+
+name: Leather Helmet
+internal_name: leather_helmet
+icon: 379
+dlvl: 1
+cost: 12
+max_level: 4
+category: armor
+armor_type: helmet
+armor_class: 1
+throw_damage: 1
+throw_chance_to_break: 0.05
+
 
 name: Hard Leather Cap
 internal_name: hard_leather_cap
@@ -326,30 +239,45 @@ cost: 12
 max_level: 4
 category: armor
 armor_type: helmet
-armor_class: 2
-throw_damage: 0
+armor_class: 1
+throw_damage: 1
+throw_chance_to_break: 0.05
+
+name: Leather Helmet
+internal_name: leather_helmet
+icon: 379
+dlvl: 1
+cost: 12
+max_level: 4
+category: armor
+armor_type: helmet
+armor_class: 1
+throw_damage: 1
 throw_chance_to_break: 0.05
 
 name: Metal Cap
 internal_name: metal_cap
 icon: 354
-dlvl: 3
-cost: 30
+dlvl: 1
+cost: 12
+max_level: 4
 category: armor
 armor_type: helmet
-armor_class: 3
-throw_damage: 1-2
+armor_class: 2
+throw_damage: 1
 throw_chance_to_break: 0.05
 
-name: Iron Helm
-internal_name: iron_helm
-icon: 211
-dlvl: 5
-cost: 75
+
+name: Chain Coif
+internal_name: chain_coif
+icon: 350
+dlvl: 1
+cost: 12
+max_level: 4
 category: armor
 armor_type: helmet
-armor_class: 5
-throw_damage: 1-2
+armor_class: 2
+throw_damage: 1
 throw_chance_to_break: 0.05
 
 name: Steel Helm
@@ -359,7 +287,7 @@ dlvl: 5
 cost: 200
 category: armor
 armor_type: helmet
-armor_class: 6
+armor_class: 3
 throw_damage: 1-2
 throw_chance_to_break: 0.05
 
@@ -370,7 +298,7 @@ dlvl: 6
 cost: 500
 category: armor
 armor_type: helmet
-armor_class: 0
+armor_class: 1
 throw_damage: 0
 throw_chance_to_break: 0.05
 
@@ -381,8 +309,8 @@ dlvl: 6
 cost: 1000
 category: armor
 armor_type: helmet
-armor_class: 0
-throw_damage: 0
+armor_class: 1
+throw_damage: 1
 throw_chance_to_break: 0.05
 
 name: Jewel Encrusted Crown
@@ -392,8 +320,8 @@ dlvl: 7
 cost: 2000
 category: armor
 armor_type: helmet
-armor_class: 0
-throw_damage: 0
+armor_class: 1-2
+throw_damage: 1
 throw_chance_to_break: 0.05
 
 name: Buckler
@@ -403,11 +331,11 @@ dlvl: 2
 cost: 35
 category: armor
 armor_type: shield
-armor_class: 2
+armor_class: 1
 weapon_type: shield
 weapon_damage: 1-4
 weapon_speed: 0.9
-throw_damage: 0
+throw_damage: 1
 throw_chance_to_break: 0.05
 
 name: Small Leather Shield
@@ -417,53 +345,11 @@ dlvl: 2
 cost: 35
 category: armor
 armor_type: shield
-armor_class: 2
+armor_class: 1
 weapon_type: shield
 weapon_damage: 1-4
 weapon_speed: 0.9
 throw_damage: 0
-throw_chance_to_break: 0.05
-
-name: Large Leather Shield
-internal_name: large_leather_shield
-icon: 207
-dlvl: 3
-cost: 35
-category: armor
-armor_type: shield
-armor_class: 4
-weapon_type: shield
-weapon_damage: 2-5
-weapon_speed: 1
-throw_damage: 0
-throw_chance_to_break: 0.05
-
-name: Large Rusted Shield
-internal_name: large_rusted_shield
-icon: 206
-dlvl: 3
-cost: 40
-category: armor
-armor_type: shield
-armor_class: 4
-weapon_type: shield
-weapon_damage: 1-6
-weapon_speed: 1
-throw_damage: 1-2
-throw_chance_to_break: 0.05
-
-name: Small Metal Shield
-internal_name: small_metal_shield
-icon: 203
-dlvl: 3
-cost: 50
-category: armor
-armor_type: shield
-armor_class: 3
-weapon_type: shield
-weapon_damage: 2-5
-weapon_speed: 1
-throw_damage: 1-2
 throw_chance_to_break: 0.05
 
 name: Large Metal Shield
@@ -473,7 +359,7 @@ dlvl: 4
 cost: 200
 category: armor
 armor_type: shield
-armor_class: 5
+armor_class: 2
 weapon_type: shield
 weapon_damage: 3-7
 weapon_speed: 1.1
@@ -489,7 +375,7 @@ out_of_depth_chance: 0.1
 min_level_for_ood: 4
 category: armor
 armor_type: shield
-armor_class: 10
+armor_class: 3
 weapon_type: shield
 weapon_damage: 3-7
 weapon_speed: 1

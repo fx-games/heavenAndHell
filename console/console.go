@@ -1,163 +1,424 @@
 package console
 
+import "C"
 import (
-	"github.com/gdamore/tcell"
+	"fmt"
+	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
+	"image/color"
 	"log"
-	"rpg/game"
+	"regexp"
+	"rpg/common"
+	"rpg/defs"
 	"rpg/geometry"
-)
-
-func drawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string) {
-	row := y1
-	col := x1
-	for _, r := range []rune(text) {
-		s.SetContent(col, row, r, nil, style)
-		col++
-		if col >= x2 {
-			row++
-			col = x1
-		}
-		if row > y2 {
-			break
-		}
-	}
-}
-
-type UIState int
-
-const (
-	Default UIState = iota
-	Inventory
+	"rpg/gridmap"
+	"rpg/stats"
+	"rpg/util"
+	"strings"
 )
 
 type Console struct {
-	game            *game.GameInstance
+	context         common.UIContext
 	terminationCode int
 	lightStyle      tcell.Style
 	darkStyle       tcell.Style
 	screen          tcell.Screen
-	state           UIState
+	mapWindow       *tview.Box
+	messageLabel    *tview.TextView
+	statusBar       *tview.TextView
+	rootPages       *tview.Pages
+	focus           tview.Primitive
+}
+
+func (c *Console) GetVisibleMap() geometry.Rect {
+	return geometry.Rect{}
+}
+
+func (c *Console) IsPlayerForcingAggression() bool {
+	return false
+}
+
+func (c *Console) HasOverlays() bool {
+	return false
+}
+
+func (c *Console) ShowLogMessage(message string) {
+	c.messageLabel.SetText(message)
+}
+
+func (c *Console) Cancel() {
+
+}
+
+func (c *Console) PopAll() {
+
+}
+
+func (c *Console) ShowGameOverMenu() {
+
+}
+
+func (c *Console) OpenMenu(options []util.MenuItem) {
+	list := tview.NewList()
+	list.ShowSecondaryText(false)
+	list.SetBorder(true)
+	longestOption := 0
+	for index, i := range options {
+		item := i
+		list.AddItem(item.MainText, "", util.GetShortCutForIndex(index), func() {
+			c.rootPages.HidePage("menu")
+			c.focus = nil
+			item.Action()
+		})
+		longestOption = max(longestOption, len(item.MainText))
+	}
+	w, h := c.screen.Size()
+	height := min(h-4, len(options)+2)
+	width := min(longestOption+6, w-4)
+	modalContainer := makeModal(list, width, height)
+	list.SetInputCapture(c.popOnEscape("menu"))
+	c.rootPages.AddPage("menu", modalContainer, true, true)
+	c.rootPages.ShowPage("menu")
+	c.focus = list
+}
+
+func (c *Console) OpenTextWindow(msg []util.LabelText) {
+	c.openTextWindow(toTcellColorCodes(msg))
+}
+
+func toTcellColorCodes(msg []util.LabelText) []string { // DOESN'T DO COLOR FOR NOW
+	result := make([]string, len(msg))
+	for i, labelText := range msg {
+		if len(labelText.TextWithColorCodes) == 0 {
+			result[i] = labelText.Text
+			continue
+		}
+		result[i] = toTcellColorCodedText(labelText.TextWithColorCodes)
+	}
+	return result
+}
+
+func toTcellColorCodedText(codes []util.ColoredTextPart) string {
+	var result strings.Builder
+	for i, part := range codes {
+		if i != 0 {
+			result.WriteString(" ")
+		}
+		result.WriteString(toTcellColorString(part.Color))
+		result.WriteString(part.Text)
+	}
+	return result.String()
+}
+
+func toTcellColorString(c color.RGBA) string {
+	//[#8080ff]
+	return fmt.Sprintf("[#%02x%02x%02x]", c.R, c.G, c.B)
+}
+
+func (c *Console) openTextWindow(msg []string) {
+	textView := tview.NewTextView()
+	textView.SetBorder(true)
+	longestLine := MaxLenWithoutColorCodes(msg)
+	textView.SetText(strings.Join(msg, "\n"))
+	w, h := c.screen.Size()
+	height := min(h-4, len(msg)+2)
+	width := min(longestLine+2, w-4)
+	modalContainer := makeModal(textView, width, height)
+	textView.SetInputCapture(c.popOnEscape("text"))
+	textView.SetDynamicColors(true)
+	c.rootPages.AddPage("text", modalContainer, true, true)
+	c.rootPages.ShowPage("text")
+	c.focus = textView
+}
+func RemoveColorCodes(colorCodedText string) string {
+	// color codes look like this [:red] [:blue] [:green] [:yellow] [:white] [:24,54,222]
+	regexPattern := `\[([\w,]+)\]`
+	rp, _ := regexp.Compile(regexPattern)
+
+	return rp.ReplaceAllString(colorCodedText, "")
+}
+
+func MaxLenWithoutColorCodes(text []string) int {
+	maxLength := 0
+	for _, line := range text {
+		asRunes := []rune(RemoveColorCodes(line))
+		if len(asRunes) > maxLength {
+			maxLength = len(asRunes)
+		}
+	}
+	return maxLength
+}
+func (c *Console) CancelTargeting() {
+
+}
+
+func (c *Console) ShowFullStats() {
+
+}
+
+func (c *Console) UpdateStatsLabel() {
+	player := c.context.GameState().GetPlayer()
+	pStats := player.GetStats()
+
+	level := pStats.GetAttribute(stats.Level)
+	levelStr := fmt.Sprintf("Level: %-2d", level)
+
+	gold := pStats.GetAttribute(stats.Gold)
+	goldStr := fmt.Sprintf("Gold: %-5d", gold)
+
+	hp := pStats.GetResource(stats.Health).Value()
+	hpMax := pStats.GetResource(stats.Health).GetMax()
+	hpValString := fmt.Sprintf("%d(%d)", hp, hpMax)
+	hpStr := fmt.Sprintf("HP: %-7s", hpValString)
+
+	str := pStats.GetAttribute(stats.Strength)
+	strMax := pStats.GetAttribute(stats.Strength)
+	strValString := fmt.Sprintf("%d(%d)", str, strMax)
+	strStr := fmt.Sprintf("Str: %-7s", strValString)
+
+	armor := player.GetArmorClass()
+	armorStr := fmt.Sprintf("Armor: %-3d", armor)
+
+	xp := pStats.GetAttribute(stats.Experience)
+	xpStr := fmt.Sprintf("XP: %d", xp)
+
+	statusStr := fmt.Sprintf("%s %s %s %s %s %s", levelStr, goldStr, hpStr, strStr, armorStr, xpStr)
+
+	c.statusBar.SetText(statusStr)
+}
+func (c *Console) OpenStash(inv *common.Inventory, town *common.Inventory, drop func(item *common.Item)) {
+
+}
+
+func (c *Console) OnMapChanged() {
+	//c.screen.Clear()
+	c.screen.Sync()
+}
+
+func (c *Console) OpenClassSelectionMenu() {
+
+}
+
+func (c *Console) Say(actor *common.Actor, linesOfText []string) {
+
+}
+
+func (c *Console) BeginTargeting(rules common.TargetRules, onHit *common.HitEffect) {
+
+}
+
+func (c *Console) OpenShopMenu(npc *common.Actor) {
+
+}
+
+func (c *Console) BeginPlayerSellingTo(vendor *common.Actor) {
+
+}
+
+func (c *Console) OpenTransferEnchantmentMenu() {
+
+}
+func (c *Console) UpdateMiniMap() {
+
+}
+
+func (c *Console) OpenPlayerStashInTown() {
+
+}
+
+func (c *Console) OnPlayerTurnTaken() {
+	c.UpdateStatsLabel()
+}
+
+func (c *Console) SetPlayerMessage(message func(message string)) {
+
+}
+
+func (c *Console) SetDebugActions(actions func() common.DebugActions) {
+	c.context.DebugActions = actions
 }
 
 func (c *Console) HandleInput() (terminationCode int) {
+
 	ev := c.screen.PollEvent()
 	if ev == nil {
 		return 1
 	}
+
 	switch typedEvent := ev.(type) {
 	case *tcell.EventResize:
-		c.screen.Sync()
+		c.onScreenSizeChanged()
 	case *tcell.EventKey:
+		if c.focus != nil {
+			handler := c.focus.InputHandler()
+			handler(typedEvent, func(p tview.Primitive) {
+				c.focus = p
+			})
+			return c.terminationCode
+		}
 		typedRune := typedEvent.Rune()
 		//mod, key, ch := typedEvent.Modifiers(), typedEvent.Key(), typedRune
 		//println(fmt.Sprintf("EventKey Modifiers: %d Key: %d Rune: %d", mod, key, ch))
+		actions := c.context.PlayerAction()
 		if typedRune == 'w' {
-			c.game.GetActions().ManualMovePlayer(geometry.Point{X: 0, Y: -1})
+			actions.ManualMovePlayer(geometry.Point{X: 0, Y: -1})
 		} else if typedRune == 's' {
-			c.game.GetActions().ManualMovePlayer(geometry.Point{X: 0, Y: 1})
+			actions.ManualMovePlayer(geometry.Point{X: 0, Y: 1})
 		} else if typedRune == 'a' {
-			c.game.GetActions().ManualMovePlayer(geometry.Point{X: -1, Y: 0})
+			actions.ManualMovePlayer(geometry.Point{X: -1, Y: 0})
 		} else if typedRune == 'd' {
-			c.game.GetActions().ManualMovePlayer(geometry.Point{X: 1, Y: 0})
+			actions.ManualMovePlayer(geometry.Point{X: 1, Y: 0})
 		} else if typedRune == 'i' {
-			if c.state == Inventory {
-				c.state = Default
-			} else {
-				c.state = Inventory
-			}
-		} else if typedRune == 'q' {
+			c.OpenListInventory()
+		} else if typedRune == 'l' {
+			c.showLog()
+		} else if typedRune == 'b' {
+			c.OpenListInventoryForDropping()
+		} else if typedRune == 'g' {
+			actions.PickUpItem()
+		} else if typedRune == 'Q' {
 			c.terminationCode = 1
 			c.screen.Fini()
-		} else if typedRune == 'p' {
-			c.terminationCode = 2
-			c.screen.Fini()
+		} else if typedRune == 'o' {
+			actions.StartAutoExplore()
+		} else if typedEvent.Key() == tcell.KeyTab {
+			actions.AutoAttack()
+		} else if typedEvent.Key() == tcell.KeyF10 {
+			c.context.DebugActions().OpenDebugMenu()
 		}
 	}
 	return c.terminationCode
 }
 
-func (c *Console) putRune(x, y int, style tcell.Style, r rune) {
-	c.screen.SetContent(x, y, r, nil, style)
+func (c *Console) putRune(screen tcell.Screen, x, y int, style tcell.Style, r rune) {
+	screen.SetContent(x, y, r, nil, style)
 }
 
 func (c *Console) Update(dt float64) {
 	// Poll event
 	/*
-		gameErr := c.game.Update()
+		gameErr := c.context.Update()
 		if gameErr != nil {
 			c.terminationCode = 1
 		}
 
 	*/
+	c.context.Animator().Tick() // this is animations
+	for _, actor := range c.context.GameState().GetMap().Actors() {
+		actor.Tick()
+	}
 }
 
+func (c *Console) OpenListInventory() {
+	noFilter := func(element *common.Item) bool { return true }
+	c.OpenListInventoryForSelection(noFilter, func(invItemKey rune) {
+		inv := c.context.GameState().GetPlayer().GetInventory()
+		c.onItemInInventoryClicked(inv.GetItemByLetter(invItemKey))
+		c.closeInventory()
+	})
+}
+func (c *Console) OpenListInventoryForDropping() {
+	noFilter := func(element *common.Item) bool { return true }
+	c.OpenListInventoryForSelection(noFilter, func(invItemKey rune) {
+		inv := c.context.GameState().GetPlayer().GetInventory()
+		c.context.PlayerAction().DropItem(inv.GetItemByLetter(invItemKey))
+		c.closeInventory()
+	})
+}
+func (c *Console) onItemInInventoryClicked(typedItem *common.Item) {
+	state := c.context.GameState()
+	if !state.GetPlayer().IsAlive() {
+		return
+	}
+	act := c.context.PlayerAction()
+	// shift state
+
+	player := state.GetPlayer()
+
+	wasEquipped := player.GetEquipment().IsEquipped(typedItem)
+	/*
+		if c.shiftIsBeingPressedThisTick { // drop
+			act.DropItem(typedItem)
+			if wasEquipped {
+				c.ShowFullStats()
+			}
+			return
+		}
+
+	*/
+
+	// equip
+	if typedItem.IsEquippable() {
+		if wasEquipped {
+			act.UnequipItem(typedItem)
+		} else {
+			act.EquipItem(typedItem)
+		}
+		c.ShowFullStats()
+		return
+	}
+
+	// use
+	contextActions := c.context.PlayerAction().GetContextActionsForItem(typedItem)
+	if len(contextActions) == 0 {
+		return // maybe open a description? or at least a menu with drop or sth?
+	}
+
+	if len(contextActions) == 1 {
+		actionFunc := contextActions[0].Action
+		actionFunc()
+		// hmm, this will trigger even if unsuc
+		return
+	}
+	c.OpenMenu(contextActions)
+}
+func (c *Console) OpenListInventoryForSelection(filter func(element *common.Item) bool, onSelected func(invItemKey rune)) {
+	inventory := c.context.GameState().GetPlayer().GetInventory()
+	items := common.SortStacksForTextUITyped(inventory.StackedItemsWithFilter(filter), inventory.GetLetterForItemStack, onSelected)
+	//msg := c.
+	if len(items) == 0 {
+		c.ShowLogMessage("You are not carrying anything.")
+		return
+	}
+	list := tview.NewList()
+	list.SetBorder(true)
+	longestItem := 0
+	for _, item := range items {
+		firstItem := item.InventoryStack[0]
+		wornString := ""
+		if firstItem.IsEquippable() && c.context.GameState().GetPlayer().GetEquipment().IsEquipped(firstItem) {
+			wornString = fmt.Sprintf("(worn: %s)", firstItem.SlotName().ToString())
+		}
+		list.AddItem(item.BandStyleName(), wornString, item.Shortcut(), item.OnSelected)
+		longestItem = max(longestItem, len(item.BandStyleName()))
+	}
+	w, h := c.screen.Size()
+	height := min(h-4, len(items)*2+2)
+	width := min(longestItem+6, w-4)
+	modalContainer := makeModal(list, width, height)
+	list.SetInputCapture(c.popOnEscape("inventory"))
+	c.rootPages.AddPage("inventory", modalContainer, true, true)
+	c.rootPages.ShowPage("inventory")
+	c.focus = list
+}
+func (c *Console) popOnEscape(currentPage string) func(event *tcell.EventKey) *tcell.EventKey {
+	return func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEscape {
+			c.rootPages.HidePage(currentPage)
+			c.focus = nil
+		}
+		return event
+	}
+}
 func (c *Console) Draw() {
 	screen := c.screen
-	player := c.game.GetWorldState().GetPlayer()
-	sWidth, sHeight := screen.Size()
-	currentMap := c.game.GetWorldState().GetMap()
-	startX := 0
-	startY := 0
-	cellCountX := min(sWidth, currentMap.GetWidth())
-	cellCountY := min(sHeight, currentMap.GetHeight())
-	if sWidth < currentMap.GetWidth() {
-		startX = max(0, player.MapPosition().X-sWidth/2)
-	}
-	if sHeight < currentMap.GetHeight() {
-		startY = max(0, player.MapPosition().Y-sHeight/2)
-	}
 
-	screen.Clear()
-
-	for y := 0; y < cellCountY; y++ {
-		for x := 0; x < cellCountX; x++ {
-			//drawInfos := c.game.StaticMapLookup(x, y, c.game.GetTicks())
-			//lastInfo := drawInfos[len(drawInfos)-1]
-			//lastInfo.
-
-			mapPos := geometry.Point{X: startX + x, Y: startY + y}
-			if !currentMap.Contains(mapPos) || !currentMap.IsExplored(mapPos) {
-				continue
-			}
-
-			drawStyle := c.darkStyle
-			if player.CanSee(mapPos) {
-				drawStyle = c.lightStyle
-			}
-
-			if mapPos == player.MapPosition() {
-				c.putRune(x, y, drawStyle, '@')
-			} else if currentMap.IsActorAt(mapPos) {
-				actorAt := currentMap.ActorAt(mapPos)
-				c.putRune(x, y, drawStyle, rune(actorAt.Name()[0]))
-			} else if currentMap.IsTileWalkable(mapPos) {
-				c.putRune(x, y, drawStyle, '.')
-			} else {
-				c.putRune(x, y, drawStyle, '#')
-			}
-		}
-	}
-
-	// Draw inventory
-	if c.state == Inventory {
-		c.drawInventory()
-	}
+	c.rootPages.Draw(screen)
 
 	screen.Show()
 }
 
-func (c *Console) drawInventory() {
-	screen := c.screen
-	player := c.game.GetWorldState().GetPlayer()
-	sWidth, sHeight := screen.Size()
-	inventory := player.GetInventory()
-
-	for i, item := range inventory.AsColorCodedStrings() {
-		drawText(screen, 0, i, sWidth, sHeight, c.lightStyle, item)
-	}
-}
-
-func NewConsole(game *game.GameInstance) *Console {
+func NewConsole(gameContext common.UIContext) *Console {
 	// Initialize screen
 	s, err := tcell.NewScreen()
 	if err != nil {
@@ -172,15 +433,150 @@ func NewConsole(game *game.GameInstance) *Console {
 	//s.EnableMouse()
 	s.Clear()
 
-	game.SetOnMapChange(func() {
-		s.Clear()
-		s.Sync()
-	})
-
-	return &Console{
-		game:       game,
+	c := &Console{
+		context:    gameContext,
 		screen:     s,
 		lightStyle: lightStyle,
 		darkStyle:  darkStyle,
 	}
+	c.setupUI()
+	return c
+}
+func (c *Console) setupUI() {
+	c.mapWindow = tview.NewBox()
+	c.mapWindow.SetDrawFunc(c.drawMap)
+
+	c.messageLabel = tview.NewTextView()
+	c.messageLabel.SetText("Hello, world!")
+
+	c.statusBar = tview.NewTextView()
+	c.statusBar.SetText("Status Bar")
+
+	grid := tview.NewGrid().
+		SetRows(1, 0, 1).
+		//SetColumns(30, 0, 30).
+		//SetBorders(true).
+		AddItem(c.messageLabel, 0, 0, 1, 1, 0, 0, false).
+		AddItem(c.mapWindow, 1, 0, 1, 1, 5, 5, true).
+		AddItem(c.statusBar, 2, 0, 1, 1, 0, 0, false)
+
+	c.rootPages = tview.NewPages().
+		AddPage("main", grid, true, true)
+
+	width, height := c.screen.Size()
+
+	c.rootPages.SetRect(0, 0, width, height)
+}
+
+func (c *Console) drawMap(screen tcell.Screen, xOff int, yOff int, sWidth int, sHeight int) (int, int, int, int) {
+	state := c.context.GameState()
+	player := state.GetPlayer()
+	currentMap := state.GetMap()
+	scrollX := 0
+	scrollY := 0
+	if sWidth < currentMap.GetWidth() {
+		scrollX = max(0, player.MapPosition().X-sWidth/2)
+	}
+	if sHeight < currentMap.GetHeight() {
+		scrollY = max(0, player.MapPosition().Y-sHeight/2)
+	}
+
+	for y := 0; y < sHeight; y++ {
+		for x := 0; x < sWidth; x++ {
+			//drawInfos := c.context.StaticMapLookup(x, y, c.context.GetTicks())
+			//lastInfo := drawInfos[len(drawInfos)-1]
+			//lastInfo.
+
+			mapPos := geometry.Point{X: scrollX + x, Y: scrollY + y}
+			drawX := x + xOff
+			drawY := y + yOff
+			drawStyle := c.darkStyle
+
+			if !currentMap.Contains(mapPos) || !currentMap.IsExplored(mapPos) {
+				c.putRune(screen, drawX, drawY, drawStyle, ' ')
+				continue
+			}
+
+			canSeeLocation := player.CanSee(mapPos)
+			if canSeeLocation {
+				drawStyle = c.lightStyle
+			}
+			drawRune := ' '
+			if canSeeLocation && currentMap.IsActorAt(mapPos) {
+				actorAt := currentMap.ActorAt(mapPos)
+				if actorAt.IsHurt() {
+					drawStyle = drawStyle.Foreground(toTcellColor(defs.Red))
+				}
+				if mapPos == player.MapPosition() {
+					drawRune = '@'
+				} else {
+					drawRune = rune(actorAt.Name()[0])
+				}
+				c.putRune(screen, drawX, drawY, drawStyle, drawRune)
+			} else if canSeeLocation && currentMap.IsItemAt(mapPos) {
+				//itemAt := currentMap.ItemAt(mapPos)
+				c.putRune(screen, drawX, drawY, drawStyle, '!')
+			} else if currentMap.IsObjectAt(mapPos) {
+				objectAt := currentMap.ObjectAt(mapPos)
+				if door, ok := objectAt.(*common.Door); ok {
+					if door.IsClosed() {
+						c.putRune(screen, drawX, drawY, drawStyle, '+')
+					} else {
+						c.putRune(screen, drawX, drawY, drawStyle, '´')
+					}
+				} else {
+					c.putRune(screen, drawX, drawY, drawStyle, rune(objectAt.Name()[0]))
+				}
+			} else if currentMap.IsTileWithSpecialAt(mapPos, gridmap.SpecialTileStairsUp) {
+				c.putRune(screen, drawX, drawY, drawStyle, '<')
+			} else if currentMap.IsTileWithSpecialAt(mapPos, gridmap.SpecialTileStairsDown) {
+				c.putRune(screen, drawX, drawY, drawStyle, '>')
+			} else if currentMap.IsTileWithSpecialAt(mapPos, gridmap.SpecialTileWater) {
+				c.putRune(screen, drawX, drawY, drawStyle.Foreground(toTcellColor(c.context.GameState().GetWaterColor())), '~')
+			} else if currentMap.IsTileWithSpecialAt(mapPos, gridmap.SpecialTileMountain) {
+				c.putRune(screen, drawX, drawY, drawStyle, '^')
+			} else if currentMap.IsTileWalkable(mapPos) {
+				if _, hasDecal := currentMap.GetDecal(mapPos); hasDecal {
+					drawStyle = drawStyle.Foreground(toTcellColor(defs.Red))
+				}
+				c.putRune(screen, drawX, drawY, drawStyle, '·')
+			} else {
+				c.putRune(screen, drawX, drawY, drawStyle, '█')
+			}
+		}
+	}
+	return xOff, yOff, sWidth, sHeight
+}
+
+func toTcellColor(rgba color.RGBA) tcell.Color {
+	return tcell.NewRGBColor(int32(rgba.R), int32(rgba.G), int32(rgba.B))
+}
+
+func (c *Console) closeInventory() {
+	c.rootPages.HidePage("inventory")
+	c.focus = nil
+}
+
+func (c *Console) onScreenSizeChanged() {
+	c.screen.Sync()
+	width, height := c.screen.Size()
+	c.rootPages.SetRect(0, 0, width, height)
+}
+
+func (c *Console) showLog() {
+	buffer := c.context.GetLog()
+	if len(buffer) > 20 {
+		buffer = buffer[len(buffer)-20:]
+	}
+	c.openTextWindow(buffer)
+}
+
+func makeModal(p tview.Primitive, width, height int) tview.Primitive {
+	return tview.NewFlex().
+		AddItem(nil, 0, 1, false).
+		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
+			AddItem(nil, 0, 1, false).
+			AddItem(p, height, 1, true).
+			AddItem(nil, 0, 1, false), width, 1, true).
+		AddItem(nil, 0, 1, false)
 }

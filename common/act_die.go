@@ -23,10 +23,11 @@ func NewDieAction(source Cause, actor *Actor) *DieAction {
 func (d *DieAction) Execute(context ActionContext) []Action {
 	state := context.GameState
 	gameMap := state.GetMap() // read state
+	msg := context.Msg
 	actor := d.actor
 	ui := context.UserInterface()
 	if actor == state.GetPlayer() {
-		ui.ShowLogMessage(fmt.Sprintf("You die. CoD: %s", d.cause.ToString()))
+		msg(fmt.Sprintf("You die. CoD: %s", d.cause.ToString()))
 		ui.ShowGameOverMenu()
 	} else {
 		gameMap.RemoveActor(actor)
@@ -34,7 +35,7 @@ func (d *DieAction) Execute(context ActionContext) []Action {
 			corpsePos := d.getCorpsePos(gameMap, actor.MapPosition())
 			gameMap.AddDownedActor(actor, corpsePos) // write state
 		}
-		ui.ShowLogMessage(fmt.Sprintf(actor.GetDeathStringFormat(), actor.Name()))
+		msg(fmt.Sprintf(actor.GetDeathStringFormat(), actor.Name()))
 		//engine.UpdateMiniMap()
 	}
 

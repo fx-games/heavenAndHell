@@ -45,8 +45,10 @@ func (g *MapGenerator) GenerateMap(targetMap string, mapTemplates *ldtk.Project,
 		dungeonDef = defs.GetLevelDefinition(g.randomSource, dungeonLevel)
 	}
 
-	generatedLayout := g.createRandomLayout(mapTemplates, dungeonDef.TemplateRules)
+	//generatedLayout := g.createRandomLayout(mapTemplates, dungeonDef.TemplateRules)
+	generatedLayout := g.createRandomClassicLayout(mapTemplates, dungeonDef.TemplateRules)
 
+	generatedLayout.Print()
 	genWidth, genHeight := generatedLayout.GetSize()
 	emptyMap := gridmap.NewEmptyMap[*Actor, *Item, Object](genWidth, genHeight)
 
@@ -119,9 +121,9 @@ func (g *MapGenerator) addShrine(emptyMap *gridmap.GridMap[*Actor, *Item, Object
 }
 func (g *MapGenerator) addRandomShrine(source *rand.Rand, emptyMap *gridmap.GridMap[*Actor, *Item, Object], dungeonLevel int, pos geometry.Point) {
 	actionForShrine := g.factory.GetRandomUntargetedAction(dungeonLevel, defs.ForShrine)
+
 	newShrine := NewBumpObject("a shrine", defs.IconShrine, func(actor *Actor, startAnimating func() bool) {
-		actionForShrine.SetCurrentUser(actor) // TODO: should this trigger an animation, then it should listen to startAnimating
-		actionForShrine.Invoke(actor)
+		actionForShrine.Invoke(actor, "shrine")
 	})
 	emptyMap.AddObject(newShrine, pos)
 	shrineName := fmt.Sprintf("Shrine of %s", actionForShrine.Name())
@@ -190,8 +192,9 @@ func (g *MapGenerator) decorateRoomFromTemplate(emptyMap *gridmap.GridMap[*Actor
 		if emptyMap.IsCurrentlyPassable(mapPos) {
 			if !entity.PropertyByIdentifier("UniqueName").IsNull() {
 				uniqueName := entity.PropertyByIdentifier("UniqueName").AsString()
-				uniqueActor := NewUniqueEnemyFromName(uniqueName)
+				uniqueActor := g.factory.NewUniqueEnemyFromName(uniqueName)
 				emptyMap.AddActor(uniqueActor, mapPos)
+				uniqueActor.SetDrawPosition(mapPos.ToPointF())
 			}
 		}
 
@@ -358,6 +361,19 @@ func (g *MapGenerator) createRandomLayout(mapTemplates *ldtk.Project, levelRules
 
 	//dunGen.SetDebugSteps(true)
 	dunGen.SetRoomCount(16)
+	generatedLayout := dunGen.Generate(scratchSpaceWidth, scratchSpaceHeight)
+	for len(generatedLayout.AllRooms()) < 10 {
+		generatedLayout = dunGen.Generate(scratchSpaceWidth, scratchSpaceHeight)
+	}
+	return generatedLayout
+}
+
+func (g *MapGenerator) createRandomClassicLayout(mapTemplates *ldtk.Project, levelRules dungen.TemplateRules) *dungen.DungeonMap {
+	randomSource := g.randomSource
+
+	scratchSpaceWidth := 60
+	scratchSpaceHeight := 60
+	dunGen := dungen.NewMegaDungeonGenerator(randomSource)
 	generatedLayout := dunGen.Generate(scratchSpaceWidth, scratchSpaceHeight)
 	for len(generatedLayout.AllRooms()) < 10 {
 		generatedLayout = dunGen.Generate(scratchSpaceWidth, scratchSpaceHeight)

@@ -3,7 +3,6 @@ package gui
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
-	"rpg/common"
 	"rpg/defs"
 	"rpg/geometry"
 	"rpg/util"
@@ -188,7 +187,7 @@ func (o *IconOverlay) Draw() {
 		}
 		item := items[i]
 		if o.isHighlighted(item) {
-			renderer.DrawColoredBorder(itemPosition, o.tileSizeInPixels, common.DarkGreen, common.DarkYellow)
+			renderer.DrawColoredBorder(itemPosition, o.tileSizeInPixels, defs.DarkGreen, defs.DarkYellow)
 		} else {
 			renderer.DrawDefaultBorder(itemPosition, o.tileSizeInPixels)
 			//renderer.DrawOnScreenWithScale(itemPosition.X, itemPosition.Y, o.normalBackgroundIcon, o.scale)
@@ -198,7 +197,7 @@ func (o *IconOverlay) Draw() {
 			renderer.DrawOnScreenWithScale(itemPosition.X, itemPosition.Y, defs.IconTargeting, o.scale)
 		}
 		if o.showShortCuts {
-			renderer.DrawCharOnScreen(itemPosition.X, itemPosition.Y, o.getShortCutForIndex(i), 1, color.White)
+			renderer.DrawCharOnScreen(itemPosition.X, itemPosition.Y, util.GetShortCutForIndex(i), 1, color.White)
 		} else if o.showCounter {
 			counter := item.Counter()
 			if counter > 1 {
@@ -241,14 +240,6 @@ func (o *IconOverlay) getItemIndexFromScreenPosition(point geometry.Point) int {
 	point.X /= o.tileSizeInPixels.X + o.margin.X
 	point.Y /= o.tileSizeInPixels.Y + o.margin.Y
 	return point.Y*o.dimensions.X + point.X
-}
-
-func (o *IconOverlay) getShortCutForIndex(i int) rune {
-	if i < 9 {
-		return rune('1' + i)
-	}
-	// else start with a
-	return rune('A' + i - 9)
 }
 
 func (o *IconOverlay) onItemSelected(index int) {

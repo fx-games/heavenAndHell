@@ -224,7 +224,7 @@ func (g *AccretionGenerator) Generate(width, height int) *DungeonMap {
 		dMap.ConnectRoomsOnMap(false)
 	} else {
 		dMap.ConnectRoomsOnMap(true)
-		g.addMoreDoors(dMap)
+		dMap.addMoreDoors(g.random, 10, 0.8)
 	}
 
 	//dMap.FillDeadEnds(g.random)
@@ -308,19 +308,7 @@ func getSortedKeys(doors map[geometry.Point]RoomConnection) []geometry.Point {
 	return keys
 }
 
-func (g *AccretionGenerator) addMoreDoors(dMap *DungeonMap) {
-	pathingDistanceThreshold := 10
-	dMap.TraverseTilesRandomly(g.random, func(mapPos geometry.Point) {
-		if direction, ok := dMap.CouldBeADoor(mapPos); ok {
-			posOne := mapPos.Add(direction.ToPoint())
-			posTwo := mapPos.Add(direction.Opposite().ToPoint())
-			path := dMap.GetJPSPath(posOne, posTwo)
-			if len(path) == 0 || len(path) > pathingDistanceThreshold {
-				dMap.AddDoorAndConnect(mapPos, direction)
-			}
-		}
-	})
-}
+
 
 func (g *AccretionGenerator) LoadTemplatesFrom(templates *ldtk.Project, prefix string) {
 	for _, level := range templates.Levels {

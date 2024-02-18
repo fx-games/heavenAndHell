@@ -14,11 +14,11 @@ AddToBaseMana,
 AddToBaseStrength,
 AddToBaseDexterity,
 AddToBaseIntelligence,
-AddToBaseDamage,
+AddToDamage,
 StealHealth,
 StealMana,
-MultiplyDamage,
-MultiplyArmor,
+AddDamage,
+AddArmor,
 
 */
 
@@ -68,12 +68,12 @@ func GetAllModifiers() map[string]func(source *rand.Rand, level int) *stats.Modi
 		"intelligence":      AddToBaseIntelligence,
 		"vision_range":      AddToBaseVisionRange,
 		"armor_penetration": AddToBaseArmorPenetration,
-		"damage":            AddToBaseDamage,
+		"damage":            AddToDamage,
 		"armor_class":       AddToArmorClass,
 		"steal_health":      StealHealth,
 		"steal_mana":        StealMana,
-		"damage_multiplier": MultiplyDamage,
-		"armor_multiplier":  MultiplyArmor,
+		"damage_multiplier": AddDamage,
+		"armor_multiplier":  AddArmor,
 		"light_radius":      AddToBaseLightRadius,
 		"health_regen":      AddToHealthRegen,
 	}
@@ -125,8 +125,8 @@ func AddToArmorClass(source *rand.Rand, level int) *stats.Modifier {
 	interval := chooseIntervalFromTable(source, level, levelTable)
 	acAdded := randIntervalValue(source, interval)
 	mod := &stats.Modifier{
-		Name:           "of protection",
-		Attribute:      stats.BaseArmorClass,
+		Description:    "of protection",
+		Attribute:      stats.ArmorClass,
 		Value:          float64(acAdded),
 		Mode:           stats.ModifyAdditive,
 		IsPercentBased: false,
@@ -142,7 +142,7 @@ func AddToHealthRegen(source *rand.Rand, level int) *stats.Modifier {
 	interval := chooseIntervalFromTable(source, level, levelTable)
 
 	mod := &stats.Modifier{
-		Name:           "of regeneration",
+		Description:    "of regeneration",
 		Attribute:      stats.HealthRegeneration,
 		Value:          randIntervalValue(source, interval),
 		Mode:           stats.ModifyAdditive,
@@ -183,9 +183,9 @@ func AddToBaseMana(source *rand.Rand, level int) *stats.Modifier {
 	interval := chooseIntervalFromTable(source, level, levelTable)
 	return AddToBaseResource(source, stats.MaxMana, interval)
 }
-func AddToBaseDamage(source *rand.Rand, level int) *stats.Modifier {
-	interval := util.NewTuple(1, 20)
-	return AddToBaseAttribute(source, stats.BaseDamage, interval)
+func AddToDamage(source *rand.Rand, level int) *stats.Modifier {
+	interval := util.NewTuple(1, 5)
+	return AddToBaseAttributeRandomly(source, stats.DamageBonus, interval)
 }
 func AddToBaseStrength(source *rand.Rand, level int) *stats.Modifier {
 	levelTable := []ModRow[int, int]{
@@ -198,7 +198,7 @@ func AddToBaseStrength(source *rand.Rand, level int) *stats.Modifier {
 		{23, util.NewTuple(21, 30)},
 	}
 	interval := chooseIntervalFromTable(source, level, levelTable)
-	return AddToBaseAttribute(source, stats.Strength, interval)
+	return AddToBaseAttributeRandomly(source, stats.Strength, interval)
 }
 func AddToBaseDexterity(source *rand.Rand, level int) *stats.Modifier {
 	levelTable := []ModRow[int, int]{
@@ -211,7 +211,7 @@ func AddToBaseDexterity(source *rand.Rand, level int) *stats.Modifier {
 		{23, util.NewTuple(21, 30)},
 	}
 	interval := chooseIntervalFromTable(source, level, levelTable)
-	return AddToBaseAttribute(source, stats.Dexterity, interval)
+	return AddToBaseAttributeRandomly(source, stats.Dexterity, interval)
 }
 
 func AddToBaseIntelligence(source *rand.Rand, level int) *stats.Modifier {
@@ -225,42 +225,34 @@ func AddToBaseIntelligence(source *rand.Rand, level int) *stats.Modifier {
 		{23, util.NewTuple(21, 30)},
 	}
 	interval := chooseIntervalFromTable(source, level, levelTable)
-	return AddToBaseAttribute(source, stats.Intelligence, interval)
+	return AddToBaseAttributeRandomly(source, stats.Intelligence, interval)
 }
 
 func AddToBaseArmorPenetration(source *rand.Rand, level int) *stats.Modifier {
 	interval := util.NewTuple(2, 24)
-	return AddToBaseAttribute(source, stats.ArmorPenetration, interval)
+	return AddToBaseAttributeRandomly(source, stats.ArmorPenetration, interval)
 }
 func AddToBaseVisionRange(source *rand.Rand, level int) *stats.Modifier {
 	interval := util.NewTuple(-7, 16)
-	return AddToBaseAttribute(source, stats.VisionRange, interval)
+	return AddToBaseAttributeRandomly(source, stats.VisionRange, interval)
 }
 
 func AddToBaseLightRadius(source *rand.Rand, level int) *stats.Modifier {
 	interval := util.NewTuple(-7, 16)
-	return AddToBaseAttribute(source, stats.LightRadius, interval)
+	return AddToBaseAttributeRandomly(source, stats.LightRadius, interval)
 }
-func MultiplyDamage(source *rand.Rand, level int) *stats.Modifier {
-	interval := util.NewTuple(-1.0, 2.8)
-	return MultiplyDamageOrArmor(source, stats.EnhancedDamageFactor, interval)
+func AddDamage(source *rand.Rand, level int) *stats.Modifier {
+	interval := util.NewTuple(1, 2)
+	return AddDamageOrArmor(source, stats.DamageBonus, interval)
 }
-func MultiplyArmor(source *rand.Rand, level int) *stats.Modifier {
-	table := []ModRow[float64, float64]{
-		{3, util.NewTuple(-1.0, -0.51)},
-		{1, util.NewTuple(-0.5, -0.25)},
-		{1, util.NewTuple(0.2, 0.3)},
-		{6, util.NewTuple(0.31, 0.4)},
-		{10, util.NewTuple(0.41, 0.55)},
-		{14, util.NewTuple(0.56, 0.70)},
-		{19, util.NewTuple(0.71, 0.90)},
-		{24, util.NewTuple(0.91, 1.1)},
-		{28, util.NewTuple(1.11, 1.3)},
-		{35, util.NewTuple(1.31, 1.7)},
-		{60, util.NewTuple(1.71, 2.0)},
+func AddArmor(source *rand.Rand, level int) *stats.Modifier {
+	table := []ModRow[int, int]{
+		{3, util.NewTuple(-1, -0)},
+		{1, util.NewTuple(0, 1)},
+		{6, util.NewTuple(1, 2)},
 	}
 	interval := chooseIntervalFromTable(source, level, table)
-	return MultiplyDamageOrArmor(source, stats.EnhancedArmorClassFactor, interval)
+	return AddDamageOrArmor(source, stats.ArmorClass, interval)
 }
 
 func StealBaseResource(source *rand.Rand, randomAttribute stats.Name, minMax util.Tuple[float64, float64]) *stats.Modifier {
@@ -274,7 +266,7 @@ func StealBaseResource(source *rand.Rand, randomAttribute stats.Name, minMax uti
 	}
 	modifier := &stats.Modifier{
 		Attribute:      randomAttribute,
-		Name:           fmt.Sprintf("of %s stealing", randomAttribute),
+		Description:    fmt.Sprintf("of %s stealing", randomAttribute),
 		Value:          bonusValue,
 		Mode:           stats.ModifyAdditive,
 		IsPercentBased: true,
@@ -283,24 +275,24 @@ func StealBaseResource(source *rand.Rand, randomAttribute stats.Name, minMax uti
 	return modifier
 }
 
-func MultiplyDamageOrArmor(source *rand.Rand, randomAttribute stats.Name, minMax util.Tuple[float64, float64]) *stats.Modifier {
+func AddDamageOrArmor(source *rand.Rand, randomAttribute stats.Name, minMax util.Tuple[int, int]) *stats.Modifier {
 	intervalMin := minMax.Item1
 	intervalMax := minMax.Item2
 
-	var bonusValue float64
+	var bonusValue int
 	if intervalMin == intervalMax {
-		bonusValue = float64(intervalMin)
+		bonusValue = int(intervalMin)
 	} else {
-		bonusValue = float64(source.Float64()*(intervalMax-intervalMin) + intervalMin)
+		bonusValue = source.Intn(intervalMax-intervalMin) + intervalMin
 	}
 	bonusValue += 1.0
 
 	modifier := &stats.Modifier{
 		Attribute:      randomAttribute,
-		Name:           fmt.Sprintf("of %s", randomAttribute),
-		Value:          bonusValue,
-		Mode:           stats.ModifyMultiplicative,
-		IsPercentBased: true,
+		Description:    fmt.Sprintf("of %s", randomAttribute),
+		Value:          float64(bonusValue),
+		Mode:           stats.ModifyAdditive,
+		IsPercentBased: false,
 	}
 
 	return modifier
@@ -317,7 +309,7 @@ func AddToBaseResource(source *rand.Rand, randomAttribute stats.Name, minMax uti
 	}
 	modifier := &stats.Modifier{
 		Attribute:      randomAttribute,
-		Name:           fmt.Sprintf("of %s", randomAttribute),
+		Description:    fmt.Sprintf("of %s", randomAttribute),
 		Value:          bonusValue,
 		Mode:           stats.ModifyAdditive,
 		IsPercentBased: false,
@@ -325,12 +317,15 @@ func AddToBaseResource(source *rand.Rand, randomAttribute stats.Name, minMax uti
 
 	return modifier
 }
-func AddToBaseAttribute(source *rand.Rand, randomAttribute stats.Name, minMax util.Tuple[int, int]) *stats.Modifier {
+func AddToBaseAttributeRandomly(source *rand.Rand, randomAttribute stats.Name, minMax util.Tuple[int, int]) *stats.Modifier {
 	bonusValue := randIntervalValue(source, minMax)
+	return AddToBaseAttribute(source, randomAttribute, bonusValue)
+}
 
+func AddToBaseAttribute(source *rand.Rand, randomAttribute stats.Name, bonusValue float64) *stats.Modifier {
 	modifier := &stats.Modifier{
 		Attribute:      randomAttribute,
-		Name:           fmt.Sprintf("of %s", randomAttribute),
+		Description:    fmt.Sprintf("of %s", randomAttribute),
 		Value:          bonusValue,
 		Mode:           stats.ModifyAdditive,
 		IsPercentBased: false,

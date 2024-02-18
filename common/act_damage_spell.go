@@ -49,7 +49,7 @@ func (d *DamageSpellAction) Execute(context ActionContext) []Action {
 			continue
 		}
 		hitActor := currentMap.ActorAt(pos)
-		hitActions = append(hitActions, NewChangeResourceAction(NewActorCause(d.actionDescription, d.caster), hitActor, stats.Health, -d.damageAmount))
+		hitActions = append(hitActions, NewChangeResourceAction(NewActorCause(d.actionDescription, d.caster), hitActor, stats.Health, float64(-d.damageAmount)))
 	}
 	casterPart := fmt.Sprintf("%s casts", d.caster.Name())
 	if d.caster == state.GetPlayer() {

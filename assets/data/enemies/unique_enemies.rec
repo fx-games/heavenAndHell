@@ -1,0 +1,229 @@
+%rec: default
+#FIELDS: name internal_name icon dlvl out_of_depth_chance min_level_for_ood max_level base_speed damage_dice resource_health stats_armor_class stats_experience stats_strength stats_dexterity stats_intelligence equipment targeted_skill untargeted_skill group_spawn aggro_range tags speech_on_sight death_string
+
+name: Lucifer
+internal_name: lucifer
+icon: 261
+dlvl: 8
+base_speed: 14
+damage_dice: 6d6+6
+resource_health: 10d4+120
+stats_armor_class: 16
+stats_experience: 1200
+stats_strength: 18
+stats_dexterity: 18
+stats_intelligence: 18
+tags: unique | no_corpse
+speech_on_sight: I am the morning star!
+speech_on_sight: I am the fallen one!
+speech_on_sight: I am the lightbringer!
+speech_on_sight: I am the prince of darkness!
+speech_on_sight: I am just a scapegoat!
+speech_on_sight: I am the antichrist!
+speech_on_sight: I am the challenger!
+speech_on_sight: I am the prosecutor!
+speech_on_sight: I am the accuser!
+speech_on_sight: I am the tempter!
+speech_on_sight: I am the deceiver!
+speech_on_sight: I am the rebel!
+speech_on_sight: I am the adversary!
+speech_on_sight: I am the enemy!
+speech_on_sight: I am the opposer!
+speech_on_sight: I am the destroyer!
+speech_on_sight: I am the lord of the flies!
+speech_on_sight: I am the lord of the underworld!
+speech_on_sight: I am the lord of the night!
+speech_on_sight: I am the lord of hell!
+death_string: %s vanishes in a puff of smoke.
+death_string: %s disappears in a flash of light.
+death_string: %s is gone.
+death_string: %s disappears.
+death_string: %s has left.
+
+name: King Zedek
+internal_name: king_zedek
+icon: 259
+dlvl: 4
+base_speed: 9
+damage_dice: 3d8
+resource_health: 6d4+60
+stats_armor_class: 12
+stats_experience: 200
+stats_strength: 14
+stats_dexterity: 9
+stats_intelligence: 10
+tags: unique | no_corpse
+speech_on_sight: We've all sworn the eternal vow!
+speech_on_sight: Your time to die is now!
+speech_on_sight: Still brave, beyond the grave!
+speech_on_sight: Victory! Victory! Eternal glory!
+death_string: %s crumbles to legendary dust.
+death_string: %s falls apart into royal pieces.
+death_string: %s is gone from the throne.
+death_string: %s dies again.
+
+name: Meat Jack
+internal_name: meat_jack
+icon: 258
+dlvl: 2
+base_speed: 13
+damage_dice: 2d6
+resource_health: 5d4+60
+stats_armor_class: 5
+stats_experience: 200
+stats_strength: 18
+stats_dexterity: 4
+stats_intelligence: 4
+tags: unique | no_corpse
+speech_on_sight: Meet Meat Jack!
+speech_on_sight: Meat, meet Jack!
+speech_on_sight: Meat Jack meets meat!
+speech_on_sight: Jack, meet meat!
+speech_on_sight: Meat Jack, meet meat!
+speech_on_sight: I am Meat Jack!
+speech_on_sight: My name is.. Ji.. Jack!
+death_string: %s explodes into a pile of meat.
+death_string: %s blows up into a heap of blood and guts.
+death_string: %s was butchered.
+death_string: %s died an agonizing death.
+death_string: %s was slaughtered.
+death_string: %s was minced.
+death_string: %s was chopped.
+death_string: %s was diced.
+death_string: %s was sliced.
+death_string: %s was cut to pieces.
+
+name: The Rogue
+internal_name: rogue
+icon: 315
+dlvl: 10
+base_speed: 10
+damage_dice: 2d8+2
+resource_health: 7d8
+stats_armor_class: 11
+stats_experience: 200
+stats_strength: 12
+stats_dexterity: 12
+stats_intelligence: 12
+tags: unique | no_corpse
+speech_on_sight: qf
+speech_on_sight: za
+speech_on_sight: rb
+speech_on_sight: f
+death_string: %s ascends forever.
+death_string: %s descends forever.
+death_string: %s quaffed his last potion.
+death_string: %s dies again.
+
+name: a rogue dog
+internal_name: rogue_dog
+icon: 343
+dlvl: 10
+base_speed: 10
+damage_dice: 1d6+2
+resource_health: 3d8
+stats_armor_class: 4
+stats_experience: 200
+stats_strength: 10
+stats_dexterity: 9
+stats_intelligence: 9
+tags: unique | no_corpse
+speech_on_sight: f
+death_string: %s goes to dog heaven.
+
+name: the true Shekel
+internal_name: evil_shekel
+icon: 287
+dlvl: 13
+base_speed: 11
+damage_dice: 1d6+2
+resource_health: 12d8
+stats_armor_class: 5
+stats_experience: 200
+stats_strength: 14
+stats_dexterity: 12
+stats_intelligence: 16
+tags: unique | no_corpse
+speech_on_sight: Your time has come!
+death_string: %s dies.
+
+name: the true Kirioth
+internal_name: evil_kirioth
+icon: 288
+dlvl: 12
+base_speed: 10
+damage_dice: 1d6
+resource_health: 12d8
+stats_armor_class: 5
+stats_experience: 200
+stats_strength: 10
+stats_dexterity: 10
+stats_intelligence: 18
+tags: unique | no_corpse
+speech_on_sight: Your time has come!
+death_string: %s dies.
+
+name: a red knight
+internal_name: adventurer_knight
+icon: 286
+dlvl: 9
+base_speed: 8
+damage_dice: 2d6
+resource_health: 9d8
+stats_armor_class: 8
+stats_experience: 200
+stats_strength: 9
+stats_dexterity: 10
+stats_intelligence: 9
+tags: unique | no_corpse
+speech_on_sight: Your time has come!
+death_string: %s dies.
+
+name: a false prophet
+internal_name: adventurer_priest
+icon: 314
+dlvl: 9
+base_speed: 10
+damage_dice: 1d6+1
+resource_health: 9d8
+stats_armor_class: 6
+stats_experience: 200
+stats_strength: 10
+stats_dexterity: 10
+stats_intelligence: 9
+tags: unique | no_corpse
+speech_on_sight: Your time has come!
+death_string: %s dies.
+
+name: a barbarian
+internal_name: adventurer_barbarian
+icon: 342
+dlvl: 9
+base_speed: 12
+damage_dice: 2d6+2
+resource_health: 9d8
+stats_armor_class: 4
+stats_experience: 200
+stats_strength: 9
+stats_dexterity: 12
+stats_intelligence: 9
+tags: unique | no_corpse
+speech_on_sight: Your time has come!
+death_string: %s dies.
+
+name: an archer in tights
+internal_name: adventurer_archer
+icon: 370
+dlvl: 9
+base_speed: 12
+damage_dice: 1d5
+resource_health: 9d8
+stats_armor_class: 6
+stats_experience: 200
+stats_strength: 10
+stats_dexterity: 16
+stats_intelligence: 9
+tags: unique | no_corpse
+speech_on_sight: Your time has come!
+death_string: %s dies.
+

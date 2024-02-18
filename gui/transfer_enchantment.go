@@ -8,11 +8,12 @@ import (
 
 func (u *UIController) OpenTransferEnchantmentMenu() {
 	// step one, choose an item
-	state := u.context.GameState
+	state := u.context.GameState()
 	player := state.GetPlayer()
 	playerInventory := player.GetInventory()
+	msg := u.msg
 	if playerInventory.IsEmpty() {
-		u.ShowLogMessage(fmt.Sprintf("You have no items"))
+		msg(fmt.Sprintf("You have no items"))
 		return
 	}
 	itemsWithEnchantments := make([]*common.Item, 0)
@@ -23,7 +24,7 @@ func (u *UIController) OpenTransferEnchantmentMenu() {
 		}
 	}
 	if len(itemsWithEnchantments) == 0 {
-		u.ShowLogMessage(fmt.Sprintf("You have no items with enchantments"))
+		msg(fmt.Sprintf("You have no items with enchantments"))
 		return
 	}
 	var menuItems []util.MenuItem
@@ -56,7 +57,7 @@ func (u *UIController) openChooseEnchantmentMenu(source *common.Item) {
 }
 
 func (u *UIController) openChooseTransferTargetMenu(source *common.Item, enchantment common.Enchantment) {
-	state := u.context.GameState
+	state := u.context.GameState()
 	player := state.GetPlayer()
 	playerInventory := player.GetInventory()
 	if playerInventory.IsEmpty() {
@@ -81,9 +82,10 @@ func (u *UIController) openChooseTransferTargetMenu(source *common.Item, enchant
 }
 
 func (u *UIController) transferEnchantment(source *common.Item, item *common.Item, enchantment common.Enchantment) {
+	msg := u.msg
 	source.RemoveEnchantment(enchantment)
-	u.ShowLogMessage(fmt.Sprintf("%s lost %s", source.Name(), enchantment.ToString()))
+	msg(fmt.Sprintf("%s lost %s", source.Name(), enchantment.ToString()))
 	item.AddEnchantment(enchantment)
-	u.ShowLogMessage(fmt.Sprintf("%s gained %s", item.Name(), enchantment.ToString()))
+	msg(fmt.Sprintf("%s gained %s", item.Name(), enchantment.ToString()))
 	u.PopAll()
 }

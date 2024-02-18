@@ -34,8 +34,12 @@ func (f *Flags) Increment(flag string) {
 
 func (f *Flags) AsStrings() []string {
 	result := make([]string, 0)
-	for flag, _ := range f.flags {
-		result = append(result, fmt.Sprintf("%s: %d", flag, f.flags[flag]))
+	for flag, value := range f.flags {
+		if value >= 0 {
+			result = append(result, fmt.Sprintf("%s for %d turns", flag, value))
+		} else {
+			result = append(result, flag)
+		}
 	}
 	return result
 }

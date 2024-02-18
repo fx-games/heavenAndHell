@@ -8,7 +8,6 @@ import (
 	"image/color"
 	"io"
 	"math"
-	"rpg/audio"
 	"rpg/common"
 	"rpg/defs"
 	"rpg/geometry"
@@ -22,15 +21,6 @@ import (
 type TilemapAnimInfo struct {
 	FrameCount     int
 	DelayInSeconds float64
-}
-
-type UIContext struct {
-	GameState    *common.State
-	PlayerAction common.PlayerActions
-	AudioPlayer  *audio.Player
-	ResetGame    func(class defs.LoadoutDefinition)
-	Animator     common.Animator
-	DebugActions common.DebugActions
 }
 
 type UIWidget interface {
@@ -63,13 +53,13 @@ type UIRenderer interface {
 	ParseColorCodedText(string) []util.ColoredTextPart
 }
 
-func NewUIController(tileRenderer *renderer.TileRenderer, context UIContext, config common.Configuration) *UIController {
+func NewUIController(tileRenderer *renderer.TileRenderer, context common.UIContext, config common.Configuration) *UIController {
 	u := &UIController{
 		tileRenderer:   tileRenderer,
 		screenSize:     config.WindowSize,
 		configuration:  config,
 		context:        context,
-		worldTexture:   context.GameState.GetWorldTexture(),
+		worldTexture:   context.GameState().GetWorldTexture(),
 		deviceDPIScale: ebiten.DeviceScaleFactor(),
 	}
 	u.setTileScale(4)
@@ -92,7 +82,7 @@ type UIController struct {
 	mapRenderer  *renderer.MapRenderer
 	worldTexture renderer.TextureAtlas
 
-	context                     UIContext
+	context                     common.UIContext
 	isMouseCapturedByUI         bool
 	shiftIsBeingPressedThisTick bool
 
@@ -109,11 +99,9 @@ type UIController struct {
 	timer         *IconOverlay
 	miniMap       *MinimapOverlay
 	message       PrintMessage
-	definitions   defs.DataContainer
 
 	configuration common.Configuration
 
-	logBuffer        []string
 	setToExactFit    bool
 	isFullScreen     bool
 	logHook          func(string)
@@ -133,7 +121,7 @@ type UIController struct {
 	msg                        func(message string) // this might be a smell already? Should the UI really generate messages to the player?
 }
 
-func (u *UIController) SetDebugActions(actions common.DebugActions) {
+func (u *UIController) SetDebugActions(actions func() common.DebugActions) {
 	u.context.DebugActions = actions
 }
 
@@ -149,6 +137,9 @@ func (u *UIController) GetVisibleMap() geometry.Rect {
 }
 
 func (u *UIController) ShowLogMessage(message string) {
+	if message == "" {
+		return
+	}
 	rawText := common.RemoveColorCodes(message)
 	u.message.rawText = rawText
 	u.message.textForRenderer = u.tileRenderer.ParseColorCodedText(message)
@@ -192,7 +183,7 @@ func (u *UIController) ChangeMapZoom(sign int) {
 	}
 	targetScale := util.Clamp(minScale, maxScale, currentScale+change)
 
-	mapSize := u.context.GameState.GetMap().MapSize()
+	mapSize := u.context.GameState().GetMap().MapSize()
 	tileSize := u.worldTexture.GetTileSize()
 
 	targetMapSize := geometry.Point{
@@ -219,7 +210,7 @@ func (u *UIController) ChangeMapZoom(sign int) {
 
 func (u *UIController) disableScrolling() {
 	u.setToExactFit = true
-	state := u.context.GameState
+	state := u.context.GameState()
 	mapSize := state.GetMap().MapSize()
 	tileSize := u.worldTexture.GetTileSize()
 
@@ -474,9 +465,9 @@ func (u *UIController) SetTileMapAnimations(mapping map[int32]TilemapAnimInfo) {
 
 func (u *UIController) SetAndInitTileRenderer(tileRenderer *renderer.TileRenderer) {
 	u.tileRenderer = tileRenderer
-	tileRenderer.SetColorFromName(common.ColorFromName)
+	tileRenderer.SetColorFromName(defs.ColorFromName)
 	tileRenderer.SetWhiteTile(defs.IconWhite)
-	tileRenderer.SetDefaultColors(common.DarkYellow, color.Black)
+	tileRenderer.SetDefaultColors(defs.DarkYellow, color.Black)
 }
 
 func (u *UIController) GetScreenSize() geometry.Point {
@@ -538,13 +529,13 @@ func (u *UIController) ParseColorCodedText(colorCodedText string) []util.Colored
 }
 
 func (u *UIController) OpenStash(playerInv *common.Inventory, stashInTown *common.Inventory, drop func(item *common.Item)) {
-	player := u.context.GameState.GetPlayer()
+	player := u.context.GameState().GetPlayer()
 	toStashHandler := func(uiItem UIElement) {
 		playerEquip := player.GetEquipment()
 		itemStack := uiItem.(common.InventoryStack)
 		firstItem := itemStack[0]
 		if playerEquip.IsEquipped(firstItem) { // unequip first..
-			u.context.PlayerAction.UnequipItem(firstItem)
+			u.context.PlayerAction().UnequipItem(firstItem)
 		}
 		playerInv.Remove(firstItem)
 		if u.shiftIsBeingPressedThisTick {
@@ -568,7 +559,7 @@ func (u *UIController) OpenStash(playerInv *common.Inventory, stashInTown *commo
 
 			if u.shiftIsBeingPressedThisTick { // drop
 				firstItem.DroppedByPlayer()
-				u.context.PlayerAction.DropItem(firstItem)
+				u.context.PlayerAction().DropItem(firstItem)
 			} else { // move
 				playerInv.Add(firstItem)
 			}
@@ -636,7 +627,7 @@ func (u *UIController) setupUI() {
 }
 
 func (u *UIController) addInventoryOverlay(pixelEdgeFromBottomRight geometry.Point) *IconOverlay {
-	state := u.context.GameState
+	state := u.context.GameState()
 	isEquipped := func(uiItem UIElement) bool {
 		player := state.GetPlayer()
 		itemStack := uiItem.(common.InventoryStack)
@@ -670,11 +661,11 @@ func firstItemFromUIStack(uiItem UIElement) *common.Item {
 }
 
 func (u *UIController) onItemInInventoryClicked(uiItem UIElement) {
-	state := u.context.GameState
+	state := u.context.GameState()
 	if !state.GetPlayer().IsAlive() {
 		return
 	}
-	act := u.context.PlayerAction
+	act := u.context.PlayerAction()
 	// shift state
 	u.shiftIsBeingPressedThisTick = ebiten.IsKeyPressed(ebiten.KeyShift)
 	typedItem := firstItemFromUIStack(uiItem)
@@ -702,7 +693,7 @@ func (u *UIController) onItemInInventoryClicked(uiItem UIElement) {
 	}
 
 	// use
-	contextActions := u.context.PlayerAction.GetContextActionsForItem(typedItem)
+	contextActions := u.context.PlayerAction().GetContextActionsForItem(typedItem)
 	if len(contextActions) == 0 {
 		return // maybe open a description? or at least a menu with drop or sth?
 	}
@@ -720,7 +711,7 @@ func (u *UIController) ShowFullStats() {
 	u.miniMap.Hide()
 	label := u.statsLabel
 
-	player := u.context.GameState.GetPlayer()
+	player := u.context.GameState().GetPlayer()
 	label.SetText(player.GetFullStats())
 }
 
@@ -731,10 +722,11 @@ func (u *UIController) addLevelUpButton(offset geometry.Point) *ButtonOverlay {
 	return button
 }
 func (u *UIController) BeginPlayerSellingTo(vendor *common.Actor) {
-	player := u.context.GameState.GetPlayer()
+	player := u.context.GameState().GetPlayer()
 	playerInventory := player.GetInventory()
+	msg := u.msg
 	if playerInventory.IsEmpty() {
-		u.ShowLogMessage("You have nothing to sell")
+		msg("You have nothing to sell")
 		return
 	}
 	var sellItems []ShopMenuItem
@@ -769,22 +761,25 @@ func (u *UIController) BeginPlayerSellingTo(vendor *common.Actor) {
 			Action: func() {
 				playerEquip := player.GetEquipment()
 				if playerEquip.IsEquipped(typedItem) {
-					u.context.PlayerAction.UnequipItem(typedItem)
+					u.context.PlayerAction().UnequipItem(typedItem)
 				}
 				playerInventory.Remove(typedItem)
 				vendor.GetInventory().Add(typedItem)
 				player.GetStats().IncrementBy(stats.Gold, sellPrice)
 				//u.sendInventoryToWindowClient()
-				u.ShowLogMessage(fmt.Sprintf("You sold [:darkText]%s[:white] for [:darkText]%d[:white] gold", typedItem.Name(), sellPrice))
+				msg(fmt.Sprintf("You sold [:darkText]%s[:white] for [:darkText]%d[:white] gold", typedItem.Name(), sellPrice))
 				u.BeginPlayerSellingTo(vendor)
 			},
 		})
 	}
-
-	u.OpenShopMenu(vendor)
+	goldAmount := player.GetStats().GetAttribute(stats.Gold)
+	menu := NewShopMenu(u, u.worldTexture.GetTileSize())
+	u.PushWidget(menu)
+	menu.SetHeader("You have:", fmt.Sprintf("%d gold", goldAmount))
+	menu.SetItems(sellItems, []Alignment{AlignmentLeft, AlignmentRight})
 }
 func (u *UIController) openLevelUpMenu() {
-	player := u.context.GameState.GetPlayer()
+	player := u.context.GameState().GetPlayer()
 	if !player.CanLevelUp() {
 		return
 	}
@@ -841,7 +836,7 @@ func (u *UIController) addMiniMap(offset geometry.Point, maxHeight int, horizont
 
 func (u *UIController) addSkillsOverlay(pixelEdgeFromBottomRight geometry.Point) *IconOverlay {
 	tileSize := u.worldTexture.GetTileSize()
-	state := u.context.GameState
+	state := u.context.GameState()
 	getList := func() []UIElement {
 		player := state.GetPlayer()
 		items := make([]UIElement, 0)
@@ -860,9 +855,9 @@ func (u *UIController) addSkillsOverlay(pixelEdgeFromBottomRight geometry.Point)
 		OnSelection: func(element UIElement) {
 			switch typedElement := element.(type) {
 			case *common.UntargetedAction:
-				u.context.PlayerAction.ActivateUntargetedAction(typedElement)
+				u.context.PlayerAction().ActivateUntargetedAction(typedElement, common.EffectSource(typedElement.GetInternalName()))
 			case *common.TargetedAction:
-				u.context.PlayerAction.BeginActionTargeting(typedElement)
+				u.context.PlayerAction().BeginActionTargeting(typedElement)
 			}
 		},
 	}
@@ -898,13 +893,13 @@ func (u *UIController) addTimerOverlay(pixelEdgeFromBottomRight geometry.Point) 
 }
 func (u *UIController) getCurrentTimedEffects() []UIElement {
 	var result []UIElement
-	for _, timedBeing := range u.context.GameState.GetTimeKeeper().GetBeingsByFilter(func(being common.TimedBeing) bool {
+	for _, timedBeing := range u.context.GameState().GetTimeKeeper().GetBeingsByFilter(func(being common.TimedBeing) bool {
 		switch being.(type) {
 		case *common.Actor:
 			return false
-		case *common.UntargetedAction:
+		case *common.UntargetedAction: // this is used to delay activation of spells
 			return true
-		case *common.TimedModifier:
+		case *common.TimedModifier: // these are temporary buffs/debuffs to a characters' stats
 			return true
 		default:
 			return false
@@ -913,8 +908,11 @@ func (u *UIController) getCurrentTimedEffects() []UIElement {
 		result = append(result, timedBeing.(UIElement))
 	}
 
-	for statusName, turnsLeft := range u.context.GameState.GetPlayer().GetStatusEffects().AllEntries() {
+	for statusName, turnsLeft := range u.context.GameState().GetPlayer().GetStatusEffects().AllEntries() {
 		result = append(result, NewStatusEffectWidget(statusName, turnsLeft))
+	}
+	for _, statusEffect := range u.context.GameState().GetPlayer().GetParametrizedStatusEffects() {
+		result = append(result, NewStatusEffectWidget(statusEffect.GetName(), statusEffect.TurnsLeft()))
 	}
 	return result
 }
@@ -938,7 +936,7 @@ func (u *UIController) SetTTFFont(file io.ReaderAt, size float64) {
 }
 
 func (u *UIController) OnMapChanged() {
-	loadedMap := u.context.GameState.GetMap()
+	loadedMap := u.context.GameState().GetMap()
 
 	gridSize := u.worldTexture.GetTileSize()
 	mapWindow := renderer.NewMapWindow(
@@ -956,7 +954,7 @@ func (u *UIController) OnMapChanged() {
 	u.OnPlayerTurnTaken()
 }
 func (u *UIController) getMiniMapColor(mapPos geometry.Point, tileColor *[4]byte) {
-	state := u.context.GameState
+	state := u.context.GameState()
 	currentMap := state.GetMap()
 	if state.GetPlayer().MapPosition() == mapPos {
 		*tileColor = [4]byte{100, 255, 100, 255}
@@ -1019,7 +1017,7 @@ func prepend[T any](slice []T, s T) []T {
 }
 func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.CellDrawInfo {
 	mapPos := geometry.Point{X: x, Y: y}
-	state := u.context.GameState
+	state := u.context.GameState()
 	currentMap := state.GetMap()
 	if currentMap == nil || !currentMap.Contains(mapPos) {
 		return []renderer.CellDrawInfo{}
@@ -1058,7 +1056,7 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 	var drawInfo []renderer.CellDrawInfo
 
 	// 1. items
-	if itemAt, isItemAt := currentMap.TryGetItemAt(mapPos); isItemAt && itemAt.IsDrawn() && (!itemAt.IsHidden() || u.context.GameState.GetFlags().IsSet(string(common.FlagHasTrueSight))) {
+	if itemAt, isItemAt := currentMap.TryGetItemAt(mapPos); isItemAt && itemAt.IsDrawn() && (!itemAt.IsHidden() || u.context.GameState().GetFlags().IsSet(string(common.FlagHasTrueSight))) {
 		itemIcon := itemAt.Icon(u.worldTicks)
 		drawItem := renderer.CellDrawInfo{
 			Atlas: u.worldTexture,
@@ -1157,23 +1155,23 @@ func (u *UIController) CancelTargeting() {
 }
 
 func (u *UIController) BeginThrowTargeting(targetRules common.TargetRules, onSelected func(attacker *common.Actor, target geometry.Point)) {
-	state := u.context.GameState
+	state := u.context.GameState()
 	if !state.GetPlayer().IsAlive() {
 		return
 	}
-	act := u.context.PlayerAction
+	act := u.context.PlayerAction()
 	act.CancelAutoMove()
-
+	msg := u.msg
 	u.targeter = NewTargeter(u, targetRules, &common.HitEffect{
 		Activate: func(attacker *common.Actor, target geometry.Point, hitPositions []geometry.Point) {
 			u.CancelTargeting()
 
 			origin := state.GetPlayer().MapPosition()
 			if origin == target {
-				u.ShowLogMessage("You can't attack yourself like that")
+				msg("You can't attack yourself like that")
 				return
 			}
-			u.context.Animator.CancelAllAnimations()
+			u.context.Animator().CancelAllAnimations()
 			act.CancelAutoMove()
 			onSelected(attacker, target)
 		},
@@ -1191,7 +1189,7 @@ func (u *UIController) ShowGameOverMenu() {
 		{
 			MainText: "Try again",
 			Action: func() {
-				u.context.ResetGame(u.context.GameState.SelectedClass)
+				u.context.ResetGame(u.context.GameState().SelectedClass)
 			},
 		},
 		{
@@ -1210,7 +1208,7 @@ func (u *UIController) ShowGameOverMenu() {
 }
 
 func (u *UIController) OpenPlayerStashInTown() {
-	state := u.context.GameState
+	state := u.context.GameState()
 	gui := u
 	stashInTown := state.GetPlayerStashInTown()
 	playerInv := state.GetPlayer().GetInventory()
@@ -1227,7 +1225,7 @@ func (u *UIController) OpenPlayerStashInTown() {
 
 func (u *UIController) OpenClassSelectionMenu() {
 	var items []util.MenuItem
-	for _, c := range u.definitions.ClassDefinitions {
+	for _, c := range u.context.Definitions.ClassDefinitions {
 		classDef := c
 		items = append(items, util.MenuItem{
 			MainText: classDef.Name,
@@ -1241,7 +1239,7 @@ func (u *UIController) OpenClassSelectionMenu() {
 func (u *UIController) OnPlayerTurnTaken() {
 	u.UpdateMiniMap()
 	u.UpdateStatsLabel()
-	player := u.context.GameState.GetPlayer()
+	player := u.context.GameState().GetPlayer()
 
 	if (!u.setToExactFit && !u.configuration.KeepPlayerCentered) || u.configuration.KeepPlayerCentered {
 		distFromBorder := 4
@@ -1255,13 +1253,13 @@ func (u *UIController) OnPlayerTurnTaken() {
 }
 
 func (u *UIController) UpdateStatsLabel() {
-	state := u.context.GameState
+	state := u.context.GameState()
 	player := state.GetPlayer()
 	playerStats := player.GetStats()
 	var hpColor color.Color
 	var manaColor color.Color
-	hpColor = common.DarkTextColor
-	manaColor = common.DarkTextColor
+	hpColor = defs.DarkTextColor
+	manaColor = defs.DarkTextColor
 
 	if playerStats.GetResource(stats.Health).IsLessThanPercent(0.25) {
 		hpColor = color.RGBA{R: 255, G: 30, B: 30, A: 255}
@@ -1279,7 +1277,7 @@ func (u *UIController) UpdateStatsLabel() {
 		manaColor = color.RGBA{R: 255, G: 255, B: 30, A: 255}
 	}
 	label := u.statsLabel
-	mapNameParts := util.ToLabelTextWithColor(strings.Split(state.GetMap().GetDisplayName(), "\n"), common.DarkTextColor)
+	mapNameParts := util.ToLabelTextWithColor(strings.Split(state.GetMap().GetDisplayName(), "\n"), defs.DarkTextColor)
 	statusParts := []util.LabelText{
 		{
 			Text:      fmt.Sprintf("HP: %s", playerStats.GetResource(stats.Health).ToString()),
@@ -1291,7 +1289,7 @@ func (u *UIController) UpdateStatsLabel() {
 		},
 		{
 			Text:      fmt.Sprintf("Gold: %d", playerStats.GetAttribute(stats.Gold)),
-			TextColor: common.DarkTextColor,
+			TextColor: defs.DarkTextColor,
 		},
 	}
 	statLines := append(mapNameParts, statusParts...)
@@ -1300,7 +1298,7 @@ func (u *UIController) UpdateStatsLabel() {
 	u.miniMap.Show()
 }
 func (u *UIController) showHelpText() {
-	textColor := common.DarkTextColor
+	textColor := defs.DarkTextColor
 	var pickupText string
 	if u.configuration.AutoPickup {
 		pickupText = "Press 'g' to pick up items you dropped"
@@ -1361,9 +1359,9 @@ func (u *UIController) showHelpText() {
 	})
 }
 func (u *UIController) ShowLog() {
-	buffer := u.logBuffer
+	buffer := u.context.GetLog()
 	if len(buffer) > 20 {
-		buffer = buffer[len(u.logBuffer)-20:]
+		buffer = buffer[len(buffer)-20:]
 	}
 	u.OpenTextWindow(toGradientLabelText(u.tileRenderer.ParseColorCodedText, buffer))
 	//logWindow.ScrollToBottom()
@@ -1372,7 +1370,7 @@ func (u *UIController) ShowLog() {
 func (u *UIController) OpenListInventory() {
 	noFilter := func(element *common.Item) bool { return true }
 	u.OpenListInventoryForSelection(noFilter, func(invItemKey rune) {
-		inv := u.context.GameState.GetPlayer().GetInventory()
+		inv := u.context.GameState().GetPlayer().GetInventory()
 		u.onItemInInventoryClicked(inv.GetItemByLetter(invItemKey))
 	})
 }
@@ -1386,8 +1384,8 @@ func (u *UIController) FlashScreen(color color.Color, seconds float64) {
 func (u *UIController) OpenListInventoryForSelection(filter func(element *common.Item) bool, onSelected func(invItemKey rune)) {
 	dataSource := ListDataSource{
 		GetElements: func() []IconListElement {
-			inventory := u.context.GameState.GetPlayer().GetInventory()
-			typed := sortStacksForTextUITyped(inventory.StackedItemsWithFilter(filter), inventory.GetLetterForItemStack, onSelected)
+			inventory := u.context.GameState().GetPlayer().GetInventory()
+			typed := common.SortStacksForTextUITyped(inventory.StackedItemsWithFilter(filter), inventory.GetLetterForItemStack, onSelected)
 			var result []IconListElement
 			for _, item := range typed {
 				result = append(result, item)
@@ -1397,15 +1395,6 @@ func (u *UIController) OpenListInventoryForSelection(filter func(element *common
 	}
 	u.PopAll()
 	u.OpenInventoryListModal(u.worldTexture.GetTileSize(), dataSource)
-}
-
-func sortStacksForTextUITyped(stacks []common.InventoryStack, getLetterForStack func(stack common.InventoryStack) rune, selected func(invItemKey rune)) []*common.TextualStack {
-	items := make([]*common.TextualStack, 0)
-	common.SortInventory(stacks)
-	for _, itemStack := range stacks {
-		items = append(items, common.NewTextualStack(itemStack, getLetterForStack(itemStack), selected))
-	}
-	return items
 }
 
 type ColorCodeParser func(draw string) []util.ColoredTextPart
@@ -1422,7 +1411,7 @@ func toGradientLabelText(textParser ColorCodeParser, buffer []string) []util.Lab
 	var result []util.LabelText
 	for i, line := range buffer {
 		fadedBaseColor := color.RGBA{R: intensityFromIndex(i), G: intensityFromIndex(i), B: intensityFromIndex(i), A: 255}
-		baseColorCode := common.RGBAToColorCode(fadedBaseColor)
+		baseColorCode := defs.RGBAToColorCode(fadedBaseColor)
 		result = append(result, util.LabelText{
 			UseColorCodes:      true,
 			TextWithColorCodes: textParser(baseColorCode + line),
@@ -1442,16 +1431,20 @@ func sortStacksForUI(stacks []common.InventoryStack) []UIElement {
 	return items
 }
 
-func (u *UIController) OpenShopMenu(npc *common.Actor) {
-	npcInventory := npc.GetInventory()
-	if npcInventory.IsEmpty() {
+func (u *UIController) OpenShopMenu(vendor *common.Actor) {
+	u.openShopMenuWithHandler(vendor.GetInventory(), func(item *common.Item) {
+		u.tryToBuy(item, vendor)
+	})
+}
+func (u *UIController) openShopMenuWithHandler(inventory *common.Inventory, handler func(item *common.Item)) {
+	if inventory.IsEmpty() {
 		return
 	}
-	player := u.context.GameState.GetPlayer()
+	player := u.context.GameState().GetPlayer()
 	goldAmount := player.GetStats().GetAttribute(stats.Gold)
 
 	var menuItems []ShopMenuItem
-	inventoryStacks := npcInventory.StackedItems()
+	inventoryStacks := inventory.StackedItems()
 	common.SortInventory(inventoryStacks)
 	textParser := u.ParseColorCodedText
 
@@ -1475,7 +1468,7 @@ func (u *UIController) OpenShopMenu(npc *common.Actor) {
 			itemName = fmt.Sprintf("%s (x%d)", itemName, len(i))
 		}
 		nameString := fmt.Sprintf("%s", itemName)
-		nameStringWithColor := fmt.Sprintf("%s", itemName)
+		//nameStringWithColor := fmt.Sprintf("%s", itemName)
 		priceString := fmt.Sprintf("%d", cost)
 		priceStringWithColor := fmt.Sprintf("[:%s]%d", colorCodeForPrice, cost)
 		// shortcuts start with 0 => 'a'
@@ -1488,8 +1481,9 @@ func (u *UIController) OpenShopMenu(npc *common.Actor) {
 			TextColumns: []util.LabelText{
 				{
 					Text:               nameString,
-					TextWithColorCodes: textParser(nameStringWithColor),
-					UseColorCodes:      true,
+					//TextWithColorCodes: textParser(nameStringWithColor),
+					UseColorCodes:      false,
+					TextColor: item.TintColor(),
 				},
 				{
 					Text:               priceString,
@@ -1498,7 +1492,7 @@ func (u *UIController) OpenShopMenu(npc *common.Actor) {
 				},
 			},
 			Action: func() {
-				u.tryToBuy(item, npc)
+				handler(item)
 			},
 		})
 	}
@@ -1510,11 +1504,12 @@ func (u *UIController) OpenShopMenu(npc *common.Actor) {
 }
 
 func (u *UIController) tryToBuy(item *common.Item, seller *common.Actor) {
-	player := u.context.GameState.GetPlayer()
+	player := u.context.GameState().GetPlayer()
 	goldAmount := player.GetStats().GetAttribute(stats.Gold)
 	msg := u.msg
 	cost := item.BuyPrice()
 	cannotPayForItem := cost > goldAmount
+
 	if cannotPayForItem {
 		msg("You don't have enough gold")
 		u.OpenShopMenu(seller)
@@ -1530,16 +1525,16 @@ func (u *UIController) tryToBuy(item *common.Item, seller *common.Actor) {
 }
 
 func (u *UIController) showJournal() {
-	state := u.context.GameState
+	state := u.context.GameState()
 	if !state.IsStoryModeEnabled() {
 		return
 	}
-	entries := u.context.GameState.GetQuestLog(u.tileRenderer.ParseColorCodedText)
+	entries := u.context.GameState().GetQuestLog(u.tileRenderer.ParseColorCodedText)
 	u.OpenTextWindow(entries)
 }
 
 func (u *UIController) showFlags() {
-	state := u.context.GameState
+	state := u.context.GameState()
 	asStrings := state.GetFlags().AsStrings()
 	u.OpenTextWindow(util.ToLabelText(asStrings))
 	//logWindow.ScrollToBottom()
@@ -1556,4 +1551,41 @@ func (u *UIController) UpdateMiniMap() {
 
 func (u *UIController) SetPlayerMessage(message func(message string)) {
 	u.msg = message
+}
+
+func (u *UIController) drawHealthBar(actor *common.Actor) {
+	health := actor.GetStats().GetResource(stats.Health).Value()
+	maxHealth := actor.GetStats().GetAttribute(stats.MaxHealth)
+	healthPercent := float64(health) / float64(maxHealth)
+
+	gridSize := u.worldTexture.GetTileSize()
+	tileScale := u.GetTileScaleFactor()
+	pos := actor.DrawPosition()
+	screenPos := u.mapRenderer.MapFloatToScreen(pos)
+	healthBarHeight := 2
+	healthBarWidth := float64(gridSize.X) * tileScale
+
+	healthBarX := screenPos.X
+	healthBarY := float64(screenPos.Y) + (float64(gridSize.Y) * tileScale) - float64(healthBarHeight)
+
+	healthBarColor := color.RGBA{R: 0, G: 255, B: 0, A: 255}
+	backgroundColor := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+
+	if actor != u.context.GameState().GetPlayer() {
+		backgroundColor = color.RGBA{R: 0, G: 0, B: 0, A: 255}
+		healthBarColor = redToGreen(healthPercent)
+	}
+
+	topLeft := geometry.Point{X: int(healthBarX), Y: int(healthBarY)}
+	size := geometry.Point{X: int(healthBarWidth), Y: healthBarHeight}
+	barSize := geometry.Point{X: int(healthBarWidth * healthPercent), Y: healthBarHeight}
+	u.tileRenderer.DrawColoredRect(topLeft, size, backgroundColor)
+	u.tileRenderer.DrawColoredRect(topLeft, barSize, healthBarColor)
+}
+
+func redToGreen(percent float64) color.RGBA {
+	// 0 -> red, 0.5 -> yellow, 1 -> green
+	red := uint8(255 * (1 - percent))
+	green := uint8(255 * percent)
+	return color.RGBA{R: red, G: green, B: 0, A: 255}
 }

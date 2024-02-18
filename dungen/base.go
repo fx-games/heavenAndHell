@@ -215,6 +215,47 @@ func (m *DungeonMap) CanPlaceRoom(room *DungeonRoom) bool {
 	return true
 }
 
+func (m *DungeonMap) CanPlaceRoomPermissive(room *DungeonRoom) bool {
+	nb := geometry.Neighbors{}
+	absoluteFloorTiles := room.GetAbsoluteFloorTiles()
+	for _, tile := range absoluteFloorTiles {
+		if !m.Contains(tile) {
+			return false
+		}
+		tileAt := m.GetTileAt(tile)
+		if tileAt != Wall {
+			return false
+		}
+		unusableNeighborTiles := nb.All(tile, func(pos geometry.Point) bool {
+			return !m.Contains(pos)
+		})
+		if len(unusableNeighborTiles) > 0 {
+			return false
+		}
+	}
+	return true
+}
+func (m *DungeonMap) CanPlaceRoomRestrictive(room *DungeonRoom) bool {
+	nb := geometry.Neighbors{}
+	absoluteFloorTiles := room.GetAbsoluteFloorTiles()
+	for _, tile := range absoluteFloorTiles {
+		if !m.Contains(tile) {
+			return false
+		}
+		tileAt := m.GetTileAt(tile)
+		if tileAt != Wall {
+			return false
+		}
+		unusableNeighborTiles := nb.All(tile, func(pos geometry.Point) bool {
+			return !m.Contains(pos) || m.GetTileAt(pos) != Wall
+		})
+		if len(unusableNeighborTiles) > 0 {
+			return false
+		}
+	}
+	return true
+}
+
 func (m *DungeonMap) Contains(pos geometry.Point) bool {
 	return pos.X >= 0 && pos.X < m.width && pos.Y >= 0 && pos.Y < m.height
 }
@@ -245,7 +286,21 @@ func (m *DungeonMap) CouldBeADoor(pos geometry.Point) (geometry.CompassDirection
 
 	return geometry.East, false
 }
-
+func (m *DungeonMap) addMoreDoors(rnd *rand.Rand, minPathDistance int, spawnChance float64) {
+	m.TraverseTilesRandomly(rnd, func(mapPos geometry.Point) {
+		if direction, ok := m.CouldBeADoor(mapPos); ok {
+			if rnd.Float64() > spawnChance {
+				return
+			}
+			posOne := mapPos.Add(direction.ToPoint())
+			posTwo := mapPos.Add(direction.Opposite().ToPoint())
+			path := m.GetJPSPath(posOne, posTwo)
+			if len(path) == 0 || len(path) > minPathDistance {
+				m.AddDoorAndConnect(mapPos, direction)
+			}
+		}
+	})
+}
 func (m *DungeonMap) IsEmptySpace(pos geometry.Point) bool {
 	if !m.Contains(pos) {
 		return false
@@ -298,14 +353,23 @@ func (m *DungeonMap) TraverseTilesRandomly(random *rand.Rand, traversalFunc func
 }
 
 func (m *DungeonMap) FillDeadEnds(random *rand.Rand) {
-	m.TraverseTilesRandomly(random, func(pos geometry.Point) {
-		direction, isDeadEnd := m.IsDeadEnd(pos)
-		for isDeadEnd {
+	deadEnds := make([]geometry.Point, 0)
+	for y := 0; y < m.height; y++ {
+		for x := 0; x < m.width; x++ {
+			pos := geometry.Point{X: x, Y: y}
+			_, isDeadEnd := m.IsDeadEnd(pos)
+			if isDeadEnd {
+				deadEnds = append(deadEnds, pos)
+			}
+		}
+	}
+
+	for _, pos := range deadEnds {
+		for direction, isDeadEnd := m.IsDeadEnd(pos); isDeadEnd; direction, isDeadEnd = m.IsDeadEnd(pos) {
 			m.SetWall(pos.X, pos.Y)
 			pos = pos.Add(direction.ToPoint())
-			direction, isDeadEnd = m.IsDeadEnd(pos)
 		}
-	})
+	}
 }
 
 func (m *DungeonMap) IsDeadEnd(pos geometry.Point) (geometry.CompassDirection, bool) {
@@ -314,7 +378,7 @@ func (m *DungeonMap) IsDeadEnd(pos geometry.Point) (geometry.CompassDirection, b
 	}
 
 	nb := geometry.Neighbors{}
-	neighoringWalls := nb.All(pos, func(pos geometry.Point) bool {
+	neighoringWalls := nb.Cardinal(pos, func(pos geometry.Point) bool {
 		return m.Contains(pos) && m.GetTileAt(pos) == Wall
 	})
 
@@ -324,10 +388,11 @@ func (m *DungeonMap) IsDeadEnd(pos geometry.Point) (geometry.CompassDirection, b
 	for _, dir := range cardinalDirs {
 		if m.IsEmptySpace(pos.Add(dir.ToPoint())) {
 			openDirection = dir
+			break
 		}
 	}
 
-	return openDirection, len(neighoringWalls) == 7 || len(neighoringWalls) == 5
+	return openDirection, len(neighoringWalls) == 3
 }
 
 func (m *DungeonMap) patternMatch(x int, y int, patternOne [3][3]DungeonTile) bool {
@@ -561,6 +626,51 @@ func (m *DungeonMap) GetCardinalNeighbours(pos geometry.Point) []geometry.Point 
 	return neighbors.Cardinal(pos, func(pos geometry.Point) bool {
 		return m.Contains(pos)
 	})
+}
+
+func (m *DungeonMap) GetFilteredCardinalNeighbours(pos geometry.Point, filter func(pos geometry.Point) bool) []geometry.Point {
+	neighbors := geometry.Neighbors{}
+	return neighbors.Cardinal(pos, func(pos geometry.Point) bool {
+		return m.Contains(pos) && filter(pos)
+	})
+}
+func (m *DungeonMap) GetAllNeighbours(pos geometry.Point) []geometry.Point {
+	neighbors := geometry.Neighbors{}
+	return neighbors.All(pos, func(pos geometry.Point) bool {
+		return m.Contains(pos)
+	})
+}
+
+func (m *DungeonMap) GetAllFilteredNeighbours(pos geometry.Point, filter func(pos geometry.Point) bool) []geometry.Point {
+	neighbors := geometry.Neighbors{}
+	return neighbors.All(pos, func(pos geometry.Point) bool {
+		return m.Contains(pos) && filter(pos)
+	})
+}
+
+func (m *DungeonMap) GetRandomRoom(rnd *rand.Rand) *DungeonRoom {
+	return m.rooms[rnd.Intn(len(m.rooms))]
+}
+
+func (m *DungeonMap) AddBorder() {
+	currentTiles := m.tiles
+	newTiles := make([]DungeonTile, (m.width+2)*(m.height+2))
+	for x := 0; x < m.width+2; x++ {
+		for y := 0; y < m.height+2; y++ {
+			if x == 0 || y == 0 || x == m.width+1 || y == m.height+1 {
+				newTiles[x+y*(m.width+2)] = Wall
+				continue
+			}
+			newTiles[x+y*(m.width+2)] = currentTiles[x-1+(y-1)*m.width]
+		}
+	}
+	m.width += 2
+	m.height += 2
+	m.tiles = newTiles
+
+	for _, room := range m.rooms {
+		room.SetPositionOffset(geometry.Point{X: 1, Y: 1})
+	}
 }
 
 func NewDungeonMap(width, height int) *DungeonMap {

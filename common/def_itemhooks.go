@@ -63,13 +63,13 @@ func returnDamage(itemContext *ItemContext, action Action, context ActionContext
 	if !isMelee {
 		return nil
 	}
-	mainDefender := meleeAction.GetTargetedDefender()
+	mainDefender := meleeAction.GetDefender()
 	if mainDefender != itemContext.GetActor() {
 		return nil
 	}
 	damageDealt := meleeAction.GetTotalDamageDealt()
 	returnedDamage := max(1, int(float64(damageDealt)*factor))
-	return OneAction(NewChangeResourceAction(action.Cause(), meleeAction.GetAttacker(), stats.Health, -returnedDamage))
+	return OneAction(NewChangeResourceAction(action.Cause(), meleeAction.GetAttacker(), stats.Health, float64(-returnedDamage)))
 }
 
 func fireBallOnRangedAttack(itemContext *ItemContext, action Action, context ActionContext) []Action {
@@ -83,7 +83,7 @@ func fireBallOnRangedAttack(itemContext *ItemContext, action Action, context Act
 	}
 
 	targetRules := NewRangedAttackTargetingRules(util.Arguments{})
-	rangedTargetRules := targetRules.GetTargetRules(attacker, DijkstraAoE(context.GameState.GetMap(), util.Arguments{"3"}), context.GameState.GetMap()).(*RangedTargetingRules)
+	rangedTargetRules := targetRules.GetTargetRules(attacker, DijkstraAoE(context.GameState.GetMap, util.Arguments{"3"}), context.GameState.GetMap()).(*RangedTargetingRules)
 
 	targetPos := rangedAction.GetTargetPos()
 
@@ -94,5 +94,5 @@ func fireBallOnRangedAttack(itemContext *ItemContext, action Action, context Act
 // stat change on kill
 func manaForKills(itemContext *ItemContext, action Action, context ActionContext) []Action {
 	amount := 4
-	return OneAction(NewChangeResourceAction(action.Cause(), itemContext.GetActor(), stats.Mana, amount))
+	return OneAction(NewChangeResourceAction(action.Cause(), itemContext.GetActor(), stats.Mana, float64(amount)))
 }

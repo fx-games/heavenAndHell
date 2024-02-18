@@ -1667,7 +1667,43 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetDecal(pos geometry.Point) 
 	}
 	return decal, true
 }
+func (m *GridMap[ActorType, ItemType, ObjectType]) JumpOverPositions(origin geometry.Point, target geometry.Point, maxSprint, maxJump int) JumpOverInfo {
+	direction := target.Sub(origin)
+	beyondTargetPos := target.Add(direction)
+	lineOfSprint := m.BresenhamLine(origin, beyondTargetPos, func(pos geometry.Point) bool {
+		return !m.Contains(pos)
+	})
 
+	var sprint []geometry.Point
+	var jump []geometry.Point
+	var jumpedPos geometry.Point
+	actorFound := false
+
+	for _, pos := range lineOfSprint {
+		if m.IsCurrentlyPassable(pos) {
+			if actorFound {
+				jump = append(jump, pos)
+				if len(jump) >= maxJump {
+					break
+				}
+			} else {
+				sprint = append(sprint, pos)
+				if len(sprint) >= maxSprint {
+					break
+				}
+			}
+		} else if m.IsActorAt(pos) {
+			jumpedPos = pos
+			actorFound = true
+		}
+	}
+	return JumpOverInfo{
+		Sprint: sprint,
+		Jump: jump,
+		JumpedPos: jumpedPos,
+		ActorFound: actorFound,
+	}
+}
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetWidth() int {
 	return m.mapWidth
 }
@@ -1692,3 +1728,11 @@ func GetLocationsInRadius(origin geometry.Point, radius float64, keep func(point
 	}
 	return result
 }
+
+type JumpOverInfo struct {
+	Sprint []geometry.Point
+	Jump []geometry.Point
+	JumpedPos geometry.Point
+	ActorFound bool
+}
+

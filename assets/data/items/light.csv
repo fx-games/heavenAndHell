@@ -1,5 +1,0 @@
-name,internal_name,icon,dlvl,cost,charges,max_level,out_of_depth_chance,min_level_for_ood,category,armor_type,armor_class,weapon_type,weapon_damage,weapon_speed,throw_hit_zone,throw_damage,throw_chance_to_break,throw_on_hit_effect,light_color,light_flicker_pattern,light_flicker_frame_delay,equip_modifier,untargeted_action,targeted_action
-a torch,torch,352,1,2,2500,,,,light,,,,,,,1-2,,,255 223 117,fire,0.125,light_radius(1),,
-a lantern,lantern,247,1,10,5000,,,,light,,,,,,,,,,255 223 117,fire,0.125,light_radius(2),,
-a star-glass,light_star_glass,248,1,100,-1,,,,light,,,,,,,,,,5 250 255,smooth,0.125,light_radius(3),,
-the Morning Star,light_morning_star,274,1,100,-1,,,,light,,,,,,,,,,255 248 207,smooth,0.500,light_radius(12),,

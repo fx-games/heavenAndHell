@@ -11,6 +11,7 @@ type Targeter struct {
 	rules             common.TargetRules
 	hitEffect         *common.HitEffect
 	currentTarget     geometry.Point
+	currentInfoText   string
 	currentHighlights []common.TargetHighlight
 	isDone            bool
 	uiController      *UIController
@@ -92,12 +93,7 @@ func (t *Targeter) OnMouseClicked(mapPos geometry.Point) bool {
 		return false
 	}
 	t.updateTarget(mapPos)
-	if t.rules.IsValidTarget(mapPos) {
-		t.hitEffect.Activate(t.rules.GetAttacker(), mapPos, t.rules.GetHitpositions(mapPos))
-		t.isDone = true
-		return true
-	}
-	return false
+	return t.Activate()
 }
 
 func (t *Targeter) OnMouseMoved(mapPos geometry.Point) (bool, Tooltip) { // THIS IS THE PROBLEM
@@ -113,12 +109,17 @@ func (t *Targeter) Draw(renderer *renderer.MapRenderer) {
 		return
 	}
 	for _, highlight := range t.currentHighlights {
+		if highlight.Pos == t.currentTarget && t.currentInfoText != "" {
+			screenOffset := geometry.Point{X: 0, Y: 0}
+			renderer.DrawStringOnMapWithOffset(t.currentTarget, screenOffset, t.currentInfoText, defs.OffWhite)
+		}
 		renderer.DrawOnMap(highlight.Pos, defs.IconTargeting, highlight.Color)
 	}
 }
 
 func (t *Targeter) updateTarget(pos geometry.Point) {
 	t.currentTarget = pos
+	t.currentInfoText = t.rules.GetInfoTextForTarget(pos)
 	t.currentHighlights = t.rules.GetHighlightsForTarget(pos)
 }
 
@@ -126,12 +127,23 @@ func (t *Targeter) HasValidTarget() bool {
 	return t.rules.IsValidTarget(t.currentTarget)
 }
 
+func (t *Targeter) Activate() bool {
+	mapPos := t.currentTarget
+	if t.rules.IsValidTarget(mapPos) {
+		t.hitEffect.Activate(t.rules.GetAttacker(), mapPos, t.rules.GetHitpositions(mapPos))
+		t.isDone = true
+		return true
+	}
+	return false
+}
+
 func NewTargeter(uiController *UIController, rules common.TargetRules, onTargetSelected *common.HitEffect) *Targeter {
-	return &Targeter{
+	t := &Targeter{
 		rules:             rules,
 		uiController:      uiController,
 		hitEffect:         onTargetSelected,
-		currentTarget:     rules.GetPreSelectedTarget(),
 		currentHighlights: rules.GetHighlightsForTarget(rules.GetPreSelectedTarget()),
 	}
+	t.updateTarget(rules.GetPreSelectedTarget())
+	return t
 }

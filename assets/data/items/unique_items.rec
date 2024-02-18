@@ -1,9 +1,33 @@
 %rec: default
 #FIELDS: name internal_name icon dlvl cost charges max_level out_of_depth_chance min_level_for_ood category armor_type armor_class weapon_type weapon_damage weapon_speed throw_hit_zone throw_damage throw_chance_to_break throw_on_hit_effect light_color light_flicker_pattern light_flicker_frame_delay equip_modifier untargeted_action targeted_action
 
+name: The Star-Glass
+internal_name: light_star_glass
+icon: 248
+dlvl: 3
+cost: 100
+charges: -1
+category: light
+light_color: 5 250 255
+light_flicker_pattern: smooth
+light_flicker_frame_delay: 0.125
+equip_modifier: light_radius(4)
+
+name: The Morning Star
+internal_name: light_morning_star
+icon: 274
+dlvl: 7
+cost: 100
+charges: -1
+category: light
+light_color: 255 248 207
+light_flicker_pattern: smooth
+light_flicker_frame_delay: 0.500
+equip_modifier: light_radius(12)
+
 name: Boots of the Shadow Dancer
 internal_name: boots_of_the_shadow_dancer
-icon: 355
+icon: 440
 dlvl: 5
 cost: 7
 max_level: 12
@@ -15,7 +39,7 @@ throw_chance_to_break: 0.03
 
 name: Ancient Nightmare's Hood
 internal_name: ancient_nightmares_hood
-icon: 356
+icon: 467
 dlvl: 5
 cost: 7
 max_level: 12
@@ -27,19 +51,19 @@ throw_chance_to_break: 0.03
 
 name: Plate Mail of the Dark Lord
 internal_name: plate_mail_of_the_dark_lord
-icon: 357
+icon: 441
 dlvl: 5
 cost: 7
 max_level: 12
 category: armor
-armor_type: plate mail
+armor_type: cuirass
 armor_class: 40
 throw_damage: 1-4
 throw_chance_to_break: 0.03
 
 name: Wall of Thorns
 internal_name: wall_of_thorns
-icon: 358
+icon: 495
 dlvl: 5
 cost: 7
 max_level: 12
@@ -51,19 +75,19 @@ throw_chance_to_break: 0.03
 
 name: Veil of Darkness
 internal_name: veil_of_darkness
-icon: 359
+icon: 411
 dlvl: 5
 cost: 7
 max_level: 12
 category: armor
-armor_type: cloak
+armor_type: cape
 armor_class: 10
 throw_damage: 1-4
 throw_chance_to_break: 0.03
 
 name: Black Hands
 internal_name: black_hands
-icon: 360
+icon: 439
 dlvl: 5
 cost: 7
 max_level: 12
@@ -75,7 +99,7 @@ throw_chance_to_break: 0.03
 
 name: Never-ending Night
 internal_name: never_ending_night
-icon: 361
+icon: 468
 dlvl: 5
 cost: 7
 max_level: 12
@@ -85,7 +109,7 @@ throw_chance_to_break: 0.03
 
 name: Eternal Darkness
 internal_name: eternal_darkness
-icon: 362
+icon: 468
 dlvl: 5
 cost: 7
 max_level: 12
@@ -95,7 +119,7 @@ throw_chance_to_break: 0.03
 
 name: Amulet of Shadows
 internal_name: amulet_of_shadows
-icon: 363
+icon: 496
 dlvl: 5
 cost: 7
 max_level: 12
@@ -105,7 +129,7 @@ throw_chance_to_break: 0.03
 
 name: Shadow's Embrace
 internal_name: shadows_embrace
-icon: 364
+icon: 496
 dlvl: 5
 cost: 7
 max_level: 12
@@ -114,27 +138,27 @@ throw_damage: 1-4
 
 name: Malleus Maleficarum
 internal_name: malleus_maleficarum
-icon: 365
+icon: 498
 dlvl: 5
 cost: 7
 max_level: 12
 category: weapon
 weapon_type: mace
 weapon_damage: 3-12
-weapon_speed: 10
+weapon_speed: 0.9
 throw_damage: 1-4
 throw_chance_to_break: 0.03
 
 name: Soul Reaver
 internal_name: soul_reaver
-icon: 366
+icon: 497
 dlvl: 5
 cost: 7
 max_level: 12
 category: weapon
 weapon_type: scythe
 weapon_damage: 3-12
-weapon_speed: 10
+weapon_speed: 0.9
 throw_damage: 1-4
 throw_chance_to_break: 0.03
 

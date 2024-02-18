@@ -3,7 +3,15 @@ package defs
 import (
 	"math/rand"
 	"rpg/recfile"
+	"rpg/util"
 	"strings"
+)
+
+type ActorSpeechTrigger int
+
+const (
+	SpeechTriggerSight ActorSpeechTrigger = iota
+	SpeechTriggerHurt
 )
 
 type EnemyDefinition struct {
@@ -15,7 +23,8 @@ type EnemyDefinition struct {
 	Name               string
 	InternalName       string
 	BaseSpeed          int
-	ResourceHealth     int
+	ResourceHealth     util.Dice
+	DamageDice         util.Dice
 	Stats              map[string]int
 	Equipment          []string
 	DeathStringFormats []string
@@ -24,15 +33,21 @@ type EnemyDefinition struct {
 	UntargetedSkills []string
 	GroupSpawn       []string
 
+	Tags EnemyTags
+
 	AggroRange int
+
+
+	Speech      map[ActorSpeechTrigger][]string
 }
 
 func NewEnemyDefinitionFromRecord(record recfile.Record) EnemyDefinition {
 	enemyDefinition := EnemyDefinition{
-		Stats: make(map[string]int),
+		Stats:  make(map[string]int),
+		Speech: make(map[ActorSpeechTrigger][]string),
 	}
-	for _, field := range record {
 
+	for _, field := range record {
 		// special case for stats
 		if strings.HasPrefix(field.Name, "stats_") {
 			statName := strings.TrimPrefix(field.Name, "stats_")
@@ -40,21 +55,29 @@ func NewEnemyDefinitionFromRecord(record recfile.Record) EnemyDefinition {
 			continue
 		}
 		switch field.Name {
+		case "internal_name":
+			enemyDefinition.InternalName = field.Value
+		case "name":
+			enemyDefinition.Name = field.Value
 		case "icon":
 			enemyDefinition.Icon = field.AsInt32()
 		case "dlvl":
 			enemyDefinition.DLvl = field.AsInt()
-		case "name":
-			enemyDefinition.Name = field.Value
-		case "internal_name":
-			enemyDefinition.InternalName = field.Value
+		case "out_of_depth_chance":
+			enemyDefinition.OutOfDepthChance = field.AsFloat()
+		case "min_level_for_ood":
+			enemyDefinition.MinLevelForOoD = field.AsInt()
+		case "max_level":
+			enemyDefinition.MaxLevel = field.AsInt()
 		case "base_speed":
 			enemyDefinition.BaseSpeed = field.AsInt()
 		case "resource_health":
-			enemyDefinition.ResourceHealth = field.AsInt()
+			enemyDefinition.ResourceHealth = util.ParseDice(field.Value)
+		case "damage_dice":
+			enemyDefinition.DamageDice = util.ParseDice(field.Value)
 		case "equipment":
 			enemyDefinition.Equipment = append(enemyDefinition.Equipment, field.Value)
-		case "death_string_formats":
+		case "death_string":
 			enemyDefinition.DeathStringFormats = append(enemyDefinition.DeathStringFormats, field.Value)
 		case "targeted_skill":
 			enemyDefinition.TargetedSkills = append(enemyDefinition.TargetedSkills, field.Value)
@@ -64,6 +87,10 @@ func NewEnemyDefinitionFromRecord(record recfile.Record) EnemyDefinition {
 			enemyDefinition.GroupSpawn = append(enemyDefinition.GroupSpawn, field.Value)
 		case "aggro_range":
 			enemyDefinition.AggroRange = field.AsInt()
+		case "tags":
+			enemyDefinition.Tags = EnemyTagsFromString(field.Value)
+		case "speech_on_sight":
+			enemyDefinition.Speech[SpeechTriggerSight] = append(enemyDefinition.Speech[SpeechTriggerSight], field.Value)
 		}
 	}
 	return enemyDefinition
@@ -80,4 +107,41 @@ func (d EnemyDefinition) CanAppearAt(randomSource *rand.Rand, dungeonLevel int) 
 	oodAppearance := dungeonLevel >= d.MinLevelForOoD && randomSource.Float64() < d.OutOfDepthChance
 
 	return regularAppearance || oodAppearance
+}
+
+
+
+
+
+type EnemyTags int
+
+func (t EnemyTags) Has(tag EnemyTags) bool {
+	return t&tag != 0
+}
+
+const (
+	TagFlying EnemyTags = 1 << iota
+	TagUndead
+	TagUnique
+	TagNoCorpse
+)
+//IsUnique    bool
+//	HasNoCorpse bool
+
+func EnemyTagsFromString(tags string) EnemyTags {
+	var result EnemyTags
+	for _, tag := range strings.Split(tags, "|") {
+		tag = strings.ToLower(strings.TrimSpace(tag))
+		switch tag {
+		case "flying":
+			result |= TagFlying
+		case "undead":
+			result |= TagUndead
+		case "unique":
+			result |= TagUnique
+		case "no_corpse":
+			result |= TagNoCorpse
+		}
+	}
+	return result
 }

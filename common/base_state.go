@@ -22,7 +22,7 @@ type PlayerActions interface {
 	EquipItem(item *Item)
 	UnequipItem(item *Item)
 
-	ActivateUntargetedAction(action *UntargetedAction)
+	ActivateUntargetedAction(action *UntargetedAction, source EffectSource)
 	BeginActionTargeting(element *TargetedAction)
 
 	StartAutoExplore()
@@ -86,6 +86,7 @@ func NewState(ldtkProject *ldtk.Project) State {
 		flags:               NewFlags(),
 		playerStashInTown:   NewInventory(32),
 		ldtkProject:         ldtkProject,
+		visibility: 		 NewVisibility(),
 	}
 }
 func (s *State) SetAnimator(animator Animator) {
@@ -141,10 +142,6 @@ func (s *State) SetPlayerMessage(msg func(string)) {
 func (s *State) SetPlayerTurnHandler(playerTookTurn func(int)) {
 	s.playerTookTurn = playerTookTurn
 }
-func (s *State) InitVisibility() {
-	s.visibility = NewVisibility()
-}
-
 func (s *State) SetTownMap(currentMap *gridmap.GridMap[*Actor, *Item, Object]) {
 	s.townMaps[currentMap.GetName()] = currentMap
 }
@@ -361,10 +358,15 @@ func (s *State) MapTransition(to gridmap.Transition) {
 	if to.IsEmpty() {
 		return
 	}
-	s.animator.CancelAllAnimations()
-	s.actions.ClearQueuedActions(func(action Action) bool {
-		return true
-	})
+	if s.animator != nil {
+		s.animator.CancelAllAnimations()
+	}
+	if s.actions != nil {
+		s.actions.ClearQueuedActions(func(action Action) bool {
+			return true
+		})
+	}
+
 	s.timekeeper.ClearTrackedBeings(func(being TimedBeing) bool {
 		switch being.(type) {
 		case *Actor:
@@ -483,21 +485,21 @@ func (s *State) GetQuestLog(textParser func(string) []util.ColoredTextPart) []ut
 					UseColorCodes:      true,
 					TextWithColorCodes: textParser(fmt.Sprintf("%s - [:green]DONE", questName)),
 					Text:               fmt.Sprintf("%s - DONE", questName),
-					TextColor:          DarkTextColor,
+					TextColor:          defs.DarkTextColor,
 				})
 			} else if flags.IsSet(flagPair.GoalFlag) {
 				entries = append(entries, util.LabelText{
 					UseColorCodes:      true,
 					TextWithColorCodes: textParser(fmt.Sprintf("%s - [:yellow]IN PROGRESS", returnMessage)),
 					Text:               fmt.Sprintf("%s - IN PROGRESS", returnMessage),
-					TextColor:          DarkTextColor,
+					TextColor:          defs.DarkTextColor,
 				})
 			} else {
 				entries = append(entries, util.LabelText{
 					UseColorCodes:      true,
 					TextWithColorCodes: textParser(fmt.Sprintf("%s - [:yellow]IN PROGRESS", questName)),
 					Text:               fmt.Sprintf("%s - IN PROGRESS", questName),
-					TextColor:          DarkTextColor,
+					TextColor:          defs.DarkTextColor,
 				})
 			}
 		}
@@ -523,6 +525,10 @@ func (s *State) SetActionBroker(broker *Broker) {
 
 func (s *State) SetFactory(factory *Factory) {
 	s.factory = factory
+}
+
+func (s *State) GetPlayerDijkstraMap() map[geometry.Point]int {
+	return s.playerDijkstraMap
 }
 func getDropPos(gameMap *gridmap.GridMap[*Actor, *Item, Object], actorPos geometry.Point) geometry.Point {
 	isFree := func(pos geometry.Point) bool {

@@ -28,6 +28,7 @@ const (
 
 	ActionNameDie               ActionName = "ActionNameDie"
 	ActionNameApplyStatusEffect ActionName = "ActionNameApplyStatusEffect"
+	ActionNameApplyStatusEffectParametrized ActionName = "ActionNameApplyStatusEffectParametrized"
 	ActionNameEndTurn           ActionName = "ActionNameEndTurn"
 	ActionNameTransition        ActionName = "ActionNameTransition"
 	ActionNameTalkTo            ActionName = "ActionNameTalkToNpc"
@@ -87,7 +88,7 @@ type UserInterface interface {
 	OpenPlayerStashInTown()
 	OnPlayerTurnTaken()
 	SetPlayerMessage(message func(message string))
-	SetDebugActions(actions DebugActions)
+	SetDebugActions(actions func() DebugActions)
 }
 type ActionBroker interface {
 	Execute(action Action)
@@ -104,7 +105,7 @@ type ActionContext struct {
 	Data          defs.DataContainer
 	ActionBroker  ActionBroker
 	Msg           func(message string)
-	Speak         func(actor *Actor, trigger ActorSpeechTrigger)
+	Speak         func(actor *Actor, trigger defs.ActorSpeechTrigger)
 }
 
 type ActionHook interface {

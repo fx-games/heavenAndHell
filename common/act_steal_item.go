@@ -23,11 +23,10 @@ func NewStealItemAction(source Cause, thief *Actor, victim *Actor) *StealItemAct
 }
 func (d *StealItemAction) Execute(context ActionContext) []Action {
 	thief := d.actor
-	ui := context.UserInterface()
 	victimItems := d.victim.GetStealableItems()
-
+	msg := context.Msg
 	if len(victimItems) == 0 {
-		ui.ShowLogMessage(fmt.Sprintf("%s did not have items that can be stolen", d.victim.Name()))
+		msg(fmt.Sprintf("%s did not have items that can be stolen", d.victim.Name()))
 		return nil
 	}
 
@@ -43,7 +42,8 @@ func (d *StealItemAction) Execute(context ActionContext) []Action {
 	if context.GameState.GetPlayer() == thief {
 		name = "You"
 	}
-	ui.ShowLogMessage(fmt.Sprintf("%s stole [:darkText]%s", name, randomItem.Name()))
+
+	msg(fmt.Sprintf("%s stole [:darkText]%s", name, randomItem.Name()))
 
 	return nil
 }

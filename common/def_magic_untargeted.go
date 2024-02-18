@@ -23,6 +23,7 @@ const (
 	ActionNameBuffSpeed         UntargetedActionName = "buff_speed"
 	ActionNameRecall            UntargetedActionName = "recall"
 	ActionNameBless             UntargetedActionName = "buff_armor"
+	ActionNameStoneSkin             UntargetedActionName = "stoneskin"
 	ActionNameEnchantWeapon     UntargetedActionName = "enchant_weapon"
 	ActionNameEnchantArmor      UntargetedActionName = "enchant_armor"
 	ActionNameMultiShot         UntargetedActionName = "multi_shot"
@@ -50,12 +51,12 @@ func (g *Factory) NewUntargetedActionFromName(name string) *UntargetedAction {
 }
 
 type UntargetedEffect struct {
-	Effect      func(user *Actor)
+	Effect      func(user *Actor, source EffectSource)
 	Description []util.LabelText
 }
 
-func (u UntargetedEffect) Invoke(user *Actor) {
-	u.Effect(user)
+func (u UntargetedEffect) Invoke(user *Actor, source EffectSource) {
+	u.Effect(user, source)
 }
 
 func (u UntargetedEffect) GetDescription() []util.LabelText {
@@ -63,7 +64,7 @@ func (u UntargetedEffect) GetDescription() []util.LabelText {
 }
 
 func (g *Factory) getReplicate(args util.Arguments) UntargetedEffect {
-	effect := func(user *Actor) {
+	effect := func(user *Actor, source EffectSource) {
 		currentMap := g.state.GetMap()
 		origin := user.MapPosition()
 		// find position for spawning
@@ -81,7 +82,10 @@ func (g *Factory) getReplicate(args util.Arguments) UntargetedEffect {
 		clonedActor := user.Clone()
 		clonedActor.SetDrawPosition(clonePosition.ToPointF())
 		currentMap.AddActor(clonedActor, clonePosition)
-		g.addToTimeKeeper(clonedActor)
+
+		keeper := g.getTimeKeeper()
+
+		keeper.AddTimed(clonedActor)
 		g.logError(fmt.Sprintf("A new %s is born!", clonedActor.Name()))
 	}
 	return UntargetedEffect{
@@ -93,8 +97,8 @@ func (g *Factory) getReplicate(args util.Arguments) UntargetedEffect {
 }
 
 func (g *Factory) getReadMessage(textForMessage []util.LabelText, onRead func()) UntargetedEffect {
-	effect := func(user *Actor) {
-		g.gui.OpenTextWindow(textForMessage)
+	effect := func(user *Actor, source EffectSource) {
+		g.gui().OpenTextWindow(textForMessage)
 		if onRead != nil {
 			onRead()
 		}
@@ -107,19 +111,25 @@ func (g *Factory) getReadMessage(textForMessage []util.LabelText, onRead func())
 	}
 }
 func (g *Factory) getSpeedBuff(args util.Arguments) UntargetedEffect {
-	amount := args.GetInt(0)
-	turnCount := args.GetInt(1)
-	effect := func(user *Actor) {
+	amount := util.ParseDice(args.Get(0)).Roll()
+	turnCount := util.ParseDice(args.Get(1)).Roll()
+	effect := func(user *Actor, source EffectSource) {
 		modifier := &stats.Modifier{
 			Attribute:      stats.BaseSpeed,
-			Name:           "of haste",
+			Description:    "of haste",
 			Value:          float64(amount),
 			Mode:           stats.ModifyAdditive,
 			IsPercentBased: false,
+			StackID: 	    string(source),
 		}
+		timekeeper := g.getTimeKeeper()
+
+		RemoveTimedEffectsBySource(timekeeper, source)
+
 		timedModifier := NewTimedModifier(string(ActionNameBuffSpeed), user, modifier, turnCount)
 		timedModifier.Apply()
-		g.addToTimeKeeper(timedModifier)
+		timekeeper.AddTimed(timedModifier)
+
 		g.logError("You feel the world around you slow down!")
 	}
 	return UntargetedEffect{
@@ -130,14 +140,38 @@ func (g *Factory) getSpeedBuff(args util.Arguments) UntargetedEffect {
 	}
 }
 
+func RemoveTimedEffectsBySource(timekeeper *TimeKeeper, source EffectSource) {
+	if source == "" {
+		return
+	}
+	timeModsWithSameSource := timekeeper.ClearTrackedBeings(func(being TimedBeing) bool {
+		if mod, ok := being.(*TimedModifier); ok {
+			return mod.modifier.StackID == string(source)
+		}
+		if untargeted, ok := being.(*UntargetedAction); ok {
+			return untargeted.effectSource == source
+		}
+		return false
+	})
+	for _, timedMod := range timeModsWithSameSource {
+		if mod, ok := timedMod.(*TimedModifier); ok {
+			mod.Remove()
+		}
+	}
+}
+
 func (g *Factory) getDamageBuff(args util.Arguments) UntargetedEffect {
 	intervalRange := stats.NewIntervalFromString(args.Get(0))
 	turnCount := args.GetInt(1)
-	effect := func(user *Actor) {
-		modifier := defs.AddToBaseAttribute(g.randomSource, stats.BaseDamage, intervalRange.AsTuple())
+	effect := func(user *Actor, source EffectSource) {
+		modifier := defs.AddToBaseAttributeRandomly(g.randomSource, stats.DamageBonus, intervalRange.AsTuple())
+		modifier.StackID = string(source)
 		timedModifier := NewTimedModifier(string(ActionNameBuffDamage), user, modifier, turnCount)
+		timeKeeper := g.getTimeKeeper()
+
+		RemoveTimedEffectsBySource(timeKeeper, source)
 		timedModifier.Apply()
-		g.addToTimeKeeper(timedModifier)
+		timeKeeper.AddTimed(timedModifier)
 		g.logError("You feel stronger!")
 	}
 	return UntargetedEffect{
@@ -148,22 +182,31 @@ func (g *Factory) getDamageBuff(args util.Arguments) UntargetedEffect {
 	}
 }
 func (g *Factory) getEnchantWeapon(args util.Arguments) UntargetedEffect {
-	effect := func(user *Actor) {
+	maxEnchantLevel := 3
+	effect := func(user *Actor, source EffectSource) {
 		isWeapon := func(element *Item) bool { return element.IsWeapon() }
 		selected := func(itemKey rune) {
+			g.gui().PopAll()
 			inventory := user.GetInventory()
 			selectedItem := inventory.GetItemByLetter(itemKey)
 			weaponStats := selectedItem.GetWeaponStats()
+			if weaponStats.Plus >= maxEnchantLevel {
+				g.logError(fmt.Sprintf("Your [:darkText]%s[:white] cannot be enchanted any further.", selectedItem.Name()))
+				return
+			}
 			weaponStats.Plus += 1
 			g.logError(fmt.Sprintf("Your [:darkText]%s[:white] glows [:blue]blue[:white] for a moment.", selectedItem.Name()))
 		}
 
 		if user == g.state.GetPlayer() {
-			g.gui.OpenListInventoryForSelection(isWeapon, selected)
+			g.gui().OpenListInventoryForSelection(isWeapon, selected)
 		} else if user.GetEquipment().HasWeaponEquipped() {
 			// select wielded weapon
 			wieldedWeapon := user.GetEquipment().GetBySlot(defs.SlotNameMainHand)
 			weaponStats := wieldedWeapon.GetWeaponStats()
+			if weaponStats.Plus >= maxEnchantLevel {
+				return
+			}
 			weaponStats.Plus += 1
 		}
 	}
@@ -175,22 +218,31 @@ func (g *Factory) getEnchantWeapon(args util.Arguments) UntargetedEffect {
 	}
 }
 func (g *Factory) getEnchantArmor(args util.Arguments) UntargetedEffect {
-	effect := func(user *Actor) {
+	maxEnchantLevel := 3
+	effect := func(user *Actor, source EffectSource) {
 		isArmor := func(element *Item) bool { return element.IsArmor() }
 		selected := func(itemKey rune) {
+			g.gui().PopAll()
 			inventory := user.GetInventory()
 			selectedItem := inventory.GetItemByLetter(itemKey)
 			weaponStats := selectedItem.GetArmorStats()
+			if weaponStats.Plus >= maxEnchantLevel {
+				g.logError(fmt.Sprintf("Your [:darkText]%s[:white] cannot be enchanted any further.", selectedItem.Name()))
+				return
+			}
 			weaponStats.Plus += 1
 			g.logError(fmt.Sprintf("Your [:darkText]%s[:white] glows [:blue]blue[:white] for a moment.", selectedItem.Name()))
 		}
 
 		if user == g.state.GetPlayer() {
-			g.gui.OpenListInventoryForSelection(isArmor, selected)
+			g.gui().OpenListInventoryForSelection(isArmor, selected)
 		} else if user.GetEquipment().HasArmorEquipped() {
 			// select worn armor
 			wornArmor := user.GetEquipment().GetBySlot(defs.SlotNameArmorTorso)
 			armorStats := wornArmor.GetWeaponStats()
+			if armorStats.Plus >= maxEnchantLevel {
+				return
+			}
 			armorStats.Plus += 1
 		}
 	}
@@ -202,9 +254,9 @@ func (g *Factory) getEnchantArmor(args util.Arguments) UntargetedEffect {
 	}
 }
 func (g *Factory) getHealHealthAndMana(args util.Arguments) UntargetedEffect {
-	effect := func(user *Actor) {
-		healHealthAction := NewChangeResourceAction(NewActorCause("Full Heal", user), user, stats.Health, user.GetStats().GetAttribute(stats.MaxHealth))
-		healManaAction := NewChangeResourceAction(NewActorCause("Full Heal", user), user, stats.Mana, user.GetStats().GetAttribute(stats.MaxMana))
+	effect := func(user *Actor, source EffectSource) {
+		healHealthAction := NewChangeResourceAction(NewActorCause("Full Heal", user), user, stats.Health, float64(user.GetStats().GetAttribute(stats.MaxHealth)))
+		healManaAction := NewChangeResourceAction(NewActorCause("Full Heal", user), user, stats.Mana, float64(user.GetStats().GetAttribute(stats.MaxMana)))
 		g.actionBroker.Execute(healHealthAction)
 		g.actionBroker.Execute(healManaAction)
 	}
@@ -216,10 +268,10 @@ func (g *Factory) getHealHealthAndMana(args util.Arguments) UntargetedEffect {
 	}
 }
 func (g *Factory) getHealHealth(args util.Arguments) UntargetedEffect {
-	effect := func(user *Actor) {
-		healHealthAction := NewChangeResourceAction(NewActorCause("Full Heal", user), user, stats.Health, user.GetStats().GetAttribute(stats.MaxHealth))
+	effect := func(user *Actor, source EffectSource) {
+		healHealthAction := NewChangeResourceAction(NewActorCause("Full Heal", user), user, stats.Health, float64(user.GetStats().GetAttribute(stats.MaxHealth)))
 		g.actionBroker.Execute(healHealthAction)
-		g.gui.UpdateStatsLabel()
+		g.gui().UpdateStatsLabel()
 	}
 	return UntargetedEffect{
 		Effect: effect,
@@ -228,12 +280,18 @@ func (g *Factory) getHealHealth(args util.Arguments) UntargetedEffect {
 		},
 	}
 }
+func (g *Factory) logIfPlayer(user *Actor, message string) {
+	if user == g.state.GetPlayer() {
+		g.logError(message)
+	}
+}
 func (g *Factory) getHealHealthBy(args util.Arguments) UntargetedEffect {
 	interval := stats.NewIntervalFromString(args.Get(0))
-	effect := func(user *Actor) {
-		healHealthAction := NewChangeResourceAction(NewActorCause("Heal", user), user, stats.Health, interval.LinearRandom())
+	effect := func(user *Actor, source EffectSource) {
+		healHealthAction := NewChangeResourceAction(NewActorCause("Heal", user), user, stats.Health, float64(interval.LinearRandom()))
 		g.actionBroker.Execute(healHealthAction)
-		g.logError("You feel better")
+		g.logIfPlayer(user,"You feel better")
+		g.tryEndTurn(user, 100 / user.GetBaseSpeed())
 	}
 	return UntargetedEffect{
 		Effect: effect,
@@ -245,10 +303,11 @@ func (g *Factory) getHealHealthBy(args util.Arguments) UntargetedEffect {
 
 func (g *Factory) getHealManaBy(args util.Arguments) UntargetedEffect {
 	interval := stats.NewIntervalFromString(args.Get(0))
-	effect := func(user *Actor) {
-		healHealthAction := NewChangeResourceAction(NewActorCause("Mana Surge", user), user, stats.Mana, interval.LinearRandom())
+	effect := func(user *Actor, source EffectSource) {
+		healHealthAction := NewChangeResourceAction(NewActorCause("Mana Surge", user), user, stats.Mana, float64(interval.LinearRandom()))
 		g.actionBroker.Execute(healHealthAction)
 		g.logError("You feel a surge of mana")
+		g.tryEndTurn(user, 100 / user.GetBaseSpeed())
 	}
 	return UntargetedEffect{
 		Effect: effect,
@@ -259,7 +318,7 @@ func (g *Factory) getHealManaBy(args util.Arguments) UntargetedEffect {
 }
 func (g *Factory) getMultiShot(args util.Arguments) UntargetedEffect {
 	shotCount := args.GetInt(0)
-	effect := func(user *Actor) {
+	effect := func(user *Actor, source EffectSource) {
 		if !user.GetEquipment().HasRangedWeaponEquipped() {
 			g.logError("No ranged weapon equipped")
 			return
@@ -272,9 +331,10 @@ func (g *Factory) getMultiShot(args util.Arguments) UntargetedEffect {
 		hitCount := min(shotCount, len(nearbyEnemies))
 		for i := 0; i < hitCount; i++ {
 			target := nearbyEnemies[i]
-			rangedAttackAction := NewRangedAttackAction(NewActorCause("Ranged attack", user), user, target.MapPosition())
+			rangedAttackAction := NewRangedAttackAction(NewActorCause("Multi Shot", user), user, target.MapPosition())
 			g.actionBroker.Execute(rangedAttackAction)
 		}
+		g.tryEndTurn(user, 100 / user.GetAttackSpeed(RangedAttack))
 	}
 	return UntargetedEffect{
 		Effect: effect,
@@ -283,36 +343,101 @@ func (g *Factory) getMultiShot(args util.Arguments) UntargetedEffect {
 		},
 	}
 }
+
+func (g *Factory) tryEndTurn(user *Actor, autUsed int) {
+	if user == g.state.GetPlayer() {
+		g.actionBroker.QueueForExecution(NewEndPlayerTurnAction(NewActorCause("Action Used", user), autUsed))
+	}
+}
+
 func (g *Factory) getBlessing(args util.Arguments) UntargetedEffect {
-	interval := stats.NewIntervalFromString(args.Get(0))
-	turnCount := args.GetInt(1)
-	effect := func(user *Actor) {
-		modifier := defs.AddToBaseAttribute(g.randomSource, stats.BaseArmorClass, interval.AsTuple())
+	//interval := stats.NewIntervalFromString(args.Get(0))
+	turnCount := args.GetInt(0)
+	effect := func(user *Actor, source EffectSource) {
+
+		currentAC := user.GetStats().GetAttribute(stats.ArmorClass)
+		acBonus := 0
+		if currentAC < 5 {
+			acBonus = 5
+		} else {
+			acBonus = currentAC
+		}
+
+		timeKeeper := g.getTimeKeeper()
+		RemoveTimedEffectsBySource(timeKeeper, source)
+
+		modifier := defs.AddToBaseAttribute(g.randomSource, stats.ArmorClass, float64(acBonus))
+		modifier.StackID = string(source)
+
 		timedModifier := NewTimedModifier(string(ActionNameBless), user, modifier, turnCount)
 		timedModifier.Apply()
-		g.addToTimeKeeper(timedModifier)
+		timeKeeper.AddTimed(timedModifier)
 	}
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Increase your Armor Class by %s for %d turns", interval.ToString(), turnCount)),
+			util.LabelTextFromString(fmt.Sprintf("Increase your Armor Class for %d turns", turnCount)),
 		},
 	}
 }
+func (g *Factory) getStoneSkinBuff(args util.Arguments) UntargetedEffect {
+	//amount := args.GetInt(0)
+	turnCount := util.ParseDice(args.Get(0)).Roll()
+	effect := func(user *Actor, source EffectSource) {
+		speedMod := &stats.Modifier{
+			Attribute:      stats.BaseSpeed,
+			Description:    "Slowed",
+			Value:          float64(-5),
+			Mode:           stats.ModifyAdditive,
+			IsPercentBased: false,
+			StackID: 	    string(source),
+		}
+		timeKeeper := g.getTimeKeeper()
+		RemoveTimedEffectsBySource(timeKeeper, source)
+
+		timedSpeedMod := NewTimedModifier(string(ActionNameStoneSkin), user, speedMod, turnCount)
+		timedSpeedMod.Apply()
+		timeKeeper.AddTimed(timedSpeedMod)
+
+		currentAC := user.GetStats().GetAttribute(stats.ArmorClass)
+		missingToThirty := max(0, 30 - currentAC)
+		acMod := defs.AddToBaseAttribute(g.randomSource, stats.ArmorClass, float64(missingToThirty))
+		acMod.StackID = string(source)
+		timedACMod := NewTimedModifier(string(ActionNameStoneSkin), user, acMod, turnCount)
+		timedACMod.Apply()
+		timeKeeper.AddTimed(timedACMod)
+
+		g.logIfPlayer(user, "Your skin hardens but movement becomes difficult.")
+		g.tryEndTurn(user, 100 / user.GetBaseSpeed())
+	}
+	return UntargetedEffect{
+		Effect: effect,
+		Description: []util.LabelText{
+			util.LabelTextFromString(fmt.Sprintf("Apply Stoneskin for %d turns", turnCount)),
+		},
+	}
+}
+
 func (g *Factory) getBerserkSelfAction(args util.Arguments) UntargetedEffect {
 	if args.IsEmpty() {
 		g.logError(fmt.Sprintf("Berserk effect requires arguments"))
 	}
 	intervalRange := stats.NewIntervalFromString(args.Get(0))
 	turnCount := args.GetInt(1)
-	effect := func(user *Actor) {
+	effect := func(user *Actor, source EffectSource) {
 		applyStatusAction := NewApplyStatusAction(NewActorCause("ApplyStatusEffect", user), user, StatusBerserk, turnCount)
 		g.actionBroker.Execute(applyStatusAction)
 
-		modifier := defs.AddToBaseAttribute(g.randomSource, stats.BaseDamage, intervalRange.AsTuple())
+		timeKeeper := g.getTimeKeeper()
+
+		RemoveTimedEffectsBySource(timeKeeper, source)
+		modifier := defs.AddToBaseAttributeRandomly(g.randomSource, stats.DamageBonus, intervalRange.AsTuple())
+		modifier.StackID = string(source)
 		timedModifier := NewTimedModifier(string(ActionNameBuffDamage), user, modifier, turnCount)
 		timedModifier.Apply()
-		g.addToTimeKeeper(timedModifier)
+
+		timeKeeper.AddTimed(timedModifier)
+
 		g.logError("Blood for the blood god!")
 	}
 	return UntargetedEffect{
@@ -327,10 +452,12 @@ func (g *Factory) getApplyStatusAction(args util.Arguments) UntargetedEffect {
 	statusEffect := args.Get(0)
 	turnCount := args.GetInt(1)
 	message := args.Get(2)
-	effect := func(user *Actor) {
+	effect := func(user *Actor, source EffectSource) {
 		applyStatusAction := NewApplyStatusAction(NewActorCause("ApplyStatusEffect", user), user, StatusEffect(statusEffect), turnCount)
 		g.actionBroker.Execute(applyStatusAction)
-		g.logError(message)
+		if message != "" {
+			g.logError(message)
+		}
 	}
 	return UntargetedEffect{
 		Effect: effect,
@@ -341,14 +468,14 @@ func (g *Factory) getApplyStatusAction(args util.Arguments) UntargetedEffect {
 }
 
 func (g *Factory) getRandomTelefragAction(args util.Arguments) UntargetedEffect {
-	gui := g.gui
-	effect := func(user *Actor) {
+	effect := func(user *Actor, source EffectSource) {
+		gui := g.gui
 		currentMap := g.state.GetMap()
 		var visEnemies []*Actor
 		for _, visPos := range user.GetFOV().Visibles {
 			if currentMap.IsActorAt(visPos) {
 				actorAt := currentMap.ActorAt(visPos)
-				if (actorAt.IsHostileTo(user) || gui.IsPlayerForcingAggression()) && actorAt.IsAlive() && actorAt != user {
+				if (actorAt.IsHostileTo(user) || gui().IsPlayerForcingAggression()) && actorAt.IsAlive() && actorAt != user {
 					visEnemies = append(visEnemies, actorAt)
 				}
 			}
@@ -364,7 +491,7 @@ func (g *Factory) getRandomTelefragAction(args util.Arguments) UntargetedEffect 
 		moveAction.DisableAnimation()
 
 		changeHealthAmount := -randomEnemy.GetStats().GetResource(stats.Health).Value()
-		killAction := NewChangeResourceAction(NewActorCause("Telefrag", user), randomEnemy, stats.Health, changeHealthAmount)
+		killAction := NewChangeResourceAction(NewActorCause("Telefrag", user), randomEnemy, stats.Health, float64(changeHealthAmount))
 		g.actionBroker.Execute(killAction)
 		g.actionBroker.Execute(moveAction)
 	}
@@ -383,7 +510,7 @@ func (g *Factory) getRandomTeleportAction(args util.Arguments) UntargetedEffect 
 	}
 	distanceInterval := stats.NewIntervalFromString(args.Get(0))
 
-	effect := func(user *Actor) {
+	effect := func(user *Actor, source EffectSource) {
 		currentMap := g.state.GetMap()
 		origin := user.MapPosition()
 		location, found := currentMap.GetRandomLocation(func(location geometry.Point) bool {
@@ -409,7 +536,7 @@ func (g *Factory) getRandomTeleportAction(args util.Arguments) UntargetedEffect 
 
 func (g *Factory) getPlayerRecallAction(args util.Arguments) UntargetedEffect {
 	return UntargetedEffect{
-		Effect: func(user *Actor) {
+		Effect: func(user *Actor, source EffectSource) {
 			recallAction := func() {
 				currentMapName := g.state.GetMap().GetName()
 				isInTown := defs.IsTownLevel(currentMapName)
@@ -432,7 +559,6 @@ func (g *Factory) getPlayerRecallAction(args util.Arguments) UntargetedEffect {
 				g.state.TransitionTo(dest)
 			}
 			g.queueAfterTurn(recallAction)
-
 		},
 		Description: []util.LabelText{
 			util.LabelTextFromString("Recall to town"),
@@ -472,7 +598,7 @@ func (t *TimedModifier) GetTooltipLines(textParser func(string) []util.ColoredTe
 	return []util.LabelText{
 		{
 			Text:               t.modifier.ToString(),
-			TextColor:          DarkTextColor,
+			TextColor:          defs.DarkTextColor,
 			UseColorCodes:      false,
 			TextWithColorCodes: textParser(t.Name()),
 		},
@@ -535,7 +661,7 @@ func (g *Factory) getVisibleEnemiesByDistance(user *Actor) []*Actor {
 			continue
 		}
 		actor := currentMap.ActorAt(visPos)
-		if (actor.IsHostileTo(user) || g.gui.IsPlayerForcingAggression()) && actor.IsAlive() && user != actor {
+		if (actor.IsHostileTo(user) || g.gui().IsPlayerForcingAggression()) && actor.IsAlive() && user != actor {
 			nearbyEnemies = append(nearbyEnemies, actor)
 		}
 	}
@@ -551,8 +677,38 @@ func (g *Factory) NewConditionFromString(condition string) func(user *Actor) boo
 	if condition == "can_replicate" {
 		return g.canReplicate
 	}
+	if condition == "can_enchant_armor" {
+		return g.hasEnchentableArmor
+	}
+	if condition == "can_enchant_weapon" {
+		return g.hasEnchentableWeapon
+	}
 	g.logError(fmt.Sprintf("no condition found for name %s", condition))
 	return func(user *Actor) bool { return true }
+}
+
+func (g *Factory) hasEnchentableArmor(user *Actor) bool {
+	if !user.GetInventory().HasEnchantableArmor() {
+		g.logError("You have no armor to enchant")
+		return false
+	}
+	return true
+}
+
+func (g *Factory) doesntHaveDamageBuff(user *Actor) bool {
+	if user.GetStats().IsBuffed(stats.DamageBonus) {
+		g.logError("Your damage output is already magically enhanced.")
+		return false
+	}
+	return true
+}
+
+func (g *Factory) hasEnchentableWeapon(user *Actor) bool {
+	if !user.GetInventory().HasEnchantableWeapon() {
+		g.logError("You have no weapon to enchant")
+		return false
+	}
+	return true
 }
 
 func (g *Factory) canReplicate(user *Actor) bool {
@@ -595,3 +751,5 @@ func (g *Factory) canReplicate(user *Actor) bool {
 
 	return true
 }
+
+type EffectSource string

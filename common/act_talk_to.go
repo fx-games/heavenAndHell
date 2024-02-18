@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"rpg/stats"
 	"rpg/util"
 )
 
@@ -24,10 +25,11 @@ func (d *TalkToAction) Execute(context ActionContext) []Action {
 	gui := context.UserInterface()
 	npc := d.npc
 	vendorType := npc.GetVendorType()
+	msg := context.Msg
 
 	if vendorType == VendorTypeWands {
 		state.GetPlayer().HealCompletely()
-		gui.ShowLogMessage(fmt.Sprintf("You feel refreshed"))
+		msg(fmt.Sprintf("You feel refreshed"))
 	}
 
 	options := getVendorOptions(context, npc)
@@ -115,6 +117,16 @@ func getWeaponVendorOptions(context ActionContext, vendor *Actor) []util.MenuIte
 			MainText: "BUY",
 			Action: func() {
 				gui.OpenShopMenu(vendor)
+			},
+		},
+		{
+			MainText: "REPAIR",
+			Action: func() {
+				//gui.BeginPlayerRepairing(vendor)
+				//TODO
+				player := state.GetPlayer()
+				player.GetInventory().RepairAll()
+				player.GetStats().DecrementBy(stats.Gold, 10)
 			},
 		},
 	}

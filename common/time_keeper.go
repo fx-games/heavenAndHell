@@ -48,16 +48,20 @@ func (t *TimeKeeper) PlayerTakesTurn(playerAutUsed int) {
 		timedBeing := t.timed[i]
 		if !timedBeing.IsAlive() {
 			t.removeAtIndex(i)
-			if t.onRemoveTimed != nil {
-				t.onRemoveTimed(timedBeing)
-			}
 			continue
 		}
 		addedEnergy := int((float64(playerAutUsed) / 10.0) * float64(timedBeing.GetBaseSpeed()))
 		timedBeing.AddEnergy(addedEnergy)
-		for energyUsed, action := t.hasEnergyForAction(timedBeing); timedBeing.IsAlive() && action != nil; energyUsed, action = t.hasEnergyForAction(timedBeing) {
-			timedBeing.RemoveEnergy(energyUsed)
-			action()
+		for energyUsed, action := t.hasEnergyForAction(timedBeing); // init
+		timedBeing.IsAlive() && action != nil; // condition
+		energyUsed, action = t.hasEnergyForAction(timedBeing) { // executed after each iteration
+			timedBeing.RemoveEnergy(energyUsed) // this does update status effects, such as poison, thus could kill the being..
+			if timedBeing.IsAlive() {
+				action()
+			} else {
+				t.removeAtIndex(i)
+				break
+			}
 		}
 	}
 }
@@ -67,17 +71,24 @@ func (t *TimeKeeper) AddTimed(actor TimedBeing) {
 }
 
 func (t *TimeKeeper) removeAtIndex(i int) {
+	timedBeing := t.timed[i]
 	t.timed = append(t.timed[:i], t.timed[i+1:]...)
+	if t.onRemoveTimed != nil {
+		t.onRemoveTimed(timedBeing)
+	}
 }
 func (t *TimeKeeper) SetOnRemoveTimed(onRemoveTimed func(thing TimedBeing)) {
 	t.onRemoveTimed = onRemoveTimed
 }
-func (t *TimeKeeper) ClearTrackedBeings(shouldRemoveBeing func(being TimedBeing) bool) {
+func (t *TimeKeeper) ClearTrackedBeings(shouldRemoveBeing func(being TimedBeing) bool) []TimedBeing {
+	var removed []TimedBeing
 	for i := len(t.timed) - 1; i >= 0; i-- {
 		if shouldRemoveBeing(t.timed[i]) {
-			t.timed = append(t.timed[:i], t.timed[i+1:]...)
+			removed = append(removed, t.timed[i])
+			t.removeAtIndex(i)
 		}
 	}
+	return removed
 }
 
 func (t *TimeKeeper) GetBeingsByFilter(keep func(being TimedBeing) bool) []TimedBeing {

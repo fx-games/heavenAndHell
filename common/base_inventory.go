@@ -14,6 +14,7 @@ type Inventory struct {
 	maxItemStacks int
 	letterToItem  map[rune]*Item
 	itemToLetter  map[*Item]rune
+	onChanged     func()
 }
 
 func NewInventory(maxItemStacks int) *Inventory {
@@ -96,6 +97,7 @@ func (i *Inventory) StackedItemsWithFilter(filter func(*Item) bool) []InventoryS
 }
 
 func (i *Inventory) Remove(item *Item) {
+	defer i.changed()
 	for idx, invItem := range i.items {
 		if invItem == item {
 			i.items = append(i.items[:idx], i.items[idx+1:]...)
@@ -115,6 +117,7 @@ func (i *Inventory) Has(item *Item) bool {
 }
 
 func (i *Inventory) Add(item *Item) {
+	defer i.changed()
 	i.items = append(i.items, item)
 	i.updateLetterMapping()
 }
@@ -150,10 +153,14 @@ func (i *Inventory) GetItemByLetter(letter rune) *Item {
 }
 
 func (i *Inventory) GetLetterForItemStack(item InventoryStack) rune {
+	firstItem := item[0]
+	return i.GetLetterForItem(firstItem)
+}
+
+func (i *Inventory) GetLetterForItem(firstItem *Item) rune {
 	if i.itemToLetter == nil {
 		i.updateLetterMapping()
 	}
-	firstItem := item[0]
 	return i.itemToLetter[firstItem]
 }
 
@@ -162,7 +169,7 @@ func (i *Inventory) AsColorCodedStrings() []string {
 	SortInventory(items)
 	var asStrings []string
 	for _, item := range items {
-		itemColor := ColorCodeFromColor(item.TintColor())
+		itemColor := defs.ColorCodeFromColor(item.TintColor())
 		itemLetter := i.GetLetterForItemStack(item)
 		itemLine := fmt.Sprintf("[:white]%c) %s%s", itemLetter, itemColor, item.BandStyleName())
 		if item.Counter() > 1 {
@@ -192,6 +199,40 @@ func (i *Inventory) Clone() *Inventory {
 		clonedInv.Add(item.Clone())
 	}
 	return clonedInv
+}
+
+func (i *Inventory) HasEnchantableArmor() bool {
+	for _, item := range i.items {
+		if item.IsArmor() && item.GetArmorStats().CanBeFurtherEnchanted() {
+			return true
+		}
+	}
+	return false
+}
+
+func (i *Inventory) HasEnchantableWeapon() bool {
+	for _, item := range i.items {
+		if item.IsWeapon() && item.GetWeaponStats().CanBeFurtherEnchanted() {
+			return true
+		}
+	}
+	return false
+}
+
+func (i *Inventory) SetOnChangeHandler(onChanged func()) {
+	i.onChanged = onChanged
+}
+
+func (i *Inventory) changed() {
+	if i.onChanged != nil {
+		i.onChanged()
+	}
+}
+
+func (i *Inventory) RepairAll() {
+	for _, item := range i.items {
+		item.Repair()
+	}
 }
 
 func SortInventory(stacks []InventoryStack) {

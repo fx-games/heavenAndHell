@@ -1,8 +1,10 @@
 package common
 
 import (
+	"math/rand"
 	"rpg/geometry"
 	"rpg/stats"
+	"rpg/util"
 )
 
 type ThrowAction struct {
@@ -52,10 +54,14 @@ func (d *ThrowAction) Execute(context ActionContext) []Action {
 	currentMap := context.GameState.GetMap()
 	if currentMap.IsActorAt(d.targetPos) {
 		d.defender = currentMap.ActorAt(d.targetPos)
-		if throwInfo.Damage.NotZero() { // deal direct throw damage
+
+		hitChance := CalculateThrowHitChance(d.attacker, d.defender)
+
+		doesHit := hitChance > 0 && hitChance >= rand.Float64()
+		if doesHit && throwInfo.Damage.NotZero() { // deal direct throw damage
 			damage := throwInfo.Damage.PyramidRandom()
 			logAttack(context, d.attacker, d.defender, damage)
-			actions = append(actions, NewChangeResourceAction(NewActorCause(ActionNameThrow, d.attacker), d.defender, stats.Health, -damage))
+			actions = append(actions, NewChangeResourceAction(NewActorCause(ActionNameThrow, d.attacker), d.defender, stats.Health, float64(-damage)))
 			d.damageAmount += damage
 		}
 	}
@@ -103,4 +109,39 @@ func (d *ThrowAction) GetDefender() interface{} {
 
 func (d *ThrowAction) GetTargetPos() geometry.Point {
 	return d.targetPos
+}
+
+
+
+func CalculateThrowHitChance(attacker, defender *Actor) float64 {
+	distance := geometry.Distance(defender.MapPosition(), attacker.MapPosition())
+
+	dexModifier := float64(defaultModifierPattern(attacker.GetStats().GetAttribute(stats.Dexterity))) * 0.2
+	strModifier := float64(defaultModifierPattern(attacker.GetStats().GetAttribute(stats.Strength)))
+	// dex modifier only applies in full to skill based ranged weapons
+	// => in particular, crossbows don't get this penalty
+
+
+	maxRange := 10 + (2 * strModifier)
+	accuracyAtMaxRange := 0.5
+	accuracyAtMinRange := 0.9
+
+	if distance > maxRange {
+		dropOffPerTile := 0.3
+		delta := distance - maxRange
+		return util.Clamp(0.0, 1.0, accuracyAtMaxRange - (delta * dropOffPerTile) + dexModifier)
+	}
+
+	if distance <= 1 {
+		return util.Clamp(0.0, 1.0, accuracyAtMinRange + dexModifier)
+	}
+
+	// interpolate
+
+	// min range == 2
+	normalizedMaxRange := maxRange - 1
+	percent := (distance - 1) / normalizedMaxRange
+	accuracy := util.Clamp(0.0, 1.0, accuracyAtMinRange + (percent * (accuracyAtMaxRange - accuracyAtMinRange)) + dexModifier)
+
+	return accuracy
 }

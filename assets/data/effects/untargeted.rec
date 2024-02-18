@@ -1,5 +1,5 @@
 %rec: default
-#FIELDS: internal_name icon dlvl name
+#FIELDS: internal_name icon dlvl name activation_condition allowed_usage default_args
 
 internal_name: replicate_with
 icon: 194
@@ -65,6 +65,7 @@ internal_name: recall
 icon: 223
 dlvl: 1
 name: Recall
+activation_delay: 5
 allowed_usage: wand | shrine
 
 internal_name: buff_armor
@@ -98,4 +99,11 @@ icon: 223
 dlvl: 1
 name: Telefrag
 default_args: 7-14
+allowed_usage: wand | shrine
+
+internal_name: stoneskin
+icon: 223
+dlvl: 1
+name: Stone Skin
+default_args: 5-10
 allowed_usage: wand | shrine

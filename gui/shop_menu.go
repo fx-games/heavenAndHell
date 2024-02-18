@@ -3,7 +3,7 @@ package gui
 import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
-	"rpg/common"
+	"rpg/defs"
 	"rpg/geometry"
 	"rpg/util"
 )
@@ -177,11 +177,11 @@ func (i *ShopMenu) Draw() {
 	headerBorderSize := headerSize.Add(i.borderPadding)
 	uiRenderer.DrawDefaultBorder(headerBorderTopLeft, headerBorderSize)
 
-	uiRenderer.DrawTTFOnScreen(float64(topLeftHeader.X)+1, float64(topLeftHeader.Y)+i.posInfo.LineHeight+1, i.headerTextLeft, common.DarkTextColor)
+	uiRenderer.DrawTTFOnScreen(float64(topLeftHeader.X)+1, float64(topLeftHeader.Y)+i.posInfo.LineHeight+1, i.headerTextLeft, defs.DarkTextColor)
 	// right align
 	headerTextRightX := float64(i.topLeft.X) + float64(i.posInfo.SizeInPixels.X) - i.headerTextRightWidth
 
-	uiRenderer.DrawTTFOnScreen(headerTextRightX, float64(topLeftHeader.Y)+i.posInfo.LineHeight+1, i.headerTextRight, common.DarkTextColor)
+	uiRenderer.DrawTTFOnScreen(headerTextRightX, float64(topLeftHeader.Y)+i.posInfo.LineHeight+1, i.headerTextRight, defs.DarkTextColor)
 }
 
 func (i *ShopMenu) IsNull() bool {
@@ -205,7 +205,7 @@ func (i *ShopMenu) drawStringArray(lines []ShopMenuItem) {
 		colOffset := i.posInfo.ColumnXOffsets[1]
 		letterDrawX := 1.0 + float64(i.topLeft.X) + float64(colOffset)
 
-		uiRenderer.DrawTTFOnScreen(letterDrawX, drawY, fmt.Sprintf("%c)", line.ShortCut), common.DarkTextColor)
+		uiRenderer.DrawTTFOnScreen(letterDrawX, drawY, fmt.Sprintf("%c)", line.ShortCut), defs.White)
 		for ci, column := range line.TextColumns {
 			columnIndex := ci + 2 // +2 for the icon + letter shortcut column
 			colOffset = i.posInfo.ColumnXOffsets[columnIndex]
@@ -220,22 +220,14 @@ func (i *ShopMenu) drawStringArray(lines []ShopMenuItem) {
 
 			if column.UseColorCodes {
 				textWithColorCodes := column.TextWithColorCodes
-
-				if lineIndex == i.selectedIndex {
-					textWithColorCodes[0].Color = common.LightTextColor
-					//textWithColorCodes = "[:lightText]" + textWithColorCodes
-				} else {
-					//textWithColorCodes = "[:darkText]" + textWithColorCodes
-					textWithColorCodes[0].Color = common.DarkTextColor
-				}
 				uiRenderer.DrawTTFOnScreenWithColorCodes(drawX, float64(drawY), textWithColorCodes)
 			} else {
 				drawColor := column.TextColor
 				if drawColor == nil {
-					drawColor = common.DarkTextColor
+					drawColor = defs.DarkTextColor
 				}
 				if lineIndex == i.selectedIndex {
-					drawColor = common.LightTextColor
+					drawColor = defs.LightTextColor
 				}
 
 				uiRenderer.DrawTTFOnScreen(float64(drawX), float64(drawY), column.Text, drawColor)

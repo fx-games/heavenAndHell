@@ -90,3 +90,4 @@ const ( // bitmask
 	ForShrine ActionUsage = 1 << iota
 	ForWand
 )
+

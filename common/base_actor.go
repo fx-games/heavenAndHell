@@ -31,6 +31,7 @@ type Actor struct {
 	inventory           *Inventory
 	equipment           *Equipment
 	statusEffects       *Flags
+	parametrizedStatusEffects []*ParametrizedStatusEffect
 	isAnimatingMovement bool
 
 	stats      stats.AttributeHolder
@@ -43,7 +44,7 @@ type Actor struct {
 	isVendorOfType     VendorType
 	lastMoveWasWest    bool
 	isHostile          bool
-	speechMap          map[ActorSpeechTrigger][]string
+	speechMap          map[defs.ActorSpeechTrigger][]string
 	isUnique           bool
 	internalName       string
 	disableCorpse      bool
@@ -51,6 +52,7 @@ type Actor struct {
 	targetedSkills     []*TargetedAction
 	untargetedSkills   []*UntargetedAction
 	corpseIcon         int32
+	damageDice         util.Dice
 }
 
 type AttackType int
@@ -103,6 +105,8 @@ func NewActor(icon int32) *Actor {
 		fov:           geometry.NewFOV(geometry.NewRect(-visionRange, -visionRange, visionRange, visionRange)),
 		statusEffects: NewFlags(),
 		corpseIcon:    defs.IconCorpse,
+		speechMap:     make(map[defs.ActorSpeechTrigger][]string),
+		damageDice:    util.ParseDice("1d3"),
 	}
 }
 
@@ -204,73 +208,44 @@ func (a *Actor) GetAttackSpeed(attackType AttackType) int {
 	// TODO - missing:
 	// - class based attack speed modifier per weapon type (eg. barb swinging axes faster, mages using staves faster)
 	baseSpeed := a.GetBaseSpeed()
+
 	attackFactor := a.stats.GetAttributeAsFloat(stats.AttackSpeedFactor)
 
 	baseAttackSpeed := float64(baseSpeed) * attackFactor
 
-	weapons := a.GetEquipment().GetWeapons(attackType)
+	weapon := a.GetEquipment().GetWeapon(attackType)
 
-	if len(weapons) == 0 {
+	if weapon == nil {
 		return int(baseAttackSpeed)
 	}
 
-	slowerWeapon := weapons[0]
-
-	if len(weapons) > 1 && weapons[1].GetWeaponStats().AttackSpeedFactor < weapons[0].GetWeaponStats().AttackSpeedFactor {
-		slowerWeapon = weapons[1]
-	}
-
-	attackSpeed := int(baseAttackSpeed * slowerWeapon.GetWeaponStats().AttackSpeedFactor)
-	return attackSpeed
+	attackSpeed := int(baseAttackSpeed * weapon.GetWeaponStats().AttackSpeedFactor)
+	return max(1, attackSpeed) // minimum attack speed is 1
 }
 
 func (a *Actor) GetMoveSpeed() int {
 	baseSpeed := a.GetBaseSpeed()
 	moveFactor := a.stats.GetAttributeAsFloat(stats.MoveSpeedFactor)
 	moveSpeed := int(float64(baseSpeed) * moveFactor)
-	return moveSpeed
+	return max(1, moveSpeed) // minimum move speed is 1
 }
-func (a *Actor) GetDamageInterval(attackType AttackType) stats.Interval {
-	weapons := a.GetEquipment().GetWeapons(attackType)
-	hasWeapons := len(weapons) > 0
+func (a *Actor) GetDamageDice(attackType AttackType) util.Dice {
+	weapons := a.GetEquipment().GetWeapon(attackType)
+	hasWeapons := weapons != nil
 
-	var statBonus int // a bonus from the corresponding stat for this activity, reflects the skill of the actor
-	if attackType == RangedAttack {
-		statBonus = a.GetStats().GetAttribute(stats.Dexterity)
-	} else if attackType == MeleeAttack {
-		statBonus = a.GetStats().GetAttribute(stats.Strength)
-	}
+	var damageDice util.Dice
 
-	// base damage bonus, defaults to zero, usually from equipment providing a bonus to damage
-	baseDamage := a.GetStats().GetAttribute(stats.BaseDamage)
-
-	minDmg := baseDamage + (statBonus / 4)
-	maxDmg := baseDamage + (statBonus / 4)
-	weaponPlus := 0
 	if hasWeapons {
-		for _, w := range weapons { // damage is summed for all equipped weapons
-			// weapon damage interval comes from the weapon itself
-			// plus the base damage bonus
-			// plus the stat bonus divided by 4
-			weaponPlus += w.GetWeaponStats().Plus
-			minDmg += w.GetWeaponStats().Damage.Min() + weaponPlus
-			maxDmg += w.GetWeaponStats().Damage.Max() + weaponPlus
-		}
-	} else if attackType == RangedAttack { // no weapon, ranged attack = no damage
-		minDmg = 0
-		maxDmg = 0
-	} else { // unarmed receives the stat bonus 1:1 as damage, -1..+1
-		minDmg = max(1, baseDamage+(statBonus/4))
-		maxDmg = baseDamage + (statBonus / 4) + 2
+		weaponPlus := weapons.GetWeaponStats().Plus
+		damageDice = weapons.GetWeaponStats().Damage.WithBonus(weaponPlus)
+	} else if attackType == RangedAttack { // no ranged weapon, no ranged damage
+		return util.NewDice(0,0,0)
+	} else { // no weapon, built in damage
+		damageDice = a.damageDice
 	}
 
-	// last step is applying the enhanced damage factor, which is a multiplier
-	// defaults to 1.0 and usually is provided from equipment providing a percentage bonus to damage
-	enhancedDamageFactor := a.GetStats().GetAttributeAsFloat(stats.EnhancedDamageFactor)
-	minDmg = int(enhancedDamageFactor * float64(minDmg))
-	maxDmg = int(enhancedDamageFactor * float64(maxDmg))
-
-	return stats.NewInterval(minDmg, maxDmg)
+	damageBonus := a.GetStats().GetAttribute(stats.DamageBonus)
+	return damageDice.WithBonus(damageBonus)
 }
 func (a *Actor) SetBaseSpeed(speed int) {
 	a.stats.SetAttribute(stats.BaseSpeed, speed)
@@ -285,9 +260,8 @@ func (a *Actor) GetInfoText() []string {
 		fmt.Sprintf("Str: %d", a.GetStats().GetAttribute(stats.Strength)),
 		fmt.Sprintf("Dex: %d", a.GetStats().GetAttribute(stats.Dexterity)),
 		fmt.Sprintf("Int: %d", a.GetStats().GetAttribute(stats.Intelligence)),
-		fmt.Sprintf("ADR: %d%%", int(a.GetArmorDamageReduction(0)*100)),
-		fmt.Sprintf("Energy: %d", a.GetEnergy()),
-		fmt.Sprintf("Base speed: %d", a.GetBaseSpeed()),
+		fmt.Sprintf("AC: %d", a.GetArmorClass()),
+		fmt.Sprintf("ADR: %d%%", int(a.GetArmorDamageReduction()*100)),
 		fmt.Sprintf("Movement speed: %d", a.GetMoveSpeed()),
 		fmt.Sprintf("Melee speed: %d", a.GetAttackSpeed(MeleeAttack)),
 		fmt.Sprintf("Ranged speed: %d", a.GetAttackSpeed(RangedAttack)),
@@ -303,37 +277,26 @@ func (a *Actor) GetInfoText() []string {
 		tableLines = append(tableLines, armorInfo...)
 	}
 
-	meleeWeapons := a.GetEquipment().GetWeapons(MeleeAttack)
+	meleeWeapon := a.GetEquipment().GetWeapon(MeleeAttack)
 	var meleeInfo []string
-	if len(meleeWeapons) > 0 {
-		meleeInfo = append(meleeInfo, "", "Melee weapons")
-		for _, weapon := range meleeWeapons {
-			meleeInfo = append(meleeInfo, " "+weapon.Name())
-		}
+	meleeDamageString := a.GetDamageDice(MeleeAttack).String()
+	if meleeWeapon != nil {
+		meleeInfo = append(meleeInfo, "", "Melee weapon")
+		meleeInfo = append(meleeInfo, fmt.Sprintf(" %s - %s", meleeWeapon.Name(), meleeDamageString))
 	} else {
 		meleeInfo = append(meleeInfo, "", "Melee weapon")
-		meleeInfo = append(meleeInfo, " bare hands")
+		meleeInfo = append(meleeInfo, fmt.Sprintf(" unarmed - %s", meleeDamageString))
 	}
-	meleeInfo = append(meleeInfo, []string{
-		fmt.Sprintf("Melee damage: %s", a.GetDamageInterval(MeleeAttack).ToString()),
-		fmt.Sprintf("Melee speed: %d", a.GetAttackSpeed(MeleeAttack)),
-	}...)
 	tableLines = append(tableLines, meleeInfo...)
 
 	hasRanged := a.GetEquipment().HasRangedWeaponEquipped()
 	if hasRanged {
 		var rangedInfo []string
-		rangedWeapons := a.GetEquipment().GetWeapons(RangedAttack)
-		if len(rangedWeapons) > 0 {
-			rangedInfo = append(rangedInfo, "", "Ranged weapons")
-			for _, weapon := range rangedWeapons {
-				rangedInfo = append(rangedInfo, " "+weapon.Name())
-			}
-
-			rangedInfo = append(rangedInfo, []string{
-				fmt.Sprintf("Ranged damage: %s", a.GetDamageInterval(RangedAttack).ToString()),
-				fmt.Sprintf("Ranged speed: %d", a.GetAttackSpeed(RangedAttack)),
-			}...)
+		rangedWeapon := a.GetEquipment().GetWeapon(RangedAttack)
+		if rangedWeapon != nil {
+			rangedDamageString := a.GetDamageDice(RangedAttack).String()
+			rangedInfo = append(rangedInfo, "", "Ranged weapon")
+			rangedInfo = append(rangedInfo, fmt.Sprintf(" %s - %s", rangedWeapon.Name(), rangedDamageString))
 		}
 		tableLines = append(tableLines, rangedInfo...)
 	}
@@ -384,13 +347,6 @@ const (
 	ActorStateAttacking
 )
 
-type ActorSpeechTrigger int
-
-const (
-	SpeechTriggerSight ActorSpeechTrigger = iota
-	SpeechTriggerHurt
-)
-
 func (a *Actor) SetState(newState ActorState) {
 	a.state = newState
 }
@@ -399,52 +355,26 @@ func (a *Actor) GetState() ActorState {
 	return a.state
 }
 
-func (a *Actor) GetDamageLocationPredictions(attackType AttackType, targetPos geometry.Point) []LocationDamagePrediction {
-	weapons := a.GetEquipment().GetWeapons(attackType)
-
-	if len(weapons) == 0 {
-		return []LocationDamagePrediction{{Location: targetPos, Damage: a.GetDamageInterval(attackType)}}
-	}
-	attackerPos := a.MapPosition()
-
-	var damageLocations []LocationDamagePrediction
-
-	totalMeleeDamage := a.GetDamageInterval(attackType)
-	weaponCount := len(weapons)
-	for _, weapon := range weapons {
-		damageLocations = append(damageLocations, weapon.GetWeaponStats().GetDamagePerLocationPrediction(attackerPos, targetPos, totalMeleeDamage, weaponCount)...)
-	}
-
-	return damageLocations
-}
 
 func (a *Actor) GetArmorClass() int {
-	baseArmorClass := a.stats.GetAttribute(stats.BaseArmorClass)
-	baseArmorClassMultiplier := a.stats.GetAttributeAsFloat(stats.EnhancedArmorClassFactor)
+	if a.HasStatusEffect(StatusBerserk) {
+		return 0
+	}
+	baseArmorClass := a.stats.GetAttribute(stats.ArmorClass)
 	armor := baseArmorClass
 	for _, item := range a.GetEquipment().GetArmor() {
-		armor += item.GetArmorStats().GetArmorClass()
+		armor += item.GetArmorStats().GetTotalArmorClass()
 	}
-	armor = int(float64(armor) * baseArmorClassMultiplier)
+	armor = int(float64(armor))
 	return armor
 }
 
-/*
-Armor Rating	Damage Reduction in %
-1	0.01
-5	0.05
-25	0.20
-50	0.33
-100	0.50
-200	0.67
-1000	0.91
-*/
-func (a *Actor) GetArmorDamageReduction(attackerArmorPenetration int) float64 {
-	armorClass := float64(max(0, a.GetArmorClass()-attackerArmorPenetration))
-	magicalConstantForDiminishingReturns := 100.0
-	armorDamageReduction := util.Clamp(0, 0.9, armorClass/(armorClass+magicalConstantForDiminishingReturns))
-	return armorDamageReduction
+func (a *Actor) GetArmorDamageReduction() float64 {
+	armorClass := a.GetArmorClass()
+	return ADRFromAC(armorClass)
 }
+
+
 
 func (a *Actor) HealCompletely() {
 	a.GetStats().GetResource(stats.Health).SetToMax()
@@ -544,19 +474,29 @@ func (a *Actor) handleStatusEffects() {
 				a.statusEffects.SetFalse(flagName)
 			} else {
 				a.statusEffects.SetToValue(flagName, newValue)
-				if StatusEffect(flagName) == StatusDamageOverTime {
-					// hmm, we now need parameters for the status effect
-				}
 			}
+		}
+	}
+
+	//for _, effect := range a.parametrizedStatusEffects {
+	for i := len(a.parametrizedStatusEffects) - 1; i >= 0; i-- {
+		effect := a.parametrizedStatusEffects[i]
+		effect.NextTurn(a)
+		if effect.TurnsLeft() == 0 {
+			a.parametrizedStatusEffects = append(a.parametrizedStatusEffects[:i], a.parametrizedStatusEffects[i+1:]...)
 		}
 	}
 }
 
-func (a *Actor) HasSpeech(trigger ActorSpeechTrigger) bool {
+func (a *Actor) AddParametrizedStatusEffect(effect *ParametrizedStatusEffect) {
+	a.parametrizedStatusEffects = append(a.parametrizedStatusEffects, effect)
+}
+
+func (a *Actor) HasSpeech(trigger defs.ActorSpeechTrigger) bool {
 	return len(a.speechMap[trigger]) > 0
 }
 
-func (a *Actor) GetSpeech(random *rand.Rand, trigger ActorSpeechTrigger) []string {
+func (a *Actor) GetSpeech(random *rand.Rand, trigger defs.ActorSpeechTrigger) []string {
 	allSpeech := a.speechMap[trigger]
 	if len(allSpeech) == 0 {
 		return []string{}
@@ -568,8 +508,12 @@ func (a *Actor) GetSpeech(random *rand.Rand, trigger ActorSpeechTrigger) []strin
 	return strings.Split(chosenLines, "\n")
 }
 
-func (a *Actor) SetSpeech(speechMap map[ActorSpeechTrigger][]string) {
+func (a *Actor) SetSpeech(speechMap map[defs.ActorSpeechTrigger][]string) {
 	a.speechMap = speechMap
+}
+
+func (a *Actor) SetSpeechForTrigger(trigger defs.ActorSpeechTrigger, speech []string) {
+	a.speechMap[trigger] = speech
 }
 
 func (a *Actor) SetUnique() {
@@ -694,15 +638,15 @@ func (a *Actor) GetFullStats() []util.LabelText {
 	ourStats := a.GetStats()
 	var hpColor color.Color
 	var manaColor color.Color
-	defaultColor := DarkTextColor
+	defaultColor := defs.DarkTextColor
 	hpColor = defaultColor
 	manaColor = defaultColor
 	colorFromModifierType := func(mType stats.ModifierImpact) color.Color {
 		switch mType {
 		case stats.ModifierImpactPositive:
-			return PositiveHighlightColor
+			return defs.PositiveHighlightColor
 		case stats.ModifierImpactNegative:
-			return NegativeHighlightColor
+			return defs.NegativeHighlightColor
 		default:
 			return defaultColor
 		}
@@ -724,7 +668,7 @@ func (a *Actor) GetFullStats() []util.LabelText {
 	}
 	levelColor := defaultColor
 	if a.CanLevelUp() {
-		levelColor = LightTextColor
+		levelColor = defs.LightTextColor
 	}
 
 	fullStats := []util.LabelText{
@@ -769,23 +713,19 @@ func (a *Actor) GetFullStats() []util.LabelText {
 			TextColor: defaultColor,
 		},
 		{
-			Text:      fmt.Sprintf("ADR: %d%%", int(a.GetArmorDamageReduction(0)*100)),
+			Text:      fmt.Sprintf("ADR: %d%%", int(a.GetArmorDamageReduction()*100)),
 			TextColor: defaultColor,
 		},
 		{
-			Text:      fmt.Sprintf("Melee dmg: %s", a.GetDamageInterval(MeleeAttack).ToString()),
+			Text:      fmt.Sprintf("Melee dmg: %s", a.GetDamageDice(MeleeAttack).String()),
 			TextColor: defaultColor,
 		},
 		{
-			Text:      fmt.Sprintf("Ranged dmg: %s", a.GetDamageInterval(RangedAttack).ToString()),
+			Text:      fmt.Sprintf("Ranged dmg: %s", a.GetDamageDice(RangedAttack).String()),
 			TextColor: defaultColor,
 		},
 		{
-			Text:      fmt.Sprintf("Dmg mult: %d%%", int(a.GetStats().GetAttributeAsFloat(stats.EnhancedDamageFactor)*100)),
-			TextColor: defaultColor,
-		},
-		{
-			Text:      fmt.Sprintf("AC mult: %d%%", int(a.GetStats().GetAttributeAsFloat(stats.EnhancedArmorClassFactor)*100)),
+			Text:      fmt.Sprintf("+Dmg: %d", int(a.GetStats().GetAttribute(stats.DamageBonus))),
 			TextColor: defaultColor,
 		},
 		{
@@ -852,4 +792,25 @@ func (a *Actor) SetAggroRange(aggroRange int) {
 
 func (a *Actor) GetAggroRange() int {
 	return a.stats.GetAttribute(stats.AggroRange)
+}
+
+func (a *Actor) SetDamageDice(dice util.Dice) {
+	a.damageDice = dice
+}
+
+func (a *Actor) GetParametrizedStatusEffects() []*ParametrizedStatusEffect{
+	return a.parametrizedStatusEffects
+}
+
+func (a *Actor) IsVisible() bool {
+	return !a.HasStatusEffect(StatusInvisible)
+}
+
+func (a *Actor) GetRangedHitEffects() []*HitEffect{
+	// TODO
+	return []*HitEffect{}
+}
+
+func ADRFromAC(armorClass int) float64 {
+	return util.Clamp(0.0, 0.9, (float64(armorClass)/float64(armorClass+20))*1.5)
 }

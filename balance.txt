@@ -67,18 +67,28 @@ XP Rewards (QR = Quest Rewards, MR = Monster Rewards):
    - MR: 59750
 
 Expected typical player stats when facing the end boss:
-Max Level ~ 30
+Max Level ~ 10
 Max XP ~ 100k
-Max AC ~ 200 (66% damage reduction)
-Max HP ~ 200 (mages) - 400 (warriors)
-Max Dmg. per Hit ~ 50 (mages) - 100 (warriors)
+Max AC ~ 17
+Max HP ~ 40 (mages) - 80 (warriors)
+Max Dmg. per Hit ~ 20 (mages) - 40 (warriors)
+
+
+End Game Enemy
+ - HP: 100-200
+ - AC: 17
+ - Dmg.: 20-50
+
+Most Powerful Stuff
+ - Set of Armor: +17 AC
+ - Unique Weapon: Damage 20-40 (4d10, 2d20, 10d4)
 
 Stat Progression And Role
 Starting Stats:
 
-Warrior: 20 Str, 5 Dex, 5 Int
-Mage: 5 Str, 5 Dex, 20 Int
-Archer: 5 Str, 20 Dex, 5 Int
+Warrior: 16 Str, 8 Dex, 5 Int
+Mage: 5 Str, 8 Dex, 16 Int
+Archer: 8 Str, 16 Dex, 5 Int
 
 On level up: Gain 1 point to spend on any stat
 Total Points available: 29
@@ -94,6 +104,12 @@ Int - x0.25 damage bonus per point - magic & mana
 Item Ranges
 Enchantments: from -10 to +10
 
+Shields/Helmet, Cuirass
+Unarmored   +0 - Robes
+Light Armor +1,+2 - Leather
+Heavy Armor +2,+4 - Chain, Plate
+
+Max enchantment: +3
 
 AC Ratings
  - Torso - Max. 40

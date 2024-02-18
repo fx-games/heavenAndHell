@@ -1,14 +1,19 @@
 package defs
 
 import (
-	"rpg/stats"
+	"rpg/util"
 	"strings"
 )
 
 type WeaponDefinition struct {
-	WeaponType WeaponType
-	Damage     stats.Interval
-	Speed      float64
+	WeaponType         WeaponType
+	Damage             util.Dice
+	Speed              float64
+	MaxRange           int
+	AccuracyAtMaxRange float64
+	AccuracyAtMinRange float64
+	ArmorPenetration   int
+	ProjectileIcon     int32
 }
 
 func (d WeaponDefinition) IsValid() bool {
@@ -25,7 +30,7 @@ func (t WeaponType) ToString() string {
 		return "Axe"
 	case WeaponTypeBow:
 		return "Bow"
-	case WeaponTypeCrossBow:
+	case WeaponTypeCrossbow:
 		return "Crossbow"
 	case WeaponTypeMace:
 		return "Mace"
@@ -39,6 +44,10 @@ func (t WeaponType) ToString() string {
 		return "Spear"
 	case WeaponTypeWhip:
 		return "Whip"
+	case WeaponTypeDagger:
+		return "Dagger"
+	case WeaponTypeSling:
+		return "Sling"
 	default:
 		return "Unknown"
 	}
@@ -73,8 +82,10 @@ const (
 	WeaponTypeMace
 	WeaponTypeStaff
 	WeaponTypeSpear
+	WeaponTypeDagger
 	WeaponTypeBow
-	WeaponTypeCrossBow
+	WeaponTypeCrossbow
+	WeaponTypeSling
 	WeaponTypeShield
 	WeaponTypeScythe
 	WeaponTypeWhip
@@ -94,7 +105,7 @@ func WeaponTypeFromString(str string) WeaponType {
 	case "bow":
 		return WeaponTypeBow
 	case "crossbow":
-		return WeaponTypeCrossBow
+		return WeaponTypeCrossbow
 	case "shield":
 		return WeaponTypeShield
 	case "scythe":
@@ -103,6 +114,10 @@ func WeaponTypeFromString(str string) WeaponType {
 		return WeaponTypeSpear
 	case "whip":
 		return WeaponTypeWhip
+	case "dagger":
+		return WeaponTypeDagger
+	case "sling":
+		return WeaponTypeSling
 	default:
 		return WeaponTypeNone
 	}

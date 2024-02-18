@@ -17,10 +17,10 @@ type Factory struct {
 	actionBroker ActionBroker
 	randomSource *rand.Rand
 	state        *State
-	gui          UserInterface
+	gui          func ()UserInterface
 
 	giveAndEquipItemToActor func(actor *Actor, item *Item)
-	addToTimeKeeper         func(being TimedBeing)
+	getTimeKeeper           func() *TimeKeeper
 	logError                func(msg string)
 	queueAfterTurn          func(func())
 }
@@ -31,7 +31,8 @@ type FactoryContext struct {
 	RandomSource *rand.Rand
 	State        *State
 
-	AddToTimeKeeper         func(being TimedBeing)
+	GetTimeKeeper         func() *TimeKeeper
+
 	GiveAndEquipItemToActor func(actor *Actor, item *Item)
 	Msg                     func(msg string)
 }
@@ -43,7 +44,7 @@ func NewFactory(context FactoryContext) *Factory {
 		state:                   context.State,
 		giveAndEquipItemToActor: context.GiveAndEquipItemToActor,
 		actionBroker:            context.ActionBroker,
-		addToTimeKeeper:         context.AddToTimeKeeper,
+		getTimeKeeper:           context.GetTimeKeeper,
 		logError:                context.Msg,
 	}
 }
@@ -89,6 +90,30 @@ func (g *Factory) NewRandomEnemy(dungeonLevel int) (*Actor, []defs.EnemyDefiniti
 	return g.NewEnemyFromDefinition(enemyDef, dungeonLevel), groupDefs
 }
 
+func (g *Factory) NewUniqueItemFromName(name string) *Item {
+	// new way
+	uniqueDefs := g.definitions.UniqueItemDefinitions
+
+	if itemDef, ok := uniqueDefs[name]; ok {
+		item := g.NewItemFromDefinition(itemDef, 1)
+		item.SetRarity(ItemRarityUnique)
+		return item
+	}
+
+	return nil
+}
+
+func (g *Factory) NewUniqueEnemyFromName(name string) *Actor {
+	// new way
+	uniqueDefs := g.definitions.UniqueEnemyDefinitions
+
+	if enemyDef, ok := uniqueDefs[name]; ok {
+		return g.NewEnemyFromDefinition(enemyDef, 1)
+	}
+
+	return nil
+}
+
 func (g *Factory) NewEnemyFromDefinition(enemyDef defs.EnemyDefinition, dungeonLevel int) *Actor {
 	actor := NewActor(enemyDef.Icon)
 	//index := len(emptyMap.Actors())
@@ -96,10 +121,25 @@ func (g *Factory) NewEnemyFromDefinition(enemyDef defs.EnemyDefinition, dungeonL
 	actor.SetInternalName(enemyDef.InternalName)
 	actor.SetDeathStringFormats(enemyDef.DeathStringFormats)
 	actor.SetHostile()
+
+	if enemyDef.Tags.Has(defs.TagUnique) {
+		actor.SetUnique()
+	}
+	if enemyDef.Tags.Has(defs.TagNoCorpse) {
+		actor.SetNoCorpse()
+	}
+	if enemyDef.Tags.Has(defs.TagFlying) {
+		actor.AddStatusEffect(StatusFlying, -1)
+	}
+	for trigger, lines := range enemyDef.Speech {
+		actor.SetSpeechForTrigger(trigger, lines)
+	}
+	actor.SetDamageDice(enemyDef.DamageDice)
 	actor.SetBaseSpeed(enemyDef.BaseSpeed)
+
 	actorStats := actor.GetStats()
 
-	actorStats.SetAttribute(stats.MaxHealth, enemyDef.ResourceHealth)
+	actorStats.SetAttribute(stats.MaxHealth, enemyDef.ResourceHealth.Roll())
 	actorStats.GetResource(stats.Health).SetToMax()
 
 	for statName, statValue := range enemyDef.Stats {
@@ -157,7 +197,8 @@ func (g *Factory) GenerateLoot(dungeonLevel int) *Item {
 	case diceRoll >= 80 && diceRoll < 100:
 		addedItem = g.NewRandomScroll(dungeonLevel)
 	}
-	if addedItem != nil && addedItem.IsEquippable() {
+	if addedItem != nil &&
+		(addedItem.IsWeapon() || addedItem.IsArmor() || addedItem.IsAccessory()) {
 		rarityRoll := source.Intn(100)
 		rarity := ItemRarityCommon
 		if rarityRoll >= 80 && rarityRoll < 95 {
@@ -193,6 +234,31 @@ func (g *Factory) setRarityAndEnchantments(source *rand.Rand, item *Item, rarity
 		itemHooks := NewHooksForItem(source, itemLevel, hookCount)
 		item.SetItemHooks(itemHooks)
 	}
+
+	if item.IsArmor() {
+		randomVal := min(10, source.Intn(10) + itemLevel)
+		switch  {
+		case randomVal >= 5 && randomVal <= 7:
+			item.GetArmorStats().Plus = 1
+		case randomVal >= 8 && randomVal <= 9:
+			item.GetArmorStats().Plus = 2
+		case randomVal == 10:
+			item.GetArmorStats().Plus = 3
+		}
+	}
+
+	if item.IsWeapon() {
+		randomVal := min(10, source.Intn(10) + itemLevel)
+		switch  {
+		case randomVal >= 5 && randomVal <= 7:
+			item.GetWeaponStats().Plus = 1
+		case randomVal >= 8 && randomVal <= 9:
+			item.GetWeaponStats().Plus = 2
+		case randomVal == 10:
+			item.GetWeaponStats().Plus = 3
+		}
+	}
+
 }
 
 func randomSplit(source *rand.Rand, value int) (int, int) {
@@ -244,6 +310,7 @@ func (g *Factory) NewItemFromDefinition(itemDefinition defs.ItemDefinition, dung
 	baseItem.SetBaseCost(itemDefinition.Cost)
 	baseItem.SetCategory(itemDefinition.InventoryCategory)
 	baseItem.SetQualityLevel(itemDefinition.DLvl)
+	baseItem.SetInternalName(itemDefinition.InternalName)
 
 	if itemDefinition.Armor.IsValid() {
 		armorPart := &ArmorStats{
@@ -256,17 +323,24 @@ func (g *Factory) NewItemFromDefinition(itemDefinition defs.ItemDefinition, dung
 
 	if itemDefinition.Weapon.IsValid() {
 		weaponPart := &WeaponStats{
-			Damage:            itemDefinition.Weapon.Damage,
-			Durability:        stats.NewResource(0, flatFunc(20), 20),
-			Type:              itemDefinition.Weapon.WeaponType,
-			MeleeRange:        1,
-			AttackSpeedFactor: itemDefinition.Weapon.Speed,
+			Damage:             itemDefinition.Weapon.Damage,
+			Requirements:       nil, // TODO
+			Durability:         stats.NewResource(0, flatFunc(20), 20),
+			Type:               itemDefinition.Weapon.WeaponType,
+			AttackSpeedFactor:  itemDefinition.Weapon.Speed,
+			MeleeRange:         1, // currently unused
+			Plus:               0,
+			MaxRange:           itemDefinition.Weapon.MaxRange,
+			AccuracyAtMaxRange: itemDefinition.Weapon.AccuracyAtMaxRange,
+			AccuracyAtMinRange: itemDefinition.Weapon.AccuracyAtMinRange,
+			ArmorPenetration:   itemDefinition.Weapon.ArmorPenetration,
+			ProjectileIcon:     itemDefinition.Weapon.ProjectileIcon,
 		}
 		baseItem.SetWeaponComponent(weaponPart)
 	}
 
 	if itemDefinition.Throw.IsValid() {
-		hitZone := HitZoneFromString(state.GetMap(), itemDefinition.Throw.HitZone)
+		hitZone := HitZoneFromString(state.GetMap, itemDefinition.Throw.HitZone)
 		if hitZone != nil {
 			throwPart := &ThrowStats{
 				Damage:        itemDefinition.Throw.Damage,
@@ -376,6 +450,7 @@ func (g *Factory) NewItemFromDefinitionName(itemString string, dungeonLevel int)
 	if def, exists := g.definitions.ItemDefinitions[itemString]; exists {
 		return g.NewItemFromDefinition(def, dungeonLevel)
 	}
+	g.logError(fmt.Sprintf("Unknown item def: %s", itemString))
 	return nil
 }
 
@@ -388,10 +463,9 @@ func (g *Factory) NewTargetedActionFromName(name string) *TargetedAction {
 }
 
 func (g *Factory) NewTargetedActionFromDefinition(definition defs.TargetedActionDefinition) *TargetedAction {
-
 	targetedAction := NewTargetedAction(
 		definition.Name,
-		HitZoneFromString(g.state.GetMap(), definition.HitZone),
+		HitZoneFromString(g.state.GetMap, definition.HitZone),
 		g.NewOnHitEffectFromString(definition.OnHitEffect),
 		NewTargetingRulesFromString(definition.Targeting),
 	)
@@ -404,10 +478,13 @@ func (g *Factory) NewTargetedActionFromDefinition(definition defs.TargetedAction
 
 func (g *Factory) GetAllHitEffects() map[string]func(args util.Arguments) *HitEffect {
 	return map[string]func(args util.Arguments) *HitEffect{
-		"apply":               g.applyStatusEffectToSelection,
-		"confuse":             g.confuseOnHitProc,
+		"confuse":             g.confuseTarget,
+		"berserk":             g.berserkTarget,
+		"poison": 			   g.poisonTarget,
+		"immobilize": 		   g.immobilizeTarget,
 		"fireball":            g.throwFireball,
 		"project_fire":        g.projectFire,
+		"jumpstart": 		   g.jumpStart,
 		"fire_zone":           g.fireZone,
 		"steal_item":          g.stealItem,
 		"steal_item_teleport": g.stealItemAndTeleport,
@@ -415,6 +492,7 @@ func (g *Factory) GetAllHitEffects() map[string]func(args util.Arguments) *HitEf
 		"blink":               g.blink,
 	}
 }
+
 func (g *Factory) NewOnHitEffectFromString(effectName string) *HitEffect {
 	if effectName == "" {
 		return nil
@@ -478,7 +556,7 @@ func (g *Factory) NewRandomAccessory(dungeonLevel int) *Item {
 	var filtered []defs.ItemDefinition
 	for _, itemDef := range itemDefinitions {
 
-		if !itemDef.IsAccessory() || !itemDef.CanAppearAt(g.randomSource, dungeonLevel) {
+		if !itemDef.IsRing() || !itemDef.IsAmulet() || !itemDef.CanAppearAt(g.randomSource, dungeonLevel) {
 			continue
 		}
 
@@ -496,7 +574,7 @@ func (g *Factory) NewRandomAccessory(dungeonLevel int) *Item {
 
 func (g *Factory) NewRandomWand(dungeonLevel int) *Item {
 	source := g.randomSource
-	var newConsumable *Item
+	var newWand *Item
 	roll := source.Intn(100)
 	if roll < 50 {
 		wandType := []func(targetedAction *TargetedAction) *Item{
@@ -513,7 +591,8 @@ func (g *Factory) NewRandomWand(dungeonLevel int) *Item {
 			wandTypeIndex = 1
 		}
 		randomTargetableFunc := wandType[wandTypeIndex]
-		newConsumable = randomTargetableFunc(randomTargetedAction)
+		newWand = randomTargetableFunc(randomTargetedAction)
+		newWand.SetInternalName("wand_of_" + randomTargetedAction.GetInternalName())
 	} else {
 		wandType := []func(untargetedAction *UntargetedAction) *Item{
 			g.NewFiniteUntargetedWand,
@@ -529,7 +608,8 @@ func (g *Factory) NewRandomWand(dungeonLevel int) *Item {
 			wandTypeIndex = 1
 		}
 		randomUntargetableFunc := wandType[wandTypeIndex]
-		newConsumable = randomUntargetableFunc(randomUntargetedAction)
+		newWand = randomUntargetableFunc(randomUntargetedAction)
+		newWand.SetInternalName("wand_of_" + randomUntargetedAction.GetInternalName())
 	}
 	/* scrapped for now, reasons: need an extra UI step (menu), name too long for UI display
 	   else {
@@ -539,7 +619,7 @@ func (g *Factory) NewRandomWand(dungeonLevel int) *Item {
 	   }
 	*/
 
-	return newConsumable
+	return newWand
 }
 
 func (g *Factory) NewInfiniteTargetedWand(targetedAction *TargetedAction) *Item {
@@ -604,6 +684,7 @@ func (g *Factory) GetRandomUntargetedAction(dungeonLevel int, actionUsage defs.A
 
 func (g *Factory) NewUntargetedActionFromDefinition(def defs.UntargetedActionDefinition, args util.Arguments) *UntargetedAction {
 	action := NewUntargetedAction(def.Name, def.Icon)
+	action.SetInternalName(def.InternalName)
 	action.SetDelay(def.ActivationDelay)
 	effectFromName := g.UntargetedEffectFromName(def.InternalName, args)
 	if effectFromName == nil {
@@ -611,7 +692,6 @@ func (g *Factory) NewUntargetedActionFromDefinition(def defs.UntargetedActionDef
 		return nil
 	}
 	action.SetEffect(effectFromName)
-
 	if def.ActivationCondition != "" {
 		action.SetCondition(g.NewConditionFromString(def.ActivationCondition))
 	}
@@ -633,13 +713,14 @@ func (g *Factory) GetAllUntargetedEffects() map[string]func(args util.Arguments)
 		string(ActionNameHealHealthAndMana): g.getHealHealthAndMana,
 		string(ActionNameHealHealth):        g.getHealHealthBy,
 		string(ActionNameBerserk):           g.getBerserkSelfAction,
-		string(ActionNameApplyStatusEffect): g.getApplyStatusAction,
+		string(ActionNameApplyStatusSelf):   g.getApplyStatusAction,
 		string(ActionNameHealMana):          g.getHealManaBy,
 		string(ActionNameTeleport):          g.getRandomTeleportAction,
 		string(ActionNameBuffSpeed):         g.getSpeedBuff,
 		string(ActionNameBuffDamage):        g.getDamageBuff,
 		string(ActionNameRecall):            g.getPlayerRecallAction,
 		string(ActionNameBless):             g.getBlessing,
+		string(ActionNameStoneSkin):	     g.getStoneSkinBuff,
 		string(ActionNameEnchantWeapon):     g.getEnchantWeapon,
 		string(ActionNameEnchantArmor):      g.getEnchantArmor,
 		string(ActionNameMultiShot):         g.getMultiShot,
@@ -741,7 +822,7 @@ func (g *Factory) NewScroll(untargetedAction *UntargetedAction) *Item {
 
 func (g *Factory) NewSign(inscription []string) *BumpObject {
 	return NewBumpObject("a sign", defs.IconSign, func(actor *Actor, startAnimating func() bool) {
-		g.gui.OpenTextWindow(util.ToLabelText(inscription))
+		g.gui().OpenTextWindow(util.ToLabelText(inscription))
 	})
 }
 
@@ -749,6 +830,13 @@ func (g *Factory) SetQueueAfterTurn(afterTurn func(call func())) {
 	g.queueAfterTurn = afterTurn
 }
 
-func (g *Factory) SetUserInterface(ui UserInterface) {
+func (g *Factory) SetUserInterface(ui func() UserInterface) {
 	g.gui = ui
+}
+
+
+func  (g *Factory) NewPoisonedEffect(turnsLeft int, damagePerRound int) *ParametrizedStatusEffect {
+	return NewParametrizedStatusEffect(StatusDamageOverTime, func(a *Actor) {
+		g.actionBroker.Execute(NewChangeResourceAction(AbstractCause("poison"), a, stats.Health, float64(-damagePerRound)))
+	}, turnsLeft)
 }

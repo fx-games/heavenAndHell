@@ -13,13 +13,18 @@ import (
 
 type DataContainer struct {
 	ItemDefinitions       map[string]ItemDefinition
-	EnemyDefinitions      map[string]EnemyDefinition
-	VendorDefinitions     map[string]VendorDefinition
-	TargetedDefinitions   map[string]TargetedActionDefinition
-	UntargetedDefinitions map[string]UntargetedActionDefinition
-	ClassDefinitions      []LoadoutDefinition
+	UniqueItemDefinitions map[string]ItemDefinition
+
+	EnemyDefinitions       map[string]EnemyDefinition
+	UniqueEnemyDefinitions map[string]EnemyDefinition
 
 	Modifiers map[string]func(source *rand.Rand, level int) *stats.Modifier
+
+	TargetedDefinitions   map[string]TargetedActionDefinition
+	UntargetedDefinitions map[string]UntargetedActionDefinition
+
+	ClassDefinitions  []LoadoutDefinition
+	VendorDefinitions map[string]VendorDefinition
 }
 
 func (c DataContainer) GetItemCategories() []ItemCategory {
@@ -57,9 +62,9 @@ func LoadGameData(logErr func(err string)) DataContainer {
 	itemDefs = merge(itemDefs, weaponDefs)
 	file.Close()
 
-	file, _ = os.Open(path.Join(itemDir, "throwables.rec"))
+	file, _ = os.Open(path.Join(itemDir, "misc.rec"))
 	throwableDefs := ReadItemDefinitions(file, logErr)
-	println(fmt.Sprintf("Loaded %d throwable definitions", len(throwableDefs)))
+	println(fmt.Sprintf("Loaded %d misc. definitions", len(throwableDefs)))
 	itemDefs = merge(itemDefs, throwableDefs)
 	file.Close()
 
@@ -92,6 +97,11 @@ func LoadGameData(logErr func(err string)) DataContainer {
 	println(fmt.Sprintf("Loaded %d enemy definitions", len(enemyDefs)))
 	file.Close()
 
+	file, _ = os.Open(path.Join(enemyDir, "unique_enemies.rec"))
+	uniquEnemyDefs := ReadEnemyDefinitions(file, logErr)
+	println(fmt.Sprintf("Loaded %d unique enemy definitions", len(uniquEnemyDefs)))
+	file.Close()
+
 	file, _ = os.Open(path.Join(effectsDir, "untargeted.rec"))
 	untargetedDefs := ReadUntargetedDefinitions(file, logErr)
 	println(fmt.Sprintf("Loaded %d untargeted effect definitions", len(untargetedDefs)))
@@ -112,14 +122,21 @@ func LoadGameData(logErr func(err string)) DataContainer {
 	println(fmt.Sprintf("Loaded %d class definitions", len(classDefs)))
 	file.Close()
 
+	file, _ = os.Open(path.Join(itemDir, "unique_items.rec"))
+	uniqueItemDefs := ReadItemDefinitions(file, logErr)
+	println(fmt.Sprintf("Loaded %d unique item definitions", len(uniqueItemDefs)))
+	file.Close()
+
 	return DataContainer{
-		ItemDefinitions:       itemDefs,
-		EnemyDefinitions:      enemyDefs,
-		TargetedDefinitions:   targetedDefs,
-		UntargetedDefinitions: untargetedDefs,
-		VendorDefinitions:     vendorDefs,
-		ClassDefinitions:      classDefs,
-		Modifiers:             GetAllModifiers(),
+		ItemDefinitions:        itemDefs,
+		UniqueItemDefinitions:  uniqueItemDefs,
+		EnemyDefinitions:       enemyDefs,
+		UniqueEnemyDefinitions: uniquEnemyDefs,
+		TargetedDefinitions:    targetedDefs,
+		UntargetedDefinitions:  untargetedDefs,
+		VendorDefinitions:      vendorDefs,
+		ClassDefinitions:       classDefs,
+		Modifiers:              GetAllModifiers(),
 	}
 }
 

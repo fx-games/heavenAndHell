@@ -44,19 +44,6 @@ From Brogue
 
 */
 
-const (
-	TargetedActionNameFireball     TargetedActionName = "fireball"
-	ActionNameFirewall             TargetedActionName = "firewall"
-	ActionNameBlink                TargetedActionName = "blink"
-	ActionNameMindPush             TargetedActionName = "mind_push"
-	ActionNameImmobilize           TargetedActionName = "immobilize_target"
-	ActionNameDebilitatingShot     TargetedActionName = "debilitating_shot"
-	ActionNameFireRay              TargetedActionName = "fire_ray"
-	TargetedActionNameStealItem    TargetedActionName = "steal_item"
-	ActionNameStealItemAndTeleport TargetedActionName = "steal_item_vanish"
-	ActionNameFireBresen           TargetedActionName = "fire_bresen"
-)
-
 func (g *Factory) GetRandomTargetedAction(randomSource *rand.Rand, dungeonLevel int) *TargetedAction {
 	var allowed []defs.TargetedActionDefinition
 	for _, targetedDef := range g.definitions.TargetedDefinitions {
@@ -70,7 +57,11 @@ func (g *Factory) GetRandomTargetedAction(randomSource *rand.Rand, dungeonLevel 
 	return tAction
 }
 
-func (g *Factory) confuseOnHitProc(args util.Arguments) *HitEffect {
+func (g *Factory) confuseTarget(args util.Arguments) *HitEffect {
+	turns := 5
+	if !args.IsEmpty() {
+		turns = util.ParseDice(args.Get(0)).Roll()
+	}
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			currentMap := g.state.GetMap()
@@ -78,10 +69,69 @@ func (g *Factory) confuseOnHitProc(args util.Arguments) *HitEffect {
 				return
 			}
 			hitActor := currentMap.ActorAt(target)
-			g.actionBroker.Execute(NewApplyStatusAction(NewActorCause("Dart Throw", attacker), hitActor, StatusConfused, 5))
+			g.actionBroker.Execute(NewApplyStatusAction(NewActorCause("Confused", attacker), hitActor, StatusConfused, turns))
 		},
 		Description: []util.LabelText{
-			util.LabelTextFromString("Confuse target"),
+			util.LabelTextFromString(fmt.Sprintf("Confuse target for %d turns", turns)),
+		},
+	}
+}
+
+func (g *Factory) berserkTarget(args util.Arguments) *HitEffect {
+	turns := 5
+	if !args.IsEmpty() {
+		turns = util.ParseDice(args.Get(0)).Roll()
+	}
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			currentMap := g.state.GetMap()
+			if !currentMap.IsActorAt(target) {
+				return
+			}
+			hitActor := currentMap.ActorAt(target)
+			g.actionBroker.Execute(NewApplyStatusAction(NewActorCause("Berserked", attacker), hitActor, StatusBerserk, turns))
+		},
+		Description: []util.LabelText{
+			util.LabelTextFromString(fmt.Sprintf("Berserk target for %d turns", turns)),
+		},
+	}
+}
+
+func (g *Factory) poisonTarget(args util.Arguments) *HitEffect {
+	turns := 3
+	damagePerTurn := util.ParseDice("1d3")
+	if !args.IsEmpty() {
+		turns = util.ParseDice(args.Get(0)).Roll()
+		damagePerTurn = util.ParseDice(args.Get(1))
+	}
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			currentMap := g.state.GetMap()
+			if !currentMap.IsActorAt(target) {
+				return
+			}
+			hitActor := currentMap.ActorAt(target)
+			poisonEffect := g.NewPoisonedEffect(turns, damagePerTurn.Roll())
+			g.actionBroker.Execute(NewApplyStatusParametrizedAction(NewActorCause("Poisoned", attacker), hitActor, poisonEffect))
+		},
+		Description: []util.LabelText{
+			util.LabelTextFromString(fmt.Sprintf("Poison target for %d turns, dealing %s damage per turn", turns, damagePerTurn.String())),
+		},
+	}
+}
+func (g *Factory) immobilizeTarget(args util.Arguments) *HitEffect {
+	turns := args.GetInt(0)
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			currentMap := g.state.GetMap()
+			if !currentMap.IsActorAt(target) {
+				return
+			}
+			hitActor := currentMap.ActorAt(target)
+			g.actionBroker.Execute(NewApplyStatusAction(NewActorCause("Poisoned", attacker), hitActor, StatusImmobile, turns))
+		},
+		Description: []util.LabelText{
+			util.LabelTextFromString("Immobilize target"),
 		},
 	}
 }
@@ -111,6 +161,42 @@ func (g *Factory) projectFire(args util.Arguments) *HitEffect {
 	}
 }
 
+func (g *Factory) jumpStart(args util.Arguments) *HitEffect {
+	maxSprint := args.GetIntOrDefault(0, 5)
+	maxJump := args.GetIntOrDefault(1, 5)
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			currentMap := g.state.GetMap()
+			jumpInfo := currentMap.JumpOverPositions(attacker.MapPosition(), target, maxSprint, maxJump)
+			if !jumpInfo.ActorFound {
+				return
+			}
+			isPlayer := attacker == g.state.GetPlayer()
+			//attackedActor := currentMap.ActorAt(jumpInfo.JumpedPos)
+			jumpExecution := g.actionBroker.Execute
+			landingPos := jumpInfo.Jump[len(jumpInfo.Jump)-1]
+
+			if len(jumpInfo.Sprint) > 0 {
+				firstMoveTarget := jumpInfo.Sprint[len(jumpInfo.Sprint)-1]
+				g.actionBroker.Execute(NewMoveAction(NewActorCause("JumpStart", attacker), attacker, firstMoveTarget, isPlayer))
+				jumpExecution = g.actionBroker.QueueForExecution
+			}
+
+			jump := NewMoveAction(NewActorCause("JumpStart", attacker), attacker, landingPos, isPlayer)
+			jump.DisableAnimation()
+			jumpExecution(jump)
+
+			g.actionBroker.QueueForExecution(NewRangedAttackAction(NewActorCause("JumpStart", attacker), attacker, jumpInfo.JumpedPos))
+
+			actionCost := 100 / attacker.GetMoveSpeed()
+			g.actionBroker.QueueForExecution(NewEndPlayerTurnAction(NewActorCause("JumpStart", attacker), actionCost))
+		},
+		Description: []util.LabelText{
+			util.LabelTextFromString("Jumpstart DESC HERE"),
+		},
+	}
+}
+
 func (g *Factory) spawnFireAt(location geometry.Point) {
 	fire := NewFire(3)
 	procFireAtLocation := func(location geometry.Point, startAnimating func() bool) {
@@ -130,26 +216,26 @@ func (g *Factory) spawnFireAt(location geometry.Point) {
 	}
 	fire.SetOnTurn(onTurn)
 	fire.SetDealDamage(procFireAtLocation)
-	g.addToTimeKeeper(fire)
+	g.getTimeKeeper().AddTimed(fire)
 
 	g.state.SpawnObject(location, fire)
 	procFireAtLocation(location, AnimateNow())
 }
 
 func (g *Factory) fireZone(args util.Arguments) *HitEffect {
-	damageInterval := stats.NewIntervalFromString(args.Get(0))
+	damageInterval := util.ParseDice(args.Get(0))
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			if !attacker.GetInventory().HasLightSource() {
 				return
 			}
-			damagePerTile := damageInterval.LinearRandom()
+			damagePerTile := damageInterval.Roll()
 			damageSpellAction := NewDamageSpellAction(NewActorCause("Flask of Oil", attacker), attacker, damagePerTile, target, hitPositions)
 			g.actionBroker.Execute(damageSpellAction)
 		},
 		Description: []util.LabelText{
 			util.LabelTextFromString(fmt.Sprintf("Create a small fiery explosion,")),
-			util.LabelTextFromString(fmt.Sprintf("dealing %s damage to all targets", damageInterval.ToString())),
+			util.LabelTextFromString(fmt.Sprintf("dealing %s damage to all targets", damageInterval.String())),
 		},
 	}
 }
@@ -176,7 +262,7 @@ func (g *Factory) stealItemAndTeleport(args util.Arguments) *HitEffect {
 				g.actionBroker.Execute(NewStealItemAction(NewActorCause("Steal", attacker), attacker, hitActor))
 			})
 			teleportAction := g.NewUntargetedActionFromName("teleport")
-			teleportAction.Invoke(attacker)
+			teleportAction.Invoke(attacker, "StealAndTeleport")
 			attacker.SetNeutral()
 		},
 		Description: []util.LabelText{
@@ -201,14 +287,6 @@ func (g *Factory) mindPush(args util.Arguments) *HitEffect {
 		},
 	}
 }
-
-/*
-	 func (g *Factory) getDebilitatingShot(name common.TargetedActionName) *common.TargetedAction {
-		applyStatus := common.NewTargetedAction(name, OneTargetTile, g.rangedAttack, NewDirectTargetingRules)
-		applyStatus.SetIcon(223)
-		return applyStatus
-	}
-*/
 func (g *Factory) applyStatusEffectToSelection(args util.Arguments) *HitEffect {
 	//effect common.StatusEffect, turnCount int
 	effectName := args.Get(0)

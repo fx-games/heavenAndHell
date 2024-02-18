@@ -22,20 +22,18 @@ const (
 	Dexterity    Name = "dexterity"
 
 	// baseline for the game
-	Level                    Name = "level"
-	Experience               Name = "experience"
-	Gold                     Name = "gold"
-	BaseSpeed                Name = "speed"
-	BaseDamage               Name = "damage"
-	BaseArmorClass           Name = "armor_class"
-	AttackSpeedFactor        Name = "attack_speed"
-	MoveSpeedFactor          Name = "move_speed"
-	LifeStealFactor          Name = "life_steal"
-	ManaStealFactor          Name = "mana_steal"
-	ManaRegeneration         Name = "mana_regeneration"
-	HealthRegeneration       Name = "health_regeneration"
-	EnhancedDamageFactor     Name = "enhanced_damage"
-	EnhancedArmorClassFactor Name = "armor_class_multiplier"
+	Level              Name = "level"
+	Experience         Name = "experience"
+	Gold               Name = "gold"
+	BaseSpeed          Name = "speed"
+	ArmorClass         Name = "armor_class"
+	AttackSpeedFactor  Name = "attack_speed"
+	MoveSpeedFactor    Name = "move_speed"
+	LifeStealFactor    Name = "life_steal"
+	ManaStealFactor    Name = "mana_steal"
+	ManaRegeneration   Name = "mana_regeneration"
+	HealthRegeneration Name = "health_regeneration"
+	DamageBonus        Name = "damage_bonus"
 
 	ArmorPenetration Name = "armor_penetration"
 
@@ -80,7 +78,7 @@ func GetAttributesForModifiersByLevel(level int) []Name {
 	case level >= 5 && level < 7:
 		return []Name{Strength, Intelligence, Dexterity, MaxHealth, MaxMana, AttackSpeedFactor, MoveSpeedFactor}
 	default:
-		return []Name{Strength, Intelligence, Dexterity, MaxHealth, MaxMana, AttackSpeedFactor, MoveSpeedFactor, EnhancedDamageFactor}
+		return []Name{Strength, Intelligence, Dexterity, MaxHealth, MaxMana, AttackSpeedFactor, MoveSpeedFactor, DamageBonus}
 	}
 }
 
@@ -93,7 +91,8 @@ const (
 
 type Modifier struct {
 	Attribute      Name
-	Name           string
+	Description    string
+	StackID        string
 	Value          float64
 	Mode           ModificationMode
 	IsPercentBased bool
@@ -136,20 +135,18 @@ func NewAttributeHolder() AttributeHolder {
 		attributes: map[Name]float64{
 			Level:        1,
 			Experience:   0,
-			Strength:     10,
-			Intelligence: 10,
-			Dexterity:    10,
+			Strength:     9,
+			Intelligence: 9,
+			Dexterity:    9,
 
 			Gold: 0,
 
-			BaseSpeed:      10, // we now would need an attack speed and a movement speed modifier
-			BaseArmorClass: 0,
-			BaseDamage:     0,
+			BaseSpeed:  10, // we now would need an attack speed and a movement speed modifier
+			ArmorClass: 0,
 
-			AttackSpeedFactor:        1,
-			MoveSpeedFactor:          1,
-			EnhancedDamageFactor:     1,
-			EnhancedArmorClassFactor: 1,
+			AttackSpeedFactor: 1,
+			MoveSpeedFactor:   1,
+			DamageBonus:       0,
 
 			LifeStealFactor: 0,
 			ManaStealFactor: 0,
@@ -249,11 +246,12 @@ func (a *AttributeHolder) GetAllModifiersForAttribute(name Name) []*Modifier {
 }
 
 func (a *AttributeHolder) AddModifier(modifier *Modifier) {
+	defer a.statsChanged()
 	attr := modifier.Attribute
 	a.modifiers[attr] = append(a.modifiers[attr], modifier)
-	a.statsChanged()
 }
 func (a *AttributeHolder) RemoveModifier(modifier *Modifier) {
+	defer a.statsChanged()
 	attr := modifier.Attribute
 	for i, m := range a.modifiers[attr] {
 		if m == modifier {
@@ -261,7 +259,6 @@ func (a *AttributeHolder) RemoveModifier(modifier *Modifier) {
 			return
 		}
 	}
-	a.statsChanged()
 }
 func (a *AttributeHolder) Increment(attributeName Name) {
 	a.attributes[attributeName]++
@@ -296,7 +293,7 @@ func (a *AttributeHolder) IncrementBy(attributeName Name, amount int) {
 	a.statsChanged()
 }
 
-func (a *AttributeHolder) IncrementResourceBy(name Name, amount int) {
+func (a *AttributeHolder) IncrementResourceBy(name Name, amount float64) {
 	a.resources[name].Increase(amount)
 	a.statsChanged()
 }
@@ -328,4 +325,15 @@ func (a *AttributeHolder) statsChanged() {
 	if a.onChanged != nil {
 		a.onChanged()
 	}
+}
+
+func (a *AttributeHolder) IsBuffed(statName Name) bool {
+	if len(a.modifiers[statName]) == 0 {
+		return false
+	}
+	totalModifier := 0.0
+	for _, mod := range a.modifiers[statName] {
+		totalModifier += mod.Value
+	}
+	return totalModifier > 0
 }

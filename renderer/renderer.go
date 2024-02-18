@@ -35,7 +35,7 @@ type TileRenderer struct {
 	whiteTile int32
 	ttfFont   font.Face
 
-	colorFromName      func(name string) color.Color
+	colorFromName      func(name string) color.RGBA
 	defaultBorderColor color.Color
 	defaultFillColor   color.Color
 	globalScaleColor   [4]float32
@@ -47,7 +47,7 @@ func (g *TileRenderer) SetRenderTarget(screen *ebiten.Image) {
 func (g *TileRenderer) IsInitialized() bool {
 	return g.currentRenderTarget != nil
 }
-func (g *TileRenderer) SetColorFromName(colorFromName func(name string) color.Color) {
+func (g *TileRenderer) SetColorFromName(colorFromName func(name string) color.RGBA) {
 	g.colorFromName = colorFromName
 }
 func (g *TileRenderer) SetTTF(font font.Face) {
@@ -402,9 +402,11 @@ func (g *TileRenderer) ParseColorCodedText(draw string) []util.ColoredTextPart {
 	return textParts
 }
 
-func (g *TileRenderer) toColor(matches [][]string, index int) color.Color {
+var White = color.RGBA{R: 255, G: 255, B: 255, A: 255}
+
+func (g *TileRenderer) toColor(matches [][]string, index int) color.RGBA {
 	if len(matches) == 0 {
-		return color.White
+		return White
 	}
 	colorName := matches[index][1]
 	if strings.ContainsRune(colorName, ',') {

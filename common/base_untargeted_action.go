@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"image/color"
+	"rpg/defs"
 	"rpg/util"
 )
 
@@ -18,6 +19,8 @@ type UntargetedAction struct {
 	timeNeededInAut        int
 	monetaryValue          int
 	condition              func(user *Actor) bool
+	effectSource           EffectSource
+	internalName           string
 }
 
 func NewUntargetedAction(name string, icon int32) *UntargetedAction {
@@ -37,7 +40,7 @@ func (a *UntargetedAction) GetDescription() []util.LabelText {
 		fullDescription = append(fullDescription,
 			util.LabelText{
 				Text:          fmt.Sprintf("Delayed: Will activate after %d turns", a.activationDelayInTurns),
-				TextColor:     DarkTextColor,
+				TextColor:     defs.DarkTextColor,
 				UseColorCodes: false,
 				//TextWithColorCodes: nil,
 			},
@@ -69,7 +72,7 @@ func (a *UntargetedAction) IsAlive() bool {
 func (a *UntargetedAction) Turn() {
 	a.activationDelayInTurns--
 	if a.activationDelayInTurns == 0 {
-		a.Invoke(a.user)
+		a.Invoke(a.user, a.effectSource)
 	}
 }
 
@@ -84,12 +87,13 @@ func (a *UntargetedAction) String() string {
 	return string(a.name)
 }
 
-func (a *UntargetedAction) SetCurrentUser(user *Actor) {
+func (a *UntargetedAction) SetCurrentUserAndSource(user *Actor, source EffectSource) { // only needed for time delayed effects
 	a.user = user
+	a.effectSource = source
 }
 
-func (a *UntargetedAction) Invoke(actor *Actor) {
-	a.effect.Invoke(actor)
+func (a *UntargetedAction) Invoke(actor *Actor, source EffectSource) {
+	a.effect.Invoke(actor, source)
 }
 
 func (a *UntargetedAction) GetDelayInTurns() int {
@@ -150,4 +154,12 @@ func (a *UntargetedAction) CanActivate(user *Actor) bool {
 
 func (a *UntargetedAction) SetCondition(condition func(user *Actor) bool) {
 	a.condition = condition
+}
+
+func (a *UntargetedAction) SetInternalName(name string) {
+	a.internalName = name
+}
+
+func (a *UntargetedAction) GetInternalName() string {
+	return a.internalName
 }

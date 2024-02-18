@@ -24,6 +24,10 @@ dlvl: 1
 cost: 50
 category: potion
 untargeted_action: apply_berserk_self
+throw_hit_zone: dijkstra_aoe(1)
+throw_damage: 1
+throw_chance_to_break: 1.0
+throw_on_hit_effect: berserk(3-4)
 
 name: Potion of Confusion
 internal_name: confuse_potion
@@ -31,7 +35,12 @@ icon: 325
 dlvl: 1
 cost: 50
 category: potion
-untargeted_action: apply_status_self(confused | 10)
+untargeted_action: apply_status_self(confused | 10 | You feel confused.)
+throw_hit_zone: dijkstra_aoe(1)
+throw_damage: 1
+throw_chance_to_break: 1.0
+throw_on_hit_effect: confuse(3-4)
+
 
 name: Potion of Speed
 internal_name: speed_potion
@@ -49,3 +58,22 @@ cost: 50
 category: potion
 untargeted_action: buff_damage(5-10 | 6)
 
+name: Potion of Stoneskin
+internal_name: stoneskin_potion
+icon: 334
+dlvl: 1
+cost: 50
+category: potion
+untargeted_action: stoneskin(5-10)
+
+name: Potion of Poison
+internal_name: poison_potion
+icon: 325
+dlvl: 1
+cost: 50
+category: potion
+untargeted_action: apply_status_self(poisoned | 10 | You feel sick.)
+throw_hit_zone: dijkstra_aoe(1)
+throw_damage: 1
+throw_chance_to_break: 1.0
+throw_on_hit_effect: poison(3-4 | 2-4)

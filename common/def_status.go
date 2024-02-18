@@ -18,7 +18,7 @@ Status Effects
 */
 func IsValidStatusEffect(name string) bool {
 	switch StatusEffect(name) {
-	case StatusInvisible, StatusStunned, StatusImmobile, StatusBlinded, StatusSlow, StatusHasted, StatusScared, StatusSilenced, StatusPacified, StatusDamageOverTime, StatusConfused, StatusCharmed, StatusBerserk, StatusHaywire, StatusFlying:
+	case StatusInvisible, StatusStunned, StatusPoisoned, StatusImmobile, StatusBlinded, StatusSlow, StatusHasted, StatusScared, StatusSilenced, StatusPacified, StatusDamageOverTime, StatusConfused, StatusCharmed, StatusBerserk, StatusHaywire, StatusFlying:
 		return true
 	}
 	return false
@@ -35,6 +35,7 @@ const (
 	StatusPacified  StatusEffect = "pacified"  // cannot attack
 	StatusImmobile  StatusEffect = "immobile"  // cannot move
 	StatusConfused  StatusEffect = "confused"  // random actions
+	StatusPoisoned  StatusEffect = "poisoned"  // random actions
 	StatusCharmed   StatusEffect = "charmed"   // change faction
 	StatusBerserk   StatusEffect = "berserk"   // random attacks
 	StatusHaywire   StatusEffect = "haywire"   // random magic
@@ -48,4 +49,26 @@ const (
 
 type ParametrizedStatusEffect struct {
 	name StatusEffect
+	nextTurn func(a *Actor)
+	turnsLeft int
 }
+func NewParametrizedStatusEffect(name StatusEffect, nextTurn func(a *Actor), turnsLeft int) *ParametrizedStatusEffect {
+	return &ParametrizedStatusEffect{name: name, nextTurn: nextTurn, turnsLeft: turnsLeft}
+}
+func (e *ParametrizedStatusEffect) NextTurn(a *Actor) {
+	if e.turnsLeft <= 0 {
+		return
+	}
+	e.nextTurn(a)
+	e.turnsLeft--
+}
+
+func (e *ParametrizedStatusEffect) TurnsLeft() int {
+	return e.turnsLeft
+}
+
+func (e *ParametrizedStatusEffect) GetName() string {
+	return string(e.name)
+}
+
+

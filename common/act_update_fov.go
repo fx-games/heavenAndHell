@@ -1,8 +1,6 @@
 package common
 
-import (
-	"fmt"
-)
+import "rpg/defs"
 
 type UpdateFoVAction struct {
 	BaseAction
@@ -78,7 +76,7 @@ func updatePlayerKnowledge(context ActionContext) {
 	vis.Set(currentlyVisible)
 	for newActor, _ := range cameIntoView {
 		if newActor.IsHostile() {
-			context.Msg(fmt.Sprintf("%s comes into view", newActor.Name()))
+			//context.Msg(fmt.Sprintf("%s comes into view", newActor.Name()))
 			aggroRange := newActor.GetAggroRange()
 
 			distToPlayer := currentMap.MoveDistance(player.MapPosition(), newActor.MapPosition())
@@ -86,13 +84,13 @@ func updatePlayerKnowledge(context ActionContext) {
 				newActor.SetState(ActorStateAttacking)
 			}
 		}
-		if newActor.HasSpeech(SpeechTriggerSight) {
-			context.Speak(newActor, SpeechTriggerSight)
+		if newActor.HasSpeech(defs.SpeechTriggerSight) {
+			context.Speak(newActor, defs.SpeechTriggerSight)
 		}
 	}
 	for oldActor, _ := range wentOutOfView {
 		if oldActor.IsHostile() {
-			context.Msg(fmt.Sprintf("%s leaves your field of view", oldActor.Name()))
+			//context.Msg(fmt.Sprintf("%s leaves your field of view", oldActor.Name()))
 		}
 	}
 }

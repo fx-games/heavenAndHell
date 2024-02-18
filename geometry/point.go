@@ -116,6 +116,20 @@ func (p Point) ChebyshevDistanceTo(other Point) int {
 	return DistanceChebyshev(p, other)
 }
 
+func (p Point) RotateLeft() Point {
+	return Point{
+		X: -p.Y,
+		Y: p.X,
+	}
+}
+
+func (p Point) RotateRight() Point {
+	return Point{
+		X: p.Y,
+		Y: -p.X,
+	}
+}
+
 func NewPointFromEncodedString(encoded string) (Point, error) {
 	var x, y int
 	_, err := fmt.Sscanf(encoded, "(%d,%d)", &x, &y)

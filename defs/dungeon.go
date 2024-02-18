@@ -304,6 +304,26 @@ func GetLevelDefinition(randomSource *rand.Rand, dungeonLevel int) LevelDefiniti
 				IsUp: true,
 			},
 		},
+		8: {
+			{
+				LocationName: "to_hell_town",
+				Target: gridmap.Transition{
+					TargetMap:      string(LevelNameTownHell),
+					TargetLocation: "to_caves",
+				},
+				IsUp: true,
+			},
+		},
+		9: {
+			{
+				LocationName: "to_hell_town",
+				Target: gridmap.Transition{
+					TargetMap:      string(LevelNameTownHell),
+					TargetLocation: "to_dungeon",
+				},
+				IsUp: true,
+			},
+		},
 	}
 	getRequiredRoomsForLevel := map[int][]string{
 		2: {

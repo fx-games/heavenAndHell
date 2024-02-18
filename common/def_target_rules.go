@@ -1,7 +1,7 @@
 package common
 
 import (
-	"rpg/util"
+    "rpg/util"
 )
 
 func GetAllTargetingRules() map[string]func(args util.Arguments) *TargetRulesProvider {
@@ -9,6 +9,7 @@ func GetAllTargetingRules() map[string]func(args util.Arguments) *TargetRulesPro
 		"direct": NewDirectTargetingRules,
 		"melee":  NewMeleeTargetingRules,
 		"ranged": NewRangedAttackTargetingRules,
+		"jumpstart": NewJumpStartTargetingRules,
 	}
 }
 

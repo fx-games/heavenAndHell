@@ -1,5 +1,7 @@
 package util
 
+import "fmt"
+
 // LoopConfig describes a configuration for a game loop.
 type LoopConfig struct {
 	// TargetFPS is used to calculate the seconds per update (1 / TargetFPS).
@@ -60,9 +62,7 @@ func CreateLoop(c LoopConfig, terminationCode *int) func() {
 			}
 
 			lag += elapsed
-
 			*terminationCode = c.ProcessInputFunc()
-
 			for lag >= secsPerUpdate {
 				c.UpdateFunc(secsPerUpdate)
 				lag -= secsPerUpdate
@@ -70,5 +70,6 @@ func CreateLoop(c LoopConfig, terminationCode *int) func() {
 
 			c.RenderFunc()
 		}
+		println(fmt.Sprintf("Terminated with code: %d", *terminationCode))
 	}
 }

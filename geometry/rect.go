@@ -182,6 +182,10 @@ func (rg Rect) IsOnEdge(position Point) bool {
 	return position.X == rg.Min.X || position.X == rg.Max.X-1 || position.Y == rg.Min.Y || position.Y == rg.Max.Y-1
 }
 
+func (rg Rect) IsOnCorner(position Point) bool {
+	return position.X == rg.Min.X && position.Y == rg.Min.Y || position.X == rg.Max.X-1 && position.Y == rg.Min.Y || position.X == rg.Min.X && position.Y == rg.Max.Y-1 || position.X == rg.Max.X-1 && position.Y == rg.Max.Y-1
+}
+
 func (rg Rect) ToHalfWidth() Rect {
 	// the new rect will start at the 2*x position of the old rect
 	// and it will have double the width

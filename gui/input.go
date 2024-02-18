@@ -43,6 +43,16 @@ const (
 	PlayerCommandOptions
 )
 
+func isBeingPressedRepeatedly(key ebiten.Key) bool {
+	pressedForTicks := inpututil.KeyPressDuration(key)
+	ticksBetweenMovement := 20
+	if pressedForTicks > 30 {
+		ticksBetweenMovement = 8
+	}
+	isRepetitionTick := pressedForTicks > 0 && pressedForTicks%ticksBetweenMovement == 0
+	return inpututil.IsKeyJustPressed(key) || (ebiten.IsKeyPressed(key) && isRepetitionTick)
+}
+
 func (u *UIController) handleKeyboardInput() {
 	// must-have
 	//  - movement
@@ -59,7 +69,7 @@ func (u *UIController) handleKeyboardInput() {
 	//  - pick up item
 	//  - quick travel
 
-	act := u.context.PlayerAction
+	act := u.context.PlayerAction()
 
 	u.shiftIsBeingPressedThisTick = ebiten.IsKeyPressed(ebiten.KeyShift)
 
@@ -105,7 +115,12 @@ func (u *UIController) handleKeyboardInput() {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
-		act.AimedRangedAttack()
+		if u.targeter != nil && u.targeter.HasValidTarget() {
+			u.targeter.Activate()
+			u.CancelTargeting()
+		} else {
+			act.AimedRangedAttack()
+		}
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyV) {
 		act.AimedThrow()
@@ -124,7 +139,7 @@ func (u *UIController) handleKeyboardInput() {
 		act.RestUntilHealed()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyX) {
-		u.mapRenderer.CenterOnFloat(u.context.GameState.GetPlayer().DrawPosition())
+		u.mapRenderer.CenterOnFloat(u.context.GameState().GetPlayer().DrawPosition())
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyB) {
 		u.showFlags()
@@ -143,16 +158,16 @@ func (u *UIController) handleKeyboardInput() {
 		u.ShowFullStats()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
-		u.context.DebugActions.KillLevel()
+		u.context.DebugActions().KillLevel()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyH) {
-		u.context.DebugActions.GotoHellTown()
+		u.context.DebugActions().GotoHellTown()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyF9) {
 		u.disableFogOfWar = !u.disableFogOfWar
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyF10) {
-		u.context.DebugActions.OpenDebugMenu()
+		u.context.DebugActions().OpenDebugMenu()
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF11) {
@@ -183,17 +198,17 @@ func (u *UIController) handleKeyboardInput() {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyO) {
 		act.StartAutoExplore()
-
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyTab) {
+
+	if isBeingPressedRepeatedly(ebiten.KeyTab) {
 		act.AutoAttack()
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyJ) {
-		u.context.DebugActions.GoOneLevelUp()
+		u.context.DebugActions().GoOneLevelUp()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyK) {
-		u.context.DebugActions.GoOneLevelDown()
+		u.context.DebugActions().GoOneLevelDown()
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
@@ -212,13 +227,13 @@ func (u *UIController) handleKeyboardInput() {
 		u.mapRenderer.ScrollBy(geometry.Point{X: 0, Y: 8})
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
+	if isBeingPressedRepeatedly(ebiten.KeyW) {
 		act.ManualMovePlayer(geometry.Point{X: 0, Y: -1})
-	} else if inpututil.IsKeyJustPressed(ebiten.KeyS) {
+	} else if isBeingPressedRepeatedly(ebiten.KeyS) {
 		act.ManualMovePlayer(geometry.Point{X: 0, Y: 1})
-	} else if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+	} else if isBeingPressedRepeatedly(ebiten.KeyA) {
 		act.ManualMovePlayer(geometry.Point{X: -1, Y: 0})
-	} else if inpututil.IsKeyJustPressed(ebiten.KeyD) {
+	} else if isBeingPressedRepeatedly(ebiten.KeyD) {
 		act.ManualMovePlayer(geometry.Point{X: 1, Y: 0})
 	}
 
@@ -277,12 +292,15 @@ func (u *UIController) handleMouseInput() {
 			return
 		}
 		visibleMap := u.mapRenderer.GetVisibleMap()
-		state := u.context.GameState
+		state := u.context.GameState()
 		if !state.GetMap().Contains(u.mousePosOnMap) || !visibleMap.Contains(u.mousePosOnMap) {
 			return
 		}
 		if u.targeter != nil {
 			u.targeter.OnMouseClicked(u.mousePosOnMap)
+			if u.targeter.IsDone() {
+				u.CancelTargeting()
+			}
 			return
 		}
 		if !handledByUI {
@@ -294,11 +312,11 @@ func (u *UIController) onMapClicked(mouseButton ebiten.MouseButton, mapPos geome
 	if u.IsUIModalVisible() {
 		return
 	}
-	act := u.context.PlayerAction
-	state := u.context.GameState
+	act := u.context.PlayerAction()
+	state := u.context.GameState()
 	currentMap := state.GetMap()
 	if mouseButton == ebiten.MouseButtonRight && currentMap.IsActorAt(mapPos) && state.GetPlayer().CanSee(mapPos) {
-		u.context.PlayerAction.ShowActorInfoAt(mapPos)
+		act.ShowActorInfoAt(mapPos)
 	} else if mouseButton == ebiten.MouseButtonLeft && currentMap.IsExplored(mapPos) {
 		act.CancelAutoMove()
 		act.StartPlayerAutoMovement(mapPos)

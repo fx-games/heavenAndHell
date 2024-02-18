@@ -8,8 +8,8 @@ import (
 	"rpg/util"
 )
 
-func GetAllHitZones() map[string]func(gridMap *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
-	return map[string]func(gridMap *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver{
+func GetAllHitZones() map[string]func(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
+	return map[string]func(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver{
 		"target_only":   OneTargetTile,
 		"ray_aoe":       RayAoE,
 		"bresenham_aoe": BresenhamAoE,
@@ -19,7 +19,7 @@ func GetAllHitZones() map[string]func(gridMap *gridmap.GridMap[*Actor, *Item, Ob
 }
 
 // These determine aoe zones for spells and throwable items
-func HitZoneFromString(gridMap *gridmap.GridMap[*Actor, *Item, Object], zone string) *AoEResolver {
+func HitZoneFromString(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], zone string) *AoEResolver {
 	allHitZones := GetAllHitZones()
 	if util.LooksLikeAFunction(zone) {
 		parametrizedHitZone, args := util.GetNameAndArgs(zone)
@@ -29,11 +29,11 @@ func HitZoneFromString(gridMap *gridmap.GridMap[*Actor, *Item, Object], zone str
 	}
 	return OneTargetTile(gridMap, util.Arguments{})
 }
-func DijkstraAoE(gridMap *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
+func DijkstraAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
 	maxDistance := args.GetInt(0)
 	return &AoEResolver{
 		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
-			currentMap := gridMap
+			currentMap := gridMap()
 			return toList(currentMap.GetDijkstraMapWithActorsNotBlocking(target, maxDistance))
 		},
 		Description: []util.LabelText{
@@ -41,11 +41,11 @@ func DijkstraAoE(gridMap *gridmap.GridMap[*Actor, *Item, Object], args util.Argu
 		},
 	}
 }
-func RayAoE(gridMap *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
+func RayAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
 	maxDistance := args.GetInt(0)
 	return &AoEResolver{
 		GetHitPositions: func(originGrid, targetGrid geometry.Point) []geometry.Point {
-			currentMap := gridMap
+			currentMap := gridMap()
 			var result []geometry.Point
 			origin := originGrid.ToCenteredPointF()
 			target := targetGrid.ToCenteredPointF()
@@ -74,11 +74,11 @@ func RayAoE(gridMap *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments
 		},
 	}
 }
-func BresenhamAoE(gridMap *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
+func BresenhamAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
 	maxDistance := args.GetInt(0)
 	return &AoEResolver{
 		GetHitPositions: func(originGrid, targetGrid geometry.Point) []geometry.Point {
-			currentMap := gridMap
+			currentMap := gridMap()
 			var result []geometry.Point
 			traversedGridCells := currentMap.BresenhamLine(originGrid, targetGrid, func(pos geometry.Point) bool {
 				return !currentMap.IsWalkable(pos)
@@ -103,7 +103,7 @@ func BresenhamAoE(gridMap *gridmap.GridMap[*Actor, *Item, Object], args util.Arg
 	}
 }
 
-func WallAoE(gridMap *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
+func WallAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
 	wallParts := args.GetInt(0)
 	return &AoEResolver{
 		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
@@ -161,7 +161,7 @@ func WallAoE(gridMap *gridmap.GridMap[*Actor, *Item, Object], args util.Argument
 	}
 }
 
-func OneTargetTile(gridMap *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
+func OneTargetTile(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
 	return &AoEResolver{
 		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
 			return []geometry.Point{target}

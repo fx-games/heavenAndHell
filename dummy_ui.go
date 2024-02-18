@@ -9,7 +9,7 @@ import (
 type DummyUI struct {
 }
 
-func (d DummyUI) SetDebugActions(actions common.DebugActions) {
+func (d DummyUI) SetDebugActions(actions func()common.DebugActions) {
 
 }
 

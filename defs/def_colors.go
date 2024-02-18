@@ -1,9 +1,8 @@
-package common
+package defs
 
 import (
 	"fmt"
 	"image/color"
-	"regexp"
 )
 
 var PositiveHighlightColor = color.RGBA{R: 20, G: 255, B: 20, A: 255}
@@ -16,7 +15,17 @@ var TextBackgroundColor = color.RGBA{R: 0, G: 0, B: 0, A: 255}
 var MagicHighlightColor = color.RGBA{R: 65, G: 105, B: 225, A: 255}
 var RareHighlightColor = color.RGBA{R: 255, G: 255, A: 255}
 var SetHighlightColor = color.RGBA{R: 0, G: 255, B: 0, A: 255}
-var UniqueHighlightColor = color.RGBA{R: 165, G: 146, B: 99, A: 255}
+var InvColorUnique = color.RGBA{R: 45, G: 255, B: 254, A: 255}
+var InvColorLightSource = color.RGBA{R: 255, G: 253, B: 56, A: 255}
+var InvColorArmor = color.RGBA{R: 191, G: 128, B: 70, A: 255}
+var InvColorMisc = color.RGBA{R: 191, G: 128, B: 70, A: 255}
+var InvColorMeleeWeapon = color.RGBA{R: 230, G: 230, B: 230, A: 255}
+var InvColorPotion = color.RGBA{R: 45, G: 255, B: 254, A: 255}
+var InvColorScroll = color.RGBA{R: 240, G: 240, B: 240, A: 255}
+var InvColorWand = color.RGBA{R: 16, G: 127, B: 66, A: 255}
+var InvColorRing = color.RGBA{R: 190, G: 7, B: 18, A: 255}
+var InvColorAmulet = color.RGBA{R: 249, G: 129, B: 40, A: 255}
+var InvColorRangedWeapon = color.RGBA{R: 127, G: 64, B: 12, A: 255}
 var Red = color.RGBA{R: 255, G: 20, B: 20, A: 255}
 var Green = color.RGBA{R: 20, G: 255, B: 20, A: 255}
 var Blue = color.RGBA{R: 20, G: 20, B: 255, A: 255}
@@ -35,7 +44,7 @@ var PureRed = color.RGBA{R: 255, G: 0, B: 0, A: 255}
 var PureGreen = color.RGBA{R: 0, G: 255, B: 0, A: 255}
 var PureBlue = color.RGBA{R: 0, G: 0, B: 255, A: 255}
 
-func ColorFromName(name string) color.Color {
+func ColorFromName(name string) color.RGBA {
 	switch name {
 	case "red":
 		return Red
@@ -56,13 +65,13 @@ func ColorFromName(name string) color.Color {
 	case "set":
 		return SetHighlightColor
 	case "unique":
-		return UniqueHighlightColor
+		return InvColorUnique
 	case "positive":
 		return PositiveHighlightColor
 	case "negative":
 		return NegativeHighlightColor
 	default:
-		return color.White
+		return White
 	}
 }
 func ColorCodeFromColor(color color.Color) string {
@@ -85,18 +94,11 @@ func ColorCodeFromColor(color color.Color) string {
 		return "[:rare]"
 	case SetHighlightColor:
 		return "[:set]"
-	case UniqueHighlightColor:
+	case InvColorUnique:
 		return "[:unique]"
 	default:
 		return "[:white]"
 	}
-}
-func RemoveColorCodes(colorCodedText string) string {
-	// color codes look like this [:red] [:blue] [:green] [:yellow] [:white] [:24,54,222]
-	regexPattern := `\[:([\w,]+)\]`
-	rp, _ := regexp.Compile(regexPattern)
-
-	return rp.ReplaceAllString(colorCodedText, "")
 }
 
 func RGBAToColorCode(color color.RGBA) string {

@@ -1,10 +1,10 @@
 basics.. once again..
  - movement (repeat key missing)
- - move to attack (missing damage number anims)
+ - move to attack - GOOD ENOUGH!
  - pickup/drop item - GOOD ENOUGH!
  - equip/unequip item - GOOD ENOUGH!
  - item modifiers - GOOD ENOUGH!
- - item use/drink/read
+ - item use/drink/read - GOOD ENOUGH!
  - untargeted spells (with item)
    - enchant armor scroll still buggy (allows multiple enchants)
  - targeted spells (with item)
@@ -24,6 +24,14 @@ basics.. once again..
  - show inventory (tooltips missing)
  - show equipment
  - change class (not working)
+
+BUGS
+ - Word of Recall is instantly
+ - Cannot scroll map for targeting off-screen enemies
+ - Aimed Ranged attacks don't work for the second activation
+ - Corpses drawn over items
+ - No accessory found for dungeon level 1
+ - Logs are not wiped on restart
 
 missing 7drl goals
 

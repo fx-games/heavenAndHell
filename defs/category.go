@@ -10,6 +10,8 @@ func (c ItemCategory) HasAlwaysOneCharge() bool {
 		return true
 	case ItemCategoryScroll:
 		return true
+	case ItemCategoryFood:
+		return true
 	}
 	return false
 }
@@ -31,9 +33,15 @@ func (c ItemCategory) IsValid() bool {
 		fallthrough
 	case ItemCategoryArmor:
 		fallthrough
-	case ItemCategoryAccessory:
+	case ItemCategoryRing:
+		fallthrough
+	case ItemCategoryAmulet:
 		fallthrough
 	case ItemCategoryThrowable:
+		fallthrough
+	case ItemCategoryFood:
+		fallthrough
+	case ItemCategoryAmmunition:
 		fallthrough
 	case ItemCategoryOther:
 		return true
@@ -56,10 +64,16 @@ func (c ItemCategory) ToString() string {
 		return "Weapon"
 	case ItemCategoryArmor:
 		return "Armor"
-	case ItemCategoryAccessory:
-		return "Accessory"
+	case ItemCategoryRing:
+		return "Ring"
+	case ItemCategoryAmulet:
+		return "Amulet"
 	case ItemCategoryThrowable:
 		return "Throwable"
+	case ItemCategoryAmmunition:
+		return "Ammunition"
+	case ItemCategoryFood:
+		return "Food"
 	case ItemCategoryOther:
 		return "Other"
 	}
@@ -70,12 +84,15 @@ const ( // defines the sort order of the inventory
 	ItemCategoryInvalid ItemCategory = iota - 1
 	ItemCategoryPotion
 	ItemCategoryScroll
+	ItemCategoryFood
 	ItemCategoryWand
 	ItemCategoryLightSource
 	ItemCategoryWeapon
 	ItemCategoryArmor
-	ItemCategoryAccessory
+	ItemCategoryRing
+	ItemCategoryAmulet
 	ItemCategoryThrowable
+	ItemCategoryAmmunition
 	ItemCategoryOther
 )
 
@@ -94,8 +111,14 @@ func ItemCategoryFromString(str string) ItemCategory {
 		return ItemCategoryWeapon
 	case "armor":
 		return ItemCategoryArmor
-	case "accessory":
-		return ItemCategoryAccessory
+	case "ammo":
+		return ItemCategoryAmmunition
+	case "ring":
+		return ItemCategoryRing
+	case "food":
+		return ItemCategoryFood
+	case "amulet":
+		return ItemCategoryAmulet
 	case "throwable":
 		return ItemCategoryThrowable
 	}

@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"regexp"
 )
 
 type BaseAction struct {
@@ -43,35 +44,71 @@ func (d *BaseActionHook) After(action Action, context ActionContext) []Action {
 func logDodged(context ActionContext, attacker, defender *Actor) {
 	state := context.GameState
 	msg := context.Msg
-	if attacker == state.GetPlayer() {
-		msg(fmt.Sprintf("Your attack misses %s", defender.Name()))
-	} else if defender == state.GetPlayer() {
-		msg(fmt.Sprintf("%s misses you", attacker.Name()))
-	} else {
-		msg(fmt.Sprintf("%s misses %s", attacker.Name(), defender.Name()))
+	attackerName := attacker.Name() + "'s"
+	if !attacker.IsVisible() {
+		attackerName = "something's"
 	}
+	if attacker == state.GetPlayer() {
+		attackerName = "your"
+	}
+
+	defenderName := defender.Name()
+	if !defender.IsVisible() {
+		defenderName = "Something"
+	}
+	if defender == state.GetPlayer() {
+		defenderName = "You"
+	}
+
+	msg(fmt.Sprintf("%s dodged %s attack", defenderName, attackerName))
+}
+
+func logMissed(context ActionContext, attacker, defender *Actor) {
+	state := context.GameState
+	msg := context.Msg
+	attackerName := attacker.Name()
+	if !attacker.IsVisible() {
+		attackerName = "Something"
+	}
+	defenderName := defender.Name()
+	if !defender.IsVisible() {
+		defenderName = "something"
+	}
+	verb := "misses"
+
+	if attacker == state.GetPlayer() {
+		attackerName = "You"
+		verb = "miss"
+	}
+	if defender == state.GetPlayer() {
+		defenderName = "you"
+	}
+	msg(fmt.Sprintf("%s %s %s", attackerName, verb, defenderName))
 }
 func logAttack(context ActionContext, attacker, defender *Actor, damageAmount int) {
 	state := context.GameState
 	msg := context.Msg
+	attackerName := attacker.Name()
+	if !attacker.IsVisible() {
+		attackerName = "Something"
+	}
+	defenderName := defender.Name()
+	if !defender.IsVisible() {
+		defenderName = "something"
+	}
+	verb := "hits"
+
 	if attacker == state.GetPlayer() {
-		if damageAmount > 0 {
-			msg(fmt.Sprintf("Your attack hits %s", defender.Name()))
-		} else {
-			msg(fmt.Sprintf("Your attack hits %s but does no damage", defender.Name()))
-		}
-	} else if defender == state.GetPlayer() {
-		if damageAmount > 0 {
-			msg(fmt.Sprintf("%s hits you", attacker.Name()))
-		} else {
-			msg(fmt.Sprintf("%s hits you but does no damage", attacker.Name()))
-		}
+		attackerName = "You"
+		verb = "hit"
+	}
+	if defender == state.GetPlayer() {
+		defenderName = "you"
+	}
+	if damageAmount > 0 {
+		msg(fmt.Sprintf("%s %s %s (%d)", attackerName, verb, defenderName, damageAmount))
 	} else {
-		if damageAmount > 0 {
-			msg(fmt.Sprintf("%s hits %s", attacker.Name(), defender.Name()))
-		} else {
-			msg(fmt.Sprintf("%s hits %s but does no damage", attacker.Name(), defender.Name()))
-		}
+		msg(fmt.Sprintf("%s %s %s, but no damage is done", attackerName, verb, defenderName))
 	}
 }
 
@@ -93,4 +130,12 @@ func (b *BaseAnimation) shouldRunNow() bool {
 }
 func (b *BaseAnimation) StartWhenTrue(startThisTick func() bool) {
 	b.startThisTick = startThisTick
+}
+
+func RemoveColorCodes(colorCodedText string) string {
+	// color codes look like this [:red] [:blue] [:green] [:yellow] [:white] [:24,54,222]
+	regexPattern := `\[(:[\w,]+)\]`
+	rp, _ := regexp.Compile(regexPattern)
+
+	return rp.ReplaceAllString(colorCodedText, "")
 }

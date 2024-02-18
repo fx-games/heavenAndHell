@@ -3,7 +3,7 @@ package gui
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
-	"rpg/common"
+	"rpg/defs"
 
 	"rpg/geometry"
 	"rpg/util"
@@ -120,7 +120,7 @@ func (i *IconList) Draw() {
 		textDrawX := itemDrawX + iconWidthWithPadding
 		drawColor := element.TintColor()
 		if eIndex == i.selectedIndex {
-			drawColor = common.PositiveHighlightColor
+			drawColor = defs.LightTextColor
 		}
 		renderer.DrawTTFOnScreen(float64(textDrawX), float64(itemDrawY), element.Name(), drawColor)
 		itemDrawY += i.posInfo.ItemSizes[eIndex].Y + i.lineSpacing

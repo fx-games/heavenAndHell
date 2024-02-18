@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"rpg/recfile"
 	"rpg/stats"
+	"rpg/util"
 )
 
 // item line for typical weapon
@@ -33,7 +34,11 @@ type ItemDefinition struct {
 }
 
 func NewItemDefinitionFromRecord(record recfile.Record) ItemDefinition {
-	itemDefinition := ItemDefinition{}
+	itemDefinition := ItemDefinition{
+		Weapon: WeaponDefinition{
+			ProjectileIcon: -1,
+		},
+	}
 	for _, field := range record {
 		switch field.Name {
 		case "name":
@@ -63,9 +68,18 @@ func NewItemDefinitionFromRecord(record recfile.Record) ItemDefinition {
 		case "weapon_type":
 			itemDefinition.Weapon.WeaponType = WeaponTypeFromString(field.Value)
 		case "weapon_damage":
-			itemDefinition.Weapon.Damage = stats.NewIntervalFromString(field.Value)
+			itemDefinition.Weapon.Damage = util.ParseDice(field.Value)
 		case "weapon_speed":
 			itemDefinition.Weapon.Speed = field.AsFloat()
+		case "weapon_armor_penetration":
+			itemDefinition.Weapon.ArmorPenetration = field.AsInt()
+		case "ranged_max_range":
+			itemDefinition.Weapon.MaxRange = field.AsInt()
+		case "ranged_accuracy_at_max_range":
+			itemDefinition.Weapon.AccuracyAtMaxRange = field.AsFloat()
+		case "ranged_accuracy_at_min_range":
+			itemDefinition.Weapon.AccuracyAtMinRange = field.AsFloat()
+		case "ranged_projectile_icon": itemDefinition.Weapon.ProjectileIcon = field.AsInt32()
 		case "throw_hit_zone":
 			itemDefinition.Throw.HitZone = field.Value
 		case "throw_damage":
@@ -116,10 +130,6 @@ func (d ItemDefinition) IsThrow() bool {
 	return d.Throw.IsValid()
 }
 
-func (d ItemDefinition) IsAccessory() bool {
-	return d.InventoryCategory == ItemCategoryAccessory
-}
-
 func (d ItemDefinition) IsLightSource() bool {
 	return d.Light.IsValid()
 }
@@ -130,4 +140,12 @@ func (d ItemDefinition) IsPotion() bool {
 
 func (d ItemDefinition) IsScroll() bool {
 	return d.InventoryCategory == ItemCategoryScroll
+}
+
+func (d ItemDefinition) IsRing() bool {
+	return d.InventoryCategory == ItemCategoryRing
+}
+
+func (d ItemDefinition) IsAmulet() bool {
+	return d.InventoryCategory == ItemCategoryAmulet
 }

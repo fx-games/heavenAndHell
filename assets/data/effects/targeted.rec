@@ -71,7 +71,15 @@ icon: 223
 dlvl: 1
 targeting: direct
 hit_zone: target_only
-effect: apply(confused | 5)
+effect: confuse(5)
+
+name: Poison
+internal_name: poison_target
+icon: 223
+dlvl: 1
+targeting: direct
+hit_zone: target_only
+effect: poison(4 | 2)
 
 name: Immobilize
 internal_name: immobilize_target
@@ -79,5 +87,13 @@ icon: 223
 dlvl: 1
 targeting: direct
 hit_zone: target_only
-effect: apply(immobile | 5)
+effect: immobilize(5)
+
+name: Jump Start
+internal_name: jump_start
+icon: 223
+dlvl: 1
+targeting: jumpstart(5 | 5)
+hit_zone: target_only
+effect: jumpstart(5 | 5)
 
