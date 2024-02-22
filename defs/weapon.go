@@ -14,6 +14,7 @@ type WeaponDefinition struct {
 	AccuracyAtMinRange float64
 	ArmorPenetration   int
 	ProjectileIcon     int32
+	IsTwoHanded        bool
 }
 
 func (d WeaponDefinition) IsValid() bool {
@@ -34,8 +35,6 @@ func (t WeaponType) ToString() string {
 		return "Crossbow"
 	case WeaponTypeMace:
 		return "Mace"
-	case WeaponTypeStaff:
-		return "Staff"
 	case WeaponTypeShield:
 		return "Shield"
 	case WeaponTypeScythe:
@@ -53,21 +52,6 @@ func (t WeaponType) ToString() string {
 	}
 }
 
-func (t WeaponType) GetInventorySlot() SlotName {
-	switch t {
-	case WeaponTypeSword, WeaponTypeAxe, WeaponTypeMace, WeaponTypeWhip:
-		return SlotNameOneHandedWeapon
-	case WeaponTypeStaff, WeaponTypeScythe, WeaponTypeSpear:
-		return SlotNameTwoHandedWeapon
-	case WeaponTypeShield:
-		return SlotNameOffHand
-	case WeaponTypeBow:
-		return SlotNameMissileLauncher
-	default:
-		return SlotNameNotEquippable
-	}
-}
-
 /*
 - Swords
 - Clubs/Maces
@@ -80,7 +64,6 @@ const (
 	WeaponTypeSword
 	WeaponTypeAxe
 	WeaponTypeMace
-	WeaponTypeStaff
 	WeaponTypeSpear
 	WeaponTypeDagger
 	WeaponTypeBow
@@ -100,8 +83,6 @@ func WeaponTypeFromString(str string) WeaponType {
 		return WeaponTypeAxe
 	case "mace":
 		return WeaponTypeMace
-	case "staff":
-		return WeaponTypeStaff
 	case "bow":
 		return WeaponTypeBow
 	case "crossbow":

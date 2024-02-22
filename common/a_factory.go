@@ -336,6 +336,7 @@ func (g *Factory) NewItemFromDefinition(itemDefinition defs.ItemDefinition, dung
 			AccuracyAtMinRange: itemDefinition.Weapon.AccuracyAtMinRange,
 			ArmorPenetration:   itemDefinition.Weapon.ArmorPenetration,
 			ProjectileIcon:     itemDefinition.Weapon.ProjectileIcon,
+			IsTwoHanded: itemDefinition.Weapon.IsTwoHanded,
 		}
 		baseItem.SetWeaponComponent(weaponPart)
 	}

@@ -67,6 +67,8 @@ func NewItemDefinitionFromRecord(record recfile.Record) ItemDefinition {
 			itemDefinition.Armor.ArmorClass = stats.NewIntervalFromString(field.Value)
 		case "weapon_type":
 			itemDefinition.Weapon.WeaponType = WeaponTypeFromString(field.Value)
+		case "weapon_two_handed":
+			itemDefinition.Weapon.IsTwoHanded = field.AsBool()
 		case "weapon_damage":
 			itemDefinition.Weapon.Damage = util.ParseDice(field.Value)
 		case "weapon_speed":

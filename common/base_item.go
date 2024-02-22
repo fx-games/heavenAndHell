@@ -303,7 +303,7 @@ func (i *Item) SlotName() defs.SlotName {
 		return i.armorComponent.Type.GetInventorySlot()
 	}
 	if i.IsWeapon() {
-		return i.weaponComponent.Type.GetInventorySlot()
+		return i.weaponComponent.GetInventorySlot()
 	}
 	if i.IsThrowable() {
 		return defs.SlotNameQuiver
