@@ -1723,9 +1723,9 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) SprintTooPosition(origin geom
 		}
 	}
 
-	if len(sprint) <= maxSprint {
+	if len(sprint) <= maxSprint && len(sprint) > 0 {
 		emptyTileFound = true
-		sprintEndPos = target
+		sprintEndPos = sprint[len(sprint)-1]
 	}
 
 	return SprintTooInfo{
