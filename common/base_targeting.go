@@ -337,6 +337,7 @@ func earthShakerHighlights(currentMap *gridmap.GridMap[*Actor, *Item, Object], m
 		}
 
 		highlights := make([]TargetHighlight, 0, len(sprintInfo.Sprint))
+		sprintEndPos := sprintInfo.Sprint[len(sprintInfo.Sprint)-1]
 
 		for _, pos := range sprintInfo.Sprint {
 			highlights = append(highlights, TargetHighlight{
@@ -345,11 +346,11 @@ func earthShakerHighlights(currentMap *gridmap.GridMap[*Actor, *Item, Object], m
 			})
 		}
 		highlights = append(highlights, TargetHighlight{
-			Pos:   sprintInfo.SprintEndPos,
+			Pos:   sprintEndPos,
 			Color: color.RGBA{R: 255, G: 80, B: 80, A: 255},
 		})
 
-		neighbors := currentMap.NeighborsAll(target, func(p geometry.Point) bool {
+		neighbors := currentMap.NeighborsAll(sprintEndPos, func(p geometry.Point) bool {
 			return currentMap.Contains(p) && currentMap.IsWalkable(p)
 		})
 
