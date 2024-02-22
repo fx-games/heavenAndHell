@@ -1,0 +1,59 @@
+= Pricing
+Torch: 2gp
+Cheap Armor Piece: <10gp
+Expensive Armor Piece: ~1000gp (Full Plate)
+
+= Non-Unique Helmets - GOOD ENOUGH
+
+hood
+hard_leather_cap
+leather_helmet
+metal_cap
+chain_coif
+steel_helm
+iron_crown
+golden_crown
+jewel_crown
+
+= Non-Unique Cuirass - GOOD ENOUGH
+
+robe
+ceremonial_robe
+partial_leather_armour
+full_leather_armour
+leather_brigandine
+rusted_chain_mail
+chain_mail
+scale_mail
+full_plate_armour
+
+= Non-Unique Gloves - GOOD ENOUGH
+
+leather_gloves
+gauntlets
+cesti
+alchemists_gloves
+
+= Non-Unique Boots - GOOD ENOUGH
+
+soft_leather_boots
+hard_leather_boots
+steel_boots
+
+= Non-Unique Capes - GOOD ENOUGH
+
+cloak
+fur_cloak
+elven_cloak
+shadow_cloak
+
+= Non-Unique Shields - GOOD ENOUGH
+
+leather_buckler
+metal_buckler
+small_leather_shield
+large_leather_shield
+small_metal_shield
+large_metal_shield
+shield_of_deflection
+

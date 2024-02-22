@@ -1,6 +1,7 @@
 package defs
 
 import (
+	"image/color"
 	"math/rand"
 	"rpg/recfile"
 	"rpg/util"
@@ -37,14 +38,20 @@ type EnemyDefinition struct {
 
 	AggroRange int
 
-
 	Speech      map[ActorSpeechTrigger][]string
+	AsciiIcon   rune
+	UnicodeIcon rune
+	CP437Icon   rune // As Corresponding Unicode Code Point
+	Color       color.RGBA
 }
 
 func NewEnemyDefinitionFromRecord(record recfile.Record) EnemyDefinition {
 	enemyDefinition := EnemyDefinition{
 		Stats:  make(map[string]int),
 		Speech: make(map[ActorSpeechTrigger][]string),
+		AsciiIcon: -1,
+		CP437Icon: -1,
+		UnicodeIcon: -1,
 	}
 
 	for _, field := range record {
@@ -61,6 +68,16 @@ func NewEnemyDefinitionFromRecord(record recfile.Record) EnemyDefinition {
 			enemyDefinition.Name = field.Value
 		case "icon":
 			enemyDefinition.Icon = field.AsInt32()
+		case "ascii":
+			enemyDefinition.AsciiIcon = rune(field.Value[0])
+		case "unicode":
+			enemyDefinition.UnicodeIcon = rune(field.Value[0])
+		case "cp437":
+			cp437IconAsUnicode := rune(field.Value[0])
+			cp437Byte := util.UnicodeToCP437Byte(cp437IconAsUnicode)
+			enemyDefinition.CP437Icon = int32(cp437Byte)
+		case "color":
+			enemyDefinition.Color = util.GetColorFromRGBString(field.Value)
 		case "dlvl":
 			enemyDefinition.DLvl = field.AsInt()
 		case "out_of_depth_chance":
@@ -92,6 +109,15 @@ func NewEnemyDefinitionFromRecord(record recfile.Record) EnemyDefinition {
 		case "speech_on_sight":
 			enemyDefinition.Speech[SpeechTriggerSight] = append(enemyDefinition.Speech[SpeechTriggerSight], field.Value)
 		}
+	}
+	if enemyDefinition.AsciiIcon == -1 {
+		enemyDefinition.AsciiIcon = rune(enemyDefinition.Name[0])
+	}
+	if enemyDefinition.UnicodeIcon == -1 {
+		enemyDefinition.UnicodeIcon = enemyDefinition.AsciiIcon
+	}
+	if enemyDefinition.CP437Icon == -1 {
+		enemyDefinition.CP437Icon = enemyDefinition.AsciiIcon
 	}
 	return enemyDefinition
 }

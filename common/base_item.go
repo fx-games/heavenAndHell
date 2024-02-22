@@ -179,7 +179,33 @@ func (i *Item) Counter() int {
 	return -1
 }
 func (i *Item) BuyPrice() int {
-	return i.baseCost * i.qualityLevel // TODO: calculate price based on item stats
+	itemPrice := i.baseCost
+	if i.IsArmor() {
+		pricePerPlus := 35
+		plusValue := i.armorComponent.Plus * pricePerPlus
+		itemPrice += plusValue
+	}
+	if i.IsWeapon() {
+		pricePerPlus := 45
+		plusValue := i.weaponComponent.Plus * pricePerPlus
+		itemPrice += plusValue
+	}
+	chargeMultiplier := 20 // for infinite charges
+	if !i.HasInfiniteCharges() {
+		chargeMultiplier = i.GetCharges()
+	}
+	if i.HasTargetedAction() {
+		itemPrice += i.targetedAction.GetMonetaryValue()*chargeMultiplier
+	}
+	if i.HasUntargetedAction() {
+		itemPrice += i.untargetedAction.GetMonetaryValue()*chargeMultiplier
+	}
+	if i.HasModifiers() {
+		for _, m := range i.equippedModifiers {
+			itemPrice += m.GetMonetaryValue()
+		}
+	}
+	return i.baseCost
 }
 func (i *Item) InventoryIcon() int32 {
 	return i.icon
@@ -383,6 +409,7 @@ func (i *Item) SetBaseCost(cost int) {
 func (i *Item) Clone() *Item {
 	clone := &Item{
 		name:              i.name,
+		internalName: 	i.internalName,
 		pos:               i.pos,
 		icon:              i.icon,
 		weaponComponent:   nil,
@@ -783,6 +810,14 @@ func (i *Item) Repair() {
 	if i.IsWeapon() {
 		i.GetWeaponStats().Durability.SetToMax()
 	}
+}
+
+func (i *Item) IsFood() bool {
+	return i.GetItemType() == defs.ItemCategoryFood
+}
+
+func (i *Item) HasModifiers() bool {
+	return len(i.equippedModifiers) > 0
 }
 
 

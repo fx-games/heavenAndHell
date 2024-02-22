@@ -300,6 +300,7 @@ func (g *GameInstance) ResetGame(playerStartDefinition defs.LoadoutDefinition) {
 		Animator:      g.actionBroker,
 		Speak:         g.ActorSpeak,
 		Configuration: g.configuration,
+		QueueAfterTurn: g.queueAfterTurn,
 	})
 	g.state.SetOnMapChanged(g.onMapChanged)
 	g.state.MapTransition(gridmap.Transition{
@@ -424,9 +425,6 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 	g.handleLightSource()
 
 
-	if g.actions.DoesPlayerRest() {
-		return
-	}
 	// automatic pickup & player movement..
 	if g.configuration.AutoPickup && g.state.GetMap().IsItemAt(player.MapPosition()) {
 		itemAtLocation := g.state.GetMap().ItemAt(player.MapPosition())
@@ -462,6 +460,9 @@ func (g *GameInstance) spawnActorOnMap(actor *common.Actor, mapPos geometry.Poin
 
 func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition) *common.Actor {
 	player := common.NewActor(playerStartDefinition.Icon)
+	player.SetAsciiIcon('@')
+	player.SetCP437Icon(int32(util.UnicodeToCP437Byte('☺')))
+	player.SetColor(defs.White)
 	player.SetName("Player")
 	g.state.SetPlayer(player)
 
@@ -1149,22 +1150,22 @@ func (g *GameInstance) GenerateLoot(dungeonLevel int, count int) []*common.Item 
 }
 
 func (g *GameInstance) getVendorInventoryFromDefinition(definition defs.VendorDefinition) []*common.Item {
-	itemsNeeded := definition.ItemCount.LinearRandom()
+	itemsNeeded := max(len(definition.Always), definition.ItemCount.LinearRandom())
 	sometimesCount := 0
 	alwaysCount := 0
-	if len(definition.Sometimes) > 0 {
-		sometimesCount = min(itemsNeeded, definition.SometimesCount.LinearRandom())
-	}
 	if len(definition.Always) > 0 {
-		alwaysCount = itemsNeeded - sometimesCount
+		alwaysCount = min(itemsNeeded, len(definition.Always))
 	}
+	if len(definition.Sometimes) > 0 {
+		sometimesCount = max(1, itemsNeeded - alwaysCount)
+	}
+
 
 	var result []*common.Item
 
-	for i := 0; i < alwaysCount; i++ {
-		// choose a random item
-		randomIndex := g.randomSource.Intn(len(definition.Always))
-		itemName := definition.Always[randomIndex]
+	for i := 0; i < len(definition.Always); i++ {
+		// add all the always items at least once
+		itemName := definition.Always[i]
 		dungeonLevel := g.randomSource.Intn(4) + 1
 		item := g.factory.NewItemFromDefinitionName(itemName, dungeonLevel)
 		result = append(result, item)

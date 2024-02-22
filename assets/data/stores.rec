@@ -23,7 +23,8 @@ turnover_items: 2
 sometimes_count: 18
 sometimes: robe
 sometimes: cloak
-sometimes: leather_boots
+sometimes: soft_leather_boots
+sometimes: hard_leather_boots
 sometimes: leather_brigandine
 sometimes: partial_leather_armour
 sometimes: chain_mail
@@ -33,7 +34,7 @@ sometimes: fur_cloak
 sometimes: ceremonial_robe
 sometimes: gauntlets
 sometimes: steel_boots
-sometimes: buckler
+sometimes: leather_buckler
 sometimes: small_leather_shield
 
 internal_name: store_weapons

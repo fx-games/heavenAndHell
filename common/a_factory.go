@@ -2,13 +2,10 @@ package common
 
 import (
 	"fmt"
-	"image/color"
 	"math/rand"
-	"regexp"
 	"rpg/defs"
 	"rpg/stats"
 	"rpg/util"
-	"strconv"
 )
 
 // Will turn definitions into actual game objects
@@ -116,6 +113,10 @@ func (g *Factory) NewUniqueEnemyFromName(name string) *Actor {
 
 func (g *Factory) NewEnemyFromDefinition(enemyDef defs.EnemyDefinition, dungeonLevel int) *Actor {
 	actor := NewActor(enemyDef.Icon)
+	actor.SetAsciiIcon(enemyDef.AsciiIcon)
+	actor.SetUnicodeIcon(enemyDef.UnicodeIcon)
+	actor.SetCP437Icon(enemyDef.CP437Icon)
+	actor.SetColor(enemyDef.Color)
 	//index := len(emptyMap.Actors())
 	actor.SetName(enemyDef.Name)
 	actor.SetInternalName(enemyDef.InternalName)
@@ -354,7 +355,7 @@ func (g *Factory) NewItemFromDefinition(itemDefinition defs.ItemDefinition, dung
 
 	if itemDefinition.Light.IsValid() {
 		lightPart := &LightStats{
-			LightColor:        GetColorFromRGBString(itemDefinition.Light.LightColor),
+			LightColor:        util.GetColorFromRGBString(itemDefinition.Light.LightColor),
 			FlickerPattern:    GetFlickerPatternFromName(itemDefinition.Light.FlickerPattern),
 			FlickerFrameDelay: itemDefinition.Light.FlickerFrameDelay,
 		}
@@ -399,18 +400,7 @@ func (g *Factory) NewItemFromDefinition(itemDefinition defs.ItemDefinition, dung
 	return baseItem
 }
 
-func GetColorFromRGBString(lightColor string) color.RGBA {
-	// looks like "234 12 124"
-	regexpPattern := regexp.MustCompile(`([0-9]{1,3}) +([0-9]{1,3}) +([0-9]{1,3})`)
-	matches := regexpPattern.FindStringSubmatch(lightColor)
-	if matches == nil {
-		return color.RGBA{}
-	}
-	r, _ := strconv.Atoi(matches[1])
-	g, _ := strconv.Atoi(matches[2])
-	b, _ := strconv.Atoi(matches[3])
-	return color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 255}
-}
+
 
 func (g *Factory) NewRandomLightSource(dungeonLevel int) *Item {
 	// get defs

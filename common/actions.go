@@ -89,6 +89,8 @@ type UserInterface interface {
 	OnPlayerTurnTaken()
 	SetPlayerMessage(message func(message string))
 	SetDebugActions(actions func() DebugActions)
+	FadeToBlack()
+	FadeFromBlack()
 }
 type ActionBroker interface {
 	Execute(action Action)

@@ -1,5 +1,5 @@
 %rec: default
-#FIELDS: name internal_name icon dlvl cost charges max_level out_of_depth_chance min_level_for_ood category armor_type armor_class weapon_type weapon_damage weapon_speed throw_hit_zone throw_damage throw_chance_to_break throw_on_hit_effect light_color light_flicker_pattern light_flicker_frame_delay equip_modifier untargeted_action targeted_action
+#FIELDS: name internal_name icon dlvl cost max_level out_of_depth_chance min_level_for_ood category armor_type armor_class weapon_type weapon_damage weapon_speed weapon_armor_penetration ranged_max_range ranged_accuracy_at_max_range ranged_accuracy_at_min_range ranged_projectile_icon throw_hit_zone throw_damage throw_chance_to_break throw_on_hit_effect light_color light_flicker_pattern light_flicker_frame_delay equip_modifier untargeted_action targeted_action
 
 name: The Star-Glass
 internal_name: light_star_glass

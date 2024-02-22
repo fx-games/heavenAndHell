@@ -10,6 +10,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path"
 	"rpg/common"
 	"rpg/console"
 	"rpg/defs"
@@ -287,6 +288,7 @@ func runGameWithEbiten(theGame *game.GameInstance, context common.UIContext) {
 	uiController := gui.NewUIController(tileRenderer, context, startInfos.UserConfiguration)
 	uiController.SetTileMapAnimations(tileMapAnimations)
 	uiController.SetTTFFont(util.MustOpen(startInfos.FontInfos.TTFFile), startInfos.FontInfos.TTFSize)
+	uiController.SetAsciiAtlas(renderer.NewTextureAtlas(path.Join("assets", "Bm437_IBM_CGA.png"), 8, 8))
 	theGame.SetAndInitUserInterface(uiController)
 
 	screenSize := uiController.GetDeviceIndependentScreenSize()

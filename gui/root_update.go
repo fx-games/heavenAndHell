@@ -22,11 +22,28 @@ func (u *UIController) Update() error {
 
 	u.context.AudioPlayer.Update()
 
-	if u.globalFlashColorTicksLeft > 0 {
+	if u.keepBlack {
+		u.tileRenderer.SetGlobalScaleColor([4]float32{0, 0, 0, 1})
+	} else if u.globalFlashColorTicksLeft > 0 {
 		//percentage := float64(u.globalFlashColorTicksLeft) / float64(u.globalFlashColorTicksStart)
 		//lerpedColor := util.LerpColor(color.White, u.globalFlashColor, percentage)
-		u.tileRenderer.SetGlobalScaleColor(colorAsScaledFloat(u.globalFlashColor, 10.0))
+		u.tileRenderer.SetGlobalScaleColor(colorAsScaledFloat(u.globalScaleColor, 10.0))
 		u.globalFlashColorTicksLeft--
+	} else if u.globalFadeColorTicksLeft > 0 {
+
+		percentageDone := float32(float64(u.globalFadeColorTicksLeft) / float64(u.globalFadeColorTicksStart)) // from 1 to 0
+		if u.fadeFromBlack {
+			percentageDone = 1 - percentageDone // from 0 to 1
+		}
+		u.tileRenderer.SetGlobalScaleColor([4]float32{percentageDone, percentageDone, percentageDone, 1})
+		u.globalFadeColorTicksLeft--
+		if u.globalFadeColorTicksLeft == 0 {
+			if u.fadeFromBlack {
+				u.keepBlack = false
+			} else {
+				u.keepBlack = true
+			}
+		}
 	} else if player.HasStatusEffect(common.StatusBerserk) {
 		u.tileRenderer.SetGlobalScaleColor([4]float32{1.0, 0.5, 0.5, 1})
 	} else {

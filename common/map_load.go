@@ -7,6 +7,7 @@ import (
 	"rpg/gridmap"
 	"rpg/ldtk"
 	"rpg/renderer"
+	"rpg/util"
 	"strings"
 )
 
@@ -66,6 +67,14 @@ func addActorFromEntity(ldtkMapProject *ldtk.Project, loadedMap *gridmap.GridMap
 	actorName := entity.PropertyByIdentifier("Name").AsString()
 	actor := NewActor(icon)
 	actor.SetName(actorName)
+	asciiIcon := entity.PropertyByIdentifier("ASCII").AsString()
+	ascii := int32(asciiIcon[0])
+	actor.SetAsciiIcon(ascii)
+	actor.SetCP437Icon(int32(util.UnicodeToCP437Byte(ascii)))
+	actor.SetUnicodeIcon(icon)
+
+	actor.SetColor(defs.White)
+
 	actor.SetDrawPosition(pos.ToPointF())
 
 	if !entity.PropertyByIdentifier("InternalName").IsNull() {
