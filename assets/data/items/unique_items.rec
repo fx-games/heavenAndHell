@@ -1,6 +1,30 @@
 %rec: default
 #FIELDS: name internal_name icon dlvl cost charges max_level out_of_depth_chance min_level_for_ood category armor_type armor_class weapon_type weapon_damage weapon_speed ranged_projectile_icon throw_hit_zone throw_damage throw_chance_to_break throw_on_hit_effect light_color light_flicker_pattern light_flicker_frame_delay equip_modifier untargeted_action targeted_action
 
+name: Scythe of Slicing
+internal_name: scythe_of_slicing
+icon: 635
+dlvl: 7
+cost: 4000
+category: weapon
+weapon_type: scythe
+weapon_damage: 6d4
+weapon_speed: 0.95
+throw_damage: 1-8
+throw_chance_to_break: 0.7
+
+name: Blade of Chaos
+internal_name: blade_of_chaos
+icon: 602
+dlvl: 8
+cost: 4500
+category: weapon
+weapon_type: sword
+weapon_damage: 3d6+1
+weapon_speed: 1
+throw_damage: 1-6
+throw_chance_to_break: 0.25
+
 name: Shadow Cloak
 internal_name: shadow_cloak
 icon: 411
@@ -192,4 +216,3 @@ weapon_damage: 3-12
 weapon_speed: 0.9
 throw_damage: 1-4
 throw_chance_to_break: 0.03
-

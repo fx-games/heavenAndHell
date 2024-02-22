@@ -86,18 +86,6 @@ weapon_speed: 1
 throw_damage: 1-6
 throw_chance_to_break: 0.25
 
-name: Blade of Chaos
-internal_name: blade_of_chaos
-icon: 602
-dlvl: 8
-cost: 4500
-category: weapon
-weapon_type: sword
-weapon_damage: 3d6+1
-weapon_speed: 1
-throw_damage: 1-6
-throw_chance_to_break: 0.25
-
 name: Zweihander
 internal_name: zweihander
 icon: 650
@@ -315,18 +303,6 @@ category: weapon
 weapon_type: scythe
 weapon_damage: 5d4
 weapon_speed: 0.9
-throw_damage: 1-8
-throw_chance_to_break: 0.7
-
-name: Scythe of Slicing
-internal_name: scythe_of_slicing
-icon: 635
-dlvl: 7
-cost: 4000
-category: weapon
-weapon_type: scythe
-weapon_damage: 6d4
-weapon_speed: 0.95
 throw_damage: 1-8
 throw_chance_to_break: 0.7
 
