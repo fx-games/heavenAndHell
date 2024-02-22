@@ -321,3 +321,29 @@ func (g *Factory) blink(args util.Arguments) *HitEffect {
 		},
 	}
 }
+
+func (g *Factory) earthShaker(args util.Arguments) *HitEffect {
+	maxSprint := args.GetIntOrDefault(0, 5)
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			currentMap := g.state.GetMap()
+			sprintInfo := currentMap.SprintTooPosition(attacker.mapPosition, target, maxSprint)
+
+			if !sprintInfo.EmptyTileFound {
+				return
+			}
+
+			isPlayer := attacker == g.state.player
+			sprintAction := NewMoveAction(NewActorCause("EarthShaker", attacker), attacker, target, isPlayer)
+			g.actionBroker.Execute(sprintAction)
+
+			for _, pos := range hitPositions {
+				g.actionBroker.QueueForExecution(NewMeleeAttackAction(NewActorCause("EarthShaker", attacker), attacker, pos))
+			}
+
+		},
+		Description: []util.LabelText{
+			util.LabelTextFromString("Rush forward to a specified location."),
+		},
+	}
+}

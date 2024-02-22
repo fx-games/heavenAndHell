@@ -97,3 +97,10 @@ targeting: jumpstart(5 | 5)
 hit_zone: target_only
 effect: jumpstart(5 | 5)
 
+name: Earth Shaker
+internal_name: earth_shaker
+icon: 223
+dlvl: 1
+targeting: earthshaker(5 | 5)
+hit_zone: neighbors_only(5)
+effect: earthshaker(5 | 5)

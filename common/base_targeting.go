@@ -113,12 +113,12 @@ func NewRangedAttackTargetingRules(args util.Arguments) *TargetRulesProvider {
 }
 
 type DirectTargetingRules struct {
-	isOnMap  func(dest geometry.Point) bool
-	attacker *Actor
-	aoe      *AoEResolver
-	isValid  func(target geometry.Point) bool
-	moveDist func(origin, target geometry.Point) int
-	maxRange int
+	isOnMap       func(dest geometry.Point) bool
+	attacker      *Actor
+	aoe           *AoEResolver
+	isValid       func(target geometry.Point) bool
+	moveDist      func(origin, target geometry.Point) int
+	maxRange      int
 	infoForTarget func(geometry.Point) string
 }
 
@@ -214,7 +214,6 @@ func (d DirectTargetingRules) GetHitpositions(target geometry.Point) []geometry.
 	return d.aoe.GetHitPositions(d.GetOrigin(), target)
 }
 
-
 type CustomTargetingRules struct {
 	attacker            *Actor
 	isOnMap             func(target geometry.Point) bool
@@ -259,12 +258,12 @@ func NewJumpStartTargetingRules(args util.Arguments) *TargetRulesProvider {
 	return &TargetRulesProvider{
 		GetTargetRules: func(attacker *Actor, hitPositions *AoEResolver, currentMap *gridmap.GridMap[*Actor, *Item, Object]) TargetRules {
 			return &CustomTargetingRules{
-				attacker: attacker,
-				isOnMap: currentMap.Contains,
+				attacker:            attacker,
+				isOnMap:             currentMap.Contains,
 				nearestHostileActor: GetPositionOfNearestEnemy(attacker, currentMap),
 				aoe:                 hitPositions,
-				isValidTarget: jumpStartValidTarget(currentMap, attacker, maxSprint, maxJump),
-				highlights: jumpStartHighlights(currentMap, maxSprint, maxJump),
+				isValidTarget:       jumpStartValidTarget(currentMap, attacker, maxSprint, maxJump),
+				highlights:          jumpStartHighlights(currentMap, maxSprint, maxJump),
 			}
 		},
 		Description: []util.LabelText{
@@ -275,13 +274,13 @@ func NewJumpStartTargetingRules(args util.Arguments) *TargetRulesProvider {
 
 func jumpStartHighlights(currentMap *gridmap.GridMap[*Actor, *Item, Object], maxSprint int, maxJump int) func(origin geometry.Point, target geometry.Point, positions []geometry.Point) []TargetHighlight {
 	return func(origin geometry.Point, target geometry.Point, positions []geometry.Point) []TargetHighlight {
-		jumpInfo := currentMap.JumpOverPositions(origin, target, maxSprint,maxJump)
+		jumpInfo := currentMap.JumpOverPositions(origin, target, maxSprint, maxJump)
 
 		if !jumpInfo.ActorFound || len(jumpInfo.Jump) == 0 {
 			return []TargetHighlight{}
 		}
 
-		highlights := make([]TargetHighlight,0,len(jumpInfo.Sprint)+2)
+		highlights := make([]TargetHighlight, 0, len(jumpInfo.Sprint)+2)
 		for _, pos := range jumpInfo.Sprint {
 			highlights = append(highlights, TargetHighlight{
 				Pos:   pos,
@@ -303,11 +302,72 @@ func jumpStartHighlights(currentMap *gridmap.GridMap[*Actor, *Item, Object], max
 	}
 }
 
-
 func jumpStartValidTarget(currentMap *gridmap.GridMap[*Actor, *Item, Object], attacker *Actor, maxSprint int, maxJump int) func(target geometry.Point) bool {
 	return func(target geometry.Point) bool {
 		jumpInfo := currentMap.JumpOverPositions(attacker.MapPosition(), target, maxSprint, maxJump)
 		return jumpInfo.ActorFound && len(jumpInfo.Jump) > 0
+	}
+}
+
+func NewEarthShakerTargetingRules(args util.Arguments) *TargetRulesProvider {
+	maxSprint := args.GetIntOrDefault(0, 5)
+	return &TargetRulesProvider{
+		GetTargetRules: func(attacker *Actor, hitPositions *AoEResolver, currentMap *gridmap.GridMap[*Actor, *Item, Object]) TargetRules {
+			return &CustomTargetingRules{
+				attacker:            attacker,
+				isOnMap:             currentMap.Contains,
+				nearestHostileActor: GetPositionOfNearestEnemy(attacker, currentMap),
+				aoe:                 hitPositions,
+				isValidTarget:       earthShakerValidTarget(currentMap, attacker, maxSprint),
+				highlights:          earthShakerHighlights(currentMap, maxSprint),
+			}
+		},
+		Description: []util.LabelText{
+			util.LabelTextFromString("Earth Shaker"),
+		},
+	}
+}
+
+func earthShakerHighlights(currentMap *gridmap.GridMap[*Actor, *Item, Object], maxSprint int) func(origin geometry.Point, target geometry.Point, positions []geometry.Point) []TargetHighlight {
+	return func(origin geometry.Point, target geometry.Point, positions []geometry.Point) []TargetHighlight {
+		sprintInfo := currentMap.SprintTooPosition(origin, target, maxSprint)
+
+		if !sprintInfo.EmptyTileFound || len(sprintInfo.Sprint) == 0 {
+			return []TargetHighlight{}
+		}
+
+		highlights := make([]TargetHighlight, 0, len(sprintInfo.Sprint))
+
+		for _, pos := range sprintInfo.Sprint {
+			highlights = append(highlights, TargetHighlight{
+				Pos:   pos,
+				Color: color.RGBA{R: 80, G: 80, B: 255, A: 255},
+			})
+		}
+		highlights = append(highlights, TargetHighlight{
+			Pos:   sprintInfo.SprintEndPos,
+			Color: color.RGBA{R: 255, G: 80, B: 80, A: 255},
+		})
+
+		neighbors := currentMap.NeighborsAll(target, func(p geometry.Point) bool {
+			return currentMap.Contains(p) && currentMap.IsWalkable(p)
+		})
+
+		for _, pos := range neighbors {
+			highlights = append(highlights, TargetHighlight{
+				Pos:   pos,
+				Color: color.RGBA{R: 50, G: 220, B: 0, A: 255},
+			})
+		}
+
+		return highlights
+	}
+}
+
+func earthShakerValidTarget(currentMap *gridmap.GridMap[*Actor, *Item, Object], attacker *Actor, maxSprint int) func(target geometry.Point) bool {
+	return func(target geometry.Point) bool {
+		sprintInfo := currentMap.SprintTooPosition(attacker.MapPosition(), target, maxSprint)
+		return sprintInfo.EmptyTileFound && len(sprintInfo.Sprint) > 0
 	}
 }
 

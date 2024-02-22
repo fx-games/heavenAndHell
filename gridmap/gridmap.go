@@ -1698,12 +1698,43 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) JumpOverPositions(origin geom
 		}
 	}
 	return JumpOverInfo{
-		Sprint: sprint,
-		Jump: jump,
-		JumpedPos: jumpedPos,
+		Sprint:     sprint,
+		Jump:       jump,
+		JumpedPos:  jumpedPos,
 		ActorFound: actorFound,
 	}
 }
+
+func (m *GridMap[ActorType, ItemType, ObjectType]) SprintTooPosition(origin geometry.Point, target geometry.Point, maxSprint int) SprintTooInfo {
+	lineOfSprint := m.BresenhamLine(origin, target, func(pos geometry.Point) bool { return !m.Contains(pos) })
+
+	var sprint []geometry.Point
+	var sprintEndPos geometry.Point
+	var emptyTileFound bool
+
+	for _, pos := range lineOfSprint {
+		if !m.IsActorAt(pos) && m.IsCurrentlyPassable(pos) {
+			sprint = append(sprint, pos)
+			if len(sprint) >= maxSprint {
+				break
+			}
+		} else {
+			break
+		}
+	}
+
+	if len(sprint) <= maxSprint {
+		emptyTileFound = true
+		sprintEndPos = target
+	}
+
+	return SprintTooInfo{
+		Sprint:         sprint,
+		SprintEndPos:   sprintEndPos,
+		EmptyTileFound: emptyTileFound,
+	}
+}
+
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetWidth() int {
 	return m.mapWidth
 }
@@ -1730,9 +1761,14 @@ func GetLocationsInRadius(origin geometry.Point, radius float64, keep func(point
 }
 
 type JumpOverInfo struct {
-	Sprint []geometry.Point
-	Jump []geometry.Point
-	JumpedPos geometry.Point
+	Sprint     []geometry.Point
+	Jump       []geometry.Point
+	JumpedPos  geometry.Point
 	ActorFound bool
 }
 
+type SprintTooInfo struct {
+	Sprint         []geometry.Point
+	SprintEndPos   geometry.Point
+	EmptyTileFound bool
+}

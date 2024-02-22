@@ -17,7 +17,7 @@ type Factory struct {
 	actionBroker ActionBroker
 	randomSource *rand.Rand
 	state        *State
-	gui          func ()UserInterface
+	gui          func() UserInterface
 
 	giveAndEquipItemToActor func(actor *Actor, item *Item)
 	getTimeKeeper           func() *TimeKeeper
@@ -31,7 +31,7 @@ type FactoryContext struct {
 	RandomSource *rand.Rand
 	State        *State
 
-	GetTimeKeeper         func() *TimeKeeper
+	GetTimeKeeper func() *TimeKeeper
 
 	GiveAndEquipItemToActor func(actor *Actor, item *Item)
 	Msg                     func(msg string)
@@ -236,8 +236,8 @@ func (g *Factory) setRarityAndEnchantments(source *rand.Rand, item *Item, rarity
 	}
 
 	if item.IsArmor() {
-		randomVal := min(10, source.Intn(10) + itemLevel)
-		switch  {
+		randomVal := min(10, source.Intn(10)+itemLevel)
+		switch {
 		case randomVal >= 5 && randomVal <= 7:
 			item.GetArmorStats().Plus = 1
 		case randomVal >= 8 && randomVal <= 9:
@@ -248,8 +248,8 @@ func (g *Factory) setRarityAndEnchantments(source *rand.Rand, item *Item, rarity
 	}
 
 	if item.IsWeapon() {
-		randomVal := min(10, source.Intn(10) + itemLevel)
-		switch  {
+		randomVal := min(10, source.Intn(10)+itemLevel)
+		switch {
 		case randomVal >= 5 && randomVal <= 7:
 			item.GetWeaponStats().Plus = 1
 		case randomVal >= 8 && randomVal <= 9:
@@ -480,16 +480,17 @@ func (g *Factory) GetAllHitEffects() map[string]func(args util.Arguments) *HitEf
 	return map[string]func(args util.Arguments) *HitEffect{
 		"confuse":             g.confuseTarget,
 		"berserk":             g.berserkTarget,
-		"poison": 			   g.poisonTarget,
-		"immobilize": 		   g.immobilizeTarget,
+		"poison":              g.poisonTarget,
+		"immobilize":          g.immobilizeTarget,
 		"fireball":            g.throwFireball,
 		"project_fire":        g.projectFire,
-		"jumpstart": 		   g.jumpStart,
+		"jumpstart":           g.jumpStart,
 		"fire_zone":           g.fireZone,
 		"steal_item":          g.stealItem,
 		"steal_item_teleport": g.stealItemAndTeleport,
 		"mind_push":           g.mindPush,
 		"blink":               g.blink,
+		"earthshaker":         g.earthShaker,
 	}
 }
 
@@ -720,7 +721,7 @@ func (g *Factory) GetAllUntargetedEffects() map[string]func(args util.Arguments)
 		string(ActionNameBuffDamage):        g.getDamageBuff,
 		string(ActionNameRecall):            g.getPlayerRecallAction,
 		string(ActionNameBless):             g.getBlessing,
-		string(ActionNameStoneSkin):	     g.getStoneSkinBuff,
+		string(ActionNameStoneSkin):         g.getStoneSkinBuff,
 		string(ActionNameEnchantWeapon):     g.getEnchantWeapon,
 		string(ActionNameEnchantArmor):      g.getEnchantArmor,
 		string(ActionNameMultiShot):         g.getMultiShot,
@@ -834,8 +835,7 @@ func (g *Factory) SetUserInterface(ui func() UserInterface) {
 	g.gui = ui
 }
 
-
-func  (g *Factory) NewPoisonedEffect(turnsLeft int, damagePerRound int) *ParametrizedStatusEffect {
+func (g *Factory) NewPoisonedEffect(turnsLeft int, damagePerRound int) *ParametrizedStatusEffect {
 	return NewParametrizedStatusEffect(StatusDamageOverTime, func(a *Actor) {
 		g.actionBroker.Execute(NewChangeResourceAction(AbstractCause("poison"), a, stats.Health, float64(-damagePerRound)))
 	}, turnsLeft)
