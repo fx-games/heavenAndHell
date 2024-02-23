@@ -334,7 +334,7 @@ func (g *Factory) earthShaker(args util.Arguments) *HitEffect {
 			}
 
 			isPlayer := attacker == g.state.player
-			sprintAction := NewMoveAction(NewActorCause("EarthShaker", attacker), attacker, sprintInfo.SprintEndPos, isPlayer)
+			sprintAction := NewMoveAction(NewActorCause("EarthShaker", attacker), attacker, target, isPlayer)
 			g.actionBroker.Execute(sprintAction)
 
 			for _, pos := range hitPositions {

@@ -175,8 +175,7 @@ func TilesAroundTarget(gridmap func() *gridmap.GridMap[*Actor, *Item, Object], a
 	return &AoEResolver{
 		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
 			currentMap := gridmap()
-			sprintInfo := currentMap.SprintTooPosition(origin, target, args.GetInt(0))
-			neighbors := currentMap.NeighborsAll(sprintInfo.SprintEndPos, func(p geometry.Point) bool {
+			neighbors := currentMap.NeighborsAll(target, func(p geometry.Point) bool {
 				return currentMap.Contains(p) && currentMap.IsWalkable(p) && currentMap.IsActorAt(p) && p != origin
 			})
 			return neighbors
