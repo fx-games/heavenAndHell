@@ -198,46 +198,58 @@ func (g *Factory) GenerateLoot(dungeonLevel int) *Item {
 	case diceRoll >= 80 && diceRoll < 100:
 		addedItem = g.NewRandomScroll(dungeonLevel)
 	}
-	if addedItem != nil &&
-		(addedItem.IsWeapon() || addedItem.IsArmor() || addedItem.IsAccessory()) {
-		rarityRoll := source.Intn(100)
-		rarity := ItemRarityCommon
-		if rarityRoll >= 80 && rarityRoll < 95 {
-			rarity = ItemRarityMagic
-		} else if rarityRoll >= 95 {
-			rarity = ItemRarityUnique
-		}
+	return addedItem
+}
 
-		g.setRarityAndEnchantments(source, addedItem, rarity, dungeonLevel)
+func (g *Factory) GenerateMagicItem(dungeonLevel int) *Item {
+	source := g.randomSource
+	diceRoll := source.Intn(100)
+	var addedItem *Item
+	switch {
+	case diceRoll >= 0 && diceRoll < 40:
+		addedItem = g.NewRandomWeapon(dungeonLevel)
+	case diceRoll >= 40 && diceRoll < 80:
+		addedItem = g.NewRandomArmorPiece(dungeonLevel)
+	default:
+		addedItem = g.NewRandomAccessory(dungeonLevel)
 	}
 	return addedItem
 }
-func (g *Factory) setRarityAndEnchantments(source *rand.Rand, item *Item, rarity ItemRarity, itemLevel int) {
-	enchantmentCount := 0
+func (g *Factory) setRarityAndEnchantments(item *Item, itemLevel int) {
+	if !item.IsWeapon() && !item.IsArmor() && !item.IsAccessory() {
+		return
+	}
+	random := g.randomSource
+	rarity := ItemRarityCommon
+	rarityRoll := random.Intn(100)+1-itemLevel // 1-100
+
+	if rarityRoll <= 20 {
+		rarity = ItemRarityMagic
+	}
+
 	if rarity == ItemRarityCommon {
 		return
 	}
-	// TODO: this should actually change the icon of the item
+
+	enchantmentCount := 0
 	if rarity == ItemRarityMagic {
-		enchantmentCount = source.Intn(1) + 1
+		enchantmentCount = random.Intn(1) + 1
 	}
-	if rarity == ItemRarityUnique {
-		enchantmentCount = source.Intn(5) + 1
-	}
-	modifierCount, hookCount := randomSplit(source, enchantmentCount)
+
+	modifierCount, hookCount := randomSplit(random, enchantmentCount)
 
 	if modifierCount > 0 {
-		mods := defs.NewModifiersForItem(source, itemLevel, modifierCount)
+		mods := defs.NewModifiersForItem(random, itemLevel, modifierCount)
 		item.SetEquippedModifiers(mods)
 	}
 
 	if hookCount > 0 {
-		itemHooks := NewHooksForItem(source, itemLevel, hookCount)
+		itemHooks := NewHooksForItem(random, itemLevel, hookCount)
 		item.SetItemHooks(itemHooks)
 	}
 
 	if item.IsArmor() {
-		randomVal := min(10, source.Intn(10) + itemLevel)
+		randomVal := min(10, random.Intn(10) + itemLevel)
 		switch  {
 		case randomVal >= 5 && randomVal <= 7:
 			item.GetArmorStats().Plus = 1
@@ -249,7 +261,7 @@ func (g *Factory) setRarityAndEnchantments(source *rand.Rand, item *Item, rarity
 	}
 
 	if item.IsWeapon() {
-		randomVal := min(10, source.Intn(10) + itemLevel)
+		randomVal := min(10, random.Intn(10) + itemLevel)
 		switch  {
 		case randomVal >= 5 && randomVal <= 7:
 			item.GetWeaponStats().Plus = 1
@@ -299,10 +311,13 @@ func (g *Factory) NewRandomWeapon(dungeonLevel int) *Item {
 	weaponType := availableTypes[g.randomSource.Intn(len(availableTypes))]
 
 	// pick random definition
-	armorDefinition := weaponTypeMap[weaponType][g.randomSource.Intn(len(weaponTypeMap[weaponType]))]
+	weaponDef := weaponTypeMap[weaponType][g.randomSource.Intn(len(weaponTypeMap[weaponType]))]
 
 	// create item
-	return g.NewItemFromDefinition(armorDefinition, dungeonLevel)
+
+
+	weapon := g.NewItemFromDefinition(weaponDef, dungeonLevel)
+	return weapon
 }
 
 func (g *Factory) NewItemFromDefinition(itemDefinition defs.ItemDefinition, dungeonLevel int) *Item {
@@ -367,10 +382,10 @@ func (g *Factory) NewItemFromDefinition(itemDefinition defs.ItemDefinition, dung
 		var mod *stats.Modifier
 		if util.LooksLikeAFunction(modifierName) {
 			modName, args := util.GetNameAndArgs(modifierName)
-			modValue := args.GetFloat(0)
-			mod = defs.NewModifierFromNameWithFixedBonus(modName, modValue)
+			dice := util.ParseDice(args.Get(0))
+			mod = defs.NewModifierFromNameWithDiceBonus(modName, dice)
 		} else {
-			mod = defs.NewModifierFromNameWithRandomRange(modifierName, dungeonLevel)
+			mod = defs.NewModifierFromNameWithDungeonLevel(modifierName, dungeonLevel)
 		}
 		if mod != nil {
 			baseItem.AddEquippedModifier(mod)
@@ -398,6 +413,9 @@ func (g *Factory) NewItemFromDefinition(itemDefinition defs.ItemDefinition, dung
 	baseItem.SetDestroyAfterUse(destroyAfterUse)
 	baseItem.SetUntargetedAction(untargetedAction)
 	baseItem.SetTargetedAction(targetedAction)
+
+	g.setRarityAndEnchantments(baseItem, dungeonLevel)
+
 	return baseItem
 }
 
@@ -536,7 +554,8 @@ func (g *Factory) NewRandomArmorPiece(dungeonLevel int) *Item {
 	armorDefinition := armorTypeMap[armorType][g.randomSource.Intn(len(armorTypeMap[armorType]))]
 
 	// create item
-	return g.NewItemFromDefinition(armorDefinition, dungeonLevel)
+	newArmor := g.NewItemFromDefinition(armorDefinition, dungeonLevel)
+	return newArmor
 }
 
 func (g *Factory) NewRandomAccessory(dungeonLevel int) *Item {
@@ -559,8 +578,9 @@ func (g *Factory) NewRandomAccessory(dungeonLevel int) *Item {
 		return nil
 	}
 	// pick random type
-	accessory := filtered[g.randomSource.Intn(len(filtered))]
-	return g.NewItemFromDefinition(accessory, dungeonLevel)
+	accessoryDef := filtered[g.randomSource.Intn(len(filtered))]
+	newAccessory := g.NewItemFromDefinition(accessoryDef, dungeonLevel)
+	return newAccessory
 }
 
 func (g *Factory) NewRandomWand(dungeonLevel int) *Item {
@@ -714,6 +734,7 @@ func (g *Factory) GetAllUntargetedEffects() map[string]func(args util.Arguments)
 		string(ActionNameStoneSkin):	     g.getStoneSkinBuff,
 		string(ActionNameEnchantWeapon):     g.getEnchantWeapon,
 		string(ActionNameEnchantArmor):      g.getEnchantArmor,
+		string(ActionNameAcquirement):       g.getAcquirement,
 		string(ActionNameMultiShot):         g.getMultiShot,
 		string(ActionNameTelefrag):          g.getRandomTelefragAction,
 		string(ActionNameReplicate):         g.getReplicate,

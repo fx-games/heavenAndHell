@@ -205,7 +205,7 @@ func (i *Item) BuyPrice() int {
 			itemPrice += m.GetMonetaryValue()
 		}
 	}
-	return i.baseCost
+	return itemPrice
 }
 func (i *Item) InventoryIcon() int32 {
 	return i.icon

@@ -1,5 +1,5 @@
 %rec: default
-#FIELDS: name internal_name icon dlvl cost charges max_level out_of_depth_chance min_level_for_ood category armor_type armor_class weapon_type weapon_damage weapon_speed ranged_projectile_icon throw_hit_zone throw_damage throw_chance_to_break throw_on_hit_effect light_color light_flicker_pattern light_flicker_frame_delay equip_modifier untargeted_action targeted_action
+#FIELDS: name internal_name icon dlvl cost charges max_level out_of_depth_chance min_level_for_ood category armor_type armor_class weapon_type weapon_damage weapon_speed ranged_max_range ranged_accuracy_at_min_range ranged_accuracy_at_max_range ranged_projectile_icon throw_hit_zone throw_damage throw_chance_to_break throw_on_hit_effect light_color light_flicker_pattern light_flicker_frame_delay equip_modifier untargeted_action targeted_action
 
 name: Dagger
 internal_name: dagger
@@ -195,18 +195,6 @@ weapon_speed: 1
 throw_damage: 2-4
 throw_chance_to_break: 0.25
 
-name: Mace of Disruption
-internal_name: mace_of_destruction
-icon: 632
-dlvl: 7
-cost: 2500
-category: weapon
-weapon_type: mace
-weapon_damage: 2d8
-weapon_speed: 1
-throw_damage: 2-6
-throw_chance_to_break: 0.25
-
 name: Whip
 internal_name: whip
 icon: 718
@@ -316,6 +304,9 @@ weapon_type: sling
 weapon_damage: 1d4
 weapon_speed: 1
 ranged_projectile_icon: 693
+ranged_max_range: 5
+ranged_accuracy_at_min_range: 0.6
+ranged_accuracy_at_max_range: 0.3
 
 name: Short Bow
 internal_name: short_bow
@@ -327,6 +318,9 @@ weapon_type: bow
 weapon_damage: 1d4
 weapon_speed: 1.1
 ranged_projectile_icon: 694
+ranged_max_range: 6
+ranged_accuracy_at_min_range: 0.6
+ranged_accuracy_at_max_range: 0.3
 throw_damage: 1-4
 throw_chance_to_break: 0.25
 
@@ -340,6 +334,9 @@ weapon_type: bow
 weapon_damage: 1d4+1
 weapon_speed: 1
 ranged_projectile_icon: 694
+ranged_max_range: 12
+ranged_accuracy_at_min_range: 0.7
+ranged_accuracy_at_max_range: 0.4
 throw_damage: 1-4
 throw_chance_to_break: 0.25
 
@@ -353,6 +350,9 @@ weapon_type: crossbow
 weapon_damage: 1d6
 weapon_speed: 0.9
 ranged_projectile_icon: 722
+ranged_max_range: 10
+ranged_accuracy_at_min_range: 0.8
+ranged_accuracy_at_max_range: 0.5
 throw_damage: 1-6
 throw_chance_to_break: 0.25
 
@@ -366,6 +366,9 @@ weapon_type: crossbow
 weapon_damage: 1d8
 weapon_speed: 0.7
 ranged_projectile_icon: 722
+ranged_max_range: 16
+ranged_accuracy_at_min_range: 0.9
+ranged_accuracy_at_max_range: 0.6
 throw_damage: 1-6
 throw_chance_to_break: 0.25
 

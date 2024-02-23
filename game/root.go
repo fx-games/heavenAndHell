@@ -667,7 +667,7 @@ func (g *GameInstance) showDebugMenu() {
 				playerStats.GetResource(stats.Health).Increase(10000)
 				playerStats.SetAttribute(stats.MaxMana, 10000)
 				playerStats.GetResource(stats.Mana).Increase(10000)
-				playerStats.SetAttribute(stats.Gold, 10000)
+				playerStats.SetAttribute(stats.Gold, 200000)
 
 				inv := g.state.GetPlayer().GetInventory()
 				for i := 0; i < 10; i++ {
@@ -1165,17 +1165,17 @@ func (g *GameInstance) getVendorInventoryFromDefinition(definition defs.VendorDe
 
 	for i := 0; i < len(definition.Always); i++ {
 		// add all the always items at least once
+		dungeonLevel := max(1, g.randomSource.Intn(g.state.GetLastDungeonLevel()))
 		itemName := definition.Always[i]
-		dungeonLevel := g.randomSource.Intn(4) + 1
 		item := g.factory.NewItemFromDefinitionName(itemName, dungeonLevel)
 		result = append(result, item)
 	}
 
 	for i := 0; i < sometimesCount; i++ {
 		// choose a random item
+		dungeonLevel := max(1, g.randomSource.Intn(g.state.GetLastDungeonLevel()))
 		randomIndex := g.randomSource.Intn(len(definition.Sometimes))
 		itemName := definition.Sometimes[randomIndex]
-		dungeonLevel := g.randomSource.Intn(4) + 1
 		item := g.factory.NewItemFromDefinitionName(itemName, dungeonLevel)
 		result = append(result, item)
 	}
