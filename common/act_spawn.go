@@ -8,23 +8,22 @@ import (
 type SpawnAction struct {
 	BaseAction
 	spawnPos          geometry.Point
-	spawnFunc         func(location geometry.Point)
+	spawnFunc         func()
 	actionDescription string
 }
 
-func NewSpawnObjectAction(source Cause, spawnFunc func(location geometry.Point), spawnPos geometry.Point) *SpawnAction {
+func NewSpawnAction(source Cause, nameOfCreation string, spawnFunc func()) *SpawnAction {
 	return &SpawnAction{
 		BaseAction: BaseAction{
 			cause: source,
 			name:  ActionNameSpawnObject,
 		},
 		spawnFunc:         spawnFunc,
-		spawnPos:          spawnPos,
-		actionDescription: "walls of fire",
+		actionDescription: nameOfCreation,
 	}
 }
 func (d *SpawnAction) Execute(context ActionContext) []Action {
-	d.spawnFunc(d.spawnPos)
+	d.spawnFunc()
 
 	creator := d.Cause().GetActor()
 	if creator == nil {

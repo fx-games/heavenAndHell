@@ -47,7 +47,8 @@ func (u *UIController) Draw(screen *ebiten.Image) {
 func (u *UIController) drawActors() {
 	visibleMapOnScreen := u.mapRenderer.GetVisibleMap()
 	state := u.context.GameState()
-	playerFieldOfView := state.GetPlayer().GetFOV()
+	player := state.GetPlayer()
+	playerFieldOfView := player.GetFOV()
 
 	enemyColor := defs.White
 	actorAtlas := u.GetCurrentAtlas()
@@ -68,7 +69,7 @@ func (u *UIController) drawActors() {
 		if !visibleMapOnScreen.Contains(actor.MapPosition()) || !playerFieldOfView.Visible(actor.MapPosition()) {
 			continue
 		}
-		if !actor.IsVisible() {
+		if !actor.IsVisible() && !player.HasStatusEffect(common.StatusSeeInvisible) {
 			continue
 		}
 

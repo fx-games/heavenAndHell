@@ -14,7 +14,7 @@ type Factory struct {
 	actionBroker ActionBroker
 	randomSource *rand.Rand
 	state        *State
-	gui          func ()UserInterface
+	gui          func() UserInterface
 
 	giveAndEquipItemToActor func(actor *Actor, item *Item)
 	getTimeKeeper           func() *TimeKeeper
@@ -28,7 +28,7 @@ type FactoryContext struct {
 	RandomSource *rand.Rand
 	State        *State
 
-	GetTimeKeeper         func() *TimeKeeper
+	GetTimeKeeper func() *TimeKeeper
 
 	GiveAndEquipItemToActor func(actor *Actor, item *Item)
 	Msg                     func(msg string)
@@ -468,18 +468,24 @@ func (g *Factory) NewItemFromDefinitionName(itemString string, dungeonLevel int)
 }
 
 func (g *Factory) NewTargetedActionFromName(name string) *TargetedAction {
+	var args util.Arguments
+
+	if util.LooksLikeAFunction(name) {
+		name, args = util.GetNameAndArgs(name)
+	}
+
 	if def, exists := g.definitions.TargetedDefinitions[name]; exists {
-		return g.NewTargetedActionFromDefinition(def)
+		return g.NewTargetedActionFromDefinition(def, args)
 	}
 	g.logError(fmt.Sprintf("Unknown targeted action: %s", name))
 	return nil
 }
 
-func (g *Factory) NewTargetedActionFromDefinition(definition defs.TargetedActionDefinition) *TargetedAction {
+func (g *Factory) NewTargetedActionFromDefinition(definition defs.TargetedActionDefinition, args util.Arguments) *TargetedAction {
 	targetedAction := NewTargetedAction(
 		definition.Name,
 		HitZoneFromString(g.state.GetMap, definition.HitZone),
-		g.NewOnHitEffectFromString(definition.OnHitEffect),
+		g.NewOnHitEffectFromNameAndArgs(definition.OnHitEffect, args),
 		NewTargetingRulesFromString(definition.Targeting),
 	)
 
@@ -493,16 +499,18 @@ func (g *Factory) GetAllHitEffects() map[string]func(args util.Arguments) *HitEf
 	return map[string]func(args util.Arguments) *HitEffect{
 		"confuse":             g.confuseTarget,
 		"berserk":             g.berserkTarget,
-		"poison": 			   g.poisonTarget,
-		"immobilize": 		   g.immobilizeTarget,
+		"poison":              g.poisonTarget,
+		"immobilize":          g.immobilizeTarget,
 		"fireball":            g.throwFireball,
 		"project_fire":        g.projectFire,
-		"jumpstart": 		   g.jumpStart,
+		"summon_monster": 	   g.summonRandomMonster,
+		"jumpstart":           g.jumpStart,
 		"fire_zone":           g.fireZone,
 		"steal_item":          g.stealItem,
 		"steal_item_teleport": g.stealItemAndTeleport,
 		"mind_push":           g.mindPush,
 		"blink":               g.blink,
+		"earthshaker":         g.earthShaker,
 	}
 }
 
@@ -514,6 +522,10 @@ func (g *Factory) NewOnHitEffectFromString(effectName string) *HitEffect {
 	if util.LooksLikeAFunction(effectName) {
 		effectName, args = util.GetNameAndArgs(effectName)
 	}
+	return g.NewOnHitEffectFromNameAndArgs(effectName, args)
+}
+
+func (g *Factory) NewOnHitEffectFromNameAndArgs(effectName string, args util.Arguments) *HitEffect {
 	allHitEffects := g.GetAllHitEffects()
 	if _, ok := allHitEffects[effectName]; ok {
 		return allHitEffects[effectName](args)
@@ -735,7 +747,7 @@ func (g *Factory) GetAllUntargetedEffects() map[string]func(args util.Arguments)
 		string(ActionNameBuffDamage):        g.getDamageBuff,
 		string(ActionNameRecall):            g.getPlayerRecallAction,
 		string(ActionNameBless):             g.getBlessing,
-		string(ActionNameStoneSkin):	     g.getStoneSkinBuff,
+		string(ActionNameStoneSkin):         g.getStoneSkinBuff,
 		string(ActionNameEnchantWeapon):     g.getEnchantWeapon,
 		string(ActionNameEnchantArmor):      g.getEnchantArmor,
 		string(ActionNameAcquirement):       g.getAcquirement,
@@ -850,8 +862,7 @@ func (g *Factory) SetUserInterface(ui func() UserInterface) {
 	g.gui = ui
 }
 
-
-func  (g *Factory) NewPoisonedEffect(turnsLeft int, damagePerRound int) *ParametrizedStatusEffect {
+func (g *Factory) NewPoisonedEffect(turnsLeft int, damagePerRound int) *ParametrizedStatusEffect {
 	return NewParametrizedStatusEffect(StatusDamageOverTime, func(a *Actor) {
 		g.actionBroker.Execute(NewChangeResourceAction(AbstractCause("poison"), a, stats.Health, float64(-damagePerRound)))
 	}, turnsLeft)

@@ -32,6 +32,8 @@ BUGS
  - Corpses drawn over items
  - No accessory found for dungeon level 1
  - Logs are not wiped on restart
+ - PROBLEM: The current approach of having the untargeted actions end the turn is colliding with their use on shrines.
+            -> The player already spents his turn by bumping into the shrine, the effect should not take another turn.
 
 missing 7drl goals
 

@@ -5,10 +5,17 @@ import (
 	"math/rand"
 	"rpg/defs"
 	"rpg/geometry"
+	"rpg/gridmap"
 	"rpg/stats"
 	"rpg/util"
 )
+// Spell Effects of Angband
+// https://github.com/angband/angband/blob/master/lib/gamedata/activation.txt
 
+// Monster Effects of Angband
+// https://github.com/angband/angband/blob/master/lib/gamedata/blow_effects.txt
+// https://github.com/angband/angband/blob/master/lib/gamedata/blow_methods.txt
+// https://github.com/angband/angband/blob/master/lib/gamedata/monster_spell.txt
 /*
 Spell Effects of Moria
  - Sleep Monster
@@ -42,6 +49,18 @@ Spell Effects of Moria
 From Brogue
  - Discord (Turn monsters against each other)
 
+
+Angband Categories
+ - Summon Monster
+ - Slow/Haste
+ - Blind
+ - Scare
+ - Short Beam of Elemental Damage - Ray with short/medium length
+ - Bolt of Elemental Damage - One projectile
+ - Orbs of Elemental Damage - Multiple projectiles?
+ - Breath of Elemental Damage - Breath Cone
+
+
 */
 
 func (g *Factory) GetRandomTargetedAction(randomSource *rand.Rand, dungeonLevel int) *TargetedAction {
@@ -52,7 +71,7 @@ func (g *Factory) GetRandomTargetedAction(randomSource *rand.Rand, dungeonLevel 
 		}
 	}
 	randomDefinition := allowed[randomSource.Intn(len(allowed))]
-	tAction := g.NewTargetedActionFromDefinition(randomDefinition)
+	tAction := g.NewTargetedActionFromDefinition(randomDefinition, nil)
 	tAction.SetDungeonLevel(dungeonLevel)
 	return tAction
 }
@@ -152,11 +171,35 @@ func (g *Factory) projectFire(args util.Arguments) *HitEffect {
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			for _, hitPos := range hitPositions {
-				g.actionBroker.Execute(NewSpawnObjectAction(NewActorCause("Fire", attacker), g.spawnFireAt, hitPos))
+				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Fire", attacker), "fire", func() {
+					g.spawnFireAt(hitPos)
+				}))
 			}
 		},
 		Description: []util.LabelText{
 			util.LabelTextFromString("Create fire at target location"),
+		},
+	}
+}
+
+func (g *Factory) summonRandomMonster(args util.Arguments) *HitEffect {
+	dlvl := util.ParseDice(args.Get(0)).Roll()
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			for _, hitPos := range hitPositions {
+				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Summon monster", attacker), "monster", func() {
+					newEnemy, _ := g.NewRandomEnemy(dlvl)
+					currentMap := g.state.GetMap()
+					currentMap.AddActor(newEnemy, hitPos)
+					newEnemy.SetDrawPosition(hitPos.ToPointF())
+
+					timeKeeper := g.getTimeKeeper()
+					timeKeeper.AddTimed(newEnemy)
+				}))
+			}
+		},
+		Description: []util.LabelText{
+			util.LabelTextFromString(fmt.Sprintf("Summon a random monster from dungeon level %d", dlvl)),
 		},
 	}
 }
@@ -271,22 +314,6 @@ func (g *Factory) stealItemAndTeleport(args util.Arguments) *HitEffect {
 	}
 }
 
-func (g *Factory) mindPush(args util.Arguments) *HitEffect {
-	return &HitEffect{
-		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
-			currentMap := g.state.GetMap()
-			currentMap.ApplyToActorsAt(hitPositions, func(hitActor *Actor) {
-				hitPos := hitActor.MapPosition()
-				pushDirection := hitPos.Sub(attacker.MapPosition())
-				pushDistance := 3
-				g.actionBroker.Execute(NewKnockbackAction(NewActorCause("Push", attacker), hitActor, pushDirection, pushDistance))
-			})
-		},
-		Description: []util.LabelText{
-			util.LabelTextFromString("Push target away"),
-		},
-	}
-}
 func (g *Factory) applyStatusEffectToSelection(args util.Arguments) *HitEffect {
 	//effect common.StatusEffect, turnCount int
 	effectName := args.Get(0)
@@ -320,4 +347,60 @@ func (g *Factory) blink(args util.Arguments) *HitEffect {
 			util.LabelTextFromString("Teleport to target location"),
 		},
 	}
+}
+
+func (g *Factory) mindPush(args util.Arguments) *HitEffect {
+	pushDistance := args.GetIntOrDefault(0, 3)
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			currentMap := g.state.GetMap()
+			g.queuePush(currentMap, hitPositions, attacker, pushDistance)
+		},
+		Description: []util.LabelText{
+			util.LabelTextFromString("Push target away"),
+		},
+	}
+}
+func (g *Factory) earthShaker(args util.Arguments) *HitEffect {
+	maxSprint := args.GetIntOrDefault(0, 5)
+	pushDist := args.GetIntOrDefault(1, 1)
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			currentMap := g.state.GetMap()
+
+			if !currentMap.IsValidSprintTarget(attacker.MapPosition(), target, maxSprint) {
+				return
+			}
+
+			isPlayer := attacker == g.state.player
+			sprintAction := NewMoveAction(NewActorCause("EarthShaker", attacker), attacker, target, isPlayer)
+			g.actionBroker.Execute(sprintAction)
+			var attackActions []Action
+			for _, pos := range hitPositions {
+				if !currentMap.IsActorAt(pos) {
+					continue
+				}
+				actorAt := currentMap.ActorAt(pos)
+				meleeAttackAction := NewMeleeAttackAction(NewActorCause("EarthShaker", attacker), attacker, actorAt)
+				meleeAttackAction.DisableAnimation()
+				attackActions = append(attackActions, meleeAttackAction)
+			}
+			g.actionBroker.QueueForExecutionAtTheSameTime(attackActions)
+			g.queuePush(currentMap, hitPositions, attacker, pushDist)
+		},
+		Description: []util.LabelText{
+			util.LabelTextFromString("Rush forward to a specified location."),
+		},
+	}
+}
+
+func (g *Factory) queuePush(currentMap *gridmap.GridMap[*Actor, *Item, Object], hitPositions []geometry.Point, attacker *Actor, pushDistance int) {
+	var knockbackActions []Action
+	currentMap.ApplyToActorsAt(hitPositions, func(hitActor *Actor) {
+		hitPos := hitActor.MapPosition()
+		pushDirection := hitPos.Sub(attacker.MapPosition())
+		knockbackAction := NewKnockbackAction(NewActorCause("Push", attacker), hitActor, pushDirection, pushDistance)
+		knockbackActions = append(knockbackActions, knockbackAction)
+	})
+	g.actionBroker.QueueForExecutionAtTheSameTime(knockbackActions)
 }

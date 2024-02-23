@@ -5,9 +5,10 @@ type Broker struct {
 	afterHooks         map[ActionName][]ActionHook
 	runningAnimations  []Animation
 	movementAnimations map[*Actor]*MovementAnimation
-	queuedActions      []Action
+	queuedActions      [][]Action
 	context            ActionContext
 }
+
 
 // NewBroker creates a new broker
 // AND will inject a reference to itself into the context
@@ -17,7 +18,7 @@ func NewBroker(context ActionContext) *Broker {
 		afterHooks:         make(map[ActionName][]ActionHook),
 		runningAnimations:  make([]Animation, 0),
 		movementAnimations: make(map[*Actor]*MovementAnimation),
-		queuedActions:      make([]Action, 0),
+		queuedActions:      make([][]Action, 0),
 	}
 	context.ActionBroker = b
 	b.context = context
@@ -47,9 +48,11 @@ func (d *Broker) Tick() {
 func (d *Broker) checkForQueuedActions() {
 	animationsRunning := len(d.runningAnimations) > 0 || len(d.movementAnimations) > 0
 	if !animationsRunning && len(d.queuedActions) > 0 {
-		action := d.queuedActions[0]
+		actions := d.queuedActions[0]
 		d.queuedActions = d.queuedActions[1:]
-		d.Execute(action)
+		for _, action := range actions {
+			d.Execute(action)
+		}
 	}
 }
 
@@ -76,12 +79,16 @@ func (d *Broker) Execute(action Action) {
 	return
 }
 
-func (d *Broker) QueueForExecution(action Action) {
-	if action == nil {
+func (d *Broker) QueueForExecutionAtTheSameTime(actions []Action) {
+	if len(actions) == 0 {
 		return
 	}
-	d.queuedActions = append(d.queuedActions, action)
+	d.queuedActions = append(d.queuedActions, actions)
 	d.checkForQueuedActions()
+
+}
+func (d *Broker) QueueForExecution(action Action) {
+	d.QueueForExecutionAtTheSameTime([]Action{action})
 }
 func (d *Broker) Draw(renderer TileRenderer) {
 	for _, animation := range d.movementAnimations {
@@ -178,8 +185,16 @@ func (d *Broker) CancelAllAnimations() {
 
 func (d *Broker) ClearQueuedActions(shouldBeRemoved func(action Action) bool) {
 	for i := len(d.queuedActions) - 1; i >= 0; i-- {
-		if shouldBeRemoved(d.queuedActions[i]) {
+		actions := d.queuedActions[i]
+		for _, action := range actions {
+			if shouldBeRemoved(action) {
+				actions = append(actions[:i], actions[i+1:]...)
+			}
+		}
+		if len(actions) == 0 {
 			d.queuedActions = append(d.queuedActions[:i], d.queuedActions[i+1:]...)
+		} else {
+			d.queuedActions[i] = actions
 		}
 	}
 }

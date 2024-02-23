@@ -3,6 +3,7 @@ assets/exclude/
 cpu.prof
 .DS_Store
 ./rpg
+rpg
 
 assets/maps/
 assets/maps/backups/

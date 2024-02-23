@@ -1,15 +1,16 @@
 package common
 
 import (
-    "rpg/util"
+	"rpg/util"
 )
 
 func GetAllTargetingRules() map[string]func(args util.Arguments) *TargetRulesProvider {
 	return map[string]func(args util.Arguments) *TargetRulesProvider{
-		"direct": NewDirectTargetingRules,
-		"melee":  NewMeleeTargetingRules,
-		"ranged": NewRangedAttackTargetingRules,
-		"jumpstart": NewJumpStartTargetingRules,
+		"direct":      NewDirectTargetingRules,
+		"melee":       NewMeleeTargetingRules,
+		"ranged":      NewRangedAttackTargetingRules,
+		"jumpstart":   NewJumpStartTargetingRules,
+		"earthshaker": NewEarthShakerTargetingRules,
 	}
 }
 

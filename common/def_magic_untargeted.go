@@ -390,6 +390,8 @@ func (g *Factory) getBlessing(args util.Arguments) UntargetedEffect {
 		timedModifier := NewTimedModifier(string(ActionNameBless), user, modifier, turnCount)
 		timedModifier.Apply()
 		timeKeeper.AddTimed(timedModifier)
+
+		g.logIfPlayer(user, "You feel protected")
 	}
 	return UntargetedEffect{
 		Effect: effect,

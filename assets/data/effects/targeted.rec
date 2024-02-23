@@ -55,7 +55,7 @@ icon: 223
 dlvl: 1
 targeting: melee
 hit_zone: target_only
-effect: steal_item_teleport(12)
+effect: steal_item_teleport
 
 name: Blink
 internal_name: blink
@@ -71,7 +71,7 @@ icon: 223
 dlvl: 1
 targeting: direct
 hit_zone: target_only
-effect: confuse(5)
+effect: confuse
 
 name: Poison
 internal_name: poison_target
@@ -79,7 +79,7 @@ icon: 223
 dlvl: 1
 targeting: direct
 hit_zone: target_only
-effect: poison(4 | 2)
+effect: poison
 
 name: Immobilize
 internal_name: immobilize_target
@@ -87,7 +87,7 @@ icon: 223
 dlvl: 1
 targeting: direct
 hit_zone: target_only
-effect: immobilize(5)
+effect: immobilize
 
 name: Jump Start
 internal_name: jump_start
@@ -95,5 +95,20 @@ icon: 223
 dlvl: 1
 targeting: jumpstart(5 | 5)
 hit_zone: target_only
-effect: jumpstart(5 | 5)
+effect: jumpstart
 
+name: Earth Shaker
+internal_name: earth_shaker
+icon: 223
+dlvl: 1
+targeting: earthshaker(5 | 5)
+hit_zone: neighbors_only(5)
+effect: earthshaker
+
+name: Summon Monster
+internal_name: summon_monster
+icon: 223
+dlvl: 1
+targeting: direct
+hit_zone: target_only
+effect: summon_monster

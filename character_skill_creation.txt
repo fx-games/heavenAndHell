@@ -1,0 +1,107 @@
+Adding a skill to a class.
+
+The skill needs to be added to the skill list of the specified class.
+The location of the file to do this is relative to the root folder of the project.
+
+assets/data/classes.rec
+
+Skill types are defined in two ways
+untargeted_skill:
+targeted_skill:
+
+Then named in the same fashion these are internal names
+heal_health
+fire_wall
+
+The targeted Effect then needs to be defined
+The path is relative to the projects root folder
+
+assets/data/effects/targeted.rec
+assets/data/effects/untargeted.rec
+
+This is the structure that is used
+
+name:
+internal_name:
+icon:
+dlvl:
+targeting:
+hit_zone:
+effect:
+
+Name
+is what will be seen or used/repesented in the game as a string so capitols and spaces are used
+e.g. Fire Wall,  Heal Self
+
+internal_name
+is used for code purposes so easy to understand and use
+e.g. fire_wall, heal_self
+
+icon
+unknowen. assuming an array location or a name?
+e.g. 223
+
+dlvl
+unknowen still investigating assuming dungeon level
+
+targeting
+unknowen ivestigating
+
+hit_zone
+there are 5 different types of hit zone.
+	"target_only"
+	"ray_aoe"       line attack
+	"bresenham_aoe" fires from the character in a straight line to its target
+	"dijkstra_aoe"  determines area around undestroyable objects ? that take damage
+	"wall_aoe"
+
+effect
+unkowen investigating
+
+
+Define hit effects
+file in regards to project root
+
+common/def_magic_hit_effects
+
+
+Skill effect rule registration
+file in regards to project root
+
+common/a_factory.go
+
+In method
+GetAllHitEffects
+
+
+Skill Target rule Registration
+file in regards to project root
+
+common/def_target_rules.go
+
+In function
+GetAllTargetingRules
+
+
+Define skill hit effect rules
+file in regards to project root
+
+common/def_magic_hit_effects
+
+
+Define skill targeting rules
+file in regards to project root
+
+common/base_targeting.go
+
+
+define custom move path (tentative)
+file in regards to project root
+
+gridmap/gridmap.go
+
+
+Define hitzone rules
+file in regards to project root
+
+common/def_hitzones

@@ -124,7 +124,7 @@ func PlayerMoveToAttack(actor *Actor, relativeDirection geometry.Point, forceAtt
 		if actorAtPos.IsVendor() && !forceAttack {
 			return NewTalkToAction(NewActorCause("Talk to", actor), actorAtPos)
 		} else {
-			return NewMeleeAttackAction(NewActorCause("Melee attack", actor), actor, targetPos)
+			return NewMeleeAttackAction(NewActorCause("Melee attack", actor), actor, actorAtPos)
 		}
 	} else if isTargetFree {
 		return NewMoveAction(NewActorCause("Move", actor), actor, targetPos, state.GetPlayer() == actor)

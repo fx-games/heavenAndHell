@@ -3,7 +3,6 @@ package common
 import (
 	"math"
 	"math/rand"
-	"rpg/geometry"
 	"rpg/stats"
 	"rpg/util"
 )
@@ -12,28 +11,22 @@ type MeleeAttackAction struct {
 	BaseAction
 	damageFactor     float64
 	attacker         *Actor
-	targetPos        geometry.Point
 	totalDamageDealt int
 	defender         *Actor
+	disableAnimation bool
 }
 
-func NewMeleeAttackAction(source Cause, attacker *Actor, targetPos geometry.Point) *MeleeAttackAction {
+func NewMeleeAttackAction(source Cause, attacker *Actor, defender *Actor) *MeleeAttackAction {
 	return &MeleeAttackAction{
 		BaseAction:   BaseAction{cause: source, name: ActionNameMeleeAttack},
 		attacker:     attacker,
-		targetPos:    targetPos,
+		defender:    defender,
 		damageFactor: 1.0,
 	}
-}
-func (d *MeleeAttackAction) SetTargetPos(pos geometry.Point) {
-	d.targetPos = pos
 }
 
 func (d *MeleeAttackAction) Execute(context ActionContext) []Action {
 	var actions []Action
-	currentMap := context.GameState.GetMap()
-
-	d.defender = currentMap.ActorAt(d.targetPos)
 
 	evasionChance := 0.0
 	if d.defender.HasStatusEffect(StatusFlying) {
@@ -56,7 +49,7 @@ func (d *MeleeAttackAction) Execute(context ActionContext) []Action {
 	actions = append(actions, NewChangeResourceAction(NewActorCause("Melee attack", d.attacker), d.defender, stats.Health, float64(-damage)))
 
 	d.defender.SetLookDirFromPoI(d.attacker.MapPosition())
-	d.attacker.SetLookDirFromPoI(d.targetPos)
+	d.attacker.SetLookDirFromPoI(d.defender.MapPosition())
 
 	if d.attacker == context.GameState.GetPlayer() {
 		context.AudioPlayer.PlayCue("melee_attack")
@@ -121,10 +114,13 @@ func GetWeaponQualityFactor(attacker *Actor) float64 {
 }
 
 func (d *MeleeAttackAction) GetAnimations() []Animation {
+	if d.disableAnimation {
+		return nil
+	}
 	ticksNeeded := util.SecondsToTicks(0.2)
 	animation := &MeleeAttackAnimation{
 		actor:       d.attacker,
-		targetPos:   d.targetPos,
+		targetPos:   d.defender.MapPosition(),
 		origin:      d.attacker.MapPosition(),
 		ticksNeeded: ticksNeeded,
 		ticksLeft:   ticksNeeded,
@@ -152,4 +148,8 @@ func (d *MeleeAttackAction) GetDefender() *Actor {
 
 func (d *MeleeAttackAction) GetTotalDamageDealt() int {
 	return d.totalDamageDealt
+}
+
+func (d *MeleeAttackAction) DisableAnimation() {
+	d.disableAnimation = true
 }

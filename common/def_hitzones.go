@@ -10,11 +10,12 @@ import (
 
 func GetAllHitZones() map[string]func(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
 	return map[string]func(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver{
-		"target_only":   OneTargetTile,
-		"ray_aoe":       RayAoE,
-		"bresenham_aoe": BresenhamAoE,
-		"dijkstra_aoe":  DijkstraAoE,
-		"wall_aoe":      WallAoE,
+		"target_only":    OneTargetTile,
+		"ray_aoe":        RayAoE,
+		"bresenham_aoe":  BresenhamAoE,
+		"dijkstra_aoe":   DijkstraAoE,
+		"wall_aoe":       WallAoE,
+		"neighbors_only": TilesAroundTarget,
 	}
 }
 
@@ -169,6 +170,20 @@ func OneTargetTile(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args 
 		Description: []util.LabelText{util.LabelTextFromString("The tile you target")},
 	}
 }
+
+func TilesAroundTarget(gridmap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
+	return &AoEResolver{
+		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
+			currentMap := gridmap()
+			neighbors := currentMap.NeighborsAll(target, func(p geometry.Point) bool {
+				return currentMap.Contains(p) && currentMap.IsWalkable(p) && currentMap.IsActorAt(p) && p != origin
+			})
+			return neighbors
+		},
+		Description: []util.LabelText{util.LabelTextFromString("Tiles Around the target")},
+	}
+}
+
 func toList(blocking map[geometry.Point]int) []geometry.Point {
 	list := make([]geometry.Point, 0)
 	for pos := range blocking {
