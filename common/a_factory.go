@@ -202,9 +202,10 @@ func (g *Factory) GenerateLoot(dungeonLevel int) *Item {
 }
 
 func (g *Factory) GenerateMagicItem(dungeonLevel int) *Item {
-	source := g.randomSource
-	diceRoll := source.Intn(100)
+	//source := g.randomSource
+	//diceRoll := source.Intn(100)
 	var addedItem *Item
+	/*
 	switch {
 	case diceRoll >= 0 && diceRoll < 40:
 		addedItem = g.NewRandomWeapon(dungeonLevel)
@@ -213,6 +214,9 @@ func (g *Factory) GenerateMagicItem(dungeonLevel int) *Item {
 	default:
 		addedItem = g.NewRandomAccessory(dungeonLevel)
 	}
+	*/
+	addedItem = g.NewRandomAccessory(dungeonLevel)
+
 	return addedItem
 }
 func (g *Factory) setRarityAndEnchantments(item *Item, itemLevel int) {
@@ -566,7 +570,7 @@ func (g *Factory) NewRandomAccessory(dungeonLevel int) *Item {
 	var filtered []defs.ItemDefinition
 	for _, itemDef := range itemDefinitions {
 
-		if !itemDef.IsRing() || !itemDef.IsAmulet() || !itemDef.CanAppearAt(g.randomSource, dungeonLevel) {
+		if (!itemDef.IsRing() && !itemDef.IsAmulet()) || !itemDef.CanAppearAt(g.randomSource, dungeonLevel) {
 			continue
 		}
 

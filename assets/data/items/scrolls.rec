@@ -45,7 +45,7 @@ name: Scroll of Acquirement
 internal_name: scroll_of_acquirement
 icon: 139
 dlvl: 1
-cost: 100000
+cost: 10
 category: scroll
 untargeted_action: acquirement
 

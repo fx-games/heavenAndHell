@@ -255,7 +255,7 @@ func (g *Factory) getEnchantArmor(args util.Arguments) UntargetedEffect {
 	}
 }
 func (g *Factory) getAcquirement(args util.Arguments) UntargetedEffect {
-	level := 20
+	level := 12
 	if !args.IsEmpty() {
 		level = util.ParseDice(args.Get(0)).Roll()
 	}
