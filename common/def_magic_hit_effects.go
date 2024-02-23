@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"rpg/defs"
 	"rpg/geometry"
+	"rpg/gridmap"
 	"rpg/stats"
 	"rpg/util"
 )
@@ -275,12 +276,8 @@ func (g *Factory) mindPush(args util.Arguments) *HitEffect {
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			currentMap := g.state.GetMap()
-			currentMap.ApplyToActorsAt(hitPositions, func(hitActor *Actor) {
-				hitPos := hitActor.MapPosition()
-				pushDirection := hitPos.Sub(attacker.MapPosition())
-				pushDistance := 3
-				g.actionBroker.Execute(NewKnockbackAction(NewActorCause("Push", attacker), hitActor, pushDirection, pushDistance))
-			})
+			pushDistance := 3
+			g.push(currentMap, hitPositions, attacker, pushDistance)
 		},
 		Description: []util.LabelText{
 			util.LabelTextFromString("Push target away"),
@@ -327,22 +324,31 @@ func (g *Factory) earthShaker(args util.Arguments) *HitEffect {
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			currentMap := g.state.GetMap()
-			sprintInfo := currentMap.SprintTooPosition(attacker.mapPosition, target, maxSprint)
 
-			if !sprintInfo.EmptyTileFound {
+			if !currentMap.IsValidSprintTarget(attacker.MapPosition(), target, maxSprint) {
 				return
 			}
 
 			isPlayer := attacker == g.state.player
 			sprintAction := NewMoveAction(NewActorCause("EarthShaker", attacker), attacker, target, isPlayer)
-			g.actionBroker.Execute(sprintAction)
+			g.actionBroker.QueueForExecution(sprintAction)
 
 			for _, pos := range hitPositions {
 				g.actionBroker.QueueForExecution(NewMeleeAttackAction(NewActorCause("EarthShaker", attacker), attacker, pos))
 			}
+			pushDistance := 1
+			g.push(currentMap, hitPositions, attacker, pushDistance)
 		},
 		Description: []util.LabelText{
 			util.LabelTextFromString("Rush forward to a specified location."),
 		},
 	}
+}
+
+func (g *Factory) push(currentMap *gridmap.GridMap[*Actor, *Item, Object], hitPositions []geometry.Point, attacker *Actor, pushDistance int) {
+	currentMap.ApplyToActorsAt(hitPositions, func(hitActor *Actor) {
+		hitPos := hitActor.MapPosition()
+		pushDirection := hitPos.Sub(attacker.MapPosition())
+		g.actionBroker.QueueForExecution(NewKnockbackAction(NewActorCause("Push", attacker), hitActor, pushDirection, pushDistance))
+	})
 }

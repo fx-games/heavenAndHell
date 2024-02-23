@@ -1760,6 +1760,18 @@ func GetLocationsInRadius(origin geometry.Point, radius float64, keep func(point
 	return result
 }
 
+func (m GridMap[ActorType, ItemType, ObjectType]) IsValidSprintTarget(attacker geometry.Point, target geometry.Point, maxSprint int) bool {
+	sprintInfo := m.SprintTooPosition(attacker, target, maxSprint)
+	isValid := false
+	for _, pos := range sprintInfo.Sprint {
+		if pos == target {
+			isValid = true
+			break
+		}
+	}
+	return isValid
+}
+
 type JumpOverInfo struct {
 	Sprint     []geometry.Point
 	Jump       []geometry.Point

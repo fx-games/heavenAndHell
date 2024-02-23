@@ -318,7 +318,7 @@ func NewEarthShakerTargetingRules(args util.Arguments) *TargetRulesProvider {
 				isOnMap:             currentMap.Contains,
 				nearestHostileActor: GetPositionOfNearestEnemy(attacker, currentMap),
 				aoe:                 hitPositions,
-				isValidTarget:       earthShakerValidTarget(currentMap, attacker, maxSprint),
+				isValidTarget:       sprintValidTarget(currentMap, attacker, maxSprint),
 				highlights:          earthShakerHighlights(currentMap, maxSprint),
 			}
 		},
@@ -332,13 +332,12 @@ func earthShakerHighlights(currentMap *gridmap.GridMap[*Actor, *Item, Object], m
 	return func(origin geometry.Point, target geometry.Point, positions []geometry.Point) []TargetHighlight {
 		sprintInfo := currentMap.SprintTooPosition(origin, target, maxSprint)
 
-		if !sprintInfo.EmptyTileFound || len(sprintInfo.Sprint) == 0 {
+		if !currentMap.IsValidSprintTarget(origin, target, maxSprint) {
 			return []TargetHighlight{}
 		}
 
 		highlights := make([]TargetHighlight, 0, len(sprintInfo.Sprint))
-		sprintEndPos := sprintInfo.Sprint[len(sprintInfo.Sprint)-1]
-
+		sprintEndPos := sprintInfo.SprintEndPos
 		for _, pos := range sprintInfo.Sprint {
 			highlights = append(highlights, TargetHighlight{
 				Pos:   pos,
@@ -350,7 +349,7 @@ func earthShakerHighlights(currentMap *gridmap.GridMap[*Actor, *Item, Object], m
 			Color: color.RGBA{R: 255, G: 80, B: 80, A: 255},
 		})
 
-		neighbors := currentMap.NeighborsAll(sprintEndPos, func(p geometry.Point) bool {
+		neighbors := currentMap.NeighborsAll(target, func(p geometry.Point) bool {
 			return currentMap.Contains(p) && currentMap.IsWalkable(p)
 		})
 
@@ -365,10 +364,9 @@ func earthShakerHighlights(currentMap *gridmap.GridMap[*Actor, *Item, Object], m
 	}
 }
 
-func earthShakerValidTarget(currentMap *gridmap.GridMap[*Actor, *Item, Object], attacker *Actor, maxSprint int) func(target geometry.Point) bool {
+func sprintValidTarget(currentMap *gridmap.GridMap[*Actor, *Item, Object], attacker *Actor, maxSprint int) func(target geometry.Point) bool {
 	return func(target geometry.Point) bool {
-		sprintInfo := currentMap.SprintTooPosition(attacker.MapPosition(), target, maxSprint)
-		return sprintInfo.EmptyTileFound && len(sprintInfo.Sprint) > 0
+		return currentMap.IsValidSprintTarget(attacker.mapPosition, target, maxSprint)
 	}
 }
 
