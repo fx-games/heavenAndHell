@@ -330,7 +330,7 @@ func NewEarthShakerTargetingRules(args util.Arguments) *TargetRulesProvider {
 
 func earthShakerHighlights(currentMap *gridmap.GridMap[*Actor, *Item, Object], maxSprint int) func(origin geometry.Point, target geometry.Point, positions []geometry.Point) []TargetHighlight {
 	return func(origin geometry.Point, target geometry.Point, positions []geometry.Point) []TargetHighlight {
-		sprintInfo := currentMap.SprintTooPosition(origin, target, maxSprint)
+		sprintInfo := currentMap.SprintToPosition(origin, target, maxSprint)
 
 		if !currentMap.IsValidSprintTarget(origin, target, maxSprint) {
 			return []TargetHighlight{}

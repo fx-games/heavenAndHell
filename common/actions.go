@@ -96,6 +96,7 @@ type ActionBroker interface {
 	Execute(action Action)
 	RegisterHook(hook ActionHook)
 	QueueForExecution(action Action)
+	QueueForExecutionAtTheSameTime(actions []Action)
 	RemoveBeforeHook(hook ActionHook)
 	RemoveAfterHook(hook ActionHook)
 	ClearQueuedActions(filter func(action Action) bool)

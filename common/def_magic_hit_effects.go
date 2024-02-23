@@ -272,18 +272,6 @@ func (g *Factory) stealItemAndTeleport(args util.Arguments) *HitEffect {
 	}
 }
 
-func (g *Factory) mindPush(args util.Arguments) *HitEffect {
-	return &HitEffect{
-		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
-			currentMap := g.state.GetMap()
-			pushDistance := 3
-			g.push(currentMap, hitPositions, attacker, pushDistance)
-		},
-		Description: []util.LabelText{
-			util.LabelTextFromString("Push target away"),
-		},
-	}
-}
 func (g *Factory) applyStatusEffectToSelection(args util.Arguments) *HitEffect {
 	//effect common.StatusEffect, turnCount int
 	effectName := args.Get(0)
@@ -319,8 +307,21 @@ func (g *Factory) blink(args util.Arguments) *HitEffect {
 	}
 }
 
+func (g *Factory) mindPush(args util.Arguments) *HitEffect {
+	pushDistance := args.GetIntOrDefault(0, 3)
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			currentMap := g.state.GetMap()
+			g.queuePush(currentMap, hitPositions, attacker, pushDistance)
+		},
+		Description: []util.LabelText{
+			util.LabelTextFromString("Push target away"),
+		},
+	}
+}
 func (g *Factory) earthShaker(args util.Arguments) *HitEffect {
 	maxSprint := args.GetIntOrDefault(0, 5)
+	pushDist := args.GetIntOrDefault(1, 1)
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			currentMap := g.state.GetMap()
@@ -331,13 +332,19 @@ func (g *Factory) earthShaker(args util.Arguments) *HitEffect {
 
 			isPlayer := attacker == g.state.player
 			sprintAction := NewMoveAction(NewActorCause("EarthShaker", attacker), attacker, target, isPlayer)
-			g.actionBroker.QueueForExecution(sprintAction)
-
+			g.actionBroker.Execute(sprintAction)
+			var attackActions []Action
 			for _, pos := range hitPositions {
-				g.actionBroker.QueueForExecution(NewMeleeAttackAction(NewActorCause("EarthShaker", attacker), attacker, pos))
+				if !currentMap.IsActorAt(pos) {
+					continue
+				}
+				actorAt := currentMap.ActorAt(pos)
+				meleeAttackAction := NewMeleeAttackAction(NewActorCause("EarthShaker", attacker), attacker, actorAt)
+				meleeAttackAction.DisableAnimation()
+				attackActions = append(attackActions, meleeAttackAction)
 			}
-			pushDistance := 1
-			g.push(currentMap, hitPositions, attacker, pushDistance)
+			g.actionBroker.QueueForExecutionAtTheSameTime(attackActions)
+			g.queuePush(currentMap, hitPositions, attacker, pushDist)
 		},
 		Description: []util.LabelText{
 			util.LabelTextFromString("Rush forward to a specified location."),
@@ -345,10 +352,13 @@ func (g *Factory) earthShaker(args util.Arguments) *HitEffect {
 	}
 }
 
-func (g *Factory) push(currentMap *gridmap.GridMap[*Actor, *Item, Object], hitPositions []geometry.Point, attacker *Actor, pushDistance int) {
+func (g *Factory) queuePush(currentMap *gridmap.GridMap[*Actor, *Item, Object], hitPositions []geometry.Point, attacker *Actor, pushDistance int) {
+	var knockbackActions []Action
 	currentMap.ApplyToActorsAt(hitPositions, func(hitActor *Actor) {
 		hitPos := hitActor.MapPosition()
 		pushDirection := hitPos.Sub(attacker.MapPosition())
-		g.actionBroker.QueueForExecution(NewKnockbackAction(NewActorCause("Push", attacker), hitActor, pushDirection, pushDistance))
+		knockbackAction := NewKnockbackAction(NewActorCause("Push", attacker), hitActor, pushDirection, pushDistance)
+		knockbackActions = append(knockbackActions, knockbackAction)
 	})
+	g.actionBroker.QueueForExecutionAtTheSameTime(knockbackActions)
 }

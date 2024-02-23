@@ -758,7 +758,7 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 			if g.state.GetMap().IsActorAt(randomNeighbor) {
 				actorAt := g.state.GetMap().ActorAt(randomNeighbor)
 				// attack
-				g.actionBroker.Execute(common.NewMeleeAttackAction(common.AbstractCause("MeleeAttack"), actor, actorAt.MapPosition()))
+				g.actionBroker.Execute(common.NewMeleeAttackAction(common.AbstractCause("MeleeAttack"), actor, actorAt))
 			} else {
 				g.actionBroker.Execute(common.NewMoveAction(common.AbstractCause("Movement"), actor, randomNeighbor, false))
 			}
@@ -782,9 +782,10 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 		}
 	}
 
-	if actor.GetState() == common.ActorStateAttacking && g.state.GetPlayer().IsAlive() {
+	player := g.state.GetPlayer()
+	if actor.GetState() == common.ActorStateAttacking && player.IsAlive() {
 		// can use a skill?
-		playerPosition := g.state.GetPlayer().MapPosition()
+		playerPosition := player.MapPosition()
 
 		untargetedSkills := actor.GetUntargetedSkills()
 		if len(untargetedSkills) > 0 {
@@ -830,7 +831,7 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 		dist = g.state.GetMap().MoveDistance(actor.MapPosition(), playerPosition)
 		if dist <= 1 && canAttack {
 			return autCostMeleeAttack, func() {
-				g.actionBroker.Execute(common.NewMeleeAttackAction(common.AbstractCause("MeleeAttack"), actor, playerPosition))
+				g.actionBroker.Execute(common.NewMeleeAttackAction(common.AbstractCause("MeleeAttack"), actor, player))
 			}
 		} else if canMove {
 			return autCostMove, func() {

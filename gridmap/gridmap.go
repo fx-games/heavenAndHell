@@ -1705,7 +1705,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) JumpOverPositions(origin geom
 	}
 }
 
-func (m *GridMap[ActorType, ItemType, ObjectType]) SprintTooPosition(origin geometry.Point, target geometry.Point, maxSprint int) SprintTooInfo {
+func (m *GridMap[ActorType, ItemType, ObjectType]) SprintToPosition(origin geometry.Point, target geometry.Point, maxSprint int) SprintTooInfo {
 	lineOfSprint := m.BresenhamLine(origin, target, func(pos geometry.Point) bool { return !m.Contains(pos) })
 
 	var sprint []geometry.Point
@@ -1760,8 +1760,8 @@ func GetLocationsInRadius(origin geometry.Point, radius float64, keep func(point
 	return result
 }
 
-func (m GridMap[ActorType, ItemType, ObjectType]) IsValidSprintTarget(attacker geometry.Point, target geometry.Point, maxSprint int) bool {
-	sprintInfo := m.SprintTooPosition(attacker, target, maxSprint)
+func (m *GridMap[ActorType, ItemType, ObjectType]) IsValidSprintTarget(attacker geometry.Point, target geometry.Point, maxSprint int) bool {
+	sprintInfo := m.SprintToPosition(attacker, target, maxSprint)
 	isValid := false
 	for _, pos := range sprintInfo.Sprint {
 		if pos == target {

@@ -634,7 +634,7 @@ func (a *Actions) AutoAttack() {
 		dist := currentMap.MoveDistance(player.MapPosition(), nearestEnemy.MapPosition())
 		if dist <= 1 {
 			if hasMelee || !hasRanged {
-				a.playerMeleeAttack(player, nearestEnemy.MapPosition())
+				a.playerMeleeAttack(player, nearestEnemy)
 				return
 			} else if hasRanged {
 				a.playerRangedAttack(player, nearestEnemy.MapPosition())
@@ -697,8 +697,8 @@ func (a *Actions) playerMoveOneStep(player *common.Actor, targetPos geometry.Poi
 	a.actionBroker.Execute(moveAction)
 	a.actionBroker.Execute(common.NewEndPlayerTurnAction(moveAction.Cause(), moveAction.GetDelayInAut()))
 }
-func (a *Actions) playerMeleeAttack(player *common.Actor, targetPos geometry.Point) {
-	meleeAction := common.NewMeleeAttackAction(common.NewActorCause("Melee attack", player), player, targetPos)
+func (a *Actions) playerMeleeAttack(player *common.Actor, defender *common.Actor) {
+	meleeAction := common.NewMeleeAttackAction(common.NewActorCause("Melee attack", player), player, defender)
 	a.actionBroker.Execute(meleeAction)
 	a.actionBroker.Execute(common.NewEndPlayerTurnAction(meleeAction.Cause(), meleeAction.GetDelayInAut()))
 }
