@@ -37,52 +37,36 @@ func (t *Targeter) OnCommand(command CommandType) bool {
 		}
 	case PlayerCommandUp:
 		nextTargetPos := t.currentTarget.Add(geometry.Point{Y: -1})
-		if t.rules.IsValidTarget(nextTargetPos) {
-			t.updateTarget(nextTargetPos)
-			return true
-		}
+		t.updateTarget(nextTargetPos)
+		return true
 	case PlayerCommandDown:
 		nextTargetPos := t.currentTarget.Add(geometry.Point{Y: 1})
-		if t.rules.IsValidTarget(nextTargetPos) {
-			t.updateTarget(nextTargetPos)
-			return true
-		}
+		t.updateTarget(nextTargetPos)
+		return true
 	case PlayerCommandLeft:
 		nextTargetPos := t.currentTarget.Add(geometry.Point{X: -1})
-		if t.rules.IsValidTarget(nextTargetPos) {
-			t.updateTarget(nextTargetPos)
-			return true
-		}
+		t.updateTarget(nextTargetPos)
+		return true
 	case PlayerCommandRight:
 		nextTargetPos := t.currentTarget.Add(geometry.Point{X: 1})
-		if t.rules.IsValidTarget(nextTargetPos) {
-			t.updateTarget(nextTargetPos)
-			return true
-		}
+		t.updateTarget(nextTargetPos)
+		return true
 	case PlayerCommandUpRight:
 		nextTargetPos := t.currentTarget.Add(geometry.Point{X: 1, Y: -1})
-		if t.rules.IsValidTarget(nextTargetPos) {
-			t.updateTarget(nextTargetPos)
-			return true
-		}
+		t.updateTarget(nextTargetPos)
+		return true
 	case PlayerCommandUpLeft:
 		nextTargetPos := t.currentTarget.Add(geometry.Point{X: -1, Y: -1})
-		if t.rules.IsValidTarget(nextTargetPos) {
-			t.updateTarget(nextTargetPos)
-			return true
-		}
+		t.updateTarget(nextTargetPos)
+		return true
 	case PlayerCommandDownRight:
 		nextTargetPos := t.currentTarget.Add(geometry.Point{X: 1, Y: 1})
-		if t.rules.IsValidTarget(nextTargetPos) {
-			t.updateTarget(nextTargetPos)
-			return true
-		}
+		t.updateTarget(nextTargetPos)
+		return true
 	case PlayerCommandDownLeft:
 		nextTargetPos := t.currentTarget.Add(geometry.Point{X: -1, Y: 1})
-		if t.rules.IsValidTarget(nextTargetPos) {
-			t.updateTarget(nextTargetPos)
-			return true
-		}
+		t.updateTarget(nextTargetPos)
+		return true
 
 	}
 	return false
@@ -118,6 +102,9 @@ func (t *Targeter) Draw(renderer *renderer.MapRenderer) {
 }
 
 func (t *Targeter) updateTarget(pos geometry.Point) {
+	if !t.rules.IsValidTarget(pos) {
+		return
+	}
 	t.currentTarget = pos
 	t.currentInfoText = t.rules.GetInfoTextForTarget(pos)
 	t.currentHighlights = t.rules.GetHighlightsForTarget(pos)

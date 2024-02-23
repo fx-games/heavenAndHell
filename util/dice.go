@@ -29,6 +29,9 @@ func (r Dice) String() string {
         flatValue := r.Min()
         return fmt.Sprintf("%d", flatValue)
     }
+    if r.bonus == 0 {
+        return fmt.Sprintf("%dd%d (%d-%d)", r.dice, r.sides, r.Min(), r.Max())
+    }
     return fmt.Sprintf("%dd%d%+d (%d-%d)", r.dice, r.sides, r.bonus, r.Min(), r.Max())
 }
 
@@ -40,6 +43,9 @@ func (r Dice) ShortString() string {
     if r.isFixed() {
         flatValue := r.Min()
         return fmt.Sprintf("%d", flatValue)
+    }
+    if r.bonus == 0 {
+        return fmt.Sprintf("%dd%d", r.dice, r.sides)
     }
     return fmt.Sprintf("%dd%d%+d", r.dice, r.sides, r.bonus)
 }
@@ -122,8 +128,8 @@ func ParseDice(dice string) Dice {
         }
         minVal,_ := strconv.Atoi(match[1])
         maxVal,_ := strconv.Atoi(match[2])
-        dieRange := maxVal - minVal
-        dieBonus := minVal
+        dieRange := (maxVal - minVal) + 1
+        dieBonus := minVal - 1
         return NewDice(1, dieRange, dieBonus)
     }
 

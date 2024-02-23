@@ -76,6 +76,9 @@ func GetAllModifiers() map[string]func(source *rand.Rand, level int) *stats.Modi
 		"armor_multiplier":  AddArmor,
 		"light_radius":      AddToBaseLightRadius,
 		"health_regen":      AddToHealthRegen,
+		"attack_speed":      AddToAttackSpeed,
+		"move_speed":        AddToMoveSpeed,
+		"speed":             AddToBaseSpeed,
 	}
 	return modifierFunctions
 }
@@ -92,19 +95,19 @@ func NewModifiersForItem(source *rand.Rand, itemLevel int, count int) []*stats.M
 	return modifiers
 }
 
-func NewModifierFromNameWithRandomRange(modName string, dungeonLevel int) *stats.Modifier {
+func NewModifierFromNameWithDungeonLevel(modName string, dungeonLevel int) *stats.Modifier {
 	source := rand.New(rand.NewSource(0))
 	modifierFunctions := GetAllModifiers()
 	modifierFunction := modifierFunctions[modName]
 	return modifierFunction(source, dungeonLevel)
 }
 
-func NewModifierFromNameWithFixedBonus(modName string, value float64) *stats.Modifier {
+func NewModifierFromNameWithDiceBonus(modName string, value util.Dice) *stats.Modifier {
 	source := rand.New(rand.NewSource(0))
 	modifierFunctions := GetAllModifiers()
 	modifierFunction := modifierFunctions[modName]
 	modifier := modifierFunction(source, 1)
-	modifier.Value = value
+	modifier.Value = float64(value.Roll())
 	return modifier
 }
 
@@ -119,8 +122,10 @@ func StealMana(source *rand.Rand, level int) *stats.Modifier {
 
 func AddToArmorClass(source *rand.Rand, level int) *stats.Modifier {
 	levelTable := []ModRow[int, int]{
-		{1, util.NewTuple(2, 4)},
-		{1, util.NewTuple(5, 8)},
+		{1, util.NewTuple(1, 2)},
+		{3, util.NewTuple(2, 4)},
+		{5, util.NewTuple(4, 8)},
+		{7, util.NewTuple(8, 10)},
 	}
 	interval := chooseIntervalFromTable(source, level, levelTable)
 	acAdded := randIntervalValue(source, interval)
@@ -184,31 +189,31 @@ func AddToBaseMana(source *rand.Rand, level int) *stats.Modifier {
 	return AddToBaseResource(source, stats.MaxMana, interval)
 }
 func AddToDamage(source *rand.Rand, level int) *stats.Modifier {
-	interval := util.NewTuple(1, 5)
+	levelTable := []ModRow[int, int]{
+		{1, util.NewTuple(1, 2)},
+		{3, util.NewTuple(2, 3)},
+		{5, util.NewTuple(4, 5)},
+		{7, util.NewTuple(6, 8)},
+	}
+	interval := chooseIntervalFromTable(source, level, levelTable)
 	return AddToBaseAttributeRandomly(source, stats.DamageBonus, interval)
 }
 func AddToBaseStrength(source *rand.Rand, level int) *stats.Modifier {
 	levelTable := []ModRow[int, int]{
-		{3, util.NewTuple(-10, -6)},
-		{1, util.NewTuple(-5, -1)},
-		{1, util.NewTuple(1, 5)},
-		{5, util.NewTuple(6, 10)},
-		{11, util.NewTuple(11, 15)},
-		{17, util.NewTuple(16, 20)},
-		{23, util.NewTuple(21, 30)},
+		{1, util.NewTuple(1, 2)},
+		{3, util.NewTuple(2, 3)},
+		{5, util.NewTuple(4, 5)},
+		{7, util.NewTuple(6, 8)},
 	}
 	interval := chooseIntervalFromTable(source, level, levelTable)
 	return AddToBaseAttributeRandomly(source, stats.Strength, interval)
 }
 func AddToBaseDexterity(source *rand.Rand, level int) *stats.Modifier {
 	levelTable := []ModRow[int, int]{
-		{3, util.NewTuple(-10, -6)},
-		{1, util.NewTuple(-5, -1)},
-		{1, util.NewTuple(1, 5)},
-		{5, util.NewTuple(6, 10)},
-		{11, util.NewTuple(11, 15)},
-		{17, util.NewTuple(16, 20)},
-		{23, util.NewTuple(21, 30)},
+		{1, util.NewTuple(1, 2)},
+		{3, util.NewTuple(2, 3)},
+		{5, util.NewTuple(4, 5)},
+		{7, util.NewTuple(6, 8)},
 	}
 	interval := chooseIntervalFromTable(source, level, levelTable)
 	return AddToBaseAttributeRandomly(source, stats.Dexterity, interval)
@@ -216,13 +221,10 @@ func AddToBaseDexterity(source *rand.Rand, level int) *stats.Modifier {
 
 func AddToBaseIntelligence(source *rand.Rand, level int) *stats.Modifier {
 	levelTable := []ModRow[int, int]{
-		{3, util.NewTuple(-10, -6)},
-		{1, util.NewTuple(-5, -1)},
-		{1, util.NewTuple(1, 5)},
-		{5, util.NewTuple(6, 10)},
-		{11, util.NewTuple(11, 15)},
-		{17, util.NewTuple(16, 20)},
-		{23, util.NewTuple(21, 30)},
+		{1, util.NewTuple(1, 2)},
+		{3, util.NewTuple(2, 3)},
+		{5, util.NewTuple(4, 5)},
+		{7, util.NewTuple(6, 8)},
 	}
 	interval := chooseIntervalFromTable(source, level, levelTable)
 	return AddToBaseAttributeRandomly(source, stats.Intelligence, interval)
@@ -231,6 +233,39 @@ func AddToBaseIntelligence(source *rand.Rand, level int) *stats.Modifier {
 func AddToBaseArmorPenetration(source *rand.Rand, level int) *stats.Modifier {
 	interval := util.NewTuple(2, 24)
 	return AddToBaseAttributeRandomly(source, stats.ArmorPenetration, interval)
+}
+
+func AddToBaseSpeed(source *rand.Rand, level int) *stats.Modifier {
+	interval := util.NewTuple(1, level)
+	return AddToBaseAttributeRandomly(source, stats.BaseSpeed, interval)
+}
+
+func AddToAttackSpeed(source *rand.Rand, level int) *stats.Modifier {
+	// 1.0 would mean 100% increase in attack speed
+	maxBonus := float64(level) * 0.1
+	modifier := &stats.Modifier{
+		Attribute:      stats.AttackSpeedFactor,
+		Description:    "of fury",
+		Value:          source.Float64() * maxBonus,
+		Mode:           stats.ModifyAdditive,
+		IsPercentBased: true,
+	}
+
+	return modifier
+}
+
+func AddToMoveSpeed(source *rand.Rand, level int) *stats.Modifier {
+	// 1.0 would mean 100% increase in attack speed
+	maxBonus := float64(level) * 0.1
+	modifier := &stats.Modifier{
+		Attribute:      stats.MoveSpeedFactor,
+		Description:    "of running",
+		Value:          source.Float64() * maxBonus,
+		Mode:           stats.ModifyAdditive,
+		IsPercentBased: true,
+	}
+
+	return modifier
 }
 func AddToBaseVisionRange(source *rand.Rand, level int) *stats.Modifier {
 	interval := util.NewTuple(-7, 16)

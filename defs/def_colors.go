@@ -29,6 +29,13 @@ var InvColorRangedWeapon = color.RGBA{R: 127, G: 64, B: 12, A: 255}
 var Red = color.RGBA{R: 255, G: 20, B: 20, A: 255}
 var Green = color.RGBA{R: 20, G: 255, B: 20, A: 255}
 var Blue = color.RGBA{R: 20, G: 20, B: 255, A: 255}
+
+var Brown = color.RGBA{R: 209, G: 145, B: 33, A: 255}
+var LightGray = color.RGBA{R: 190, G: 190, B: 190, A: 255}
+var DarkGray = color.RGBA{R: 111, G: 111, B: 111, A: 255}
+var Black = color.RGBA{R: 0, G: 0, B: 0, A: 255}
+
+var Cyan = color.RGBA{R: 10, G: 242, B: 231, A: 255}
 var White = color.RGBA{R: 255, G: 255, B: 255, A: 255}
 
 var OffWhite = color.RGBA{R: 200, G: 200, B: 200, A: 255}

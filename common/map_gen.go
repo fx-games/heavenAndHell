@@ -45,8 +45,12 @@ func (g *MapGenerator) GenerateMap(targetMap string, mapTemplates *ldtk.Project,
 		dungeonDef = defs.GetLevelDefinition(g.randomSource, dungeonLevel)
 	}
 
-	//generatedLayout := g.createRandomLayout(mapTemplates, dungeonDef.TemplateRules)
-	generatedLayout := g.createRandomClassicLayout(mapTemplates, dungeonDef.TemplateRules)
+	var generatedLayout *dungen.DungeonMap
+	if g.factory.state.IsStoryModeEnabled() {
+		generatedLayout = g.createStoryLayout(mapTemplates, dungeonDef.TemplateRules)
+	} else {
+		generatedLayout = g.createMegaDungeonLayout()
+	}
 
 	generatedLayout.Print()
 	genWidth, genHeight := generatedLayout.GetSize()
@@ -350,7 +354,7 @@ func (g *MapGenerator) addBasicTiles(emptyMap *gridmap.GridMap[*Actor, *Item, Ob
 	return allDoorPositions
 }
 
-func (g *MapGenerator) createRandomLayout(mapTemplates *ldtk.Project, levelRules dungen.TemplateRules) *dungen.DungeonMap {
+func (g *MapGenerator) createStoryLayout(mapTemplates *ldtk.Project, levelRules dungen.TemplateRules) *dungen.DungeonMap {
 	randomSource := g.randomSource
 
 	scratchSpaceWidth := 40
@@ -368,7 +372,7 @@ func (g *MapGenerator) createRandomLayout(mapTemplates *ldtk.Project, levelRules
 	return generatedLayout
 }
 
-func (g *MapGenerator) createRandomClassicLayout(mapTemplates *ldtk.Project, levelRules dungen.TemplateRules) *dungen.DungeonMap {
+func (g *MapGenerator) createMegaDungeonLayout() *dungen.DungeonMap {
 	randomSource := g.randomSource
 
 	scratchSpaceWidth := 60

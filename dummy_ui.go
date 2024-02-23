@@ -9,6 +9,14 @@ import (
 type DummyUI struct {
 }
 
+func (d DummyUI) FadeToBlack() {
+
+}
+
+func (d DummyUI) FadeFromBlack() {
+
+}
+
 func (d DummyUI) SetDebugActions(actions func()common.DebugActions) {
 
 }

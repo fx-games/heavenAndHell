@@ -25,12 +25,13 @@ type Actions struct {
 	audio        *audio.Player
 	definitions  defs.DataContainer
 
-	getTimeKeeper func() *common.TimeKeeper
-	logError      func(message string)
-	autoExplore     bool
-	playerPath      []geometry.Point
-	isResting       bool
-	actorSpeak      func(actor *common.Actor, trigger defs.ActorSpeechTrigger)
+	getTimeKeeper  func() *common.TimeKeeper
+	logError       func(message string)
+	autoExplore    bool
+	playerPath     []geometry.Point
+	isResting      bool
+	actorSpeak     func(actor *common.Actor, trigger defs.ActorSpeechTrigger)
+	queueAfterTurn func(call func())
 }
 
 func (a *Actions) BeginActionTargeting(element *common.TargetedAction) {
@@ -89,15 +90,16 @@ func (a *Actions) PickUpItem() {
 }
 
 type PlayerActionsContext struct {
-	Player          *common.Actor
-	ActionBroker    common.ActionBroker
-	State           *common.State
-	UI              func() common.UserInterface
-	Speak         func(actor *common.Actor, trigger defs.ActorSpeechTrigger)
-	GetTimeKeeper func() *common.TimeKeeper
-	Msg           func(message string)
-	Animator        common.Animator
-	Configuration   common.Configuration
+	Player         *common.Actor
+	ActionBroker   common.ActionBroker
+	State          *common.State
+	UI             func() common.UserInterface
+	Speak          func(actor *common.Actor, trigger defs.ActorSpeechTrigger)
+	GetTimeKeeper  func() *common.TimeKeeper
+	Msg            func(message string)
+	Animator       common.Animator
+	Configuration  common.Configuration
+	QueueAfterTurn func(call func())
 }
 
 func NewActions(context PlayerActionsContext) *Actions {
@@ -111,6 +113,7 @@ func NewActions(context PlayerActionsContext) *Actions {
 		getTimeKeeper: context.GetTimeKeeper,
 		logError:      context.Msg,
 		config:        context.Configuration,
+		queueAfterTurn: context.QueueAfterTurn,
 	}
 }
 func (a *Actions) EquipItem(item *common.Item) {
@@ -740,11 +743,29 @@ func (a *Actions) RestUntilHealed() {
 		}
 		return
 	}
+
+	playerInventory := state.GetPlayer().GetInventory()
+	if !playerInventory.HasFood() {
+		a.isResting = false
+		a.logError("You have no food to eat")
+		return
+	}
+
+	playerInventory.UseFood()
+
 	a.isResting = true
-	a.actionBroker.QueueForExecution(common.NewChangeResourceAction(common.AbstractCause("Resting"), state.GetPlayer(), stats.Health, 1.0/15.0))
+	userInterface := a.ui()
+	userInterface.FadeToBlack()
+	a.queueAfterTurn(func() {
+		a.isResting = false
+		userInterface.FadeFromBlack()
+		a.actionBroker.QueueForExecution(common.NewChangeResourceAction(common.AbstractCause("Resting"), state.GetPlayer(), stats.Health, float64(healthResource.GetMax())))
+	})
 	a.actionBroker.QueueForExecution(common.NewEndPlayerTurnAction(common.AbstractCause("Resting"), 10))
 }
-
+func (a *Actions) SetQueueAfterTurn(afterTurn func(call func())) {
+	a.queueAfterTurn = afterTurn
+}
 func (a *Actions) ShowActorInfoAt(mapPos geometry.Point) {
 	state := a.state
 	player := state.GetPlayer()
@@ -894,10 +915,3 @@ func (a *Actions) IsPlayerAutoMoving() bool {
 	return len(a.playerPath) > 0
 }
 
-func (a *Actions) DoesPlayerRest() bool {
-	if a.isResting {
-		a.RestUntilHealed()
-		return true
-	}
-	return false
-}

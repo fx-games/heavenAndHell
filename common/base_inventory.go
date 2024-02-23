@@ -235,6 +235,24 @@ func (i *Inventory) RepairAll() {
 	}
 }
 
+func (i *Inventory) HasFood() bool {
+	for _, item := range i.items {
+		if item.IsFood() {
+			return true
+		}
+	}
+	return false
+}
+
+func (i *Inventory) UseFood() {
+	for _, item := range i.items {
+		if item.IsFood() {
+			i.Remove(item)
+			return
+		}
+	}
+}
+
 func SortInventory(stacks []InventoryStack) {
 	slices.SortStableFunc(stacks, func(i, j InventoryStack) int {
 		itemI := i[0]

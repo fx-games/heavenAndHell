@@ -107,3 +107,9 @@ dlvl: 1
 name: Stone Skin
 default_args: 5-10
 allowed_usage: wand | shrine
+
+internal_name: acquirement
+icon: 223
+dlvl: 1
+name: Acquirement
+allowed_usage: wand | shrine

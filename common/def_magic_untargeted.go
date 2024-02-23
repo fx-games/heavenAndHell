@@ -26,6 +26,7 @@ const (
 	ActionNameStoneSkin             UntargetedActionName = "stoneskin"
 	ActionNameEnchantWeapon     UntargetedActionName = "enchant_weapon"
 	ActionNameEnchantArmor      UntargetedActionName = "enchant_armor"
+	ActionNameAcquirement      UntargetedActionName = "acquirement"
 	ActionNameMultiShot         UntargetedActionName = "multi_shot"
 	ActionNameTelefrag          UntargetedActionName = "telefrag"
 	ActionNameReadMessage       UntargetedActionName = "read_message"
@@ -245,6 +246,23 @@ func (g *Factory) getEnchantArmor(args util.Arguments) UntargetedEffect {
 			}
 			armorStats.Plus += 1
 		}
+	}
+	return UntargetedEffect{
+		Effect: effect,
+		Description: []util.LabelText{
+			util.LabelTextFromString("Enchant armor protection"),
+		},
+	}
+}
+func (g *Factory) getAcquirement(args util.Arguments) UntargetedEffect {
+	level := 20
+	if !args.IsEmpty() {
+		level = util.ParseDice(args.Get(0)).Roll()
+	}
+	effect := func(user *Actor, source EffectSource) {
+		state := g.state
+		magicItem := g.GenerateMagicItem(level)
+		state.AddItemToMapWithDistribution(magicItem, user.MapPosition())
 	}
 	return UntargetedEffect{
 		Effect: effect,

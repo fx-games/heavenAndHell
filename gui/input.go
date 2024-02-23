@@ -163,6 +163,10 @@ func (u *UIController) handleKeyboardInput() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyH) {
 		u.context.DebugActions().GotoHellTown()
 	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyF8) {
+		u.renderingMode = (u.renderingMode + 1) % 3
+		u.configuration.FlipActorsHorizontally = u.renderingMode == GraphicRendering
+	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyF9) {
 		u.disableFogOfWar = !u.disableFogOfWar
 	}

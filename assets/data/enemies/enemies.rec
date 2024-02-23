@@ -4,6 +4,10 @@
 name: rat
 internal_name: rat
 icon: 760
+ascii: r
+cp437: r
+unicode: r
+color: 120 120 120
 dlvl: 1
 base_speed: 10
 damage_dice: 1d3
@@ -21,6 +25,8 @@ death_string: %s meets the Death of Rats.
 name: a skeleton
 internal_name: skeleton
 icon: 397
+ascii: u
+color: 200 200 200
 dlvl: 1
 base_speed: 9
 damage_dice: 1d3+1
@@ -35,6 +41,8 @@ death_string: %s falls apart.
 name: a skeleton archer
 internal_name: skeleton_archer
 icon: 401
+ascii: u
+color: 191 169 147
 dlvl: 2
 base_speed: 9
 damage_dice: 1d4
@@ -52,6 +60,8 @@ name: a skeleton warrior
 internal_name: skeleton_warrior
 icon: 397
 dlvl: 2
+ascii: u
+color: 247 246 245
 base_speed: 9
 damage_dice: 1d6+1
 resource_health: 2d8+2
@@ -67,6 +77,8 @@ death_string: %s falls apart.
 name: a skeleton captain
 internal_name: skeleton_captain
 icon: 400
+ascii: u
+color: 189 136 136
 dlvl: 3
 base_speed: 9
 damage_dice: 1d8+1
@@ -84,6 +96,8 @@ death_string: %s falls apart.
 name: a bat
 internal_name: bat
 icon: 93
+ascii: b
+color: 147 143 201
 dlvl: 1
 base_speed: 12
 damage_dice: 1d3
@@ -131,6 +145,8 @@ death_string: %s bites the dust.
 name: an imp
 internal_name: fallen
 icon: 426
+ascii: i
+color: 219 42 68
 dlvl: 1
 base_speed: 8
 damage_dice: 1d5
@@ -146,6 +162,8 @@ death_string: %s bursts into pieces.
 name: a fiend
 internal_name: fiend
 icon: 548
+ascii: f
+color: 219 42 68
 dlvl: 7
 base_speed: 10
 damage_dice: 3d4
@@ -161,6 +179,8 @@ death_string: %s violently explodes.
 name: a horned fiend
 internal_name: fiend_horned
 icon: 547
+ascii: f
+color: 214 188 192
 dlvl: 7
 base_speed: 10
 damage_dice: 5d4
@@ -176,6 +196,8 @@ death_string: %s violently explodes.
 name: a horned fiend with knife
 internal_name: fiend_armed
 icon: 546
+ascii: f
+color: 214 188 192
 dlvl: 7
 base_speed: 10
 damage_dice: 2d6+1
@@ -192,6 +214,8 @@ death_string: %s violently explodes.
 name: a horned fiend with whip
 internal_name: fiend_whip
 icon: 544
+ascii: f
+color: 214 188 192
 dlvl: 7
 base_speed: 10
 damage_dice: 3d6
@@ -208,6 +232,8 @@ death_string: %s violently explodes.
 name: a horned fiend with glaive
 internal_name: fiend_glaive
 icon: 545
+ascii: f
+color: 214 188 192
 dlvl: 7
 base_speed: 10
 damage_dice: 3d6+1
@@ -224,6 +250,8 @@ death_string: %s violently explodes.
 name: a big horned fiend
 internal_name: fiend_big
 icon: 543
+ascii: f
+color: 240 2 39
 dlvl: 7
 base_speed: 10
 damage_dice: 3d6+1
@@ -239,6 +267,8 @@ death_string: %s violently explodes.
 name: a fallen warrior
 internal_name: fallen_warrior
 icon: 427
+ascii: i
+color: 189 47 69
 dlvl: 2
 base_speed: 8
 damage_dice: 1d5
@@ -255,6 +285,8 @@ death_string: %s bursts into pieces.
 name: a fallen archer
 internal_name: fallen_archer
 icon: 425
+ascii: i
+color: 189 111 47
 dlvl: 4
 base_speed: 8
 damage_dice: 1d5
@@ -271,6 +303,8 @@ death_string: %s bursts into pieces.
 name: a fallen shaman
 internal_name: fallen_shaman
 icon: 428
+ascii: i
+color: 38 98 189
 dlvl: 5
 base_speed: 8
 damage_dice: 1d4

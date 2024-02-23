@@ -11,7 +11,7 @@
 	"iid": "0aad30e0-8990-11ee-aa96-5fbb691582f7",
 	"jsonVersion": "1.4.1",
 	"appBuildId": 471015,
-	"nextUid": 145,
+	"nextUid": 146,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "Free",
@@ -375,6 +375,44 @@
 					"regex": null,
 					"acceptFileTypes": null,
 					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "ASCII",
+					"doc": null,
+					"__type": "String",
+					"uid": 145,
+					"type": "F_String",
+					"isArray": false,
+					"canBeNull": false,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "Hidden",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": {
+						"id": "V_String",
+						"params": ["@"]
+					},
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": true,
@@ -927,8 +965,8 @@
 			"customData": [],
 			"savedSelections": [],
 			"cachedPixelData": {
-				"opaqueTiles": "0000000000000001111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001111100000000000000000000000010110000000000000000000000000000000000011100000000000000101000000001110000000000000000000000000111000000000000000000000000011110000000000000000000000001111000000000000000000000000111100000000000000000000000011110000000000000000000000001111000000000000000000000000111100000000000000000000000011110000000000000000000000001100000000000000000000000000000011000000000000000000000000001100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-				"averageColors": "23640742236417316364474227b787316731573177424742a536b536b536f779f324f426fcefba97a99bc966a866b855bcb8ccbcb989b7693fff3fff27b727b75e914e915a45774237422fc22fc22abd1abd5b133b133b132b1315951595bc76a98abb86a989a855bdc9cbccb99aa7696abd3abd688a7731a13351333742752185367536753675367536b5314521a57b457b3bce3bce4abd9545b5355abd9bab9cbbbc76a9896eed5cdf59acb4359cab4e913fdd4a454abd37b7357b5a455e91ab7779ad8a878c64ac888c998b898d84357b5b134fdd457b457b3e913e91ada7474257b74abd3abd7abd3abd3abd3abd2abd2abd6baa399a3b64a978a868d954bb643b87379b39647a537a8475756abd3abd2a455364cd856a6367676846647659795bab59565c865788497857536b88789c589c7c75b531f313f212facdfb61f5236b5566a6695566586c963fdd3fdd4a9b46794c98589b5a345da7267528442b85a88aa789ab762a457d927a71bd828b71f2351944f335f6321b131b132b135b139b133fdd3fdd97689c758899878a86858d948734757a7954a67aa668a954a879a99aa953c789c7337cab6fdd2fdd4fdd7fdd3fdd1fdd7fdd1fdd3fdd3fddf878f878f778584469558733966900002a9a4aacb4334944a646a646b6465a455ffff9411ffff0000000000068687c944a9a4bde6fff3ffff878f568f878000000000000ad889cddaa45ab240000000000000000000000005fff1fff2fff3e935e937e936dbb775575767a677a667457f778f878f878000000000000ba239cbbcd96000000000000000000000000000000003fff3a443b6438543ea8378b9a56946497329ebb0000f568f669f669f43600000000cd965cef5ccd5ccd5b35000000000000000000006b886ab96a8766576ccc699b6ab96b886b776c866eb768a7f78bf78bf78af78b00000000ac887fff7ecc00000000000000000000000000005a735743789ba834b743a955ba65a632a553b99bbb52ac85f668f436f78af66800000000ba96000000000000000000000000000000000000000000000000864489548879856986458aac893388a78c86f68bf77af78af68b00008ccdabbbaa9a9aab9cbcb99900000000000000000000000000000000b446b955b679b742b99bb576b955bc86b953f558f558f668f6680000ab539a449a66a5549ebaab44bd769845aa46000000000000000000008447a3358458000000000000000000000000f89cf89cf78bf78b00009644b9569cb8a765998aa9868c768cda9dca9ba78c988a87abaa0000a32544469446000000000000000000000000f78bf78bf78bf78b0000b523b955c9b6c444c78ac474aa54bab8cba9b896a765a665bbaa0000b44776574448385600000000000000000000f225f8557b767b76e644e644b3230000000000000000000000000000000000000000000000000000000000000000000000000000000000006a6669667b767b76f965f965c864b865986697667753aa45aa44ba689a568a338a34bab8abb7a9b98bb700000000000000000000000000007855785577447744f754f8547fff8fff6fff7fff7fff6fff7fff7fff5fff6fff7fff6fff7fff8fff7fff7fff8fff7fff7fff5fff7fff7fff7fff7fff6fff6fff3fff0000000000005abd5d966d86289b488b5bab699a3b884c985c896b894689b854baacbc97296728562b882bac2aab0000000000000000000049785978586759786b886a756caa47736a8757463843494459436a334734a789aa89a88b399a3957387a3b793c9800000000000000000000000000000000000000005a743a65578a3a885a4339794aab599a699b497aaa75acbbab994866586558657877787800000000000000000000000000000000000000002d833b543a8a29443b95c89cca87ba76a833a657000000000000498a599b599b799b799b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000575659635bbc5dde8aac00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+				"opaqueTiles": "0000000000000001111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001111100000000000000000000000010110000000000000000000000000000000000011100000000000000101000000001110000000000000000000000000111000000000000000000000000011000000000000000000000000001111000000000000000000000000111100000000000001000000000011110000000000000000000000001111000000000000000000000000111100000000000000000000000011110000000000000000000000001100000000000000000000000000000011000000000000000000000000001100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+				"averageColors": "23640742236417316364474227b787316731573177424742a536b536b536f779f324f426fcefba97a99bc966a866b855bcb8ccbcb989b7693fff3fff27b727b75e914e915a45774237422fc22fc22abd1abd5b133b133b132b1315951595bc76a98abb86a989a855bdc9cbccb99aa7696abd3abd688a7731a13351333742752185367536753675367536b5314521a57b457b3bce3bce4abd9545b5355abd9bab9cbbbc76a9896eed5cdf59acb4359cab4e913fdd4a454abd37b7357b5a455e91ab7779ad8a878c64ac888c998b898d84357b5b134fdd457b457b3e913e91ada7474257b74abd3abd7abd3abd3abd3abd2abd2abd6baa399a3b64a978a868d954bb643b87379b39647a537a8475756abd3abd2a455364cd856a6367676846647659795bab59565c865788497857536b88789c589c7c75b531f313f212facdfb61f5236b5566a6695566586c963fdd3fdd4a9b46794c98589b5a345da7267528442b85a88aa789ab762a457d927a71bd828b71f2351944f335f6321b131b132b135b139b133fdd3fdd97689c758899878a86858d948734757a7954a67aa668a954a879a99aa953c789c7337cab6fdd2fdd4fdd7fdd3fdd1fdd7fdd1fdd3fdd3fddf878f878f77858446955873396695bbb2a9a4aacb4334944a646a646b6465a455ffff9411ffff0006a897c6368687c944a9a4bde6fff3ffff878f568f8785cda5b745cdead889cddaa45ab240000000000000000000000005fff1fff2fff3e935e937e936dbb775575767a677a667457f778f878f8784bca4b744deeba249cbbcd960000000000000000000000002b782a453fff3a443b6438543ea8378b9a56946497329ebb8b88f568f669e6694dcb00000000cd965cef5ccd5ccd5b35000000000000000000006b886ab96a8766576ccc699b6ab96b886b776c866eb768a7f78bf78bf78af78b00000000ac887fff7ecc0000000000000000000086786a645a735743789ba834b743a955ba65a632a553b99bbb52ac85f668f436f78af66800000000ba960000000000000000000000000000c9636963f89cfabce78b864489548879856986458aac893388a78c86f68bf77af78af68b00008ccdabbbaa9a9aab9cbcb9990000000000000000000000005fc79ea2b446b955b679b742b99bb576b955bc86b953f558f558f668f6680000ab539a449a66a5549ebaab44bd769845aa46000000000000000000008447a3358458000000000000000000000000f89cf89cf78bf78b00009644b9569cb8a765998aa9868c768cda9dca9ba78c988a87abaa0000a32544469446000000000000000000000000f78bf78bf78bf78b0000b523b955c9b6c444c78ac474aa54bab8cba9b896a765a665bbaa0000b44776574448385600000000000000000000f225f8557b767b76e644e644b3230000000000000000000000000000000000000000000000000000000000000000000000000000000000006a6669667b767b76f965f965c864b865986697667753aa45aa44ba689a568a338a34bab8abb7a9b98bb700000000000000000000000000007855785577447744f754f8547fff8fff6fff7fff7fff6fff7fff7fff5fff6fff7fff6fff7fff8fff7fff7fff8fff7fff7fff5fff7fff7fff7fff7fff6fff6fff3fff0000000000005abd5d966d86289b488b5bab699a3b884c985c896b894689b854baacbc97296728562b882bac2aab0000000000000000000049785978586759786b886a756caa47736a8757463843494459436a334734a789aa89a88b399a3957387a3b793c9800000000000000000000000000000000000000005a743a65578a3a885a4339794aab599a699b497aaa75acbbab994866586558657877787800000000000000000000000000000000000000002d833b543a8a29443b95c89cca87ba76a833a6576742689b3b76498a599b599b799b799b00000000000000000000000000000000000000000000000000000000000000000000000047330000000000002989000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000575659635bbc5dde8aac00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 			}
 		}
 	], "enums": [
@@ -1409,7 +1447,11 @@
 									"params": ["Store_weapons"]
 								}] },
 								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
-								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] }
+								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "2", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["2"]
+								}] }
 							]
 						},
 						{
@@ -1444,7 +1486,11 @@
 									"params": ["Store_armor"]
 								}] },
 								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
-								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] }
+								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "3", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["3"]
+								}] }
 							]
 						},
 						{
@@ -1482,7 +1528,11 @@
 									"id": "V_Bool",
 									"params": [ true ]
 								}] },
-								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] }
+								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "1", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["1"]
+								}] }
 							]
 						},
 						{
@@ -1598,7 +1648,11 @@
 									"id": "V_Bool",
 									"params": [ true ]
 								}] },
-								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] }
+								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "4", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["4"]
+								}] }
 							]
 						},
 						{
@@ -6623,7 +6677,8 @@
 								{ "__identifier": "UniqueName", "__type": "String", "__value": "lucifer", "__tile": null, "defUid": 130, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["lucifer"]
-								}] }
+								}] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "@", "__tile": null, "defUid": 145, "realEditorValues": [] }
 							]
 						}
 					]
@@ -9116,7 +9171,8 @@
 								{ "__identifier": "UniqueName", "__type": "String", "__value": "king_zedek", "__tile": null, "defUid": 130, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["king_zedek"]
-								}] }
+								}] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "@", "__tile": null, "defUid": 145, "realEditorValues": [] }
 							]
 						}
 					]
@@ -10012,7 +10068,8 @@
 								{ "__identifier": "UniqueName", "__type": "String", "__value": "meat_jack", "__tile": null, "defUid": 130, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["meat_jack"]
-								}] }
+								}] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "@", "__tile": null, "defUid": 145, "realEditorValues": [] }
 							]
 						}
 					]
@@ -10258,7 +10315,8 @@
 								{ "__identifier": "UniqueName", "__type": "String", "__value": "meat_jack", "__tile": null, "defUid": 130, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["meat_jack"]
-								}] }
+								}] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "@", "__tile": null, "defUid": 145, "realEditorValues": [] }
 							]
 						}
 					]
@@ -10504,7 +10562,8 @@
 								{ "__identifier": "UniqueName", "__type": "String", "__value": "meat_jack", "__tile": null, "defUid": 130, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["meat_jack"]
-								}] }
+								}] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "@", "__tile": null, "defUid": 145, "realEditorValues": [] }
 							]
 						}
 					]
@@ -12702,7 +12761,11 @@
 									"params": ["Store_weapons"]
 								}] },
 								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
-								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] }
+								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "2", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["2"]
+								}] }
 							]
 						},
 						{
@@ -12734,7 +12797,11 @@
 									"params": ["Store_alchemy"]
 								}] },
 								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
-								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] }
+								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "1", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["1"]
+								}] }
 							]
 						},
 						{
@@ -12766,7 +12833,11 @@
 									"params": ["Store_armor"]
 								}] },
 								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
-								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] }
+								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "3", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["3"]
+								}] }
 							]
 						},
 						{
@@ -12795,7 +12866,14 @@
 								}] },
 								{ "__identifier": "Type", "__type": "LocalEnum.NPCCategory", "__value": "Neutral", "__tile": null, "defUid": 51, "realEditorValues": [] },
 								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
-								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] }
+								{ "__identifier": "UniqueName", "__type": "String", "__value": "lucifer", "__tile": null, "defUid": 130, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["lucifer"]
+								}] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "L", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["L"]
+								}] }
 							]
 						},
 						{
@@ -12854,6 +12932,48 @@
 								"id": "V_String",
 								"params": ["Burn, Burn, BURN!"]
 							}] }]
+						},
+						{
+							"__identifier": "NPC",
+							"__grid": [27,21],
+							"__pivot": [0,0],
+							"__tags": ["NPC"],
+							"__tile": { "tilesetUid": 44, "x": 104, "y": 120, "w": 8, "h": 8 },
+							"__smartColor": "#BE4A2F",
+							"__worldX": -568,
+							"__worldY": -616,
+							"iid": "639e42f0-b0a0-11ee-9671-377cce629945",
+							"width": 8,
+							"height": 8,
+							"defUid": 33,
+							"px": [216,168],
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "Grumpitude", "__tile": null, "defUid": 52, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Grumpitude"]
+								}] },
+								{ "__identifier": "InternalName", "__type": "String", "__value": "grumpy", "__tile": null, "defUid": 131, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["grumpy"]
+								}] },
+								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 104, "y": 120, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 104, "y": 120, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["104,120,8,8"]
+								}] },
+								{ "__identifier": "Type", "__type": "LocalEnum.NPCCategory", "__value": "Store_general", "__tile": null, "defUid": 51, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Store_general"]
+								}] },
+								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": true, "__tile": null, "defUid": 54, "realEditorValues": [{
+									"id": "V_Bool",
+									"params": [ true ]
+								}] },
+								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "4", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["4"]
+								}] }
+							]
 						}
 					]
 				},
@@ -15389,7 +15509,8 @@
 								{ "__identifier": "UniqueName", "__type": "String", "__value": "rogue", "__tile": null, "defUid": 130, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["rogue"]
-								}] }
+								}] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "@", "__tile": null, "defUid": 145, "realEditorValues": [] }
 							]
 						},
 						{
@@ -15421,7 +15542,8 @@
 								{ "__identifier": "UniqueName", "__type": "String", "__value": "rogue_dog", "__tile": null, "defUid": 130, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["rogue_dog"]
-								}] }
+								}] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "@", "__tile": null, "defUid": 145, "realEditorValues": [] }
 							]
 						}
 					]

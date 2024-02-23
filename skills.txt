@@ -109,9 +109,7 @@ Triumph of steel
 Call to Odin
 
 == Earth Shaker
-Scale area with skill level (1-5)
 Rush forward to a specified location, deal damage to all enemies in a specified area and push them back.
-Enemies adjacent to walls take more damage.
 
 Mage
 

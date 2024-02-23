@@ -25,14 +25,18 @@ type Actor struct {
 	mapPosition  geometry.Point
 	drawPosition geometry.PointF
 	icon         int32
+	unicodeIcon  int32
+	asciiIcon    int32
+	cp437Icon    int32
+	corpseIcon   int32
 	fov          *geometry.FOV
 	name         string
 
-	inventory           *Inventory
-	equipment           *Equipment
-	statusEffects       *Flags
+	inventory                 *Inventory
+	equipment                 *Equipment
+	statusEffects             *Flags
 	parametrizedStatusEffects []*ParametrizedStatusEffect
-	isAnimatingMovement bool
+	isAnimatingMovement       bool
 
 	stats      stats.AttributeHolder
 	timeEnergy int
@@ -51,8 +55,8 @@ type Actor struct {
 	deathStringFormats []string
 	targetedSkills     []*TargetedAction
 	untargetedSkills   []*UntargetedAction
-	corpseIcon         int32
 	damageDice         util.Dice
+	color              color.RGBA
 }
 
 type AttackType int
@@ -809,6 +813,50 @@ func (a *Actor) IsVisible() bool {
 func (a *Actor) GetRangedHitEffects() []*HitEffect{
 	// TODO
 	return []*HitEffect{}
+}
+
+func (a *Actor) AsciiIcon(ticksForAnimation uint64) int32 {
+	return a.asciiIcon
+}
+
+func (a *Actor) CodePage437Icon(ticksForAnimation uint64) int32 {
+	return a.cp437Icon
+}
+
+func (a *Actor) UnicodeIcon(ticksForAnimation uint64) int32 {
+	return a.unicodeIcon
+}
+
+func (a *Actor) SetAsciiIcon(icon int32) {
+	a.asciiIcon = icon
+}
+
+func (a *Actor) SetCP437Icon(icon int32) {
+	a.cp437Icon = icon
+}
+
+func (a *Actor) SetUnicodeIcon(icon int32) {
+	a.unicodeIcon = icon
+}
+
+func (a *Actor) SetColor(color color.RGBA) {
+	a.color = color
+}
+
+func (a *Actor) GetColor() color.RGBA {
+	if a.IsVendor() {
+		switch a.isVendorOfType {
+		case VendorTypeGeneral:
+			return defs.Brown
+		case VendorTypeArmor:
+			return defs.LightGray
+		case VendorTypeWeapons:
+			return defs.DarkGray
+		case VendorTypeWands:
+			return defs.Blue
+		}
+	}
+	return a.color
 }
 
 func ADRFromAC(armorClass int) float64 {

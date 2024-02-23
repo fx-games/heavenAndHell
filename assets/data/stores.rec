@@ -23,7 +23,8 @@ turnover_items: 2
 sometimes_count: 18
 sometimes: robe
 sometimes: cloak
-sometimes: leather_boots
+sometimes: soft_leather_boots
+sometimes: hard_leather_boots
 sometimes: leather_brigandine
 sometimes: partial_leather_armour
 sometimes: chain_mail
@@ -33,7 +34,7 @@ sometimes: fur_cloak
 sometimes: ceremonial_robe
 sometimes: gauntlets
 sometimes: steel_boots
-sometimes: buckler
+sometimes: leather_buckler
 sometimes: small_leather_shield
 
 internal_name: store_weapons
@@ -43,15 +44,15 @@ turnover_items: 2
 sometimes_count: 18
 sometimes: dagger
 sometimes: main_gauche
+sometimes: sax
+sometimes: flail
 sometimes: whip
 sometimes: spear
-sometimes: rapier
-sometimes: sabre
+sometimes: zweihander
+sometimes: flamberge
+sometimes: kettenmorgenstern
 sometimes: short_sword
-sometimes: mace
-sometimes: tulwar
 sometimes: quarterstaff
-sometimes: ball_and_chain
 sometimes: war_hammer
 sometimes: broad_sword
 sometimes: long_sword
@@ -72,6 +73,7 @@ sometimes_count: 0-4
 always: scroll_of_recall
 always: scroll_of_random_teleport
 always: healing_potion
+always: scroll_of_acquirement
 sometimes: mana_potion
 sometimes: scroll_of_blessing
 sometimes: speed_potion

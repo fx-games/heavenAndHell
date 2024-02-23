@@ -15,6 +15,7 @@ import (
 	"rpg/renderer"
 	"rpg/stats"
 	"rpg/util"
+	"slices"
 	"strings"
 )
 
@@ -81,6 +82,7 @@ type UIController struct {
 	tileRenderer *renderer.TileRenderer
 	mapRenderer  *renderer.MapRenderer
 	worldTexture renderer.TextureAtlas
+	asciiTexture renderer.TextureAtlas
 
 	context                     common.UIContext
 	isMouseCapturedByUI         bool
@@ -115,10 +117,27 @@ type UIController struct {
 	tileScale                  float64
 	globalFlashColorTicksLeft  int
 	globalFlashColorTicksStart int
-	globalFlashColor           color.Color
+	globalScaleColor           color.Color
 	disableFogOfWar            bool
 	mousePosOnMap              geometry.Point
 	msg                        func(message string) // this might be a smell already? Should the UI really generate messages to the player?
+	renderingMode              RenderingMode
+	globalFadeColorTicksLeft   int
+	globalFadeColorTicksStart  int
+	fadeFromBlack              bool
+	keepBlack                  bool
+}
+
+func (u *UIController) FadeToBlack() {
+	u.globalFadeColorTicksLeft = int(util.SecondsToTicks(2))
+	u.globalFadeColorTicksStart = u.globalFadeColorTicksLeft
+	u.fadeFromBlack = false
+}
+
+func (u *UIController) FadeFromBlack() {
+	u.globalFadeColorTicksLeft = int(util.SecondsToTicks(2))
+	u.globalFadeColorTicksStart = u.globalFadeColorTicksLeft
+	u.fadeFromBlack = true
 }
 
 func (u *UIController) SetDebugActions(actions func() common.DebugActions) {
@@ -1028,15 +1047,16 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 	}
 
 	var drawColor color.RGBA = color.RGBA{255, 255, 255, 255}
-	var worldTileColor color.RGBA = color.RGBA{255, 255, 255, 255}
 
 	tileAt := currentMap.GetCell(mapPos).TileType
+	worldIcon, worldTileColor := u.getTileIcon(tileAt)
 	if tileAt.Special == gridmap.SpecialTileWater {
 		worldTileColor = state.GetWaterColor()
 	}
-	worldIcon := tileAt.Icon()
+
+
 	// animate the worldIcon
-	if state.GetPlayer().CanSee(mapPos) || u.disableFogOfWar {
+	if u.renderingMode == GraphicRendering && (state.GetPlayer().CanSee(mapPos) || u.disableFogOfWar) {
 		if !u.configuration.DrawTilesBehindActors && currentMap.IsActorAt(mapPos) {
 			return []renderer.CellDrawInfo{}
 		}
@@ -1045,7 +1065,6 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 			frameOffset := util.GetLoopingFrameFromTick(tick+1000-uint64(x*17)-uint64(y*19), info.DelayInSeconds, info.FrameCount)
 			worldIcon += frameOffset
 		}
-
 	}
 	// fake lighting
 	if !u.disableFogOfWar {
@@ -1095,17 +1114,12 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 
 	// 1. world
 	drawInfo = prepend(drawInfo, renderer.CellDrawInfo{
-		Atlas: u.worldTexture,
+		Atlas: u.GetCurrentAtlas(),
 		Icon:  worldIcon,
 		Color: worldTileColor,
 	})
 
 	return drawInfo
-}
-
-func (u *UIController) SetWorldTexture(atlas renderer.TextureAtlas) {
-	u.worldTexture = atlas
-	u.tileRenderer.SetDefaultAtlas(atlas)
 }
 
 func (u *UIController) GetDeviceIndependentScreenSize() geometry.Point {
@@ -1376,7 +1390,7 @@ func (u *UIController) OpenListInventory() {
 }
 
 func (u *UIController) FlashScreen(color color.Color, seconds float64) {
-	u.globalFlashColor = color
+	u.globalScaleColor = color
 	u.globalFlashColorTicksLeft = int(util.SecondsToTicks(seconds))
 	u.globalFlashColorTicksStart = int(util.SecondsToTicks(seconds))
 }
@@ -1518,8 +1532,14 @@ func (u *UIController) tryToBuy(item *common.Item, seller *common.Actor) {
 	player.GetStats().DecrementBy(stats.Gold, cost)
 	seller.GetStats().IncrementBy(stats.Gold, cost)
 
+	alwaysItems := u.context.Definitions.VendorDefinitions[string(seller.GetVendorType())].Always
 	seller.GetInventory().Remove(item)
 	player.GetInventory().Add(item)
+	itemName := item.GetInternalName()
+	if slices.Contains(alwaysItems, itemName) {
+		seller.GetInventory().Add(item.Clone())
+	}
+
 	msg(fmt.Sprintf("You bought [:darkText]%s[:white] for [:darkText]%d[:white] gold", item.Name(), cost))
 	u.OpenShopMenu(seller)
 }
@@ -1581,6 +1601,23 @@ func (u *UIController) drawHealthBar(actor *common.Actor) {
 	barSize := geometry.Point{X: int(healthBarWidth * healthPercent), Y: healthBarHeight}
 	u.tileRenderer.DrawColoredRect(topLeft, size, backgroundColor)
 	u.tileRenderer.DrawColoredRect(topLeft, barSize, healthBarColor)
+}
+
+func (u *UIController) GetCurrentAtlas() renderer.TextureAtlas {
+	switch u.renderingMode {
+	case UnicodeRendering:
+		fallthrough
+	case CodePage437Rendering:
+		fallthrough
+	case AsciiRendering:
+		return u.asciiTexture
+	default:
+		return u.worldTexture
+	}
+}
+
+func (u *UIController) SetAsciiAtlas(atlas renderer.TextureAtlas) {
+	u.asciiTexture = atlas
 }
 
 func redToGreen(percent float64) color.RGBA {

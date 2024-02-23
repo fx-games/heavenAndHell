@@ -1,0 +1,95 @@
+= Pricing
+Torch: 2gp
+Cheap Armor Piece: <10gp
+Expensive Armor Piece: ~1000gp (Full Plate)
+
+= Non-Unique Helmets - GOOD ENOUGH
+
+hood
+hard_leather_cap
+leather_helmet
+metal_cap
+chain_coif
+steel_helm
+iron_crown
+golden_crown
+jewel_crown
+
+= Non-Unique Cuirass - GOOD ENOUGH
+
+robe
+ceremonial_robe
+partial_leather_armour
+full_leather_armour
+leather_brigandine
+rusted_chain_mail
+chain_mail
+scale_mail
+full_plate_armour
+
+= Non-Unique Gloves - GOOD ENOUGH
+
+leather_gloves
+gauntlets
+cesti
+alchemists_gloves
+
+= Non-Unique Boots - GOOD ENOUGH
+
+soft_leather_boots
+hard_leather_boots
+steel_boots
+
+= Non-Unique Capes - GOOD ENOUGH
+
+cloak
+fur_cloak
+elven_cloak
+shadow_cloak
+
+= Non-Unique Shields - GOOD ENOUGH
+
+leather_buckler
+metal_buckler
+small_leather_shield
+large_leather_shield
+small_metal_shield
+large_metal_shield
+shield_of_deflection
+
+
+
+
+= Non-Unique RINGS
+
+  {"Strength",                        0x00000001L, TV_RING,        '=', 0,    400,  0,   1, 2,    0,  0, 0,   0, {0, 0}, 30}, // 132
+    {"Dexterity",                       0x00000008L, TV_RING,        '=', 0,    400,  1,   1, 2,    0,  0, 0,   0, {0, 0}, 30}, // 133
+    {"Constitution",                    0x00000010L, TV_RING,        '=', 0,    400,  2,   1, 2,    0,  0, 0,   0, {0, 0}, 30}, // 134
+    {"Intelligence",                    0x00000002L, TV_RING,        '=', 0,    400,  3,   1, 2,    0,  0, 0,   0, {0, 0}, 30}, // 135
+    {"Speed",                           0x00001000L, TV_RING,        '=', 0,    3000, 4,   1, 2,    0,  0, 0,   0, {0, 0}, 50}, // 136
+    {"Searching",                       0x00000040L, TV_RING,        '=', 0,    250,  5,   1, 2,    0,  0, 0,   0, {0, 0}, 7}, // 137
+    {"Teleportation",                   0x80000400L, TV_RING,        '=', 0,    0,    6,   1, 2,    0,  0, 0,   0, {0, 0}, 7}, // 138
+    {"Slow Digestion",                  0x00000080L, TV_RING,        '=', 0,    200,  7,   1, 2,    0,  0, 0,   0, {0, 0}, 7}, // 139
+    {"Resist Fire",                     0x00080000L, TV_RING,        '=', 0,    250,  8,   1, 2,    0,  0, 0,   0, {0, 0}, 14}, // 140
+    {"Resist Cold",                     0x00200000L, TV_RING,        '=', 0,    250,  9,   1, 2,    0,  0, 0,   0, {0, 0}, 14}, // 141
+    {"Feather Falling",                 0x04000000L, TV_RING,        '=', 0,    200,  10,  1, 2,    0,  0, 0,   0, {0, 0}, 7}, // 142
+    {"Adornment",                       0x00000000L, TV_RING,        '=', 0,    20,   11,
+
+    {"Weakness",                        0x80000001L, TV_RING,         '=', -5, 0,    13,  1, 2, 0, 0, 0,  0, {0, 0}, 7}, // 145
+        {"Lordly Protection (FIRE)",        0x00080000L, TV_RING,         '=',  0, 1200, 14,  1, 2, 0, 0, 0,  5, {0, 0}, 50}, // 146
+        {"Lordly Protection (ACID)",        0x00100000L, TV_RING,         '=',  0, 1200, 15,  1, 2, 0, 0, 0,  5, {0, 0}, 50}, // 147
+        {"Lordly Protection (COLD)",        0x00200000L, TV_RING,         '=',  0, 1200, 16,  1, 2, 0, 0, 0,  5, {0, 0}, 50}, // 148
+        {"WOE",                             0x80000644L, TV_RING,         '=', -5, 0,    17,  1, 2, 0, 0, 0, -3, {0, 0}, 50}, // 149
+        {"Stupidity",                       0x80000002L, TV_RING,         '=', -5, 0,    18,  1, 2, 0, 0, 0,  0, {0, 0}, 7}, // 150
+        {"Increase Damage",                 0x00000000L, TV_RING,         '=',  0, 100,  19,  1, 2, 0, 0, 0,  0, {0, 0}, 20}, // 151
+        {"Increase To-Hit",                 0x00000000L, TV_RING,         '=',  0, 100,  20,  1, 2, 0, 0, 0,  0, {0, 0}, 20}, // 152
+        {"Protection",                      0x00000000L, TV_RING,         '=',  0, 100,  21,  1, 2, 0, 0, 0,  0, {0, 0}, 7}, // 153
+        {"Aggravate Monster",               0x80000200L, TV_RING,         '=',  0, 0,    22,  1, 2, 0, 0, 0,  0, {0, 0}, 7}, // 154
+        {"See Invisible",                   0x01000000L, TV_RING,         '=',  0, 500,  23,  1, 2, 0, 0, 0,  0, {0, 0}, 40}, // 155
+        {"Sustain Strength",                0x00400000L, TV_RING,         '=',  1, 750,  24,  1, 2, 0, 0, 0,  0, {0, 0}, 44}, // 156
+        {"Sustain Intelligence",            0x00400000L, TV_RING,         '=',  2, 600,  25,  1, 2, 0, 0, 0,  0, {0, 0}, 44}, // 157
+        {"Sustain Wisdom",                  0x00400000L, TV_RING,         '=',  3, 600,  26,  1, 2, 0, 0, 0,  0, {0, 0}, 44}, // 158
+        {"Sustain Constitution",            0x00400000L, TV_RING,         '=',  4, 750,  27,  1, 2, 0, 0, 0,  0, {0, 0}, 44}, // 159
+        {"Sustain Dexterity",               0x00400000L, TV_RING,         '=',  5, 750,  28,  1, 2, 0, 0, 0,  0, {0, 0}, 44}, // 160
+        {"Sustain Charisma",                0x00400000L, TV_RING,         '=',  6, 500,  29,  1, 2, 0, 0, 0,  0, {0, 0}, 44}, // 161
+        {"Slaying",                         0x00000000L, TV_RING,

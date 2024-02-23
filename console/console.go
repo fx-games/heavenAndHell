@@ -30,6 +30,14 @@ type Console struct {
 	focus           tview.Primitive
 }
 
+func (c *Console) FadeToBlack() {
+
+}
+
+func (c *Console) FadeFromBlack() {
+
+}
+
 func (c *Console) GetVisibleMap() geometry.Rect {
 	return geometry.Rect{}
 }
