@@ -74,6 +74,7 @@ always: scroll_of_recall
 always: scroll_of_random_teleport
 always: healing_potion
 always: scroll_of_acquirement
+always: scroll_of_summoning
 sometimes: mana_potion
 sometimes: scroll_of_blessing
 sometimes: speed_potion

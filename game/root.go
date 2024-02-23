@@ -453,10 +453,6 @@ func (g *GameInstance) updateStatsDisplay() {
 	g.uiController.UpdateStatsLabel()
 	g.sendStatsToWindowClient()
 }
-func (g *GameInstance) spawnActorOnMap(actor *common.Actor, mapPos geometry.Point, playerStartDefinition defs.LoadoutDefinition) {
-	g.state.GetMap().AddActor(actor, mapPos)
-	actor.SetDrawPosition(mapPos.ToPointF())
-}
 
 func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition) *common.Actor {
 	player := common.NewActor(playerStartDefinition.Icon)
