@@ -123,6 +123,10 @@ func (m Modifier) ToString() string {
 	return fmt.Sprintf("+%d%% %s", plusPercent, niceName)
 }
 
+func (m Modifier) GetMonetaryValue() int {
+	return int(m.Value * 65)
+}
+
 type AttributeHolder struct {
 	attributes map[Name]float64
 	resources  map[Name]*Resource

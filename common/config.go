@@ -29,24 +29,25 @@ type StartInfo struct {
 }
 
 type Configuration struct {
-	AudioEnabled         bool
-	ActorBobbingEnabled  bool
-	WindowSize           geometry.Point
-	DefaultFont          string
-	DefaultFontSize      float64
-	AutoPickup           bool
-	CardinalMovementOnly bool
-	KeepPlayerCentered   bool
+    AudioEnabled         bool
+    ActorBobbingEnabled  bool
+    WindowSize           geometry.Point
+    DefaultFont          string
+    DefaultFontSize      float64
+    AutoPickup           bool
+    CardinalMovementOnly bool
+    KeepPlayerCentered   bool
 
-	ItemNamesInShop ItemNamingScheme
+    ItemNamesInShop ItemNamingScheme
 
-	DrawTilesBehindActors  bool
-	DrawTilesBehindItems   bool
-	DrawTilesBehindObjects bool
-	ServeStats             bool
-	ServeInventory         bool
-	ServeLog               bool
-	ServeEquipment         bool
+    DrawTilesBehindActors  bool
+    DrawTilesBehindItems   bool
+    DrawTilesBehindObjects bool
+    ServeStats             bool
+    ServeInventory         bool
+    ServeLog               bool
+    ServeEquipment         bool
+    FlipActorsHorizontally bool
 }
 
 func (c Configuration) ToRecord() recfile.Record {
@@ -119,6 +120,10 @@ func (c Configuration) ToRecord() recfile.Record {
 			Name:  "ItemNamesInShop",
 			Value: string(c.ItemNamesInShop),
 		},
+		{
+			Name:  "FlipActorsHorizontally",
+			Value: recfile.BoolStr(c.FlipActorsHorizontally),
+		},
 	}
 }
 
@@ -161,6 +166,7 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		ServeInventory:         configMap.GetBoolOrFalse("ServeInventory"),
 		ServeEquipment:         configMap.GetBoolOrFalse("ServeEquipment"),
 		ServeLog:               configMap.GetBoolOrFalse("ServeLog"),
+		FlipActorsHorizontally: configMap.GetBoolOrTrue("FlipActorsHorizontally"),
 		ItemNamesInShop:        ItemNamingScheme(configMap.GetStringOrDefault("ItemNamesInShop", string(ItemNamingSchemeEnchantments))),
 		WindowSize: geometry.Point{ //1280, Y: 800
 			X: configMap.GetIntOrDefault("WindowWidth", 1280),

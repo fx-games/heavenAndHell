@@ -45,18 +45,19 @@ func (s ThrowStats) ToLabelText() []util.LabelText {
 }
 
 type WeaponStats struct {
-    Damage             util.Dice
-    Requirements       map[stats.Name]int
-    Durability         *stats.Resource
-    Type               defs.WeaponType
-    AttackSpeedFactor  float64
-    MeleeRange         int
-    Plus               int // Plus is enchantment that gets added to damage
-    MaxRange           int
-    AccuracyAtMaxRange float64
-    AccuracyAtMinRange float64
-    ArmorPenetration   int
-    ProjectileIcon     int32
+	Damage             util.Dice
+	Requirements       map[stats.Name]int
+	Durability         *stats.Resource
+	Type               defs.WeaponType
+	AttackSpeedFactor  float64
+	MeleeRange         int
+	Plus               int // Plus is enchantment that gets added to damage
+	MaxRange           int
+	AccuracyAtMaxRange float64
+	AccuracyAtMinRange float64
+	ArmorPenetration   int
+	ProjectileIcon int32
+	IsTwoHanded    bool
 }
 
 func (s WeaponStats) ToString(forActor *Actor) []util.LabelText {
@@ -122,7 +123,6 @@ func (s WeaponStats) IsMeleeWeapon() bool {
 	return s.Type == defs.WeaponTypeSword ||
 		s.Type == defs.WeaponTypeAxe ||
 		s.Type == defs.WeaponTypeMace ||
-		s.Type == defs.WeaponTypeStaff ||
 		s.Type == defs.WeaponTypeScythe ||
 		s.Type == defs.WeaponTypeSpear ||
 		s.Type == defs.WeaponTypeDagger
@@ -152,4 +152,20 @@ func (s WeaponStats) Clone() *WeaponStats {
 
 func (s WeaponStats) CanBeFurtherEnchanted() bool {
 	return s.Plus < 3
+}
+
+func (s WeaponStats) GetInventorySlot() defs.SlotName {
+	if s.IsRangedWeapon(){
+		return defs.SlotNameMissileLauncher
+	}
+	if s.Type == defs.WeaponTypeShield {
+		return defs.SlotNameOffHand
+	}
+	if s.Type == defs.WeaponTypeScythe || s.Type == defs.WeaponTypeSpear {
+		return defs.SlotNameTwoHandedWeapon
+	}
+	if s.IsTwoHanded {
+		return defs.SlotNameTwoHandedWeapon
+	}
+	return defs.SlotNameMainHand
 }

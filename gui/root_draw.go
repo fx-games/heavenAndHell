@@ -6,6 +6,8 @@ import (
 	"rpg/common"
 	"rpg/defs"
 	"rpg/geometry"
+	"rpg/gridmap"
+	"rpg/renderer"
 	"rpg/stats"
 	"rpg/util"
 )
@@ -47,6 +49,9 @@ func (u *UIController) drawActors() {
 	state := u.context.GameState()
 	playerFieldOfView := state.GetPlayer().GetFOV()
 
+	enemyColor := defs.White
+	actorAtlas := u.GetCurrentAtlas()
+
 	for _, downedActor := range state.GetMap().DownedActors() {
 		if !visibleMapOnScreen.Contains(downedActor.MapPosition()) || !playerFieldOfView.Visible(downedActor.MapPosition()) {
 			continue
@@ -54,8 +59,9 @@ func (u *UIController) drawActors() {
 		if !u.configuration.DrawTilesBehindActors && state.GetMap().IsActorAt(downedActor.MapPosition()) {
 			continue
 		}
+		enemyColor = defs.OffWhite
 		screenPos := u.mapRenderer.MapFloatToScreen(downedActor.DrawPosition())
-		u.tileRenderer.DrawDefaultScaleTile(float64(screenPos.X), float64(screenPos.Y), u.worldTexture, downedActor.Icon(u.worldTicks), u.context.GameState().ApplyLighting(downedActor.MapPosition(), defs.White, u.worldTicks))
+		u.tileRenderer.DrawDefaultScaleTile(float64(screenPos.X), float64(screenPos.Y), actorAtlas, downedActor.Icon(u.worldTicks), u.context.GameState().ApplyLighting(downedActor.MapPosition(), enemyColor, u.worldTicks))
 	}
 
 	for _, actor := range state.GetMap().Actors() {
@@ -65,18 +71,24 @@ func (u *UIController) drawActors() {
 		if !actor.IsVisible() {
 			continue
 		}
+
+		if u.renderingMode != GraphicRendering {
+			enemyColor = actor.GetColor()
+		}
 		var drawColor color.Color
-		drawColor = state.ApplyLighting(actor.MapPosition(), defs.White, u.worldTicks)
+		drawColor = state.ApplyLighting(actor.MapPosition(), enemyColor, u.worldTicks)
 
 		if actor.IsHurt() {
 			percentage := actor.GetHurtTicksAsPercentage() // goes from 1.0 to 0.0
-			drawColor = util.LerpColor(defs.Red, color.White, percentage)
+			drawColor = util.LerpColor(defs.Red, enemyColor, percentage)
 		}
 		if u.configuration.ActorBobbingEnabled {
-			u.drawActorWithBobbingAnimation(actor, drawColor)
+			u.drawActorWithBobbingAnimation(actor, actorAtlas, drawColor)
 		} else {
 			screenPos := u.mapRenderer.MapFloatToScreen(actor.DrawPosition())
-			u.tileRenderer.DrawDefaultScaleTileWithFlip(float64(screenPos.X), float64(screenPos.Y), u.worldTexture, actor.Icon(u.worldTicks), drawColor, actor.FlipX())
+			flippedX := actor.FlipX() && u.configuration.FlipActorsHorizontally
+			icon := u.getActorIcon(actor, u.worldTicks)
+			u.tileRenderer.DrawDefaultScaleTileWithFlip(float64(screenPos.X), float64(screenPos.Y), actorAtlas, icon, drawColor, flippedX)
 		}
 	}
 
@@ -90,7 +102,7 @@ func (u *UIController) drawActors() {
 	}
 }
 
-func (u *UIController) drawActorWithBobbingAnimation(actor *common.Actor, drawColor color.Color) {
+func (u *UIController) drawActorWithBobbingAnimation(actor *common.Actor, atlas renderer.TextureAtlas, drawColor color.Color) {
 	screenPos := u.mapRenderer.MapFloatToScreen(actor.DrawPosition())
 	actorTickOffset := actor.MapPosition().X + actor.MapPosition().Y + len(actor.Name())
 	tileSize := u.mapRenderer.GetScaledTileSize()
@@ -106,5 +118,108 @@ func (u *UIController) drawActorWithBobbingAnimation(actor *common.Actor, drawCo
 	currentScale := util.LerpPointF(scaleUp, scaleDown, percentage)
 	yOffset := float64(tileSize.Y) * (1 - currentScale.Y)
 	xOffset := (float64(tileSize.X) * (1 - currentScale.X)) / 2
-	u.tileRenderer.DrawScaledTileWithFlip(float64(screenPos.X)+xOffset, float64(screenPos.Y)+yOffset, u.worldTexture, actor.Icon(ticksForAnimation), currentScale, drawColor, actor.FlipX())
+
+	icon := u.getActorIcon(actor, ticksForAnimation)
+
+	flippedX := actor.FlipX() && u.configuration.FlipActorsHorizontally
+	u.tileRenderer.DrawScaledTileWithFlip(float64(screenPos.X)+xOffset, float64(screenPos.Y)+yOffset, atlas, icon, currentScale, drawColor, flippedX)
+}
+
+func (u *UIController) getActorIcon(actor *common.Actor, ticksForAnimation uint64) int32 {
+	var icon int32
+	switch u.renderingMode {
+	case AsciiRendering:
+		icon = actor.AsciiIcon(ticksForAnimation)
+	case CodePage437Rendering:
+		icon = actor.CodePage437Icon(ticksForAnimation)
+	case UnicodeRendering:
+		icon = actor.UnicodeIcon(ticksForAnimation)
+	default:
+		icon = actor.Icon(ticksForAnimation)
+	}
+	return icon
+}
+
+func (u *UIController) getTileIcon(tileAt gridmap.Tile) (int32, color.RGBA) {
+	tileColor := defs.White
+	var icon int32
+	switch u.renderingMode {
+	case UnicodeRendering:
+		fallthrough
+	case AsciiRendering:
+		icon, tileColor = AsciiIconAndColor(tileAt)
+	case CodePage437Rendering:
+		icon, tileColor = CodePage437IconAndColor(tileAt)
+	default:
+		icon = tileAt.Icon()
+	}
+
+	return icon, tileColor
+}
+
+type RenderingMode int
+
+const (
+	GraphicRendering RenderingMode = iota
+	AsciiRendering
+	CodePage437Rendering
+	UnicodeRendering
+)
+
+func AsciiIconAndColor(t gridmap.Tile) (int32, color.RGBA) {
+	switch t.Special {
+	case gridmap.SpecialTileWater:
+		return int32('~'), defs.Blue
+	case gridmap.SpecialTileForest:
+		return int32(';'), defs.Brown
+	case gridmap.SpecialTileMountain:
+		return int32('^'), defs.LightGray
+	case gridmap.SpecialTileVoid:
+		return int32(' '), defs.Black
+	case gridmap.SpecialTileStairsUp:
+		return int32('<'), defs.White
+	case gridmap.SpecialTileStairsDown:
+		return int32('>'), defs.White
+	case gridmap.SpecialTileDamaging:
+		return int32('~'), defs.Red
+	}
+
+	if t.IsWalkable {
+		return '.', defs.DarkGray
+	} else {
+		return '#', defs.OffWhite
+	}
+
+	//return '?', defs.White
+}
+
+func CodePage437IconAndColor(t gridmap.Tile) (int32, color.RGBA) {
+	//*
+	//if tileAt.IsWalkable {
+	//			icon = int32(util.UnicodeToCP437Byte('∙'))
+	//		} else {
+	//			icon = int32(util.UnicodeToCP437Byte('█'))
+	//		}*/
+	switch t.Special {
+	case gridmap.SpecialTileWater:
+		return int32(util.UnicodeToCP437Byte('≈')), defs.Blue
+	case gridmap.SpecialTileForest:
+		return int32(util.UnicodeToCP437Byte('♣')), defs.Brown
+	case gridmap.SpecialTileMountain:
+		return int32(util.UnicodeToCP437Byte('∩')), defs.LightGray
+	case gridmap.SpecialTileVoid:
+		return int32(util.UnicodeToCP437Byte(' ')), defs.Black
+	case gridmap.SpecialTileStairsUp:
+		return int32(util.UnicodeToCP437Byte('≡')), defs.White
+	case gridmap.SpecialTileStairsDown:
+		return int32(util.UnicodeToCP437Byte('≡')), defs.Cyan
+	case gridmap.SpecialTileDamaging:
+		return int32(util.UnicodeToCP437Byte('≈')), defs.Red
+	}
+
+	if t.IsWalkable {
+		return int32(util.UnicodeToCP437Byte('∙')), defs.DarkGray
+	} else {
+		return int32(util.UnicodeToCP437Byte('█')), defs.OffWhite
+	}
 }
