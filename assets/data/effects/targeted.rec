@@ -103,7 +103,7 @@ icon: 223
 dlvl: 1
 targeting: earthshaker(5 | 5)
 hit_zone: neighbors_only(1)
-effect: earthshaker(5 | 1)
+effect: earthshaker
 
 name: Summon Monster
 internal_name: summon_monster
