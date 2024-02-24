@@ -23,14 +23,15 @@ const (
 	ActionNameBuffSpeed         UntargetedActionName = "buff_speed"
 	ActionNameRecall            UntargetedActionName = "recall"
 	ActionNameBless             UntargetedActionName = "buff_armor"
-	ActionNameStoneSkin             UntargetedActionName = "stoneskin"
+	ActionNameStoneSkin         UntargetedActionName = "stoneskin"
 	ActionNameEnchantWeapon     UntargetedActionName = "enchant_weapon"
 	ActionNameEnchantArmor      UntargetedActionName = "enchant_armor"
-	ActionNameAcquirement      UntargetedActionName = "acquirement"
+	ActionNameAcquirement       UntargetedActionName = "acquirement"
 	ActionNameMultiShot         UntargetedActionName = "multi_shot"
 	ActionNameTelefrag          UntargetedActionName = "telefrag"
 	ActionNameReadMessage       UntargetedActionName = "read_message"
 	ActionNameReplicate         UntargetedActionName = "replicate_with"
+	ActionNameEarthquake        UntargetedActionName = "earthquake"
 )
 
 func (g *Factory) NewUntargetedActionFromName(name string) *UntargetedAction {
@@ -121,7 +122,7 @@ func (g *Factory) getSpeedBuff(args util.Arguments) UntargetedEffect {
 			Value:          float64(amount),
 			Mode:           stats.ModifyAdditive,
 			IsPercentBased: false,
-			StackID: 	    string(source),
+			StackID:        string(source),
 		}
 		timekeeper := g.getTimeKeeper()
 
@@ -308,8 +309,8 @@ func (g *Factory) getHealHealthBy(args util.Arguments) UntargetedEffect {
 	effect := func(user *Actor, source EffectSource) {
 		healHealthAction := NewChangeResourceAction(NewActorCause("Heal", user), user, stats.Health, float64(interval.LinearRandom()))
 		g.actionBroker.Execute(healHealthAction)
-		g.logIfPlayer(user,"You feel better")
-		g.tryEndTurn(user, 100 / user.GetBaseSpeed())
+		g.logIfPlayer(user, "You feel better")
+		g.tryEndTurn(user, 100/user.GetBaseSpeed())
 	}
 	return UntargetedEffect{
 		Effect: effect,
@@ -325,7 +326,7 @@ func (g *Factory) getHealManaBy(args util.Arguments) UntargetedEffect {
 		healHealthAction := NewChangeResourceAction(NewActorCause("Mana Surge", user), user, stats.Mana, float64(interval.LinearRandom()))
 		g.actionBroker.Execute(healHealthAction)
 		g.logError("You feel a surge of mana")
-		g.tryEndTurn(user, 100 / user.GetBaseSpeed())
+		g.tryEndTurn(user, 100/user.GetBaseSpeed())
 	}
 	return UntargetedEffect{
 		Effect: effect,
@@ -352,7 +353,7 @@ func (g *Factory) getMultiShot(args util.Arguments) UntargetedEffect {
 			rangedAttackAction := NewRangedAttackAction(NewActorCause("Multi Shot", user), user, target.MapPosition())
 			g.actionBroker.Execute(rangedAttackAction)
 		}
-		g.tryEndTurn(user, 100 / user.GetAttackSpeed(RangedAttack))
+		g.tryEndTurn(user, 100/user.GetAttackSpeed(RangedAttack))
 	}
 	return UntargetedEffect{
 		Effect: effect,
@@ -360,6 +361,10 @@ func (g *Factory) getMultiShot(args util.Arguments) UntargetedEffect {
 			util.LabelTextFromString(fmt.Sprintf("Shoot at %d enemies at the same time", shotCount)),
 		},
 	}
+}
+
+func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
+	return UntargetedEffect{}
 }
 
 func (g *Factory) tryEndTurn(user *Actor, autUsed int) {
@@ -410,7 +415,7 @@ func (g *Factory) getStoneSkinBuff(args util.Arguments) UntargetedEffect {
 			Value:          float64(-5),
 			Mode:           stats.ModifyAdditive,
 			IsPercentBased: false,
-			StackID: 	    string(source),
+			StackID:        string(source),
 		}
 		timeKeeper := g.getTimeKeeper()
 		RemoveTimedEffectsBySource(timeKeeper, source)
@@ -420,7 +425,7 @@ func (g *Factory) getStoneSkinBuff(args util.Arguments) UntargetedEffect {
 		timeKeeper.AddTimed(timedSpeedMod)
 
 		currentAC := user.GetStats().GetAttribute(stats.ArmorClass)
-		missingToThirty := max(0, 30 - currentAC)
+		missingToThirty := max(0, 30-currentAC)
 		acMod := defs.AddToBaseAttribute(g.randomSource, stats.ArmorClass, float64(missingToThirty))
 		acMod.StackID = string(source)
 		timedACMod := NewTimedModifier(string(ActionNameStoneSkin), user, acMod, turnCount)
@@ -428,7 +433,7 @@ func (g *Factory) getStoneSkinBuff(args util.Arguments) UntargetedEffect {
 		timeKeeper.AddTimed(timedACMod)
 
 		g.logIfPlayer(user, "Your skin hardens but movement becomes difficult.")
-		g.tryEndTurn(user, 100 / user.GetBaseSpeed())
+		g.tryEndTurn(user, 100/user.GetBaseSpeed())
 	}
 	return UntargetedEffect{
 		Effect: effect,
