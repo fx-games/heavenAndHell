@@ -206,14 +206,14 @@ func (g *Factory) GenerateMagicItem(dungeonLevel int) *Item {
 	//diceRoll := source.Intn(100)
 	var addedItem *Item
 	/*
-	switch {
-	case diceRoll >= 0 && diceRoll < 40:
-		addedItem = g.NewRandomWeapon(dungeonLevel)
-	case diceRoll >= 40 && diceRoll < 80:
-		addedItem = g.NewRandomArmorPiece(dungeonLevel)
-	default:
-		addedItem = g.NewRandomAccessory(dungeonLevel)
-	}
+		switch {
+		case diceRoll >= 0 && diceRoll < 40:
+			addedItem = g.NewRandomWeapon(dungeonLevel)
+		case diceRoll >= 40 && diceRoll < 80:
+			addedItem = g.NewRandomArmorPiece(dungeonLevel)
+		default:
+			addedItem = g.NewRandomAccessory(dungeonLevel)
+		}
 	*/
 	addedItem = g.NewRandomAccessory(dungeonLevel)
 
@@ -225,7 +225,7 @@ func (g *Factory) setRarityAndEnchantments(item *Item, itemLevel int) {
 	}
 	random := g.randomSource
 	rarity := ItemRarityCommon
-	rarityRoll := random.Intn(100)+1-itemLevel // 1-100
+	rarityRoll := random.Intn(100) + 1 - itemLevel // 1-100
 
 	if rarityRoll <= 20 {
 		rarity = ItemRarityMagic
@@ -253,8 +253,8 @@ func (g *Factory) setRarityAndEnchantments(item *Item, itemLevel int) {
 	}
 
 	if item.IsArmor() {
-		randomVal := min(10, random.Intn(10) + itemLevel)
-		switch  {
+		randomVal := min(10, random.Intn(10)+itemLevel)
+		switch {
 		case randomVal >= 5 && randomVal <= 7:
 			item.GetArmorStats().Plus = 1
 		case randomVal >= 8 && randomVal <= 9:
@@ -265,8 +265,8 @@ func (g *Factory) setRarityAndEnchantments(item *Item, itemLevel int) {
 	}
 
 	if item.IsWeapon() {
-		randomVal := min(10, random.Intn(10) + itemLevel)
-		switch  {
+		randomVal := min(10, random.Intn(10)+itemLevel)
+		switch {
 		case randomVal >= 5 && randomVal <= 7:
 			item.GetWeaponStats().Plus = 1
 		case randomVal >= 8 && randomVal <= 9:
@@ -319,7 +319,6 @@ func (g *Factory) NewRandomWeapon(dungeonLevel int) *Item {
 
 	// create item
 
-
 	weapon := g.NewItemFromDefinition(weaponDef, dungeonLevel)
 	return weapon
 }
@@ -355,7 +354,7 @@ func (g *Factory) NewItemFromDefinition(itemDefinition defs.ItemDefinition, dung
 			AccuracyAtMinRange: itemDefinition.Weapon.AccuracyAtMinRange,
 			ArmorPenetration:   itemDefinition.Weapon.ArmorPenetration,
 			ProjectileIcon:     itemDefinition.Weapon.ProjectileIcon,
-			IsTwoHanded: itemDefinition.Weapon.IsTwoHanded,
+			IsTwoHanded:        itemDefinition.Weapon.IsTwoHanded,
 		}
 		baseItem.SetWeaponComponent(weaponPart)
 	}
@@ -422,8 +421,6 @@ func (g *Factory) NewItemFromDefinition(itemDefinition defs.ItemDefinition, dung
 
 	return baseItem
 }
-
-
 
 func (g *Factory) NewRandomLightSource(dungeonLevel int) *Item {
 	// get defs
@@ -503,7 +500,7 @@ func (g *Factory) GetAllHitEffects() map[string]func(args util.Arguments) *HitEf
 		"immobilize":          g.immobilizeTarget,
 		"fireball":            g.throwFireball,
 		"project_fire":        g.projectFire,
-		"summon_monster": 	   g.summonRandomMonster,
+		"summon_monster":      g.summonRandomMonster,
 		"jumpstart":           g.jumpStart,
 		"fire_zone":           g.fireZone,
 		"steal_item":          g.stealItem,
@@ -754,6 +751,7 @@ func (g *Factory) GetAllUntargetedEffects() map[string]func(args util.Arguments)
 		string(ActionNameMultiShot):         g.getMultiShot,
 		string(ActionNameTelefrag):          g.getRandomTelefragAction,
 		string(ActionNameReplicate):         g.getReplicate,
+		string(ActionNameEarthquake):        g.getEarthquake,
 	}
 }
 

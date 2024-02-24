@@ -364,7 +364,46 @@ func (g *Factory) getMultiShot(args util.Arguments) UntargetedEffect {
 }
 
 func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
-	return UntargetedEffect{}
+	earthQuakeRadius := args.GetIntOrDefault(0, 4)
+	effect := func(user *Actor, source EffectSource) {
+		currentMap := g.state.GetMap()
+		dijkstraAoeMap := toList(currentMap.GetDijkstraMap(user.mapPosition, earthQuakeRadius, func(point geometry.Point) bool {
+			return point != user.mapPosition
+		}))
+		
+		wallTile := gridmap.Tile{
+			DefinedIcon:        defs.IconCathedralWall,
+			DefinedDescription: "a wall",
+			IsWalkable:         false,
+			IsTransparent:      false,
+			Special:            gridmap.SpecialTileWall,
+		}
+
+		floorTile := gridmap.Tile{
+			DefinedIcon:        defs.IconCathedralFloor,
+			DefinedDescription: "floor tile",
+			IsWalkable:         true,
+			IsTransparent:      false,
+		}
+
+		for _, pos := range dijkstraAoeMap {
+			if currentMap.IsTileWall(pos) {
+				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Floor", user), "floor", func() {
+					currentMap.SetTile(pos, floorTile)
+				}))
+			} else if !currentMap.IsTileWall(pos) {
+				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Wall", user), "wall", func() {
+					currentMap.SetTile(pos, wallTile)
+				}))
+			}
+		}
+	}
+	return UntargetedEffect{
+		Effect: effect,
+		Description: []util.LabelText{
+			util.LabelTextFromString("changes the terrain around the actor"),
+		},
+	}
 }
 
 func (g *Factory) tryEndTurn(user *Actor, autUsed int) {

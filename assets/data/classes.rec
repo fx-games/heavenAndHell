@@ -8,6 +8,7 @@ gold: 180
 item: main_gauche
 item: torch
 item: partial_leather_armour
+item: scroll_of_earthquake
 resource_health: 20
 resource_mana: 1
 stats_health_regeneration: 0.0
