@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	//"rpg/defs"
 )
 
 type SpecialTileType uint64
