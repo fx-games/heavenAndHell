@@ -173,7 +173,10 @@ func (c *Console) CancelTargeting() {
 }
 
 func (c *Console) ShowFullStats() {
-
+	player := c.context.GameState().GetPlayer()
+	fullStats := player.GetFullStats()
+	c.OpenTextWindow(fullStats)
+	//label.SetText(fullStats)
 }
 
 func (c *Console) UpdateStatsLabel() {
@@ -270,6 +273,7 @@ func (c *Console) openShopMenuWithHandler(inventory *common.Inventory, handler f
 	common.SortInventory(inventoryStacks)
 
 	table := tview.NewTable()
+	table.SetWrapSelection(true, false)
 	table.SetSelectedStyle(tcell.StyleDefault.Background(tcell.ColorGreen))
 	table.SetBorders(false)
 	table.SetBorder(true)
@@ -402,6 +406,8 @@ func (c *Console) HandleInput() (terminationCode int) {
 			actions.PickUpItem()
 		} else if typedRune == 'S' {
 			c.OpenSkillsMenu()
+		} else if typedRune == 'C' {
+			c.ShowFullStats()
 		} else if typedRune == 'Q' {
 			c.terminationCode = 1
 			c.screen.Fini()
@@ -481,7 +487,7 @@ func (c *Console) onItemInInventoryClicked(typedItem *common.Item) {
 		} else {
 			act.EquipItem(typedItem)
 		}
-		c.ShowFullStats()
+		//c.ShowFullStats()
 		return
 	}
 
@@ -668,7 +674,8 @@ func (c *Console) drawMap(screen tcell.Screen, xOff int, yOff int, sWidth int, s
 				}
 				c.putRune(screen, drawX, drawY, drawStyle, '·')
 			} else {
-				c.putRune(screen, drawX, drawY, drawStyle, '█')
+				drawStyle = drawStyle.Reverse(true)
+				c.putRune(screen, drawX, drawY, drawStyle, ' ')
 			}
 		}
 	}

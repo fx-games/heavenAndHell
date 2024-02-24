@@ -602,8 +602,8 @@ type TimedModifier struct {
 	name      string
 }
 
-func (t *TimedModifier) TintColor() color.Color {
-	return color.White
+func (t *TimedModifier) TintColor() color.RGBA {
+	return defs.White
 }
 func (t *TimedModifier) Name() string {
 	return t.name
