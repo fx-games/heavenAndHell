@@ -464,18 +464,24 @@ func (g *Factory) NewItemFromDefinitionName(itemString string, dungeonLevel int)
 }
 
 func (g *Factory) NewTargetedActionFromName(name string) *TargetedAction {
+	var args util.Arguments
+
+	if util.LooksLikeAFunction(name) {
+		name, args = util.GetNameAndArgs(name)
+	}
+
 	if def, exists := g.definitions.TargetedDefinitions[name]; exists {
-		return g.NewTargetedActionFromDefinition(def)
+		return g.NewTargetedActionFromDefinition(def, args)
 	}
 	g.logError(fmt.Sprintf("Unknown targeted action: %s", name))
 	return nil
 }
 
-func (g *Factory) NewTargetedActionFromDefinition(definition defs.TargetedActionDefinition) *TargetedAction {
+func (g *Factory) NewTargetedActionFromDefinition(definition defs.TargetedActionDefinition, args util.Arguments) *TargetedAction {
 	targetedAction := NewTargetedAction(
 		definition.Name,
 		HitZoneFromString(g.state.GetMap, definition.HitZone),
-		g.NewOnHitEffectFromString(definition.OnHitEffect),
+		g.NewOnHitEffectFromNameAndArgs(definition.OnHitEffect, args),
 		NewTargetingRulesFromString(definition.Targeting),
 	)
 
@@ -493,6 +499,7 @@ func (g *Factory) GetAllHitEffects() map[string]func(args util.Arguments) *HitEf
 		"immobilize":          g.immobilizeTarget,
 		"fireball":            g.throwFireball,
 		"project_fire":        g.projectFire,
+		"summon_monster": 	   g.summonRandomMonster,
 		"jumpstart":           g.jumpStart,
 		"fire_zone":           g.fireZone,
 		"steal_item":          g.stealItem,
@@ -511,6 +518,10 @@ func (g *Factory) NewOnHitEffectFromString(effectName string) *HitEffect {
 	if util.LooksLikeAFunction(effectName) {
 		effectName, args = util.GetNameAndArgs(effectName)
 	}
+	return g.NewOnHitEffectFromNameAndArgs(effectName, args)
+}
+
+func (g *Factory) NewOnHitEffectFromNameAndArgs(effectName string, args util.Arguments) *HitEffect {
 	allHitEffects := g.GetAllHitEffects()
 	if _, ok := allHitEffects[effectName]; ok {
 		return allHitEffects[effectName](args)

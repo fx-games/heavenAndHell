@@ -9,7 +9,13 @@ import (
 	"rpg/stats"
 	"rpg/util"
 )
+// Spell Effects of Angband
+// https://github.com/angband/angband/blob/master/lib/gamedata/activation.txt
 
+// Monster Effects of Angband
+// https://github.com/angband/angband/blob/master/lib/gamedata/blow_effects.txt
+// https://github.com/angband/angband/blob/master/lib/gamedata/blow_methods.txt
+// https://github.com/angband/angband/blob/master/lib/gamedata/monster_spell.txt
 /*
 Spell Effects of Moria
  - Sleep Monster
@@ -43,6 +49,18 @@ Spell Effects of Moria
 From Brogue
  - Discord (Turn monsters against each other)
 
+
+Angband Categories
+ - Summon Monster
+ - Slow/Haste
+ - Blind
+ - Scare
+ - Short Beam of Elemental Damage - Ray with short/medium length
+ - Bolt of Elemental Damage - One projectile
+ - Orbs of Elemental Damage - Multiple projectiles?
+ - Breath of Elemental Damage - Breath Cone
+
+
 */
 
 func (g *Factory) GetRandomTargetedAction(randomSource *rand.Rand, dungeonLevel int) *TargetedAction {
@@ -53,7 +71,7 @@ func (g *Factory) GetRandomTargetedAction(randomSource *rand.Rand, dungeonLevel 
 		}
 	}
 	randomDefinition := allowed[randomSource.Intn(len(allowed))]
-	tAction := g.NewTargetedActionFromDefinition(randomDefinition)
+	tAction := g.NewTargetedActionFromDefinition(randomDefinition, nil)
 	tAction.SetDungeonLevel(dungeonLevel)
 	return tAction
 }
@@ -153,11 +171,35 @@ func (g *Factory) projectFire(args util.Arguments) *HitEffect {
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			for _, hitPos := range hitPositions {
-				g.actionBroker.Execute(NewSpawnObjectAction(NewActorCause("Fire", attacker), g.spawnFireAt, hitPos))
+				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Fire", attacker), "fire", func() {
+					g.spawnFireAt(hitPos)
+				}))
 			}
 		},
 		Description: []util.LabelText{
 			util.LabelTextFromString("Create fire at target location"),
+		},
+	}
+}
+
+func (g *Factory) summonRandomMonster(args util.Arguments) *HitEffect {
+	dlvl := util.ParseDice(args.Get(0)).Roll()
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			for _, hitPos := range hitPositions {
+				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Summon monster", attacker), "monster", func() {
+					newEnemy, _ := g.NewRandomEnemy(dlvl)
+					currentMap := g.state.GetMap()
+					currentMap.AddActor(newEnemy, hitPos)
+					newEnemy.SetDrawPosition(hitPos.ToPointF())
+
+					timeKeeper := g.getTimeKeeper()
+					timeKeeper.AddTimed(newEnemy)
+				}))
+			}
+		},
+		Description: []util.LabelText{
+			util.LabelTextFromString(fmt.Sprintf("Summon a random monster from dungeon level %d", dlvl)),
 		},
 	}
 }

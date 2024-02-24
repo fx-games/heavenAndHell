@@ -29,6 +29,7 @@ type StatusEffect string
 const (
 	// binary
 	StatusInvisible StatusEffect = "invisible" // cannot be seen
+	StatusSeeInvisible StatusEffect = "see_invisible" // can see invisible things
 	StatusStunned   StatusEffect = "stunned"   // cannot act
 	StatusScared    StatusEffect = "scared"    // runs away
 	StatusSilenced  StatusEffect = "silenced"  // cannot cast spells

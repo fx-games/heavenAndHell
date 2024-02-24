@@ -34,7 +34,7 @@ stats_dexterity: 15
 stats_intelligence: 5
 untargeted_skill: multi_shot
 targeted_skill: blink
-targeted_skill: jump_start
+targeted_skill: jump_start(5 | 5)
 
 internal_name: mage
 name: Mage

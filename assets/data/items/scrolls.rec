@@ -45,9 +45,17 @@ name: Scroll of Acquirement
 internal_name: scroll_of_acquirement
 icon: 139
 dlvl: 1
-cost: 100000
+cost: 100
 category: scroll
 untargeted_action: acquirement
+
+name: Scroll of Summoning
+internal_name: scroll_of_summoning
+icon: 139
+dlvl: 1
+cost: 100
+category: scroll
+targeted_action: summon_monster(1d10)
 
 name: Scroll of Earthquake
 internal_name: scroll_of_earthquake
