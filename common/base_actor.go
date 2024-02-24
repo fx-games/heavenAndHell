@@ -655,21 +655,9 @@ func (a *Actor) GetFullStats() []util.LabelText {
 			return defaultColor
 		}
 	}
-	if ourStats.GetResource(stats.Health).IsLessThanPercent(0.25) {
-		hpColor = color.RGBA{R: 255, G: 30, B: 30, A: 255}
-	} else if ourStats.GetResource(stats.Health).IsLessThanPercent(0.5) {
-		hpColor = color.RGBA{R: 255, G: 150, B: 30, A: 255}
-	} else if ourStats.GetResource(stats.Health).IsLessThanPercent(0.75) {
-		hpColor = color.RGBA{R: 255, G: 255, B: 30, A: 255}
-	}
+	hpColor = ourStats.GetResource(stats.Health).AsColor()
+	manaColor = ourStats.GetResource(stats.Mana).AsColor()
 
-	if ourStats.GetResource(stats.Mana).IsLessThanPercent(0.25) {
-		manaColor = color.RGBA{R: 255, G: 30, B: 30, A: 255}
-	} else if ourStats.GetResource(stats.Mana).IsLessThanPercent(0.5) {
-		manaColor = color.RGBA{R: 255, G: 150, B: 30, A: 255}
-	} else if ourStats.GetResource(stats.Mana).IsLessThanPercent(0.75) {
-		manaColor = color.RGBA{R: 255, G: 255, B: 30, A: 255}
-	}
 	levelColor := defaultColor
 	if a.CanLevelUp() {
 		levelColor = defs.LightTextColor

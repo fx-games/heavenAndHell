@@ -14,6 +14,7 @@ import (
 	"rpg/gridmap"
 	"rpg/stats"
 	"rpg/util"
+	"slices"
 	"strings"
 )
 
@@ -51,7 +52,19 @@ func (c *Console) HasOverlays() bool {
 }
 
 func (c *Console) ShowLogMessage(message string) {
-	c.messageLabel.SetText(message)
+	c.messageLabel.SetText(convertColorCodes(message))
+}
+
+func convertColorCodes(message string) string {
+	regexPattern := `\[:([\w,]+)\]` // our color codes look like this [:red] [:blue] [:green] [:yellow] [:white] [:24,54,222]
+	rp, _ := regexp.Compile(regexPattern)
+	return rp.ReplaceAllStringFunc(message, func(match string) string {
+		colorCode := match[2 : len(match)-1]
+		if strings.Contains(colorCode, ",") {
+			return fmt.Sprintf("[#%s]", colorCode)
+		}
+		return toTcellColorString(defs.ColorFromName(colorCode))
+	})
 }
 
 func (c *Console) Cancel() {
@@ -142,7 +155,6 @@ func RemoveColorCodes(colorCodedText string) string {
 	// color codes look like this [:red] [:blue] [:green] [:yellow] [:white] [:24,54,222]
 	regexPattern := `\[([\w,]+)\]`
 	rp, _ := regexp.Compile(regexPattern)
-
 	return rp.ReplaceAllString(colorCodedText, "")
 }
 
@@ -216,9 +228,113 @@ func (c *Console) BeginTargeting(rules common.TargetRules, onHit *common.HitEffe
 }
 
 func (c *Console) OpenShopMenu(npc *common.Actor) {
+	c.openShopMenuWithHandler(npc.GetInventory(), func(item *common.Item) {
+		c.tryToBuy(item, npc)
+	})
+}
+func (c *Console) tryToBuy(item *common.Item, seller *common.Actor) {
+	player := c.context.GameState().GetPlayer()
+	goldAmount := player.GetStats().GetAttribute(stats.Gold)
+	msg := c.ShowLogMessage // TODO, this is wrong..
+	cost := item.BuyPrice()
+	cannotPayForItem := cost > goldAmount
 
+	if cannotPayForItem {
+		msg("You don't have enough gold")
+		c.OpenShopMenu(seller)
+		return
+	}
+	player.GetStats().DecrementBy(stats.Gold, cost)
+	seller.GetStats().IncrementBy(stats.Gold, cost)
+
+	alwaysItems := c.context.Definitions.VendorDefinitions[string(seller.GetVendorType())].Always
+	seller.GetInventory().Remove(item)
+	player.GetInventory().Add(item)
+	itemName := item.GetInternalName()
+	if slices.Contains(alwaysItems, itemName) {
+		seller.GetInventory().Add(item.Clone())
+	}
+
+	msg(fmt.Sprintf("You bought [:darkText]%s[:white] for [:darkText]%d[:white] gold", item.Name(), cost))
+	c.OpenShopMenu(seller)
 }
 
+func (c *Console) openShopMenuWithHandler(inventory *common.Inventory, handler func(item *common.Item)) {
+	if inventory.IsEmpty() {
+		return
+	}
+	player := c.context.GameState().GetPlayer()
+	goldAmount := player.GetStats().GetAttribute(stats.Gold)
+
+	inventoryStacks := inventory.StackedItems()
+	common.SortInventory(inventoryStacks)
+
+	table := tview.NewTable()
+	table.SetSelectedStyle(tcell.StyleDefault.Background(tcell.ColorGreen))
+	table.SetBorders(false)
+	table.SetBorder(true)
+	table.SetSelectable(true, false)
+	table.SetSelectedFunc(func(row, column int) {
+		item := inventoryStacks[row][0]
+		handler(item)
+	})
+	table.SetTitle(fmt.Sprintf("You have %d gold", goldAmount))
+	longestName := 0
+	longestPrice := 0
+	for itemIndex, i := range inventoryStacks {
+
+		item := i[0]
+		cost := item.BuyPrice()
+		cannotPayForItem := cost > goldAmount
+
+		colorCodeForPrice := "darkText"
+		if cannotPayForItem {
+			colorCodeForPrice = "negative"
+		}
+		/*
+		itemName := item.Name()
+		if c.configuration.ItemNamesInShop == common.ItemNamingSchemeEnchantments {
+			itemName = item.PlusName()
+		} else if c.configuration.ItemNamesInShop == common.ItemNamingSchemeBandStyle {
+
+		 */
+			itemName := item.BandStyleName()
+		//}
+		if len(i) > 1 {
+			itemName = fmt.Sprintf("%s (x%d)", itemName, len(i))
+		}
+		nameString := fmt.Sprintf("%s", itemName)
+		//nameStringWithColor := fmt.Sprintf("%s", itemName)
+		priceString := fmt.Sprintf("%d", cost)
+
+		nameCell := &tview.TableCell{
+			Text:  nameString,
+			Color: toTcellColor(item.TintColor()),
+			Align: tview.AlignLeft,
+			NotSelectable: false,
+		}
+		priceCell := &tview.TableCell{
+			Text:  priceString,
+			Color: toTcellColor(defs.ColorFromName(colorCodeForPrice)),
+			Align: tview.AlignRight,
+			NotSelectable: false,
+		}
+		table.SetCell(itemIndex, 0, nameCell)
+		table.SetCell(itemIndex, 1, priceCell)
+		longestName = max(longestName, len(nameString))
+		longestPrice = max(longestPrice, len(priceString))
+	}
+
+	longestItem := longestName + longestPrice + 1
+	w, h := c.screen.Size()
+	height := min(h-4, len(inventoryStacks)+2)
+	width := min(longestItem+2, w-4)
+	modalContainer := makeModal(table, width, height)
+	table.SetInputCapture(c.popOnEscape("shop"))
+	c.rootPages.AddPage("shop", modalContainer, true, true)
+	c.rootPages.ShowPage("shop")
+	c.focus = table
+}
 func (c *Console) BeginPlayerSellingTo(vendor *common.Actor) {
 
 }
@@ -284,6 +400,8 @@ func (c *Console) HandleInput() (terminationCode int) {
 			c.OpenListInventoryForDropping()
 		} else if typedRune == 'g' {
 			actions.PickUpItem()
+		} else if typedRune == 'S' {
+			c.OpenSkillsMenu()
 		} else if typedRune == 'Q' {
 			c.terminationCode = 1
 			c.screen.Fini()
@@ -311,6 +429,7 @@ func (c *Console) Update(dt float64) {
 		}
 
 	*/
+	c.context.Animator().CancelAllAnimations()
 	c.context.Animator().Tick() // this is animations
 	for _, actor := range c.context.GameState().GetMap().Actors() {
 		actor.Tick()
@@ -455,10 +574,11 @@ func (c *Console) setupUI() {
 	c.mapWindow.SetDrawFunc(c.drawMap)
 
 	c.messageLabel = tview.NewTextView()
-	c.messageLabel.SetText("Hello, world!")
+	c.messageLabel.SetDynamicColors(true)
+	c.messageLabel.SetText("Welcome, [green]Stranger!")
 
 	c.statusBar = tview.NewTextView()
-	c.statusBar.SetText("Status Bar")
+	//c.statusBar.SetText("Status Bar")
 
 	grid := tview.NewGrid().
 		SetRows(1, 0, 1).
@@ -474,6 +594,7 @@ func (c *Console) setupUI() {
 	width, height := c.screen.Size()
 
 	c.rootPages.SetRect(0, 0, width, height)
+	c.UpdateStatsLabel()
 }
 
 func (c *Console) drawMap(screen tcell.Screen, xOff int, yOff int, sWidth int, sHeight int) (int, int, int, int) {
@@ -512,10 +633,8 @@ func (c *Console) drawMap(screen tcell.Screen, xOff int, yOff int, sWidth int, s
 			drawRune := ' '
 			if canSeeLocation && currentMap.IsActorAt(mapPos) {
 				actorAt := currentMap.ActorAt(mapPos)
-				if actorAt.IsHurt() {
-					drawStyle = drawStyle.Foreground(toTcellColor(defs.Red))
-				}
 				if mapPos == player.MapPosition() {
+					drawStyle = drawStyle.Foreground(toTcellColor(actorAt.GetStats().GetResource(stats.Health).AsColor()))
 					drawRune = '@'
 				} else {
 					drawRune = rune(actorAt.Name()[0])
@@ -576,7 +695,41 @@ func (c *Console) showLog() {
 	if len(buffer) > 20 {
 		buffer = buffer[len(buffer)-20:]
 	}
+	for i := range buffer {
+		buffer[i] = convertColorCodes(buffer[i])
+	}
 	c.openTextWindow(buffer)
+}
+func (c *Console) GetActiveSkillsForUI(player *common.Actor) []fmt.Stringer {
+	var activeSkills []fmt.Stringer
+	for _, skill := range player.GetTargetedSkills() {
+		activeSkills = append(activeSkills, skill)
+	}
+	for _, skill := range player.GetUntargetedSkills() {
+		activeSkills = append(activeSkills, skill)
+	}
+	return activeSkills
+}
+func (c *Console) OpenSkillsMenu() {
+	player := c.context.GameState().GetPlayer()
+	allSkills := c.GetActiveSkillsForUI(player)
+	var options []util.MenuItem
+	for _, s := range allSkills {
+		skill := s
+		options = append(options, util.MenuItem{
+			MainText: skill.String(),
+			Action: func() {
+				switch typedSkill := skill.(type) {
+				case *common.TargetedAction:
+					c.context.PlayerAction().BeginActionTargeting(typedSkill)
+				case *common.UntargetedAction:
+					c.context.PlayerAction().ActivateUntargetedAction(typedSkill, common.EffectSource("Player"))
+				}
+			},
+		})
+
+	}
+	c.OpenMenu(options)
 }
 
 func makeModal(p tview.Primitive, width, height int) tview.Primitive {

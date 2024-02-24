@@ -17,11 +17,30 @@ type RangedTargetingRules struct {
 	infoForTarget       func(geometry.Point) string
 }
 
-func (r RangedTargetingRules) GetInfoTextForTarget(pos geometry.Point) string {
+func (r RangedTargetingRules) OnTargetChanged(targetPos geometry.Point) TargetInfo {
+	var infoText string
 	if r.infoForTarget != nil {
-		return r.infoForTarget(pos)
+		infoText = r.infoForTarget(targetPos)
 	}
-	return ""
+
+	isValid := r.GetOrigin() != targetPos && r.IsVisiblePositionOnMap(targetPos)
+	highlights := make([]TargetHighlight, 0)
+	origin := r.GetOrigin()
+
+	hitPositions := r.aoe.GetHitPositions(origin, targetPos)
+	for _, highPos := range hitPositions {
+		highlights = append(highlights, TargetHighlight{
+			Pos:   highPos,
+			Color: color.RGBA{R: 255, G: 80, B: 80, A: 255},
+		})
+	}
+	return TargetInfo{
+		AdjustedTarget: targetPos,
+		Highlights:     highlights,
+		Hitpositions:   hitPositions,
+		IsValid:        isValid,
+		InfoText:       infoText,
+	}
 }
 
 func (r RangedTargetingRules) GetAttacker() *Actor {
@@ -41,26 +60,10 @@ func (r RangedTargetingRules) IsVisiblePositionOnMap(target geometry.Point) bool
 	return r.isOnMap(target) && r.attacker.CanSee(target)
 }
 
-func (r RangedTargetingRules) IsValidTarget(target geometry.Point) bool {
-	return r.GetOrigin() != target && r.IsVisiblePositionOnMap(target)
-}
-
 func (r RangedTargetingRules) GetPreSelectedTarget() geometry.Point {
 	return r.nearestHostileActor()
 }
 
-func (r RangedTargetingRules) GetHighlightsForTarget(target geometry.Point) []TargetHighlight {
-	highlights := make([]TargetHighlight, 0)
-	origin := r.GetOrigin()
-
-	for _, pos := range r.aoe.GetHitPositions(origin, target) {
-		highlights = append(highlights, TargetHighlight{
-			Pos:   pos,
-			Color: color.RGBA{R: 255, G: 80, B: 80, A: 255},
-		})
-	}
-	return highlights
-}
 
 func NewRangedAttackTargetingRules(args util.Arguments) *TargetRulesProvider {
 	hitChanceFunc := CalculateRangedWeaponHitChance
@@ -74,15 +77,6 @@ func NewRangedAttackTargetingRules(args util.Arguments) *TargetRulesProvider {
 				isOnMap: func(target geometry.Point) bool {
 					return currentMap.Contains(target)
 				},
-				/*
-					getActorAt: func(target geometry.Point) *common.Actor {
-						if !currentMap.Contains(target) || !currentMap.IsActorAt(target) {
-							return nil
-						}
-						return currentMap.GetActor(target)
-					},
-
-				*/
 				nearestHostileActor: func() geometry.Point {
 					nearestActor := currentMap.GetNearestActor(attacker.MapPosition(), func(actor *Actor) bool {
 						if !actor.IsHostileTo(attacker) || !attacker.CanSee(actor.MapPosition()) || actor.IsVendor() {
@@ -120,6 +114,18 @@ type DirectTargetingRules struct {
 	moveDist      func(origin, target geometry.Point) int
 	maxRange      int
 	infoForTarget func(geometry.Point) string
+}
+
+func (d DirectTargetingRules) OnTargetChanged(target geometry.Point) TargetInfo {
+	isValid := d.IsValidTarget(target)
+	highlights := d.GetHighlightsForTarget(target)
+	return TargetInfo{
+		AdjustedTarget: target,
+		Highlights:     highlights,
+		Hitpositions:   d.GetHitpositions(target),
+		IsValid:        isValid,
+		InfoText:       d.GetInfoTextForTarget(target),
+	}
 }
 
 func (d DirectTargetingRules) GetInfoTextForTarget(pos geometry.Point) string {
@@ -221,6 +227,18 @@ type CustomTargetingRules struct {
 	aoe                 *AoEResolver
 	isValidTarget       func(target geometry.Point) bool
 	highlights          func(origin, target geometry.Point, hitPositions []geometry.Point) []TargetHighlight
+}
+
+func (c CustomTargetingRules) OnTargetChanged(target geometry.Point) TargetInfo {
+	isValid := c.IsValidTarget(target)
+	highlights := c.GetHighlightsForTarget(target)
+	return TargetInfo{
+		AdjustedTarget: target,
+		Highlights:     highlights,
+		Hitpositions:   c.GetHitpositions(target),
+		IsValid:        isValid,
+		InfoText:       c.GetInfoTextForTarget(target),
+	}
 }
 
 func (c CustomTargetingRules) IsVisiblePositionOnMap(target geometry.Point) bool {

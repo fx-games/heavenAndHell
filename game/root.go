@@ -807,7 +807,8 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 					continue
 				}
 				targetingRules := skill.GetTargetingRules(actor, g.GetWorldState().GetMap())
-				if !targetingRules.IsValidTarget(playerPosition) {
+				targetInfo := targetingRules.OnTargetChanged(playerPosition)
+				if !targetInfo.IsValid {
 					continue
 				}
 				return skill.GetTimeNeededInAut(), func() {

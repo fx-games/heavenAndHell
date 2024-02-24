@@ -215,7 +215,7 @@ func (i *Item) GetLightStats() *LightStats {
 	return i.lightComponent
 }
 
-func (i *Item) TintColor() color.Color {
+func (i *Item) TintColor() color.RGBA {
 	switch i.rarity {
 	case ItemRarityCommon:
 		return i.categoryColor()
@@ -228,7 +228,7 @@ func (i *Item) TintColor() color.Color {
 	return defs.InvColorMisc
 }
 
-func (i *Item) categoryColor() color.Color {
+func (i *Item) categoryColor() color.RGBA {
 	if i.IsLightSource() {
 		return defs.InvColorLightSource
 	}

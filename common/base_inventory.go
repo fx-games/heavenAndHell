@@ -63,7 +63,7 @@ func (i InventoryStack) InventoryIcon() int32 {
 	return i[0].InventoryIcon()
 }
 
-func (i InventoryStack) TintColor() color.Color {
+func (i InventoryStack) TintColor() color.RGBA {
 	return i[0].TintColor()
 }
 

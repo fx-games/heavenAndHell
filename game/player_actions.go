@@ -643,11 +643,8 @@ func (a *Actions) AutoAttack() {
 		}
 
 		if hasRanged {
-			rangedRules := a.getRangedAttackRules(player)
-			if rangedRules.IsValidTarget(nearestEnemy.MapPosition()) {
-				a.playerRangedAttack(player, nearestEnemy.MapPosition())
-				return
-			}
+			a.playerRangedAttack(player, nearestEnemy.MapPosition())
+			return
 		}
 
 		// do melee
