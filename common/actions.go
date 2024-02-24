@@ -91,6 +91,7 @@ type UserInterface interface {
 	SetDebugActions(actions func() DebugActions)
 	FadeToBlack()
 	FadeFromBlack()
+
 }
 type ActionBroker interface {
 	Execute(action Action)

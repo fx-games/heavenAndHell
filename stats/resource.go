@@ -2,6 +2,7 @@ package stats
 
 import (
 	"fmt"
+	"image/color"
 	"math"
 )
 
@@ -95,4 +96,18 @@ func (r *Resource) Min() int {
 
 func (r *Resource) AsPercentage() float64 {
 	return r.value / float64(r.getMax())
+}
+
+func (r *Resource) AsColor() color.RGBA {
+	var resColor color.RGBA
+	resColor = color.RGBA{R: 250, G: 250, B: 250, A: 255}
+
+	if r.IsLessThanPercent(0.25) {
+		resColor = color.RGBA{R: 255, G: 30, B: 30, A: 255}
+	} else if r.IsLessThanPercent(0.5) {
+		resColor = color.RGBA{R: 255, G: 150, B: 30, A: 255}
+	} else if r.IsLessThanPercent(0.75) {
+		resColor = color.RGBA{R: 255, G: 255, B: 30, A: 255}
+	}
+	return resColor
 }

@@ -61,8 +61,8 @@ func (a *UntargetedAction) InventoryIcon() int32 {
 	return a.icon
 }
 
-func (a *UntargetedAction) TintColor() color.Color {
-	return color.White
+func (a *UntargetedAction) TintColor() color.RGBA {
+	return defs.White
 }
 
 func (a *UntargetedAction) IsAlive() bool {

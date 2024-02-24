@@ -377,7 +377,7 @@ func randIntervalValue(source *rand.Rand, minMax util.Tuple[int, int]) float64 {
 	if intervalMin == intervalMax {
 		bonusValue = float64(intervalMin)
 	} else {
-		bonusValue = float64(source.Intn(intervalMax-intervalMin) + intervalMin)
+		bonusValue = float64(source.Intn(intervalMax-intervalMin+1) + intervalMin)
 	}
 	return bonusValue
 }

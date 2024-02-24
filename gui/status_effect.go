@@ -30,7 +30,7 @@ func (s *StatusEffectWidget) GetTooltipLines(func(string) []util.ColoredTextPart
 	return []util.LabelText{
 		{
 			Text:      fmt.Sprintf("%s for %d turns", s.statusEffect, s.turnsLeft),
-			TextColor: color.White,
+			TextColor: defs.White,
 		},
 	}
 }
@@ -39,8 +39,8 @@ func (s *StatusEffectWidget) InventoryIcon() int32 {
 	return defs.IconEffectLightning
 }
 
-func (s *StatusEffectWidget) TintColor() color.Color {
-	return color.White
+func (s *StatusEffectWidget) TintColor() color.RGBA {
+	return defs.White
 }
 
 func (s *StatusEffectWidget) Counter() int {

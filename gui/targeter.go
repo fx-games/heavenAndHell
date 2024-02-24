@@ -10,11 +10,9 @@ import (
 type Targeter struct {
 	rules             common.TargetRules
 	hitEffect         *common.HitEffect
-	currentTarget     geometry.Point
-	currentInfoText   string
-	currentHighlights []common.TargetHighlight
 	isDone            bool
 	uiController      *UIController
+	targetInfo        common.TargetInfo
 }
 
 func (t *Targeter) IsDone() bool {
@@ -27,44 +25,42 @@ func (t *Targeter) OnCommand(command CommandType) bool {
 		t.isDone = true
 		return true
 	case PlayerCommandConfirm:
-		if t.rules.IsValidTarget(t.currentTarget) {
-			t.hitEffect.Activate(t.rules.GetAttacker(), t.currentTarget, t.rules.GetHitpositions(t.currentTarget))
-			t.isDone = true
-			return true
+		if t.HasValidTarget() {
+			t.Activate()
 		} else {
 			t.isDone = true
 			return true
 		}
 	case PlayerCommandUp:
-		nextTargetPos := t.currentTarget.Add(geometry.Point{Y: -1})
+		nextTargetPos := t.targetInfo.AdjustedTarget.Add(geometry.Point{Y: -1})
 		t.updateTarget(nextTargetPos)
 		return true
 	case PlayerCommandDown:
-		nextTargetPos := t.currentTarget.Add(geometry.Point{Y: 1})
+		nextTargetPos := t.targetInfo.AdjustedTarget.Add(geometry.Point{Y: 1})
 		t.updateTarget(nextTargetPos)
 		return true
 	case PlayerCommandLeft:
-		nextTargetPos := t.currentTarget.Add(geometry.Point{X: -1})
+		nextTargetPos := t.targetInfo.AdjustedTarget.Add(geometry.Point{X: -1})
 		t.updateTarget(nextTargetPos)
 		return true
 	case PlayerCommandRight:
-		nextTargetPos := t.currentTarget.Add(geometry.Point{X: 1})
+		nextTargetPos := t.targetInfo.AdjustedTarget.Add(geometry.Point{X: 1})
 		t.updateTarget(nextTargetPos)
 		return true
 	case PlayerCommandUpRight:
-		nextTargetPos := t.currentTarget.Add(geometry.Point{X: 1, Y: -1})
+		nextTargetPos := t.targetInfo.AdjustedTarget.Add(geometry.Point{X: 1, Y: -1})
 		t.updateTarget(nextTargetPos)
 		return true
 	case PlayerCommandUpLeft:
-		nextTargetPos := t.currentTarget.Add(geometry.Point{X: -1, Y: -1})
+		nextTargetPos := t.targetInfo.AdjustedTarget.Add(geometry.Point{X: -1, Y: -1})
 		t.updateTarget(nextTargetPos)
 		return true
 	case PlayerCommandDownRight:
-		nextTargetPos := t.currentTarget.Add(geometry.Point{X: 1, Y: 1})
+		nextTargetPos := t.targetInfo.AdjustedTarget.Add(geometry.Point{X: 1, Y: 1})
 		t.updateTarget(nextTargetPos)
 		return true
 	case PlayerCommandDownLeft:
-		nextTargetPos := t.currentTarget.Add(geometry.Point{X: -1, Y: 1})
+		nextTargetPos := t.targetInfo.AdjustedTarget.Add(geometry.Point{X: -1, Y: 1})
 		t.updateTarget(nextTargetPos)
 		return true
 
@@ -81,7 +77,7 @@ func (t *Targeter) OnMouseClicked(mapPos geometry.Point) bool {
 }
 
 func (t *Targeter) OnMouseMoved(mapPos geometry.Point) (bool, Tooltip) { // THIS IS THE PROBLEM
-	if mapPos == t.currentTarget || !t.rules.IsVisiblePositionOnMap(mapPos) {
+	if mapPos == t.targetInfo.AdjustedTarget {
 		return false, NoTooltip{}
 	}
 	t.updateTarget(mapPos)
@@ -92,32 +88,26 @@ func (t *Targeter) Draw(renderer *renderer.MapRenderer) {
 	if t.IsDone() {
 		return
 	}
-	for _, highlight := range t.currentHighlights {
-		if highlight.Pos == t.currentTarget && t.currentInfoText != "" {
+	for _, highlight := range t.targetInfo.Highlights {
+		if highlight.Pos == t.targetInfo.AdjustedTarget && t.targetInfo.InfoText != "" {
 			screenOffset := geometry.Point{X: 0, Y: 0}
-			renderer.DrawStringOnMapWithOffset(t.currentTarget, screenOffset, t.currentInfoText, defs.OffWhite)
+			renderer.DrawStringOnMapWithOffset(t.targetInfo.AdjustedTarget, screenOffset, t.targetInfo.InfoText, defs.OffWhite)
 		}
 		renderer.DrawOnMap(highlight.Pos, defs.IconTargeting, highlight.Color)
 	}
 }
 
 func (t *Targeter) updateTarget(pos geometry.Point) {
-	if !t.rules.IsValidTarget(pos) {
-		return
-	}
-	t.currentTarget = pos
-	t.currentInfoText = t.rules.GetInfoTextForTarget(pos)
-	t.currentHighlights = t.rules.GetHighlightsForTarget(pos)
+	t.targetInfo = t.rules.OnTargetChanged(pos)
 }
 
 func (t *Targeter) HasValidTarget() bool {
-	return t.rules.IsValidTarget(t.currentTarget)
+	return t.targetInfo.IsValid
 }
 
 func (t *Targeter) Activate() bool {
-	mapPos := t.currentTarget
-	if t.rules.IsValidTarget(mapPos) {
-		t.hitEffect.Activate(t.rules.GetAttacker(), mapPos, t.rules.GetHitpositions(mapPos))
+	if t.HasValidTarget() {
+		t.hitEffect.Activate(t.rules.GetAttacker(), t.targetInfo.AdjustedTarget, t.targetInfo.Hitpositions)
 		t.isDone = true
 		return true
 	}
@@ -129,7 +119,7 @@ func NewTargeter(uiController *UIController, rules common.TargetRules, onTargetS
 		rules:             rules,
 		uiController:      uiController,
 		hitEffect:         onTargetSelected,
-		currentHighlights: rules.GetHighlightsForTarget(rules.GetPreSelectedTarget()),
+		targetInfo:        rules.OnTargetChanged(rules.GetPreSelectedTarget()),
 	}
 	t.updateTarget(rules.GetPreSelectedTarget())
 	return t

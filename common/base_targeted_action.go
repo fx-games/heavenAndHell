@@ -22,15 +22,17 @@ type TargetRulesProvider struct {
 }
 
 type TargetRules interface {
-	IsVisiblePositionOnMap(target geometry.Point) bool
-	IsValidTarget(target geometry.Point) bool
+	OnTargetChanged(target geometry.Point) TargetInfo
 	GetPreSelectedTarget() geometry.Point
-	GetHighlightsForTarget(target geometry.Point) []TargetHighlight
-	GetHitpositions(target geometry.Point) []geometry.Point
 	GetAttacker() *Actor
-	GetInfoTextForTarget(pos geometry.Point) string
 }
-
+type TargetInfo struct {
+	AdjustedTarget geometry.Point
+	Highlights     []TargetHighlight
+	Hitpositions   []geometry.Point
+	IsValid        bool
+	InfoText       string
+}
 type TargetHighlight struct {
 	Pos   geometry.Point
 	Color color.Color
@@ -81,8 +83,8 @@ func (t *TargetedAction) InventoryIcon() int32 {
 	return t.icon
 }
 
-func (t *TargetedAction) TintColor() color.Color {
-	return color.White
+func (t *TargetedAction) TintColor() color.RGBA {
+	return defs.White
 }
 
 func (t *TargetedAction) GetHitPositions(origin, target geometry.Point) []geometry.Point {
