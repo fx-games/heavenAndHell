@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"rpg/defs"
 )
 
 type SpecialTileType uint64
@@ -145,6 +146,22 @@ func (t Tile) IsStairsDown() bool {
 	return t.Special == SpecialTileStairsDown
 }
 
+func (t Tile) IsWall() bool {
+	switch t.Icon() {
+	case defs.IconCatacombsWall:
+	case defs.IconCathedralWall:
+	case defs.IconDungeonRockyWall:
+	case defs.IconDungeonOfDoomCorridorWall:
+	case defs.IconCatacombsWallWithShading:
+	case defs.IconCathedralWallWithShading:
+	case defs.IconDungeonOfDoomWallHoriz:
+	case defs.IconDungeonOfDoomWallModern:
+	case defs.IconDungeonOfDoomWallVert:
+	default:
+		return false
+	}
+	return true
+}
 
 type MapCell[ActorType interface {
 	comparable
