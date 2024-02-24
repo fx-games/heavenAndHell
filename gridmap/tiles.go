@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"rpg/defs"
+	//"rpg/defs"
 )
 
 type SpecialTileType uint64
@@ -25,6 +25,7 @@ const (
 	SpecialTileSwamp
 	SpecialTileVoid
 	SpecialTileBed
+	SpecialTileWall
 )
 
 type Tile struct {
@@ -147,20 +148,7 @@ func (t Tile) IsStairsDown() bool {
 }
 
 func (t Tile) IsWall() bool {
-	switch t.Icon() {
-	case defs.IconCatacombsWall:
-	case defs.IconCathedralWall:
-	case defs.IconDungeonRockyWall:
-	case defs.IconDungeonOfDoomCorridorWall:
-	case defs.IconCatacombsWallWithShading:
-	case defs.IconCathedralWallWithShading:
-	case defs.IconDungeonOfDoomWallHoriz:
-	case defs.IconDungeonOfDoomWallModern:
-	case defs.IconDungeonOfDoomWallVert:
-	default:
-		return false
-	}
-	return true
+	return t.Special == SpecialTileWall
 }
 
 type MapCell[ActorType interface {
