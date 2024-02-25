@@ -4,8 +4,8 @@ import (
 	"cmp"
 	"fmt"
 	"math/rand"
-	"os"
 	"path"
+	"rpg/files"
 	"rpg/stats"
 	"rpg/util"
 	"slices"
@@ -50,79 +50,79 @@ func LoadGameData(logErr func(err string)) DataContainer {
 	otherDir := path.Join("assets", "data")
 
 	join := path.Join(itemDir, "armor.rec")
-	file, _ := os.Open(join)
+	file, _ := files.Open(join)
 	armorDefs := ReadItemDefinitions(file, logErr)
 	println(fmt.Sprintf("Loaded %d armor definitions", len(armorDefs)))
 	itemDefs = merge(itemDefs, armorDefs)
 	file.Close()
 
-	file, _ = os.Open(path.Join(itemDir, "weapons.rec"))
+	file, _ = files.Open(path.Join(itemDir, "weapons.rec"))
 	weaponDefs := ReadItemDefinitions(file, logErr)
 	println(fmt.Sprintf("Loaded %d weapon definitions", len(weaponDefs)))
 	itemDefs = merge(itemDefs, weaponDefs)
 	file.Close()
 
-	file, _ = os.Open(path.Join(itemDir, "misc.rec"))
+	file, _ = files.Open(path.Join(itemDir, "misc.rec"))
 	throwableDefs := ReadItemDefinitions(file, logErr)
 	println(fmt.Sprintf("Loaded %d misc. definitions", len(throwableDefs)))
 	itemDefs = merge(itemDefs, throwableDefs)
 	file.Close()
 
-	file, _ = os.Open(path.Join(itemDir, "accessory.rec"))
+	file, _ = files.Open(path.Join(itemDir, "accessory.rec"))
 	accessoryDefs := ReadItemDefinitions(file, logErr)
 	println(fmt.Sprintf("Loaded %d accessory definitions", len(accessoryDefs)))
 	itemDefs = merge(itemDefs, accessoryDefs)
 	file.Close()
 
-	file, _ = os.Open(path.Join(itemDir, "light.rec"))
+	file, _ = files.Open(path.Join(itemDir, "light.rec"))
 	lightDefs := ReadItemDefinitions(file, logErr)
 	println(fmt.Sprintf("Loaded %d light definitions", len(lightDefs)))
 	itemDefs = merge(itemDefs, lightDefs)
 	file.Close()
 
-	file, _ = os.Open(path.Join(itemDir, "potions.rec"))
+	file, _ = files.Open(path.Join(itemDir, "potions.rec"))
 	potionDefs := ReadItemDefinitions(file, logErr)
 	println(fmt.Sprintf("Loaded %d potion definitions", len(potionDefs)))
 	itemDefs = merge(itemDefs, potionDefs)
 	file.Close()
 
-	file, _ = os.Open(path.Join(itemDir, "scrolls.rec"))
+	file, _ = files.Open(path.Join(itemDir, "scrolls.rec"))
 	scrollDefs := ReadItemDefinitions(file, logErr)
 	println(fmt.Sprintf("Loaded %d scroll definitions", len(scrollDefs)))
 	itemDefs = merge(itemDefs, scrollDefs)
 	file.Close()
 
-	file, _ = os.Open(path.Join(enemyDir, "enemies.rec"))
+	file, _ = files.Open(path.Join(enemyDir, "enemies.rec"))
 	enemyDefs := ReadEnemyDefinitions(file, logErr)
 	println(fmt.Sprintf("Loaded %d enemy definitions", len(enemyDefs)))
 	file.Close()
 
-	file, _ = os.Open(path.Join(enemyDir, "unique_enemies.rec"))
+	file, _ = files.Open(path.Join(enemyDir, "unique_enemies.rec"))
 	uniquEnemyDefs := ReadEnemyDefinitions(file, logErr)
 	println(fmt.Sprintf("Loaded %d unique enemy definitions", len(uniquEnemyDefs)))
 	file.Close()
 
-	file, _ = os.Open(path.Join(effectsDir, "untargeted.rec"))
+	file, _ = files.Open(path.Join(effectsDir, "untargeted.rec"))
 	untargetedDefs := ReadUntargetedDefinitions(file, logErr)
 	println(fmt.Sprintf("Loaded %d untargeted effect definitions", len(untargetedDefs)))
 	file.Close()
 
-	file, _ = os.Open(path.Join(effectsDir, "targeted.rec"))
+	file, _ = files.Open(path.Join(effectsDir, "targeted.rec"))
 	targetedDefs := ReadTargetedDefinitions(file, logErr)
 	println(fmt.Sprintf("Loaded %d targeted effect definitions", len(targetedDefs)))
 	file.Close()
 
-	file, _ = os.Open(path.Join(otherDir, "stores.rec"))
+	file, _ = files.Open(path.Join(otherDir, "stores.rec"))
 	vendorDefs := ReadVendorDefinitions(file)
 	println(fmt.Sprintf("Loaded %d store definitions", len(vendorDefs)))
 	file.Close()
 
-	file, _ = os.Open(path.Join(otherDir, "classes.rec"))
+	file, _ = files.Open(path.Join(otherDir, "classes.rec"))
 	classDefs := ReadClassDefinitions(file)
 	println(fmt.Sprintf("Loaded %d class definitions", len(classDefs)))
 	file.Close()
 
-	file, _ = os.Open(path.Join(itemDir, "unique_items.rec"))
+	file, _ = files.Open(path.Join(itemDir, "unique_items.rec"))
 	uniqueItemDefs := ReadItemDefinitions(file, logErr)
 	println(fmt.Sprintf("Loaded %d unique item definitions", len(uniqueItemDefs)))
 	file.Close()

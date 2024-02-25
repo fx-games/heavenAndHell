@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/flopp/go-findfont"
 	"image/color"
-	"io/fs"
 	"math"
 	"math/rand"
 	"os"
@@ -13,6 +12,7 @@ import (
 	"rpg/audio"
 	"rpg/common"
 	"rpg/defs"
+	"rpg/files"
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/ldtk"
@@ -169,7 +169,7 @@ func NewGameInstance(startInfo common.StartInfo, uiController common.UserInterfa
 		startInfo:    startInfo,
 		uiController: uiController,
 		randomSource: rand.New(rand.NewSource(time.Now().UnixNano())),
-		audioPlayer:  audio.NewAudioPlayer(os.DirFS("assets").(fs.ReadDirFS), audio.SampleRate44100),
+		audioPlayer:  audio.NewAudioPlayer(startInfo.FileSystem, audio.SampleRate44100),
 	}
 	println(fmt.Sprintf("GameInstance created.."))
 	println(fmt.Sprintf("Random source loaded.."))
@@ -240,7 +240,8 @@ func (g *GameInstance) ResetGame(playerStartDefinition defs.LoadoutDefinition) {
 		g.SetLogHook(g.serverLog.Write)
 	}
 
-	ldtkFile := g.startInfo.LDTKMapFile
+	ldtkFileName := g.startInfo.LDTKMapFile
+	ldtkFile, _ := files.ReadFile(ldtkFileName)
 	ldtkProject, _ := ldtk.Open(ldtkFile)
 
 	timeKeeper := common.NewTimeKeeper(g.hasEnergyForAction)
@@ -323,7 +324,7 @@ func (g *GameInstance) ResetGame(playerStartDefinition defs.LoadoutDefinition) {
 
 	// load audio
 	if g.configuration.AudioEnabled {
-		sfxPath := path.Join("sfx")
+		sfxPath := path.Join("assets", "sfx")
 		cues := []string{
 			"heavy_door",
 			"missile_hit_human",

@@ -120,8 +120,8 @@ func (m *DungeonMap) GetPotentialStairPositions() []geometry.Point {
 				continue
 			}
 			result = append(result, matchPos)
-			println(fmt.Sprintf("Found potential stair position at %v", matchPos))
-			m.PrintWithHighlight(matchPos)
+			//println(fmt.Sprintf("Found potential stair position at %v", matchPos))
+			//m.PrintWithHighlight(matchPos)
 		}
 	}
 

@@ -1,30 +1,28 @@
 package util
 
 import (
+	"fmt"
 	"io"
 	"log"
-	"os"
+	"rpg/files"
 )
 
-func MustLoad(open *os.File, err error) io.ReaderAt {
-	if err != nil {
-		panic(err)
-	}
-	return open
-}
-
 func MustOpen(filename string) io.ReaderAt {
-	f, err := os.Open(filename)
+	f, err := files.Open(filename)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Errorf("failed to open file '%s': %w", filename, err))
 	}
-	return f
+	readerAt, ok := f.(io.ReaderAt)
+	if !ok {
+		return nil
+	}
+	return readerAt
 }
 
-func MustOpenReader(filename string) io.ReadCloser {
-	f, err := os.Open(filename)
+func MustOpenReader(filename string) io.Reader {
+	f, err := files.Open(filename)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Errorf("failed to open file '%s': %w", filename, err))
 	}
 	return f
 }

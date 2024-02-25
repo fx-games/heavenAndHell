@@ -52,7 +52,7 @@ func (g *MapGenerator) GenerateMap(targetMap string, mapTemplates *ldtk.Project,
 		generatedLayout = g.createMegaDungeonLayout()
 	}
 
-	generatedLayout.Print()
+	//generatedLayout.Print()
 	genWidth, genHeight := generatedLayout.GetSize()
 	emptyMap := gridmap.NewEmptyMap[*Actor, *Item, Object](genWidth, genHeight)
 
@@ -99,7 +99,7 @@ func (g *MapGenerator) GenerateMap(targetMap string, mapTemplates *ldtk.Project,
 	}
 
 	emptyMap.SetDisplayName(dungeonDef.LevelName)
-	emptyMap.Print()
+	//emptyMap.Print()
 
 	return emptyMap
 }

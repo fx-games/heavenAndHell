@@ -6,7 +6,6 @@ import (
 	"github.com/tidwall/gjson"
 	"image"
 	"image/color"
-	"io/ioutil"
 	"path/filepath"
 	"strconv"
 )
@@ -398,17 +397,14 @@ func (project *Project) EntityByIID(iid string) *Entity {
 }
 
 // Open loads the LDtk project from the filepath specified. Returns the Project and an error should the loading process fail (unable to find the file, unable to deserialize the JSON).
-func Open(filepath string) (*Project, error) {
+func Open(fileData []byte) (*Project, error) {
 
 	var project *Project
 
-	var bytes []byte
 	var err error
 
-	bytes, err = ioutil.ReadFile(filepath)
-
 	if err == nil {
-		project, err = Read(bytes)
+		project, err = Read(fileData)
 	}
 
 	return project, err

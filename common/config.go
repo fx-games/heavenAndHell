@@ -2,7 +2,8 @@ package common
 
 import (
 	"fmt"
-	"os"
+    "io/fs"
+    "os"
 	"rpg/geometry"
 	"rpg/recfile"
 )
@@ -20,13 +21,15 @@ type FontInfo struct {
 }
 
 type StartInfo struct {
-	FontInfos         FontInfo
-	ScreenSize        geometry.Point
-	TileScale         float64
-	Title             string
-	LDTKMapFile       string
-	UserConfiguration Configuration
+    FontInfos         FontInfo
+    ScreenSize        geometry.Point
+    TileScale         float64
+    Title             string
+    LDTKMapFile       string
+    UserConfiguration Configuration
+    FileSystem        fs.ReadDirFS
 }
+
 
 type Configuration struct {
     AudioEnabled         bool
@@ -138,25 +141,23 @@ func (c Configuration) SaveToRecFile(recFilename string) {
 func NewConfigurationFromRecFile(recFilename string) Configuration {
 	println(fmt.Sprintf("Loading configuration from %s", recFilename))
 	file, err := os.Open(recFilename)
-	if err != nil {
-		defaultConfig := NewDefaultConfig()
-		defaultConfig.SaveToRecFile(recFilename)
-		return defaultConfig
-	}
-	records := recfile.Read(file)
-	if len(records) == 0 {
-		defaultConfig := NewDefaultConfig()
-		defaultConfig.SaveToRecFile(recFilename)
-		return defaultConfig
-	}
-	configMap := records[0].ToMap(",")
+	configExists := false
+	var configMap recfile.DataMap
 
-	return Configuration{
+	if err == nil {
+		records := recfile.Read(file)
+		if len(records) > 0 {
+			configMap = records[0].ToMap(",")
+			configExists = true
+		}
+	}
+
+	configuration := Configuration{
 		AudioEnabled:           configMap.GetBoolOrFalse("AudioEnabled"),
 		ActorBobbingEnabled:    configMap.GetBoolOrTrue("ActorBobbingEnabled"),
 		CardinalMovementOnly:   configMap.GetBoolOrFalse("CardinalMovementOnly"),
-		DefaultFont:            configMap.GetStringOrDefault("DefaultFont", "assets/fonts/exocet-blizzard-light.ttf"),
-		DefaultFontSize:        configMap.GetFloatOrDefault("DefaultFontSize", 20.0),
+		DefaultFont:            configMap.GetStringOrDefault("DefaultFont", "assets/fonts/Ac437_EagleSpCGA_Alt3.ttf"),
+		DefaultFontSize:        configMap.GetFloatOrDefault("DefaultFontSize", 16.0),
 		AutoPickup:             configMap.GetBoolOrTrue("AutoPickup"),
 		KeepPlayerCentered:     configMap.GetBoolOrTrue("KeepPlayerCentered"),
 		DrawTilesBehindActors:  configMap.GetBoolOrFalse("DrawTilesBehindActors"),
@@ -173,8 +174,8 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 			Y: configMap.GetIntOrDefault("WindowHeight", 800),
 		},
 	}
-}
-
-func NewDefaultConfig() Configuration {
-	return Configuration{AudioEnabled: true}
+	if !configExists {
+		configuration.SaveToRecFile(recFilename)
+	}
+	return configuration
 }

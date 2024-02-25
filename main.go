@@ -17,18 +17,19 @@ import (
 	"rpg/console"
 	"rpg/defs"
 	"rpg/dungen"
+	"rpg/files"
 	"rpg/game"
 	"rpg/gui"
 	"rpg/osr"
 	"rpg/renderer"
 	"rpg/util"
-	"runtime/pprof"
 	"strconv"
 	"strings"
 	"time"
 )
 
 func main() {
+	/*
 	cpuProfileFile, err := os.Create("cpu.prof")
 	if err != nil {
 		panic(err)
@@ -40,7 +41,7 @@ func main() {
 		panic(err)
 	}
 	defer pprof.StopCPUProfile()
-
+	*/
 	if len(os.Args) > 1 {
 		argCmd := strings.ToLower(os.Args[1])
 		switch argCmd {
@@ -169,6 +170,7 @@ func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 			TTFSize: userConfig.DefaultFontSize,
 		},
 		UserConfiguration: userConfig,
+		FileSystem: files.GetFileSystem(),
 	}
 	theGame := game.NewGameInstance(startInfos, NewDummyUI())
 	uiContext := common.UIContext{
@@ -179,13 +181,12 @@ func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 		Animator: func() common.Animator {
 			return theGame.GetActionBroker()
 		},
-		GetLog:       theGame.GetLog,
-		StartInfos:       startInfos,
+		GetLog:      theGame.GetLog,
+		StartInfos:  startInfos,
 		Definitions: theGame.GetGameData(),
 	}
 	return theGame, uiContext
 }
-
 
 func osrSim() {
 	// Helmet / Shield
@@ -225,24 +226,24 @@ func osrSim() {
 	// random fighter usually has a 50-80% chance to win the fight
 
 	kobold := osr.NewMonster(osr.MonsterSpecs{
-		Name: "Kobold",
-		AC: 0, // 0 protection
+		Name:       "Kobold",
+		AC:         0, // 0 protection
 		AttackDice: util.ParseDice("1d6"),
-		HitDice: util.ParseDice("1d8"),
+		HitDice:    util.ParseDice("1d8"),
 	})
 
 	ghoul := osr.NewMonster(osr.MonsterSpecs{
-		Name: "Ghoul",
-		AC: 4, // 1 protection
+		Name:       "Ghoul",
+		AC:         4, // 1 protection
 		AttackDice: util.ParseDice("1d6"),
-		HitDice: util.ParseDice("5d8"),
+		HitDice:    util.ParseDice("5d8"),
 	})
 
 	manticore := osr.NewMonster(osr.MonsterSpecs{
-		Name: "Manticore",
-		AC: 8, // 2 protection
+		Name:       "Manticore",
+		AC:         8, // 2 protection
 		AttackDice: util.ParseDice("1d12+2"),
-		HitDice: util.ParseDice("10d8"),
+		HitDice:    util.ParseDice("10d8"),
 	})
 
 	enemies := []*osr.Character{kobold, ghoul, manticore}
@@ -275,7 +276,7 @@ func osrSim() {
 	for _, enemy := range enemies {
 		fmt.Println(enemy.CombatInfo())
 	}
-		// print as csv matrix table
+	// print as csv matrix table
 	fmt.Println("/," + namesFrom(enemies))
 	for _, fighter := range []*osr.Character{fighterLevelOne, fighterLevelFive, fighterLevelTen} {
 		fmt.Print(fighter.GetName() + ",")
@@ -386,7 +387,7 @@ func runGameWithEbiten(theGame *game.GameInstance, context common.UIContext) {
 
 	screenSize := uiController.GetDeviceIndependentScreenSize()
 
-	ebiten.SetWindowTitle("roguelike")
+	ebiten.SetWindowTitle("Lux Aeterna")
 	ebiten.SetWindowSize(screenSize.X, screenSize.Y)
 	ebiten.SetScreenClearedEveryFrame(true)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
@@ -400,3 +401,4 @@ func runGameWithEbiten(theGame *game.GameInstance, context common.UIContext) {
 		log.Fatal(err)
 	}
 }
+

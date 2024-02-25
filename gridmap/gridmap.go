@@ -266,7 +266,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) SetPlayerSpawn(position geome
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) SaveToDisk(path string) error {
-	file, _ := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	file, _ := os.Open(path)
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	encodeErr := enc.Encode(m)

@@ -53,6 +53,7 @@ missing 7drl goals
    - uniques
    - items
    - monsters
+     - COMBAT FACTIONS
    - status effects
    - spawn balancing
  - progression (last)
