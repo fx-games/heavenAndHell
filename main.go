@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/gdamore/tcell/v2"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/inancgumus/screen"
 	"image/color"
 	_ "image/png"
 	"log"
@@ -57,11 +59,101 @@ func main() {
 			startCreator(theGame.GetGameData())
 		case "osr":
 			osrSim()
+		case "7drl":
+			showTitleScreen()
 		case "validate":
 			return
 		}
 	} else {
 		runGameWithEbiten(createGameAndUIContext())
+	}
+}
+
+func showTitleScreen() {
+	logoFile := util.MustOpenReader(path.Join("assets","logo.txt"))
+	defer logoFile.Close()
+	//reader := bufio.NewReader(logoFile)
+	scanner := bufio.NewScanner(logoFile)
+	logoHeight := 0
+	logoWidth := 0
+	var logoLines []string
+	for scanner.Scan() {
+		line := scanner.Text()
+		logoLines = append(logoLines, line)
+		logoHeight++
+		logoWidth = max(logoWidth, len(line))
+	}
+
+	s, _ := tcell.NewScreen()
+	s.Init()
+	s.Clear()
+	w, h := s.Size()
+
+	// center logo
+	logoStartY := 3
+	for y := 0; y < logoHeight; y++ {
+		line := logoLines[y]
+		for x := 0; x < len(line); x++ {
+			s.SetContent((w-logoWidth)/2+x, logoStartY+y, rune(line[x]), nil, tcell.StyleDefault)
+		}
+	}
+
+	lineAfterLogo := logoStartY + logoHeight + 1
+	credits := "a game by Felix Ruzzoli"
+	centeredCredits := (w - len(credits)) / 2
+	for x, c := range credits {
+		s.SetContent(centeredCredits+x, lineAfterLogo, c, nil, tcell.StyleDefault)
+	}
+
+	// center prompt vertically
+	promptStartY := ((h - 1) / 2) + 2
+	prompt := "Do you want graphics? (y/n)"
+	centeredPrompt := (w - len(prompt)) / 2
+	for x, c := range prompt {
+		s.SetContent(centeredPrompt+x, promptStartY, c, nil, tcell.StyleDefault)
+	}
+	s.ShowCursor(centeredPrompt + len(prompt), promptStartY)
+	s.SetCursorStyle(tcell.CursorStyleBlinkingUnderline)
+	s.Show()
+	graphics := false
+	outerloop:
+	for event := s.PollEvent(); event != nil; event = s.PollEvent() {
+		if ev, ok := event.(*tcell.EventKey); ok {
+			if ev.Key() == tcell.KeyRune {
+				switch ev.Rune() {
+				case 'y':
+					fallthrough
+				case 'Y':
+					graphics = true
+					break outerloop
+				case 'n':
+					fallthrough
+				case 'N':
+					graphics = false
+					break outerloop
+				}
+			}
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	s.Clear()
+	s.Fini()
+	if graphics {
+		runGameWithEbiten(createGameAndUIContext())
+	} else {
+		runGameWithConsole(createGameAndUIContext())
+	}
+
+	screen.Clear()
+	screen.MoveTopLeft()
+
+	messageFile := util.MustOpenReader(path.Join("assets","endMessage.txt"))
+	defer messageFile.Close()
+	//reader := bufio.NewReader(logoFile)
+	msgScanner := bufio.NewScanner(messageFile)
+	for msgScanner.Scan() {
+		line := msgScanner.Text()
+		println(line)
 	}
 }
 
@@ -268,6 +360,7 @@ func runGameWithConsole(theGame *game.GameInstance, context common.UIContext) {
 
 	loop := util.CreateLoop(loopConfig, &terminationCode)
 	loop()
+
 }
 
 // runGameWithEbiten will start the infinitely running game loop

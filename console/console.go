@@ -409,8 +409,9 @@ func (c *Console) HandleInput() (terminationCode int) {
 		} else if typedRune == 'C' {
 			c.ShowFullStats()
 		} else if typedRune == 'Q' {
-			c.terminationCode = 1
+			c.screen.Clear()
 			c.screen.Fini()
+			c.terminationCode = 1
 		} else if typedRune == 'o' {
 			actions.StartAutoExplore()
 		} else if typedEvent.Key() == tcell.KeyTab {

@@ -21,7 +21,7 @@ func MustOpen(filename string) io.ReaderAt {
 	return f
 }
 
-func MustOpenReader(filename string) io.Reader {
+func MustOpenReader(filename string) io.ReadCloser {
 	f, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)
