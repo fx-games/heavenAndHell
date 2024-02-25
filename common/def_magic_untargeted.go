@@ -369,6 +369,8 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 	earthQuakeRadius := args.GetIntOrDefault(0, 4)
 	effect := func(user *Actor, source EffectSource) {
 		currentMap := g.state.GetMap()
+
+		generator := g.randomSource
 		var defWallIcon int32
 		var defFloorIcon int32
 		floorNumberExpr := regexp.MustCompile(`\d+`)
@@ -396,9 +398,26 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 		}
 
 		println(floorNumberExpr.FindString(currentMap.GetName()))
-		dijkstraAoeMap := toList(currentMap.GetDijkstraMap(user.mapPosition, earthQuakeRadius, func(point geometry.Point) bool {
+
+		dijkstraAoeMap := currentMap.GetDijkstraMap(user.mapPosition, earthQuakeRadius, func(point geometry.Point) bool {
 			return point != user.MapPosition() && !currentMap.IsStairsAt(point)
-		}))
+		})
+
+		dijkstraAoeMapBounds := currentMap.GetDijkstraMap(user.mapPosition, earthQuakeRadius+1, func(point geometry.Point) bool {
+			return point != user.MapPosition() && !currentMap.IsStairsAt(point)
+		})
+
+		for pos, _ := range dijkstraAoeMap {
+			delete(dijkstraAoeMapBounds, pos)
+		}
+
+		for pos, _ := range dijkstraAoeMapBounds {
+			if currentMap.IsTileWall(pos) || !currentMap.IsTileWalkable(pos) {
+				delete(dijkstraAoeMapBounds, pos)
+			}
+		}
+
+		dijkstraAoeList := toList(dijkstraAoeMap)
 
 		wallTile := gridmap.Tile{
 			DefinedIcon:        defWallIcon,
@@ -415,15 +434,28 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 			IsTransparent:      false,
 		}
 
-		for _, pos := range dijkstraAoeMap {
-			if currentMap.IsTileWall(pos) {
+		for _, pos := range dijkstraAoeList {
+
+			willUse := generator.Intn(2) == 1
+			if currentMap.IsTileWall(pos) && willUse {
 				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Floor", user), "floor", func() {
 					currentMap.SetTile(pos, floorTile)
 				}))
-			} else if !currentMap.IsTileWall(pos) && pos != user.MapPosition() {
+			} else if !currentMap.IsTileWall(pos) && pos != user.MapPosition() && willUse {
 				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Wall", user), "wall", func() {
 					currentMap.SetTile(pos, wallTile)
 				}))
+
+				for endPos, _ := range dijkstraAoeMapBounds {
+					hasPath := currentMap.GetJPSPath(user.MapPosition(), endPos, currentMap.CurrentlyPassableForActor(user)) != nil
+					if !hasPath {
+						fmt.Println("removed blocking wall")
+						g.actionBroker.Execute(NewSpawnAction(NewActorCause("Floor", user), "floor", func() {
+							currentMap.SetTile(pos, floorTile)
+						}))
+						break
+					}
+				}
 			}
 		}
 	}
