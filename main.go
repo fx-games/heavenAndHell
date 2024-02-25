@@ -351,7 +351,7 @@ func runGameWithConsole(theGame *game.GameInstance, context common.UIContext) {
 
 	terminationCode := 0
 	loopConfig := util.LoopConfig{
-		TargetFPS:        4,
+		TargetFPS:        30,
 		IdleThreshold:    5,
 		CurrentTimeFunc:  func() float64 { return float64(time.Now().UnixNano()) * 1e-9 },
 		ProcessInputFunc: con.HandleInput,
