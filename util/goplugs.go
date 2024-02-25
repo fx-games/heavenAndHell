@@ -19,7 +19,7 @@ func MustOpen(filename string) io.ReaderAt {
 	return readerAt
 }
 
-func MustOpenReader(filename string) io.Reader {
+func MustOpenReader(filename string) io.ReadCloser {
 	f, err := files.Open(filename)
 	if err != nil {
 		log.Fatal(fmt.Errorf("failed to open file '%s': %w", filename, err))
