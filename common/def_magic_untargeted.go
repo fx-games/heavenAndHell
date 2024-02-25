@@ -446,25 +446,31 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 				if isDoor {
 					currentMap.RemoveObjectAt(pos)
 				}
+				if currentMap.IsItemAt(pos) {
+					currentMap.RemoveItemAt(pos)
+				}
+				if currentMap.IsActorAt(pos) && currentMap.ActorAt(pos) != user {
+					if generator.Intn(101) == 50 {
+						g.actionBroker.Execute(NewDieAction(nil, currentMap.ActorAt(pos)))
+					}
+				}
 				if currentMap.IsDownedActorAt(pos) {
 					downedActor := currentMap.DownedActorAt(pos)
 					currentMap.RemoveDownedActor(downedActor)
 				}
-				if currentMap.IsItemAt(pos) {
-					currentMap.RemoveItemAt(pos)
-				}
-				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Wall", user), "wall", func() {
-					currentMap.SetTile(pos, wallTile)
-				}))
-
-				for endPos, _ := range dijkstraAoeMapBounds {
-					hasPath := currentMap.GetJPSPath(user.MapPosition(), endPos, currentMap.CurrentlyPassableForActor(user)) != nil
-					if !hasPath {
-						fmt.Println("removed blocking wall")
-						g.actionBroker.Execute(NewSpawnAction(NewActorCause("Floor", user), "floor", func() {
-							currentMap.SetTile(pos, floorTile)
-						}))
-						break
+				if !currentMap.IsActorAt(pos) {
+					g.actionBroker.Execute(NewSpawnAction(NewActorCause("Wall", user), "wall", func() {
+						currentMap.SetTile(pos, wallTile)
+					}))
+					for endPos, _ := range dijkstraAoeMapBounds {
+						hasPath := currentMap.GetJPSPath(user.MapPosition(), endPos, currentMap.CurrentlyPassableForActor(user)) != nil
+						if !hasPath {
+							fmt.Println("removed blocking wall")
+							g.actionBroker.Execute(NewSpawnAction(NewActorCause("Floor", user), "floor", func() {
+								currentMap.SetTile(pos, floorTile)
+							}))
+							break
+						}
 					}
 				}
 			}
