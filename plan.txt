@@ -613,7 +613,7 @@ Bad:
  - Resistance stacking is too important
    - Remove damage types completely and go with mechanical effects instead
  - Too complex for its own good
- - Enemies have unfair attacks (reduce stats, massive damage, damage equipment, burn scrolls, blind, stund, paralyze, etc.)
+ - Enemies have unfair attacks (reduce stats, massive damage, damage equipment, burn scrolls, blind, stuns, paralyze, etc.)
    - Enable situational counters that don't depend on having the right "anti-item" in your inventory
    - Reduce the impact of these effects (only temporary, only on certain "brittle" items, etc.)
  - Many items become useless fast

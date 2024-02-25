@@ -9,7 +9,7 @@
 #ItemNamesInShop: Short|Enchantments|BandStyle
 
 AutoPickup: true
-AudioEnabled: false
+AudioEnabled: true
 KeepPlayerCentered: true
 ActorBobbingEnabled: true
 CardinalMovementOnly: false

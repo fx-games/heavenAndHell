@@ -403,7 +403,7 @@ func Log(msg string) {
 	// append to ShowLogMessage file
 	// deactivating ShowLogMessage for now
 	/*
-		file, err := os.OpenFile("ShowLogMessage.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		file, err := files.OpenFile("ShowLogMessage.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			panic(err)
 		}

@@ -3,9 +3,9 @@ package common
 import (
 	"fmt"
 	"io"
-	"os"
 	"path"
 	"rpg/defs"
+	"rpg/files"
 	"rpg/stats"
 	"rpg/util"
 	"strings"
@@ -160,7 +160,7 @@ func (s *State) getTextFromTriggers(dialogueTriggers []TriggeredDialogue) ([]uti
 func NewDialogueTextFromFile(filename string) []util.LabelText {
 	filepath := path.Join("assets", "dialogue", filename)
 
-	file, err := os.Open(filepath)
+	file, err := files.Open(filepath)
 	if err != nil {
 		return nil
 	}

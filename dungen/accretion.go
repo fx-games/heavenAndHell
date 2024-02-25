@@ -214,11 +214,14 @@ func (g *AccretionGenerator) Generate(width, height int) *DungeonMap {
 	if len(dMap.rooms) < maxRooms {
 		println("=== COULD NOT PLACE ALL ROOMS ===")
 	}
-	println("=== BEFORE TRIM ===")
-	dMap.PrintPlannedDoors()
-	dMap.Trim()
-	println("=== AFTER TRIM ===")
-	dMap.PrintPlannedDoors()
+
+	if g.printDebugSteps {
+		println("=== BEFORE TRIM ===")
+		dMap.PrintPlannedDoors()
+		dMap.Trim()
+		println("=== AFTER TRIM ===")
+		dMap.PrintPlannedDoors()
+	}
 
 	if g.levelRules.NoDoors {
 		dMap.ConnectRoomsOnMap(false)
