@@ -442,6 +442,17 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 					currentMap.SetTile(pos, floorTile)
 				}))
 			} else if !currentMap.IsTileWall(pos) && pos != user.MapPosition() && willUse {
+				_, isDoor := g.state.IsDoorAt(pos)
+				if isDoor {
+					currentMap.RemoveObjectAt(pos)
+				}
+				if currentMap.IsDownedActorAt(pos) {
+					downedActor := currentMap.DownedActorAt(pos)
+					currentMap.RemoveDownedActor(downedActor)
+				}
+				if currentMap.IsItemAt(pos) {
+					currentMap.RemoveItemAt(pos)
+				}
 				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Wall", user), "wall", func() {
 					currentMap.SetTile(pos, wallTile)
 				}))

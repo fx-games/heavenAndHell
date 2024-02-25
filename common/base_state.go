@@ -86,7 +86,7 @@ func NewState(ldtkProject *ldtk.Project) State {
 		flags:               NewFlags(),
 		playerStashInTown:   NewInventory(32),
 		ldtkProject:         ldtkProject,
-		visibility: 		 NewVisibility(),
+		visibility:          NewVisibility(),
 	}
 }
 func (s *State) SetAnimator(animator Animator) {
@@ -317,14 +317,18 @@ func (s *State) GetWaterColor() color.RGBA {
 	}
 }
 
-func (s *State) IsClosedDoorAt(pos geometry.Point) bool {
+func (s *State) IsDoorAt(pos geometry.Point) (*Door, bool) {
 	currentMap := s.GetMap()
 	if !currentMap.IsObjectAt(pos) {
-		return false
+		return nil, false
 	}
-
 	objectAt := currentMap.ObjectAt(pos)
 	door, isDoorHere := objectAt.(*Door)
+	return door, isDoorHere
+}
+
+func (s *State) IsClosedDoorAt(pos geometry.Point) bool {
+	door, isDoorHere := s.IsDoorAt(pos)
 	if !isDoorHere {
 		return false
 	}
