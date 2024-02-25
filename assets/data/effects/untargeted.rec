@@ -118,5 +118,5 @@ internal_name: earthquake
 icon: 223
 dlvl: 1
 name: Earthquake
-default_args: 5
+default_args: 3
 allowed_usage: shrine | scroll

@@ -4,12 +4,14 @@ import (
 	"cmp"
 	"fmt"
 	"image/color"
+	"regexp"
 	"rpg/defs"
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/stats"
 	"rpg/util"
 	"slices"
+	"strconv"
 )
 
 const (
@@ -367,12 +369,39 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 	earthQuakeRadius := args.GetIntOrDefault(0, 4)
 	effect := func(user *Actor, source EffectSource) {
 		currentMap := g.state.GetMap()
+		var defWallIcon int32
+		var defFloorIcon int32
+		floorNumberExpr := regexp.MustCompile(`\d+`)
+		floorNumber, err := strconv.Atoi(floorNumberExpr.FindString(currentMap.GetName()))
+		if err != nil {
+			floorNumber = 0
+		}
+
+		switch floorNumber {
+		case 1, 2:
+			defWallIcon = defs.IconCathedralWall
+			defFloorIcon = defs.IconCathedralFloor
+		case 3, 4:
+			defWallIcon = defs.IconCatacombsWall
+			defFloorIcon = defs.IconCatacombsFloor
+		case 5, 6:
+			defWallIcon = defs.IconDungeonRockyWall
+			defFloorIcon = defs.IconDungeonRedEarthFloor
+		case 7, 8:
+			defWallIcon = defs.IconDungeonOfDoomWallModern
+			defFloorIcon = defs.IconDungeonOfDoomFloorModern
+		default:
+			defWallIcon = defs.IconDungeonRockyWall
+			defFloorIcon = defs.IconDungeonFloorAlternative1
+		}
+
+		println(floorNumberExpr.FindString(currentMap.GetName()))
 		dijkstraAoeMap := toList(currentMap.GetDijkstraMap(user.mapPosition, earthQuakeRadius, func(point geometry.Point) bool {
-			return point != user.mapPosition
+			return point != user.MapPosition() && !currentMap.IsStairsAt(point)
 		}))
-		
+
 		wallTile := gridmap.Tile{
-			DefinedIcon:        defs.IconCathedralWall,
+			DefinedIcon:        defWallIcon,
 			DefinedDescription: "a wall",
 			IsWalkable:         false,
 			IsTransparent:      false,
@@ -380,7 +409,7 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 		}
 
 		floorTile := gridmap.Tile{
-			DefinedIcon:        defs.IconCathedralFloor,
+			DefinedIcon:        defFloorIcon,
 			DefinedDescription: "floor tile",
 			IsWalkable:         true,
 			IsTransparent:      false,
@@ -391,7 +420,7 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Floor", user), "floor", func() {
 					currentMap.SetTile(pos, floorTile)
 				}))
-			} else if !currentMap.IsTileWall(pos) {
+			} else if !currentMap.IsTileWall(pos) && pos != user.MapPosition() {
 				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Wall", user), "wall", func() {
 					currentMap.SetTile(pos, wallTile)
 				}))
