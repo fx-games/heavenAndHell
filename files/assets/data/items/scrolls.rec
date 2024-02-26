@@ -57,3 +57,11 @@ cost: 100
 category: scroll
 targeted_action: summon_monster(1d10)
 
+name: Scroll of Earthquake
+internal_name: scroll_of_earthquake
+icon: 139
+dlvl: 1
+cost: 5
+category: scroll
+untargeted_action: earthquake
+

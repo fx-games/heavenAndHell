@@ -76,7 +76,13 @@ func (s *State) GetWorldTexture() renderer.TextureAtlas {
 func (s *State) GetPlayerStashInTown() *Inventory {
 	return s.playerStashInTown
 }
-
+func (s *State) GetCurrentDungeonLevel() int {
+	currentMapName := s.GetMap().GetName()
+	if defs.IsTownLevel(currentMapName) {
+		return 0
+	}
+	return LevelFromName(currentMapName)
+}
 func NewState(ldtkProject *ldtk.Project) State {
 
 	return State{
@@ -86,7 +92,7 @@ func NewState(ldtkProject *ldtk.Project) State {
 		flags:               NewFlags(),
 		playerStashInTown:   NewInventory(32),
 		ldtkProject:         ldtkProject,
-		visibility: 		 NewVisibility(),
+		visibility:          NewVisibility(),
 	}
 }
 func (s *State) SetAnimator(animator Animator) {
@@ -118,6 +124,27 @@ func (s *State) Log(message string) { // Maybe remove this?
 func (s *State) GetPlayer() *Actor {
 	return s.player
 }
+
+// IsStairwayReachable returns true, if the player can reach all the stairs in the current level.
+// Assumes that the player's dijkstra map is up-to-date.
+// NOTE: This might still be misleading when applied to levels where
+// POIs must be reached which are not the stairs.
+// eg.: Vendors in Town, Quest Locations & End Bosses in Dungeons
+func (s *State) IsStairwayReachable() bool {
+	allStairs := s.GetMap().GetAllStairs()
+	return s.IsReachableByPlayer(allStairs)
+}
+
+func (s *State) IsReachableByPlayer(positionsOfInterest []geometry.Point) bool {
+	for _, stairs := range positionsOfInterest {
+		if _, exists := s.playerDijkstraMap[stairs]; !exists {
+			return false
+		}
+	}
+	return true
+}
+
+
 
 func (s *State) GetMap() *gridmap.GridMap[*Actor, *Item, Object] {
 	return s.currentMap
@@ -317,14 +344,18 @@ func (s *State) GetWaterColor() color.RGBA {
 	}
 }
 
-func (s *State) IsClosedDoorAt(pos geometry.Point) bool {
+func (s *State) IsDoorAt(pos geometry.Point) (*Door, bool) {
 	currentMap := s.GetMap()
 	if !currentMap.IsObjectAt(pos) {
-		return false
+		return nil, false
 	}
-
 	objectAt := currentMap.ObjectAt(pos)
 	door, isDoorHere := objectAt.(*Door)
+	return door, isDoorHere
+}
+
+func (s *State) IsClosedDoorAt(pos geometry.Point) bool {
+	door, isDoorHere := s.IsDoorAt(pos)
 	if !isDoorHere {
 		return false
 	}
@@ -351,9 +382,13 @@ func (s *State) AddBloodDecalAt(mapPos geometry.Point) {
 	}
 	currentMap.AddDecal(mapPos, icon)
 }
-func (s *State) SetPlayerDijkstraMap(dijkstraMap map[geometry.Point]int) {
+func (s *State) updatePlayerDijkstra() {
+	actor := s.GetPlayer()
+	currentMap := s.GetMap()
+	dijkstraMap := currentMap.GetDijkstraMapWithActorsNotBlocking(actor.MapPosition(), 10000)
 	s.playerDijkstraMap = dijkstraMap
 }
+
 func (s *State) MapTransition(to gridmap.Transition) {
 	if to.IsEmpty() {
 		return
@@ -529,6 +564,24 @@ func (s *State) SetFactory(factory *Factory) {
 
 func (s *State) GetPlayerDijkstraMap() map[geometry.Point]int {
 	return s.playerDijkstraMap
+}
+
+// GetAllPOIs returns all points of interest on the current map.
+// This is used to make sure that all the required locations on a map can be reached.
+// This includes
+// - stairs
+// - vendors
+// - enemies with win condition
+// - quest items
+func (s *State) GetAllPOIs() []geometry.Point {
+	return s.GetMap().GetPositionsByFilter(func(mapCellRef *gridmap.MapCell[*Actor, *Item, Object]) bool {
+		cell := *mapCellRef
+		isStairs := cell.TileType.Special == gridmap.SpecialTileStairsUp || cell.TileType.Special == gridmap.SpecialTileStairsDown
+		isVendor := cell.Actor != nil && (*cell.Actor).IsVendor()
+		isWinCondition := cell.Actor != nil && (*cell.Actor).IsWinCondition()
+		isQuestItem := cell.Item != nil && (*cell.Item).IsQuestItem()
+		return isStairs || isVendor || isWinCondition || isQuestItem
+	})
 }
 func getDropPos(gameMap *gridmap.GridMap[*Actor, *Item, Object], actorPos geometry.Point) geometry.Point {
 	isFree := func(pos geometry.Point) bool {

@@ -147,10 +147,12 @@ func (a *Actions) ActivateItemActionForPlayer(itemWithAction *common.Item) {
 
 		untargetedAction := itemWithAction.GetUntargetedAction()
 		a.activateUntargetedAction(user, untargetedAction, common.EffectSource(itemWithAction.GetInternalName()))
+		/* Actions should end the turn themselves
 		autTaken := untargetedAction.GetTimeNeededInAut()
 		if autTaken > 0 {
 			a.actionBroker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("ActiveItemUse"), autTaken))
 		}
+		 */
 	}
 }
 

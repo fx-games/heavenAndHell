@@ -145,7 +145,6 @@ func (t Tile) IsStairsDown() bool {
 	return t.Special == SpecialTileStairsDown
 }
 
-
 type MapCell[ActorType interface {
 	comparable
 	MapActor

@@ -490,7 +490,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) getDijkstraMapperWithActorsNo
 	return DijkstraMapper{
 		neighbors: func(point geometry.Point) []geometry.Point {
 			return m.GetFilteredNeighbors(point, func(p geometry.Point) bool {
-				return m.Contains(p) && m.IsTileWalkable(p)
+				return m.Contains(p) && m.IsWalkable(p)
 			})
 		},
 		cost: func(point geometry.Point, point2 geometry.Point) int {
@@ -905,10 +905,26 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) SetLit(pos geometry.Point, va
 	}
 	m.cells[pos.X+pos.Y*m.mapWidth].IsLit = value
 }
+func (m *GridMap[ActorType, ItemType, ObjectType]) GetAllStairs() []geometry.Point {
+	return m.GetPositionsByFilter(func(cell *MapCell[ActorType, ItemType, ObjectType]) bool {
+		return cell.TileType.Special == SpecialTileStairsUp || cell.TileType.Special == SpecialTileStairsDown
+	})
+}
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetAllSpecialTilePositions(tile SpecialTileType) []geometry.Point {
 	result := make([]geometry.Point, 0)
 	for index, c := range m.cells {
 		if c.TileType.Special == tile {
+			x := index % m.mapWidth
+			y := index / m.mapWidth
+			result = append(result, geometry.Point{X: x, Y: y})
+		}
+	}
+	return result
+}
+func (m *GridMap[ActorType, ItemType, ObjectType]) GetPositionsByFilter(filter func (tile *MapCell[ActorType, ItemType, ObjectType]) bool) []geometry.Point {
+	result := make([]geometry.Point, 0)
+	for index, c := range m.cells {
+		if filter(&c) {
 			x := index % m.mapWidth
 			y := index / m.mapWidth
 			result = append(result, geometry.Point{X: x, Y: y})
@@ -1345,12 +1361,12 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) UpdateFieldOfView(fov *geomet
 	var fovRange = geometry.NewRect(-visionRange, -visionRange, visionRange+1, visionRange+1)
 	fov.SetRange(fovRange.Add(fovPosition).Intersect(geometry.NewRect(0, 0, m.mapWidth, m.mapHeight)))
 
-	fov.SSCVisionMap(fovPosition, visionRange, func(p geometry.Point) bool {
-		if sourceIsLit && !m.IsTileLit(p) {
+	fov.SSCVisionMap(fovPosition, visionRange, false, func(p geometry.Point) bool {
+		if !m.Contains(p) || (sourceIsLit && !m.IsTileLit(p)) {
 			return false
 		}
 		return m.IsTransparent(p) && geometry.DistanceSquared(p, fovPosition) <= visionRangeSquared
-	}, false)
+	})
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) ToggleNoClip() bool {
@@ -1744,6 +1760,9 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetHeight() int {
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) IsTileLit(pos geometry.Point) bool {
+	if !m.Contains(pos) {
+		return false
+	}
 	return m.GetCell(pos).IsLit
 }
 
@@ -1770,6 +1789,14 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsValidSprintTarget(attacker 
 		}
 	}
 	return isValid
+}
+
+func (m *GridMap[ActorType, ItemType, ObjectType]) IsBorderWall(point geometry.Point) bool {
+	// pos is on the edge of the map
+	if point.X == 0 || point.X == m.mapWidth-1 || point.Y == 0 || point.Y == m.mapHeight-1 {
+		return true
+	}
+	return false
 }
 
 type JumpOverInfo struct {

@@ -32,7 +32,7 @@ func (d *UpdateFoVAction) Execute(context ActionContext) []Action {
 	updatePlayerKnowledge(context)
 
 	if actor == state.GetPlayer() {
-		d.updatePlayerDijkstra(context)
+		state.updatePlayerDijkstra()
 	}
 	return nil
 }
@@ -99,10 +99,3 @@ func (d *UpdateFoVAction) GetAnimations() []Animation {
 	return nil
 }
 
-func (d *UpdateFoVAction) updatePlayerDijkstra(context ActionContext) {
-	state := context.GameState
-	actor := state.GetPlayer()
-	currentMap := state.GetMap()
-	dijkstraMap := currentMap.GetDijkstraMapWithActorsNotBlocking(actor.MapPosition(), 10000)
-	state.SetPlayerDijkstraMap(dijkstraMap)
-}

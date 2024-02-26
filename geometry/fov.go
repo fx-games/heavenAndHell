@@ -538,7 +538,7 @@ func (fov *FOV) reveal(qt quadrant, tile Point) {
 // It returns a cached slice of visible points. Visibility of positions can
 // also be checked with the Visible method.  Contrary to VisionMap and
 // LightMap, this algorithm can have some discontinuous rays.
-func (fov *FOV) SSCVisionMap(src Point, maxDepth int, passable func(p Point) bool, diags bool) []Point {
+func (fov *FOV) SSCVisionMap(src Point, maxDepth int, diags bool, passable func(p Point) bool) []Point {
 	if !src.In(fov.Rg) {
 		return nil
 	}

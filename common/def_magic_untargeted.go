@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"fmt"
 	"image/color"
+	"math"
 	"rpg/defs"
 	"rpg/geometry"
 	"rpg/gridmap"
@@ -23,14 +24,15 @@ const (
 	ActionNameBuffSpeed         UntargetedActionName = "buff_speed"
 	ActionNameRecall            UntargetedActionName = "recall"
 	ActionNameBless             UntargetedActionName = "buff_armor"
-	ActionNameStoneSkin             UntargetedActionName = "stoneskin"
+	ActionNameStoneSkin         UntargetedActionName = "stoneskin"
 	ActionNameEnchantWeapon     UntargetedActionName = "enchant_weapon"
 	ActionNameEnchantArmor      UntargetedActionName = "enchant_armor"
-	ActionNameAcquirement      UntargetedActionName = "acquirement"
+	ActionNameAcquirement       UntargetedActionName = "acquirement"
 	ActionNameMultiShot         UntargetedActionName = "multi_shot"
 	ActionNameTelefrag          UntargetedActionName = "telefrag"
 	ActionNameReadMessage       UntargetedActionName = "read_message"
 	ActionNameReplicate         UntargetedActionName = "replicate_with"
+	ActionNameEarthquake        UntargetedActionName = "earthquake"
 )
 
 func (g *Factory) NewUntargetedActionFromName(name string) *UntargetedAction {
@@ -121,7 +123,7 @@ func (g *Factory) getSpeedBuff(args util.Arguments) UntargetedEffect {
 			Value:          float64(amount),
 			Mode:           stats.ModifyAdditive,
 			IsPercentBased: false,
-			StackID: 	    string(source),
+			StackID:        string(source),
 		}
 		timekeeper := g.getTimeKeeper()
 
@@ -308,8 +310,8 @@ func (g *Factory) getHealHealthBy(args util.Arguments) UntargetedEffect {
 	effect := func(user *Actor, source EffectSource) {
 		healHealthAction := NewChangeResourceAction(NewActorCause("Heal", user), user, stats.Health, float64(interval.LinearRandom()))
 		g.actionBroker.Execute(healHealthAction)
-		g.logIfPlayer(user,"You feel better")
-		g.tryEndTurn(user, 100 / user.GetBaseSpeed())
+		g.logIfPlayer(user, "You feel better")
+		g.tryEndTurn(user, 100/user.GetBaseSpeed())
 	}
 	return UntargetedEffect{
 		Effect: effect,
@@ -325,7 +327,7 @@ func (g *Factory) getHealManaBy(args util.Arguments) UntargetedEffect {
 		healHealthAction := NewChangeResourceAction(NewActorCause("Mana Surge", user), user, stats.Mana, float64(interval.LinearRandom()))
 		g.actionBroker.Execute(healHealthAction)
 		g.logError("You feel a surge of mana")
-		g.tryEndTurn(user, 100 / user.GetBaseSpeed())
+		g.tryEndTurn(user, 100/user.GetBaseSpeed())
 	}
 	return UntargetedEffect{
 		Effect: effect,
@@ -352,12 +354,157 @@ func (g *Factory) getMultiShot(args util.Arguments) UntargetedEffect {
 			rangedAttackAction := NewRangedAttackAction(NewActorCause("Multi Shot", user), user, target.MapPosition())
 			g.actionBroker.Execute(rangedAttackAction)
 		}
-		g.tryEndTurn(user, 100 / user.GetAttackSpeed(RangedAttack))
+		g.tryEndTurn(user, 100/user.GetAttackSpeed(RangedAttack))
 	}
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
 			util.LabelTextFromString(fmt.Sprintf("Shoot at %d enemies at the same time", shotCount)),
+		},
+	}
+}
+
+func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
+	earthQuakeRadius := args.GetIntOrDefault(0, 4)
+	earthQuakeDamageRange := args.GetIntOrDefault(1, 10)
+	effect := func(user *Actor, source EffectSource) {
+		currentMap := g.state.GetMap()
+		generator := g.randomSource
+		allPOIs := g.state.GetAllPOIs()
+
+		defWallIcon := defs.IconDungeonRockyWall
+		defFloorIcon := defs.IconDungeonFloorAlternative1
+
+		floorNumber := g.state.GetCurrentDungeonLevel()
+
+		switch floorNumber {
+		case 1, 2:
+			defWallIcon = defs.IconCathedralWall
+			defFloorIcon = defs.IconCathedralFloor
+		case 3, 4:
+			defWallIcon = defs.IconCatacombsWall
+			defFloorIcon = defs.IconCatacombsFloor
+		case 5, 6:
+			defWallIcon = defs.IconDungeonRockyWall
+			defFloorIcon = defs.IconDungeonRedEarthFloor
+		case 7, 8:
+			defWallIcon = defs.IconDungeonOfDoomWallModern
+			defFloorIcon = defs.IconDungeonOfDoomFloorModern
+		}
+		wallTile := gridmap.Tile{
+			DefinedIcon:        defWallIcon,
+			DefinedDescription: "a wall",
+			IsWalkable:         false,
+			IsTransparent:      false,
+		}
+
+		floorTile := gridmap.Tile{
+			DefinedIcon:        defFloorIcon,
+			DefinedDescription: "floor tile",
+			IsWalkable:         true,
+			IsTransparent:      false,
+		}
+
+		areaOfEffect := currentMap.GetDijkstraMap(user.MapPosition(), earthQuakeRadius, func(point geometry.Point) bool {
+			return !currentMap.IsStairsAt(point) && !currentMap.IsBorderWall(point)
+		})
+
+
+		delete(areaOfEffect, user.MapPosition())
+
+		shuffleAreaOfEffect := func() {
+			for pos, _ := range areaOfEffect {
+				if generator.Intn(2) == 0 {
+					continue
+				}
+				// flip terrain
+				if currentMap.IsWalkable(pos) {
+					currentMap.SetTile(pos, wallTile)
+				} else {
+					currentMap.SetTile(pos, floorTile)
+				}
+			}
+		}
+
+		// this is the real algorithm we are using
+		// shuffle stuff around
+		shuffleAreaOfEffect()
+		// update the reachability map
+		g.state.updatePlayerDijkstra()
+
+		// do this until the level is connected
+		for !g.state.IsReachableByPlayer(allPOIs) {
+			shuffleAreaOfEffect()
+			g.state.updatePlayerDijkstra()
+		}
+
+		getNearestFreePositionInAoE := func(origin geometry.Point) geometry.Point {
+			minDistance := math.MaxInt64
+			nearestFree := origin
+			for pos, _ := range areaOfEffect {
+				if !currentMap.CanPlaceActorHere(pos) {
+					continue
+				}
+				distance := geometry.DistanceManhattan(origin, pos)
+				if distance < minDistance {
+					minDistance = distance
+					nearestFree = pos
+				}
+			}
+			return nearestFree
+		}
+		isSomethingStuckHere := func(pos geometry.Point) bool {
+			if currentMap.IsTileWalkable(pos) {
+				return false
+			}
+			if currentMap.IsObjectAt(pos) || currentMap.IsItemAt(pos) || currentMap.IsActorAt(pos) || currentMap.IsDownedActorAt(pos) {
+				return true
+			}
+			return false
+		}
+		var affectedActorActions []Action
+		for pos, _ := range areaOfEffect {
+			if !isSomethingStuckHere(pos) {
+				continue
+			}
+			if currentMap.IsItemAt(pos) { // destroy items on affected tiles
+				currentMap.RemoveItemAt(pos)
+			}
+
+			if currentMap.IsObjectAt(pos) { // destroy objects on affected tiles
+				currentMap.RemoveObjectAt(pos)
+			}
+
+			if currentMap.IsDownedActorAt(pos) { // destroy corpses on affected tiles
+				downedActor := currentMap.DownedActorAt(pos)
+				currentMap.RemoveDownedActor(downedActor)
+			}
+
+			if currentMap.IsActorAt(pos) {
+				// move around the actors to the nearest free position and damage them in the process
+				hitActor := currentMap.ActorAt(pos)
+				newPos := getNearestFreePositionInAoE(hitActor.MapPosition())
+				moveAction := NewMoveAction(NewActorCause("Earthquake", user), hitActor, newPos, false)
+				affectedActorActions = append(affectedActorActions, moveAction)
+
+				damage := generator.Intn(earthQuakeDamageRange) + 1
+				damageAction := NewChangeResourceAction(NewActorCause("Earthquake", user), hitActor, stats.Health, float64(-damage))
+				affectedActorActions = append(affectedActorActions, damageAction)
+
+				updateFoV := NewUpdateFoVAction(NewActorCause("Earthquake", hitActor), hitActor)
+				affectedActorActions = append(affectedActorActions, updateFoV)
+			}
+		}
+		g.actionBroker.QueueForExecution(NewUpdateFoVAction(NewActorCause("Earthquake", user), user))
+		g.actionBroker.QueueForExecutionAtTheSameTime(affectedActorActions)
+
+		actionCost := 10 // default cost for any action is 10 aut
+		g.tryEndTurn(user, actionCost)
+	}
+	return UntargetedEffect{
+		Effect: effect,
+		Description: []util.LabelText{
+			util.LabelTextFromString("changes the terrain around the actor"),
 		},
 	}
 }
@@ -410,7 +557,7 @@ func (g *Factory) getStoneSkinBuff(args util.Arguments) UntargetedEffect {
 			Value:          float64(-5),
 			Mode:           stats.ModifyAdditive,
 			IsPercentBased: false,
-			StackID: 	    string(source),
+			StackID:        string(source),
 		}
 		timeKeeper := g.getTimeKeeper()
 		RemoveTimedEffectsBySource(timeKeeper, source)
@@ -420,7 +567,7 @@ func (g *Factory) getStoneSkinBuff(args util.Arguments) UntargetedEffect {
 		timeKeeper.AddTimed(timedSpeedMod)
 
 		currentAC := user.GetStats().GetAttribute(stats.ArmorClass)
-		missingToThirty := max(0, 30 - currentAC)
+		missingToThirty := max(0, 30-currentAC)
 		acMod := defs.AddToBaseAttribute(g.randomSource, stats.ArmorClass, float64(missingToThirty))
 		acMod.StackID = string(source)
 		timedACMod := NewTimedModifier(string(ActionNameStoneSkin), user, acMod, turnCount)
@@ -428,7 +575,7 @@ func (g *Factory) getStoneSkinBuff(args util.Arguments) UntargetedEffect {
 		timeKeeper.AddTimed(timedACMod)
 
 		g.logIfPlayer(user, "Your skin hardens but movement becomes difficult.")
-		g.tryEndTurn(user, 100 / user.GetBaseSpeed())
+		g.tryEndTurn(user, 100/user.GetBaseSpeed())
 	}
 	return UntargetedEffect{
 		Effect: effect,

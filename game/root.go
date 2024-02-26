@@ -1021,13 +1021,7 @@ func (g *GameInstance) checkForLevelUp() {
 	g.GetAudio().PlayCue("levelup")
 }
 
-func (g *GameInstance) getCurrentDungeonLevel() int {
-	currentMapName := g.state.GetMap().GetName()
-	if defs.IsTownLevel(currentMapName) {
-		return 0
-	}
-	return common.LevelFromName(currentMapName)
-}
+
 
 func (g *GameInstance) gotoHellTown() {
 	dest := gridmap.Transition{TargetMap: "TownHell", TargetLocation: "spawn"}

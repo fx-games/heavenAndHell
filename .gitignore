@@ -5,7 +5,8 @@ cpu.prof
 builds/
 ./rpg
 rpg
-
+builds/
+exclude/
 assets/maps/
 assets/maps/backups/
 assets/oryx/

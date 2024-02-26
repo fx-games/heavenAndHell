@@ -18,7 +18,7 @@ Status Effects
 */
 func IsValidStatusEffect(name string) bool {
 	switch StatusEffect(name) {
-	case StatusInvisible, StatusStunned, StatusPoisoned, StatusImmobile, StatusBlinded, StatusSlow, StatusHasted, StatusScared, StatusSilenced, StatusPacified, StatusDamageOverTime, StatusConfused, StatusCharmed, StatusBerserk, StatusHaywire, StatusFlying:
+	case StatusInvisible, StatusStunned, StatusPoisoned, StatusImmobile, StatusBlinded, StatusSlow, StatusHasted, StatusScared, StatusSilenced, StatusPacified, StatusDamageOverTime, StatusConfused, StatusCharmed, StatusBerserk, StatusHaywire, StatusFlying, StatusWinCondition:
 		return true
 	}
 	return false
@@ -46,6 +46,7 @@ const (
 	StatusSlow           StatusEffect = "slow"             // are really timed modifiers
 	StatusHasted         StatusEffect = "hasted"           // are really timed modifiers
 	StatusDamageOverTime StatusEffect = "damage over time" // timed resource changes
+	StatusWinCondition   StatusEffect = "win condition"    // killing this enemy is part of the win condition
 )
 
 type ParametrizedStatusEffect struct {

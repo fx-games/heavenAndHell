@@ -847,6 +847,10 @@ func (a *Actor) GetColor() color.RGBA {
 	return a.color
 }
 
+func (a *Actor) IsWinCondition() bool {
+	return a.HasStatusEffect(StatusWinCondition)
+}
+
 func ADRFromAC(armorClass int) float64 {
 	return util.Clamp(0.0, 0.9, (float64(armorClass)/float64(armorClass+20))*1.5)
 }

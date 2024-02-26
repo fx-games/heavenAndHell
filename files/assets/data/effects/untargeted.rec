@@ -113,3 +113,10 @@ icon: 223
 dlvl: 1
 name: Acquirement
 allowed_usage: wand | shrine
+
+internal_name: earthquake
+icon: 223
+dlvl: 1
+name: Earthquake
+default_args: 8
+allowed_usage: shrine | scroll
