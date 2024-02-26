@@ -319,7 +319,6 @@ func (g *MapGenerator) addBasicTiles(emptyMap *gridmap.GridMap[*Actor, *Item, Ob
 			DefinedDescription: "a wall",
 			IsWalkable:         false,
 			IsTransparent:      false,
-			Special:            gridmap.SpecialTileWall,
 		}
 	}
 	floorTileFromIcon := func(icon int32) gridmap.Tile {

@@ -399,32 +399,42 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 
 		println(floorNumberExpr.FindString(currentMap.GetName()))
 
-		dijkstraAoeMap := currentMap.GetDijkstraMap(user.mapPosition, earthQuakeRadius, func(point geometry.Point) bool {
+		dijkstraAoeMapBounds := currentMap.GetDijkstraMap(user.MapPosition(), earthQuakeRadius+1, func(point geometry.Point) bool {
 			return point != user.MapPosition() && !currentMap.IsStairsAt(point)
 		})
 
-		dijkstraAoeMapBounds := currentMap.GetDijkstraMap(user.mapPosition, earthQuakeRadius+1, func(point geometry.Point) bool {
-			return point != user.MapPosition() && !currentMap.IsStairsAt(point)
-		})
+		var dijkstraAoeList []geometry.Point
+		for pos, _ := range dijkstraAoeMapBounds {
+			if geometry.Distance(user.MapPosition(), pos) > float64(earthQuakeRadius) {
+				continue
+			}
 
-		for pos, _ := range dijkstraAoeMap {
+			dijkstraAoeList = append(dijkstraAoeList, pos)
 			delete(dijkstraAoeMapBounds, pos)
 		}
 
 		for pos, _ := range dijkstraAoeMapBounds {
-			if currentMap.IsTileWall(pos) || !currentMap.IsTileWalkable(pos) {
+			if !currentMap.IsTileWalkable(pos) {
+				delete(dijkstraAoeMapBounds, pos)
+				continue
+			}
+
+			if !currentMap.IsObjectAt(pos) {
+				continue
+			}
+
+			objectAt := currentMap.ObjectAt(pos)
+			_, isBumper := objectAt.(*BumpObject)
+			if !isBumper && !currentMap.IsStairsAt(pos) {
 				delete(dijkstraAoeMapBounds, pos)
 			}
 		}
-
-		dijkstraAoeList := toList(dijkstraAoeMap)
 
 		wallTile := gridmap.Tile{
 			DefinedIcon:        defWallIcon,
 			DefinedDescription: "a wall",
 			IsWalkable:         false,
 			IsTransparent:      false,
-			Special:            gridmap.SpecialTileWall,
 		}
 
 		floorTile := gridmap.Tile{
@@ -437,44 +447,64 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 		for _, pos := range dijkstraAoeList {
 
 			willUse := generator.Intn(2) == 1
-			if currentMap.IsTileWall(pos) && willUse {
+			if !willUse {
+				continue
+			}
+
+			if !currentMap.IsWalkable(pos) {
 				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Floor", user), "floor", func() {
 					currentMap.SetTile(pos, floorTile)
 				}))
-			} else if !currentMap.IsTileWall(pos) && pos != user.MapPosition() && willUse {
-				_, isDoor := g.state.IsDoorAt(pos)
-				if isDoor {
-					currentMap.RemoveObjectAt(pos)
-				}
-				if currentMap.IsItemAt(pos) {
-					currentMap.RemoveItemAt(pos)
-				}
-				if currentMap.IsActorAt(pos) && currentMap.ActorAt(pos) != user {
-					if generator.Intn(101) == 50 {
-						g.actionBroker.Execute(NewDieAction(nil, currentMap.ActorAt(pos)))
-					}
-				}
-				if currentMap.IsDownedActorAt(pos) {
-					downedActor := currentMap.DownedActorAt(pos)
-					currentMap.RemoveDownedActor(downedActor)
-				}
-				if !currentMap.IsActorAt(pos) {
-					g.actionBroker.Execute(NewSpawnAction(NewActorCause("Wall", user), "wall", func() {
-						currentMap.SetTile(pos, wallTile)
-					}))
-					for endPos, _ := range dijkstraAoeMapBounds {
-						hasPath := currentMap.GetJPSPath(user.MapPosition(), endPos, currentMap.CurrentlyPassableForActor(user)) != nil
-						if !hasPath {
-							fmt.Println("removed blocking wall")
-							g.actionBroker.Execute(NewSpawnAction(NewActorCause("Floor", user), "floor", func() {
-								currentMap.SetTile(pos, floorTile)
-							}))
-							break
-						}
-					}
+			}
+
+			if pos == user.MapPosition() {
+				continue
+			}
+
+			_, isDoor := g.state.IsDoorAt(pos)
+			if isDoor {
+				currentMap.RemoveObjectAt(pos)
+			}
+
+			if currentMap.IsItemAt(pos) {
+				currentMap.RemoveItemAt(pos)
+			}
+
+			if currentMap.IsActorAt(pos) {
+				if generator.Intn(101) == 50 {
+					g.actionBroker.Execute(NewDieAction(nil, currentMap.ActorAt(pos)))
 				}
 			}
+
+			if currentMap.IsDownedActorAt(pos) {
+				downedActor := currentMap.DownedActorAt(pos)
+				currentMap.RemoveDownedActor(downedActor)
+			}
+
+			if currentMap.IsActorAt(pos) {
+				continue
+			}
+
+			g.actionBroker.Execute(NewSpawnAction(NewActorCause("Wall", user), "wall", func() {
+				currentMap.SetTile(pos, wallTile)
+			}))
+
+			for endPos, _ := range dijkstraAoeMapBounds {
+				hasPath := currentMap.GetJPSPath(user.MapPosition(), endPos, currentMap.CurrentlyPassableForActor(user)) != nil
+
+				if hasPath {
+					continue
+				}
+
+				fmt.Println("removed blocking wall")
+				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Floor", user), "floor", func() {
+					currentMap.SetTile(pos, floorTile)
+				}))
+				break
+			}
 		}
+		actionCost := 100
+		g.actionBroker.QueueForExecution(NewEndPlayerTurnAction(NewActorCause("Earthquake", user), actionCost))
 	}
 	return UntargetedEffect{
 		Effect: effect,

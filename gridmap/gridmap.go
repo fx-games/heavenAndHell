@@ -1747,10 +1747,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsTileLit(pos geometry.Point)
 	return m.GetCell(pos).IsLit
 }
 
-func (m *GridMap[ActorType, ItemType, ObjectType]) IsTileWall(pos geometry.Point) bool {
-	return m.GetCell(pos).TileType.IsWall()
-}
-
 func GetLocationsInRadius(origin geometry.Point, radius float64, keep func(point geometry.Point) bool) []geometry.Point {
 	result := make([]geometry.Point, 0)
 	for y := origin.Y - int(radius); y <= origin.Y+int(radius); y++ {

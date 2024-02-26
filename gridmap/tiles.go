@@ -24,7 +24,6 @@ const (
 	SpecialTileSwamp
 	SpecialTileVoid
 	SpecialTileBed
-	SpecialTileWall
 )
 
 type Tile struct {
@@ -144,10 +143,6 @@ func (t Tile) IsStairsUp() bool {
 
 func (t Tile) IsStairsDown() bool {
 	return t.Special == SpecialTileStairsDown
-}
-
-func (t Tile) IsWall() bool {
-	return t.Special == SpecialTileWall
 }
 
 type MapCell[ActorType interface {
