@@ -368,12 +368,10 @@ func (c *Console) SetDebugActions(actions func() common.DebugActions) {
 
 func (c *Console) HandleInput() (terminationCode int) {
 
-	/*
 	if !c.screen.HasPendingEvent() {
 		return 0
 	}
 
-	 */
 	for c.screen.HasPendingEvent() {
 		ev := c.screen.PollEvent()
 		if ev == nil {
