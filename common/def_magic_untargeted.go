@@ -400,7 +400,7 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 		println(floorNumberExpr.FindString(currentMap.GetName()))
 
 		dijkstraAoeMapBounds := currentMap.GetDijkstraMap(user.MapPosition(), earthQuakeRadius+1, func(point geometry.Point) bool {
-			return point != user.MapPosition() && !currentMap.IsStairsAt(point)
+			return point != user.MapPosition()
 		})
 
 		var dijkstraAoeList []geometry.Point
@@ -414,20 +414,26 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 		}
 
 		for pos, _ := range dijkstraAoeMapBounds {
-			if !currentMap.IsTileWalkable(pos) {
-				delete(dijkstraAoeMapBounds, pos)
+
+			if currentMap.IsObjectAt(pos) {
+
+				objectAt := currentMap.ObjectAt(pos)
+				_, isBumper := objectAt.(*BumpObject)
+
+				if isBumper {
+					continue
+				}
+			}
+
+			if currentMap.IsTileWalkable(pos) {
 				continue
 			}
 
-			if !currentMap.IsObjectAt(pos) {
+			if currentMap.IsStairsAt(pos) {
 				continue
 			}
 
-			objectAt := currentMap.ObjectAt(pos)
-			_, isBumper := objectAt.(*BumpObject)
-			if !isBumper && !currentMap.IsStairsAt(pos) {
-				delete(dijkstraAoeMapBounds, pos)
-			}
+			delete(dijkstraAoeMapBounds, pos)
 		}
 
 		wallTile := gridmap.Tile{
@@ -504,7 +510,7 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 			}
 		}
 		actionCost := 100
-		g.actionBroker.QueueForExecution(NewEndPlayerTurnAction(NewActorCause("Earthquake", user), actionCost))
+		g.tryEndTurn(user, actionCost)
 	}
 	return UntargetedEffect{
 		Effect: effect,
