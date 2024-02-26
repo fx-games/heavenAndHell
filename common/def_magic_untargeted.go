@@ -408,7 +408,7 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 		areaOfEffect := currentMap.GetDijkstraMap(user.MapPosition(), earthQuakeRadius, func(point geometry.Point) bool {
 			return !currentMap.IsStairsAt(point)
 		})
-		previouslyAffected := func(pos geometry.Point) bool {
+		isSomethingStuckHere := func(pos geometry.Point) bool {
 			if currentMap.IsTileWalkable(pos) {
 				return false
 			}
@@ -420,23 +420,21 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 
 		delete(areaOfEffect, user.MapPosition())
 
-		var affectedPositions []geometry.Point
+		var stuckInWallPositions []geometry.Point
 		shuffleAreaOfEffect := func() {
-			affectedPositions = make([]geometry.Point, 0, len(areaOfEffect))
+			stuckInWallPositions = make([]geometry.Point, 0, len(areaOfEffect))
 			for pos, _ := range areaOfEffect {
 				if generator.Intn(2) == 0 {
-					if previouslyAffected(pos) {
-						affectedPositions = append(affectedPositions, pos)
+					// flip terrain
+					if currentMap.IsWalkable(pos) {
+						currentMap.SetTile(pos, wallTile)
+					} else {
+						currentMap.SetTile(pos, floorTile)
 					}
-					continue
 				}
-				// flip terrain
-				if currentMap.IsWalkable(pos) {
-					currentMap.SetTile(pos, wallTile)
-				} else {
-					currentMap.SetTile(pos, floorTile)
+				if isSomethingStuckHere(pos) {
+					stuckInWallPositions = append(stuckInWallPositions, pos)
 				}
-				affectedPositions = append(affectedPositions, pos)
 			}
 		}
 
@@ -469,7 +467,7 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 		}
 
 		var affectedActorActions []Action
-		for _, pos := range affectedPositions {
+		for _, pos := range stuckInWallPositions {
 			if currentMap.IsItemAt(pos) { // destroy items on affected tiles
 				currentMap.RemoveItemAt(pos)
 			}
