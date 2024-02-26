@@ -4,14 +4,13 @@ import (
 	"cmp"
 	"fmt"
 	"image/color"
-	"regexp"
+	"math"
 	"rpg/defs"
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/stats"
 	"rpg/util"
 	"slices"
-	"strconv"
 )
 
 const (
@@ -367,17 +366,15 @@ func (g *Factory) getMultiShot(args util.Arguments) UntargetedEffect {
 
 func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 	earthQuakeRadius := args.GetIntOrDefault(0, 4)
+	earthQuakeDamageRange := args.GetIntOrDefault(1, 10)
 	effect := func(user *Actor, source EffectSource) {
 		currentMap := g.state.GetMap()
-
 		generator := g.randomSource
-		var defWallIcon int32
-		var defFloorIcon int32
-		floorNumberExpr := regexp.MustCompile(`\d+`)
-		floorNumber, err := strconv.Atoi(floorNumberExpr.FindString(currentMap.GetName()))
-		if err != nil {
-			floorNumber = 0
-		}
+
+		defWallIcon := defs.IconDungeonRockyWall
+		defFloorIcon := defs.IconDungeonFloorAlternative1
+
+		floorNumber := g.state.GetCurrentDungeonLevel()
 
 		switch floorNumber {
 		case 1, 2:
@@ -392,50 +389,7 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 		case 7, 8:
 			defWallIcon = defs.IconDungeonOfDoomWallModern
 			defFloorIcon = defs.IconDungeonOfDoomFloorModern
-		default:
-			defWallIcon = defs.IconDungeonRockyWall
-			defFloorIcon = defs.IconDungeonFloorAlternative1
 		}
-
-		println(floorNumberExpr.FindString(currentMap.GetName()))
-
-		dijkstraAoeMapBounds := currentMap.GetDijkstraMap(user.MapPosition(), earthQuakeRadius+1, func(point geometry.Point) bool {
-			return point != user.MapPosition()
-		})
-
-		var dijkstraAoeList []geometry.Point
-		for pos, _ := range dijkstraAoeMapBounds {
-			if geometry.Distance(user.MapPosition(), pos) > float64(earthQuakeRadius) {
-				continue
-			}
-
-			dijkstraAoeList = append(dijkstraAoeList, pos)
-			delete(dijkstraAoeMapBounds, pos)
-		}
-
-		for pos, _ := range dijkstraAoeMapBounds {
-
-			if currentMap.IsObjectAt(pos) {
-
-				objectAt := currentMap.ObjectAt(pos)
-				_, isBumper := objectAt.(*BumpObject)
-
-				if isBumper {
-					continue
-				}
-			}
-
-			if currentMap.IsTileWalkable(pos) {
-				continue
-			}
-
-			if currentMap.IsStairsAt(pos) {
-				continue
-			}
-
-			delete(dijkstraAoeMapBounds, pos)
-		}
-
 		wallTile := gridmap.Tile{
 			DefinedIcon:        defWallIcon,
 			DefinedDescription: "a wall",
@@ -450,66 +404,97 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 			IsTransparent:      false,
 		}
 
-		for _, pos := range dijkstraAoeList {
+		areaOfEffect := currentMap.GetDijkstraMap(user.MapPosition(), earthQuakeRadius, func(point geometry.Point) bool {
+			return !currentMap.IsStairsAt(point)
+		})
 
-			willUse := generator.Intn(2) == 1
-			if !willUse {
-				continue
-			}
+		delete(areaOfEffect, user.MapPosition())
 
-			if !currentMap.IsWalkable(pos) {
-				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Floor", user), "floor", func() {
-					currentMap.SetTile(pos, floorTile)
-				}))
-			}
-
-			if pos == user.MapPosition() {
-				continue
-			}
-
-			_, isDoor := g.state.IsDoorAt(pos)
-			if isDoor {
-				currentMap.RemoveObjectAt(pos)
-			}
-
-			if currentMap.IsItemAt(pos) {
-				currentMap.RemoveItemAt(pos)
-			}
-
-			if currentMap.IsActorAt(pos) {
-				if generator.Intn(101) == 50 {
-					g.actionBroker.Execute(NewDieAction(nil, currentMap.ActorAt(pos)))
-				}
-			}
-
-			if currentMap.IsDownedActorAt(pos) {
-				downedActor := currentMap.DownedActorAt(pos)
-				currentMap.RemoveDownedActor(downedActor)
-			}
-
-			if currentMap.IsActorAt(pos) {
-				continue
-			}
-
-			g.actionBroker.Execute(NewSpawnAction(NewActorCause("Wall", user), "wall", func() {
-				currentMap.SetTile(pos, wallTile)
-			}))
-
-			for endPos, _ := range dijkstraAoeMapBounds {
-				hasPath := currentMap.GetJPSPath(user.MapPosition(), endPos, currentMap.CurrentlyPassableForActor(user)) != nil
-
-				if hasPath {
+		var affectedActors []*Actor
+		shuffleAreaOfEffect := func() {
+			affectedActors = nil
+			for pos, _ := range areaOfEffect {
+				willUse := generator.Intn(2) == 1
+				if !willUse {
 					continue
 				}
 
-				fmt.Println("removed blocking wall")
-				g.actionBroker.Execute(NewSpawnAction(NewActorCause("Floor", user), "floor", func() {
-					currentMap.SetTile(pos, floorTile)
-				}))
-				break
+				if currentMap.IsItemAt(pos) { // destroy items on affected tiles
+					currentMap.RemoveItemAt(pos)
+				}
+
+				if currentMap.IsObjectAt(pos) { // destroy objects on affected tiles
+					currentMap.RemoveObjectAt(pos)
+				}
+
+				if currentMap.IsDownedActorAt(pos) { // destroy corpses on affected tiles
+					downedActor := currentMap.DownedActorAt(pos)
+					currentMap.RemoveDownedActor(downedActor)
+				}
+
+				if currentMap.IsActorAt(pos) { // actors on affected tiles
+					hitActor := currentMap.ActorAt(pos)
+					affectedActors = append(affectedActors, hitActor)
+				}
+
+				// flip terrain
+				if currentMap.IsWalkable(pos) {
+					g.actionBroker.Execute(NewSpawnAction(NewActorCause("Wall", user), "wall", func() {
+						currentMap.SetTile(pos, wallTile)
+					}))
+				} else {
+					g.actionBroker.Execute(NewSpawnAction(NewActorCause("Floor", user), "floor", func() {
+						currentMap.SetTile(pos, floorTile)
+					}))
+				}
 			}
 		}
-		actionCost := 100
+
+		// this is the real algorithm we are using
+		// shuffle stuff around
+		shuffleAreaOfEffect()
+		// update the reachability map
+		g.state.updatePlayerDijkstra()
+
+		// do this until the level is connected
+		for !g.state.IsLevelConnectedForPlayer() {
+			shuffleAreaOfEffect()
+			g.state.updatePlayerDijkstra()
+		}
+
+
+		getNearestFreePositionInAoE := func(origin geometry.Point) geometry.Point {
+			minDistance := math.MaxInt64
+			nearestFree := origin
+			for pos, _ := range areaOfEffect {
+				if !currentMap.CanPlaceActorHere(pos) {
+					continue
+				}
+				distance := geometry.DistanceManhattan(origin, pos)
+				if distance < minDistance {
+					minDistance = distance
+					nearestFree = pos
+				}
+			}
+			return nearestFree
+		}
+
+		// move around the actors to the nearest free position and damage them in the process
+		var affectedActorActions []Action
+		for _, hitActor := range affectedActors {
+
+			newPos := getNearestFreePositionInAoE(hitActor.MapPosition())
+			moveAction := NewMoveAction(NewActorCause("Earthquake", user), hitActor, newPos, false)
+			affectedActorActions = append(affectedActorActions, moveAction)
+
+			damage := generator.Intn(earthQuakeDamageRange) + 1
+			damageAction := NewChangeResourceAction(NewActorCause("Earthquake", user), hitActor, stats.Health, float64(-damage))
+			affectedActorActions = append(affectedActorActions, damageAction)
+		}
+
+		g.actionBroker.QueueForExecutionAtTheSameTime(affectedActorActions)
+
+		actionCost := 10 // default cost for any action is 10 aut
 		g.tryEndTurn(user, actionCost)
 	}
 	return UntargetedEffect{

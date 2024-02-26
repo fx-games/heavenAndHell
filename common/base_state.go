@@ -76,7 +76,13 @@ func (s *State) GetWorldTexture() renderer.TextureAtlas {
 func (s *State) GetPlayerStashInTown() *Inventory {
 	return s.playerStashInTown
 }
-
+func (s *State) GetCurrentDungeonLevel() int {
+	currentMapName := s.GetMap().GetName()
+	if defs.IsTownLevel(currentMapName) {
+		return 0
+	}
+	return LevelFromName(currentMapName)
+}
 func NewState(ldtkProject *ldtk.Project) State {
 
 	return State{
@@ -117,6 +123,19 @@ func (s *State) Log(message string) { // Maybe remove this?
 
 func (s *State) GetPlayer() *Actor {
 	return s.player
+}
+
+// IsLevelConnectedForPlayer returns, if the player can reach all the stairs in the current level.
+// Assumes that the player's dijkstra map is up to date.
+func (s *State) IsLevelConnectedForPlayer() bool {
+	for _, stairs := range s.GetMap().GetPositionsByFilter(func(tile gridmap.Tile) bool {
+		return tile.Special == gridmap.SpecialTileStairsUp || tile.Special == gridmap.SpecialTileStairsDown
+	}) {
+		if _, exists := s.playerDijkstraMap[stairs]; !exists {
+			return false
+		}
+	}
+	return true
 }
 
 func (s *State) GetMap() *gridmap.GridMap[*Actor, *Item, Object] {
@@ -355,9 +374,13 @@ func (s *State) AddBloodDecalAt(mapPos geometry.Point) {
 	}
 	currentMap.AddDecal(mapPos, icon)
 }
-func (s *State) SetPlayerDijkstraMap(dijkstraMap map[geometry.Point]int) {
+func (s *State) updatePlayerDijkstra() {
+	actor := s.GetPlayer()
+	currentMap := s.GetMap()
+	dijkstraMap := currentMap.GetDijkstraMapWithActorsNotBlocking(actor.MapPosition(), 10000)
 	s.playerDijkstraMap = dijkstraMap
 }
+
 func (s *State) MapTransition(to gridmap.Transition) {
 	if to.IsEmpty() {
 		return

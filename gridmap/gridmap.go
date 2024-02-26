@@ -916,6 +916,17 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetAllSpecialTilePositions(ti
 	}
 	return result
 }
+func (m *GridMap[ActorType, ItemType, ObjectType]) GetPositionsByFilter(filter func (tile Tile) bool) []geometry.Point {
+	result := make([]geometry.Point, 0)
+	for index, c := range m.cells {
+		if filter(c.TileType) {
+			x := index % m.mapWidth
+			y := index / m.mapWidth
+			result = append(result, geometry.Point{X: x, Y: y})
+		}
+	}
+	return result
+}
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetNeighborWithSpecial(pos geometry.Point, specialType SpecialTileType) geometry.Point {
 	neighbors := m.GetAllCardinalNeighbors(pos)
 	for _, n := range neighbors {

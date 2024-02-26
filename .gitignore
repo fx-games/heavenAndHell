@@ -4,7 +4,8 @@ cpu.prof
 .DS_Store
 ./rpg
 rpg
-
+builds/
+exclude/
 assets/maps/
 assets/maps/backups/
 assets/oryx/
