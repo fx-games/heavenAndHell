@@ -370,6 +370,7 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 	effect := func(user *Actor, source EffectSource) {
 		currentMap := g.state.GetMap()
 		generator := g.randomSource
+		allPOIs := g.state.GetAllPOIs()
 
 		defWallIcon := defs.IconDungeonRockyWall
 		defFloorIcon := defs.IconDungeonFloorAlternative1
@@ -410,43 +411,20 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 
 		delete(areaOfEffect, user.MapPosition())
 
-		var affectedActors []*Actor
+		var affectedPositions []geometry.Point
 		shuffleAreaOfEffect := func() {
-			affectedActors = nil
+			affectedPositions = make([]geometry.Point, 0, len(areaOfEffect))
 			for pos, _ := range areaOfEffect {
-				willUse := generator.Intn(2) == 1
-				if !willUse {
+				if generator.Intn(2) == 0 {
 					continue
 				}
-
-				if currentMap.IsItemAt(pos) { // destroy items on affected tiles
-					currentMap.RemoveItemAt(pos)
-				}
-
-				if currentMap.IsObjectAt(pos) { // destroy objects on affected tiles
-					currentMap.RemoveObjectAt(pos)
-				}
-
-				if currentMap.IsDownedActorAt(pos) { // destroy corpses on affected tiles
-					downedActor := currentMap.DownedActorAt(pos)
-					currentMap.RemoveDownedActor(downedActor)
-				}
-
-				if currentMap.IsActorAt(pos) { // actors on affected tiles
-					hitActor := currentMap.ActorAt(pos)
-					affectedActors = append(affectedActors, hitActor)
-				}
-
 				// flip terrain
 				if currentMap.IsWalkable(pos) {
-					g.actionBroker.Execute(NewSpawnAction(NewActorCause("Wall", user), "wall", func() {
-						currentMap.SetTile(pos, wallTile)
-					}))
+					currentMap.SetTile(pos, wallTile)
 				} else {
-					g.actionBroker.Execute(NewSpawnAction(NewActorCause("Floor", user), "floor", func() {
-						currentMap.SetTile(pos, floorTile)
-					}))
+					currentMap.SetTile(pos, floorTile)
 				}
+				affectedPositions = append(affectedPositions, pos)
 			}
 		}
 
@@ -457,12 +435,11 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 		g.state.updatePlayerDijkstra()
 
 		// do this until the level is connected
-		for !g.state.IsLevelConnectedForPlayer() {
+		for !g.state.IsReachableByPlayer(allPOIs) {
 			shuffleAreaOfEffect()
 			g.state.updatePlayerDijkstra()
 		}
-
-
+		
 		getNearestFreePositionInAoE := func(origin geometry.Point) geometry.Point {
 			minDistance := math.MaxInt64
 			nearestFree := origin
@@ -479,17 +456,32 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 			return nearestFree
 		}
 
-		// move around the actors to the nearest free position and damage them in the process
 		var affectedActorActions []Action
-		for _, hitActor := range affectedActors {
+		for _, pos := range affectedPositions {
+			if currentMap.IsItemAt(pos) { // destroy items on affected tiles
+				currentMap.RemoveItemAt(pos)
+			}
 
-			newPos := getNearestFreePositionInAoE(hitActor.MapPosition())
-			moveAction := NewMoveAction(NewActorCause("Earthquake", user), hitActor, newPos, false)
-			affectedActorActions = append(affectedActorActions, moveAction)
+			if currentMap.IsObjectAt(pos) { // destroy objects on affected tiles
+				currentMap.RemoveObjectAt(pos)
+			}
 
-			damage := generator.Intn(earthQuakeDamageRange) + 1
-			damageAction := NewChangeResourceAction(NewActorCause("Earthquake", user), hitActor, stats.Health, float64(-damage))
-			affectedActorActions = append(affectedActorActions, damageAction)
+			if currentMap.IsDownedActorAt(pos) { // destroy corpses on affected tiles
+				downedActor := currentMap.DownedActorAt(pos)
+				currentMap.RemoveDownedActor(downedActor)
+			}
+
+			if currentMap.IsActorAt(pos) {
+				// move around the actors to the nearest free position and damage them in the process
+				hitActor := currentMap.ActorAt(pos)
+				newPos := getNearestFreePositionInAoE(hitActor.MapPosition())
+				moveAction := NewMoveAction(NewActorCause("Earthquake", user), hitActor, newPos, false)
+				affectedActorActions = append(affectedActorActions, moveAction)
+
+				damage := generator.Intn(earthQuakeDamageRange) + 1
+				damageAction := NewChangeResourceAction(NewActorCause("Earthquake", user), hitActor, stats.Health, float64(-damage))
+				affectedActorActions = append(affectedActorActions, damageAction)
+			}
 		}
 
 		g.actionBroker.QueueForExecutionAtTheSameTime(affectedActorActions)

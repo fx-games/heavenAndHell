@@ -905,6 +905,11 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) SetLit(pos geometry.Point, va
 	}
 	m.cells[pos.X+pos.Y*m.mapWidth].IsLit = value
 }
+func (m *GridMap[ActorType, ItemType, ObjectType]) GetAllStairs() []geometry.Point {
+	return m.GetPositionsByFilter(func(cell *MapCell[ActorType, ItemType, ObjectType]) bool {
+		return cell.TileType.Special == SpecialTileStairsUp || cell.TileType.Special == SpecialTileStairsDown
+	})
+}
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetAllSpecialTilePositions(tile SpecialTileType) []geometry.Point {
 	result := make([]geometry.Point, 0)
 	for index, c := range m.cells {
@@ -916,10 +921,10 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetAllSpecialTilePositions(ti
 	}
 	return result
 }
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetPositionsByFilter(filter func (tile Tile) bool) []geometry.Point {
+func (m *GridMap[ActorType, ItemType, ObjectType]) GetPositionsByFilter(filter func (tile *MapCell[ActorType, ItemType, ObjectType]) bool) []geometry.Point {
 	result := make([]geometry.Point, 0)
 	for index, c := range m.cells {
-		if filter(c.TileType) {
+		if filter(&c) {
 			x := index % m.mapWidth
 			y := index / m.mapWidth
 			result = append(result, geometry.Point{X: x, Y: y})

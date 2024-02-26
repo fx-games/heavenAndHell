@@ -125,18 +125,26 @@ func (s *State) GetPlayer() *Actor {
 	return s.player
 }
 
-// IsLevelConnectedForPlayer returns, if the player can reach all the stairs in the current level.
-// Assumes that the player's dijkstra map is up to date.
-func (s *State) IsLevelConnectedForPlayer() bool {
-	for _, stairs := range s.GetMap().GetPositionsByFilter(func(tile gridmap.Tile) bool {
-		return tile.Special == gridmap.SpecialTileStairsUp || tile.Special == gridmap.SpecialTileStairsDown
-	}) {
+// IsStairwayReachable returns true, if the player can reach all the stairs in the current level.
+// Assumes that the player's dijkstra map is up-to-date.
+// NOTE: This might still be misleading when applied to levels where
+// POIs must be reached which are not the stairs.
+// eg.: Vendors in Town, Quest Locations & End Bosses in Dungeons
+func (s *State) IsStairwayReachable() bool {
+	allStairs := s.GetMap().GetAllStairs()
+	return s.IsReachableByPlayer(allStairs)
+}
+
+func (s *State) IsReachableByPlayer(positionsOfInterest []geometry.Point) bool {
+	for _, stairs := range positionsOfInterest {
 		if _, exists := s.playerDijkstraMap[stairs]; !exists {
 			return false
 		}
 	}
 	return true
 }
+
+
 
 func (s *State) GetMap() *gridmap.GridMap[*Actor, *Item, Object] {
 	return s.currentMap
@@ -556,6 +564,24 @@ func (s *State) SetFactory(factory *Factory) {
 
 func (s *State) GetPlayerDijkstraMap() map[geometry.Point]int {
 	return s.playerDijkstraMap
+}
+
+// GetAllPOIs returns all points of interest on the current map.
+// This is used to make sure that all the required locations on a map can be reached.
+// This includes
+// - stairs
+// - vendors
+// - enemies with win condition
+// - quest items
+func (s *State) GetAllPOIs() []geometry.Point {
+	return s.GetMap().GetPositionsByFilter(func(mapCellRef *gridmap.MapCell[*Actor, *Item, Object]) bool {
+		cell := *mapCellRef
+		isStairs := cell.TileType.Special == gridmap.SpecialTileStairsUp || cell.TileType.Special == gridmap.SpecialTileStairsDown
+		isVendor := cell.Actor != nil && (*cell.Actor).IsVendor()
+		isWinCondition := cell.Actor != nil && (*cell.Actor).IsWinCondition()
+		isQuestItem := cell.Item != nil && (*cell.Item).IsQuestItem()
+		return isStairs || isVendor || isWinCondition || isQuestItem
+	})
 }
 func getDropPos(gameMap *gridmap.GridMap[*Actor, *Item, Object], actorPos geometry.Point) geometry.Point {
 	isFree := func(pos geometry.Point) bool {

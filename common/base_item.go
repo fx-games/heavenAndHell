@@ -113,6 +113,7 @@ type Item struct {
 	destroyAfterUse   bool
 	nameOnlyInTooltip bool
 	internalName      string
+	isQuestItem       bool
 }
 
 func NewItem(getPlayerRef func() *Actor, name string, icon int32) *Item {
@@ -818,6 +819,10 @@ func (i *Item) IsFood() bool {
 
 func (i *Item) HasModifiers() bool {
 	return len(i.equippedModifiers) > 0
+}
+
+func (i *Item) IsQuestItem() bool {
+	return i.isQuestItem
 }
 
 
