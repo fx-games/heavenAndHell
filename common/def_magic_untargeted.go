@@ -408,6 +408,15 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 		areaOfEffect := currentMap.GetDijkstraMap(user.MapPosition(), earthQuakeRadius, func(point geometry.Point) bool {
 			return !currentMap.IsStairsAt(point)
 		})
+		previouslyAffected := func(pos geometry.Point) bool {
+			if currentMap.IsTileWalkable(pos) {
+				return false
+			}
+			if currentMap.IsObjectAt(pos) || currentMap.IsItemAt(pos) || currentMap.IsActorAt(pos) || currentMap.IsDownedActorAt(pos) {
+				return true
+			}
+			return false
+		}
 
 		delete(areaOfEffect, user.MapPosition())
 
@@ -416,6 +425,9 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 			affectedPositions = make([]geometry.Point, 0, len(areaOfEffect))
 			for pos, _ := range areaOfEffect {
 				if generator.Intn(2) == 0 {
+					if previouslyAffected(pos) {
+						affectedPositions = append(affectedPositions, pos)
+					}
 					continue
 				}
 				// flip terrain
@@ -439,7 +451,7 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 			shuffleAreaOfEffect()
 			g.state.updatePlayerDijkstra()
 		}
-		
+
 		getNearestFreePositionInAoE := func(origin geometry.Point) geometry.Point {
 			minDistance := math.MaxInt64
 			nearestFree := origin
