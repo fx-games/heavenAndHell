@@ -368,57 +368,65 @@ func (c *Console) SetDebugActions(actions func() common.DebugActions) {
 
 func (c *Console) HandleInput() (terminationCode int) {
 
-	ev := c.screen.PollEvent()
-	if ev == nil {
-		return 1
+	if !c.screen.HasPendingEvent() {
+		return 0
 	}
 
-	switch typedEvent := ev.(type) {
-	case *tcell.EventResize:
-		c.onScreenSizeChanged()
-	case *tcell.EventKey:
-		if c.focus != nil {
-			handler := c.focus.InputHandler()
-			handler(typedEvent, func(p tview.Primitive) {
-				c.focus = p
-			})
-			return c.terminationCode
+	for c.screen.HasPendingEvent() {
+		ev := c.screen.PollEvent()
+		if ev == nil {
+			return 1
 		}
-		typedRune := typedEvent.Rune()
-		//mod, key, ch := typedEvent.Modifiers(), typedEvent.Key(), typedRune
-		//println(fmt.Sprintf("EventKey Modifiers: %d Key: %d Rune: %d", mod, key, ch))
-		actions := c.context.PlayerAction()
-		if typedRune == 'w' {
-			actions.ManualMovePlayer(geometry.Point{X: 0, Y: -1})
-		} else if typedRune == 's' {
-			actions.ManualMovePlayer(geometry.Point{X: 0, Y: 1})
-		} else if typedRune == 'a' {
-			actions.ManualMovePlayer(geometry.Point{X: -1, Y: 0})
-		} else if typedRune == 'd' {
-			actions.ManualMovePlayer(geometry.Point{X: 1, Y: 0})
-		} else if typedRune == 'i' {
-			c.OpenListInventory()
-		} else if typedRune == 'l' {
-			c.showLog()
-		} else if typedRune == 'b' {
-			c.OpenListInventoryForDropping()
-		} else if typedRune == 'g' {
-			actions.PickUpItem()
-		} else if typedRune == 'S' {
-			c.OpenSkillsMenu()
-		} else if typedRune == 'C' {
-			c.ShowFullStats()
-		} else if typedRune == 'Q' {
-			c.terminationCode = 1
-			c.screen.Fini()
-		} else if typedRune == 'o' {
-			actions.StartAutoExplore()
-		} else if typedEvent.Key() == tcell.KeyTab {
-			actions.AutoAttack()
-		} else if typedEvent.Key() == tcell.KeyF10 {
-			c.context.DebugActions().OpenDebugMenu()
+
+		switch typedEvent := ev.(type) {
+		case *tcell.EventResize:
+			c.onScreenSizeChanged()
+		case *tcell.EventKey:
+			if c.focus != nil {
+				handler := c.focus.InputHandler()
+				handler(typedEvent, func(p tview.Primitive) {
+					c.focus = p
+				})
+				return c.terminationCode
+			}
+			typedRune := typedEvent.Rune()
+			//mod, key, ch := typedEvent.Modifiers(), typedEvent.Key(), typedRune
+			//println(fmt.Sprintf("EventKey Modifiers: %d Key: %d Rune: %d", mod, key, ch))
+			actions := c.context.PlayerAction()
+			if typedRune == 'w' {
+				actions.ManualMovePlayer(geometry.Point{X: 0, Y: -1})
+			} else if typedRune == 's' {
+				actions.ManualMovePlayer(geometry.Point{X: 0, Y: 1})
+			} else if typedRune == 'a' {
+				actions.ManualMovePlayer(geometry.Point{X: -1, Y: 0})
+			} else if typedRune == 'd' {
+				actions.ManualMovePlayer(geometry.Point{X: 1, Y: 0})
+			} else if typedRune == 'i' {
+				c.OpenListInventory()
+			} else if typedRune == 'l' {
+				c.showLog()
+			} else if typedRune == 'b' {
+				c.OpenListInventoryForDropping()
+			} else if typedRune == 'g' {
+				actions.PickUpItem()
+			} else if typedRune == 'S' {
+				c.OpenSkillsMenu()
+			} else if typedRune == 'C' {
+				c.ShowFullStats()
+			} else if typedRune == 'Q' {
+				c.screen.Clear()
+				c.screen.Fini()
+				c.terminationCode = 1
+			} else if typedRune == 'o' {
+				actions.StartAutoExplore()
+			} else if typedEvent.Key() == tcell.KeyTab {
+				actions.AutoAttack()
+			} else if typedEvent.Key() == tcell.KeyF10 {
+				c.context.DebugActions().OpenDebugMenu()
+			}
 		}
 	}
+
 	return c.terminationCode
 }
 
@@ -435,7 +443,7 @@ func (c *Console) Update(dt float64) {
 		}
 
 	*/
-	c.context.Animator().CancelAllAnimations()
+	//c.context.Animator().CancelAllAnimations()
 	c.context.Animator().Tick() // this is animations
 	for _, actor := range c.context.GameState().GetMap().Actors() {
 		actor.Tick()

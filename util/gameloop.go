@@ -1,6 +1,6 @@
 package util
 
-import "fmt"
+import "time"
 
 // LoopConfig describes a configuration for a game loop.
 type LoopConfig struct {
@@ -53,23 +53,29 @@ func CreateLoop(c LoopConfig, terminationCode *int) func() {
 		lag := 0.0
 
 		for *terminationCode = 0; *terminationCode == 0; {
-			current = c.CurrentTimeFunc()
-			elapsed = current - previous
-			previous = current
 
-			if elapsed > c.IdleThreshold {
-				continue
-			}
 
-			lag += elapsed
 			*terminationCode = c.ProcessInputFunc()
-			for lag >= secsPerUpdate {
-				c.UpdateFunc(secsPerUpdate)
-				lag -= secsPerUpdate
+			if *terminationCode == 0 {
+				lag += elapsed
+				for lag >= secsPerUpdate {
+					c.UpdateFunc(secsPerUpdate)
+					lag -= secsPerUpdate
+				}
+
+				c.RenderFunc()
+
+
+				current = c.CurrentTimeFunc()
+				elapsed = current - previous
+				previous = current
+
+				if elapsed < secsPerUpdate {
+					time.Sleep(time.Second * time.Duration(secsPerUpdate - elapsed))
+				}
 			}
 
-			c.RenderFunc()
+
 		}
-		println(fmt.Sprintf("Terminated with code: %d", *terminationCode))
 	}
 }
