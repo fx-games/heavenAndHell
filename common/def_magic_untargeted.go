@@ -406,34 +406,22 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 		}
 
 		areaOfEffect := currentMap.GetDijkstraMap(user.MapPosition(), earthQuakeRadius, func(point geometry.Point) bool {
-			return !currentMap.IsStairsAt(point)
+			return !currentMap.IsStairsAt(point) && !currentMap.IsBorderWall(point)
 		})
-		isSomethingStuckHere := func(pos geometry.Point) bool {
-			if currentMap.IsTileWalkable(pos) {
-				return false
-			}
-			if currentMap.IsObjectAt(pos) || currentMap.IsItemAt(pos) || currentMap.IsActorAt(pos) || currentMap.IsDownedActorAt(pos) {
-				return true
-			}
-			return false
-		}
+
 
 		delete(areaOfEffect, user.MapPosition())
 
-		var stuckInWallPositions []geometry.Point
 		shuffleAreaOfEffect := func() {
-			stuckInWallPositions = make([]geometry.Point, 0, len(areaOfEffect))
 			for pos, _ := range areaOfEffect {
 				if generator.Intn(2) == 0 {
-					// flip terrain
-					if currentMap.IsWalkable(pos) {
-						currentMap.SetTile(pos, wallTile)
-					} else {
-						currentMap.SetTile(pos, floorTile)
-					}
+					continue
 				}
-				if isSomethingStuckHere(pos) {
-					stuckInWallPositions = append(stuckInWallPositions, pos)
+				// flip terrain
+				if currentMap.IsWalkable(pos) {
+					currentMap.SetTile(pos, wallTile)
+				} else {
+					currentMap.SetTile(pos, floorTile)
 				}
 			}
 		}
@@ -465,9 +453,20 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 			}
 			return nearestFree
 		}
-
+		isSomethingStuckHere := func(pos geometry.Point) bool {
+			if currentMap.IsTileWalkable(pos) {
+				return false
+			}
+			if currentMap.IsObjectAt(pos) || currentMap.IsItemAt(pos) || currentMap.IsActorAt(pos) || currentMap.IsDownedActorAt(pos) {
+				return true
+			}
+			return false
+		}
 		var affectedActorActions []Action
-		for _, pos := range stuckInWallPositions {
+		for pos, _ := range areaOfEffect {
+			if !isSomethingStuckHere(pos) {
+				continue
+			}
 			if currentMap.IsItemAt(pos) { // destroy items on affected tiles
 				currentMap.RemoveItemAt(pos)
 			}
@@ -491,9 +490,12 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 				damage := generator.Intn(earthQuakeDamageRange) + 1
 				damageAction := NewChangeResourceAction(NewActorCause("Earthquake", user), hitActor, stats.Health, float64(-damage))
 				affectedActorActions = append(affectedActorActions, damageAction)
+
+				updateFoV := NewUpdateFoVAction(NewActorCause("Earthquake", hitActor), hitActor)
+				affectedActorActions = append(affectedActorActions, updateFoV)
 			}
 		}
-
+		g.actionBroker.QueueForExecution(NewUpdateFoVAction(NewActorCause("Earthquake", user), user))
 		g.actionBroker.QueueForExecutionAtTheSameTime(affectedActorActions)
 
 		actionCost := 10 // default cost for any action is 10 aut
