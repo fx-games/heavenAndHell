@@ -15,8 +15,8 @@ import (
 	"path"
 	"rpg/common"
 	"rpg/console"
+	"rpg/d1"
 	"rpg/defs"
-	"rpg/dungen"
 	"rpg/files"
 	"rpg/game"
 	"rpg/gui"
@@ -52,9 +52,6 @@ func main() {
 			maptest()
 		case "ascii":
 			runGameWithConsole(createGameAndUIContext())
-		case "list":
-			theGame, _ := createGameAndUIContext()
-			dumpGameData(theGame.GetGameData())
 		case "osr":
 			osrSim()
 		case "7drl":
@@ -295,7 +292,6 @@ func namesFrom(enemies []*osr.Character) string {
 	return strings.Join(names, ",")
 }
 
-
 func genLoot(theGame *game.GameInstance) {
 	if len(os.Args) < 3 {
 		fmt.Println("usage: loot <dungeon_level>")
@@ -308,31 +304,16 @@ func genLoot(theGame *game.GameInstance) {
 	}
 }
 
-func dumpGameData(gameData defs.DataContainer) {
-	println("Defined Enemies:")
-	for key, _ := range gameData.EnemyDefinitions {
-		println(fmt.Sprintf("  %s", key))
-	}
-}
-
+// maptest prints D1 levels: dun_gen [dungeon level] [seed].
 func maptest() {
-	testSource := rand.New(rand.NewSource(42))
-	dunGen := dungen.NewMegaDungeonGenerator(testSource)
-	// dunGen.SetDebugSteps(true)
-
-	for {
-		generatedLayout := dunGen.Generate(64, 64)
-		generatedLayout.Print()
-		// wait for key
-		var input string
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("-more-")
-		input, _ = reader.ReadString('\n')
-		if strings.ToLower(input) == "q" {
-			break
-		}
+	dlvl, seed := 1, int64(42)
+	if len(os.Args) > 2 {
+		dlvl, _ = strconv.Atoi(os.Args[2])
 	}
-
+	if len(os.Args) > 3 {
+		seed, _ = strconv.ParseInt(os.Args[3], 10, 64)
+	}
+	fmt.Print(d1.Generate(rand.New(rand.NewSource(seed)), dlvl))
 }
 
 func runGameWithConsole(theGame *game.GameInstance, context common.UIContext) {

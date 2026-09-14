@@ -69,11 +69,11 @@ func TestLoadAndGenerate(t *testing.T) {
 	t.Logf("magic=%d uniques=%d gold=%d books=%d", magic, uniques, gold, books)
 }
 
-func TestGenerateL1Connected(t *testing.T) {
+func TestGenerateConnected(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
-	for n := 0; n < 200; n++ {
-		dlvl := n%4 + 1
-		lvl := GenerateL1(rng, dlvl)
+	for n := 0; n < 320; n++ {
+		dlvl := n%16 + 1
+		lvl := Generate(rng, dlvl)
 		seen := map[[2]int]bool{lvl.StairsUp: true}
 		queue := [][2]int{lvl.StairsUp}
 		floor := 0
@@ -95,31 +95,13 @@ func TestGenerateL1Connected(t *testing.T) {
 				}
 			}
 		}
-		if !seen[lvl.StairsDn] {
-			t.Fatalf("level %d (dlvl %d): stairs down unreachable\n%s", n, dlvl, render(lvl))
+		if dlvl != 16 && !seen[lvl.StairsDn] || lvl.Warp != [2]int{} && !seen[lvl.Warp] || (lvl.Warp != [2]int{}) != (dlvl == 5 || dlvl == 9 || dlvl == 13) {
+			t.Fatalf("level %d (dlvl %d): stairs down or warp %v unreachable\n%s", n, dlvl, lvl.Warp, lvl)
 		}
 		if len(seen) < floor*9/10 {
-			t.Fatalf("level %d (dlvl %d): only %d of %d walkable cells reachable\n%s", n, dlvl, len(seen), floor, render(lvl))
+			t.Fatalf("level %d (dlvl %d): only %d of %d walkable cells reachable\n%s", n, dlvl, len(seen), floor, lvl)
 		}
 	}
-}
-
-func render(l *Level) string {
-	var b strings.Builder
-	for y := 0; y < LevelSize; y++ {
-		for x := 0; x < LevelSize; x++ {
-			switch {
-			case [2]int{x, y} == l.StairsUp:
-				b.WriteByte('<')
-			case [2]int{x, y} == l.StairsDn:
-				b.WriteByte('>')
-			default:
-				b.WriteByte("#.+"[l.Cells[x][y]])
-			}
-		}
-		b.WriteByte('\n')
-	}
-	return b.String()
 }
 
 func TestHero(t *testing.T) {
@@ -245,9 +227,9 @@ func TestObjectsAndThemes(t *testing.T) {
 	g := NewGenerator(d, rand.New(rand.NewSource(11)))
 	kinds := map[int]int{}
 	themed := 0
-	for n := 0; n < 60; n++ {
-		dlvl := n%4 + 1
-		lvl := GenerateL1(g.Rng, dlvl)
+	for n := 0; n < 150; n++ {
+		dlvl := n%15 + 1
+		lvl := Generate(g.Rng, dlvl)
 		w := &fakeWorld{lvl: lvl, occ: map[[2]int]bool{}}
 		p := g.NewPlacer(w, lvl, dlvl, g.LevelMonsterTypes(dlvl))
 		p.InitThemes()
@@ -271,11 +253,11 @@ func TestObjectsAndThemes(t *testing.T) {
 				t.Fatalf("level %d: shrine %s not available here", n, ShrineNames[o.Var1])
 			}
 		}
-		if chests := count[ObjChest1] + count[ObjChest2] + count[ObjChest3]; chests < 9 || count[ObjSarc] < 10 {
+		if chests := count[ObjChest1] + count[ObjChest2] + count[ObjChest3]; chests < 9 || dlvl <= 4 && count[ObjSarc] < 10 {
 			t.Fatalf("level %d: %d chests, %d sarcophagi", n, chests, count[ObjSarc])
 		}
 	}
-	if themed == 0 || kinds[ObjShrineL]+kinds[ObjShrineR]+kinds[ObjBookcaseL]+kinds[ObjBookcaseR]+kinds[ObjGoatShrine] == 0 {
+	if themed < 150 || kinds[ObjArmorStand]+kinds[ObjWeaponRack] == 0 || kinds[ObjShrineL]+kinds[ObjShrineR]+kinds[ObjBookcaseL]+kinds[ObjBookcaseR]+kinds[ObjGoatShrine] == 0 {
 		t.Fatalf("no theme rooms (%d) or theme objects: %v", themed, kinds)
 	}
 	t.Logf("%d theme rooms, objects by kind: %v", themed, kinds)

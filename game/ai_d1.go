@@ -77,7 +77,8 @@ func (g *GameInstance) getD1MonsterAction(a *common.Actor) (int, func()) {
 }
 
 func (b *d1Brain) think() (d1Act, bool) {
-	switch b.mon.AI {
+	mon := b.mon
+	switch mon.AI {
 	case "AI_ZOMBIE":
 		return b.zombie()
 	case "AI_FALLEN":
@@ -89,13 +90,43 @@ func (b *d1Brain) think() (d1Act, bool) {
 	case "AI_SNEAK":
 		return b.sneak()
 	case "AI_GOATMC":
-		return b.round()
+		return b.round(true)
 	case "AI_BAT":
 		return b.bat()
 	case "AI_GOATBOW":
-		return b.ranged()
+		return b.ranged(b.shoot)
+	case "AI_SUCC":
+		return b.ranged(func() (d1Act, bool) { return b.missile(common.MisFlare, 0, common.D1ModeRAttack) })
+	case "AI_ACIDUNIQ":
+		return b.ranged(func() (d1Act, bool) { return b.missile(common.MisAcid, 0, common.D1ModeRSpAttack) })
+	case "AI_MAGMA":
+		return b.roundRanged(common.MisMagmaball, 4, 0)
+	case "AI_STORM":
+		return b.roundRanged(common.MisLightCtrl2, 4, 0)
+	case "AI_ACID":
+		return b.roundRanged(common.MisAcid, 4, 1)
+	case "AI_MEGA":
+		return b.rr2(common.MisFlamec)
+	case "AI_FAT":
+		return b.fat()
+	case "AI_GARG":
+		return b.garg()
+	case "AI_RHINO":
+		return b.rhino()
+	case "AI_SNAKE":
+		return b.snake()
+	case "AI_COUNSLR":
+		return b.counselor()
+	case "AI_CLEAVER":
+		if mon.Squelch == 0 {
+			return noAct, false
+		}
+		if b.near(2) {
+			return b.attack()
+		}
+		return b.callWalk(b.dirTo(mon.Last))
 	}
-	return b.skelSd() // ponytail: AI types of deeper levels fall back to AI_SKELSD until milestone 6 ports them
+	return b.skelSd() // ponytail: the quest bosses' AIs (Leoric, Zhar, Lazarus, Warlord, Diablo) come with milestone 7
 }
 
 func iabs(v int) int {
@@ -450,7 +481,9 @@ func (b *d1Brain) bat() (d1Act, bool) {
 		}
 		return b.callWalk(md + 1)
 	}
-	// ponytail: MT_GLOOM's charge and MT_FAMILIAR's lightning come with deeper levels (milestone 6).
+	if mon.Data.ID == "MT_GLOOM" && !b.near(5) && v < 4*mon.Int+33 && b.lineWalkable() {
+		return b.charge(false, false)
+	}
 	if !b.near(2) {
 		if b.stoodLong() && v < mon.Int+13 || b.justWalked() && v < mon.Int+63 {
 			return b.callWalk(md)
@@ -460,6 +493,13 @@ func (b *d1Brain) bat() (d1Act, bool) {
 	if v < 4*mon.Int+8 {
 		if act, ok := b.attack(); ok {
 			mon.Goal, mon.GoalVar1 = 2, 0
+			if mon.Data.ID == "MT_FAMILIAR" && b.target == b.g.state.GetPlayer() {
+				target, run := b.enemy, act.run
+				act.run = func() {
+					run()
+					b.g.actionBroker.Execute(common.NewMonsterMissileAction(b.a, common.MisLightning, target, b.rnd(10)+1))
+				}
+			}
 			return act, true
 		}
 	}
@@ -520,9 +560,9 @@ func (b *d1Brain) sneak() (d1Act, bool) {
 	return noAct, false
 }
 
-// round ports MAI_Round (goat men): close in, sometimes circle around. ponytail: D1's same-room check is
-// treated as always true, and the special attack (Hit2/MinDam2/MaxDam2) is a normal attack for now.
-func (b *d1Brain) round() (d1Act, bool) {
+// round ports MAI_Round (goat men, gargoyles): close in, sometimes circle around. ponytail: D1's same-room check
+// (dTransVal) is treated as always true here and in the other circling AIs.
+func (b *d1Brain) round(special bool) (d1Act, bool) {
 	mon := b.mon
 	if mon.Squelch == 0 {
 		return noAct, false
@@ -551,6 +591,9 @@ func (b *d1Brain) round() (d1Act, bool) {
 		if b.near(2) {
 			if v < 2*mon.Int+23 {
 				mon.Dir = md
+				if hp := b.a.GetStats().GetResource(stats.Health); special && hp.Value() < hp.GetMax()/2 && b.rnd(2) != 0 {
+					return b.specialAttack()
+				}
 				return b.attack()
 			}
 		} else if b.stoodLong() && v < 2*mon.Int+28 || b.justWalked() && v < 2*mon.Int+78 {
@@ -560,8 +603,8 @@ func (b *d1Brain) round() (d1Act, bool) {
 	return noAct, false
 }
 
-// ranged ports MAI_Ranged with arrows (goat archers): keep distance, shoot on a clear line.
-func (b *d1Brain) ranged() (d1Act, bool) {
+// ranged ports MAI_Ranged (goat archers, succubi, unique acid beasts): keep distance, fire on a clear line.
+func (b *d1Brain) ranged(fire func() (d1Act, bool)) (d1Act, bool) {
 	mon := b.mon
 	if mon.Squelch == 255 {
 		md := b.dirTo(b.enemy)
@@ -575,7 +618,7 @@ func (b *d1Brain) ranged() (d1Act, bool) {
 			}
 		}
 		if b.lineClear(b.enemy) {
-			return b.shoot()
+			return fire()
 		}
 		return noAct, false
 	}

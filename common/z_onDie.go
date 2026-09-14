@@ -12,24 +12,6 @@ type OnDieHook struct {
 	effectDescription string
 }
 
-func (d *OnDieHook) ToString() string {
-	return fmt.Sprintf("On Kill: %s", d.effectDescription)
-}
-
-func (d *OnDieHook) Name() string {
-	return "OnDieHook"
-}
-
-func NewOnDieHook(effectDescription string, afterHook func(itemContext *ItemContext, action Action, engine ActionContext) []Action) *OnDieHook {
-	return &OnDieHook{
-		ItemHook: ItemHook{
-			HookedAction: ActionNameDie,
-			AfterHook:    afterHook,
-		},
-		effectDescription: effectDescription,
-	}
-}
-
 type OnKillHook struct {
 	BaseActionHook
 }

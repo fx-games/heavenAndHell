@@ -2,7 +2,6 @@ package defs
 
 import (
 	"rpg/util"
-	"strings"
 )
 
 type WeaponDefinition struct {
@@ -15,10 +14,6 @@ type WeaponDefinition struct {
 	ArmorPenetration   int
 	ProjectileIcon     int32
 	IsTwoHanded        bool
-}
-
-func (d WeaponDefinition) IsValid() bool {
-	return d.WeaponType != WeaponTypeNone
 }
 
 type WeaponType int
@@ -73,33 +68,3 @@ const (
 	WeaponTypeScythe
 	WeaponTypeWhip
 )
-
-func WeaponTypeFromString(str string) WeaponType {
-	str = strings.ToLower(str)
-	switch str {
-	case "sword":
-		return WeaponTypeSword
-	case "axe":
-		return WeaponTypeAxe
-	case "mace":
-		return WeaponTypeMace
-	case "bow":
-		return WeaponTypeBow
-	case "crossbow":
-		return WeaponTypeCrossbow
-	case "shield":
-		return WeaponTypeShield
-	case "scythe":
-		return WeaponTypeScythe
-	case "spear":
-		return WeaponTypeSpear
-	case "whip":
-		return WeaponTypeWhip
-	case "dagger":
-		return WeaponTypeDagger
-	case "sling":
-		return WeaponTypeSling
-	default:
-		return WeaponTypeNone
-	}
-}

@@ -135,9 +135,6 @@ func (u *UIController) handleKeyboardInput() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyL) {
 		u.ShowLog()
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		u.showJournal()
-	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyZ) {
 		act.RestUntilHealed()
 	}
@@ -162,9 +159,6 @@ func (u *UIController) handleKeyboardInput() {
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		u.context.DebugActions().KillLevel()
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyH) {
-		u.context.DebugActions().GotoHellTown()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyF8) {
 		u.renderingMode = (u.renderingMode + 1) % 3

@@ -74,3 +74,13 @@ func (d OnMoveHook) logObjectsAtLocation(context ActionContext, pos geometry.Poi
 	}
 	return nil
 }
+
+func TriggerCellEffectsDuringMovementForActor(state *State, sourceAction Action, actor *Actor, mapPos geometry.Point, startAnimating func() bool) []Action {
+	if actor.HasStatusEffect(StatusFlying) {
+		return nil
+	}
+	if currentMap := state.GetMap(); currentMap.IsObjectAt(mapPos) {
+		currentMap.ObjectAt(mapPos).ActorWalkedOn(actor, startAnimating)
+	}
+	return nil
+}

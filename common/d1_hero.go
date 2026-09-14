@@ -162,9 +162,14 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 	case att.d1Monster != nil && def.hero != nil:
 		h, s, mon := def.hero, def.HeroSheet(), att.d1Monster
 		dlvl := d1DungeonLevel(state)
-		chance := h.MonsterMeleeHitChance(s, mon.Hit, mon.Level, dlvl)
+		hit, minDam, maxDam := mon.Hit, mon.MinDam, mon.MaxDam
+		if mon.HitWith != nil { // M_StartSpAttack and charges
+			hit, minDam, maxDam = mon.HitWith[0], mon.HitWith[1], mon.HitWith[2]
+			mon.HitWith = nil
+		}
+		chance := h.MonsterMeleeHitChance(s, hit, mon.Level, dlvl)
 		if ranged {
-			chance = h.MonsterArrowHitChance(s, mon.Hit, mon.Level, dist, dlvl)
+			chance = h.MonsterArrowHitChance(s, hit, mon.Level, dist, dlvl)
 		}
 		if d1Rng.Intn(100) >= chance {
 			logMissed(ctx, att, def)
@@ -176,13 +181,14 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 			return 0, nil, true
 		}
 		d1Broke(ctx, def, d1.ArmorDur(d1Rng, def.equippedD1()))
-		dam = d1ManaShield(def, d1.MonsterDamage(d1Rng, s, mon.MinDam, mon.MaxDam)>>6)
+		dam = d1ManaShield(def, d1.MonsterDamage(d1Rng, s, minDam, maxDam)>>6)
 		if !ranged && s.Flags&d1.ISplThorns != 0 {
 			extra = append(extra, NewChangeResourceAction(NewActorCause("Thorns", def), att, stats.Health, -float64(d1Rng.Intn(3)+1)))
 		}
 		return dam, extra, true
 	case att.d1Monster != nil && def.d1Monster != nil: // the golem and the monsters fighting it: M_TryM2MHit
 		mon := att.d1Monster
+		mon.HitWith = nil
 		if !def.HasStatusEffect(StatusStone) && d1Rng.Intn(100) >= mon.Hit {
 			logMissed(ctx, att, def)
 			return 0, nil, true
@@ -250,6 +256,7 @@ func d1OnKill(ctx ActionContext, killer, victim *Actor) []Action {
 		}
 	}
 	d1FallenFear(state, victim.MapPosition())
+	state.factory.d1AcidDeath(ctx, victim)
 	dlvl := d1DungeonLevel(state)
 	if it := state.factory.D1().MonsterDrop(mon.Data, mon.Level, mon.Unique != nil, dlvl, dlvl > 12); it != nil {
 		state.AddItemToMapWithDistribution(state.factory.NewD1Item(it), victim.MapPosition())

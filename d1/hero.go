@@ -305,6 +305,20 @@ func (h *Hero) MonsterArrowHitChance(s Sheet, monHit, monLevel, dist, dlvl int) 
 	return dlvlHitFloor(max(monHit+30+(monLevel-h.Level)<<1-tac-dist<<1, 10), dlvl)
 }
 
+// MonsterSpellHitChance ports PlayerMHit for magic missiles; dist in cells.
+func (h *Hero) MonsterSpellHitChance(monLevel, dist, dlvl int) int {
+	return dlvlHitFloor(max(40+(monLevel-h.Level)<<1-dist<<1, 10), dlvl)
+}
+
+// MissileDamage64 ports PlayerMHit's damage roll in 1/64. With shift (lingering missiles hitting every tick)
+// mind..maxd are already 1/64; D1 still adds the whole -damage affix unshifted and hits for at least 1 HP.
+func MissileDamage64(rng *rand.Rand, s Sheet, mind, maxd int, shift bool) int {
+	if shift {
+		return max(rnd(rng, maxd-mind+1)+mind+s.GetHit, 64)
+	}
+	return MonsterDamage(rng, s, mind, maxd)
+}
+
 // BlockChance ports the block roll; 0 without a shield.
 func (h *Hero) BlockChance(s Sheet, monLevel int) int {
 	if !s.Block {

@@ -19,6 +19,8 @@ type Level struct {
 	StairsUp, StairsDn [2]int                     // x, y
 	Trans              [LevelSize][LevelSize]int  // D1's dTransVal: room regions (0 = none)
 	Held               [LevelSize][LevelSize]bool // dFlags & 8: reserved for a theme room
+	Warp               [2]int                     // the town warp on levels 5, 9 and 13; {0, 0} = none
+	Themes             []int                      // transvals of theme rooms placed during generation (L2-L4)
 }
 
 func (l *Level) Walkable(x, y int) bool {
@@ -27,42 +29,10 @@ func (l *Level) Walkable(x, y int) bool {
 
 // l1 holds drlg_l1.cpp's globals.
 type l1 struct {
-	rng           *rand.Rand
-	dungeon       [40][40]byte
-	flags         [40][40]byte
+	drlg
 	fine          [80][80]byte // L5dungeon
 	hr1, hr2, hr3 int
 	vr1, vr2, vr3 int
-	trans         [112][112]int // dTransVal in dPiece coordinates (megatile i covers 16+2i..17+2i)
-	transVal      int
-}
-
-func (g *l1) random(v int) int {
-	if v <= 0 {
-		return 0
-	}
-	return g.rng.Intn(v)
-}
-
-// at reads dungeon with D1's out-of-bounds reads turned into void.
-func (g *l1) at(i, j int) byte {
-	if i < 0 || j < 0 || i >= 40 || j >= 40 {
-		return 0
-	}
-	return g.dungeon[i][j]
-}
-
-func (g *l1) set(i, j int, v byte) {
-	if i >= 0 && j >= 0 && i < 40 && j < 40 {
-		g.dungeon[i][j] = v
-	}
-}
-
-func (g *l1) flag(i, j int) byte {
-	if i < 0 || j < 0 || i >= 40 || j >= 40 {
-		return 0
-	}
-	return g.flags[i][j]
 }
 
 func (g *l1) drawRoom(x, y, w, h int) {
@@ -548,109 +518,6 @@ var (
 	stairsDown = []byte{4, 3, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 62, 57, 58, 0, 61, 59, 60, 0, 0, 0, 0, 0}
 )
 
-// placeMiniSet ports DRLG_PlaceMiniSet for a single placement without quadrant rules; returns sx, sy or -1.
-func (g *l1) placeMiniSet(m []byte) (int, int) {
-	sw, sh := int(m[0]), int(m[1])
-	sx, sy := g.random(40-sw), g.random(40-sh)
-	for found := 0; ; {
-		ok := true
-		ii := 2
-		for yy := 0; yy < sh && ok; yy++ {
-			for xx := 0; xx < sw && ok; xx++ {
-				if m[ii] != 0 && g.dungeon[xx+sx][sy+yy] != m[ii] || g.flags[xx+sx][sy+yy] != 0 {
-					ok = false
-				}
-				ii++
-			}
-		}
-		if ok {
-			break
-		}
-		if sx++; sx == 40-sw {
-			sx = 0
-			if sy++; sy == 40-sh {
-				sy = 0
-			}
-		}
-		if found++; found > 4000 {
-			return -1, -1
-		}
-	}
-	ii := sw*sh + 2
-	for yy := 0; yy < sh; yy++ {
-		for xx := 0; xx < sw; xx++ {
-			if m[ii] != 0 {
-				g.dungeon[xx+sx][sy+yy] = m[ii]
-			}
-			ii++
-		}
-	}
-	return sx, sy
-}
-
-func (g *l1) setTrans(x, y int) {
-	if x >= 0 && y >= 0 && x < 112 && y < 112 {
-		g.trans[x][y] = g.transVal
-	}
-}
-
-// ftvr ports DRLG_L5FTVR: flood a room region over floor megatiles, marking the wall edges it touches.
-func (g *l1) ftvr(i, j, x, y, d int) {
-	if x < 0 || y < 0 || x > 110 || y > 110 {
-		return
-	}
-	if g.trans[x][y] != 0 || g.at(i, j) != 13 {
-		switch d {
-		case 1:
-			g.setTrans(x, y)
-			g.setTrans(x, y+1)
-		case 2:
-			g.setTrans(x+1, y)
-			g.setTrans(x+1, y+1)
-		case 3:
-			g.setTrans(x, y)
-			g.setTrans(x+1, y)
-		case 4:
-			g.setTrans(x, y+1)
-			g.setTrans(x+1, y+1)
-		case 5:
-			g.setTrans(x+1, y+1)
-		case 6:
-			g.setTrans(x, y+1)
-		case 7:
-			g.setTrans(x+1, y)
-		case 8:
-			g.setTrans(x, y)
-		}
-		return
-	}
-	g.setTrans(x, y)
-	g.setTrans(x+1, y)
-	g.setTrans(x, y+1)
-	g.setTrans(x+1, y+1)
-	g.ftvr(i+1, j, x+2, y, 1)
-	g.ftvr(i-1, j, x-2, y, 2)
-	g.ftvr(i, j+1, x, y+2, 3)
-	g.ftvr(i, j-1, x, y-2, 4)
-	g.ftvr(i-1, j-1, x-2, y-2, 5)
-	g.ftvr(i+1, j-1, x+2, y-2, 6)
-	g.ftvr(i-1, j+1, x-2, y+2, 7)
-	g.ftvr(i+1, j+1, x+2, y+2, 8)
-}
-
-// floodTVal ports DRLG_L5FloodTVal.
-func (g *l1) floodTVal() {
-	g.transVal = 1
-	for j := 0; j < 40; j++ {
-		for i := 0; i < 40; i++ {
-			if g.dungeon[i][j] == 13 && g.trans[16+2*i][16+2*j] == 0 {
-				g.ftvr(i, j, 16+2*i, 16+2*j, 0)
-				g.transVal++
-			}
-		}
-	}
-}
-
 // transFix ports the stair tile copy and DRLG_L5TransFix.
 func (g *l1) transFix() {
 	for j := 0; j < 40; j++ {
@@ -694,7 +561,7 @@ func GenerateL1(rng *rand.Rand, dlvl int) *Level {
 		minarea = 761
 	}
 	for {
-		g := &l1{rng: rng}
+		g := &l1{drlg: newDrlg(rng)}
 		for {
 			g.dungeon = [40][40]byte{}
 			g.flags = [40][40]byte{}
@@ -713,33 +580,18 @@ func GenerateL1(rng *rand.Rand, dlvl int) *Level {
 				g.flags[j][i] &= 0xBF
 			}
 		}
-		g.trans = [112][112]int{}
-		g.floodTVal()
-		ux, uy := g.placeMiniSet(l5StairsUp)
+		g.floodTVal(13)
+		ux, uy := g.placeMiniSet(l5StairsUp, 4001, 0)
 		if ux < 0 {
 			continue
 		}
-		dx, dy := g.placeMiniSet(stairsDown)
+		dx, dy := g.placeMiniSet(stairsDown, 4001, 0)
 		if dx < 0 {
 			continue
 		}
 		g.transFix()
-		lvl := &Level{}
-		for x := 0; x < LevelSize; x++ {
-			for y := 0; y < LevelSize; y++ {
-				lvl.Trans[x][y] = g.trans[x+16][y+16]
-			}
-		}
-		// megatile (i,j) samples L5dungeon[2i+1..2i+2][2j+1..2j+2]; its walls sit on its top/left edge, so a room's
-		// floor reaches one cell past the L5dungeon room on the right/bottom: a cell is floor if any of
-		// L5dungeon[x..x+1][y..y+1] is, and the megatile overlays below put the walls back.
-		for x := 0; x < LevelSize-1; x++ {
-			for y := 0; y < LevelSize-1; y++ {
-				if g.fine[x][y]|g.fine[x+1][y]|g.fine[x][y+1]|g.fine[x+1][y+1] != 0 {
-					lvl.Cells[x][y] = CellFloor
-				}
-			}
-		}
+		lvl := g.level()
+		lvl.dilate(&g.fine)
 		for j := 0; j < 40; j++ {
 			for i := 0; i < 40; i++ {
 				c := g.dungeon[i][j]
@@ -756,5 +608,18 @@ func GenerateL1(rng *rand.Rand, dlvl int) *Level {
 		lvl.StairsUp = [2]int{2*ux + 3, 2*uy + 3}
 		lvl.StairsDn = [2]int{2*dx + 3, 2*dy + 3}
 		return lvl
+	}
+}
+
+// dilate sets the cells from an L5dungeon/L4dungeon-style fine map. Megatile (i,j) samples fine[2i+1..2i+2][2j+1..2j+2]
+// and its walls sit on its top/left edge, so a room's floor reaches one cell past the fine room on the right/bottom:
+// a cell is floor if any of fine[x..x+1][y..y+1] is. Megatile wall overlays put the inner walls back.
+func (l *Level) dilate(fine *[80][80]byte) {
+	for x := 0; x < LevelSize-1; x++ {
+		for y := 0; y < LevelSize-1; y++ {
+			if fine[x][y]|fine[x+1][y]|fine[x][y+1]|fine[x+1][y+1] != 0 {
+				l.Cells[x][y] = CellFloor
+			}
+		}
 	}
 }

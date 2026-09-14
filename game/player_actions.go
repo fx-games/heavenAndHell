@@ -30,7 +30,6 @@ type Actions struct {
 	autoExplore    bool
 	playerPath     []geometry.Point
 	isResting      bool
-	actorSpeak     func(actor *common.Actor, trigger defs.ActorSpeechTrigger)
 	queueAfterTurn func(call func())
 }
 
@@ -94,7 +93,6 @@ type PlayerActionsContext struct {
 	ActionBroker   common.ActionBroker
 	State          *common.State
 	UI             func() common.UserInterface
-	Speak          func(actor *common.Actor, trigger defs.ActorSpeechTrigger)
 	GetTimeKeeper  func() *common.TimeKeeper
 	Msg            func(message string)
 	Animator       common.Animator
@@ -108,7 +106,6 @@ func NewActions(context PlayerActionsContext) *Actions {
 		actionBroker:  context.ActionBroker,
 		state:         context.State,
 		ui:            context.UI,
-		actorSpeak:    context.Speak,
 		animator:      context.Animator,
 		getTimeKeeper: context.GetTimeKeeper,
 		logError:      context.Msg,
@@ -163,7 +160,6 @@ func (a *Actions) activateUntargetedAction(actor *common.Actor, action *common.U
 		a.logError(fmt.Sprintf("%s is delayed for %d turns", action.Name(), action.GetDelayInTurns()))
 		action.SetCurrentUserAndSource(actor, source)
 		timeKeeper := a.getTimeKeeper()
-		common.RemoveTimedEffectsBySource(timeKeeper, source)
 		timeKeeper.AddTimed(action)
 	} else if action.CanActivate(actor) {
 		action.Invoke(actor, source)
@@ -246,7 +242,6 @@ func (a *Actions) getActionContext() common.ActionContext {
 		AudioPlayer:   a.audio,
 		Data:          a.definitions,
 		ActionBroker:  a.actionBroker,
-		Speak:         a.actorSpeak,
 	}
 }
 
@@ -683,13 +678,6 @@ func (a *Actions) AutoAttack() {
 
 }
 
-func (a *Actions) getRangedAttackRules(player *common.Actor) *common.RangedTargetingRules {
-	state := a.state
-	targetRulesProvider := common.NewRangedAttackTargetingRules(util.Arguments{})
-	targetRules := targetRulesProvider.GetTargetRules(player, common.OneTargetTile(state.GetMap, util.Arguments{}), state.GetMap())
-	rangedAttackRules := targetRules.(*common.RangedTargetingRules)
-	return rangedAttackRules
-}
 
 func (a *Actions) playerMoveOneStep(player *common.Actor, targetPos geometry.Point) {
 	moveAction := common.NewMoveAction(common.NewActorCause("Move", player), player, targetPos, true)

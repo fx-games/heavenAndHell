@@ -1,6 +1,5 @@
 package common
 
-import "rpg/defs"
 
 type UpdateFoVAction struct {
 	BaseAction
@@ -83,9 +82,6 @@ func updatePlayerKnowledge(context ActionContext) {
 			if aggroRange == 0 || distToPlayer <= aggroRange {
 				newActor.SetState(ActorStateAttacking)
 			}
-		}
-		if newActor.HasSpeech(defs.SpeechTriggerSight) {
-			context.Speak(newActor, defs.SpeechTriggerSight)
 		}
 	}
 	for oldActor, _ := range wentOutOfView {

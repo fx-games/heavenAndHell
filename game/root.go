@@ -4,7 +4,6 @@ import (
 	"cmp"
 	"fmt"
 	"github.com/flopp/go-findfont"
-	"image/color"
 	"math"
 	"math/rand"
 	"os"
@@ -91,9 +90,6 @@ type GameInstance struct {
 func (g *GameInstance) SetConsoleMode(consoleMode bool) {
 	// only disable audio for now
 	g.audioPlayer.SetDisablePlayback(consoleMode)
-}
-func (g *GameInstance) GetTicks() uint64 {
-	return g.worldTicks
 }
 
 func (g *GameInstance) GetActionBroker() *common.Broker {
@@ -220,7 +216,6 @@ func (g *GameInstance) getActionContext() common.ActionContext {
 		AudioPlayer:   g.audioPlayer,
 		Data:          g.dataDefinitions,
 		Msg:           g.PlayerMessage,
-		Speak:         g.ActorSpeak,
 	}
 }
 
@@ -281,14 +276,6 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 	g.actionBroker.RegisterHook(common.NewMainOnMeleeHook())
 	g.actionBroker.RegisterHook(common.NewMainOnRangedHook())
 	g.actionBroker.RegisterHook(common.NewMainOnKillHook())
-	g.actionBroker.RegisterHook(common.NewOnDieHook("lucifer talking", func(itemContext *common.ItemContext, action common.Action, context common.ActionContext) []common.Action {
-		dieAction := action.(*common.DieAction)
-		dyingActor := dieAction.GetActor()
-		if dyingActor.GetInternalName() == "lucifer" {
-			g.onLuciferDeath()
-		}
-		return nil
-	}))
 
 	g.actionBroker.RegisterHook(common.NewMainOnDropHook())
 	g.actionBroker.RegisterHook(common.NewMainOnEquipHook())
@@ -322,7 +309,6 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 		GetTimeKeeper: g.state.GetTimeKeeper,
 		Msg:           g.PlayerMessage,
 		Animator:      g.actionBroker,
-		Speak:         g.ActorSpeak,
 		Configuration: g.configuration,
 		QueueAfterTurn: g.queueAfterTurn,
 	})
@@ -334,7 +320,6 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 
 	mapGen := common.NewMapGenerator(g.randomSource)
 	mapGen.SetFactory(g.factory)
-	mapGen.SetLdtkProject(ldtkProject)
 	mapGen.SetSeed(g.levelSeed)
 	mapGen.SetSnapshots(g.levelSnapshots)
 
@@ -395,27 +380,6 @@ func (g *GameInstance) SetAndInitUserInterface(ui common.UserInterface) {
 func (g *GameInstance) queueAfterTurn(call func()) {
 	g.executeAfterTurn = append(g.executeAfterTurn, call)
 }
-func (g *GameInstance) ActorSpeak(actor *common.Actor, trigger defs.ActorSpeechTrigger) {
-	textLines := actor.GetSpeech(g.randomSource, trigger)
-	if len(textLines) == 0 {
-		return
-	}
-
-	if oldAnim, exists := g.actionBroker.GetAnimation(func(anim common.Animation) bool {
-		if speechAnim, isSpeechAnim := anim.(*common.SpeechAnimation); isSpeechAnim {
-			return speechAnim.GetActor() == actor
-		}
-		return false
-	}); exists {
-		oldAnim.Cancel()
-	}
-
-	speechAnim := common.NewSpeechAnimation(actor, textLines)
-	g.actionBroker.AddAnimation(speechAnim)
-
-	g.uiController.Say(actor, textLines)
-	g.PlayerMessage(fmt.Sprintf("%s says: %s", actor.Name(), strings.Join(textLines, "\n")))
-}
 
 func (g *GameInstance) GetUserInterface() common.UserInterface {
 	return g.uiController
@@ -463,14 +427,6 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 	g.uiController.OnPlayerTurnTaken()
 }
 
-func (g *GameInstance) procFireAtLocation(location geometry.Point, startAnimating func() bool) {
-	if g.state.GetMap().IsActorAt(location) {
-		actor := g.state.GetMap().ActorAt(location)
-		action := common.NewChangeResourceAction(common.AbstractCause("Fire"), actor, stats.Health, -3)
-		action.SetAnimationStartPredicate(startAnimating)
-		g.actionBroker.Execute(action)
-	}
-}
 func (g *GameInstance) updateStatsDisplay() {
 	g.uiController.UpdateStatsLabel()
 	g.sendStatsToWindowClient()
@@ -510,15 +466,7 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	return player
 }
 
-func (g *GameInstance) spawnItem(mapPos geometry.Point, item *common.Item) {
-	g.state.GetMap().AddItem(item, mapPos)
-}
 
-func (g *GameInstance) spawnItemInTown(namedLocation string, item *common.Item) {
-	townMap := g.state.GetTownMap(string(defs.LevelNameTown))
-	location := townMap.GetNamedLocation(namedLocation)
-	townMap.AddItem(item, location)
-}
 
 func (g *GameInstance) GetFactory() *common.Factory { return g.factory }
 
@@ -593,36 +541,6 @@ func (g *GameInstance) showDebugMenu() {
 					if strings.HasSuffix(fontFile, ".ttf") {
 						g.PlayerMessage(fontFile)
 					}
-				}
-			},
-		},
-		{
-			MainText: "Trigger nightfall in town",
-			Action: func() {
-				g.state.GetFlags().SetTrue("town_changed_to_night")
-			},
-		},
-		{
-			MainText: "Trigger death of Lucifer",
-			Action: func() {
-				g.onLuciferDeath()
-			},
-		},
-		{
-			MainText: "Trigger completion of poisoned water supply",
-			Action: func() {
-				g.state.GetFlags().SetTrue(string("all_clear:" + defs.SpecialLevelPoisonedWaterSupply))
-			},
-		},
-		{
-			MainText: "Toggle Story Mode",
-			Action: func() {
-				newState := !g.state.IsStoryModeEnabled()
-				g.GetWorldState().GetFlags().Set(string(common.FlagStoryModeEnabled), newState)
-				if newState {
-					g.PlayerMessage("Story mode enabled")
-				} else {
-					g.PlayerMessage("Story mode disabled")
 				}
 			},
 		},
@@ -822,19 +740,6 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 	return 10, func() {}
 }
 
-func (g *GameInstance) TransferRandomEnchantment(source *common.Item, destination *common.Item) {
-	enchantments := source.GetAllEnchantments()
-
-	if len(enchantments) == 0 {
-		return
-	}
-
-	index := rand.Intn(len(enchantments))
-	randomEnchantment := enchantments[index]
-
-	source.RemoveEnchantment(randomEnchantment)
-	destination.AddEnchantment(randomEnchantment)
-}
 
 func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 	if defs.IsTownLevel(newMapName) {
@@ -843,8 +748,6 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 		if newMapName == string(defs.LevelNameTown) {
 			g.setupD1Town(currentMap)
 			common.PlaceD1Portal(g.GetWorldState(), currentMap)
-		} else if newMapName == string(defs.LevelNameTownHell) {
-			g.setupHellTownTransitions(currentMap)
 		}
 	} else { // dungeon map
 		g.state.SetDungeonMap(newMapName, g.state.GetMap())
@@ -867,41 +770,8 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 	}
 }
 
-func (g *GameInstance) setupHellTownTransitions(currentMap *gridmap.GridMap[*common.Actor, *common.Item, common.Object]) {
-	caveEntrace := currentMap.GetNamedLocation("to_caves")
-
-	entranceTile := currentMap.GetCell(caveEntrace).TileType
-	currentMap.SetTile(caveEntrace, entranceTile.WithSpecial(gridmap.SpecialTileStairsDown))
-
-	currentMap.AddTransitionAt(caveEntrace, gridmap.Transition{
-		TargetMap:      defs.LevelNameFromDepth(8),
-		TargetLocation: "to_hell_town",
-	})
-
-	dungeonEntrance := currentMap.GetNamedLocation("to_dungeon")
-	entranceTile = currentMap.GetCell(dungeonEntrance).TileType
-	currentMap.SetTile(dungeonEntrance, entranceTile.WithSpecial(gridmap.SpecialTileStairsDown))
-
-	currentMap.AddTransitionAt(dungeonEntrance, gridmap.Transition{
-		TargetMap:      defs.LevelNameFromDepth(9),
-		TargetLocation: "to_hell_town",
-	})
-
-}
 
 
-func (g *GameInstance) initPlayerSkills(player *common.Actor, targetedSkills []string, untargetedSkills []string) {
-	var targeted []*common.TargetedAction
-	for _, skillName := range targetedSkills {
-		targeted = append(targeted, g.factory.NewTargetedActionFromName(skillName))
-	}
-	player.SetTargetedSkills(targeted)
-	var untargeted []*common.UntargetedAction
-	for _, skillName := range untargetedSkills {
-		untargeted = append(untargeted, g.factory.NewUntargetedActionFromName(skillName))
-	}
-	player.SetUntargetedSkills(untargeted)
-}
 
 type Turner interface {
 	Turn()
@@ -915,32 +785,6 @@ func (g *GameInstance) getTurnerAction(baseSpeed int, energy int, being Turner) 
 	return baseSpeed, being.Turn
 }
 
-func (g *GameInstance) getDisplacePositionForActor(victimToDisplace *common.Actor, direction geometry.Point) geometry.Point {
-	currentMap := g.state.GetMap()
-	victimPos := victimToDisplace.MapPosition()
-	var displacePos geometry.Point
-	stepsInDegrees := 45
-	for turnBy := stepsInDegrees; turnBy < 180; turnBy += stepsInDegrees {
-		curDir := geometry.RotateVector(direction, float64(turnBy))
-		displacePos = victimPos.Add(curDir)
-		if currentMap.IsCurrentlyPassable(displacePos) {
-			return displacePos
-		}
-
-		curDir = geometry.RotateVector(direction, float64(-turnBy))
-		displacePos = victimPos.Add(curDir)
-		if currentMap.IsCurrentlyPassable(displacePos) {
-			return displacePos
-		}
-	}
-	displacePos = victimPos.Add(direction)
-	if currentMap.IsCurrentlyPassable(displacePos) {
-		return displacePos
-	}
-	// return source
-	behindUs := victimPos.Add(direction.Mul(-1))
-	return behindUs
-}
 
 func (g *GameInstance) checkForLevelUp() {
 	if !g.state.GetPlayer().CanLevelUp() {
@@ -951,23 +795,7 @@ func (g *GameInstance) checkForLevelUp() {
 
 
 
-func (g *GameInstance) gotoHellTown() {
-	dest := gridmap.Transition{TargetMap: "TownHell", TargetLocation: "spawn"}
-	g.state.TransitionTo(dest)
-	g.actionBroker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("Travel"), 10))
-}
 
-func (g *GameInstance) onLuciferDeath() {
-	lines := []util.LabelText{
-		util.LabelTextFromStringWithColor("Lucifer", color.White),
-		util.LabelTextFromString(""),
-	}
-
-	luciferLines := append(lines, common.NewDialogueTextFromFile("lucifer_death.txt")...)
-	g.uiController.OpenTextWindow(luciferLines)
-
-	g.spawnItemInTown("true_sight_potion", g.NewPotionOfTrueSight())
-}
 
 func (g *GameInstance) sendStatsToWindowClient() {
 	if !g.configuration.ServeStats {
@@ -1049,9 +877,6 @@ func sortEquipForUI(equip *common.Equipment) []*common.Item {
 	})
 	return itemList
 }
-func (g *GameInstance) SetOnMapChange(onMapChange func()) {
-	g.onMapChange = onMapChange
-}
 
 func (g *GameInstance) ErrLog(errorMessage string) {
 	// write to stderr
@@ -1093,7 +918,6 @@ func (g *GameInstance) GetLog() []string {
 func (g *GameInstance) getDebugActions() common.DebugActions {
 	return common.DebugActions{
 		KillLevel:      g.killLevel,
-		GotoHellTown:   g.gotoHellTown,
 		OpenDebugMenu:  g.showDebugMenu,
 		GoOneLevelDown: g.actions.goOneLevelDown,
 		GoOneLevelUp:   g.actions.goOneLevelUp,

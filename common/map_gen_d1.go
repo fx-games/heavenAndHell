@@ -4,7 +4,6 @@ import (
 	"math/rand"
 	"rpg/d1"
 	"rpg/defs"
-	"rpg/dungen"
 	"rpg/geometry"
 	"rpg/gridmap"
 	"slices"
@@ -16,7 +15,7 @@ func (g *MapGenerator) SetSeed(seed int64) { g.seed = seed }
 // SetSnapshots sets saved level state applied after a level is generated.
 func (g *MapGenerator) SetSnapshots(snapshots map[string]*LevelSnapshot) { g.snapshots = snapshots }
 
-// generateD1Map builds a dungeon level from D1's generator (Cathedral for now).
+// generateD1Map builds dungeon level dlvl (1-16) with D1's generators.
 func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMap[*Actor, *Item, Object] {
 	rng := rand.New(rand.NewSource(g.seed*1000003 + int64(dlvl)))
 	gen := g.factory.D1()
@@ -24,24 +23,11 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 	gen.Rng = rng // monster HP rolls must come from the level seed too
 	defer func() { gen.Rng = gameRng }()
 
-	lvl := d1.GenerateL1(rng, dlvl)
-
-	layout := dungen.NewDungeonMap(d1.LevelSize, d1.LevelSize)
-	for x := 0; x < d1.LevelSize; x++ {
-		for y := 0; y < d1.LevelSize; y++ {
-			switch lvl.Cells[x][y] {
-			case d1.CellFloor:
-				layout.SetRoom(x, y)
-			case d1.CellDoor:
-				layout.SetDoor(x, y)
-			}
-		}
-	}
+	lvl := d1.Generate(rng, dlvl)
 
 	m := gridmap.NewEmptyMap[*Actor, *Item, Object](d1.LevelSize, d1.LevelSize)
 	m.SetName(targetMap)
-	levelDef := defs.GetLevelDefinition(g.randomSource, dlvl)
-	g.addBasicTiles(m, layout, levelDef.GetTilemapForBasicTiles(layout, dlvl))
+	g.addBasicTiles(m, lvl, dlvl)
 
 	up := geometry.Point{X: lvl.StairsUp[0], Y: lvl.StairsUp[1]}
 	m.SetTile(up, gridmap.Tile{DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp})
@@ -52,17 +38,30 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 	}
 	m.AddTransitionAt(up, upTarget)
 
-	dn := geometry.Point{X: lvl.StairsDn[0], Y: lvl.StairsDn[1]}
-	m.SetTile(dn, gridmap.Tile{DefinedIcon: defs.IconStairsDown, DefinedDescription: "stairs leading down", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsDown})
-	m.AddNamedLocation("ladder_down", dn)
-	m.AddTransitionAt(dn, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl + 1), TargetLocation: "ladder_up"})
+	avoid := []geometry.Point{up}
+	downTile := gridmap.Tile{DefinedIcon: defs.IconStairsDown, DefinedDescription: "stairs leading down", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsDown}
+	if dlvl < 16 {
+		dn := geometry.Point{X: lvl.StairsDn[0], Y: lvl.StairsDn[1]}
+		m.SetTile(dn, downTile)
+		m.AddNamedLocation("ladder_down", dn)
+		m.AddTransitionAt(dn, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl + 1), TargetLocation: "ladder_up"})
+		avoid = append(avoid, dn)
+	}
+	if lvl.Warp != [2]int{} { // D1's town warp on levels 5, 9 and 13
+		warp := geometry.Point{X: lvl.Warp[0], Y: lvl.Warp[1]}
+		downTile.DefinedDescription = "a way back to town"
+		m.SetTile(warp, downTile)
+		m.AddNamedLocation("warp", warp)
+		m.AddTransitionAt(warp, gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: D1TownGates[dlvl]})
+		avoid = append(avoid, warp)
+	}
 
 	// CreateLevel's order: themes, monsters, objects, items, then the theme rooms' contents.
 	types := gen.LevelMonsterTypes(dlvl)
 	placer := gen.NewPlacer(&d1World{f: g.factory, m: m}, lvl, dlvl, types)
 	placer.InitThemes()
 	placer.HoldThemeRooms()
-	g.spawnD1Monsters(rng, m, lvl, dlvl, types, []geometry.Point{up, dn})
+	g.spawnD1Monsters(rng, m, lvl, dlvl, types, avoid)
 	placer.InitObjects()
 	// AddInitItems: 3-5 healing or mana potions lie around.
 	for n := rng.Intn(3) + 3; n > 0; n-- {
@@ -83,9 +82,12 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 	}
 	PlaceD1Portal(g.factory.state, m)
 
-	m.SetDisplayName(levelDef.LevelName)
+	m.SetDisplayName(defs.D1LevelName(dlvl))
 	return m
 }
+
+// D1TownGates are the town locations of the entrances to levels 1, 5, 9 and 13.
+var D1TownGates = map[int]string{1: "to_cathedral", 5: "to_catacombs", 9: "to_caves", 13: "to_hell"}
 
 // Uniques tied to quests that aren't active (Gharbad, Zhar, Snotspill, Lachdanan, Warlord) stay out, like D1's PlaceUniques.
 var d1QuestUniques = map[int]bool{0: true, 2: true, 3: true, 7: true, 8: true}

@@ -22,6 +22,7 @@ func playthrough() {
 	game.SaveFile = filepath.Join(os.TempDir(), "heavenAndHell_playthrough_save.json")
 	defer os.Remove(game.SaveFile)
 	theGame, _ := createGameAndUIContext() // one instance: ebiten allows a single audio context per process
+	missiles := &missileCounter{} // registered per check: a new game or a load makes a new broker
 	for run := 1; run <= 3; run++ {
 		theGame.NewGame(theGame.GetGameData().ClassDefinitions[run-1], false)
 		state := theGame.GetWorldState()
@@ -29,16 +30,30 @@ func playthrough() {
 		if player.Hero() == nil {
 			fail("run %d: player has no D1 hero", run)
 		}
-		for dlvl := 1; dlvl <= 4; dlvl++ {
+		for dlvl := 1; dlvl <= 16; dlvl++ {
 			name := defs.LevelNameFromDepth(dlvl)
 			state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: "ladder_up"})
 			m := state.GetMap()
 			if m.GetName() != name {
 				fail("run %d: expected map %s, got %s", run, name, m.GetName())
 			}
-			up, dn := m.GetNamedLocation("ladder_up"), m.GetNamedLocation("ladder_down")
-			if _, ok := m.GetDijkstraMapWithActorsNotBlocking(up, 10000)[dn]; !ok {
-				fail("run %d dlvl %d: stairs down at %v unreachable from %v", run, dlvl, dn, up)
+			// milestone 6: stairs (and the town warp on 5, 9, 13) reachable on every level type
+			up := m.GetNamedLocation("ladder_up")
+			reach := reachable(m, up)
+			for _, loc := range []string{"ladder_down", "warp"} {
+				p := m.GetNamedLocation(loc)
+				exists := m.GetNamedLocationByPos(p) == loc
+				want := loc == "ladder_down" && dlvl < 16 || loc == "warp" && (dlvl == 5 || dlvl == 9 || dlvl == 13)
+				if exists != want {
+					fail("run %d dlvl %d: %s exists=%v", run, dlvl, loc, exists)
+				}
+				if _, ok := reach[p]; exists && !ok {
+					dumpMap(m, reach)
+					fail("run %d dlvl %d: %s at %v unreachable from %v", run, dlvl, loc, p, up)
+				}
+			}
+			if dlvl > 4 {
+				boost(player, dlvl)
 			}
 			monsters := 0
 			for _, a := range m.Actors() {
@@ -55,7 +70,7 @@ func playthrough() {
 			}
 			// milestone 4: open chests, sarcophagi and barrels, use shrines
 			objects, used, dropped := operateObjects(state, player)
-			if objects < 9 || used == 0 || dropped == 0 {
+			if dlvl < 16 && (objects < 9 || used == 0 || dropped == 0) {
 				fail("run %d dlvl %d: objects didn't work (objects=%d used=%d items dropped=%d)", run, dlvl, objects, used, dropped)
 			}
 			fmt.Printf("run %d dlvl %d: %d objects, %d used, %d items dropped\n", run, dlvl, objects, used, dropped)
@@ -67,6 +82,10 @@ func playthrough() {
 			}
 			fmt.Printf("run %d (%s) dlvl %d: %d monsters, %d kills, %d damage taken, level %d, %d D1 items on floor\n",
 				run, player.Name(), dlvl, monsters, kills, damageTaken, player.Hero().Level, items)
+
+			if dlvl > 4 { // milestone 6: every monster that casts does so, and it hurts
+				checkCasters(theGame.GetActionBroker(), state, player, missiles, fail)
+			}
 
 			if run == 3 && dlvl == 2 { // milestone 5: the sorcerer casts every spell
 				castAllSpells(theGame.GetFactory(), theGame.GetActionBroker(), state, player, fail)
@@ -86,9 +105,13 @@ func playthrough() {
 			}
 		}
 	}
-	// milestone 3: the D1 town after a trip to level 4
+	// milestone 3: the D1 town after a trip down to level 16
 	theGame.GetWorldState().MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"})
 	checkTown(theGame.GetWorldState(), fail)
+	if len(missiles.byAI) < 6 { // level monster types are random; six of the eight casting AIs always showed up
+		fail("missile AIs: only %v cast", missiles.byAI)
+	}
+	fmt.Printf("monster missiles by AI: %v\n", missiles.byAI)
 
 	// milestone 2: a permadeath save is gone once the death menu is built
 	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], true)
@@ -254,8 +277,10 @@ func checkTown(state *common.State, fail func(string, ...any)) {
 	if _, ok := m.GetTransitionAt(m.GetNamedLocation("to_cathedral")); !ok {
 		fail("town: cathedral gate is closed")
 	}
-	if _, ok := m.GetTransitionAt(m.GetNamedLocation("to_catacombs")); ok {
-		fail("town: catacombs gate is open before level 5 was reached")
+	for dlvl, gate := range common.D1TownGates { // all open after level 16, each leading to its level's warp
+		if t, ok := m.GetTransitionAt(m.GetNamedLocation(gate)); !ok || t.TargetMap != defs.LevelNameFromDepth(dlvl) {
+			fail("town: %s gate leads to %+v", gate, t)
+		}
 	}
 
 	player := state.GetPlayer()
@@ -352,4 +377,139 @@ func castAllSpells(f *common.Factory, broker *common.Broker, state *common.State
 		fail("spells: town portal round trip didn't close the portal (%v on %s)", state.D1Portal(), state.GetMap().GetName())
 	}
 	fmt.Printf("spells: %d damage, failed casts %v\n", dealt, failed)
+}
+
+// boost stands in for a hero who fought their way down: character level 2×dlvl with the points in Str/Dex/Vit.
+func boost(player *common.Actor, dlvl int) {
+	h := player.Hero()
+	if want := min(2*dlvl, 50); h.Level < want {
+		h.AddExperience(h.Level, d1.ExpLvls[want-2]-h.Exp)
+	}
+	for ; h.StatPts > 0; h.StatPts-- {
+		h.AddBaseStat([]int{d1.AttrStr, d1.AttrDex, d1.AttrVit}[h.StatPts%3], 1)
+	}
+	common.SyncHero(player)
+	player.GetStats().GetResource(stats.Health).SetToMax()
+}
+
+// missileCounter counts monster missiles by the AI that cast them.
+type missileCounter struct{ byAI map[string]int }
+
+func (c *missileCounter) ActionName() common.ActionName { return common.ActionNameMonsterMissile }
+func (c *missileCounter) IsBefore() bool                { return true }
+func (c *missileCounter) IsAfter() bool                 { return false }
+func (c *missileCounter) After(common.Action, common.ActionContext) []common.Action {
+	return nil
+}
+func (c *missileCounter) Before(action common.Action, _ common.ActionContext) []common.Action {
+	if c.byAI == nil {
+		c.byAI = map[string]int{}
+	}
+	c.byAI[action.Cause().GetActor().D1Monster().AI]++
+	return nil
+}
+
+// checkCasters puts one monster of every AI type on the level four cells from the player and lets it act for a while;
+// the casters' missiles are counted.
+func checkCasters(broker *common.Broker, state *common.State, player *common.Actor, missiles *missileCounter, fail func(string, ...any)) {
+	broker.RegisterHook(missiles)
+	defer broker.RemoveBeforeHook(missiles)
+	m := state.GetMap()
+	seen := map[string]bool{}
+	for _, a := range append([]*common.Actor(nil), m.Actors()...) {
+		mon := a.D1Monster()
+		if mon == nil || !a.IsAlive() || seen[mon.AI] {
+			continue
+		}
+		seen[mon.AI] = true
+		before := 0
+		for _, n := range missiles.byAI {
+			before += n
+		}
+		hp := player.GetStats().GetResource(stats.Health)
+		taken := 0
+		for turn := 0; turn < 40; turn++ {
+			if !a.IsAlive() {
+				break
+			}
+			// stand four cells away in a line the monster can see
+			if geometry.DistanceChebyshev(a.MapPosition(), player.MapPosition()) != 4 {
+				for _, d := range common.D1Dirs {
+					p := a.MapPosition().Add(geometry.Point{X: 4 * d.X, Y: 4 * d.Y})
+					if m.Contains(p) && m.CanPlaceActorHere(p) && clearLine(m, a.MapPosition(), p) {
+						m.MoveActor(player, p)
+						player.SetDrawPosition(p.ToPointF())
+						broker.Execute(common.NewUpdateFoVAction(common.AbstractCause("playthrough"), player))
+						break
+					}
+				}
+			}
+			v := hp.Value()
+			broker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("playthrough"), 10))
+			taken += max(v-hp.Value(), 0)
+			hp.SetToMax()
+		}
+		after := 0
+		for _, n := range missiles.byAI {
+			after += n
+		}
+		if os.Getenv("PLAYTHROUGH_DEBUG") != "" {
+			fmt.Printf("DEBUG caster %s (%s) at %v: %d missiles, %d damage\n", a.Name(), mon.AI, a.MapPosition(), after-before, taken)
+		}
+	}
+}
+
+func clearLine(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], from, to geometry.Point) bool {
+	los := geometry.LineOfSight(from, to, func(p geometry.Point) bool { return p == from || p == to || m.IsTransparent(p) })
+	return los[len(los)-1] == to
+}
+
+func dumpMap(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], reach map[geometry.Point]bool) {
+	for y := 0; y < 80; y++ {
+		for x := 0; x < 80; x++ {
+			p := geometry.Point{X: x, Y: y}
+			_, r := reach[p]
+			switch {
+			case m.GetNamedLocationByPos(p) != "":
+				fmt.Print("S")
+			case m.IsActorAt(p):
+				fmt.Print("a")
+			case m.IsObjectAt(p) && !m.IsWalkable(p):
+				fmt.Print("O")
+			case m.IsObjectAt(p):
+				fmt.Print("o")
+			case !m.IsTileWalkable(p):
+				fmt.Print("#")
+			case r:
+				fmt.Print(",")
+			default:
+				fmt.Print(".")
+			}
+		}
+		fmt.Println()
+	}
+}
+
+// reachable walks from p through floor, doors and barrels (bumping breaks them).
+func reachable(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], p geometry.Point) map[geometry.Point]bool {
+	seen := map[geometry.Point]bool{p: true}
+	for queue := []geometry.Point{p}; len(queue) > 0; queue = queue[1:] {
+		for _, d := range common.D1Dirs {
+			q := queue[0].Add(d)
+			if seen[q] || !m.Contains(q) || !m.IsTileWalkable(q) {
+				continue
+			}
+			if m.IsObjectAt(q) {
+				o := m.ObjectAt(q)
+				d1o, isD1 := o.(*common.D1Object)
+				_, isDoor := o.(*common.Door)
+				if !o.IsWalkable(nil) && !isDoor && !(isD1 && (d1o.O.Kind == d1.ObjBarrel || d1o.O.Kind == d1.ObjBarrelEx)) {
+					continue
+				}
+			}
+			seen[q] = true
+			queue = append(queue, q)
+		}
+	}
+	return seen
 }

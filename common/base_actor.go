@@ -9,7 +9,6 @@ import (
 	"rpg/geometry"
 	"rpg/stats"
 	"rpg/util"
-	"strings"
 )
 
 type VendorType string
@@ -49,7 +48,6 @@ type Actor struct {
 	isVendorOfType     VendorType
 	lastMoveWasWest    bool
 	isHostile          bool
-	speechMap          map[defs.ActorSpeechTrigger][]string
 	isUnique           bool
 	internalName       string
 	disableCorpse      bool
@@ -112,7 +110,6 @@ func NewActor(icon int32) *Actor {
 		fov:           geometry.NewFOV(geometry.NewRect(-visionRange, -visionRange, visionRange, visionRange)),
 		statusEffects: NewFlags(),
 		corpseIcon:    defs.IconCorpse,
-		speechMap:     make(map[defs.ActorSpeechTrigger][]string),
 		damageDice:    util.ParseDice("1d3"),
 	}
 }
@@ -246,7 +243,7 @@ func (a *Actor) GetDamageDice(attackType AttackType) util.Dice {
 		weaponPlus := weapons.GetWeaponStats().Plus
 		damageDice = weapons.GetWeaponStats().Damage.WithBonus(weaponPlus)
 	} else if attackType == RangedAttack { // no ranged weapon, no ranged damage
-		return util.NewDice(0,0,0)
+		return util.NewDice(0, 0, 0)
 	} else { // no weapon, built in damage
 		damageDice = a.damageDice
 	}
@@ -368,7 +365,6 @@ func (a *Actor) GetState() ActorState {
 	return a.state
 }
 
-
 func (a *Actor) GetArmorClass() int {
 	if a.HasStatusEffect(StatusBerserk) {
 		return 0
@@ -386,8 +382,6 @@ func (a *Actor) GetArmorDamageReduction() float64 {
 	armorClass := a.GetArmorClass()
 	return ADRFromAC(armorClass)
 }
-
-
 
 func (a *Actor) HealCompletely() {
 	a.GetStats().GetResource(stats.Health).SetToMax()
@@ -517,30 +511,6 @@ func (a *Actor) handleStatusEffects() {
 
 func (a *Actor) AddParametrizedStatusEffect(effect *ParametrizedStatusEffect) {
 	a.parametrizedStatusEffects = append(a.parametrizedStatusEffects, effect)
-}
-
-func (a *Actor) HasSpeech(trigger defs.ActorSpeechTrigger) bool {
-	return len(a.speechMap[trigger]) > 0
-}
-
-func (a *Actor) GetSpeech(random *rand.Rand, trigger defs.ActorSpeechTrigger) []string {
-	allSpeech := a.speechMap[trigger]
-	if len(allSpeech) == 0 {
-		return []string{}
-	}
-	chosenIndex := random.Intn(len(allSpeech))
-	chosenLines := allSpeech[chosenIndex]
-	//remove
-	a.speechMap[trigger] = append(allSpeech[:chosenIndex], allSpeech[chosenIndex+1:]...)
-	return strings.Split(chosenLines, "\n")
-}
-
-func (a *Actor) SetSpeech(speechMap map[defs.ActorSpeechTrigger][]string) {
-	a.speechMap = speechMap
-}
-
-func (a *Actor) SetSpeechForTrigger(trigger defs.ActorSpeechTrigger, speech []string) {
-	a.speechMap[trigger] = speech
 }
 
 func (a *Actor) SetUnique() {
@@ -813,7 +783,7 @@ func (a *Actor) SetDamageDice(dice util.Dice) {
 	a.damageDice = dice
 }
 
-func (a *Actor) GetParametrizedStatusEffects() []*ParametrizedStatusEffect{
+func (a *Actor) GetParametrizedStatusEffects() []*ParametrizedStatusEffect {
 	return a.parametrizedStatusEffects
 }
 
@@ -821,7 +791,7 @@ func (a *Actor) IsVisible() bool {
 	return !a.HasStatusEffect(StatusInvisible)
 }
 
-func (a *Actor) GetRangedHitEffects() []*HitEffect{
+func (a *Actor) GetRangedHitEffects() []*HitEffect {
 	// TODO
 	return []*HitEffect{}
 }

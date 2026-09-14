@@ -37,13 +37,3 @@ func NewMainOnDropHook() *OnDropHook {
 		hookDescription: "Unequip if equipped",
 	}
 }
-
-func NewOnDropHook(hookDescription string, afterHook func(*ItemContext, Action, ActionContext) []Action) *OnDropHook {
-	return &OnDropHook{
-		ItemHook: ItemHook{
-			HookedAction: ActionNameRangedAttack,
-			AfterHook:    afterHook,
-		},
-		hookDescription: hookDescription,
-	}
-}

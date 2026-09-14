@@ -30,13 +30,3 @@ func NewMainOnRangedHook() *OnRangedHook {
 		},
 	}
 }
-
-func NewOnRangedHook(hookDescription string, afterHook func(*ItemContext, Action, ActionContext) []Action) *OnRangedHook {
-	return &OnRangedHook{
-		ItemHook: ItemHook{
-			HookedAction: ActionNameRangedAttack,
-			AfterHook:    afterHook,
-		},
-		hookDescription: hookDescription,
-	}
-}

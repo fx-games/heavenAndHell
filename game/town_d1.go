@@ -128,16 +128,16 @@ func (g *GameInstance) onD1MapChanged(oldMapName, newMapName string) {
 
 // setupD1TownGates opens the town entrances like D1's town warps: the cathedral always, deeper areas once reached.
 func (g *GameInstance) setupD1TownGates(m *gameMap) {
-	for _, gate := range []struct {
-		location string
-		dlvl     int
-	}{{"to_cathedral", 1}, {"to_catacombs", 5}, {"to_caves", 9}} {
-		pos := m.GetNamedLocation(gate.location)
-		if gate.dlvl > 1 && g.state.GetLastDungeonLevel() < gate.dlvl {
+	for dlvl, location := range common.D1TownGates {
+		if dlvl > 1 && g.state.GetLastDungeonLevel() < dlvl {
 			continue
 		}
+		target := "warp"
+		if dlvl == 1 {
+			target = "ladder_up"
+		}
+		pos := m.GetNamedLocation(location)
 		m.SetTile(pos, m.GetCell(pos).TileType.WithSpecial(gridmap.SpecialTileStairsDown))
-		m.AddTransitionAt(pos, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(gate.dlvl), TargetLocation: "ladder_up"})
+		m.AddTransitionAt(pos, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl), TargetLocation: target})
 	}
-	// ponytail: the Hell gate (level 13) needs a spot on the town map; it comes with milestone 6.
 }

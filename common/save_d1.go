@@ -68,30 +68,34 @@ func (s *LevelSnapshot) apply(f *Factory, m *gridmap.GridMap[*Actor, *Item, Obje
 			o.O.Active = !used[o.O.Index]
 		}
 	}
+	// take the monsters off the map first, so none finds its saved cell taken by one that hasn't moved yet
+	var restore []*Actor
+	var at []SavedMonster
 	for _, a := range append([]*Actor(nil), m.Actors()...) {
 		mon := a.d1Monster
 		if mon == nil {
 			continue
 		}
-		saved, alive := s.Monsters[mon.SpawnIndex]
-		if !alive {
-			m.RemoveActor(a)
-			continue
-		}
-		SetResource(a.GetStats().GetResource(stats.Health), saved.HP)
-		if p := (geometry.Point{X: saved.X, Y: saved.Y}); p != a.MapPosition() && m.CanPlaceActorHere(p) {
-			m.MoveActor(a, p)
-			a.SetDrawPosition(p.ToPointF())
+		m.RemoveActor(a)
+		if saved, alive := s.Monsters[mon.SpawnIndex]; alive {
+			restore, at = append(restore, a), append(at, saved)
 		}
 	}
 	for _, saved := range s.Spawned {
-		if p := (geometry.Point{X: saved.X, Y: saved.Y}); m.CanPlaceActorHere(p) {
-			a := f.NewD1Monster(saved.Type)
-			a.d1Monster.SpawnIndex = -1
-			SetResource(a.GetStats().GetResource(stats.Health), saved.HP)
-			a.SetDrawPosition(p.ToPointF())
-			m.AddActor(a, p)
+		a := f.NewD1Monster(saved.Type)
+		a.d1Monster.SpawnIndex = -1
+		restore, at = append(restore, a), append(at, saved)
+	}
+	for i, a := range restore {
+		p := geometry.Point{X: at[i].X, Y: at[i].Y}
+		if !m.CanPlaceActorHere(p) {
+			if near := freeCellsNear(m, p, 1, m.CanPlaceActorHere); len(near) > 0 {
+				p = near[0]
+			}
 		}
+		SetResource(a.GetStats().GetResource(stats.Health), at[i].HP)
+		a.SetDrawPosition(p.ToPointF())
+		m.AddActor(a, p)
 	}
 	for _, it := range append([]*Item(nil), m.Items()...) {
 		if it.d1 != nil {

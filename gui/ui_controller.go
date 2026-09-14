@@ -922,8 +922,6 @@ func (u *UIController) getCurrentTimedEffects() []UIElement {
 			return false
 		case *common.UntargetedAction: // this is used to delay activation of spells
 			return true
-		case *common.TimedModifier: // these are temporary buffs/debuffs to a characters' stats
-			return true
 		default:
 			return false
 		}
@@ -993,11 +991,6 @@ func (u *UIController) getMiniMapColor(mapPos geometry.Point, tileColor *[4]byte
 	}
 	if !state.GetPlayer().CanSee(mapPos) {
 		if currentMap.IsSpecialAt(mapPos, gridmap.SpecialTileWater) {
-			if !state.GetFlags().IsSet(fmt.Sprintf("all_clear:%s", defs.SpecialLevelPoisonedWaterSupply)) {
-				//199, G: 251, B: 161
-				*tileColor = [4]byte{199 / 2, 251 / 2, 161 / 2, 255}
-				return
-			}
 			*tileColor = [4]byte{86 / 2, 112 / 2, 194 / 2, 255}
 			return
 		}
@@ -1019,11 +1012,6 @@ func (u *UIController) getMiniMapColor(mapPos geometry.Point, tileColor *[4]byte
 	}
 
 	if currentMap.IsSpecialAt(mapPos, gridmap.SpecialTileWater) {
-		if !state.GetFlags().IsSet(fmt.Sprintf("all_clear:%s", defs.SpecialLevelPoisonedWaterSupply)) {
-			//199, G: 251, B: 161
-			*tileColor = [4]byte{199, 251, 161, 255}
-			return
-		}
 		*tileColor = [4]byte{86, 112, 194, 255}
 		return
 	}
@@ -1548,14 +1536,6 @@ func (u *UIController) tryToBuy(item *common.Item, seller *common.Actor) {
 	u.OpenShopMenu(seller)
 }
 
-func (u *UIController) showJournal() {
-	state := u.context.GameState()
-	if !state.IsStoryModeEnabled() {
-		return
-	}
-	entries := u.context.GameState().GetQuestLog(u.tileRenderer.ParseColorCodedText)
-	u.OpenTextWindow(entries)
-}
 
 func (u *UIController) showFlags() {
 	state := u.context.GameState()

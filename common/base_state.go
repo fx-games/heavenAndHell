@@ -231,9 +231,6 @@ func (s *State) IsPlayerInTown() bool {
 	return defs.IsTownLevel(mapName)
 }
 
-func (s *State) isInHellTown() bool {
-	return s.GetMap().GetName() == string(defs.LevelNameTownHell)
-}
 
 func (s *State) PlayerStandsInLitArea() bool {
 	currentMap := s.GetMap()
@@ -342,14 +339,9 @@ func (s *State) mixLightSourceColor(drawColor, noLightSource color.RGBA, worldTi
 func (s *State) GetWaterColor() color.RGBA {
 	//all_clear:SpecialLevelPoisonedWaterSupply
 	//
-	poisonColor := color.RGBA{R: 199, G: 251, B: 161, A: 255}
 	cleanColor := color.RGBA{R: 86, G: 112, B: 194, A: 255}
 
-	if s.GetFlags().IsSet(fmt.Sprintf("all_clear:%s", defs.SpecialLevelPoisonedWaterSupply)) {
-		return cleanColor
-	} else {
-		return poisonColor
-	}
+	return cleanColor
 }
 
 func (s *State) IsDoorAt(pos geometry.Point) (*Door, bool) {
@@ -447,7 +439,7 @@ func (s *State) MapTransition(to gridmap.Transition) {
 		s.SetCurrentMap(s.GetDungeonMap(targetMap))
 	} else {
 		// generate the map and set it
-		generatedMap := s.mapGen.GenerateMap(targetMap, s.ldtkProject, LevelFromName(targetMap))
+		generatedMap := s.mapGen.GenerateMap(targetMap, LevelFromName(targetMap))
 		s.SetDungeonMap(targetMap, generatedMap)
 		s.SetCurrentMap(generatedMap)
 	}
@@ -456,6 +448,9 @@ func (s *State) MapTransition(to gridmap.Transition) {
 
 	targetLocation := newlyLoadedMap.GetNamedLocation(to.TargetLocation)
 	freeTargetLocations := newlyLoadedMap.GetFreeCardinalNeighbors(targetLocation)
+	if len(freeTargetLocations) == 0 { // stairs in a cave corner, or barrels and monsters all around
+		freeTargetLocations = freeCellsNear(newlyLoadedMap, targetLocation, 1, newlyLoadedMap.CanPlaceActorHere)
+	}
 
 	if len(freeTargetLocations) == 0 {
 		newlyLoadedMap.PrintStairsAndActors()
@@ -495,60 +490,7 @@ func (s *State) SetTimeKeeper(keeper *TimeKeeper) {
 	s.timekeeper = keeper
 }
 
-func (s *State) IsStoryModeEnabled() bool {
-	return s.GetFlags().IsSet(string(FlagStoryModeEnabled))
-}
 
-func (s *State) GetQuestLog(textParser func(string) []util.ColoredTextPart) []util.LabelText {
-	var entries []util.LabelText
-
-	flags := s.GetFlags()
-
-	flagPairs := []QuestFlags{
-		{"Kirioth (Town)", "Kill Meat Jack (Level 2 - Cathedral)", "quest_received:meat_jack", "killed:meat_jack", "quest_rewarded:meat_jack"},
-		{"Abel (Town)", "Clear the poisoned water (Catacombs)", "quest_received:poisoned_water", string("all_clear:" + defs.SpecialLevelPoisonedWaterSupply), "quest_rewarded:poisoned_water"},
-		{"Shekel (Town)", "Kill King Zedek (Level 4 - Catacombs)", "quest_received:skeleton_king", "killed:skeleton_king", "quest_rewarded:skeleton_king"},
-		{"Kirioth (Town)", "Kill Lucifer (Level 8 - Hell)", "quest_received:lucifer", "killed:lucifer", "quest_rewarded:lucifer"},
-
-		{"Lucifer (Hell)", "Find evidence (Town)", "quest_received:evidence_one", "found:evidence_one", "quest_rewarded:evidence_one"},
-		{"Lucifer (Hell)", "Find evidence (Catacombs)", "quest_received:evidence_two", "found:evidence_two", "quest_rewarded:evidence_two"},
-		{"Lucifer (Hell)", "Find evidence (Water Supply)", "quest_received:evidence_three", "found:evidence_three", "quest_rewarded:evidence_three"},
-		{"Lucifer (Hell)", "Find evidence (Caves)", "quest_received:evidence_four", "found:evidence_four", "quest_rewarded:evidence_four"},
-	}
-	//textParser := g.tileRenderer.ParseColorCodedText
-	// meat jack flags
-	for _, flagPair := range flagPairs {
-		questName := flagPair.Description
-		returnMessage := fmt.Sprintf("Return to %s", flagPair.Giver)
-		questGivenFlag := flagPair.GivenFlag
-		questDoneFlag := flagPair.RewardedFlag
-		if flags.IsSet(questGivenFlag) {
-			if flags.IsSet(questDoneFlag) {
-				entries = append(entries, util.LabelText{
-					UseColorCodes:      true,
-					TextWithColorCodes: textParser(fmt.Sprintf("%s - [:green]DONE", questName)),
-					Text:               fmt.Sprintf("%s - DONE", questName),
-					TextColor:          defs.DarkTextColor,
-				})
-			} else if flags.IsSet(flagPair.GoalFlag) {
-				entries = append(entries, util.LabelText{
-					UseColorCodes:      true,
-					TextWithColorCodes: textParser(fmt.Sprintf("%s - [:yellow]IN PROGRESS", returnMessage)),
-					Text:               fmt.Sprintf("%s - IN PROGRESS", returnMessage),
-					TextColor:          defs.DarkTextColor,
-				})
-			} else {
-				entries = append(entries, util.LabelText{
-					UseColorCodes:      true,
-					TextWithColorCodes: textParser(fmt.Sprintf("%s - [:yellow]IN PROGRESS", questName)),
-					Text:               fmt.Sprintf("%s - IN PROGRESS", questName),
-					TextColor:          defs.DarkTextColor,
-				})
-			}
-		}
-	}
-	return entries
-}
 
 func (s *State) RemoveObject(gameObject Object) {
 	s.GetMap().RemoveObject(gameObject)

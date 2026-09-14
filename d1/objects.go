@@ -404,16 +404,22 @@ func (p *Placer) tfitGoatShrine(i int) bool {
 	return p.tfitObj5(i)
 }
 
-// InitThemes picks theme rooms and their themes. ponytail: catacombs, caves and hell place their theme rooms
-// during level generation (DRLG_PlaceThemeRooms); that comes with their generators in milestone 6.
+// InitThemes picks theme rooms and their themes: enclosed rooms in the cathedral, the rooms the generator placed
+// elsewhere. ponytail: Zhar's library on level 8 comes with his quest.
 func (p *Placer) InitThemes() {
-	if p.Dlvl == 16 || p.lt != 1 {
+	if p.Dlvl == 16 {
 		return
 	}
-	for tv := 0; tv < 256 && len(p.themes) < 50; tv++ {
-		if !p.checkThemeRoom(tv) {
-			continue
+	tvs := p.L.Themes
+	if p.lt == 1 {
+		tvs = nil
+		for tv := 0; tv < 256 && len(tvs) < 50; tv++ {
+			if p.checkThemeRoom(tv) {
+				tvs = append(tvs, tv)
+			}
 		}
+	}
+	for _, tv := range tvs {
 		i := len(p.themes)
 		p.themes = append(p.themes, theme{ttval: tv})
 		t := themeGood[p.G.random(4)]
@@ -505,7 +511,7 @@ func (p *Placer) rndBarrels() {
 }
 
 // InitObjects ports InitObjects' random objects. ponytail: traps (AddObjTraps/AddChestTraps) are deferred with
-// trap disarming; quest objects come with their quests; hell's tortured bodies with milestone 6.
+// trap disarming; quest objects come with their quests; torches, hooked and tortured bodies are decoration.
 func (p *Placer) InitObjects() {
 	if p.Dlvl == 16 {
 		return
@@ -514,6 +520,10 @@ func (p *Placer) InitObjects() {
 		p.rndLoc(10, 15, ObjSarc, true)
 	}
 	p.rndBarrels()
+	if p.lt == 4 { // AddL4Goodies
+		p.rndLoc(2, 6, ObjDecap, false)
+		p.rndLoc(1, 3, ObjCauldron, false)
+	}
 	p.rndLoc(5, 10, ObjChest1, false)
 	p.rndLoc(3, 6, ObjChest2, false)
 	p.rndLoc(1, 5, ObjChest3, false)

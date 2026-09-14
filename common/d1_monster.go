@@ -25,22 +25,27 @@ type D1Monster struct {
 	Last                               geometry.Point
 	Dir                                int // index into D1Dirs
 	Leader                             *Actor
-	SpawnIndex                         int  // order of creation on its level, identifies the monster in saves
-	Golem                              bool // the player's golem (AI_GOLUM), fights for the player
+	SpawnIndex                         int     // order of creation on its level, identifies the monster in saves
+	Golem                              bool    // the player's golem (AI_GOLUM), fights for the player
+	Dormant                            bool    // _mFlags & 4 on gargoyles: waiting in stone until the enemy comes close
+	HitWith                            *[3]int // set for one melee attack: to-hit, min and max damage of a special attack
 }
 
 // D1 monster modes (MON_MODE) the AI compares against.
 const (
-	D1ModeStand   = 0
-	D1ModeWalk    = 1
-	D1ModeAttack  = 4
-	D1ModeGotHit  = 5
-	D1ModeSAttack = 7
-	D1ModeFadeIn  = 8
-	D1ModeFadeOut = 9
-	D1ModeRAttack = 10
-	D1ModeSpStand = 11
-	D1ModeDelay   = 13
+	D1ModeStand     = 0
+	D1ModeWalk      = 1
+	D1ModeAttack    = 4
+	D1ModeGotHit    = 5
+	D1ModeSAttack   = 7
+	D1ModeFadeIn    = 8
+	D1ModeFadeOut   = 9
+	D1ModeRAttack   = 10
+	D1ModeSpStand   = 11
+	D1ModeRSpAttack = 12
+	D1ModeDelay     = 13
+	D1ModeCharge    = 14
+	D1ModeHeal      = 16
 )
 
 // D1Dirs lists the 8 directions in circular order, so d-1/d+1 are D1's left[]/right[] and d+4 is opposite[].
@@ -108,6 +113,7 @@ func (g *Factory) NewD1Monster(mt int) *Actor {
 	st.SetAttribute(stats.Experience, m.Exp)
 	st.SetAttributeAsFloat(stats.MoveSpeedFactor, d1.SpeedTier(d1.RefWalkTicks, m.Frames[1]))
 	st.SetAttributeAsFloat(stats.AttackSpeedFactor, d1.SpeedTier(d1.RefAttackTicks, m.Frames[2]))
+	a.d1Monster.Dormant = m.AI == "AI_GARG"
 	if m.Flags&d1.MFlagHidden != 0 {
 		a.AddStatusEffect(StatusInvisible, -1)
 	}

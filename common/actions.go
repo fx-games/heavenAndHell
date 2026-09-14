@@ -19,16 +19,13 @@ const (
 	ActionNameChangeEquipment ActionName = "ActionNameChangeEquipment"
 	ActionNameChangeResource  ActionName = "ActionNameChangeHealth"
 	ActionNamePickup          ActionName = "ActionNamePickup"
-	ActionNameStealItem       ActionName = "ActionNameStealItem"
 	ActionNameDrop            ActionName = "ActionNameDrop"
 	ActionNameOpenDoor        ActionName = "ActionNameOpenDoor"
-	ActionNameSpawnObject     ActionName = "ActionNameSpawnObject"
 	ActionNameUseItem         ActionName = "ActionNameUseItem"
 	ActionNameFireball        ActionName = "ActionNameFireball"
+	ActionNameMonsterMissile  ActionName = "ActionNameMonsterMissile"
 
 	ActionNameDie               ActionName = "ActionNameDie"
-	ActionNameApplyStatusEffect ActionName = "ActionNameApplyStatusEffect"
-	ActionNameApplyStatusEffectParametrized ActionName = "ActionNameApplyStatusEffectParametrized"
 	ActionNameEndTurn           ActionName = "ActionNameEndTurn"
 	ActionNameTransition        ActionName = "ActionNameTransition"
 	ActionNameTalkTo            ActionName = "ActionNameTalkToNpc"
@@ -41,7 +38,6 @@ type Animator interface {
 }
 type DebugActions struct {
 	KillLevel      func()
-	GotoHellTown   func()
 	OpenDebugMenu  func()
 	GoOneLevelDown func()
 	GoOneLevelUp   func()
@@ -109,7 +105,6 @@ type ActionContext struct {
 	Data          defs.DataContainer
 	ActionBroker  ActionBroker
 	Msg           func(message string)
-	Speak         func(actor *Actor, trigger defs.ActorSpeechTrigger)
 }
 
 type ActionHook interface {
