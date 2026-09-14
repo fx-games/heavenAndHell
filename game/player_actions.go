@@ -770,6 +770,10 @@ func (a *Actions) ShowActorInfoAt(mapPos geometry.Point) {
 	player := state.GetPlayer()
 	actor := state.GetMap().ActorAt(mapPos)
 	infoText := util.ToLabelText(actor.GetInfoText())
+	if actor.D1Monster() != nil {
+		a.ui().OpenTextWindow(infoText)
+		return
+	}
 	if actor != player && actor.IsHostile() {
 		otherHasRanged := actor.GetEquipment().HasRangedWeaponEquipped()
 		playerHasRanged := player.GetEquipment().HasRangedWeaponEquipped()

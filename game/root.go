@@ -11,6 +11,7 @@ import (
 	"path"
 	"rpg/audio"
 	"rpg/common"
+	"rpg/d1"
 	"rpg/defs"
 	"rpg/files"
 	"rpg/geometry"
@@ -68,6 +69,7 @@ type GameInstance struct {
 
 	// data definitions
 	dataDefinitions defs.DataContainer
+	d1Data          *d1.Data
 
 
 	actions *Actions
@@ -178,6 +180,11 @@ func NewGameInstance(startInfo common.StartInfo, uiController common.UserInterfa
 		println(err)
 	})
 	println(fmt.Sprintf("Data definitions loaded.."))
+	d1Data, err := d1.Load(files.GetFileSystem())
+	if err != nil {
+		panic(err)
+	}
+	g.d1Data = d1Data
 	g.ResetGame(g.dataDefinitions.ClassDefinitions[0])
 	return g
 }
@@ -279,6 +286,7 @@ func (g *GameInstance) ResetGame(playerStartDefinition defs.LoadoutDefinition) {
 		GetTimeKeeper:           g.state.GetTimeKeeper,
 		GiveAndEquipItemToActor: g.giveAndEquipItemToActor,
 		Msg:                     g.PlayerMessage,
+		D1:                      d1.NewGenerator(g.d1Data, g.randomSource),
 	})
 	g.factory.SetUserInterface(g.GetUserInterface)
 	g.factory.SetQueueAfterTurn(g.queueAfterTurn)
@@ -463,30 +471,26 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	player.SetName("Player")
 	g.state.SetPlayer(player)
 
-	// Innate Skills
-	g.initPlayerSkills(player, playerStartDefinition.TargetedSkills, playerStartDefinition.UntargetedSkills)
-
-	// Starting gear
-	for _, itemName := range playerStartDefinition.Items {
-		item := g.factory.NewItemFromDefinitionName(itemName, 1)
-		if item != nil {
+	hero := d1.NewHero(d1ClassIndex(playerStartDefinition.InternalName))
+	player.SetHero(hero)
+	gen := g.factory.D1()
+	for _, idx := range map[int][]int{d1.Warrior: {1, 2, 3, 24, 24}, d1.Rogue: {4, 24, 24}, d1.Sorcerer: {5, 25, 25}}[hero.Class] {
+		item := g.factory.NewD1Item(gen.PlainItem(idx))
+		if item.IsEquippable() && idx != 3 { // CreatePlrItems: the warrior's club goes into the pack
 			g.giveAndEquipItemToActor(player, item)
+		} else {
+			player.GetInventory().Add(item)
 		}
 	}
-
-	playerStats := player.GetStats()
-	for attr, value := range playerStartDefinition.Attributes {
-		playerStats.SetAttributeAsFloat(stats.StatFromString(attr), value)
-	}
-	for resourceName, value := range playerStartDefinition.Resources {
-		maxAttributeName := "max_" + resourceName
-		playerStats.SetAttributeAsFloat(stats.StatFromString(maxAttributeName), value)
-		playerStats.GetResource(stats.StatFromString(resourceName)).SetToMax()
-	}
-	// Gold
-	playerStats.SetAttribute(stats.Gold, playerStartDefinition.Gold)
+	player.GetStats().SetAttribute(stats.Gold, 100)
+	common.SyncHero(player)
+	player.GetStats().GetResource(stats.Health).SetToMax()
+	player.GetStats().GetResource(stats.Mana).SetToMax()
 	player.GetStats().SetOnChangeHandler(g.updateStatsDisplay)
-	player.GetEquipment().SetOnChangeHandler(g.sendEquipmentToWindowClient)
+	player.GetEquipment().SetOnChangeHandler(func() {
+		common.SyncHero(player)
+		g.sendEquipmentToWindowClient()
+	})
 	player.GetInventory().SetOnChangeHandler(g.sendInventoryToWindowClient)
 	return player
 }
@@ -700,6 +704,9 @@ func (g *GameInstance) killLevel() {
 
 // getAIAction returns the action to execute and the cost in AUT associated with it
 func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
+	if actor.D1Monster() != nil {
+		return g.getD1MonsterAction(actor)
+	}
 	autCostMove := 100 / actor.GetMoveSpeed()
 	autCostMeleeAttack := 100 / actor.GetAttackSpeed(common.MeleeAttack)
 	autCostRangedAttack := 100 / actor.GetAttackSpeed(common.RangedAttack)
@@ -1210,4 +1217,14 @@ func (g *GameInstance) getDebugActions() common.DebugActions {
 		GoOneLevelDown: g.actions.goOneLevelDown,
 		GoOneLevelUp:   g.actions.goOneLevelUp,
 	}
+}
+
+func d1ClassIndex(internalName string) int {
+	switch internalName {
+	case "rogue", "archer":
+		return d1.Rogue
+	case "sorcerer", "mage":
+		return d1.Sorcerer
+	}
+	return d1.Warrior
 }

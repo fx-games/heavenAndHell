@@ -2,6 +2,8 @@ package common
 
 import (
 	"fmt"
+	"rpg/d1"
+	"rpg/stats"
 )
 
 type PickUpAction struct {
@@ -30,6 +32,12 @@ func (d *PickUpAction) Execute(context ActionContext) []Action {
 	item := gameMap.ItemAt(actorPos)
 
 	gameMap.RemoveItem(item)
+
+	if item.d1 != nil && item.d1.Type == d1.ITypeGold {
+		actor.GetStats().IncrementBy(stats.Gold, item.d1.Value)
+		context.Msg(fmt.Sprintf("You pick up %d gold", item.d1.Value))
+		return nil
+	}
 
 	inventory := actor.GetInventory()
 	inventory.Add(item)

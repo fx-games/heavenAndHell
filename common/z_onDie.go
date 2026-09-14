@@ -64,6 +64,9 @@ func (d *OnKillHook) After(action Action, context ActionContext) []Action {
 }
 
 func (d *OnKillHook) onKill(context ActionContext, killer, victim *Actor) []Action {
+	if victim.d1Monster != nil {
+		return d1OnKill(context, killer, victim)
+	}
 	msg := context.Msg
 	victimLevel := victim.GetStats().GetAttribute(stats.Level)
 	victimXP := max(1, victim.GetStats().GetAttribute(stats.Experience))

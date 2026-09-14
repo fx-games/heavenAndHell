@@ -1,0 +1,753 @@
+package d1
+
+import (
+	"fmt"
+	"math/rand"
+)
+
+// ISPL_ item special-effect bits.
+const (
+	ISplInfravision    = 0x00000001
+	ISplRndStealLife   = 0x00000002
+	ISplRndArrowVel    = 0x00000004
+	ISplFireArrows     = 0x00000008
+	ISplFireDam        = 0x00000010
+	ISplLightDam       = 0x00000020
+	ISplDrainLife      = 0x00000040
+	ISplNoHealPlr      = 0x00000100
+	ISplKnockback      = 0x00000800
+	ISplNoHealMon      = 0x00001000
+	ISplStealMana3     = 0x00002000
+	ISplStealMana5     = 0x00004000
+	ISplStealLife3     = 0x00008000
+	ISplStealLife5     = 0x00010000
+	ISplQuickAttack    = 0x00020000
+	ISplFastAttack     = 0x00040000
+	ISplFasterAttack   = 0x00080000
+	ISplFastestAttack  = 0x00100000
+	ISplFastRecover    = 0x00200000
+	ISplFasterRecover  = 0x00400000
+	ISplFastestRecover = 0x00800000
+	ISplFastBlock      = 0x01000000
+	ISplLightArrows    = 0x02000000
+	ISplThorns         = 0x04000000
+	ISplNoMana         = 0x08000000
+	ISplAbsHalfTrap    = 0x10000000
+	ISpl3xDamVsDemons  = 0x40000000
+	ISplAllResZero     = 0x80000000
+)
+
+// Item is a rolled D1 item (ItemStruct minus graphics). HP/Mana bonuses are whole points, not D1's <<6.
+type Item struct {
+	BaseIdx                            int
+	Name, IName                        string // unidentified / identified name
+	Type, Curs                         int
+	Class, Loc, MiscID                 string
+	Spell                              int // SPL_ index, 0 = none
+	MinDam, MaxDam, AC                 int
+	Flags                              uint32
+	Magical                            int // 0 normal, 1 magic, 2 unique
+	Identified                         bool
+	Value, IValue                      int
+	vAdd1, vMult1, vAdd2, vMult2       int
+	PLDam, PLToHit, PLAC               int
+	PLStr, PLMag, PLDex, PLVit         int
+	Charges, MaxCharges                int
+	Durability, MaxDur                 int
+	MinStr, MinMag, MinDex             int
+	PLFR, PLLR, PLMR                   int
+	PLDamMod, PLGetHit, PLLight        int
+	SplLvlAdd                          int
+	FMinDam, FMaxDam, LMinDam, LMaxDam int
+	PLEnAc, PLMana, PLHP               int
+	PrePower, SufPower                 string
+	Uid                                int // unique index, -1 = none
+}
+
+// Generator rolls D1 loot. UniqueDropped is game state (single player: each unique drops once) and must be saved.
+type Generator struct {
+	D             *Data
+	Rng           *rand.Rand
+	UniqueDropped []bool
+}
+
+func NewGenerator(d *Data, rng *rand.Rand) *Generator {
+	return &Generator{D: d, Rng: rng, UniqueDropped: make([]bool, len(d.UniqueItems))}
+}
+
+// random mirrors engine.cpp random(idx, v): 0..v-1, 0 for v <= 0.
+func (g *Generator) random(v int) int {
+	if v <= 0 {
+		return 0
+	}
+	return g.Rng.Intn(v)
+}
+
+// itemAttrs ports GetItemAttrs. dlvl is the dungeon level (for gold), lvl the item level.
+func (g *Generator) itemAttrs(idx, lvl, dlvl int, hell bool) *Item {
+	b := g.D.Items[idx]
+	it := &Item{
+		BaseIdx: idx, Name: b.Name, IName: b.Name, Type: b.Type, Curs: b.Curs, Class: b.Class, Loc: b.Loc, MiscID: b.MiscID,
+		Spell: g.spellIdx(b.Spell), MinDam: b.MinDam, MaxDam: b.MaxDam, AC: g.random(b.MaxAC-b.MinAC+1) + b.MinAC,
+		Flags: g.isplFlags(b.Flags), Value: b.Value, IValue: b.Value, Durability: b.Durability, MaxDur: b.Durability,
+		MinStr: b.MinStr, MinMag: b.MinMag, MinDex: b.MinDex, Uid: -1,
+	}
+	if it.MiscID == "IMISC_BOOK" {
+		g.bookSpell(it, lvl)
+	}
+	if it.Type == ITypeGold {
+		v := 5*dlvl + g.random(10*dlvl)
+		if hell {
+			v += v >> 3
+		}
+		it.Value = min(v, 5000)
+	}
+	return it
+}
+
+func (g *Generator) spellIdx(id string) int {
+	for i, s := range g.D.Spells {
+		if s.ID == id {
+			return i
+		}
+	}
+	return 0
+}
+
+func (g *Generator) isplFlags(s string) uint32 {
+	if s == "ISPL_RNDSTEALLIFE" {
+		return ISplRndStealLife
+	}
+	return 0
+}
+
+// nextSpell walks spells like GetBookSpell/GetStaffSpell, skipping multiplayer-only ones.
+func (g *Generator) nextSpell(ok func(SpellData) bool) int {
+	rv := g.random(37) + 1
+	s, bs := 1, 0
+	for rv > 0 {
+		if ok(g.D.Spells[s]) {
+			rv--
+			bs = s
+		}
+		s++
+		if s == 32 { // SPL_RESURRECT
+			s = 33
+		}
+		if s == 34 { // SPL_HEALOTHER
+			s = 35
+		}
+		if s == 37 {
+			s = 1
+		}
+	}
+	return bs
+}
+
+func (g *Generator) bookSpell(it *Item, lvl int) {
+	lvl = max(lvl, 1)
+	bs := g.nextSpell(func(s SpellData) bool { return s.BookLvl != -1 && lvl >= s.BookLvl })
+	sp := g.D.Spells[bs]
+	it.Name += sp.Name
+	it.IName += sp.Name
+	it.Spell = bs
+	it.MinMag = sp.MinInt
+	it.Value += sp.BookCost
+	it.IValue += sp.BookCost
+}
+
+func (g *Generator) rndPL(p1, p2 int) int { return p1 + g.random(p2-p1+1) }
+
+func plVal(pv, p1, p2, minv, maxv int) int {
+	if p1 == p2 || minv == maxv {
+		return minv
+	}
+	return minv + (maxv-minv)*(100*(pv-p1)/(p2-p1))/100
+}
+
+// savePower ports SaveItemPower.
+func (g *Generator) savePower(it *Item, power string, p1, p2, minv, maxv, multv int) {
+	r := g.rndPL(p1, p2)
+	switch power {
+	case "IPL_TOHIT":
+		it.PLToHit += r
+	case "IPL_TOHIT_CURSE":
+		it.PLToHit -= r
+	case "IPL_DAMP":
+		it.PLDam += r
+	case "IPL_DAMP_CURSE":
+		it.PLDam -= r
+	case "IPL_TOHIT_DAMP":
+		r = g.rndPL(p1, p2)
+		it.PLDam += r
+		r2 := 0
+		switch p1 {
+		case 20:
+			r2 = g.rndPL(1, 5)
+		case 36:
+			r2 = g.rndPL(6, 10)
+		case 51:
+			r2 = g.rndPL(11, 15)
+		case 66:
+			r2 = g.rndPL(16, 20)
+		case 81:
+			r2 = g.rndPL(21, 30)
+		case 96:
+			r2 = g.rndPL(31, 40)
+		case 111:
+			r2 = g.rndPL(41, 50)
+		case 126:
+			r2 = g.rndPL(51, 75)
+		case 151:
+			r2 = g.rndPL(76, 100)
+		}
+		it.PLToHit += r2
+	case "IPL_TOHIT_DAMP_CURSE":
+		it.PLDam -= r
+		r2 := 0
+		switch p1 {
+		case 25:
+			r2 = g.rndPL(1, 5)
+		case 50:
+			r2 = g.rndPL(6, 10)
+		}
+		it.PLToHit -= r2
+	case "IPL_ACP":
+		it.PLAC += r
+	case "IPL_ACP_CURSE":
+		it.PLAC -= r
+	case "IPL_SETAC":
+		it.AC = r
+	case "IPL_AC_CURSE":
+		it.AC -= r
+	case "IPL_FIRERES":
+		it.PLFR += r
+	case "IPL_LIGHTRES":
+		it.PLLR += r
+	case "IPL_MAGICRES":
+		it.PLMR += r
+	case "IPL_ALLRES":
+		it.PLFR = max(it.PLFR+r, 0)
+		it.PLLR = max(it.PLLR+r, 0)
+		it.PLMR = max(it.PLMR+r, 0)
+	case "IPL_SPLLVLADD":
+		it.SplLvlAdd = r
+	case "IPL_CHARGES":
+		it.Charges *= p1
+		it.MaxCharges = it.Charges
+	case "IPL_SPELL":
+		it.Spell = p1
+		it.Charges = p1
+		it.MaxCharges = p2
+	case "IPL_FIREDAM":
+		it.Flags |= ISplFireDam
+		it.FMinDam, it.FMaxDam = p1, p2
+	case "IPL_LIGHTDAM":
+		it.Flags |= ISplLightDam
+		it.LMinDam, it.LMaxDam = p1, p2
+	case "IPL_STR":
+		it.PLStr += r
+	case "IPL_STR_CURSE":
+		it.PLStr -= r
+	case "IPL_MAG":
+		it.PLMag += r
+	case "IPL_MAG_CURSE":
+		it.PLMag -= r
+	case "IPL_DEX":
+		it.PLDex += r
+	case "IPL_DEX_CURSE":
+		it.PLDex -= r
+	case "IPL_VIT":
+		it.PLVit += r
+	case "IPL_VIT_CURSE":
+		it.PLVit -= r
+	case "IPL_ATTRIBS":
+		it.PLStr += r
+		it.PLMag += r
+		it.PLDex += r
+		it.PLVit += r
+	case "IPL_ATTRIBS_CURSE":
+		it.PLStr -= r
+		it.PLMag -= r
+		it.PLDex -= r
+		it.PLVit -= r
+	case "IPL_GETHIT_CURSE":
+		it.PLGetHit += r
+	case "IPL_GETHIT":
+		it.PLGetHit -= r
+	case "IPL_LIFE":
+		it.PLHP += r
+	case "IPL_LIFE_CURSE":
+		it.PLHP -= r
+	case "IPL_MANA":
+		it.PLMana += r
+	case "IPL_MANA_CURSE":
+		it.PLMana -= r
+	case "IPL_DUR":
+		r2 := r * it.MaxDur / 100
+		it.MaxDur += r2
+		it.Durability += r2
+	case "IPL_DUR_CURSE":
+		it.MaxDur = max(it.MaxDur-r*it.MaxDur/100, 1)
+		it.Durability = it.MaxDur
+	case "IPL_INDESTRUCTIBLE":
+		it.Durability, it.MaxDur = 255, 255
+	case "IPL_LIGHT":
+		it.PLLight += p1
+	case "IPL_LIGHT_CURSE":
+		it.PLLight -= p1
+	case "IPL_FIRE_ARROWS":
+		it.Flags |= ISplFireArrows
+		it.FMinDam, it.FMaxDam = p1, p2
+	case "IPL_LIGHT_ARROWS":
+		it.Flags |= ISplLightArrows
+		it.LMinDam, it.LMaxDam = p1, p2
+	case "IPL_THORNS":
+		it.Flags |= ISplThorns
+	case "IPL_NOMANA":
+		it.Flags |= ISplNoMana
+	case "IPL_NOHEALPLR":
+		it.Flags |= ISplNoHealPlr
+	case "IPL_ABSHALFTRAP":
+		it.Flags |= ISplAbsHalfTrap
+	case "IPL_KNOCKBACK":
+		it.Flags |= ISplKnockback
+	case "IPL_3XDAMVDEM":
+		it.Flags |= ISpl3xDamVsDemons
+	case "IPL_ALLRESZERO":
+		it.Flags |= ISplAllResZero
+	case "IPL_NOHEALMON":
+		it.Flags |= ISplNoHealMon
+	case "IPL_STEALMANA":
+		if p1 == 3 {
+			it.Flags |= ISplStealMana3
+		}
+		if p1 == 5 {
+			it.Flags |= ISplStealMana5
+		}
+	case "IPL_STEALLIFE":
+		if p1 == 3 {
+			it.Flags |= ISplStealLife3
+		}
+		if p1 == 5 {
+			it.Flags |= ISplStealLife5
+		}
+	case "IPL_TARGAC":
+		it.PLEnAc += r
+	case "IPL_FASTATTACK":
+		it.Flags |= [5]uint32{0, ISplQuickAttack, ISplFastAttack, ISplFasterAttack, ISplFastestAttack}[min(max(p1, 0), 4)]
+	case "IPL_FASTRECOVER":
+		it.Flags |= [4]uint32{0, ISplFastRecover, ISplFasterRecover, ISplFastestRecover}[min(max(p1, 0), 3)]
+	case "IPL_FASTBLOCK":
+		it.Flags |= ISplFastBlock
+	case "IPL_DAMMOD":
+		it.PLDamMod += r
+	case "IPL_RNDARROWVEL":
+		it.Flags |= ISplRndArrowVel
+	case "IPL_SETDAM":
+		it.MinDam, it.MaxDam = p1, p2
+	case "IPL_SETDUR":
+		it.Durability, it.MaxDur = p1, p1
+	case "IPL_FASTSWING":
+		it.Flags |= ISplFasterAttack
+	case "IPL_ONEHAND":
+		it.Loc = "ILOC_ONEHAND"
+	case "IPL_DRAINLIFE":
+		it.Flags |= ISplDrainLife
+	case "IPL_RNDSTEALLIFE":
+		it.Flags |= ISplRndStealLife
+	case "IPL_INFRAVISION":
+		it.Flags |= ISplInfravision
+	case "IPL_NOMINSTR":
+		it.MinStr = 0
+	case "IPL_INVCURS":
+		it.Curs = p1
+		// ponytail: IPL_ADDACLIFE/ADDMANAAC/FIRERESCLVL read the player at roll time in D1; not ported until an item needs them.
+	}
+	if it.vAdd1 == 0 && it.vMult1 == 0 {
+		it.vAdd1, it.vMult1 = plVal(r, p1, p2, minv, maxv), multv
+	} else {
+		it.vAdd2, it.vMult2 = plVal(r, p1, p2, minv, maxv), multv
+	}
+}
+
+func (g *Generator) calcValue(it *Item) {
+	v := it.vMult1 + it.vMult2
+	if v > 0 {
+		v *= it.Value
+	}
+	if v < 0 {
+		v = it.Value / v
+	}
+	v += it.vAdd1 + it.vAdd2
+	it.IValue = max(v, 1)
+}
+
+func (g *Generator) applyPrefix(it *Item, a Affix) {
+	it.IName = a.Name + " " + it.IName
+	it.Magical = 1
+	g.savePower(it, a.Power, a.P1, a.P2, a.MinVal, a.MaxVal, a.MultVal)
+	it.PrePower = a.Power
+}
+
+// itemPower ports GetItemPower.
+func (g *Generator) itemPower(it *Item, minlvl, maxlvl, flgs int, onlygood bool) {
+	pre, post := g.random(4), g.random(3)
+	if pre != 0 && post == 0 {
+		if g.random(2) != 0 {
+			post = 1
+		} else {
+			pre = 0
+		}
+	}
+	if !onlygood && g.random(3) != 0 {
+		onlygood = true
+	}
+	goe := 0
+	magical := false
+	if pre == 0 {
+		var l []int
+		for j, a := range g.D.Prefixes {
+			if a.IType&flgs != 0 && a.MinLvl >= minlvl && a.MinLvl <= maxlvl && (!onlygood || a.Ok) && (flgs != PLTStaff || a.Power != "IPL_CHARGES") {
+				l = append(l, j)
+				if a.Double {
+					l = append(l, j)
+				}
+			}
+		}
+		if len(l) != 0 {
+			a := g.D.Prefixes[l[g.random(len(l))]]
+			g.applyPrefix(it, a)
+			goe = a.GOE
+			magical = true
+		}
+	}
+	if post != 0 {
+		var l []int
+		for j, a := range g.D.Suffixes {
+			if a.IType&flgs != 0 && a.MinLvl >= minlvl && a.MinLvl <= maxlvl && (goe|a.GOE) != 0x11 && (!onlygood || a.Ok) {
+				l = append(l, j)
+			}
+		}
+		if len(l) != 0 {
+			a := g.D.Suffixes[l[g.random(len(l))]]
+			it.IName = it.IName + " of " + a.Name
+			it.Magical = 1
+			g.savePower(it, a.Power, a.P1, a.P2, a.MinVal, a.MaxVal, a.MultVal)
+			it.SufPower = a.Power
+			magical = true
+		}
+	}
+	if magical {
+		g.calcValue(it)
+	}
+}
+
+// staffSpell ports GetStaffSpell + GetStaffPower.
+func (g *Generator) staffSpell(it *Item, lvl int, onlygood bool) {
+	if g.random(4) == 0 {
+		g.itemPower(it, lvl>>1, lvl, PLTStaff, onlygood)
+		return
+	}
+	l := max(lvl>>1, 1)
+	bs := g.nextSpell(func(s SpellData) bool { return s.StaffLvl != -1 && l >= s.StaffLvl })
+	sp := g.D.Spells[bs]
+	it.Name = fmt.Sprintf("%s of %s", it.Name, sp.Name)
+	it.IName = it.Name
+	it.Spell = bs
+	it.Charges = g.random(sp.StaffMax-sp.StaffMin+1) + sp.StaffMin
+	it.MaxCharges = it.Charges
+	it.MinMag = sp.MinInt
+	v := it.Charges * sp.StaffCost / 5
+	it.Value += v
+	it.IValue += v
+	if g.random(10) == 0 || onlygood {
+		var cand []int
+		for j, a := range g.D.Prefixes {
+			if a.IType&PLTStaff != 0 && a.MinLvl <= lvl && (!onlygood || a.Ok) {
+				cand = append(cand, j)
+				if a.Double {
+					cand = append(cand, j)
+				}
+			}
+		}
+		if len(cand) != 0 {
+			g.applyPrefix(it, g.D.Prefixes[cand[g.random(len(cand))]])
+		}
+	}
+	g.calcValue(it)
+}
+
+func (g *Generator) itemBonus(it *Item, minlvl, maxlvl int, onlygood bool) {
+	if it.Class == "ICLASS_GOLD" {
+		return
+	}
+	minlvl = min(minlvl, 25)
+	switch it.Type {
+	case ITypeSword, ITypeAxe, ITypeMace:
+		g.itemPower(it, minlvl, maxlvl, PLTWeap, onlygood)
+	case ITypeBow:
+		g.itemPower(it, minlvl, maxlvl, PLTBow, onlygood)
+	case ITypeShield:
+		g.itemPower(it, minlvl, maxlvl, PLTShld, onlygood)
+	case ITypeLArmor, ITypeHelm, ITypeMArmor, ITypeHArmor:
+		g.itemPower(it, minlvl, maxlvl, PLTArmo, onlygood)
+	case ITypeStaff:
+		g.staffSpell(it, maxlvl, onlygood)
+	case ITypeRing, ITypeAmulet:
+		g.itemPower(it, minlvl, maxlvl, PLTMisc, onlygood)
+	}
+}
+
+// checkUnique ports CheckUnique, including D1's bug that the last eligible unique always wins.
+func (g *Generator) checkUnique(it *Item, lvl, uper int) int {
+	if g.random(100) > uper {
+		return -1
+	}
+	j := -1
+	for u, ud := range g.D.UniqueItems {
+		if ud.Base == g.D.Items[it.BaseIdx].UniqueBase && lvl >= ud.MinLvl && !g.UniqueDropped[u] {
+			j = u
+		}
+	}
+	return j
+}
+
+func (g *Generator) uniqueItem(it *Item, uid int) {
+	g.UniqueDropped[uid] = true
+	ud := g.D.UniqueItems[uid]
+	for p := 0; p < min(max(ud.NumPL, 1), 6); p++ {
+		g.savePower(it, ud.Powers[p].Power, ud.Powers[p].P1, ud.Powers[p].P2, 0, 0, 1)
+	}
+	it.IName = ud.Name
+	it.IValue = ud.Value
+	it.Uid = uid
+	it.Magical = 2
+}
+
+func (g *Generator) rndDur(it *Item) {
+	if it.Durability == 0 || it.Durability == 255 {
+		return
+	}
+	it.Durability = g.random(it.MaxDur>>1) + (it.MaxDur >> 2) + 1
+}
+
+// setupAllItems ports SetupAllItems. lvl is the item level (monster level or 2×dlvl).
+func (g *Generator) setupAllItems(idx, lvl, dlvl, uper int, onlygood, hell bool) *Item {
+	it := g.itemAttrs(idx, lvl>>1, dlvl, hell)
+	if it.MiscID != "IMISC_UNIQUE" {
+		iblvl := -1
+		if g.random(100) <= 10 || g.random(100) <= lvl {
+			iblvl = lvl
+		}
+		if iblvl == -1 && (it.MiscID == "IMISC_STAFF" || it.MiscID == "IMISC_RING" || it.MiscID == "IMISC_AMULET") {
+			iblvl = lvl
+		}
+		if onlygood {
+			iblvl = lvl
+		}
+		if uper == 15 {
+			iblvl = lvl + 4
+		}
+		if iblvl != -1 {
+			if uid := g.checkUnique(it, iblvl, uper); uid == -1 {
+				g.itemBonus(it, iblvl>>1, iblvl, onlygood)
+			} else {
+				g.uniqueItem(it, uid)
+			}
+		}
+		if it.Magical != 2 {
+			g.rndDur(it)
+		}
+	}
+	it.Identified = it.Magical == 0
+	return it
+}
+
+func (g *Generator) rndItemIdx(mlvl int, onlyNonMisc bool) int {
+	var l []int
+	for i, b := range g.D.Items {
+		ok := b.Drop != "IDROP_NEVER" && mlvl >= b.MinMLvl
+		if onlyNonMisc { // RndUItem: no misc/gold, but books always qualify
+			ok = ok && b.Type != ITypeMisc && b.Type != ITypeGold || b.MiscID == "IMISC_BOOK"
+		}
+		if !ok || b.Spell == "SPL_RESURRECT" || b.Spell == "SPL_HEALOTHER" {
+			continue
+		}
+		l = append(l, i)
+		if !onlyNonMisc && b.Drop == "IDROP_DOUBLE" {
+			l = append(l, i)
+		}
+	}
+	return l[g.random(len(l))]
+}
+
+func (g *Generator) uniqueIdxByBase(uid int) int {
+	for i, b := range g.D.Items {
+		if b.UniqueBase == g.D.UniqueItems[uid].Base {
+			return i
+		}
+	}
+	return 0
+}
+
+// SpawnUnique creates a specific unique item (quest/boss drops).
+func (g *Generator) SpawnUnique(uid, dlvl int) *Item {
+	it := g.itemAttrs(g.uniqueIdxByBase(uid), dlvl, dlvl, false)
+	g.uniqueItem(it, uid)
+	it.Identified = false
+	return it
+}
+
+// MonsterDrop ports SpawnItem/RndItem/RndUItem. mlvl is the (unique-boosted) monster level that picks the base item;
+// the item itself rolls at the base monster level like D1. Returns nil for no drop.
+func (g *Generator) MonsterDrop(m *MonsterData, mlvl int, unique bool, dlvl int, hell bool) *Item {
+	if m.Treasure&0x8000 != 0 {
+		return g.SpawnUnique(m.Treasure&0xFFF, dlvl)
+	}
+	if unique {
+		return g.setupAllItems(g.rndItemIdx(mlvl, true), m.Level, dlvl, 15, true, hell)
+	}
+	if m.Treasure&0x4000 != 0 || g.random(100) > 40 {
+		return nil
+	}
+	if g.random(100) > 25 {
+		return g.setupAllItems(0, m.Level, dlvl, 1, false, hell) // IDI_GOLD
+	}
+	return g.setupAllItems(g.rndItemIdx(mlvl, false), m.Level, dlvl, 1, false, hell)
+}
+
+// FloorItem ports CreateRndItem (containers, floor loot). Returns nil when RndAllItems rolls nothing.
+func (g *Generator) FloorItem(dlvl int, onlygood, hell bool) *Item {
+	lvl := dlvl << 1
+	var idx int
+	if onlygood {
+		idx = g.rndItemIdx(lvl, true)
+	} else {
+		if g.random(100) > 25 {
+			idx = 0
+		} else {
+			idx = g.rndItemIdx(lvl, false)
+		}
+	}
+	return g.setupAllItems(idx, lvl, dlvl, 1, onlygood, hell)
+}
+
+// LevelMonsterTypes ports GetLevelMTypes' random selection (quest additions are handled by the caller).
+func (g *Generator) LevelMonsterTypes(dlvl int) []int {
+	var list []int
+	for i, m := range g.D.Monsters[:111] {
+		minl, maxl := 15*m.MinDLvl/30+1, 15*m.MaxDLvl/30+1
+		if dlvl >= minl && dlvl <= maxl && m.Available {
+			list = append(list, i)
+		}
+	}
+	var types []int
+	budget := 4000
+	for len(list) > 0 && len(types) < 16 {
+		for i := 0; i < len(list); {
+			if g.D.Monsters[list[i]].ImgSize > budget {
+				list[i] = list[len(list)-1]
+				list = list[:len(list)-1]
+			} else {
+				i++
+			}
+		}
+		if len(list) == 0 {
+			break
+		}
+		rv := g.random(len(list))
+		types = append(types, list[rv])
+		budget -= g.D.Monsters[list[rv]].ImgSize
+		list[rv] = list[len(list)-1]
+		list = list[:len(list)-1]
+	}
+	return types
+}
+
+// MonsterHP ports InitMonster's HP roll, halved for single player like D1.
+func (g *Generator) MonsterHP(m *MonsterData) int {
+	hp := g.random(m.MaxHP-m.MinHP+1) + m.MinHP
+	if m.ID == "MT_DIABLO" {
+		hp = 1666
+	}
+	return max(hp>>1, 1)
+}
+
+// GroupSize ports InitMonsters' pack size roll.
+func (g *Generator) GroupSize(dlvl int) int {
+	if dlvl != 1 && g.random(2) != 0 {
+		if dlvl == 2 {
+			return g.random(2) + 2
+		}
+		return g.random(3) + 3
+	}
+	return 1
+}
+
+// MonsterCount ports InitMonsters: one monster per 30 walkable D1 tiles, capped at 190.
+func MonsterCount(walkableTiles int) int { return min(walkableTiles/30, 190) }
+
+// PlainItem ports SetPlrHandItem: a base item without random AC or affixes (starting gear).
+func (g *Generator) PlainItem(idx int) *Item {
+	b := g.D.Items[idx]
+	it := &Item{BaseIdx: idx, Name: b.Name, IName: b.Name, Type: b.Type, Curs: b.Curs, Class: b.Class, Loc: b.Loc,
+		MiscID: b.MiscID, Spell: g.spellIdx(b.Spell), MinDam: b.MinDam, MaxDam: b.MaxDam, AC: b.MinAC, Value: b.Value,
+		IValue: b.Value, Durability: b.Durability, MaxDur: b.Durability, MinStr: b.MinStr, MinMag: b.MinMag,
+		MinDex: b.MinDex, Uid: -1, Identified: true}
+	if b.MiscID == "IMISC_STAFF" {
+		it.Charges, it.MaxCharges = 40, 40
+	}
+	return it
+}
+
+// Properties describes an item's magical powers (a compact PrintItemPower).
+func (it *Item) Properties() []string {
+	var p []string
+	add := func(cond bool, format string, args ...any) {
+		if cond {
+			p = append(p, fmt.Sprintf(format, args...))
+		}
+	}
+	add(it.PLToHit != 0, "chance to hit: %+d%%", it.PLToHit)
+	add(it.PLDam != 0, "%+d%% damage", it.PLDam)
+	add(it.PLAC != 0, "%+d%% armor", it.PLAC)
+	if it.PLFR != 0 && it.PLFR == it.PLLR && it.PLLR == it.PLMR {
+		add(true, "Resist All: %+d%%", it.PLFR)
+	} else {
+		add(it.PLFR != 0, "Resist Fire: %+d%%", it.PLFR)
+		add(it.PLLR != 0, "Resist Lightning: %+d%%", it.PLLR)
+		add(it.PLMR != 0, "Resist Magic: %+d%%", it.PLMR)
+	}
+	add(it.PLStr != 0, "%+d to strength", it.PLStr)
+	add(it.PLMag != 0, "%+d to magic", it.PLMag)
+	add(it.PLDex != 0, "%+d to dexterity", it.PLDex)
+	add(it.PLVit != 0, "%+d to vitality", it.PLVit)
+	add(it.PLHP != 0, "Hit Points: %+d", it.PLHP)
+	add(it.PLMana != 0, "Mana: %+d", it.PLMana)
+	add(it.PLDamMod != 0, "adds %d points to damage", it.PLDamMod)
+	add(it.PLGetHit != 0, "%+d damage from enemies", it.PLGetHit)
+	add(it.PLLight != 0, "%+d%% light radius", it.PLLight*10)
+	add(it.SplLvlAdd != 0, "%+d to spell levels", it.SplLvlAdd)
+	add(it.PLEnAc != 0, "decreases target's armor")
+	add(it.Flags&ISplFireDam != 0, "fire hit damage: %d-%d", it.FMinDam, it.FMaxDam)
+	add(it.Flags&ISplLightDam != 0, "lightning hit damage: %d-%d", it.LMinDam, it.LMaxDam)
+	add(it.Flags&ISplFireArrows != 0, "fire arrows damage: %d-%d", it.FMinDam, it.FMaxDam)
+	add(it.Flags&ISplLightArrows != 0, "lightning arrows damage: %d-%d", it.LMinDam, it.LMaxDam)
+	for _, f := range []struct {
+		bit  uint32
+		text string
+	}{{ISplStealLife3, "steals 3% life"}, {ISplStealLife5, "steals 5% life"}, {ISplStealMana3, "steals 3% mana"},
+		{ISplStealMana5, "steals 5% mana"}, {ISplRndStealLife, "hit steals random life"}, {ISplDrainLife, "drains life"},
+		{ISplQuickAttack, "quick attack"}, {ISplFastAttack, "fast attack"}, {ISplFasterAttack, "faster attack"},
+		{ISplFastestAttack, "fastest attack"}, {ISplFastRecover, "fast hit recovery"}, {ISplFasterRecover, "faster hit recovery"},
+		{ISplFastestRecover, "fastest hit recovery"}, {ISplFastBlock, "fast block"}, {ISplKnockback, "knocks target back"},
+		{ISplThorns, "attacker takes 1-3 damage"}, {ISplNoMana, "user loses all mana"}, {ISplNoHealPlr, "you can't heal"},
+		{ISplAbsHalfTrap, "absorbs half of trap damage"}, {ISpl3xDamVsDemons, "+200% damage vs. demons"},
+		{ISplAllResZero, "all resistance equals 0"}, {ISplInfravision, "see with infravision"},
+		{ISplNoHealMon, "hit monster doesn't heal"}, {ISplRndArrowVel, "fires random speed arrows"}} {
+		add(it.Flags&f.bit != 0, "%s", f.text)
+	}
+	add(it.MaxDur == 255, "indestructible")
+	return p
+}

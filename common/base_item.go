@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"fmt"
 	"image/color"
+	"rpg/d1"
 	"rpg/defs"
 	"rpg/geometry"
 	"rpg/stats"
@@ -114,6 +115,7 @@ type Item struct {
 	nameOnlyInTooltip bool
 	internalName      string
 	isQuestItem       bool
+	d1                *d1.Item
 }
 
 func NewItem(getPlayerRef func() *Actor, name string, icon int32) *Item {
@@ -217,6 +219,14 @@ func (i *Item) GetLightStats() *LightStats {
 }
 
 func (i *Item) TintColor() color.RGBA {
+	if i.d1 != nil { // D1 text colors: blue for magic, gold for unique
+		switch i.d1.Magical {
+		case 1:
+			return color.RGBA{R: 120, G: 150, B: 255, A: 255}
+		case 2:
+			return defs.InvColorUnique
+		}
+	}
 	switch i.rarity {
 	case ItemRarityCommon:
 		return i.categoryColor()
@@ -294,6 +304,9 @@ func (i *Item) IsRangedWeapon() bool {
 }
 
 func (i *Item) SlotName() defs.SlotName {
+	if i.d1 != nil {
+		return d1SlotName(i.d1)
+	}
 	if i.IsLightSource() {
 		return defs.SlotNameLightSource
 	}
@@ -426,6 +439,7 @@ func (i *Item) Clone() *Item {
 		isHidden:          i.isHidden,
 		shouldBeDrawn:     i.shouldBeDrawn,
 		baseCost:          i.baseCost,
+		d1:                i.d1,
 	}
 	if i.weaponComponent != nil {
 		clone.weaponComponent = i.weaponComponent.Clone()

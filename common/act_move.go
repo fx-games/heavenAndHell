@@ -123,6 +123,8 @@ func PlayerMoveToAttack(actor *Actor, relativeDirection geometry.Point, forceAtt
 		actorAtPos := gameMap.ActorAt(targetPos)
 		if actorAtPos.IsVendor() && !forceAttack {
 			return NewTalkToAction(NewActorCause("Talk to", actor), actorAtPos)
+		} else if actor.hero != nil && actor.GetEquipment().GetWeapon(RangedAttack) != nil { // D1 bows shoot point-blank
+			return NewRangedAttackAction(NewActorCause("Ranged attack", actor), actor, targetPos)
 		} else {
 			return NewMeleeAttackAction(NewActorCause("Melee attack", actor), actor, actorAtPos)
 		}

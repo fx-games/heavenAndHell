@@ -49,6 +49,16 @@ func (d *RangedAttackAction) Execute(context ActionContext) []Action {
 
 	d.defender = currentMap.ActorAt(d.targetPos)
 
+	if dam, extra, handled := resolveD1Attack(context, d.attacker, d.defender, true); handled {
+		d.damageAmount = dam
+		actions = append(actions, extra...)
+		if dam <= 0 {
+			return actions
+		}
+		logAttack(context, d.attacker, d.defender, dam)
+		return append(actions, NewChangeResourceAction(NewActorCause(ActionNameRangedAttack, d.attacker), d.defender, stats.Health, float64(-dam)))
+	}
+
 	hitChance := CalculateRangedWeaponHitChance(d.attacker, d.defender)
 
 
@@ -193,10 +203,9 @@ func defaultModifierPattern(attribute int) int {
 }
 
 func (d *RangedAttackAction) GetAnimations() []Animation {
-	weapon := d.attacker.GetEquipment().GetWeapon(RangedAttack).GetWeaponStats()
 	projectileIcon := int32(41)
-	if weapon.ProjectileIcon > -1 {
-		projectileIcon = weapon.ProjectileIcon
+	if weapon := d.attacker.GetEquipment().GetWeapon(RangedAttack); weapon != nil && weapon.GetWeaponStats().ProjectileIcon > -1 {
+		projectileIcon = weapon.GetWeaponStats().ProjectileIcon // D1 monsters shoot without a weapon item
 	}
 	return OneAnimation(NewProjectileDirectionAnimation(d.attacker, d.attacker.MapPosition(), d.targetPos, 0.02, projectileIcon, 1))
 	//return OneAnimation(NewProjectileAnimation(d.attacker, d.flightPath, 0.02, 41, 1))

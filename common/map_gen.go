@@ -38,6 +38,9 @@ func (g *MapGenerator) SetLdtkProject(project *ldtk.Project) {
 	g.ldtkProject = project
 }
 func (g *MapGenerator) GenerateMap(targetMap string, mapTemplates *ldtk.Project, dungeonLevel int) *gridmap.GridMap[*Actor, *Item, Object] {
+	if dungeonLevel >= 1 && dungeonLevel <= 4 && !strings.HasPrefix(targetMap, "!spec_") {
+		return g.generateD1Map(targetMap, dungeonLevel)
+	}
 	var dungeonDef defs.LevelDefinition
 	if strings.HasPrefix(targetMap, "!spec_") {
 		dungeonDef = defs.GetLevelDefinitionByName(g.randomSource, defs.SpecialLevelName(targetMap))

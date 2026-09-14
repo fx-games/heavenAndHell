@@ -237,7 +237,7 @@ func (s *State) PlayerStandsInLitArea() bool {
 }
 
 func (s *State) PlayerCanSeeNeighbors() bool {
-	return s.GetPlayer().GetEquipment().HasLightSourceEquipped() || s.PlayerStandsInLitArea()
+	return s.GetPlayer().hero != nil || s.GetPlayer().GetEquipment().HasLightSourceEquipped() || s.PlayerStandsInLitArea()
 }
 func (s *State) IsDaylight() bool {
 	return s.IsPlayerInTown() && !s.GetFlags().IsSet("town_changed_to_night")
@@ -250,6 +250,9 @@ func (s *State) GetPlayerVisionRange() int {
 	if playerInDungeon {
 		if s.GetMap().IsTileLit(actor.MapPosition()) {
 			return visionRange
+		}
+		if actor.hero != nil { // D1: light radius 10 plus item bonuses, no torch needed
+			return actor.HeroSheet().LightRad
 		}
 		equipment := actor.GetEquipment()
 		if equipment.HasLightSourceEquipped() {

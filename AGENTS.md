@@ -12,3 +12,9 @@
 Re-create with: `git clone --depth 1 https://github.com/galaxyhaxz/devilution reference/devilution`
 
 Design decisions and deferred scope for the D1 rebuild: `D1_PLAN.md`.
+
+## Running
+
+- Game: `go run -tags development .` (assets from `files/`, `config.rec` from the repo root)
+- D1 unit tests: `go test ./d1`
+- Headless smoke test: `go run -tags development . playthrough` (must print `PLAYTHROUGH OK`)

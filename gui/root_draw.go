@@ -73,15 +73,16 @@ func (u *UIController) drawActors() {
 			continue
 		}
 
-		if u.renderingMode != GraphicRendering {
-			enemyColor = actor.GetColor()
+		actorColor := enemyColor
+		if u.renderingMode != GraphicRendering || actor.D1Monster() != nil { // decision 8: D1 variants are tinted sprites
+			actorColor = actor.GetColor()
 		}
 		var drawColor color.Color
-		drawColor = state.ApplyLighting(actor.MapPosition(), enemyColor, u.worldTicks)
+		drawColor = state.ApplyLighting(actor.MapPosition(), actorColor, u.worldTicks)
 
 		if actor.IsHurt() {
 			percentage := actor.GetHurtTicksAsPercentage() // goes from 1.0 to 0.0
-			drawColor = util.LerpColor(defs.Red, enemyColor, percentage)
+			drawColor = util.LerpColor(defs.Red, actorColor, percentage)
 		}
 		if u.configuration.ActorBobbingEnabled {
 			u.drawActorWithBobbingAnimation(actor, actorAtlas, drawColor)

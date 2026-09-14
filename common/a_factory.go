@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"math/rand"
+	"rpg/d1"
 	"rpg/defs"
 	"rpg/stats"
 	"rpg/util"
@@ -20,6 +21,7 @@ type Factory struct {
 	getTimeKeeper           func() *TimeKeeper
 	logError                func(msg string)
 	queueAfterTurn          func(func())
+	d1                      *d1.Generator
 }
 
 type FactoryContext struct {
@@ -32,6 +34,7 @@ type FactoryContext struct {
 
 	GiveAndEquipItemToActor func(actor *Actor, item *Item)
 	Msg                     func(msg string)
+	D1                      *d1.Generator
 }
 
 func NewFactory(context FactoryContext) *Factory {
@@ -43,8 +46,11 @@ func NewFactory(context FactoryContext) *Factory {
 		actionBroker:            context.ActionBroker,
 		getTimeKeeper:           context.GetTimeKeeper,
 		logError:                context.Msg,
+		d1:                      context.D1,
 	}
 }
+
+func (g *Factory) D1() *d1.Generator { return g.d1 }
 func (g *Factory) NewRandomEnemy(dungeonLevel int) (*Actor, []defs.EnemyDefinition) {
 	// get defs
 	enemyDefinitions := g.definitions.EnemyDefinitions

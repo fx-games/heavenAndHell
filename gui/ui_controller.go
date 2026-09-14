@@ -805,11 +805,16 @@ func (u *UIController) openLevelUpMenu() {
 	audioPlayer := u.context.AudioPlayer
 	u.levelUpButton.Hide()
 	u.ShowFullStats()
-	u.OpenMenu([]util.MenuItem{
-		{
-			MainText: "STR",
+	var items []util.MenuItem
+	for _, choice := range []struct {
+		label string
+		stat  stats.Name
+	}{{"STR", stats.Strength}, {"MAG", stats.Magic}, {"DEX", stats.Dexterity}, {"VIT", stats.Vitality}} {
+		stat := choice.stat
+		items = append(items, util.MenuItem{
+			MainText: choice.label,
 			Action: func() {
-				player.LevelUp(stats.Strength)
+				player.LevelUp(stat)
 				if player.CanLevelUp() {
 					audioPlayer.PlayCue("levelup")
 					u.openLevelUpMenu()
@@ -818,34 +823,9 @@ func (u *UIController) openLevelUpMenu() {
 					u.ShowFullStats()
 				}
 			},
-		},
-		{
-			MainText: "DEX",
-			Action: func() {
-				player.LevelUp(stats.Dexterity)
-				if player.CanLevelUp() {
-					audioPlayer.PlayCue("levelup")
-					u.openLevelUpMenu()
-				} else {
-					u.levelUpButton.Hide()
-					u.ShowFullStats()
-				}
-			},
-		},
-		{
-			MainText: "INT",
-			Action: func() {
-				player.LevelUp(stats.Intelligence)
-				if player.CanLevelUp() {
-					audioPlayer.PlayCue("levelup")
-					u.openLevelUpMenu()
-				} else {
-					u.levelUpButton.Hide()
-					u.ShowFullStats()
-				}
-			},
-		},
-	})
+		})
+	}
+	u.OpenMenu(items)
 }
 func (u *UIController) addMiniMap(offset geometry.Point, maxHeight int, horizontalPadding int) *MinimapOverlay {
 	miniMap := u.AddMinimap(offset.Sub(geometry.Point{X: horizontalPadding}), maxHeight, offset.X-(horizontalPadding*2), u.mapRenderer.GetMiniMap())
@@ -1077,10 +1057,17 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 	// 1. items
 	if itemAt, isItemAt := currentMap.TryGetItemAt(mapPos); isItemAt && itemAt.IsDrawn() && (!itemAt.IsHidden() || u.context.GameState().GetFlags().IsSet(string(common.FlagHasTrueSight))) {
 		itemIcon := itemAt.Icon(u.worldTicks)
+		itemColor := drawColor
+		if d := itemAt.D1(); d != nil && d.Magical > 0 { // decision 8: magic items blue, uniques gold
+			itemColor = itemAt.TintColor()
+			if !u.disableFogOfWar {
+				itemColor = state.ApplyLighting(mapPos, itemColor, tick)
+			}
+		}
 		drawItem := renderer.CellDrawInfo{
 			Atlas: u.worldTexture,
 			Icon:  itemIcon,
-			Color: drawColor,
+			Color: itemColor,
 		}
 		drawInfo = prepend(drawInfo, drawItem)
 		if !u.configuration.DrawTilesBehindItems {

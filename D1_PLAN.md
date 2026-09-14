@@ -27,12 +27,13 @@ From D1: loot, enemies, dungeon generation. Kept from H&H: graphics, UI, time ma
 
 ## Milestones
 
-1. [ ] **Cathedral slice** — D1 table loading, character sheet, D1 combat, L1 generator, levels 1–4 with D1 monsters + AIs, loot drops (affixes, uniques), speed tiers, sprite mapping; delete replaced H&H content; `playthrough` for 1–4.
+1. [x] **Cathedral slice** — D1 table loading, character sheet, D1 combat, L1 generator, levels 1–4 with D1 monsters + AIs, loot drops (affixes, uniques), speed tiers, sprite mapping; `playthrough` for 1–4.
+   Notes: sprite icons/tints are first guesses (`common/d1_monster.go`, `common/d1_item.go`). Old H&H content still feeds town shops and levels 5+, so its deletion moved to milestones 3 and 6. Shortcuts are marked `ponytail:` in code.
 2. [ ] **Saving** — snapshot save, Continue/New game, permadeath toggle, load on death.
-3. [ ] **Town** — Griswold, Adria, Pepin, Cain, Wirt; D1 store gen; identify, durability, repair; town entrances unlock.
+3. [ ] **Town** — Griswold, Adria, Pepin, Cain, Wirt; D1 store gen; identify, durability, repair; town entrances unlock; delete H&H items/vendor defs.
 4. [ ] **Objects** — containers, shrines, fountains.
 5. [ ] **Spells** — all 26, books/scrolls/staves.
-6. [ ] **Catacombs, Caves, Hell** — L2–L4 generators, remaining AIs, levels 1–16.
+6. [ ] **Catacombs, Caves, Hell** — L2–L4 generators, remaining AIs, levels 1–16; delete H&H enemies/effects/story generator.
 7. [ ] **Quests & ending** — set pieces (Butcher, Leoric, Zhar, Warlord, Lazarus, Diablo), critical-path triggers, end screen, debug shortcuts, full `playthrough`.
 
 ## Defaults (not grilled)

@@ -20,6 +20,8 @@ const (
 	Strength     Name = "strength"
 	Intelligence Name = "intelligence"
 	Dexterity    Name = "dexterity"
+	Magic        Name = "magic"
+	Vitality     Name = "vitality"
 
 	// baseline for the game
 	Level              Name = "level"
@@ -142,6 +144,8 @@ func NewAttributeHolder() AttributeHolder {
 			Strength:     9,
 			Intelligence: 9,
 			Dexterity:    9,
+			Magic:        9,
+			Vitality:     9,
 
 			Gold: 0,
 

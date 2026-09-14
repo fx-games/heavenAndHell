@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"math/rand"
+	"rpg/d1"
 	"rpg/defs"
 	"rpg/geometry"
 	"rpg/stats"
@@ -57,6 +58,8 @@ type Actor struct {
 	untargetedSkills   []*UntargetedAction
 	damageDice         util.Dice
 	color              color.RGBA
+	d1Monster          *D1Monster
+	hero               *d1.Hero
 }
 
 type AttackType int
@@ -258,6 +261,12 @@ func (a *Actor) GetBaseSpeed() int {
 	return a.stats.GetAttribute(stats.BaseSpeed)
 }
 func (a *Actor) GetInfoText() []string {
+	if a.hero != nil {
+		return a.heroInfoText()
+	}
+	if a.d1Monster != nil {
+		return a.d1MonsterInfoText()
+	}
 	tableLines := []string{
 		fmt.Sprintf("HP: %s", a.GetStats().GetResource(stats.Health).ToString()),
 		fmt.Sprintf("MP: %s", a.GetStats().GetResource(stats.Mana).ToString()),
@@ -406,6 +415,9 @@ func (a *Actor) GetVendorType() VendorType {
 }
 
 func (a *Actor) CanLevelUp() bool {
+	if a.hero != nil {
+		return a.hero.StatPts > 0
+	}
 	currentLevel := a.GetStats().GetAttribute(stats.Level)
 	currentXP := a.GetStats().GetAttribute(stats.Experience)
 	xpNeeded := a.GetXPForLevel(currentLevel + 1)
@@ -427,6 +439,17 @@ func (a *Actor) GetXPForLevel(level int) int {
 }
 
 func (a *Actor) LevelUp(chosenAttribute stats.Name) {
+	if a.hero != nil {
+		attr := map[stats.Name]int{stats.Strength: d1.AttrStr, stats.Magic: d1.AttrMag, stats.Dexterity: d1.AttrDex, stats.Vitality: d1.AttrVit}[chosenAttribute]
+		st := a.GetStats()
+		maxHP, maxMana := st.GetAttribute(stats.MaxHealth), st.GetAttribute(stats.MaxMana)
+		if a.hero.SpendStatPoint(attr) {
+			SyncHero(a) // ModifyPlrVit/Mag raise current HP/mana along with the maximum
+			st.GetResource(stats.Health).Increase(float64(st.GetAttribute(stats.MaxHealth) - maxHP))
+			st.GetResource(stats.Mana).Increase(float64(st.GetAttribute(stats.MaxMana) - maxMana))
+		}
+		return
+	}
 	pStats := a.GetStats()
 	pStats.SetAttribute(stats.Level, pStats.GetAttribute(stats.Level)+1)
 	pStats.SetAttribute(chosenAttribute, pStats.GetAttribute(chosenAttribute)+1)

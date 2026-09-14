@@ -64,6 +64,8 @@ func main() {
 			showTitleScreen()
 		case "validate":
 			return
+		case "playthrough":
+			playthrough()
 		}
 	} else {
 		runGameWithEbiten(createGameAndUIContext())

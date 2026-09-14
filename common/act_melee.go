@@ -28,6 +28,20 @@ func NewMeleeAttackAction(source Cause, attacker *Actor, defender *Actor) *Melee
 func (d *MeleeAttackAction) Execute(context ActionContext) []Action {
 	var actions []Action
 
+	if dam, extra, handled := resolveD1Attack(context, d.attacker, d.defender, false); handled {
+		d.defender.SetLookDirFromPoI(d.attacker.MapPosition())
+		d.attacker.SetLookDirFromPoI(d.defender.MapPosition())
+		if d.attacker == context.GameState.GetPlayer() {
+			context.AudioPlayer.PlayCue("melee_attack")
+		}
+		d.totalDamageDealt = dam
+		if dam <= 0 {
+			return extra
+		}
+		logAttack(context, d.attacker, d.defender, dam)
+		return append(extra, NewChangeResourceAction(NewActorCause("Melee attack", d.attacker), d.defender, stats.Health, float64(-dam)))
+	}
+
 	evasionChance := 0.0
 	if d.defender.HasStatusEffect(StatusFlying) {
 		evasionChance = 0.25
