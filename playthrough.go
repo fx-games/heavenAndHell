@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"rpg/common"
 	"rpg/defs"
+	"rpg/game"
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/stats"
@@ -16,11 +18,11 @@ func playthrough() {
 		fmt.Printf("PLAYTHROUGH FAILED: "+format+"\n", args...)
 		os.Exit(1)
 	}
+	game.SaveFile = filepath.Join(os.TempDir(), "heavenAndHell_playthrough_save.json")
+	defer os.Remove(game.SaveFile)
 	theGame, _ := createGameAndUIContext() // one instance: ebiten allows a single audio context per process
 	for run := 1; run <= 3; run++ {
-		if run > 1 {
-			theGame.ResetGame(theGame.GetGameData().ClassDefinitions[run-1])
-		}
+		theGame.NewGame(theGame.GetGameData().ClassDefinitions[run-1], false)
 		state := theGame.GetWorldState()
 		player := state.GetPlayer()
 		if player.Hero() == nil {
@@ -58,7 +60,28 @@ func playthrough() {
 			}
 			fmt.Printf("run %d (%s) dlvl %d: %d monsters, %d kills, %d damage taken, level %d, %d D1 items on floor\n",
 				run, player.Name(), dlvl, monsters, kills, damageTaken, player.Hero().Level, items)
+
+			// milestone 2: save, load, and everything that matters is back
+			before := saveCheckOf(state)
+			theGame.SaveGame()
+			if err := theGame.LoadGame(); err != nil {
+				fail("run %d dlvl %d: load failed: %v", run, dlvl, err)
+			}
+			state = theGame.GetWorldState()
+			player = state.GetPlayer()
+			if after := saveCheckOf(state); after != before {
+				fail("run %d dlvl %d: save/load mismatch\n before %+v\n after  %+v", run, dlvl, before, after)
+			}
 		}
+	}
+	// milestone 2: a permadeath save is gone once the death menu is built
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], true)
+	if !game.HasSave() {
+		fail("permadeath: new game wrote no save")
+	}
+	theGame.StartMenuItems(true)
+	if game.HasSave() {
+		fail("permadeath: save survived death")
 	}
 	fmt.Println("PLAYTHROUGH OK")
 }
@@ -72,7 +95,8 @@ func fight(broker *common.Broker, state *common.State, player *common.Actor) (ki
 	nearest := func() *common.Actor {
 		var target *common.Actor
 		for _, a := range m.Actors() {
-			if a.D1Monster() != nil && a.IsAlive() && (target == nil ||
+			reachable := geometry.DistanceChebyshev(a.MapPosition(), player.MapPosition()) <= 1 || len(m.GetFreeCardinalNeighbors(a.MapPosition())) > 0
+			if a.D1Monster() != nil && a.IsAlive() && reachable && (target == nil ||
 				geometry.DistanceChebyshev(a.MapPosition(), player.MapPosition()) < geometry.DistanceChebyshev(target.MapPosition(), player.MapPosition())) {
 				target = a
 			}
@@ -128,4 +152,31 @@ func fight(broker *common.Broker, state *common.State, player *common.Actor) (ki
 		endTurn()
 	}
 	return kills, damageTaken, player.Hero().Exp - expBefore
+}
+
+type saveCheck struct {
+	Map                              string
+	Pos                              geometry.Point
+	Level, Exp, StatPts, Gold, HP    int
+	Items, Equipped, Monsters, Floor int
+}
+
+func saveCheckOf(state *common.State) saveCheck {
+	player := state.GetPlayer()
+	m := state.GetMap()
+	c := saveCheck{Map: m.GetName(), Pos: player.MapPosition(), Level: player.Hero().Level, Exp: player.Hero().Exp,
+		StatPts: player.Hero().StatPts, Gold: player.GetStats().GetAttribute(stats.Gold),
+		HP: player.GetStats().GetResource(stats.Health).Value(), Items: len(player.GetInventory().Items()),
+		Equipped: len(player.GetEquipment().AllItems())}
+	for _, a := range m.Actors() {
+		if a.D1Monster() != nil && a.IsAlive() {
+			c.Monsters++
+		}
+	}
+	for _, it := range m.Items() {
+		if it.D1() != nil {
+			c.Floor++
+		}
+	}
+	return c
 }

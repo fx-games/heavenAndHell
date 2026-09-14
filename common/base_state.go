@@ -188,6 +188,10 @@ func (s *State) GetDungeonMap(name string) *gridmap.GridMap[*Actor, *Item, Objec
 	return s.dungeonMaps[name]
 }
 
+func (s *State) DungeonMaps() map[string]*gridmap.GridMap[*Actor, *Item, Object] {
+	return s.dungeonMaps
+}
+
 func (s *State) HasDungeonMap(name string) bool {
 	_, exists := s.dungeonMaps[name]
 	return exists

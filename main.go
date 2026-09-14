@@ -30,17 +30,17 @@ import (
 
 func main() {
 	/*
-	cpuProfileFile, err := os.Create("cpu.prof")
-	if err != nil {
-		panic(err)
-	}
-	defer cpuProfileFile.Close()
+		cpuProfileFile, err := os.Create("cpu.prof")
+		if err != nil {
+			panic(err)
+		}
+		defer cpuProfileFile.Close()
 
-	// start CPU profiling
-	if err := pprof.StartCPUProfile(cpuProfileFile); err != nil {
-		panic(err)
-	}
-	defer pprof.StopCPUProfile()
+		// start CPU profiling
+		if err := pprof.StartCPUProfile(cpuProfileFile); err != nil {
+			panic(err)
+		}
+		defer pprof.StopCPUProfile()
 	*/
 	if len(os.Args) > 1 {
 		argCmd := strings.ToLower(os.Args[1])
@@ -73,7 +73,7 @@ func main() {
 }
 
 func showTitleScreen() {
-	logoFile := util.MustOpenReader(path.Join("assets","logo.txt"))
+	logoFile := util.MustOpenReader(path.Join("assets", "logo.txt"))
 	defer logoFile.Close()
 	//reader := bufio.NewReader(logoFile)
 	scanner := bufio.NewScanner(logoFile)
@@ -115,11 +115,11 @@ func showTitleScreen() {
 	for x, c := range prompt {
 		s.SetContent(centeredPrompt+x, promptStartY, c, nil, tcell.StyleDefault)
 	}
-	s.ShowCursor(centeredPrompt + len(prompt), promptStartY)
+	s.ShowCursor(centeredPrompt+len(prompt), promptStartY)
 	s.SetCursorStyle(tcell.CursorStyleBlinkingUnderline)
 	s.Show()
 	graphics := false
-	outerloop:
+outerloop:
 	for event := s.PollEvent(); event != nil; event = s.PollEvent() {
 		if ev, ok := event.(*tcell.EventKey); ok {
 			if ev.Key() == tcell.KeyRune {
@@ -150,7 +150,7 @@ func showTitleScreen() {
 	screen.Clear()
 	screen.MoveTopLeft()
 
-	messageFile := util.MustOpenReader(path.Join("assets","endMessage.txt"))
+	messageFile := util.MustOpenReader(path.Join("assets", "endMessage.txt"))
 	defer messageFile.Close()
 	//reader := bufio.NewReader(logoFile)
 	msgScanner := bufio.NewScanner(messageFile)
@@ -172,14 +172,15 @@ func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 			TTFSize: userConfig.DefaultFontSize,
 		},
 		UserConfiguration: userConfig,
-		FileSystem: files.GetFileSystem(),
+		FileSystem:        files.GetFileSystem(),
 	}
 	theGame := game.NewGameInstance(startInfos, NewDummyUI())
 	uiContext := common.UIContext{
-		GameState:    theGame.GetWorldState,
-		PlayerAction: theGame.GetActions,
-		AudioPlayer:  theGame.GetAudio(),
-		ResetGame:    theGame.ResetGame,
+		GameState:      theGame.GetWorldState,
+		PlayerAction:   theGame.GetActions,
+		AudioPlayer:    theGame.GetAudio(),
+		ResetGame:      theGame.ResetGame,
+		StartMenuItems: theGame.StartMenuItems,
 		Animator: func() common.Animator {
 			return theGame.GetActionBroker()
 		},
@@ -350,6 +351,7 @@ func runGameWithConsole(theGame *game.GameInstance, context common.UIContext) {
 	theGame.SetConsoleMode(true)
 	con := console.NewConsole(context)
 	theGame.SetAndInitUserInterface(con)
+	theGame.ShowStartMenu()
 
 	terminationCode := 0
 	loopConfig := util.LoopConfig{
@@ -363,6 +365,7 @@ func runGameWithConsole(theGame *game.GameInstance, context common.UIContext) {
 
 	loop := util.CreateLoop(loopConfig, &terminationCode)
 	loop()
+	theGame.SaveGame() // decision 11: autosave on quit
 
 }
 
@@ -386,6 +389,7 @@ func runGameWithEbiten(theGame *game.GameInstance, context common.UIContext) {
 	uiController.SetTTFFont(util.MustOpen(startInfos.FontInfos.TTFFile), startInfos.FontInfos.TTFSize)
 	uiController.SetAsciiAtlas(renderer.NewTextureAtlas(path.Join("assets", "Bm437_IBM_CGA.png"), 8, 8))
 	theGame.SetAndInitUserInterface(uiController)
+	theGame.ShowStartMenu()
 
 	screenSize := uiController.GetDeviceIndependentScreenSize()
 
@@ -399,8 +403,8 @@ func runGameWithEbiten(theGame *game.GameInstance, context common.UIContext) {
 	err := ebiten.RunGameWithOptions(uiController, &ebiten.RunGameOptions{
 		GraphicsLibrary: ebiten.GraphicsLibraryOpenGL,
 	})
+	theGame.SaveGame() // decision 11: autosave on quit
 	if err != nil && !errors.Is(err, ebiten.Termination) {
 		log.Fatal(err)
 	}
 }
-

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"math/rand"
 	"rpg/d1"
 	"rpg/defs"
 	"rpg/dungen"
@@ -9,9 +10,21 @@ import (
 	"slices"
 )
 
+// SetSeed sets the game seed levels are generated from (decision 11: levels rebuild from their seed).
+func (g *MapGenerator) SetSeed(seed int64) { g.seed = seed }
+
+// SetSnapshots sets saved level state applied after a level is generated.
+func (g *MapGenerator) SetSnapshots(snapshots map[string]*LevelSnapshot) { g.snapshots = snapshots }
+
 // generateD1Map builds a dungeon level from D1's generator (Cathedral for now).
 func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMap[*Actor, *Item, Object] {
-	lvl := d1.GenerateL1(g.randomSource, dlvl)
+	rng := rand.New(rand.NewSource(g.seed*1000003 + int64(dlvl)))
+	gen := g.factory.D1()
+	gameRng := gen.Rng
+	gen.Rng = rng // monster HP rolls must come from the level seed too
+	defer func() { gen.Rng = gameRng }()
+
+	lvl := d1.GenerateL1(rng, dlvl)
 
 	layout := dungen.NewDungeonMap(d1.LevelSize, d1.LevelSize)
 	for x := 0; x < d1.LevelSize; x++ {
@@ -44,20 +57,24 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 	m.AddNamedLocation("ladder_down", dn)
 	m.AddTransitionAt(dn, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl + 1), TargetLocation: "ladder_up"})
 
-	g.spawnD1Monsters(m, dlvl, []geometry.Point{up, dn})
+	g.spawnD1Monsters(rng, m, dlvl, []geometry.Point{up, dn})
 	// AddInitItems: 3-5 healing or mana potions lie around.
-	for n := g.randomSource.Intn(3) + 3; n > 0; n-- {
+	for n := rng.Intn(3) + 3; n > 0; n-- {
 		idx := 25 // IDI_MANA
-		if g.randomSource.Intn(2) != 0 {
+		if rng.Intn(2) != 0 {
 			idx = 24 // IDI_HEAL
 		}
 		for try := 0; try < 1000; try++ {
-			if p := (geometry.Point{X: g.randomSource.Intn(d1.LevelSize), Y: g.randomSource.Intn(d1.LevelSize)}); m.CanPlaceItemHere(p) && !m.IsActorAt(p) {
-				m.AddItem(g.factory.NewD1Item(g.factory.D1().PlainItem(idx)), p)
+			if p := (geometry.Point{X: rng.Intn(d1.LevelSize), Y: rng.Intn(d1.LevelSize)}); m.CanPlaceItemHere(p) && !m.IsActorAt(p) {
+				m.AddItem(g.factory.NewD1Item(gen.PlainItem(idx)), p)
 				break
 			}
 		}
 	}
+	if snap := g.snapshots[targetMap]; snap != nil {
+		snap.apply(g.factory, m)
+	}
+
 	m.SetDisplayName(levelDef.LevelName)
 	return m
 }
@@ -66,7 +83,7 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 var d1QuestUniques = map[int]bool{0: true, 2: true, 3: true, 7: true, 8: true}
 
 // spawnD1Monsters ports InitMonsters/PlaceUniques/PlaceGroup.
-func (g *MapGenerator) spawnD1Monsters(m *gridmap.GridMap[*Actor, *Item, Object], dlvl int, avoid []geometry.Point) {
+func (g *MapGenerator) spawnD1Monsters(rng *rand.Rand, m *gridmap.GridMap[*Actor, *Item, Object], dlvl int, avoid []geometry.Point) {
 	gen := g.factory.D1()
 	types := gen.LevelMonsterTypes(dlvl)
 	if len(types) == 0 {
@@ -84,23 +101,26 @@ func (g *MapGenerator) spawnD1Monsters(m *gridmap.GridMap[*Actor, *Item, Object]
 	free := func(p geometry.Point) bool { return m.CanPlaceActorHere(p) && minDist(avoid, p) > 10 }
 	randomFree := func() (geometry.Point, bool) {
 		for try := 0; try < 1000; try++ {
-			p := geometry.Point{X: g.randomSource.Intn(d1.LevelSize), Y: g.randomSource.Intn(d1.LevelSize)}
+			p := geometry.Point{X: rng.Intn(d1.LevelSize), Y: rng.Intn(d1.LevelSize)}
 			if free(p) {
 				return p, true
 			}
 		}
 		return geometry.Point{}, false
 	}
+	spawned := 0
 	place := func(a *Actor, p geometry.Point) {
+		a.d1Monster.SpawnIndex = spawned
+		spawned++
 		a.SetDrawPosition(p.ToPointF())
 		m.AddActor(a, p)
 	}
 	group := func(mt, num int, leader *Actor, leaderf int) int {
 		var cells []geometry.Point
 		if leader != nil {
-			cells = m.GetFreeCellsForDistribution(leader.MapPosition(), num, free)
+			cells = freeCellsNear(m, leader.MapPosition(), num, free)
 		} else if origin, ok := randomFree(); ok {
-			cells = append([]geometry.Point{origin}, m.GetFreeCellsForDistribution(origin, num-1, free)...)
+			cells = append([]geometry.Point{origin}, freeCellsNear(m, origin, num-1, free)...)
 		}
 		n := min(num, len(cells))
 		for i := 0; i < n; i++ {
@@ -128,6 +148,30 @@ func (g *MapGenerator) spawnD1Monsters(m *gridmap.GridMap[*Actor, *Item, Object]
 	}
 	na := d1.MonsterCount(walkable)
 	for placed, tries := 0, 0; placed < na && tries < 1000; tries++ {
-		placed += group(types[g.randomSource.Intn(len(types))], gen.GroupSize(dlvl), nil, 0)
+		placed += group(types[rng.Intn(len(types))], gen.GroupSize(dlvl), nil, 0)
 	}
+}
+
+// freeCellsNear finds up to n free cells around origin by breadth-first search. Unlike GetFreeCellsForDistribution
+// it doesn't iterate a Go map, so spawns stay reproducible from the level seed.
+func freeCellsNear(m *gridmap.GridMap[*Actor, *Item, Object], origin geometry.Point, n int, free func(geometry.Point) bool) []geometry.Point {
+	seen := map[geometry.Point]bool{origin: true}
+	queue := []geometry.Point{origin}
+	var out []geometry.Point
+	for len(queue) > 0 && len(out) < n {
+		p := queue[0]
+		queue = queue[1:]
+		for _, d := range D1Dirs {
+			q := p.Add(d)
+			if seen[q] || !m.Contains(q) || !m.IsTileWalkable(q) {
+				continue
+			}
+			seen[q] = true
+			queue = append(queue, q)
+			if free(q) && len(out) < n {
+				out = append(out, q)
+			}
+		}
+	}
+	return out
 }

@@ -29,7 +29,8 @@ From D1: loot, enemies, dungeon generation. Kept from H&H: graphics, UI, time ma
 
 1. [x] **Cathedral slice** — D1 table loading, character sheet, D1 combat, L1 generator, levels 1–4 with D1 monsters + AIs, loot drops (affixes, uniques), speed tiers, sprite mapping; `playthrough` for 1–4.
    Notes: sprite icons/tints are first guesses (`common/d1_monster.go`, `common/d1_item.go`). Old H&H content still feeds town shops and levels 5+, so its deletion moved to milestones 3 and 6. Shortcuts are marked `ponytail:` in code.
-2. [ ] **Saving** — snapshot save, Continue/New game, permadeath toggle, load on death.
+2. [x] **Saving** — snapshot save, Continue/New game, permadeath toggle, load on death.
+   Notes: `savegame.json` in the working directory (`game/save.go`); levels rebuild from `levelSeed` + `LevelSnapshot`. Not saved: explored map/fog, monster AI state, corpses, non-D1 (old H&H) items — revisit when those matter.
 3. [ ] **Town** — Griswold, Adria, Pepin, Cain, Wirt; D1 store gen; identify, durability, repair; town entrances unlock; delete H&H items/vendor defs.
 4. [ ] **Objects** — containers, shrines, fountains.
 5. [ ] **Spells** — all 26, books/scrolls/staves.

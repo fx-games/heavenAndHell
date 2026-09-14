@@ -1,0 +1,214 @@
+package game
+
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"rpg/common"
+	"rpg/d1"
+	"rpg/defs"
+	"rpg/geometry"
+	"rpg/gridmap"
+	"rpg/stats"
+	"rpg/util"
+)
+
+// SaveFile is the single save slot (decision 11).
+var SaveFile = "savegame.json"
+
+type savedInvItem struct {
+	Item     d1.Item
+	Equipped bool
+}
+
+type saveGame struct {
+	Class          string
+	Permadeath     bool
+	Seed           int64
+	Hero           d1.Hero
+	HP, Mana, Gold int
+	Items          []savedInvItem
+	UniqueDropped  []bool
+	Flags          map[string]int
+	Map            string
+	X, Y           int
+	Levels         map[string]*common.LevelSnapshot
+}
+
+func HasSave() bool {
+	_, err := os.Stat(SaveFile)
+	return err == nil
+}
+
+// SaveGame writes the save slot. It does nothing until a game was started or loaded through the menus,
+// so a save file is never overwritten by the throwaway game behind the start menu.
+func (g *GameInstance) SaveGame() {
+	player := g.state.GetPlayer()
+	if !g.autosave || player == nil || !player.IsAlive() || player.Hero() == nil {
+		return
+	}
+	st := player.GetStats()
+	pos := player.MapPosition()
+	sg := saveGame{
+		Class: g.state.SelectedClass.InternalName, Permadeath: g.permadeath, Seed: g.levelSeed, Hero: *player.Hero(),
+		HP: st.GetResource(stats.Health).Value(), Mana: st.GetResource(stats.Mana).Value(), Gold: st.GetAttribute(stats.Gold),
+		UniqueDropped: g.factory.D1().UniqueDropped, Flags: g.state.GetFlags().AllEntries(),
+		Map: g.state.GetMap().GetName(), X: pos.X, Y: pos.Y, Levels: map[string]*common.LevelSnapshot{},
+	}
+	inv, eq := player.GetInventory(), player.GetEquipment()
+	for _, it := range inv.Items() {
+		if it.D1() != nil {
+			sg.Items = append(sg.Items, savedInvItem{Item: *it.D1(), Equipped: eq.IsEquipped(it)})
+		}
+	}
+	for _, it := range eq.AllItems() {
+		if it.D1() != nil && !inv.Has(it) {
+			sg.Items = append(sg.Items, savedInvItem{Item: *it.D1(), Equipped: true})
+		}
+	}
+	for name, snap := range g.levelSnapshots {
+		sg.Levels[name] = snap
+	}
+	for name, m := range g.state.DungeonMaps() {
+		sg.Levels[name] = common.SnapshotLevel(m)
+	}
+	data, err := json.Marshal(sg)
+	if err != nil {
+		g.ErrLog(fmt.Sprintf("saving failed: %v", err))
+		return
+	}
+	tmp := SaveFile + ".tmp" // write then rename, so a crash never leaves a half-written save
+	if err := os.WriteFile(tmp, data, 0o644); err != nil {
+		g.ErrLog(fmt.Sprintf("saving failed: %v", err))
+		return
+	}
+	if err := os.Rename(tmp, SaveFile); err != nil {
+		g.ErrLog(fmt.Sprintf("saving failed: %v", err))
+	}
+}
+
+func (g *GameInstance) classByName(internalName string) defs.LoadoutDefinition {
+	for _, c := range g.dataDefinitions.ClassDefinitions {
+		if c.InternalName == internalName {
+			return c
+		}
+	}
+	return g.dataDefinitions.ClassDefinitions[0]
+}
+
+// LoadGame restores the save slot: the world is rebuilt from the seed, then hero, items and level snapshots are applied.
+func (g *GameInstance) LoadGame() error {
+	data, err := os.ReadFile(SaveFile)
+	if err != nil {
+		return err
+	}
+	var sg saveGame
+	if err := json.Unmarshal(data, &sg); err != nil {
+		return fmt.Errorf("save file is corrupt: %w", err)
+	}
+	g.autosave = false
+	g.resetGame(g.classByName(sg.Class), sg.Seed)
+	g.permadeath = sg.Permadeath
+
+	player := g.state.GetPlayer()
+	*player.Hero() = sg.Hero
+	if gen := g.factory.D1(); len(sg.UniqueDropped) == len(gen.UniqueDropped) {
+		copy(gen.UniqueDropped, sg.UniqueDropped)
+	}
+	for k, v := range sg.Flags {
+		g.state.GetFlags().SetToValue(k, v)
+	}
+	inv, eq := player.GetInventory(), player.GetEquipment()
+	for _, it := range append([]*common.Item(nil), eq.AllItems()...) {
+		eq.UnEquip(it)
+	}
+	for _, it := range append([]*common.Item(nil), inv.Items()...) {
+		inv.Remove(it)
+	}
+	for _, si := range sg.Items {
+		d := si.Item
+		item := g.factory.NewD1Item(&d)
+		inv.Add(item)
+		if si.Equipped {
+			eq.Equip(item)
+		}
+	}
+	st := player.GetStats()
+	st.SetAttribute(stats.Gold, sg.Gold)
+	common.SyncHero(player)
+	common.SetResource(st.GetResource(stats.Health), sg.HP)
+	common.SetResource(st.GetResource(stats.Mana), sg.Mana)
+	for name, snap := range sg.Levels {
+		g.levelSnapshots[name] = snap
+	}
+
+	target := gridmap.Transition{TargetMap: sg.Map, TargetLocation: "ladder_up"}
+	if defs.IsTownLevel(sg.Map) {
+		target.TargetLocation = "spawn"
+	}
+	g.state.MapTransition(target)
+	m := g.state.GetMap()
+	if p := (geometry.Point{X: sg.X, Y: sg.Y}); p != player.MapPosition() && m.CanPlaceActorHere(p) {
+		m.MoveActor(player, p)
+		player.SetDrawPosition(p.ToPointF())
+	}
+	g.actionBroker.Execute(common.NewUpdateFoVAction(common.AbstractCause("Load game"), player))
+	g.autosave = true
+	return nil
+}
+
+// NewGame starts a fresh game and enables autosaving.
+func (g *GameInstance) NewGame(class defs.LoadoutDefinition, permadeath bool) {
+	g.autosave = false
+	g.resetGame(class, g.randomSource.Int63())
+	g.permadeath = permadeath
+	g.autosave = true
+	g.SaveGame()
+}
+
+// StartMenuItems builds the start menu, or the death menu when afterDeath is set (which ends autosaving,
+// and deletes the save in permadeath games).
+func (g *GameInstance) StartMenuItems(afterDeath bool) []util.MenuItem {
+	var items []util.MenuItem
+	if afterDeath {
+		g.autosave = false
+		if g.permadeath {
+			os.Remove(SaveFile)
+		}
+	}
+	if HasSave() {
+		label := "Continue"
+		if afterDeath {
+			label = "Load last save"
+		}
+		items = append(items, util.MenuItem{MainText: label, Action: func() {
+			if err := g.LoadGame(); err != nil {
+				g.PlayerMessage(fmt.Sprintf("Could not load the game: %v", err))
+			}
+		}})
+	}
+	return append(items, util.MenuItem{MainText: "New game", Action: g.openNewGameMenu})
+}
+
+func (g *GameInstance) openNewGameMenu() {
+	var items []util.MenuItem
+	for _, c := range g.dataDefinitions.ClassDefinitions {
+		class := c
+		items = append(items, util.MenuItem{MainText: class.Name, Action: func() {
+			g.uiController.OpenMenu([]util.MenuItem{
+				{MainText: "Normal (load last save on death)", Action: func() { g.NewGame(class, false) }},
+				{MainText: "Permadeath", Action: func() { g.NewGame(class, true) }},
+			})
+		}})
+	}
+	g.uiController.OpenMenu(items)
+}
+
+// ShowStartMenu opens Continue/New game when a save exists; without one the default game autosaves right away.
+func (g *GameInstance) ShowStartMenu() {
+	if !HasSave() {
+		g.autosave = true
+		return
+	}
+	g.uiController.OpenMenu(g.StartMenuItems(false))
+}

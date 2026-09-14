@@ -70,6 +70,10 @@ type GameInstance struct {
 	// data definitions
 	dataDefinitions defs.DataContainer
 	d1Data          *d1.Data
+	levelSeed       int64
+	levelSnapshots  map[string]*common.LevelSnapshot
+	autosave        bool // on once a game was started or loaded through the menus
+	permadeath      bool
 
 
 	actions *Actions
@@ -217,6 +221,12 @@ func (g *GameInstance) getActionContext() common.ActionContext {
 }
 
 func (g *GameInstance) ResetGame(playerStartDefinition defs.LoadoutDefinition) {
+	g.resetGame(playerStartDefinition, g.randomSource.Int63())
+}
+
+func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, seed int64) {
+	g.levelSeed = seed
+	g.levelSnapshots = map[string]*common.LevelSnapshot{}
 	// we have loaded at this point:
 	// - random source
 	// - audio player
@@ -320,6 +330,8 @@ func (g *GameInstance) ResetGame(playerStartDefinition defs.LoadoutDefinition) {
 	mapGen := common.NewMapGenerator(g.randomSource)
 	mapGen.SetFactory(g.factory)
 	mapGen.SetLdtkProject(ldtkProject)
+	mapGen.SetSeed(g.levelSeed)
+	mapGen.SetSnapshots(g.levelSnapshots)
 
 	// set references
 	g.state.SetMapGenerator(mapGen)
@@ -890,6 +902,7 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 	}
 
 	g.actions.updateFoV()
+	g.SaveGame()
 	g.uiController.OnMapChanged()
 
 	if g.onMapChange != nil {

@@ -21,6 +21,8 @@ type MapGenerator struct {
 	randomSource *rand.Rand
 	factory      *Factory
 	ldtkProject  *ldtk.Project
+	seed         int64
+	snapshots    map[string]*LevelSnapshot
 }
 
 const MAX_LEVELS = 12

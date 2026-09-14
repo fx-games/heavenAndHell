@@ -25,6 +25,7 @@ type D1Monster struct {
 	Last                               geometry.Point
 	Dir                                int // index into D1Dirs
 	Leader                             *Actor
+	SpawnIndex                         int // order of creation on its level, identifies the monster in saves
 }
 
 // D1 monster modes (MON_MODE) the AI compares against.

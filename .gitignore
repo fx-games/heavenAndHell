@@ -11,3 +11,5 @@ assets/maps/
 assets/maps/backups/
 assets/oryx/
 reference/
+savegame.json
+savegame.json.tmp

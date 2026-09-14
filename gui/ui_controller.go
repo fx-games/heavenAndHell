@@ -1186,26 +1186,13 @@ func (u *UIController) BeginTargeting(targetRules common.TargetRules, onHit *com
 }
 
 func (u *UIController) ShowGameOverMenu() {
-	u.OpenMenu([]util.MenuItem{
-		{
-			MainText: "Try again",
-			Action: func() {
-				u.context.ResetGame(u.context.GameState().SelectedClass)
-			},
+	items := u.context.StartMenuItems(true)
+	u.OpenMenu(append(items, util.MenuItem{
+		MainText: "Quit",
+		Action: func() {
+			u.shouldQuitGame = true
 		},
-		{
-			MainText: "Change class",
-			Action: func() {
-				u.OpenClassSelectionMenu()
-			},
-		},
-		{
-			MainText: "Quit",
-			Action: func() {
-				u.shouldQuitGame = true
-			},
-		},
-	})
+	}))
 }
 
 func (u *UIController) OpenPlayerStashInTown() {
