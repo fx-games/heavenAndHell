@@ -42,6 +42,7 @@ From D1: loot, enemies, dungeon generation. Kept from H&H: graphics, UI, time ma
    Monster AIs: all single-player types except the quest bosses' (milestone 7). `AI_FIREMAN` isn't ported: Incinerators are unavailable in single player. Monster missiles (`common/d1_mmissile.go`) port PlayerMHit (magic to-hit, resistances, block, 1 HP minimum per tick) and resolve at once like the player's spells; flames and acid puddles linger as hazards; charges (horned demons, glooms, snakes) rush along the line and knock back. Like D1, monster missiles only hurt the player, not the golem. Simplifications: circling AIs treat D1's same-room check as always true, monsters don't open doors while circling (MonstCheckDoors), charged bolts fly straight, gargoyles heal one step per turn.
    Removed: H&H level generator (`dungen`), level templates and TownHell from `maps.ldtk`, enemy/effect rec files and their factories, dialogue, story mode/quest log, Lucifer/hell-town code (~16k lines, mostly level templates). Fixed on the way: save/load could lose a monster whose saved cell was still taken.
 7. [ ] **Quests & ending** — set pieces (Butcher, Leoric, Zhar, Warlord, Lazarus, Diablo), critical-path triggers, end screen, debug shortcuts, full `playthrough`.
+   Quest log (D1's questlog): bring back the journal window and its `r` key (removed with H&H's story in milestone 6, old version in commit `6b98f74`), listing the quests above by their D1 name as active or done, with at most a one-line description (no dialogue system, decision 15).
 
 ## Defaults (not grilled)
 
