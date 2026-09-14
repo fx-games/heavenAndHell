@@ -1080,10 +1080,17 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 	if currentMap.IsObjectAt(mapPos) {
 		objectAt := currentMap.ObjectAt(mapPos)
 		objIcon := objectAt.Icon(u.worldTicks)
+		objColor := drawColor
+		if tinted, ok := objectAt.(interface{ TintColor() color.RGBA }); ok { // D1 objects: used, exploding, fountains
+			objColor = tinted.TintColor()
+			if !u.disableFogOfWar {
+				objColor = state.ApplyLighting(mapPos, objColor, tick)
+			}
+		}
 		drawObject := renderer.CellDrawInfo{
 			Atlas: u.worldTexture,
 			Icon:  objIcon,
-			Color: drawColor,
+			Color: objColor,
 		}
 		drawInfo = prepend(drawInfo, drawObject)
 		if !u.configuration.DrawTilesBehindObjects {

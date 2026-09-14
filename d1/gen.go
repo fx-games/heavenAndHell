@@ -751,3 +751,35 @@ func (it *Item) Properties() []string {
 	add(it.MaxDur == 255, "indestructible")
 	return p
 }
+
+// TypeItem ports CreateTypeItem: an item of an ITYPE (and IMISC, "" = any) rolled at item level 2×dlvl.
+func (g *Generator) TypeItem(dlvl, itype int, imisc string, onlygood bool) *Item {
+	idx := 0 // IDI_GOLD
+	if itype != ITypeGold {
+		var l []int
+		for i, b := range g.D.Items {
+			if b.Drop != "IDROP_NEVER" && dlvl<<1 >= b.MinMLvl && b.Type == itype && (imisc == "" || b.MiscID == imisc) {
+				l = append(l, i)
+			}
+		}
+		if len(l) == 0 {
+			return nil
+		}
+		idx = l[g.random(len(l))]
+	}
+	return g.setupAllItems(idx, dlvl<<1, dlvl, 1, onlygood, dlvl > 12)
+}
+
+// UsefulItem ports SetupAllUseful: a healing or mana potion, sometimes a town portal scroll.
+func (g *Generator) UsefulItem(dlvl int) *Item {
+	idx := IdxHeal
+	if g.random(2) == 0 {
+		idx = IdxMana
+	}
+	if dlvl > 1 && g.random(3) == 0 {
+		idx = IdxPortal
+	}
+	it := g.itemAttrs(idx, dlvl, dlvl, false)
+	it.Identified = true
+	return it
+}

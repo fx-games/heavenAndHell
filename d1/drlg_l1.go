@@ -16,7 +16,9 @@ const LevelSize = 80
 
 type Level struct {
 	Cells              [LevelSize][LevelSize]Cell
-	StairsUp, StairsDn [2]int // x, y
+	StairsUp, StairsDn [2]int                     // x, y
+	Trans              [LevelSize][LevelSize]int  // D1's dTransVal: room regions (0 = none)
+	Held               [LevelSize][LevelSize]bool // dFlags & 8: reserved for a theme room
 }
 
 func (l *Level) Walkable(x, y int) bool {
@@ -31,6 +33,8 @@ type l1 struct {
 	fine          [80][80]byte // L5dungeon
 	hr1, hr2, hr3 int
 	vr1, vr2, vr3 int
+	trans         [112][112]int // dTransVal in dPiece coordinates (megatile i covers 16+2i..17+2i)
+	transVal      int
 }
 
 func (g *l1) random(v int) int {
@@ -584,17 +588,100 @@ func (g *l1) placeMiniSet(m []byte) (int, int) {
 	return sx, sy
 }
 
+func (g *l1) setTrans(x, y int) {
+	if x >= 0 && y >= 0 && x < 112 && y < 112 {
+		g.trans[x][y] = g.transVal
+	}
+}
+
+// ftvr ports DRLG_L5FTVR: flood a room region over floor megatiles, marking the wall edges it touches.
+func (g *l1) ftvr(i, j, x, y, d int) {
+	if x < 0 || y < 0 || x > 110 || y > 110 {
+		return
+	}
+	if g.trans[x][y] != 0 || g.at(i, j) != 13 {
+		switch d {
+		case 1:
+			g.setTrans(x, y)
+			g.setTrans(x, y+1)
+		case 2:
+			g.setTrans(x+1, y)
+			g.setTrans(x+1, y+1)
+		case 3:
+			g.setTrans(x, y)
+			g.setTrans(x+1, y)
+		case 4:
+			g.setTrans(x, y+1)
+			g.setTrans(x+1, y+1)
+		case 5:
+			g.setTrans(x+1, y+1)
+		case 6:
+			g.setTrans(x, y+1)
+		case 7:
+			g.setTrans(x+1, y)
+		case 8:
+			g.setTrans(x, y)
+		}
+		return
+	}
+	g.setTrans(x, y)
+	g.setTrans(x+1, y)
+	g.setTrans(x, y+1)
+	g.setTrans(x+1, y+1)
+	g.ftvr(i+1, j, x+2, y, 1)
+	g.ftvr(i-1, j, x-2, y, 2)
+	g.ftvr(i, j+1, x, y+2, 3)
+	g.ftvr(i, j-1, x, y-2, 4)
+	g.ftvr(i-1, j-1, x-2, y-2, 5)
+	g.ftvr(i+1, j-1, x+2, y-2, 6)
+	g.ftvr(i-1, j+1, x-2, y+2, 7)
+	g.ftvr(i+1, j+1, x+2, y+2, 8)
+}
+
+// floodTVal ports DRLG_L5FloodTVal.
+func (g *l1) floodTVal() {
+	g.transVal = 1
+	for j := 0; j < 40; j++ {
+		for i := 0; i < 40; i++ {
+			if g.dungeon[i][j] == 13 && g.trans[16+2*i][16+2*j] == 0 {
+				g.ftvr(i, j, 16+2*i, 16+2*j, 0)
+				g.transVal++
+			}
+		}
+	}
+}
+
+// transFix ports the stair tile copy and DRLG_L5TransFix.
+func (g *l1) transFix() {
+	for j := 0; j < 40; j++ {
+		for i := 0; i < 40; i++ {
+			xx, yy := 16+2*i, 16+2*j
+			t := &g.trans
+			switch c := g.dungeon[i][j]; {
+			case c == 64:
+				t[xx][yy], t[xx+1][yy] = t[xx][yy+1], t[xx+1][yy+1]
+			case c == 23 && g.at(i, j-1) == 18, c == 18:
+				t[xx+1][yy], t[xx+1][yy+1] = t[xx][yy], t[xx][yy]
+			case c == 24 && g.at(i+1, j) == 19, c == 19:
+				t[xx][yy+1], t[xx+1][yy+1] = t[xx][yy], t[xx][yy]
+			case c == 20:
+				t[xx+1][yy], t[xx][yy+1], t[xx+1][yy+1] = t[xx][yy], t[xx][yy], t[xx][yy]
+			}
+		}
+	}
+}
+
 // overlayWalls: cells (top-left, top-right, bottom-left, bottom-right) that a megatile's own walls/arches block
 // on top of the fine room mask. Walls sit on a megatile's top/left edge, like D1 draws them.
 func overlayWalls(c byte) [4]bool {
 	switch c {
-	case 2, 7, 26: // top edge wall (26 = door)
+	case 2, 7, 26, 36: // top edge wall (26 = door, 36 = wall variant)
 		return [4]bool{true, true, false, false}
-	case 1, 6, 25: // left edge wall (25 = door)
+	case 1, 6, 25, 35: // left edge wall (25 = door, 35 = wall variant)
 		return [4]bool{true, false, true, false}
-	case 3: // top + left
+	case 3, 4, 27, 37: // top + left (corner posts)
 		return [4]bool{true, true, true, false}
-	case 4, 5, 8, 9, 10, 11, 12, 14, 15, 16, 17, 27, 35, 36, 37: // pillars, arches, wall ends
+	case 5, 8, 9, 10, 11, 12, 14, 15, 16, 17: // pillars, arches, wall ends
 		return [4]bool{true, false, false, false}
 	}
 	return [4]bool{}
@@ -626,6 +713,8 @@ func GenerateL1(rng *rand.Rand, dlvl int) *Level {
 				g.flags[j][i] &= 0xBF
 			}
 		}
+		g.trans = [112][112]int{}
+		g.floodTVal()
 		ux, uy := g.placeMiniSet(l5StairsUp)
 		if ux < 0 {
 			continue
@@ -634,11 +723,19 @@ func GenerateL1(rng *rand.Rand, dlvl int) *Level {
 		if dx < 0 {
 			continue
 		}
+		g.transFix()
 		lvl := &Level{}
-		// megatile (i,j) samples L5dungeon[2i+1..2i+2][2j+1..2j+2], so cell (x,y) is L5dungeon[x+1][y+1].
+		for x := 0; x < LevelSize; x++ {
+			for y := 0; y < LevelSize; y++ {
+				lvl.Trans[x][y] = g.trans[x+16][y+16]
+			}
+		}
+		// megatile (i,j) samples L5dungeon[2i+1..2i+2][2j+1..2j+2]; its walls sit on its top/left edge, so a room's
+		// floor reaches one cell past the L5dungeon room on the right/bottom: a cell is floor if any of
+		// L5dungeon[x..x+1][y..y+1] is, and the megatile overlays below put the walls back.
 		for x := 0; x < LevelSize-1; x++ {
 			for y := 0; y < LevelSize-1; y++ {
-				if g.fine[x+1][y+1] != 0 {
+				if g.fine[x][y]|g.fine[x+1][y]|g.fine[x][y+1]|g.fine[x+1][y+1] != 0 {
 					lvl.Cells[x][y] = CellFloor
 				}
 			}

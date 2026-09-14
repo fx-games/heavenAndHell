@@ -57,20 +57,27 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 	m.AddNamedLocation("ladder_down", dn)
 	m.AddTransitionAt(dn, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl + 1), TargetLocation: "ladder_up"})
 
-	g.spawnD1Monsters(rng, m, dlvl, []geometry.Point{up, dn})
+	// CreateLevel's order: themes, monsters, objects, items, then the theme rooms' contents.
+	types := gen.LevelMonsterTypes(dlvl)
+	placer := gen.NewPlacer(&d1World{f: g.factory, m: m}, lvl, dlvl, types)
+	placer.InitThemes()
+	placer.HoldThemeRooms()
+	g.spawnD1Monsters(rng, m, lvl, dlvl, types, []geometry.Point{up, dn})
+	placer.InitObjects()
 	// AddInitItems: 3-5 healing or mana potions lie around.
 	for n := rng.Intn(3) + 3; n > 0; n-- {
-		idx := 25 // IDI_MANA
+		idx := d1.IdxMana
 		if rng.Intn(2) != 0 {
-			idx = 24 // IDI_HEAL
+			idx = d1.IdxHeal
 		}
 		for try := 0; try < 1000; try++ {
-			if p := (geometry.Point{X: rng.Intn(d1.LevelSize), Y: rng.Intn(d1.LevelSize)}); m.CanPlaceItemHere(p) && !m.IsActorAt(p) {
+			if p := (geometry.Point{X: rng.Intn(d1.LevelSize), Y: rng.Intn(d1.LevelSize)}); m.CanPlaceItemHere(p) && !m.IsActorAt(p) && !lvl.Held[p.X][p.Y] {
 				m.AddItem(g.factory.NewD1Item(gen.PlainItem(idx)), p)
 				break
 			}
 		}
 	}
+	placer.CreateThemeRooms()
 	if snap := g.snapshots[targetMap]; snap != nil {
 		snap.apply(g.factory, m)
 	}
@@ -83,9 +90,8 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 var d1QuestUniques = map[int]bool{0: true, 2: true, 3: true, 7: true, 8: true}
 
 // spawnD1Monsters ports InitMonsters/PlaceUniques/PlaceGroup.
-func (g *MapGenerator) spawnD1Monsters(rng *rand.Rand, m *gridmap.GridMap[*Actor, *Item, Object], dlvl int, avoid []geometry.Point) {
+func (g *MapGenerator) spawnD1Monsters(rng *rand.Rand, m *gridmap.GridMap[*Actor, *Item, Object], lvl *d1.Level, dlvl int, types []int, avoid []geometry.Point) {
 	gen := g.factory.D1()
-	types := gen.LevelMonsterTypes(dlvl)
 	if len(types) == 0 {
 		return
 	}
@@ -98,7 +104,9 @@ func (g *MapGenerator) spawnD1Monsters(rng *rand.Rand, m *gridmap.GridMap[*Actor
 		}
 	}
 	// ponytail: D1 keeps spawns out of the stairs' line of sight (radius 15); we use a plain radius.
-	free := func(p geometry.Point) bool { return m.CanPlaceActorHere(p) && minDist(avoid, p) > 10 }
+	free := func(p geometry.Point) bool {
+		return m.CanPlaceActorHere(p) && minDist(avoid, p) > 10 && !lvl.Held[p.X][p.Y]
+	}
 	randomFree := func() (geometry.Point, bool) {
 		for try := 0; try < 1000; try++ {
 			p := geometry.Point{X: rng.Intn(d1.LevelSize), Y: rng.Intn(d1.LevelSize)}

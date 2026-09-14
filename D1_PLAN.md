@@ -33,7 +33,8 @@ From D1: loot, enemies, dungeon generation. Kept from H&H: graphics, UI, time ma
    Notes: `savegame.json` in the working directory (`game/save.go`); levels rebuild from `levelSeed` + `LevelSnapshot`. Not saved: explored map/fog, monster AI state, corpses, non-D1 (old H&H) items — revisit when those matter.
 3. [x] **Town** — Griswold, Adria, Pepin, Cain, Wirt; D1 store gen; identify, durability, repair; town entrances unlock; delete H&H items/vendor defs.
    Notes: the H&H NPCs are renamed in code (`game/town_d1.go`), Abel's spot became Cain, Wirt stands near the cathedral entrance. Griswold's premium items share his BUY list. Deliberate differences from D1 (per decisions 9/10): Cain identifies for free, broken items stay until repaired. H&H's town stash is gone (D1 has none). Hell gate (level 13) and book requirements rising with spell level come with milestones 6 and 5.
-4. [ ] **Objects** — containers, shrines, fountains.
+4. [x] **Objects** — containers, shrines, fountains.
+   Notes: `d1/objects.go` ports InitThemes/InitObjects/CreateThemeRooms (Cathedral theme rooms only; L2–L4 themes come with milestone 6); `common/d1_object.go` operates them. Fixing theme-room detection also corrected the Cathedral grid (it was one cell off D1's walls). Operating an object takes no time, like H&H bump objects. Broken barrels leave walkable debris. Mana Shield/Nova shrines and the Murky Pool's infravision do nothing yet (milestone 5). Any wall counts as a "trap wall", so shrines/bookcases on left walls are rare. Object icons are first guesses.
 5. [ ] **Spells** — all 26, books/scrolls/staves.
 6. [ ] **Catacombs, Caves, Hell** — L2–L4 generators, remaining AIs, levels 1–16; delete H&H enemies/effects/story generator.
 7. [ ] **Quests & ending** — set pieces (Butcher, Leoric, Zhar, Warlord, Lazarus, Diablo), critical-path triggers, end screen, debug shortcuts, full `playthrough`.

@@ -53,6 +53,12 @@ func playthrough() {
 			if kills == 0 || damageTaken == 0 || exp == 0 {
 				fail("run %d dlvl %d: fight didn't work (kills=%d damage taken=%d exp=%d)", run, dlvl, kills, damageTaken, exp)
 			}
+			// milestone 4: open chests, sarcophagi and barrels, use shrines
+			objects, used, dropped := operateObjects(state, player)
+			if objects < 9 || used == 0 || dropped == 0 {
+				fail("run %d dlvl %d: objects didn't work (objects=%d used=%d items dropped=%d)", run, dlvl, objects, used, dropped)
+			}
+			fmt.Printf("run %d dlvl %d: %d objects, %d used, %d items dropped\n", run, dlvl, objects, used, dropped)
 			items := 0
 			for _, it := range m.Items() {
 				if it.D1() != nil {
@@ -164,6 +170,28 @@ type saveCheck struct {
 	Pos                              geometry.Point
 	Level, Exp, StatPts, Gold, HP    int
 	Items, Equipped, Monsters, Floor int
+	UsedObjects                      int
+}
+
+// operateObjects bumps into every chest, sarcophagus, plain barrel and shrine on the level.
+func operateObjects(state *common.State, player *common.Actor) (objects, used, dropped int) {
+	m := state.GetMap()
+	before := len(m.Items())
+	for _, obj := range append([]common.Object(nil), m.Objects()...) {
+		o, ok := obj.(*common.D1Object)
+		if !ok {
+			continue
+		}
+		objects++
+		switch o.O.Kind {
+		case d1.ObjChest1, d1.ObjChest2, d1.ObjChest3, d1.ObjSarc, d1.ObjBarrel, d1.ObjShrineL, d1.ObjShrineR:
+			o.ActorBumpedInto(player, nil)
+			if !o.O.Active {
+				used++
+			}
+		}
+	}
+	return objects, used, len(m.Items()) - before
 }
 
 func saveCheckOf(state *common.State) saveCheck {
@@ -181,6 +209,11 @@ func saveCheckOf(state *common.State) saveCheck {
 	for _, it := range m.Items() {
 		if it.D1() != nil {
 			c.Floor++
+		}
+	}
+	for _, obj := range m.Objects() {
+		if o, ok := obj.(*common.D1Object); ok && !o.O.Active {
+			c.UsedObjects++
 		}
 	}
 	return c

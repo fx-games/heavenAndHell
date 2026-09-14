@@ -367,8 +367,8 @@ func (h *Hero) nextLevel() {
 // AddBaseStat ports ModifyPlr{Str,Mag,Dex,Vit}: raises a base attribute (capped) and returns HP/mana gained in 1/64.
 func (h *Hero) AddBaseStat(attr, n int) (hp, mana int) {
 	base := [4]*int{&h.BaseStr, &h.BaseMag, &h.BaseDex, &h.BaseVit}[attr]
-	n = min(n, MaxStats[h.Class][attr]-*base)
-	if n <= 0 {
+	n = max(min(n, MaxStats[h.Class][attr]-*base), -*base) // ModifyPlr* caps at MaxStats, CheckStats floors at 0
+	if n == 0 {
 		return 0, 0
 	}
 	*base += n

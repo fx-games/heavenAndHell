@@ -15,7 +15,7 @@ var d1TypeIcons = map[int]int32{
 	d1.ITypeSword: 646, d1.ITypeAxe: 697, d1.ITypeMace: 659, d1.ITypeBow: 621, d1.ITypeStaff: defs.IconItemStaff,
 	d1.ITypeShield: 204, d1.ITypeLArmor: 227, d1.ITypeHelm: 211, d1.ITypeMArmor: 230, d1.ITypeHArmor: 199,
 	d1.ITypeRing: 129, d1.ITypeAmulet: 132,
-	d1.ITypeGold: defs.IconItemPotionYellow, // ponytail: no coin sprite found yet
+	d1.ITypeGold: 273, // gold pile
 }
 
 var d1MiscIcons = map[string]int32{

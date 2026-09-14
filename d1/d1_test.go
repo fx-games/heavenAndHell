@@ -217,3 +217,66 @@ func TestStores(t *testing.T) {
 		t.Fatal("sell filters")
 	}
 }
+
+type fakeWorld struct {
+	lvl      *Level
+	occ      map[[2]int]bool
+	objects  []*Object
+	monsters int
+	items    int
+}
+
+func (w *fakeWorld) Occupied(x, y int) bool { return w.occ[[2]int{x, y}] }
+func (w *fakeWorld) AddObject(o *Object) {
+	w.occ[[2]int{o.X, o.Y}] = true
+	w.objects = append(w.objects, o)
+}
+func (w *fakeWorld) AddMonster(mt, x, y int) {
+	w.occ[[2]int{x, y}] = true
+	w.monsters++
+}
+func (w *fakeWorld) AddItem(it *Item, x, y int) { w.items++ }
+
+func TestObjectsAndThemes(t *testing.T) {
+	d, err := Load(os.DirFS("../files"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := NewGenerator(d, rand.New(rand.NewSource(11)))
+	kinds := map[int]int{}
+	themed := 0
+	for n := 0; n < 60; n++ {
+		dlvl := n%4 + 1
+		lvl := GenerateL1(g.Rng, dlvl)
+		w := &fakeWorld{lvl: lvl, occ: map[[2]int]bool{}}
+		p := g.NewPlacer(w, lvl, dlvl, g.LevelMonsterTypes(dlvl))
+		p.InitThemes()
+		p.HoldThemeRooms()
+		p.InitObjects()
+		random := len(w.objects)
+		p.CreateThemeRooms()
+		themed += len(p.themes)
+
+		count := map[int]int{}
+		for i, o := range w.objects {
+			count[o.Kind]++
+			kinds[o.Kind]++
+			if !lvl.Walkable(o.X, o.Y) {
+				t.Fatalf("level %d: object %d on a wall at %d,%d", n, o.Kind, o.X, o.Y)
+			}
+			if i < random && lvl.Held[o.X][o.Y] {
+				t.Fatalf("level %d: random object %d inside a theme room", n, o.Kind)
+			}
+			if (o.Kind == ObjShrineL || o.Kind == ObjShrineR) && (o.Var1 == 18 || o.Var1 == 25 || dlvl > shrineMax[o.Var1]) {
+				t.Fatalf("level %d: shrine %s not available here", n, ShrineNames[o.Var1])
+			}
+		}
+		if chests := count[ObjChest1] + count[ObjChest2] + count[ObjChest3]; chests < 9 || count[ObjSarc] < 10 {
+			t.Fatalf("level %d: %d chests, %d sarcophagi", n, chests, count[ObjSarc])
+		}
+	}
+	if themed == 0 || kinds[ObjShrineL]+kinds[ObjShrineR]+kinds[ObjBookcaseL]+kinds[ObjBookcaseR]+kinds[ObjGoatShrine] == 0 {
+		t.Fatalf("no theme rooms (%d) or theme objects: %v", themed, kinds)
+	}
+	t.Logf("%d theme rooms, objects by kind: %v", themed, kinds)
+}
