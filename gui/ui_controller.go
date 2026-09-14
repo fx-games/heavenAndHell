@@ -1066,6 +1066,16 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 
 	var drawInfo []renderer.CellDrawInfo
 
+	// corpses lie under objects and items (loot dropped on a corpse stays visible)
+	var corpse *renderer.CellDrawInfo
+	if currentMap.IsDownedActorAt(mapPos) && state.GetPlayer().GetFOV().Visible(mapPos) {
+		corpse = &renderer.CellDrawInfo{
+			Atlas: u.GetCurrentAtlas(),
+			Icon:  currentMap.DownedActorAt(mapPos).Icon(u.worldTicks),
+			Color: state.ApplyLighting(mapPos, defs.OffWhite, tick),
+		}
+	}
+
 	// 1. items
 	if itemAt, isItemAt := currentMap.TryGetItemAt(mapPos); isItemAt && itemAt.IsDrawn() && (!itemAt.IsHidden() || u.context.GameState().GetFlags().IsSet(string(common.FlagHasTrueSight))) {
 		itemIcon := itemAt.Icon(u.worldTicks)
@@ -1083,6 +1093,9 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 		}
 		drawInfo = prepend(drawInfo, drawItem)
 		if !u.configuration.DrawTilesBehindItems {
+			if corpse != nil {
+				drawInfo = prepend(drawInfo, *corpse)
+			}
 			return drawInfo
 		}
 	}
@@ -1107,6 +1120,10 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 		if !u.configuration.DrawTilesBehindObjects {
 			return drawInfo
 		}
+	}
+
+	if corpse != nil {
+		drawInfo = prepend(drawInfo, *corpse)
 	}
 
 	// 2. decals

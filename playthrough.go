@@ -534,6 +534,18 @@ func actorNamed(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], 
 func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false)
 	state := theGame.GetWorldState()
+
+	// D1 has no natural regeneration: waiting doesn't heal a hurt hero
+	hp, mana := state.GetPlayer().GetStats().GetResource(stats.Health), state.GetPlayer().GetStats().GetResource(stats.Mana)
+	common.SetResource(hp, hp.GetMax()/2)
+	common.SetResource(mana, mana.GetMax()/2)
+	for turn := 0; turn < 50; turn++ {
+		theGame.GetActionBroker().Execute(common.NewEndPlayerTurnAction(common.AbstractCause("playthrough"), 10))
+	}
+	if hp.Value() != hp.GetMax()/2 || mana.Value() != mana.GetMax()/2 {
+		fail("regeneration: HP %d/%d, mana %d/%d after 50 turns from half", hp.Value(), hp.GetMax(), mana.Value(), mana.GetMax())
+	}
+
 	travel := func(name, loc string) *gridmap.GridMap[*common.Actor, *common.Item, common.Object] {
 		state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: loc})
 		return state.GetMap()
@@ -572,6 +584,50 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 	}
 
 	travel(defs.LevelNameFromDepth(3), "ladder_up")
+	// D1 monsters heal over time, unless a no-heal weapon hit them
+	var healer, noHeal *common.Actor
+	for _, a := range state.GetMap().Actors() {
+		if mon := a.D1Monster(); mon != nil && mon.Unique == nil && geometry.DistanceChebyshev(a.MapPosition(), state.GetPlayer().MapPosition()) > 15 {
+			if healer == nil {
+				healer = a
+			} else if noHeal == nil {
+				noHeal = a
+			}
+		}
+	}
+	noHeal.D1Monster().NoHeal = true
+	for _, a := range []*common.Actor{healer, noHeal} {
+		common.SetResource(a.GetStats().GetResource(stats.Health), 1)
+	}
+	for turn := 0; turn < 50; turn++ {
+		theGame.GetActionBroker().Execute(common.NewEndPlayerTurnAction(common.AbstractCause("playthrough"), 10))
+		state.GetPlayer().GetStats().GetResource(stats.Health).SetToMax()
+	}
+	if h, n := healer.GetStats().GetResource(stats.Health).Value(), noHeal.GetStats().GetResource(stats.Health).Value(); h <= 1 || n != 1 {
+		fail("monster regeneration: healer at %d HP, no-heal at %d HP after 50 turns from 1", h, n)
+	}
+	// D1 hit recovery: a hard hit costs the hero time and a monster energy; the lost time passes with the next turn
+	player, broker := state.GetPlayer(), theGame.GetActionBroker()
+	broker.Execute(common.NewChangeResourceAction(common.NewActorCause("playthrough", healer), player, stats.Health, -float64(player.Hero().Level)))
+	if player.HitRecovery() == 0 {
+		fail("hit recovery: a hit of %d didn't stagger the level %d hero", player.Hero().Level, player.Hero().Level)
+	}
+	broker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("playthrough"), 10))
+	player.GetStats().GetResource(stats.Health).SetToMax()
+	if player.HitRecovery() != 0 {
+		fail("hit recovery: %d AUT still pending after the turn", player.HitRecovery())
+	}
+	for _, a := range state.GetMap().Actors() {
+		if mon := a.D1Monster(); mon != nil && a.IsAlive() && common.D1MonsterRecoveryAUT(mon) > 0 {
+			a.GetStats().SetAttribute(stats.MaxHealth, 1000)
+			a.GetStats().GetResource(stats.Health).SetToMax()
+			broker.Execute(common.NewChangeResourceAction(common.NewActorCause("playthrough", player), a, stats.Health, -float64(mon.Level+3)))
+			if lost := common.D1MonsterRecoveryAUT(mon); a.GetEnergy() > -lost {
+				fail("hit recovery: %s has %d energy after a hard hit (should lose %d AUT)", a.Name(), a.GetEnergy(), lost)
+			}
+			break
+		}
+	}
 	through("leoric")
 	slay("Skeleton King", common.QuestLeoric)
 	through("ladder_up")

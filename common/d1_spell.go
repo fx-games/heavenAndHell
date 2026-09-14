@@ -171,7 +171,6 @@ func (c *spellCtx) strike(a *Actor, dam64, ticks int) bool {
 		total >>= 2
 	}
 	d1Alert(a, c.caster)
-	d1MonsterGotHit(a, total>>6)
 	if _, seen := c.dealt[a]; !seen {
 		c.order = append(c.order, a)
 	}

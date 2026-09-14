@@ -30,6 +30,31 @@ var noAct = d1Act{}
 // getD1MonsterAction ports ProcessMonsters for one monster. D1 re-runs the AI every tick while a monster stands,
 // so a turn tries up to RefWalkTicks ticks before the monster idles.
 func (g *GameInstance) getD1MonsterAction(a *common.Actor) (int, func()) {
+	cost, run := g.d1MonsterAction(a)
+	if run == nil {
+		return cost, nil
+	}
+	return cost, func() {
+		d1MonsterRegen(a, cost)
+		run()
+	}
+}
+
+// d1MonsterRegen ports ProcessMonsters' healing for the time an action takes: mLevel/2 (mLevel on level 1)
+// in 1/64 HP per tick, unless a no-heal weapon hit the monster.
+func d1MonsterRegen(a *common.Actor, aut int) {
+	mon, hp := a.D1Monster(), a.GetStats().GetResource(stats.Health)
+	if mon.NoHeal || hp.Value() <= 0 || hp.IsAtMax() {
+		return
+	}
+	perTick := mon.Level >> 1
+	if mon.Level <= 1 {
+		perTick = mon.Level
+	}
+	hp.IncreaseByFloat(float64(perTick*aut*d1.RefWalkTicks) / 10 / 64)
+}
+
+func (g *GameInstance) d1MonsterAction(a *common.Actor) (int, func()) {
 	b := &d1Brain{g: g, a: a, mon: a.D1Monster(), pos: a.MapPosition()}
 	if a.GetEnergy() < min(b.walkCost(), b.attackCost()) {
 		return 0, nil

@@ -28,6 +28,7 @@ type D1Monster struct {
 	SpawnIndex                         int     // order of creation on its level, identifies the monster in saves
 	Golem                              bool    // the player's golem (AI_GOLUM), fights for the player
 	Dormant                            bool    // _mFlags & 4 on gargoyles: waiting in stone until the enemy comes close
+	NoHeal                             bool    // _mFlags & 8 (MFLAG_NOHEAL): hit by a weapon that stops healing
 	HitWith                            *[3]int // set for one melee attack: to-hit, min and max damage of a special attack
 }
 

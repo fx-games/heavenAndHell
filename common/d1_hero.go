@@ -157,7 +157,9 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 			}
 		}
 		dam = max(dam, 0)
-		d1MonsterGotHit(def, dam)
+		if s.Flags&d1.ISplNoHealMon != 0 {
+			mon.NoHeal = true
+		}
 		return dam, extra, true
 	case att.d1Monster != nil && def.hero != nil:
 		h, s, mon := def.hero, def.HeroSheet(), att.d1Monster
@@ -206,10 +208,35 @@ func d1Alert(victim, attacker *Actor) {
 	}
 }
 
-// d1MonsterGotHit ports M_StartHit's AI side effects. ponytail: hit recovery (losing time) is deferred.
+// d1HitRecovery ports StartPlrHit and M_StartHit for any damage taken: a hard hit makes the victim flinch and lose
+// time. A new hit restarts the recovery instead of adding to it. Ticks convert at a warrior's swing (RefAttackTicks
+// ticks = one 10 AUT turn).
+func d1HitRecovery(victim *Actor, dam int) {
+	switch {
+	case victim.hero != nil && dam >= victim.hero.Level:
+		victim.hitRecovery = max(victim.hitRecovery, d1TicksToAUT(d1.HitRecoveryTicks(victim.hero.Class, victim.HeroSheet().Flags)))
+	case victim.d1Monster != nil:
+		d1MonsterGotHit(victim, dam)
+	}
+}
+
+func d1TicksToAUT(ticks int) int { return (ticks*10 + d1.RefAttackTicks/2) / d1.RefAttackTicks }
+
+// D1MonsterRecoveryAUT is the time a hard hit costs a monster: its hit animation minus the part of its attack
+// animation after the hit frame, because our monsters' blows land when their action ends and D1's at mAFNum.
+// Without that, a monster as fast as the hero could never strike back once every hit is hard.
+func D1MonsterRecoveryAUT(mon *D1Monster) int {
+	d := mon.Data
+	return max(d1TicksToAUT(d.Frames[3]*(d.Rate[3]+1)-(d.Frames[2]-d.AFNum)*(d.Rate[2]+1)), 0)
+}
+
+// d1MonsterGotHit ports M_StartHit: AI side effects, and the monster loses D1MonsterRecoveryAUT of energy.
 func d1MonsterGotHit(victim *Actor, dam int) {
 	mon := victim.d1Monster
 	if mon.Data.Family == "Sneak" || dam >= mon.Level+3 {
+		if lost := D1MonsterRecoveryAUT(mon); lost > 0 && !victim.HasStatusEffect(StatusStone) && victim.GetEnergy() > -lost {
+			victim.RemoveEnergy(victim.GetEnergy() + lost)
+		}
 		mon.LastMode, mon.StandTicks = D1ModeGotHit, 0
 		if mon.Data.Family == "Scav" {
 			mon.Goal = 1

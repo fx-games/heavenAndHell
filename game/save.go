@@ -56,7 +56,7 @@ func (g *GameInstance) SaveGame() {
 	pos := player.MapPosition()
 	sg := saveGame{
 		Class: g.state.SelectedClass.InternalName, Permadeath: g.permadeath, Seed: g.levelSeed, Hero: *player.Hero(),
-		HP: st.GetResource(stats.Health).Value(), Mana: st.GetResource(stats.Mana).Value(), Gold: st.GetAttribute(stats.Gold),
+		HP: max(st.GetResource(stats.Health).Value(), 1), Mana: st.GetResource(stats.Mana).Value(), Gold: st.GetAttribute(stats.Gold),
 		UniqueDropped: g.factory.D1().UniqueDropped, Flags: g.state.GetFlags().AllEntries(),
 		Map: g.state.GetMap().GetName(), X: pos.X, Y: pos.Y, Levels: map[string]*common.LevelSnapshot{},
 		Deepest: g.state.GetLastDungeonLevel(), Premium: g.premium, Boy: g.boyItem, BoyLevel: g.boyLevel, Portal: g.state.D1Portal(),

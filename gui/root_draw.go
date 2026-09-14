@@ -53,18 +53,6 @@ func (u *UIController) drawActors() {
 	enemyColor := defs.White
 	actorAtlas := u.GetCurrentAtlas()
 
-	for _, downedActor := range state.GetMap().DownedActors() {
-		if !visibleMapOnScreen.Contains(downedActor.MapPosition()) || !playerFieldOfView.Visible(downedActor.MapPosition()) {
-			continue
-		}
-		if !u.configuration.DrawTilesBehindActors && state.GetMap().IsActorAt(downedActor.MapPosition()) {
-			continue
-		}
-		enemyColor = defs.OffWhite
-		screenPos := u.mapRenderer.MapFloatToScreen(downedActor.DrawPosition())
-		u.tileRenderer.DrawDefaultScaleTile(float64(screenPos.X), float64(screenPos.Y), actorAtlas, downedActor.Icon(u.worldTicks), u.context.GameState().ApplyLighting(downedActor.MapPosition(), enemyColor, u.worldTicks))
-	}
-
 	infravision := player.HasStatusEffect(common.StatusInfravision)
 	for _, actor := range state.GetMap().Actors() {
 		seen := playerFieldOfView.Visible(actor.MapPosition()) ||

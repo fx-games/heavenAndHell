@@ -54,6 +54,11 @@ var d1ObjectLooks = map[int]d1ObjectLook{
 	d1.ObjLazStand:   {"Staff Stand", 140, 199, white},
 }
 
+// d1Containers are the objects that are looted: opening or breaking them may give nothing.
+var d1Containers = map[int]bool{d1.ObjChest1: true, d1.ObjChest2: true, d1.ObjChest3: true, d1.ObjSarc: true, d1.ObjBarrel: true,
+	d1.ObjSkelBook: true, d1.ObjBookcaseL: true, d1.ObjBookcaseR: true, d1.ObjBookstand: true, d1.ObjDecap: true,
+	d1.ObjArmorStand: true, d1.ObjWeaponRack: true}
+
 func (o *D1Object) Name() string {
 	if k := o.O.Kind; k == d1.ObjShrineL || k == d1.ObjShrineR {
 		return d1.ShrineNames[o.O.Var1] + " Shrine"
@@ -179,6 +184,15 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		return
 	}
 	obj.Active = false
+	if d1Containers[obj.Kind] { // looting that yields no item and no monster still says so
+		m := f.state.GetMap()
+		items, actors := len(m.Items()), len(m.Actors())
+		defer func() {
+			if len(m.Items()) == items && len(m.Actors()) == actors {
+				msg(fmt.Sprintf("The %s is empty.", o.Name()))
+			}
+		}()
+	}
 	switch obj.Kind {
 	case d1.ObjChest1, d1.ObjChest2, d1.ObjChest3:
 		for j := 0; j < obj.Var1; j++ {
@@ -187,9 +201,6 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 			} else {
 				drop(gen.UsefulItem(dlvl))
 			}
-		}
-		if obj.Var1 == 0 {
-			msg(fmt.Sprintf("The %s is empty.", o.Name()))
 		}
 	case d1.ObjSarc:
 		if obj.Var1 <= 2 {

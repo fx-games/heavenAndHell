@@ -25,7 +25,21 @@ var (
 		67831218, 85670061, 107834823, 135274799, 169122009, 210720231, 261657253, 323800420, 399335440,
 		490808349, 601170414, 733825617, 892680222, 1082908612, 1310707109, 1583495809}
 	attackFrames = [3]int{16, 18, 16} // PlrGFXAnimLens[class][1]
+	hitFrames    = [3]int{6, 7, 8}    // PlrGFXAnimLens[class][6]
 )
+
+// HitRecoveryTicks ports PM_DoGotHit: the hit animation, one to three frames shorter with the recovery affixes.
+func HitRecoveryTicks(class int, flags uint32) int {
+	switch {
+	case flags&ISplFastestRecover != 0:
+		return hitFrames[class] - 3
+	case flags&ISplFasterRecover != 0:
+		return hitFrames[class] - 2
+	case flags&ISplFastRecover != 0:
+		return hitFrames[class] - 1
+	}
+	return hitFrames[class]
+}
 
 // Attributes (ATTRIB_).
 const (

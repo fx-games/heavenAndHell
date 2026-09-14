@@ -63,6 +63,7 @@ type GameInstance struct {
 	quitToAscii      bool
 	debugModeEnabled bool
 	godMode      bool
+	heroLevel         int // last seen character level, for the level-up sound
 
 	// event handler
 	executeAfterTurn []func()
@@ -226,6 +227,7 @@ func (g *GameInstance) ResetGame(playerStartDefinition defs.LoadoutDefinition) {
 
 func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, seed int64) {
 	g.levelSeed = seed
+	g.heroLevel = 0
 	g.levelSnapshots = map[string]*common.LevelSnapshot{}
 	g.premium, g.boyItem, g.boyLevel, g.storesShown = d1.Premium{}, nil, 0, false
 	// we have loaded at this point:
@@ -399,6 +401,15 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 	player := g.state.GetPlayer()
 
 	g.state.GetTimeKeeper().PlayerTakesTurn(autUsed)
+	// D1 hit recovery: the world goes on while the hero flinches; a hard hit meanwhile restarts it.
+	// ponytail: at most 50 recoveries in a row, so a stun-lock can't freeze the game.
+	for n := 0; n < 50 && player.IsAlive(); n++ {
+		lost := player.TakeHitRecovery()
+		if lost == 0 {
+			break
+		}
+		g.state.GetTimeKeeper().PlayerTakesTurn(lost)
+	}
 
 	// execute after turn events, =?
 	for _, event := range g.executeAfterTurn {
@@ -818,11 +829,17 @@ func (g *GameInstance) getTurnerAction(baseSpeed int, energy int, being Turner) 
 }
 
 
+// checkForLevelUp plays the level-up sound once per new character level (CanLevelUp stays true while stat points
+// are unspent). The first turn after a new game or load only records the level.
 func (g *GameInstance) checkForLevelUp() {
-	if !g.state.GetPlayer().CanLevelUp() {
+	h := g.state.GetPlayer().Hero()
+	if h == nil {
 		return
 	}
-	g.GetAudio().PlayCue("levelup")
+	if g.heroLevel != 0 && h.Level > g.heroLevel {
+		g.GetAudio().PlayCue("levelup")
+	}
+	g.heroLevel = h.Level
 }
 
 

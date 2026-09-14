@@ -36,6 +36,9 @@ func (d *ChangeResourceAction) Execute(context ActionContext) []Action {
 	if d.changedByAmount < 0 { // this needs to be synched to the animation
 
 		receiver.SetHurt()
+		if d.resourceName == stats.Health && receiver.IsAlive() {
+			d1HitRecovery(receiver, int(-d.changedByAmount))
+		}
 	}
 
 	d.animations = d.prepareAnimations(context)

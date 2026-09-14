@@ -40,6 +40,7 @@ type Actor struct {
 
 	stats      stats.AttributeHolder
 	timeEnergy int
+	hitRecovery int // AUT the D1 hero still loses to a hard hit (PM_GOTHIT)
 
 	state ActorState
 
@@ -200,6 +201,15 @@ func (a *Actor) SetName(name string) {
 
 func (a *Actor) GetEnergy() int {
 	return a.timeEnergy
+}
+
+func (a *Actor) HitRecovery() int { return a.hitRecovery }
+
+// TakeHitRecovery returns and clears the time the hero loses to hit recovery.
+func (a *Actor) TakeHitRecovery() int {
+	lost := a.hitRecovery
+	a.hitRecovery = 0
+	return lost
 }
 
 func (a *Actor) RemoveEnergy(energy int) {
