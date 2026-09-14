@@ -62,6 +62,7 @@ type GameInstance struct {
 	shouldQuitGame   bool
 	quitToAscii      bool
 	debugModeEnabled bool
+	godMode      bool
 
 	// event handler
 	executeAfterTurn []func()
@@ -409,6 +410,10 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 
 	player.BeforeTurn()
 	g.handleLightSource()
+	if g.godMode {
+		player.GetStats().GetResource(stats.Health).SetToMax()
+		player.GetStats().GetResource(stats.Mana).SetToMax()
+	}
 
 
 	// automatic pickup & player movement..
@@ -474,8 +479,35 @@ func (g *GameInstance) GetWorldState() *common.State {
 	return &g.state
 }
 
+// d1DebugItems: go to a level, god mode, complete a quest (decision 16).
+func (g *GameInstance) d1DebugItems() []util.MenuItem {
+	var levels, quests []util.MenuItem
+	for dlvl := 1; dlvl <= 16; dlvl++ {
+		name := defs.LevelNameFromDepth(dlvl)
+		levels = append(levels, util.MenuItem{MainText: fmt.Sprintf("Level %d", dlvl), Action: func() {
+			g.state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: "ladder_up"})
+		}})
+	}
+	for _, set := range []string{common.D1LeoricLevel, common.D1LazarusLevel} {
+		levels = append(levels, util.MenuItem{MainText: set, Action: func() {
+			g.state.MapTransition(gridmap.Transition{TargetMap: set, TargetLocation: "ladder_up"})
+		}})
+	}
+	for _, q := range append(common.D1Quests, struct{ Name, Flag, Text string }{"Cain has the Staff of Lazarus", common.QuestStaff, ""}) {
+		quests = append(quests, util.MenuItem{MainText: q.Name, Action: func() {
+			g.state.GetFlags().SetTrue(q.Flag)
+			common.UpdateD1Quests(&g.state, g.state.GetMap())
+		}})
+	}
+	return []util.MenuItem{
+		{MainText: "Go to level", Action: func() { g.uiController.OpenMenu(levels) }},
+		{MainText: "Toggle god mode", Action: func() { g.godMode = !g.godMode }},
+		{MainText: "Complete quest", Action: func() { g.uiController.OpenMenu(quests) }},
+	}
+}
+
 func (g *GameInstance) showDebugMenu() {
-	g.uiController.OpenMenu([]util.MenuItem{
+	g.uiController.OpenMenu(append(g.d1DebugItems(), []util.MenuItem{
 		{
 			MainText: "Toggle Debug Mode",
 			Action: func() {
@@ -575,7 +607,7 @@ func (g *GameInstance) showDebugMenu() {
 				g.uiController.UpdateStatsLabel()
 			},
 		},
-	})
+	}...))
 }
 
 func (g *GameInstance) killLevel() {

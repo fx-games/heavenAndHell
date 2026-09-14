@@ -98,6 +98,9 @@ func TestGenerateConnected(t *testing.T) {
 		if dlvl != 16 && !seen[lvl.StairsDn] || lvl.Warp != [2]int{} && !seen[lvl.Warp] || (lvl.Warp != [2]int{}) != (dlvl == 5 || dlvl == 9 || dlvl == 13) {
 			t.Fatalf("level %d (dlvl %d): stairs down or warp %v unreachable\n%s", n, dlvl, lvl.Warp, lvl)
 		}
+		if dlvl == 16 && lvl.Chamber == [2]int{} {
+			t.Fatalf("level %d: no chamber for Diablo\n%s", n, lvl)
+		}
 		if len(seen) < floor*9/10 {
 			t.Fatalf("level %d (dlvl %d): only %d of %d walkable cells reachable\n%s", n, dlvl, len(seen), floor, lvl)
 		}

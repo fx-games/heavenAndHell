@@ -1364,7 +1364,7 @@ func (u *UIController) showHelpText() {
 			TextColor: textColor,
 		},
 		{
-			Text:      "Press 'v' to show the quest log",
+			Text:      "Press 'r' to show the quest log",
 			TextColor: textColor,
 		},
 	})

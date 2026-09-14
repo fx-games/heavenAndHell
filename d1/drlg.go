@@ -336,7 +336,7 @@ func Generate(rng *rand.Rand, dlvl int) *Level {
 	return GenerateL4(rng, dlvl)
 }
 
-// String draws the level: # wall, . floor, + door, < > stairs, W town warp.
+// String draws the level: # wall, . floor, + door, ~ lava, = fence, < > stairs, W town warp.
 func (l *Level) String() string {
 	var b strings.Builder
 	for y := 0; y < LevelSize; y++ {
@@ -349,7 +349,7 @@ func (l *Level) String() string {
 			case p == l.Warp && p != [2]int{}:
 				b.WriteByte('W')
 			default:
-				b.WriteByte("#.+"[l.Cells[x][y]])
+				b.WriteByte("#.+~="[l.Cells[x][y]])
 			}
 		}
 		b.WriteByte('\n')

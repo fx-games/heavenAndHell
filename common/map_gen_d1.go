@@ -17,7 +17,12 @@ func (g *MapGenerator) SetSnapshots(snapshots map[string]*LevelSnapshot) { g.sna
 
 // generateD1Map builds dungeon level dlvl (1-16) with D1's generators.
 func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMap[*Actor, *Item, Object] {
-	rng := rand.New(rand.NewSource(g.seed*1000003 + int64(dlvl)))
+	setLevel := targetMap == D1LeoricLevel || targetMap == D1LazarusLevel
+	seed := g.seed*1000003 + int64(dlvl)
+	if setLevel {
+		seed += 1000 // not the layout of the level it is entered from
+	}
+	rng := rand.New(rand.NewSource(seed))
 	gen := g.factory.D1()
 	gameRng := gen.Rng
 	gen.Rng = rng // monster HP rolls must come from the level seed too
@@ -30,21 +35,28 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 	g.addBasicTiles(m, lvl, dlvl)
 
 	up := geometry.Point{X: lvl.StairsUp[0], Y: lvl.StairsUp[1]}
-	m.SetTile(up, gridmap.Tile{DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp})
 	m.AddNamedLocation("ladder_up", up)
 	upTarget := gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl - 1), TargetLocation: "ladder_down"}
-	if dlvl == 1 {
+	switch {
+	case targetMap == D1LeoricLevel:
+		upTarget = gridmap.Transition{TargetMap: defs.LevelNameFromDepth(3), TargetLocation: "leoric"}
+	case dlvl == 1:
 		upTarget = gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "to_cathedral"}
 	}
-	m.AddTransitionAt(up, upTarget)
+	if targetMap != D1LazarusLevel { // the lair's way back opens with Lazarus' death (UpdateD1Quests)
+		m.SetTile(up, gridmap.Tile{DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp})
+		m.AddTransitionAt(up, upTarget)
+	}
 
 	avoid := []geometry.Point{up}
-	downTile := gridmap.Tile{DefinedIcon: defs.IconStairsDown, DefinedDescription: "stairs leading down", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsDown}
-	if dlvl < 16 {
+	downTile := d1StairsDown
+	if dlvl < 16 && !setLevel {
 		dn := geometry.Point{X: lvl.StairsDn[0], Y: lvl.StairsDn[1]}
-		m.SetTile(dn, downTile)
 		m.AddNamedLocation("ladder_down", dn)
-		m.AddTransitionAt(dn, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl + 1), TargetLocation: "ladder_up"})
+		if dlvl != 15 { // level 15's stairs open with Lazarus' death (UpdateD1Quests)
+			m.SetTile(dn, downTile)
+			m.AddTransitionAt(dn, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl + 1), TargetLocation: "ladder_up"})
+		}
 		avoid = append(avoid, dn)
 	}
 	if lvl.Warp != [2]int{} { // D1's town warp on levels 5, 9 and 13
@@ -61,8 +73,10 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 	placer := gen.NewPlacer(&d1World{f: g.factory, m: m}, lvl, dlvl, types)
 	placer.InitThemes()
 	placer.HoldThemeRooms()
+	avoid = append(avoid, placeD1QuestExits(rng, m, lvl)...)
 	g.spawnD1Monsters(rng, m, lvl, dlvl, types, avoid)
 	placer.InitObjects()
+	g.placeD1QuestObjects(rng, m, lvl)
 	// AddInitItems: 3-5 healing or mana potions lie around.
 	for n := rng.Intn(3) + 3; n > 0; n-- {
 		idx := d1.IdxMana
@@ -82,7 +96,14 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 	}
 	PlaceD1Portal(g.factory.state, m)
 
-	m.SetDisplayName(defs.D1LevelName(dlvl))
+	switch targetMap {
+	case D1LeoricLevel:
+		m.SetDisplayName("King Leoric's Tomb")
+	case D1LazarusLevel:
+		m.SetDisplayName("Lazarus' Lair")
+	default:
+		m.SetDisplayName(defs.D1LevelName(dlvl))
+	}
 	return m
 }
 
@@ -95,9 +116,6 @@ var d1QuestUniques = map[int]bool{0: true, 2: true, 3: true, 7: true, 8: true}
 // spawnD1Monsters ports InitMonsters/PlaceUniques/PlaceGroup.
 func (g *MapGenerator) spawnD1Monsters(rng *rand.Rand, m *gridmap.GridMap[*Actor, *Item, Object], lvl *d1.Level, dlvl int, types []int, avoid []geometry.Point) {
 	gen := g.factory.D1()
-	if len(types) == 0 {
-		return
-	}
 	walkable := 0
 	for x := 0; x < d1.LevelSize; x++ {
 		for y := 0; y < d1.LevelSize; y++ {
@@ -144,6 +162,18 @@ func (g *MapGenerator) spawnD1Monsters(rng *rand.Rand, m *gridmap.GridMap[*Actor
 		return n
 	}
 
+	// PlaceQuestMonsters: quest bosses first; Diablo waits in his sealed chamber on 16.
+	for _, u := range d1QuestBosses(m.GetName()) {
+		if p, ok := randomFree(); ok {
+			place(g.factory.NewD1UniqueMonster(u), p)
+		}
+	}
+	if dlvl == 16 {
+		place(g.factory.NewD1Monster(gen.D.MonsterByID("MT_DIABLO")), geometry.Point{X: lvl.Chamber[0], Y: lvl.Chamber[1]})
+	}
+	if len(types) == 0 {
+		return
+	}
 	for u, um := range gen.D.UniqueMonsters {
 		mt := gen.D.MonsterByID(um.Type)
 		if um.Level != dlvl || d1QuestUniques[u] || !slices.Contains(types, mt) {

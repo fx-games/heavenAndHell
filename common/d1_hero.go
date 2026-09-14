@@ -255,6 +255,7 @@ func d1OnKill(ctx ActionContext, killer, victim *Actor) []Action {
 			state.factory.RefreshD1Spells(killer)
 		}
 	}
+	d1QuestKill(ctx, mon)
 	d1FallenFear(state, victim.MapPosition())
 	state.factory.d1AcidDeath(ctx, victim)
 	dlvl := d1DungeonLevel(state)

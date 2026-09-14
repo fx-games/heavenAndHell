@@ -118,6 +118,7 @@ func (g *GameInstance) onD1MapChanged(oldMapName, newMapName string) {
 			}
 		}
 	}
+	common.UpdateD1Quests(&g.state, g.state.GetMap())
 	player := g.state.GetPlayer()
 	player.GetStatusEffects().SetFalse(string(common.StatusManaShield))
 	if p := g.state.D1Portal(); p != nil && defs.IsTownLevel(oldMapName) && newMapName == p.Map &&

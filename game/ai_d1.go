@@ -125,8 +125,65 @@ func (b *d1Brain) think() (d1Act, bool) {
 			return b.attack()
 		}
 		return b.callWalk(b.dirTo(mon.Last))
+	case "AI_SKELKING":
+		return b.skelKing()
+	case "AI_ZHAR", "AI_LAZURUS": // ponytail: their talk before the fight is skipped (decision 15), then MAI_Counselor
+		return b.counselor()
+	case "AI_LAZHELP": // MAI_Lazhelp fights like a succubus once Lazarus has spoken
+		return b.ranged(func() (d1Act, bool) { return b.missile(common.MisFlare, 0, common.D1ModeRSpAttack) })
+	case "AI_WARLORD": // MAI_Warlord, minus the talk
+		return b.skelSd()
+	case "AI_DIABLO":
+		return b.roundRanged(common.MisApoca, 40, 0)
 	}
-	return b.skelSd() // ponytail: the quest bosses' AIs (Leoric, Zhar, Lazarus, Warlord, Diablo) come with milestone 7
+	return b.skelSd() // Gharbad, Snotspill and Lachdanan belong to deferred quests
+}
+
+// skelKing ports MAI_SkelKing: circle now and then, raise skeletons from afar, hit up close.
+// ponytail: D1's same-room check (dTransVal) counts as always true, like the other circling AIs.
+func (b *d1Brain) skelKing() (d1Act, bool) {
+	mon := b.mon
+	if mon.Squelch == 0 {
+		return noAct, false
+	}
+	md := b.dirTo(mon.Last)
+	v := b.rnd(100)
+	if b.near(2) || mon.Squelch != 255 {
+		mon.Goal = 1
+	} else if mon.Goal == 4 || !b.near(3) && b.rnd(4) == 0 {
+		if mon.Goal != 4 {
+			mon.GoalVar1, mon.GoalVar2 = 0, b.rnd(2)
+		}
+		mon.Goal = 4
+		_, dirOK := b.step(md)
+		if mon.GoalVar1++; mon.GoalVar1-1 >= 2*max(iabs(b.dx), iabs(b.dy)) && dirOK {
+			mon.Goal = 1
+		} else if act, ok := b.roundWalk(md); ok {
+			return act, true
+		} else {
+			return b.delay(b.rnd(10) + 10)
+		}
+	}
+	if mon.Goal != 1 {
+		return noAct, false
+	}
+	switch {
+	case (!b.near(3) && v < 4*mon.Int+35 || v < 6) && b.lineClear(b.enemy):
+		if p, ok := b.step(md); ok {
+			return d1Act{cost: b.attackCost(), mode: common.D1ModeSpStand, run: func() { b.g.factory.SpawnD1Skeleton(p) }}, true
+		}
+	case b.near(2):
+		if v < mon.Int+20 {
+			mon.Dir = md
+			return b.attack()
+		}
+	default:
+		if v = b.rnd(100); v < mon.Int+25 || b.justWalked() && v < mon.Int+75 {
+			return b.callWalk(md)
+		}
+		return b.delay(b.rnd(10) + 10)
+	}
+	return noAct, false
 }
 
 func iabs(v int) int {
@@ -285,10 +342,12 @@ func (b *d1Brain) roundWalk(md int) (d1Act, bool) {
 	return b.callWalk(md + 4)
 }
 
-// lineClear ports LineClear: nothing blocks the straight line to p.
+// lineClear ports LineClear: nothing blocks the straight line to p. Lava and fences don't, like D1's missile table.
 func (b *d1Brain) lineClear(p geometry.Point) bool {
 	m := b.g.state.GetMap()
-	line := geometry.LineOfSight(b.pos, p, func(q geometry.Point) bool { return q == b.pos || q == p || m.IsCurrentlyPassable(q) })
+	line := geometry.LineOfSight(b.pos, p, func(q geometry.Point) bool {
+		return q == b.pos || q == p || m.IsTransparent(q) && !m.IsActorAt(q) && (!m.IsObjectAt(q) || m.IsWalkable(q))
+	})
 	return len(line) > 0 && line[len(line)-1] == p
 }
 

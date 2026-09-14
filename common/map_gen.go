@@ -54,6 +54,10 @@ func (g *MapGenerator) addBasicTiles(emptyMap *gridmap.GridMap[*Actor, *Item, Ob
 			switch lvl.Cells[x][y] {
 			case d1.CellWall:
 				emptyMap.SetTile(mapPos, gridmap.Tile{DefinedIcon: tileMap.ChooseWallTile(mapPos), DefinedDescription: "a wall"})
+			case d1.CellLava:
+				emptyMap.SetTile(mapPos, gridmap.Tile{DefinedIcon: defs.IconLava, DefinedDescription: "lava", IsTransparent: true})
+			case d1.CellFence:
+				emptyMap.SetTile(mapPos, gridmap.Tile{DefinedIcon: defs.IconWoodenFence, DefinedDescription: "a wooden fence", IsTransparent: true})
 			case d1.CellDoor:
 				emptyMap.SetTile(mapPos, gridmap.Tile{DefinedIcon: tileMap.FloorTile, DefinedDescription: "a floor", IsWalkable: true, IsTransparent: true})
 				emptyMap.AddObject(NewDoor(tileMap.OpenDoor, tileMap.ClosedDoor), mapPos)

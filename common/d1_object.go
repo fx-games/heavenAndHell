@@ -7,6 +7,7 @@ import (
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/stats"
+	"strings"
 )
 
 // D1Object is a D1 dungeon object (decision 12), operated by bumping into it.
@@ -49,6 +50,8 @@ var d1ObjectLooks = map[int]d1ObjectLook{
 	d1.ObjMurkyFtn:   {"Murky Pool", 153, 153, color.RGBA{90, 140, 90, 255}},
 	d1.ObjTearFtn:    {"Fountain of Tears", 153, 153, color.RGBA{220, 240, 255, 255}},
 	d1.ObjWeaponRack: {"Weapon Rack", 646, 646, white},
+	d1.ObjLever:      {"Lever", 154, 154, color.RGBA{255, 120, 120, 255}},
+	d1.ObjLazStand:   {"Staff Stand", 140, 199, white},
 }
 
 func (o *D1Object) Name() string {
@@ -229,6 +232,16 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 	case d1.ObjMurkyFtn:
 		player.AddStatusEffect(StatusInfravision, d1.InfravisionTurns(2*((dlvl-1)/4+1)))
 		msg("You drink from the Murky Pool. You can see in the dark.")
+	case d1.ObjLazStand:
+		for i, b := range gen.D.Items {
+			if b.Name == d1StaffName {
+				drop(gen.PlainItem(i))
+			}
+		}
+		msg("The Staff of Lazarus falls from its stand.")
+	case d1.ObjLever:
+		msg("You pull the lever. Something rumbles in the distance.")
+		UpdateD1Quests(f.state, f.state.GetMap())
 	case d1.ObjTearFtn:
 		from := gen.Rng.Intn(4)
 		to := gen.Rng.Intn(3)
@@ -239,6 +252,18 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		f.d1ModifyStat(player, to, 1)
 		msg("You drink from the Fountain of Tears.")
 	}
+}
+
+// SpawnD1Skeleton ports M_SpawnSkel for the Skeleton King: one of the level's skeletons rises next to pos.
+func (f *Factory) SpawnD1Skeleton(pos geometry.Point) {
+	mt := f.d1.D.MonsterByID("MT_WSKELAX")
+	for _, a := range f.state.GetMap().Actors() {
+		if mon := a.d1Monster; mon != nil && mon.Unique == nil && strings.HasPrefix(mon.Data.Family, "Skel") {
+			mt = mon.Type
+			break
+		}
+	}
+	f.d1Skeleton(mt, pos, f.state.GetPlayer())
 }
 
 func (f *Factory) d1Skeleton(mt int, pos geometry.Point, player *Actor) {

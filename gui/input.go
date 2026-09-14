@@ -5,6 +5,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"image/color"
 	"rpg/geometry"
+	"rpg/util"
 )
 
 type InputReceiver interface {
@@ -134,6 +135,9 @@ func (u *UIController) handleKeyboardInput() {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyL) {
 		u.ShowLog()
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+		u.OpenTextWindow(util.ToLabelText(u.context.GameState().D1QuestLog()))
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyZ) {
 		act.RestUntilHealed()

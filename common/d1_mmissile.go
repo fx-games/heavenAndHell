@@ -24,6 +24,7 @@ const (
 	MisCbolt  // advocates: three charged bolts
 	MisAcid   // acid beasts, leaves a puddle
 	MisAcidPud
+	MisApoca // Diablo: a blast on the player if he sees them
 )
 
 // d1MissileResist is missiledata's mResist for these missiles; all of them are magical (mType 1).
@@ -31,7 +32,7 @@ var d1MissileResist = map[D1Missile]int{
 	MisFirebolt: d1.ResistKindFire, MisFireball: d1.ResistKindFire, MisLightCtrl: d1.ResistKindLightning,
 	MisLightCtrl2: d1.ResistKindLightning, MisLightning: d1.ResistKindLightning, MisFlash: d1.ResistKindMagic,
 	MisMagmaball: d1.ResistKindFire, MisFlare: d1.ResistKindMagic, MisFlamec: d1.ResistKindFire,
-	MisCbolt: d1.ResistKindLightning, MisAcid: d1.ResistKindMagic, MisAcidPud: d1.ResistKindMagic,
+	MisCbolt: d1.ResistKindLightning, MisAcid: d1.ResistKindMagic, MisAcidPud: d1.ResistKindMagic, MisApoca: d1.ResistKindMagic,
 }
 
 // MonsterMissileAction resolves one monster missile at once on the grid, like the player's spells (decision 6):
@@ -179,6 +180,11 @@ func (c *missileCtx) fire(mis D1Missile, target geometry.Point, dam int) {
 	case MisFlash: // the six cells from one left of the caster to one right and below
 		for _, d := range []geometry.Point{{X: -1}, {}, {X: 1}, {X: -1, Y: 1}, {Y: 1}, {X: 1, Y: 1}} {
 			c.hit(mis, o.Add(d), o, 2*c.mon.Level, 2*c.mon.Level, true, d1.FlashTicks)
+		}
+	case MisApoca: // AddDiabApoca: MIS_BOOM2 on the player when the line is clear
+		if p := c.player.MapPosition(); c.c.lineClear(o, p) {
+			c.hit(mis, p, o, dam, dam, false, 1)
+			c.c.animations = append(c.c.animations, NewHitAnimation(p, 0.4, defs.IconEffectFireBig, 2))
 		}
 	case MisFlamec: // MI_Flamec: flames on the next three cells towards the target, the n-th burning 20+5n ticks
 		for n, p := range c.c.ray(o, target, 3) {

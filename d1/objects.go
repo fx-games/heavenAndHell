@@ -3,6 +3,7 @@ package d1
 // Object kinds are D1's OBJ_ indexes (rows of xl_obj). Decorations (candles, banners, crosses, empty stands)
 // are not placed (decision 12), but their rolls still happen so levels stay D1-shaped.
 const (
+	ObjLever      = 4
 	ObjChest1     = 5
 	ObjChest2     = 6
 	ObjChest3     = 7
@@ -24,6 +25,7 @@ const (
 	ObjMurkyFtn   = 81
 	ObjTearFtn    = 82
 	ObjWeaponRack = 92
+	ObjLazStand   = 95
 )
 
 // Theme types (THEME_).

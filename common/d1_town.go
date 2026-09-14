@@ -86,6 +86,7 @@ func d1VendorOptions(ctx ActionContext, vendor *Actor) []util.MenuItem {
 	case VendorTypeGeneral:
 		return []util.MenuItem{buy}
 	case VendorTypeCain:
+		D1GiveStaffToCain(ctx.GameState, ctx.Msg)
 		// decision 9: Cain identifies for free (D1 charges 100 gold)
 		return []util.MenuItem{d1ServiceOption(ctx, "IDENTIFY", func(it *d1.Item) bool { return it.Magical != 0 && !it.Identified },
 			func(*d1.Item) int { return 0 }, func(it *d1.Item) { it.Identified = true })}

@@ -52,6 +52,10 @@ func playthrough() {
 					fail("run %d dlvl %d: %s at %v unreachable from %v", run, dlvl, loc, p, up)
 				}
 			}
+			// milestone 7: the quest bosses wait on their levels
+			if boss := map[int]string{2: "The Butcher", 8: "Zhar the Mad", 13: "Warlord of Blood", 16: "The Dark Lord"}[dlvl]; boss != "" && actorNamed(m, boss) == nil {
+				fail("run %d dlvl %d: %s is missing", run, dlvl, boss)
+			}
 			if dlvl > 4 {
 				boost(player, dlvl)
 			}
@@ -112,6 +116,8 @@ func playthrough() {
 		fail("missile AIs: only %v cast", missiles.byAI)
 	}
 	fmt.Printf("monster missiles by AI: %v\n", missiles.byAI)
+
+	questPath(theGame, fail)
 
 	// milestone 2: a permadeath save is gone once the death menu is built
 	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], true)
@@ -512,4 +518,140 @@ func reachable(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], p
 		}
 	}
 	return seen
+}
+
+func actorNamed(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], name string) *common.Actor {
+	for _, a := range m.Actors() {
+		if a.Name() == name && a.IsAlive() {
+			return a
+		}
+	}
+	return nil
+}
+
+// questPath walks decision 15's critical path with a fresh hero: Leoric's tomb, the staff, Cain, the red portal,
+// Lazarus, a save and load, the stairs to 16, the levers and Diablo. Bosses are struck down directly.
+func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false)
+	state := theGame.GetWorldState()
+	travel := func(name, loc string) *gridmap.GridMap[*common.Actor, *common.Item, common.Object] {
+		state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: loc})
+		return state.GetMap()
+	}
+	through := func(loc string) {
+		m := state.GetMap()
+		p := m.GetNamedLocation(loc)
+		t, ok := m.GetTransitionAt(p)
+		if !ok || m.GetNamedLocationByPos(p) != loc {
+			fail("quests: no way through %s on %s", loc, m.GetName())
+		}
+		if reach := reachable(m, m.GetNamedLocation("ladder_up")); !reach[p] {
+			dumpMap(m, reach)
+			fail("quests: %s on %s unreachable", loc, m.GetName())
+		}
+		state.MapTransition(t)
+	}
+	slay := func(name, flag string) {
+		a := actorNamed(state.GetMap(), name)
+		if a == nil {
+			fail("quests: %s not found on %s", name, state.GetMap().GetName())
+		}
+		hp := a.GetStats().GetResource(stats.Health).GetMax()
+		theGame.GetActionBroker().Execute(common.NewChangeResourceAction(common.NewActorCause("playthrough", state.GetPlayer()), a, stats.Health, -float64(10*hp)))
+		if !state.GetFlags().IsSet(flag) {
+			fail("quests: killing %s didn't set %s", name, flag)
+		}
+	}
+	objectsOf := func(kind int) (out []*common.D1Object) {
+		for _, obj := range state.GetMap().Objects() {
+			if o, ok := obj.(*common.D1Object); ok && o.O.Kind == kind {
+				out = append(out, o)
+			}
+		}
+		return
+	}
+
+	travel(defs.LevelNameFromDepth(3), "ladder_up")
+	through("leoric")
+	slay("Skeleton King", common.QuestLeoric)
+	through("ladder_up")
+	if state.GetMap().GetName() != defs.LevelNameFromDepth(3) {
+		fail("quests: Leoric's tomb leads to %s", state.GetMap().GetName())
+	}
+
+	m := travel(defs.LevelNameFromDepth(15), "ladder_up")
+	if _, open := m.GetTransitionAt(m.GetNamedLocation("ladder_down")); open {
+		fail("quests: level 15's stairs down are open before Lazarus died")
+	}
+	stands := objectsOf(d1.ObjLazStand)
+	if len(stands) != 1 || !reachable(m, m.GetNamedLocation("ladder_up"))[stands[0].MapPosition()] && len(m.GetFreeCardinalNeighbors(stands[0].MapPosition())) == 0 {
+		fail("quests: %d staff stands on level 15", len(stands))
+	}
+	stands[0].ActorBumpedInto(state.GetPlayer(), nil)
+	var staff *common.Item
+	for _, it := range m.Items() {
+		if it.D1() != nil && it.D1().Name == "Staff of Lazarus" {
+			staff = it
+		}
+	}
+	if staff == nil {
+		fail("quests: the stand dropped no staff")
+	}
+	m.RemoveItem(staff)
+	state.GetPlayer().GetInventory().Add(staff)
+	travel(string(defs.LevelNameTown), "spawn")
+	if !common.D1GiveStaffToCain(state, func(string) {}) {
+		fail("quests: Cain didn't take the staff")
+	}
+	travel(defs.LevelNameFromDepth(15), "ladder_up")
+	through("red_portal")
+	m = state.GetMap()
+	for _, name := range []string{"Arch-Bishop Lazarus", "Red Vex", "BlackJade"} {
+		if actorNamed(m, name) == nil {
+			fail("quests: %s is missing from %s", name, m.GetName())
+		}
+	}
+	if _, open := m.GetTransitionAt(m.GetNamedLocation("ladder_up")); open {
+		fail("quests: the lair's portal is open before Lazarus died")
+	}
+	slay("Arch-Bishop Lazarus", common.QuestLazarus)
+
+	theGame.SaveGame()
+	if err := theGame.LoadGame(); err != nil {
+		fail("quests: load failed: %v", err)
+	}
+	state = theGame.GetWorldState()
+	through("ladder_up")
+	through("ladder_down")
+	m = state.GetMap()
+	diablo := actorNamed(m, "The Dark Lord")
+	if diablo == nil {
+		fail("quests: Diablo is missing")
+	}
+	nextToDiablo := func() bool {
+		reach := reachable(m, m.GetNamedLocation("ladder_up"))
+		for _, d := range common.D1Dirs {
+			if reach[diablo.MapPosition().Add(d)] {
+				return true
+			}
+		}
+		return false
+	}
+	if nextToDiablo() {
+		fail("quests: Diablo is reachable before the levers are pulled")
+	}
+	levers := objectsOf(d1.ObjLever)
+	reach := reachable(m, m.GetNamedLocation("ladder_up"))
+	for _, l := range levers {
+		if len(m.GetFreeCardinalNeighbors(l.MapPosition())) == 0 || !reach[m.GetFreeCardinalNeighbors(l.MapPosition())[0]] {
+			dumpMap(m, reach)
+			fail("quests: lever at %v unreachable", l.MapPosition())
+		}
+		l.ActorBumpedInto(state.GetPlayer(), nil)
+	}
+	if len(levers) != 4 || !nextToDiablo() {
+		fail("quests: %d levers didn't open Diablo's chamber", len(levers))
+	}
+	slay("The Dark Lord", common.QuestDiablo)
+	fmt.Println("quests: Leoric, staff, Cain, red portal, Lazarus, save/load, levers and Diablo OK")
 }

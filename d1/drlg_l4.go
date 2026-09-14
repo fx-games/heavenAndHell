@@ -964,6 +964,43 @@ func GenerateL4(rng *rand.Rand, dlvl int) *Level {
 		if wx >= 0 {
 			lvl.Warp = lvl.nearestFloor(2*wx+4, 2*wy+4)
 		}
+		if dlvl == 16 {
+			ok := false
+			if lvl.Chamber, ok = lvl.sealChamber(); !ok {
+				continue
+			}
+		}
 		return lvl
 	}
+}
+
+// sealChamber walls in a 3×3 room for Diablo inside a 7×7 open area as far from the stairs as possible, so the walls
+// cut nothing else off. ponytail: stands in for D1's four quadrant set pieces (diab1-4.DUN live in the MPQ).
+func (l *Level) sealChamber() ([2]int, bool) {
+	best, bestDist := [2]int{}, -1
+	for x := 3; x < LevelSize-3; x++ {
+		for y := 3; y < LevelSize-3; y++ {
+			open := true
+			for dx := -3; dx <= 3 && open; dx++ {
+				for dy := -3; dy <= 3 && open; dy++ {
+					open = l.Cells[x+dx][y+dy] == CellFloor
+				}
+			}
+			if d := max(iabs(x-l.StairsUp[0]), iabs(y-l.StairsUp[1])); open && d > bestDist {
+				best, bestDist = [2]int{x, y}, d
+			}
+		}
+	}
+	if bestDist < 0 {
+		return best, false
+	}
+	for dx := -2; dx <= 2; dx++ {
+		for dy := -2; dy <= 2; dy++ {
+			if max(iabs(dx), iabs(dy)) == 2 {
+				l.Cells[best[0]+dx][best[1]+dy] = CellWall
+			}
+			l.Held[best[0]+dx][best[1]+dy] = true
+		}
+	}
+	return best, true
 }

@@ -10,6 +10,8 @@ const (
 	CellWall Cell = iota
 	CellFloor
 	CellDoor
+	CellLava  // blocks movement, not sight
+	CellFence // blocks movement, not sight
 )
 
 const LevelSize = 80
@@ -21,10 +23,11 @@ type Level struct {
 	Held               [LevelSize][LevelSize]bool // dFlags & 8: reserved for a theme room
 	Warp               [2]int                     // the town warp on levels 5, 9 and 13; {0, 0} = none
 	Themes             []int                      // transvals of theme rooms placed during generation (L2-L4)
+	Chamber            [2]int                     // level 16: centre of Diablo's sealed 3×3 chamber
 }
 
 func (l *Level) Walkable(x, y int) bool {
-	return x >= 0 && y >= 0 && x < LevelSize && y < LevelSize && l.Cells[x][y] != CellWall
+	return x >= 0 && y >= 0 && x < LevelSize && y < LevelSize && (l.Cells[x][y] == CellFloor || l.Cells[x][y] == CellDoor)
 }
 
 // l1 holds drlg_l1.cpp's globals.

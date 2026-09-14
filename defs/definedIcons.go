@@ -85,6 +85,8 @@ const (
 	IconMountainWithEntrance     int32 = 8
 	IconWater                    int32 = 28
 	IconWoodenBridge             int32 = 63
+	IconWoodenFence              int32 = 63 // first guess
+	IconLava                     int32 = 159
 	IconTreeDark                 int32 = 5
 	IconTreeLight                int32 = 4
 	IconDungeonOfDoomFloorModern int32 = 157
