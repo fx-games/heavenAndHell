@@ -125,6 +125,9 @@ func (u *UIController) handleKeyboardInput() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyV) {
 		act.AimedThrow()
 	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyE) {
+		u.openSpellMenu()
+	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		act.QuickRangedAttack()
 	}

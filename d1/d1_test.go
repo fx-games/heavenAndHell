@@ -280,3 +280,32 @@ func TestObjectsAndThemes(t *testing.T) {
 	}
 	t.Logf("%d theme rooms, objects by kind: %v", themed, kinds)
 }
+
+func TestSpells(t *testing.T) {
+	d, err := Load(os.DirFS("../files"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	sorc, rogue, warrior := NewHero(Sorcerer), NewHero(Rogue), NewHero(Warrior)
+	if sorc.SpellLevels[SplFirebolt] != 2 {
+		t.Fatalf("sorcerer starts with firebolt level %d", sorc.SpellLevels[SplFirebolt])
+	}
+	rogue.SpellLevels[SplFirebolt] = 2
+	for _, c := range []struct {
+		h           *Hero
+		spell, mana int
+	}{{sorc, SplFirebolt, 6}, {rogue, SplFirebolt, 4}, {warrior, SplHeal, 7}} {
+		if got := d.ManaCost(c.h, Sheet{}, c.spell) >> 6; got != c.mana {
+			t.Errorf("class %d spell %d costs %d mana, want %d", c.h.Class, c.spell, got, c.mana)
+		}
+	}
+	if len(NovaRays) != 36 {
+		t.Errorf("nova sends %d rays, want 36", len(NovaRays))
+	}
+	if g := GolemStats(1, 1, 0); g.HP != 10 || g.Hit != 47 || g.MinDam != 10 || g.MaxDam != 18 {
+		t.Errorf("golem %+v", g)
+	}
+	if StoneTurns(1) != 14 || FireWallTurns(0) != 20 {
+		t.Errorf("stone %d turns, fire wall %d turns", StoneTurns(1), FireWallTurns(0))
+	}
+}

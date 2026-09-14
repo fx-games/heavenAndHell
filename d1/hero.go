@@ -62,6 +62,9 @@ func NewHero(class int) *Hero {
 		mana *= 2
 	}
 	h.HPBase, h.MaxHPBase, h.ManaBase, h.MaxManaBase = hp, hp, mana, mana
+	if class == Sorcerer {
+		h.SpellLevels[SplFirebolt] = 2
+	}
 	return h
 }
 

@@ -94,6 +94,14 @@ func (o *D1Object) ActorBumpedInto(actor *Actor, _ func() bool) {
 	}
 }
 
+func d1ObjectAt(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point) *D1Object {
+	if !m.Contains(p) || !m.IsObjectAt(p) {
+		return nil
+	}
+	o, _ := m.ObjectAt(p).(*D1Object)
+	return o
+}
+
 // d1World places generated objects, theme monsters and items on a level map.
 type d1World struct {
 	f *Factory
@@ -219,8 +227,8 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		t := [4]int{d1.ITypeSword, d1.ITypeAxe, d1.ITypeBow, d1.ITypeMace}[gen.Rng.Intn(4)]
 		drop(gen.TypeItem(dlvl, t, "", dlvl > 4))
 	case d1.ObjMurkyFtn:
-		// ponytail: MIS_INFRA (see monsters through walls) comes with the spells of milestone 5
-		msg("You drink from the Murky Pool. Your vision sharpens for a moment.")
+		player.AddStatusEffect(StatusInfravision, d1.InfravisionTurns(2*((dlvl-1)/4+1)))
+		msg("You drink from the Murky Pool. You can see in the dark.")
 	case d1.ObjTearFtn:
 		from := gen.Rng.Intn(4)
 		to := gen.Rng.Intn(3)
@@ -246,6 +254,7 @@ func (f *Factory) d1Skeleton(mt int, pos geometry.Point, player *Actor) {
 	a.d1Monster.SpawnIndex = -1 // saved in LevelSnapshot.Spawned
 	a.SetDrawPosition(cells[0].ToPointF())
 	m.AddActor(a, cells[0])
+	f.state.OnActorSpawned(a)
 	d1Alert(a, player)
 }
 
@@ -294,7 +303,7 @@ func (f *Factory) breakD1Barrel(o *D1Object, player *Actor) {
 					f.actionBroker.QueueForExecution(NewChangeResourceAction(cause, a, stats.Health, -float64(dam)))
 				}
 			}
-			if other, ok := m.ObjectAt(p).(*D1Object); ok && m.IsObjectAt(p) && other.O.Kind == d1.ObjBarrelEx && other.O.Active {
+			if other := d1ObjectAt(m, p); other != nil && other.O.Kind == d1.ObjBarrelEx && other.O.Active {
 				f.breakD1Barrel(other, player)
 			}
 		}
@@ -390,7 +399,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 			}
 		}
 	case 4, 11: // Magical
-		// ponytail: the mana shield comes with the spells of milestone 5
+		player.AddStatusEffect(StatusManaShield, -1)
 	case 5: // Stone
 		for _, it := range all {
 			if it.d1.Type == d1.ITypeStaff {
@@ -424,7 +433,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 	case 9: // Fascinating
 		learn(1)
 	case 10: // Cryptic
-		// ponytail: the nova comes with the spells of milestone 5
+		f.actionBroker.Execute(NewSpellAction(player, d1.SplNova, 2*lt, player.MapPosition()))
 		mana.SetToMax()
 	case 12: // Eldritch
 		for _, it := range pack {
@@ -458,23 +467,8 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 		}
 		hp.SetToMax()
 		mana.SetToMax()
-	case 15: // Holy: MIS_RNDTELEPORT jumps 4-6 cells along each axis
-		p := player.MapPosition()
-		for try := 0; try < 500; try++ {
-			dx, dy := gen.Rng.Intn(3)+4, gen.Rng.Intn(3)+4
-			if gen.Rng.Intn(2) == 1 {
-				dx = -dx
-			}
-			if gen.Rng.Intn(2) == 1 {
-				dy = -dy
-			}
-			if q := p.Add(geometry.Point{X: dx, Y: dy}); m.CanPlaceActorHere(q) {
-				m.MoveActor(player, q)
-				player.SetDrawPosition(q.ToPointF())
-				f.actionBroker.QueueForExecution(NewUpdateFoVAction(NewActorCause("Holy shrine", player), player))
-				break
-			}
-		}
+	case 15: // Holy
+		f.d1RandomTeleport(player)
 	case 16: // Sacred
 		learn(14)
 	case 17: // Spiritual
@@ -503,5 +497,6 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 		it.RefreshD1()
 	}
 	SyncHero(player)
+	f.RefreshD1Spells(player)
 	f.logError(d1.ShrineMessages[shrine])
 }

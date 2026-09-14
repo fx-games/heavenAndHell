@@ -178,6 +178,7 @@ type SpellData struct {
 	ID, Type, Name                          string
 	Mana, BookLvl, StaffLvl, MinInt         int
 	StaffMin, StaffMax, BookCost, StaffCost int
+	ManaAdj, MinMana                        int
 	Town                                    bool
 }
 
@@ -307,7 +308,7 @@ func Load(fsys fs.FS) (*Data, error) {
 			ID: r.s("sName"), Type: r.s("sType"), Name: name, Mana: r.i("sManaCost"),
 			BookLvl: r.i("sBookLvl"), StaffLvl: r.i("sStaffLvl"), MinInt: r.i("sMinInt"),
 			StaffMin: r.i("sStaffMin"), StaffMax: r.i("sStaffMax"), BookCost: r.i("sBookCost"), StaffCost: r.i("sStaffCost"),
-			Town: r.i("sTownSpell") != 0,
+			Town: r.i("sTownSpell") != 0, ManaAdj: r.i("sManaAdj"), MinMana: r.i("sMinMana"),
 		})
 	}
 	if len(d.Monsters) != 112 || len(d.Items) != 156 || len(d.Spells) != 37 {

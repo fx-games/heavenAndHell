@@ -1393,6 +1393,10 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) AddTransitionAt(pos geometry.
 	m.transitionMap[pos] = transition
 }
 
+func (m *GridMap[ActorType, ItemType, ObjectType]) RemoveTransitionAt(pos geometry.Point) {
+	delete(m.transitionMap, pos)
+}
+
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetTransitionAt(pos geometry.Point) (Transition, bool) {
 	transition, ok := m.transitionMap[pos]
 	return transition, ok

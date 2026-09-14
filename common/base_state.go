@@ -42,6 +42,7 @@ type State struct {
 	currentMap     *gridmap.GridMap[*Actor, *Item, Object]
 	townMaps       map[string]*gridmap.GridMap[*Actor, *Item, Object]
 	dungeonMaps    map[string]*gridmap.GridMap[*Actor, *Item, Object]
+	d1Portal       *D1Portal
 	player         *Actor
 	camera         Camera
 	msg            func(string)

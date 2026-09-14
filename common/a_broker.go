@@ -185,10 +185,10 @@ func (d *Broker) CancelAllAnimations() {
 
 func (d *Broker) ClearQueuedActions(shouldBeRemoved func(action Action) bool) {
 	for i := len(d.queuedActions) - 1; i >= 0; i-- {
-		actions := d.queuedActions[i]
-		for _, action := range actions {
-			if shouldBeRemoved(action) {
-				actions = append(actions[:i], actions[i+1:]...)
+		var actions []Action
+		for _, action := range d.queuedActions[i] {
+			if !shouldBeRemoved(action) {
+				actions = append(actions, action)
 			}
 		}
 		if len(actions) == 0 {

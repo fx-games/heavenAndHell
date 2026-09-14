@@ -500,8 +500,10 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	player.GetStats().GetResource(stats.Health).SetToMax()
 	player.GetStats().GetResource(stats.Mana).SetToMax()
 	player.GetStats().SetOnChangeHandler(g.updateStatsDisplay)
+	g.factory.RefreshD1Spells(player)
 	player.GetEquipment().SetOnChangeHandler(func() {
 		common.SyncHero(player)
+		g.factory.RefreshD1Spells(player)
 		g.sendEquipmentToWindowClient()
 	})
 	player.GetInventory().SetOnChangeHandler(g.sendInventoryToWindowClient)
@@ -517,6 +519,8 @@ func (g *GameInstance) spawnItemInTown(namedLocation string, item *common.Item) 
 	location := townMap.GetNamedLocation(namedLocation)
 	townMap.AddItem(item, location)
 }
+
+func (g *GameInstance) GetFactory() *common.Factory { return g.factory }
 
 func (g *GameInstance) GetWorldState() *common.State {
 	return &g.state
@@ -838,6 +842,7 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 		g.state.SetTownMap(currentMap)
 		if newMapName == string(defs.LevelNameTown) {
 			g.setupD1Town(currentMap)
+			common.PlaceD1Portal(g.GetWorldState(), currentMap)
 		} else if newMapName == string(defs.LevelNameTownHell) {
 			g.setupHellTownTransitions(currentMap)
 		}
@@ -851,6 +856,7 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 	if defs.IsTownLevel(oldMapName) {
 		g.GetAudio().PlayCue("heavy_door")
 	}
+	g.onD1MapChanged(oldMapName, newMapName)
 
 	g.actions.updateFoV()
 	g.SaveGame()

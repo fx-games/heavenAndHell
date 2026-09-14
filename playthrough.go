@@ -68,6 +68,11 @@ func playthrough() {
 			fmt.Printf("run %d (%s) dlvl %d: %d monsters, %d kills, %d damage taken, level %d, %d D1 items on floor\n",
 				run, player.Name(), dlvl, monsters, kills, damageTaken, player.Hero().Level, items)
 
+			if run == 3 && dlvl == 2 { // milestone 5: the sorcerer casts every spell
+				castAllSpells(theGame.GetFactory(), theGame.GetActionBroker(), state, player, fail)
+				player = state.GetPlayer()
+			}
+
 			// milestone 2: save, load, and everything that matters is back
 			before := saveCheckOf(state)
 			theGame.SaveGame()
@@ -267,4 +272,84 @@ func checkTown(state *common.State, fail func(string, ...any)) {
 			d.Durability = d.MaxDur
 		}
 	}
+}
+
+// castAllSpells teaches the hero all 26 spells and casts each at the nearest monster; then it walks through the
+// town portal and back, which closes it.
+func castAllSpells(f *common.Factory, broker *common.Broker, state *common.State, player *common.Actor, fail func(string, ...any)) {
+	spells := []int{d1.SplFirebolt, d1.SplHeal, d1.SplLightning, d1.SplFlash, d1.SplIdentify, d1.SplFireWall, d1.SplStone,
+		d1.SplInfra, d1.SplPhasing, d1.SplManaShield, d1.SplFireball, d1.SplGuardian, d1.SplChain, d1.SplWave, d1.SplNova,
+		d1.SplInferno, d1.SplGolem, d1.SplTeleport, d1.SplApocalypse, d1.SplElemental, d1.SplChargedBolt, d1.SplHolyBolt,
+		d1.SplTelekinesis, d1.SplBloodStar, d1.SplBoneSpirit, d1.SplTown}
+	h := player.Hero()
+	for _, sp := range spells {
+		h.SpellLevels[sp] = 5
+	}
+	h.MaxManaBase += 5000 << 6
+	common.SyncHero(player)
+	f.RefreshD1Spells(player)
+	m := state.GetMap()
+	mana, hp := player.GetStats().GetResource(stats.Mana), player.GetStats().GetResource(stats.Health)
+	monsterHP := func() (sum int) {
+		for _, a := range m.Actors() {
+			if mon := a.D1Monster(); mon != nil && !mon.Golem && a.IsAlive() {
+				sum += a.GetStats().GetResource(stats.Health).Value()
+			}
+		}
+		return
+	}
+	dealt := 0
+	var failed []string
+	for _, sp := range spells {
+		var target *common.Actor
+		for _, a := range m.Actors() {
+			if mon := a.D1Monster(); mon != nil && !mon.Golem && a.IsAlive() && len(m.GetFreeCardinalNeighbors(a.MapPosition())) > 0 && (target == nil ||
+				geometry.DistanceChebyshev(a.MapPosition(), player.MapPosition()) < geometry.DistanceChebyshev(target.MapPosition(), player.MapPosition())) {
+				target = a
+			}
+		}
+		if target == nil {
+			fail("spells: no monster left to cast at")
+		}
+		if geometry.DistanceChebyshev(target.MapPosition(), player.MapPosition()) > 1 {
+			free := m.GetFreeCardinalNeighbors(target.MapPosition())[0]
+			m.MoveActor(player, free)
+			player.SetDrawPosition(free.ToPointF())
+			broker.Execute(common.NewUpdateFoVAction(common.AbstractCause("playthrough"), player))
+		}
+		mana.SetToMax()
+		hp.SetToMax()
+		before, manaBefore := monsterHP(), mana.Value()
+		f.CastD1FromMemory(player, sp, target.MapPosition())
+		if mana.Value() == manaBefore {
+			failed = append(failed, state.GetMap().GetName()+": "+fmt.Sprint(sp))
+		}
+		dealt += max(before-monsterHP(), 0)
+		if os.Getenv("PLAYTHROUGH_DEBUG") != "" {
+			fmt.Printf("DEBUG spell %d at %s %v res=%x (dist %d): %d damage, mana %d->%d\n", sp, target.Name(), target.MapPosition(), target.D1Monster().MagicRes,
+				geometry.DistanceChebyshev(target.MapPosition(), player.MapPosition()), before-monsterHP(), manaBefore, mana.Value())
+		}
+	}
+	for turn := 0; turn < 10; turn++ { // fire walls and the guardian burn on their own turns
+		broker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("playthrough"), 10))
+		hp.SetToMax()
+	}
+	golem := false
+	for _, a := range m.Actors() {
+		golem = golem || a.D1Monster() != nil && a.D1Monster().Golem
+	}
+	// Identify has nothing to identify and Telekinesis may find no room to push; everything else must cast.
+	if len(failed) > 2 || dealt == 0 || !golem || state.D1Portal() == nil {
+		fail("spells: failed casts %v, damage %d, golem %v, portal %v", failed, dealt, golem, state.D1Portal())
+	}
+	portal := *state.D1Portal()
+	state.MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"})
+	if !state.GetMap().IsObjectAt(state.GetMap().GetNamedLocation("portal")) {
+		fail("spells: no town portal in town")
+	}
+	state.MapTransition(gridmap.Transition{TargetMap: portal.Map, TargetLocation: "portal"})
+	if state.D1Portal() != nil || state.GetMap().GetName() != portal.Map {
+		fail("spells: town portal round trip didn't close the portal (%v on %s)", state.D1Portal(), state.GetMap().GetName())
+	}
+	fmt.Printf("spells: %d damage, failed casts %v\n", dealt, failed)
 }

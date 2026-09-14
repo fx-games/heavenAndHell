@@ -94,7 +94,21 @@ func (g *Factory) NewD1Item(it *d1.Item) *Item {
 		item.SetCategory(defs.ItemCategoryOther)
 		switch it.MiscID {
 		case "IMISC_SCROLL", "IMISC_SCROLLT":
-			item.SetCategory(defs.ItemCategoryScroll) // ponytail: reading scrolls comes with spells (milestone 5)
+			item.SetCategory(defs.ItemCategoryScroll)
+			item.SetCharges(1)
+			item.SetDestroyAfterUse(true)
+			g.d1SpellItemAction(item)
+		case "IMISC_BOOK":
+			book := it
+			action := NewUntargetedAction(it.Name, item.icon)
+			action.SetEffect(&UntargetedEffect{
+				Effect:      func(user *Actor, _ EffectSource) { g.readD1Book(user, book) },
+				Description: []util.LabelText{util.LabelTextFromString(it.Name)},
+			})
+			item.SetCategory(defs.ItemCategoryScroll)
+			item.SetCharges(1)
+			item.SetDestroyAfterUse(true)
+			item.SetUntargetedAction(action)
 		case "IMISC_HEAL", "IMISC_FULLHEAL", "IMISC_MANA", "IMISC_FULLMANA", "IMISC_REJUV", "IMISC_FULLREJUV",
 			"IMISC_ELIXSTR", "IMISC_ELIXMAG", "IMISC_ELIXDEX", "IMISC_ELIXVIT", "IMISC_SPECELIX":
 			miscID := it.MiscID
@@ -108,6 +122,9 @@ func (g *Factory) NewD1Item(it *d1.Item) *Item {
 			item.SetDestroyAfterUse(true)
 			item.SetUntargetedAction(action)
 		}
+	}
+	if it.Type == d1.ITypeStaff && it.Spell > 0 && it.MaxCharges > 0 {
+		g.d1SpellItemAction(item)
 	}
 	item.SetRarity(ItemRarity(it.Magical))
 	item.RefreshD1()
@@ -137,6 +154,9 @@ func (i *Item) RefreshD1() {
 	}
 	if it.MaxCharges > 0 {
 		add("Charges: %d/%d", it.Charges, it.MaxCharges)
+		if i.HasAction() {
+			i.actionCharges = it.Charges
+		}
 	}
 	if it.Magical > 0 && !it.Identified {
 		add("Not Identified")

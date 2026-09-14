@@ -65,8 +65,11 @@ func (u *UIController) drawActors() {
 		u.tileRenderer.DrawDefaultScaleTile(float64(screenPos.X), float64(screenPos.Y), actorAtlas, downedActor.Icon(u.worldTicks), u.context.GameState().ApplyLighting(downedActor.MapPosition(), enemyColor, u.worldTicks))
 	}
 
+	infravision := player.HasStatusEffect(common.StatusInfravision)
 	for _, actor := range state.GetMap().Actors() {
-		if !visibleMapOnScreen.Contains(actor.MapPosition()) || !playerFieldOfView.Visible(actor.MapPosition()) {
+		seen := playerFieldOfView.Visible(actor.MapPosition()) ||
+			infravision && geometry.DistanceChebyshev(actor.MapPosition(), player.MapPosition()) <= 15 // D1 infravision: monsters through walls
+		if !visibleMapOnScreen.Contains(actor.MapPosition()) || !seen {
 			continue
 		}
 		if !actor.IsVisible() && !player.HasStatusEffect(common.StatusSeeInvisible) {

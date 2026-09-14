@@ -81,6 +81,7 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 	if snap := g.snapshots[targetMap]; snap != nil {
 		snap.apply(g.factory, m)
 	}
+	PlaceD1Portal(g.factory.state, m)
 
 	m.SetDisplayName(levelDef.LevelName)
 	return m

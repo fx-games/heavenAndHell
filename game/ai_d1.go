@@ -21,7 +21,8 @@ type d1Brain struct {
 	mon    *common.D1Monster
 	pos    geometry.Point
 	enemy  geometry.Point
-	dx, dy int // monster minus enemy, D1's mx/my
+	target *common.Actor // who stands at enemy: the player or their golem
+	dx, dy int           // monster minus enemy, D1's mx/my
 }
 
 var noAct = d1Act{}
@@ -34,11 +35,17 @@ func (g *GameInstance) getD1MonsterAction(a *common.Actor) (int, func()) {
 		return 0, nil
 	}
 	player := g.state.GetPlayer()
-	if !player.IsAlive() || a.HasStatusEffect(common.StatusStunned) {
+	if !player.IsAlive() || a.HasStatusEffect(common.StatusStunned) || a.HasStatusEffect(common.StatusStone) {
 		return 10, func() {}
 	}
 	mon := b.mon
-	b.enemy = player.MapPosition()
+	if mon.Golem {
+		return b.golem()
+	}
+	b.enemy, b.target = player.MapPosition(), player
+	if golem := g.golemOnMap(); golem != nil && geometry.DistanceSquared(b.pos, golem.MapPosition()) < geometry.DistanceSquared(b.pos, b.enemy) {
+		b.enemy, b.target = golem.MapPosition(), golem // M_Enemy: the closest of player and golem
+	}
 	b.dx, b.dy = b.pos.X-b.enemy.X, b.pos.Y-b.enemy.Y
 	if player.CanSee(b.pos) {
 		mon.Squelch, mon.Last = 255, b.enemy
@@ -121,13 +128,48 @@ func (b *d1Brain) delay(ticks int) (d1Act, bool) {
 }
 
 func (b *d1Brain) attack() (d1Act, bool) {
-	player := b.g.state.GetPlayer()
+	target := b.target
 	if b.g.state.GetMap().MoveDistance(b.pos, b.enemy) > 1 {
 		return noAct, false
 	}
 	return d1Act{cost: b.attackCost(), mode: common.D1ModeAttack, run: func() {
-		b.g.actionBroker.Execute(common.NewMeleeAttackAction(common.NewActorCause("Melee attack", b.a), b.a, player))
+		b.g.actionBroker.Execute(common.NewMeleeAttackAction(common.NewActorCause("Melee attack", b.a), b.a, target))
 	}}, true
+}
+
+func (g *GameInstance) golemOnMap() *common.Actor {
+	for _, a := range g.state.GetMap().Actors() {
+		if mon := a.D1Monster(); mon != nil && mon.Golem && a.IsAlive() {
+			return a
+		}
+	}
+	return nil
+}
+
+// golem ports MAI_Golum: fight the closest monster in line, otherwise stay with the player.
+func (b *d1Brain) golem() (int, func()) {
+	player := b.g.state.GetPlayer()
+	for _, a := range b.g.state.GetMap().Actors() {
+		mon := a.D1Monster()
+		if mon == nil || mon.Golem || !a.IsAlive() || geometry.DistanceChebyshev(b.pos, a.MapPosition()) > 15 || !b.lineClear(a.MapPosition()) {
+			continue
+		}
+		if b.target == nil || geometry.DistanceSquared(b.pos, a.MapPosition()) < geometry.DistanceSquared(b.pos, b.enemy) {
+			b.enemy, b.target = a.MapPosition(), a
+		}
+	}
+	act, ok := noAct, false
+	if b.target != nil {
+		if act, ok = b.attack(); !ok {
+			act, ok = b.callWalk(b.dirTo(b.enemy))
+		}
+	} else if geometry.DistanceChebyshev(b.pos, player.MapPosition()) > 2 {
+		act, ok = b.callWalk(b.dirTo(player.MapPosition()))
+	}
+	if !ok {
+		return 10, func() {}
+	}
+	return act.cost, act.run
 }
 
 func (b *d1Brain) shoot() (d1Act, bool) {

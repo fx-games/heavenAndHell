@@ -28,7 +28,7 @@ type LevelSnapshot struct {
 func SnapshotLevel(m *gridmap.GridMap[*Actor, *Item, Object]) *LevelSnapshot {
 	s := &LevelSnapshot{Monsters: map[int]SavedMonster{}}
 	for _, a := range m.Actors() {
-		if mon := a.d1Monster; mon != nil && a.IsAlive() {
+		if mon := a.d1Monster; mon != nil && a.IsAlive() && !mon.Golem {
 			p := a.MapPosition()
 			saved := SavedMonster{HP: a.GetStats().GetResource(stats.Health).Value(), X: p.X, Y: p.Y, Type: mon.Type}
 			if mon.SpawnIndex < 0 {

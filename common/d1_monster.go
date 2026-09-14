@@ -25,7 +25,8 @@ type D1Monster struct {
 	Last                               geometry.Point
 	Dir                                int // index into D1Dirs
 	Leader                             *Actor
-	SpawnIndex                         int // order of creation on its level, identifies the monster in saves
+	SpawnIndex                         int  // order of creation on its level, identifies the monster in saves
+	Golem                              bool // the player's golem (AI_GOLUM), fights for the player
 }
 
 // D1 monster modes (MON_MODE) the AI compares against.

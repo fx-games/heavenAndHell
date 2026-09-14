@@ -4,6 +4,7 @@ import (
 	"rpg/common"
 	"rpg/d1"
 	"rpg/defs"
+	"rpg/geometry"
 	"rpg/gridmap"
 )
 
@@ -104,6 +105,24 @@ func (g *GameInstance) stock(inv *common.Inventory, items []*d1.Item, price func
 			item.SetBaseCost(price(it))
 			inv.Add(item)
 		}
+	}
+}
+
+// onD1MapChanged: the golem and the mana shield don't follow the player to another level (D1 clears missiles and
+// the golem on level change), and walking back through the town portal closes it.
+func (g *GameInstance) onD1MapChanged(oldMapName, newMapName string) {
+	if old := g.state.GetDungeonMap(oldMapName); old != nil {
+		for _, a := range append([]*common.Actor(nil), old.Actors()...) {
+			if mon := a.D1Monster(); mon != nil && mon.Golem {
+				old.RemoveActor(a)
+			}
+		}
+	}
+	player := g.state.GetPlayer()
+	player.GetStatusEffects().SetFalse(string(common.StatusManaShield))
+	if p := g.state.D1Portal(); p != nil && defs.IsTownLevel(oldMapName) && newMapName == p.Map &&
+		geometry.DistanceChebyshev(player.MapPosition(), geometry.Point{X: p.X, Y: p.Y}) <= 1 {
+		g.state.CloseD1Portal()
 	}
 }
 

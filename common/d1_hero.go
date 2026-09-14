@@ -133,6 +133,9 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 		if ranged {
 			chance = h.ArrowHitChance(s, mon.AC, dist)
 		}
+		if def.HasStatusEffect(StatusStone) {
+			chance = 100
+		}
 		d1Alert(def, att)
 		if d1Rng.Intn(100) >= chance {
 			logMissed(ctx, att, def)
@@ -173,11 +176,19 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 			return 0, nil, true
 		}
 		d1Broke(ctx, def, d1.ArmorDur(d1Rng, def.equippedD1()))
-		dam = d1.MonsterDamage(d1Rng, s, mon.MinDam, mon.MaxDam) >> 6
+		dam = d1ManaShield(def, d1.MonsterDamage(d1Rng, s, mon.MinDam, mon.MaxDam)>>6)
 		if !ranged && s.Flags&d1.ISplThorns != 0 {
 			extra = append(extra, NewChangeResourceAction(NewActorCause("Thorns", def), att, stats.Health, -float64(d1Rng.Intn(3)+1)))
 		}
 		return dam, extra, true
+	case att.d1Monster != nil && def.d1Monster != nil: // the golem and the monsters fighting it: M_TryM2MHit
+		mon := att.d1Monster
+		if !def.HasStatusEffect(StatusStone) && d1Rng.Intn(100) >= mon.Hit {
+			logMissed(ctx, att, def)
+			return 0, nil, true
+		}
+		d1Alert(def, att)
+		return mon.MinDam + d1Rng.Intn(max(mon.MaxDam-mon.MinDam+1, 1)), nil, true
 	}
 	return 0, nil, false
 }
@@ -221,6 +232,12 @@ func d1FallenFear(state *State, pos geometry.Point) {
 func d1OnKill(ctx ActionContext, killer, victim *Actor) []Action {
 	state := ctx.GameState
 	mon := victim.d1Monster
+	if killer.d1Monster != nil && killer.d1Monster.Golem {
+		killer = state.GetPlayer() // the golem's kills are the player's
+	}
+	if mon.Golem {
+		return nil
+	}
 	if h := killer.hero; h != nil {
 		before := h.Level
 		h.AddExperience(mon.Level, mon.Exp)
@@ -229,6 +246,7 @@ func d1OnKill(ctx ActionContext, killer, victim *Actor) []Action {
 			killer.GetStats().GetResource(stats.Health).SetToMax()
 			killer.GetStats().GetResource(stats.Mana).SetToMax()
 			ctx.Msg(fmt.Sprintf("You reached level %d! (%d stat points to spend)", h.Level, h.StatPts))
+			state.factory.RefreshD1Spells(killer)
 		}
 	}
 	d1FallenFear(state, victim.MapPosition())

@@ -58,7 +58,6 @@ func (d *DamageDealingObject) IsPassableForProjectile() bool {
 
 func (d *DamageDealingObject) Turn() {
 	d.turnsUntilRemoval--
-	println("turns until removal", d.turnsUntilRemoval)
 	if d.onTurn != nil {
 		d.onTurn()
 	}

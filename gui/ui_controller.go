@@ -864,6 +864,29 @@ func (u *UIController) addSkillsOverlay(pixelEdgeFromBottomRight geometry.Point)
 
 	return u.OpenSkillsOverlay(pixelEdgeFromBottomRight, tileSize, dataSource)
 }
+// openSpellMenu lists the memorized D1 spells; picking one casts it (targeted spells start targeting first).
+func (u *UIController) openSpellMenu() {
+	player := u.context.GameState().GetPlayer()
+	var items []util.MenuItem
+	for _, skill := range player.GetTargetedSkills() {
+		s := skill
+		items = append(items, util.MenuItem{MainText: s.Name(), Action: func() {
+			u.context.PlayerAction().BeginActionTargeting(s)
+		}})
+	}
+	for _, skill := range player.GetUntargetedSkills() {
+		s := skill
+		items = append(items, util.MenuItem{MainText: s.Name(), Action: func() {
+			u.context.PlayerAction().ActivateUntargetedAction(s, common.EffectSource(s.GetInternalName()))
+		}})
+	}
+	if len(items) == 0 {
+		u.ShowLogMessage("You don't know any spells.")
+		return
+	}
+	u.OpenMenu(items)
+}
+
 func (u *UIController) GetActiveSkillsForUI(player *common.Actor) []UIElement {
 	var activeSkills []UIElement
 	for _, skill := range player.GetTargetedSkills() {
@@ -1322,6 +1345,10 @@ func (u *UIController) showHelpText() {
 		},
 		{
 			Text:      "Press 'f' to aim at a specific enemy with your ranged weapon",
+			TextColor: textColor,
+		},
+		{
+			Text:      "Press 'e' to cast a spell you know (read books to learn more)",
 			TextColor: textColor,
 		},
 		{
