@@ -1549,9 +1549,9 @@
 							"height": 8,
 							"defUid": 106,
 							"px": [96,144],
-							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Abel's Tools for self-defense", "__tile": null, "defUid": 107, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Deckard Cain", "__tile": null, "defUid": 107, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["Abel's Tools for self-defense"]
+								"params": ["Deckard Cain"]
 							}] }]
 						},
 						{
@@ -1568,10 +1568,10 @@
 							"height": 8,
 							"defUid": 106,
 							"px": [144,144],
-							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Kirioth's world of Wonders\nDuring the siege of the undead only: Free heal with every visit", "__tile": null, "defUid": 107, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Adria the Witch", "__tile": null, "defUid": 107, "realEditorValues": [{
 								"id": "V_String",
 								"params": [
-									"Kirioth's world of Wonders\\nDuring the siege of the undead only: Free heal with every visit"
+									"Adria the Witch"
 								]
 							}] }]
 						},
@@ -1589,9 +1589,9 @@
 							"height": 8,
 							"defUid": 106,
 							"px": [96,48],
-							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Shekel's Inventory of extended diplomacy", "__tile": null, "defUid": 107, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Griswold the Blacksmith", "__tile": null, "defUid": 107, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["Shekel's Inventory of extended diplomacy"]
+								"params": ["Griswold the Blacksmith"]
 							}] }]
 						},
 						{
@@ -1608,9 +1608,9 @@
 							"height": 8,
 							"defUid": 106,
 							"px": [272,144],
-							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Adventurer Supply", "__tile": null, "defUid": 107, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Pepin the Healer", "__tile": null, "defUid": 107, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["Adventurer Supply"]
+								"params": ["Pepin the Healer"]
 							}] }]
 						},
 						{

@@ -47,7 +47,7 @@ func (s *State) getTextForKirioth() []TriggeredDialogue {
 		// TODO: REWARDS ARE STATE CHANGES AND SHOULD THEREFORE BE AN ACTION..
 		s.GetFlags().SetTrue("quest_rewarded:meat_jack")
 
-		rewardItem := s.factory.NewRandomWeapon(4)
+		rewardItem := s.factory.NewD1Item(s.factory.D1().FloorItem(4, true, false))
 
 		s.GetPlayer().GetInventory().Add(rewardItem)
 
@@ -65,7 +65,7 @@ func (s *State) getTextForKirioth() []TriggeredDialogue {
 	addLuciferQuestReward := func() {
 		s.GetFlags().SetTrue("quest_rewarded:lucifer")
 
-		rewardItem := s.factory.NewRandomWeapon(10)
+		rewardItem := s.factory.NewD1Item(s.factory.D1().FloorItem(10, true, false))
 		s.GetPlayer().GetInventory().Add(rewardItem)
 
 		rewardXP := 1000
@@ -98,7 +98,7 @@ func (s *State) getTextForShekel() []TriggeredDialogue {
 	addSkeletonKingQuestReward := func() {
 		s.GetFlags().SetTrue("quest_rewarded:skeleton_king")
 
-		rewardItem := s.factory.NewRandomWeapon(6)
+		rewardItem := s.factory.NewD1Item(s.factory.D1().FloorItem(6, true, false))
 		s.GetPlayer().GetInventory().Add(rewardItem)
 
 		rewardXP := 1000
@@ -124,7 +124,7 @@ func (s *State) getTextForAbel() []TriggeredDialogue {
 	addPoisonQuestReward := func() {
 		s.GetFlags().SetTrue("quest_rewarded:poisoned_water")
 
-		rewardItem := s.factory.NewRandomWeapon(6)
+		rewardItem := s.factory.NewD1Item(s.factory.D1().FloorItem(6, true, false))
 		s.GetPlayer().GetInventory().Add(rewardItem)
 
 		rewardXP := 1000

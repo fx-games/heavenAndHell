@@ -182,6 +182,9 @@ func (i *Item) Counter() int {
 	return -1
 }
 func (i *Item) BuyPrice() int {
+	if i.d1 != nil {
+		return i.baseCost // set from D1 prices when stocked
+	}
 	itemPrice := i.baseCost
 	if i.IsArmor() {
 		pricePerPlus := 35
@@ -535,6 +538,9 @@ func (i *Item) GetItemHooks() []ItemActionHook {
 	return i.itemHooks
 }
 func (i *Item) GetTooltipLines(func(string) []util.ColoredTextPart) []util.LabelText {
+	if i.d1 != nil {
+		i.RefreshD1() // durability and charges change during play
+	}
 	info := []util.LabelText{util.LabelTextFromStringWithColor(i.Name(), defs.OffWhite)}
 
 	if i.nameOnlyInTooltip {

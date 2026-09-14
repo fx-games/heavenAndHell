@@ -55,9 +55,6 @@ func main() {
 		case "list":
 			theGame, _ := createGameAndUIContext()
 			dumpGameData(theGame.GetGameData())
-		case "create":
-			theGame, _ := createGameAndUIContext()
-			startCreator(theGame.GetGameData())
 		case "osr":
 			osrSim()
 		case "7drl":
@@ -298,10 +295,6 @@ func namesFrom(enemies []*osr.Character) string {
 	return strings.Join(names, ",")
 }
 
-func startCreator(data defs.DataContainer) {
-	creator := NewCreator(data)
-	creator.Run()
-}
 
 func genLoot(theGame *game.GameInstance) {
 	if len(os.Args) < 3 {
@@ -316,11 +309,6 @@ func genLoot(theGame *game.GameInstance) {
 }
 
 func dumpGameData(gameData defs.DataContainer) {
-	println("Defined Items:")
-	for key, _ := range gameData.ItemDefinitions {
-		println(fmt.Sprintf("  %s", key))
-	}
-
 	println("Defined Enemies:")
 	for key, _ := range gameData.EnemyDefinitions {
 		println(fmt.Sprintf("  %s", key))

@@ -159,3 +159,61 @@ func TestHero(t *testing.T) {
 		t.Fatal("speed tiers")
 	}
 }
+
+func TestStores(t *testing.T) {
+	d, err := Load(os.DirFS("../files"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := NewGenerator(d, rand.New(rand.NewSource(3)))
+	for lvl := 6; lvl <= 16; lvl += 5 {
+		for _, it := range g.SmithStock(lvl) {
+			if it.Type == ITypeMisc || it.Type == ITypeStaff || it.Type == ITypeRing || it.Magical != 0 || !it.Identified {
+				t.Fatalf("smith sells %+v", it)
+			}
+		}
+		witch := g.WitchStock(lvl)
+		if witch[0].MiscID != "IMISC_MANA" || witch[1].MiscID != "IMISC_FULLMANA" || witch[2].Spell != 7 || len(witch) < 10 {
+			t.Fatalf("witch stock starts wrong: %s %s %s (%d items)", witch[0].Name, witch[1].Name, witch[2].Name, len(witch))
+		}
+		healer := g.HealerStock(lvl)
+		if healer[0].MiscID != "IMISC_HEAL" || healer[1].MiscID != "IMISC_FULLHEAL" {
+			t.Fatalf("healer stock starts wrong: %s %s", healer[0].Name, healer[1].Name)
+		}
+		for _, it := range healer[2:] {
+			if it.MiscID == "IMISC_HEAL" || it.MiscID == "IMISC_MANA" {
+				t.Fatalf("healer random stock has %s", it.Name)
+			}
+		}
+		if boy := g.BoyItem(lvl); boy.Magical == 0 || boy.IValue > boyMaxVal || WirtPrice(boy) <= BuyPrice(boy) {
+			t.Fatalf("wirt item %+v", boy)
+		}
+	}
+
+	p := &Premium{}
+	g.RefillPremium(p, 1)
+	third := p.Items[3]
+	g.RefillPremium(p, 2)
+	if p.Level != 2 || p.Items[1] != third || p.Items[5] == nil {
+		t.Fatalf("premium rotation: level %d", p.Level)
+	}
+	p.Items[4] = nil
+	g.RefillPremium(p, 2)
+	if p.Items[4] == nil {
+		t.Fatal("premium slot not refilled")
+	}
+
+	sword := &Item{Type: ITypeSword, Class: "ICLASS_WEAPON", Value: 400, IValue: 400, MaxDur: 20, Durability: 1}
+	if SellPrice(sword) != 100 || RepairCost(sword) != 190 {
+		t.Fatalf("prices: sell %d repair %d", SellPrice(sword), RepairCost(sword))
+	}
+	if broke := WeaponDur(rand.New(rand.NewSource(1)), []*Item{sword}, 1); broke != sword || sword.Durability != 0 {
+		t.Fatalf("weapon should break, durability %d", sword.Durability)
+	}
+	if s := NewHero(Warrior).Sheet([]*Item{sword}); s.Active[0] || s.MinDam != 1 {
+		t.Fatalf("broken weapon still counts: %+v", s)
+	}
+	if !SmithBuys(sword) || WitchBuys(sword) {
+		t.Fatal("sell filters")
+	}
+}

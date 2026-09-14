@@ -74,6 +74,10 @@ type GameInstance struct {
 	levelSnapshots  map[string]*common.LevelSnapshot
 	autosave        bool // on once a game was started or loaded through the menus
 	permadeath      bool
+	premium         d1.Premium // Griswold's premium stock
+	boyItem         *d1.Item   // Wirt's item
+	boyLevel        int
+	storesShown     bool // stores were stocked this session, so missing items were bought
 
 
 	actions *Actions
@@ -227,6 +231,7 @@ func (g *GameInstance) ResetGame(playerStartDefinition defs.LoadoutDefinition) {
 func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, seed int64) {
 	g.levelSeed = seed
 	g.levelSnapshots = map[string]*common.LevelSnapshot{}
+	g.premium, g.boyItem, g.boyLevel, g.storesShown = d1.Premium{}, nil, 0, false
 	// we have loaded at this point:
 	// - random source
 	// - audio player
@@ -416,10 +421,6 @@ func (g *GameInstance) GetUserInterface() common.UserInterface {
 	return g.uiController
 }
 
-func (g *GameInstance) spawnDebugItems() {
-	masterSword := NewMasterSword(g.GetWorldState())
-	g.spawnItem(geometry.Point{X: 15, Y: 10}, masterSword)
-}
 
 func (g *GameInstance) handleLightSource() {
 	player := g.state.GetPlayer()
@@ -548,47 +549,6 @@ func (g *GameInstance) showDebugMenu() {
 			},
 		},
 		{
-			MainText: "Put End-Game Gear into Stash",
-			Action: func() {
-				stash := g.state.GetPlayerStashInTown()
-				stash.Add(g.factory.NewUniqueItemFromName("veil_of_darkness"))
-				stash.Add(g.factory.NewUniqueItemFromName("plate_mail_of_the_dark_lord"))
-				stash.Add(g.factory.NewUniqueItemFromName("eternal_darkness"))
-				stash.Add(g.factory.NewUniqueItemFromName("never_ending_night"))
-				stash.Add(g.factory.NewUniqueItemFromName("ancient_nightmares_hood"))
-				stash.Add(g.factory.NewUniqueItemFromName("boots_of_the_shadow_dancer"))
-				stash.Add(g.factory.NewUniqueItemFromName("black_hands"))
-				stash.Add(g.factory.NewUniqueItemFromName("amulet_of_shadows"))
-				stash.Add(g.factory.NewUniqueItemFromName("shadows_embrace"))
-				stash.Add(g.factory.NewUniqueItemFromName("wall_of_thorns"))
-				stash.Add(g.factory.NewUniqueItemFromName("soul_reaver"))
-				stash.Add(g.factory.NewUniqueItemFromName("malleus_maleficarum"))
-				stash.Add(g.factory.NewUniqueItemFromName("light_morning_star"))
-			},
-		},
-		{
-			MainText: "Put Level 2 Gear into Stash",
-			Action: func() {
-				stash := g.state.GetPlayerStashInTown()
-				stash.Add(g.factory.NewItemFromDefinitionName("hard_leather_cap", 2))
-				stash.Add(g.factory.NewItemFromDefinitionName("partial_leather_armour", 2))
-				stash.Add(g.factory.NewItemFromDefinitionName("leather_gloves", 2))
-				stash.Add(g.factory.NewItemFromDefinitionName("leather_boots", 2))
-				stash.Add(g.factory.NewItemFromDefinitionName("cloak", 2))
-				stash.Add(g.factory.NewItemFromDefinitionName("small_leather_shield", 2))
-				stash.Add(g.factory.NewItemFromDefinitionName("long_bow", 2))
-			},
-		},
-		{
-			MainText: "Put Random Wands into Stash",
-			Action: func() {
-				stash := g.state.GetPlayerStashInTown()
-				for i := 0; i < 10; i++ {
-					stash.Add(g.factory.NewRandomWand(1))
-				}
-			},
-		},
-		{
 			MainText: "Enchant Stash to +10",
 			Action: func() {
 				stash := g.state.GetPlayerStashInTown()
@@ -619,12 +579,6 @@ func (g *GameInstance) showDebugMenu() {
 			Action: func() {
 				visibleMap := g.uiController.GetVisibleMap()
 				g.PlayerMessage(fmt.Sprintf("Visible map: (%d, %d) - (%d, %d)", visibleMap.Min.X, visibleMap.Min.Y, visibleMap.Max.X, visibleMap.Max.Y))
-			},
-		},
-		{
-			MainText: "Spawn Debug Items",
-			Action: func() {
-				g.spawnDebugItems()
 			},
 		},
 		{
@@ -684,9 +638,8 @@ func (g *GameInstance) showDebugMenu() {
 
 				inv := g.state.GetPlayer().GetInventory()
 				for i := 0; i < 10; i++ {
-					inv.Add(g.factory.NewItemFromDefinitionName("healing_potion", 1))
-					inv.Add(g.factory.NewItemFromDefinitionName("mana_potion", 1))
-					inv.Add(g.factory.NewItemFromDefinitionName("speed_potion", 1))
+					inv.Add(g.factory.NewD1Item(g.factory.D1().PlainItem(d1.IdxHeal)))
+					inv.Add(g.factory.NewD1Item(g.factory.D1().PlainItem(d1.IdxMana)))
 				}
 				g.uiController.UpdateStatsLabel()
 			},
@@ -694,8 +647,9 @@ func (g *GameInstance) showDebugMenu() {
 		{
 			MainText: "give 10k XP",
 			Action: func() {
-				playerStats := g.state.GetPlayer().GetStats()
-				playerStats.SetAttribute(stats.Experience, 10000)
+				player := g.state.GetPlayer()
+				player.Hero().AddExperience(player.Hero().Level, 10000)
+				common.SyncHero(player)
 				g.uiController.UpdateStatsLabel()
 			},
 		},
@@ -882,19 +836,16 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 	if defs.IsTownLevel(newMapName) {
 		currentMap := g.state.GetMap()
 		g.state.SetTownMap(currentMap)
-		for _, actor := range currentMap.Actors() {
-			if !actor.IsVendor() {
-				continue
-			}
-			g.ensureVendorInventory(actor)
-		}
 		if newMapName == string(defs.LevelNameTown) {
-			g.setupTownTransitions(currentMap)
+			g.setupD1Town(currentMap)
 		} else if newMapName == string(defs.LevelNameTownHell) {
 			g.setupHellTownTransitions(currentMap)
 		}
 	} else { // dungeon map
 		g.state.SetDungeonMap(newMapName, g.state.GetMap())
+		if dlvl := common.LevelFromName(newMapName); dlvl > g.state.GetLastDungeonLevel() {
+			g.state.SetLastDungeonLevel(dlvl) // opens town gates, raises store item levels
+		}
 	}
 
 	if defs.IsTownLevel(oldMapName) {
@@ -910,37 +861,6 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 	}
 }
 
-func (g *GameInstance) setupTownTransitions(currentMap *gridmap.GridMap[*common.Actor, *common.Item, common.Object]) {
-	entrancePos := currentMap.GetNamedLocation("to_cathedral")
-
-	entranceTile := currentMap.GetCell(entrancePos).TileType
-	currentMap.SetTile(entrancePos, entranceTile.WithSpecial(gridmap.SpecialTileStairsDown))
-
-	currentMap.AddTransitionAt(entrancePos, gridmap.Transition{
-		TargetMap:      defs.LevelNameFromDepth(1),
-		TargetLocation: "ladder_up",
-	})
-
-	entrancePos = currentMap.GetNamedLocation("to_catacombs")
-
-	entranceTile = currentMap.GetCell(entrancePos).TileType
-	currentMap.SetTile(entrancePos, entranceTile.WithSpecial(gridmap.SpecialTileStairsDown))
-
-	currentMap.AddTransitionAt(entrancePos, gridmap.Transition{
-		TargetMap:      defs.LevelNameFromDepth(4),
-		TargetLocation: "to_town",
-	})
-
-	entrancePos = currentMap.GetNamedLocation("to_caves")
-
-	entranceTile = currentMap.GetCell(entrancePos).TileType
-	currentMap.SetTile(entrancePos, entranceTile.WithSpecial(gridmap.SpecialTileStairsDown))
-
-	currentMap.AddTransitionAt(entrancePos, gridmap.Transition{
-		TargetMap:      defs.LevelNameFromDepth(6),
-		TargetLocation: "to_town",
-	})
-}
 func (g *GameInstance) setupHellTownTransitions(currentMap *gridmap.GridMap[*common.Actor, *common.Item, common.Object]) {
 	caveEntrace := currentMap.GetNamedLocation("to_caves")
 
@@ -963,24 +883,6 @@ func (g *GameInstance) setupHellTownTransitions(currentMap *gridmap.GridMap[*com
 
 }
 
-func (g *GameInstance) ensureVendorInventory(actor *common.Actor) {
-	inventory := actor.GetInventory()
-	if !inventory.IsEmpty() {
-		return
-	}
-	var inventoryItems []*common.Item
-	definition, exists := g.dataDefinitions.VendorDefinitions[string(actor.GetVendorType())]
-	if !exists {
-		g.ErrLog(fmt.Sprintf("No store definition for %s", actor.GetVendorType()))
-		return
-	}
-
-	inventoryItems = g.getVendorInventoryFromDefinition(definition)
-
-	for _, item := range inventoryItems {
-		inventory.Add(item)
-	}
-}
 
 func (g *GameInstance) initPlayerSkills(player *common.Actor, targetedSkills []string, untargetedSkills []string) {
 	var targeted []*common.TargetedAction
@@ -1154,47 +1056,7 @@ func (g *GameInstance) GetGameData() defs.DataContainer {
 	return g.dataDefinitions
 }
 
-func (g *GameInstance) GenerateLoot(dungeonLevel int, count int) []*common.Item {
-	var result []*common.Item
-	for i := 0; i < count; i++ {
-		result = append(result, g.factory.GenerateLoot(dungeonLevel))
-	}
-	return result
-}
 
-func (g *GameInstance) getVendorInventoryFromDefinition(definition defs.VendorDefinition) []*common.Item {
-	itemsNeeded := max(len(definition.Always), definition.ItemCount.LinearRandom())
-	sometimesCount := 0
-	alwaysCount := 0
-	if len(definition.Always) > 0 {
-		alwaysCount = min(itemsNeeded, len(definition.Always))
-	}
-	if len(definition.Sometimes) > 0 {
-		sometimesCount = max(1, itemsNeeded - alwaysCount)
-	}
-
-
-	var result []*common.Item
-
-	for i := 0; i < len(definition.Always); i++ {
-		// add all the always items at least once
-		dungeonLevel := max(1, g.randomSource.Intn(g.state.GetLastDungeonLevel()))
-		itemName := definition.Always[i]
-		item := g.factory.NewItemFromDefinitionName(itemName, dungeonLevel)
-		result = append(result, item)
-	}
-
-	for i := 0; i < sometimesCount; i++ {
-		// choose a random item
-		dungeonLevel := max(1, g.randomSource.Intn(g.state.GetLastDungeonLevel()))
-		randomIndex := g.randomSource.Intn(len(definition.Sometimes))
-		itemName := definition.Sometimes[randomIndex]
-		item := g.factory.NewItemFromDefinitionName(itemName, dungeonLevel)
-		result = append(result, item)
-	}
-
-	return result
-}
 
 func (g *GameInstance) GetActions() common.PlayerActions {
 	return g.actions
@@ -1240,4 +1102,14 @@ func d1ClassIndex(internalName string) int {
 		return d1.Sorcerer
 	}
 	return d1.Warrior
+}
+
+func (g *GameInstance) GenerateLoot(dungeonLevel int, count int) []*common.Item {
+	var result []*common.Item
+	for len(result) < count {
+		if it := g.factory.D1().FloorItem(dungeonLevel, true, dungeonLevel > 12); it != nil {
+			result = append(result, g.factory.NewD1Item(it))
+		}
+	}
+	return result
 }

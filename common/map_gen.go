@@ -96,9 +96,8 @@ func (g *MapGenerator) GenerateMap(targetMap string, mapTemplates *ldtk.Project,
 			emptyMap.AddActor(enemy, pos)
 			g.spawnCompanions(emptyMap, enemy, companions, dungeonLevel)
 		} else if randomSource.Intn(100) < 1 && distToStairs > 7 && emptyMap.CanPlaceItemHere(pos) {
-			lootItem := g.factory.GenerateLoot(dungeonLevel)
-			if lootItem != nil {
-				emptyMap.AddItem(lootItem, pos)
+			if lootItem := g.factory.D1().FloorItem(dungeonLevel, false, dungeonLevel > 12); lootItem != nil {
+				emptyMap.AddItem(g.factory.NewD1Item(lootItem), pos)
 			}
 		}
 	}

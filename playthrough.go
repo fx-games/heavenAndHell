@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"rpg/common"
+	"rpg/d1"
 	"rpg/defs"
 	"rpg/game"
 	"rpg/geometry"
@@ -74,6 +75,10 @@ func playthrough() {
 			}
 		}
 	}
+	// milestone 3: the D1 town after a trip to level 4
+	theGame.GetWorldState().MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"})
+	checkTown(theGame.GetWorldState(), fail)
+
 	// milestone 2: a permadeath save is gone once the death menu is built
 	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], true)
 	if !game.HasSave() {
@@ -179,4 +184,54 @@ func saveCheckOf(state *common.State) saveCheck {
 		}
 	}
 	return c
+}
+
+// checkTown: D1 shopkeepers with priced D1 stock, gates by depth, broken gear and repairs.
+func checkTown(state *common.State, fail func(string, ...any)) {
+	m := state.GetMap()
+	want := map[common.VendorType]string{common.VendorTypeWeapons: "Griswold", common.VendorTypeWands: "Adria",
+		common.VendorTypeGeneral: "Pepin", common.VendorTypeCain: "Deckard Cain", common.VendorTypeWirt: "Wirt"}
+	found := map[common.VendorType]*common.Actor{}
+	for _, a := range m.Actors() {
+		if name, ok := want[a.GetVendorType()]; ok && a.Name() == name {
+			found[a.GetVendorType()] = a
+		}
+	}
+	for vt, name := range want {
+		if found[vt] == nil {
+			fail("town: %s is missing", name)
+		}
+	}
+	for _, vt := range []common.VendorType{common.VendorTypeWeapons, common.VendorTypeWands, common.VendorTypeGeneral, common.VendorTypeWirt} {
+		inv := found[vt].GetInventory()
+		if inv.IsEmpty() {
+			fail("town: %s has no stock", want[vt])
+		}
+		for _, it := range inv.Items() {
+			if it.D1() == nil || it.BuyPrice() <= 0 {
+				fail("town: %s sells %s for %d", want[vt], it.Name(), it.BuyPrice())
+			}
+		}
+	}
+	if _, ok := m.GetTransitionAt(m.GetNamedLocation("to_cathedral")); !ok {
+		fail("town: cathedral gate is closed")
+	}
+	if _, ok := m.GetTransitionAt(m.GetNamedLocation("to_catacombs")); ok {
+		fail("town: catacombs gate is open before level 5 was reached")
+	}
+
+	player := state.GetPlayer()
+	for _, it := range player.GetEquipment().AllItems() {
+		if d := it.D1(); d != nil && d.Class == "ICLASS_WEAPON" && d.MaxDur > 0 && d.MaxDur < 255 {
+			before := player.HeroSheet()
+			d.Durability = 0
+			if after := player.HeroSheet(); after.MaxDam == before.MaxDam && before.MaxDam > 1 {
+				fail("town: broken %s still counts (max damage %d)", d.Name, after.MaxDam)
+			}
+			if !d1.CanRepair(d) || d1.RepairCost(d) <= 0 {
+				fail("town: broken %s can't be repaired", d.Name)
+			}
+			d.Durability = d.MaxDur
+		}
+	}
 }

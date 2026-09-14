@@ -14,7 +14,6 @@ import (
 	"rpg/gridmap"
 	"rpg/stats"
 	"rpg/util"
-	"slices"
 	"strings"
 )
 
@@ -250,13 +249,8 @@ func (c *Console) tryToBuy(item *common.Item, seller *common.Actor) {
 	player.GetStats().DecrementBy(stats.Gold, cost)
 	seller.GetStats().IncrementBy(stats.Gold, cost)
 
-	alwaysItems := c.context.Definitions.VendorDefinitions[string(seller.GetVendorType())].Always
 	seller.GetInventory().Remove(item)
 	player.GetInventory().Add(item)
-	itemName := item.GetInternalName()
-	if slices.Contains(alwaysItems, itemName) {
-		seller.GetInventory().Add(item.Clone())
-	}
 
 	msg(fmt.Sprintf("You bought [:darkText]%s[:white] for [:darkText]%d[:white] gold", item.Name(), cost))
 	c.OpenShopMenu(seller)

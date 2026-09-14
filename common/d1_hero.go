@@ -16,13 +16,7 @@ func (a *Actor) SetHero(h *d1.Hero) { a.hero = h }
 
 // HeroSheet derives D1's character sheet from the hero and the D1 items they wear.
 func (a *Actor) HeroSheet() d1.Sheet {
-	var items []*d1.Item
-	for _, it := range a.GetEquipment().AllItems() {
-		if it.d1 != nil {
-			items = append(items, it.d1)
-		}
-	}
-	return a.hero.Sheet(items)
+	return a.hero.Sheet(a.equippedD1())
 }
 
 // SyncHero copies the D1 character sheet into the stats the UI and energy system read.
@@ -144,6 +138,11 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 			logMissed(ctx, att, def)
 			return 0, nil, true
 		}
+		durrnd := 30
+		if ranged {
+			durrnd = 40
+		}
+		d1Broke(ctx, att, d1.WeaponDur(d1Rng, att.equippedD1(), durrnd))
 		if ranged {
 			dam = h.ArrowDamage(d1Rng, s)
 		} else {
@@ -170,8 +169,10 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 		}
 		if d1Rng.Intn(100) < h.BlockChance(s, mon.Level) {
 			ctx.Msg(fmt.Sprintf("You block the attack of %s.", att.Name()))
+			d1Broke(ctx, def, d1.ShieldDur(def.equippedD1()))
 			return 0, nil, true
 		}
+		d1Broke(ctx, def, d1.ArmorDur(d1Rng, def.equippedD1()))
 		dam = d1.MonsterDamage(d1Rng, s, mon.MinDam, mon.MaxDam) >> 6
 		if !ranged && s.Flags&d1.ISplThorns != 0 {
 			extra = append(extra, NewChangeResourceAction(NewActorCause("Thorns", def), att, stats.Health, -float64(d1Rng.Intn(3)+1)))

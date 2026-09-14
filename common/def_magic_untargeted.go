@@ -263,7 +263,7 @@ func (g *Factory) getAcquirement(args util.Arguments) UntargetedEffect {
 	}
 	effect := func(user *Actor, source EffectSource) {
 		state := g.state
-		magicItem := g.GenerateMagicItem(level)
+		magicItem := g.NewD1Item(g.d1.FloorItem(level, true, level > 12))
 		state.AddItemToMapWithDistribution(magicItem, user.MapPosition())
 	}
 	return UntargetedEffect{

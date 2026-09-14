@@ -86,8 +86,8 @@ type Sheet struct {
 // Sheet ports CalcSelfItems + CalcPlrItemVals: items whose Str/Mag/Dex requirements aren't met do nothing.
 func (h *Hero) Sheet(equipped []*Item) Sheet {
 	active := make([]bool, len(equipped))
-	for i := range active {
-		active[i] = true
+	for i, it := range equipped {
+		active[i] = it.MaxDur == 0 || it.Durability > 0 // broken items do nothing until repaired (decision 9)
 	}
 	for changed := true; changed; {
 		changed = false

@@ -33,6 +33,10 @@ type saveGame struct {
 	Map            string
 	X, Y           int
 	Levels         map[string]*common.LevelSnapshot
+	Deepest        int
+	Premium        d1.Premium
+	Boy            *d1.Item
+	BoyLevel       int
 }
 
 func HasSave() bool {
@@ -54,6 +58,7 @@ func (g *GameInstance) SaveGame() {
 		HP: st.GetResource(stats.Health).Value(), Mana: st.GetResource(stats.Mana).Value(), Gold: st.GetAttribute(stats.Gold),
 		UniqueDropped: g.factory.D1().UniqueDropped, Flags: g.state.GetFlags().AllEntries(),
 		Map: g.state.GetMap().GetName(), X: pos.X, Y: pos.Y, Levels: map[string]*common.LevelSnapshot{},
+		Deepest: g.state.GetLastDungeonLevel(), Premium: g.premium, Boy: g.boyItem, BoyLevel: g.boyLevel,
 	}
 	inv, eq := player.GetInventory(), player.GetEquipment()
 	for _, it := range inv.Items() {
@@ -141,6 +146,9 @@ func (g *GameInstance) LoadGame() error {
 	for name, snap := range sg.Levels {
 		g.levelSnapshots[name] = snap
 	}
+	g.state.SetLastDungeonLevel(max(sg.Deepest, 1))
+	g.premium, g.boyItem, g.boyLevel = sg.Premium, sg.Boy, sg.BoyLevel
+	g.storesShown = false // the reset stocked the town; keep the saved premium and Wirt items on the next visit
 
 	target := gridmap.Transition{TargetMap: sg.Map, TargetLocation: "ladder_up"}
 	if defs.IsTownLevel(sg.Map) {

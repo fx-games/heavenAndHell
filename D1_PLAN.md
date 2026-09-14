@@ -31,7 +31,8 @@ From D1: loot, enemies, dungeon generation. Kept from H&H: graphics, UI, time ma
    Notes: sprite icons/tints are first guesses (`common/d1_monster.go`, `common/d1_item.go`). Old H&H content still feeds town shops and levels 5+, so its deletion moved to milestones 3 and 6. Shortcuts are marked `ponytail:` in code.
 2. [x] **Saving** — snapshot save, Continue/New game, permadeath toggle, load on death.
    Notes: `savegame.json` in the working directory (`game/save.go`); levels rebuild from `levelSeed` + `LevelSnapshot`. Not saved: explored map/fog, monster AI state, corpses, non-D1 (old H&H) items — revisit when those matter.
-3. [ ] **Town** — Griswold, Adria, Pepin, Cain, Wirt; D1 store gen; identify, durability, repair; town entrances unlock; delete H&H items/vendor defs.
+3. [x] **Town** — Griswold, Adria, Pepin, Cain, Wirt; D1 store gen; identify, durability, repair; town entrances unlock; delete H&H items/vendor defs.
+   Notes: the H&H NPCs are renamed in code (`game/town_d1.go`), Abel's spot became Cain, Wirt stands near the cathedral entrance. Griswold's premium items share his BUY list. Deliberate differences from D1 (per decisions 9/10): Cain identifies for free, broken items stay until repaired. H&H's town stash is gone (D1 has none). Hell gate (level 13) and book requirements rising with spell level come with milestones 6 and 5.
 4. [ ] **Objects** — containers, shrines, fountains.
 5. [ ] **Spells** — all 26, books/scrolls/staves.
 6. [ ] **Catacombs, Caves, Hell** — L2–L4 generators, remaining AIs, levels 1–16; delete H&H enemies/effects/story generator.

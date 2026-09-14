@@ -15,7 +15,6 @@ import (
 	"rpg/renderer"
 	"rpg/stats"
 	"rpg/util"
-	"slices"
 	"strings"
 )
 
@@ -753,7 +752,10 @@ func (u *UIController) BeginPlayerSellingTo(vendor *common.Actor) {
 
 	for _, itemStack := range playerInventory.StackedItems() {
 		typedItem := itemStack[0]
-		sellPrice := typedItem.BuyPrice() / 2
+		if !common.D1VendorBuys(vendor, typedItem) || player.GetEquipment().IsEquipped(typedItem) {
+			continue // D1: each store buys only its kind of goods, and only from the pack
+		}
+		sellPrice := common.D1SellPrice(typedItem)
 
 		itemName := typedItem.Name()
 		if u.configuration.ItemNamesInShop == common.ItemNamingSchemeEnchantments {
@@ -783,7 +785,6 @@ func (u *UIController) BeginPlayerSellingTo(vendor *common.Actor) {
 					u.context.PlayerAction().UnequipItem(typedItem)
 				}
 				playerInventory.Remove(typedItem)
-				vendor.GetInventory().Add(typedItem)
 				player.GetStats().IncrementBy(stats.Gold, sellPrice)
 				//u.sendInventoryToWindowClient()
 				msg(fmt.Sprintf("You sold [:darkText]%s[:white] for [:darkText]%d[:white] gold", typedItem.Name(), sellPrice))
@@ -1506,13 +1507,8 @@ func (u *UIController) tryToBuy(item *common.Item, seller *common.Actor) {
 	player.GetStats().DecrementBy(stats.Gold, cost)
 	seller.GetStats().IncrementBy(stats.Gold, cost)
 
-	alwaysItems := u.context.Definitions.VendorDefinitions[string(seller.GetVendorType())].Always
 	seller.GetInventory().Remove(item)
 	player.GetInventory().Add(item)
-	itemName := item.GetInternalName()
-	if slices.Contains(alwaysItems, itemName) {
-		seller.GetInventory().Add(item.Clone())
-	}
 
 	msg(fmt.Sprintf("You bought [:darkText]%s[:white] for [:darkText]%d[:white] gold", item.Name(), cost))
 	u.OpenShopMenu(seller)
