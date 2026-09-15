@@ -17,11 +17,11 @@ import (
 
 type Actions struct {
 	player       *common.Actor
-	actionBroker common.ActionBroker
+	actionBroker *common.Broker
 	state        *common.State
 	animator     common.Animator
 	ui           func() common.UserInterface
-	config       common.Configuration
+	config       *common.Configuration
 	audio        *audio.Player
 	definitions  defs.DataContainer
 
@@ -47,12 +47,16 @@ func (a *Actions) DropItem(item *common.Item) {
 }
 
 func (a *Actions) ActivateUntargetedAction(action *common.UntargetedAction, source common.EffectSource) {
+	a.player.SetLastCastUntargeted(action)
 	a.activateUntargetedAction(a.player, action, source)
 }
 func (a *Actions) beginActionTargeting(action *common.TargetedAction, chargedItem *common.Item) {
 	state := a.state
 	if !state.GetPlayer().IsAlive() {
 		return
+	}
+	if chargedItem == nil {
+		a.player.SetLastCastTargeted(action)
 	}
 	act := a
 	act.CancelAutoMove()
@@ -90,13 +94,13 @@ func (a *Actions) PickUpItem() {
 
 type PlayerActionsContext struct {
 	Player         *common.Actor
-	ActionBroker   common.ActionBroker
+	ActionBroker   *common.Broker
 	State          *common.State
 	UI             func() common.UserInterface
 	GetTimeKeeper  func() *common.TimeKeeper
 	Msg            func(message string)
 	Animator       common.Animator
-	Configuration  common.Configuration
+	Configuration  *common.Configuration
 	QueueAfterTurn func(call func())
 }
 
@@ -137,12 +141,16 @@ func (a *Actions) ActivateItemActionForPlayer(itemWithAction *common.Item) {
 		a.beginActionTargeting(itemWithAction.GetTargetedAction(), itemWithAction)
 	} else if itemWithAction.HasUntargetedAction() {
 
+		untargetedAction := itemWithAction.GetUntargetedAction()
+		if !untargetedAction.CanActivate(user) {
+			return // e.g. a book that needs more magic than the reader has: not consumed
+		}
+
 		itemWithAction.UseCharge()
 		if !itemWithAction.HasChargesLeft() && itemWithAction.SelfDestructs() {
 			user.GetInventory().Remove(itemWithAction)
 		}
 
-		untargetedAction := itemWithAction.GetUntargetedAction()
 		a.activateUntargetedAction(user, untargetedAction, common.EffectSource(itemWithAction.GetInternalName()))
 		/* Actions should end the turn themselves
 		autTaken := untargetedAction.GetTimeNeededInAut()
@@ -231,6 +239,11 @@ func (a *Actions) ManualMovePlayer(direction geometry.Point) {
 		return
 	}
 
+	attackType, isAttack := common.AttackTypeOf(playerAction)
+	if isAttack {
+		a.executeAttack(playerAction, attackType)
+		return
+	}
 	a.actionBroker.Execute(playerAction)
 	a.actionBroker.Execute(common.NewEndPlayerTurnAction(playerAction.Cause(), playerAction.GetDelayInAut()))
 }
@@ -280,7 +293,7 @@ func (a *Actions) nextStepOnPlayerPath() {
 				a.actionBroker.QueueForExecution(openDoorAction)
 				a.actionBroker.QueueForExecution(common.NewEndPlayerTurnAction(openDoorAction.Cause(), openDoorAction.GetDelayInAut()))
 				return
-			} else if !a.autoExplore {
+			} else if !a.autoExplore || a.config.AutoExploreOpenContainers {
 				objectAt := state.GetMap().ObjectAt(nextStep)
 				if !objectAt.IsWalkable(state.GetPlayer()) {
 					a.stopAutoMove()
@@ -315,7 +328,7 @@ func (a *Actions) continuePlayerAutoMovement(targetPos geometry.Point) {
 	currentMap := a.state.GetMap()
 	var isWalkable func(point geometry.Point) bool
 	if a.autoExplore {
-		isWalkable = a.allowedForAutoExplore
+		isWalkable = a.allowedForAutoExplore(targetPos)
 	} else {
 		isWalkable = a.allowedForAutoMove(targetPos)
 	}
@@ -326,10 +339,16 @@ func (a *Actions) continuePlayerAutoMovement(targetPos geometry.Point) {
 	a.playerPath = pathToTarget[1:]
 	a.nextStepOnPlayerPath()
 }
-func (a *Actions) allowedForAutoExplore(point geometry.Point) bool {
-	currentMap := a.state.GetMap()
-	isWalkable := currentMap.CurrentlyPassableAndSafeForActor(a.state.GetPlayer())
-	return isWalkable(point) && !currentMap.IsStairsAt(point)
+func (a *Actions) allowedForAutoExplore(targetPos geometry.Point) func(point geometry.Point) bool {
+	return func(point geometry.Point) bool {
+		currentMap := a.state.GetMap()
+		isWalkable := currentMap.CurrentlyPassableAndSafeForActor(a.state.GetPlayer())
+		if isWalkable(point) && !currentMap.IsStairsAt(point) {
+			return true
+		}
+		// the explore target itself may be an unopened container to bump (Open Containers option)
+		return a.config.AutoExploreOpenContainers && point == targetPos && currentMap.IsObjectAt(point)
+	}
 }
 func (a *Actions) allowedForAutoMove(targetPos geometry.Point) func(point geometry.Point) bool {
 	return func(point geometry.Point) bool {
@@ -381,7 +400,7 @@ func (a *Actions) StartPlayerAutoMovement(targetPos geometry.Point) {
 
 	var isWalkable func(point geometry.Point) bool
 	if a.autoExplore {
-		isWalkable = a.allowedForAutoExplore
+		isWalkable = a.allowedForAutoExplore(targetPos)
 	} else {
 		isWalkable = a.allowedForAutoMove(targetPos)
 	}
@@ -413,6 +432,16 @@ func (a *Actions) getNextAutoExploreTarget() (geometry.Point, bool) {
 		})
 		if nearestItem != playerPos {
 			return nearestItem, true
+		}
+	}
+
+	if a.config.AutoExploreOpenContainers {
+		nearestContainer := state.GetMap().GetNearestExploredObject(playerPos, func(object common.Object) bool {
+			container, ok := object.(*common.D1Object)
+			return ok && container.IsUnlootedContainer()
+		})
+		if nearestContainer != playerPos {
+			return nearestContainer, true
 		}
 	}
 
@@ -523,6 +552,25 @@ func (a *Actions) QuickRangedAttack() {
 	}
 	a.playerRangedAttack(state.GetPlayer(), target)
 	return
+}
+
+// CastLastSpellAtNearest recasts the last spell picked from the spell menu or skill bar at the nearest hostile actor.
+func (a *Actions) CastLastSpellAtNearest() {
+	state := a.state
+	player := state.GetPlayer()
+	if !player.IsAlive() {
+		return
+	}
+	targeted, untargeted := player.LastCastSpell()
+	switch {
+	case targeted != nil:
+		target := targeted.GetTargetingRules(player, state.GetMap()).GetPreSelectedTarget()
+		targeted.OnSelected(player, target, targeted.GetHitPositions(player.MapPosition(), target))
+	case untargeted != nil:
+		a.activateUntargetedAction(player, untargeted, common.EffectSource(untargeted.GetInternalName()))
+	default:
+		a.logError("No spell to recast")
+	}
 }
 
 func (a *Actions) AimedRangedAttack() {
@@ -684,10 +732,23 @@ func (a *Actions) playerMoveOneStep(player *common.Actor, targetPos geometry.Poi
 	a.actionBroker.Execute(moveAction)
 	a.actionBroker.Execute(common.NewEndPlayerTurnAction(moveAction.Cause(), moveAction.GetDelayInAut()))
 }
+// executeAttack runs action and ends the turn, unless it would destroy an already-broken equipped weapon, in
+// which case the player is asked to confirm first (Gameplay menu > Warning: Weapon breaking).
+func (a *Actions) executeAttack(action common.Action, attackType common.AttackType) {
+	proceed := func() {
+		a.actionBroker.Execute(action)
+		a.actionBroker.Execute(common.NewEndPlayerTurnAction(action.Cause(), action.GetDelayInAut()))
+	}
+	if brokenWeapon := common.WeaponAboutToBreak(a.player, attackType); brokenWeapon != nil && a.config.WeaponBreakWarning {
+		a.ui().Confirm(fmt.Sprintf("Your %s will break. Attack anyway?", brokenWeapon.Name()), proceed)
+		return
+	}
+	proceed()
+}
+
 func (a *Actions) playerMeleeAttack(player *common.Actor, defender *common.Actor) {
 	meleeAction := common.NewMeleeAttackAction(common.NewActorCause("Melee attack", player), player, defender)
-	a.actionBroker.Execute(meleeAction)
-	a.actionBroker.Execute(common.NewEndPlayerTurnAction(meleeAction.Cause(), meleeAction.GetDelayInAut()))
+	a.executeAttack(meleeAction, common.MeleeAttack)
 }
 func (a *Actions) playerRangedAttack(player *common.Actor, targetPos geometry.Point) {
 	rangedAttackAction := common.NewRangedAttackAction(common.NewActorCause("Ranged attack", player), player, targetPos)
@@ -702,8 +763,7 @@ func (a *Actions) playerRangedAttack(player *common.Actor, targetPos geometry.Po
 	}
 
 	 */
-	a.actionBroker.Execute(rangedAttackAction)
-	a.actionBroker.Execute(common.NewEndPlayerTurnAction(rangedAttackAction.Cause(), rangedAttackAction.GetDelayInAut()))
+	a.executeAttack(rangedAttackAction, common.RangedAttack)
 }
 
 func (a *Actions) RestUntilHealed() {

@@ -10,6 +10,7 @@ import (
 	"rpg/stats"
 	"rpg/util"
 	"slices"
+	"strings"
 )
 
 type ItemRarity int
@@ -105,6 +106,7 @@ type Item struct {
 	isHidden        bool
 	shouldBeDrawn   bool
 	baseCost        int
+	isPremiumStock  bool // Griswold's rotating premium stock, shown in its own "Buy premium items" menu
 
 	forcedTooltip     []util.LabelText
 	itemHooks         []ItemActionHook
@@ -165,6 +167,14 @@ func (i *Item) DroppedByPlayer() {
 
 func (i *Item) IsDroppedByPlayer() bool {
 	return i.droppedByPlayer
+}
+
+func (i *Item) SetPremiumStock(value bool) {
+	i.isPremiumStock = value
+}
+
+func (i *Item) IsPremiumStock() bool {
+	return i.isPremiumStock
 }
 func (i *Item) GetRarity() ItemRarity {
 	return i.rarity
@@ -292,6 +302,24 @@ func (i *Item) String() string {
 
 func (i *Item) IsWeapon() bool {
 	return i.weaponComponent != nil
+}
+
+// DurabilityPercent returns the item's remaining durability (0..1) and whether it has durability at all
+// (rings, potions, scrolls etc. don't).
+func (i *Item) DurabilityPercent() (float64, bool) {
+	if i.d1 != nil { // D1 wear updates the d1 fields, not the Durability resources
+		if i.d1.MaxDur <= 0 || i.d1.MaxDur == 255 {
+			return 1, false
+		}
+		return float64(i.d1.Durability) / float64(i.d1.MaxDur), true
+	}
+	if i.IsWeapon() {
+		return i.GetWeaponStats().Durability.AsPercentage(), true
+	}
+	if i.IsArmor() {
+		return i.GetArmorStats().Durability.AsPercentage(), true
+	}
+	return 1, false
 }
 
 func (i *Item) IsArmor() bool {
@@ -537,7 +565,7 @@ func (i *Item) GetUntargetedAction() *UntargetedAction {
 func (i *Item) GetItemHooks() []ItemActionHook {
 	return i.itemHooks
 }
-func (i *Item) GetTooltipLines(func(string) []util.ColoredTextPart) []util.LabelText {
+func (i *Item) GetTooltipLines(parseColorCodedText func(string) []util.ColoredTextPart) []util.LabelText {
 	if i.d1 != nil {
 		i.RefreshD1() // durability and charges change during play
 	}
@@ -548,7 +576,14 @@ func (i *Item) GetTooltipLines(func(string) []util.ColoredTextPart) []util.Label
 	}
 
 	if len(i.forcedTooltip) > 0 {
-		return append(info, i.forcedTooltip...)
+		tooltip := append(info, i.forcedTooltip...)
+		for idx := range tooltip {
+			if strings.Contains(tooltip[idx].Text, "[:") { // e.g. the requirement line's per-stat [:red] markers
+				tooltip[idx].UseColorCodes = true
+				tooltip[idx].TextWithColorCodes = parseColorCodedText(tooltip[idx].Text)
+			}
+		}
+		return tooltip
 	}
 
 	if i.IsWeapon() {

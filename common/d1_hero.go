@@ -45,9 +45,12 @@ func (a *Actor) heroInfoText() []string {
 	lines := []string{a.name, fmt.Sprintf("Level %d %s", h.Level, d1.ClassNames[h.Class]), "",
 		fmt.Sprintf("HP: %s", st.GetResource(stats.Health).ToString()),
 		fmt.Sprintf("Mana: %s", st.GetResource(stats.Mana).ToString()),
-		fmt.Sprintf("Experience: %d / %d", h.Exp, d1.ExpLvls[min(h.Level, 50)]),
+		fmt.Sprintf("XP: %d / %d", h.Exp, d1.ExpLvls[min(h.Level, 50)]),
 		"",
-		fmt.Sprintf("Str %d  Mag %d  Dex %d  Vit %d", s.Str, s.Mag, s.Dex, s.Vit),
+		fmt.Sprintf("Str %d", s.Str),
+		fmt.Sprintf("Mag %d", s.Mag),
+		fmt.Sprintf("Dex %d", s.Dex),
+		fmt.Sprintf("Vit %d", s.Vit),
 	}
 	if h.StatPts > 0 {
 		lines = append(lines, fmt.Sprintf("Unspent stat points: %d", h.StatPts))
@@ -58,7 +61,10 @@ func (a *Actor) heroInfoText() []string {
 		fmt.Sprintf("Armor class: %d", s.AC+s.BonusAC+s.Dex/5),
 		fmt.Sprintf("To hit: %d%%", h.MeleeHitChance(s, 0)),
 		fmt.Sprintf("Damage: %d-%d", minD, maxD),
-		fmt.Sprintf("Resist fire %d%%  lightning %d%%  magic %d%%", s.FR, s.LR, s.MR),
+		fmt.Sprintf("Damage bonus from Str/Dex: +%d", s.DamageMod),
+		fmt.Sprintf("Resist fire %d%%", s.FR),
+		fmt.Sprintf("Resist lightning %d%%", s.LR),
+		fmt.Sprintf("Resist magic %d%%", s.MR),
 		fmt.Sprintf("Gold: %d", st.GetAttribute(stats.Gold)),
 	)
 }
@@ -137,15 +143,32 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 			chance = 100
 		}
 		d1Alert(def, att)
+		blast := 0
+		if !ranged { // PM_DoAttack: fire and lightning weapons explode on the swing's target, hit or miss (MI_Weapexp)
+			if s.Flags&d1.ISplFireDam != 0 {
+				blast += d1ElementalHit(def, d1.ResistKindFire, h.SpellHitChance(s, mon.Level, 0), func() int { return s.FMinDam + d1Rng.Intn(max(s.FMaxDam-s.FMinDam+1, 1)) })
+			}
+			if s.Flags&d1.ISplLightDam != 0 {
+				blast += d1ElementalHit(def, d1.ResistKindLightning, h.SpellHitChance(s, mon.Level, 0), func() int { return s.LMinDam + d1Rng.Intn(max(s.LMaxDam-s.LMinDam+1, 1)) })
+			}
+		}
 		if d1Rng.Intn(100) >= chance {
 			logMissed(ctx, att, def)
-			return 0, nil, true
+			return blast, nil, true
 		}
-		durrnd := 30
+		attackType := MeleeAttack
 		if ranged {
-			durrnd = 40
+			attackType = RangedAttack
 		}
-		d1Broke(ctx, att, d1.WeaponDur(d1Rng, att.equippedD1(), durrnd))
+		if brokenWeapon := WeaponAboutToBreak(att, attackType); brokenWeapon != nil {
+			destroyBrokenWeapon(ctx, att, brokenWeapon)
+		} else {
+			durrnd := 30
+			if ranged {
+				durrnd = 40
+			}
+			d1Broke(ctx, att, d1.WeaponDur(d1Rng, att.equippedD1(), durrnd))
+		}
 		if ranged {
 			dam = h.ArrowDamage(d1Rng, s)
 		} else {
@@ -156,9 +179,25 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 					NewChangeResourceAction(NewActorCause("Mana steal", att), att, stats.Mana, float64(lmana>>6)))
 			}
 		}
-		dam = max(dam, 0)
-		if s.Flags&d1.ISplNoHealMon != 0 {
+		if ranged && s.Flags&(d1.ISplFireArrows|d1.ISplLightArrows) != 0 { // MI_LArrow: the arrow bursts where it hits
+			kind, mind, maxd := d1.ResistKindFire, s.FMinDam, s.FMaxDam
+			if s.Flags&d1.ISplLightArrows != 0 {
+				kind, mind, maxd = d1.ResistKindLightning, s.LMinDam, s.LMaxDam
+			}
+			blast = d1ElementalHit(def, kind, h.ArrowHitChance(s, mon.AC, dist), func() int { return h.ArrowBlastDamage(d1Rng, s, mind, maxd) })
+		}
+		dam = max(dam, 0) + blast
+		// D1 stops a monster's healing on melee hits with the "can't heal" bit (0x100) and on hits by fire arrows;
+		// the bit named for monsters (ISPL_NOHEALMON) is never read.
+		if !ranged && s.Flags&d1.ISplNoHealPlr != 0 || ranged && s.Flags&d1.ISplFireArrows != 0 {
 			mon.NoHeal = true
+		}
+		if s.Flags&d1.ISplKnockback != 0 && !def.HasStatusEffect(StatusStone) && def.GetStats().GetResource(stats.Health).Value() > dam { // M_GetKnockback
+			m := state.GetMap()
+			push := def.MapPosition().Add(D1Dirs[D1DirTo(att.MapPosition(), def.MapPosition())])
+			if _, isTransition := m.GetTransitionAt(push); m.IsCurrentlyPassable(push) && !isTransition {
+				extra = append(extra, NewMoveAction(AbstractCause("Knockback"), def, push, false))
+			}
 		}
 		return dam, extra, true
 	case att.d1Monster != nil && def.hero != nil:
@@ -201,6 +240,21 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 	return 0, nil, false
 }
 
+// d1ElementalHit ports MonsterMHit for a fire or lightning blast: its own to-hit roll, nothing against immunity,
+// a quarter against resistance.
+func d1ElementalHit(def *Actor, kind, chance int, roll func() int) int {
+	mon := def.d1Monster
+	resist, immune := resistBits(kind)
+	if mon.MagicRes&immune != 0 || !def.HasStatusEffect(StatusStone) && d1Rng.Intn(100) >= chance {
+		return 0
+	}
+	dam := max(roll(), 0)
+	if mon.MagicRes&resist != 0 {
+		dam >>= 2
+	}
+	return dam
+}
+
 // d1Alert wakes a monster that is attacked before it noticed the player (MonsterMHit).
 func d1Alert(victim, attacker *Actor) {
 	if mon := victim.d1Monster; mon.Squelch == 0 {
@@ -211,9 +265,12 @@ func d1Alert(victim, attacker *Actor) {
 // d1HitRecovery ports StartPlrHit and M_StartHit for any damage taken: a hard hit makes the victim flinch and lose
 // time. A new hit restarts the recovery instead of adding to it. Ticks convert at a warrior's swing (RefAttackTicks
 // ticks = one 10 AUT turn).
-func d1HitRecovery(victim *Actor, dam int) {
+func d1HitRecovery(ctx ActionContext, victim *Actor, dam int) {
 	switch {
 	case victim.hero != nil && dam >= victim.hero.Level:
+		if victim.hitRecovery == 0 {
+			ctx.Msg("You are staggered!")
+		}
 		victim.hitRecovery = max(victim.hitRecovery, d1TicksToAUT(d1.HitRecoveryTicks(victim.hero.Class, victim.HeroSheet().Flags)))
 	case victim.d1Monster != nil:
 		d1MonsterGotHit(victim, dam)
@@ -278,15 +335,20 @@ func d1OnKill(ctx ActionContext, killer, victim *Actor) []Action {
 		if h.Level > before {
 			killer.GetStats().GetResource(stats.Health).SetToMax()
 			killer.GetStats().GetResource(stats.Mana).SetToMax()
-			ctx.Msg(fmt.Sprintf("You reached level %d! (%d stat points to spend)", h.Level, h.StatPts))
+			ctx.Msg(fmt.Sprintf("You reached level %d! Press 'u' to spend %d stat points.", h.Level, h.StatPts))
 			state.factory.RefreshD1Spells(killer)
 		}
+	}
+	if cue := victim.D1MonsterSoundCue("death"); cue != "" && ctx.AudioPlayer.HasCue(cue) {
+		ctx.AudioPlayer.PlayCue(cue)
 	}
 	d1QuestKill(ctx, mon)
 	d1FallenFear(state, victim.MapPosition())
 	state.factory.d1AcidDeath(ctx, victim)
 	dlvl := d1DungeonLevel(state)
-	if it := state.factory.D1().MonsterDrop(mon.Data, mon.Level, mon.Unique != nil, dlvl, dlvl > 12); it != nil {
+	if it := state.factory.d1QuestDrop(mon); it != nil {
+		state.AddItemToMapWithDistribution(state.factory.NewD1Item(it), victim.MapPosition())
+	} else if it := state.factory.D1().MonsterDrop(mon.Data, mon.Level, mon.Unique != nil, dlvl, dlvl > 12); it != nil {
 		state.AddItemToMapWithDistribution(state.factory.NewD1Item(it), victim.MapPosition())
 	}
 	return nil

@@ -395,6 +395,16 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestExploredItem(curren
 	}
 	return currentPosition
 }
+func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestExploredObject(currentPosition geometry.Point, filter func(object ObjectType) bool) geometry.Point {
+	distribution := m.GetFreeCellsForDistribution(currentPosition, 1, func(p geometry.Point) bool {
+		isValidObjectAtPos := m.Contains(p) && m.IsExplored(p) && m.IsObjectAt(p)
+		return isValidObjectAtPos && filter(m.ObjectAt(p))
+	})
+	if len(distribution) > 0 {
+		return distribution[0]
+	}
+	return currentPosition
+}
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetFreeCellsForDistribution(position geometry.Point, neededCellCount int, freePredicate func(p geometry.Point) bool) []geometry.Point {
 	foundFreeCells := make(SetOfPoints)
 	currentPosition := position

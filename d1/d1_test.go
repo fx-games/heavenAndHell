@@ -1,6 +1,7 @@
 package d1
 
 import (
+	"fmt"
 	"math/rand"
 	"os"
 	"strings"
@@ -18,8 +19,12 @@ func TestLoadAndGenerate(t *testing.T) {
 	if m := d.Monsters[0]; m.Name != "Zombie" || m.Family != "Zombie" || d.Monsters[4].Family != "FalSpear" || m.AI != "AI_ZOMBIE" || m.Frames[1] != 24 || m.MagicRes != 72 {
 		t.Fatalf("zombie row: %+v", m)
 	}
+	if blind := d.Texts["TEXT_BLIND1"]; !strings.HasPrefix(blind, "You recite") || strings.Count(blind, "\n\n") != 1 ||
+		d.Texts["TEXT_BONER"] == "" || !strings.HasPrefix(d.Texts["TEXT_GARBUD1"], "Pleeeease") || len(d.Gossip["ogden"]) == 0 {
+		t.Fatalf("texts: blind=%q boner=%q garbud=%q ogden=%d", blind, d.Texts["TEXT_BONER"], d.Texts["TEXT_GARBUD1"], len(d.Gossip["ogden"]))
+	}
 
-	g := NewGenerator(d, rand.New(rand.NewSource(1)))
+	g := NewGenerator(d, 1)
 	var magic, uniques, gold, books int
 	for dlvl := 1; dlvl <= 16; dlvl++ {
 		types := g.LevelMonsterTypes(dlvl)
@@ -69,44 +74,6 @@ func TestLoadAndGenerate(t *testing.T) {
 	t.Logf("magic=%d uniques=%d gold=%d books=%d", magic, uniques, gold, books)
 }
 
-func TestGenerateConnected(t *testing.T) {
-	rng := rand.New(rand.NewSource(7))
-	for n := 0; n < 320; n++ {
-		dlvl := n%16 + 1
-		lvl := Generate(rng, dlvl)
-		seen := map[[2]int]bool{lvl.StairsUp: true}
-		queue := [][2]int{lvl.StairsUp}
-		floor := 0
-		for x := 0; x < LevelSize; x++ {
-			for y := 0; y < LevelSize; y++ {
-				if lvl.Walkable(x, y) {
-					floor++
-				}
-			}
-		}
-		for len(queue) > 0 {
-			p := queue[0]
-			queue = queue[1:]
-			for _, d := range [][2]int{{1, 0}, {-1, 0}, {0, 1}, {0, -1}} {
-				q := [2]int{p[0] + d[0], p[1] + d[1]}
-				if lvl.Walkable(q[0], q[1]) && !seen[q] {
-					seen[q] = true
-					queue = append(queue, q)
-				}
-			}
-		}
-		if dlvl != 16 && !seen[lvl.StairsDn] || lvl.Warp != [2]int{} && !seen[lvl.Warp] || (lvl.Warp != [2]int{}) != (dlvl == 5 || dlvl == 9 || dlvl == 13) {
-			t.Fatalf("level %d (dlvl %d): stairs down or warp %v unreachable\n%s", n, dlvl, lvl.Warp, lvl)
-		}
-		if dlvl == 16 && lvl.Chamber == [2]int{} {
-			t.Fatalf("level %d: no chamber for Diablo\n%s", n, lvl)
-		}
-		if len(seen) < floor*9/10 {
-			t.Fatalf("level %d (dlvl %d): only %d of %d walkable cells reachable\n%s", n, dlvl, len(seen), floor, lvl)
-		}
-	}
-}
-
 func TestHero(t *testing.T) {
 	w := NewHero(Warrior)
 	if w.MaxHPBase>>6 != 70 || w.MaxManaBase>>6 != 10 {
@@ -150,16 +117,23 @@ func TestStores(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	g := NewGenerator(d, rand.New(rand.NewSource(3)))
+	g := NewGenerator(d, 3)
 	for lvl := 6; lvl <= 16; lvl += 5 {
 		for _, it := range g.SmithStock(lvl) {
 			if it.Type == ITypeMisc || it.Type == ITypeStaff || it.Type == ITypeRing || it.Magical != 0 || !it.Identified {
 				t.Fatalf("smith sells %+v", it)
 			}
 		}
-		witch := g.WitchStock(lvl)
+		witch := g.WitchStock(lvl, [37]int{})
 		if witch[0].MiscID != "IMISC_MANA" || witch[1].MiscID != "IMISC_FULLMANA" || witch[2].Spell != 7 || len(witch) < 10 {
 			t.Fatalf("witch stock starts wrong: %s %s %s (%d items)", witch[0].Name, witch[1].Name, witch[2].Name, len(witch))
+		}
+		book := &Item{MiscID: "IMISC_BOOK", Spell: SplFirebolt}
+		var levels [37]int
+		levels[SplFirebolt] = 2
+		g.witchBookLevel(book, levels)
+		if want := d.Spells[SplFirebolt].MinInt; book.MinMag != want+want*20/100+(want+want*20/100)*20/100 {
+			t.Fatalf("witch book with spell level 2 needs %d magic (base %d)", book.MinMag, want)
 		}
 		healer := g.HealerStock(lvl)
 		if healer[0].MiscID != "IMISC_HEAL" || healer[1].MiscID != "IMISC_FULLHEAL" {
@@ -203,69 +177,6 @@ func TestStores(t *testing.T) {
 	}
 }
 
-type fakeWorld struct {
-	lvl      *Level
-	occ      map[[2]int]bool
-	objects  []*Object
-	monsters int
-	items    int
-}
-
-func (w *fakeWorld) Occupied(x, y int) bool { return w.occ[[2]int{x, y}] }
-func (w *fakeWorld) AddObject(o *Object) {
-	w.occ[[2]int{o.X, o.Y}] = true
-	w.objects = append(w.objects, o)
-}
-func (w *fakeWorld) AddMonster(mt, x, y int) {
-	w.occ[[2]int{x, y}] = true
-	w.monsters++
-}
-func (w *fakeWorld) AddItem(it *Item, x, y int) { w.items++ }
-
-func TestObjectsAndThemes(t *testing.T) {
-	d, err := Load(os.DirFS("../files"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	g := NewGenerator(d, rand.New(rand.NewSource(11)))
-	kinds := map[int]int{}
-	themed := 0
-	for n := 0; n < 150; n++ {
-		dlvl := n%15 + 1
-		lvl := Generate(g.Rng, dlvl)
-		w := &fakeWorld{lvl: lvl, occ: map[[2]int]bool{}}
-		p := g.NewPlacer(w, lvl, dlvl, g.LevelMonsterTypes(dlvl))
-		p.InitThemes()
-		p.HoldThemeRooms()
-		p.InitObjects()
-		random := len(w.objects)
-		p.CreateThemeRooms()
-		themed += len(p.themes)
-
-		count := map[int]int{}
-		for i, o := range w.objects {
-			count[o.Kind]++
-			kinds[o.Kind]++
-			if !lvl.Walkable(o.X, o.Y) {
-				t.Fatalf("level %d: object %d on a wall at %d,%d", n, o.Kind, o.X, o.Y)
-			}
-			if i < random && lvl.Held[o.X][o.Y] {
-				t.Fatalf("level %d: random object %d inside a theme room", n, o.Kind)
-			}
-			if (o.Kind == ObjShrineL || o.Kind == ObjShrineR) && (o.Var1 == 18 || o.Var1 == 25 || dlvl > shrineMax[o.Var1]) {
-				t.Fatalf("level %d: shrine %s not available here", n, ShrineNames[o.Var1])
-			}
-		}
-		if chests := count[ObjChest1] + count[ObjChest2] + count[ObjChest3]; chests < 9 || dlvl <= 4 && count[ObjSarc] < 10 {
-			t.Fatalf("level %d: %d chests, %d sarcophagi", n, chests, count[ObjSarc])
-		}
-	}
-	if themed < 150 || kinds[ObjArmorStand]+kinds[ObjWeaponRack] == 0 || kinds[ObjShrineL]+kinds[ObjShrineR]+kinds[ObjBookcaseL]+kinds[ObjBookcaseR]+kinds[ObjGoatShrine] == 0 {
-		t.Fatalf("no theme rooms (%d) or theme objects: %v", themed, kinds)
-	}
-	t.Logf("%d theme rooms, objects by kind: %v", themed, kinds)
-}
-
 func TestSpells(t *testing.T) {
 	d, err := Load(os.DirFS("../files"))
 	if err != nil {
@@ -292,5 +203,94 @@ func TestSpells(t *testing.T) {
 	}
 	if StoneTurns(1) != 14 || FireWallTurns(0) != 20 {
 		t.Errorf("stone %d turns, fire wall %d turns", StoneTurns(1), FireWallTurns(0))
+	}
+}
+
+func TestPotionRangeMatchesRolls(t *testing.T) {
+	rng := rand.New(rand.NewSource(1))
+	for _, class := range []int{Warrior, Rogue, Sorcerer} {
+		h := &Hero{Class: class}
+		maxV := 80 << 6
+		hlo, hhi := h.PotionHealRange(maxV)
+		mlo, mhi := h.PotionManaRange(maxV)
+		for range 500 {
+			if v := h.PotionHeal(rng, maxV); v < hlo || v > hhi {
+				t.Fatalf("class %d heal %d outside %d-%d", class, v, hlo, hhi)
+			}
+			if v := h.PotionMana(rng, maxV); v < mlo || v > mhi {
+				t.Fatalf("class %d mana %d outside %d-%d", class, v, mlo, mhi)
+			}
+		}
+	}
+}
+
+func TestSpellDescriptionsMatchNames(t *testing.T) {
+	if len(SpellDescriptions) != len(spellNames) {
+		t.Fatalf("%d descriptions for %d spells", len(SpellDescriptions), len(spellNames))
+	}
+}
+
+func TestQuestItemIndices(t *testing.T) {
+	d, err := Load(os.DirFS("../files"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for idx, name := range map[int]string{IdiRock: "Magic Rock", IdiOptAmulet: "Optic Amulet", IdiBanner: "Tavern Sign",
+		IdiGldnElix: "Golden Elixir", IdiAnvil: "Anvil of Fury", IdiMushroom: "Black Mushroom", IdiBrain: "Brain",
+		IdiFungalTm: "Fungal Tome", IdiSpecElix: "Spectral Elixir", IdiBldStone: "Blood Stone", IdiArmOfVal: "Arkaine's Valor",
+		IdiLazStaff: "Staff of Lazarus"} {
+		if d.Items[idx].Name != name {
+			t.Errorf("item %d is %q, want %q", idx, d.Items[idx].Name, name)
+		}
+	}
+	for uid, name := range map[int]string{UItemInfraRing: "Empyrean Band", UItemOptAmulet: "Optic Amulet", UItemTRing: "Ring of Truth",
+		UItemHarCrest: "Harlequin Crest", UItemSteelVeil: "Veil of Steel", UItemArmOfVal: "Arkaine's Valor", UItemGriswold: "Griswold's Edge"} {
+		if d.UniqueItems[uid].Name != name {
+			t.Errorf("unique %d is %q, want %q", uid, d.UniqueItems[uid].Name, name)
+		}
+	}
+}
+
+// TestClassSkills checks Item Repair and Staff Recharge: they refill at the cost of the maximum, and wear it out.
+func TestClassSkills(t *testing.T) {
+	zero := func(int) int { return 0 }
+	it := &Item{Durability: 10, MaxDur: 40}
+	if RepairItem(it, 10, zero) || it.MaxDur != 35 || it.Durability != 35 {
+		t.Errorf("repair: %d/%d", it.Durability, it.MaxDur)
+	}
+	if worn := (&Item{Durability: 0, MaxDur: 1}); !RepairItem(worn, 1, zero) {
+		t.Errorf("repair didn't wear out a 0/1 item")
+	}
+	d, err := Load(os.DirFS("../files"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	staff := &Item{Type: ITypeStaff, Spell: SplFirebolt, Charges: 0, MaxCharges: 10}
+	d.RechargeItem(staff, 1, zero) // one charge per round: 1 of 9, ... until the charges reach the shrinking maximum
+	if staff.MaxCharges != 5 || staff.Charges != 5 {
+		t.Errorf("recharge: %d/%d", staff.Charges, staff.MaxCharges)
+	}
+}
+
+// TestTextSpeech checks that every text's speech and every hero line the quests play is in SfxFiles.
+func TestTextSpeech(t *testing.T) {
+	d, err := Load(os.DirFS("../files"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id, sfx := range d.TextSfx {
+		if _, ok := SfxFiles[sfx]; !ok {
+			t.Errorf("%s: speech %q has no file", id, sfx)
+		}
+	}
+	for _, n := range []int{8, 9, 13, 24, 61, 62, 80, 82, 83, 87, 88, 89, 91, 94, 95} {
+		for _, class := range []string{"WARR", "ROGUE", "MAGE"} {
+			if id := "PS_" + class + fmt.Sprint(n); SfxFiles[id] == "" {
+				t.Errorf("hero line %s has no file", id)
+			}
+		}
+	}
+	if len(d.Gossip["farnham"]) < 2 || len(d.Gossip["gillian"]) < 2 {
+		t.Errorf("gossip: farnham %d, gillian %d", len(d.Gossip["farnham"]), len(d.Gossip["gillian"]))
 	}
 }

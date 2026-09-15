@@ -218,7 +218,7 @@ func (i *ShopMenu) drawStringArray(lines []ShopMenuItem) {
 				drawX += float64(i.topLeft.X) + float64(colOffset)
 			}
 
-			if column.UseColorCodes {
+			if column.UseColorCodes && lineIndex != i.selectedIndex {
 				textWithColorCodes := column.TextWithColorCodes
 				uiRenderer.DrawTTFOnScreenWithColorCodes(drawX, float64(drawY), textWithColorCodes)
 			} else {

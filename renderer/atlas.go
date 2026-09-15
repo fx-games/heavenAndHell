@@ -6,7 +6,7 @@ import (
 	"image/color"
 	"log"
 	"rpg/geometry"
-	"rpg/util"
+	"rpg/files"
 )
 
 type CellDrawInfo struct {
@@ -33,7 +33,7 @@ func NewTextureAtlas(imageFilename string, tileSizeX, tileSizeY int) TextureAtla
 }
 
 func mustLoadImage(filename string) image.Image {
-	img, _, err := image.Decode(util.MustOpenReader(filename))
+	img, _, err := image.Decode(files.MustOpenReader(filename))
 	if err != nil {
 		log.Fatal(err)
 	}

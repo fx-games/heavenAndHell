@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"rpg/geometry"
 	"rpg/stats"
-	"rpg/util"
 )
 
 type RangedAttackAction struct {
@@ -44,6 +43,7 @@ func (d *RangedAttackAction) Execute(context ActionContext) []Action {
 	d.damageAmount = 0
 
 	if !currentMap.IsActorAt(d.targetPos) {
+		context.GameState.factory.hitD1Barrel(currentMap, d.targetPos, d.attacker) // an arrow shot at a barrel breaks it
 		return actions
 	}
 
@@ -165,11 +165,11 @@ func CalculateRangedWeaponHitChance(attacker, defender *Actor) float64 {
 	if distance > maxRange {
 		dropOffPerTile := 0.3
 		delta := distance - maxRange
-		return util.Clamp(0.0, 1.0, accuracyAtMaxRange - (delta * dropOffPerTile) + dexModifier)
+		return min(max(accuracyAtMaxRange - (delta * dropOffPerTile) + dexModifier, 0.0), 1.0)
 	}
 
 	if distance <= 1 {
-		return util.Clamp(0.0, 1.0, accuracyAtMinRange + dexModifier)
+		return min(max(accuracyAtMinRange + dexModifier, 0.0), 1.0)
 	}
 
 	// interpolate
@@ -177,7 +177,7 @@ func CalculateRangedWeaponHitChance(attacker, defender *Actor) float64 {
 	// min range == 2
 	normalizedMaxRange := maxRange - 1
 	percent := (distance - 1) / normalizedMaxRange
-	accuracy := util.Clamp(0.0, 1.0, accuracyAtMinRange + (percent * (accuracyAtMaxRange - accuracyAtMinRange)) + dexModifier)
+	accuracy := min(max(accuracyAtMinRange + (percent * (accuracyAtMaxRange - accuracyAtMinRange)) + dexModifier, 0.0), 1.0)
 
 	return accuracy
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"math/rand"
+	"rpg/d1"
 	"rpg/defs"
 	"rpg/geometry"
 	"rpg/gridmap"
@@ -34,6 +35,7 @@ type PlayerActions interface {
 	AimedRangedAttack()
 	AimedThrow()
 	QuickRangedAttack()
+	CastLastSpellAtNearest()
 	RestUntilHealed()
 	AutoAttack()
 	ShowActorInfoAt(mapPos geometry.Point)
@@ -57,7 +59,7 @@ type State struct {
 	playerStashInTown   *Inventory
 	playerDijkstraMap   map[geometry.Point]int
 	timekeeper          *TimeKeeper
-	actions             ActionBroker
+	actions             *Broker
 	animator            Animator
 
 	config Configuration
@@ -69,6 +71,8 @@ type State struct {
 
 	SelectedClass defs.LoadoutDefinition
 	worldTexture  renderer.TextureAtlas
+
+	glowCache map[*gridmap.GridMap[*Actor, *Item, Object]]map[geometry.Point]float64 // decorative light per map (d1Glow)
 }
 
 func (s *State) GetWorldTexture() renderer.TextureAtlas {
@@ -104,6 +108,12 @@ func (s *State) SetOnMapChanged(onMapChanged func(oldName, newName string)) {
 }
 func (s *State) SetMapGenerator(mapGen *MapGenerator) {
 	s.mapGen = mapGen
+}
+
+// D1Quests reports which of D1's quests this game's seed picked (InitQuests): QuestNotAvail for the ones it
+// disabled, so callers can tell an absent quest boss from a missing one.
+func (s *State) D1Quests() *d1.Quests {
+	return s.mapGen.d1Quests
 }
 func (s *State) GetVisibility() *Visibility {
 	return s.visibility
@@ -306,6 +316,13 @@ func (s *State) ApplyLighting(mapPos geometry.Point, drawColor color.RGBA, world
 	} else {
 		percentageLightness := float64(distanceToPlayer) / float64(maxDistance)
 		percentageLightness = 1.0 - util.EaseInExpo(percentageLightness)
+		if glow := s.d1GlowAt(mapPos); glow > 0 { // wall torches and braziers, each flickering out of step
+			frame := util.GetLoopingFrameFromTick(worldTick+uint64(mapPos.X*7+mapPos.Y*13), d1HeroTorch.FlickerFrameDelay, len(d1HeroTorch.FlickerPattern))
+			if g := glow * d1HeroTorch.FlickerPattern[frame]; g > percentageLightness {
+				percentageLightness = g
+				drawColor = multiplyColors(drawColor, d1HeroTorch.LightColor)
+			}
+		}
 		//light := 255 // 1.0 -> 100% of original value
 		//dark := 20   // 0.0 -> 12,75% of original value
 		percentagOfValue := darkPercentage + ((lightPercentage - darkPercentage) * percentageLightness)
@@ -317,8 +334,15 @@ func (s *State) ApplyLighting(mapPos geometry.Point, drawColor color.RGBA, world
 	return drawColor
 }
 
+// d1HeroTorch is the light every D1 hero carries without an item: H&H's torch color and fire flicker.
+var d1HeroTorch = LightStats{LightColor: color.RGBA{R: 255, G: 223, B: 117, A: 255}, FlickerPattern: defs.GetFireFlickerPattern(), FlickerFrameDelay: 0.125}
+
 func (s *State) mixLightSourceColor(drawColor, noLightSource color.RGBA, worldTick uint64) color.RGBA {
 	state := s
+	if s.GetPlayer().hero != nil {
+		flicker := d1HeroTorch.FlickerPattern[util.GetLoopingFrameFromTick(worldTick, d1HeroTorch.FlickerFrameDelay, len(d1HeroTorch.FlickerPattern))]
+		return multiplyColors(drawColor, multiplyColor(d1HeroTorch.LightColor, flicker))
+	}
 	equipment := state.GetPlayer().GetEquipment()
 	if equipment.HasLightSourceEquipped() {
 		lightSource := equipment.GetLightSource()
@@ -336,12 +360,12 @@ func (s *State) mixLightSourceColor(drawColor, noLightSource color.RGBA, worldTi
 	}
 	return drawColor
 }
+// GetWaterColor tints water tiles: light green while the Poisoned Water Supply is foul, blue otherwise.
 func (s *State) GetWaterColor() color.RGBA {
-	//all_clear:SpecialLevelPoisonedWaterSupply
-	//
-	cleanColor := color.RGBA{R: 86, G: 112, B: 194, A: 255}
-
-	return cleanColor
+	if sl := d1SetLevelOf(s.GetMap().GetName()); sl != nil && sl.SL == d1.SLPoisonWater && s.QuestActive(d1.QPWater) != d1.QuestDone {
+		return color.RGBA{R: 199, G: 251, B: 161, A: 255}
+	}
+	return color.RGBA{R: 86, G: 112, B: 194, A: 255}
 }
 
 func (s *State) IsDoorAt(pos geometry.Point) (*Door, bool) {
@@ -541,16 +565,18 @@ func getDropPos(gameMap *gridmap.GridMap[*Actor, *Item, Object], actorPos geomet
 				return false
 			}
 		}
-		cell := gameMap.GetCell(pos)
-		if cell.TileType.Special != gridmap.SpecialTileNone {
+		if !gameMap.Contains(pos) || gameMap.GetCell(pos).TileType.Special != gridmap.SpecialTileNone {
 			return false
 		}
-		return gameMap.Contains(pos) && gameMap.IsWalkable(pos) && !gameMap.IsItemAt(pos) && !gameMap.IsObjectAt(pos)
+		return gameMap.IsWalkable(pos) && !gameMap.IsItemAt(pos) && !gameMap.IsObjectAt(pos)
 	}
 	if isFree(actorPos) {
 		return actorPos
 	}
 	freeCells := gameMap.GetFreeCellsForDistribution(actorPos, 1, isFree)
+	if len(freeCells) == 0 { // e.g. a container walled in by others: search the whole reachable area
+		freeCells = freeCellsNear(gameMap, actorPos, gameMap.MapSize().X*gameMap.MapSize().Y, isFree)
+	}
 	if len(freeCells) == 0 {
 		println("ERR: No free cells for item drop")
 		return actorPos
@@ -592,4 +618,46 @@ type QuestFlags struct {
 	GivenFlag    string
 	GoalFlag     string
 	RewardedFlag string
+}
+
+// d1GlowAt is how much decorative light (wall torches, braziers) falls on a cell, 0..1: brightest at the light,
+// fading to nothing at its D1 light radius, only where the light has a clear line. Built once per map.
+func (s *State) d1GlowAt(p geometry.Point) float64 {
+	m := s.GetMap()
+	if s.glowCache == nil {
+		s.glowCache = map[*gridmap.GridMap[*Actor, *Item, Object]]map[geometry.Point]float64{}
+	}
+	glow, ok := s.glowCache[m]
+	if !ok {
+		glow = map[geometry.Point]float64{}
+		for y := 0; y < m.MapSize().Y; y++ {
+			for x := 0; x < m.MapSize().X; x++ {
+				src := geometry.Point{X: x, Y: y}
+				r := 0
+				if icon, has := m.GetDecal(src); has && icon == defs.IconWallTorch {
+					r = d1LightRadius(icon)
+				}
+				if m.IsObjectAt(src) { // ObjectAt dereferences the cell's object: only call it where there is one
+					if wl, ok := m.ObjectAt(src).(*d1WallLight); ok {
+						r = d1LightRadius(wl.icon)
+					}
+				}
+				for dy := -r; dy <= r && r > 0; dy++ {
+					for dx := -r; dx <= r; dx++ {
+						q := src.Add(geometry.Point{X: dx, Y: dy})
+						d := geometry.Distance(src, q)
+						if !m.Contains(q) || d >= float64(r) {
+							continue
+						}
+						los := geometry.LineOfSight(src, q, func(c geometry.Point) bool { return c == src || m.IsTransparent(c) })
+						if len(los) > 0 && los[len(los)-1] == q {
+							glow[q] = max(glow[q], 1-d/float64(r))
+						}
+					}
+				}
+			}
+		}
+		s.glowCache[m] = glow
+	}
+	return glow[p]
 }

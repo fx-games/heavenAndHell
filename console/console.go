@@ -38,6 +38,10 @@ func (c *Console) FadeFromBlack() {
 
 }
 
+func (c *Console) Confirm(message string, onConfirm func()) {
+	onConfirm()
+}
+
 func (c *Console) GetVisibleMap() geometry.Rect {
 	return geometry.Rect{}
 }
@@ -76,6 +80,10 @@ func (c *Console) PopAll() {
 
 func (c *Console) ShowGameOverMenu() {
 
+}
+
+func (c *Console) OpenUncancelableMenu(options []util.MenuItem) {
+	c.OpenMenu(options)
 }
 
 func (c *Console) OpenMenu(options []util.MenuItem) {
@@ -208,20 +216,18 @@ func (c *Console) UpdateStatsLabel() {
 
 	c.statusBar.SetText(statusStr)
 }
-func (c *Console) OpenStash(inv *common.Inventory, town *common.Inventory, drop func(item *common.Item)) {
-
-}
-
 func (c *Console) OnMapChanged() {
 	//c.screen.Clear()
 	c.screen.Sync()
 }
 
-func (c *Console) OpenClassSelectionMenu() {
-
-}
-
-func (c *Console) Say(actor *common.Actor, linesOfText []string) {
+// OpenNewGameScreen is a plain class menu in ASCII mode (male icon, no permadeath, default name).
+func (c *Console) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string)) {
+	var items []util.MenuItem
+	for _, class := range c.context.Definitions.ClassDefinitions {
+		items = append(items, util.MenuItem{MainText: class.Name, Action: func() { start(class, false, "") }})
+	}
+	c.OpenMenu(items)
 
 }
 
@@ -233,6 +239,11 @@ func (c *Console) OpenShopMenu(npc *common.Actor) {
 	c.openShopMenuWithHandler(npc.GetInventory(), func(item *common.Item) {
 		c.tryToBuy(item, npc)
 	})
+}
+
+// OpenShopMenuFiltered: the console UI shows everything in one list rather than splitting basic/premium stock.
+func (c *Console) OpenShopMenuFiltered(npc *common.Actor, filter func(*common.Item) bool) {
+	c.OpenShopMenu(npc)
 }
 func (c *Console) tryToBuy(item *common.Item, seller *common.Actor) {
 	player := c.context.GameState().GetPlayer()
@@ -337,16 +348,11 @@ func (c *Console) BeginPlayerSellingTo(vendor *common.Actor) {
 
 }
 
-func (c *Console) OpenTransferEnchantmentMenu() {
-
-}
 func (c *Console) UpdateMiniMap() {
 
 }
 
-func (c *Console) OpenPlayerStashInTown() {
-
-}
+func (c *Console) OpenPlayerStashInTown() {}
 
 func (c *Console) OnPlayerTurnTaken() {
 	c.UpdateStatsLabel()

@@ -59,6 +59,7 @@ type UserInterface interface {
 	PopAll()
 	ShowGameOverMenu()
 	OpenMenu(options []util.MenuItem)
+	OpenUncancelableMenu(options []util.MenuItem) // like OpenMenu, but ESC/cancel does nothing (e.g. the start menu)
 	OpenTextWindow(msg []util.LabelText)
 
 	CancelTargeting()
@@ -66,19 +67,17 @@ type UserInterface interface {
 	UpdateStatsLabel()
 
 	// Specialized
-	OpenStash(inv *Inventory, town *Inventory, drop func(item *Item))
 	OnMapChanged()
-	OpenClassSelectionMenu()
+	OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string))
 
 	// Action specific
-	Say(actor *Actor, linesOfText []string)
 	BeginTargeting(rules TargetRules, onHit *HitEffect)
 
 	// Vendor interactions
 	OpenShopMenu(npc *Actor)
+	OpenShopMenuFiltered(npc *Actor, filter func(*Item) bool)
 	BeginPlayerSellingTo(vendor *Actor)
 
-	OpenTransferEnchantmentMenu()
 	OpenListInventoryForSelection(filter func(element *Item) bool, selected func(itemKey rune))
 	UpdateMiniMap()
 	OpenPlayerStashInTown()
@@ -88,22 +87,15 @@ type UserInterface interface {
 	FadeToBlack()
 	FadeFromBlack()
 
-}
-type ActionBroker interface {
-	Execute(action Action)
-	RegisterHook(hook ActionHook)
-	QueueForExecution(action Action)
-	QueueForExecutionAtTheSameTime(actions []Action)
-	RemoveBeforeHook(hook ActionHook)
-	RemoveAfterHook(hook ActionHook)
-	ClearQueuedActions(filter func(action Action) bool)
+	// Confirm opens a Yes/No prompt asking message; onConfirm runs only if the player picks Yes.
+	Confirm(message string, onConfirm func())
 }
 type ActionContext struct {
 	GameState     *State
 	UserInterface func() UserInterface
 	AudioPlayer   *audio.Player
 	Data          defs.DataContainer
-	ActionBroker  ActionBroker
+	ActionBroker  *Broker
 	Msg           func(message string)
 }
 

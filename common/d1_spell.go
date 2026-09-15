@@ -48,7 +48,7 @@ func (a *SpellAction) Execute(ctx ActionContext) []Action {
 		m: ctx.GameState.GetMap(), cause: a.cause, dealt: map[*Actor]int{}, ctx: ctx}
 	a.castSucceeded = c.cast(a.target)
 	if a.castSucceeded {
-		ctx.Msg(fmt.Sprintf("You cast %s.", f.d1.D.Spells[a.spell].Name))
+		ctx.Msg(fmt.Sprintf("You cast %s.", f.Generator.D.Spells[a.spell].Name))
 	}
 	a.animations = c.animations
 	return c.finish()
@@ -85,6 +85,12 @@ func (c *spellCtx) monsterAt(p geometry.Point) *Actor {
 		return a
 	}
 	return nil
+}
+
+// hitCell is monsterAt for a cell a spell hits: a barrel there breaks first.
+func (c *spellCtx) hitCell(p geometry.Point) *Actor {
+	c.f.hitD1Barrel(c.m, p, c.caster)
+	return c.monsterAt(p)
 }
 
 func (c *spellCtx) open(p geometry.Point) bool { return c.m.Contains(p) && c.m.IsTransparent(p) }
@@ -132,6 +138,11 @@ func (c *spellCtx) freeNear(target geometry.Point, ok func(geometry.Point) bool)
 
 func (c *spellCtx) emptyFloor(p geometry.Point) bool {
 	return c.m.IsCurrentlyPassable(p) && !c.m.IsObjectAt(p) && c.lineClear(c.origin(), p)
+}
+
+// HasInfravision: the spell, the Murky Pool, or an item with the infravision affix (_pInfraFlag).
+func (a *Actor) HasInfravision() bool {
+	return a.HasStatusEffect(StatusInfravision) || a.hero != nil && a.HeroSheet().Flags&d1.ISplInfravision != 0
 }
 
 func resistBits(kind int) (resist, immune int) {
@@ -189,7 +200,7 @@ func (c *spellCtx) finish() []Action {
 	return actions
 }
 
-func (c *spellCtx) icon() int32 { return d1SpellIcons[c.f.d1.D.Spells[c.spell].Type] }
+func (c *spellCtx) icon() int32 { return d1SpellIcons[c.f.Generator.D.Spells[c.spell].Type] }
 
 // bolt flies from `from` towards `to` until it hits a monster or a wall; a miss flies on (CheckMissileCol).
 // It returns the last cell it reached. Barrels in its way break.
@@ -198,9 +209,7 @@ func (c *spellCtx) bolt(from, to geometry.Point, hit func(a *Actor) bool) geomet
 	for _, p := range c.ray(from, to, 20) {
 		last = p
 		if o := d1ObjectAt(c.m, p); o != nil && !o.IsWalkable(nil) {
-			if o.O.Kind == d1.ObjBarrel || o.O.Kind == d1.ObjBarrelEx {
-				c.f.breakD1Barrel(o, c.caster)
-			}
+			c.f.hitD1Barrel(c.m, p, c.caster)
 			break
 		}
 		if a := c.monsterAt(p); a != nil && hit(a) {
@@ -217,7 +226,7 @@ func (c *spellCtx) bolt(from, to geometry.Point, hit func(a *Actor) bool) geomet
 func (c *spellCtx) beam(to geometry.Point, dam func() int) {
 	cells := c.ray(c.origin(), to, 20)
 	for _, p := range cells {
-		if a := c.monsterAt(p); a != nil {
+		if a := c.hitCell(p); a != nil {
 			c.strike(a, dam()<<6, 1)
 		}
 	}
@@ -243,7 +252,7 @@ func (c *spellCtx) home(from geometry.Point, dam64 int) {
 func (c *spellCtx) payHP(hp int) {
 	c.caster.GetStats().GetResource(stats.Health).Decrease(hp)
 	if !c.caster.IsAlive() {
-		c.f.actionBroker.QueueForExecution(NewDieAction(c.cause, c.caster))
+		c.f.ActionBroker.QueueForExecution(NewDieAction(c.cause, c.caster))
 	}
 }
 
@@ -252,7 +261,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 	clvl := h.Level
 	st := c.caster.GetStats()
 	inTown := defs.IsTownLevel(c.m.GetName())
-	if inTown && !f.d1.D.Spells[c.spell].Town {
+	if inTown && !f.Generator.D.Spells[c.spell].Town {
 		c.ctx.Msg("That spell doesn't work in town.")
 		return false
 	}
@@ -286,7 +295,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		low, high := d1.FlashDamage64(d1Rng, clvl, slvl)
 		for dx := -1; dx <= 1; dx++ {
 			for dy, dam := range map[int]int{-1: high, 0: low, 1: low} {
-				if a := c.monsterAt(o.Add(geometry.Point{X: dx, Y: dy})); a != nil {
+				if a := c.hitCell(o.Add(geometry.Point{X: dx, Y: dy})); a != nil {
 					c.strike(a, dam, d1.FlashTicks)
 				}
 			}
@@ -338,7 +347,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		for dy := -1; dy <= 1; dy++ {
 			for dx := -1; dx <= 1; dx++ {
 				p := impact.Add(geometry.Point{X: dx, Y: dy})
-				if a := c.monsterAt(p); a != nil && c.lineClear(o, p) {
+				if a := c.hitCell(p); a != nil && c.lineClear(o, p) {
 					c.strike(a, dam<<6, 1)
 				}
 			}
@@ -371,7 +380,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 			dam := d1.WaveDamage(d1Rng, clvl)
 			cells := append([]geometry.Point{p}, c.ray(p, p.Add(D1Dirs[dir]), 20)...)
 			for _, q := range cells {
-				if a := c.monsterAt(q); a != nil {
+				if a := c.hitCell(q); a != nil {
 					c.strike(a, dam<<6, 1)
 				}
 			}
@@ -381,7 +390,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		dam := d1.NovaDamage(d1Rng, clvl, slvl)
 		for _, r := range d1.NovaRays {
 			for _, p := range c.ray(o, o.Add(geometry.Point{X: r[0], Y: r[1]}), 20) {
-				if a := c.monsterAt(p); a != nil {
+				if a := c.hitCell(p); a != nil {
 					c.strike(a, dam<<6, 1)
 				}
 			}
@@ -390,7 +399,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 	case d1.SplInferno:
 		for n, p := range c.ray(o, target, 3) {
 			dam := d1.InfernoDamage64(d1Rng, clvl)
-			if a := c.monsterAt(p); a != nil {
+			if a := c.hitCell(p); a != nil {
 				c.strike(a, dam, d1.InfernoTicks(n))
 			}
 			c.animations = append(c.animations, NewHitAnimation(p, 0.5, defs.IconEffectFireBig, 2))
@@ -438,7 +447,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 					break
 				}
 				p = next
-				if a := c.monsterAt(p); a != nil && c.strike(a, dam<<6, 1) {
+				if a := c.hitCell(p); a != nil && c.strike(a, dam<<6, 1) {
 					break
 				}
 			}
@@ -456,7 +465,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 
 // spawnD1Fire places one fire wall cell: each turn it burns whoever stands in it (MI_Firewall, 8 ticks a turn).
 func (f *Factory) spawnD1Fire(caster *Actor, p geometry.Point, slvl int) {
-	m := f.state.GetMap()
+	m := f.State.GetMap()
 	if m.IsObjectAt(p) {
 		return
 	}
@@ -464,13 +473,13 @@ func (f *Factory) spawnD1Fire(caster *Actor, p geometry.Point, slvl int) {
 	fire.turnsUntilRemoval = d1.FireWallTurns(slvl)
 	fire.SetDealDamage(func(location geometry.Point, _ func() bool) {})
 	fire.SetOnTurn(func() {
-		if !fire.IsAlive() || f.state.GetMap() != m {
+		if !fire.IsAlive() || f.State.GetMap() != m {
 			m.RemoveObject(fire)
 			fire.turnsUntilRemoval = 0
 			return
 		}
 		if a, ok := m.TryGetActorAt(p); ok && a.d1Monster != nil && caster.IsAlive() {
-			f.actionBroker.Execute(&spellTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
+			f.ActionBroker.Execute(&spellTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
 				caster: caster, spell: d1.SplFireWall, run: func(c *spellCtx) {
 					if v := c.monsterAt(p); v != nil {
 						c.strike(v, d1.FireWallDamage64(d1Rng, caster.hero.Level), d1.RefWalkTicks)
@@ -478,18 +487,18 @@ func (f *Factory) spawnD1Fire(caster *Actor, p geometry.Point, slvl int) {
 				}})
 		}
 	})
-	f.getTimeKeeper().AddTimed(fire)
+	f.GetTimeKeeper().AddTimed(fire)
 	m.AddObject(fire, p)
 }
 
 // spawnD1Guardian places a Guardian: every other turn it spits a firebolt at the closest monster it can see (MI_Guardian).
 func (f *Factory) spawnD1Guardian(caster *Actor, p geometry.Point, turns int) {
-	m := f.state.GetMap()
+	m := f.State.GetMap()
 	g := NewFire(0)
 	g.icon, g.frameCount, g.turnsUntilRemoval = defs.IconEffectFireBig, 2, turns
 	g.SetDealDamage(func(geometry.Point, func() bool) {})
 	g.SetOnTurn(func() {
-		if !g.IsAlive() || f.state.GetMap() != m {
+		if !g.IsAlive() || f.State.GetMap() != m {
 			m.RemoveObject(g)
 			g.turnsUntilRemoval = 0
 			return
@@ -497,7 +506,7 @@ func (f *Factory) spawnD1Guardian(caster *Actor, p geometry.Point, turns int) {
 		if g.turnsUntilRemoval%2 != 0 || caster.hero == nil {
 			return
 		}
-		f.actionBroker.Execute(&spellTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
+		f.ActionBroker.Execute(&spellTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
 			caster: caster, spell: d1.SplFirebolt, run: func(c *spellCtx) {
 				var best *Actor
 				for _, a := range m.Actors() {
@@ -512,7 +521,7 @@ func (f *Factory) spawnD1Guardian(caster *Actor, p geometry.Point, turns int) {
 				}
 			}})
 	})
-	f.getTimeKeeper().AddTimed(g)
+	f.GetTimeKeeper().AddTimed(g)
 	m.AddObject(g, p)
 }
 
@@ -537,15 +546,15 @@ func (a *spellTickAction) Execute(ctx ActionContext) []Action {
 
 // d1MovePlayer puts the player on a cell (Teleport, Phasing, the Holy shrine).
 func (f *Factory) d1MovePlayer(player *Actor, p geometry.Point, why ActionName) {
-	m := f.state.GetMap()
+	m := f.State.GetMap()
 	m.MoveActor(player, p)
 	player.SetDrawPosition(p.ToPointF())
-	f.actionBroker.QueueForExecution(NewUpdateFoVAction(NewActorCause(why, player), player))
+	f.ActionBroker.QueueForExecution(NewUpdateFoVAction(NewActorCause(why, player), player))
 }
 
 // d1RandomTeleport ports MIS_RNDTELEPORT: a jump of 4-6 cells along each axis.
 func (f *Factory) d1RandomTeleport(player *Actor) {
-	m, p := f.state.GetMap(), player.MapPosition()
+	m, p := f.State.GetMap(), player.MapPosition()
 	for try := 0; try < 500; try++ {
 		dx, dy := d1Rng.Intn(3)+4, d1Rng.Intn(3)+4
 		if d1Rng.Intn(2) == 1 {
@@ -572,15 +581,15 @@ func (f *Factory) openD1IdentifyMenu(player *Actor) bool {
 			item.d1.Identified = true
 			item.RefreshD1()
 			SyncHero(player)
-			f.logError(fmt.Sprintf("It is %s.", item.Name()))
+			f.Msg(fmt.Sprintf("It is %s.", item.Name()))
 		}})
 	}
 	if len(items) == 0 {
-		f.logError("You have nothing to identify.")
+		f.Msg("You have nothing to identify.")
 		return false
 	}
-	if f.gui != nil {
-		f.gui().OpenMenu(items)
+	if f.UI != nil {
+		f.UI().OpenMenu(items)
 	}
 	return true
 }
@@ -627,17 +636,51 @@ func (f *Factory) summonD1Golem(c *spellCtx, target geometry.Point) bool {
 		}
 	}
 	gs := d1.GolemStats(c.slvl, c.h.Level, c.s.MaxMana)
-	a := f.NewD1Monster(f.d1.D.MonsterByID("MT_GOLEM"))
+	f.placeD1Golem(c.m, p, SavedGolem{AC: gs.AC, Hit: gs.Hit, MinDam: gs.MinDam, MaxDam: gs.MaxDam, MaxHP: gs.HP, HP: gs.HP})
+	return true
+}
+
+// SavedGolem is the player's golem, which follows them from level to level and into the save.
+type SavedGolem struct {
+	AC, Hit, MinDam, MaxDam, MaxHP, HP int
+}
+
+func (f *Factory) placeD1Golem(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point, g SavedGolem) *Actor {
+	a := f.NewD1Monster(f.Generator.D.MonsterByID("MT_GOLEM"))
 	a.isHostile = false
 	mon := a.d1Monster
-	mon.Golem, mon.SpawnIndex, mon.AC, mon.Hit, mon.MinDam, mon.MaxDam = true, -1, gs.AC, gs.Hit, gs.MinDam, gs.MaxDam
+	mon.Golem, mon.SpawnIndex, mon.AC, mon.Hit, mon.MinDam, mon.MaxDam = true, -1, g.AC, g.Hit, g.MinDam, g.MaxDam
 	a.SetColor(defs.White)
-	a.GetStats().SetAttribute(stats.MaxHealth, gs.HP)
-	a.GetStats().GetResource(stats.Health).SetToMax()
+	a.GetStats().SetAttribute(stats.MaxHealth, g.MaxHP)
+	SetResource(a.GetStats().GetResource(stats.Health), max(g.HP, 1))
 	a.SetDrawPosition(p.ToPointF())
-	c.m.AddActor(a, p)
-	f.state.OnActorSpawned(a)
-	return true
+	m.AddActor(a, p)
+	f.State.OnActorSpawned(a)
+	return a
+}
+
+// D1Golem is the player's living golem on m, if any.
+func D1Golem(m *gridmap.GridMap[*Actor, *Item, Object]) *Actor {
+	for _, a := range m.Actors() {
+		if a.d1Monster != nil && a.d1Monster.Golem && a.IsAlive() {
+			return a
+		}
+	}
+	return nil
+}
+
+// SaveD1Golem describes a golem for moving or saving it.
+func SaveD1Golem(a *Actor) SavedGolem {
+	mon, st := a.d1Monster, a.GetStats()
+	return SavedGolem{AC: mon.AC, Hit: mon.Hit, MinDam: mon.MinDam, MaxDam: mon.MaxDam, MaxHP: st.GetAttribute(stats.MaxHealth), HP: st.GetResource(stats.Health).Value()}
+}
+
+// PlaceD1GolemNear puts the player's golem back next to the player (after a level change or loading a save).
+func (f *Factory) PlaceD1GolemNear(player *Actor, g SavedGolem) {
+	m := f.State.GetMap()
+	if cells := freeCellsNear(m, player.MapPosition(), 1, m.CanPlaceActorHere); len(cells) > 0 {
+		f.placeD1Golem(m, cells[0], g)
+	}
 }
 
 // D1Portal is the open town portal: where it stands in the dungeon.
@@ -656,7 +699,9 @@ type d1PortalObject struct {
 func (o *d1PortalObject) Name() string                        { return "Town Portal" }
 func (o *d1PortalObject) MapPosition() geometry.Point         { return o.pos }
 func (o *d1PortalObject) SetMapPosition(p geometry.Point)     { o.pos = p }
-func (o *d1PortalObject) Icon(uint64) int32                   { return 72 }
+func (o *d1PortalObject) Icon(tick uint64) int32 {
+	return []int32{defs.Icon("prop.portal"), defs.Icon("prop.portal.2")}[util.GetLoopingFrameFromTick(tick, 0.3, 2)]
+}
 func (o *d1PortalObject) IsWalkable(*Actor) bool              { return true }
 func (o *d1PortalObject) IsTransparent() bool                 { return true }
 func (o *d1PortalObject) IsPassableForProjectile() bool       { return true }
@@ -668,9 +713,9 @@ func (s *State) D1Portal() *D1Portal     { return s.d1Portal }
 func (s *State) SetD1Portal(p *D1Portal) { s.d1Portal = p }
 
 func (f *Factory) openD1Portal(player *Actor) bool {
-	m := f.state.GetMap()
-	if old := f.state.d1Portal; old != nil {
-		f.state.CloseD1Portal()
+	m := f.State.GetMap()
+	if old := f.State.d1Portal; old != nil {
+		f.State.CloseD1Portal()
 	}
 	cells := freeCellsNear(m, player.MapPosition(), 1, func(p geometry.Point) bool {
 		_, isTransition := m.GetTransitionAt(p)
@@ -679,8 +724,8 @@ func (f *Factory) openD1Portal(player *Actor) bool {
 	if len(cells) == 0 {
 		return false
 	}
-	f.state.d1Portal = &D1Portal{Map: m.GetName(), X: cells[0].X, Y: cells[0].Y}
-	PlaceD1Portal(f.state, m)
+	f.State.d1Portal = &D1Portal{Map: m.GetName(), X: cells[0].X, Y: cells[0].Y}
+	PlaceD1Portal(f.State, m)
 	return true
 }
 
@@ -746,15 +791,20 @@ func (f *Factory) D1SpellSkills(player *Actor) ([]*TargetedAction, []*Untargeted
 	s := player.HeroSheet()
 	var targeted []*TargetedAction
 	var untargeted []*UntargetedAction
+	if t, u := f.d1ClassSkill(player); t != nil {
+		targeted = append(targeted, t)
+	} else {
+		untargeted = append(untargeted, u)
+	}
 	for spell := range h.SpellLevels {
 		if h.SpellLevel(s, spell) <= 0 {
 			continue
 		}
-		sd := f.d1.D.Spells[spell]
-		name := fmt.Sprintf("%s (lvl %d, %d mana)", sd.Name, h.SpellLevel(s, spell), f.d1.D.ManaCost(h, s, spell)>>6)
+		sd := f.Generator.D.Spells[spell]
+		name := fmt.Sprintf("%s (lvl %d, %d mana)", sd.Name, h.SpellLevel(s, spell), f.Generator.D.ManaCost(h, s, spell)>>6)
 		sp := spell
 		if d1.SpellTargeted[spell] {
-			action := NewTargetedAction(name, OneTargetTile(f.state.GetMap, util.Arguments{}),
+			action := NewTargetedAction(name, OneTargetTile(f.State.GetMap, util.Arguments{}),
 				&HitEffect{Activate: func(caster *Actor, target geometry.Point, _ []geometry.Point) { f.CastD1FromMemory(caster, sp, target) },
 					Description: []util.LabelText{util.LabelTextFromString(sd.Name)}},
 				d1SpellTargeting(f, sp))
@@ -801,7 +851,7 @@ func d1SpellTargeting(f *Factory, spell int) *TargetRulesProvider {
 				},
 			}
 		},
-		Description: []util.LabelText{util.LabelTextFromString(f.d1.D.Spells[spell].Name)},
+		Description: []util.LabelText{util.LabelTextFromString(f.Generator.D.Spells[spell].Name)},
 	}
 }
 
@@ -812,10 +862,10 @@ func (f *Factory) CastD1FromMemory(caster *Actor, spell int, target geometry.Poi
 	if h.SpellLevel(s, spell) <= 0 {
 		return
 	}
-	cost := f.d1.D.ManaCost(h, s, spell)
+	cost := f.Generator.D.ManaCost(h, s, spell)
 	mana := caster.GetStats().GetResource(stats.Mana)
 	if mana.Value() < cost>>6 || s.Flags&d1.ISplNoMana != 0 && cost > 0 {
-		f.logError("Not enough mana.")
+		f.Msg("Not enough mana.")
 		return
 	}
 	if f.castD1(caster, spell, h.SpellLevel(s, spell), target) {
@@ -827,9 +877,9 @@ func (f *Factory) CastD1FromMemory(caster *Actor, spell int, target geometry.Poi
 // castD1 casts and ends the player's turn; false if the spell did nothing.
 func (f *Factory) castD1(caster *Actor, spell, slvl int, target geometry.Point) bool {
 	action := NewSpellAction(caster, spell, slvl, target)
-	f.actionBroker.Execute(action)
-	if action.Succeeded() && caster == f.state.GetPlayer() {
-		f.actionBroker.Execute(NewEndPlayerTurnAction(action.Cause(), action.GetDelayInAut()))
+	f.ActionBroker.Execute(action)
+	if action.Succeeded() && caster == f.State.GetPlayer() {
+		f.ActionBroker.Execute(NewEndPlayerTurnAction(action.Cause(), action.GetDelayInAut()))
 	}
 	return action.Succeeded()
 }
@@ -837,7 +887,7 @@ func (f *Factory) castD1(caster *Actor, spell, slvl int, target geometry.Point) 
 // d1SpellItemAction makes scrolls and staves castable: they cast at the hero's spell level, without mana (UseMana).
 func (f *Factory) d1SpellItemAction(item *Item) {
 	it := item.d1
-	sd := f.d1.D.Spells[it.Spell]
+	sd := f.Generator.D.Spells[it.Spell]
 	use := func(caster *Actor, target geometry.Point) {
 		h := caster.hero
 		if h == nil {
@@ -851,7 +901,7 @@ func (f *Factory) d1SpellItemAction(item *Item) {
 			}
 		}
 		if s.Mag < it.MinMag {
-			f.logError(fmt.Sprintf("You need %d magic to use that.", it.MinMag))
+			f.Msg(fmt.Sprintf("You need %d magic to use that.", it.MinMag))
 			refund()
 			return
 		}
@@ -865,7 +915,7 @@ func (f *Factory) d1SpellItemAction(item *Item) {
 		}
 	}
 	if d1.SpellTargeted[it.Spell] {
-		action := NewTargetedAction(sd.Name, OneTargetTile(f.state.GetMap, util.Arguments{}),
+		action := NewTargetedAction(sd.Name, OneTargetTile(f.State.GetMap, util.Arguments{}),
 			&HitEffect{Activate: func(caster *Actor, target geometry.Point, _ []geometry.Point) { use(caster, target) },
 				Description: []util.LabelText{util.LabelTextFromString(sd.Name)}},
 			d1SpellTargeting(f, it.Spell))
@@ -878,21 +928,18 @@ func (f *Factory) d1SpellItemAction(item *Item) {
 	}
 }
 
-// ReadD1Book ports UseItem's IMISC_BOOK: the spell level rises and some mana comes back.
+// ReadD1Book ports UseItem's IMISC_BOOK: the spell level rises and some mana comes back. The magic requirement
+// is checked by the item's UntargetedAction condition (see d1_item.go), so it's guaranteed met here.
 func (f *Factory) readD1Book(user *Actor, it *d1.Item) {
 	h := user.hero
 	if h == nil {
 		return
 	}
-	if user.HeroSheet().Mag < it.MinMag {
-		f.logError(fmt.Sprintf("You need %d magic to read that.", it.MinMag))
-		return
-	}
 	h.SpellLevels[it.Spell] = min(h.SpellLevels[it.Spell]+1, 15)
-	sd := f.d1.D.Spells[it.Spell]
+	sd := f.Generator.D.Spells[it.Spell]
 	user.GetStats().GetResource(stats.Mana).Increase(float64(sd.Mana))
 	f.RefreshD1Spells(user)
-	f.logError(fmt.Sprintf("You learn %s (level %d).", sd.Name, h.SpellLevels[it.Spell]))
+	f.Msg(fmt.Sprintf("You learn %s (level %d).", sd.Name, h.SpellLevels[it.Spell]))
 }
 
 // d1ManaShield ports MI_Manashield for a hit of dam whole points: mana pays first (a third less from spell level 1).
@@ -914,3 +961,6 @@ func d1ManaShield(def *Actor, dam int) int {
 	def.GetStatusEffects().SetFalse(string(StatusManaShield))
 	return rest
 }
+
+// D1SpellName is a spell's name for menus.
+func (s *State) D1SpellName(spell int) string { return s.factory.Generator.D.Spells[spell].Name }

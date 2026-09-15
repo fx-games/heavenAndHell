@@ -21,6 +21,7 @@ type BasicMenu struct {
 
 	selectedIndex int
 	closeOnSelect bool
+	cancelable    bool
 	bounds        geometry.Rect
 }
 
@@ -30,6 +31,7 @@ func NewBasicMenu(uiController *UIController) *BasicMenu {
 		drawBackground: true,
 		centeredText:   true,
 		closeOnSelect:  true,
+		cancelable:     true,
 		borderPadding:  geometry.Point{X: 40, Y: 40},
 	}
 	b.layoutFunc = func() {
@@ -41,7 +43,9 @@ func NewBasicMenu(uiController *UIController) *BasicMenu {
 func (i *BasicMenu) OnCommand(command CommandType) bool {
 	switch command {
 	case PlayerCommandCancel:
-		i.close()
+		if i.cancelable {
+			i.close()
+		}
 		return true
 	case PlayerCommandUp:
 		i.selectionUp()
@@ -51,6 +55,20 @@ func (i *BasicMenu) OnCommand(command CommandType) bool {
 		return true
 	case PlayerCommandConfirm:
 		i.confirmSelection()
+		return true
+	case PlayerCommandLeft, PlayerCommandRight: // items with ActionLeft/ActionRight (sliders) update their text
+		if !i.hasValidSelection() {
+			return false
+		}
+		item := &i.items[i.selectedIndex]
+		act := item.ActionLeft
+		if command == PlayerCommandRight {
+			act = item.ActionRight
+		}
+		if act != nil {
+			item.MainText = act()
+			i.Layout()
+		}
 		return true
 	}
 	return false

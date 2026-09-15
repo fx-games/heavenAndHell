@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"os"
 	"path/filepath"
 	"rpg/common"
@@ -24,12 +25,16 @@ func playthrough() {
 	theGame, _ := createGameAndUIContext() // one instance: ebiten allows a single audio context per process
 	missiles := &missileCounter{} // registered per check: a new game or a load makes a new broker
 	for run := 1; run <= 3; run++ {
-		theGame.NewGame(theGame.GetGameData().ClassDefinitions[run-1], false)
+		theGame.NewGame(theGame.GetGameData().ClassDefinitions[run-1], false, "")
 		state := theGame.GetWorldState()
 		player := state.GetPlayer()
 		if player.Hero() == nil {
 			fail("run %d: player has no D1 hero", run)
 		}
+		// the checks park the hero in packs: one turn of a whole pack must not kill a low-HP sorcerer on 14
+		player.Hero().MaxHPBase += 1000 << 6
+		common.SyncHero(player)
+		player.GetStats().GetResource(stats.Health).SetToMax()
 		for dlvl := 1; dlvl <= 16; dlvl++ {
 			name := defs.LevelNameFromDepth(dlvl)
 			state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: "ladder_up"})
@@ -37,9 +42,34 @@ func playthrough() {
 			if m.GetName() != name {
 				fail("run %d: expected map %s, got %s", run, name, m.GetName())
 			}
+			// the lighting the renderer asks for on every cell (hero torch, braziers, wall torches) must not crash
+			for y := 0; y < m.MapSize().Y; y++ {
+				for x := 0; x < m.MapSize().X; x++ {
+					state.ApplyLighting(geometry.Point{X: x, Y: y}, color.RGBA{R: 200, G: 200, B: 200, A: 255}, uint64(x+y))
+				}
+			}
 			// milestone 6: stairs (and the town warp on 5, 9, 13) reachable on every level type
 			up := m.GetNamedLocation("ladder_up")
 			reach := reachable(m, up)
+			if dlvl == 4 && state.D1Quests()[d1.QLtBanner].Active != d1.QuestNotAvail { // Snotspill's gang holds the stairs down
+				if reach[m.GetNamedLocation("ladder_down")] {
+					fail("run %d dlvl 4: the stairs down are open before Ogden's Sign is done", run)
+				}
+				state.SetQuestVar(d1.QLtBanner, 1, 3)
+				common.UpdateD1Quests(state, m)
+				reach = reachable(m, up)
+			}
+			if dlvl == 13 && state.D1Quests()[d1.QWarlord].Active != d1.QuestNotAvail { // the way down leads through his hall
+				if reach[m.GetNamedLocation("ladder_down")] {
+					fail("run %d dlvl 13: the Warlord's hall is open before the Steel Tome is read", run)
+				}
+				for _, obj := range m.Objects() {
+					if o, ok := obj.(*common.D1Object); ok && o.O.Kind == d1.ObjSTEELTOME && reach[m.GetFreeCardinalNeighbors(o.MapPosition())[0]] {
+						o.ActorBumpedInto(player, nil)
+					}
+				}
+				reach = reachable(m, up)
+			}
 			for _, loc := range []string{"ladder_down", "warp"} {
 				p := m.GetNamedLocation(loc)
 				exists := m.GetNamedLocationByPos(p) == loc
@@ -52,13 +82,25 @@ func playthrough() {
 					fail("run %d dlvl %d: %s at %v unreachable from %v", run, dlvl, loc, p, up)
 				}
 			}
-			// milestone 7: the quest bosses wait on their levels
-			if boss := map[int]string{2: "The Butcher", 8: "Zhar the Mad", 13: "Warlord of Blood", 16: "The Dark Lord"}[dlvl]; boss != "" && actorNamed(m, boss) == nil {
-				fail("run %d dlvl %d: %s is missing", run, dlvl, boss)
+			// milestone 7: the quest bosses wait on their levels, when D1's own per-seed quest RNG (InitQuests'
+			// QuestGroup1/3/4) kept their quest active - Butcher/LtBanner/Garbud, Mushroom/Zhar/Anvil and
+			// Veil/Warlord are each mutually exclusive, so not every seed places all four bosses.
+			type boss struct {
+				name string
+				q    int
 			}
-			if dlvl > 4 {
-				boost(player, dlvl)
+			if b, ok := map[int]boss{2: {"The Butcher", d1.QButcher}, 8: {"Zhar the Mad", d1.QZhar},
+				13: {"Warlord of Blood", d1.QWarlord}, 16: {"The Dark Lord", d1.QDiablo}}[dlvl]; ok {
+				active := state.D1Quests()[b.q].Active != d1.QuestNotAvail
+				if active && actorNamed(m, b.name) == nil {
+					fail("run %d dlvl %d: %s is missing", run, dlvl, b.name)
+				}
 			}
+			if dlvl == 16 { // Diablo's quarters open lever by lever
+				pullD1Levers(state)
+			}
+			boost(player, dlvl) // a level-1 hero healed every turn gets stun-locked forever by hit recovery
+			player.RemoveStatusEffect(common.StatusManaShield) // shrines grant it, and it lasts across levels: the fight measures HP
 			monsters := 0
 			for _, a := range m.Actors() {
 				if a.D1Monster() != nil {
@@ -96,7 +138,8 @@ func playthrough() {
 				player = state.GetPlayer()
 			}
 
-			// milestone 2: save, load, and everything that matters is back
+			// milestone 2: save, load, and everything that matters is back (a load sees from where the hero stands)
+			theGame.GetActionBroker().Execute(common.NewUpdateFoVAction(common.AbstractCause("playthrough"), player))
 			before := saveCheckOf(state)
 			theGame.SaveGame()
 			if err := theGame.LoadGame(); err != nil {
@@ -104,8 +147,18 @@ func playthrough() {
 			}
 			state = theGame.GetWorldState()
 			player = state.GetPlayer()
-			if after := saveCheckOf(state); after != before {
+			after := saveCheckOf(state)
+			if after.Explored < before.Explored { // loading arrives by the stairs first, which may explore a few more cells
+				fail("run %d dlvl %d: load forgot explored cells (%d -> %d)", run, dlvl, before.Explored, after.Explored)
+			}
+			after.Explored = before.Explored
+			if after != before {
 				fail("run %d dlvl %d: save/load mismatch\n before %+v\n after  %+v", run, dlvl, before, after)
+			}
+			for _, it := range state.GetMap().Items() { // nothing lies in a wall, in lava or on a fence
+				if p := it.MapPosition(); !state.GetMap().IsTileWalkable(p) {
+					fail("run %d dlvl %d: %s lies on %s at %v", run, dlvl, it.Name(), state.GetMap().GetCell(p).TileType.DefinedDescription, p)
+				}
 			}
 		}
 	}
@@ -118,9 +171,10 @@ func playthrough() {
 	fmt.Printf("monster missiles by AI: %v\n", missiles.byAI)
 
 	questPath(theGame, fail)
+	questLines(theGame, fail)
 
 	// milestone 2: a permadeath save is gone once the death menu is built
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], true)
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], true, "")
 	if !game.HasSave() {
 		fail("permadeath: new game wrote no save")
 	}
@@ -141,12 +195,18 @@ func fight(broker *common.Broker, state *common.State, player *common.Actor) (ki
 		var target *common.Actor
 		for _, a := range m.Actors() {
 			reachable := geometry.DistanceChebyshev(a.MapPosition(), player.MapPosition()) <= 1 || len(m.GetFreeCardinalNeighbors(a.MapPosition())) > 0
-			if a.D1Monster() != nil && a.IsAlive() && reachable && (target == nil ||
+			// Diablo waits sealed in; a meleeing sorcerer can't outdamage his regeneration; talking bosses don't fight yet
+			if a.D1Monster() != nil && !a.D1Monster().Golem && a.D1Monster().Data.ID != "MT_DIABLO" && a.D1Monster().TalkMsg == "" && a.IsAlive() && reachable && (target == nil ||
 				geometry.DistanceChebyshev(a.MapPosition(), player.MapPosition()) < geometry.DistanceChebyshev(target.MapPosition(), player.MapPosition())) {
 				target = a
 			}
 		}
 		return target
+	}
+	moveTo := func(p geometry.Point) {
+		m.MoveActor(player, p)
+		player.SetDrawPosition(p.ToPointF())
+		broker.Execute(common.NewUpdateFoVAction(common.AbstractCause("playthrough"), player))
 	}
 	approach := func(target *common.Actor) bool {
 		if geometry.DistanceChebyshev(target.MapPosition(), player.MapPosition()) <= 1 {
@@ -156,9 +216,7 @@ func fight(broker *common.Broker, state *common.State, player *common.Actor) (ki
 		if len(free) == 0 {
 			return false
 		}
-		m.MoveActor(player, free[0])
-		player.SetDrawPosition(free[0].ToPointF())
-		broker.Execute(common.NewUpdateFoVAction(common.AbstractCause("playthrough"), player))
+		moveTo(free[0])
 		return true
 	}
 	endTurn := func() {
@@ -168,9 +226,13 @@ func fight(broker *common.Broker, state *common.State, player *common.Actor) (ki
 		hp.SetToMax()
 	}
 
-	for turn := 0; turn < 40; turn++ {
+	for turn := 0; turn < 200 && (turn < 40 || damageTaken == 0); turn++ { // casters may fade away: stay until hit
 		if target := nearest(); target != nil && approach(target) {
 			endTurn()
+			// a counselor's flash only reaches the cells beside and below it (MI_Flash): try another side now and then
+			if free := m.GetFreeCardinalNeighbors(target.MapPosition()); turn%10 == 9 && len(free) > 0 && target.IsAlive() {
+				moveTo(free[turn/10%len(free)])
+			}
 		}
 	}
 	if os.Getenv("PLAYTHROUGH_DEBUG") != "" {
@@ -190,11 +252,11 @@ func fight(broker *common.Broker, state *common.State, player *common.Actor) (ki
 		if !approach(target) {
 			continue
 		}
+		// no turn passes between blows: a hero healed every turn can be stun-locked forever while monsters regenerate
 		broker.Execute(common.NewMeleeAttackAction(common.NewActorCause("playthrough", player), player, target))
 		if !target.IsAlive() {
 			kills++
 		}
-		endTurn()
 	}
 	return kills, damageTaken, player.Hero().Exp - expBefore
 }
@@ -205,6 +267,8 @@ type saveCheck struct {
 	Level, Exp, StatPts, Gold, HP    int
 	Items, Equipped, Monsters, Floor int
 	UsedObjects                      int
+	Corpses, Explored, AIState       int
+	Golem, ManaShield                bool
 }
 
 // operateObjects bumps into every chest, sarcophagus, plain barrel and shrine on the level.
@@ -218,7 +282,7 @@ func operateObjects(state *common.State, player *common.Actor) (objects, used, d
 		}
 		objects++
 		switch o.O.Kind {
-		case d1.ObjChest1, d1.ObjChest2, d1.ObjChest3, d1.ObjSarc, d1.ObjBarrel, d1.ObjShrineL, d1.ObjShrineR:
+		case d1.ObjCHEST1, d1.ObjCHEST2, d1.ObjCHEST3, d1.ObjSARC, d1.ObjBARREL, d1.ObjSHRINEL, d1.ObjSHRINER:
 			o.ActorBumpedInto(player, nil)
 			if !o.O.Active {
 				used++
@@ -236,8 +300,20 @@ func saveCheckOf(state *common.State) saveCheck {
 		HP: player.GetStats().GetResource(stats.Health).Value(), Items: len(player.GetInventory().Items()),
 		Equipped: len(player.GetEquipment().AllItems())}
 	for _, a := range m.Actors() {
-		if a.D1Monster() != nil && a.IsAlive() {
+		if mon := a.D1Monster(); mon != nil && a.IsAlive() {
 			c.Monsters++
+			if !mon.Golem {
+				c.AIState += mon.Goal + mon.GoalVar1 + mon.Squelch + mon.Dir + mon.StandTicks
+			}
+		}
+	}
+	c.Golem, c.ManaShield = common.D1Golem(m) != nil, player.HasStatusEffect(common.StatusManaShield)
+	c.Corpses = len(m.DownedActors())
+	for y := 0; y < d1.LevelSize; y++ {
+		for x := 0; x < d1.LevelSize; x++ {
+			if m.IsExplored(geometry.Point{X: x, Y: y}) {
+				c.Explored++
+			}
 		}
 	}
 	for _, it := range m.Items() {
@@ -257,7 +333,8 @@ func saveCheckOf(state *common.State) saveCheck {
 func checkTown(state *common.State, fail func(string, ...any)) {
 	m := state.GetMap()
 	want := map[common.VendorType]string{common.VendorTypeWeapons: "Griswold", common.VendorTypeWands: "Adria",
-		common.VendorTypeGeneral: "Pepin", common.VendorTypeCain: "Deckard Cain", common.VendorTypeWirt: "Wirt"}
+		common.VendorTypeGeneral: "Pepin", common.VendorTypeCain: "Deckard Cain", common.VendorTypeWirt: "Wirt",
+		common.VendorTypeDrunk: "Farnham", common.VendorTypeBarmaid: "Gillian"}
 	found := map[common.VendorType]*common.Actor{}
 	for _, a := range m.Actors() {
 		if name, ok := want[a.GetVendorType()]; ok && a.Name() == name {
@@ -373,6 +450,7 @@ func castAllSpells(f *common.Factory, broker *common.Broker, state *common.State
 	if len(failed) > 2 || dealt == 0 || !golem || state.D1Portal() == nil {
 		fail("spells: failed casts %v, damage %d, golem %v, portal %v", failed, dealt, golem, state.D1Portal())
 	}
+	shield := player.HasStatusEffect(common.StatusManaShield)
 	portal := *state.D1Portal()
 	state.MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"})
 	if !state.GetMap().IsObjectAt(state.GetMap().GetNamedLocation("portal")) {
@@ -382,7 +460,15 @@ func castAllSpells(f *common.Factory, broker *common.Broker, state *common.State
 	if state.D1Portal() != nil || state.GetMap().GetName() != portal.Map {
 		fail("spells: town portal round trip didn't close the portal (%v on %s)", state.D1Portal(), state.GetMap().GetName())
 	}
-	fmt.Printf("spells: %d damage, failed casts %v\n", dealt, failed)
+	if common.D1Golem(state.GetMap()) == nil || shield && !player.HasStatusEffect(common.StatusManaShield) {
+		fail("spells: after the town portal round trip: golem %v, mana shield %v (had %v)", common.D1Golem(state.GetMap()), player.HasStatusEffect(common.StatusManaShield), shield)
+	}
+	fmt.Printf("spells: %d damage, failed casts %v, mana shield %v\n", dealt, failed, shield)
+	// the golem and the mana shield now outlast level changes: dismiss them so later fights measure the hero's damage
+	if golem := common.D1Golem(state.GetMap()); golem != nil {
+		state.GetMap().RemoveActor(golem)
+	}
+	player.RemoveStatusEffect(common.StatusManaShield)
 }
 
 // boost stands in for a hero who fought their way down: character level 2×dlvl with the points in Str/Dex/Vit.
@@ -509,7 +595,7 @@ func reachable(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], p
 				o := m.ObjectAt(q)
 				d1o, isD1 := o.(*common.D1Object)
 				_, isDoor := o.(*common.Door)
-				if !o.IsWalkable(nil) && !isDoor && !(isD1 && (d1o.O.Kind == d1.ObjBarrel || d1o.O.Kind == d1.ObjBarrelEx)) {
+				if !o.IsWalkable(nil) && !isDoor && !(isD1 && (d1o.O.Kind == d1.ObjBARREL || d1o.O.Kind == d1.ObjBARRELEX)) {
 					continue
 				}
 			}
@@ -532,7 +618,7 @@ func actorNamed(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], 
 // questPath walks decision 15's critical path with a fresh hero: Leoric's tomb, the staff, Cain, the red portal,
 // Lazarus, a save and load, the stairs to 16, the levers and Diablo. Bosses are struck down directly.
 func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false)
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 	state := theGame.GetWorldState()
 
 	// D1 has no natural regeneration: waiting doesn't heal a hurt hero
@@ -563,15 +649,15 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 		}
 		state.MapTransition(t)
 	}
-	slay := func(name, flag string) {
+	slay := func(name string, q int) {
 		a := actorNamed(state.GetMap(), name)
 		if a == nil {
 			fail("quests: %s not found on %s", name, state.GetMap().GetName())
 		}
 		hp := a.GetStats().GetResource(stats.Health).GetMax()
 		theGame.GetActionBroker().Execute(common.NewChangeResourceAction(common.NewActorCause("playthrough", state.GetPlayer()), a, stats.Health, -float64(10*hp)))
-		if !state.GetFlags().IsSet(flag) {
-			fail("quests: killing %s didn't set %s", name, flag)
+		if state.QuestActive(q) != d1.QuestDone {
+			fail("quests: killing %s didn't complete %s", name, d1.QuestNames[q])
 		}
 	}
 	objectsOf := func(kind int) (out []*common.D1Object) {
@@ -587,7 +673,9 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 	// D1 monsters heal over time, unless a no-heal weapon hit them
 	var healer, noHeal *common.Actor
 	for _, a := range state.GetMap().Actors() {
-		if mon := a.D1Monster(); mon != nil && mon.Unique == nil && geometry.DistanceChebyshev(a.MapPosition(), state.GetPlayer().MapPosition()) > 15 {
+		// single player halves monster HP down to 1: such a monster is already at max and has nothing to heal
+		if mon := a.D1Monster(); mon != nil && mon.Unique == nil && a.GetStats().GetResource(stats.Health).GetMax() > 1 &&
+			geometry.DistanceChebyshev(a.MapPosition(), state.GetPlayer().MapPosition()) > 15 {
 			if healer == nil {
 				healer = a
 			} else if noHeal == nil {
@@ -596,6 +684,13 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 		}
 	}
 	noHeal.D1Monster().NoHeal = true
+	var stoned []*common.Actor // stone monsters still heal but can't kill the level-1 hero while turns pass
+	for _, a := range state.GetMap().Actors() {
+		if a.D1Monster() != nil && a.IsAlive() {
+			a.AddStatusEffect(common.StatusStone, 100)
+			stoned = append(stoned, a)
+		}
+	}
 	for _, a := range []*common.Actor{healer, noHeal} {
 		common.SetResource(a.GetStats().GetResource(stats.Health), 1)
 	}
@@ -617,6 +712,24 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 	if player.HitRecovery() != 0 {
 		fail("hit recovery: %d AUT still pending after the turn", player.HitRecovery())
 	}
+	for _, a := range stoned {
+		a.RemoveStatusEffect(common.StatusStone)
+	}
+	checkItemEffects(broker, state, fail)
+	var barrel *common.D1Object // anything that hits a barrel breaks it: here an arrow shot at its cell
+	for _, obj := range state.GetMap().Objects() {
+		if o, ok := obj.(*common.D1Object); ok && o.O.Active && (o.O.Kind == d1.ObjBARREL || o.O.Kind == d1.ObjBARRELEX) && geometry.DistanceChebyshev(o.MapPosition(), player.MapPosition()) > 3 {
+			barrel = o
+			break
+		}
+	}
+	if barrel == nil {
+		fail("barrels: none on %s to shoot at", state.GetMap().GetName())
+	}
+	broker.Execute(common.NewRangedAttackAction(common.NewActorCause("playthrough", player), player, barrel.MapPosition()))
+	if barrel.O.Active {
+		fail("barrels: an arrow didn't break the barrel at %v", barrel.MapPosition())
+	}
 	for _, a := range state.GetMap().Actors() {
 		if mon := a.D1Monster(); mon != nil && a.IsAlive() && common.D1MonsterRecoveryAUT(mon) > 0 {
 			a.GetStats().SetAttribute(stats.MaxHealth, 1000)
@@ -628,18 +741,20 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 			break
 		}
 	}
-	through("leoric")
-	slay("Skeleton King", common.QuestLeoric)
-	through("ladder_up")
-	if state.GetMap().GetName() != defs.LevelNameFromDepth(3) {
-		fail("quests: Leoric's tomb leads to %s", state.GetMap().GetName())
+	if state.D1Quests()[d1.QSkelKing].Active != d1.QuestNotAvail { // InitQuests drops Leoric or Poisoned Water per seed
+		through("leoric")
+		slay("Skeleton King", d1.QSkelKing)
+		through("ladder_up")
+		if state.GetMap().GetName() != defs.LevelNameFromDepth(3) {
+			fail("quests: Leoric's tomb leads to %s", state.GetMap().GetName())
+		}
 	}
 
 	m := travel(defs.LevelNameFromDepth(15), "ladder_up")
 	if _, open := m.GetTransitionAt(m.GetNamedLocation("ladder_down")); open {
 		fail("quests: level 15's stairs down are open before Lazarus died")
 	}
-	stands := objectsOf(d1.ObjLazStand)
+	stands := objectsOf(d1.ObjLAZSTAND)
 	if len(stands) != 1 || !reachable(m, m.GetNamedLocation("ladder_up"))[stands[0].MapPosition()] && len(m.GetFreeCardinalNeighbors(stands[0].MapPosition())) == 0 {
 		fail("quests: %d staff stands on level 15", len(stands))
 	}
@@ -656,7 +771,8 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 	m.RemoveItem(staff)
 	state.GetPlayer().GetInventory().Add(staff)
 	travel(string(defs.LevelNameTown), "spawn")
-	if !common.D1GiveStaffToCain(state, func(string) {}) {
+	talkTo(theGame, common.VendorTypeCain)
+	if state.QuestVar(d1.QBetrayer, 1) != 2 || d1Carried(state.GetPlayer(), d1.IdiLazStaff) {
 		fail("quests: Cain didn't take the staff")
 	}
 	travel(defs.LevelNameFromDepth(15), "ladder_up")
@@ -670,7 +786,7 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 	if _, open := m.GetTransitionAt(m.GetNamedLocation("ladder_up")); open {
 		fail("quests: the lair's portal is open before Lazarus died")
 	}
-	slay("Arch-Bishop Lazarus", common.QuestLazarus)
+	slay("Arch-Bishop Lazarus", d1.QBetrayer)
 
 	theGame.SaveGame()
 	if err := theGame.LoadGame(); err != nil {
@@ -696,18 +812,342 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 	if nextToDiablo() {
 		fail("quests: Diablo is reachable before the levers are pulled")
 	}
-	levers := objectsOf(d1.ObjLever)
-	reach := reachable(m, m.GetNamedLocation("ladder_up"))
-	for _, l := range levers {
-		if len(m.GetFreeCardinalNeighbors(l.MapPosition())) == 0 || !reach[m.GetFreeCardinalNeighbors(l.MapPosition())[0]] {
-			dumpMap(m, reach)
-			fail("quests: lever at %v unreachable", l.MapPosition())
-		}
-		l.ActorBumpedInto(state.GetPlayer(), nil)
+	levers := objectsOf(d1.ObjSWITCHSKL)
+	if pulled := pullD1Levers(state); pulled != len(levers) {
+		dumpMap(m, reachable(m, m.GetNamedLocation("ladder_up")))
+		fail("quests: only %d of %d skull levers reachable one after another", pulled, len(levers))
 	}
-	if len(levers) != 4 || !nextToDiablo() {
+	if len(levers) == 0 || !nextToDiablo() {
 		fail("quests: %d levers didn't open Diablo's chamber", len(levers))
 	}
-	slay("The Dark Lord", common.QuestDiablo)
+	slay("The Dark Lord", d1.QDiablo)
 	fmt.Println("quests: Leoric, staff, Cain, red portal, Lazarus, save/load, levers and Diablo OK")
 }
+
+// questLines walks every other quest line of D1 with a fresh warrior, all quests made available (InitQuests leaves
+// out one of each group per seed): who starts it, the set pieces that open, the items handed in and the rewards.
+func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
+	state, broker := theGame.GetWorldState(), theGame.GetActionBroker()
+	for q := range state.D1Quests() {
+		state.D1Quests()[q].Active, state.D1Quests()[q].Var2 = d1.QuestInit, 0
+	}
+	player := func() *common.Actor { return state.GetPlayer() }
+	cause := func() common.Cause { return common.NewActorCause("playthrough", player()) }
+	travel := func(dlvl int) *gridmap.GridMap[*common.Actor, *common.Item, common.Object] {
+		state.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl), TargetLocation: "ladder_up"})
+		state.SetLastDungeonLevel(max(state.GetLastDungeonLevel(), dlvl))
+		common.UpdateD1Quests(state, state.GetMap())
+		return state.GetMap()
+	}
+	must := func(ok bool, format string, args ...any) {
+		if !ok {
+			fail("quest lines: "+format, args...)
+		}
+	}
+	log := func(q int) { must(state.QuestLog(q), "%s isn't in the quest log", d1.QuestNames[q]) }
+	done := func(q int) { must(state.QuestActive(q) == d1.QuestDone, "%s isn't done", d1.QuestNames[q]) }
+	pickUp := func(idx int) {
+		m := state.GetMap()
+		for _, it := range m.Items() {
+			if it.D1() == nil || it.D1().BaseIdx != idx || !m.IsTileWalkable(it.MapPosition()) {
+				continue // Valor's blood stones wait in alcoves the pedestal opens one by one
+			}
+			cells := m.GetFreeCellsForDistribution(it.MapPosition(), 1, func(p geometry.Point) bool { return m.CanPlaceActorHere(p) && !m.IsItemAt(p) })
+			must(len(cells) > 0, "no room next to %s", it.Name())
+			m.RemoveItem(it)
+			m.AddItem(it, cells[0])
+			m.MoveActor(player(), cells[0])
+			broker.Execute(common.NewPickUpAction(cause(), player()))
+			return
+		}
+		fail("quest lines: no %s on %s", theGame.GetFactory().D1().D.Items[idx].Name, m.GetName())
+	}
+	object := func(kind int) *common.D1Object {
+		for _, obj := range state.GetMap().Objects() {
+			if o, ok := obj.(*common.D1Object); ok && o.O.Kind == kind {
+				return o
+			}
+		}
+		fail("quest lines: no object %d on %s", kind, state.GetMap().GetName())
+		return nil
+	}
+	monster := func(ai string) *common.Actor {
+		for _, a := range state.GetMap().Actors() {
+			if mon := a.D1Monster(); mon != nil && mon.AI == ai && a.IsAlive() {
+				return a
+			}
+		}
+		fail("quest lines: no %s on %s", ai, state.GetMap().GetName())
+		return nil
+	}
+	reward := func(uid int) {
+		for _, it := range state.GetMap().Items() {
+			if it.D1() != nil && it.D1().Uid == uid {
+				return
+			}
+		}
+		fail("quest lines: no %s on %s", theGame.GetFactory().D1().D.UniqueItems[uid].Name, state.GetMap().GetName())
+	}
+	opens := func(loc string, open func()) {
+		m := state.GetMap()
+		p := m.GetNamedLocation(loc)
+		must(!reachable(m, m.GetNamedLocation("ladder_up"))[p], "%s on %s is open too early", loc, m.GetName())
+		open()
+		must(reachable(m, m.GetNamedLocation("ladder_up"))[p], "%s on %s didn't open", loc, m.GetName())
+	}
+	f := theGame.GetFactory()
+
+	talkTo(theGame, common.VendorTypeDeadGuy) // The Butcher
+	log(d1.QButcher)
+
+	travel(4)
+	talkTo(theGame, common.VendorTypeOgden) // The Curse of King Leoric, then Ogden's Sign
+	log(d1.QSkelKing)
+	talkTo(theGame, common.VendorTypeOgden)
+	log(d1.QLtBanner)
+	talkTo(theGame, common.VendorTypeWeapons) // The Magic Rock
+	log(d1.QRock)
+
+	travel(4)
+	f.TalkToD1Monster(monster("AI_SNOTSPIL"))
+	must(state.QuestVar(d1.QLtBanner, 1) == 2, "Snotspill's talk didn't send the hero for the banner")
+	object(d1.ObjSIGNCHEST).ActorBumpedInto(player(), nil)
+	pickUp(d1.IdiBanner)
+	garbud := monster("AI_GARBUD") // Gharbad the Weak: talks, gives, talks, and fights
+	for n := 1; n <= 4; n++ {
+		must(garbud.D1Monster().TalkMsg == fmt.Sprintf("TEXT_GARBUD%d", n), "Gharbad says %s, not his line %d", garbud.D1Monster().TalkMsg, n)
+		items := len(state.GetMap().Items())
+		f.TalkToD1Monster(garbud)
+		must(n != 2 || len(state.GetMap().Items()) > items, "Gharbad gave nothing")
+		f.D1TalkerTurn(garbud, n == 4)
+	}
+	log(d1.QGarbud)
+	must(garbud.D1Monster().TalkMsg == "" && f.D1TalkerTurn(garbud, true), "Gharbad doesn't fight after his last line")
+	talkTo(theGame, common.VendorTypeOgden)
+	done(d1.QLtBanner)
+	reward(d1.UItemHarCrest)
+
+	travel(5) // The Magic Rock, Valor
+	pickUp(d1.IdiRock)
+	object(d1.ObjBLOODBOOK).ActorBumpedInto(player(), nil)
+	log(d1.QBlood)
+	for i := 0; i < 3; i++ {
+		pickUp(d1.IdiBldStone)
+		object(d1.ObjPEDISTAL).ActorBumpedInto(player(), nil)
+	}
+	pickUp(d1.IdiArmOfVal)
+	done(d1.QBlood)
+	talkTo(theGame, common.VendorTypeWeapons)
+	done(d1.QRock)
+	reward(d1.UItemInfraRing)
+
+	travel(6) // The Chamber of Bone
+	opens("schamb", func() { object(d1.ObjBOOK2R).ActorBumpedInto(player(), nil) })
+	log(d1.QSchamb)
+	state.MapTransition(gridmap.Transition{TargetMap: "!gen_bonechamb_6", TargetLocation: "ladder_up"})
+	guardian := player().Hero().SpellLevels[d1.SplGuardian]
+	object(d1.ObjBOOK2L).ActorBumpedInto(player(), nil)
+	must(player().Hero().SpellLevels[d1.SplGuardian] == guardian+1, "the Ancient Tome taught no Guardian")
+	done(d1.QSchamb)
+
+	travel(7) // Halls of the Blind
+	object(d1.ObjBLINDBOOK).ActorBumpedInto(player(), nil)
+	pickUp(d1.IdiOptAmulet)
+	done(d1.QBlind)
+
+	travel(8) // Zhar the Mad
+	f.TalkToD1Monster(monster("AI_ZHAR"))
+	log(d1.QZhar)
+
+	travel(9) // Black Mushroom
+	pickUp(d1.IdiFungalTm)
+	talkTo(theGame, common.VendorTypeWands)
+	log(d1.QMushroom)
+	travel(9)
+	object(d1.ObjMUSHPATCH).ActorBumpedInto(player(), nil)
+	pickUp(d1.IdiMushroom)
+	talkTo(theGame, common.VendorTypeWands)
+	must(state.QuestVar(d1.QMushroom, 1) == d1.QSMushGiven, "Adria didn't take the mushroom")
+	m := travel(9)
+	for _, a := range m.Actors() {
+		if mon := a.D1Monster(); mon != nil && mon.Unique == nil && a.IsAlive() {
+			broker.Execute(common.NewChangeResourceAction(cause(), a, stats.Health, -1e6))
+			break
+		}
+	}
+	pickUp(d1.IdiBrain)
+	talkTo(theGame, common.VendorTypeGeneral)
+	pickUp(d1.IdiSpecElix)
+	talkTo(theGame, common.VendorTypeWands)
+	done(d1.QMushroom)
+
+	talkTo(theGame, common.VendorTypeWeapons) // Anvil of Fury
+	log(d1.QAnvil)
+	travel(10)
+	pickUp(d1.IdiAnvil)
+	talkTo(theGame, common.VendorTypeWeapons)
+	done(d1.QAnvil)
+	reward(d1.UItemGriswold)
+
+	travel(13) // Warlord of Blood: speaks once seen, then fights
+	warlord := monster("AI_WARLORD")
+	must(!f.D1TalkerTurn(warlord, true) && f.D1TalkerTurn(warlord, true), "the Warlord doesn't speak, then fight")
+
+	travel(14) // Lachdanan
+	lachdanan := monster("AI_LACHDAN")
+	f.TalkToD1Monster(lachdanan)
+	log(d1.QVeil)
+	travel(15)
+	pickUp(d1.IdiGldnElix)
+	travel(14)
+	lachdanan = monster("AI_LACHDAN")
+	f.TalkToD1Monster(lachdanan)
+	reward(d1.UItemSteelVeil)
+	f.D1TalkerTurn(lachdanan, true)
+	done(d1.QVeil)
+	must(!lachdanan.IsAlive(), "Lachdanan didn't find his rest")
+
+	talkTo(theGame, common.VendorTypeGeneral) // Poisoned Water Supply
+	log(d1.QPWater)
+	travel(2)
+	state.MapTransition(gridmap.Transition{TargetMap: "!gen_pwater_2", TargetLocation: "ladder_up"})
+	water := func(want string) { // the foul water is tinted light green, the clean water blue
+		n := 0
+		for y := 0; y < d1.LevelSize; y++ {
+			for x := 0; x < d1.LevelSize; x++ {
+				if t := state.GetMap().GetCell(geometry.Point{X: x, Y: y}).TileType; t.IsWater() && t.DefinedDescription == want {
+					n++
+				}
+			}
+		}
+		if c := state.GetWaterColor(); n == 0 || (want == "poisoned water") != (c.G > c.B) {
+			fail("quest lines: %d cells of %s, water color %v", n, want, c)
+		}
+	}
+	water("poisoned water")
+	for _, a := range append([]*common.Actor(nil), state.GetMap().Actors()...) {
+		if a.D1Monster() != nil && a.IsAlive() {
+			broker.Execute(common.NewChangeResourceAction(cause(), a, stats.Health, -1e6))
+		}
+	}
+	done(d1.QPWater)
+	water("clean water")
+	talkTo(theGame, common.VendorTypeGeneral)
+	reward(d1.UItemTRing)
+	fmt.Println("quest lines: Butcher, Leoric, Ogden's Sign, Gharbad, Magic Rock, Valor, Chamber of Bone, Blind, Zhar, Black Mushroom, Anvil, Warlord, Lachdanan, Poisoned Water OK")
+}
+
+// pullD1Levers pulls every skull lever the hero can walk to, again and again as pulled levers open the level's
+// quarters (diab1-4), and reports how many were pulled.
+func pullD1Levers(state *common.State) (pulled int) {
+	m := state.GetMap()
+	for progress := true; progress; {
+		progress = false
+		reach := reachable(m, m.GetNamedLocation("ladder_up"))
+		for _, obj := range m.Objects() {
+			if o, ok := obj.(*common.D1Object); ok && o.O.Kind == d1.ObjSWITCHSKL && o.O.Active {
+				for _, p := range m.GetAllCardinalNeighbors(o.MapPosition()) { // monsters may crowd round a lever
+					if reach[p] && o.O.Active {
+						o.ActorBumpedInto(state.GetPlayer(), nil)
+						pulled, progress = pulled+1, true
+					}
+				}
+			}
+		}
+	}
+	return
+}
+
+// talkTo walks to town and talks to the townsperson of vendor type v, like bumping into them.
+func talkTo(theGame *game.GameInstance, v common.VendorType) {
+	state := theGame.GetWorldState()
+	if !defs.IsTownLevel(state.GetMap().GetName()) {
+		state.MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"})
+	}
+	for _, a := range state.GetMap().Actors() {
+		if a.GetVendorType() == v {
+			theGame.GetActionBroker().Execute(common.NewTalkToAction(common.NewActorCause("playthrough", state.GetPlayer()), a))
+			return
+		}
+	}
+	fmt.Printf("PLAYTHROUGH FAILED: nobody in town for %s\n", v)
+	os.Exit(1)
+}
+
+// d1Carried reports an item of base idx in the player's pack.
+func d1Carried(player *common.Actor, idx int) bool {
+	for _, it := range player.GetInventory().Items() {
+		if it.D1() != nil && it.D1().BaseIdx == idx {
+			return true
+		}
+	}
+	return false
+}
+
+// checkItemEffects: a fire weapon with knockback burns and pushes a monster, a drain-life item drains the hero.
+func checkItemEffects(broker *common.Broker, state *common.State, fail func(string, ...any)) {
+	player, m := state.GetPlayer(), state.GetMap()
+	var weapon *d1.Item
+	for _, it := range player.GetEquipment().AllItems() {
+		if d := it.D1(); d != nil && d.Class == "ICLASS_WEAPON" {
+			weapon = d
+		}
+	}
+	weapon.Flags |= d1.ISplFireDam | d1.ISplKnockback
+	weapon.FMinDam, weapon.FMaxDam = 200, 200
+	common.SyncHero(player)
+	var target *common.Actor
+	var from geometry.Point // a free cell next to the target with a free cell behind the target to push it into
+	for _, a := range m.Actors() {
+		if mon := a.D1Monster(); target == nil && mon != nil && a.IsAlive() && mon.MagicRes&(d1.ImmuneFire|d1.ResistFire) == 0 {
+			for _, p := range m.GetFreeCardinalNeighbors(a.MapPosition()) {
+				if behind := a.MapPosition().Add(a.MapPosition().Sub(p)); m.Contains(behind) && m.IsCurrentlyPassable(behind) {
+					target, from = a, p
+					break
+				}
+			}
+		}
+	}
+	target.GetStats().SetAttribute(stats.MaxHealth, 100000)
+	target.GetStats().GetResource(stats.Health).SetToMax()
+	burned, pushed := false, false
+	for try := 0; try < 200 && !(burned && pushed); try++ {
+		if !pushed {
+			m.MoveActor(player, from)
+		}
+		player.SetDrawPosition(player.MapPosition().ToPointF())
+		hp, pos := target.GetStats().GetResource(stats.Health).Value(), target.MapPosition()
+		broker.Execute(common.NewMeleeAttackAction(common.NewActorCause("playthrough", player), player, target))
+		burned = burned || hp-target.GetStats().GetResource(stats.Health).Value() >= 200
+		pushed = pushed || target.MapPosition() != pos
+	}
+	if !burned || !pushed {
+		fail("item effects: fire damage %v, knockback %v", burned, pushed)
+	}
+
+	weapon.Flags = weapon.Flags&^(d1.ISplFireDam|d1.ISplKnockback) | d1.ISplDrainLife
+	common.SyncHero(player)
+	var stoned []*common.Actor // monsters stay out of it
+	for _, a := range m.Actors() {
+		if a.D1Monster() != nil && a.IsAlive() {
+			a.AddStatusEffect(common.StatusStone, 100)
+			stoned = append(stoned, a)
+		}
+	}
+	hp := player.GetStats().GetResource(stats.Health)
+	hp.SetToMax()
+	for turn := 0; turn < 20; turn++ {
+		broker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("playthrough"), 10))
+	}
+	if lost := hp.GetMax() - hp.Value(); lost < 9 || lost > 11 {
+		fail("item effects: drain life took %d HP in 20 turns (want 10)", lost)
+	}
+	weapon.Flags &^= d1.ISplDrainLife
+	common.SyncHero(player)
+	for _, a := range stoned {
+		a.RemoveStatusEffect(common.StatusStone)
+	}
+	hp.SetToMax()
+}
+

@@ -2,10 +2,11 @@ package common
 
 import (
 	"fmt"
-    "io/fs"
-    "os"
+	"io/fs"
+	"os"
 	"rpg/geometry"
 	"rpg/recfile"
+	"strings"
 )
 
 type ItemNamingScheme string
@@ -15,42 +16,50 @@ const (
 	ItemNamingSchemeEnchantments ItemNamingScheme = "Enchantments"
 	ItemNamingSchemeBandStyle    ItemNamingScheme = "BandStyle"
 )
+
 type FontInfo struct {
 	TTFFile string
 	TTFSize float64
 }
 
 type StartInfo struct {
-    FontInfos         FontInfo
-    ScreenSize        geometry.Point
-    TileScale         float64
-    Title             string
-    LDTKMapFile       string
-    UserConfiguration Configuration
-    FileSystem        fs.ReadDirFS
+	FontInfos         FontInfo
+	ScreenSize        geometry.Point
+	TileScale         float64
+	Title             string
+	LDTKMapFile       string
+	UserConfiguration *Configuration
+	FileSystem        fs.ReadDirFS
 }
 
-
 type Configuration struct {
-    AudioEnabled         bool
-    ActorBobbingEnabled  bool
-    WindowSize           geometry.Point
-    DefaultFont          string
-    DefaultFontSize      float64
-    AutoPickup           bool
-    CardinalMovementOnly bool
-    KeepPlayerCentered   bool
+	AudioEnabled         bool
+	ActorBobbingEnabled  bool
+	WindowSize           geometry.Point
+	DefaultFont          string
+	DefaultFontSize      float64
+	AutoPickup           bool
+	CardinalMovementOnly bool
+	KeepPlayerCentered   bool
 
-    ItemNamesInShop ItemNamingScheme
+	ItemNamesInShop ItemNamingScheme
 
-    DrawTilesBehindActors  bool
-    DrawTilesBehindItems   bool
-    DrawTilesBehindObjects bool
-    ServeStats             bool
-    ServeInventory         bool
-    ServeLog               bool
-    ServeEquipment         bool
-    FlipActorsHorizontally bool
+	DrawTilesBehindActors  bool
+	DrawTilesBehindItems   bool
+	DrawTilesBehindObjects bool
+	ServeStats             bool
+	ServeInventory         bool
+	ServeLog               bool
+	ServeEquipment         bool
+	FlipActorsHorizontally bool
+
+	SoundVolume, MusicVolume, VoiceVolume float64 // 0..1, set in the audio menu
+
+	DiabloAudioEnabled bool // gates assets/diablo_sfx and assets/diablo_music; takes effect on next launch
+
+	AutoExploreOpenContainers bool // auto explore also bumps chests/barrels/sarcophagi it finds
+
+	WeaponBreakWarning bool // ask for confirmation before an attack that would destroy a zero-durability weapon
 }
 
 func (c Configuration) ToRecord() recfile.Record {
@@ -127,6 +136,12 @@ func (c Configuration) ToRecord() recfile.Record {
 			Name:  "FlipActorsHorizontally",
 			Value: recfile.BoolStr(c.FlipActorsHorizontally),
 		},
+		{Name: "SoundVolume", Value: recfile.FloatStr(c.SoundVolume)},
+		{Name: "MusicVolume", Value: recfile.FloatStr(c.MusicVolume)},
+		{Name: "VoiceVolume", Value: recfile.FloatStr(c.VoiceVolume)},
+		{Name: "DiabloAudioEnabled", Value: recfile.BoolStr(c.DiabloAudioEnabled)},
+		{Name: "AutoExploreOpenContainers", Value: recfile.BoolStr(c.AutoExploreOpenContainers)},
+		{Name: "WeaponBreakWarning", Value: recfile.BoolStr(c.WeaponBreakWarning)},
 	}
 }
 
@@ -153,22 +168,28 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 	}
 
 	configuration := Configuration{
-		AudioEnabled:           configMap.GetBoolOrFalse("AudioEnabled"),
-		ActorBobbingEnabled:    configMap.GetBoolOrTrue("ActorBobbingEnabled"),
-		CardinalMovementOnly:   configMap.GetBoolOrFalse("CardinalMovementOnly"),
-		DefaultFont:            configMap.GetStringOrDefault("DefaultFont", "assets/fonts/Ac437_EagleSpCGA_Alt3.ttf"),
-		DefaultFontSize:        configMap.GetFloatOrDefault("DefaultFontSize", 16.0),
-		AutoPickup:             configMap.GetBoolOrTrue("AutoPickup"),
-		KeepPlayerCentered:     configMap.GetBoolOrTrue("KeepPlayerCentered"),
-		DrawTilesBehindActors:  configMap.GetBoolOrFalse("DrawTilesBehindActors"),
-		DrawTilesBehindItems:   configMap.GetBoolOrFalse("DrawTilesBehindItems"),
-		DrawTilesBehindObjects: configMap.GetBoolOrFalse("DrawTilesBehindObjects"),
-		ServeStats:             configMap.GetBoolOrFalse("ServeStats"),
-		ServeInventory:         configMap.GetBoolOrFalse("ServeInventory"),
-		ServeEquipment:         configMap.GetBoolOrFalse("ServeEquipment"),
-		ServeLog:               configMap.GetBoolOrFalse("ServeLog"),
-		FlipActorsHorizontally: configMap.GetBoolOrTrue("FlipActorsHorizontally"),
-		ItemNamesInShop:        ItemNamingScheme(configMap.GetStringOrDefault("ItemNamesInShop", string(ItemNamingSchemeEnchantments))),
+		AudioEnabled:              configMap.GetBoolOrFalse("AudioEnabled"),
+		ActorBobbingEnabled:       configMap.GetBoolOrTrue("ActorBobbingEnabled"),
+		CardinalMovementOnly:      configMap.GetBoolOrFalse("CardinalMovementOnly"),
+		DefaultFont:               configMap.GetStringOrDefault("DefaultFont", "assets/fonts/Ac437_EagleSpCGA_Alt3.ttf"),
+		DefaultFontSize:           configMap.GetFloatOrDefault("DefaultFontSize", 16.0),
+		AutoPickup:                configMap.GetBoolOrTrue("AutoPickup"),
+		KeepPlayerCentered:        configMap.GetBoolOrTrue("KeepPlayerCentered"),
+		DrawTilesBehindActors:     configMap.GetBoolOrFalse("DrawTilesBehindActors"),
+		DrawTilesBehindItems:      configMap.GetBoolOrFalse("DrawTilesBehindItems"),
+		DrawTilesBehindObjects:    configMap.GetBoolOrFalse("DrawTilesBehindObjects"),
+		ServeStats:                configMap.GetBoolOrFalse("ServeStats"),
+		ServeInventory:            configMap.GetBoolOrFalse("ServeInventory"),
+		ServeEquipment:            configMap.GetBoolOrFalse("ServeEquipment"),
+		ServeLog:                  configMap.GetBoolOrFalse("ServeLog"),
+		FlipActorsHorizontally:    configMap.GetBoolOrTrue("FlipActorsHorizontally"),
+		ItemNamesInShop:           ItemNamingScheme(configMap.GetStringOrDefault("ItemNamesInShop", string(ItemNamingSchemeEnchantments))),
+		SoundVolume:               configMap.GetFloatOrDefault("SoundVolume", 1),
+		MusicVolume:               configMap.GetFloatOrDefault("MusicVolume", 1),
+		VoiceVolume:               configMap.GetFloatOrDefault("VoiceVolume", 1),
+		DiabloAudioEnabled:        configMap.GetBoolOrTrue("DiabloAudioEnabled"),
+		AutoExploreOpenContainers: configMap.GetBoolOrFalse("AutoExploreOpenContainers"),
+		WeaponBreakWarning:        configMap.GetBoolOrTrue("WeaponBreakWarning"),
 		WindowSize: geometry.Point{ //1280, Y: 800
 			X: configMap.GetIntOrDefault("WindowWidth", 1280),
 			Y: configMap.GetIntOrDefault("WindowHeight", 800),
@@ -178,4 +199,28 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		configuration.SaveToRecFile(recFilename)
 	}
 	return configuration
+}
+
+// ConfigFile is the user configuration next to the game.
+const ConfigFile = "config.rec"
+
+// SaveVolumes writes the volume settings into the config file in place, keeping its other lines and comments.
+func (c Configuration) SaveVolumes(recFilename string) error {
+	data, err := os.ReadFile(recFilename)
+	if err != nil {
+		return err
+	}
+	lines := strings.Split(strings.TrimRight(string(data), "\n"), "\n")
+	for _, kv := range [][2]string{{"SoundVolume", recfile.FloatStr(c.SoundVolume)}, {"MusicVolume", recfile.FloatStr(c.MusicVolume)}, {"VoiceVolume", recfile.FloatStr(c.VoiceVolume)}} {
+		line, found := kv[0]+": "+kv[1], false
+		for i, l := range lines {
+			if strings.HasPrefix(l, kv[0]+":") {
+				lines[i], found = line, true
+			}
+		}
+		if !found {
+			lines = append(lines, line)
+		}
+	}
+	return os.WriteFile(recFilename, []byte(strings.Join(lines, "\n")+"\n"), 0o644)
 }

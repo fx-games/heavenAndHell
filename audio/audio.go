@@ -1,11 +1,16 @@
 package audio
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"io/fs"
 	"math/rand"
-	"path/filepath"
+	"path"
+	"slices"
 	"strings"
+
+	"rpg/recfile"
 
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
@@ -40,6 +45,9 @@ type Player struct {
 	queuedSounds    []string
 	loopVolume      float64
 	sfxVolume       float64
+	voiceVolume     float64
+	musicTracks     []string // cues registered by RegisterMusic, in file order
+	currentMusic    string
 	masterVolume    float64
 	files           fs.ReadDirFS
 	disablePlayback bool
@@ -58,6 +66,26 @@ func (ap *Player) GetMusicVolume() float64 {
 
 func (ap *Player) GetSoundVolume() float64 {
 	return ap.sfxVolume
+}
+
+func (ap *Player) GetVoiceVolume() float64 {
+	return ap.voiceVolume
+}
+
+func (ap *Player) SetVoiceVolume(volume float64) {
+	ap.voiceVolume = Clamp(volume, 0, 1)
+	ap.updateVolume()
+}
+
+// volumeFor is the effective volume of a sound's category: music loops, voice lines or sound effects.
+func (ap *Player) volumeFor(s *Sound) float64 {
+	switch {
+	case s.IsLooping:
+		return ap.effectiveMusicVolume()
+	case s.IsVoice:
+		return ap.voiceVolume * ap.masterVolume
+	}
+	return ap.effectiveSoundVolume()
 }
 
 func (ap *Player) effectiveMusicVolume() float64 {
@@ -87,11 +115,7 @@ func (ap *Player) updateVolume() {
 	for cue, activeSounds := range ap.activeSounds {
 		sound := ap.availableSounds[cue]
 		for _, activeSound := range activeSounds {
-			if sound.IsLooping {
-				activeSound.player.SetVolume(ap.effectiveMusicVolume())
-			} else {
-				activeSound.player.SetVolume(ap.effectiveSoundVolume())
-			}
+			activeSound.player.SetVolume(ap.volumeFor(sound))
 		}
 	}
 }
@@ -101,6 +125,7 @@ type Sound struct {
 	Filenames    []string
 	Samples      [][]byte
 	IsLooping    bool
+	IsVoice      bool
 	IsRandomized bool
 	currentIndex int
 }
@@ -108,8 +133,9 @@ type Sound struct {
 func (s *Sound) Unload() {
 	s.Samples = make([][]byte, len(s.Filenames))
 }
+// IsLoaded reports whether at least one of the cue's files decoded; the others may be missing.
 func (s *Sound) IsLoaded() bool {
-	return len(s.Samples) > 0 && s.Samples[0] != nil && len(s.Samples[0]) > 0
+	return slices.ContainsFunc(s.Samples, func(b []byte) bool { return len(b) > 0 })
 }
 
 func (s *Sound) Load(ap *Player) bool {
@@ -124,9 +150,16 @@ func (s *Sound) Load(ap *Player) bool {
 	}
 	return true
 }
+// Next picks the sample to play: a random loaded one for randomized cues, skipping files that failed to load.
 func (s *Sound) Next() []byte {
 	if s.IsRandomized {
-		return s.Samples[rand.Intn(len(s.Samples))]
+		var loaded [][]byte
+		for _, b := range s.Samples {
+			if len(b) > 0 {
+				loaded = append(loaded, b)
+			}
+		}
+		return loaded[rand.Intn(len(loaded))]
 	}
 	sample := s.Samples[s.currentIndex]
 	s.currentIndex = (s.currentIndex + 1) % len(s.Samples)
@@ -171,6 +204,7 @@ func NewAudioPlayer(fileSystem fs.ReadDirFS, sampleRate SampleRate) *Player {
 		activeSounds:    make(map[string][]*ActiveSound),
 		sfxVolume:       1,
 		loopVolume:      1,
+		voiceVolume:     1,
 		masterVolume:    1,
 	}
 }
@@ -192,23 +226,28 @@ func (ap *Player) StopAll() {
 
 // LoadOGG loads an OGG file from the given filename into memory.
 func (ap *Player) LoadOGG(filename string) []byte {
-	file, filErr := ap.files.Open(filename)
-	defer file.Close()
-	stream, decodeErr := vorbis.DecodeWithoutResampling(file)
-	if decodeErr != nil || filErr != nil {
+	file, err := ap.files.Open(filename)
+	if err != nil {
 		return nil
 	}
-	buffer := make([]byte, stream.Length())
-	stream.Read(buffer)
+	defer file.Close()
+	stream, err := vorbis.DecodeWithSampleRate(ap.context.SampleRate(), file)
+	if err != nil {
+		return nil
+	}
+	buffer, _ := io.ReadAll(stream)
 	return buffer
 }
 
-// OpenOGG opens an OGG file from the given filename for streaming.
+// OpenOGG opens an OGG file for streaming, resampled to the context's rate. The file is read into memory first:
+// the player keeps reading the stream after this returns.
 func (ap *Player) OpenOGG(filename string) *audio.Player {
-	file, filErr := ap.files.Open(filename)
-	defer file.Close()
-	stream, decodeErr := vorbis.DecodeWithoutResampling(file)
-	if decodeErr != nil || filErr != nil {
+	data, err := fs.ReadFile(ap.files, filename)
+	if err != nil {
+		return nil
+	}
+	stream, decodeErr := vorbis.DecodeWithSampleRate(ap.context.SampleRate(), bytes.NewReader(data))
+	if decodeErr != nil {
 		return nil
 	}
 	player, err := ap.context.NewPlayer(stream)
@@ -255,6 +294,10 @@ func (ap *Player) StartLoopStream(cue string) Handle {
 	if sound, ok := ap.availableSounds[cue]; ok {
 		sound.IsLooping = true
 		player := sound.OpenStream(ap)
+		if player == nil {
+			println("ERR: Could not open music: " + cue)
+			return &NullHandle{}
+		}
 		player.Rewind()
 		player.SetVolume(ap.effectiveMusicVolume())
 		player.Play()
@@ -288,7 +331,7 @@ func (ap *Player) PlayCue(cue string) Handle {
 		if !sound.IsLoaded() && !sound.Load(ap) {
 			return &NullHandle{}
 		}
-		return ap.startPlaying(sound, ap.effectiveSoundVolume(), nil)
+		return ap.startPlaying(sound, ap.volumeFor(sound), nil)
 	} else {
 		println("ERR: Sound cue not found: " + cue)
 	}
@@ -313,7 +356,7 @@ func (ap *Player) PlayCueWithCallback(cue string, callback func()) Handle {
 		if !sound.IsLoaded() && !sound.Load(ap) {
 			return &NullHandle{}
 		}
-		return ap.startPlaying(sound, ap.effectiveSoundVolume(), callback)
+		return ap.startPlaying(sound, ap.volumeFor(sound), callback)
 	} else {
 		println("ERR: Sound cue not found: " + cue)
 	}
@@ -358,26 +401,6 @@ func (ap *Player) Update() {
 		ap.PlayCue(cue)
 	}
 }
-func (ap *Player) RegisterSoundCues(filenames []string) {
-	files := ap.files
-	for _, filename := range filenames {
-		file, err := files.Open(filename)
-		if err != nil {
-			println("ERR: Sound file not found: " + filename)
-			continue
-		}
-		file.Close()
-		extension := strings.ToLower(filepath.Ext(filename))
-		basename := filepath.Base(filename)
-		cue := basename[0 : len(basename)-len(extension)]
-		s := &Sound{
-			Cue:       cue,
-			Filenames: []string{filename},
-			Samples:   make([][]byte, 1),
-		}
-		ap.availableSounds[cue] = s
-	}
-}
 func (ap *Player) PreLoadCuesIntoMemory(soundCues []string) {
 	for _, soundCue := range soundCues {
 		if sound, ok := ap.availableSounds[soundCue]; ok {
@@ -398,26 +421,12 @@ func (ap *Player) UnloadCues(soundCues []string) {
 		}
 	}
 }
-func (ap *Player) RegisterRandomizedSoundCues(directories []string) {
-	for _, directory := range directories {
-		cue := filepath.Base(directory)
-		filesInDirectory, _ := ap.files.ReadDir(directory)
-		var fileNames []string
-		for _, file := range filesInDirectory {
-			filename := file.Name()
-			if !strings.HasSuffix(filename, ".ogg") {
-				continue
-			}
-			fileNames = append(fileNames, filepath.Join(directory, filename))
-		}
-		s := &Sound{
-			Cue:          cue,
-			Filenames:    fileNames,
-			Samples:      make([][]byte, len(filesInDirectory)),
-			IsRandomized: true,
-		}
-		ap.availableSounds[cue] = s
-	}
+
+// HasCue reports whether a sound cue is registered, so callers can fall back to a generic cue when a
+// monster-specific one (from RegisterSoundEvents) isn't available.
+func (ap *Player) HasCue(cue string) bool {
+	_, ok := ap.availableSounds[cue]
+	return ok
 }
 
 func (ap *Player) IsSoundEffectPlaying() bool {
@@ -430,4 +439,94 @@ func (ap *Player) IsSoundEffectPlaying() bool {
 		}
 	}
 	return false
+}
+
+// RegisterMusic registers every .ogg in a directory as a background music track named after its file.
+func (ap *Player) RegisterMusic(directory string) {
+	ap.registerDirectory(directory, func(s *Sound) {
+		s.IsLooping = true
+		if !slicesContains(ap.musicTracks, s.Cue) {
+			ap.musicTracks = append(ap.musicTracks, s.Cue)
+		}
+	})
+}
+
+// RegisterVoices registers every .ogg in a directory as a voice line, played with PlayCue at the voice volume.
+func (ap *Player) RegisterVoices(directory string) {
+	ap.registerDirectory(directory, func(s *Sound) { s.IsVoice = true })
+}
+
+// RegisterVoice registers one .ogg file as a voice line under cue, if the file exists.
+func (ap *Player) RegisterVoice(cue, filename string) {
+	if _, err := fs.Stat(ap.files, filename); err == nil {
+		ap.availableSounds[cue] = &Sound{Cue: cue, Filenames: []string{filename}, Samples: make([][]byte, 1), IsVoice: true}
+	}
+}
+
+func (ap *Player) registerDirectory(directory string, setup func(s *Sound)) {
+	entries, _ := ap.files.ReadDir(directory)
+	for _, entry := range entries {
+		if !strings.HasSuffix(entry.Name(), ".ogg") {
+			continue
+		}
+		s := &Sound{Cue: strings.TrimSuffix(entry.Name(), ".ogg"), Filenames: []string{path.Join(directory, entry.Name())}, Samples: make([][]byte, 1)}
+		setup(s)
+		ap.availableSounds[s.Cue] = s
+	}
+}
+
+func slicesContains(list []string, s string) bool {
+	for _, v := range list {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
+func (ap *Player) MusicTracks() []string { return ap.musicTracks }
+func (ap *Player) CurrentMusic() string  { return ap.currentMusic }
+
+// PlayMusic switches the background music to a registered track and reports whether it knows the track.
+func (ap *Player) PlayMusic(cue string) bool {
+	if !slicesContains(ap.musicTracks, cue) || ap.disablePlayback {
+		return false
+	}
+	if cue == ap.currentMusic && ap.IsCuePlaying(cue) {
+		return true
+	}
+	ap.Stop(ap.currentMusic)
+	ap.currentMusic = cue
+	ap.StartLoopStream(cue)
+	return true
+}
+
+// RegisterSoundEvents registers every event in a sounds rec file (assets/data/sounds.rec, edited with
+// ./remap_sounds.sh) as a randomized cue named after its internal_name, one "sound:" field per file relative to
+// assets/. All files are kept (missing ones are skipped when a sample is picked at play time, see Sound.Next), except
+// those rejected by keep; an event left without files isn't registered, so HasCue fallbacks still work.
+func (ap *Player) RegisterSoundEvents(recFile string, keep func(filename string) bool) {
+	f, err := ap.files.Open(recFile)
+	if err != nil {
+		println("ERR: Sound events not found: " + recFile)
+		return
+	}
+	defer f.Close()
+	for _, rec := range recfile.Read(f) {
+		var cue string
+		var filenames []string
+		for _, field := range rec {
+			switch field.Name {
+			case "internal_name":
+				cue = field.Value
+			case "sound":
+				if keep(field.Value) {
+					filenames = append(filenames, path.Join("assets", field.Value))
+				}
+			}
+		}
+		if len(filenames) > 0 {
+			ap.availableSounds[cue] = &Sound{Cue: cue, Filenames: filenames, Samples: make([][]byte, len(filenames)), IsRandomized: true}
+		}
+	}
 }

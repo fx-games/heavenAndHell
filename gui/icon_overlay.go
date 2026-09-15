@@ -3,6 +3,7 @@ package gui
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
+	"rpg/common"
 	"rpg/defs"
 	"rpg/geometry"
 	"rpg/util"
@@ -186,6 +187,13 @@ func (o *IconOverlay) Draw() {
 			continue
 		}
 		item := items[i]
+		var gameItem *common.Item // the overlay holds inventory stacks, not bare items
+		if stack, ok := item.(common.InventoryStack); ok && len(stack) > 0 {
+			gameItem = stack[0]
+		}
+		if gameItem != nil && !gameItem.MeetsRequirements() {
+			renderer.DrawColoredRect(itemPosition, o.tileSizeInPixels, color.RGBA{R: 150, G: 0, B: 0, A: 180})
+		}
 		if o.isHighlighted(item) {
 			renderer.DrawColoredBorder(itemPosition, o.tileSizeInPixels, defs.DarkGreen, defs.DarkYellow)
 		} else {
@@ -193,6 +201,16 @@ func (o *IconOverlay) Draw() {
 			//renderer.DrawOnScreenWithScale(itemPosition.X, itemPosition.Y, o.normalBackgroundIcon, o.scale)
 		}
 		renderer.DrawOnScreenWithScale(itemPosition.X, itemPosition.Y, item.InventoryIcon(), o.scale)
+		if gameItem != nil {
+			if percent, hasDurability := gameItem.DurabilityPercent(); hasDurability && percent < 0.5 {
+				barHeight := 2
+				barTopLeft := geometry.Point{X: itemPosition.X, Y: itemPosition.Y + o.tileSizeInPixels.Y - barHeight}
+				barSize := geometry.Point{X: o.tileSizeInPixels.X, Y: barHeight}
+				fillSize := geometry.Point{X: int(float64(o.tileSizeInPixels.X) * percent), Y: barHeight}
+				renderer.DrawColoredRect(barTopLeft, barSize, color.RGBA{R: 0, G: 0, B: 0, A: 255})
+				renderer.DrawColoredRect(barTopLeft, fillSize, redToGreen(percent))
+			}
+		}
 		if i == o.selectedIndex {
 			renderer.DrawOnScreenWithScale(itemPosition.X, itemPosition.Y, defs.IconTargeting, o.scale)
 		}

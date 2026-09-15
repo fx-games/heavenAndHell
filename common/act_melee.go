@@ -33,6 +33,8 @@ func (d *MeleeAttackAction) Execute(context ActionContext) []Action {
 		d.attacker.SetLookDirFromPoI(d.defender.MapPosition())
 		if d.attacker == context.GameState.GetPlayer() {
 			context.AudioPlayer.PlayCue("melee_attack")
+		} else if cue := d.attacker.D1MonsterSoundCue("attack"); cue != "" && context.AudioPlayer.HasCue(cue) {
+			context.AudioPlayer.PlayCue(cue)
 		}
 		d.totalDamageDealt = dam
 		if dam <= 0 {
@@ -67,6 +69,8 @@ func (d *MeleeAttackAction) Execute(context ActionContext) []Action {
 
 	if d.attacker == context.GameState.GetPlayer() {
 		context.AudioPlayer.PlayCue("melee_attack")
+	} else if cue := d.attacker.D1MonsterSoundCue("attack"); cue != "" && context.AudioPlayer.HasCue(cue) {
+		context.AudioPlayer.PlayCue(cue)
 	}
 
 	return actions

@@ -1,0 +1,38 @@
+package d1
+
+import (
+	"encoding/binary"
+	"testing"
+)
+
+// TestMPQ reads each level type's tile tables and checks they agree: every megatile points at pieces the
+// .SOL and .MIN describe, which fails if decompression or decryption is off.
+func TestMPQ(t *testing.T) {
+	a, err := DiabDat()
+	if err != nil {
+		t.Skip(err)
+	}
+	for lt, dir := range []string{`Levels\L1Data\L1`, `Levels\L2Data\L2`, `Levels\L3Data\L3`, `Levels\L4Data\L4`} {
+		til, err1 := a.ReadFile(dir + ".TIL")
+		sol, err2 := a.ReadFile(dir + ".SOL")
+		min, err3 := a.ReadFile(dir + ".MIN")
+		if err1 != nil || err2 != nil || err3 != nil {
+			t.Fatal(err1, err2, err3)
+		}
+		blocks := 20
+		if lt == 3 {
+			blocks = 32
+		}
+		if len(min) != len(sol)*blocks {
+			t.Errorf("%s: %d pieces in .SOL, .MIN is %d bytes", dir, len(sol), len(min))
+		}
+		for i := 0; i+2 <= len(til); i += 2 {
+			if p := int(binary.LittleEndian.Uint16(til[i:])); p >= len(sol) {
+				t.Fatalf("%s.TIL: piece %d of %d", dir, p, len(sol))
+			}
+		}
+	}
+	if d := loadDun(`Levels\L1Data\SklKng2.DUN`); d.w() != 37 || d.h() != 25 || len(d) != 2+37*25+4*4*37*25 {
+		t.Errorf("SklKng2.DUN: %dx%d, %d words", d.w(), d.h(), len(d))
+	}
+}

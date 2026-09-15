@@ -123,6 +123,9 @@ func PlayerMoveToAttack(actor *Actor, relativeDirection geometry.Point, forceAtt
 		actorAtPos := gameMap.ActorAt(targetPos)
 		if actorAtPos.IsVendor() && !forceAttack {
 			return NewTalkToAction(NewActorCause("Talk to", actor), actorAtPos)
+		} else if mon := actorAtPos.d1Monster; mon != nil && mon.TalkMsg != "" && actor.hero != nil && !forceAttack {
+			state.factory.TalkToD1Monster(actorAtPos) // TalktoMonster: a monster with something to say is talked to, not hit
+			return nil
 		} else if actorAtPos.d1Monster != nil && actorAtPos.d1Monster.Golem && !forceAttack {
 			return NewSwapPositionsAction(NewActorCause("Swap", actor), actor, actorAtPos, true)
 		} else if actor.hero != nil && actor.GetEquipment().GetWeapon(RangedAttack) != nil { // D1 bows shoot point-blank
@@ -136,6 +139,18 @@ func PlayerMoveToAttack(actor *Actor, relativeDirection geometry.Point, forceAtt
 
 	state.GetMap().SetExplored(targetPos)
 	return nil
+}
+
+// AttackTypeOf reports which attack type action performs, if any (used to gate the weapon-break confirmation
+// on the bump-to-attack path, which returns a plain Action).
+func AttackTypeOf(action Action) (attackType AttackType, isAttack bool) {
+	switch action.(type) {
+	case *MeleeAttackAction:
+		return MeleeAttack, true
+	case *RangedAttackAction:
+		return RangedAttack, true
+	}
+	return 0, false
 }
 
 func AnimateNow() func() bool {

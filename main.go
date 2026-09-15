@@ -1,16 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
-	"github.com/gdamore/tcell/v2"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/inancgumus/screen"
 	"image/color"
 	_ "image/png"
 	"log"
-	"math/rand"
 	"os"
 	"path"
 	"rpg/common"
@@ -45,6 +41,9 @@ func main() {
 	if len(os.Args) > 1 {
 		argCmd := strings.ToLower(os.Args[1])
 		switch argCmd {
+		case "debug_tints":
+			theGame, _ := createGameAndUIContext()
+			debugTints(theGame, os.Args[2:])
 		case "loot":
 			theGame, _ := createGameAndUIContext()
 			genLoot(theGame)
@@ -54,8 +53,6 @@ func main() {
 			runGameWithConsole(createGameAndUIContext())
 		case "osr":
 			osrSim()
-		case "7drl":
-			showTitleScreen()
 		case "validate":
 			return
 		case "playthrough":
@@ -66,96 +63,8 @@ func main() {
 	}
 }
 
-func showTitleScreen() {
-	logoFile := util.MustOpenReader(path.Join("assets", "logo.txt"))
-	defer logoFile.Close()
-	//reader := bufio.NewReader(logoFile)
-	scanner := bufio.NewScanner(logoFile)
-	logoHeight := 0
-	logoWidth := 0
-	var logoLines []string
-	for scanner.Scan() {
-		line := scanner.Text()
-		logoLines = append(logoLines, line)
-		logoHeight++
-		logoWidth = max(logoWidth, len(line))
-	}
-
-	s, _ := tcell.NewScreen()
-	s.Init()
-	s.Clear()
-	w, h := s.Size()
-
-	// center logo
-	logoStartY := 3
-	for y := 0; y < logoHeight; y++ {
-		line := logoLines[y]
-		for x := 0; x < len(line); x++ {
-			s.SetContent((w-logoWidth)/2+x, logoStartY+y, rune(line[x]), nil, tcell.StyleDefault)
-		}
-	}
-
-	lineAfterLogo := logoStartY + logoHeight + 1
-	credits := "a game by Felix Ruzzoli"
-	centeredCredits := (w - len(credits)) / 2
-	for x, c := range credits {
-		s.SetContent(centeredCredits+x, lineAfterLogo, c, nil, tcell.StyleDefault)
-	}
-
-	// center prompt vertically
-	promptStartY := ((h - 1) / 2) + 2
-	prompt := "Do you want graphics? (y/n)"
-	centeredPrompt := (w - len(prompt)) / 2
-	for x, c := range prompt {
-		s.SetContent(centeredPrompt+x, promptStartY, c, nil, tcell.StyleDefault)
-	}
-	s.ShowCursor(centeredPrompt+len(prompt), promptStartY)
-	s.SetCursorStyle(tcell.CursorStyleBlinkingUnderline)
-	s.Show()
-	graphics := false
-outerloop:
-	for event := s.PollEvent(); event != nil; event = s.PollEvent() {
-		if ev, ok := event.(*tcell.EventKey); ok {
-			if ev.Key() == tcell.KeyRune {
-				switch ev.Rune() {
-				case 'y':
-					fallthrough
-				case 'Y':
-					graphics = true
-					break outerloop
-				case 'n':
-					fallthrough
-				case 'N':
-					graphics = false
-					break outerloop
-				}
-			}
-		}
-		time.Sleep(10 * time.Millisecond)
-	}
-	s.Clear()
-	s.Fini()
-	if graphics {
-		runGameWithEbiten(createGameAndUIContext())
-	} else {
-		runGameWithConsole(createGameAndUIContext())
-	}
-
-	screen.Clear()
-	screen.MoveTopLeft()
-
-	messageFile := util.MustOpenReader(path.Join("assets", "endMessage.txt"))
-	defer messageFile.Close()
-	//reader := bufio.NewReader(logoFile)
-	msgScanner := bufio.NewScanner(messageFile)
-	for msgScanner.Scan() {
-		line := msgScanner.Text()
-		println(line)
-	}
-}
-
 func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
-	userConfig := common.NewConfigurationFromRecFile("config.rec")
+	userConfig := common.NewConfigurationFromRecFile(common.ConfigFile)
 	startInfos := common.StartInfo{
 		Title:       "RPG",
 		ScreenSize:  userConfig.WindowSize,
@@ -165,7 +74,7 @@ func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 			TTFFile: userConfig.DefaultFont,
 			TTFSize: userConfig.DefaultFontSize,
 		},
-		UserConfiguration: userConfig,
+		UserConfiguration: &userConfig,
 		FileSystem:        files.GetFileSystem(),
 	}
 	theGame := game.NewGameInstance(startInfos, NewDummyUI())
@@ -173,7 +82,6 @@ func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 		GameState:      theGame.GetWorldState,
 		PlayerAction:   theGame.GetActions,
 		AudioPlayer:    theGame.GetAudio(),
-		ResetGame:      theGame.ResetGame,
 		StartMenuItems: theGame.StartMenuItems,
 		Animator: func() common.Animator {
 			return theGame.GetActionBroker()
@@ -313,7 +221,27 @@ func maptest() {
 	if len(os.Args) > 3 {
 		seed, _ = strconv.ParseInt(os.Args[3], 10, 64)
 	}
-	fmt.Print(d1.Generate(rand.New(rand.NewSource(seed)), dlvl))
+	d1Data, err := d1.Load(files.GetFileSystem())
+	if err != nil {
+		log.Fatal(err)
+	}
+	seeds := d1.LevelSeeds(int32(seed))
+	quests := d1.InitQuests(seeds)
+	gen := d1.NewGenerator(d1Data, int32(seed))
+	lvl, err := gen.CreateLevel(&quests, seeds, dlvl, d1.SLNone, d1.EntryMain)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for y := 0; y < d1.LevelSize; y++ {
+		for x := 0; x < d1.LevelSize; x++ {
+			if lvl.CellSolid(x, y) {
+				fmt.Print("#")
+			} else {
+				fmt.Print(".")
+			}
+		}
+		fmt.Println()
+	}
 }
 
 func runGameWithConsole(theGame *game.GameInstance, context common.UIContext) {
@@ -355,7 +283,7 @@ func runGameWithEbiten(theGame *game.GameInstance, context common.UIContext) {
 	}
 	uiController := gui.NewUIController(tileRenderer, context, startInfos.UserConfiguration)
 	uiController.SetTileMapAnimations(tileMapAnimations)
-	uiController.SetTTFFont(util.MustOpen(startInfos.FontInfos.TTFFile), startInfos.FontInfos.TTFSize)
+	uiController.SetTTFFont(files.MustOpen(startInfos.FontInfos.TTFFile), startInfos.FontInfos.TTFSize)
 	uiController.SetAsciiAtlas(renderer.NewTextureAtlas(path.Join("assets", "Bm437_IBM_CGA.png"), 8, 8))
 	theGame.SetAndInitUserInterface(uiController)
 	theGame.ShowStartMenu()

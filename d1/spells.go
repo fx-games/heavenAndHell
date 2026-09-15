@@ -24,6 +24,9 @@ const (
 	SplGolem       = 21
 	SplTeleport    = 23
 	SplApocalypse  = 24
+	SplRepair      = 26 // the class skills (_pAblSpells)
+	SplRecharge    = 27
+	SplDisarm      = 28
 	SplElemental   = 29
 	SplChargedBolt = 30
 	SplHolyBolt    = 31

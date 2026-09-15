@@ -141,6 +141,13 @@ const (
 	ITypeGold
 	ITypeRing
 	ITypeAmulet
+	ITypeFood
+)
+
+// ICURS_ graphics the slain hero's rewards are rolled until (CreateMagicArmor/CreateMagicWeapon).
+const (
+	ICursLongWarBow  = 119
+	ICursBreastPlate = 153
 )
 
 // PLT_ affix item-type bits.
@@ -189,6 +196,45 @@ var spellNames = []string{"", "Firebolt", "Healing", "Lightning", "Flash", "Iden
 	"Item Repair", "Staff Recharge", "Trap Disarm", "Elemental", "Charged Bolt", "Holy Bolt", "Resurrect",
 	"Telekinesis", "Heal Other", "Blood Star", "Bone Spirit"}
 
+// SpellDescriptions holds one short item-tooltip sentence per spell, indexed like spellNames.
+var SpellDescriptions = []string{"",
+	"Hurls a bolt of fire at the target.",
+	"Restores some of your life.",
+	"Fires a crackling line of lightning at the target.",
+	"Unleashes a burst of light that damages everything around you.",
+	"Reveals the magical properties of an item.",
+	"Raises a wall of flame that burns anything passing through.",
+	"Opens a portal back to town and returns you to where you were.",
+	"Turns a monster to stone for a short while.",
+	"Lets you see monsters through the darkness.",
+	"Teleports you to a random nearby spot.",
+	"Uses your mana to absorb damage instead of life.",
+	"Launches an exploding ball of fire at the target.",
+	"Summons a fire-breathing guardian that attacks nearby monsters.",
+	"Sends lightning arcing into every monster in sight.",
+	"Sends a wave of flame rolling toward the target.",
+	"Summons serpents that hunt your enemies.",
+	"Sacrifices your own blood for power.",
+	"Blasts lightning in a ring all around you.",
+	"Makes you unseen by monsters.",
+	"Breathes a short stream of fire at the target.",
+	"Summons a golem that fights at your side.",
+	"Makes your enemies' blood boil.",
+	"Instantly moves you to the chosen spot.",
+	"Rains fire on every monster in sight.",
+	"Makes you ethereal so physical attacks pass through you.",
+	"Repairs an item at the cost of some of its durability.",
+	"Restores a staff's charges at the cost of some of its maximum.",
+	"Disarms a trapped door or chest.",
+	"Launches a fireball that seeks out the nearest monster.",
+	"Releases sparks of lightning that wander toward monsters.",
+	"Fires a holy bolt that is deadly to the undead.",
+	"Brings a dead ally back to life.",
+	"Lets you pick up items and trigger objects from afar.",
+	"Restores life to another player.",
+	"Fires a star of blood that drains your life when mana runs out.",
+	"Sends a spirit that tears away a third of a monster's life."}
+
 // monstdat.cpp MonstAvailTbl: 0 = never spawns at random.
 var monstAvail = [112]byte{
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -206,7 +252,64 @@ type Data struct {
 	Prefixes       []Affix
 	Suffixes       []Affix
 	UniqueItems    []UniqueItemData
-	Spells         []SpellData // index = SPL_ value
+	Spells         []SpellData         // index = SPL_ value
+	Objects        []ObjData           // index = OBJ_ value
+	Gossip         map[string][]string // town NPC internal_name -> TEXT_* ids of its gossip, greeting first (assets/data/d1/gossip)
+	Texts          map[string]string   // TEXT_* id -> gossip, quest and book text, paragraphs split by "\n\n"
+	TextSfx        map[string]string   // TEXT_* id -> the speech D1 plays with it (alltext's sfxnr, see SfxFiles)
+}
+
+// gossipFiles maps a town NPC's internal name (see common.d1_town.go's VendorType) to its gossip file's base
+// name in assets/data/d1/gossip, ported from Diablo's own Source/Data/Text/Gossip/*.txt.
+var gossipFiles = map[string]string{
+	"griswold": "griswold", "adria": "adria", "pepin": "pepin", "wirt": "wirt", "cain": "story", "ogden": "ogden",
+	"farnham": "farnham", "gillian": "gillian",
+}
+
+// parseTexts reads a D1 text file (Source/Data/Text): blocks of a "[TEXT_*]" header, a quoted line and a few
+// numeric/sfx fields, blank-line separated. D1's "\n \n" paragraph breaks become "\n\n".
+func parseTexts(data string) (ids, texts, sfx []string) {
+	for _, block := range strings.Split(data, "\n\n") {
+		lines := strings.Split(strings.TrimSpace(block), "\n")
+		if len(lines) < 2 || !strings.HasPrefix(lines[0], "[TEXT_") {
+			continue
+		}
+		quoted := strings.TrimSuffix(strings.TrimSpace(strings.Trim(strings.TrimSpace(lines[1]), "\"")), "|")
+		var paragraphs []string
+		for _, par := range strings.Split(quoted, `\n \n`) {
+			if par = strings.Join(strings.Fields(strings.ReplaceAll(par, `\n`, " ")), " "); par != "" {
+				paragraphs = append(paragraphs, par)
+			}
+		}
+		ids, texts = append(ids, strings.Trim(lines[0], "[]")), append(texts, strings.Join(paragraphs, "\n\n"))
+		sfx = append(sfx, strings.TrimSpace(lines[len(lines)-1]))
+	}
+	return
+}
+
+// loadTexts loads every gossip and quest text by its TEXT_* id, and each NPC's gossip lines (missing files are
+// skipped).
+func loadTexts(fsys fs.FS) (texts, sfx map[string]string, gossip map[string][]string) {
+	texts, sfx, gossip = map[string]string{}, map[string]string{}, map[string][]string{}
+	for _, dir := range []string{"gossip", "text"} {
+		files, _ := fs.ReadDir(fsys, path.Join("assets", "data", "d1", dir))
+		for _, f := range files {
+			data, err := fs.ReadFile(fsys, path.Join("assets", "data", "d1", dir, f.Name()))
+			if err != nil {
+				continue
+			}
+			ids, lines, sounds := parseTexts(string(data))
+			for i, id := range ids {
+				texts[id], sfx[id] = lines[i], sounds[i]
+			}
+			for npc, file := range gossipFiles {
+				if dir == "gossip" && file+".txt" == f.Name() {
+					gossip[npc] = ids
+				}
+			}
+		}
+	}
+	return
 }
 
 func (d *Data) MonsterByID(id string) int {
@@ -230,7 +333,7 @@ func family(graphic string) string {
 func Load(fsys fs.FS) (*Data, error) {
 	d := &Data{}
 	tables := map[string][]row{}
-	for _, n := range []string{"xl_monst", "xl_umon", "xl_item", "xl_ipre", "xl_isuf", "xl_uitem", "xl_spell"} {
+	for _, n := range []string{"xl_monst", "xl_umon", "xl_item", "xl_ipre", "xl_isuf", "xl_uitem", "xl_spell", "xl_obj"} {
 		rows, err := readTable(fsys, n+".txt")
 		if err != nil {
 			return nil, err
@@ -311,8 +414,20 @@ func Load(fsys fs.FS) (*Data, error) {
 			Town: r.i("sTownSpell") != 0, ManaAdj: r.i("sManaAdj"), MinMana: r.i("sMinMana"),
 		})
 	}
+	for _, r := range tables["xl_obj"] {
+		if r.s("") == "-1" {
+			break
+		}
+		d.Objects = append(d.Objects, ObjData{
+			Name: r.s(""), Load: r.i("oload"), MinLvl: r.i("ominlvl"), MaxLvl: r.i("omaxlvl"), LvlType: r.i("olvltype"),
+			Theme: r.i("otheme"), AnimFlag: r.i("oAnimFlag"), AnimDelay: r.i("oAnimDelay"), AnimLen: r.i("oAnimLen"),
+			Solid: r.i("oSolidFlag") != 0, Missile: r.i("oMissFlag") != 0, Light: r.i("oLightFlag") != 0,
+			Break: r.i("oBreak"), SelFlag: r.i("oSelFlag"), Trap: r.i("oTrapFlag") != 0,
+		})
+	}
 	if len(d.Monsters) != 112 || len(d.Items) != 156 || len(d.Spells) != 37 {
 		return nil, fmt.Errorf("d1 tables: unexpected sizes monsters=%d items=%d spells=%d", len(d.Monsters), len(d.Items), len(d.Spells))
 	}
+	d.Texts, d.TextSfx, d.Gossip = loadTexts(fsys)
 	return d, nil
 }

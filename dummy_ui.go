@@ -2,6 +2,7 @@ package main
 
 import (
 	"rpg/common"
+	"rpg/defs"
 	"rpg/geometry"
 	"rpg/util"
 )
@@ -15,6 +16,10 @@ func (d DummyUI) FadeToBlack() {
 
 func (d DummyUI) FadeFromBlack() {
 
+}
+
+func (d DummyUI) Confirm(message string, onConfirm func()) {
+	onConfirm()
 }
 
 func (d DummyUI) SetDebugActions(actions func()common.DebugActions) {
@@ -61,6 +66,11 @@ func (d DummyUI) OpenMenu(options []util.MenuItem) {
 
 }
 
+func (d DummyUI) OpenUncancelableMenu(options []util.MenuItem) {
+	//TODO implement me
+
+}
+
 func (d DummyUI) OpenTextWindow(msg []util.LabelText) {
 	//TODO implement me
 
@@ -81,22 +91,12 @@ func (d DummyUI) UpdateStatsLabel() {
 
 }
 
-func (d DummyUI) OpenStash(inv *common.Inventory, town *common.Inventory, drop func(item *common.Item)) {
-	//TODO implement me
-
-}
-
 func (d DummyUI) OnMapChanged() {
 	//TODO implement me
 
 }
 
-func (d DummyUI) OpenClassSelectionMenu() {
-	//TODO implement me
-
-}
-
-func (d DummyUI) Say(actor *common.Actor, linesOfText []string) {
+func (d DummyUI) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string)) {
 	//TODO implement me
 
 }
@@ -111,12 +111,12 @@ func (d DummyUI) OpenShopMenu(npc *common.Actor) {
 
 }
 
-func (d DummyUI) BeginPlayerSellingTo(vendor *common.Actor) {
+func (d DummyUI) OpenShopMenuFiltered(npc *common.Actor, filter func(*common.Item) bool) {
 	//TODO implement me
 
 }
 
-func (d DummyUI) OpenTransferEnchantmentMenu() {
+func (d DummyUI) BeginPlayerSellingTo(vendor *common.Actor) {
 	//TODO implement me
 
 }
@@ -127,11 +127,6 @@ func (d DummyUI) OpenListInventoryForSelection(filter func(element *common.Item)
 }
 
 func (d DummyUI) UpdateMiniMap() {
-	//TODO implement me
-
-}
-
-func (d DummyUI) OpenPlayerStashInTown() {
 	//TODO implement me
 
 }
@@ -149,3 +144,5 @@ func (d DummyUI) SetPlayerMessage(message func(message string)) {
 func NewDummyUI() *DummyUI {
 	return &DummyUI{}
 }
+
+func (d DummyUI) OpenPlayerStashInTown() {}

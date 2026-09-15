@@ -1,0 +1,506 @@
+%rec: default
+
+internal_name: IconItemPotionCrimson
+name: Potion (crimson)
+icon: 161
+
+internal_name: IconItemPotionRed
+name: Potion (red)
+icon: 332
+
+internal_name: IconItemPotionBlue
+name: Potion (blue)
+icon: 329
+
+internal_name: IconItemPotionDarkBlue
+name: Potion (dark blue)
+icon: 327
+
+internal_name: IconItemPotionGreen
+name: Potion (green)
+icon: 330
+
+internal_name: IconItemPotionDarkGreen
+name: Potion (dark green)
+icon: 335
+
+internal_name: IconItemPotionYellow
+name: Potion (yellow)
+icon: 334
+
+internal_name: IconItemPotionOrange
+name: Potion (orange)
+icon: 333
+
+internal_name: IconItemPotionPink
+name: Potion (pink)
+icon: 331
+
+internal_name: IconItemPotionBrown
+name: Potion (brown)
+icon: 326
+
+internal_name: IconItemPotionWhite
+name: Potion (white)
+icon: 328
+
+internal_name: IconItemFlaskOfOil
+name: Flask of Oil
+icon: 246
+
+internal_name: IconCloakDark
+name: Cloak (dark set)
+icon: 411
+
+internal_name: IconGlovesDark
+name: Gloves (dark set)
+icon: 439
+
+internal_name: IconBootsDark
+name: Boots (dark set)
+icon: 440
+
+internal_name: IconArmorDark
+name: Armor (dark set)
+icon: 441
+
+internal_name: IconHoodDark
+name: Hood (dark set)
+icon: 467
+
+internal_name: IconRingDark
+name: Ring (dark set)
+icon: 468
+
+internal_name: IconHelmetDark
+name: Helmet (dark set)
+icon: 469
+
+internal_name: IconShieldDarkThorns
+name: Thorned Shield (dark set)
+icon: 495
+
+internal_name: IconAmuletDark
+name: Amulet (dark set)
+icon: 496
+
+internal_name: IconScytheDark
+name: Scythe (dark set)
+icon: 497
+
+internal_name: IconMalletGolden
+name: Golden Mallet
+icon: 498
+
+internal_name: IconItemScroll
+name: Scroll
+icon: 139
+
+internal_name: IconItemTorch
+name: Torch
+icon: 352
+
+internal_name: IconItemLantern
+name: Lantern
+icon: 247
+
+internal_name: IconItemStarGlass
+name: Star Glass
+icon: 248
+
+internal_name: IconItemMorningStar
+name: Morning Star
+icon: 274
+
+internal_name: IconItemRing1
+name: Ring (variant 1)
+icon: 129
+
+internal_name: IconItemRing2
+name: Ring (variant 2)
+icon: 130
+
+internal_name: IconItemRing3
+name: Ring (variant 3)
+icon: 131
+
+internal_name: IconItemMagicRing
+name: Ring (magic)
+icon: 130
+
+internal_name: IconItemUniqueRing
+name: Ring (unique)
+icon: 131
+
+internal_name: IconItemAmulet1
+name: Amulet (variant 1)
+icon: 132
+
+internal_name: IconItemAmulet2
+name: Amulet (variant 2)
+icon: 133
+
+internal_name: IconItemAmulet3
+name: Amulet (variant 3)
+icon: 134
+
+internal_name: IconItemMagicAmulet
+name: Amulet (magic)
+icon: 133
+
+internal_name: IconItemUniqueAmulet
+name: Amulet (unique)
+icon: 134
+
+internal_name: IconItemSword
+name: Sword
+icon: 144
+
+internal_name: IconItemDagger
+name: Dagger
+icon: 233
+
+internal_name: IconItemMagicSword
+name: Sword (magic)
+icon: 146
+
+internal_name: IconItemUniqueSword
+name: Sword (unique)
+icon: 147
+
+internal_name: IconItemMace
+name: Mace
+icon: 168
+
+internal_name: IconItemMagicMace
+name: Mace (magic)
+icon: 169
+
+internal_name: IconItemUniqueMace
+name: Mace (unique)
+icon: 170
+
+internal_name: IconItemAxe
+name: Axe
+icon: 171
+
+internal_name: IconItemMagicAxe
+name: Axe (magic)
+icon: 172
+
+internal_name: IconItemUniqueAxe
+name: Axe (unique)
+icon: 173
+
+internal_name: IconItemStaff
+name: Staff
+icon: 141
+
+internal_name: IconItemMagicStaff
+name: Staff (magic)
+icon: 143
+
+internal_name: IconItemUniqueStaff
+name: Staff (unique)
+icon: 140
+
+internal_name: IconItemWand
+name: Wand
+icon: 124
+
+internal_name: IconItemBow
+name: Bow
+icon: 149
+
+internal_name: IconItemMagicBow
+name: Bow (magic)
+icon: 150
+
+internal_name: IconItemUniqueBow
+name: Bow (unique)
+icon: 151
+
+internal_name: IconItemDart
+name: Dart
+icon: 232
+
+internal_name: IconItemLeatherArmor1
+name: Leather Armor (variant 1)
+icon: 227
+
+internal_name: IconItemLeatherArmor2
+name: Leather Armor (variant 2)
+icon: 228
+
+internal_name: IconItemLeatherArmor3
+name: Leather Armor (variant 3)
+icon: 229
+
+internal_name: IconItemChainMail
+name: Chain Mail
+icon: 196
+
+internal_name: IconItemUniqueChainMail
+name: Chain Mail (unique)
+icon: 197
+
+internal_name: IconItemArmor
+name: Plate Armor
+icon: 199
+
+internal_name: IconItemMagicArmor
+name: Plate Armor (magic)
+icon: 198
+
+internal_name: IconItemUniqueArmor
+name: Plate Armor (unique)
+icon: 201
+
+internal_name: IconItemHelmet
+name: Helmet
+icon: 211
+
+internal_name: IconItemMagicHelmet
+name: Helmet (magic)
+icon: 212
+
+internal_name: IconItemUniqueHelmet
+name: Helmet (unique)
+icon: 213
+
+internal_name: IconItemBoots1
+name: Boots (variant 1)
+icon: 355
+
+internal_name: IconItemBoots2
+name: Boots (variant 2)
+icon: 356
+
+internal_name: IconItemBoots3
+name: Boots (variant 3)
+icon: 357
+
+internal_name: IconItemBoots4
+name: Boots (variant 4)
+icon: 358
+
+internal_name: IconItemBoots5
+name: Boots (variant 5)
+icon: 359
+
+internal_name: IconItemBoots6
+name: Boots (variant 6)
+icon: 360
+
+internal_name: IconItemBoots7
+name: Boots (variant 7)
+icon: 361
+
+internal_name: IconItemBoots8
+name: Boots (variant 8)
+icon: 362
+
+internal_name: IconItemBoots9
+name: Boots (variant 9)
+icon: 363
+
+internal_name: IconItemGloves1
+name: Gloves (variant 1)
+icon: 383
+
+internal_name: IconItemGloves2
+name: Gloves (variant 2)
+icon: 384
+
+internal_name: IconItemGloves3
+name: Gloves (variant 3)
+icon: 385
+
+internal_name: IconItemGloves4
+name: Gloves (variant 4)
+icon: 386
+
+internal_name: IconItemGloves5
+name: Gloves (variant 5)
+icon: 387
+
+internal_name: IconItemGloves6
+name: Gloves (variant 6)
+icon: 388
+
+internal_name: IconItemGloves7
+name: Gloves (variant 7)
+icon: 389
+
+internal_name: IconItemGloves8
+name: Gloves (variant 8)
+icon: 390
+
+internal_name: IconItemGloves9
+name: Gloves (variant 9)
+icon: 391
+
+internal_name: IconItemCape1
+name: Cape (variant 1)
+icon: 412
+
+internal_name: IconItemCape2
+name: Cape (variant 2)
+icon: 413
+
+internal_name: IconItemCape3
+name: Cape (variant 3)
+icon: 414
+
+internal_name: IconItemCape4
+name: Cape (variant 4)
+icon: 415
+
+internal_name: IconItemCape5
+name: Cape (variant 5)
+icon: 416
+
+internal_name: IconItemCape6
+name: Cape (variant 6)
+icon: 417
+
+internal_name: IconItemCape7
+name: Cape (variant 7)
+icon: 418
+
+internal_name: IconItemCape8
+name: Cape (variant 8)
+icon: 419
+
+internal_name: IconItemShield
+name: Shield
+icon: 205
+
+internal_name: IconItemMagicShield
+name: Shield (magic)
+icon: 206
+
+internal_name: IconItemUniqueShield
+name: Shield (unique)
+icon: 207
+
+internal_name: item.ITYPE_MISC
+name: D1 Misc Item (fallback)
+icon: 137
+
+internal_name: item.ITYPE_SWORD
+name: D1 Sword
+icon: 646
+
+internal_name: item.ITYPE_AXE
+name: D1 Axe
+icon: 697
+
+internal_name: item.ITYPE_BOW
+name: D1 Bow
+icon: 621
+
+internal_name: item.ITYPE_MACE
+name: D1 Mace / Club
+icon: 659
+
+internal_name: item.ITYPE_SHIELD
+name: D1 Shield
+icon: 205
+
+internal_name: item.ITYPE_LARMOR
+name: D1 Light Armor (rags, capes, leather)
+icon: 227
+
+internal_name: item.ITYPE_HELM
+name: D1 Helm / Cap / Crown
+icon: 211
+
+internal_name: item.ITYPE_MARMOR
+name: D1 Medium Armor (mail)
+icon: 230
+
+internal_name: item.ITYPE_HARMOR
+name: D1 Heavy Armor (plate)
+icon: 199
+
+internal_name: item.ITYPE_STAFF
+name: D1 Staff
+icon: 141
+
+internal_name: item.ITYPE_GOLD
+name: D1 Gold
+icon: 273
+
+internal_name: item.ITYPE_RING
+name: D1 Ring
+icon: 129
+
+internal_name: item.ITYPE_AMULET
+name: D1 Amulet
+icon: 132
+
+internal_name: item.IMISC_HEAL
+name: D1 Potion of Healing
+icon: 331
+
+internal_name: item.IMISC_FULLHEAL
+name: D1 Potion of Full Healing
+icon: 332
+
+internal_name: item.IMISC_MANA
+name: D1 Potion of Mana
+icon: 329
+
+internal_name: item.IMISC_FULLMANA
+name: D1 Potion of Full Mana
+icon: 327
+
+internal_name: item.IMISC_REJUV
+name: D1 Potion of Rejuvenation
+icon: 325
+
+internal_name: item.IMISC_FULLREJUV
+name: D1 Potion of Full Rejuvenation
+icon: 335
+
+internal_name: item.IMISC_ELIXSTR
+name: D1 Elixir of Strength
+icon: 333
+
+internal_name: item.IMISC_ELIXMAG
+name: D1 Elixir of Magic
+icon: 333
+
+internal_name: item.IMISC_ELIXDEX
+name: D1 Elixir of Dexterity
+icon: 333
+
+internal_name: item.IMISC_ELIXVIT
+name: D1 Elixir of Vitality
+icon: 333
+
+internal_name: item.IMISC_SPECELIX
+name: D1 Spectral Elixir
+icon: 326
+
+internal_name: item.IMISC_SCROLL
+name: D1 Scroll
+icon: 139
+
+internal_name: item.IMISC_SCROLLT
+name: D1 Scroll (targeted spell)
+icon: 139
+
+internal_name: item.IMISC_BOOK
+name: D1 Spell Book
+icon: 323
+
+internal_name: item.IMISC_EAR
+name: D1 Ear / Heart
+icon: 139
+
+internal_name: item.IMISC_MAPOFDOOM
+name: D1 Map of the Stars (quest)
+icon: 139
+

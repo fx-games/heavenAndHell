@@ -9,8 +9,12 @@ import (
 
 // D1 town vendors (decision 10). The H&H vendor types keep their ids; their meaning is D1's.
 const (
-	VendorTypeCain VendorType = "store_cain"
-	VendorTypeWirt VendorType = "store_wirt"
+	VendorTypeCain    VendorType = "store_cain"
+	VendorTypeWirt    VendorType = "store_wirt"
+	VendorTypeOgden   VendorType = "store_ogden"   // no store in single player, only talk
+	VendorTypeDeadGuy VendorType = "store_deadguy" // the wounded townsman: only his last words
+	VendorTypeDrunk   VendorType = "store_drunk"   // Farnham: only talk (S_StartDrunk)
+	VendorTypeBarmaid VendorType = "store_barmaid" // Gillian: only talk (S_StartBarmaid)
 )
 
 // WirtLookCost is what Wirt charges to show his item.
@@ -71,32 +75,51 @@ func d1ServiceOption(ctx ActionContext, label string, applies func(*d1.Item) boo
 	}}
 }
 
+// d1VendorOptions ports each NPC's S_Start* menu (stores.cpp) with its exact D1 labels and structure: Griswold
+// splits his stock into basic and premium buy lists (S_StartSmith), Adria has one buy list plus recharging
+// (S_StartWitch), Pepin's free heal is its own choice rather than a side effect of talking (S_StartHealer, base
+// game), Cain only identifies (S_StartStory), and Wirt only offers his one item for a look fee (S_StartBoy).
 func d1VendorOptions(ctx ActionContext, vendor *Actor) []util.MenuItem {
 	gui := ctx.UserInterface()
 	data := ctx.GameState.factory.D1().D
-	buy := util.MenuItem{MainText: "BUY", Action: func() { gui.OpenShopMenu(vendor) }}
-	sell := util.MenuItem{MainText: "SELL", Action: func() { gui.BeginPlayerSellingTo(vendor) }}
+	sell := util.MenuItem{MainText: "Sell items", Action: func() { gui.BeginPlayerSellingTo(vendor) }}
 	switch vendor.GetVendorType() {
 	case VendorTypeWeapons:
-		return []util.MenuItem{buy, sell, d1ServiceOption(ctx, "REPAIR", d1.CanRepair, d1.RepairCost,
+		basic := util.MenuItem{MainText: "Buy basic items", Action: func() {
+			gui.OpenShopMenuFiltered(vendor, func(item *Item) bool { return !item.IsPremiumStock() })
+		}}
+		premium := util.MenuItem{MainText: "Buy premium items", Action: func() {
+			gui.OpenShopMenuFiltered(vendor, func(item *Item) bool { return item.IsPremiumStock() })
+		}}
+		return []util.MenuItem{basic, premium, sell, d1ServiceOption(ctx, "Repair items", d1.CanRepair, d1.RepairCost,
 			func(it *d1.Item) { it.Durability = it.MaxDur })}
 	case VendorTypeWands:
-		return []util.MenuItem{buy, sell, d1ServiceOption(ctx, "RECHARGE", d1.CanRecharge, data.RechargeCost,
+		buy := util.MenuItem{MainText: "Buy items", Action: func() { gui.OpenShopMenu(vendor) }}
+		return []util.MenuItem{buy, sell, d1ServiceOption(ctx, "Recharge staves", d1.CanRecharge, data.RechargeCost,
 			func(it *d1.Item) { it.Charges = it.MaxCharges })}
 	case VendorTypeGeneral:
-		return []util.MenuItem{buy}
+		heal := util.MenuItem{MainText: "Receive healing", Action: func() {
+			ctx.GameState.GetPlayer().HealCompletely()
+			ctx.Msg("Pepin tends to your wounds.")
+		}}
+		buy := util.MenuItem{MainText: "Buy items", Action: func() { gui.OpenShopMenu(vendor) }}
+		return []util.MenuItem{heal, buy}
 	case VendorTypeCain:
-		D1GiveStaffToCain(ctx.GameState, ctx.Msg)
-		// decision 9: Cain identifies for free (D1 charges 100 gold)
-		return []util.MenuItem{d1ServiceOption(ctx, "IDENTIFY", func(it *d1.Item) bool { return it.Magical != 0 && !it.Identified },
-			func(*d1.Item) int { return 0 }, func(it *d1.Item) { it.Identified = true })}
-	case VendorTypeWirt:
-		return []util.MenuItem{{MainText: fmt.Sprintf("LOOK (%d gold)", WirtLookCost), Action: func() {
-			if vendor.GetInventory().IsEmpty() {
-				ctx.Msg("Wirt has nothing for sale.")
-				return
-			}
-			if PayGold(ctx, ctx.GameState.GetPlayer(), WirtLookCost) {
+		// D1 charges a flat 100 gold to identify (AddStoreHoldId in stores.cpp), regardless of item value
+		return []util.MenuItem{d1ServiceOption(ctx, "Identify an item", func(it *d1.Item) bool { return it.Magical != 0 && !it.Identified },
+			func(*d1.Item) int { return 100 }, func(it *d1.Item) { it.Identified = true })}
+	case VendorTypeWirt: // the look fee is paid once per item: looking again is free until Wirt has a new one
+		if vendor.GetInventory().IsEmpty() {
+			return nil
+		}
+		flags := ctx.GameState.GetFlags()
+		label := fmt.Sprintf("I have something for sale, but it will cost %d gold just to take a look", WirtLookCost)
+		if flags.IsSet(FlagWirtItemSeen) {
+			label = "What have you got?"
+		}
+		return []util.MenuItem{{MainText: label, Action: func() {
+			if flags.IsSet(FlagWirtItemSeen) || PayGold(ctx, ctx.GameState.GetPlayer(), WirtLookCost) {
+				flags.SetTrue(FlagWirtItemSeen)
 				gui.OpenShopMenu(vendor)
 			}
 		}}}
@@ -126,3 +149,25 @@ func d1Broke(ctx ActionContext, owner *Actor, broke *d1.Item) {
 	ctx.Msg(fmt.Sprintf("Your %s broke! Griswold can repair it.", name))
 	SyncHero(owner)
 }
+
+// WeaponAboutToBreak returns the equipped weapon for attackType if it is already at zero durability, i.e.
+// swinging it now destroys it. Used to warn the player before such an attack.
+func WeaponAboutToBreak(actor *Actor, attackType AttackType) *Item {
+	weapon := actor.GetEquipment().GetWeapon(attackType)
+	if weapon == nil || weapon.d1 == nil || weapon.d1.MaxDur == 0 || weapon.d1.Durability != 0 {
+		return nil
+	}
+	return weapon
+}
+
+// destroyBrokenWeapon removes a weapon that was used at zero durability from the owner entirely.
+func destroyBrokenWeapon(ctx ActionContext, owner *Actor, weapon *Item) {
+	name := weapon.Name()
+	owner.GetEquipment().UnEquip(weapon)
+	owner.GetInventory().Remove(weapon)
+	ctx.Msg(fmt.Sprintf("Your %s falls apart!", name))
+	SyncHero(owner)
+}
+
+// FlagWirtItemSeen is set once the look fee for Wirt's current item is paid; a new item clears it (saved with the flags).
+const FlagWirtItemSeen = "wirt_item_seen"

@@ -2,6 +2,7 @@ package util
 
 import (
 	"image/color"
+	"strings"
 )
 
 type MenuItem struct {
@@ -63,4 +64,27 @@ func IndexToXY(index int, width int) (int, int) {
 
 func XYToIndex(x int, y int, width int) int {
 	return y*width + x
+}
+
+// WrapLabelText greedily word-wraps plain lines wider than maxWidth pixels; color-coded lines pass through.
+func WrapLabelText(lines []LabelText, maxWidth int, measureString func(line string) (float64, float64)) []LabelText {
+	var result []LabelText
+	for _, line := range lines {
+		words := strings.Fields(line.Text)
+		if w, _ := measureString(line.Text); line.UseColorCodes || len(words) == 0 || int(w) <= maxWidth {
+			result = append(result, line)
+			continue
+		}
+		current := words[0]
+		for _, word := range words[1:] {
+			if w, _ := measureString(current + " " + word); int(w) > maxWidth {
+				result = append(result, LabelText{Text: current, TextColor: line.TextColor})
+				current = word
+			} else {
+				current += " " + word
+			}
+		}
+		result = append(result, LabelText{Text: current, TextColor: line.TextColor})
+	}
+	return result
 }

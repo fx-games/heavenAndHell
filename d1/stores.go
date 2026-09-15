@@ -8,6 +8,7 @@ import (
 
 // Item indexes (IDI_) used by stores and starting gear.
 const (
+	IdxGold      = 0
 	IdxHeal      = 24
 	IdxMana      = 25
 	IdxPortal    = 27
@@ -139,7 +140,8 @@ func (g *Generator) RefillPremium(p *Premium, clvl int) {
 }
 
 // WitchStock ports SpawnWitch: mana potions and town portal, then 7-14 random misc items and staves.
-func (g *Generator) WitchStock(lvl int) []*Item {
+// spellLevels are the hero's, for WitchBookLevel.
+func (g *Generator) WitchStock(lvl int, spellLevels [37]int) []*Item {
 	out := []*Item{g.storeItem(IdxMana, 1), g.storeItem(IdxFullMana, 1), g.storeItem(IdxPortal, 1)}
 	var rnd []*Item
 	for n := g.random(8) + 10; n > 3; n-- {
@@ -155,11 +157,27 @@ func (g *Generator) WitchStock(lvl int) []*Item {
 			}
 		}
 		it.Identified = true
+		g.witchBookLevel(it, spellLevels)
 		rnd = append(rnd, it)
 	}
-	// ponytail: WitchBookLevel (book requirements rise with known spell level) comes with spells in milestone 5.
 	sortByBase(rnd)
 	return append(out, rnd...)
+}
+
+// witchBookLevel ports WitchBookLevel: a book in Adria's stock asks 20% more Magic per level the hero already has
+// in its spell, up to 255.
+func (g *Generator) witchBookLevel(it *Item, spellLevels [37]int) {
+	if it.MiscID != "IMISC_BOOK" {
+		return
+	}
+	it.MinMag = g.D.Spells[it.Spell].MinInt
+	for slvl := spellLevels[it.Spell]; slvl != 0; {
+		it.MinMag += 20 * it.MinMag / 100
+		slvl--
+		if it.MinMag+20*it.MinMag/100 > 255 {
+			it.MinMag, slvl = 255, 0
+		}
+	}
 }
 
 // HealerStock ports SpawnHealer: healing potions, then 8-15 random elixirs, rejuvenation potions and healing scrolls.
@@ -218,6 +236,56 @@ func WitchBuys(it *Item) bool {
 func CanRepair(it *Item) bool {
 	return it.MaxDur > 0 && it.Durability != it.MaxDur && it.Type != ITypeMisc && it.Type != ITypeGold
 }
+
+// RepairItem ports the Warrior's Item Repair (RepairItem): each round of repair costs maximum durability, and an
+// item worn down to none is gone (it reports true). rnd is random_.
+func RepairItem(it *Item, clvl int, rnd func(int) int) (destroyed bool) {
+	if it.Durability == it.MaxDur {
+		return false
+	}
+	if it.MaxDur <= 0 {
+		return true
+	}
+	rep := 0
+	for {
+		rep += clvl + rnd(clvl)
+		it.MaxDur -= max(it.MaxDur/(clvl+9), 1)
+		if it.MaxDur == 0 {
+			return true
+		}
+		if rep+it.Durability >= it.MaxDur {
+			break
+		}
+	}
+	it.Durability = min(it.Durability+rep, it.MaxDur)
+	return false
+}
+
+// RechargeItem ports the Sorcerer's Staff Recharge (DoRecharge/RechargeItem): each round adds up to clvl/sBookLvl
+// charges and costs one maximum charge. rnd is random_, which gives 0 for a range of 0 or less.
+func (d *Data) RechargeItem(it *Item, clvl int, rnd func(int) int) {
+	if it.Type != ITypeStaff || it.Spell == 0 || it.Charges == it.MaxCharges {
+		return
+	}
+	r := 1
+	if bl := d.Spells[it.Spell].BookLvl; bl > 0 && clvl/bl > 0 {
+		r += rnd(clvl / bl)
+	}
+	for {
+		it.MaxCharges--
+		if it.MaxCharges == 0 {
+			return
+		}
+		it.Charges += r
+		if it.Charges >= it.MaxCharges {
+			break
+		}
+	}
+	it.Charges = min(it.Charges, it.MaxCharges)
+}
+
+// DisarmChance ports TryDisarm's roll: disarming works if random_(154, 100) <= the result.
+func DisarmChance(dex, dlvl int) int { return 2*dex - 5*dlvl }
 
 // RepairCost ports AddStoreHoldRepair.
 func RepairCost(it *Item) int {

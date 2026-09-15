@@ -74,6 +74,7 @@ type missileCtx struct {
 
 // hit ports PlayerMHit: `ticks` hit rolls against the player standing at p, from a missile that flew from `from`.
 func (c *missileCtx) hit(mis D1Missile, p, from geometry.Point, mind, maxd int, shift bool, ticks int) bool {
+	c.ctx.GameState.factory.hitD1Barrel(c.c.m, p, c.caster)
 	pl := c.player
 	if pl.hero == nil || !pl.IsAlive() || pl.MapPosition() != p {
 		return false
@@ -129,6 +130,7 @@ func (c *missileCtx) bolt(mis D1Missile, to geometry.Point, dam int) (geometry.P
 	from, last, hit := c.caster.MapPosition(), c.caster.MapPosition(), false
 	for _, p := range c.c.ray(from, to, 20) {
 		if o := d1ObjectAt(c.c.m, p); o != nil && !o.IsWalkable(nil) { // monster missiles fly through other monsters
+			c.ctx.GameState.factory.hitD1Barrel(c.c.m, p, c.caster)
 			break
 		}
 		last = p
@@ -207,22 +209,22 @@ func (c *missileCtx) hazard(mis D1Missile, p geometry.Point, turns, dam64 int) {
 		hz.icon = defs.IconEffectHit
 	}
 	burn := func() {
-		if f.state.GetMap() != m || c.player.MapPosition() != p {
+		if f.State.GetMap() != m || c.player.MapPosition() != p {
 			return
 		}
-		f.actionBroker.Execute(&hazardTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
+		f.ActionBroker.Execute(&hazardTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
 			mc: &missileCtx{caster: caster, mon: mon}, mis: mis, p: p, dam64: dam64})
 	}
 	hz.SetDealDamage(func(geometry.Point, func() bool) {})
 	hz.SetOnTurn(func() {
-		if !hz.IsAlive() || f.state.GetMap() != m {
+		if !hz.IsAlive() || f.State.GetMap() != m {
 			m.RemoveObject(hz)
 			hz.turnsUntilRemoval = 0
 			return
 		}
 		burn()
 	})
-	f.getTimeKeeper().AddTimed(hz)
+	f.GetTimeKeeper().AddTimed(hz)
 	m.AddObject(hz, p)
 	burn()
 }

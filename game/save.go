@@ -23,6 +23,8 @@ type savedInvItem struct {
 
 type saveGame struct {
 	Class          string
+	Female         bool
+	Name           string
 	Permadeath     bool
 	Seed           int64
 	Hero           d1.Hero
@@ -38,6 +40,8 @@ type saveGame struct {
 	Boy            *d1.Item
 	BoyLevel       int
 	Portal         *common.D1Portal
+	Golem          *common.SavedGolem // the golem follows the hero (onD1MapChanged)
+	ManaShield     bool
 }
 
 func HasSave() bool {
@@ -55,11 +59,17 @@ func (g *GameInstance) SaveGame() {
 	st := player.GetStats()
 	pos := player.MapPosition()
 	sg := saveGame{
-		Class: g.state.SelectedClass.InternalName, Permadeath: g.permadeath, Seed: g.levelSeed, Hero: *player.Hero(),
+		Class: g.state.SelectedClass.InternalName, Female: g.state.SelectedClass.Icon == defs.FemaleIconByClass[g.state.SelectedClass.InternalName],
+		Name: player.Name(), Permadeath: g.permadeath, Seed: g.levelSeed, Hero: *player.Hero(),
 		HP: max(st.GetResource(stats.Health).Value(), 1), Mana: st.GetResource(stats.Mana).Value(), Gold: st.GetAttribute(stats.Gold),
 		UniqueDropped: g.factory.D1().UniqueDropped, Flags: g.state.GetFlags().AllEntries(),
 		Map: g.state.GetMap().GetName(), X: pos.X, Y: pos.Y, Levels: map[string]*common.LevelSnapshot{},
 		Deepest: g.state.GetLastDungeonLevel(), Premium: g.premium, Boy: g.boyItem, BoyLevel: g.boyLevel, Portal: g.state.D1Portal(),
+		ManaShield: player.HasStatusEffect(common.StatusManaShield),
+	}
+	if golem := common.D1Golem(g.state.GetMap()); golem != nil {
+		saved := common.SaveD1Golem(golem)
+		sg.Golem = &saved
 	}
 	inv, eq := player.GetInventory(), player.GetEquipment()
 	for _, it := range inv.Items() {
@@ -113,10 +123,17 @@ func (g *GameInstance) LoadGame() error {
 		return fmt.Errorf("save file is corrupt: %w", err)
 	}
 	g.autosave = false
-	g.resetGame(g.classByName(sg.Class), sg.Seed)
+	class := g.classByName(sg.Class)
+	if sg.Female {
+		class.Icon = defs.FemaleIconByClass[class.InternalName]
+	}
+	g.resetGame(class, sg.Seed)
 	g.permadeath = sg.Permadeath
 
 	player := g.state.GetPlayer()
+	if sg.Name != "" {
+		player.SetName(sg.Name)
+	}
 	*player.Hero() = sg.Hero
 	if gen := g.factory.D1(); len(sg.UniqueDropped) == len(gen.UniqueDropped) {
 		copy(gen.UniqueDropped, sg.UniqueDropped)
@@ -163,15 +180,24 @@ func (g *GameInstance) LoadGame() error {
 		m.MoveActor(player, p)
 		player.SetDrawPosition(p.ToPointF())
 	}
+	if sg.Golem != nil {
+		g.factory.PlaceD1GolemNear(player, *sg.Golem)
+	}
+	if sg.ManaShield {
+		player.AddStatusEffect(common.StatusManaShield, -1)
+	}
 	g.actionBroker.Execute(common.NewUpdateFoVAction(common.AbstractCause("Load game"), player))
 	g.autosave = true
 	return nil
 }
 
 // NewGame starts a fresh game and enables autosaving.
-func (g *GameInstance) NewGame(class defs.LoadoutDefinition, permadeath bool) {
+func (g *GameInstance) NewGame(class defs.LoadoutDefinition, permadeath bool, name string) {
 	g.autosave = false
 	g.resetGame(class, g.randomSource.Int63())
+	if name != "" {
+		g.state.GetPlayer().SetName(name)
+	}
 	g.permadeath = permadeath
 	g.autosave = true
 	g.SaveGame()
@@ -202,17 +228,7 @@ func (g *GameInstance) StartMenuItems(afterDeath bool) []util.MenuItem {
 }
 
 func (g *GameInstance) openNewGameMenu() {
-	var items []util.MenuItem
-	for _, c := range g.dataDefinitions.ClassDefinitions {
-		class := c
-		items = append(items, util.MenuItem{MainText: class.Name, Action: func() {
-			g.uiController.OpenMenu([]util.MenuItem{
-				{MainText: "Normal (load last save on death)", Action: func() { g.NewGame(class, false) }},
-				{MainText: "Permadeath", Action: func() { g.NewGame(class, true) }},
-			})
-		}})
-	}
-	g.uiController.OpenMenu(items)
+	g.uiController.OpenNewGameScreen(g.NewGame)
 }
 
 // ShowStartMenu opens Continue/New game when a save exists; without one the default game autosaves right away.
@@ -221,5 +237,5 @@ func (g *GameInstance) ShowStartMenu() {
 		g.autosave = true
 		return
 	}
-	g.uiController.OpenMenu(g.StartMenuItems(false))
+	g.uiController.OpenUncancelableMenu(g.StartMenuItems(false))
 }

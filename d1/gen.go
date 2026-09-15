@@ -1,9 +1,6 @@
 package d1
 
-import (
-	"fmt"
-	"math/rand"
-)
+import "fmt"
 
 // ISPL_ item special-effect bits.
 const (
@@ -62,26 +59,35 @@ type Item struct {
 	PLEnAc, PLMana, PLHP               int
 	PrePower, SufPower                 string
 	Uid                                int // unique index, -1 = none
+	Seed                               int32
+	CreateInfo                         int // _iCreateInfo: item level and CF_ flags, to recreate the item
 }
 
-// Generator rolls D1 loot. UniqueDropped is game state (single player: each unique drops once) and must be saved.
+// _iCreateInfo flags.
+const (
+	CFLevel    = 0x3F
+	CFOnlyGood = 0x40
+	CFUper15   = 0x80
+	CFUper1    = 0x100
+	CFUnique   = 0x200
+	CFPregen   = 0x8000
+)
+
+// Generator rolls D1 loot with D1's RNG. UniqueDropped is game state (single player: each unique drops once) and must
+// be saved.
 type Generator struct {
 	D             *Data
-	Rng           *rand.Rand
+	R             *Rng
 	UniqueDropped []bool
 }
 
-func NewGenerator(d *Data, rng *rand.Rand) *Generator {
-	return &Generator{D: d, Rng: rng, UniqueDropped: make([]bool, len(d.UniqueItems))}
+func NewGenerator(d *Data, seed int32) *Generator {
+	g := &Generator{D: d, R: &Rng{}, UniqueDropped: make([]bool, len(d.UniqueItems))}
+	g.R.SetSeed(seed)
+	return g
 }
 
-// random mirrors engine.cpp random(idx, v): 0..v-1, 0 for v <= 0.
-func (g *Generator) random(v int) int {
-	if v <= 0 {
-		return 0
-	}
-	return g.Rng.Intn(v)
-}
+func (g *Generator) random(v int) int { return g.R.Random(v) }
 
 // itemAttrs ports GetItemAttrs. dlvl is the dungeon level (for gold), lvl the item level.
 func (g *Generator) itemAttrs(idx, lvl, dlvl int, hell bool) *Item {
@@ -500,15 +506,18 @@ func (g *Generator) itemBonus(it *Item, minlvl, maxlvl int, onlygood bool) {
 }
 
 // checkUnique ports CheckUnique, including D1's bug that the last eligible unique always wins.
-func (g *Generator) checkUnique(it *Item, lvl, uper int) int {
+func (g *Generator) checkUnique(it *Item, lvl, uper int, recreate bool) int {
 	if g.random(100) > uper {
 		return -1
 	}
 	j := -1
 	for u, ud := range g.D.UniqueItems {
-		if ud.Base == g.D.Items[it.BaseIdx].UniqueBase && lvl >= ud.MinLvl && !g.UniqueDropped[u] {
+		if ud.Base == g.D.Items[it.BaseIdx].UniqueBase && lvl >= ud.MinLvl && (recreate || !g.UniqueDropped[u]) {
 			j = u
 		}
+	}
+	if j >= 0 {
+		g.random(10) // D1 rolls and ignores it
 	}
 	return j
 }
@@ -532,9 +541,23 @@ func (g *Generator) rndDur(it *Item) {
 	it.Durability = g.random(it.MaxDur>>1) + (it.MaxDur >> 2) + 1
 }
 
-// setupAllItems ports SetupAllItems. lvl is the item level (monster level or 2×dlvl).
-func (g *Generator) setupAllItems(idx, lvl, dlvl, uper int, onlygood, hell bool) *Item {
+// setupAllItems ports SetupAllItems: it reseeds the RNG with the item's seed. lvl is the item level (monster level or
+// 2×dlvl).
+func (g *Generator) setupAllItems(idx int, seed int32, lvl, dlvl, uper int, onlygood, recreate, pregen, hell bool) *Item {
+	g.R.SetSeed(seed)
 	it := g.itemAttrs(idx, lvl>>1, dlvl, hell)
+	it.Seed, it.CreateInfo = seed, lvl
+	if pregen {
+		it.CreateInfo |= CFPregen
+	}
+	if onlygood {
+		it.CreateInfo |= CFOnlyGood
+	}
+	if uper == 15 {
+		it.CreateInfo |= CFUper15
+	} else if uper == 1 {
+		it.CreateInfo |= CFUper1
+	}
 	if it.MiscID != "IMISC_UNIQUE" {
 		iblvl := -1
 		if g.random(100) <= 10 || g.random(100) <= lvl {
@@ -550,10 +573,11 @@ func (g *Generator) setupAllItems(idx, lvl, dlvl, uper int, onlygood, hell bool)
 			iblvl = lvl + 4
 		}
 		if iblvl != -1 {
-			if uid := g.checkUnique(it, iblvl, uper); uid == -1 {
+			if uid := g.checkUnique(it, iblvl, uper, recreate); uid == -1 {
 				g.itemBonus(it, iblvl>>1, iblvl, onlygood)
 			} else {
 				g.uniqueItem(it, uid)
+				it.CreateInfo |= CFUnique
 			}
 		}
 		if it.Magical != 2 {
@@ -564,22 +588,85 @@ func (g *Generator) setupAllItems(idx, lvl, dlvl, uper int, onlygood, hell bool)
 	return it
 }
 
-func (g *Generator) rndItemIdx(mlvl int, onlyNonMisc bool) int {
-	var l []int
+// rndItem ports RndItem: a monster's drop, 0 none, -1-uid a fixed unique, otherwise base index + 1.
+func (g *Generator) rndItem(m *MonsterData, mlvl int) int {
+	if m.Treasure&0x8000 != 0 {
+		return -1 - m.Treasure&0xFFF
+	}
+	if m.Treasure&0x4000 != 0 || g.random(100) > 40 {
+		return 0
+	}
+	if g.random(100) > 25 {
+		return IdxGold + 1
+	}
+	var ril []int
 	for i, b := range g.D.Items {
-		ok := b.Drop != "IDROP_NEVER" && mlvl >= b.MinMLvl
-		if onlyNonMisc { // RndUItem: no misc/gold, but books always qualify
-			ok = ok && b.Type != ITypeMisc && b.Type != ITypeGold || b.MiscID == "IMISC_BOOK"
+		if b.Drop == "IDROP_DOUBLE" && mlvl >= b.MinMLvl {
+			ril = append(ril, i)
 		}
-		if !ok || b.Spell == "SPL_RESURRECT" || b.Spell == "SPL_HEALOTHER" {
-			continue
+		if b.Drop != "IDROP_NEVER" && mlvl >= b.MinMLvl {
+			ril = append(ril, i)
 		}
-		l = append(l, i)
-		if !onlyNonMisc && b.Drop == "IDROP_DOUBLE" {
-			l = append(l, i)
+		if b.Spell == "SPL_RESURRECT" || b.Spell == "SPL_HEALOTHER" { // D1 drops the last entry even when these weren't added
+			ril = ril[:len(ril)-1]
 		}
 	}
-	return l[g.random(len(l))]
+	return ril[g.random(len(ril))] + 1
+}
+
+// rndUItem ports RndUItem: a unique monster's or good container's base item (mlvl < 0: use 2×dlvl).
+func (g *Generator) rndUItem(m *MonsterData, mlvl, dlvl int) int {
+	if m != nil && m.Treasure&0x8000 != 0 {
+		return -1 - m.Treasure&0xFFF
+	}
+	var ril []int
+	for i, b := range g.D.Items {
+		ok := b.Drop != "IDROP_NEVER"
+		if m != nil && mlvl < b.MinMLvl || m == nil && 2*dlvl < b.MinMLvl {
+			ok = false
+		}
+		if b.Type == ITypeMisc || b.Type == ITypeGold || b.Type == ITypeFood {
+			ok = false
+		}
+		if b.MiscID == "IMISC_BOOK" {
+			ok = true
+		}
+		if b.Spell == "SPL_RESURRECT" || b.Spell == "SPL_HEALOTHER" {
+			ok = false
+		}
+		if ok {
+			ril = append(ril, i)
+		}
+	}
+	return ril[g.random(len(ril))]
+}
+
+// rndAllItems ports RndAllItems: gold three times in four, otherwise any droppable base item.
+func (g *Generator) rndAllItems(dlvl int) int {
+	if g.random(100) > 25 {
+		return IdxGold
+	}
+	var ril []int
+	for i, b := range g.D.Items {
+		if b.Drop != "IDROP_NEVER" && 2*dlvl >= b.MinMLvl {
+			ril = append(ril, i)
+		}
+		if b.Spell == "SPL_RESURRECT" || b.Spell == "SPL_HEALOTHER" {
+			ril = ril[:len(ril)-1]
+		}
+	}
+	return ril[g.random(len(ril))]
+}
+
+// rndTypeItems ports RndTypeItems (imisc "" = any).
+func (g *Generator) rndTypeItems(itype int, imisc string, dlvl int) int {
+	var ril []int
+	for i, b := range g.D.Items {
+		if b.Drop != "IDROP_NEVER" && dlvl<<1 >= b.MinMLvl && b.Type == itype && (imisc == "" || b.MiscID == imisc) {
+			ril = append(ril, i)
+		}
+	}
+	return ril[g.random(len(ril))]
 }
 
 func (g *Generator) uniqueIdxByBase(uid int) int {
@@ -591,7 +678,7 @@ func (g *Generator) uniqueIdxByBase(uid int) int {
 	return 0
 }
 
-// SpawnUnique creates a specific unique item (quest/boss drops).
+// SpawnUnique ports SpawnUnique's item: a specific unique (quest and boss drops).
 func (g *Generator) SpawnUnique(uid, dlvl int) *Item {
 	it := g.itemAttrs(g.uniqueIdxByBase(uid), dlvl, dlvl, false)
 	g.uniqueItem(it, uid)
@@ -599,38 +686,40 @@ func (g *Generator) SpawnUnique(uid, dlvl int) *Item {
 	return it
 }
 
-// MonsterDrop ports SpawnItem/RndItem/RndUItem. mlvl is the (unique-boosted) monster level that picks the base item;
-// the item itself rolls at the base monster level like D1. Returns nil for no drop.
+// MonsterDrop ports SpawnItem's roll: nil for no drop. mlvl is the monster's level (a unique's is raised), which
+// picks the base item; the item rolls at the monster type's level like D1.
 func (g *Generator) MonsterDrop(m *MonsterData, mlvl int, unique bool, dlvl int, hell bool) *Item {
-	if m.Treasure&0x8000 != 0 {
-		return g.SpawnUnique(m.Treasure&0xFFF, dlvl)
-	}
-	if unique {
-		return g.setupAllItems(g.rndItemIdx(mlvl, true), m.Level, dlvl, 15, true, hell)
-	}
-	if m.Treasure&0x4000 != 0 || g.random(100) > 40 {
-		return nil
-	}
-	if g.random(100) > 25 {
-		return g.setupAllItems(0, m.Level, dlvl, 1, false, hell) // IDI_GOLD
-	}
-	return g.setupAllItems(g.rndItemIdx(mlvl, false), m.Level, dlvl, 1, false, hell)
-}
-
-// FloorItem ports CreateRndItem (containers, floor loot). Returns nil when RndAllItems rolls nothing.
-func (g *Generator) FloorItem(dlvl int, onlygood, hell bool) *Item {
-	lvl := dlvl << 1
 	var idx int
-	if onlygood {
-		idx = g.rndItemIdx(lvl, true)
+	onlygood := unique
+	if unique {
+		idx = g.rndUItem(m, mlvl, dlvl)
 	} else {
-		if g.random(100) > 25 {
-			idx = 0
-		} else {
-			idx = g.rndItemIdx(lvl, false)
+		if idx = g.rndItem(m, mlvl); idx == 0 {
+			return nil
+		}
+		if idx > 0 {
+			idx--
 		}
 	}
-	return g.setupAllItems(idx, lvl, dlvl, 1, onlygood, hell)
+	if idx < 0 {
+		return g.SpawnUnique(-(idx + 1), dlvl)
+	}
+	uper := 1
+	if unique {
+		uper = 15
+	}
+	return g.setupAllItems(idx, g.R.Seed(), m.Level, dlvl, uper, onlygood, false, false, hell)
+}
+
+// FloorItem ports CreateRndItem's roll (containers, theme rooms).
+func (g *Generator) FloorItem(dlvl int, onlygood, hell bool) *Item {
+	var idx int
+	if onlygood {
+		idx = g.rndUItem(nil, 0, dlvl)
+	} else {
+		idx = g.rndAllItems(dlvl)
+	}
+	return g.setupAllItems(idx, g.R.Seed(), 2*dlvl, dlvl, 1, onlygood, false, false, hell)
 }
 
 // LevelMonsterTypes ports GetLevelMTypes' random selection (quest additions are handled by the caller).
@@ -663,6 +752,20 @@ func (g *Generator) LevelMonsterTypes(dlvl int) []int {
 		list = list[:len(list)-1]
 	}
 	return types
+}
+
+const shrineThaumaturgic = 8
+
+// RandomShrine ports FindValidShrine for the goat shrine / cauldron, which reroll their effect at operate time.
+// Single-player only, so shrineAvail==2 (multiplayer-only) shrines never appear.
+func (g *Generator) RandomShrine(dlvl int) int {
+	for {
+		rv := g.random(len(ShrineNames))
+		if rv == shrineThaumaturgic || shrineAvail[rv] == 2 || dlvl > shrineMax[rv] {
+			continue
+		}
+		return rv
+	}
 }
 
 // MonsterHP ports InitMonster's HP roll, halved for single player like D1.
@@ -752,34 +855,50 @@ func (it *Item) Properties() []string {
 	return p
 }
 
-// TypeItem ports CreateTypeItem: an item of an ITYPE (and IMISC, "" = any) rolled at item level 2×dlvl.
+// TypeItem ports CreateTypeItem's roll: an item of an ITYPE (and IMISC, "" = any) at item level 2×dlvl.
 func (g *Generator) TypeItem(dlvl, itype int, imisc string, onlygood bool) *Item {
-	idx := 0 // IDI_GOLD
+	idx := IdxGold
 	if itype != ITypeGold {
-		var l []int
-		for i, b := range g.D.Items {
-			if b.Drop != "IDROP_NEVER" && dlvl<<1 >= b.MinMLvl && b.Type == itype && (imisc == "" || b.MiscID == imisc) {
-				l = append(l, i)
-			}
-		}
-		if len(l) == 0 {
-			return nil
-		}
-		idx = l[g.random(len(l))]
+		idx = g.rndTypeItems(itype, imisc, dlvl)
 	}
-	return g.setupAllItems(idx, dlvl<<1, dlvl, 1, onlygood, dlvl > 12)
+	return g.setupAllItems(idx, g.R.Seed(), 2*dlvl, dlvl, 1, onlygood, false, false, dlvl > 12)
+}
+
+// MagicItemWithCurs ports CreateMagicArmor/CreateMagicWeapon: magic items of type itype are rolled until one has
+// graphic curs.
+func (g *Generator) MagicItemWithCurs(dlvl, itype, curs int) *Item {
+	idx := g.rndTypeItems(itype, "", dlvl)
+	for {
+		it := g.setupAllItems(idx, g.R.Seed(), 2*dlvl, dlvl, 1, true, false, true, dlvl > 12)
+		if it.Curs == curs {
+			return it
+		}
+		idx = g.rndTypeItems(itype, "", dlvl)
+	}
+}
+
+// SpellBook ports CreateSpellBook: a book rolled until it teaches spell.
+func (g *Generator) SpellBook(dlvl, spell int) *Item {
+	idx := g.rndTypeItems(ITypeMisc, "IMISC_BOOK", dlvl)
+	for {
+		if it := g.setupAllItems(idx, g.R.Seed(), 2*dlvl, dlvl, 1, true, false, true, dlvl > 12); it.Spell == spell {
+			return it
+		}
+	}
 }
 
 // UsefulItem ports SetupAllUseful: a healing or mana potion, sometimes a town portal scroll.
 func (g *Generator) UsefulItem(dlvl int) *Item {
-	idx := IdxHeal
-	if g.random(2) == 0 {
-		idx = IdxMana
+	seed := g.R.Seed()
+	g.R.SetSeed(seed)
+	idx := IdxMana
+	if g.random(2) != 0 {
+		idx = IdxHeal
 	}
 	if dlvl > 1 && g.random(3) == 0 {
 		idx = IdxPortal
 	}
 	it := g.itemAttrs(idx, dlvl, dlvl, false)
-	it.Identified = true
+	it.Seed, it.CreateInfo, it.Identified = seed, dlvl|CFUper15|CFUper1, true
 	return it
 }

@@ -55,6 +55,8 @@ type Actor struct {
 	deathStringFormats []string
 	targetedSkills     []*TargetedAction
 	untargetedSkills   []*UntargetedAction
+	lastCastTargeted   *TargetedAction
+	lastCastUntargeted *UntargetedAction
 	damageDice         util.Dice
 	color              color.RGBA
 	d1Monster          *D1Monster
@@ -591,6 +593,23 @@ func (a *Actor) GetUntargetedSkills() []*UntargetedAction {
 	return a.untargetedSkills
 }
 
+// SetLastCastTargeted remembers a targeted spell as the one to recast with CastLastSpellAtNearest.
+func (a *Actor) SetLastCastTargeted(skill *TargetedAction) {
+	a.lastCastTargeted = skill
+	a.lastCastUntargeted = nil
+}
+
+// SetLastCastUntargeted remembers an untargeted spell as the one to recast with CastLastSpellAtNearest.
+func (a *Actor) SetLastCastUntargeted(skill *UntargetedAction) {
+	a.lastCastUntargeted = skill
+	a.lastCastTargeted = nil
+}
+
+// LastCastSpell returns the last spell cast via the spell menu or skill bar, if any.
+func (a *Actor) LastCastSpell() (*TargetedAction, *UntargetedAction) {
+	return a.lastCastTargeted, a.lastCastUntargeted
+}
+
 func (a *Actor) VisionRange() int {
 	return a.stats.GetAttribute(stats.VisionRange)
 }
@@ -642,6 +661,13 @@ func (a *Actor) CanUseItems() bool {
 }
 
 func (a *Actor) GetFullStats() []util.LabelText {
+	if a.hero != nil { // the D1 character sheet (Str, Mag, Dex, Vit), not H&H's attributes
+		var lines []util.LabelText
+		for _, line := range a.heroInfoText() {
+			lines = append(lines, util.LabelText{Text: line, TextColor: defs.DarkTextColor})
+		}
+		return lines
+	}
 	ourStats := a.GetStats()
 	var hpColor color.Color
 	var manaColor color.Color
@@ -855,5 +881,5 @@ func (a *Actor) IsWinCondition() bool {
 }
 
 func ADRFromAC(armorClass int) float64 {
-	return util.Clamp(0.0, 0.9, (float64(armorClass)/float64(armorClass+20))*1.5)
+	return min(max((float64(armorClass)/float64(armorClass+20))*1.5, 0.0), 0.9)
 }

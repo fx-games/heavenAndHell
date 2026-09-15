@@ -10,7 +10,6 @@ type UIContext struct {
 	GameState    func() *State
 	PlayerAction func() PlayerActions
 	AudioPlayer  *audio.Player
-	ResetGame    func(class defs.LoadoutDefinition)
 	Animator     func() Animator
 	DebugActions func() DebugActions
 	GetLog       func() []string

@@ -148,6 +148,12 @@ func SizeNeededForText[T fmt.Stringer](measureString func(line string) (float64,
 	var itemSizes []geometry.Point
 	for i, line := range text {
 		w, h := measureString(line.String())
+		if label, ok := any(line).(util.LabelText); ok && label.UseColorCodes && len(label.TextWithColorCodes) > 0 {
+			// the raw text still holds [:color] markup; measure the parts as they are drawn
+			last := label.TextWithColorCodes[len(label.TextWithColorCodes)-1]
+			lastW, _ := measureString(last.Text)
+			w = last.XOffset + lastW
+		}
 		width := int(w)
 		height := int(h)
 		itemSizes = append(itemSizes, geometry.Point{X: width, Y: height})

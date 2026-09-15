@@ -37,7 +37,7 @@ func (d *ChangeResourceAction) Execute(context ActionContext) []Action {
 
 		receiver.SetHurt()
 		if d.resourceName == stats.Health && receiver.IsAlive() {
-			d1HitRecovery(receiver, int(-d.changedByAmount))
+			d1HitRecovery(context, receiver, int(-d.changedByAmount))
 		}
 	}
 
@@ -90,6 +90,10 @@ func (d *ChangeResourceAction) prepareAnimations(context ActionContext) []Animat
 
 func (d *ChangeResourceAction) playHitSound(context ActionContext) {
 	hitActor := d.actor
+	if cue := hitActor.D1MonsterSoundCue("hit"); cue != "" && context.AudioPlayer.HasCue(cue) {
+		context.AudioPlayer.PlayCue(cue)
+		return
+	}
 	hitCue := "human_hit"
 	if strings.HasPrefix(hitActor.GetInternalName(), "skeleton") {
 		hitCue = "skeleton_hit"

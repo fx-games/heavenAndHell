@@ -287,7 +287,13 @@ func (h *Hero) ArrowHitChance(s Sheet, monAC, dist int) int {
 
 // ArrowDamage ports MonsterMHit's physical damage (whole points).
 func (h *Hero) ArrowDamage(rng *rand.Rand, s Sheet) int {
-	dam := s.MinDam + rng.Intn(max(s.MaxDam-s.MinDam+1, 1))
+	return h.ArrowBlastDamage(rng, s, s.MinDam, s.MaxDam)
+}
+
+// ArrowBlastDamage is MonsterMHit's damage for any arrow missile (mType 0), also the burst of fire and lightning
+// arrows: the roll plus the damage bonuses.
+func (h *Hero) ArrowBlastDamage(rng *rand.Rand, s Sheet, mind, maxd int) int {
+	dam := mind + rng.Intn(max(maxd-mind+1, 1))
 	dam += s.BonusDamMod + dam*s.BonusDam/100
 	if h.Class == Rogue {
 		return dam + s.DamageMod
@@ -433,12 +439,12 @@ func (h *Hero) SpendStatPoint(attr int) bool {
 	return true
 }
 
-// PotionHeal ports UseItem's IMISC_HEAL amount in 1/64; maxHP in 1/64.
-func (h *Hero) PotionHeal(rng *rand.Rand, maxHP int) int {
-	l := maxHP >> 8
-	l = (l>>1 + rng.Intn(max(l, 1))) << 6
+// potionAmount is UseItem's IMISC_HEAL/IMISC_MANA formula in 1/64 for roll in [0, maxV>>8); bonus is the class
+// that gets double.
+func (h *Hero) potionAmount(maxV, roll, bonus int) int {
+	l := (maxV>>8>>1 + roll) << 6
 	switch h.Class {
-	case Warrior:
+	case bonus:
 		l *= 2
 	case Rogue:
 		l += l >> 1
@@ -446,17 +452,23 @@ func (h *Hero) PotionHeal(rng *rand.Rand, maxHP int) int {
 	return l
 }
 
+// PotionHeal ports UseItem's IMISC_HEAL amount in 1/64; maxHP in 1/64.
+func (h *Hero) PotionHeal(rng *rand.Rand, maxHP int) int {
+	return h.potionAmount(maxHP, rng.Intn(max(maxHP>>8, 1)), Warrior)
+}
+
 // PotionMana ports UseItem's IMISC_MANA amount in 1/64; maxMana in 1/64.
 func (h *Hero) PotionMana(rng *rand.Rand, maxMana int) int {
-	l := maxMana >> 8
-	l = (l>>1 + rng.Intn(max(l, 1))) << 6
-	switch h.Class {
-	case Sorcerer:
-		l *= 2
-	case Rogue:
-		l += l >> 1
-	}
-	return l
+	return h.potionAmount(maxMana, rng.Intn(max(maxMana>>8, 1)), Sorcerer)
+}
+
+// PotionHealRange and PotionManaRange are the lowest and highest PotionHeal/PotionMana rolls, in 1/64.
+func (h *Hero) PotionHealRange(maxHP int) (int, int) {
+	return h.potionAmount(maxHP, 0, Warrior), h.potionAmount(maxHP, max(maxHP>>8, 1)-1, Warrior)
+}
+
+func (h *Hero) PotionManaRange(maxMana int) (int, int) {
+	return h.potionAmount(maxMana, 0, Sorcerer), h.potionAmount(maxMana, max(maxMana>>8, 1)-1, Sorcerer)
 }
 
 // SpeedTiers is the calibration knob from decision 13: D1 animation lengths snap to these speed factors.

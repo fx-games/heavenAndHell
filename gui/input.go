@@ -79,7 +79,11 @@ func (u *UIController) handleKeyboardInput() {
 		return
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
-		u.Cancel()
+		if u.IsUIModalVisible() || u.targeter != nil || u.inventory.IsActive() {
+			u.Cancel()
+		} else {
+			u.openPauseMenu()
+		}
 		return
 	}
 	if u.IsUIModalVisible() {
@@ -131,6 +135,9 @@ func (u *UIController) handleKeyboardInput() {
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		act.QuickRangedAttack()
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		act.CastLastSpellAtNearest()
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyL) {
@@ -190,15 +197,7 @@ func (u *UIController) handleKeyboardInput() {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyU) {
-		/*
-			level := g.getCurrentDungeonLevel()
-			g.transitionTo(gridmap.Transition{
-				TargetMap:      defs.LevelNameFromDepth(level + 1),
-				TargetLocation: "ladder_up",
-			})
-			g.actionBroker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("Travel"), 10))
-
-		*/
+		u.openLevelUpMenu() // spend stat points
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyO) {
@@ -281,6 +280,7 @@ func (u *UIController) handleMouseInput() {
 			u.ShowTooltipWithDelay(toolTip)
 		} else {
 			u.HideTooltip()
+			u.updateMapTileHoverInfo(newMapPos)
 		}
 
 	}

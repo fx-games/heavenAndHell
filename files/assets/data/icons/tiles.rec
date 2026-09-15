@@ -1,0 +1,442 @@
+%rec: default
+
+internal_name: IconNone
+icon: -1
+
+internal_name: IconWhite
+icon: 18
+
+internal_name: IconTargeting
+icon: 220
+
+internal_name: IconGrass
+icon: 0
+
+internal_name: IconDirt
+icon: 1
+
+internal_name: IconMountain
+icon: 7
+
+internal_name: IconMountainWithEntrance
+icon: 8
+
+internal_name: IconWater
+icon: 28
+
+internal_name: IconWoodenBridge
+icon: 63
+
+internal_name: IconWoodenFence
+icon: 63
+
+internal_name: IconLava
+icon: 159
+
+internal_name: IconWallTorch
+icon: 352
+
+internal_name: IconBrazier
+icon: 32
+
+internal_name: IconTreeDark
+icon: 5
+
+internal_name: IconTreeLight
+icon: 4
+
+internal_name: IconDungeonOfDoomFloorModern
+icon: 157
+
+internal_name: IconDungeonOfDoomWallModern
+icon: 158
+
+internal_name: IconDungeonOfDoomDoorModern
+icon: 241
+
+internal_name: IconDungeonOfDoomFloor
+icon: 242
+
+internal_name: IconDungeonOfDoomWallHoriz
+icon: 269
+
+internal_name: IconDungeonOfDoomWallVert
+icon: 297
+
+internal_name: IconDungeonOfDoomDoor
+icon: 240
+
+internal_name: IconDungeonOfDoomCorridorWall
+icon: 243
+
+internal_name: IconDungeonOfDoomCorridorFloor
+icon: 268
+
+internal_name: IconCathedralFloor
+icon: 64
+
+internal_name: IconCatacombsFloor
+icon: 86
+
+internal_name: IconCatacombsWall
+icon: 84
+
+internal_name: IconCatacombsWallWithShading
+icon: 85
+
+internal_name: IconDungeonFloorAlternative1
+icon: 14
+
+internal_name: IconDungeonRedEarthFloor
+icon: 186
+
+internal_name: IconDungeonRockyWall
+icon: 9
+
+internal_name: IconCathedralWall
+icon: 56
+
+internal_name: IconCathedralWallWithShading
+icon: 58
+
+internal_name: IconOpenDoor
+icon: 70
+
+internal_name: IconClosedDoor
+icon: 69
+
+internal_name: IconStairsUp
+icon: 74
+
+internal_name: IconStairsDown
+icon: 73
+
+internal_name: IconShrine
+icon: 75
+
+internal_name: IconSign
+icon: 154
+
+internal_name: IconDecalBlood1
+icon: 189
+
+internal_name: IconDecalBlood2
+icon: 190
+
+internal_name: IconDecalBlood3
+icon: 191
+
+internal_name: IconDecalBlood4
+icon: 192
+
+internal_name: IconDecalBlood5
+icon: 193
+
+internal_name: IconEffectLightning
+icon: 37
+
+internal_name: IconEffectFireSmall
+icon: 109
+
+internal_name: IconEffectFireBig
+icon: 32
+
+internal_name: IconEffectHit
+icon: 43
+
+internal_name: prop.OBJ_L1LIGHT
+name: Cathedral Candelabra (wall light)
+icon: 109
+
+internal_name: prop.OBJ_CHEST1
+name: Small Chest
+icon: 128
+
+internal_name: prop.OBJ_CHEST1.used
+name: Small Chest (opened)
+icon: 127
+
+internal_name: prop.OBJ_TCHEST1
+name: Small Chest (trapped)
+icon: 128
+
+internal_name: prop.OBJ_TCHEST1.used
+name: Small Chest (trapped, opened)
+icon: 127
+
+internal_name: prop.OBJ_CHEST2
+name: Chest
+icon: 128
+
+internal_name: prop.OBJ_CHEST2.used
+name: Chest (opened)
+icon: 127
+
+internal_name: prop.OBJ_TCHEST2
+name: Chest (trapped)
+icon: 128
+
+internal_name: prop.OBJ_TCHEST2.used
+name: Chest (trapped, opened)
+icon: 127
+
+internal_name: prop.OBJ_CHEST3
+name: Large Chest
+icon: 128
+
+internal_name: prop.OBJ_CHEST3.used
+name: Large Chest (opened)
+icon: 127
+
+internal_name: prop.OBJ_TCHEST3
+name: Large Chest (trapped)
+icon: 128
+
+internal_name: prop.OBJ_TCHEST3.used
+name: Large Chest (trapped, opened)
+icon: 127
+
+internal_name: prop.OBJ_SARC
+name: Sarcophagus
+icon: 264
+
+internal_name: prop.OBJ_SARC.used
+name: Sarcophagus (opened)
+icon: 265
+
+internal_name: prop.OBJ_BARREL
+name: Barrel
+icon: 125
+
+internal_name: prop.OBJ_BARRELEX
+name: Explosive Barrel
+icon: 320
+
+internal_name: prop.OBJ_SHRINEL
+name: Shrine (left wall)
+icon: 75
+
+internal_name: prop.OBJ_SHRINEL.used
+name: Shrine (left wall, used)
+icon: 75
+
+internal_name: prop.OBJ_SHRINER
+name: Shrine (right wall)
+icon: 75
+
+internal_name: prop.OBJ_SHRINER.used
+name: Shrine (right wall, used)
+icon: 75
+
+internal_name: prop.OBJ_SKELBOOK
+name: Skeleton Tome (book on stand)
+icon: 321
+
+internal_name: prop.OBJ_SKELBOOK.used
+name: Skeleton Tome (read)
+icon: 322
+
+internal_name: prop.OBJ_BOOKCASEL
+name: Bookcase (left wall)
+icon: 321
+
+internal_name: prop.OBJ_BOOKCASEL.used
+name: Bookcase (left wall, searched)
+icon: 322
+
+internal_name: prop.OBJ_BOOKCASER
+name: Bookcase (right wall)
+icon: 321
+
+internal_name: prop.OBJ_BOOKCASER.used
+name: Bookcase (right wall, searched)
+icon: 322
+
+internal_name: prop.OBJ_BOOKSTAND
+name: Library Book (on lectern)
+icon: 321
+
+internal_name: prop.OBJ_BOOKSTAND.used
+name: Library Book (read)
+icon: 322
+
+internal_name: prop.OBJ_BLOODFTN
+name: Blood Fountain
+icon: 293
+
+internal_name: prop.OBJ_DECAP
+name: Decapitated Body
+icon: 135
+
+internal_name: prop.OBJ_DECAP.used
+name: Decapitated Body (searched)
+icon: 135
+
+internal_name: prop.OBJ_PURIFYINGFTN
+name: Purifying Spring
+icon: 292
+
+internal_name: prop.OBJ_ARMORSTAND
+name: Armor Stand (with armor)
+icon: 348
+
+internal_name: prop.OBJ_ARMORSTAND.used
+name: Armor Stand (empty)
+icon: 349
+
+internal_name: prop.OBJ_GOATSHRINE
+name: Goat Shrine
+icon: 75
+
+internal_name: prop.OBJ_GOATSHRINE.used
+name: Goat Shrine (used)
+icon: 75
+
+internal_name: prop.OBJ_CAULDRON
+name: Cauldron
+icon: 75
+
+internal_name: prop.OBJ_CAULDRON.used
+name: Cauldron (used)
+icon: 75
+
+internal_name: prop.OBJ_MURKYFTN
+name: Murky Pool
+icon: 292
+
+internal_name: prop.OBJ_MURKYFTN.used
+name: Murky Pool (used)
+icon: 292
+
+internal_name: prop.OBJ_TEARFTN
+name: Fountain of Tears
+icon: 292
+
+internal_name: prop.OBJ_TEARFTN.used
+name: Fountain of Tears (used)
+icon: 292
+
+internal_name: prop.OBJ_WEAPONRACK
+name: Weapon Rack (with weapon)
+icon: 376
+
+internal_name: prop.OBJ_WEAPONRACK.used
+name: Weapon Rack (empty)
+icon: 377
+
+internal_name: prop.OBJ_LEVER
+name: Lever
+icon: 266
+
+internal_name: prop.OBJ_LEVER.used
+name: Lever (pulled)
+icon: 267
+
+internal_name: prop.OBJ_LAZSTAND
+name: Staff of Lazarus Stand (with staff)
+icon: 347
+
+internal_name: prop.OBJ_LAZSTAND.used
+name: Staff of Lazarus Stand (empty)
+icon: 349
+
+internal_name: prop.OBJ_SWITCHSKL
+name: Skull Lever
+icon: 266
+
+internal_name: prop.OBJ_SWITCHSKL.used
+name: Skull Lever (pulled)
+icon: 267
+
+internal_name: prop.OBJ_MUSHPATCH
+name: Mushroom Patch (Black Mushroom quest)
+icon: 34
+
+internal_name: prop.OBJ_MUSHPATCH.used
+name: Mushroom Patch (searched)
+icon: 46
+
+internal_name: prop.OBJ_SIGNCHEST
+name: Large Chest (Ogden's Sign quest)
+icon: 128
+
+internal_name: prop.OBJ_SIGNCHEST.used
+name: Large Chest (Ogden's Sign quest, opened)
+icon: 127
+
+internal_name: prop.OBJ_BLINDBOOK
+name: Book of the Blind (Halls of the Blind quest)
+icon: 321
+
+internal_name: prop.OBJ_BLINDBOOK.used
+name: Book of the Blind (read)
+icon: 322
+
+internal_name: prop.OBJ_BLOODBOOK
+name: Book of Blood (Valor quest)
+icon: 321
+
+internal_name: prop.OBJ_BLOODBOOK.used
+name: Book of Blood (read)
+icon: 322
+
+internal_name: prop.OBJ_STEELTOME
+name: Steel Tome (Warlord of Blood quest)
+icon: 321
+
+internal_name: prop.OBJ_STEELTOME.used
+name: Steel Tome (read)
+icon: 322
+
+internal_name: prop.OBJ_PEDISTAL
+name: Pedestal of Blood (Valor quest)
+icon: 39
+
+internal_name: prop.OBJ_PEDISTAL.used
+name: Pedestal of Blood (stones placed)
+icon: 40
+
+internal_name: prop.OBJ_BOOK2L
+name: Ancient Tome (Chamber of Bone / Lazarus lair)
+icon: 321
+
+internal_name: prop.OBJ_BOOK2L.used
+name: Ancient Tome (read)
+icon: 322
+
+internal_name: prop.OBJ_BOOK2R
+name: Mythical Book (Chamber of Bone quest)
+icon: 321
+
+internal_name: prop.OBJ_BOOK2R.used
+name: Mythical Book (read)
+icon: 322
+
+internal_name: prop.OBJ_STORYBOOK
+name: Story Book (levels 4, 8, 12)
+icon: 321
+
+internal_name: prop.OBJ_STORYBOOK.used
+name: Story Book (read)
+icon: 322
+
+internal_name: prop.OBJ_SLAINHERO
+name: Slain Hero (level 9)
+icon: 135
+
+internal_name: prop.OBJ_SLAINHERO.used
+name: Slain Hero (searched)
+icon: 135
+
+internal_name: prop.debris
+name: Debris (broken object)
+icon: 11
+
+internal_name: prop.portal
+name: Town Portal (frame 1)
+icon: 72
+
+internal_name: prop.portal.2
+name: Town Portal (frame 2)
+icon: 294
+

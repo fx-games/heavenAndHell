@@ -49,6 +49,9 @@ func (d *OnKillHook) onKill(context ActionContext, killer, victim *Actor) []Acti
 	if victim.d1Monster != nil {
 		return d1OnKill(context, killer, victim)
 	}
+	if victim.hero != nil { // D1 monsters gain nothing from killing the hero
+		return nil
+	}
 	msg := context.Msg
 	victimLevel := victim.GetStats().GetAttribute(stats.Level)
 	victimXP := max(1, victim.GetStats().GetAttribute(stats.Experience))

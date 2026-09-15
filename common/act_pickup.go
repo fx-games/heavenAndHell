@@ -41,6 +41,9 @@ func (d *PickUpAction) Execute(context ActionContext) []Action {
 
 	inventory := actor.GetInventory()
 	inventory.Add(item)
+	if item.d1 != nil && actor == state.GetPlayer() {
+		state.factory.d1QuestItemPickedUp(item.d1)
+	}
 
 	name := actor.Name()
 	if context.GameState.GetPlayer() == actor {

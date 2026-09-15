@@ -36,12 +36,11 @@ func (d *MoveItemAction) GetDelayInAut() int {
 
 func (d *MoveItemAction) Execute(context ActionContext) []Action {
 	state := context.GameState
-	gameMap := state.GetMap() // read state
 
 	inventory := d.holder.GetInventory()
 	inventory.Remove(d.item)
 	if rand.Float64() >= d.chanceToBreak {
-		gameMap.AddItem(d.item, d.targetPos)
+		state.AddItemToMapWithDistribution(d.item, d.targetPos) // a throw can end at a wall: land on the nearest free cell
 	} else {
 		context.Msg(fmt.Sprintf("%s breaks!", d.item.Name()))
 	}

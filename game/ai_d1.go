@@ -23,6 +23,7 @@ type d1Brain struct {
 	enemy  geometry.Point
 	target *common.Actor // who stands at enemy: the player or their golem
 	dx, dy int           // monster minus enemy, D1's mx/my
+	fights *bool         // a talking boss' decision this turn (talker)
 }
 
 var noAct = d1Act{}
@@ -152,16 +153,48 @@ func (b *d1Brain) think() (d1Act, bool) {
 		return b.callWalk(b.dirTo(mon.Last))
 	case "AI_SKELKING":
 		return b.skelKing()
-	case "AI_ZHAR", "AI_LAZURUS": // ponytail: their talk before the fight is skipped (decision 15), then MAI_Counselor
-		return b.counselor()
+	case "AI_ZHAR", "AI_LAZURUS": // MAI_Zhar, MAI_Lazurus: talk, then MAI_Counselor
+		if b.talker() {
+			return b.counselor()
+		}
+		return noAct, false
 	case "AI_LAZHELP": // MAI_Lazhelp fights like a succubus once Lazarus has spoken
-		return b.ranged(func() (d1Act, bool) { return b.missile(common.MisFlare, 0, common.D1ModeRSpAttack) })
-	case "AI_WARLORD": // MAI_Warlord, minus the talk
-		return b.skelSd()
+		if b.talker() {
+			return b.ranged(func() (d1Act, bool) { return b.missile(common.MisFlare, 0, common.D1ModeRSpAttack) })
+		}
+		return noAct, false
+	case "AI_WARLORD":
+		if b.talker() {
+			return b.skelSd()
+		}
+		return noAct, false
+	case "AI_GARBUD":
+		if b.talker() {
+			return b.round(true)
+		}
+		return noAct, false
+	case "AI_SNOTSPIL":
+		if b.talker() {
+			return b.fallen()
+		}
+		return noAct, false
+	case "AI_LACHDAN": // MAI_Lachdanan never fights
+		b.talker()
+		return noAct, false
 	case "AI_DIABLO":
 		return b.roundRanged(common.MisApoca, 40, 0)
 	}
-	return b.skelSd() // Gharbad, Snotspill and Lachdanan belong to deferred quests
+	return b.skelSd()
+}
+
+// talker runs a quest boss' talk states once per turn, so a boss that just spoke fights from its next turn on;
+// true once it fights (Factory.D1TalkerTurn).
+func (b *d1Brain) talker() bool {
+	if b.fights == nil {
+		fights := b.g.factory.D1TalkerTurn(b.a, b.g.state.GetPlayer().CanSee(b.pos))
+		b.fights = &fights
+	}
+	return *b.fights
 }
 
 // skelKing ports MAI_SkelKing: circle now and then, raise skeletons from afar, hit up close.
@@ -466,6 +499,9 @@ func (b *d1Brain) fallen() (d1Act, bool) {
 	if cycle := mon.Data.Frames[0] * max(mon.Data.Rate[0], 1); b.rnd(cycle) == 0 && b.rnd(4) == 0 {
 		rad := 2*mon.Int + 4
 		return d1Act{cost: b.attackCost(), mode: common.D1ModeSpStand, run: func() {
+			if !mon.NoHeal { // MAI_Fallen: the howl itself heals the howler by 2*int+2, capped at max
+				b.a.GetStats().GetResource(stats.Health).Increase(float64(2*mon.Int + 2))
+			}
 			for _, other := range b.g.state.GetMap().Actors() {
 				om := other.D1Monster()
 				if om != nil && om.AI == "AI_FALLEN" && geometry.DistanceChebyshev(other.MapPosition(), b.pos) <= rad {

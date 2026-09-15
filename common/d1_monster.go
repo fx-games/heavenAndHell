@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"rpg/d1"
+	"rpg/defs"
 	"rpg/geometry"
 	"rpg/stats"
 	"strings"
@@ -11,25 +12,31 @@ import (
 
 // D1Monster holds the MonsterStruct fields D1's AI and combat need.
 type D1Monster struct {
-	Type                               int
-	Data                               *d1.MonsterData
-	Unique                             *d1.UniqueMonsterData
-	Level, Exp, Int                    int
-	Hit, MinDam, MaxDam                int
-	Hit2, MinDam2, MaxDam2             int
-	AC, MagicRes                       int
-	AI                                 string
+	Type                   int
+	Data                   *d1.MonsterData
+	Unique                 *d1.UniqueMonsterData
+	Level, Exp, Int        int
+	Hit, MinDam, MaxDam    int
+	Hit2, MinDam2, MaxDam2 int
+	AC, MagicRes           int
+	AI                     string
+	TalkMsg                string
+	D1MonsterState
+	Leader     *Actor
+	SpawnIndex int     // order of creation on its level, identifies the monster in saves
+	Golem      bool    // the player's golem (AI_GOLUM), fights for the player
+	HitWith    *[3]int // set for one melee attack: to-hit, min and max damage of a special attack
+}
+
+// D1MonsterState is the AI state a save keeps for each monster.
+type D1MonsterState struct {
 	Goal, GoalVar1, GoalVar2, GoalVar3 int
 	LastMode, StandTicks               int // _mVar1 (previous mode), _mVar2 (ticks spent standing)
 	Squelch, PathCount                 int
 	Last                               geometry.Point
-	Dir                                int // index into D1Dirs
-	Leader                             *Actor
-	SpawnIndex                         int     // order of creation on its level, identifies the monster in saves
-	Golem                              bool    // the player's golem (AI_GOLUM), fights for the player
-	Dormant                            bool    // _mFlags & 4 on gargoyles: waiting in stone until the enemy comes close
-	NoHeal                             bool    // _mFlags & 8 (MFLAG_NOHEAL): hit by a weapon that stops healing
-	HitWith                            *[3]int // set for one melee attack: to-hit, min and max damage of a special attack
+	Dir                                int  // index into D1Dirs
+	Dormant                            bool // _mFlags & 4 on gargoyles: waiting in stone until the enemy comes close
+	NoHeal                             bool // _mFlags & 8 (MFLAG_NOHEAL): hit by a weapon that stops healing
 }
 
 // D1 monster modes (MON_MODE) the AI compares against.
@@ -75,23 +82,22 @@ func D1DirTo(from, to geometry.Point) int {
 
 func (a *Actor) D1Monster() *D1Monster { return a.d1Monster }
 
-// Decision 8: one sheet icon per D1 graphics family, variants by tint. First guesses; tune freely.
-var d1FamilyIcons = map[string]int32{
-	"Zombie": 485, "FalSpear": 428, "SkelAxe": 397, "FalSword": 427, "Scav": 540, "SkelBow": 401, "SkelSd": 400,
-	"TSneak": 411, "Sneak": 411, "GoatLord": 95, "GoatMace": 95, "Bat": 93, "GoatBow": 97, "Acid": 90,
-	"SKing": 259, "FatC": 258, "Fat": 99, "Worm": 91, "Magma": 102, "Rhino": 100, "Demskel": 96, "Thin": 101,
-	"Fireman": 98, "BigFall": 429, "Gargoyle": 88, "Mega": 487, "Snake": 91, "Black": 412, "Unrav": 413,
-	"Succ": 454, "Mage": 453, "Golem": 96, "Diablo": 261, "DarkMage": 453,
+// D1MonsterSoundCue builds a monster-specific sound event (e.g. "monster.MT_NZOMBIE.attack", from
+// assets/data/sounds.rec) for category "attack"/"hit"/"death". Empty if this actor isn't a D1 monster.
+func (a *Actor) D1MonsterSoundCue(category string) string {
+	if a.d1Monster == nil || a.d1Monster.Data == nil {
+		return ""
+	}
+	return "monster." + a.d1Monster.Data.ID + "." + category
 }
 
-var (
-	d1VariantTints = []color.RGBA{{255, 255, 255, 255}, {160, 200, 255, 255}, {255, 190, 120, 255}, {255, 110, 110, 255}}
-	d1UniqueTint   = color.RGBA{R: 255, G: 215, B: 80, A: 255}
-)
+// Decision 8: one sheet icon per D1 monster type ("monster.<ID>" in icons/actors.rec, seeded from its graphics
+// family), variants by tint. Monster variants are the only tinted tiles; everything else gets its own icon.
+var d1VariantTints = []color.RGBA{{255, 255, 255, 255}, {160, 200, 255, 255}, {255, 190, 120, 255}, {255, 110, 110, 255}}
 
 // NewD1Monster ports InitMonster for monster type mt.
 func (g *Factory) NewD1Monster(mt int) *Actor {
-	d := g.d1.D
+	d := g.Generator.D
 	m := &d.Monsters[mt]
 	variant := 0
 	for i := 0; i < mt; i++ {
@@ -99,16 +105,16 @@ func (g *Factory) NewD1Monster(mt int) *Actor {
 			variant++
 		}
 	}
-	a := NewActor(d1FamilyIcons[m.Family])
+	a := NewActor(defs.Icon("monster." + m.ID))
 	a.SetName(m.Name)
 	a.SetInternalName(m.ID)
 	a.SetHostile()
 	a.SetAsciiIcon(rune(strings.ToLower(m.Name)[0]))
 	a.SetColor(d1VariantTints[variant%len(d1VariantTints)])
 	a.d1Monster = &D1Monster{Type: mt, Data: m, Level: m.Level, Exp: m.Exp, Int: m.Int, Hit: m.Hit, MinDam: m.MinDam,
-		MaxDam: m.MaxDam, Hit2: m.Hit2, MinDam2: m.MinDam2, MaxDam2: m.MaxDam2, AC: m.AC, MagicRes: m.MagicRes, AI: m.AI, Goal: 1}
+		MaxDam: m.MaxDam, Hit2: m.Hit2, MinDam2: m.MinDam2, MaxDam2: m.MaxDam2, AC: m.AC, MagicRes: m.MagicRes, AI: m.AI, D1MonsterState: D1MonsterState{Goal: 1}}
 	st := a.GetStats()
-	st.SetAttribute(stats.MaxHealth, g.d1.MonsterHP(m))
+	st.SetAttribute(stats.MaxHealth, g.Generator.MonsterHP(m))
 	st.GetResource(stats.Health).SetToMax()
 	st.SetAttribute(stats.Level, m.Level)
 	st.SetAttribute(stats.Experience, m.Exp)
@@ -121,10 +127,18 @@ func (g *Factory) NewD1Monster(mt int) *Actor {
 	return a
 }
 
+// setD1Unique marks a as unique um, drawn untinted with its own "unique.<Name>" icon from icons/actors.rec.
+func setD1Unique(a *Actor, um *d1.UniqueMonsterData) {
+	a.SetName(um.Name)
+	a.SetUnique()
+	a.SetColor(defs.White)
+	a.SetIcon(defs.Icon("unique." + um.Name))
+}
+
 // NewD1UniqueMonster ports PlaceUniqueMonst's stat changes for UniqMonst[u].
 func (g *Factory) NewD1UniqueMonster(u int) *Actor {
-	um := &g.d1.D.UniqueMonsters[u]
-	a := g.NewD1Monster(g.d1.D.MonsterByID(um.Type))
+	um := &g.Generator.D.UniqueMonsters[u]
+	a := g.NewD1Monster(g.Generator.D.MonsterByID(um.Type))
 	mon := a.d1Monster
 	mon.Unique = um
 	if um.Level != 0 {
@@ -141,14 +155,34 @@ func (g *Factory) NewD1UniqueMonster(u int) *Actor {
 	if um.UnqAttr&8 != 0 {
 		mon.AC = um.UnqVar1
 	}
-	a.SetName(um.Name)
-	a.SetUnique()
-	a.SetColor(d1UniqueTint)
+	setD1Unique(a, um)
 	st := a.GetStats()
 	st.SetAttribute(stats.MaxHealth, max(um.MaxHP>>1, 1))
 	st.GetResource(stats.Health).SetToMax()
 	st.SetAttribute(stats.Level, mon.Level)
 	st.SetAttribute(stats.Experience, mon.Exp)
+	return a
+}
+
+// NewD1MonsterFromLevel builds an Actor from a monster the exact-RNG level generator already placed (d1.Level's
+// Monsters), using its precomputed HP/AI/damage/resist instead of rerolling them: mon.HP is 1/64 units like D1's
+// _mmaxhp, so >>6 gives whole hit points.
+func (g *Factory) NewD1MonsterFromLevel(mon *d1.Monster) *Actor {
+	a := g.NewD1Monster(mon.Type)
+	dm := a.d1Monster
+	dm.AI, dm.Int, dm.MinDam, dm.MaxDam, dm.MagicRes, dm.Level = mon.AI, mon.Int, mon.MinDam, mon.MaxDam, mon.MagicRes, mon.Level
+	if mon.Unique >= 0 {
+		um := &g.Generator.D.UniqueMonsters[mon.Unique]
+		dm.Unique = um
+		setD1Unique(a, um)
+		dm.TalkMsg = um.TalkMsg
+	}
+	dm.Dir = mon.Dir
+	hp := max(mon.HP>>6, 1)
+	st := a.GetStats()
+	st.SetAttribute(stats.MaxHealth, hp)
+	st.GetResource(stats.Health).SetToMax()
+	st.SetAttribute(stats.Level, dm.Level)
 	return a
 }
 

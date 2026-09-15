@@ -1,7 +1,6 @@
 package game
 
 import (
-	"cmp"
 	"fmt"
 	"github.com/flopp/go-findfont"
 	"math"
@@ -18,7 +17,6 @@ import (
 	"rpg/ldtk"
 	"rpg/stats"
 	"rpg/util"
-	"slices"
 	"strings"
 	"time"
 )
@@ -28,7 +26,7 @@ type GameInstance struct {
 	// base infos / config
 	title                       string
 	deviceIndependentScreenSize geometry.Point
-	configuration               common.Configuration
+	configuration               *common.Configuration
 	startInfo                   common.StartInfo
 
 	// dependencies
@@ -181,6 +179,10 @@ func NewGameInstance(startInfo common.StartInfo, uiController common.UserInterfa
 	}
 	println(fmt.Sprintf("GameInstance created.."))
 	println(fmt.Sprintf("Random source loaded.."))
+	cfg := startInfo.UserConfiguration
+	g.audioPlayer.SetSoundVolume(cfg.SoundVolume)
+	g.audioPlayer.SetMusicVolume(cfg.MusicVolume)
+	g.audioPlayer.SetVoiceVolume(cfg.VoiceVolume)
 	println(fmt.Sprintf("Audio player loaded.."))
 	g.dataDefinitions = defs.LoadGameData(func(err string) {
 		println(err)
@@ -242,23 +244,7 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 	g.configuration = g.startInfo.UserConfiguration
 	g.deviceIndependentScreenSize = g.startInfo.ScreenSize
 
-	if g.configuration.ServeLog {
-		g.serverLog = NewTextServer("rogue_log", 1)
-	}
-	if g.configuration.ServeStats {
-		g.serverStats = NewTextServer("rogue_stats", 2)
-	}
-	if g.configuration.ServeInventory {
-		g.serverInventory = NewTextServer("rogue_inventory", 3)
-	}
-	if g.configuration.ServeEquipment {
-		g.serverEquipment = NewTextServer("rogue_equipment", 4)
-	}
-
-	// WE DO NOT HAVE A UI YET
-	if g.configuration.ServeLog {
-		g.SetLogHook(g.serverLog.Write)
-	}
+	g.startWindowServers()
 
 	ldtkFileName := g.startInfo.LDTKMapFile
 	ldtkFile, _ := files.ReadFile(ldtkFileName)
@@ -283,18 +269,17 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 	g.actionBroker.RegisterHook(common.NewMainOnDropHook())
 	g.actionBroker.RegisterHook(common.NewMainOnEquipHook())
 
-	g.factory = common.NewFactory(common.FactoryContext{
-		Definitions:             g.dataDefinitions,
-		RandomSource:            g.randomSource,
-		State:                   g.GetWorldState(),
-		ActionBroker:            g.actionBroker,
-		GetTimeKeeper:           g.state.GetTimeKeeper,
-		GiveAndEquipItemToActor: g.giveAndEquipItemToActor,
-		Msg:                     g.PlayerMessage,
-		D1:                      d1.NewGenerator(g.d1Data, g.randomSource),
-	})
-	g.factory.SetUserInterface(g.GetUserInterface)
-	g.factory.SetQueueAfterTurn(g.queueAfterTurn)
+	g.factory = &common.Factory{
+		ActionBroker:   g.actionBroker,
+		RandomSource:   g.randomSource,
+		State:          g.GetWorldState(),
+		UI:             g.GetUserInterface,
+		GetTimeKeeper:  g.state.GetTimeKeeper,
+		Msg:            g.PlayerMessage,
+		QueueAfterTurn: g.queueAfterTurn,
+		Generator:      d1.NewGenerator(g.d1Data, g.randomSource.Int31()),
+		Audio:          g.audioPlayer,
+	}
 
 
 	g.state.SetPlayerMessage(g.PlayerMessage)
@@ -335,32 +320,25 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 
 	//g.spawnActorOnMap(g.state.GetPlayer(), townSpawn, playerStartDefinition)
 
-	// load audio
+	// load audio: sound events (assets/data/sounds.rec, ./remap_sounds.sh) pick their files from sfx/ang_sfx and the
+	// optional diablo_sfx (only present if the player dropped their own converted Diablo assets in, see AGENTS.md).
 	if g.configuration.AudioEnabled {
-		sfxPath := path.Join("assets", "sfx")
-		cues := []string{
-			"heavy_door",
-			"missile_hit_human",
-			"heavy_hit_human",
-			"levelup",
-			"bat_attack",
-			"skeleton_hit",
-			"skeleton_death",
-		}
-		sfxFiles := make([]string, len(cues))
-		for i, sfxFile := range cues {
-			sfxFiles[i] = path.Join(sfxPath, sfxFile+".ogg")
-		}
-		g.audioPlayer.RegisterSoundCues(sfxFiles)
-		g.audioPlayer.RegisterRandomizedSoundCues([]string{
-			path.Join(sfxPath, "bow_fire"),
-			//path.Join(sfxPath, "close_door"),
-			path.Join(sfxPath, "open_door"),
-			path.Join(sfxPath, "melee_attack"),
-			path.Join(sfxPath, "human_hit"),
+		diablo := g.configuration.DiabloAudioEnabled
+		g.audioPlayer.RegisterSoundEvents(path.Join("assets", "data", "sounds.rec"), func(f string) bool {
+			return diablo || !strings.HasPrefix(f, "diablo_")
 		})
-
-		g.audioPlayer.PreLoadCuesIntoMemory(cues)
+		preload := []string{"enter_dungeon", "level_up", "missile_hit_human", "heavy_hit_human", "skeleton_hit"}
+		g.audioPlayer.PreLoadCuesIntoMemory(preload)
+		g.audioPlayer.RegisterMusic(path.Join("assets", "ambience"))
+		if g.configuration.DiabloAudioEnabled {
+			g.audioPlayer.RegisterMusic(path.Join("assets", "diablo_music")) // dtowne/dlvla-d renamed to town/cathedral/catacombs/caves/hell
+		}
+		g.audioPlayer.RegisterVoices(path.Join("assets", "voice"))
+		if diablo {
+			for id, file := range d1.SfxFiles { // D1's speech and quest sounds, played by their _sfx_id
+				g.audioPlayer.RegisterVoice(id, path.Join("assets", "diablo_sfx", file))
+			}
+		}
 	}
 
 	g.state.GetFlags().SetTrue("game_started")
@@ -409,6 +387,10 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 			break
 		}
 		g.state.GetTimeKeeper().PlayerTakesTurn(lost)
+	}
+	// ISPL_DRAINLIFE (ProcessPlayers): a cursed item drains 4/64 HP per tick outside town
+	if player.IsAlive() && player.Hero() != nil && player.HeroSheet().Flags&d1.ISplDrainLife != 0 && !defs.IsTownLevel(g.state.GetMap().GetName()) {
+		g.actionBroker.Execute(common.NewChangeResourceAction(common.AbstractCause("Drain life"), player, stats.Health, -float64(autUsed*d1.RefWalkTicks*4)/10/64))
 	}
 
 	// execute after turn events, =?
@@ -499,17 +481,22 @@ func (g *GameInstance) d1DebugItems() []util.MenuItem {
 			g.state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: "ladder_up"})
 		}})
 	}
-	for _, set := range []string{common.D1LeoricLevel, common.D1LazarusLevel} {
-		levels = append(levels, util.MenuItem{MainText: set, Action: func() {
-			g.state.MapTransition(gridmap.Transition{TargetMap: set, TargetLocation: "ladder_up"})
+	for _, set := range common.D1SetLevels {
+		levels = append(levels, util.MenuItem{MainText: set.Name, Action: func() {
+			g.state.MapTransition(gridmap.Transition{TargetMap: set.Map, TargetLocation: "ladder_up"})
 		}})
 	}
-	for _, q := range append(common.D1Quests, struct{ Name, Flag, Text string }{"Cain has the Staff of Lazarus", common.QuestStaff, ""}) {
-		quests = append(quests, util.MenuItem{MainText: q.Name, Action: func() {
-			g.state.GetFlags().SetTrue(q.Flag)
+	for q, name := range d1.QuestNames {
+		quests = append(quests, util.MenuItem{MainText: name, Action: func() {
+			g.state.GetFlags().SetTrue(common.QuestFlag(q))
 			common.UpdateD1Quests(&g.state, g.state.GetMap())
 		}})
 	}
+	quests = append(quests, util.MenuItem{MainText: "Cain has the Staff of Lazarus", Action: func() {
+		g.state.SetQuestActive(d1.QBetrayer, d1.QuestActive)
+		g.state.SetQuestVar(d1.QBetrayer, 1, 2)
+		common.UpdateD1Quests(&g.state, g.state.GetMap())
+	}})
 	return []util.MenuItem{
 		{MainText: "Go to level", Action: func() { g.uiController.OpenMenu(levels) }},
 		{MainText: "Toggle god mode", Action: func() { g.godMode = !g.godMode }},
@@ -528,7 +515,7 @@ func (g *GameInstance) showDebugMenu() {
 		{
 			MainText: "Open class selection",
 			Action: func() {
-				g.uiController.OpenClassSelectionMenu()
+				g.openNewGameMenu()
 			},
 		},
 		{
@@ -800,7 +787,7 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 	}
 
 	if defs.IsTownLevel(oldMapName) {
-		g.GetAudio().PlayCue("heavy_door")
+		g.GetAudio().PlayCue("enter_dungeon")
 	}
 	g.onD1MapChanged(oldMapName, newMapName)
 
@@ -837,7 +824,7 @@ func (g *GameInstance) checkForLevelUp() {
 		return
 	}
 	if g.heroLevel != 0 && h.Level > g.heroLevel {
-		g.GetAudio().PlayCue("levelup")
+		g.GetAudio().PlayCue("level_up")
 	}
 	g.heroLevel = h.Level
 }
@@ -846,90 +833,10 @@ func (g *GameInstance) checkForLevelUp() {
 
 
 
-func (g *GameInstance) sendStatsToWindowClient() {
-	if !g.configuration.ServeStats {
-		return
-	}
-	lines := g.GetWorldState().GetPlayer().GetFullStats()
-	var asStrings []string
-	for _, line := range lines {
-		asStrings = append(asStrings, line.Text)
-	}
-	g.serverStats.Write(strings.Join(asStrings, "\n"))
-}
-
-func (g *GameInstance) sendInventoryToWindowClient() {
-	if !g.configuration.ServeInventory {
-		return
-	}
-	asStrings := g.state.GetPlayer().GetInventory().AsColorCodedStrings()
-	g.serverInventory.Write(strings.Join(asStrings, "\n"))
-}
-
-func (g *GameInstance) sendEquipmentToWindowClient() {
-	if !g.configuration.ServeEquipment {
-		return
-	}
-	equipment := g.state.GetPlayer().GetEquipment()
-	inventory := g.state.GetPlayer().GetInventory()
-	items := sortEquipForUI(equipment)
-	var asStrings []string
-
-	maxItemLength := 0
-	maxSlotLength := 0
-	for _, item := range items {
-		// index 0 => a, 1 => b, 2 => c, ...
-		//itemColor := common.ColorCodeFromColor(item.TintColor())
-		slotName := equipment.GetSlot(item)
-		slotDesc := fmt.Sprintf("<-- %s", slotName.ToString())
-
-		//itemLine := fmt.Sprintf("[:white]%c) %s%s", 'a'+index, itemColor, item.Name())
-		shortcut := inventory.GetLetterForItem(item)
-		itemLineWithoutColor := fmt.Sprintf("%c) %s", shortcut, item.BandStyleName())
-		//minLineLength := len(itemLineWithoutColor) + len(slotDesc) + 1
-
-		//asStrings = append(asStrings, itemLine)
-		if len(itemLineWithoutColor) > maxItemLength {
-			maxItemLength = len(itemLineWithoutColor)
-		}
-		if len(slotDesc) > maxSlotLength {
-			maxSlotLength = len(slotDesc)
-		}
-	}
-
-	for _, item := range items {
-		// index 0 => a, 1 => b, 2 => c, ...
-		itemColor := defs.ColorCodeFromColor(item.TintColor())
-
-		slotName := equipment.GetSlot(item)
-		slotDesc := fmt.Sprintf("[:white]<-- %s", slotName.ToString())
-		shortcut := inventory.GetLetterForItem(item)
-		itemLine := fmt.Sprintf("[:white]%c) %s%s", shortcut, itemColor, item.BandStyleName())
-
-		withoutColor := common.RemoveColorCodes(slotDesc)
-		padForSlot := (maxSlotLength + 1) - len(withoutColor)
-		padForItem := maxItemLength - len(common.RemoveColorCodes(itemLine))
-		slotDesc = util.LeftPadCount(slotDesc, padForSlot)
-		itemLine = util.RightPadCount(itemLine, padForItem)
-
-		asStrings = append(asStrings, itemLine+slotDesc)
-	}
-	g.serverEquipment.Write(strings.Join(asStrings, "\n"))
-}
-func sortEquipForUI(equip *common.Equipment) []*common.Item {
-	itemList := equip.AllItems()
-
-	slices.SortStableFunc(itemList, func(i, j *common.Item) int {
-		slotNameI := equip.GetSlot(i)
-		slotNameJ := equip.GetSlot(j)
-		return cmp.Compare(slotNameI, slotNameJ)
-	})
-	return itemList
-}
 
 func (g *GameInstance) ErrLog(errorMessage string) {
 	// write to stderr
-	fmt.Fprintf(os.Stderr, errorMessage+"\n")
+	fmt.Fprintln(os.Stderr, errorMessage)
 }
 
 func (g *GameInstance) GetGameData() defs.DataContainer {

@@ -53,7 +53,7 @@ func (u *UIController) drawActors() {
 	enemyColor := defs.White
 	actorAtlas := u.GetCurrentAtlas()
 
-	infravision := player.HasStatusEffect(common.StatusInfravision)
+	infravision := player.HasInfravision()
 	for _, actor := range state.GetMap().Actors() {
 		seen := playerFieldOfView.Visible(actor.MapPosition()) ||
 			infravision && geometry.DistanceChebyshev(actor.MapPosition(), player.MapPosition()) <= 15 // D1 infravision: monsters through walls
