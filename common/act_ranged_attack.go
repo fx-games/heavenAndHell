@@ -43,7 +43,7 @@ func (d *RangedAttackAction) Execute(context ActionContext) []Action {
 	d.damageAmount = 0
 
 	if !currentMap.IsActorAt(d.targetPos) {
-		context.GameState.factory.hitD1Barrel(currentMap, d.targetPos, d.attacker) // an arrow shot at a barrel breaks it
+		context.GameState.factory.hitD1Object(currentMap, d.targetPos, d.attacker) // an arrow shot at a barrel breaks it
 		return actions
 	}
 

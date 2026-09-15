@@ -24,7 +24,10 @@ const (
 	MisCbolt  // advocates: three charged bolts
 	MisAcid   // acid beasts, leaves a puddle
 	MisAcidPud
-	MisApoca // Diablo: a blast on the player if he sees them
+	MisApoca  // Diablo: a blast on the player if he sees them
+	MisArrow  // traps: a plain arrow
+	MisFarrow // trapped chests: a fire arrow that bursts where it stops
+	MisNova   // trapped chests: a ring of lightning balls
 )
 
 // d1MissileResist is missiledata's mResist for these missiles; all of them are magical (mType 1).
@@ -33,6 +36,7 @@ var d1MissileResist = map[D1Missile]int{
 	MisLightCtrl2: d1.ResistKindLightning, MisLightning: d1.ResistKindLightning, MisFlash: d1.ResistKindMagic,
 	MisMagmaball: d1.ResistKindFire, MisFlare: d1.ResistKindMagic, MisFlamec: d1.ResistKindFire,
 	MisCbolt: d1.ResistKindLightning, MisAcid: d1.ResistKindMagic, MisAcidPud: d1.ResistKindMagic, MisApoca: d1.ResistKindMagic,
+	MisFarrow: d1.ResistKindFire, MisNova: d1.ResistKindLightning,
 }
 
 // MonsterMissileAction resolves one monster missile at once on the grid, like the player's spells (decision 6):
@@ -65,8 +69,9 @@ func (a *MonsterMissileAction) Execute(ctx ActionContext) []Action {
 
 type missileCtx struct {
 	ctx    ActionContext
-	caster *Actor
-	mon    *D1Monster
+	caster *Actor         // nil for a trap
+	mon    *D1Monster     // nil for a trap
+	from   geometry.Point // a trap's cell
 	player *Actor
 	c      *spellCtx // for its grid helpers
 	dealt  int       // whole points
@@ -74,17 +79,30 @@ type missileCtx struct {
 
 // hit ports PlayerMHit: `ticks` hit rolls against the player standing at p, from a missile that flew from `from`.
 func (c *missileCtx) hit(mis D1Missile, p, from geometry.Point, mind, maxd int, shift bool, ticks int) bool {
-	c.ctx.GameState.factory.hitD1Barrel(c.c.m, p, c.caster)
+	return c.hitAs(mis, p, from, mind, maxd, shift, ticks, d1MissileResist[mis])
+}
+
+// hitAs is hit with the missile's resistance kind given: a fire arrow's flight hits as a plain arrow (MI_LArrow).
+func (c *missileCtx) hitAs(mis D1Missile, p, from geometry.Point, mind, maxd int, shift bool, ticks, resist int) bool {
+	c.ctx.GameState.factory.hitD1Object(c.c.m, p, c.attacker())
 	pl := c.player
 	if pl.hero == nil || !pl.IsAlive() || pl.MapPosition() != p {
 		return false
 	}
 	h, s := pl.hero, pl.HeroSheet()
-	chance := h.MonsterSpellHitChance(c.mon.Level, geometry.DistanceChebyshev(from, p), d1DungeonLevel(c.ctx.GameState))
-	resper := map[int]int{d1.ResistKindFire: s.FR, d1.ResistKindLightning: s.LR, d1.ResistKindMagic: s.MR}[d1MissileResist[mis]]
+	dist, dlvl := geometry.DistanceChebyshev(from, p), d1DungeonLevel(c.ctx.GameState)
+	monLevel := h.Level // PlayerMHit without a monster: no level difference
+	var chance int
+	if c.mon != nil {
+		monLevel = c.mon.Level
+		chance = h.MonsterSpellHitChance(c.mon.Level, dist, dlvl)
+	} else {
+		chance = d1.TrapHitChance(s, mis != MisArrow && mis != MisFarrow, dist, dlvl) // missiledata's mType
+	}
+	resper := map[int]int{d1.ResistKindFire: s.FR, d1.ResistKindLightning: s.LR, d1.ResistKindMagic: s.MR}[resist]
 	block := 0
 	if !shift && mis != MisAcidPud {
-		block = h.BlockChance(s, c.mon.Level)
+		block = h.BlockChance(s, monLevel)
 	}
 	total, blocked := 0, false
 	for i := 0; i < ticks; i++ {
@@ -92,6 +110,9 @@ func (c *missileCtx) hit(mis D1Missile, p, from geometry.Point, mind, maxd int, 
 			continue
 		}
 		dam := d1.MissileDamage64(d1Rng, s, mind, maxd, shift)
+		if c.mon == nil {
+			dam = d1.TrapDamage64(d1Rng, s, mind, maxd, shift)
+		}
 		if resper > 0 {
 			dam -= resper * dam / 100
 		} else if d1Rng.Intn(100) < block {
@@ -101,7 +122,11 @@ func (c *missileCtx) hit(mis D1Missile, p, from geometry.Point, mind, maxd int, 
 		total += dam
 	}
 	if blocked && total == 0 {
-		c.ctx.Msg(fmt.Sprintf("You block the attack of %s.", c.caster.Name()))
+		if c.caster == nil {
+			c.ctx.Msg("You block the trap.")
+		} else {
+			c.ctx.Msg(fmt.Sprintf("You block the attack of %s.", c.caster.Name()))
+		}
 	}
 	if total == 0 {
 		return false
@@ -109,6 +134,22 @@ func (c *missileCtx) hit(mis D1Missile, p, from geometry.Point, mind, maxd int, 
 	c.dealt += d1ManaShield(pl, total>>6)
 	c.c.animations = append(c.c.animations, NewHitAnimation(p, 0.3, defs.IconEffectHit, 2))
 	return true
+}
+
+// origin is where the missile starts: the caster, or the trap.
+func (c *missileCtx) origin() geometry.Point {
+	if c.caster != nil {
+		return c.caster.MapPosition()
+	}
+	return c.from
+}
+
+// attacker is who breaks the barrels a missile hits: the caster, or the hero for a trap's missile.
+func (c *missileCtx) attacker() *Actor {
+	if c.caster != nil {
+		return c.caster
+	}
+	return c.player
 }
 
 func (c *missileCtx) monsterDamage() int {
@@ -126,15 +167,16 @@ func missileIcon(mis D1Missile) int32 {
 }
 
 // bolt flies towards the target until it hits the player or something solid (MI_Firebolt, CheckMissileCol).
-func (c *missileCtx) bolt(mis D1Missile, to geometry.Point, dam int) (geometry.Point, bool) {
-	from, last, hit := c.caster.MapPosition(), c.caster.MapPosition(), false
+func (c *missileCtx) bolt(mis D1Missile, to geometry.Point, mind, maxd int) (geometry.Point, bool) {
+	from, hit := c.origin(), false
+	last := from
 	for _, p := range c.c.ray(from, to, 20) {
 		if o := d1ObjectAt(c.c.m, p); o != nil && !o.IsWalkable(nil) { // monster missiles fly through other monsters
-			c.ctx.GameState.factory.hitD1Barrel(c.c.m, p, c.caster)
+			c.ctx.GameState.factory.hitD1Object(c.c.m, p, c.attacker())
 			break
 		}
 		last = p
-		if hit = c.hit(mis, p, from, dam, dam, false, 1); hit {
+		if hit = c.hit(mis, p, from, mind, maxd, false, 1); hit {
 			break
 		}
 	}
@@ -145,12 +187,14 @@ func (c *missileCtx) bolt(mis D1Missile, to geometry.Point, dam int) (geometry.P
 }
 
 func (c *missileCtx) fire(mis D1Missile, target geometry.Point, dam int) {
-	o := c.caster.MapPosition()
+	o := c.origin()
 	switch mis {
 	case MisFirebolt, MisMagmaball, MisFlare:
-		c.bolt(mis, target, c.monsterDamage())
+		d := c.monsterDamage()
+		c.bolt(mis, target, d, d)
 	case MisAcid:
-		if end, _ := c.bolt(mis, target, c.monsterDamage()); end != o { // MI_Acidsplat
+		d := c.monsterDamage()
+		if end, _ := c.bolt(mis, target, d, d); end != o { // MI_Acidsplat
 			d := 1
 			if c.mon.Data.Level >= 2 {
 				d = 2
@@ -159,10 +203,10 @@ func (c *missileCtx) fire(mis D1Missile, target geometry.Point, dam int) {
 		}
 	case MisCbolt:
 		for i := 0; i < 3; i++ { // ponytail: charged bolts fly straight instead of D1's wobbling paths
-			c.bolt(mis, target, 15)
+			c.bolt(mis, target, 15, 15)
 		}
 	case MisFireball:
-		end, _ := c.bolt(mis, target, dam)
+		end, _ := c.bolt(mis, target, dam, dam)
 		if p := c.player.MapPosition(); geometry.DistanceChebyshev(end, p) <= 1 && c.c.lineClear(end, p) {
 			c.hit(mis, p, o, dam, dam, false, 1)
 		}

@@ -440,3 +440,222 @@ internal_name: prop.portal.2
 name: Town Portal (frame 2)
 icon: 294
 
+internal_name: prop.OBJ_SKFIRE
+name: Skull Fire
+icon: 32
+
+internal_name: prop.OBJ_CANDLE1
+name: Candle
+icon: 110
+
+internal_name: prop.OBJ_CANDLE2
+name: Candle (lit)
+icon: 110
+
+internal_name: prop.OBJ_CANDLEO
+name: Candle
+icon: 110
+
+internal_name: prop.OBJ_BOOKCANDLE
+name: Candle (library)
+icon: 110
+
+internal_name: prop.OBJ_STORYCANDLE
+name: Candle (story book, Lazarus' staff)
+icon: 110
+
+internal_name: prop.OBJ_BANNERL
+name: Banner (left)
+icon: 61
+
+internal_name: prop.OBJ_BANNERM
+name: Banner (middle)
+icon: 61
+
+internal_name: prop.OBJ_BANNERR
+name: Banner (right)
+icon: 61
+
+internal_name: prop.OBJ_SKPILE
+name: Skull Pile
+icon: 250
+
+internal_name: prop.OBJ_SKSTICK1
+name: Skull on a Stick 1
+icon: 251
+
+internal_name: prop.OBJ_SKSTICK2
+name: Skull on a Stick 2
+icon: 251
+
+internal_name: prop.OBJ_SKSTICK3
+name: Skull on a Stick 3
+icon: 251
+
+internal_name: prop.OBJ_SKSTICK4
+name: Skull on a Stick 4
+icon: 251
+
+internal_name: prop.OBJ_SKSTICK5
+name: Skull on a Stick 5
+icon: 251
+
+internal_name: prop.OBJ_CRUX1
+name: Crucified Skeleton 1
+icon: 240
+
+internal_name: prop.OBJ_CRUX2
+name: Crucified Skeleton 2
+icon: 240
+
+internal_name: prop.OBJ_CRUX3
+name: Crucified Skeleton 3
+icon: 240
+
+internal_name: prop.OBJ_CRUX1.used
+name: Crucified Skeleton 1 (broken)
+icon: 250
+
+internal_name: prop.OBJ_CRUX2.used
+name: Crucified Skeleton 2 (broken)
+icon: 250
+
+internal_name: prop.OBJ_CRUX3.used
+name: Crucified Skeleton 3 (broken)
+icon: 250
+
+internal_name: prop.OBJ_STAND
+name: Magic Rock Stand
+icon: 347
+
+internal_name: prop.OBJ_ANGEL
+name: Angel Statue
+icon: 106
+
+internal_name: prop.OBJ_BCROSS
+name: Burning Cross
+icon: 241
+
+internal_name: prop.OBJ_TBCROSS
+name: Burning Cross (theme room)
+icon: 241
+
+internal_name: prop.OBJ_NUDEW2R
+name: Tortured Body (woman)
+icon: 101
+
+internal_name: prop.OBJ_TNUDEM1
+name: Tortured Body (man 1)
+icon: 101
+
+internal_name: prop.OBJ_TNUDEM2
+name: Tortured Body (man 2)
+icon: 101
+
+internal_name: prop.OBJ_TNUDEM3
+name: Tortured Body (man 3)
+icon: 101
+
+internal_name: prop.OBJ_TNUDEM4
+name: Tortured Body (man 4)
+icon: 101
+
+internal_name: prop.OBJ_TNUDEW1
+name: Tortured Body (woman 1)
+icon: 101
+
+internal_name: prop.OBJ_TNUDEW2
+name: Tortured Body (woman 2)
+icon: 101
+
+internal_name: prop.OBJ_TNUDEW3
+name: Tortured Body (woman 3)
+icon: 101
+
+internal_name: prop.OBJ_TORTURE1
+name: Hooked Body 1
+icon: 97
+
+internal_name: prop.OBJ_TORTURE2
+name: Hooked Body 2
+icon: 97
+
+internal_name: prop.OBJ_TORTURE3
+name: Hooked Body 3
+icon: 97
+
+internal_name: prop.OBJ_TORTURE4
+name: Hooked Body 4
+icon: 97
+
+internal_name: prop.OBJ_TORTURE5
+name: Hooked Body 5
+icon: 97
+
+internal_name: prop.OBJ_FLAMEHOLE
+name: Flame Hole
+icon: 32
+
+internal_name: prop.OBJ_FLAMELVR
+name: Flame Trap Lever
+icon: 266
+
+internal_name: prop.OBJ_FLAMELVR.used
+name: Flame Trap Lever (pulled)
+icon: 267
+
+internal_name: prop.OBJ_WATER
+name: Water
+icon: 28
+
+internal_name: prop.OBJ_BOOKLVR
+name: Book Lever
+icon: 321
+
+internal_name: prop.OBJ_BOOKLVR.used
+name: Book Lever (read)
+icon: 322
+
+internal_name: prop.OBJ_BOOKSHELF
+name: Bookshelf
+icon: 321
+
+internal_name: prop.OBJ_WEAPRACK
+name: Weapon Stand
+icon: 377
+
+internal_name: prop.OBJ_ARMORSTANDN
+name: Armor Stand (empty)
+icon: 349
+
+internal_name: prop.OBJ_WEAPONRACKN
+name: Weapon Rack (empty)
+icon: 377
+
+internal_name: prop.OBJ_ALTBOY
+name: Altar (Lazarus' lair)
+icon: 347
+
+internal_name: prop.OBJ_MCIRCLE1
+name: Magic Circle
+icon: 216
+
+internal_name: prop.OBJ_MCIRCLE2
+name: Magic Circle
+icon: 216
+
+internal_name: prop.OBJ_WARARMOR
+name: Armor Stand (Warlord, with armor)
+icon: 348
+
+internal_name: prop.OBJ_WARARMOR.used
+name: Armor Stand (Warlord, empty)
+icon: 349
+
+internal_name: prop.OBJ_WARWEAP
+name: Weapon Rack (Warlord, with weapon)
+icon: 376
+
+internal_name: prop.OBJ_WARWEAP.used
+name: Weapon Rack (Warlord, empty)
+icon: 377

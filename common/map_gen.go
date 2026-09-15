@@ -20,6 +20,7 @@ type MapGenerator struct {
 	d1Seeds      [17]int32
 	d1Quests     *d1.Quests
 	levels       map[string]*d1.Level // the generated D1 levels by map name, for changeD1Map
+	walledIn     map[string][]*Actor  // monsters D1 placed inside walls that a map change opens later, by map name
 }
 
 func NewMapGenerator(randomSource *rand.Rand) *MapGenerator {
@@ -147,6 +148,18 @@ func (g *MapGenerator) changeD1Map(m *gridmap.GridMap[*Actor, *Item, Object], x1
 		}
 		return lvl.CellDoor(p.X, p.Y)
 	})
+	waiting := g.walledIn[m.GetName()][:0]
+	for _, a := range g.walledIn[m.GetName()] {
+		if p := a.MapPosition(); m.CanPlaceActorHere(p) {
+			m.AddActor(a, p)
+			if g.factory.State.GetMap() == m { // a level being built gets its actors timed on arrival
+				g.factory.State.OnActorSpawned(a)
+			}
+		} else {
+			waiting = append(waiting, a)
+		}
+	}
+	g.walledIn[m.GetName()] = waiting
 }
 
 func LevelFromName(targetMap string) int {

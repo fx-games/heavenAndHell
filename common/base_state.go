@@ -640,6 +640,8 @@ func (s *State) d1GlowAt(p geometry.Point) float64 {
 				if m.IsObjectAt(src) { // ObjectAt dereferences the cell's object: only call it where there is one
 					if wl, ok := m.ObjectAt(src).(*d1WallLight); ok {
 						r = d1LightRadius(wl.icon)
+					} else if o, ok := m.ObjectAt(src).(*D1Object); ok {
+						r = d1ObjectLights[o.O.Kind]
 					}
 				}
 				for dy := -r; dy <= r && r > 0; dy++ {

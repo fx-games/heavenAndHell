@@ -368,7 +368,8 @@ func (g *Generator) savePower(it *Item, power string, p1, p2, minv, maxv, multv 
 		it.MinStr = 0
 	case "IPL_INVCURS":
 		it.Curs = p1
-		// ponytail: IPL_ADDACLIFE/ADDMANAAC/FIRERESCLVL read the player at roll time in D1; not ported until an item needs them.
+		// IPL_ADDACLIFE/ADDMANAAC/FIRERESCLVL aren't ported: in 1.09 only Hellfire's Blitzen and Thunderclap roll the
+		// first two, and no item or affix rolls FIRERESCLVL.
 	}
 	if it.vAdd1 == 0 && it.vMult1 == 0 {
 		it.vAdd1, it.vMult1 = plVal(r, p1, p2, minv, maxv), multv

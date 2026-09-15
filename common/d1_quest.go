@@ -475,8 +475,6 @@ func (f *Factory) d1DoTalk(a *Actor) {
 // D1TalkerTurn ports the talk states of MAI_Garbud, MAI_Zhar, MAI_SnotSpil, MAI_Lachdanan, MAI_Warlord,
 // MAI_Lazurus and MAI_Lazhelp for one turn; visible is D1's BFLAG_VISIBLE (the player sees the monster). It
 // reports whether the monster fights this turn.
-// ponytail: Lazarus talks once he's seen, not once the hero stands on the pentagram his lair's teleports lead to
-// (the lair starts open, see resyncQuests).
 func (f *Factory) D1TalkerTurn(a *Actor, visible bool) bool {
 	mon, s := a.d1Monster, f.State
 	quiet := func() { mon.Squelch, mon.TalkMsg, mon.Goal = 255, "", d1GoalNormal }
@@ -529,12 +527,13 @@ func (f *Factory) D1TalkerTurn(a *Actor, visible bool) bool {
 		} else if visible && mon.TalkMsg == "TEXT_WARLRD9" && talking {
 			quiet()
 		}
-	case "AI_LAZURUS":
-		if visible && mon.TalkMsg == "TEXT_VILE13" && mon.Goal == d1GoalInquiring {
+	case "AI_LAZURUS": // he speaks once the hero stands on the circle in front of him, then opens his helpers' rooms
+		if visible && mon.TalkMsg == "TEXT_VILE13" && mon.Goal == d1GoalInquiring && s.GetPlayer().MapPosition() == pieceCell(d1VileAltar) {
 			s.SetQuestVar(d1.QBetrayer, 1, 5)
 			f.d1DoTalk(a)
 		} else if visible && mon.TalkMsg == "TEXT_VILE13" && talking {
 			s.SetQuestVar(d1.QBetrayer, 1, 6)
+			UpdateD1Quests(s, s.GetMap())
 			quiet()
 		}
 	case "AI_LAZHELP":
@@ -586,8 +585,8 @@ func UpdateD1Quests(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 			f.spawnD1QuestItem(m, d1.IdiGldnElix)
 		}
 	case D1LazarusLevel:
-		if betrayer == d1.QuestDone {
-			open("ladder_up", d1RedPortal, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(15), TargetLocation: "red_portal"})
+		if betrayer == d1.QuestDone { // M_StartKill's MIS_RPORTAL at (35, 32)
+			open("exit", d1RedPortal, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(15), TargetLocation: "red_portal"})
 		}
 	case defs.LevelNameFromDepth(9):
 		if q := d1.QMushroom; s.QuestActive(q) == d1.QuestInit && s.QuestVar(q, 1) == d1.QSInit {
@@ -622,6 +621,14 @@ func replayD1MapChanges(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 			delete(s.glowCache, m)
 		}
 	}
+	if m.GetName() == D1LazarusLevel { // ResyncQuests: the way to Lazarus, then to Red Vex and Black Jade
+		if s.QuestVar(d1.QBetrayer, 1) >= 4 || s.QuestActive(d1.QBetrayer) == d1.QuestDone {
+			gen.changeD1Map(m, 1, 11, 20, 18)
+		}
+		if s.QuestVar(d1.QBetrayer, 1) >= 6 || s.QuestActive(d1.QBetrayer) == d1.QuestDone {
+			gen.changeD1Map(m, 1, 18, 20, 24)
+		}
+	}
 	for _, obj := range m.Objects() {
 		o, ok := obj.(*D1Object)
 		if !ok || o.O.Active {
@@ -630,19 +637,95 @@ func replayD1MapChanges(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 		switch o.O.Kind {
 		case d1.ObjLEVER, d1.ObjBLINDBOOK, d1.ObjSTEELTOME, d1.ObjBOOK2R:
 			gen.changeD1Map(m, o.O.Var1, o.O.Var2, o.O.Var3, o.O.Var4)
+		case d1.ObjBOOK2L:
+			if m.GetName() == D1LazarusLevel {
+				gen.changeD1Map(m, o.O.Var1, o.O.Var2, o.O.Var3, o.O.Var4)
+			}
 		}
 	}
 	for _, obj := range m.Objects() {
-		if o, ok := obj.(*D1Object); ok && o.O.Kind == d1.ObjSWITCHSKL && d1SkullGroupPulled(m, o.O.Var8) {
+		o, ok := obj.(*D1Object)
+		if !ok {
+			continue
+		}
+		if o.O.Kind == d1.ObjSWITCHSKL && d1ObjectGroupUsed(m, isD1Skull, o.O.Var8) || isD1Crux(o.O.Kind) && d1ObjectGroupUsed(m, isD1Crux, o.O.Var8) {
 			gen.changeD1Map(m, o.O.Var1, o.O.Var2, o.O.Var3, o.O.Var4)
 		}
 	}
 }
 
-// d1SkullGroupPulled ports OperateLever's check on level 16: every skull lever of group v is pulled.
-func d1SkullGroupPulled(m *gridmap.GridMap[*Actor, *Item, Object], v int) bool {
+// Lazarus' lair (Vile2.DUN), in piece coordinates: the magic circles in front of the two Books of Vileness and where
+// they teleport the hero, the central circle and the one in front of Lazarus it leads to, and the return portal.
+var (
+	d1VileCircles = map[geometry.Point]geometry.Point{{X: 26, Y: 46}: {X: 27, Y: 29}, {X: 45, Y: 47}: {X: 43, Y: 29}}
+	d1VileCenter  = geometry.Point{X: 35, Y: 36}
+	d1VileAltar   = geometry.Point{X: 35, Y: 46}
+	D1VilePortal  = geometry.Point{X: 35, Y: 32}
+)
+
+func pieceCell(p geometry.Point) geometry.Point { return toCell(p.X, p.Y) }
+
+// operateD1VileBook ports OperateBook in Lazarus' lair: read while standing on the magic circle in front of it, a
+// Book of Vileness teleports the hero into the sealed room behind it and opens that room.
+func (f *Factory) operateD1VileBook(o *D1Object, player *Actor) {
+	to, onCircle := geometry.Point{}, false
+	for circle, dest := range d1VileCircles {
+		if player.MapPosition() == pieceCell(circle) {
+			to, onCircle = dest, true
+		}
+	}
+	if !o.O.Active || !onCircle {
+		return
+	}
+	o.O.Active = false
+	f.d1VileTeleport(player, pieceCell(to))
+	UpdateD1Quests(f.State, f.State.GetMap())
+}
+
+// d1VileTeleport ports MIS_RNDTELEPORT onto a lair circle: the hero lands on it, or next to it when taken
+// (GetVileMissPos).
+func (f *Factory) d1VileTeleport(player *Actor, p geometry.Point) {
+	m := f.State.GetMap()
+	if !m.CanPlaceActorHere(p) {
+		if near := freeCellsNear(m, p, 1, m.CanPlaceActorHere); len(near) > 0 {
+			p = near[0]
+		}
+	}
+	f.d1MovePlayer(player, p, "Teleport")
+}
+
+// d1MagicCircle ports Obj_Circle: once both Books of Vileness are read, the central circle opens the way to
+// Lazarus and teleports the hero in front of him.
+func (f *Factory) d1MagicCircle(o *D1Object, player *Actor) {
+	m, s := f.State.GetMap(), f.State
+	if m.GetName() != D1LazarusLevel || o.pos != pieceCell(d1VileCenter) || d1VileBooksRead(m) < 2 {
+		return
+	}
+	// 1.09 sets _qvar1 4 on every step onto the circle, even after Lazarus spoke (its BUGFIX note); not done again here
+	if s.QuestActive(d1.QBetrayer) == d1.QuestActive && s.QuestVar(d1.QBetrayer, 1) < 4 {
+		s.SetQuestVar(d1.QBetrayer, 1, 4)
+	}
+	s.mapGen.changeD1Map(m, o.O.Var1, o.O.Var2, o.O.Var3, o.O.Var4)
+	UpdateD1Quests(s, m)
+	f.d1VileTeleport(player, pieceCell(d1VileAltar))
+}
+
+// d1VileBooksRead counts the lair's used Books of Vileness (the central circle's _oVar5 minus 1).
+func d1VileBooksRead(m *gridmap.GridMap[*Actor, *Item, Object]) (n int) {
 	for _, obj := range m.Objects() {
-		if o, ok := obj.(*D1Object); ok && o.O.Kind == d1.ObjSWITCHSKL && o.O.Var8 == v && o.O.Active {
+		if o, ok := obj.(*D1Object); ok && o.O.Kind == d1.ObjBOOK2L && !o.O.Active {
+			n++
+		}
+	}
+	return
+}
+
+func isD1Skull(kind int) bool { return kind == d1.ObjSWITCHSKL }
+
+// d1ObjectGroupUsed ports OperateLever's and BreakCrux's check: every object of the kind in group v is used.
+func d1ObjectGroupUsed(m *gridmap.GridMap[*Actor, *Item, Object], kind func(int) bool, v int) bool {
+	for _, obj := range m.Objects() {
+		if o, ok := obj.(*D1Object); ok && kind(o.O.Kind) && o.O.Var8 == v && o.O.Active {
 			return false
 		}
 	}
@@ -827,8 +910,10 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 			UpdateD1Quests(s, m)
 		}
 		f.say(o.Name(), d1.QuestMsgs[d1.QSchamb])
-	case d1.ObjBOOK2L: // OperateBook in the Chamber of Bone; the lair's teleporting books are skipped (resyncQuests)
-		if sl := d1SetLevelOf(m.GetName()); obj.Active && sl != nil && sl.SL == d1.SLBoneChamb {
+	case d1.ObjBOOK2L: // OperateBook
+		if m.GetName() == D1LazarusLevel {
+			f.operateD1VileBook(o, player)
+		} else if sl := d1SetLevelOf(m.GetName()); obj.Active && sl != nil && sl.SL == d1.SLBoneChamb {
 			obj.Active = false
 			h := player.hero
 			h.SpellLevels[d1.SplGuardian] = min(h.SpellLevels[d1.SplGuardian]+1, 15)

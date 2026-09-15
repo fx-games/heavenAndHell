@@ -24,6 +24,7 @@ func playthrough() {
 	defer os.Remove(game.SaveFile)
 	theGame, _ := createGameAndUIContext() // one instance: ebiten allows a single audio context per process
 	missiles := &missileCounter{} // registered per check: a new game or a load makes a new broker
+	wallTraps, chestTraps := 0, 0 // traps that fired while objects were operated
 	for run := 1; run <= 3; run++ {
 		theGame.NewGame(theGame.GetGameData().ClassDefinitions[run-1], false, "")
 		state := theGame.GetWorldState()
@@ -115,7 +116,20 @@ func playthrough() {
 				fail("run %d dlvl %d: fight didn't work (kills=%d damage taken=%d exp=%d)", run, dlvl, kills, damageTaken, exp)
 			}
 			// milestone 4: open chests, sarcophagi and barrels, use shrines
+			trapped := 0
+			for _, obj := range m.Objects() {
+				if o, ok := obj.(*common.D1Object); ok && o.O.TrapFlag && o.O.Kind >= d1.ObjTCHEST1 && o.O.Kind <= d1.ObjTCHEST3 {
+					trapped++
+				}
+			}
 			objects, used, dropped := operateObjects(state, player)
+			for _, obj := range m.Objects() {
+				if o, ok := obj.(*common.D1Object); ok && o.O.TrapFlag && o.O.Kind >= d1.ObjTCHEST1 && o.O.Kind <= d1.ObjTCHEST3 {
+					fail("run %d dlvl %d: the trap of the opened %s at %v didn't fire", run, dlvl, o.Name(), o.MapPosition())
+				}
+			}
+			chestTraps += trapped
+			wallTraps += len(common.SnapshotLevel(state, m).Traps)
 			if dlvl < 16 && (objects < 9 || used == 0 || dropped == 0) {
 				fail("run %d dlvl %d: objects didn't work (objects=%d used=%d items dropped=%d)", run, dlvl, objects, used, dropped)
 			}
@@ -165,6 +179,10 @@ func playthrough() {
 	// milestone 3: the D1 town after a trip down to level 16
 	theGame.GetWorldState().MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"})
 	checkTown(theGame.GetWorldState(), fail)
+	if wallTraps == 0 || chestTraps == 0 { // Catacombs and Caves chests are trapped 1 in 10, trap walls 10-25%
+		fail("traps: %d wall traps and %d chest traps fired in 3 runs", wallTraps, chestTraps)
+	}
+	fmt.Printf("traps: %d wall traps and %d chest traps fired\n", wallTraps, chestTraps)
 	if len(missiles.byAI) < 6 { // level monster types are random; six of the eight casting AIs always showed up
 		fail("missile AIs: only %v cast", missiles.byAI)
 	}
@@ -266,12 +284,12 @@ type saveCheck struct {
 	Pos                              geometry.Point
 	Level, Exp, StatPts, Gold, HP    int
 	Items, Equipped, Monsters, Floor int
-	UsedObjects                      int
+	UsedObjects, Traps               int
 	Corpses, Explored, AIState       int
 	Golem, ManaShield                bool
 }
 
-// operateObjects bumps into every chest, sarcophagus, plain barrel and shrine on the level.
+// operateObjects bumps into every chest, sarcophagus, plain barrel and shrine on the level; the traps on them fire.
 func operateObjects(state *common.State, player *common.Actor) (objects, used, dropped int) {
 	m := state.GetMap()
 	before := len(m.Items())
@@ -282,7 +300,7 @@ func operateObjects(state *common.State, player *common.Actor) (objects, used, d
 		}
 		objects++
 		switch o.O.Kind {
-		case d1.ObjCHEST1, d1.ObjCHEST2, d1.ObjCHEST3, d1.ObjSARC, d1.ObjBARREL, d1.ObjSHRINEL, d1.ObjSHRINER:
+		case d1.ObjCHEST1, d1.ObjCHEST2, d1.ObjCHEST3, d1.ObjTCHEST1, d1.ObjTCHEST2, d1.ObjTCHEST3, d1.ObjSARC, d1.ObjBARREL, d1.ObjSHRINEL, d1.ObjSHRINER:
 			o.ActorBumpedInto(player, nil)
 			if !o.O.Active {
 				used++
@@ -326,6 +344,7 @@ func saveCheckOf(state *common.State) saveCheck {
 			c.UsedObjects++
 		}
 	}
+	c.Traps = len(common.SnapshotLevel(state, m).Traps)
 	return c
 }
 
@@ -583,6 +602,15 @@ func dumpMap(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], rea
 }
 
 // reachable walks from p through floor, doors and barrels (bumping breaks them).
+func objectAt(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], p geometry.Point) int {
+	if m.IsObjectAt(p) {
+		if o, ok := m.ObjectAt(p).(*common.D1Object); ok {
+			return o.O.Kind
+		}
+	}
+	return -1
+}
+
 func reachable(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], p geometry.Point) map[geometry.Point]bool {
 	seen := map[geometry.Point]bool{p: true}
 	for queue := []geometry.Point{p}; len(queue) > 0; queue = queue[1:] {
@@ -778,13 +806,69 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 	travel(defs.LevelNameFromDepth(15), "ladder_up")
 	through("red_portal")
 	m = state.GetMap()
-	for _, name := range []string{"Arch-Bishop Lazarus", "Red Vex", "BlackJade"} {
-		if actorNamed(m, name) == nil {
-			fail("quests: %s is missing from %s", name, m.GetName())
+	if _, open := m.GetTransitionAt(m.GetNamedLocation("exit")); open {
+		fail("quests: the lair's portal is open before Lazarus died")
+	}
+	// Lazarus' lair: both Books of Vileness, read from their circles, then the central circle leads to him
+	player = state.GetPlayer()
+	player.Hero().MaxHPBase += 1000 << 6 // his lair is full of monsters for a level-1 warrior
+	common.SyncHero(player)
+	if actorNamed(m, "Arch-Bishop Lazarus") != nil {
+		fail("quests: Lazarus isn't walled in before the Books of Vileness are read")
+	}
+	var center *common.D1Object
+	for _, c := range append(objectsOf(d1.ObjMCIRCLE1), objectsOf(d1.ObjMCIRCLE2)...) {
+		if c.MapPosition() == (geometry.Point{X: 35 - 16, Y: 36 - 16}) {
+			center = c
 		}
 	}
-	if _, open := m.GetTransitionAt(m.GetNamedLocation("ladder_up")); open {
-		fail("quests: the lair's portal is open before Lazarus died")
+	books := objectsOf(d1.ObjBOOK2L)
+	if len(books) != 2 || center == nil {
+		fail("quests: the lair has %d Books of Vileness, central circle %v", len(books), center != nil)
+	}
+	for _, book := range books {
+		start := player.MapPosition()
+		book.ActorBumpedInto(player, nil) // not on its circle: nothing happens
+		if !book.O.Active || player.MapPosition() != start {
+			fail("quests: a Book of Vileness worked away from its circle")
+		}
+		circle := book.MapPosition().Add(geometry.Point{Y: 1})
+		if d1.ObjMCIRCLE2 != objectAt(m, circle) {
+			fail("quests: no magic circle in front of the book at %v", book.MapPosition())
+		}
+		if !reachable(m, m.GetNamedLocation("ladder_up"))[circle] {
+			fail("quests: the magic circle at %v can't be walked to from the lair's entrance", circle)
+		}
+		m.MoveActor(player, circle)
+		book.ActorBumpedInto(player, nil)
+		theGame.GetActionBroker().Execute(common.NewEndPlayerTurnAction(common.AbstractCause("playthrough"), 10))
+		if book.O.Active || geometry.DistanceChebyshev(player.MapPosition(), circle) < 10 {
+			fail("quests: the Book of Vileness at %v didn't teleport the hero (now at %v)", book.MapPosition(), player.MapPosition())
+		}
+	}
+	m.MoveActor(player, center.MapPosition())
+	center.ActorWalkedOn(player, nil)
+	if state.QuestVar(d1.QBetrayer, 1) != 4 || player.MapPosition() != (geometry.Point{X: 35 - 16, Y: 46 - 16}) {
+		fail("quests: the central circle didn't lead to Lazarus (qvar1 %d, hero at %v)", state.QuestVar(d1.QBetrayer, 1), player.MapPosition())
+	}
+	lazarus := actorNamed(m, "Arch-Bishop Lazarus")
+	if lazarus == nil {
+		fail("quests: the central circle didn't open Lazarus' room")
+	}
+	for turn := 0; turn < 5 && state.QuestVar(d1.QBetrayer, 1) < 6; turn++ {
+		theGame.GetActionBroker().Execute(common.NewUpdateFoVAction(common.AbstractCause("playthrough"), player))
+		theGame.GetActionBroker().Execute(common.NewEndPlayerTurnAction(common.AbstractCause("playthrough"), 10))
+		player.GetStats().GetResource(stats.Health).SetToMax()
+	}
+	if state.QuestVar(d1.QBetrayer, 1) != 6 {
+		dumpMap(m, reachable(m, player.MapPosition()))
+		fail("quests: Lazarus didn't speak (qvar1 %d, Lazarus at %v seen %v goal %d talk %q, hero at %v)", state.QuestVar(d1.QBetrayer, 1),
+			lazarus.MapPosition(), player.CanSee(lazarus.MapPosition()), lazarus.D1Monster().Goal, lazarus.D1Monster().TalkMsg, player.MapPosition())
+	}
+	for _, name := range []string{"Red Vex", "BlackJade"} {
+		if actorNamed(m, name) == nil {
+			fail("quests: %s is missing from %s after Lazarus spoke", name, m.GetName())
+		}
 	}
 	slay("Arch-Bishop Lazarus", d1.QBetrayer)
 
@@ -793,7 +877,7 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 		fail("quests: load failed: %v", err)
 	}
 	state = theGame.GetWorldState()
-	through("ladder_up")
+	through("exit")
 	through("ladder_down")
 	m = state.GetMap()
 	diablo := actorNamed(m, "The Dark Lord")
@@ -904,6 +988,42 @@ func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
 	travel(4)
 	talkTo(theGame, common.VendorTypeOgden) // The Curse of King Leoric, then Ogden's Sign
 	log(d1.QSkelKing)
+	tomb := travel(3)
+	if t, ok := tomb.GetTransitionAt(tomb.GetNamedLocation("leoric")); ok {
+		state.MapTransition(t)
+	} else {
+		fail("quest lines: no way into King Leoric's Tomb")
+	}
+	// King Leoric's Tomb: breaking its four crucified skeletons opens the side room (BreakCrux)
+	cruxes := 0
+	walkable := func() (n int) {
+		m := state.GetMap()
+		for y := 0; y < d1.LevelSize; y++ {
+			for x := 0; x < d1.LevelSize; x++ {
+				if m.IsTileWalkable(geometry.Point{X: x, Y: y}) {
+					n++
+				}
+			}
+		}
+		return
+	}
+	before := walkable()
+	for kind := d1.ObjCRUX1; kind <= d1.ObjCRUX3; kind++ {
+		for _, obj := range state.GetMap().Objects() {
+			o, ok := obj.(*common.D1Object)
+			if !ok || o.O.Kind != kind {
+				continue
+			}
+			if before != walkable() {
+				fail("quest lines: Leoric's tomb opened before the last crucified skeleton broke")
+			}
+			o.ActorBumpedInto(player(), nil)
+			cruxes++
+		}
+	}
+	if cruxes != 4 || walkable() <= before {
+		fail("quest lines: breaking %d crucified skeletons didn't open Leoric's side room", cruxes)
+	}
 	talkTo(theGame, common.VendorTypeOgden)
 	log(d1.QLtBanner)
 	talkTo(theGame, common.VendorTypeWeapons) // The Magic Rock

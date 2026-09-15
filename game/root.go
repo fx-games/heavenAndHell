@@ -393,6 +393,8 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 		g.actionBroker.Execute(common.NewChangeResourceAction(common.AbstractCause("Drain life"), player, stats.Health, -float64(autUsed*d1.RefWalkTicks*4)/10/64))
 	}
 
+	common.D1BurningCross(&g.state, player, autUsed)
+
 	// execute after turn events, =?
 	for _, event := range g.executeAfterTurn {
 		event()

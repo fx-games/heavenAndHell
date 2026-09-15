@@ -24,13 +24,17 @@ type LevelSnapshot struct {
 	Items    []SavedItem          // D1 floor items
 	Used     []int                // indices of used objects (opened chests, broken barrels, ...)
 	Disarmed []int                // indices of objects whose trap the rogue disarmed
+	Traps    []int                // indices of wall traps that fired or were disarmed
 	Spawned  []SavedMonster       // skeletons from sarcophagi and barrels
 	Corpses  []SavedMonster       // dead monsters, which scavengers feed on
 	Explored []byte               // explored cells, one bit per cell row by row
 }
 
-func SnapshotLevel(m *gridmap.GridMap[*Actor, *Item, Object]) *LevelSnapshot {
+func SnapshotLevel(state *State, m *gridmap.GridMap[*Actor, *Item, Object]) *LevelSnapshot {
 	s := &LevelSnapshot{Monsters: map[int]SavedMonster{}}
+	if lvl := state.mapGen.levels[m.GetName()]; lvl != nil {
+		s.Traps = d1SprungTraps(lvl)
+	}
 	for _, a := range m.Actors() {
 		if mon := a.d1Monster; mon != nil && a.IsAlive() && !mon.Golem {
 			p := a.MapPosition()
@@ -89,6 +93,17 @@ func (s *LevelSnapshot) apply(f *Factory, m *gridmap.GridMap[*Actor, *Item, Obje
 	disarmed := map[int]bool{}
 	for _, i := range s.Disarmed {
 		disarmed[i] = true
+	}
+	sprung := map[int]bool{}
+	for _, i := range s.Traps {
+		sprung[i] = true
+	}
+	if lvl := f.State.mapGen.levels[m.GetName()]; lvl != nil {
+		for _, t := range lvl.Objects {
+			if (t.Kind == d1.ObjTRAPL || t.Kind == d1.ObjTRAPR) && sprung[t.Index] {
+				t.Var4 = 1
+			}
+		}
 	}
 	for _, obj := range m.Objects() {
 		if o, ok := obj.(*D1Object); ok {

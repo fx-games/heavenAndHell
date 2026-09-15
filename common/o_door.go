@@ -11,6 +11,7 @@ type Door struct {
 	openIcon   int32
 
 	isOpen bool
+	onOpen func() // D1: the wall traps aimed at this door fire (Obj_Trap)
 }
 
 func (d *Door) Turn() {
@@ -20,6 +21,9 @@ func (d *Door) Name() string {
 	return "a door"
 }
 func (d *Door) ActorWalkedOn(actor *Actor, startAnimating func() bool) {
+	if !d.isOpen && d.onOpen != nil {
+		defer d.onOpen()
+	}
 	d.isOpen = true
 }
 func (d *Door) ActorBumpedInto(actor *Actor, startAnimating func() bool) {

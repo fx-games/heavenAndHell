@@ -34,8 +34,25 @@ var d1ObjectNames = map[int]string{
 	d1.ObjLEVER: "Lever", d1.ObjLAZSTAND: "Staff Stand", d1.ObjSWITCHSKL: "Skull Lever", d1.ObjMUSHPATCH: "Mushroom Patch",
 	d1.ObjSIGNCHEST: "Large Chest", d1.ObjBLINDBOOK: "Book of the Blind", d1.ObjBLOODBOOK: "Book of Blood",
 	d1.ObjSTEELTOME: "Steel Tome", d1.ObjPEDISTAL: "Pedestal of Blood", d1.ObjBOOK2R: "Mythical Book",
-	d1.ObjBOOK2L: "Ancient Tome", d1.ObjSLAINHERO: "Slain Hero",
+	d1.ObjBOOK2L: "Ancient Tome", d1.ObjSLAINHERO: "Slain Hero", d1.ObjWARARMOR: "Armor", d1.ObjWARWEAP: "Weapon Rack",
+	// decoration (D1 shows no name for these)
+	d1.ObjSKFIRE: "Skull Fire", d1.ObjCANDLE1: "Candle", d1.ObjCANDLE2: "Candle", d1.ObjCANDLEO: "Candle",
+	d1.ObjBOOKCANDLE: "Candle", d1.ObjSTORYCANDLE: "Candle", d1.ObjBANNERL: "Banner", d1.ObjBANNERM: "Banner",
+	d1.ObjBANNERR: "Banner", d1.ObjSKPILE: "Skull Pile", d1.ObjSKSTICK1: "Skull on a Stick", d1.ObjSKSTICK2: "Skull on a Stick",
+	d1.ObjSKSTICK3: "Skull on a Stick", d1.ObjSKSTICK4: "Skull on a Stick", d1.ObjSKSTICK5: "Skull on a Stick",
+	d1.ObjCRUX1: "Crucified Skeleton", d1.ObjCRUX2: "Crucified Skeleton", d1.ObjCRUX3: "Crucified Skeleton",
+	d1.ObjSTAND: "Stand", d1.ObjANGEL: "Angel Statue", d1.ObjBCROSS: "Burning Cross", d1.ObjTBCROSS: "Burning Cross",
+	d1.ObjNUDEW2R: "Tortured Body", d1.ObjTNUDEM1: "Tortured Body", d1.ObjTNUDEM2: "Tortured Body", d1.ObjTNUDEM3: "Tortured Body",
+	d1.ObjTNUDEM4: "Tortured Body", d1.ObjTNUDEW1: "Tortured Body", d1.ObjTNUDEW2: "Tortured Body", d1.ObjTNUDEW3: "Tortured Body",
+	d1.ObjTORTURE1: "Hooked Body", d1.ObjTORTURE2: "Hooked Body", d1.ObjTORTURE3: "Hooked Body", d1.ObjTORTURE4: "Hooked Body",
+	d1.ObjTORTURE5: "Hooked Body", d1.ObjBOOKSHELF: "Bookshelf", d1.ObjWEAPRACK: "Weapon Stand", d1.ObjARMORSTANDN: "Armor Stand",
+	d1.ObjWEAPONRACKN: "Weapon Rack", d1.ObjALTBOY: "Altar", d1.ObjMCIRCLE1: "Magic Circle", d1.ObjMCIRCLE2: "Magic Circle",
+	d1.ObjFLAMEHOLE: "Flame Hole", d1.ObjFLAMELVR: "Lever", d1.ObjWATER: "Water", d1.ObjBOOKLVR: "Book",
 }
+
+// d1ObjectLights are the light radii of the decorative objects that glow (ProcessObjects' Obj_Light).
+var d1ObjectLights = map[int]int{d1.ObjSKFIRE: 5, d1.ObjCANDLE2: 5, d1.ObjBOOKCANDLE: 5, d1.ObjSTORYCANDLE: 3,
+	d1.ObjBCROSS: 10, d1.ObjTBCROSS: 10}
 
 // d1StoryBookNames ports StoryBookName, indexed by a story book's Var3.
 var d1StoryBookNames = [...]string{"The Great Conflict", "The Wages of Sin are War", "The Tale of the Horadrim",
@@ -45,7 +62,7 @@ var d1StoryBookNames = [...]string{"The Great Conflict", "The Wages of Sin are W
 var d1Containers = map[int]bool{d1.ObjCHEST1: true, d1.ObjCHEST2: true, d1.ObjCHEST3: true,
 	d1.ObjTCHEST1: true, d1.ObjTCHEST2: true, d1.ObjTCHEST3: true, d1.ObjSARC: true, d1.ObjBARREL: true,
 	d1.ObjSKELBOOK: true, d1.ObjBOOKCASEL: true, d1.ObjBOOKCASER: true, d1.ObjBOOKSTAND: true, d1.ObjDECAP: true,
-	d1.ObjARMORSTAND: true, d1.ObjWEAPONRACK: true}
+	d1.ObjARMORSTAND: true, d1.ObjWEAPONRACK: true, d1.ObjWARARMOR: true, d1.ObjWARWEAP: true}
 
 func (o *D1Object) Name() string {
 	if player := o.f.State.GetPlayer(); o.O.TrapFlag && player != nil && player.hero != nil && player.hero.Class == d1.Rogue {
@@ -73,6 +90,8 @@ func (o *D1Object) IsUnlootedContainer() bool { return o.O.Active && d1Container
 func (o *D1Object) broken() bool {
 	return !o.O.Active && (o.O.Kind == d1.ObjBARREL || o.O.Kind == d1.ObjBARRELEX)
 }
+
+func isD1Crux(kind int) bool { return kind >= d1.ObjCRUX1 && kind <= d1.ObjCRUX3 }
 
 func (o *D1Object) iconName() string {
 	name := "prop." + o.f.Generator.D.Objects[o.O.Kind].Name
@@ -102,16 +121,30 @@ func (o *D1Object) TintColor() color.RGBA {
 
 func (o *D1Object) MapPosition() geometry.Point       { return o.pos }
 func (o *D1Object) SetMapPosition(p geometry.Point)   { o.pos = p }
-func (o *D1Object) IsWalkable(*Actor) bool            { return o.broken() }
+func (o *D1Object) IsWalkable(*Actor) bool {
+	return o.broken() || o.O.Kind == d1.ObjMCIRCLE1 || o.O.Kind == d1.ObjMCIRCLE2
+}
 func (o *D1Object) IsTransparent() bool               { return true }
 func (o *D1Object) IsPassableForProjectile() bool     { return true }
 func (o *D1Object) Turn()                             {}
-func (o *D1Object) ActorWalkedOn(*Actor, func() bool) {}
+func (o *D1Object) ActorWalkedOn(actor *Actor, _ func() bool) {
+	if actor == o.f.State.GetPlayer() && (o.O.Kind == d1.ObjMCIRCLE1 || o.O.Kind == d1.ObjMCIRCLE2) {
+		o.f.d1MagicCircle(o, actor)
+	}
+}
 
 func (o *D1Object) ActorBumpedInto(actor *Actor, _ func() bool) {
 	if actor == o.f.State.GetPlayer() && actor.hero != nil {
 		o.f.operateD1Object(o, actor)
 	}
+}
+
+func d1DoorAt(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point) (*Door, bool) {
+	if !m.Contains(p) || !m.IsObjectAt(p) {
+		return nil, false
+	}
+	door, ok := m.ObjectAt(p).(*Door)
+	return door, ok
 }
 
 func d1ObjectAt(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point) *D1Object {
@@ -158,6 +191,10 @@ func (o *d1WallLight) ActorBumpedInto(*Actor, func() bool) {}
 // pre-spawned sarcophagus/barrel skeleton resolved to its monster type from the level's (still-hidden) monster
 // list, everything else as an interactive D1Object.
 func d1PlaceObject(f *Factory, m *gridmap.GridMap[*Actor, *Item, Object], lvl *d1.Level, o *d1.Object, p geometry.Point) {
+	if lvl.CellSolid(p.X, p.Y) && f.Generator.D.Objects[o.Kind].SelFlag == 0 && !d1WallLightKinds[o.Kind] { // hangs on a wall
+		m.AddDecal(p, defs.Icon("prop."+f.Generator.D.Objects[o.Kind].Name))
+		return
+	}
 	if d1WallLightKinds[o.Kind] {
 		icon := defs.IconBrazier
 		onFloor := !lvl.CellSolid(p.X, p.Y)
@@ -185,13 +222,19 @@ func d1PlaceObject(f *Factory, m *gridmap.GridMap[*Actor, *Item, Object], lvl *d
 	if slot >= 0 && slot < len(lvl.Monsters) && lvl.Monsters[slot] != nil {
 		preSpawn = lvl.Monsters[slot].Type
 	}
+	if o.AnimDisabled { // a second armor stand or weapon rack of its kind stands empty (_oSelFlag 0)
+		o.Active = false
+	}
 	m.AddObject(&D1Object{O: o, f: f, pos: p, PreSpawnType: preSpawn}, p)
 }
 
-// operateD1Object ports OperateObject/BreakBarrel for the player.
-// ponytail: operating takes no time, like H&H's other bump objects; traps are deferred (see D1_PLAN.md).
+// operateD1Object ports OperateObject/BreakObject for the player.
+// ponytail: operating takes no time, like H&H's other bump objects.
 func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 	obj, gen, st := o.O, f.Generator, player.GetStats()
+	if gen.D.Objects[obj.Kind].SelFlag == 0 { // decoration: nothing to operate
+		return
+	}
 	dlvl := d1DungeonLevel(f.State)
 	hell := dlvl > 12
 	drop := func(it *d1.Item) {
@@ -226,6 +269,9 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		return
 	}
 	obj.Active = false
+	if d1TrapTargets[obj.Kind] { // Obj_Trap notices the used object on the next tick
+		defer f.springD1WallTraps(f.State.GetMap(), obj.X, obj.Y)
+	}
 	if d1Containers[obj.Kind] { // looting that yields no item and no monster still says so
 		m := f.State.GetMap()
 		items, actors := len(m.Items()), len(m.Actors())
@@ -244,6 +290,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 				drop(gen.UsefulItem(dlvl))
 			}
 		}
+		f.springD1ChestTrap(o, player)
 	case d1.ObjSARC:
 		if obj.Var1 <= 2 {
 			drop(gen.FloorItem(dlvl, false, hell))
@@ -253,6 +300,8 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		}
 	case d1.ObjBARREL, d1.ObjBARRELEX:
 		f.breakD1Barrel(o, player)
+	case d1.ObjCRUX1, d1.ObjCRUX2, d1.ObjCRUX3:
+		f.breakD1Crux(o)
 	case d1.ObjSHRINEL, d1.ObjSHRINER:
 		f.d1Shrine(player, obj.Var1, o.pos)
 	case d1.ObjGOATSHRINE, d1.ObjCAULDRON:
@@ -277,7 +326,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 			drop(gen.SpellBook(dlvl, d1.SplLightning))
 		}
 		f.playD1HeroSound(9)
-	case d1.ObjARMORSTAND:
+	case d1.ObjARMORSTAND, d1.ObjWARARMOR:
 		unique := d1Rng.Intn(2) != 0
 		switch {
 		case dlvl <= 5:
@@ -289,7 +338,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		default:
 			drop(gen.TypeItem(dlvl, d1.ITypeHArmor, "", true))
 		}
-	case d1.ObjWEAPONRACK:
+	case d1.ObjWEAPONRACK, d1.ObjWARWEAP:
 		t := [4]int{d1.ITypeSword, d1.ITypeAxe, d1.ITypeBow, d1.ITypeMace}[d1Rng.Intn(4)]
 		drop(gen.TypeItem(dlvl, t, "", dlvl > 4))
 	case d1.ObjMURKYFTN:
@@ -342,10 +391,25 @@ func (f *Factory) d1Skeleton(mt int, pos geometry.Point, player *Actor) {
 	d1Alert(a, player)
 }
 
-// hitD1Barrel breaks an intact barrel at p: anything that hits its cell does, like D1's missile collisions.
-func (f *Factory) hitD1Barrel(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point, attacker *Actor) {
-	if o := d1ObjectAt(m, p); o != nil && o.O.Active && (o.O.Kind == d1.ObjBARREL || o.O.Kind == d1.ObjBARRELEX) {
+// hitD1Object breaks an intact barrel or crucified skeleton at p (_oBreak 1): anything that hits its cell does,
+// like D1's missile collisions (BreakObject).
+func (f *Factory) hitD1Object(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point, attacker *Actor) {
+	o := d1ObjectAt(m, p)
+	switch {
+	case o == nil || !o.O.Active:
+	case o.O.Kind == d1.ObjBARREL || o.O.Kind == d1.ObjBARRELEX:
 		f.breakD1Barrel(o, attacker)
+	case isD1Crux(o.O.Kind) && m == f.State.GetMap():
+		f.breakD1Crux(o)
+	}
+}
+
+// breakD1Crux ports BreakCrux: once every crucified skeleton of its group is down, its part of the map opens.
+func (f *Factory) breakD1Crux(o *D1Object) {
+	o.O.Active = false
+	if m := f.State.GetMap(); d1ObjectGroupUsed(m, isD1Crux, o.O.Var8) {
+		f.Msg("Something rumbles in the distance.")
+		f.State.mapGen.changeD1Map(m, o.O.Var1, o.O.Var2, o.O.Var3, o.O.Var4)
 	}
 }
 

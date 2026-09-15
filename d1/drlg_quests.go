@@ -62,18 +62,11 @@ func (g *gen) drawAlternate(name string, x, y int) {
 	}
 }
 
-// resyncQuests ports ResyncQuests for a fresh game: Ogden's sign at qvar1 1 (InitQuests), and Lazarus' lair as it
-// is after his talk (MAI_Lazarus) and its three books (OperateBook, SetObjMapRange in LoadSetMap). Later quest
-// states open the rest on the built level (common's UpdateD1Quests). DRLG_MRectTrans is skipped: it only
+// resyncQuests ports ResyncQuests for a fresh game: Ogden's sign at qvar1 1 (InitQuests). Later quest states,
+// Lazarus' lair included, open the rest on the built level (common's UpdateD1Quests). DRLG_MRectTrans is skipped: it only
 // marks rooms (dTransVal) for drawing walls see-through and the circling AIs' same-room check, which our grid
 // doesn't need.
 func (g *gen) resyncQuests() {
-	if g.setlevel && g.setLvlNum == SLVileBetrayer {
-		g.objChangeMapResync(1, 18, 20, 24)
-		g.objChangeMapResync(1, 1, 9, 10)
-		g.objChangeMapResync(11, 1, 20, 10)
-		g.objChangeMapResync(7, 11, 13, 18)
-	}
 	if r := g.setPiece; g.available(QLtBanner) {
 		g.objChangeMapResync(r.w+r.x-2, r.h+r.y-2, r.w+r.x+1, r.h+r.y+1)
 	}

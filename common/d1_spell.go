@@ -89,7 +89,7 @@ func (c *spellCtx) monsterAt(p geometry.Point) *Actor {
 
 // hitCell is monsterAt for a cell a spell hits: a barrel there breaks first.
 func (c *spellCtx) hitCell(p geometry.Point) *Actor {
-	c.f.hitD1Barrel(c.m, p, c.caster)
+	c.f.hitD1Object(c.m, p, c.caster)
 	return c.monsterAt(p)
 }
 
@@ -209,7 +209,7 @@ func (c *spellCtx) bolt(from, to geometry.Point, hit func(a *Actor) bool) geomet
 	for _, p := range c.ray(from, to, 20) {
 		last = p
 		if o := d1ObjectAt(c.m, p); o != nil && !o.IsWalkable(nil) {
-			c.f.hitD1Barrel(c.m, p, c.caster)
+			c.f.hitD1Object(c.m, p, c.caster)
 			break
 		}
 		if a := c.monsterAt(p); a != nil && hit(a) {

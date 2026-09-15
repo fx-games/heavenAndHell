@@ -339,6 +339,30 @@ func MissileDamage64(rng *rand.Rand, s Sheet, mind, maxd int, shift bool) int {
 	return MonsterDamage(rng, s, mind, maxd)
 }
 
+// TrapHitChance ports PlayerMHit for a missile from no monster (a trap): 100 − AC/2 − 2·dist for arrows, a flat
+// 40 for magic; dist in cells.
+func TrapHitChance(s Sheet, magic bool, dist, dlvl int) int {
+	if magic {
+		return dlvlHitFloor(40, dlvl)
+	}
+	return dlvlHitFloor(max(100-(s.AC+s.BonusAC+s.Dex/5)>>1-dist<<1, 10), dlvl)
+}
+
+// TrapDamage64 ports PlayerMHit's damage roll for a trap's missile, in 1/64: like MissileDamage64, but halved by
+// ISPL_ABSHALFTRAP before the -damage affix is added.
+func TrapDamage64(rng *rand.Rand, s Sheet, mind, maxd int, shift bool) int {
+	var dam, getHit int
+	if shift {
+		dam, getHit = rnd(rng, maxd-mind+1)+mind, s.GetHit
+	} else {
+		dam, getHit = rng.Intn((maxd-mind+1)<<6)+mind<<6, s.GetHit<<6
+	}
+	if s.Flags&ISplAbsHalfTrap != 0 {
+		dam >>= 1
+	}
+	return max(dam+getHit, 64)
+}
+
 // BlockChance ports the block roll; 0 without a shield.
 func (h *Hero) BlockChance(s Sheet, monLevel int) int {
 	if !s.Block {

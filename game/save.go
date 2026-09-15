@@ -86,7 +86,7 @@ func (g *GameInstance) SaveGame() {
 		sg.Levels[name] = snap
 	}
 	for name, m := range g.state.DungeonMaps() {
-		sg.Levels[name] = common.SnapshotLevel(m)
+		sg.Levels[name] = common.SnapshotLevel(&g.state, m)
 	}
 	data, err := json.Marshal(sg)
 	if err != nil {

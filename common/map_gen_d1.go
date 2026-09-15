@@ -63,7 +63,7 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 	if snap := g.snapshots[targetMap]; snap != nil {
 		snap.apply(g.factory, m)
 	}
-	for _, a := range m.Actors() {
+	for _, a := range append(append([]*Actor(nil), m.Actors()...), g.walledIn[targetMap]...) {
 		if a.d1Monster != nil {
 			g.factory.initD1Talk(a)
 		}
@@ -144,12 +144,17 @@ func (g *MapGenerator) wireD1SetLevelReturn(m *gridmap.GridMap[*Actor, *Item, Ob
 	}
 	if sl.SL == d1.SLVileBetrayer {
 		m.AddNamedLocation("ladder_up", toCell(lvl.View[0], lvl.View[1]))
+		m.AddNamedLocation("exit", pieceCell(D1VilePortal))
 	}
 }
 
 // placeD1Monsters ports the actor side of InitMonsters: everything D1's generator placed, except the four reserved
 // golem slots and skeletons still hidden inside a sarcophagus or barrel (those rise when the container is opened).
 func (g *MapGenerator) placeD1Monsters(m *gridmap.GridMap[*Actor, *Item, Object], lvl *d1.Level) {
+	if g.walledIn == nil {
+		g.walledIn = map[string][]*Actor{}
+	}
+	g.walledIn[m.GetName()] = nil
 	for i, mon := range lvl.Monsters {
 		if mon == nil || mon.Reserved || mon.Hidden {
 			continue
@@ -157,34 +162,30 @@ func (g *MapGenerator) placeD1Monsters(m *gridmap.GridMap[*Actor, *Item, Object]
 		a := g.factory.NewD1MonsterFromLevel(mon)
 		a.d1Monster.SpawnIndex = i
 		p := toCell(mon.X, mon.Y)
-		if !m.CanPlaceActorHere(p) {
-			continue // a monster D1 placed inside what our simplified terrain treats as solid (see d1IsLavaMega etc.)
-		}
 		a.SetDrawPosition(p.ToPointF())
+		if !m.CanPlaceActorHere(p) {
+			// walled in, like Lazarus and his helpers until their rooms open (changeD1Map places them then), or
+			// inside what our simplified terrain treats as solid (see d1IsLavaMega etc.)
+			a.SetMapPosition(p)
+			g.walledIn[m.GetName()] = append(g.walledIn[m.GetName()], a)
+			continue
+		}
 		m.AddActor(a, p)
 	}
 }
 
-// d1RenderedObjects are the D1Object kinds decision 12 keeps as interactive containers/fixtures (everything else -
-// candles, banners, crosses, torture bodies, empty stands, traps - is decoration or deferred and is
-// skipped). Door kinds are excluded: those become terrain + an H&H Door object in addBasicTiles.
-var d1RenderedObjects = map[int]bool{
-	d1.ObjL1LIGHT: true, d1.ObjLEVER: true, d1.ObjCHEST1: true, d1.ObjCHEST2: true, d1.ObjCHEST3: true,
-	d1.ObjTCHEST1: true, d1.ObjTCHEST2: true, d1.ObjTCHEST3: true, d1.ObjSARC: true, d1.ObjBARREL: true,
-	d1.ObjBARRELEX: true, d1.ObjSHRINEL: true, d1.ObjSHRINER: true, d1.ObjSKELBOOK: true, d1.ObjBOOKCASEL: true,
-	d1.ObjBOOKCASER: true, d1.ObjBOOKSTAND: true, d1.ObjBLOODFTN: true, d1.ObjDECAP: true, d1.ObjPURIFYINGFTN: true,
-	d1.ObjARMORSTAND: true, d1.ObjGOATSHRINE: true, d1.ObjCAULDRON: true, d1.ObjMURKYFTN: true, d1.ObjTEARFTN: true,
-	d1.ObjWEAPONRACK: true, d1.ObjLAZSTAND: true, d1.ObjTORCHL: true, d1.ObjTORCHR: true, d1.ObjTORCHL2: true,
-	d1.ObjTORCHR2: true, d1.ObjSWITCHSKL: true, d1.ObjMUSHPATCH: true, d1.ObjSIGNCHEST: true, d1.ObjBLINDBOOK: true,
-	d1.ObjBLOODBOOK: true, d1.ObjSTEELTOME: true, d1.ObjPEDISTAL: true, d1.ObjBOOK2L: true, d1.ObjBOOK2R: true,
-	d1.ObjSTORYBOOK: true, d1.ObjSLAINHERO: true,
-}
-
-// placeD1Objects ports the object side of InitObjects/CreateThemeRooms: everything D1's generator placed, at the
-// exact kinds decision 12 keeps.
+// placeD1Objects ports the object side of InitObjects/CreateThemeRooms: everything D1's generator placed. Doors
+// become terrain + an H&H Door object in addBasicTiles; wall traps stay hidden in the walls (d1_trap.go).
 func (g *MapGenerator) placeD1Objects(m *gridmap.GridMap[*Actor, *Item, Object], lvl *d1.Level) {
 	for _, o := range lvl.Objects {
-		if !d1RenderedObjects[o.Kind] {
+		if d1DoorKinds[o.Kind] {
+			if door, ok := d1DoorAt(m, toCell(o.X, o.Y)); ok {
+				x, y := o.X, o.Y
+				door.onOpen = func() { g.factory.springD1WallTraps(m, x, y) }
+			}
+			continue
+		}
+		if o.Kind == d1.ObjTRAPL || o.Kind == d1.ObjTRAPR {
 			continue
 		}
 		p := toCell(o.X, o.Y)
