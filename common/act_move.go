@@ -114,6 +114,10 @@ func PlayerMoveToAttack(actor *Actor, relativeDirection geometry.Point, forceAtt
 			return NewOpenDoorAction(NewActorCause("Open door", actor), actor, targetPos)
 		} else {
 			objectAtPos.ActorBumpedInto(actor, AnimateNow())
+			if o, ok := objectAtPos.(*D1Object); ok && o.UsesTurn(actor) {
+				state.factory.ActionBroker.Execute(NewEndPlayerTurnAction(NewActorCause("Operate", actor), 10))
+				return nil
+			}
 		}
 	}
 

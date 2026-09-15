@@ -572,7 +572,7 @@ func (f *Factory) d1RandomTeleport(player *Actor) {
 
 func (f *Factory) openD1IdentifyMenu(player *Actor) bool {
 	var items []util.MenuItem
-	for _, it := range player.GetInventory().Items() {
+	for _, it := range d1HeroItems(player) {
 		if it.d1 == nil || it.d1.Magical == 0 || it.d1.Identified {
 			continue
 		}

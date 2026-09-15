@@ -25,6 +25,7 @@ type LevelSnapshot struct {
 	Used     []int                // indices of used objects (opened chests, broken barrels, ...)
 	Disarmed []int                // indices of objects whose trap the rogue disarmed
 	Traps    []int                // indices of wall traps that fired or were disarmed
+	Doors    []int                // indices of open doors
 	Spawned  []SavedMonster       // skeletons from sarcophagi and barrels
 	Corpses  []SavedMonster       // dead monsters, which scavengers feed on
 	Explored []byte               // explored cells, one bit per cell row by row
@@ -66,8 +67,18 @@ func SnapshotLevel(state *State, m *gridmap.GridMap[*Actor, *Item, Object]) *Lev
 		}
 	}
 	for _, obj := range m.Objects() {
-		if o, ok := obj.(*D1Object); ok && o.Disarmed {
-			s.Disarmed = append(s.Disarmed, o.O.Index)
+		switch o := obj.(type) {
+		case *D1Object:
+			if o.Disarmed {
+				s.Disarmed = append(s.Disarmed, o.O.Index)
+			}
+		case *Door:
+			if o.D1 != nil && o.Disarmed {
+				s.Disarmed = append(s.Disarmed, o.D1.Index)
+			}
+			if o.D1 != nil && o.isOpen {
+				s.Doors = append(s.Doors, o.D1.Index)
+			}
 		}
 	}
 	for _, it := range m.Items() {
@@ -102,14 +113,36 @@ func (s *LevelSnapshot) apply(f *Factory, m *gridmap.GridMap[*Actor, *Item, Obje
 		for _, t := range lvl.Objects {
 			if (t.Kind == d1.ObjTRAPL || t.Kind == d1.ObjTRAPR) && sprung[t.Index] {
 				t.Var4 = 1
+				for _, o := range lvl.Objects { // Obj_Trap cleared the target's flag when the trap fired
+					if o.X == t.Var1 && o.Y == t.Var2 {
+						o.TrapFlag = false
+					}
+				}
+			}
+			if used[t.Index] && t.Kind >= d1.ObjTCHEST1 && t.Kind <= d1.ObjTCHEST3 { // opening set its trap off
+				t.TrapFlag = false
 			}
 		}
 	}
+	open := map[int]bool{}
+	for _, i := range s.Doors {
+		open[i] = true
+	}
 	for _, obj := range m.Objects() {
-		if o, ok := obj.(*D1Object); ok {
+		switch o := obj.(type) {
+		case *D1Object:
 			o.O.Active = !used[o.O.Index]
 			if disarmed[o.O.Index] {
-				f.State.mapGen.disarmD1Object(m, o)
+				o.Disarmed = true
+				f.State.mapGen.disarmD1Object(m, o.O)
+			}
+		case *Door:
+			if o.D1 != nil && disarmed[o.D1.Index] {
+				o.Disarmed = true
+				f.State.mapGen.disarmD1Object(m, o.D1)
+			}
+			if o.D1 != nil && open[o.D1.Index] {
+				o.isOpen = true // its wall traps are restored above, so opening it doesn't fire them again
 			}
 		}
 	}

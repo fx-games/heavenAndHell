@@ -91,6 +91,10 @@ func TestHero(t *testing.T) {
 	if !s.Active[0] || s.Active[1] || s.AC != 0 || s.MinDam != 2 || s.WeaponType != ITypeSword {
 		t.Fatalf("requirements not applied: %+v", s)
 	}
+	if s = w.Sheet([]*Item{sword, heavy, ring}); s.Active[1] || s.Str != 30 {
+		t.Fatalf("an unidentified ring must not count: %+v", s)
+	}
+	ring.Identified = true
 	s = w.Sheet([]*Item{sword, heavy, ring})
 	if !s.Active[1] || s.AC != 40 || s.Str != 90 {
 		t.Fatalf("ring should enable heavy armor: %+v", s)

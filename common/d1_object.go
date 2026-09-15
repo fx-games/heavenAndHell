@@ -139,6 +139,12 @@ func (o *D1Object) ActorBumpedInto(actor *Actor, _ func() bool) {
 	}
 }
 
+// UsesTurn is true when bumping into the object operates it, which takes the hero a turn; decoration and walkable
+// debris don't.
+func (o *D1Object) UsesTurn(actor *Actor) bool {
+	return actor.hero != nil && o.f.Generator.D.Objects[o.O.Kind].SelFlag != 0 && !o.IsWalkable(actor)
+}
+
 func d1DoorAt(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point) (*Door, bool) {
 	if !m.Contains(p) || !m.IsObjectAt(p) {
 		return nil, false

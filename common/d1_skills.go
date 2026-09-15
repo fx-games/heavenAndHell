@@ -30,7 +30,7 @@ func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedActio
 		})
 	}
 	action := NewTargetedAction("Trap Disarm", OneTargetTile(f.State.GetMap, util.Arguments{}),
-		&HitEffect{Activate: func(caster *Actor, target geometry.Point, _ []geometry.Point) { f.d1Disarm(caster, target) },
+		&HitEffect{Activate: func(caster *Actor, target geometry.Point, _ []geometry.Point) { f.D1Disarm(caster, target) },
 			Description: []util.LabelText{util.LabelTextFromString("Trap Disarm")}},
 		d1SpellTargeting(f, d1.SplDisarm))
 	action.SetIcon(defs.IconEffectHit)
@@ -42,14 +42,7 @@ func (f *Factory) d1ItemSkill(name string, applies func(*d1.Item) bool, perform 
 	action := NewUntargetedAction(name, defs.IconEffectHit)
 	action.SetEffect(&UntargetedEffect{Effect: func(player *Actor, _ EffectSource) {
 		var items []util.MenuItem
-		inv := player.GetInventory()
-		all := inv.Items()
-		for _, it := range player.GetEquipment().AllItems() {
-			if !inv.Has(it) {
-				all = append(all, it)
-			}
-		}
-		for _, it := range all {
+		for _, it := range d1HeroItems(player) {
 			if it.d1 == nil || !applies(it.d1) {
 				continue
 			}
@@ -70,12 +63,28 @@ func (f *Factory) d1ItemSkill(name string, applies func(*d1.Item) bool, perform 
 	return action
 }
 
-// d1Disarm ports TryDisarm on the object next to the hero: a Dexterity roll against the depth clears its trap
-// flag, and the wall traps aimed at it stop firing.
-func (f *Factory) d1Disarm(player *Actor, target geometry.Point) {
+// d1HeroItems are the pack's items and the equipped ones that aren't in it.
+func d1HeroItems(player *Actor) []*Item {
+	inv := player.GetInventory()
+	all := append([]*Item(nil), inv.Items()...)
+	for _, it := range player.GetEquipment().AllItems() {
+		if !inv.Has(it) {
+			all = append(all, it)
+		}
+	}
+	return all
+}
+
+// D1Disarm ports ACTION_DISARM on the object next to the hero: TryDisarm's Dexterity roll against the depth clears
+// its trap flag and the wall traps aimed at it, then the object is operated anyway (a failed roll sets the trap off).
+func (f *Factory) D1Disarm(player *Actor, target geometry.Point) {
 	m := f.State.GetMap()
 	o := d1ObjectAt(m, target)
-	if o == nil {
+	door, isDoor := d1DoorAt(m, target)
+	if isDoor && door.D1 == nil {
+		isDoor = false
+	}
+	if o == nil && !isDoor {
 		f.Msg("There is nothing to disarm there.")
 		return
 	}
@@ -84,18 +93,36 @@ func (f *Factory) d1Disarm(player *Actor, target geometry.Point) {
 		return
 	}
 	f.ActionBroker.Execute(NewEndPlayerTurnAction(AbstractCause("Trap Disarm"), 10))
-	if !o.O.TrapFlag || d1Rng.Intn(100) > d1.DisarmChance(player.HeroSheet().Dex, d1DungeonLevel(f.State)) {
-		f.Msg(fmt.Sprintf("You find no trap on the %s you can disarm.", o.Name()))
+	if o != nil && f.Generator.D.Objects[o.O.Kind].Break == 1 { // barrels and crucified skeletons are attacked
+		f.hitD1Object(m, target, player)
 		return
 	}
-	f.State.mapGen.disarmD1Object(m, o)
-	f.Msg(fmt.Sprintf("You disarm the %s.", o.Name()))
+	obj, name := door.D1, "door"
+	if o != nil {
+		obj, name = o.O, o.Name()
+	}
+	if obj.TrapFlag && d1Rng.Intn(100) <= d1.DisarmChance(player.HeroSheet().Dex, d1DungeonLevel(f.State)) {
+		f.State.mapGen.disarmD1Object(m, obj)
+		if o != nil {
+			o.Disarmed = true
+		} else {
+			door.Disarmed = true
+		}
+		f.Msg(fmt.Sprintf("You disarm the %s.", name))
+	} else {
+		f.Msg(fmt.Sprintf("You find no trap on the %s you can disarm.", name))
+	}
+	if o != nil {
+		f.operateD1Object(o, player)
+	} else {
+		door.Open()
+		f.ActionBroker.Execute(NewUpdateFoVAction(AbstractCause("Trap Disarm"), player))
+	}
 }
 
-// disarmD1Object clears an object's trap: its flag, and the wall traps pointing at it (their _oVar4 set to 1).
-func (g *MapGenerator) disarmD1Object(m interface{ GetName() string }, o *D1Object) {
-	obj := o.O
-	obj.TrapFlag, o.Disarmed = false, true
+// disarmD1Object ports TryDisarm's success: the wall traps pointing at the object stop (their _oVar4 set to 1).
+func (g *MapGenerator) disarmD1Object(m interface{ GetName() string }, obj *d1.Object) {
+	obj.TrapFlag = false
 	lvl := g.levels[m.GetName()]
 	if lvl == nil {
 		return

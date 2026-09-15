@@ -154,7 +154,17 @@ func playthrough() {
 
 			// milestone 2: save, load, and everything that matters is back (a load sees from where the hero stands)
 			theGame.GetActionBroker().Execute(common.NewUpdateFoVAction(common.AbstractCause("playthrough"), player))
+			disarmedDoor := checkDoorDisarm(theGame.GetFactory(), state, player, fail)
+			for _, obj := range state.GetMap().Objects() { // a door opened before the save stays open
+				if door, ok := obj.(*common.Door); ok && door.D1 != nil && door.IsClosed() {
+					door.Open()
+					break
+				}
+			}
 			before := saveCheckOf(state)
+			if dlvl <= 12 && before.OpenDoors == 0 { // Hell has no doors
+				fail("run %d dlvl %d: no open door to save", run, dlvl)
+			}
 			theGame.SaveGame()
 			if err := theGame.LoadGame(); err != nil {
 				fail("run %d dlvl %d: load failed: %v", run, dlvl, err)
@@ -164,6 +174,9 @@ func playthrough() {
 			after := saveCheckOf(state)
 			if after.Explored < before.Explored { // loading arrives by the stairs first, which may explore a few more cells
 				fail("run %d dlvl %d: load forgot explored cells (%d -> %d)", run, dlvl, before.Explored, after.Explored)
+			}
+			if disarmedDoor >= 0 && !doorDisarmed(state, disarmedDoor) {
+				fail("run %d dlvl %d: load forgot the disarmed door", run, dlvl)
 			}
 			after.Explored = before.Explored
 			if after != before {
@@ -279,12 +292,50 @@ func fight(broker *common.Broker, state *common.State, player *common.Actor) (ki
 	return kills, damageTaken, player.Hero().Exp - expBefore
 }
 
+// checkDoorDisarm: Trap Disarm on a trapped door clears its trap, stops the wall traps aimed at it and opens it
+// without setting them off (ACTION_DISARM: TryDisarm, then OperateDoor). Returns the door's object index, or -1.
+func checkDoorDisarm(f *common.Factory, state *common.State, player *common.Actor, fail func(string, ...any)) int {
+	m := state.GetMap()
+	for _, obj := range m.Objects() {
+		door, ok := obj.(*common.Door)
+		if !ok || door.D1 == nil || !door.D1.TrapFlag || !door.IsClosed() {
+			continue
+		}
+		free := m.GetFreeCardinalNeighbors(door.MapPosition())
+		if len(free) == 0 {
+			continue
+		}
+		dex := player.Hero().BaseDex
+		player.Hero().BaseDex = 250 // 2·Dex − 5·dlvl ≥ 100: the roll can't fail
+		common.SyncHero(player)
+		m.MoveActor(player, free[0])
+		traps := len(common.SnapshotLevel(state, m).Traps)
+		f.D1Disarm(player, door.MapPosition())
+		player.Hero().BaseDex = dex
+		common.SyncHero(player)
+		if door.D1.TrapFlag || !door.Disarmed || door.IsClosed() || len(common.SnapshotLevel(state, m).Traps) <= traps {
+			fail("disarming a trapped door: trapped=%v disarmed=%v closed=%v", door.D1.TrapFlag, door.Disarmed, door.IsClosed())
+		}
+		return door.D1.Index
+	}
+	return -1
+}
+
+func doorDisarmed(state *common.State, index int) bool {
+	for _, obj := range state.GetMap().Objects() {
+		if door, ok := obj.(*common.Door); ok && door.D1 != nil && door.D1.Index == index {
+			return door.Disarmed && !door.D1.TrapFlag
+		}
+	}
+	return false
+}
+
 type saveCheck struct {
 	Map                              string
 	Pos                              geometry.Point
 	Level, Exp, StatPts, Gold, HP    int
 	Items, Equipped, Monsters, Floor int
-	UsedObjects, Traps               int
+	UsedObjects, Traps, OpenDoors    int
 	Corpses, Explored, AIState       int
 	Golem, ManaShield                bool
 }
@@ -344,7 +395,8 @@ func saveCheckOf(state *common.State) saveCheck {
 			c.UsedObjects++
 		}
 	}
-	c.Traps = len(common.SnapshotLevel(state, m).Traps)
+	snap := common.SnapshotLevel(state, m)
+	c.Traps, c.OpenDoors = len(snap.Traps), len(snap.Doors)
 	return c
 }
 

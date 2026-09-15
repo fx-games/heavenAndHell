@@ -51,7 +51,7 @@ func d1ServiceOption(ctx ActionContext, label string, applies func(*d1.Item) boo
 	return util.MenuItem{MainText: label, Action: func() {
 		player := ctx.GameState.GetPlayer()
 		var items []util.MenuItem
-		for _, item := range player.GetInventory().Items() {
+		for _, item := range d1HeroItems(player) {
 			if item.d1 == nil || !applies(item.d1) {
 				continue
 			}

@@ -110,7 +110,7 @@ func (h *Hero) Sheet(equipped []*Item) Sheet {
 		changed = false
 		str, mag, dex := h.BaseStr, h.BaseMag, h.BaseDex
 		for i, it := range equipped {
-			if active[i] {
+			if active[i] && it.Identified { // CalcSelfItems counts only identified bonuses
 				str, mag, dex = str+it.PLStr, mag+it.PLMag, dex+it.PLDex
 			}
 		}
@@ -139,8 +139,9 @@ func (h *Hero) Sheet(equipped []*Item) Sheet {
 		if it.Class == "ICLASS_WEAPON" {
 			s.WeaponType = it.Type
 		}
-		// ponytail: D1 skips bonuses of unidentified magic items here (_iMagical == 0 || _iIdentified);
-		// we apply them, since decision 9 says unidentified items work with hidden effects.
+		if it.Magical != 0 && !it.Identified { // unidentified magic items give only their base damage and armor
+			continue
+		}
 		s.BonusDam += it.PLDam
 		s.BonusToHit += it.PLToHit
 		if it.PLAC != 0 {
