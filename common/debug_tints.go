@@ -19,13 +19,13 @@ func (g *Factory) DebugTints() []TintedTile {
 	var out []TintedTile
 	for mt, m := range g.Generator.D.Monsters {
 		if a := g.NewD1Monster(mt); a.GetColor() != defs.White {
-			out = append(out, TintedTile{a.icon, a.GetColor(), "monster." + m.ID, m.Name + ": variant tint"})
+			out = append(out, TintedTile{a.icon, a.GetColor(), defs.IconID("monster", m.ID), m.Name + ": variant tint"})
 		}
 	}
 	for _, o := range g.Generator.D.Objects {
-		fresh, ok := defs.IconOK("prop." + o.Name)
-		if used, hasUsed := defs.IconOK("prop." + o.Name + ".used"); ok && hasUsed && fresh == used {
-			out = append(out, TintedTile{used, D1UsedTint, "prop." + o.Name + ".used", "used object: same icon as fresh"})
+		fresh, ok := defs.IconOK(defs.IconID("prop", o.Name))
+		if used, hasUsed := defs.IconOK(defs.IconID("prop", o.Name) + ".used"); ok && hasUsed && fresh == used {
+			out = append(out, TintedTile{used, D1UsedTint, defs.IconID("prop", o.Name) + ".used", "used object: same icon as fresh"})
 		}
 	}
 	return out

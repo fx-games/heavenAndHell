@@ -934,10 +934,10 @@ func (f *Factory) D1SpellSkills(player *Actor) ([]*TargetedAction, []*Untargeted
 				&HitEffect{Activate: func(caster *Actor, target geometry.Point, _ []geometry.Point) { f.CastD1FromMemory(caster, sp, target) },
 					Description: []util.LabelText{util.LabelTextFromString(d1.SpellDescriptions[sp])}},
 				d1SpellTargeting(f, sp))
-			action.SetIcon(defs.Icon("spell." + sd.ID))
+			action.SetIcon(defs.Icon(defs.IconID("spell", sd.ID)))
 			targeted = append(targeted, action)
 		} else {
-			action := NewUntargetedAction(name, defs.Icon("spell."+sd.ID))
+			action := NewUntargetedAction(name, defs.Icon(defs.IconID("spell", sd.ID)))
 			action.SetEffect(&UntargetedEffect{Effect: func(caster *Actor, _ EffectSource) { f.CastD1FromMemory(caster, sp, caster.MapPosition()) },
 				Description: []util.LabelText{util.LabelTextFromString(d1.SpellDescriptions[sp])}})
 			untargeted = append(untargeted, action)

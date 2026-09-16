@@ -80,7 +80,7 @@ func addActorFromEntity(ldtkMapProject *ldtk.Project, loadedMap *gridmap.GridMap
 	actorName := entity.PropertyByIdentifier("Name").AsString()
 	// every NPC is a townsperson: its internal name is its vendor type
 	internalName := entity.PropertyByIdentifier("InternalName").AsString()
-	if remapped, ok := defs.IconOK("npc." + internalName); ok { // ./remap_actors.sh overrides the tile baked into maps.ldtk
+	if remapped, ok := defs.IconOK(defs.IconID("npc", internalName)); ok { // ./remap_actors.sh overrides the tile baked into maps.ldtk
 		icon = remapped
 	}
 	actor := NewActor(icon)

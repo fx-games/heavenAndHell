@@ -58,7 +58,7 @@ func (g *Factory) NewSign(inscription []string) *BumpObject {
 }
 
 func (g *Factory) NewStash() *BumpObject {
-	return NewBumpObject("your stash", defs.Icon("prop.OBJ_CHEST1"), func(actor *Actor, startAnimating func() bool) {
+	return NewBumpObject("your stash", defs.Icon("prop.chest1"), func(actor *Actor, startAnimating func() bool) {
 		g.UI().OpenPlayerStashInTown()
 	})
 }

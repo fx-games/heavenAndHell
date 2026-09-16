@@ -2,15 +2,20 @@ package defs
 
 import (
 	"path"
+	"regexp"
 	"rpg/files"
 	"rpg/recfile"
+	"strings"
 )
 
 // Icons live in four independently remappable rec files under files/assets/data/icons/ (8x8 tiles in
-// assets/classic_roguelike.png): actors.rec (H&H IconCharacter*/IconMonster*/IconUnique*/IconCorpse*/IconRogue*
-// plus D1's "monster.<ID>", "unique.<Name>" and "npc.<name>"), items.rec (IconItem* plus D1's "item.ITYPE_*"/"item.IMISC_*"),
-// tiles.rec (everything else: terrain, doors, decals, effects, plus D1's "prop.OBJ_*"), skills.rec (D1's "spell.SPL_*" skill and spell icons). Remap them with
-// ./remap_actors.sh, ./remap_items.sh, ./remap_tiles.sh, ./remap_skills.sh — each rec file is read fresh on every game start, no
+// assets/classic_roguelike.png), one ID convention throughout: "kind.snake_case_name", e.g. "class.warrior_male",
+// "monster.nzombie", "unique.gharbad_the_weak", "npc.wirt", "corpse.default" (actors.rec); "item.falchion",
+// "item.falchion.magic"/".unique" (per weapon/armor family), "item.heal" (potions/scrolls, keyed by IMISC_*) etc.
+// (items.rec); "tile.grass", "prop.chest1"(+".used"), "decal.blood1", "effect.fire_small" (tiles.rec);
+// "spell.firebolt" (skills.rec). IDs built from D1's own enum names (MT_*, OBJ_*, SPL_*, ITYPE_*, IMISC_*) go
+// through IconID, which strips the enum prefix and lowercases the rest. Remap them with ./remap_actors.sh,
+// ./remap_items.sh, ./remap_tiles.sh, ./remap_skills.sh — each rec file is read fresh on every game start, no
 // rebuild needed. The H&H constants (IconGrass, ...) are package vars, not consts, for the same
 // reason: their value comes from the rec file, not from the Go source.
 func loadIconRec(name string) map[string]int32 {
@@ -36,8 +41,25 @@ func loadIconRec(name string) map[string]int32 {
 	return icons
 }
 
-// IconOK looks up a name not exposed as a Go constant (D1's dynamically keyed "monster.<ID>", "npc.<name>",
-// "item.ITYPE_*"/"item.IMISC_*", "prop.OBJ_*", "spell.SPL_*") in all four category files.
+var iconIDPrefixes = []string{"MT_", "OBJ_", "SPL_", "ITYPE_", "IMISC_"}
+var iconIDNonWord = regexp.MustCompile(`[^a-z0-9]+`)
+
+// IconID builds a "kind.snake_case_name" icon ID from a D1 enum value or free-text name, stripping the enum's
+// own prefix (MT_NZOMBIE -> nzombie, OBJ_CHEST1 -> chest1, "Gharbad the Weak" -> gharbad_the_weak) so every
+// rec file uses one convention regardless of where the raw name came from.
+func IconID(kind, raw string) string {
+	for _, p := range iconIDPrefixes {
+		if trimmed, ok := strings.CutPrefix(raw, p); ok {
+			raw = trimmed
+			break
+		}
+	}
+	slug := strings.Trim(iconIDNonWord.ReplaceAllString(strings.ToLower(raw), "_"), "_")
+	return kind + "." + slug
+}
+
+// IconOK looks up a name not exposed as a Go constant (D1's dynamically keyed "monster.<id>", "npc.<name>",
+// "item.<name>", "prop.<name>", "spell.<name>", built with IconID) in all four category files.
 func IconOK(name string) (int32, bool) {
 	for _, m := range []map[string]int32{actorsIcons, itemsIcons, tilesIcons, skillsIcons} {
 		if icon, ok := m[name]; ok {

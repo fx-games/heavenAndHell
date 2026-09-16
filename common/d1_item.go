@@ -10,21 +10,13 @@ import (
 
 func (i *Item) D1() *d1.Item { return i.d1 }
 
-// Decision 8: one icon per D1 item class, with dedicated IconItemMagic*/IconItemUnique* icons for quality (items.rec) -
-// items are never tinted on the map.
-var d1ITypeNames = []string{"ITYPE_MISC", "ITYPE_SWORD", "ITYPE_AXE", "ITYPE_BOW", "ITYPE_MACE", "ITYPE_SHIELD", "ITYPE_LARMOR",
-	"ITYPE_HELM", "ITYPE_MARMOR", "ITYPE_HARMOR", "ITYPE_STAFF", "ITYPE_GOLD", "ITYPE_RING", "ITYPE_AMULET"}
+// Decision 8: one icon per D1 weapon/armor family (falchion, dagger, broad sword...), with a ".magic"/".unique"
+// variant of each for quality (items.rec) - items are never tinted on the map.
+var d1ITypeFallback = []string{"item.misc", "item.sword", "item.axe", "item.bow", "item.mace", "item.shield",
+	"item.larmor", "item.helm", "item.marmor", "item.harmor", "item.staff", "item.gold", "item.ring", "item.amulet"}
 
-// d1RarityIconSuffix names the IconItemMagic<suffix>/IconItemUnique<suffix> icon for every D1 item type that rolls
-// affixes or uniques; magic items are never tinted, so each needs one in items.rec.
-var d1RarityIconSuffix = map[int]string{
-	d1.ITypeSword: "Sword", d1.ITypeAxe: "Axe", d1.ITypeMace: "Mace", d1.ITypeBow: "Bow", d1.ITypeStaff: "Staff",
-	d1.ITypeShield: "Shield", d1.ITypeLArmor: "Armor", d1.ITypeMArmor: "Armor", d1.ITypeHArmor: "Armor", d1.ITypeHelm: "Helmet",
-	d1.ITypeRing: "Ring", d1.ITypeAmulet: "Amulet",
-}
-
-// d1ItemIcon: icons.rec "item.IMISC_*" if present (potions, scrolls), else the magic/unique variant of the item's
-// class icon if it.Magical calls for one, else "item.ITYPE_*".
+// d1ItemIcon: icons.rec "item.<misc id>" if present (potions, scrolls), else the ".magic"/".unique" variant of the
+// item's own family icon if it.Magical calls for one, else the family icon, else "item.<type>".
 func d1ItemIcon(it *d1.Item) int32 {
 	return defs.Icon(d1ItemIconName(it))
 }
@@ -35,31 +27,35 @@ func d1GoldIconName(value int) string {
 	const lo, hi = 5, 268
 	switch {
 	case value < lo+(hi-lo)/3:
-		return "item.ITYPE_GOLD_SMALL"
+		return "item.gold_small"
 	case value < lo+2*(hi-lo)/3:
-		return "item.ITYPE_GOLD_MEDIUM"
+		return "item.gold_medium"
 	}
-	return "item.ITYPE_GOLD_LARGE"
+	return "item.gold_large"
 }
 
 func d1ItemIconName(it *d1.Item) string {
-	if _, ok := defs.IconOK("item." + it.Name); ok { // quest items are IMISC_NONE, so they're keyed by name
-		return "item." + it.Name
-	}
-	if _, ok := defs.IconOK("item." + it.MiscID); ok {
-		return "item." + it.MiscID
-	}
 	if it.Type == d1.ITypeGold {
 		return d1GoldIconName(it.Value)
 	}
-	if suffix, ok := d1RarityIconSuffix[it.Type]; ok && it.Magical > 0 {
-		prefix := "IconItemMagic"
+	familyName := defs.IconID("item", it.Name) // quest items and every weapon/armor family are keyed by base name
+	if it.Magical > 0 {
+		suffix := ".magic"
 		if it.Magical == 2 {
-			prefix = "IconItemUnique"
+			suffix = ".unique"
 		}
-		return prefix + suffix
+		if _, ok := defs.IconOK(familyName + suffix); ok {
+			return familyName + suffix
+		}
 	}
-	return "item." + d1ITypeNames[it.Type]
+	if _, ok := defs.IconOK(familyName); ok {
+		return familyName
+	}
+	miscName := defs.IconID("item", it.MiscID)
+	if _, ok := defs.IconOK(miscName); ok { // potions/scrolls/runes/oils, keyed by IMISC_*
+		return miscName
+	}
+	return d1ITypeFallback[it.Type]
 }
 
 // d1SlotName is the slot an item goes in; dualWield (the Bard) puts a one-handed weapon in either free hand,

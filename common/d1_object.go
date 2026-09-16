@@ -101,7 +101,7 @@ func (o *D1Object) broken() bool {
 func isD1Crux(kind int) bool { return kind >= d1.ObjCRUX1 && kind <= d1.ObjCRUX3 }
 
 func (o *D1Object) iconName() string {
-	name := "prop." + o.f.Generator.D.Objects[o.O.Kind].Name
+	name := defs.IconID("prop", o.f.Generator.D.Objects[o.O.Kind].Name)
 	if !o.O.Active && o.O.Kind != d1.ObjBLOODFTN && o.O.Kind != d1.ObjPURIFYINGFTN { // used objects have their own icon
 		return name + ".used"
 	}
@@ -205,7 +205,7 @@ func (o *d1WallLight) ActorBumpedInto(*Actor, func() bool) {}
 // list, everything else as an interactive D1Object.
 func d1PlaceObject(f *Factory, m *gridmap.GridMap[*Actor, *Item, Object], lvl *d1.Level, o *d1.Object, p geometry.Point) {
 	if lvl.CellSolid(p.X, p.Y) && f.Generator.D.Objects[o.Kind].SelFlag == 0 && !d1WallLightKinds[o.Kind] { // hangs on a wall
-		m.AddDecal(p, defs.Icon("prop."+f.Generator.D.Objects[o.Kind].Name))
+		m.AddDecal(p, defs.Icon(defs.IconID("prop", f.Generator.D.Objects[o.Kind].Name)))
 		return
 	}
 	if d1WallLightKinds[o.Kind] {

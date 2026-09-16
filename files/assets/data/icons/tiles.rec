@@ -1,442 +1,494 @@
 %rec: default
 
-internal_name: IconNone
+internal_name: tile.none
 icon: -1
+name: None
 
-internal_name: IconWhite
+internal_name: tile.white
 icon: 18
+name: White
 
-internal_name: IconTargeting
+internal_name: tile.targeting
 icon: 220
+name: Targeting
 
-internal_name: IconGrass
+internal_name: tile.grass
 icon: 0
+name: Grass
 
-internal_name: IconDirt
+internal_name: tile.dirt
 icon: 1
+name: Dirt
 
-internal_name: IconMountain
+internal_name: tile.mountain
 icon: 7
+name: Mountain
 
-internal_name: IconMountainWithEntrance
+internal_name: tile.mountain_with_entrance
 icon: 8
+name: Mountain With Entrance
 
-internal_name: IconWater
+internal_name: tile.water
 icon: 28
+name: Water
 
-internal_name: IconWoodenBridge
+internal_name: tile.wooden_bridge
 icon: 63
+name: Wooden Bridge
 
-internal_name: IconWoodenFence
+internal_name: tile.wooden_fence
 icon: 63
+name: Wooden Fence
 
-internal_name: IconLava
+internal_name: tile.lava
 icon: 159
+name: Lava
 
-internal_name: IconWallTorch
+internal_name: tile.wall_torch
 icon: 352
+name: Wall Torch
 
-internal_name: IconBrazier
+internal_name: tile.brazier
 icon: 32
+name: Brazier
 
-internal_name: IconTreeDark
+internal_name: tile.tree_dark
 icon: 5
+name: Tree Dark
 
-internal_name: IconTreeLight
+internal_name: tile.tree_light
 icon: 4
+name: Tree Light
 
-internal_name: IconDungeonOfDoomFloorModern
+internal_name: tile.dungeon_of_doom_floor_modern
 icon: 157
+name: Dungeon Of Doom Floor Modern
 
-internal_name: IconDungeonOfDoomWallModern
+internal_name: tile.dungeon_of_doom_wall_modern
 icon: 158
+name: Dungeon Of Doom Wall Modern
 
-internal_name: IconDungeonOfDoomDoorModern
+internal_name: tile.dungeon_of_doom_door_modern
 icon: 241
+name: Dungeon Of Doom Door Modern
 
-internal_name: IconDungeonOfDoomFloor
+internal_name: tile.dungeon_of_doom_floor
 icon: 242
+name: Dungeon Of Doom Floor
 
-internal_name: IconDungeonOfDoomWallHoriz
+internal_name: tile.dungeon_of_doom_wall_horiz
 icon: 269
+name: Dungeon Of Doom Wall Horiz
 
-internal_name: IconDungeonOfDoomWallVert
+internal_name: tile.dungeon_of_doom_wall_vert
 icon: 297
+name: Dungeon Of Doom Wall Vert
 
-internal_name: IconDungeonOfDoomDoor
+internal_name: tile.dungeon_of_doom_door
 icon: 240
+name: Dungeon Of Doom Door
 
-internal_name: IconDungeonOfDoomCorridorWall
+internal_name: tile.dungeon_of_doom_corridor_wall
 icon: 243
+name: Dungeon Of Doom Corridor Wall
 
-internal_name: IconDungeonOfDoomCorridorFloor
+internal_name: tile.dungeon_of_doom_corridor_floor
 icon: 268
+name: Dungeon Of Doom Corridor Floor
 
-internal_name: IconCathedralFloor
+internal_name: tile.cathedral_floor
 icon: 64
+name: Cathedral Floor
 
-internal_name: IconCatacombsFloor
+internal_name: tile.catacombs_floor
 icon: 86
+name: Catacombs Floor
 
-internal_name: IconCatacombsWall
+internal_name: tile.catacombs_wall
 icon: 84
+name: Catacombs Wall
 
-internal_name: IconCatacombsWallWithShading
+internal_name: tile.catacombs_wall_with_shading
 icon: 85
+name: Catacombs Wall With Shading
 
-internal_name: IconDungeonFloorAlternative1
+internal_name: tile.dungeon_floor_alternative1
 icon: 14
+name: Dungeon Floor Alternative1
 
-internal_name: IconDungeonRedEarthFloor
+internal_name: tile.dungeon_red_earth_floor
 icon: 186
+name: Dungeon Red Earth Floor
 
-internal_name: IconDungeonRockyWall
+internal_name: tile.dungeon_rocky_wall
 icon: 9
+name: Dungeon Rocky Wall
 
-internal_name: IconCathedralWall
+internal_name: tile.cathedral_wall
 icon: 56
+name: Cathedral Wall
 
-internal_name: IconArch
+internal_name: tile.arch
 icon: 346
+name: Arch
 
-internal_name: IconGrate
+internal_name: tile.grate
 icon: 345
+name: Grate
 
-internal_name: IconPillar
+internal_name: tile.pillar
 icon: 75
+name: Pillar
 
-internal_name: IconLamp
+internal_name: tile.lamp
 icon: 247
+name: Lamp
 
-internal_name: IconCathedralWallWithShading
+internal_name: tile.cathedral_wall_with_shading
 icon: 58
+name: Cathedral Wall With Shading
 
-internal_name: IconOpenDoor
+internal_name: tile.open_door
 icon: 70
+name: Open Door
 
-internal_name: IconClosedDoor
+internal_name: tile.closed_door
 icon: 69
+name: Closed Door
 
-internal_name: IconStairsUp
+internal_name: tile.stairs_up
 icon: 73
+name: Stairs Up
 
-internal_name: IconStairsDown
+internal_name: tile.stairs_down
 icon: 74
+name: Stairs Down
 
-internal_name: IconShrine
+internal_name: tile.shrine
 icon: 75
+name: Shrine
 
-internal_name: IconSign
+internal_name: tile.sign
 icon: 154
+name: Sign
 
-internal_name: IconDecalBlood1
+internal_name: decal.blood1
 icon: 189
+name: Decal Blood1
 
-internal_name: IconDecalBlood2
+internal_name: decal.blood2
 icon: 190
+name: Decal Blood2
 
-internal_name: IconDecalBlood3
+internal_name: decal.blood3
 icon: 191
+name: Decal Blood3
 
-internal_name: IconDecalBlood4
+internal_name: decal.blood4
 icon: 192
+name: Decal Blood4
 
-internal_name: IconDecalBlood5
+internal_name: decal.blood5
 icon: 193
+name: Decal Blood5
 
-internal_name: IconEffectLightning
+internal_name: effect.lightning
 icon: 37
+name: Effect Lightning
 
-internal_name: IconEffectFireSmall
+internal_name: effect.fire_small
 icon: 109
+name: Effect Fire Small
 
-internal_name: IconEffectFireBig
+internal_name: effect.fire_big
 icon: 32
+name: Effect Fire Big
 
-internal_name: IconEffectHit
+internal_name: effect.hit
 icon: 43
+name: Effect Hit
 
-internal_name: prop.OBJ_L1LIGHT
+internal_name: prop.l1light
 name: Cathedral Candelabra (wall light)
 icon: 109
 
-internal_name: prop.OBJ_CHEST1
+internal_name: prop.chest1
 name: Small Chest
 icon: 128
 
-internal_name: prop.OBJ_CHEST1.used
+internal_name: prop.chest1.used
 name: Small Chest (opened)
 icon: 127
 
-internal_name: prop.OBJ_TCHEST1
+internal_name: prop.tchest1
 name: Small Chest (trapped)
 icon: 128
 
-internal_name: prop.OBJ_TCHEST1.used
+internal_name: prop.tchest1.used
 name: Small Chest (trapped, opened)
 icon: 127
 
-internal_name: prop.OBJ_CHEST2
+internal_name: prop.chest2
 name: Chest
 icon: 128
 
-internal_name: prop.OBJ_CHEST2.used
+internal_name: prop.chest2.used
 name: Chest (opened)
 icon: 127
 
-internal_name: prop.OBJ_TCHEST2
+internal_name: prop.tchest2
 name: Chest (trapped)
 icon: 128
 
-internal_name: prop.OBJ_TCHEST2.used
+internal_name: prop.tchest2.used
 name: Chest (trapped, opened)
 icon: 127
 
-internal_name: prop.OBJ_CHEST3
+internal_name: prop.chest3
 name: Large Chest
 icon: 128
 
-internal_name: prop.OBJ_CHEST3.used
+internal_name: prop.chest3.used
 name: Large Chest (opened)
 icon: 127
 
-internal_name: prop.OBJ_TCHEST3
+internal_name: prop.tchest3
 name: Large Chest (trapped)
 icon: 128
 
-internal_name: prop.OBJ_TCHEST3.used
+internal_name: prop.tchest3.used
 name: Large Chest (trapped, opened)
 icon: 127
 
-internal_name: prop.OBJ_SARC
+internal_name: prop.sarc
 name: Sarcophagus
 icon: 264
 
-internal_name: prop.OBJ_SARC.used
+internal_name: prop.sarc.used
 name: Sarcophagus (opened)
 icon: 265
 
-internal_name: prop.OBJ_BARREL
+internal_name: prop.barrel
 name: Barrel
 icon: 125
 
-internal_name: prop.OBJ_BARRELEX
+internal_name: prop.barrelex
 name: Explosive Barrel
 icon: 320
 
-internal_name: prop.OBJ_SHRINEL
+internal_name: prop.shrinel
 name: Shrine (left wall)
 icon: 75
 
-internal_name: prop.OBJ_SHRINEL.used
+internal_name: prop.shrinel.used
 name: Shrine (left wall, used)
 icon: 75
 
-internal_name: prop.OBJ_SHRINER
+internal_name: prop.shriner
 name: Shrine (right wall)
 icon: 75
 
-internal_name: prop.OBJ_SHRINER.used
+internal_name: prop.shriner.used
 name: Shrine (right wall, used)
 icon: 75
 
-internal_name: prop.OBJ_SKELBOOK
+internal_name: prop.skelbook
 name: Skeleton Tome (book on stand)
 icon: 321
 
-internal_name: prop.OBJ_SKELBOOK.used
+internal_name: prop.skelbook.used
 name: Skeleton Tome (read)
 icon: 322
 
-internal_name: prop.OBJ_BOOKCASEL
+internal_name: prop.bookcasel
 name: Bookcase (left wall)
 icon: 321
 
-internal_name: prop.OBJ_BOOKCASEL.used
+internal_name: prop.bookcasel.used
 name: Bookcase (left wall, searched)
 icon: 322
 
-internal_name: prop.OBJ_BOOKCASER
+internal_name: prop.bookcaser
 name: Bookcase (right wall)
 icon: 321
 
-internal_name: prop.OBJ_BOOKCASER.used
+internal_name: prop.bookcaser.used
 name: Bookcase (right wall, searched)
 icon: 322
 
-internal_name: prop.OBJ_BOOKSTAND
+internal_name: prop.bookstand
 name: Library Book (on lectern)
 icon: 321
 
-internal_name: prop.OBJ_BOOKSTAND.used
+internal_name: prop.bookstand.used
 name: Library Book (read)
 icon: 322
 
-internal_name: prop.OBJ_BLOODFTN
+internal_name: prop.bloodftn
 name: Blood Fountain
 icon: 293
 
-internal_name: prop.OBJ_DECAP
+internal_name: prop.decap
 name: Decapitated Body
 icon: 135
 
-internal_name: prop.OBJ_DECAP.used
+internal_name: prop.decap.used
 name: Decapitated Body (searched)
 icon: 135
 
-internal_name: prop.OBJ_PURIFYINGFTN
+internal_name: prop.purifyingftn
 name: Purifying Spring
 icon: 292
 
-internal_name: prop.OBJ_ARMORSTAND
+internal_name: prop.armorstand
 name: Armor Stand (with armor)
 icon: 348
 
-internal_name: prop.OBJ_ARMORSTAND.used
+internal_name: prop.armorstand.used
 name: Armor Stand (empty)
 icon: 349
 
-internal_name: prop.OBJ_GOATSHRINE
+internal_name: prop.goatshrine
 name: Goat Shrine
 icon: 75
 
-internal_name: prop.OBJ_GOATSHRINE.used
+internal_name: prop.goatshrine.used
 name: Goat Shrine (used)
 icon: 75
 
-internal_name: prop.OBJ_CAULDRON
+internal_name: prop.cauldron
 name: Cauldron
 icon: 75
 
-internal_name: prop.OBJ_CAULDRON.used
+internal_name: prop.cauldron.used
 name: Cauldron (used)
 icon: 75
 
-internal_name: prop.OBJ_MURKYFTN
+internal_name: prop.murkyftn
 name: Murky Pool
 icon: 292
 
-internal_name: prop.OBJ_MURKYFTN.used
+internal_name: prop.murkyftn.used
 name: Murky Pool (used)
 icon: 292
 
-internal_name: prop.OBJ_TEARFTN
+internal_name: prop.tearftn
 name: Fountain of Tears
 icon: 292
 
-internal_name: prop.OBJ_TEARFTN.used
+internal_name: prop.tearftn.used
 name: Fountain of Tears (used)
 icon: 292
 
-internal_name: prop.OBJ_WEAPONRACK
+internal_name: prop.weaponrack
 name: Weapon Rack (with weapon)
 icon: 376
 
-internal_name: prop.OBJ_WEAPONRACK.used
+internal_name: prop.weaponrack.used
 name: Weapon Rack (empty)
 icon: 377
 
-internal_name: prop.OBJ_LEVER
+internal_name: prop.lever
 name: Lever
 icon: 266
 
-internal_name: prop.OBJ_LEVER.used
+internal_name: prop.lever.used
 name: Lever (pulled)
 icon: 267
 
-internal_name: prop.OBJ_LAZSTAND
+internal_name: prop.lazstand
 name: Staff of Lazarus Stand (with staff)
 icon: 347
 
-internal_name: prop.OBJ_LAZSTAND.used
+internal_name: prop.lazstand.used
 name: Staff of Lazarus Stand (empty)
 icon: 349
 
-internal_name: prop.OBJ_SWITCHSKL
+internal_name: prop.switchskl
 name: Skull Lever
 icon: 266
 
-internal_name: prop.OBJ_SWITCHSKL.used
+internal_name: prop.switchskl.used
 name: Skull Lever (pulled)
 icon: 267
 
-internal_name: prop.OBJ_MUSHPATCH
+internal_name: prop.mushpatch
 name: Mushroom Patch (Black Mushroom quest)
 icon: 34
 
-internal_name: prop.OBJ_MUSHPATCH.used
+internal_name: prop.mushpatch.used
 name: Mushroom Patch (searched)
 icon: 46
 
-internal_name: prop.OBJ_SIGNCHEST
+internal_name: prop.signchest
 name: Large Chest (Ogden's Sign quest)
 icon: 128
 
-internal_name: prop.OBJ_SIGNCHEST.used
+internal_name: prop.signchest.used
 name: Large Chest (Ogden's Sign quest, opened)
 icon: 127
 
-internal_name: prop.OBJ_BLINDBOOK
+internal_name: prop.blindbook
 name: Book of the Blind (Halls of the Blind quest)
 icon: 321
 
-internal_name: prop.OBJ_BLINDBOOK.used
+internal_name: prop.blindbook.used
 name: Book of the Blind (read)
 icon: 322
 
-internal_name: prop.OBJ_BLOODBOOK
+internal_name: prop.bloodbook
 name: Book of Blood (Valor quest)
 icon: 321
 
-internal_name: prop.OBJ_BLOODBOOK.used
+internal_name: prop.bloodbook.used
 name: Book of Blood (read)
 icon: 322
 
-internal_name: prop.OBJ_STEELTOME
+internal_name: prop.steeltome
 name: Steel Tome (Warlord of Blood quest)
 icon: 321
 
-internal_name: prop.OBJ_STEELTOME.used
+internal_name: prop.steeltome.used
 name: Steel Tome (read)
 icon: 322
 
-internal_name: prop.OBJ_PEDISTAL
+internal_name: prop.pedistal
 name: Pedestal of Blood (Valor quest)
 icon: 39
 
-internal_name: prop.OBJ_PEDISTAL.used
+internal_name: prop.pedistal.used
 name: Pedestal of Blood (stones placed)
 icon: 40
 
-internal_name: prop.OBJ_BOOK2L
+internal_name: prop.book2l
 name: Ancient Tome (Chamber of Bone / Lazarus lair)
 icon: 321
 
-internal_name: prop.OBJ_BOOK2L.used
+internal_name: prop.book2l.used
 name: Ancient Tome (read)
 icon: 322
 
-internal_name: prop.OBJ_BOOK2R
+internal_name: prop.book2r
 name: Mythical Book (Chamber of Bone quest)
 icon: 321
 
-internal_name: prop.OBJ_BOOK2R.used
+internal_name: prop.book2r.used
 name: Mythical Book (read)
 icon: 322
 
-internal_name: prop.OBJ_STORYBOOK
+internal_name: prop.storybook
 name: Story Book (levels 4, 8, 12)
 icon: 321
 
-internal_name: prop.OBJ_STORYBOOK.used
+internal_name: prop.storybook.used
 name: Story Book (read)
 icon: 322
 
-internal_name: prop.OBJ_SLAINHERO
+internal_name: prop.slainhero
 name: Slain Hero (level 9)
 icon: 135
 
-internal_name: prop.OBJ_SLAINHERO.used
+internal_name: prop.slainhero.used
 name: Slain Hero (searched)
 icon: 135
 
@@ -452,222 +504,222 @@ internal_name: prop.portal.2
 name: Town Portal (frame 2)
 icon: 294
 
-internal_name: prop.OBJ_SKFIRE
+internal_name: prop.skfire
 name: Skull Fire
 icon: 32
 
-internal_name: prop.OBJ_CANDLE1
+internal_name: prop.candle1
 name: Candle
 icon: 110
 
-internal_name: prop.OBJ_CANDLE2
+internal_name: prop.candle2
 name: Candle (lit)
 icon: 110
 
-internal_name: prop.OBJ_CANDLEO
+internal_name: prop.candleo
 name: Candle
 icon: 110
 
-internal_name: prop.OBJ_BOOKCANDLE
+internal_name: prop.bookcandle
 name: Candle (library)
 icon: 110
 
-internal_name: prop.OBJ_STORYCANDLE
+internal_name: prop.storycandle
 name: Candle (story book, Lazarus' staff)
 icon: 110
 
-internal_name: prop.OBJ_BANNERL
+internal_name: prop.bannerl
 name: Banner (left)
 icon: 61
 
-internal_name: prop.OBJ_BANNERM
+internal_name: prop.bannerm
 name: Banner (middle)
 icon: 61
 
-internal_name: prop.OBJ_BANNERR
+internal_name: prop.bannerr
 name: Banner (right)
 icon: 61
 
-internal_name: prop.OBJ_SKPILE
+internal_name: prop.skpile
 name: Skull Pile
 icon: 250
 
-internal_name: prop.OBJ_SKSTICK1
+internal_name: prop.skstick1
 name: Skull on a Stick 1
 icon: 251
 
-internal_name: prop.OBJ_SKSTICK2
+internal_name: prop.skstick2
 name: Skull on a Stick 2
 icon: 251
 
-internal_name: prop.OBJ_SKSTICK3
+internal_name: prop.skstick3
 name: Skull on a Stick 3
 icon: 251
 
-internal_name: prop.OBJ_SKSTICK4
+internal_name: prop.skstick4
 name: Skull on a Stick 4
 icon: 251
 
-internal_name: prop.OBJ_SKSTICK5
+internal_name: prop.skstick5
 name: Skull on a Stick 5
 icon: 251
 
-internal_name: prop.OBJ_CRUX1
+internal_name: prop.crux1
 name: Crucified Skeleton 1
 icon: 240
 
-internal_name: prop.OBJ_CRUX2
+internal_name: prop.crux2
 name: Crucified Skeleton 2
 icon: 240
 
-internal_name: prop.OBJ_CRUX3
+internal_name: prop.crux3
 name: Crucified Skeleton 3
 icon: 240
 
-internal_name: prop.OBJ_CRUX1.used
+internal_name: prop.crux1.used
 name: Crucified Skeleton 1 (broken)
 icon: 250
 
-internal_name: prop.OBJ_CRUX2.used
+internal_name: prop.crux2.used
 name: Crucified Skeleton 2 (broken)
 icon: 250
 
-internal_name: prop.OBJ_CRUX3.used
+internal_name: prop.crux3.used
 name: Crucified Skeleton 3 (broken)
 icon: 250
 
-internal_name: prop.OBJ_STAND
+internal_name: prop.stand
 name: Magic Rock Stand
 icon: 347
 
-internal_name: prop.OBJ_ANGEL
+internal_name: prop.angel
 name: Angel Statue
 icon: 106
 
-internal_name: prop.OBJ_BCROSS
+internal_name: prop.bcross
 name: Burning Cross
 icon: 241
 
-internal_name: prop.OBJ_TBCROSS
+internal_name: prop.tbcross
 name: Burning Cross (theme room)
 icon: 241
 
-internal_name: prop.OBJ_NUDEW2R
+internal_name: prop.nudew2r
 name: Tortured Body (woman)
 icon: 101
 
-internal_name: prop.OBJ_TNUDEM1
+internal_name: prop.tnudem1
 name: Tortured Body (man 1)
 icon: 101
 
-internal_name: prop.OBJ_TNUDEM2
+internal_name: prop.tnudem2
 name: Tortured Body (man 2)
 icon: 101
 
-internal_name: prop.OBJ_TNUDEM3
+internal_name: prop.tnudem3
 name: Tortured Body (man 3)
 icon: 101
 
-internal_name: prop.OBJ_TNUDEM4
+internal_name: prop.tnudem4
 name: Tortured Body (man 4)
 icon: 101
 
-internal_name: prop.OBJ_TNUDEW1
+internal_name: prop.tnudew1
 name: Tortured Body (woman 1)
 icon: 101
 
-internal_name: prop.OBJ_TNUDEW2
+internal_name: prop.tnudew2
 name: Tortured Body (woman 2)
 icon: 101
 
-internal_name: prop.OBJ_TNUDEW3
+internal_name: prop.tnudew3
 name: Tortured Body (woman 3)
 icon: 101
 
-internal_name: prop.OBJ_TORTURE1
+internal_name: prop.torture1
 name: Hooked Body 1
 icon: 97
 
-internal_name: prop.OBJ_TORTURE2
+internal_name: prop.torture2
 name: Hooked Body 2
 icon: 97
 
-internal_name: prop.OBJ_TORTURE3
+internal_name: prop.torture3
 name: Hooked Body 3
 icon: 97
 
-internal_name: prop.OBJ_TORTURE4
+internal_name: prop.torture4
 name: Hooked Body 4
 icon: 97
 
-internal_name: prop.OBJ_TORTURE5
+internal_name: prop.torture5
 name: Hooked Body 5
 icon: 97
 
-internal_name: prop.OBJ_FLAMEHOLE
+internal_name: prop.flamehole
 name: Flame Hole
 icon: 32
 
-internal_name: prop.OBJ_FLAMELVR
+internal_name: prop.flamelvr
 name: Flame Trap Lever
 icon: 266
 
-internal_name: prop.OBJ_FLAMELVR.used
+internal_name: prop.flamelvr.used
 name: Flame Trap Lever (pulled)
 icon: 267
 
-internal_name: prop.OBJ_WATER
+internal_name: prop.water
 name: Water
 icon: 28
 
-internal_name: prop.OBJ_BOOKLVR
+internal_name: prop.booklvr
 name: Book Lever
 icon: 321
 
-internal_name: prop.OBJ_BOOKLVR.used
+internal_name: prop.booklvr.used
 name: Book Lever (read)
 icon: 322
 
-internal_name: prop.OBJ_BOOKSHELF
+internal_name: prop.bookshelf
 name: Bookshelf
 icon: 321
 
-internal_name: prop.OBJ_WEAPRACK
+internal_name: prop.weaprack
 name: Weapon Stand
 icon: 377
 
-internal_name: prop.OBJ_ARMORSTANDN
+internal_name: prop.armorstandn
 name: Armor Stand (empty)
 icon: 349
 
-internal_name: prop.OBJ_WEAPONRACKN
+internal_name: prop.weaponrackn
 name: Weapon Rack (empty)
 icon: 377
 
-internal_name: prop.OBJ_ALTBOY
+internal_name: prop.altboy
 name: Altar (Lazarus' lair)
 icon: 347
 
-internal_name: prop.OBJ_MCIRCLE1
+internal_name: prop.mcircle1
 name: Magic Circle
 icon: 216
 
-internal_name: prop.OBJ_MCIRCLE2
+internal_name: prop.mcircle2
 name: Magic Circle
 icon: 216
 
-internal_name: prop.OBJ_WARARMOR
+internal_name: prop.wararmor
 name: Armor Stand (Warlord, with armor)
 icon: 348
 
-internal_name: prop.OBJ_WARARMOR.used
+internal_name: prop.wararmor.used
 name: Armor Stand (Warlord, empty)
 icon: 349
 
-internal_name: prop.OBJ_WARWEAP
+internal_name: prop.warweap
 name: Weapon Rack (Warlord, with weapon)
 icon: 376
 
-internal_name: prop.OBJ_WARWEAP.used
+internal_name: prop.warweap.used
 name: Weapon Rack (Warlord, empty)
 icon: 377

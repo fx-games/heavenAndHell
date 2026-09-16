@@ -85,7 +85,7 @@ func (f *Factory) d1RageEffect(clvl int) *ParametrizedStatusEffect {
 
 // d1SkillIcon is the skills.rec icon of a spell or class skill.
 func (f *Factory) d1SkillIcon(spell int) int32 {
-	return defs.Icon("spell." + f.Generator.D.Spells[spell].ID)
+	return defs.Icon(defs.IconID("spell", f.Generator.D.Spells[spell].ID))
 }
 
 // d1ItemSkill lists the pack's items the skill works on and applies it to the one picked, which takes a turn.

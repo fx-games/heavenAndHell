@@ -83,13 +83,13 @@ func D1DirTo(from, to geometry.Point) int {
 
 func (a *Actor) D1Monster() *D1Monster { return a.d1Monster }
 
-// D1MonsterSoundCue builds a monster-specific sound event (e.g. "monster.MT_NZOMBIE.attack", from
+// D1MonsterSoundCue builds a monster-specific sound event (e.g. "monster.nzombie.attack", from
 // assets/data/sounds.rec) for category "attack"/"hit"/"death". Empty if this actor isn't a D1 monster.
 func (a *Actor) D1MonsterSoundCue(category string) string {
 	if a.d1Monster == nil || a.d1Monster.Data == nil {
 		return ""
 	}
-	return "monster." + a.d1Monster.Data.ID + "." + category
+	return defs.IconID("monster", a.d1Monster.Data.ID) + "." + category
 }
 
 // Decision 8: one sheet icon per D1 monster type ("monster.<ID>" in icons/actors.rec, seeded from its graphics
@@ -106,7 +106,7 @@ func (g *Factory) NewD1Monster(mt int) *Actor {
 			variant++
 		}
 	}
-	a := NewActor(defs.Icon("monster." + m.ID))
+	a := NewActor(defs.Icon(defs.IconID("monster", m.ID)))
 	a.SetName(m.Name)
 	a.SetInternalName(m.ID)
 	a.SetHostile()
@@ -128,12 +128,12 @@ func (g *Factory) NewD1Monster(mt int) *Actor {
 	return a
 }
 
-// setD1Unique marks a as unique um, drawn untinted with its own "unique.<Name>" icon from icons/actors.rec.
+// setD1Unique marks a as unique um, drawn untinted with its own "unique.<name>" icon from icons/actors.rec.
 func setD1Unique(a *Actor, um *d1.UniqueMonsterData) {
 	a.SetName(um.Name)
 	a.SetUnique()
 	a.SetColor(defs.White)
-	a.SetIcon(defs.Icon("unique." + um.Name))
+	a.SetIcon(defs.Icon(defs.IconID("unique", um.Name)))
 }
 
 // NewD1UniqueMonster ports PlaceUniqueMonst's stat changes for UniqMonst[u].

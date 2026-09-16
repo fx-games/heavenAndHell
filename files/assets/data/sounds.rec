@@ -48,2486 +48,2486 @@ name: Dungeon - Enter
 tile: IconStairsDown
 sound: sfx/enter_dungeon.ogg
 
-internal_name: monster.MT_NZOMBIE.attack
+internal_name: monster.nzombie.attack
 name: Zombie - Attack
-tile: monster.MT_NZOMBIE
+tile: monster.nzombie
 sound: diablo_sfx/monsters/zombie/zombiea1.ogg
 sound: diablo_sfx/monsters/zombie/zombiea2.ogg
 
-internal_name: monster.MT_NZOMBIE.hit
+internal_name: monster.nzombie.hit
 name: Zombie - Hurt
-tile: monster.MT_NZOMBIE
+tile: monster.nzombie
 sound: diablo_sfx/monsters/zombie/zombieh1.ogg
 sound: diablo_sfx/monsters/zombie/zombieh2.ogg
 
-internal_name: monster.MT_NZOMBIE.death
+internal_name: monster.nzombie.death
 name: Zombie - Death
-tile: monster.MT_NZOMBIE
+tile: monster.nzombie
 sound: diablo_sfx/monsters/zombie/zombied1.ogg
 sound: diablo_sfx/monsters/zombie/zombied2.ogg
 
-internal_name: monster.MT_BZOMBIE.attack
+internal_name: monster.bzombie.attack
 name: Ghoul - Attack
-tile: monster.MT_BZOMBIE
+tile: monster.bzombie
 sound: diablo_sfx/monsters/zombie/zombiea1.ogg
 sound: diablo_sfx/monsters/zombie/zombiea2.ogg
 
-internal_name: monster.MT_BZOMBIE.hit
+internal_name: monster.bzombie.hit
 name: Ghoul - Hurt
-tile: monster.MT_BZOMBIE
+tile: monster.bzombie
 sound: diablo_sfx/monsters/zombie/zombieh1.ogg
 sound: diablo_sfx/monsters/zombie/zombieh2.ogg
 
-internal_name: monster.MT_BZOMBIE.death
+internal_name: monster.bzombie.death
 name: Ghoul - Death
-tile: monster.MT_BZOMBIE
+tile: monster.bzombie
 sound: diablo_sfx/monsters/zombie/zombied1.ogg
 sound: diablo_sfx/monsters/zombie/zombied2.ogg
 
-internal_name: monster.MT_GZOMBIE.attack
+internal_name: monster.gzombie.attack
 name: Rotting Carcass - Attack
-tile: monster.MT_GZOMBIE
+tile: monster.gzombie
 sound: diablo_sfx/monsters/zombie/zombiea1.ogg
 sound: diablo_sfx/monsters/zombie/zombiea2.ogg
 
-internal_name: monster.MT_GZOMBIE.hit
+internal_name: monster.gzombie.hit
 name: Rotting Carcass - Hurt
-tile: monster.MT_GZOMBIE
+tile: monster.gzombie
 sound: diablo_sfx/monsters/zombie/zombieh1.ogg
 sound: diablo_sfx/monsters/zombie/zombieh2.ogg
 
-internal_name: monster.MT_GZOMBIE.death
+internal_name: monster.gzombie.death
 name: Rotting Carcass - Death
-tile: monster.MT_GZOMBIE
+tile: monster.gzombie
 sound: diablo_sfx/monsters/zombie/zombied1.ogg
 sound: diablo_sfx/monsters/zombie/zombied2.ogg
 
-internal_name: monster.MT_YZOMBIE.attack
+internal_name: monster.yzombie.attack
 name: Black Death - Attack
-tile: monster.MT_YZOMBIE
+tile: monster.yzombie
 sound: diablo_sfx/monsters/zombie/zombiea1.ogg
 sound: diablo_sfx/monsters/zombie/zombiea2.ogg
 
-internal_name: monster.MT_YZOMBIE.hit
+internal_name: monster.yzombie.hit
 name: Black Death - Hurt
-tile: monster.MT_YZOMBIE
+tile: monster.yzombie
 sound: diablo_sfx/monsters/zombie/zombieh1.ogg
 sound: diablo_sfx/monsters/zombie/zombieh2.ogg
 
-internal_name: monster.MT_YZOMBIE.death
+internal_name: monster.yzombie.death
 name: Black Death - Death
-tile: monster.MT_YZOMBIE
+tile: monster.yzombie
 sound: diablo_sfx/monsters/zombie/zombied1.ogg
 sound: diablo_sfx/monsters/zombie/zombied2.ogg
 
-internal_name: monster.MT_RFALLSP.attack
+internal_name: monster.rfallsp.attack
 name: Fallen One - Attack
-tile: monster.MT_RFALLSP
+tile: monster.rfallsp
 sound: diablo_sfx/monsters/falspear/phalla1.ogg
 sound: diablo_sfx/monsters/falspear/phalla2.ogg
 
-internal_name: monster.MT_RFALLSP.hit
+internal_name: monster.rfallsp.hit
 name: Fallen One - Hurt
-tile: monster.MT_RFALLSP
+tile: monster.rfallsp
 sound: diablo_sfx/monsters/falspear/phallh1.ogg
 sound: diablo_sfx/monsters/falspear/phallh2.ogg
 
-internal_name: monster.MT_RFALLSP.death
+internal_name: monster.rfallsp.death
 name: Fallen One - Death
-tile: monster.MT_RFALLSP
+tile: monster.rfallsp
 sound: diablo_sfx/monsters/falspear/phalld1.ogg
 sound: diablo_sfx/monsters/falspear/phalld2.ogg
 
-internal_name: monster.MT_DFALLSP.attack
+internal_name: monster.dfallsp.attack
 name: Carver - Attack
-tile: monster.MT_DFALLSP
+tile: monster.dfallsp
 sound: diablo_sfx/monsters/falspear/phalla1.ogg
 sound: diablo_sfx/monsters/falspear/phalla2.ogg
 
-internal_name: monster.MT_DFALLSP.hit
+internal_name: monster.dfallsp.hit
 name: Carver - Hurt
-tile: monster.MT_DFALLSP
+tile: monster.dfallsp
 sound: diablo_sfx/monsters/falspear/phallh1.ogg
 sound: diablo_sfx/monsters/falspear/phallh2.ogg
 
-internal_name: monster.MT_DFALLSP.death
+internal_name: monster.dfallsp.death
 name: Carver - Death
-tile: monster.MT_DFALLSP
+tile: monster.dfallsp
 sound: diablo_sfx/monsters/falspear/phalld1.ogg
 sound: diablo_sfx/monsters/falspear/phalld2.ogg
 
-internal_name: monster.MT_YFALLSP.attack
+internal_name: monster.yfallsp.attack
 name: Devil Kin - Attack
-tile: monster.MT_YFALLSP
+tile: monster.yfallsp
 sound: diablo_sfx/monsters/falspear/phalla1.ogg
 sound: diablo_sfx/monsters/falspear/phalla2.ogg
 
-internal_name: monster.MT_YFALLSP.hit
+internal_name: monster.yfallsp.hit
 name: Devil Kin - Hurt
-tile: monster.MT_YFALLSP
+tile: monster.yfallsp
 sound: diablo_sfx/monsters/falspear/phallh1.ogg
 sound: diablo_sfx/monsters/falspear/phallh2.ogg
 
-internal_name: monster.MT_YFALLSP.death
+internal_name: monster.yfallsp.death
 name: Devil Kin - Death
-tile: monster.MT_YFALLSP
+tile: monster.yfallsp
 sound: diablo_sfx/monsters/falspear/phalld1.ogg
 sound: diablo_sfx/monsters/falspear/phalld2.ogg
 
-internal_name: monster.MT_BFALLSP.attack
+internal_name: monster.bfallsp.attack
 name: Dark One - Attack
-tile: monster.MT_BFALLSP
+tile: monster.bfallsp
 sound: diablo_sfx/monsters/falspear/phalla1.ogg
 sound: diablo_sfx/monsters/falspear/phalla2.ogg
 
-internal_name: monster.MT_BFALLSP.hit
+internal_name: monster.bfallsp.hit
 name: Dark One - Hurt
-tile: monster.MT_BFALLSP
+tile: monster.bfallsp
 sound: diablo_sfx/monsters/falspear/phallh1.ogg
 sound: diablo_sfx/monsters/falspear/phallh2.ogg
 
-internal_name: monster.MT_BFALLSP.death
+internal_name: monster.bfallsp.death
 name: Dark One - Death
-tile: monster.MT_BFALLSP
+tile: monster.bfallsp
 sound: diablo_sfx/monsters/falspear/phalld1.ogg
 sound: diablo_sfx/monsters/falspear/phalld2.ogg
 
-internal_name: monster.MT_WSKELAX.attack
+internal_name: monster.wskelax.attack
 name: Skeleton - Attack
-tile: monster.MT_WSKELAX
+tile: monster.wskelax
 sound: diablo_sfx/monsters/skelaxe/sklaxa1.ogg
 sound: diablo_sfx/monsters/skelaxe/sklaxa2.ogg
 
-internal_name: monster.MT_WSKELAX.hit
+internal_name: monster.wskelax.hit
 name: Skeleton - Hurt
-tile: monster.MT_WSKELAX
+tile: monster.wskelax
 sound: diablo_sfx/monsters/skelaxe/sklaxh1.ogg
 sound: diablo_sfx/monsters/skelaxe/sklaxh2.ogg
 
-internal_name: monster.MT_WSKELAX.death
+internal_name: monster.wskelax.death
 name: Skeleton - Death
-tile: monster.MT_WSKELAX
+tile: monster.wskelax
 sound: diablo_sfx/monsters/skelaxe/sklaxd1.ogg
 sound: diablo_sfx/monsters/skelaxe/sklaxd2.ogg
 
-internal_name: monster.MT_TSKELAX.attack
+internal_name: monster.tskelax.attack
 name: Corpse Axe - Attack
-tile: monster.MT_TSKELAX
+tile: monster.tskelax
 sound: diablo_sfx/monsters/skelaxe/sklaxa1.ogg
 sound: diablo_sfx/monsters/skelaxe/sklaxa2.ogg
 
-internal_name: monster.MT_TSKELAX.hit
+internal_name: monster.tskelax.hit
 name: Corpse Axe - Hurt
-tile: monster.MT_TSKELAX
+tile: monster.tskelax
 sound: diablo_sfx/monsters/skelaxe/sklaxh1.ogg
 sound: diablo_sfx/monsters/skelaxe/sklaxh2.ogg
 
-internal_name: monster.MT_TSKELAX.death
+internal_name: monster.tskelax.death
 name: Corpse Axe - Death
-tile: monster.MT_TSKELAX
+tile: monster.tskelax
 sound: diablo_sfx/monsters/skelaxe/sklaxd1.ogg
 sound: diablo_sfx/monsters/skelaxe/sklaxd2.ogg
 
-internal_name: monster.MT_RSKELAX.attack
+internal_name: monster.rskelax.attack
 name: Burning Dead - Attack
-tile: monster.MT_RSKELAX
+tile: monster.rskelax
 sound: diablo_sfx/monsters/skelaxe/sklaxa1.ogg
 sound: diablo_sfx/monsters/skelaxe/sklaxa2.ogg
 
-internal_name: monster.MT_RSKELAX.hit
+internal_name: monster.rskelax.hit
 name: Burning Dead - Hurt
-tile: monster.MT_RSKELAX
+tile: monster.rskelax
 sound: diablo_sfx/monsters/skelaxe/sklaxh1.ogg
 sound: diablo_sfx/monsters/skelaxe/sklaxh2.ogg
 
-internal_name: monster.MT_RSKELAX.death
+internal_name: monster.rskelax.death
 name: Burning Dead - Death
-tile: monster.MT_RSKELAX
+tile: monster.rskelax
 sound: diablo_sfx/monsters/skelaxe/sklaxd1.ogg
 sound: diablo_sfx/monsters/skelaxe/sklaxd2.ogg
 
-internal_name: monster.MT_XSKELAX.attack
+internal_name: monster.xskelax.attack
 name: Horror - Attack
-tile: monster.MT_XSKELAX
+tile: monster.xskelax
 sound: diablo_sfx/monsters/skelaxe/sklaxa1.ogg
 sound: diablo_sfx/monsters/skelaxe/sklaxa2.ogg
 
-internal_name: monster.MT_XSKELAX.hit
+internal_name: monster.xskelax.hit
 name: Horror - Hurt
-tile: monster.MT_XSKELAX
+tile: monster.xskelax
 sound: diablo_sfx/monsters/skelaxe/sklaxh1.ogg
 sound: diablo_sfx/monsters/skelaxe/sklaxh2.ogg
 
-internal_name: monster.MT_XSKELAX.death
+internal_name: monster.xskelax.death
 name: Horror - Death
-tile: monster.MT_XSKELAX
+tile: monster.xskelax
 sound: diablo_sfx/monsters/skelaxe/sklaxd1.ogg
 sound: diablo_sfx/monsters/skelaxe/sklaxd2.ogg
 
-internal_name: monster.MT_RFALLSD.attack
+internal_name: monster.rfallsd.attack
 name: Fallen One - Attack
-tile: monster.MT_RFALLSD
+tile: monster.rfallsd
 sound: diablo_sfx/monsters/falsword/falla1.ogg
 sound: diablo_sfx/monsters/falsword/falla2.ogg
 
-internal_name: monster.MT_RFALLSD.hit
+internal_name: monster.rfallsd.hit
 name: Fallen One - Hurt
-tile: monster.MT_RFALLSD
+tile: monster.rfallsd
 sound: diablo_sfx/monsters/falsword/fallh1.ogg
 sound: diablo_sfx/monsters/falsword/fallh2.ogg
 
-internal_name: monster.MT_RFALLSD.death
+internal_name: monster.rfallsd.death
 name: Fallen One - Death
-tile: monster.MT_RFALLSD
+tile: monster.rfallsd
 sound: diablo_sfx/monsters/falsword/falld1.ogg
 sound: diablo_sfx/monsters/falsword/falld2.ogg
 
-internal_name: monster.MT_DFALLSD.attack
+internal_name: monster.dfallsd.attack
 name: Carver - Attack
-tile: monster.MT_DFALLSD
+tile: monster.dfallsd
 sound: diablo_sfx/monsters/falsword/falla1.ogg
 sound: diablo_sfx/monsters/falsword/falla2.ogg
 
-internal_name: monster.MT_DFALLSD.hit
+internal_name: monster.dfallsd.hit
 name: Carver - Hurt
-tile: monster.MT_DFALLSD
+tile: monster.dfallsd
 sound: diablo_sfx/monsters/falsword/fallh1.ogg
 sound: diablo_sfx/monsters/falsword/fallh2.ogg
 
-internal_name: monster.MT_DFALLSD.death
+internal_name: monster.dfallsd.death
 name: Carver - Death
-tile: monster.MT_DFALLSD
+tile: monster.dfallsd
 sound: diablo_sfx/monsters/falsword/falld1.ogg
 sound: diablo_sfx/monsters/falsword/falld2.ogg
 
-internal_name: monster.MT_YFALLSD.attack
+internal_name: monster.yfallsd.attack
 name: Devil Kin - Attack
-tile: monster.MT_YFALLSD
+tile: monster.yfallsd
 sound: diablo_sfx/monsters/falsword/falla1.ogg
 sound: diablo_sfx/monsters/falsword/falla2.ogg
 
-internal_name: monster.MT_YFALLSD.hit
+internal_name: monster.yfallsd.hit
 name: Devil Kin - Hurt
-tile: monster.MT_YFALLSD
+tile: monster.yfallsd
 sound: diablo_sfx/monsters/falsword/fallh1.ogg
 sound: diablo_sfx/monsters/falsword/fallh2.ogg
 
-internal_name: monster.MT_YFALLSD.death
+internal_name: monster.yfallsd.death
 name: Devil Kin - Death
-tile: monster.MT_YFALLSD
+tile: monster.yfallsd
 sound: diablo_sfx/monsters/falsword/falld1.ogg
 sound: diablo_sfx/monsters/falsword/falld2.ogg
 
-internal_name: monster.MT_BFALLSD.attack
+internal_name: monster.bfallsd.attack
 name: Dark One - Attack
-tile: monster.MT_BFALLSD
+tile: monster.bfallsd
 sound: diablo_sfx/monsters/falsword/falla1.ogg
 sound: diablo_sfx/monsters/falsword/falla2.ogg
 
-internal_name: monster.MT_BFALLSD.hit
+internal_name: monster.bfallsd.hit
 name: Dark One - Hurt
-tile: monster.MT_BFALLSD
+tile: monster.bfallsd
 sound: diablo_sfx/monsters/falsword/fallh1.ogg
 sound: diablo_sfx/monsters/falsword/fallh2.ogg
 
-internal_name: monster.MT_BFALLSD.death
+internal_name: monster.bfallsd.death
 name: Dark One - Death
-tile: monster.MT_BFALLSD
+tile: monster.bfallsd
 sound: diablo_sfx/monsters/falsword/falld1.ogg
 sound: diablo_sfx/monsters/falsword/falld2.ogg
 
-internal_name: monster.MT_NSCAV.attack
+internal_name: monster.nscav.attack
 name: Scavenger - Attack
-tile: monster.MT_NSCAV
+tile: monster.nscav
 sound: diablo_sfx/monsters/scav/scava1.ogg
 sound: diablo_sfx/monsters/scav/scava2.ogg
 
-internal_name: monster.MT_NSCAV.hit
+internal_name: monster.nscav.hit
 name: Scavenger - Hurt
-tile: monster.MT_NSCAV
+tile: monster.nscav
 sound: diablo_sfx/monsters/scav/scavh1.ogg
 sound: diablo_sfx/monsters/scav/scavh2.ogg
 
-internal_name: monster.MT_NSCAV.death
+internal_name: monster.nscav.death
 name: Scavenger - Death
-tile: monster.MT_NSCAV
+tile: monster.nscav
 sound: diablo_sfx/monsters/scav/scavd1.ogg
 sound: diablo_sfx/monsters/scav/scavd2.ogg
 
-internal_name: monster.MT_BSCAV.attack
+internal_name: monster.bscav.attack
 name: Plague Eater - Attack
-tile: monster.MT_BSCAV
+tile: monster.bscav
 sound: diablo_sfx/monsters/scav/scava1.ogg
 sound: diablo_sfx/monsters/scav/scava2.ogg
 
-internal_name: monster.MT_BSCAV.hit
+internal_name: monster.bscav.hit
 name: Plague Eater - Hurt
-tile: monster.MT_BSCAV
+tile: monster.bscav
 sound: diablo_sfx/monsters/scav/scavh1.ogg
 sound: diablo_sfx/monsters/scav/scavh2.ogg
 
-internal_name: monster.MT_BSCAV.death
+internal_name: monster.bscav.death
 name: Plague Eater - Death
-tile: monster.MT_BSCAV
+tile: monster.bscav
 sound: diablo_sfx/monsters/scav/scavd1.ogg
 sound: diablo_sfx/monsters/scav/scavd2.ogg
 
-internal_name: monster.MT_WSCAV.attack
+internal_name: monster.wscav.attack
 name: Shadow Beast - Attack
-tile: monster.MT_WSCAV
+tile: monster.wscav
 sound: diablo_sfx/monsters/scav/scava1.ogg
 sound: diablo_sfx/monsters/scav/scava2.ogg
 
-internal_name: monster.MT_WSCAV.hit
+internal_name: monster.wscav.hit
 name: Shadow Beast - Hurt
-tile: monster.MT_WSCAV
+tile: monster.wscav
 sound: diablo_sfx/monsters/scav/scavh1.ogg
 sound: diablo_sfx/monsters/scav/scavh2.ogg
 
-internal_name: monster.MT_WSCAV.death
+internal_name: monster.wscav.death
 name: Shadow Beast - Death
-tile: monster.MT_WSCAV
+tile: monster.wscav
 sound: diablo_sfx/monsters/scav/scavd1.ogg
 sound: diablo_sfx/monsters/scav/scavd2.ogg
 
-internal_name: monster.MT_YSCAV.attack
+internal_name: monster.yscav.attack
 name: Bone Gasher - Attack
-tile: monster.MT_YSCAV
+tile: monster.yscav
 sound: diablo_sfx/monsters/scav/scava1.ogg
 sound: diablo_sfx/monsters/scav/scava2.ogg
 
-internal_name: monster.MT_YSCAV.hit
+internal_name: monster.yscav.hit
 name: Bone Gasher - Hurt
-tile: monster.MT_YSCAV
+tile: monster.yscav
 sound: diablo_sfx/monsters/scav/scavh1.ogg
 sound: diablo_sfx/monsters/scav/scavh2.ogg
 
-internal_name: monster.MT_YSCAV.death
+internal_name: monster.yscav.death
 name: Bone Gasher - Death
-tile: monster.MT_YSCAV
+tile: monster.yscav
 sound: diablo_sfx/monsters/scav/scavd1.ogg
 sound: diablo_sfx/monsters/scav/scavd2.ogg
 
-internal_name: monster.MT_WSKELBW.attack
+internal_name: monster.wskelbw.attack
 name: Skeleton - Attack
-tile: monster.MT_WSKELBW
+tile: monster.wskelbw
 sound: diablo_sfx/monsters/skelbow/sklbwa1.ogg
 sound: diablo_sfx/monsters/skelbow/sklbwa2.ogg
 
-internal_name: monster.MT_WSKELBW.hit
+internal_name: monster.wskelbw.hit
 name: Skeleton - Hurt
-tile: monster.MT_WSKELBW
+tile: monster.wskelbw
 sound: diablo_sfx/monsters/skelbow/sklbwh1.ogg
 sound: diablo_sfx/monsters/skelbow/sklbwh2.ogg
 
-internal_name: monster.MT_WSKELBW.death
+internal_name: monster.wskelbw.death
 name: Skeleton - Death
-tile: monster.MT_WSKELBW
+tile: monster.wskelbw
 sound: diablo_sfx/monsters/skelbow/sklbwd1.ogg
 sound: diablo_sfx/monsters/skelbow/sklbwd2.ogg
 
-internal_name: monster.MT_TSKELBW.attack
+internal_name: monster.tskelbw.attack
 name: Corpse Bow - Attack
-tile: monster.MT_TSKELBW
+tile: monster.tskelbw
 sound: diablo_sfx/monsters/skelbow/sklbwa1.ogg
 sound: diablo_sfx/monsters/skelbow/sklbwa2.ogg
 
-internal_name: monster.MT_TSKELBW.hit
+internal_name: monster.tskelbw.hit
 name: Corpse Bow - Hurt
-tile: monster.MT_TSKELBW
+tile: monster.tskelbw
 sound: diablo_sfx/monsters/skelbow/sklbwh1.ogg
 sound: diablo_sfx/monsters/skelbow/sklbwh2.ogg
 
-internal_name: monster.MT_TSKELBW.death
+internal_name: monster.tskelbw.death
 name: Corpse Bow - Death
-tile: monster.MT_TSKELBW
+tile: monster.tskelbw
 sound: diablo_sfx/monsters/skelbow/sklbwd1.ogg
 sound: diablo_sfx/monsters/skelbow/sklbwd2.ogg
 
-internal_name: monster.MT_RSKELBW.attack
+internal_name: monster.rskelbw.attack
 name: Burning Dead - Attack
-tile: monster.MT_RSKELBW
+tile: monster.rskelbw
 sound: diablo_sfx/monsters/skelbow/sklbwa1.ogg
 sound: diablo_sfx/monsters/skelbow/sklbwa2.ogg
 
-internal_name: monster.MT_RSKELBW.hit
+internal_name: monster.rskelbw.hit
 name: Burning Dead - Hurt
-tile: monster.MT_RSKELBW
+tile: monster.rskelbw
 sound: diablo_sfx/monsters/skelbow/sklbwh1.ogg
 sound: diablo_sfx/monsters/skelbow/sklbwh2.ogg
 
-internal_name: monster.MT_RSKELBW.death
+internal_name: monster.rskelbw.death
 name: Burning Dead - Death
-tile: monster.MT_RSKELBW
+tile: monster.rskelbw
 sound: diablo_sfx/monsters/skelbow/sklbwd1.ogg
 sound: diablo_sfx/monsters/skelbow/sklbwd2.ogg
 
-internal_name: monster.MT_XSKELBW.attack
+internal_name: monster.xskelbw.attack
 name: Horror - Attack
-tile: monster.MT_XSKELBW
+tile: monster.xskelbw
 sound: diablo_sfx/monsters/skelbow/sklbwa1.ogg
 sound: diablo_sfx/monsters/skelbow/sklbwa2.ogg
 
-internal_name: monster.MT_XSKELBW.hit
+internal_name: monster.xskelbw.hit
 name: Horror - Hurt
-tile: monster.MT_XSKELBW
+tile: monster.xskelbw
 sound: diablo_sfx/monsters/skelbow/sklbwh1.ogg
 sound: diablo_sfx/monsters/skelbow/sklbwh2.ogg
 
-internal_name: monster.MT_XSKELBW.death
+internal_name: monster.xskelbw.death
 name: Horror - Death
-tile: monster.MT_XSKELBW
+tile: monster.xskelbw
 sound: diablo_sfx/monsters/skelbow/sklbwd1.ogg
 sound: diablo_sfx/monsters/skelbow/sklbwd2.ogg
 
-internal_name: monster.MT_WSKELSD.attack
+internal_name: monster.wskelsd.attack
 name: Skeleton Captain - Attack
-tile: monster.MT_WSKELSD
+tile: monster.wskelsd
 sound: diablo_sfx/monsters/skelsd/sklsra1.ogg
 sound: diablo_sfx/monsters/skelsd/sklsra2.ogg
 
-internal_name: monster.MT_WSKELSD.hit
+internal_name: monster.wskelsd.hit
 name: Skeleton Captain - Hurt
-tile: monster.MT_WSKELSD
+tile: monster.wskelsd
 sound: diablo_sfx/monsters/skelsd/sklsrh1.ogg
 sound: diablo_sfx/monsters/skelsd/sklsrh2.ogg
 
-internal_name: monster.MT_WSKELSD.death
+internal_name: monster.wskelsd.death
 name: Skeleton Captain - Death
-tile: monster.MT_WSKELSD
+tile: monster.wskelsd
 sound: diablo_sfx/monsters/skelsd/sklsrd1.ogg
 sound: diablo_sfx/monsters/skelsd/sklsrd2.ogg
 
-internal_name: monster.MT_TSKELSD.attack
+internal_name: monster.tskelsd.attack
 name: Corpse Captain - Attack
-tile: monster.MT_TSKELSD
+tile: monster.tskelsd
 sound: diablo_sfx/monsters/skelsd/sklsra1.ogg
 sound: diablo_sfx/monsters/skelsd/sklsra2.ogg
 
-internal_name: monster.MT_TSKELSD.hit
+internal_name: monster.tskelsd.hit
 name: Corpse Captain - Hurt
-tile: monster.MT_TSKELSD
+tile: monster.tskelsd
 sound: diablo_sfx/monsters/skelsd/sklsrh1.ogg
 sound: diablo_sfx/monsters/skelsd/sklsrh2.ogg
 
-internal_name: monster.MT_TSKELSD.death
+internal_name: monster.tskelsd.death
 name: Corpse Captain - Death
-tile: monster.MT_TSKELSD
+tile: monster.tskelsd
 sound: diablo_sfx/monsters/skelsd/sklsrd1.ogg
 sound: diablo_sfx/monsters/skelsd/sklsrd2.ogg
 
-internal_name: monster.MT_RSKELSD.attack
+internal_name: monster.rskelsd.attack
 name: Burning Dead Captain - Attack
-tile: monster.MT_RSKELSD
+tile: monster.rskelsd
 sound: diablo_sfx/monsters/skelsd/sklsra1.ogg
 sound: diablo_sfx/monsters/skelsd/sklsra2.ogg
 
-internal_name: monster.MT_RSKELSD.hit
+internal_name: monster.rskelsd.hit
 name: Burning Dead Captain - Hurt
-tile: monster.MT_RSKELSD
+tile: monster.rskelsd
 sound: diablo_sfx/monsters/skelsd/sklsrh1.ogg
 sound: diablo_sfx/monsters/skelsd/sklsrh2.ogg
 
-internal_name: monster.MT_RSKELSD.death
+internal_name: monster.rskelsd.death
 name: Burning Dead Captain - Death
-tile: monster.MT_RSKELSD
+tile: monster.rskelsd
 sound: diablo_sfx/monsters/skelsd/sklsrd1.ogg
 sound: diablo_sfx/monsters/skelsd/sklsrd2.ogg
 
-internal_name: monster.MT_XSKELSD.attack
+internal_name: monster.xskelsd.attack
 name: Horror Captain - Attack
-tile: monster.MT_XSKELSD
+tile: monster.xskelsd
 sound: diablo_sfx/monsters/skelsd/sklsra1.ogg
 sound: diablo_sfx/monsters/skelsd/sklsra2.ogg
 
-internal_name: monster.MT_XSKELSD.hit
+internal_name: monster.xskelsd.hit
 name: Horror Captain - Hurt
-tile: monster.MT_XSKELSD
+tile: monster.xskelsd
 sound: diablo_sfx/monsters/skelsd/sklsrh1.ogg
 sound: diablo_sfx/monsters/skelsd/sklsrh2.ogg
 
-internal_name: monster.MT_XSKELSD.death
+internal_name: monster.xskelsd.death
 name: Horror Captain - Death
-tile: monster.MT_XSKELSD
+tile: monster.xskelsd
 sound: diablo_sfx/monsters/skelsd/sklsrd1.ogg
 sound: diablo_sfx/monsters/skelsd/sklsrd2.ogg
 
-internal_name: monster.MT_INVILORD.attack
+internal_name: monster.invilord.attack
 name: Invisible Lord - Attack
-tile: monster.MT_INVILORD
+tile: monster.invilord
 sound: diablo_sfx/monsters/tsneak/sneakla1.ogg
 sound: diablo_sfx/monsters/tsneak/sneakla2.ogg
 
-internal_name: monster.MT_INVILORD.hit
+internal_name: monster.invilord.hit
 name: Invisible Lord - Hurt
-tile: monster.MT_INVILORD
+tile: monster.invilord
 sound: diablo_sfx/monsters/tsneak/sneaklh1.ogg
 sound: diablo_sfx/monsters/tsneak/sneaklh2.ogg
 
-internal_name: monster.MT_INVILORD.death
+internal_name: monster.invilord.death
 name: Invisible Lord - Death
-tile: monster.MT_INVILORD
+tile: monster.invilord
 sound: diablo_sfx/monsters/tsneak/sneakld1.ogg
 sound: diablo_sfx/monsters/tsneak/sneakld2.ogg
 
-internal_name: monster.MT_SNEAK.attack
+internal_name: monster.sneak.attack
 name: Hidden - Attack
-tile: monster.MT_SNEAK
+tile: monster.sneak
 sound: diablo_sfx/monsters/sneak/sneaka1.ogg
 sound: diablo_sfx/monsters/sneak/sneaka2.ogg
 
-internal_name: monster.MT_SNEAK.hit
+internal_name: monster.sneak.hit
 name: Hidden - Hurt
-tile: monster.MT_SNEAK
+tile: monster.sneak
 sound: diablo_sfx/monsters/sneak/sneakh1.ogg
 sound: diablo_sfx/monsters/sneak/sneakh2.ogg
 
-internal_name: monster.MT_SNEAK.death
+internal_name: monster.sneak.death
 name: Hidden - Death
-tile: monster.MT_SNEAK
+tile: monster.sneak
 sound: diablo_sfx/monsters/sneak/sneakd1.ogg
 sound: diablo_sfx/monsters/sneak/sneakd2.ogg
 
-internal_name: monster.MT_STALKER.attack
+internal_name: monster.stalker.attack
 name: Stalker - Attack
-tile: monster.MT_STALKER
+tile: monster.stalker
 sound: diablo_sfx/monsters/sneak/sneaka1.ogg
 sound: diablo_sfx/monsters/sneak/sneaka2.ogg
 
-internal_name: monster.MT_STALKER.hit
+internal_name: monster.stalker.hit
 name: Stalker - Hurt
-tile: monster.MT_STALKER
+tile: monster.stalker
 sound: diablo_sfx/monsters/sneak/sneakh1.ogg
 sound: diablo_sfx/monsters/sneak/sneakh2.ogg
 
-internal_name: monster.MT_STALKER.death
+internal_name: monster.stalker.death
 name: Stalker - Death
-tile: monster.MT_STALKER
+tile: monster.stalker
 sound: diablo_sfx/monsters/sneak/sneakd1.ogg
 sound: diablo_sfx/monsters/sneak/sneakd2.ogg
 
-internal_name: monster.MT_UNSEEN.attack
+internal_name: monster.unseen.attack
 name: Unseen - Attack
-tile: monster.MT_UNSEEN
+tile: monster.unseen
 sound: diablo_sfx/monsters/sneak/sneaka1.ogg
 sound: diablo_sfx/monsters/sneak/sneaka2.ogg
 
-internal_name: monster.MT_UNSEEN.hit
+internal_name: monster.unseen.hit
 name: Unseen - Hurt
-tile: monster.MT_UNSEEN
+tile: monster.unseen
 sound: diablo_sfx/monsters/sneak/sneakh1.ogg
 sound: diablo_sfx/monsters/sneak/sneakh2.ogg
 
-internal_name: monster.MT_UNSEEN.death
+internal_name: monster.unseen.death
 name: Unseen - Death
-tile: monster.MT_UNSEEN
+tile: monster.unseen
 sound: diablo_sfx/monsters/sneak/sneakd1.ogg
 sound: diablo_sfx/monsters/sneak/sneakd2.ogg
 
-internal_name: monster.MT_ILLWEAV.attack
+internal_name: monster.illweav.attack
 name: Illusion Weaver - Attack
-tile: monster.MT_ILLWEAV
+tile: monster.illweav
 sound: diablo_sfx/monsters/sneak/sneaka1.ogg
 sound: diablo_sfx/monsters/sneak/sneaka2.ogg
 
-internal_name: monster.MT_ILLWEAV.hit
+internal_name: monster.illweav.hit
 name: Illusion Weaver - Hurt
-tile: monster.MT_ILLWEAV
+tile: monster.illweav
 sound: diablo_sfx/monsters/sneak/sneakh1.ogg
 sound: diablo_sfx/monsters/sneak/sneakh2.ogg
 
-internal_name: monster.MT_ILLWEAV.death
+internal_name: monster.illweav.death
 name: Illusion Weaver - Death
-tile: monster.MT_ILLWEAV
+tile: monster.illweav
 sound: diablo_sfx/monsters/sneak/sneakd1.ogg
 sound: diablo_sfx/monsters/sneak/sneakd2.ogg
 
-internal_name: monster.MT_LRDSAYTR.attack
+internal_name: monster.lrdsaytr.attack
 name: Lord Sayter - Attack
-tile: monster.MT_LRDSAYTR
+tile: monster.lrdsaytr
 sound: diablo_sfx/monsters/goatlord/goatla1.ogg
 sound: diablo_sfx/monsters/goatlord/goatla2.ogg
 
-internal_name: monster.MT_LRDSAYTR.hit
+internal_name: monster.lrdsaytr.hit
 name: Lord Sayter - Hurt
-tile: monster.MT_LRDSAYTR
+tile: monster.lrdsaytr
 sound: diablo_sfx/monsters/goatlord/goatlh1.ogg
 sound: diablo_sfx/monsters/goatlord/goatlh2.ogg
 
-internal_name: monster.MT_LRDSAYTR.death
+internal_name: monster.lrdsaytr.death
 name: Lord Sayter - Death
-tile: monster.MT_LRDSAYTR
+tile: monster.lrdsaytr
 sound: diablo_sfx/monsters/goatlord/goatld1.ogg
 sound: diablo_sfx/monsters/goatlord/goatld2.ogg
 
-internal_name: monster.MT_NGOATMC.attack
+internal_name: monster.ngoatmc.attack
 name: Flesh Clan - Attack
-tile: monster.MT_NGOATMC
+tile: monster.ngoatmc
 sound: diablo_sfx/monsters/goatmace/goata1.ogg
 sound: diablo_sfx/monsters/goatmace/goata2.ogg
 
-internal_name: monster.MT_NGOATMC.hit
+internal_name: monster.ngoatmc.hit
 name: Flesh Clan - Hurt
-tile: monster.MT_NGOATMC
+tile: monster.ngoatmc
 sound: diablo_sfx/monsters/goatmace/goath1.ogg
 sound: diablo_sfx/monsters/goatmace/goath2.ogg
 
-internal_name: monster.MT_NGOATMC.death
+internal_name: monster.ngoatmc.death
 name: Flesh Clan - Death
-tile: monster.MT_NGOATMC
+tile: monster.ngoatmc
 sound: diablo_sfx/monsters/goatmace/goatd1.ogg
 sound: diablo_sfx/monsters/goatmace/goatd2.ogg
 
-internal_name: monster.MT_BGOATMC.attack
+internal_name: monster.bgoatmc.attack
 name: Stone Clan - Attack
-tile: monster.MT_BGOATMC
+tile: monster.bgoatmc
 sound: diablo_sfx/monsters/goatmace/goata1.ogg
 sound: diablo_sfx/monsters/goatmace/goata2.ogg
 
-internal_name: monster.MT_BGOATMC.hit
+internal_name: monster.bgoatmc.hit
 name: Stone Clan - Hurt
-tile: monster.MT_BGOATMC
+tile: monster.bgoatmc
 sound: diablo_sfx/monsters/goatmace/goath1.ogg
 sound: diablo_sfx/monsters/goatmace/goath2.ogg
 
-internal_name: monster.MT_BGOATMC.death
+internal_name: monster.bgoatmc.death
 name: Stone Clan - Death
-tile: monster.MT_BGOATMC
+tile: monster.bgoatmc
 sound: diablo_sfx/monsters/goatmace/goatd1.ogg
 sound: diablo_sfx/monsters/goatmace/goatd2.ogg
 
-internal_name: monster.MT_RGOATMC.attack
+internal_name: monster.rgoatmc.attack
 name: Fire Clan - Attack
-tile: monster.MT_RGOATMC
+tile: monster.rgoatmc
 sound: diablo_sfx/monsters/goatmace/goata1.ogg
 sound: diablo_sfx/monsters/goatmace/goata2.ogg
 
-internal_name: monster.MT_RGOATMC.hit
+internal_name: monster.rgoatmc.hit
 name: Fire Clan - Hurt
-tile: monster.MT_RGOATMC
+tile: monster.rgoatmc
 sound: diablo_sfx/monsters/goatmace/goath1.ogg
 sound: diablo_sfx/monsters/goatmace/goath2.ogg
 
-internal_name: monster.MT_RGOATMC.death
+internal_name: monster.rgoatmc.death
 name: Fire Clan - Death
-tile: monster.MT_RGOATMC
+tile: monster.rgoatmc
 sound: diablo_sfx/monsters/goatmace/goatd1.ogg
 sound: diablo_sfx/monsters/goatmace/goatd2.ogg
 
-internal_name: monster.MT_GGOATMC.attack
+internal_name: monster.ggoatmc.attack
 name: Night Clan - Attack
-tile: monster.MT_GGOATMC
+tile: monster.ggoatmc
 sound: diablo_sfx/monsters/goatmace/goata1.ogg
 sound: diablo_sfx/monsters/goatmace/goata2.ogg
 
-internal_name: monster.MT_GGOATMC.hit
+internal_name: monster.ggoatmc.hit
 name: Night Clan - Hurt
-tile: monster.MT_GGOATMC
+tile: monster.ggoatmc
 sound: diablo_sfx/monsters/goatmace/goath1.ogg
 sound: diablo_sfx/monsters/goatmace/goath2.ogg
 
-internal_name: monster.MT_GGOATMC.death
+internal_name: monster.ggoatmc.death
 name: Night Clan - Death
-tile: monster.MT_GGOATMC
+tile: monster.ggoatmc
 sound: diablo_sfx/monsters/goatmace/goatd1.ogg
 sound: diablo_sfx/monsters/goatmace/goatd2.ogg
 
-internal_name: monster.MT_FIEND.attack
+internal_name: monster.fiend.attack
 name: Fiend - Attack
-tile: monster.MT_FIEND
+tile: monster.fiend
 sound: diablo_sfx/monsters/bat/bata1.ogg
 sound: diablo_sfx/monsters/bat/bata2.ogg
 
-internal_name: monster.MT_FIEND.hit
+internal_name: monster.fiend.hit
 name: Fiend - Hurt
-tile: monster.MT_FIEND
+tile: monster.fiend
 sound: diablo_sfx/monsters/bat/bath1.ogg
 sound: diablo_sfx/monsters/bat/bath2.ogg
 
-internal_name: monster.MT_FIEND.death
+internal_name: monster.fiend.death
 name: Fiend - Death
-tile: monster.MT_FIEND
+tile: monster.fiend
 sound: diablo_sfx/monsters/bat/batd1.ogg
 sound: diablo_sfx/monsters/bat/batd2.ogg
 
-internal_name: monster.MT_BLINK.attack
+internal_name: monster.blink.attack
 name: Blink - Attack
-tile: monster.MT_BLINK
+tile: monster.blink
 sound: diablo_sfx/monsters/bat/bata1.ogg
 sound: diablo_sfx/monsters/bat/bata2.ogg
 
-internal_name: monster.MT_BLINK.hit
+internal_name: monster.blink.hit
 name: Blink - Hurt
-tile: monster.MT_BLINK
+tile: monster.blink
 sound: diablo_sfx/monsters/bat/bath1.ogg
 sound: diablo_sfx/monsters/bat/bath2.ogg
 
-internal_name: monster.MT_BLINK.death
+internal_name: monster.blink.death
 name: Blink - Death
-tile: monster.MT_BLINK
+tile: monster.blink
 sound: diablo_sfx/monsters/bat/batd1.ogg
 sound: diablo_sfx/monsters/bat/batd2.ogg
 
-internal_name: monster.MT_GLOOM.attack
+internal_name: monster.gloom.attack
 name: Gloom - Attack
-tile: monster.MT_GLOOM
+tile: monster.gloom
 sound: diablo_sfx/monsters/bat/bata1.ogg
 sound: diablo_sfx/monsters/bat/bata2.ogg
 
-internal_name: monster.MT_GLOOM.hit
+internal_name: monster.gloom.hit
 name: Gloom - Hurt
-tile: monster.MT_GLOOM
+tile: monster.gloom
 sound: diablo_sfx/monsters/bat/bath1.ogg
 sound: diablo_sfx/monsters/bat/bath2.ogg
 
-internal_name: monster.MT_GLOOM.death
+internal_name: monster.gloom.death
 name: Gloom - Death
-tile: monster.MT_GLOOM
+tile: monster.gloom
 sound: diablo_sfx/monsters/bat/batd1.ogg
 sound: diablo_sfx/monsters/bat/batd2.ogg
 
-internal_name: monster.MT_FAMILIAR.attack
+internal_name: monster.familiar.attack
 name: Familiar - Attack
-tile: monster.MT_FAMILIAR
+tile: monster.familiar
 sound: diablo_sfx/monsters/bat/bata1.ogg
 sound: diablo_sfx/monsters/bat/bata2.ogg
 
-internal_name: monster.MT_FAMILIAR.hit
+internal_name: monster.familiar.hit
 name: Familiar - Hurt
-tile: monster.MT_FAMILIAR
+tile: monster.familiar
 sound: diablo_sfx/monsters/bat/bath1.ogg
 sound: diablo_sfx/monsters/bat/bath2.ogg
 
-internal_name: monster.MT_FAMILIAR.death
+internal_name: monster.familiar.death
 name: Familiar - Death
-tile: monster.MT_FAMILIAR
+tile: monster.familiar
 sound: diablo_sfx/monsters/bat/batd1.ogg
 sound: diablo_sfx/monsters/bat/batd2.ogg
 
-internal_name: monster.MT_NGOATBW.attack
+internal_name: monster.ngoatbw.attack
 name: Flesh Clan - Attack
-tile: monster.MT_NGOATBW
+tile: monster.ngoatbw
 sound: diablo_sfx/monsters/goatbow/goatba1.ogg
 sound: diablo_sfx/monsters/goatbow/goatba2.ogg
 
-internal_name: monster.MT_NGOATBW.hit
+internal_name: monster.ngoatbw.hit
 name: Flesh Clan - Hurt
-tile: monster.MT_NGOATBW
+tile: monster.ngoatbw
 sound: diablo_sfx/monsters/goatbow/goatbh1.ogg
 sound: diablo_sfx/monsters/goatbow/goatbh2.ogg
 
-internal_name: monster.MT_NGOATBW.death
+internal_name: monster.ngoatbw.death
 name: Flesh Clan - Death
-tile: monster.MT_NGOATBW
+tile: monster.ngoatbw
 sound: diablo_sfx/monsters/goatbow/goatbd1.ogg
 sound: diablo_sfx/monsters/goatbow/goatbd2.ogg
 
-internal_name: monster.MT_BGOATBW.attack
+internal_name: monster.bgoatbw.attack
 name: Stone Clan - Attack
-tile: monster.MT_BGOATBW
+tile: monster.bgoatbw
 sound: diablo_sfx/monsters/goatbow/goatba1.ogg
 sound: diablo_sfx/monsters/goatbow/goatba2.ogg
 
-internal_name: monster.MT_BGOATBW.hit
+internal_name: monster.bgoatbw.hit
 name: Stone Clan - Hurt
-tile: monster.MT_BGOATBW
+tile: monster.bgoatbw
 sound: diablo_sfx/monsters/goatbow/goatbh1.ogg
 sound: diablo_sfx/monsters/goatbow/goatbh2.ogg
 
-internal_name: monster.MT_BGOATBW.death
+internal_name: monster.bgoatbw.death
 name: Stone Clan - Death
-tile: monster.MT_BGOATBW
+tile: monster.bgoatbw
 sound: diablo_sfx/monsters/goatbow/goatbd1.ogg
 sound: diablo_sfx/monsters/goatbow/goatbd2.ogg
 
-internal_name: monster.MT_RGOATBW.attack
+internal_name: monster.rgoatbw.attack
 name: Fire Clan - Attack
-tile: monster.MT_RGOATBW
+tile: monster.rgoatbw
 sound: diablo_sfx/monsters/goatbow/goatba1.ogg
 sound: diablo_sfx/monsters/goatbow/goatba2.ogg
 
-internal_name: monster.MT_RGOATBW.hit
+internal_name: monster.rgoatbw.hit
 name: Fire Clan - Hurt
-tile: monster.MT_RGOATBW
+tile: monster.rgoatbw
 sound: diablo_sfx/monsters/goatbow/goatbh1.ogg
 sound: diablo_sfx/monsters/goatbow/goatbh2.ogg
 
-internal_name: monster.MT_RGOATBW.death
+internal_name: monster.rgoatbw.death
 name: Fire Clan - Death
-tile: monster.MT_RGOATBW
+tile: monster.rgoatbw
 sound: diablo_sfx/monsters/goatbow/goatbd1.ogg
 sound: diablo_sfx/monsters/goatbow/goatbd2.ogg
 
-internal_name: monster.MT_GGOATBW.attack
+internal_name: monster.ggoatbw.attack
 name: Night Clan - Attack
-tile: monster.MT_GGOATBW
+tile: monster.ggoatbw
 sound: diablo_sfx/monsters/goatbow/goatba1.ogg
 sound: diablo_sfx/monsters/goatbow/goatba2.ogg
 
-internal_name: monster.MT_GGOATBW.hit
+internal_name: monster.ggoatbw.hit
 name: Night Clan - Hurt
-tile: monster.MT_GGOATBW
+tile: monster.ggoatbw
 sound: diablo_sfx/monsters/goatbow/goatbh1.ogg
 sound: diablo_sfx/monsters/goatbow/goatbh2.ogg
 
-internal_name: monster.MT_GGOATBW.death
+internal_name: monster.ggoatbw.death
 name: Night Clan - Death
-tile: monster.MT_GGOATBW
+tile: monster.ggoatbw
 sound: diablo_sfx/monsters/goatbow/goatbd1.ogg
 sound: diablo_sfx/monsters/goatbow/goatbd2.ogg
 
-internal_name: monster.MT_NACID.attack
+internal_name: monster.nacid.attack
 name: Acid Beast - Attack
-tile: monster.MT_NACID
+tile: monster.nacid
 sound: diablo_sfx/monsters/acid/acida1.ogg
 sound: diablo_sfx/monsters/acid/acida2.ogg
 
-internal_name: monster.MT_NACID.hit
+internal_name: monster.nacid.hit
 name: Acid Beast - Hurt
-tile: monster.MT_NACID
+tile: monster.nacid
 sound: diablo_sfx/monsters/acid/acidh1.ogg
 sound: diablo_sfx/monsters/acid/acidh2.ogg
 
-internal_name: monster.MT_NACID.death
+internal_name: monster.nacid.death
 name: Acid Beast - Death
-tile: monster.MT_NACID
+tile: monster.nacid
 sound: diablo_sfx/monsters/acid/acidd1.ogg
 sound: diablo_sfx/monsters/acid/acidd2.ogg
 
-internal_name: monster.MT_RACID.attack
+internal_name: monster.racid.attack
 name: Poison Spitter - Attack
-tile: monster.MT_RACID
+tile: monster.racid
 sound: diablo_sfx/monsters/acid/acida1.ogg
 sound: diablo_sfx/monsters/acid/acida2.ogg
 
-internal_name: monster.MT_RACID.hit
+internal_name: monster.racid.hit
 name: Poison Spitter - Hurt
-tile: monster.MT_RACID
+tile: monster.racid
 sound: diablo_sfx/monsters/acid/acidh1.ogg
 sound: diablo_sfx/monsters/acid/acidh2.ogg
 
-internal_name: monster.MT_RACID.death
+internal_name: monster.racid.death
 name: Poison Spitter - Death
-tile: monster.MT_RACID
+tile: monster.racid
 sound: diablo_sfx/monsters/acid/acidd1.ogg
 sound: diablo_sfx/monsters/acid/acidd2.ogg
 
-internal_name: monster.MT_BACID.attack
+internal_name: monster.bacid.attack
 name: Pit Beast - Attack
-tile: monster.MT_BACID
+tile: monster.bacid
 sound: diablo_sfx/monsters/acid/acida1.ogg
 sound: diablo_sfx/monsters/acid/acida2.ogg
 
-internal_name: monster.MT_BACID.hit
+internal_name: monster.bacid.hit
 name: Pit Beast - Hurt
-tile: monster.MT_BACID
+tile: monster.bacid
 sound: diablo_sfx/monsters/acid/acidh1.ogg
 sound: diablo_sfx/monsters/acid/acidh2.ogg
 
-internal_name: monster.MT_BACID.death
+internal_name: monster.bacid.death
 name: Pit Beast - Death
-tile: monster.MT_BACID
+tile: monster.bacid
 sound: diablo_sfx/monsters/acid/acidd1.ogg
 sound: diablo_sfx/monsters/acid/acidd2.ogg
 
-internal_name: monster.MT_XACID.attack
+internal_name: monster.xacid.attack
 name: Lava Maw - Attack
-tile: monster.MT_XACID
+tile: monster.xacid
 sound: diablo_sfx/monsters/acid/acida1.ogg
 sound: diablo_sfx/monsters/acid/acida2.ogg
 
-internal_name: monster.MT_XACID.hit
+internal_name: monster.xacid.hit
 name: Lava Maw - Hurt
-tile: monster.MT_XACID
+tile: monster.xacid
 sound: diablo_sfx/monsters/acid/acidh1.ogg
 sound: diablo_sfx/monsters/acid/acidh2.ogg
 
-internal_name: monster.MT_XACID.death
+internal_name: monster.xacid.death
 name: Lava Maw - Death
-tile: monster.MT_XACID
+tile: monster.xacid
 sound: diablo_sfx/monsters/acid/acidd1.ogg
 sound: diablo_sfx/monsters/acid/acidd2.ogg
 
-internal_name: monster.MT_SKING.attack
+internal_name: monster.sking.attack
 name: Skeleton King - Attack
-tile: monster.MT_SKING
+tile: monster.sking
 sound: diablo_sfx/monsters/sking/skinga1.ogg
 sound: diablo_sfx/monsters/sking/skinga2.ogg
 
-internal_name: monster.MT_SKING.hit
+internal_name: monster.sking.hit
 name: Skeleton King - Hurt
-tile: monster.MT_SKING
+tile: monster.sking
 sound: diablo_sfx/monsters/sking/skingh1.ogg
 sound: diablo_sfx/monsters/sking/skingh2.ogg
 
-internal_name: monster.MT_SKING.death
+internal_name: monster.sking.death
 name: Skeleton King - Death
-tile: monster.MT_SKING
+tile: monster.sking
 sound: diablo_sfx/monsters/sking/skingd1.ogg
 sound: diablo_sfx/monsters/sking/skingd2.ogg
 
-internal_name: monster.MT_CLEAVER.attack
+internal_name: monster.cleaver.attack
 name: The Butcher - Attack
-tile: monster.MT_CLEAVER
+tile: monster.cleaver
 sound: diablo_sfx/monsters/fatc/fatca1.ogg
 sound: diablo_sfx/monsters/fatc/fatca2.ogg
 
-internal_name: monster.MT_CLEAVER.hit
+internal_name: monster.cleaver.hit
 name: The Butcher - Hurt
-tile: monster.MT_CLEAVER
+tile: monster.cleaver
 sound: diablo_sfx/monsters/fatc/fatch1.ogg
 sound: diablo_sfx/monsters/fatc/fatch2.ogg
 
-internal_name: monster.MT_CLEAVER.death
+internal_name: monster.cleaver.death
 name: The Butcher - Death
-tile: monster.MT_CLEAVER
+tile: monster.cleaver
 sound: diablo_sfx/monsters/fatc/fatcd1.ogg
 sound: diablo_sfx/monsters/fatc/fatcd2.ogg
 
-internal_name: monster.MT_FAT.attack
+internal_name: monster.fat.attack
 name: Overlord - Attack
-tile: monster.MT_FAT
+tile: monster.fat
 sound: diablo_sfx/monsters/fat/fata1.ogg
 sound: diablo_sfx/monsters/fat/fata2.ogg
 
-internal_name: monster.MT_FAT.hit
+internal_name: monster.fat.hit
 name: Overlord - Hurt
-tile: monster.MT_FAT
+tile: monster.fat
 sound: diablo_sfx/monsters/fat/fath1.ogg
 sound: diablo_sfx/monsters/fat/fath2.ogg
 
-internal_name: monster.MT_FAT.death
+internal_name: monster.fat.death
 name: Overlord - Death
-tile: monster.MT_FAT
+tile: monster.fat
 sound: diablo_sfx/monsters/fat/fatd1.ogg
 sound: diablo_sfx/monsters/fat/fatd2.ogg
 
-internal_name: monster.MT_MUDMAN.attack
+internal_name: monster.mudman.attack
 name: Mud Man - Attack
-tile: monster.MT_MUDMAN
+tile: monster.mudman
 sound: diablo_sfx/monsters/fat/fata1.ogg
 sound: diablo_sfx/monsters/fat/fata2.ogg
 
-internal_name: monster.MT_MUDMAN.hit
+internal_name: monster.mudman.hit
 name: Mud Man - Hurt
-tile: monster.MT_MUDMAN
+tile: monster.mudman
 sound: diablo_sfx/monsters/fat/fath1.ogg
 sound: diablo_sfx/monsters/fat/fath2.ogg
 
-internal_name: monster.MT_MUDMAN.death
+internal_name: monster.mudman.death
 name: Mud Man - Death
-tile: monster.MT_MUDMAN
+tile: monster.mudman
 sound: diablo_sfx/monsters/fat/fatd1.ogg
 sound: diablo_sfx/monsters/fat/fatd2.ogg
 
-internal_name: monster.MT_TOAD.attack
+internal_name: monster.toad.attack
 name: Toad Demon - Attack
-tile: monster.MT_TOAD
+tile: monster.toad
 sound: diablo_sfx/monsters/fat/fata1.ogg
 sound: diablo_sfx/monsters/fat/fata2.ogg
 
-internal_name: monster.MT_TOAD.hit
+internal_name: monster.toad.hit
 name: Toad Demon - Hurt
-tile: monster.MT_TOAD
+tile: monster.toad
 sound: diablo_sfx/monsters/fat/fath1.ogg
 sound: diablo_sfx/monsters/fat/fath2.ogg
 
-internal_name: monster.MT_TOAD.death
+internal_name: monster.toad.death
 name: Toad Demon - Death
-tile: monster.MT_TOAD
+tile: monster.toad
 sound: diablo_sfx/monsters/fat/fatd1.ogg
 sound: diablo_sfx/monsters/fat/fatd2.ogg
 
-internal_name: monster.MT_FLAYED.attack
+internal_name: monster.flayed.attack
 name: Flayed One - Attack
-tile: monster.MT_FLAYED
+tile: monster.flayed
 sound: diablo_sfx/monsters/fat/fata1.ogg
 sound: diablo_sfx/monsters/fat/fata2.ogg
 
-internal_name: monster.MT_FLAYED.hit
+internal_name: monster.flayed.hit
 name: Flayed One - Hurt
-tile: monster.MT_FLAYED
+tile: monster.flayed
 sound: diablo_sfx/monsters/fat/fath1.ogg
 sound: diablo_sfx/monsters/fat/fath2.ogg
 
-internal_name: monster.MT_FLAYED.death
+internal_name: monster.flayed.death
 name: Flayed One - Death
-tile: monster.MT_FLAYED
+tile: monster.flayed
 sound: diablo_sfx/monsters/fat/fatd1.ogg
 sound: diablo_sfx/monsters/fat/fatd2.ogg
 
-internal_name: monster.MT_WYRM.attack
+internal_name: monster.wyrm.attack
 name: Wyrm - Attack
-tile: monster.MT_WYRM
+tile: monster.wyrm
 sound: diablo_sfx/monsters/fat/fata1.ogg
 sound: diablo_sfx/monsters/fat/fata2.ogg
 
-internal_name: monster.MT_WYRM.hit
+internal_name: monster.wyrm.hit
 name: Wyrm - Hurt
-tile: monster.MT_WYRM
+tile: monster.wyrm
 sound: diablo_sfx/monsters/fat/fath1.ogg
 sound: diablo_sfx/monsters/fat/fath2.ogg
 
-internal_name: monster.MT_WYRM.death
+internal_name: monster.wyrm.death
 name: Wyrm - Death
-tile: monster.MT_WYRM
+tile: monster.wyrm
 sound: diablo_sfx/monsters/fat/fatd1.ogg
 sound: diablo_sfx/monsters/fat/fatd2.ogg
 
-internal_name: monster.MT_CAVSLUG.attack
+internal_name: monster.cavslug.attack
 name: Cave Slug - Attack
-tile: monster.MT_CAVSLUG
+tile: monster.cavslug
 sound: diablo_sfx/monsters/fat/fata1.ogg
 sound: diablo_sfx/monsters/fat/fata2.ogg
 
-internal_name: monster.MT_CAVSLUG.hit
+internal_name: monster.cavslug.hit
 name: Cave Slug - Hurt
-tile: monster.MT_CAVSLUG
+tile: monster.cavslug
 sound: diablo_sfx/monsters/fat/fath1.ogg
 sound: diablo_sfx/monsters/fat/fath2.ogg
 
-internal_name: monster.MT_CAVSLUG.death
+internal_name: monster.cavslug.death
 name: Cave Slug - Death
-tile: monster.MT_CAVSLUG
+tile: monster.cavslug
 sound: diablo_sfx/monsters/fat/fatd1.ogg
 sound: diablo_sfx/monsters/fat/fatd2.ogg
 
-internal_name: monster.MT_DVLWYRM.attack
+internal_name: monster.dvlwyrm.attack
 name: Devil Wyrm - Attack
-tile: monster.MT_DVLWYRM
+tile: monster.dvlwyrm
 sound: diablo_sfx/monsters/fat/fata1.ogg
 sound: diablo_sfx/monsters/fat/fata2.ogg
 
-internal_name: monster.MT_DVLWYRM.hit
+internal_name: monster.dvlwyrm.hit
 name: Devil Wyrm - Hurt
-tile: monster.MT_DVLWYRM
+tile: monster.dvlwyrm
 sound: diablo_sfx/monsters/fat/fath1.ogg
 sound: diablo_sfx/monsters/fat/fath2.ogg
 
-internal_name: monster.MT_DVLWYRM.death
+internal_name: monster.dvlwyrm.death
 name: Devil Wyrm - Death
-tile: monster.MT_DVLWYRM
+tile: monster.dvlwyrm
 sound: diablo_sfx/monsters/fat/fatd1.ogg
 sound: diablo_sfx/monsters/fat/fatd2.ogg
 
-internal_name: monster.MT_DEVOUR.attack
+internal_name: monster.devour.attack
 name: Devourer - Attack
-tile: monster.MT_DEVOUR
+tile: monster.devour
 sound: diablo_sfx/monsters/fat/fata1.ogg
 sound: diablo_sfx/monsters/fat/fata2.ogg
 
-internal_name: monster.MT_DEVOUR.hit
+internal_name: monster.devour.hit
 name: Devourer - Hurt
-tile: monster.MT_DEVOUR
+tile: monster.devour
 sound: diablo_sfx/monsters/fat/fath1.ogg
 sound: diablo_sfx/monsters/fat/fath2.ogg
 
-internal_name: monster.MT_DEVOUR.death
+internal_name: monster.devour.death
 name: Devourer - Death
-tile: monster.MT_DEVOUR
+tile: monster.devour
 sound: diablo_sfx/monsters/fat/fatd1.ogg
 sound: diablo_sfx/monsters/fat/fatd2.ogg
 
-internal_name: monster.MT_NMAGMA.attack
+internal_name: monster.nmagma.attack
 name: Magma Demon - Attack
-tile: monster.MT_NMAGMA
+tile: monster.nmagma
 sound: diablo_sfx/monsters/magma/magmaa1.ogg
 sound: diablo_sfx/monsters/magma/magmaa2.ogg
 
-internal_name: monster.MT_NMAGMA.hit
+internal_name: monster.nmagma.hit
 name: Magma Demon - Hurt
-tile: monster.MT_NMAGMA
+tile: monster.nmagma
 sound: diablo_sfx/monsters/magma/magmah1.ogg
 sound: diablo_sfx/monsters/magma/magmah2.ogg
 
-internal_name: monster.MT_NMAGMA.death
+internal_name: monster.nmagma.death
 name: Magma Demon - Death
-tile: monster.MT_NMAGMA
+tile: monster.nmagma
 sound: diablo_sfx/monsters/magma/magmad1.ogg
 sound: diablo_sfx/monsters/magma/magmad2.ogg
 
-internal_name: monster.MT_YMAGMA.attack
+internal_name: monster.ymagma.attack
 name: Blood Stone - Attack
-tile: monster.MT_YMAGMA
+tile: monster.ymagma
 sound: diablo_sfx/monsters/magma/magmaa1.ogg
 sound: diablo_sfx/monsters/magma/magmaa2.ogg
 
-internal_name: monster.MT_YMAGMA.hit
+internal_name: monster.ymagma.hit
 name: Blood Stone - Hurt
-tile: monster.MT_YMAGMA
+tile: monster.ymagma
 sound: diablo_sfx/monsters/magma/magmah1.ogg
 sound: diablo_sfx/monsters/magma/magmah2.ogg
 
-internal_name: monster.MT_YMAGMA.death
+internal_name: monster.ymagma.death
 name: Blood Stone - Death
-tile: monster.MT_YMAGMA
+tile: monster.ymagma
 sound: diablo_sfx/monsters/magma/magmad1.ogg
 sound: diablo_sfx/monsters/magma/magmad2.ogg
 
-internal_name: monster.MT_BMAGMA.attack
+internal_name: monster.bmagma.attack
 name: Hell Stone - Attack
-tile: monster.MT_BMAGMA
+tile: monster.bmagma
 sound: diablo_sfx/monsters/magma/magmaa1.ogg
 sound: diablo_sfx/monsters/magma/magmaa2.ogg
 
-internal_name: monster.MT_BMAGMA.hit
+internal_name: monster.bmagma.hit
 name: Hell Stone - Hurt
-tile: monster.MT_BMAGMA
+tile: monster.bmagma
 sound: diablo_sfx/monsters/magma/magmah1.ogg
 sound: diablo_sfx/monsters/magma/magmah2.ogg
 
-internal_name: monster.MT_BMAGMA.death
+internal_name: monster.bmagma.death
 name: Hell Stone - Death
-tile: monster.MT_BMAGMA
+tile: monster.bmagma
 sound: diablo_sfx/monsters/magma/magmad1.ogg
 sound: diablo_sfx/monsters/magma/magmad2.ogg
 
-internal_name: monster.MT_WMAGMA.attack
+internal_name: monster.wmagma.attack
 name: Lava Lord - Attack
-tile: monster.MT_WMAGMA
+tile: monster.wmagma
 sound: diablo_sfx/monsters/magma/magmaa1.ogg
 sound: diablo_sfx/monsters/magma/magmaa2.ogg
 
-internal_name: monster.MT_WMAGMA.hit
+internal_name: monster.wmagma.hit
 name: Lava Lord - Hurt
-tile: monster.MT_WMAGMA
+tile: monster.wmagma
 sound: diablo_sfx/monsters/magma/magmah1.ogg
 sound: diablo_sfx/monsters/magma/magmah2.ogg
 
-internal_name: monster.MT_WMAGMA.death
+internal_name: monster.wmagma.death
 name: Lava Lord - Death
-tile: monster.MT_WMAGMA
+tile: monster.wmagma
 sound: diablo_sfx/monsters/magma/magmad1.ogg
 sound: diablo_sfx/monsters/magma/magmad2.ogg
 
-internal_name: monster.MT_HORNED.attack
+internal_name: monster.horned.attack
 name: Horned Demon - Attack
-tile: monster.MT_HORNED
+tile: monster.horned
 sound: diablo_sfx/monsters/rhino/rhinoa1.ogg
 sound: diablo_sfx/monsters/rhino/rhinoa2.ogg
 
-internal_name: monster.MT_HORNED.hit
+internal_name: monster.horned.hit
 name: Horned Demon - Hurt
-tile: monster.MT_HORNED
+tile: monster.horned
 sound: diablo_sfx/monsters/rhino/rhinoh1.ogg
 sound: diablo_sfx/monsters/rhino/rhinoh2.ogg
 
-internal_name: monster.MT_HORNED.death
+internal_name: monster.horned.death
 name: Horned Demon - Death
-tile: monster.MT_HORNED
+tile: monster.horned
 sound: diablo_sfx/monsters/rhino/rhinod1.ogg
 sound: diablo_sfx/monsters/rhino/rhinod2.ogg
 
-internal_name: monster.MT_MUDRUN.attack
+internal_name: monster.mudrun.attack
 name: Mud Runner - Attack
-tile: monster.MT_MUDRUN
+tile: monster.mudrun
 sound: diablo_sfx/monsters/rhino/rhinoa1.ogg
 sound: diablo_sfx/monsters/rhino/rhinoa2.ogg
 
-internal_name: monster.MT_MUDRUN.hit
+internal_name: monster.mudrun.hit
 name: Mud Runner - Hurt
-tile: monster.MT_MUDRUN
+tile: monster.mudrun
 sound: diablo_sfx/monsters/rhino/rhinoh1.ogg
 sound: diablo_sfx/monsters/rhino/rhinoh2.ogg
 
-internal_name: monster.MT_MUDRUN.death
+internal_name: monster.mudrun.death
 name: Mud Runner - Death
-tile: monster.MT_MUDRUN
+tile: monster.mudrun
 sound: diablo_sfx/monsters/rhino/rhinod1.ogg
 sound: diablo_sfx/monsters/rhino/rhinod2.ogg
 
-internal_name: monster.MT_FROSTC.attack
+internal_name: monster.frostc.attack
 name: Frost Charger - Attack
-tile: monster.MT_FROSTC
+tile: monster.frostc
 sound: diablo_sfx/monsters/rhino/rhinoa1.ogg
 sound: diablo_sfx/monsters/rhino/rhinoa2.ogg
 
-internal_name: monster.MT_FROSTC.hit
+internal_name: monster.frostc.hit
 name: Frost Charger - Hurt
-tile: monster.MT_FROSTC
+tile: monster.frostc
 sound: diablo_sfx/monsters/rhino/rhinoh1.ogg
 sound: diablo_sfx/monsters/rhino/rhinoh2.ogg
 
-internal_name: monster.MT_FROSTC.death
+internal_name: monster.frostc.death
 name: Frost Charger - Death
-tile: monster.MT_FROSTC
+tile: monster.frostc
 sound: diablo_sfx/monsters/rhino/rhinod1.ogg
 sound: diablo_sfx/monsters/rhino/rhinod2.ogg
 
-internal_name: monster.MT_OBLORD.attack
+internal_name: monster.oblord.attack
 name: Obsidian Lord - Attack
-tile: monster.MT_OBLORD
+tile: monster.oblord
 sound: diablo_sfx/monsters/rhino/rhinoa1.ogg
 sound: diablo_sfx/monsters/rhino/rhinoa2.ogg
 
-internal_name: monster.MT_OBLORD.hit
+internal_name: monster.oblord.hit
 name: Obsidian Lord - Hurt
-tile: monster.MT_OBLORD
+tile: monster.oblord
 sound: diablo_sfx/monsters/rhino/rhinoh1.ogg
 sound: diablo_sfx/monsters/rhino/rhinoh2.ogg
 
-internal_name: monster.MT_OBLORD.death
+internal_name: monster.oblord.death
 name: Obsidian Lord - Death
-tile: monster.MT_OBLORD
+tile: monster.oblord
 sound: diablo_sfx/monsters/rhino/rhinod1.ogg
 sound: diablo_sfx/monsters/rhino/rhinod2.ogg
 
-internal_name: monster.MT_BONEDMN.attack
+internal_name: monster.bonedmn.attack
 name: Bone Demon - Attack
-tile: monster.MT_BONEDMN
+tile: monster.bonedmn
 sound: diablo_sfx/monsters/thin/thina1.ogg
 sound: diablo_sfx/monsters/thin/thina2.ogg
 
-internal_name: monster.MT_BONEDMN.hit
+internal_name: monster.bonedmn.hit
 name: Bone Demon - Hurt
-tile: monster.MT_BONEDMN
+tile: monster.bonedmn
 sound: diablo_sfx/monsters/thin/thinh1.ogg
 sound: diablo_sfx/monsters/thin/thinh2.ogg
 
-internal_name: monster.MT_BONEDMN.death
+internal_name: monster.bonedmn.death
 name: Bone Demon - Death
-tile: monster.MT_BONEDMN
+tile: monster.bonedmn
 sound: diablo_sfx/monsters/thin/thind1.ogg
 sound: diablo_sfx/monsters/thin/thind2.ogg
 
-internal_name: monster.MT_REDDTH.attack
+internal_name: monster.reddth.attack
 name: Red Death - Attack
-tile: monster.MT_REDDTH
+tile: monster.reddth
 sound: diablo_sfx/monsters/thin/thina1.ogg
 sound: diablo_sfx/monsters/thin/thina2.ogg
 
-internal_name: monster.MT_REDDTH.hit
+internal_name: monster.reddth.hit
 name: Red Death - Hurt
-tile: monster.MT_REDDTH
+tile: monster.reddth
 sound: diablo_sfx/monsters/thin/thinh1.ogg
 sound: diablo_sfx/monsters/thin/thinh2.ogg
 
-internal_name: monster.MT_REDDTH.death
+internal_name: monster.reddth.death
 name: Red Death - Death
-tile: monster.MT_REDDTH
+tile: monster.reddth
 sound: diablo_sfx/monsters/thin/thind1.ogg
 sound: diablo_sfx/monsters/thin/thind2.ogg
 
-internal_name: monster.MT_LTCHDMN.attack
+internal_name: monster.ltchdmn.attack
 name: Litch Demon - Attack
-tile: monster.MT_LTCHDMN
+tile: monster.ltchdmn
 sound: diablo_sfx/monsters/thin/thina1.ogg
 sound: diablo_sfx/monsters/thin/thina2.ogg
 
-internal_name: monster.MT_LTCHDMN.hit
+internal_name: monster.ltchdmn.hit
 name: Litch Demon - Hurt
-tile: monster.MT_LTCHDMN
+tile: monster.ltchdmn
 sound: diablo_sfx/monsters/thin/thinh1.ogg
 sound: diablo_sfx/monsters/thin/thinh2.ogg
 
-internal_name: monster.MT_LTCHDMN.death
+internal_name: monster.ltchdmn.death
 name: Litch Demon - Death
-tile: monster.MT_LTCHDMN
+tile: monster.ltchdmn
 sound: diablo_sfx/monsters/thin/thind1.ogg
 sound: diablo_sfx/monsters/thin/thind2.ogg
 
-internal_name: monster.MT_UDEDBLRG.attack
+internal_name: monster.udedblrg.attack
 name: Undead Balrog - Attack
-tile: monster.MT_UDEDBLRG
+tile: monster.udedblrg
 sound: diablo_sfx/monsters/thin/thina1.ogg
 sound: diablo_sfx/monsters/thin/thina2.ogg
 
-internal_name: monster.MT_UDEDBLRG.hit
+internal_name: monster.udedblrg.hit
 name: Undead Balrog - Hurt
-tile: monster.MT_UDEDBLRG
+tile: monster.udedblrg
 sound: diablo_sfx/monsters/thin/thinh1.ogg
 sound: diablo_sfx/monsters/thin/thinh2.ogg
 
-internal_name: monster.MT_UDEDBLRG.death
+internal_name: monster.udedblrg.death
 name: Undead Balrog - Death
-tile: monster.MT_UDEDBLRG
+tile: monster.udedblrg
 sound: diablo_sfx/monsters/thin/thind1.ogg
 sound: diablo_sfx/monsters/thin/thind2.ogg
 
-internal_name: monster.MT_INCIN.attack
+internal_name: monster.incin.attack
 name: Incinerator - Attack
-tile: monster.MT_INCIN
+tile: monster.incin
 sound: diablo_sfx/monsters/acid/acida1.ogg
 sound: diablo_sfx/monsters/acid/acida2.ogg
 
-internal_name: monster.MT_INCIN.hit
+internal_name: monster.incin.hit
 name: Incinerator - Hurt
-tile: monster.MT_INCIN
+tile: monster.incin
 sound: diablo_sfx/monsters/acid/acidh1.ogg
 sound: diablo_sfx/monsters/acid/acidh2.ogg
 
-internal_name: monster.MT_INCIN.death
+internal_name: monster.incin.death
 name: Incinerator - Death
-tile: monster.MT_INCIN
+tile: monster.incin
 sound: diablo_sfx/monsters/acid/acidd1.ogg
 sound: diablo_sfx/monsters/acid/acidd2.ogg
 
-internal_name: monster.MT_FLAMLRD.attack
+internal_name: monster.flamlrd.attack
 name: Flame Lord - Attack
-tile: monster.MT_FLAMLRD
+tile: monster.flamlrd
 sound: diablo_sfx/monsters/acid/acida1.ogg
 sound: diablo_sfx/monsters/acid/acida2.ogg
 
-internal_name: monster.MT_FLAMLRD.hit
+internal_name: monster.flamlrd.hit
 name: Flame Lord - Hurt
-tile: monster.MT_FLAMLRD
+tile: monster.flamlrd
 sound: diablo_sfx/monsters/acid/acidh1.ogg
 sound: diablo_sfx/monsters/acid/acidh2.ogg
 
-internal_name: monster.MT_FLAMLRD.death
+internal_name: monster.flamlrd.death
 name: Flame Lord - Death
-tile: monster.MT_FLAMLRD
+tile: monster.flamlrd
 sound: diablo_sfx/monsters/acid/acidd1.ogg
 sound: diablo_sfx/monsters/acid/acidd2.ogg
 
-internal_name: monster.MT_DOOMFIRE.attack
+internal_name: monster.doomfire.attack
 name: Doom Fire - Attack
-tile: monster.MT_DOOMFIRE
+tile: monster.doomfire
 sound: diablo_sfx/monsters/acid/acida1.ogg
 sound: diablo_sfx/monsters/acid/acida2.ogg
 
-internal_name: monster.MT_DOOMFIRE.hit
+internal_name: monster.doomfire.hit
 name: Doom Fire - Hurt
-tile: monster.MT_DOOMFIRE
+tile: monster.doomfire
 sound: diablo_sfx/monsters/acid/acidh1.ogg
 sound: diablo_sfx/monsters/acid/acidh2.ogg
 
-internal_name: monster.MT_DOOMFIRE.death
+internal_name: monster.doomfire.death
 name: Doom Fire - Death
-tile: monster.MT_DOOMFIRE
+tile: monster.doomfire
 sound: diablo_sfx/monsters/acid/acidd1.ogg
 sound: diablo_sfx/monsters/acid/acidd2.ogg
 
-internal_name: monster.MT_HELLBURN.attack
+internal_name: monster.hellburn.attack
 name: Hell Burner - Attack
-tile: monster.MT_HELLBURN
+tile: monster.hellburn
 sound: diablo_sfx/monsters/acid/acida1.ogg
 sound: diablo_sfx/monsters/acid/acida2.ogg
 
-internal_name: monster.MT_HELLBURN.hit
+internal_name: monster.hellburn.hit
 name: Hell Burner - Hurt
-tile: monster.MT_HELLBURN
+tile: monster.hellburn
 sound: diablo_sfx/monsters/acid/acidh1.ogg
 sound: diablo_sfx/monsters/acid/acidh2.ogg
 
-internal_name: monster.MT_HELLBURN.death
+internal_name: monster.hellburn.death
 name: Hell Burner - Death
-tile: monster.MT_HELLBURN
+tile: monster.hellburn
 sound: diablo_sfx/monsters/acid/acidd1.ogg
 sound: diablo_sfx/monsters/acid/acidd2.ogg
 
-internal_name: monster.MT_STORM.attack
+internal_name: monster.storm.attack
 name: Red Storm - Attack
-tile: monster.MT_STORM
+tile: monster.storm
 sound: diablo_sfx/monsters/thin/thina1.ogg
 sound: diablo_sfx/monsters/thin/thina2.ogg
 
-internal_name: monster.MT_STORM.hit
+internal_name: monster.storm.hit
 name: Red Storm - Hurt
-tile: monster.MT_STORM
+tile: monster.storm
 sound: diablo_sfx/monsters/thin/thinh1.ogg
 sound: diablo_sfx/monsters/thin/thinh2.ogg
 
-internal_name: monster.MT_STORM.death
+internal_name: monster.storm.death
 name: Red Storm - Death
-tile: monster.MT_STORM
+tile: monster.storm
 sound: diablo_sfx/monsters/thin/thind1.ogg
 sound: diablo_sfx/monsters/thin/thind2.ogg
 
-internal_name: monster.MT_RSTORM.attack
+internal_name: monster.rstorm.attack
 name: Storm Rider - Attack
-tile: monster.MT_RSTORM
+tile: monster.rstorm
 sound: diablo_sfx/monsters/thin/thina1.ogg
 sound: diablo_sfx/monsters/thin/thina2.ogg
 
-internal_name: monster.MT_RSTORM.hit
+internal_name: monster.rstorm.hit
 name: Storm Rider - Hurt
-tile: monster.MT_RSTORM
+tile: monster.rstorm
 sound: diablo_sfx/monsters/thin/thinh1.ogg
 sound: diablo_sfx/monsters/thin/thinh2.ogg
 
-internal_name: monster.MT_RSTORM.death
+internal_name: monster.rstorm.death
 name: Storm Rider - Death
-tile: monster.MT_RSTORM
+tile: monster.rstorm
 sound: diablo_sfx/monsters/thin/thind1.ogg
 sound: diablo_sfx/monsters/thin/thind2.ogg
 
-internal_name: monster.MT_STORML.attack
+internal_name: monster.storml.attack
 name: Storm Lord - Attack
-tile: monster.MT_STORML
+tile: monster.storml
 sound: diablo_sfx/monsters/thin/thina1.ogg
 sound: diablo_sfx/monsters/thin/thina2.ogg
 
-internal_name: monster.MT_STORML.hit
+internal_name: monster.storml.hit
 name: Storm Lord - Hurt
-tile: monster.MT_STORML
+tile: monster.storml
 sound: diablo_sfx/monsters/thin/thinh1.ogg
 sound: diablo_sfx/monsters/thin/thinh2.ogg
 
-internal_name: monster.MT_STORML.death
+internal_name: monster.storml.death
 name: Storm Lord - Death
-tile: monster.MT_STORML
+tile: monster.storml
 sound: diablo_sfx/monsters/thin/thind1.ogg
 sound: diablo_sfx/monsters/thin/thind2.ogg
 
-internal_name: monster.MT_MAEL.attack
+internal_name: monster.mael.attack
 name: Maelstorm - Attack
-tile: monster.MT_MAEL
+tile: monster.mael
 sound: diablo_sfx/monsters/thin/thina1.ogg
 sound: diablo_sfx/monsters/thin/thina2.ogg
 
-internal_name: monster.MT_MAEL.hit
+internal_name: monster.mael.hit
 name: Maelstorm - Hurt
-tile: monster.MT_MAEL
+tile: monster.mael
 sound: diablo_sfx/monsters/thin/thinh1.ogg
 sound: diablo_sfx/monsters/thin/thinh2.ogg
 
-internal_name: monster.MT_MAEL.death
+internal_name: monster.mael.death
 name: Maelstorm - Death
-tile: monster.MT_MAEL
+tile: monster.mael
 sound: diablo_sfx/monsters/thin/thind1.ogg
 sound: diablo_sfx/monsters/thin/thind2.ogg
 
-internal_name: monster.MT_BIGFALL.attack
+internal_name: monster.bigfall.attack
 name: Devil Kin Brute - Attack
-tile: monster.MT_BIGFALL
+tile: monster.bigfall
 sound: diablo_sfx/monsters/bigfall/bfala1.ogg
 sound: diablo_sfx/monsters/bigfall/bfala2.ogg
 
-internal_name: monster.MT_BIGFALL.hit
+internal_name: monster.bigfall.hit
 name: Devil Kin Brute - Hurt
-tile: monster.MT_BIGFALL
+tile: monster.bigfall
 sound: diablo_sfx/monsters/bigfall/bfalh1.ogg
 sound: diablo_sfx/monsters/bigfall/bfalh2.ogg
 
-internal_name: monster.MT_BIGFALL.death
+internal_name: monster.bigfall.death
 name: Devil Kin Brute - Death
-tile: monster.MT_BIGFALL
+tile: monster.bigfall
 sound: diablo_sfx/monsters/bigfall/bfald1.ogg
 sound: diablo_sfx/monsters/bigfall/bfald2.ogg
 
-internal_name: monster.MT_WINGED.attack
+internal_name: monster.winged.attack
 name: Winged-Demon - Attack
-tile: monster.MT_WINGED
+tile: monster.winged
 sound: diablo_sfx/monsters/gargoyle/gargoa1.ogg
 sound: diablo_sfx/monsters/gargoyle/gargoa2.ogg
 
-internal_name: monster.MT_WINGED.hit
+internal_name: monster.winged.hit
 name: Winged-Demon - Hurt
-tile: monster.MT_WINGED
+tile: monster.winged
 sound: diablo_sfx/monsters/gargoyle/gargoh1.ogg
 sound: diablo_sfx/monsters/gargoyle/gargoh2.ogg
 
-internal_name: monster.MT_WINGED.death
+internal_name: monster.winged.death
 name: Winged-Demon - Death
-tile: monster.MT_WINGED
+tile: monster.winged
 sound: diablo_sfx/monsters/gargoyle/gargod1.ogg
 sound: diablo_sfx/monsters/gargoyle/gargod2.ogg
 
-internal_name: monster.MT_GARGOYLE.attack
+internal_name: monster.gargoyle.attack
 name: Gargoyle - Attack
-tile: monster.MT_GARGOYLE
+tile: monster.gargoyle
 sound: diablo_sfx/monsters/gargoyle/gargoa1.ogg
 sound: diablo_sfx/monsters/gargoyle/gargoa2.ogg
 
-internal_name: monster.MT_GARGOYLE.hit
+internal_name: monster.gargoyle.hit
 name: Gargoyle - Hurt
-tile: monster.MT_GARGOYLE
+tile: monster.gargoyle
 sound: diablo_sfx/monsters/gargoyle/gargoh1.ogg
 sound: diablo_sfx/monsters/gargoyle/gargoh2.ogg
 
-internal_name: monster.MT_GARGOYLE.death
+internal_name: monster.gargoyle.death
 name: Gargoyle - Death
-tile: monster.MT_GARGOYLE
+tile: monster.gargoyle
 sound: diablo_sfx/monsters/gargoyle/gargod1.ogg
 sound: diablo_sfx/monsters/gargoyle/gargod2.ogg
 
-internal_name: monster.MT_BLOODCLW.attack
+internal_name: monster.bloodclw.attack
 name: Blood Claw - Attack
-tile: monster.MT_BLOODCLW
+tile: monster.bloodclw
 sound: diablo_sfx/monsters/gargoyle/gargoa1.ogg
 sound: diablo_sfx/monsters/gargoyle/gargoa2.ogg
 
-internal_name: monster.MT_BLOODCLW.hit
+internal_name: monster.bloodclw.hit
 name: Blood Claw - Hurt
-tile: monster.MT_BLOODCLW
+tile: monster.bloodclw
 sound: diablo_sfx/monsters/gargoyle/gargoh1.ogg
 sound: diablo_sfx/monsters/gargoyle/gargoh2.ogg
 
-internal_name: monster.MT_BLOODCLW.death
+internal_name: monster.bloodclw.death
 name: Blood Claw - Death
-tile: monster.MT_BLOODCLW
+tile: monster.bloodclw
 sound: diablo_sfx/monsters/gargoyle/gargod1.ogg
 sound: diablo_sfx/monsters/gargoyle/gargod2.ogg
 
-internal_name: monster.MT_DEATHW.attack
+internal_name: monster.deathw.attack
 name: Death Wing - Attack
-tile: monster.MT_DEATHW
+tile: monster.deathw
 sound: diablo_sfx/monsters/gargoyle/gargoa1.ogg
 sound: diablo_sfx/monsters/gargoyle/gargoa2.ogg
 
-internal_name: monster.MT_DEATHW.hit
+internal_name: monster.deathw.hit
 name: Death Wing - Hurt
-tile: monster.MT_DEATHW
+tile: monster.deathw
 sound: diablo_sfx/monsters/gargoyle/gargoh1.ogg
 sound: diablo_sfx/monsters/gargoyle/gargoh2.ogg
 
-internal_name: monster.MT_DEATHW.death
+internal_name: monster.deathw.death
 name: Death Wing - Death
-tile: monster.MT_DEATHW
+tile: monster.deathw
 sound: diablo_sfx/monsters/gargoyle/gargod1.ogg
 sound: diablo_sfx/monsters/gargoyle/gargod2.ogg
 
-internal_name: monster.MT_MEGA.attack
+internal_name: monster.mega.attack
 name: Slayer - Attack
-tile: monster.MT_MEGA
+tile: monster.mega
 sound: diablo_sfx/monsters/mega/megaa1.ogg
 sound: diablo_sfx/monsters/mega/megaa2.ogg
 
-internal_name: monster.MT_MEGA.hit
+internal_name: monster.mega.hit
 name: Slayer - Hurt
-tile: monster.MT_MEGA
+tile: monster.mega
 sound: diablo_sfx/monsters/mega/megah1.ogg
 sound: diablo_sfx/monsters/mega/megah2.ogg
 
-internal_name: monster.MT_MEGA.death
+internal_name: monster.mega.death
 name: Slayer - Death
-tile: monster.MT_MEGA
+tile: monster.mega
 sound: diablo_sfx/monsters/mega/megad1.ogg
 sound: diablo_sfx/monsters/mega/megad2.ogg
 
-internal_name: monster.MT_GUARD.attack
+internal_name: monster.guard.attack
 name: Guardian - Attack
-tile: monster.MT_GUARD
+tile: monster.guard
 sound: diablo_sfx/monsters/mega/megaa1.ogg
 sound: diablo_sfx/monsters/mega/megaa2.ogg
 
-internal_name: monster.MT_GUARD.hit
+internal_name: monster.guard.hit
 name: Guardian - Hurt
-tile: monster.MT_GUARD
+tile: monster.guard
 sound: diablo_sfx/monsters/mega/megah1.ogg
 sound: diablo_sfx/monsters/mega/megah2.ogg
 
-internal_name: monster.MT_GUARD.death
+internal_name: monster.guard.death
 name: Guardian - Death
-tile: monster.MT_GUARD
+tile: monster.guard
 sound: diablo_sfx/monsters/mega/megad1.ogg
 sound: diablo_sfx/monsters/mega/megad2.ogg
 
-internal_name: monster.MT_VTEXLRD.attack
+internal_name: monster.vtexlrd.attack
 name: Vortex Lord - Attack
-tile: monster.MT_VTEXLRD
+tile: monster.vtexlrd
 sound: diablo_sfx/monsters/mega/megaa1.ogg
 sound: diablo_sfx/monsters/mega/megaa2.ogg
 
-internal_name: monster.MT_VTEXLRD.hit
+internal_name: monster.vtexlrd.hit
 name: Vortex Lord - Hurt
-tile: monster.MT_VTEXLRD
+tile: monster.vtexlrd
 sound: diablo_sfx/monsters/mega/megah1.ogg
 sound: diablo_sfx/monsters/mega/megah2.ogg
 
-internal_name: monster.MT_VTEXLRD.death
+internal_name: monster.vtexlrd.death
 name: Vortex Lord - Death
-tile: monster.MT_VTEXLRD
+tile: monster.vtexlrd
 sound: diablo_sfx/monsters/mega/megad1.ogg
 sound: diablo_sfx/monsters/mega/megad2.ogg
 
-internal_name: monster.MT_BALROG.attack
+internal_name: monster.balrog.attack
 name: Balrog - Attack
-tile: monster.MT_BALROG
+tile: monster.balrog
 sound: diablo_sfx/monsters/mega/megaa1.ogg
 sound: diablo_sfx/monsters/mega/megaa2.ogg
 
-internal_name: monster.MT_BALROG.hit
+internal_name: monster.balrog.hit
 name: Balrog - Hurt
-tile: monster.MT_BALROG
+tile: monster.balrog
 sound: diablo_sfx/monsters/mega/megah1.ogg
 sound: diablo_sfx/monsters/mega/megah2.ogg
 
-internal_name: monster.MT_BALROG.death
+internal_name: monster.balrog.death
 name: Balrog - Death
-tile: monster.MT_BALROG
+tile: monster.balrog
 sound: diablo_sfx/monsters/mega/megad1.ogg
 sound: diablo_sfx/monsters/mega/megad2.ogg
 
-internal_name: monster.MT_NSNAKE.attack
+internal_name: monster.nsnake.attack
 name: Cave Viper - Attack
-tile: monster.MT_NSNAKE
+tile: monster.nsnake
 sound: diablo_sfx/monsters/snake/snakea1.ogg
 sound: diablo_sfx/monsters/snake/snakea2.ogg
 
-internal_name: monster.MT_NSNAKE.hit
+internal_name: monster.nsnake.hit
 name: Cave Viper - Hurt
-tile: monster.MT_NSNAKE
+tile: monster.nsnake
 sound: diablo_sfx/monsters/snake/snakeh1.ogg
 sound: diablo_sfx/monsters/snake/snakeh2.ogg
 
-internal_name: monster.MT_NSNAKE.death
+internal_name: monster.nsnake.death
 name: Cave Viper - Death
-tile: monster.MT_NSNAKE
+tile: monster.nsnake
 sound: diablo_sfx/monsters/snake/snaked1.ogg
 sound: diablo_sfx/monsters/snake/snaked2.ogg
 
-internal_name: monster.MT_RSNAKE.attack
+internal_name: monster.rsnake.attack
 name: Fire Drake - Attack
-tile: monster.MT_RSNAKE
+tile: monster.rsnake
 sound: diablo_sfx/monsters/snake/snakea1.ogg
 sound: diablo_sfx/monsters/snake/snakea2.ogg
 
-internal_name: monster.MT_RSNAKE.hit
+internal_name: monster.rsnake.hit
 name: Fire Drake - Hurt
-tile: monster.MT_RSNAKE
+tile: monster.rsnake
 sound: diablo_sfx/monsters/snake/snakeh1.ogg
 sound: diablo_sfx/monsters/snake/snakeh2.ogg
 
-internal_name: monster.MT_RSNAKE.death
+internal_name: monster.rsnake.death
 name: Fire Drake - Death
-tile: monster.MT_RSNAKE
+tile: monster.rsnake
 sound: diablo_sfx/monsters/snake/snaked1.ogg
 sound: diablo_sfx/monsters/snake/snaked2.ogg
 
-internal_name: monster.MT_BSNAKE.attack
+internal_name: monster.bsnake.attack
 name: Gold Viper - Attack
-tile: monster.MT_BSNAKE
+tile: monster.bsnake
 sound: diablo_sfx/monsters/snake/snakea1.ogg
 sound: diablo_sfx/monsters/snake/snakea2.ogg
 
-internal_name: monster.MT_BSNAKE.hit
+internal_name: monster.bsnake.hit
 name: Gold Viper - Hurt
-tile: monster.MT_BSNAKE
+tile: monster.bsnake
 sound: diablo_sfx/monsters/snake/snakeh1.ogg
 sound: diablo_sfx/monsters/snake/snakeh2.ogg
 
-internal_name: monster.MT_BSNAKE.death
+internal_name: monster.bsnake.death
 name: Gold Viper - Death
-tile: monster.MT_BSNAKE
+tile: monster.bsnake
 sound: diablo_sfx/monsters/snake/snaked1.ogg
 sound: diablo_sfx/monsters/snake/snaked2.ogg
 
-internal_name: monster.MT_GSNAKE.attack
+internal_name: monster.gsnake.attack
 name: Azure Drake - Attack
-tile: monster.MT_GSNAKE
+tile: monster.gsnake
 sound: diablo_sfx/monsters/snake/snakea1.ogg
 sound: diablo_sfx/monsters/snake/snakea2.ogg
 
-internal_name: monster.MT_GSNAKE.hit
+internal_name: monster.gsnake.hit
 name: Azure Drake - Hurt
-tile: monster.MT_GSNAKE
+tile: monster.gsnake
 sound: diablo_sfx/monsters/snake/snakeh1.ogg
 sound: diablo_sfx/monsters/snake/snakeh2.ogg
 
-internal_name: monster.MT_GSNAKE.death
+internal_name: monster.gsnake.death
 name: Azure Drake - Death
-tile: monster.MT_GSNAKE
+tile: monster.gsnake
 sound: diablo_sfx/monsters/snake/snaked1.ogg
 sound: diablo_sfx/monsters/snake/snaked2.ogg
 
-internal_name: monster.MT_NBLACK.attack
+internal_name: monster.nblack.attack
 name: Black Knight - Attack
-tile: monster.MT_NBLACK
+tile: monster.nblack
 sound: diablo_sfx/monsters/black/blacka1.ogg
 sound: diablo_sfx/monsters/black/blacka2.ogg
 
-internal_name: monster.MT_NBLACK.hit
+internal_name: monster.nblack.hit
 name: Black Knight - Hurt
-tile: monster.MT_NBLACK
+tile: monster.nblack
 sound: diablo_sfx/monsters/black/blackh1.ogg
 sound: diablo_sfx/monsters/black/blackh2.ogg
 
-internal_name: monster.MT_NBLACK.death
+internal_name: monster.nblack.death
 name: Black Knight - Death
-tile: monster.MT_NBLACK
+tile: monster.nblack
 sound: diablo_sfx/monsters/black/blackd1.ogg
 sound: diablo_sfx/monsters/black/blackd2.ogg
 
-internal_name: monster.MT_RTBLACK.attack
+internal_name: monster.rtblack.attack
 name: Doom Guard - Attack
-tile: monster.MT_RTBLACK
+tile: monster.rtblack
 sound: diablo_sfx/monsters/black/blacka1.ogg
 sound: diablo_sfx/monsters/black/blacka2.ogg
 
-internal_name: monster.MT_RTBLACK.hit
+internal_name: monster.rtblack.hit
 name: Doom Guard - Hurt
-tile: monster.MT_RTBLACK
+tile: monster.rtblack
 sound: diablo_sfx/monsters/black/blackh1.ogg
 sound: diablo_sfx/monsters/black/blackh2.ogg
 
-internal_name: monster.MT_RTBLACK.death
+internal_name: monster.rtblack.death
 name: Doom Guard - Death
-tile: monster.MT_RTBLACK
+tile: monster.rtblack
 sound: diablo_sfx/monsters/black/blackd1.ogg
 sound: diablo_sfx/monsters/black/blackd2.ogg
 
-internal_name: monster.MT_BTBLACK.attack
+internal_name: monster.btblack.attack
 name: Steel Lord - Attack
-tile: monster.MT_BTBLACK
+tile: monster.btblack
 sound: diablo_sfx/monsters/black/blacka1.ogg
 sound: diablo_sfx/monsters/black/blacka2.ogg
 
-internal_name: monster.MT_BTBLACK.hit
+internal_name: monster.btblack.hit
 name: Steel Lord - Hurt
-tile: monster.MT_BTBLACK
+tile: monster.btblack
 sound: diablo_sfx/monsters/black/blackh1.ogg
 sound: diablo_sfx/monsters/black/blackh2.ogg
 
-internal_name: monster.MT_BTBLACK.death
+internal_name: monster.btblack.death
 name: Steel Lord - Death
-tile: monster.MT_BTBLACK
+tile: monster.btblack
 sound: diablo_sfx/monsters/black/blackd1.ogg
 sound: diablo_sfx/monsters/black/blackd2.ogg
 
-internal_name: monster.MT_RBLACK.attack
+internal_name: monster.rblack.attack
 name: Blood Knight - Attack
-tile: monster.MT_RBLACK
+tile: monster.rblack
 sound: diablo_sfx/monsters/black/blacka1.ogg
 sound: diablo_sfx/monsters/black/blacka2.ogg
 
-internal_name: monster.MT_RBLACK.hit
+internal_name: monster.rblack.hit
 name: Blood Knight - Hurt
-tile: monster.MT_RBLACK
+tile: monster.rblack
 sound: diablo_sfx/monsters/black/blackh1.ogg
 sound: diablo_sfx/monsters/black/blackh2.ogg
 
-internal_name: monster.MT_RBLACK.death
+internal_name: monster.rblack.death
 name: Blood Knight - Death
-tile: monster.MT_RBLACK
+tile: monster.rblack
 sound: diablo_sfx/monsters/black/blackd1.ogg
 sound: diablo_sfx/monsters/black/blackd2.ogg
 
-internal_name: monster.MT_UNRAV.attack
+internal_name: monster.unrav.attack
 name: Unraveler - Attack
-tile: monster.MT_UNRAV
+tile: monster.unrav
 sound: diablo_sfx/monsters/acid/acida1.ogg
 sound: diablo_sfx/monsters/acid/acida2.ogg
 
-internal_name: monster.MT_UNRAV.hit
+internal_name: monster.unrav.hit
 name: Unraveler - Hurt
-tile: monster.MT_UNRAV
+tile: monster.unrav
 sound: diablo_sfx/monsters/acid/acidh1.ogg
 sound: diablo_sfx/monsters/acid/acidh2.ogg
 
-internal_name: monster.MT_UNRAV.death
+internal_name: monster.unrav.death
 name: Unraveler - Death
-tile: monster.MT_UNRAV
+tile: monster.unrav
 sound: diablo_sfx/monsters/acid/acidd1.ogg
 sound: diablo_sfx/monsters/acid/acidd2.ogg
 
-internal_name: monster.MT_HOLOWONE.attack
+internal_name: monster.holowone.attack
 name: Hollow One - Attack
-tile: monster.MT_HOLOWONE
+tile: monster.holowone
 sound: diablo_sfx/monsters/acid/acida1.ogg
 sound: diablo_sfx/monsters/acid/acida2.ogg
 
-internal_name: monster.MT_HOLOWONE.hit
+internal_name: monster.holowone.hit
 name: Hollow One - Hurt
-tile: monster.MT_HOLOWONE
+tile: monster.holowone
 sound: diablo_sfx/monsters/acid/acidh1.ogg
 sound: diablo_sfx/monsters/acid/acidh2.ogg
 
-internal_name: monster.MT_HOLOWONE.death
+internal_name: monster.holowone.death
 name: Hollow One - Death
-tile: monster.MT_HOLOWONE
+tile: monster.holowone
 sound: diablo_sfx/monsters/acid/acidd1.ogg
 sound: diablo_sfx/monsters/acid/acidd2.ogg
 
-internal_name: monster.MT_PAINMSTR.attack
+internal_name: monster.painmstr.attack
 name: Pain Master - Attack
-tile: monster.MT_PAINMSTR
+tile: monster.painmstr
 sound: diablo_sfx/monsters/acid/acida1.ogg
 sound: diablo_sfx/monsters/acid/acida2.ogg
 
-internal_name: monster.MT_PAINMSTR.hit
+internal_name: monster.painmstr.hit
 name: Pain Master - Hurt
-tile: monster.MT_PAINMSTR
+tile: monster.painmstr
 sound: diablo_sfx/monsters/acid/acidh1.ogg
 sound: diablo_sfx/monsters/acid/acidh2.ogg
 
-internal_name: monster.MT_PAINMSTR.death
+internal_name: monster.painmstr.death
 name: Pain Master - Death
-tile: monster.MT_PAINMSTR
+tile: monster.painmstr
 sound: diablo_sfx/monsters/acid/acidd1.ogg
 sound: diablo_sfx/monsters/acid/acidd2.ogg
 
-internal_name: monster.MT_REALWEAV.attack
+internal_name: monster.realweav.attack
 name: Reality Weaver - Attack
-tile: monster.MT_REALWEAV
+tile: monster.realweav
 sound: diablo_sfx/monsters/acid/acida1.ogg
 sound: diablo_sfx/monsters/acid/acida2.ogg
 
-internal_name: monster.MT_REALWEAV.hit
+internal_name: monster.realweav.hit
 name: Reality Weaver - Hurt
-tile: monster.MT_REALWEAV
+tile: monster.realweav
 sound: diablo_sfx/monsters/acid/acidh1.ogg
 sound: diablo_sfx/monsters/acid/acidh2.ogg
 
-internal_name: monster.MT_REALWEAV.death
+internal_name: monster.realweav.death
 name: Reality Weaver - Death
-tile: monster.MT_REALWEAV
+tile: monster.realweav
 sound: diablo_sfx/monsters/acid/acidd1.ogg
 sound: diablo_sfx/monsters/acid/acidd2.ogg
 
-internal_name: monster.MT_SUCCUBUS.attack
+internal_name: monster.succubus.attack
 name: Succubus - Attack
-tile: monster.MT_SUCCUBUS
+tile: monster.succubus
 sound: diablo_sfx/monsters/succ/scbsa1.ogg
 sound: diablo_sfx/monsters/succ/scbsa2.ogg
 
-internal_name: monster.MT_SUCCUBUS.hit
+internal_name: monster.succubus.hit
 name: Succubus - Hurt
-tile: monster.MT_SUCCUBUS
+tile: monster.succubus
 sound: diablo_sfx/monsters/succ/scbsh1.ogg
 sound: diablo_sfx/monsters/succ/scbsh2.ogg
 
-internal_name: monster.MT_SUCCUBUS.death
+internal_name: monster.succubus.death
 name: Succubus - Death
-tile: monster.MT_SUCCUBUS
+tile: monster.succubus
 sound: diablo_sfx/monsters/succ/scbsd1.ogg
 sound: diablo_sfx/monsters/succ/scbsd2.ogg
 
-internal_name: monster.MT_SNOWWICH.attack
+internal_name: monster.snowwich.attack
 name: Snow Witch - Attack
-tile: monster.MT_SNOWWICH
+tile: monster.snowwich
 sound: diablo_sfx/monsters/succ/scbsa1.ogg
 sound: diablo_sfx/monsters/succ/scbsa2.ogg
 
-internal_name: monster.MT_SNOWWICH.hit
+internal_name: monster.snowwich.hit
 name: Snow Witch - Hurt
-tile: monster.MT_SNOWWICH
+tile: monster.snowwich
 sound: diablo_sfx/monsters/succ/scbsh1.ogg
 sound: diablo_sfx/monsters/succ/scbsh2.ogg
 
-internal_name: monster.MT_SNOWWICH.death
+internal_name: monster.snowwich.death
 name: Snow Witch - Death
-tile: monster.MT_SNOWWICH
+tile: monster.snowwich
 sound: diablo_sfx/monsters/succ/scbsd1.ogg
 sound: diablo_sfx/monsters/succ/scbsd2.ogg
 
-internal_name: monster.MT_HLSPWN.attack
+internal_name: monster.hlspwn.attack
 name: Hell Spawn - Attack
-tile: monster.MT_HLSPWN
+tile: monster.hlspwn
 sound: diablo_sfx/monsters/succ/scbsa1.ogg
 sound: diablo_sfx/monsters/succ/scbsa2.ogg
 
-internal_name: monster.MT_HLSPWN.hit
+internal_name: monster.hlspwn.hit
 name: Hell Spawn - Hurt
-tile: monster.MT_HLSPWN
+tile: monster.hlspwn
 sound: diablo_sfx/monsters/succ/scbsh1.ogg
 sound: diablo_sfx/monsters/succ/scbsh2.ogg
 
-internal_name: monster.MT_HLSPWN.death
+internal_name: monster.hlspwn.death
 name: Hell Spawn - Death
-tile: monster.MT_HLSPWN
+tile: monster.hlspwn
 sound: diablo_sfx/monsters/succ/scbsd1.ogg
 sound: diablo_sfx/monsters/succ/scbsd2.ogg
 
-internal_name: monster.MT_SOLBRNR.attack
+internal_name: monster.solbrnr.attack
 name: Soul Burner - Attack
-tile: monster.MT_SOLBRNR
+tile: monster.solbrnr
 sound: diablo_sfx/monsters/succ/scbsa1.ogg
 sound: diablo_sfx/monsters/succ/scbsa2.ogg
 
-internal_name: monster.MT_SOLBRNR.hit
+internal_name: monster.solbrnr.hit
 name: Soul Burner - Hurt
-tile: monster.MT_SOLBRNR
+tile: monster.solbrnr
 sound: diablo_sfx/monsters/succ/scbsh1.ogg
 sound: diablo_sfx/monsters/succ/scbsh2.ogg
 
-internal_name: monster.MT_SOLBRNR.death
+internal_name: monster.solbrnr.death
 name: Soul Burner - Death
-tile: monster.MT_SOLBRNR
+tile: monster.solbrnr
 sound: diablo_sfx/monsters/succ/scbsd1.ogg
 sound: diablo_sfx/monsters/succ/scbsd2.ogg
 
-internal_name: monster.MT_COUNSLR.attack
+internal_name: monster.counslr.attack
 name: Counselor - Attack
-tile: monster.MT_COUNSLR
+tile: monster.counslr
 sound: diablo_sfx/monsters/mage/magea1.ogg
 sound: diablo_sfx/monsters/mage/magea2.ogg
 
-internal_name: monster.MT_COUNSLR.hit
+internal_name: monster.counslr.hit
 name: Counselor - Hurt
-tile: monster.MT_COUNSLR
+tile: monster.counslr
 sound: diablo_sfx/monsters/mage/mageh1.ogg
 sound: diablo_sfx/monsters/mage/mageh2.ogg
 
-internal_name: monster.MT_COUNSLR.death
+internal_name: monster.counslr.death
 name: Counselor - Death
-tile: monster.MT_COUNSLR
+tile: monster.counslr
 sound: diablo_sfx/monsters/mage/maged1.ogg
 sound: diablo_sfx/monsters/mage/maged2.ogg
 
-internal_name: monster.MT_MAGISTR.attack
+internal_name: monster.magistr.attack
 name: Magistrate - Attack
-tile: monster.MT_MAGISTR
+tile: monster.magistr
 sound: diablo_sfx/monsters/mage/magea1.ogg
 sound: diablo_sfx/monsters/mage/magea2.ogg
 
-internal_name: monster.MT_MAGISTR.hit
+internal_name: monster.magistr.hit
 name: Magistrate - Hurt
-tile: monster.MT_MAGISTR
+tile: monster.magistr
 sound: diablo_sfx/monsters/mage/mageh1.ogg
 sound: diablo_sfx/monsters/mage/mageh2.ogg
 
-internal_name: monster.MT_MAGISTR.death
+internal_name: monster.magistr.death
 name: Magistrate - Death
-tile: monster.MT_MAGISTR
+tile: monster.magistr
 sound: diablo_sfx/monsters/mage/maged1.ogg
 sound: diablo_sfx/monsters/mage/maged2.ogg
 
-internal_name: monster.MT_CABALIST.attack
+internal_name: monster.cabalist.attack
 name: Cabalist - Attack
-tile: monster.MT_CABALIST
+tile: monster.cabalist
 sound: diablo_sfx/monsters/mage/magea1.ogg
 sound: diablo_sfx/monsters/mage/magea2.ogg
 
-internal_name: monster.MT_CABALIST.hit
+internal_name: monster.cabalist.hit
 name: Cabalist - Hurt
-tile: monster.MT_CABALIST
+tile: monster.cabalist
 sound: diablo_sfx/monsters/mage/mageh1.ogg
 sound: diablo_sfx/monsters/mage/mageh2.ogg
 
-internal_name: monster.MT_CABALIST.death
+internal_name: monster.cabalist.death
 name: Cabalist - Death
-tile: monster.MT_CABALIST
+tile: monster.cabalist
 sound: diablo_sfx/monsters/mage/maged1.ogg
 sound: diablo_sfx/monsters/mage/maged2.ogg
 
-internal_name: monster.MT_ADVOCATE.attack
+internal_name: monster.advocate.attack
 name: Advocate - Attack
-tile: monster.MT_ADVOCATE
+tile: monster.advocate
 sound: diablo_sfx/monsters/mage/magea1.ogg
 sound: diablo_sfx/monsters/mage/magea2.ogg
 
-internal_name: monster.MT_ADVOCATE.hit
+internal_name: monster.advocate.hit
 name: Advocate - Hurt
-tile: monster.MT_ADVOCATE
+tile: monster.advocate
 sound: diablo_sfx/monsters/mage/mageh1.ogg
 sound: diablo_sfx/monsters/mage/mageh2.ogg
 
-internal_name: monster.MT_ADVOCATE.death
+internal_name: monster.advocate.death
 name: Advocate - Death
-tile: monster.MT_ADVOCATE
+tile: monster.advocate
 sound: diablo_sfx/monsters/mage/maged1.ogg
 sound: diablo_sfx/monsters/mage/maged2.ogg
 
-internal_name: monster.MT_GOLEM.attack
+internal_name: monster.golem.attack
 name: Golem - Attack
-tile: monster.MT_GOLEM
+tile: monster.golem
 sound: diablo_sfx/monsters/golem/golma1.ogg
 sound: diablo_sfx/monsters/golem/golma2.ogg
 
-internal_name: monster.MT_GOLEM.hit
+internal_name: monster.golem.hit
 name: Golem - Hurt
-tile: monster.MT_GOLEM
+tile: monster.golem
 sound: diablo_sfx/monsters/golem/golmh1.ogg
 sound: diablo_sfx/monsters/golem/golmh2.ogg
 
-internal_name: monster.MT_GOLEM.death
+internal_name: monster.golem.death
 name: Golem - Death
-tile: monster.MT_GOLEM
+tile: monster.golem
 sound: diablo_sfx/monsters/golem/golmd1.ogg
 sound: diablo_sfx/monsters/golem/golmd2.ogg
 
-internal_name: monster.MT_DIABLO.attack
+internal_name: monster.diablo.attack
 name: The Dark Lord - Attack
-tile: monster.MT_DIABLO
+tile: monster.diablo
 sound: diablo_sfx/monsters/diablo/diabloa1.ogg
 sound: diablo_sfx/monsters/diablo/diabloa2.ogg
 
-internal_name: monster.MT_DIABLO.hit
+internal_name: monster.diablo.hit
 name: The Dark Lord - Hurt
-tile: monster.MT_DIABLO
+tile: monster.diablo
 sound: diablo_sfx/monsters/diablo/diabloh1.ogg
 sound: diablo_sfx/monsters/diablo/diabloh2.ogg
 
-internal_name: monster.MT_DIABLO.death
+internal_name: monster.diablo.death
 name: The Dark Lord - Death
-tile: monster.MT_DIABLO
+tile: monster.diablo
 sound: diablo_sfx/monsters/diablo/diablod1.ogg
 sound: diablo_sfx/monsters/diablo/diablod2.ogg
 
-internal_name: monster.MT_DARKMAGE.attack
+internal_name: monster.darkmage.attack
 name: The Arch-Litch Malignus - Attack
-tile: monster.MT_DARKMAGE
+tile: monster.darkmage
 sound: diablo_sfx/monsters/darkmage/dmaga1.ogg
 sound: diablo_sfx/monsters/darkmage/dmaga2.ogg
 
-internal_name: monster.MT_DARKMAGE.hit
+internal_name: monster.darkmage.hit
 name: The Arch-Litch Malignus - Hurt
-tile: monster.MT_DARKMAGE
+tile: monster.darkmage
 sound: diablo_sfx/monsters/darkmage/dmagh1.ogg
 sound: diablo_sfx/monsters/darkmage/dmagh2.ogg
 
-internal_name: monster.MT_DARKMAGE.death
+internal_name: monster.darkmage.death
 name: The Arch-Litch Malignus - Death
-tile: monster.MT_DARKMAGE
+tile: monster.darkmage
 sound: diablo_sfx/monsters/darkmage/dmagd1.ogg
 sound: diablo_sfx/monsters/darkmage/dmagd2.ogg
 
-internal_name: monster.MT_FORK.attack
+internal_name: monster.fork.attack
 name: Hellboar - Attack
-tile: monster.MT_FORK
+tile: monster.fork
 sound: diablo_sfx/monsters/newsfx/hboara1.ogg
 sound: diablo_sfx/monsters/newsfx/hboara2.ogg
 
-internal_name: monster.MT_FORK.hit
+internal_name: monster.fork.hit
 name: Hellboar - Hurt
-tile: monster.MT_FORK
+tile: monster.fork
 sound: diablo_sfx/monsters/newsfx/hboarh1.ogg
 sound: diablo_sfx/monsters/newsfx/hboarh2.ogg
 
-internal_name: monster.MT_FORK.death
+internal_name: monster.fork.death
 name: Hellboar - Death
-tile: monster.MT_FORK
+tile: monster.fork
 sound: diablo_sfx/monsters/newsfx/hboard1.ogg
 sound: diablo_sfx/monsters/newsfx/hboard2.ogg
 
-internal_name: monster.MT_SCORP.attack
+internal_name: monster.scorp.attack
 name: Stinger - Attack
-tile: monster.MT_SCORP
+tile: monster.scorp
 sound: diablo_sfx/monsters/newsfx/stingra1.ogg
 sound: diablo_sfx/monsters/newsfx/stingra2.ogg
 
-internal_name: monster.MT_SCORP.hit
+internal_name: monster.scorp.hit
 name: Stinger - Hurt
-tile: monster.MT_SCORP
+tile: monster.scorp
 sound: diablo_sfx/monsters/newsfx/stingrh1.ogg
 sound: diablo_sfx/monsters/newsfx/stingrh2.ogg
 
-internal_name: monster.MT_SCORP.death
+internal_name: monster.scorp.death
 name: Stinger - Death
-tile: monster.MT_SCORP
+tile: monster.scorp
 sound: diablo_sfx/monsters/newsfx/stingrd1.ogg
 sound: diablo_sfx/monsters/newsfx/stingrd2.ogg
 
-internal_name: monster.MT_EYE.attack
+internal_name: monster.eye.attack
 name: Psychorb - Attack
-tile: monster.MT_EYE
+tile: monster.eye
 sound: diablo_sfx/monsters/newsfx/psycoa1.ogg
 sound: diablo_sfx/monsters/newsfx/psycoa2.ogg
 
-internal_name: monster.MT_EYE.hit
+internal_name: monster.eye.hit
 name: Psychorb - Hurt
-tile: monster.MT_EYE
+tile: monster.eye
 sound: diablo_sfx/monsters/newsfx/psycoh1.ogg
 sound: diablo_sfx/monsters/newsfx/psycoh2.ogg
 
-internal_name: monster.MT_EYE.death
+internal_name: monster.eye.death
 name: Psychorb - Death
-tile: monster.MT_EYE
+tile: monster.eye
 sound: diablo_sfx/monsters/newsfx/psycod1.ogg
 sound: diablo_sfx/monsters/newsfx/psycod2.ogg
 
-internal_name: monster.MT_SPIDER.attack
+internal_name: monster.spider.attack
 name: Arachnon - Attack
-tile: monster.MT_SPIDER
+tile: monster.spider
 sound: diablo_sfx/monsters/newsfx/slorda1.ogg
 sound: diablo_sfx/monsters/newsfx/slorda2.ogg
 
-internal_name: monster.MT_SPIDER.hit
+internal_name: monster.spider.hit
 name: Arachnon - Hurt
-tile: monster.MT_SPIDER
+tile: monster.spider
 sound: diablo_sfx/monsters/newsfx/slordh1.ogg
 sound: diablo_sfx/monsters/newsfx/slordh2.ogg
 
-internal_name: monster.MT_SPIDER.death
+internal_name: monster.spider.death
 name: Arachnon - Death
-tile: monster.MT_SPIDER
+tile: monster.spider
 sound: diablo_sfx/monsters/newsfx/slordd1.ogg
 sound: diablo_sfx/monsters/newsfx/slordd2.ogg
 
-internal_name: monster.MT_FELLTWIN.attack
+internal_name: monster.felltwin.attack
 name: Felltwin - Attack
-tile: monster.MT_FELLTWIN
+tile: monster.felltwin
 sound: diablo_sfx/monsters/newsfx/ftwina1.ogg
 sound: diablo_sfx/monsters/newsfx/ftwina2.ogg
 
-internal_name: monster.MT_FELLTWIN.hit
+internal_name: monster.felltwin.hit
 name: Felltwin - Hurt
-tile: monster.MT_FELLTWIN
+tile: monster.felltwin
 sound: diablo_sfx/monsters/newsfx/ftwinh1.ogg
 sound: diablo_sfx/monsters/newsfx/ftwinh2.ogg
 
-internal_name: monster.MT_FELLTWIN.death
+internal_name: monster.felltwin.death
 name: Felltwin - Death
-tile: monster.MT_FELLTWIN
+tile: monster.felltwin
 sound: diablo_sfx/monsters/newsfx/ftwind1.ogg
 sound: diablo_sfx/monsters/newsfx/ftwind2.ogg
 
-internal_name: monster.MT_SPAWN.attack
+internal_name: monster.spawn.attack
 name: Hork Spawn - Attack
-tile: monster.MT_SPAWN
+tile: monster.spawn
 sound: diablo_sfx/monsters/newsfx/hspawna1.ogg
 sound: diablo_sfx/monsters/newsfx/hspawna2.ogg
 
-internal_name: monster.MT_SPAWN.hit
+internal_name: monster.spawn.hit
 name: Hork Spawn - Hurt
-tile: monster.MT_SPAWN
+tile: monster.spawn
 sound: diablo_sfx/monsters/newsfx/hspawnh1.ogg
 sound: diablo_sfx/monsters/newsfx/hspawnh2.ogg
 
-internal_name: monster.MT_SPAWN.death
+internal_name: monster.spawn.death
 name: Hork Spawn - Death
-tile: monster.MT_SPAWN
+tile: monster.spawn
 sound: diablo_sfx/monsters/newsfx/hspawnd1.ogg
 sound: diablo_sfx/monsters/newsfx/hspawnd2.ogg
 
-internal_name: monster.MT_SCORP2.attack
+internal_name: monster.scorp2.attack
 name: Venomtail - Attack
-tile: monster.MT_SCORP2
+tile: monster.scorp2
 sound: diablo_sfx/monsters/newsfx/stingra1.ogg
 sound: diablo_sfx/monsters/newsfx/stingra2.ogg
 
-internal_name: monster.MT_SCORP2.hit
+internal_name: monster.scorp2.hit
 name: Venomtail - Hurt
-tile: monster.MT_SCORP2
+tile: monster.scorp2
 sound: diablo_sfx/monsters/newsfx/stingrh1.ogg
 sound: diablo_sfx/monsters/newsfx/stingrh2.ogg
 
-internal_name: monster.MT_SCORP2.death
+internal_name: monster.scorp2.death
 name: Venomtail - Death
-tile: monster.MT_SCORP2
+tile: monster.scorp2
 sound: diablo_sfx/monsters/newsfx/stingrd1.ogg
 sound: diablo_sfx/monsters/newsfx/stingrd2.ogg
 
-internal_name: monster.MT_EYE2.attack
+internal_name: monster.eye2.attack
 name: Necromorb - Attack
-tile: monster.MT_EYE2
+tile: monster.eye2
 sound: diablo_sfx/monsters/newsfx/psycoa1.ogg
 sound: diablo_sfx/monsters/newsfx/psycoa2.ogg
 
-internal_name: monster.MT_EYE2.hit
+internal_name: monster.eye2.hit
 name: Necromorb - Hurt
-tile: monster.MT_EYE2
+tile: monster.eye2
 sound: diablo_sfx/monsters/newsfx/psycoh1.ogg
 sound: diablo_sfx/monsters/newsfx/psycoh2.ogg
 
-internal_name: monster.MT_EYE2.death
+internal_name: monster.eye2.death
 name: Necromorb - Death
-tile: monster.MT_EYE2
+tile: monster.eye2
 sound: diablo_sfx/monsters/newsfx/psycod1.ogg
 sound: diablo_sfx/monsters/newsfx/psycod2.ogg
 
-internal_name: monster.MT_SPIDER2.attack
+internal_name: monster.spider2.attack
 name: Spider Lord - Attack
-tile: monster.MT_SPIDER2
+tile: monster.spider2
 sound: diablo_sfx/monsters/newsfx/slorda1.ogg
 sound: diablo_sfx/monsters/newsfx/slorda2.ogg
 
-internal_name: monster.MT_SPIDER2.hit
+internal_name: monster.spider2.hit
 name: Spider Lord - Hurt
-tile: monster.MT_SPIDER2
+tile: monster.spider2
 sound: diablo_sfx/monsters/newsfx/slordh1.ogg
 sound: diablo_sfx/monsters/newsfx/slordh2.ogg
 
-internal_name: monster.MT_SPIDER2.death
+internal_name: monster.spider2.death
 name: Spider Lord - Death
-tile: monster.MT_SPIDER2
+tile: monster.spider2
 sound: diablo_sfx/monsters/newsfx/slordd1.ogg
 sound: diablo_sfx/monsters/newsfx/slordd2.ogg
 
-internal_name: monster.MT_LASH.attack
+internal_name: monster.lash.attack
 name: Lashworm - Attack
-tile: monster.MT_LASH
+tile: monster.lash
 sound: diablo_sfx/monsters/newsfx/lworma1.ogg
 sound: diablo_sfx/monsters/newsfx/lworma2.ogg
 
-internal_name: monster.MT_LASH.hit
+internal_name: monster.lash.hit
 name: Lashworm - Hurt
-tile: monster.MT_LASH
+tile: monster.lash
 sound: diablo_sfx/monsters/newsfx/lwormh1.ogg
 sound: diablo_sfx/monsters/newsfx/lwormh2.ogg
 
-internal_name: monster.MT_LASH.death
+internal_name: monster.lash.death
 name: Lashworm - Death
-tile: monster.MT_LASH
+tile: monster.lash
 sound: diablo_sfx/monsters/newsfx/lwormd1.ogg
 sound: diablo_sfx/monsters/newsfx/lwormd2.ogg
 
-internal_name: monster.MT_ANT.attack
+internal_name: monster.ant.attack
 name: Torchant - Attack
-tile: monster.MT_ANT
+tile: monster.ant
 sound: diablo_sfx/monsters/newsfx/tchanta1.ogg
 sound: diablo_sfx/monsters/newsfx/tchanta2.ogg
 
-internal_name: monster.MT_ANT.hit
+internal_name: monster.ant.hit
 name: Torchant - Hurt
-tile: monster.MT_ANT
+tile: monster.ant
 sound: diablo_sfx/monsters/newsfx/tchanth1.ogg
 sound: diablo_sfx/monsters/newsfx/tchanth2.ogg
 
-internal_name: monster.MT_ANT.death
+internal_name: monster.ant.death
 name: Torchant - Death
-tile: monster.MT_ANT
+tile: monster.ant
 sound: diablo_sfx/monsters/newsfx/tchantd1.ogg
 sound: diablo_sfx/monsters/newsfx/tchantd2.ogg
 
-internal_name: monster.MT_HORKD.attack
+internal_name: monster.horkd.attack
 name: Hork Demon - Attack
-tile: monster.MT_HORKD
+tile: monster.horkd
 sound: diablo_sfx/monsters/newsfx/hdemona1.ogg
 sound: diablo_sfx/monsters/newsfx/hdemona2.ogg
 
-internal_name: monster.MT_HORKD.hit
+internal_name: monster.horkd.hit
 name: Hork Demon - Hurt
-tile: monster.MT_HORKD
+tile: monster.horkd
 sound: diablo_sfx/monsters/newsfx/hdemonh1.ogg
 sound: diablo_sfx/monsters/newsfx/hdemonh2.ogg
 
-internal_name: monster.MT_HORKD.death
+internal_name: monster.horkd.death
 name: Hork Demon - Death
-tile: monster.MT_HORKD
+tile: monster.horkd
 sound: diablo_sfx/monsters/newsfx/hdemond1.ogg
 sound: diablo_sfx/monsters/newsfx/hdemond2.ogg
 
-internal_name: monster.MT_BUG.attack
+internal_name: monster.bug.attack
 name: Hell Bug - Attack
-tile: monster.MT_BUG
+tile: monster.bug
 sound: diablo_sfx/monsters/newsfx/defilea1.ogg
 sound: diablo_sfx/monsters/newsfx/defilea2.ogg
 
-internal_name: monster.MT_BUG.hit
+internal_name: monster.bug.hit
 name: Hell Bug - Hurt
-tile: monster.MT_BUG
+tile: monster.bug
 sound: diablo_sfx/monsters/newsfx/defileh1.ogg
 sound: diablo_sfx/monsters/newsfx/defileh2.ogg
 
-internal_name: monster.MT_BUG.death
+internal_name: monster.bug.death
 name: Hell Bug - Death
-tile: monster.MT_BUG
+tile: monster.bug
 sound: diablo_sfx/monsters/newsfx/defiled1.ogg
 sound: diablo_sfx/monsters/newsfx/defiled2.ogg
 
-internal_name: monster.MT_GRAVDG.attack
+internal_name: monster.gravdg.attack
 name: Gravedigger - Attack
-tile: monster.MT_GRAVDG
+tile: monster.gravdg
 sound: diablo_sfx/monsters/newsfx/gdiggra1.ogg
 sound: diablo_sfx/monsters/newsfx/gdiggra2.ogg
 
-internal_name: monster.MT_GRAVDG.hit
+internal_name: monster.gravdg.hit
 name: Gravedigger - Hurt
-tile: monster.MT_GRAVDG
+tile: monster.gravdg
 sound: diablo_sfx/monsters/newsfx/gdiggrh1.ogg
 sound: diablo_sfx/monsters/newsfx/gdiggrh2.ogg
 
-internal_name: monster.MT_GRAVDG.death
+internal_name: monster.gravdg.death
 name: Gravedigger - Death
-tile: monster.MT_GRAVDG
+tile: monster.gravdg
 sound: diablo_sfx/monsters/newsfx/gdiggrd1.ogg
 sound: diablo_sfx/monsters/newsfx/gdiggrd2.ogg
 
-internal_name: monster.MT_RAT.attack
+internal_name: monster.rat.attack
 name: Tomb Rat - Attack
-tile: monster.MT_RAT
+tile: monster.rat
 sound: diablo_sfx/monsters/newsfx/tmbrata1.ogg
 sound: diablo_sfx/monsters/newsfx/tmbrata2.ogg
 
-internal_name: monster.MT_RAT.hit
+internal_name: monster.rat.hit
 name: Tomb Rat - Hurt
-tile: monster.MT_RAT
+tile: monster.rat
 sound: diablo_sfx/monsters/newsfx/tmbrath1.ogg
 sound: diablo_sfx/monsters/newsfx/tmbrath2.ogg
 
-internal_name: monster.MT_RAT.death
+internal_name: monster.rat.death
 name: Tomb Rat - Death
-tile: monster.MT_RAT
+tile: monster.rat
 sound: diablo_sfx/monsters/newsfx/tmbratd1.ogg
 sound: diablo_sfx/monsters/newsfx/tmbratd2.ogg
 
-internal_name: monster.MT_HELLBAT.attack
+internal_name: monster.hellbat.attack
 name: Firebat - Attack
-tile: monster.MT_HELLBAT
+tile: monster.hellbat
 sound: diablo_sfx/monsters/newsfx/helbata1.ogg
 sound: diablo_sfx/monsters/newsfx/helbata2.ogg
 
-internal_name: monster.MT_HELLBAT.hit
+internal_name: monster.hellbat.hit
 name: Firebat - Hurt
-tile: monster.MT_HELLBAT
+tile: monster.hellbat
 sound: diablo_sfx/monsters/newsfx/helbath1.ogg
 sound: diablo_sfx/monsters/newsfx/helbath2.ogg
 
-internal_name: monster.MT_HELLBAT.death
+internal_name: monster.hellbat.death
 name: Firebat - Death
-tile: monster.MT_HELLBAT
+tile: monster.hellbat
 sound: diablo_sfx/monsters/newsfx/helbatd1.ogg
 sound: diablo_sfx/monsters/newsfx/helbatd2.ogg
 
-internal_name: monster.MT_BONED.attack
+internal_name: monster.boned.attack
 name: Skullwing - Attack
-tile: monster.MT_BONED
+tile: monster.boned
 sound: diablo_sfx/monsters/newsfx/swinga1.ogg
 sound: diablo_sfx/monsters/newsfx/swinga2.ogg
 
-internal_name: monster.MT_BONED.hit
+internal_name: monster.boned.hit
 name: Skullwing - Hurt
-tile: monster.MT_BONED
+tile: monster.boned
 sound: diablo_sfx/monsters/newsfx/swingh1.ogg
 sound: diablo_sfx/monsters/newsfx/swingh2.ogg
 
-internal_name: monster.MT_BONED.death
+internal_name: monster.boned.death
 name: Skullwing - Death
-tile: monster.MT_BONED
+tile: monster.boned
 sound: diablo_sfx/monsters/newsfx/swingd1.ogg
 sound: diablo_sfx/monsters/newsfx/swingd2.ogg
 
-internal_name: monster.MT_LICH.attack
+internal_name: monster.lich.attack
 name: Lich - Attack
-tile: monster.MT_LICH
+tile: monster.lich
 sound: diablo_sfx/monsters/newsfx/licha1.ogg
 sound: diablo_sfx/monsters/newsfx/licha2.ogg
 
-internal_name: monster.MT_LICH.hit
+internal_name: monster.lich.hit
 name: Lich - Hurt
-tile: monster.MT_LICH
+tile: monster.lich
 sound: diablo_sfx/monsters/newsfx/lichh1.ogg
 sound: diablo_sfx/monsters/newsfx/lichh2.ogg
 
-internal_name: monster.MT_LICH.death
+internal_name: monster.lich.death
 name: Lich - Death
-tile: monster.MT_LICH
+tile: monster.lich
 sound: diablo_sfx/monsters/newsfx/lichd1.ogg
 sound: diablo_sfx/monsters/newsfx/lichd2.ogg
 
-internal_name: monster.MT_BUBBA.attack
+internal_name: monster.bubba.attack
 name: Crypt Demon - Attack
-tile: monster.MT_BUBBA
+tile: monster.bubba
 sound: diablo_sfx/monsters/newsfx/crypta1.ogg
 sound: diablo_sfx/monsters/newsfx/crypta2.ogg
 
-internal_name: monster.MT_BUBBA.hit
+internal_name: monster.bubba.hit
 name: Crypt Demon - Hurt
-tile: monster.MT_BUBBA
+tile: monster.bubba
 sound: diablo_sfx/monsters/newsfx/crypth1.ogg
 sound: diablo_sfx/monsters/newsfx/crypth2.ogg
 
-internal_name: monster.MT_BUBBA.death
+internal_name: monster.bubba.death
 name: Crypt Demon - Death
-tile: monster.MT_BUBBA
+tile: monster.bubba
 sound: diablo_sfx/monsters/newsfx/cryptd1.ogg
 sound: diablo_sfx/monsters/newsfx/cryptd2.ogg
 
-internal_name: monster.MT_HELLBAT2.attack
+internal_name: monster.hellbat2.attack
 name: Hellbat - Attack
-tile: monster.MT_HELLBAT2
+tile: monster.hellbat2
 sound: diablo_sfx/monsters/newsfx/helbata1.ogg
 sound: diablo_sfx/monsters/newsfx/helbata2.ogg
 
-internal_name: monster.MT_HELLBAT2.hit
+internal_name: monster.hellbat2.hit
 name: Hellbat - Hurt
-tile: monster.MT_HELLBAT2
+tile: monster.hellbat2
 sound: diablo_sfx/monsters/newsfx/helbath1.ogg
 sound: diablo_sfx/monsters/newsfx/helbath2.ogg
 
-internal_name: monster.MT_HELLBAT2.death
+internal_name: monster.hellbat2.death
 name: Hellbat - Death
-tile: monster.MT_HELLBAT2
+tile: monster.hellbat2
 sound: diablo_sfx/monsters/newsfx/helbatd1.ogg
 sound: diablo_sfx/monsters/newsfx/helbatd2.ogg
 
-internal_name: monster.MT_BONED2.attack
+internal_name: monster.boned2.attack
 name: Bone Demon - Attack
-tile: monster.MT_BONED2
+tile: monster.boned2
 sound: diablo_sfx/monsters/newsfx/swinga1.ogg
 sound: diablo_sfx/monsters/newsfx/swinga2.ogg
 
-internal_name: monster.MT_BONED2.hit
+internal_name: monster.boned2.hit
 name: Bone Demon - Hurt
-tile: monster.MT_BONED2
+tile: monster.boned2
 sound: diablo_sfx/monsters/newsfx/swingh1.ogg
 sound: diablo_sfx/monsters/newsfx/swingh2.ogg
 
-internal_name: monster.MT_BONED2.death
+internal_name: monster.boned2.death
 name: Bone Demon - Death
-tile: monster.MT_BONED2
+tile: monster.boned2
 sound: diablo_sfx/monsters/newsfx/swingd1.ogg
 sound: diablo_sfx/monsters/newsfx/swingd2.ogg
 
-internal_name: monster.MT_LICH2.attack
+internal_name: monster.lich2.attack
 name: Arch Lich - Attack
-tile: monster.MT_LICH2
+tile: monster.lich2
 sound: diablo_sfx/monsters/newsfx/licha1.ogg
 sound: diablo_sfx/monsters/newsfx/licha2.ogg
 
-internal_name: monster.MT_LICH2.hit
+internal_name: monster.lich2.hit
 name: Arch Lich - Hurt
-tile: monster.MT_LICH2
+tile: monster.lich2
 sound: diablo_sfx/monsters/newsfx/lichh1.ogg
 sound: diablo_sfx/monsters/newsfx/lichh2.ogg
 
-internal_name: monster.MT_LICH2.death
+internal_name: monster.lich2.death
 name: Arch Lich - Death
-tile: monster.MT_LICH2
+tile: monster.lich2
 sound: diablo_sfx/monsters/newsfx/lichd1.ogg
 sound: diablo_sfx/monsters/newsfx/lichd2.ogg
 
-internal_name: monster.MT_BYCLPS.attack
+internal_name: monster.byclps.attack
 name: Biclops - Attack
-tile: monster.MT_BYCLPS
+tile: monster.byclps
 sound: diablo_sfx/monsters/newsfx/biclopa1.ogg
 sound: diablo_sfx/monsters/newsfx/biclopa2.ogg
 
-internal_name: monster.MT_BYCLPS.hit
+internal_name: monster.byclps.hit
 name: Biclops - Hurt
-tile: monster.MT_BYCLPS
+tile: monster.byclps
 sound: diablo_sfx/monsters/newsfx/bicloph1.ogg
 sound: diablo_sfx/monsters/newsfx/bicloph2.ogg
 
-internal_name: monster.MT_BYCLPS.death
+internal_name: monster.byclps.death
 name: Biclops - Death
-tile: monster.MT_BYCLPS
+tile: monster.byclps
 sound: diablo_sfx/monsters/newsfx/biclopd1.ogg
 sound: diablo_sfx/monsters/newsfx/biclopd2.ogg
 
-internal_name: monster.MT_FLESH.attack
+internal_name: monster.flesh.attack
 name: Flesh Thing - Attack
-tile: monster.MT_FLESH
+tile: monster.flesh
 sound: diablo_sfx/monsters/newsfx/fleshta1.ogg
 sound: diablo_sfx/monsters/newsfx/fleshta2.ogg
 
-internal_name: monster.MT_FLESH.hit
+internal_name: monster.flesh.hit
 name: Flesh Thing - Hurt
-tile: monster.MT_FLESH
+tile: monster.flesh
 sound: diablo_sfx/monsters/newsfx/fleshth1.ogg
 sound: diablo_sfx/monsters/newsfx/fleshth2.ogg
 
-internal_name: monster.MT_FLESH.death
+internal_name: monster.flesh.death
 name: Flesh Thing - Death
-tile: monster.MT_FLESH
+tile: monster.flesh
 sound: diablo_sfx/monsters/newsfx/fleshtd1.ogg
 sound: diablo_sfx/monsters/newsfx/fleshtd2.ogg
 
-internal_name: monster.MT_REAPER.attack
+internal_name: monster.reaper.attack
 name: Reaper - Attack
-tile: monster.MT_REAPER
+tile: monster.reaper
 sound: diablo_sfx/monsters/newsfx/reapera1.ogg
 sound: diablo_sfx/monsters/newsfx/reapera2.ogg
 
-internal_name: monster.MT_REAPER.hit
+internal_name: monster.reaper.hit
 name: Reaper - Hurt
-tile: monster.MT_REAPER
+tile: monster.reaper
 sound: diablo_sfx/monsters/newsfx/reaperh1.ogg
 sound: diablo_sfx/monsters/newsfx/reaperh2.ogg
 
-internal_name: monster.MT_REAPER.death
+internal_name: monster.reaper.death
 name: Reaper - Death
-tile: monster.MT_REAPER
+tile: monster.reaper
 sound: diablo_sfx/monsters/newsfx/reaperd1.ogg
 sound: diablo_sfx/monsters/newsfx/reaperd2.ogg
 
-internal_name: monster.MT_NKR.attack
+internal_name: monster.nkr.attack
 name: Na-Krul - Attack
-tile: monster.MT_NKR
+tile: monster.nkr
 sound: diablo_sfx/monsters/newsfx/nakrula1.ogg
 sound: diablo_sfx/monsters/newsfx/nakrula2.ogg
 
-internal_name: monster.MT_NKR.hit
+internal_name: monster.nkr.hit
 name: Na-Krul - Hurt
-tile: monster.MT_NKR
+tile: monster.nkr
 sound: diablo_sfx/monsters/newsfx/nakrulh1.ogg
 sound: diablo_sfx/monsters/newsfx/nakrulh2.ogg
 
-internal_name: monster.MT_NKR.death
+internal_name: monster.nkr.death
 name: Na-Krul - Death
-tile: monster.MT_NKR
+tile: monster.nkr
 sound: diablo_sfx/monsters/newsfx/nakruld1.ogg
 sound: diablo_sfx/monsters/newsfx/nakruld2.ogg

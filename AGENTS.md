@@ -41,33 +41,44 @@ git clone --depth 1 https://github.com/pvpgn/diablo-hellfire reference/diablo-he
 
 ## Icons (tileset `files/assets/classic_roguelike.png`, 8×8)
 
-Three independent rec files under `files/assets/data/icons/`, each read fresh on every game start (no rebuild
-needed to see a remap take effect — just restart the game):
+Four independent rec files under `files/assets/data/icons/`, each read fresh on every game start (no rebuild
+needed to see a remap take effect — just restart the game). One ID convention throughout: `kind.snake_case_name`
+— `class.warrior_male`, `monster.nzombie`, `unique.gharbad_the_weak`, `npc.wirt`, `corpse.default` (actors.rec);
+`item.falchion` (+ `.magic`/`.unique` per weapon/armor family), `item.heal` (potions/scrolls, by IMISC_*) (items.rec);
+`tile.grass`, `prop.chest1` (+ `.used`), `decal.blood1`, `effect.fire_small` (tiles.rec); `spell.firebolt`
+(skills.rec). IDs built from D1's own enum names go through `defs.IconID(kind, raw)`, which strips the enum's
+prefix (`MT_`/`OBJ_`/`SPL_`/`ITYPE_`/`IMISC_`) and lowercases the rest, so game code never hand-builds these
+strings. Weapons and armor are broken down by family (falchion, dagger, broad sword, cap, kite shield...) instead
+of one icon per D1 item type, each with its own `.magic`/`.unique` variant; the remapper's list sorts by `name:`,
+so every family's `name:` is prefixed with its category ("Sword: Falchion", "Light Armor: Cape") to keep
+same-category items clustered together when picking icons.
 
-| File | Covers | H&H Go names | D1 names |
-|---|---|---|---|
-| `actors.rec` | monsters (D1's and Hellfire's), unique monsters, player classes, corpses, companions, D1 npcs | `IconCharacter*`, `IconMonster*`, `IconUnique*`, `IconCorpse*`, `IconRogue*` | `monster.<MT_ID>` (with a `name:` the remapper shows), `unique.<Name>`, `npc.<name>` |
-| `items.rec` | weapons, armor, potions, scrolls, rings... | `IconItem*` and the "Dark"/gold cosmetic set (`IconCloakDark`...) | `item.ITYPE_*` / `item.IMISC_*` (IMISC wins); every items.rec record has a `name:` the remapper shows |
-| `tiles.rec` | terrain, doors, decals, effects, dungeon objects | everything else (`IconGrass`, `IconEffect*`, `IconDecalBlood*`...) | `prop.OBJ_*` (+ `.used` for a few), each with a `name:` the remapper shows |
+| File | Covers |
+|---|---|
+| `actors.rec` | monsters (D1's and Hellfire's), uniques, player classes, corpses, D1 npcs |
+| `items.rec` | weapons (by family), armor, potions, scrolls, rings, quest items... |
+| `tiles.rec` | terrain, doors, decals, effects, dungeon objects |
+| `skills.rec` | class skill and spell icons |
 
-The H&H names are `defs.IconXxx` package vars (`defs/icons_actors.go` / `icons_items.go` / `icons_tiles.go`,
-generated 1:1 from the old `defs/definedIcons.go` consts — same names, now loaded from the rec file instead of
-compiled in), read directly. The D1 names have no Go identifier; look them up with `defs.Icon("enemy.Zombie")`
-(panics on a typo) or `defs.IconOK(name)` when the name is optional (`common/d1_item.go`'s IMISC fallback).
+The handful of always-present H&H icons (`IconGrass`, `IconCharacterWarriorMale`, ...) are still `defs.IconXxx`
+package vars (`defs/icons_actors.go` / `icons_tiles.go`), read directly; their rec key now just follows the same
+convention. Everything else has no Go identifier; look it up with `defs.Icon(defs.IconID("monster", m.ID))`
+(panics on a typo) or `defs.IconOK(id)` when the name is optional (`common/d1_item.go`'s IMISC fallback).
 
-Remap visually with `./remap_actors.sh`, `./remap_items.sh`, `./remap_tiles.sh` (each opens the remapper on its
-rec file: click a name on the left, a tile on the right, `s` saves, `F10` quits). Adding a new D1 object/monster
-family/item type needs one new `internal_name:`/`icon:` record in the right rec file — remap it same as any other.
-Tinting is reserved for D1 monster variants, water tiles (`IconWater`, tinted by `State.GetWaterColor`: light green in
-the foul Poisoned Water Supply, blue otherwise) and one fallback: a used D1 object whose `prop.OBJ_*.used` icon is the
-same tile as its fresh `prop.OBJ_*` icon is drawn grayed out (`common.D1UsedTint`); remap `.used` to a different tile
-to drop the tint. Anything else that needs to look different (uniques, magic/unique items) gets its own icon record.
-Remapper: `remapper` on `$PATH`, source `~/Projects/remapper`.
+Remap visually with `./remap_actors.sh`, `./remap_items.sh`, `./remap_tiles.sh`, `./remap_skills.sh` (each opens
+the remapper on its rec file: click a name on the left, a tile on the right, `s` saves, `F10` quits). Adding a new
+D1 object/monster family/item type needs one new `internal_name:`/`icon:`/`name:` record in the right rec file —
+remap it same as any other. Tinting is reserved for D1 monster variants, water tiles (`IconWater`, tinted by
+`State.GetWaterColor`: light green in the foul Poisoned Water Supply, blue otherwise) and one fallback: a used D1
+object whose `prop.<name>.used` icon is the same tile as its fresh `prop.<name>` icon is drawn grayed out
+(`common.D1UsedTint`); remap `.used` to a different tile to drop the tint. Anything else that needs to look
+different (uniques, magic/unique items) gets its own icon record. Remapper: `remapper` on `$PATH`, source
+`~/Projects/remapper`.
 
 ## Audio (`files/assets/`)
 
 Sound effects are **events**, not folders: `files/assets/data/sounds.rec` has one record per event the game plays
-(`internal_name` = the cue passed to `PlayCue`, e.g. `open_door` or `monster.MT_NZOMBIE.hit`; `name` = list label;
+(`internal_name` = the cue passed to `PlayCue`, e.g. `open_door` or `monster.nzombie.hit`; `name` = list label;
 `tile` = icon name; one `sound:` per file relative to `files/assets/`, one picked at random at run time). Loaded by
 `audio.Player.RegisterSoundEvents` on start; missing files are dropped (and `diablo_*` ones when
 `DiabloAudioEnabled` is off), so a fresh clone without the Diablo folders still runs. Assign files visually with
