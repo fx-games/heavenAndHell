@@ -2,51 +2,51 @@
 
 internal_name: class.rogue_male
 icon: 19
-name: Rogue (male)
+name: Class Rogue (male)
 
 internal_name: class.rogue_female
 icon: 47
-name: Rogue (female)
+name: Class Rogue (female)
 
 internal_name: class.warrior_male
 icon: 20
-name: Warrior (male)
+name: Class Warrior (male)
 
 internal_name: class.warrior_female
 icon: 48
-name: Warrior (female)
+name: Class Warrior (female)
 
 internal_name: class.sorcerer_male
 icon: 21
-name: Sorcerer (male)
+name: Class Sorcerer (male)
 
 internal_name: class.sorcerer_female
 icon: 49
-name: Sorcerer (female)
+name: Class Sorcerer (female)
 
 internal_name: class.monk_male
 icon: 22
-name: Monk (male)
+name: Class Monk (male)
 
 internal_name: class.monk_female
 icon: 50
-name: Monk (female)
+name: Class Monk (female)
 
 internal_name: class.bard_male
 icon: 23
-name: Bard (male)
+name: Class Bard (male)
 
 internal_name: class.bard_female
 icon: 51
-name: Bard (female)
+name: Class Bard (female)
 
 internal_name: class.barbarian_male
 icon: 24
-name: Barbarian (male)
+name: Class Barbarian (male)
 
 internal_name: class.barbarian_female
 icon: 52
-name: Barbarian (female)
+name: Class Barbarian (female)
 
 internal_name: corpse.default
 icon: 135
@@ -54,23 +54,23 @@ name: Corpse
 
 internal_name: npc.wirt
 icon: 79
-name: Wirt
+name: Town Wirt
 
 internal_name: npc.wounded_townsman
 icon: 592
-name: Wounded Townsman
+name: Town Wounded Townsman
 
 internal_name: npc.ogden
 icon: 79
-name: Ogden
+name: Town Ogden
 
 internal_name: npc.farnham
 icon: 79
-name: Farnham
+name: Town Farnham
 
 internal_name: npc.gillian
 icon: 79
-name: Gillian
+name: Town Gillian
 
 internal_name: monster.nzombie
 name: Zombie

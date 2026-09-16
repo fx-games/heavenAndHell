@@ -114,11 +114,11 @@ icon: 139
 
 internal_name: item.tavern_sign
 name: Tavern Sign (quest)
-icon: 137
+icon: 673
 
 internal_name: item.magic_rock
 name: Magic Rock (quest)
-icon: 137
+icon: 776
 
 internal_name: item.anvil_of_fury
 name: Anvil of Fury (quest)
@@ -126,7 +126,7 @@ icon: 137
 
 internal_name: item.black_mushroom
 name: Black Mushroom (quest)
-icon: 137
+icon: 279
 
 internal_name: item.brain
 name: Brain (quest)
@@ -134,19 +134,19 @@ icon: 137
 
 internal_name: item.fungal_tome
 name: Fungal Tome (quest)
-icon: 137
+icon: 754
 
 internal_name: item.blood_stone
 name: Blood Stone (quest)
-icon: 137
+icon: 775
 
 internal_name: item.golden_elixir
 name: Golden Elixir (quest)
-icon: 137
+icon: 334
 
 internal_name: item.staff_of_lazarus
 name: Staff of Lazarus (quest)
-icon: 137
+icon: 643
 
 internal_name: item.oilof
 name: Oil (unidentified)
@@ -194,31 +194,31 @@ icon: 333
 
 internal_name: item.runef
 name: Rune of Fire
-icon: 137
+icon: 771
 
 internal_name: item.runel
 name: Rune of Lightning
-icon: 137
+icon: 772
 
 internal_name: item.gr_runef
 name: Greater Rune of Fire
-icon: 137
+icon: 771
 
 internal_name: item.gr_runel
 name: Greater Rune of Lightning
-icon: 137
+icon: 772
 
 internal_name: item.runes
 name: Rune of Stone
-icon: 137
+icon: 773
 
 internal_name: item.auric
 name: Auric Amulet
-icon: 137
+icon: 134
 
 internal_name: item.note
 name: Reconstructed Note
-icon: 137
+icon: 111
 
 internal_name: item.arenapot
 name: Arena Potion
@@ -226,11 +226,11 @@ icon: 332
 
 internal_name: item.rune_bomb
 name: Rune Bomb
-icon: 137
+icon: 770
 
 internal_name: item.theodore
 name: Theodore
-icon: 137
+icon: 83
 
 internal_name: item.torn_note_1
 name: Torn Note 1
@@ -246,14 +246,14 @@ icon: 139
 
 internal_name: item.brown_suit
 name: Brown Suit
-icon: 137
+icon: 608
 
 internal_name: item.grey_suit
 name: Grey Suit
-icon: 137
+icon: 609
 
 internal_name: item.arkaine_s_valor
-icon: 230
+icon: 200
 name: Medium Armor: Arkaine's Valor
 
 internal_name: item.axe
@@ -305,7 +305,7 @@ icon: 199
 name: Heavy Armor: Breast Plate
 
 internal_name: item.breast_plate.magic
-icon: 198
+icon: 200
 name: Heavy Armor: Breast Plate (magic)
 
 internal_name: item.breast_plate.unique
@@ -325,7 +325,7 @@ icon: 173
 name: Axe: Broad Axe (unique)
 
 internal_name: item.broad_sword
-icon: 646
+icon: 649
 name: Sword: Broad Sword
 
 internal_name: item.broad_sword.magic
@@ -337,15 +337,15 @@ icon: 147
 name: Sword: Broad Sword (unique)
 
 internal_name: item.buckler
-icon: 205
+icon: 203
 name: Shield: Buckler
 
 internal_name: item.buckler.magic
-icon: 206
+icon: 204
 name: Shield: Buckler (magic)
 
 internal_name: item.buckler.unique
-icon: 207
+icon: 204
 name: Shield: Buckler (unique)
 
 internal_name: item.cap
@@ -357,15 +357,15 @@ icon: 212
 name: Helm: Cap (magic)
 
 internal_name: item.cape
-icon: 227
+icon: 415
 name: Light Armor: Cape
 
 internal_name: item.cape.magic
-icon: 198
+icon: 417
 name: Light Armor: Cape (magic)
 
 internal_name: item.cape.unique
-icon: 201
+icon: 418
 name: Light Armor: Cape (unique)
 
 internal_name: item.chain_mail
@@ -373,23 +373,23 @@ icon: 230
 name: Medium Armor: Chain Mail
 
 internal_name: item.chain_mail.magic
-icon: 198
+icon: 196
 name: Medium Armor: Chain Mail (magic)
 
 internal_name: item.chain_mail.unique
-icon: 201
+icon: 197
 name: Medium Armor: Chain Mail (unique)
 
 internal_name: item.claymore
-icon: 646
+icon: 650
 name: Sword: Claymore
 
 internal_name: item.claymore.magic
-icon: 146
+icon: 629
 name: Sword: Claymore (magic)
 
 internal_name: item.claymore.unique
-icon: 147
+icon: 651
 name: Sword: Claymore (unique)
 
 internal_name: item.cleaver
@@ -397,15 +397,15 @@ icon: 697
 name: Axe: Cleaver
 
 internal_name: item.cloak
-icon: 227
+icon: 415
 name: Light Armor: Cloak
 
 internal_name: item.cloak.magic
-icon: 198
+icon: 417
 name: Light Armor: Cloak (magic)
 
 internal_name: item.cloak.unique
-icon: 201
+icon: 418
 name: Light Armor: Cloak (unique)
 
 internal_name: item.club
@@ -445,19 +445,19 @@ icon: 140
 name: Staff: Composite Staff (unique)
 
 internal_name: item.crown
-icon: 211
+icon: 596
 name: Helm: Crown
 
 internal_name: item.crown.magic
-icon: 212
+icon: 597
 name: Helm: Crown (magic)
 
 internal_name: item.crown.unique
-icon: 213
+icon: 598
 name: Helm: Crown (unique)
 
 internal_name: item.dagger
-icon: 646
+icon: 233
 name: Sword: Dagger
 
 internal_name: item.dagger.magic
@@ -469,7 +469,7 @@ icon: 147
 name: Sword: Dagger (unique)
 
 internal_name: item.falchion
-icon: 646
+icon: 600
 name: Sword: Falchion
 
 internal_name: item.falchion.magic
@@ -485,7 +485,7 @@ icon: 199
 name: Heavy Armor: Field Plate
 
 internal_name: item.field_plate.magic
-icon: 198
+icon: 200
 name: Heavy Armor: Field Plate (magic)
 
 internal_name: item.flail
@@ -513,7 +513,7 @@ icon: 199
 name: Heavy Armor: Full Plate Mail
 
 internal_name: item.full_plate_mail.magic
-icon: 198
+icon: 200
 name: Heavy Armor: Full Plate Mail (magic)
 
 internal_name: item.full_plate_mail.unique
@@ -525,19 +525,19 @@ icon: 199
 name: Heavy Armor: Gothic Plate
 
 internal_name: item.gothic_plate.magic
-icon: 198
+icon: 200
 name: Heavy Armor: Gothic Plate (magic)
 
 internal_name: item.gothic_shield
-icon: 205
+icon: 691
 name: Shield: Gothic Shield
 
 internal_name: item.gothic_shield.magic
-icon: 206
+icon: 690
 name: Shield: Gothic Shield (magic)
 
 internal_name: item.gothic_shield.unique
-icon: 207
+icon: 689
 name: Shield: Gothic Shield (unique)
 
 internal_name: item.great_axe
@@ -577,7 +577,7 @@ icon: 147
 name: Sword: Great Sword (unique)
 
 internal_name: item.griswold_s_edge
-icon: 646
+icon: 645
 name: Sword: Griswold's Edge
 
 internal_name: item.hard_leather_armor
@@ -585,7 +585,7 @@ icon: 227
 name: Light Armor: Hard Leather Armor
 
 internal_name: item.hard_leather_armor.magic
-icon: 198
+icon: 228
 name: Light Armor: Hard Leather Armor (magic)
 
 internal_name: item.harlequin_crest
@@ -625,7 +625,7 @@ icon: 206
 name: Shield: Kite Shield (magic)
 
 internal_name: item.kite_shield.unique
-icon: 207
+icon: 410
 name: Shield: Kite Shield (unique)
 
 internal_name: item.large_axe
@@ -649,7 +649,7 @@ icon: 206
 name: Shield: Large Shield (magic)
 
 internal_name: item.large_shield.unique
-icon: 207
+icon: 410
 name: Shield: Large Shield (unique)
 
 internal_name: item.leather_armor
@@ -657,15 +657,15 @@ icon: 227
 name: Light Armor: Leather Armor
 
 internal_name: item.leather_armor.magic
-icon: 198
+icon: 228
 name: Light Armor: Leather Armor (magic)
 
 internal_name: item.leather_armor.unique
-icon: 201
+icon: 229
 name: Light Armor: Leather Armor (unique)
 
 internal_name: item.lightforge
-icon: 659
+icon: 498
 name: Mace: Lightforge
 
 internal_name: item.long_battle_bow
@@ -769,7 +769,7 @@ icon: 199
 name: Heavy Armor: Plate Mail
 
 internal_name: item.plate_mail.magic
-icon: 198
+icon: 200
 name: Heavy Armor: Plate Mail (magic)
 
 internal_name: item.plate_mail.unique
@@ -817,15 +817,15 @@ icon: 198
 name: Medium Armor: Ring Mail (magic)
 
 internal_name: item.robe
-icon: 227
+icon: 638
 name: Light Armor: Robe
 
 internal_name: item.robe.magic
-icon: 198
+icon: 637
 name: Light Armor: Robe (magic)
 
 internal_name: item.robe.unique
-icon: 201
+icon: 610
 name: Light Armor: Robe (unique)
 
 internal_name: item.sabre
@@ -901,7 +901,7 @@ icon: 143
 name: Staff: Short Staff of Charged Bolt (magic)
 
 internal_name: item.short_sword
-icon: 646
+icon: 652
 name: Sword: Short Sword
 
 internal_name: item.short_sword.magic
@@ -949,7 +949,7 @@ icon: 206
 name: Shield: Small Shield (magic)
 
 internal_name: item.small_shield.unique
-icon: 207
+icon: 410
 name: Shield: Small Shield (unique)
 
 internal_name: item.spiked_club
@@ -977,11 +977,11 @@ icon: 227
 name: Light Armor: Studded Leather Armor
 
 internal_name: item.studded_leather_armor.magic
-icon: 198
+icon: 228
 name: Light Armor: Studded Leather Armor (magic)
 
 internal_name: item.studded_leather_armor.unique
-icon: 201
+icon: 229
 name: Light Armor: Studded Leather Armor (unique)
 
 internal_name: item.sword
@@ -993,7 +993,7 @@ icon: 146
 name: Sword: Sword (magic)
 
 internal_name: item.the_undead_crown
-icon: 211
+icon: 598
 name: Helm: The Undead Crown
 
 internal_name: item.tower_shield
@@ -1005,23 +1005,23 @@ icon: 206
 name: Shield: Tower Shield (magic)
 
 internal_name: item.tower_shield.unique
-icon: 207
+icon: 410
 name: Shield: Tower Shield (unique)
 
 internal_name: item.two_handed_sword
-icon: 646
+icon: 650
 name: Sword: Two-Handed Sword
 
 internal_name: item.two_handed_sword.magic
-icon: 146
+icon: 629
 name: Sword: Two-Handed Sword (magic)
 
 internal_name: item.two_handed_sword.unique
-icon: 147
+icon: 627
 name: Sword: Two-Handed Sword (unique)
 
 internal_name: item.veil_of_steel
-icon: 211
+icon: 596
 name: Helm: Veil of Steel
 
 internal_name: item.war_hammer
@@ -1047,3 +1047,4 @@ name: Staff: War Staff (magic)
 internal_name: item.war_staff.unique
 icon: 140
 name: Staff: War Staff (unique)
+
