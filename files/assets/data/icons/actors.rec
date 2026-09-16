@@ -56,7 +56,7 @@ internal_name: npc.wirt
 icon: 736
 name: Town Wirt
 
-internal_name: npc.wounded_townsman
+internal_name: npc.deadguy
 icon: 511
 name: Town Wounded Townsman
 
