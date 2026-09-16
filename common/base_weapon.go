@@ -56,8 +56,8 @@ type WeaponStats struct {
 	AccuracyAtMaxRange float64
 	AccuracyAtMinRange float64
 	ArmorPenetration   int
-	ProjectileIcon int32
-	IsTwoHanded    bool
+	ProjectileIcon     int32
+	IsTwoHanded        bool
 }
 
 func (s WeaponStats) ToString(forActor *Actor) []util.LabelText {
@@ -141,12 +141,12 @@ func (s WeaponStats) NameParts() string {
 
 func (s WeaponStats) Clone() *WeaponStats {
 	return &WeaponStats{
-		Damage:                      s.Damage,
-		Requirements:                s.Requirements,
-		Durability:                  stats.NewResource(s.Durability.Min(), s.Durability.GetMax, s.Durability.Value()),
-		Type:                        s.Type,
-		AttackSpeedFactor:           s.AttackSpeedFactor,
-		MeleeRange:                  s.MeleeRange,
+		Damage:            s.Damage,
+		Requirements:      s.Requirements,
+		Durability:        stats.NewResource(s.Durability.Min(), s.Durability.GetMax, s.Durability.Value()),
+		Type:              s.Type,
+		AttackSpeedFactor: s.AttackSpeedFactor,
+		MeleeRange:        s.MeleeRange,
 	}
 }
 
@@ -155,7 +155,7 @@ func (s WeaponStats) CanBeFurtherEnchanted() bool {
 }
 
 func (s WeaponStats) GetInventorySlot() defs.SlotName {
-	if s.IsRangedWeapon(){
+	if s.IsRangedWeapon() {
 		return defs.SlotNameMissileLauncher
 	}
 	if s.Type == defs.WeaponTypeShield {

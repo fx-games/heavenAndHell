@@ -12,7 +12,7 @@ type MonsterSpecs struct {
 	Name       string
 }
 type ClassSpecs struct {
-	HitDie        util.Dice
+	HitDie util.Dice
 }
 
 func GetFighterSpecs() ClassSpecs {
@@ -22,7 +22,7 @@ func GetFighterSpecs() ClassSpecs {
 }
 
 type Character struct {
-	name         string
+	name string
 
 	strength     int
 	intelligence int
@@ -34,7 +34,7 @@ type Character struct {
 	level int
 	xp    int
 
-	armorClass          int
+	armorClass int
 
 	gold       int
 	attackDice util.Dice
@@ -510,7 +510,7 @@ func SurvivalRate(player *Character, monster *Character, silent bool, iterations
 
 		*/
 
-		flatReduced := max(1, rawDamage - protectionValue)
+		flatReduced := max(1, rawDamage-protectionValue)
 		//reducedDamage := math.Pow(1.1, float64(flatReduced))
 		return max(1, int(flatReduced))
 	}

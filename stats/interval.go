@@ -111,7 +111,7 @@ func (i Interval) AsTuple() util.Tuple[int, int] {
 
 func (i Interval) SubValPositive(value int) Interval {
 	return Interval{
-		min: max(0, i.min - value),
-		max: max(0, i.max - value),
+		min: max(0, i.min-value),
+		max: max(0, i.max-value),
 	}
 }

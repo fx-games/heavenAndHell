@@ -8,11 +8,11 @@ import (
 )
 
 type Targeter struct {
-	rules             common.TargetRules
-	hitEffect         *common.HitEffect
-	isDone            bool
-	uiController      *UIController
-	targetInfo        common.TargetInfo
+	rules        common.TargetRules
+	hitEffect    *common.HitEffect
+	isDone       bool
+	uiController *UIController
+	targetInfo   common.TargetInfo
 }
 
 func (t *Targeter) IsDone() bool {
@@ -116,10 +116,10 @@ func (t *Targeter) Activate() bool {
 
 func NewTargeter(uiController *UIController, rules common.TargetRules, onTargetSelected *common.HitEffect) *Targeter {
 	t := &Targeter{
-		rules:             rules,
-		uiController:      uiController,
-		hitEffect:         onTargetSelected,
-		targetInfo:        rules.OnTargetChanged(rules.GetPreSelectedTarget()),
+		rules:        rules,
+		uiController: uiController,
+		hitEffect:    onTargetSelected,
+		targetInfo:   rules.OnTargetChanged(rules.GetPreSelectedTarget()),
 	}
 	t.updateTarget(rules.GetPreSelectedTarget())
 	return t

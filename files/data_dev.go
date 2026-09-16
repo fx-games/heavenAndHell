@@ -3,12 +3,12 @@
 package files
 
 import (
-    "os"
+	"os"
 )
 
 func init() {
-    dirFS := os.DirFS("files") // TODO: we really want this to be just the current working directory, in a release build..
-    if asFileSystem, ok := dirFS.(FileSystem); ok {
-        sourceFileSystem = asFileSystem
-    }
+	dirFS := os.DirFS("files") // TODO: we really want this to be just the current working directory, in a release build..
+	if asFileSystem, ok := dirFS.(FileSystem); ok {
+		sourceFileSystem = asFileSystem
+	}
 }

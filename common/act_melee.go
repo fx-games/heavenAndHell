@@ -20,7 +20,7 @@ func NewMeleeAttackAction(source Cause, attacker *Actor, defender *Actor) *Melee
 	return &MeleeAttackAction{
 		BaseAction:   BaseAction{cause: source, name: ActionNameMeleeAttack},
 		attacker:     attacker,
-		defender:    defender,
+		defender:     defender,
 		damageFactor: 1.0,
 	}
 }
@@ -84,13 +84,13 @@ func RollMeleeDamage(attacker, defender *Actor, damageFactor float64) int {
 func CalculateMeleeDamage(damageRoll int, damageFactor float64, attacker, defender *Actor) int {
 	attackerStr := attacker.GetStats().GetAttribute(stats.Strength)
 	dndStyleModifier := defaultModifierPattern(attackerStr)
-	rawDamage := max(1, damageRoll + dndStyleModifier)
+	rawDamage := max(1, damageRoll+dndStyleModifier)
 
 	damageFactor *= GetWeaponQualityFactor(attacker)
 	damage := int(float64(rawDamage) * damageFactor)
 
 	armorPenetration := GetArmorPenetrationOfEquippedMeleeWeapon(attacker)
-	defenderAC := max(0, defender.GetArmorClass() - armorPenetration)
+	defenderAC := max(0, defender.GetArmorClass()-armorPenetration)
 	defenderADR := ADRFromAC(defenderAC)
 	blockedDamage := int(math.Ceil(float64(damage) * defenderADR))
 
@@ -99,7 +99,7 @@ func CalculateMeleeDamage(damageRoll int, damageFactor float64, attacker, defend
 		defenderDex := defender.GetStats().GetAttribute(stats.Dexterity)
 		dndStyleModifierDefender := defaultModifierPattern(defenderDex)
 		shield := defender.GetEquipment().GetShield()
-		shieldAC := max(1, shield.GetArmorStats().GetTotalArmorClass() + dndStyleModifierDefender)
+		shieldAC := max(1, shield.GetArmorStats().GetTotalArmorClass()+dndStyleModifierDefender)
 		if shieldAC > blockedDamage && rand.Float64() > 0.5 {
 			blockedDamage = shieldAC
 		}

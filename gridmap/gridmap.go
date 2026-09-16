@@ -931,7 +931,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetAllSpecialTilePositions(ti
 	}
 	return result
 }
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetPositionsByFilter(filter func (tile *MapCell[ActorType, ItemType, ObjectType]) bool) []geometry.Point {
+func (m *GridMap[ActorType, ItemType, ObjectType]) GetPositionsByFilter(filter func(tile *MapCell[ActorType, ItemType, ObjectType]) bool) []geometry.Point {
 	result := make([]geometry.Point, 0)
 	for index, c := range m.cells {
 		if filter(&c) {

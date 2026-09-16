@@ -15,7 +15,7 @@ func NewEquipment() *Equipment {
 
 func (e *Equipment) IsEquipped(item *Item) bool {
 	slotName := item.SlotName()
-	if slotName == defs.SlotNameTwoHandedWeapon || slotName == defs.SlotNameOneHandedWeapon{
+	if slotName == defs.SlotNameTwoHandedWeapon || slotName == defs.SlotNameOneHandedWeapon {
 		slotName = defs.SlotNameMainHand
 	}
 

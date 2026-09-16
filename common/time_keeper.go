@@ -53,8 +53,8 @@ func (t *TimeKeeper) PlayerTakesTurn(playerAutUsed int) {
 		addedEnergy := int((float64(playerAutUsed) / 10.0) * float64(timedBeing.GetBaseSpeed()))
 		timedBeing.AddEnergy(addedEnergy)
 		for energyUsed, action := t.hasEnergyForAction(timedBeing); // init
-		timedBeing.IsAlive() && action != nil; // condition
-		energyUsed, action = t.hasEnergyForAction(timedBeing) { // executed after each iteration
+		timedBeing.IsAlive() && action != nil;                      // condition
+		energyUsed, action = t.hasEnergyForAction(timedBeing) {     // executed after each iteration
 			timedBeing.RemoveEnergy(energyUsed) // this does update status effects, such as poison, thus could kill the being..
 			if timedBeing.IsAlive() {
 				action()
