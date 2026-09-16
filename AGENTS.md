@@ -6,10 +6,12 @@ Design decisions and deferred scope for the D1 rebuild: `D1_PLAN.md`.
 
 | Path | What it is | Use it for |
 |---|---|---|
-| `reference/devilution-109` | [diasurgical/devilution](https://github.com/diasurgical/devilution): bin-exact reconstruction of Diablo 1.09 (C++, `Source/*.cpp`, `enums.h`, `structs.h`, `defs.h`) | **Ground truth.** Formulas, constants, order of `random_()` calls. Ignore `#ifdef HELLFIRE` / `SPAWN` branches. |
+| `reference/devilution-109` | [diasurgical/devilution](https://github.com/diasurgical/devilution): bin-exact reconstruction of Diablo 1.09 (C++, `Source/*.cpp`, `enums.h`, `structs.h`, `defs.h`) | **Ground truth.** Formulas, constants, order of `random_()` calls. Ignore `#ifdef HELLFIRE` / `SPAWN` branches, except for the six player classes: Hellfire's Monk, Bard and Barbarian are in (`D1_PLAN.md`), and their tables come from devilutionX. |
 | `reference/devilution/2020_03_31` | [galaxyhaxz/devilution](https://github.com/galaxyhaxz/devilution): readable rewrite with the original table files in `Source/Data/Excel/xl_*.txt` | Readable second opinion; source of our `files/assets/data/d1/xl_*.txt` (copied verbatim). `2018_03_14` is an older snapshot, skip it. |
 | `reference/devilutionX` | [diasurgical/devilutionX](https://github.com/diasurgical/devilutionX): modern, maintained port | Bug-fixed logic in `Source/` (`levels/`, `monsters/`, `items/`, `quests/`...), data tables as TSV in `assets/txtdata/`, and **test fixtures** in `test/` (see below). It fixes vanilla bugs and adds QoL; when it disagrees with 1.09, 1.09 wins unless `D1_PLAN.md` says otherwise. |
 | `reference/DIABDAT.MPQ` | Diablo's own data archive (bring your own copy, ~500 MB) | Level data the sources don't contain: set pieces (`Levels\L1Data\SklKng1.DUN`...), `.TIL`/`.SOL` tile tables. Read with `d1.DiabDat()` / `mustReadMPQ` (`d1/mpq.go`, looks in `.`, `reference/`, `../reference/`). |
+| `reference/diablo-hellfire` | [pvpgn/diablo-hellfire](https://github.com/pvpgn/diablo-hellfire): Synergistic Software's own Hellfire source (VC++ 6, `src/*.CPP`, uppercase filenames) | **Ground truth for Hellfire**, the way `devilution-109` is for D1. `ITEMDAT.CPP`, `MONSTDAT.CPP`, `SPELLDAT.CPP`, `MISDAT.CPP` and `OBJDAT.CPP` hold the real tables with the original comments; `PLAYER.CPP` the class tables. The Nest generator is `DRLG_L6` in `DRLG_L3.CPP` and the Crypt's is `DRLG_L5` in `DRLG_L1.CPP`. Note Hellfire numbers its own levels 17-24 internally as 32-35 (Nest) and 21-24 (Crypt) in places — check `MonstAvailTbl` / `DRLG` callers before trusting a number. |
+| `reference/HELLFIRE.MPQ`, `HFVOICE.MPQ`, `HFMONK.MPQ`, `HFMUSIC.MPQ` | Hellfire's four archives, straight off the expansion's disc (`hdiutil attach Hellfire.iso`, they sit in the root). `hfvoice` holds the expansion's speech at full quality and `hfmonk` the Monk's lines (neither is in `hellfire.mpq`), `hfmusic` the Nest's and the Crypt's tracks | Only what the sources don't contain: the Crypt's and the Nest's tile tables (`NLevels\L5Data\L5.SOL/.TIL/.MIN`, `NLevels\L6Data\L6.*`) and `NLevels\TownData\*`, i.e. the two dungeon types, if they ever get built. **Not** needed for Hellfire's items, monsters or classes: those are numbers in the tables above, and this game draws them from its own tileset through `files/assets/data/icons/*.rec`. Opens with the same `OpenMPQ` as DIABDAT (`cmd/d1import/mpq.go`). |
 
 ### How to port with them
 
@@ -34,6 +36,7 @@ Re-create the folder (DIABDAT.MPQ comes from your own Diablo install):
 git clone --depth 1 https://github.com/diasurgical/devilution reference/devilution-109
 git clone --depth 1 https://github.com/galaxyhaxz/devilution reference/devilution
 git clone --depth 1 https://github.com/diasurgical/devilutionX reference/devilutionX
+git clone --depth 1 https://github.com/pvpgn/diablo-hellfire reference/diablo-hellfire
 ```
 
 ## Icons (tileset `files/assets/classic_roguelike.png`, 8×8)
@@ -43,7 +46,7 @@ needed to see a remap take effect — just restart the game):
 
 | File | Covers | H&H Go names | D1 names |
 |---|---|---|---|
-| `actors.rec` | monsters, unique monsters, player classes, corpses, companions, D1 npcs | `IconCharacter*`, `IconMonster*`, `IconUnique*`, `IconCorpse*`, `IconRogue*` | `monster.<MT_ID>` (with a `name:` the remapper shows), `unique.<Name>`, `npc.<name>` |
+| `actors.rec` | monsters (D1's and Hellfire's), unique monsters, player classes, corpses, companions, D1 npcs | `IconCharacter*`, `IconMonster*`, `IconUnique*`, `IconCorpse*`, `IconRogue*` | `monster.<MT_ID>` (with a `name:` the remapper shows), `unique.<Name>`, `npc.<name>` |
 | `items.rec` | weapons, armor, potions, scrolls, rings... | `IconItem*` and the "Dark"/gold cosmetic set (`IconCloakDark`...) | `item.ITYPE_*` / `item.IMISC_*` (IMISC wins); every items.rec record has a `name:` the remapper shows |
 | `tiles.rec` | terrain, doors, decals, effects, dungeon objects | everything else (`IconGrass`, `IconEffect*`, `IconDecalBlood*`...) | `prop.OBJ_*` (+ `.used` for a few), each with a `name:` the remapper shows |
 
@@ -81,10 +84,23 @@ Sound effects are **events**, not folders: `files/assets/data/sounds.rec` has on
   `reference/DIABDAT.MPQ`). Convert D1's own `.wav` files to `.ogg` (the engine only decodes Vorbis) and drop
   them in; they're picked up automatically next run, no code change:
   ```
+  brew install vorbis-tools   # oggenc, once
   find files/assets/diablo_music files/assets/diablo_sfx -iname '*.wav' -print0 | \
-    xargs -0 -I{} ffmpeg -i {} -ac 2 -c:a vorbis -strict -2 -qscale:a 3 {}.ogg
+    xargs -0 -I{} oggenc -Q -q 4 -o {}.ogg {}
   ```
-  (`-ac 2`: ffmpeg's Vorbis encoder needs stereo, some of D1's sfx are mono.) `diablo_music/`'s 6 tracks
+  Use `oggenc`, not `ffmpeg -c:a vorbis`: ffmpeg's own Vorbis encoder is its unmaintained experimental one
+  (needs `-strict -2` to even run) and produces audibly corrupted output — a wall of static — on some of D1's
+  speech files; `oggenc` is the Xiph reference encoder and doesn't have that problem. It also keeps mono
+  sources mono (no `-ac 2` needed).
+
+  `go run ./cmd/d1import -sfx` pulls those `.wav` files straight out of every archive in `reference/` into
+  `files/assets/diablo_sfx/`, in the layout `sounds.rec` expects, so you only have to run the ffmpeg line above
+  afterwards. It also drops the Nest's and the Crypt's music into `diablo_music/` as `nest.wav` / `crypt.wav`,
+  already named the way `d1AreaMusic` wants them. It takes everything `sounds.rec` points at plus `d1.SfxFiles`'
+  speech plus all of Hellfire's own sounds, and quietly skips whatever your archives don't have — no MPQ is
+  required. Where a sound is in several archives the better copy wins: `hfvoice` first, then `hfmonk`, `hfmusic`,
+  `hellfire`, and DIABDAT last. Without `hfmonk`/`hfvoice` the Monk simply has no lines; the Bard and the
+  Barbarian always borrow the Rogue's and the Warrior's, which is what Hellfire itself does. `diablo_music/`'s 6 tracks
   (`dtowne`/`dlvla`/`dlvlb`/`dlvlc`/`dlvld`/`dintro`) must be renamed to `town`/`cathedral`/`catacombs`/`caves`/
   `hell`/`intro` after conversion — that's what supplies `d1AreaMusic`'s cues. `diablo_sfx/`'s ~900 files
   (`misc/`, `monsters/`, `items/`, `warrior/`, `rogue/`, `sorceror/`, `towners/`, `narrator/`, `animals/`) are
@@ -118,3 +134,5 @@ Sound effects are **events**, not folders: `files/assets/data/sounds.rec` has on
 - D1 unit tests: `go test ./d1`
 - Headless smoke test: `go run -tags development . playthrough` (must print `PLAYTHROUGH OK`)
 - Print a generated D1 level: `go run . dun_gen <dungeon level> [seed]`
+- Import level data: `go run ./cmd/d1import` (adds the Crypt's and the Nest's tile tables when HELLFIRE.MPQ is there)
+- Extract sounds: `go run ./cmd/d1import -sfx`, then convert with the ffmpeg line above

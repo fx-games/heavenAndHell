@@ -148,13 +148,28 @@ func (a *MPQ) readBlock(name string, b []uint32) ([]byte, error) {
 	if flags&mpqFixKey != 0 {
 		key = (key + pos) ^ size
 	}
-	if flags&mpqSingleUnit != 0 || flags&(mpqImplode|mpqCompress) == 0 {
+	if flags&mpqSingleUnit != 0 {
 		if flags&mpqEncrypted != 0 {
 			decryptBytes(raw, key)
 		}
 		return a.unpack(raw, int(size), flags)
 	}
 	nSectors := (int(size) + a.sectorSize - 1) / a.sectorSize
+	if flags&(mpqImplode|mpqCompress) == 0 {
+		// Uncompressed but still sectored: each sector is a fixed-size chunk (no offset table, since sizes
+		// are all predictable) encrypted with its own key+i, not one key for the whole file.
+		out := make([]byte, 0, size)
+		for i := 0; i < nSectors; i++ {
+			start := i * a.sectorSize
+			end := min(start+a.sectorSize, len(raw))
+			sec := raw[start:end]
+			if flags&mpqEncrypted != 0 {
+				decryptBytes(sec, key+uint32(i))
+			}
+			out = append(out, sec...)
+		}
+		return out, nil
+	}
 	offsets := make([]uint32, nSectors+1)
 	for i := range offsets {
 		offsets[i] = binary.LittleEndian.Uint32(raw[4*i:])
