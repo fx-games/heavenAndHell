@@ -78,6 +78,11 @@ func addActorFromEntity(ldtkMapProject *ldtk.Project, loadedMap *gridmap.GridMap
 	flipLook := entity.PropertyByIdentifier("FlipLookDirection").AsBool()
 
 	actorName := entity.PropertyByIdentifier("Name").AsString()
+	// every NPC is a townsperson: its internal name is its vendor type
+	internalName := entity.PropertyByIdentifier("InternalName").AsString()
+	if remapped, ok := defs.IconOK("npc." + internalName); ok { // ./remap_actors.sh overrides the tile baked into maps.ldtk
+		icon = remapped
+	}
 	actor := NewActor(icon)
 	actor.SetName(actorName)
 	asciiIcon := entity.PropertyByIdentifier("ASCII").AsString()
@@ -90,8 +95,6 @@ func addActorFromEntity(ldtkMapProject *ldtk.Project, loadedMap *gridmap.GridMap
 
 	actor.SetDrawPosition(pos.ToPointF())
 
-	// every NPC is a townsperson: its internal name is its vendor type
-	internalName := entity.PropertyByIdentifier("InternalName").AsString()
 	actor.SetInternalName(internalName)
 	actor.SetVendorType(VendorType(internalName))
 	actor.SetNoCorpse()

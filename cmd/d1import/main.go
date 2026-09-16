@@ -11,6 +11,8 @@
 package main
 
 import (
+	"rpg/cmd/internal/mpq"
+
 	"flag"
 	"fmt"
 	"log"
@@ -21,14 +23,14 @@ import (
 )
 
 func main() {
-	mpq := flag.String("mpq", "", "path to DIABDAT.MPQ (default: look in "+fmt.Sprint(MPQPaths)+")")
+	mpqPath := flag.String("mpq", "", "path to DIABDAT.MPQ (default: look in "+fmt.Sprint(mpq.MPQPaths)+")")
 	hellfire := flag.String("hellfire", "reference", "directory holding HELLFIRE.MPQ and the HF*.MPQ expansion archives")
 	sfx := flag.Bool("sfx", false, "extract sound files instead of level data")
 	dest := flag.String("dest", "", "directory to write (default: assets/data/d1/levels, or assets/diablo_sfx with -sfx)")
 	flag.Parse()
 
-	if *mpq != "" {
-		MPQPaths = []string{*mpq}
+	if *mpqPath != "" {
+		mpq.MPQPaths = []string{*mpqPath}
 	}
 	if *sfx {
 		if err := importSfx(*hellfire, *dest); err != nil {
@@ -36,12 +38,12 @@ func main() {
 		}
 		return
 	}
-	a, err := DiabDat()
+	a, err := mpq.DiabDat()
 	if err != nil {
 		log.Fatal(err)
 	}
 	// the Crypt's and the Nest's tile tables live in HELLFIRE.MPQ
-	read := readFrom(append([]*MPQ{a}, hellfireArchives(*hellfire)...))
+	read := mpq.ReadFrom(append([]*mpq.MPQ{a}, mpq.HellfireArchives(*hellfire)...))
 	if *dest == "" {
 		*dest = "files/assets/data/d1/levels"
 	}
@@ -59,8 +61,8 @@ func importSfx(hellfirePath, dest string) error {
 	}
 	// hfvoice.mpq carries the expansion's speech at full quality, so it goes first and wins over the cut-down
 	// copies in hellfire.mpq; DIABDAT is last because it has none of Hellfire's own sounds.
-	archives := hellfireArchives(hellfirePath)
-	if a, err := DiabDat(); err == nil {
+	archives := mpq.HellfireArchives(hellfirePath)
+	if a, err := mpq.DiabDat(); err == nil {
 		archives = append(archives, a)
 	} else {
 		fmt.Fprintf(os.Stderr, "no DIABDAT.MPQ (%v), skipping Diablo's own sounds\n", err)
@@ -84,28 +86,4 @@ func importSfx(hellfirePath, dest string) error {
 	fmt.Fprintf(os.Stderr, "wrote %d of %d sound files to %s (and %d music tracks)\n", n, len(want), dest, music)
 	fmt.Fprintf(os.Stderr, "now convert them to .ogg (see AGENTS.md); the engine only decodes Vorbis\n")
 	return nil
-}
-
-// hellfireArchives opens the expansion's MPQs from dir, in the order their contents should win: hfvoice has the
-// best copies of the speech, hfmonk the Monk's, hfmusic the two new tracks, hellfire everything else.
-func hellfireArchives(dir string) []*MPQ {
-	var out []*MPQ
-	for _, name := range []string{"HFVOICE", "HFMONK", "HFMUSIC", "HELLFIRE"} {
-		if a, err := OpenMPQ(filepath.Join(dir, name+".MPQ")); err == nil {
-			out = append(out, a)
-		}
-	}
-	return out
-}
-
-// readFrom tries each archive in turn, so a file present in several comes from the first that has it.
-func readFrom(archives []*MPQ) func(string) ([]byte, error) {
-	return func(name string) (b []byte, err error) {
-		for _, a := range archives {
-			if b, err = a.ReadFile(name); err == nil {
-				return b, nil
-			}
-		}
-		return nil, err
-	}
 }

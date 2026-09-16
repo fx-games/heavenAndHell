@@ -1,4 +1,4 @@
-package main
+package mpq
 
 import (
 	"encoding/binary"
@@ -20,7 +20,7 @@ type MPQ struct {
 }
 
 // MPQPaths are where the game looks for DIABDAT.MPQ (you bring your own copy of Diablo).
-var MPQPaths = []string{"DIABDAT.MPQ", "reference/DIABDAT.MPQ", "../reference/DIABDAT.MPQ"}
+var MPQPaths = []string{"DIABDAT.MPQ", "reference/DIABDAT.MPQ", "../reference/DIABDAT.MPQ", "../../reference/DIABDAT.MPQ"}
 
 var (
 	mpqOnce sync.Once
@@ -355,3 +355,27 @@ var (
 	lenBase  = [16]int{3, 2, 4, 5, 6, 7, 8, 9, 10, 12, 16, 24, 40, 72, 136, 264}
 	lenExtra = [16]int{0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8}
 )
+
+// HellfireArchives opens the expansion's MPQs from dir, in the order their contents should win: hfvoice has the
+// best copies of the speech, hfmonk the Monk's, hfmusic the two new tracks, hellfire everything else.
+func HellfireArchives(dir string) []*MPQ {
+	var out []*MPQ
+	for _, name := range []string{"HFVOICE", "HFMONK", "HFMUSIC", "HELLFIRE"} {
+		if a, err := OpenMPQ(filepath.Join(dir, name+".MPQ")); err == nil {
+			out = append(out, a)
+		}
+	}
+	return out
+}
+
+// ReadFrom tries each archive in turn, so a file present in several comes from the first that has it.
+func ReadFrom(archives []*MPQ) func(string) ([]byte, error) {
+	return func(name string) (b []byte, err error) {
+		for _, a := range archives {
+			if b, err = a.ReadFile(name); err == nil {
+				return b, nil
+			}
+		}
+		return nil, err
+	}
+}

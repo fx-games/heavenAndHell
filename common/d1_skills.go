@@ -24,7 +24,7 @@ func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedActio
 			f.pickD1IdentifyTarget(p, func() {
 				f.castD1(p, d1.SplIdentify, p.hero.SpellLevel(p.HeroSheet(), d1.SplIdentify)+1, p.MapPosition())
 			})
-		}, Description: []util.LabelText{util.LabelTextFromString("Identify")}})
+		}, Description: []util.LabelText{util.LabelTextFromString(d1.SpellDescriptions[d1.SplIdentify])}})
 		return nil, action
 	case d1.Warrior:
 		return nil, f.d1ItemSkill("Item Repair", d1.SplRepair, d1.CanRepair, func(it *Item) {
@@ -45,7 +45,7 @@ func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedActio
 	}
 	action := NewTargetedAction("Trap Disarm", OneTargetTile(f.State.GetMap, util.Arguments{}),
 		&HitEffect{Activate: func(caster *Actor, target geometry.Point, _ []geometry.Point) { f.D1Disarm(caster, target) },
-			Description: []util.LabelText{util.LabelTextFromString("Trap Disarm")}},
+			Description: []util.LabelText{util.LabelTextFromString(d1.SpellDescriptions[d1.SplDisarm])}},
 		d1SpellTargeting(f, d1.SplDisarm))
 	action.SetIcon(f.d1SkillIcon(d1.SplDisarm))
 	return action, nil
@@ -56,7 +56,7 @@ func (f *Factory) d1CastSkill(name string, spell int) *UntargetedAction {
 	action := NewUntargetedAction(name, f.d1SkillIcon(spell))
 	action.SetEffect(&UntargetedEffect{Effect: func(player *Actor, _ EffectSource) {
 		f.castD1(player, spell, player.hero.SpellLevel(player.HeroSheet(), spell)+1, player.MapPosition())
-	}, Description: []util.LabelText{util.LabelTextFromString(name)}})
+	}, Description: []util.LabelText{util.LabelTextFromString(d1.SpellDescriptions[spell])}})
 	return action
 }
 
@@ -108,7 +108,7 @@ func (f *Factory) d1ItemSkill(name string, spell int, applies func(*d1.Item) boo
 			SyncHero(player)
 			f.ActionBroker.Execute(NewEndPlayerTurnAction(AbstractCause(ActionName(name)), 10))
 		})
-	}, Description: []util.LabelText{util.LabelTextFromString(name)}})
+	}, Description: []util.LabelText{util.LabelTextFromString(d1.SpellDescriptions[spell])}})
 	return action
 }
 

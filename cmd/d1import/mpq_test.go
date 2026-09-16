@@ -1,6 +1,8 @@
 package main
 
 import (
+	"rpg/cmd/internal/mpq"
+
 	"encoding/binary"
 	"testing"
 
@@ -10,7 +12,7 @@ import (
 // TestMPQ reads each level type's tile tables and checks they agree: every megatile points at pieces the
 // .SOL and .MIN describe, which fails if decompression or decryption is off.
 func TestMPQ(t *testing.T) {
-	a, err := DiabDat()
+	a, err := mpq.DiabDat()
 	if err != nil {
 		t.Skip(err)
 	}
@@ -46,7 +48,7 @@ func TestMPQ(t *testing.T) {
 // TestImportRoundTrip re-runs the import into a scratch directory. ImportLevels parses back everything it writes
 // and compares it to the MPQ's bytes, so this fails if the text encoding ever stops being lossless.
 func TestImportRoundTrip(t *testing.T) {
-	a, err := DiabDat()
+	a, err := mpq.DiabDat()
 	if err != nil {
 		t.Skip(err)
 	}

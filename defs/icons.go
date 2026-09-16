@@ -11,7 +11,7 @@ import (
 // plus D1's "monster.<ID>", "unique.<Name>" and "npc.<name>"), items.rec (IconItem* plus D1's "item.ITYPE_*"/"item.IMISC_*"),
 // tiles.rec (everything else: terrain, doors, decals, effects, plus D1's "prop.OBJ_*"), skills.rec (D1's "spell.SPL_*" skill and spell icons). Remap them with
 // ./remap_actors.sh, ./remap_items.sh, ./remap_tiles.sh, ./remap_skills.sh — each rec file is read fresh on every game start, no
-// rebuild needed. The H&H constants (IconGrass, IconItemSword, ...) are package vars, not consts, for the same
+// rebuild needed. The H&H constants (IconGrass, ...) are package vars, not consts, for the same
 // reason: their value comes from the rec file, not from the Go source.
 func loadIconRec(name string) map[string]int32 {
 	f, err := files.Open(path.Join("assets", "data", "icons", name+".rec"))

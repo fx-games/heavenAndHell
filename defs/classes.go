@@ -16,6 +16,17 @@ var FemaleIconByClass = map[string]int32{
 	"barbarian": IconCharacterBarbarianFemale,
 }
 
+// MaleIconByClass maps a class' internal_name to its male icon, kept in sync with actors.rec by
+// ./remap_actors.sh instead of the frozen "icon" numbers classes.rec used to carry.
+var MaleIconByClass = map[string]int32{
+	"warrior":   IconCharacterWarriorMale,
+	"rogue":     IconCharacterRogueMale,
+	"sorcerer":  IconCharacterSorcererMale,
+	"monk":      IconCharacterMonkMale,
+	"bard":      IconCharacterBardMale,
+	"barbarian": IconCharacterBarbarianMale,
+}
+
 type LoadoutDefinition struct {
 	Items            []string
 	Icon             int32
@@ -58,8 +69,6 @@ func NewClassDefFromRecord(record recfile.Record) LoadoutDefinition {
 			def.InternalName = field.Value
 		case "name":
 			def.Name = field.Value
-		case "icon":
-			def.Icon = field.AsInt32()
 		case "gold":
 			def.Gold = field.AsInt()
 		case "item":
@@ -70,5 +79,6 @@ func NewClassDefFromRecord(record recfile.Record) LoadoutDefinition {
 			def.TargetedSkills = append(def.TargetedSkills, field.Value)
 		}
 	}
+	def.Icon = MaleIconByClass[def.InternalName]
 	return def
 }

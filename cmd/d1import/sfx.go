@@ -1,6 +1,8 @@
 package main
 
 import (
+	"rpg/cmd/internal/mpq"
+
 	"fmt"
 	"os"
 	"path/filepath"
@@ -107,7 +109,7 @@ func sfxDest(name string) string {
 
 // extractSfx pulls every sound it can find out of the archives into dest, skipping what isn't there (a plain
 // Hellfire install has no hfmonk.mpq, and a shareware DIABDAT is missing most speech). Returns how many it wrote.
-func extractSfx(archives []*MPQ, names []string, dest string) (int, error) {
+func extractSfx(archives []*mpq.MPQ, names []string, dest string) (int, error) {
 	written := 0
 	for _, name := range names {
 		var data []byte
@@ -134,7 +136,7 @@ func extractSfx(archives []*MPQ, names []string, dest string) (int, error) {
 
 // extractMusic writes Hellfire's two new tracks under the names d1AreaMusic looks for. D1's own tracks stay a
 // manual step: they need renaming choices (dtowne -> town and so on) that AGENTS.md spells out.
-func extractMusic(archives []*MPQ, dest string) (int, error) {
+func extractMusic(archives []*mpq.MPQ, dest string) (int, error) {
 	written := 0
 	for name, out := range hellfireMusic {
 		for _, a := range archives {
