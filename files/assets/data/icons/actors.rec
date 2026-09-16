@@ -53,7 +53,7 @@ icon: 135
 name: Corpse
 
 internal_name: npc.wirt
-icon: 79
+icon: 736
 name: Town Wirt
 
 internal_name: npc.wounded_townsman
@@ -61,7 +61,7 @@ icon: 511
 name: Town Wounded Townsman
 
 internal_name: npc.ogden
-icon: 79
+icon: 22
 name: Town Ogden
 
 internal_name: npc.farnham
@@ -69,11 +69,11 @@ icon: 79
 name: Town Farnham
 
 internal_name: npc.gillian
-icon: 79
+icon: 81
 name: Town Gillian
 
 internal_name: npc.griswold
-icon: 79
+icon: 735
 name: Town Griswold
 
 internal_name: npc.cain
@@ -81,15 +81,15 @@ icon: 80
 name: Town Deckard Cain
 
 internal_name: npc.adria
-icon: 81
+icon: 82
 name: Town Adria
 
 internal_name: npc.pepin
-icon: 82
+icon: 734
 name: Town Pepin
 
 internal_name: npc.celia
-icon: 79
+icon: 733
 name: Town Celia
 
 internal_name: npc.lester

@@ -6,7 +6,7 @@ icon: 109
 
 internal_name: spell.heal
 name: Healing
-icon: 43
+icon: 332
 
 internal_name: spell.lightning
 name: Lightning
@@ -18,15 +18,15 @@ icon: 37
 
 internal_name: spell.identify
 name: Identify
-icon: 43
+icon: 270
 
 internal_name: spell.firewall
 name: Fire Wall
-icon: 109
+icon: 33
 
 internal_name: spell.town
 name: Town Portal
-icon: 43
+icon: 294
 
 internal_name: spell.stone
 name: Stone Curse
@@ -34,15 +34,15 @@ icon: 43
 
 internal_name: spell.infra
 name: Infravision
-icon: 43
+icon: 215
 
 internal_name: spell.rndteleport
 name: Phasing
-icon: 43
+icon: 108
 
 internal_name: spell.manashield
 name: Mana Shield
-icon: 43
+icon: 381
 
 internal_name: spell.fireball
 name: Fireball
@@ -50,7 +50,7 @@ icon: 109
 
 internal_name: spell.guardian
 name: Guardian
-icon: 109
+icon: 97
 
 internal_name: spell.chain
 name: Chain Lightning
@@ -58,11 +58,11 @@ icon: 37
 
 internal_name: spell.wave
 name: Flame Wave
-icon: 109
+icon: 33
 
 internal_name: spell.doomserp
 name: Doom Serpents
-icon: 37
+icon: 92
 
 internal_name: spell.blodrit
 name: Blood Ritual
@@ -70,11 +70,11 @@ icon: 43
 
 internal_name: spell.nova
 name: Nova
-icon: 43
+icon: 41
 
 internal_name: spell.invisibil
 name: Invisibility
-icon: 43
+icon: 39
 
 internal_name: spell.flame
 name: Inferno
@@ -82,15 +82,15 @@ icon: 109
 
 internal_name: spell.golem
 name: Golem
-icon: 109
+icon: 369
 
 internal_name: spell.blodboil
 name: Rage
-icon: 37
+icon: 258
 
 internal_name: spell.teleport
 name: Teleport
-icon: 43
+icon: 39
 
 internal_name: spell.apoca
 name: Apocalypse
@@ -98,19 +98,19 @@ icon: 109
 
 internal_name: spell.etherealize
 name: Etherealize
-icon: 43
+icon: 108
 
 internal_name: spell.repair
 name: Item Repair
-icon: 43
+icon: 498
 
 internal_name: spell.recharge
 name: Staff Recharge
-icon: 43
+icon: 124
 
 internal_name: spell.disarm
 name: Trap Disarm
-icon: 43
+icon: 268
 
 internal_name: spell.element
 name: Elemental
@@ -122,35 +122,35 @@ icon: 37
 
 internal_name: spell.hbolt
 name: Holy Bolt
-icon: 43
+icon: 123
 
 internal_name: spell.resurrect
 name: Resurrect
-icon: 43
+icon: 432
 
 internal_name: spell.telekinesis
 name: Telekinesis
-icon: 43
+icon: 39
 
 internal_name: spell.healother
 name: Heal Other
-icon: 43
+icon: 332
 
 internal_name: spell.flare
 name: Blood Star
-icon: 43
+icon: 775
 
 internal_name: spell.bonespirit
 name: Bone Spirit
-icon: 43
+icon: 250
 
 internal_name: spell.search
 name: Search
-icon: 43
+icon: 240
 
 internal_name: spell.mana
 name: Mana
-icon: 43
+icon: 329
 
 internal_name: spell.magi
 name: the Magi
@@ -162,7 +162,7 @@ icon: 43
 
 internal_name: spell.lightwall
 name: Lightning Wall
-icon: 43
+icon: 38
 
 internal_name: spell.immolat
 name: Immolation
@@ -170,11 +170,11 @@ icon: 109
 
 internal_name: spell.warp
 name: Warp
-icon: 43
+icon: 215
 
 internal_name: spell.reflect
 name: Reflect
-icon: 43
+icon: 410
 
 internal_name: spell.berserk
 name: Berserk
@@ -190,7 +190,7 @@ icon: 109
 
 internal_name: spell.runelight
 name: Rune of Light
-icon: 43
+icon: 247
 
 internal_name: spell.runenova
 name: Rune of Nova
@@ -202,4 +202,5 @@ icon: 109
 
 internal_name: spell.runestone
 name: Rune of Stone
-icon: 43
+icon: 775
+
