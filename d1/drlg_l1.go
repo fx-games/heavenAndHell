@@ -587,7 +587,11 @@ func (g *gen) l1FillChambers() {
 	} else {
 		g.l1GenerateHall(hall1.x, hall1.y, 16, v)
 	}
-	g.l1InitSetPiece()
+	if isCrypt(g.currlevel) {
+		g.l5SetRoom()
+	} else {
+		g.l1InitSetPiece()
+	}
 }
 
 func (g *gen) l1FixTransparency() {
@@ -680,12 +684,16 @@ func (g *gen) l1PlaceStairs(entry Entry) bool {
 			}
 		}
 	}
+	// Hellfire's Cathedral takes the plain STAIRSUP and keeps going when it doesn't fit
 	stairs := &l1L5STAIRSUP
-	if g.available(QLtBanner) {
+	if g.available(QLtBanner) || g.data.Hellfire {
 		stairs = &l1STAIRSUP
 	}
 	if x, y, found := g.placeMiniSet(stairs, 1600, true); !found {
-		return false
+		if !g.data.Hellfire {
+			return false
+		}
+		ok = false
 	} else if entry == EntryMain {
 		g.view = point{2*x + 19, 2*y + 20}
 	}
@@ -722,7 +730,7 @@ func (g *gen) l1GenerateLevel(entry Entry) {
 		g.l1FixTilesPatterns()
 		g.l1AddWall()
 		g.floodTrans(t1Floor)
-		if g.l1PlaceStairs(entry) {
+		if isCrypt(g.currlevel) && g.l5PlaceStairs(entry) || !isCrypt(g.currlevel) && g.l1PlaceStairs(entry) {
 			break
 		}
 	}
@@ -736,14 +744,20 @@ func (g *gen) l1GenerateLevel(entry Entry) {
 		}
 	}
 	g.l1FixTransparency()
-	g.l1FixDirtTiles()
-	g.l1FixCornerTiles()
-	g.l1Substitution()
-	g.l1ApplyShadows()
-	for n := g.rnd(5) + 5; n > 0; n-- {
-		g.placeMiniSet(&l1LAMPS, 1600, true)
+	if isCrypt(g.currlevel) {
+		g.l5FixDirtTiles()
+		g.l1FixCornerTiles()
+		g.l5Substitution()
+	} else {
+		g.l1FixDirtTiles()
+		g.l1FixCornerTiles()
+		g.l1Substitution()
+		g.l1ApplyShadows()
+		for n := g.rnd(5) + 5; n > 0; n-- {
+			g.placeMiniSet(&l1LAMPS, 1600, true)
+		}
+		g.l1FillFloor()
 	}
-	g.l1FillFloor()
 	g.savePdungeon()
 	g.checkQuests(g.setPiece.x, g.setPiece.y)
 }

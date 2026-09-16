@@ -12,3 +12,15 @@ icon: 19
 internal_name: sorcerer
 name: Sorcerer
 icon: 21
+
+internal_name: monk
+name: Monk
+icon: 22
+
+internal_name: bard
+name: Bard
+icon: 23
+
+internal_name: barbarian
+name: Barbarian
+icon: 24

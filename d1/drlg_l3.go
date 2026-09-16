@@ -925,6 +925,9 @@ func (g *gen) l3Lockout() bool {
 }
 
 func (g *gen) l3PlaceStairs(entry Entry) bool {
+	if isNest(g.currlevel) {
+		return g.l6PlaceStairs(entry)
+	}
 	x, y, ok := g.placeMiniSet(&l3L3UP, 199, false)
 	if !ok {
 		return false
@@ -979,9 +982,14 @@ func (g *gen) l3GenerateLevel(entry Entry) {
 		if g.available(QAnvil) && !g.l3PlaceAnvil() {
 			continue
 		}
-		if g.l3PlaceLavaPool() {
+		if isNest(g.currlevel) && g.l6PlaceSlimePool() || !isNest(g.currlevel) && g.l3PlaceLavaPool() {
 			break
 		}
+	}
+	if isNest(g.currlevel) {
+		g.l6Decorate()
+		g.savePdungeon()
+		return
 	}
 	g.l3PoolFix()
 	g.l3Warp()

@@ -37,6 +37,7 @@ type D1MonsterState struct {
 	Dir                                int  // index into D1Dirs
 	Dormant                            bool // _mFlags & 4 on gargoyles: waiting in stone until the enemy comes close
 	NoHeal                             bool // _mFlags & 8 (MFLAG_NOHEAL): hit by a weapon that stops healing
+	Berserk                            bool // Hellfire's MFLAG_BERSERK | MFLAG_GOLEM: turned on its own kind
 }
 
 // D1 monster modes (MON_MODE) the AI compares against.

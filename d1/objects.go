@@ -1,6 +1,9 @@
 package d1
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 // objects.cpp: objects placed on level creation.
 
@@ -45,12 +48,13 @@ type Object struct {
 }
 
 // ShrineNames are D1's shrinestrs.
-var ShrineNames = [26]string{"Mysterious", "Hidden", "Gloomy", "Weird", "Magical", "Stone", "Religious", "Enchanted",
+var ShrineNames = [34]string{"Mysterious", "Hidden", "Gloomy", "Weird", "Magical", "Stone", "Religious", "Enchanted",
 	"Thaumaturgic", "Fascinating", "Cryptic", "Magical", "Eldritch", "Eerie", "Divine", "Holy", "Sacred", "Spiritual",
-	"Spooky", "Abandoned", "Creepy", "Quiet", "Secluded", "Ornate", "Glimmering", "Tainted"}
+	"Spooky", "Abandoned", "Creepy", "Quiet", "Secluded", "Ornate", "Glimmering", "Tainted",
+	"Oily", "Glowing", "Mendicant's", "Sparkling", "Town", "Shimmering", "Solar", "Murphy's"} // Hellfire's last eight
 
 // ShrineMessages are the MsgStrings each shrine shows, with a note on what the shrine does.
-var ShrineMessages = [26]string{"Some are weakened as one grows strong (-1 all stats, +6 to one random stat permanently)",
+var ShrineMessages = [34]string{"Some are weakened as one grows strong (-1 all stats, +6 to one random stat permanently)",
 	"New strength is forged through destruction (+10 max durability on equipped items, one random item -20)",
 	"Those who defend seldom attack (+2 armor on all armor, -1 max damage on all weapons)",
 	"The sword of justice is swift and sharp (+1 max damage on all weapons)",
@@ -75,15 +79,24 @@ var ShrineMessages = [26]string{"Some are weakened as one grows strong (-1 all s
 	"The way is made clear when viewed from above (reveals the level map)",
 	"Salvation comes at the cost of wisdom (+2 Holy Bolt levels, -10% max mana permanently)",
 	"Mysteries are revealed in the light of reason (identifies all items)",
-	"Those who are last may yet be first (no effect in single player)"}
+	"Those who are last may yet be first (no effect in single player)",
+	"That which does not kill you... (+2 to your class' main stat, sets off a fire wall)",
+	"Knowledge is power (+1 Mag per 1000 XP, up to +5 for 5% of your XP)",
+	"Give and you shall receive (half your gold becomes XP)",
+	"Some experience is gained by touch (1000 XP per dungeon level, sets off a flash)",
+	"There's no place like home (opens a town portal)",
+	"Spirtual energy is restored (full mana)",
+	"The sun's position decides (+2 Dex, Str, Mag or Vit by the time of day)",
+	"That which can break will (halves an equipped item's durability, or takes a third of your gold)"}
 
 // StoryBookNames are D1's StoryBookName.
 var StoryBookNames = [9]string{"The Great Conflict", "The Wages of Sin are War", "The Tale of the Horadrim", "The Dark Exile",
 	"The Sin War", "The Binding of the Three", "The Realms Beyond", "Tale of the Three", "The Black King"}
 
 var (
-	shrineMax   = [26]int{16, 16, 16, 16, 16, 16, 16, 8, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16}
-	shrineAvail = [26]int{0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2} // 2 = multiplayer only
+	// Hellfire's MAX_LVLS (24); D1's 16 never cuts a shrine D1 could roll
+	shrineMax   = [34]int{24, 24, 24, 24, 24, 24, 24, 8, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24}
+	shrineAvail = [34]int{0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 0} // 2 = multiplayer only
 )
 
 func (g *gen) clrAllObjects() {
@@ -283,6 +296,15 @@ func (g *gen) addLevelObjs(ltype int) {
 	for j := 0; j < 112; j++ {
 		for i := 0; i < 112; i++ {
 			pn := g.piece[i][j] + 1
+			if isCrypt(g.currlevel) { // add_crypt_objs
+				if pn == 77 {
+					g.addObject(ObjL1LDOOR, i, j)
+				}
+				if pn == 80 {
+					g.addObject(ObjL1RDOOR, i, j)
+				}
+				continue
+			}
 			if ltype == DTypeCathedral && pn == 270 {
 				g.addObject(ObjL1LIGHT, i, j)
 			}
@@ -405,6 +427,9 @@ func (g *gen) addChestTraps() {
 					o.Var4 = g.rnd(2)
 				} else {
 					o.Var4 = g.rnd(3)
+					if g.data.Hellfire {
+						o.Var4 = g.rnd(6)
+					}
 				}
 			}
 		}
@@ -467,7 +492,7 @@ func (g *gen) addDiabObjs() {
 	g.loadMapObjects(g.loadDun("l4/diab3a"), 2*q[2].x, 2*q[2].y, q[3].x, q[3].y, 9, 9, 3)
 }
 
-func (g *gen) addStoryBooks(seeds [17]int32) {
+func (g *gen) addStoryBooks(seeds [NumLevels]int32) {
 	xp, yp, ok := g.findLoc(-3, -2, 3, 2, 20000)
 	if !ok {
 		return
@@ -539,7 +564,7 @@ func (g *gen) getRndObjLoc(randarea int) (int, int) {
 }
 
 // initObjects ports InitObjects.
-func (g *gen) initObjects(seeds [17]int32) {
+func (g *gen) initObjects(seeds [NumLevels]int32) {
 	g.clrAllObjects()
 	if g.currlevel == 16 {
 		g.addDiabObjs()
@@ -565,6 +590,18 @@ func (g *gen) initObjects(seeds [17]int32) {
 	}
 	if g.currlevel == 4 || g.currlevel == 8 || g.currlevel == 12 {
 		g.addStoryBooks(seeds)
+	}
+	switch g.currlevel {
+	case 21:
+		g.addCryptStoryBook(1)
+	case 22:
+		g.addCryptStoryBook(2)
+		g.addCryptStoryBook(3)
+	case 23:
+		g.addCryptStoryBook(4)
+		g.addCryptStoryBook(5)
+	case 24:
+		g.addNakrulGate()
 	}
 	sp := g.setPiece
 	switch g.ltype {
@@ -708,7 +745,13 @@ func (g *gen) addObject(kind, ox, oy int) {
 	case ObjWATER:
 		o.AnimFrame = 1
 	case ObjTRAPL, ObjTRAPR:
-		switch g.rnd(g.currlevel/3 + 1) {
+		mt := g.currlevel/3 + 1
+		if g.currlevel > 20 { // Hellfire rates the Nest as levels 13-16 and the Crypt as 13-16 too
+			mt = (g.currlevel-8)/3 + 1
+		} else if g.currlevel > 16 {
+			mt = (g.currlevel-4)/3 + 1
+		}
+		switch g.rnd(mt) {
 		case 0:
 			o.Var3 = misArrow
 		case 1:
@@ -728,7 +771,7 @@ func (g *gen) addObject(kind, ox, oy int) {
 	case ObjSHRINEL, ObjSHRINER:
 		o.PreFlag = true
 		for {
-			v := g.rnd(26)
+			v := g.rnd(g.data.numShrines())
 			if g.currlevel <= shrineMax[v] && shrineAvail[v] != 2 {
 				o.Var1 = v
 				break
@@ -783,7 +826,7 @@ func (g *gen) addObject(kind, ox, oy int) {
 }
 
 // addStoryBook ports AddObject(OBJ_STORYBOOK) with AddStoryBook, which reseeds the RNG from level 16's seed.
-func (g *gen) addStoryBook(x, y int, seeds [17]int32) {
+func (g *gen) addStoryBook(x, y int, seeds [NumLevels]int32) {
 	g.addObject(ObjSTORYBOOK, x, y)
 	o := g.objAt(x, y)
 	if o == nil {
@@ -827,4 +870,63 @@ func (g *gen) preSpawnSkeleton() int {
 		g.monsters[slot].Hidden = true
 	}
 	return slot
+}
+
+// addCryptStoryBook ports AddCryptStoryBook: the Crypt's book s (1-5), between six candles.
+func (g *gen) addCryptStoryBook(s int) {
+	xp, yp, ok := g.findLoc(-3, -2, 3, 2, 20000)
+	if !ok {
+		return
+	}
+	g.addCryptBook(s, xp, yp)
+	for _, c := range [][2]int{{-2, 1}, {-2, 0}, {-1, -1}, {1, -1}, {2, 0}, {2, 1}} {
+		g.addObject(ObjSTORYCANDLE, xp+c[0], yp+c[1])
+	}
+}
+
+// addCryptBook ports AddCryptBook and AddCryptObject: a story book that doesn't roll its narration. Books 6-8 are
+// Na-Krul's three spell books (Var8), whose text D1 picks by the reader's class; Var2 is the Warrior's.
+func (g *gen) addCryptBook(s, x, y int) {
+	g.addObject(ObjSTORYBOOK, x, y)
+	o := g.objAt(x, y)
+	if o == nil {
+		return
+	}
+	o.Var1, o.Var2, o.Var3, o.Var8 = 1, s+316, s+9, 0
+	if s > 5 {
+		o.Var2, o.Var3, o.Var8 = 317+s, 15, s
+	}
+	o.AnimFrame = 3
+	o.Var4 = 4
+}
+
+// addNakrulGate ports AddNakrulGate: the lever beside Na-Krul's room and his three books in a random order.
+func (g *gen) addNakrulGate() {
+	ux, uy := g.uberRoom()
+	g.findLoc(-1, -1, 1, 1, math.MaxInt) // AddNakrulLeaver looks for a free spot and then doesn't use it
+	g.addObject(ObjLEVER, ux+3, uy-1)
+	order := [6][3]int{{6, 7, 8}, {6, 8, 7}, {7, 6, 8}, {7, 8, 6}, {8, 7, 6}, {8, 6, 7}}[g.rnd(6)]
+	g.addCryptBook(order[0], ux+3, uy)
+	g.addCryptBook(order[1], ux+2, uy-3)
+	g.addCryptBook(order[2], ux+2, uy+2)
+}
+
+// uberRoom is UberRow/UberCol: the piece CreateL5Dungeon finds Na-Krul's door at (D1 piece 290).
+func (g *gen) uberRoom() (x, y int) {
+	for j := 16; j < 96; j++ {
+		for i := 16; i < 96; i++ {
+			if g.piece[i][j]+1 == 290 {
+				x, y = i, j
+			}
+		}
+	}
+	return
+}
+
+// numShrines is NUM_SHRINETYPE: Hellfire adds eight.
+func (d *Data) numShrines() int {
+	if d.Hellfire {
+		return len(ShrineNames)
+	}
+	return 26
 }

@@ -19,20 +19,24 @@ import (
 //
 //go:generate go run ../cmd/d1import -dest ../files/assets/data/d1/levels
 type levelData struct {
-	dun      map[string]dun // "l1/sklkng1" -> set piece
-	til, sol [5][]byte      // by level type (DType*)
+	dun      map[string]dun             // "l1/sklkng1" -> set piece
+	til, sol [len(levelTypeDirs)][]byte // by level type (DType*)
 }
 
 const levelDir = "levels"
 
-var levelTypeDirs = [5]string{"", "l1", "l2", "l3", "l4"}
+// 5 is Hellfire's Crypt, 6 its Nest; both are optional, so loadLevelData skips a directory that isn't there.
+var levelTypeDirs = [7]string{"", "l1", "l2", "l3", "l4", "l5", "l6"}
 
 func loadLevelData(fsys fs.FS) (levelData, error) {
 	ld := levelData{dun: map[string]dun{}}
-	for lt := 1; lt <= 4; lt++ {
+	for lt := 1; lt < len(levelTypeDirs); lt++ {
 		dir := levelTypeDirs[lt]
 		base := path.Join("assets", "data", "d1", levelDir, dir)
 		entries, err := fs.ReadDir(fsys, base)
+		if err != nil && lt > 4 {
+			continue // Hellfire's two level types are only there once someone imports them
+		}
 		if err != nil {
 			return ld, fmt.Errorf("level data: %w", err)
 		}

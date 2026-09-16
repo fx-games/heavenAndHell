@@ -148,6 +148,7 @@ func (g *GameInstance) LoadGame() error {
 	for k, v := range sg.Flags {
 		g.state.GetFlags().SetToValue(k, v)
 	}
+	g.state.ApplyHellfireOptions()
 	inv, eq := player.GetInventory(), player.GetEquipment()
 	for _, it := range append([]*common.Item(nil), eq.AllItems()...) {
 		eq.UnEquip(it)
@@ -183,6 +184,8 @@ func (g *GameInstance) LoadGame() error {
 	target := gridmap.Transition{TargetMap: sg.Map, TargetLocation: "ladder_up"}
 	if defs.IsTownLevel(sg.Map) {
 		target.TargetLocation = "spawn"
+	} else if dlvl := common.LevelFromName(sg.Map); dlvl == 17 || dlvl == 21 { // the Nest and the Crypt start at a warp
+		target.TargetLocation = "warp"
 	}
 	g.state.MapTransition(target)
 	m := g.state.GetMap()

@@ -65,15 +65,18 @@ func (g *GameInstance) d1MonsterAction(a *common.Actor) (int, func()) {
 		return 10, func() {}
 	}
 	mon := b.mon
-	if mon.Golem {
+	if mon.Golem || mon.Berserk {
 		return b.golem()
 	}
 	b.enemy, b.target = player.MapPosition(), player
-	if golem := g.golemOnMap(); golem != nil && geometry.DistanceSquared(b.pos, golem.MapPosition()) < geometry.DistanceSquared(b.pos, b.enemy) {
-		b.enemy, b.target = golem.MapPosition(), golem // M_Enemy: the closest of player and golem
+	if golem := g.golemOnMap(b.pos); golem != nil && geometry.DistanceSquared(b.pos, golem.MapPosition()) < geometry.DistanceSquared(b.pos, b.enemy) {
+		b.enemy, b.target = golem.MapPosition(), golem // M_Enemy: the closest of player, golem and berserk monsters
 	}
 	b.dx, b.dy = b.pos.X-b.enemy.X, b.pos.Y-b.enemy.Y
 	if player.CanSee(b.pos) {
+		if mon.Squelch == 0 {
+			g.factory.D1MonsterGreeting(a)
+		}
 		mon.Squelch, mon.Last = 255, b.enemy
 	} else {
 		mon.Squelch = max(mon.Squelch-d1.RefWalkTicks, 0)
@@ -125,6 +128,18 @@ func (b *d1Brain) think() (d1Act, bool) {
 		return b.ranged(func() (d1Act, bool) { return b.missile(common.MisFlare, 0, common.D1ModeRAttack) })
 	case "AI_ACIDUNIQ":
 		return b.ranged(func() (d1Act, bool) { return b.missile(common.MisAcid, 0, common.D1ModeRSpAttack) })
+	// Hellfire's casters are all MAI_Ranged with a differently coloured flare (MONSTER.CPP); this engine draws
+	// one flare, so they share MisFlare and differ only in the damage their own stats give it.
+	case "AI_LICH", "AI_ARCHLICH", "AI_PSYCHORB", "AI_NECROMORB":
+		return b.ranged(func() (d1Act, bool) { return b.missile(common.MisFlare, 0, common.D1ModeRAttack) })
+	case "AI_FIREBAT":
+		return b.ranged(func() (d1Act, bool) { return b.missile(common.MisFirebolt, 0, common.D1ModeRAttack) })
+	case "AI_HELLBAT":
+		return b.ranged(func() (d1Act, bool) { return b.missile(common.MisFireball, 0, common.D1ModeRAttack) })
+	case "AI_HORKDEMON": // the unique Hork Demon fights like any skeleton until its own behaviour is ported
+		return b.round(true)
+	case "AI_BONED": // MAI_BoneDemon: MAI_RoundRanged with a special attack
+		return b.roundRanged(common.MisFlare, 4, 1)
 	case "AI_MAGMA":
 		return b.roundRanged(common.MisMagmaball, 4, 0)
 	case "AI_STORM":
@@ -283,21 +298,25 @@ func (b *d1Brain) attack() (d1Act, bool) {
 	}}, true
 }
 
-func (g *GameInstance) golemOnMap() *common.Actor {
+// golemOnMap is the closest MFLAG_GOLEM monster to pos: the player's golem or a berserk monster.
+func (g *GameInstance) golemOnMap(pos geometry.Point) *common.Actor {
+	var best *common.Actor
 	for _, a := range g.state.GetMap().Actors() {
-		if mon := a.D1Monster(); mon != nil && mon.Golem && a.IsAlive() {
-			return a
+		if mon := a.D1Monster(); mon != nil && (mon.Golem || mon.Berserk) && a.IsAlive() && a.MapPosition() != pos &&
+			(best == nil || geometry.DistanceSquared(pos, a.MapPosition()) < geometry.DistanceSquared(pos, best.MapPosition())) {
+			best = a
 		}
 	}
-	return nil
+	return best
 }
 
-// golem ports MAI_Golum: fight the closest monster in line, otherwise stay with the player.
+// golem ports MAI_Golum: fight the closest monster in line, otherwise stay with the player. A berserk monster
+// (Hellfire) fights the same way but doesn't follow the player.
 func (b *d1Brain) golem() (int, func()) {
 	player := b.g.state.GetPlayer()
 	for _, a := range b.g.state.GetMap().Actors() {
 		mon := a.D1Monster()
-		if mon == nil || mon.Golem || !a.IsAlive() || geometry.DistanceChebyshev(b.pos, a.MapPosition()) > 15 || !b.lineClear(a.MapPosition()) {
+		if mon == nil || mon.Golem || mon.Berserk || !a.IsAlive() || geometry.DistanceChebyshev(b.pos, a.MapPosition()) > 15 || !b.lineClear(a.MapPosition()) {
 			continue
 		}
 		if b.target == nil || geometry.DistanceSquared(b.pos, a.MapPosition()) < geometry.DistanceSquared(b.pos, b.enemy) {
@@ -309,7 +328,7 @@ func (b *d1Brain) golem() (int, func()) {
 		if act, ok = b.attack(); !ok {
 			act, ok = b.callWalk(b.dirTo(b.enemy))
 		}
-	} else if geometry.DistanceChebyshev(b.pos, player.MapPosition()) > 2 {
+	} else if b.mon.Golem && geometry.DistanceChebyshev(b.pos, player.MapPosition()) > 2 {
 		act, ok = b.callWalk(b.dirTo(player.MapPosition()))
 	}
 	if !ok {

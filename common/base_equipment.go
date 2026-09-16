@@ -15,8 +15,11 @@ func NewEquipment() *Equipment {
 
 func (e *Equipment) IsEquipped(item *Item) bool {
 	slotName := item.SlotName()
-	if slotName == defs.SlotNameTwoHandedWeapon || slotName == defs.SlotNameOneHandedWeapon {
+	if slotName == defs.SlotNameTwoHandedWeapon {
 		slotName = defs.SlotNameMainHand
+	}
+	if slotName == defs.SlotNameOneHandedWeapon { // a dual wielder holds it in either hand
+		return e.slots[defs.SlotNameMainHand] == item || e.slots[defs.SlotNameOffHand] == item
 	}
 
 	if slotName == defs.SlotNameRing {
@@ -43,6 +46,14 @@ func (e *Equipment) Equip(item *Item) {
 	}
 
 	if slotName == defs.SlotNameOneHandedWeapon {
+		if main, exists := e.slots[defs.SlotNameMainHand]; exists && main.IsTwoHandedWeapon() {
+			delete(e.slots, defs.SlotNameMainHand) // the two-hander was using both hands
+		} else if exists {
+			if _, offTaken := e.slots[defs.SlotNameOffHand]; !offTaken {
+				e.slots[defs.SlotNameOffHand] = item
+				return
+			}
+		}
 		e.slots[defs.SlotNameMainHand] = item
 		return
 	}
@@ -71,6 +82,9 @@ func (e *Equipment) UnEquip(item *Item) {
 	}
 	if slotName == defs.SlotNameOneHandedWeapon {
 		slotName = defs.SlotNameMainHand
+		if e.slots[defs.SlotNameOffHand] == item {
+			slotName = defs.SlotNameOffHand
+		}
 	}
 	if slotName == defs.SlotNameRing {
 		if slotItem, exists := e.slots[defs.SlotNameRingLeft]; exists && slotItem == item {
@@ -149,8 +163,13 @@ func (e *Equipment) GetItemsToReplace(item *Item) []*Item {
 		return items
 	}
 	if item.SlotName() == defs.SlotNameOneHandedWeapon {
-		items = appendIfNotNil(items, e.slots[defs.SlotNameMainHand])
-		return items
+		if main, exists := e.slots[defs.SlotNameMainHand]; exists && main.IsTwoHandedWeapon() {
+			return appendIfNotNil(items, main)
+		}
+		if e.isOneSlotAvailable(defs.SlotNameMainHand, defs.SlotNameOffHand) {
+			return items
+		}
+		return appendIfNotNil(items, e.slots[defs.SlotNameMainHand])
 	}
 	if item.SlotName() == defs.SlotNameRing {
 		if e.isOneSlotAvailable(defs.SlotNameRingLeft, defs.SlotNameRingRight) {

@@ -29,3 +29,24 @@ var drlgFixtures = []drlgFixture{
 	{"diablo/15-1583642716-changed.dun", 15, 1583642716, []questOverride{{QBetrayer, "active", QuestDone}, {QDiablo, "active", QuestActive}}, []fixtureEntry{{EntryMain, 44, 26}, {EntryPrev, 88, 67}}},
 	{"diablo/16-741281013.dun", 16, 741281013, []questOverride{}, []fixtureEntry{{EntryMain, 58, 42}}},
 }
+
+// Generated from the same tests' Hellfire cases (Hellfire's Cathedral, the Nest and the Crypt).
+var drlgHellfireFixtures = []drlgFixture{
+	{"hellfire/1-401921334.dun", 1, 401921334, []questOverride{}, []fixtureEntry{{EntryMain, 79, 80}, {EntryPrev, 49, 63}}},
+	{"hellfire/1-536340718.dun", 1, 536340718, []questOverride{}, []fixtureEntry{{EntryMain, 55, 72}, {EntryPrev, 49, 63}}},
+	{"hellfire/2-128964898.dun", 2, 128964898, []questOverride{{QPWater, "active", QuestNotAvail}, {QButcher, "active", QuestNotAvail}}, []fixtureEntry{{EntryMain, 55, 68}, {EntryPrev, 49, 63}}},
+	{"hellfire/2-1180526547.dun", 2, 1180526547, []questOverride{{QPWater, "active", QuestNotAvail}, {QButcher, "active", QuestInit}}, []fixtureEntry{{EntryMain, 83, 68}, {EntryPrev, 81, 45}}},
+	{"hellfire/3-1369955278.dun", 3, 1369955278, []questOverride{{QSkelKing, "active", QuestInit}}, []fixtureEntry{{EntryMain, 63, 86}, {EntryPrev, 75, 69}}},
+	{"hellfire/3-1799396623.dun", 3, 1799396623, []questOverride{{QSkelKing, "active", QuestNotAvail}}, []fixtureEntry{{EntryMain, 59, 68}, {EntryPrev, 47, 55}}},
+	{"hellfire/3-1512491184.dun", 3, 1512491184, []questOverride{{QSkelKing, "active", QuestInit}}, []fixtureEntry{{EntryMain, 47, 72}, {EntryPrev, 79, 45}}},
+	{"hellfire/4-1190318991.dun", 4, 1190318991, []questOverride{{QLtBanner, "active", QuestNotAvail}}, []fixtureEntry{{EntryMain, 67, 80}, {EntryPrev, 77, 45}}},
+	{"hellfire/4-1924296259.dun", 4, 1924296259, []questOverride{{QLtBanner, "active", QuestInit}}, []fixtureEntry{{EntryMain, 83, 54}, {EntryPrev, 51, 87}}},
+	{"hellfire/21-2122696790.dun", 21, 2122696790, []questOverride{}, []fixtureEntry{{EntryTWarpDn, 61, 81}, {EntryPrev, 53, 67}}},
+	{"hellfire/22-1191662129.dun", 22, 1191662129, []questOverride{{QPWater, "active", QuestNotAvail}, {QButcher, "active", QuestNotAvail}}, []fixtureEntry{{EntryMain, 71, 47}, {EntryPrev, 85, 71}}},
+	{"hellfire/23-97055268.dun", 23, 97055268, []questOverride{}, []fixtureEntry{{EntryMain, 71, 57}, {EntryPrev, 81, 59}}},
+	{"hellfire/24-1324803725.dun", 24, 1324803725, []questOverride{}, []fixtureEntry{{EntryMain, 79, 47}}},
+	{"hellfire/17-19770182.dun", 17, 19770182, []questOverride{}, []fixtureEntry{{EntryTWarpDn, 75, 81}, {EntryPrev, 59, 41}}},
+	{"hellfire/18-1522546307.dun", 18, 1522546307, []questOverride{}, []fixtureEntry{{EntryMain, 47, 19}, {EntryPrev, 33, 35}}},
+	{"hellfire/19-125121312.dun", 19, 125121312, []questOverride{}, []fixtureEntry{{EntryMain, 61, 25}, {EntryPrev, 21, 85}}},
+	{"hellfire/20-1511478689.dun", 20, 1511478689, []questOverride{}, []fixtureEntry{{EntryMain, 65, 41}}},
+}

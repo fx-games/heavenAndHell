@@ -31,6 +31,7 @@ func (d *PickUpAction) Execute(context ActionContext) []Action {
 	item := gameMap.ItemAt(actorPos)
 
 	gameMap.RemoveItem(item)
+	state.factory.d1CornerstoneTaken(actorPos)
 
 	if item.IsGold() {
 		actor.GetStats().IncrementBy(stats.Gold, item.d1.Value)

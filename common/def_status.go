@@ -39,6 +39,7 @@ const (
 	StatusHasted         StatusEffect = "hasted"           // are really timed modifiers
 	StatusDamageOverTime StatusEffect = "damage over time" // timed resource changes
 	StatusWinCondition   StatusEffect = "win condition"    // killing this enemy is part of the win condition
+	StatusRage           StatusEffect = "rage"             // the Barbarian's Rage, and the hangover after it
 )
 
 type ParametrizedStatusEffect struct {

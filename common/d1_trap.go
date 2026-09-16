@@ -60,6 +60,35 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 		if len(cells) > 0 {
 			c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(nil, a.from, cells[len(cells)-1], 0.01, defs.IconEffectLightning, 2))
 		}
+	case MisFireRing: // mi_fire_ring: fire walls on the ring three cells out that the chest sees, until one lands on
+		// a piece that stops missiles; each burns (10 + currlevel)·16 ticks at currlevel·8/64 a tick
+		if lvl := ctx.GameState.mapGen.levels[c.c.m.GetName()]; lvl != nil {
+			for _, p := range d1Ring(a.from, 3) {
+				if !c.c.m.Contains(p) || lvl.CellSolid(p.X, p.Y) || c.c.m.IsObjectAt(p) || !c.c.lineClear(a.from, p) {
+					continue
+				}
+				if lvl.CellMissile(p.X, p.Y) {
+					break
+				}
+				c.hazard(MisFireRing, p, (10+cl)*16/d1.RefWalkTicks, 8*cl)
+			}
+		}
+	case MisFireWall: // AddFirewall from the shrine at the hero: 8/64 a tick per hero level while it burns through
+		// ponytail: one pass over the hero (two ticks), not the travelling wall D1 lets run on for (10+currlevel)·16 ticks
+		lvl := 1
+		if player.hero != nil {
+			lvl = player.hero.Level
+		}
+		if p := player.MapPosition(); c.c.lineClear(a.from, p) {
+			c.hit(a.mis, p, a.from, 8*lvl, 8*lvl, true, 2)
+		}
+		c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(nil, a.from, player.MapPosition(), 0.03, defs.IconEffectFireBig, 2))
+	case MisFlashTrap: // AddFlash for the players: monster[0]'s level (the golem slot) ·2, on the six cells below
+		dam := 2 * ctx.GameState.factory.Generator.D.Monsters[d1.MtGOLEM].Level
+		for _, d := range []geometry.Point{{X: -1}, {}, {X: 1}, {X: -1, Y: 1}, {Y: 1}, {X: 1, Y: 1}} {
+			c.hit(a.mis, a.from.Add(d), a.from, dam, dam, true, d1.FlashTicks)
+		}
+		c.c.animations = append(c.c.animations, NewHitAnimation(a.from, 0.4, defs.IconEffectLightning, 2))
 	case MisNova: // AddNova without a source: currlevel/2 + 3·rnd(3), lightning balls in every direction
 		dam := cl>>1 + d1Rng.Intn(3) + d1Rng.Intn(3) + d1Rng.Intn(3)
 		// ponytail: one hit on the hero when in line within 7 cells, not D1's 92 balls crossing its cell
@@ -120,7 +149,8 @@ func (f *Factory) springD1WallTraps(m *gridmap.GridMap[*Actor, *Item, Object], p
 	}
 }
 
-// springD1ChestTrap ports OperateChest's trap: a trapped chest shoots an arrow, a fire arrow or a nova at the hero.
+// springD1ChestTrap ports OperateChest's trap: a trapped chest shoots an arrow, a fire arrow or a nova at the hero,
+// and Hellfire's also light a ring of fire, steal potions or drain mana.
 func (f *Factory) springD1ChestTrap(o *D1Object, player *Actor) {
 	obj := o.O
 	if !obj.TrapFlag || obj.Kind < d1.ObjTCHEST1 || obj.Kind > d1.ObjTCHEST3 {
@@ -128,7 +158,71 @@ func (f *Factory) springD1ChestTrap(o *D1Object, player *Actor) {
 	}
 	obj.TrapFlag = false
 	f.Msg("The chest was trapped!")
-	f.ActionBroker.QueueForExecution(NewTrapMissileAction(o.pos, [3]D1Missile{MisArrow, MisFarrow, MisNova}[obj.Var4], player.MapPosition()))
+	switch obj.Var4 {
+	case 0, 1, 2, 3:
+		f.ActionBroker.QueueForExecution(NewTrapMissileAction(o.pos, [4]D1Missile{MisArrow, MisFarrow, MisNova, MisFireRing}[obj.Var4], player.MapPosition()))
+	case 4:
+		f.d1StealPotions(player)
+	case 5: // missiles_mana_trap
+		if h := player.hero; h != nil {
+			h.ManaBase = h.MaxManaBase - player.HeroSheet().MaxMana
+			player.GetStats().GetResource(stats.Mana).SetToMin()
+			SyncHero(player)
+		}
+	}
+}
+
+// d1StealPotions ports missiles_steal_pots on the pack (H&H has no belt): each potion has an even chance to be
+// taken or swapped for a lesser one.
+func (f *Factory) d1StealPotions(player *Actor) {
+	gen := f.Generator
+	byMisc := func(misc string) int {
+		for idx, b := range gen.D.Items {
+			if b.MiscID == misc && b.Drop != "IDROP_NEVER" {
+				return idx
+			}
+		}
+		return -1
+	}
+	inv := player.GetInventory()
+	for _, it := range inv.Items() {
+		if it.d1 == nil || it.d1.Type != d1.ITypeMisc || d1Rng.Intn(2) == 0 {
+			continue
+		}
+		into := ""
+		switch it.d1.MiscID {
+		case "IMISC_HEAL", "IMISC_MANA":
+			inv.Remove(it)
+			continue
+		case "IMISC_FULLHEAL", "IMISC_REJUV": // D1 rolls mana or healing for a rejuvenation, then takes healing anyway
+			into = "IMISC_HEAL"
+		case "IMISC_FULLMANA":
+			into = "IMISC_MANA"
+		case "IMISC_FULLREJUV":
+			into = [3]string{"IMISC_FULLMANA", "IMISC_FULLHEAL", "IMISC_REJUV"}[d1Rng.Intn(3)]
+		default:
+			continue
+		}
+		if it.d1.MiscID == "IMISC_REJUV" {
+			d1Rng.Intn(2)
+		}
+		if idx := byMisc(into); idx >= 0 {
+			inv.Remove(it)
+			inv.Add(f.NewD1Item(gen.PlainItem(idx)))
+		}
+	}
+}
+
+// d1Ring is the CrawlTable ring at radius r around p: the cells at Chebyshev distance r.
+func d1Ring(p geometry.Point, r int) (ring []geometry.Point) {
+	for dy := -r; dy <= r; dy++ {
+		for dx := -r; dx <= r; dx++ {
+			if max(geometry.Abs(dx), geometry.Abs(dy)) == r {
+				ring = append(ring, p.Add(geometry.Point{X: dx, Y: dy}))
+			}
+		}
+	}
+	return
 }
 
 // d1SprungTraps lists the wall traps of a level that fired or were disarmed (_oVar4 set), by object index.

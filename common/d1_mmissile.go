@@ -28,6 +28,10 @@ const (
 	MisArrow  // traps: a plain arrow
 	MisFarrow // trapped chests: a fire arrow that bursts where it stops
 	MisNova   // trapped chests: a ring of lightning balls
+	// Hellfire's
+	MisFireRing  // trapped chests: fire walls three cells out
+	MisFireWall  // the Oily shrine: a fire wall sent at the hero
+	MisFlashTrap // the Sparkling shrine: a flash around the shrine
 )
 
 // d1MissileResist is missiledata's mResist for these missiles; all of them are magical (mType 1).
@@ -36,7 +40,8 @@ var d1MissileResist = map[D1Missile]int{
 	MisLightCtrl2: d1.ResistKindLightning, MisLightning: d1.ResistKindLightning, MisFlash: d1.ResistKindMagic,
 	MisMagmaball: d1.ResistKindFire, MisFlare: d1.ResistKindMagic, MisFlamec: d1.ResistKindFire,
 	MisCbolt: d1.ResistKindLightning, MisAcid: d1.ResistKindMagic, MisAcidPud: d1.ResistKindMagic, MisApoca: d1.ResistKindMagic,
-	MisFarrow: d1.ResistKindFire, MisNova: d1.ResistKindLightning,
+	MisFarrow: d1.ResistKindFire, MisNova: d1.ResistKindLightning, MisFireRing: d1.ResistKindFire,
+	MisFireWall: d1.ResistKindFire, MisFlashTrap: d1.ResistKindMagic,
 }
 
 // MonsterMissileAction resolves one monster missile at once on the grid, like the player's spells (decision 6):

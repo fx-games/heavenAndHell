@@ -5,13 +5,27 @@ import (
 	"rpg/d1"
 	"rpg/defs"
 	"rpg/geometry"
+	"rpg/stats"
 	"rpg/util"
 )
 
-// The class skills (_pAblSpells): the Warrior's Item Repair, the Rogue's Trap Disarm and the Sorcerer's Staff
-// Recharge. They cost no mana; like D1's cursor, repair and recharge ask for an item and disarm for an object.
+// The class skills (_pAblSpells): the Warrior's Item Repair, the Rogue's Trap Disarm, the Sorcerer's Staff
+// Recharge and, from Hellfire, the Monk's Search, the Bard's Identify and the Barbarian's Rage. They cost no
+// mana; like D1's cursor, repair, recharge and identify ask for an item and disarm for an object.
 func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedAction) {
 	switch player.hero.Class {
+	case d1.Monk:
+		return nil, f.d1CastSkill("Search", d1.SplSearch)
+	case d1.Barbarian:
+		return nil, f.d1CastSkill("Rage", d1.SplRage)
+	case d1.Bard:
+		action := NewUntargetedAction("Identify", f.d1SkillIcon(d1.SplIdentify))
+		action.SetEffect(&UntargetedEffect{Effect: func(p *Actor, _ EffectSource) {
+			f.pickD1IdentifyTarget(p, func() {
+				f.castD1(p, d1.SplIdentify, p.hero.SpellLevel(p.HeroSheet(), d1.SplIdentify)+1, p.MapPosition())
+			})
+		}, Description: []util.LabelText{util.LabelTextFromString("Identify")}})
+		return nil, action
 	case d1.Warrior:
 		return nil, f.d1ItemSkill("Item Repair", d1.SplRepair, d1.CanRepair, func(it *Item) {
 			if d1.RepairItem(it.d1, player.hero.Level, d1Rng.Intn) {
@@ -24,7 +38,7 @@ func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedActio
 			f.Msg(fmt.Sprintf("You repair your %s.", it.Name()))
 		})
 	case d1.Sorcerer:
-		return nil, f.d1ItemSkill("Staff Recharge", d1.SplRecharge, func(it *d1.Item) bool { return it.Type == d1.ITypeStaff && d1.CanRecharge(it) }, func(it *Item) {
+		return nil, f.d1ItemSkill("Staff Recharge", d1.SplRecharge, func(it *d1.Item) bool { return it.Type == d1.ITypeStaff && f.Generator.D.CanRecharge(it) }, func(it *Item) {
 			f.Generator.D.RechargeItem(it.d1, player.hero.Level, d1Rng.Intn)
 			f.Msg(fmt.Sprintf("You recharge your %s.", it.Name()))
 		})
@@ -35,6 +49,38 @@ func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedActio
 		d1SpellTargeting(f, d1.SplDisarm))
 	action.SetIcon(f.d1SkillIcon(d1.SplDisarm))
 	return action, nil
+}
+
+// d1CastSkill is a class skill that just casts its spell on the hero, for free, at skill level 1 plus gear.
+func (f *Factory) d1CastSkill(name string, spell int) *UntargetedAction {
+	action := NewUntargetedAction(name, f.d1SkillIcon(spell))
+	action.SetEffect(&UntargetedEffect{Effect: func(player *Actor, _ EffectSource) {
+		f.castD1(player, spell, player.hero.SpellLevel(player.HeroSheet(), spell)+1, player.MapPosition())
+	}, Description: []util.LabelText{util.LabelTextFromString(name)}})
+	return action
+}
+
+// d1RageEffect ports ProcessRage: Hero.Rage counts the turns of fury down, then the same number of hangover
+// turns back up, and the Barbarian pays 6 HP per level when it finally lets go (never enough to kill him).
+func (f *Factory) d1RageEffect(clvl int) *ParametrizedStatusEffect {
+	turns := d1.RageTurns(clvl)
+	return NewParametrizedStatusEffect(StatusRage, func(a *Actor) {
+		h := a.hero
+		switch {
+		case h.Rage > 1:
+			h.Rage--
+		case h.Rage > 0:
+			h.Rage = -turns // the fury is spent, the hangover starts
+			f.Msg("Your rage subsides.")
+		case h.Rage < -1:
+			h.Rage++
+		default:
+			h.Rage = 0
+			dam := min(d1.RageDamage(clvl), a.GetStats().GetResource(stats.Health).Value()-1)
+			f.ActionBroker.Execute(NewChangeResourceAction(AbstractCause("rage"), a, stats.Health, float64(-dam)))
+		}
+		SyncHero(a)
+	}, 2*turns)
 }
 
 // d1SkillIcon is the skills.rec icon of a spell or class skill.
@@ -160,4 +206,36 @@ func (g *MapGenerator) disarmD1Object(m interface{ GetName() string }, obj *d1.O
 			t.Var4 = 1
 		}
 	}
+}
+
+// d1OilAction ports DoOil: an oil asks for an item the way Item Repair does, and is used up only on one it can
+// actually improve.
+func (f *Factory) d1OilAction(item *Item, oil, name string) {
+	item.SetCategory(defs.ItemCategoryPotion)
+	item.SetCharges(1)
+	action := NewUntargetedAction(name, item.icon)
+	action.SetEffect(&UntargetedEffect{Effect: func(player *Actor, _ EffectSource) {
+		var targets []*Item
+		for _, it := range d1HeroItems(player) {
+			if it != item && it.d1 != nil && d1.OilTarget(oil, it.d1) {
+				targets = append(targets, it)
+			}
+		}
+		if len(targets) == 0 {
+			f.Msg("You have nothing to use that on.")
+			return
+		}
+		openD1ItemList(f.UI(), player, targets, func(target *Item) {
+			if !d1.ApplyOil(oil, target.d1, d1Rng.Intn) {
+				f.Msg(fmt.Sprintf("The %s does nothing for your %s.", name, target.Name()))
+				return
+			}
+			target.RefreshD1()
+			player.GetInventory().Remove(item)
+			SyncHero(player)
+			f.Msg(fmt.Sprintf("You treat your %s with %s.", target.Name(), name))
+			f.ActionBroker.Execute(NewEndPlayerTurnAction(AbstractCause(ActionName(name)), 10))
+		})
+	}, Description: []util.LabelText{util.LabelTextFromString(name)}})
+	item.SetUntargetedAction(action)
 }

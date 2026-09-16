@@ -1,0 +1,122 @@
+package common
+
+import (
+	"fmt"
+	"rpg/d1"
+	"rpg/defs"
+	"rpg/geometry"
+	"rpg/util"
+)
+
+// Hellfire's runes (AddRuneOf*, MI_Rune): used on a cell in line of sight, a rune lies on the nearest free cell
+// until a monster or the hero steps on it, then goes off there.
+var d1RuneSpells = map[string]struct {
+	spell int // SPL_RUNE*: what the rune goes off as, for the damage and resistance
+	name  string
+}{
+	"IMISC_RUNEF":    {d1.SplRuneFire, "a fire explosion"},                // MIS_HIVEEXP
+	"IMISC_RUNEL":    {d1.SplRuneLight, "a lightning wall"},               // DevilutionX's MissileID::LightningWall
+	"IMISC_GR_RUNEF": {d1.SplRuneImmolat, "fireballs in every direction"}, // MIS_IMMOLATION
+	"IMISC_GR_RUNEL": {d1.SplRuneNova, "a lightning nova"},                // MIS_NOVA
+	"IMISC_RUNES":    {d1.SplRuneStone, "a flash of petrification"},       // MIS_STONE
+}
+
+// d1RuneAction makes a rune item placeable.
+func (f *Factory) d1RuneAction(item *Item, it *d1.Item) {
+	rune, ok := d1RuneSpells[it.MiscID]
+	if !ok {
+		return
+	}
+	misc := it.MiscID
+	action := NewTargetedAction(it.Name, OneTargetTile(f.State.GetMap, util.Arguments{}),
+		&HitEffect{Activate: func(caster *Actor, target geometry.Point, _ []geometry.Point) {
+			m := f.State.GetMap()
+			c := &spellCtx{f: f, caster: caster, m: m}
+			p, found := geometry.Point{}, false
+			if c.lineClear(caster.MapPosition(), target) {
+				p, found = c.freeNear(target, func(p geometry.Point) bool { return m.IsTileWalkable(p) && !m.IsObjectAt(p) })
+			}
+			if !found {
+				f.Msg(fmt.Sprintf("The %s finds no place to lie.", it.Name))
+				return
+			}
+			caster.GetInventory().Remove(item)
+			f.spawnD1Rune(caster, misc, p)
+			f.Msg(fmt.Sprintf("You set the %s.", it.Name))
+		}, Description: []util.LabelText{util.LabelTextFromString(fmt.Sprintf("A trap that goes off as %s", rune.name))}},
+		d1SpellTargeting(f, rune.spell))
+	item.SetTargetedAction(action)
+}
+
+// spawnD1Rune lays a rune: every turn it checks its cell and goes off under the first monster or hero on it.
+func (f *Factory) spawnD1Rune(caster *Actor, misc string, p geometry.Point) {
+	m := f.State.GetMap()
+	rune := NewFire(0)
+	rune.icon, rune.turnsUntilRemoval = defs.IconEffectHit, 1<<30
+	rune.SetDealDamage(func(geometry.Point, func() bool) {})
+	rune.SetOnTurn(func() {
+		if f.State.GetMap() != m {
+			return
+		}
+		victim, ok := m.TryGetActorAt(p)
+		if !ok || victim.d1Monster == nil && victim != f.State.GetPlayer() || victim.d1Monster != nil && victim.d1Monster.Golem {
+			return
+		}
+		m.RemoveObject(rune)
+		rune.turnsUntilRemoval = 0
+		spell := d1RuneSpells[misc].spell
+		from := p
+		f.ActionBroker.Execute(&spellTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
+			caster: caster, spell: spell, run: func(c *spellCtx) {
+				c.from = &from
+				d1RuneGoesOff(c, misc, victim.MapPosition())
+			}})
+	})
+	f.GetTimeKeeper().AddTimed(rune)
+	m.AddObject(rune, p)
+}
+
+// d1RuneGoesOff ports the missile each rune turns into, at the rune's cell. MI_Rune adds it as TARGET_BOTH: the
+// fire blast and the lightning wall hurt the hero as well; Nova and Immolation go out TARGET_MONSTERS again from a
+// hero's rune (MI_Nova, mi_fire_nova), and Stone Curse only takes monsters.
+func d1RuneGoesOff(c *spellCtx, misc string, victim geometry.Point) {
+	o, clvl := c.origin(), c.h.Level
+	switch misc {
+	case "IMISC_RUNEF": // missiles_rune_explosion: 2·(clvl + 2d10) + 4 on the 3×3 around the rune
+		dam := 2*(clvl+d1Rng.Intn(10)+d1Rng.Intn(10)) + 4
+		for dy := -1; dy <= 1; dy++ {
+			for dx := -1; dx <= 1; dx++ {
+				p := o.Add(geometry.Point{X: dx, Y: dy})
+				if a := c.hitCell(p); a != nil {
+					c.strike(a, dam<<6, 1)
+				}
+				c.hurtHero(p, dam, dam, false, 1)
+			}
+		}
+		c.animations = append(c.animations, NewHitAnimation(o, 0.5, defs.IconEffectFireBig, 2))
+	case "IMISC_RUNEL": // AddRuneOfLight: a lightning wall piece of 16·(2d10 + clvl + 2) a tick on the rune for 255 ticks
+		// (1.09 adds MIS_LIGHTBALL with no damage set, so there the rune does nothing)
+		dam := 16 * (d1Rng.Intn(10) + d1Rng.Intn(10) + clvl + 2)
+		c.f.spawnD1Wall(c.caster, o, d1.SplRuneLight, 255/d1.RefWalkTicks, true, defs.IconEffectLightning, func() int { return dam })
+	case "IMISC_GR_RUNEF": // MIS_IMMOLATION: AddNova's damage as a fireball down every Nova ray
+		dam := d1.NovaDamage(d1Rng, clvl, 0)
+		for _, r := range d1.NovaRays {
+			c.fireball(o, o.Add(geometry.Point{X: r[0], Y: r[1]}), dam)
+		}
+	case "IMISC_GR_RUNEL": // MIS_NOVA: AddNova's damage down every ray
+		dam := d1.NovaDamage(d1Rng, clvl, 0)
+		for _, r := range d1.NovaRays {
+			for _, p := range c.ray(o, o.Add(geometry.Point{X: r[0], Y: r[1]}), 20) {
+				if a := c.hitCell(p); a != nil {
+					c.strike(a, dam<<6, 1)
+				}
+			}
+		}
+		c.animations = append(c.animations, NewHitAnimation(o, 0.5, defs.IconEffectLightning, 2))
+	case "IMISC_RUNES": // AddStone on the monster that stepped on it (not Diablo or Na-Krul)
+		if a := c.monsterAt(victim); a != nil && a.d1Monster.AI != "AI_DIABLO" && a.d1Monster.Data.ID != "MT_NKR" {
+			a.AddStatusEffect(StatusStone, d1.StoneTurns(0))
+			c.animations = append(c.animations, NewHitAnimation(victim, 0.4, defs.IconEffectHit, 2))
+		}
+	}
+}

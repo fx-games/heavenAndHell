@@ -93,7 +93,40 @@ Every D1 single-player quest runs as D1 1.09 progresses it (`common/d1_quest.go`
 
 ## Defaults (not grilled)
 
-- Hellfire content, multiplayer-only items/spells/shrines, and difficulty levels (Nightmare/Hell) out of scope.
+- Hellfire's six-class roster is in: Monk, Bard and Barbarian, with their skills (Search, Identify, Rage), their
+  attribute tables (devilutionX `txtdata/classes/<class>/attributes.tsv`, which also reproduces D1 1.09's) and
+  their class traits (critical strike, trap sense, iron skin, natural resistance, the Monk's bare-handed block).
+  The Bard dual wields (`SlotNameOneHandedWeapon` resolves to whichever hand is free, like `SlotNameRing`).
+- **Hellfire's items** are in: the thirteen it drops into D1's empty table slots 35-47, the oils, runes, Scroll of
+  Search and Bovine Plate appended past 156 in `xl_item.txt`, 20 uniques, 3 prefixes and 3 suffixes. `Load` lays the
+  table out in Hellfire's own AllItemsList order (`hellfireItemOrder`: oils after Full Rejuvenation, Search after
+  Healing, Bovine Plate in Lightforge's slot, runes last, the Short Staff of Mana), which every item roll walks. `Data.Hellfire` gates
+  everything droppable, so `LoadD1` still rolls exactly like 1.09 and `TestGoldenLevels` keeps pinning it.
+- **Hellfire's monsters** are in: 26 new types, 3 new unique monsters and the seven new AIs, all of which turn out
+  to be `MAI_Ranged`/`MAI_RoundRanged` with a differently coloured flare.
+- **The Nest (17-20) and the Crypt (21-24)** are in. Hellfire keeps D1's level types and branches inside the Caves
+  and Cathedral generators (`d1/drlg_l6.go`, `d1/drlg_l5.go`); both match all of DevilutionX's Hellfire fixtures, as
+  do Hellfire's changed Cathedral stairs. Downstream: their triggers, crypt doors, story journals, Na-Krul's lever
+  and books, Hork Demon / Defiler / Na-Krul placement, Hellfire's 34 shrines, six chest traps, item levels
+  (`ItemLevel`) and speech.
+- **Hellfire's quests** are in (`common/d1_hellfire_quest.go`): Farmer's Orchard (Lester, the Rune Bomb opens the
+  Nest, the Auric Amulet), Grave Matters (the Defiler's Cathedral Map opens the Crypt, Gillian's hint), The Defiler,
+  Na-Krul (journals, the three books in order open his door and weaken him, or the lever), the Cornerstone of the
+  World (its item is kept between games in `cornerstone.json`), and behind the debug menu's Cowquest / Theoquest
+  switches The Jersey's Jersey (Complete Nut, cow suits, Bovine Plate) and the Little Girl (Celia, Theodore).
+  Shrines fire their missiles (Oily, Sparkling), chests lay the ring of fire, and the five runes are placeable traps
+  (Rune of Lightning as DevilutionX's lightning wall; the fire blast and the wall hurt the hero too).
+- **Hellfire's spells** are in, in Hellfire's spell table order (37-51, Search moved to 46): Mana, the Magi, the
+  Jester, Lightning Wall, Immolation, Warp, Reflect, Berserk and Ring of Fire, with Hellfire's book and staff rolls
+  (MAX_SPELLS 52, staves always carry a spell, Nova and Apocalypse books) and its fire wall that burns the hero.
+  Doppelganger's weapons split ordinary monsters (AddDoppelganger).
+- **Hellfire's stores** are in (`d1/stores.go`): bigger stocks and value caps, 15 premium items rotating three a
+  level and picked for the hero's class, stats and best gear, Wirt's class-aware item at 25% off, Adria's up to three
+  guaranteed books, no oils at Adria but oils and plain staves at Griswold, uniques recharged, elixirs only below
+  the class maximum, and Pepin healing as you walk in.
+- **Still out**: the Wandering Trader (nothing in Hellfire runs it), the Auric Amulet's gold capacity (H&H has no
+  gold cap), town cows, Nest/Crypt tile icons, the stores' 48-line list cap and belt selling (H&H has neither),
+  multiplayer-only items/spells/shrines and difficulty levels (Nightmare/Hell).
 - UI stays: H&H stack inventory, hotkeys, menus; no D1 grid inventory, belt, automap.
 - Unrelated H&H subsystems (`osr`, `console` ASCII mode, `creator`, window-client IPC) left untouched.
 

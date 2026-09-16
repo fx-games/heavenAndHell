@@ -16,7 +16,10 @@ import (
 // Every file is parsed back and compared to the bytes it came from before it is written, so an encoding slip
 // fails the import instead of quietly changing a dungeon.
 func ImportLevels(read func(name string) ([]byte, error), destDir string) error {
-	for lt := 1; lt <= 4; lt++ {
+	for lt := 1; lt < len(levelTypeDirs); lt++ {
+		if _, err := read(tilFiles[lt]); err != nil && lt > 4 {
+			continue // no HELLFIRE.MPQ: the Crypt and the Nest simply don't get imported
+		}
 		dir := filepath.Join(destDir, levelTypeDirs[lt])
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return err
@@ -57,8 +60,9 @@ func ImportLevels(read func(name string) ([]byte, error), destDir string) error 
 	return nil
 }
 
-// importDuns lists the set pieces the generators load, by level type.
-var importDuns = [5][]string{
+// importDuns lists the set pieces the generators load, by level type. The Crypt's l5/uberroom and l5/cornerstone
+// aren't in any MPQ (Hellfire compiles them into DRLG_L1.CPP), so they're checked in by hand.
+var importDuns = [7][]string{
 	1: {"Banner1", "Banner2", "SKngDO", "SklKng1", "SklKng2", "Vile1", "Vile2", "rnd6"},
 	2: {"Blind1", "Blind2", "Blood1", "Blood2", "Bonecha1", "Bonecha2", "Bonestr1", "Bonestr2"},
 	3: {"Anvil", "Foulwatr"},

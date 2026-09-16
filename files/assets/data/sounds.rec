@@ -2064,3 +2064,470 @@ tile: monster.MT_DARKMAGE
 sound: diablo_sfx/monsters/darkmage/dmagd1.ogg
 sound: diablo_sfx/monsters/darkmage/dmagd2.ogg
 
+internal_name: monster.MT_FORK.attack
+name: Hellboar - Attack
+tile: monster.MT_FORK
+sound: diablo_sfx/monsters/newsfx/hboara1.ogg
+sound: diablo_sfx/monsters/newsfx/hboara2.ogg
+
+internal_name: monster.MT_FORK.hit
+name: Hellboar - Hurt
+tile: monster.MT_FORK
+sound: diablo_sfx/monsters/newsfx/hboarh1.ogg
+sound: diablo_sfx/monsters/newsfx/hboarh2.ogg
+
+internal_name: monster.MT_FORK.death
+name: Hellboar - Death
+tile: monster.MT_FORK
+sound: diablo_sfx/monsters/newsfx/hboard1.ogg
+sound: diablo_sfx/monsters/newsfx/hboard2.ogg
+
+internal_name: monster.MT_SCORP.attack
+name: Stinger - Attack
+tile: monster.MT_SCORP
+sound: diablo_sfx/monsters/newsfx/stingra1.ogg
+sound: diablo_sfx/monsters/newsfx/stingra2.ogg
+
+internal_name: monster.MT_SCORP.hit
+name: Stinger - Hurt
+tile: monster.MT_SCORP
+sound: diablo_sfx/monsters/newsfx/stingrh1.ogg
+sound: diablo_sfx/monsters/newsfx/stingrh2.ogg
+
+internal_name: monster.MT_SCORP.death
+name: Stinger - Death
+tile: monster.MT_SCORP
+sound: diablo_sfx/monsters/newsfx/stingrd1.ogg
+sound: diablo_sfx/monsters/newsfx/stingrd2.ogg
+
+internal_name: monster.MT_EYE.attack
+name: Psychorb - Attack
+tile: monster.MT_EYE
+sound: diablo_sfx/monsters/newsfx/psycoa1.ogg
+sound: diablo_sfx/monsters/newsfx/psycoa2.ogg
+
+internal_name: monster.MT_EYE.hit
+name: Psychorb - Hurt
+tile: monster.MT_EYE
+sound: diablo_sfx/monsters/newsfx/psycoh1.ogg
+sound: diablo_sfx/monsters/newsfx/psycoh2.ogg
+
+internal_name: monster.MT_EYE.death
+name: Psychorb - Death
+tile: monster.MT_EYE
+sound: diablo_sfx/monsters/newsfx/psycod1.ogg
+sound: diablo_sfx/monsters/newsfx/psycod2.ogg
+
+internal_name: monster.MT_SPIDER.attack
+name: Arachnon - Attack
+tile: monster.MT_SPIDER
+sound: diablo_sfx/monsters/newsfx/slorda1.ogg
+sound: diablo_sfx/monsters/newsfx/slorda2.ogg
+
+internal_name: monster.MT_SPIDER.hit
+name: Arachnon - Hurt
+tile: monster.MT_SPIDER
+sound: diablo_sfx/monsters/newsfx/slordh1.ogg
+sound: diablo_sfx/monsters/newsfx/slordh2.ogg
+
+internal_name: monster.MT_SPIDER.death
+name: Arachnon - Death
+tile: monster.MT_SPIDER
+sound: diablo_sfx/monsters/newsfx/slordd1.ogg
+sound: diablo_sfx/monsters/newsfx/slordd2.ogg
+
+internal_name: monster.MT_FELLTWIN.attack
+name: Felltwin - Attack
+tile: monster.MT_FELLTWIN
+sound: diablo_sfx/monsters/newsfx/ftwina1.ogg
+sound: diablo_sfx/monsters/newsfx/ftwina2.ogg
+
+internal_name: monster.MT_FELLTWIN.hit
+name: Felltwin - Hurt
+tile: monster.MT_FELLTWIN
+sound: diablo_sfx/monsters/newsfx/ftwinh1.ogg
+sound: diablo_sfx/monsters/newsfx/ftwinh2.ogg
+
+internal_name: monster.MT_FELLTWIN.death
+name: Felltwin - Death
+tile: monster.MT_FELLTWIN
+sound: diablo_sfx/monsters/newsfx/ftwind1.ogg
+sound: diablo_sfx/monsters/newsfx/ftwind2.ogg
+
+internal_name: monster.MT_SPAWN.attack
+name: Hork Spawn - Attack
+tile: monster.MT_SPAWN
+sound: diablo_sfx/monsters/newsfx/hspawna1.ogg
+sound: diablo_sfx/monsters/newsfx/hspawna2.ogg
+
+internal_name: monster.MT_SPAWN.hit
+name: Hork Spawn - Hurt
+tile: monster.MT_SPAWN
+sound: diablo_sfx/monsters/newsfx/hspawnh1.ogg
+sound: diablo_sfx/monsters/newsfx/hspawnh2.ogg
+
+internal_name: monster.MT_SPAWN.death
+name: Hork Spawn - Death
+tile: monster.MT_SPAWN
+sound: diablo_sfx/monsters/newsfx/hspawnd1.ogg
+sound: diablo_sfx/monsters/newsfx/hspawnd2.ogg
+
+internal_name: monster.MT_SCORP2.attack
+name: Venomtail - Attack
+tile: monster.MT_SCORP2
+sound: diablo_sfx/monsters/newsfx/stingra1.ogg
+sound: diablo_sfx/monsters/newsfx/stingra2.ogg
+
+internal_name: monster.MT_SCORP2.hit
+name: Venomtail - Hurt
+tile: monster.MT_SCORP2
+sound: diablo_sfx/monsters/newsfx/stingrh1.ogg
+sound: diablo_sfx/monsters/newsfx/stingrh2.ogg
+
+internal_name: monster.MT_SCORP2.death
+name: Venomtail - Death
+tile: monster.MT_SCORP2
+sound: diablo_sfx/monsters/newsfx/stingrd1.ogg
+sound: diablo_sfx/monsters/newsfx/stingrd2.ogg
+
+internal_name: monster.MT_EYE2.attack
+name: Necromorb - Attack
+tile: monster.MT_EYE2
+sound: diablo_sfx/monsters/newsfx/psycoa1.ogg
+sound: diablo_sfx/monsters/newsfx/psycoa2.ogg
+
+internal_name: monster.MT_EYE2.hit
+name: Necromorb - Hurt
+tile: monster.MT_EYE2
+sound: diablo_sfx/monsters/newsfx/psycoh1.ogg
+sound: diablo_sfx/monsters/newsfx/psycoh2.ogg
+
+internal_name: monster.MT_EYE2.death
+name: Necromorb - Death
+tile: monster.MT_EYE2
+sound: diablo_sfx/monsters/newsfx/psycod1.ogg
+sound: diablo_sfx/monsters/newsfx/psycod2.ogg
+
+internal_name: monster.MT_SPIDER2.attack
+name: Spider Lord - Attack
+tile: monster.MT_SPIDER2
+sound: diablo_sfx/monsters/newsfx/slorda1.ogg
+sound: diablo_sfx/monsters/newsfx/slorda2.ogg
+
+internal_name: monster.MT_SPIDER2.hit
+name: Spider Lord - Hurt
+tile: monster.MT_SPIDER2
+sound: diablo_sfx/monsters/newsfx/slordh1.ogg
+sound: diablo_sfx/monsters/newsfx/slordh2.ogg
+
+internal_name: monster.MT_SPIDER2.death
+name: Spider Lord - Death
+tile: monster.MT_SPIDER2
+sound: diablo_sfx/monsters/newsfx/slordd1.ogg
+sound: diablo_sfx/monsters/newsfx/slordd2.ogg
+
+internal_name: monster.MT_LASH.attack
+name: Lashworm - Attack
+tile: monster.MT_LASH
+sound: diablo_sfx/monsters/newsfx/lworma1.ogg
+sound: diablo_sfx/monsters/newsfx/lworma2.ogg
+
+internal_name: monster.MT_LASH.hit
+name: Lashworm - Hurt
+tile: monster.MT_LASH
+sound: diablo_sfx/monsters/newsfx/lwormh1.ogg
+sound: diablo_sfx/monsters/newsfx/lwormh2.ogg
+
+internal_name: monster.MT_LASH.death
+name: Lashworm - Death
+tile: monster.MT_LASH
+sound: diablo_sfx/monsters/newsfx/lwormd1.ogg
+sound: diablo_sfx/monsters/newsfx/lwormd2.ogg
+
+internal_name: monster.MT_ANT.attack
+name: Torchant - Attack
+tile: monster.MT_ANT
+sound: diablo_sfx/monsters/newsfx/tchanta1.ogg
+sound: diablo_sfx/monsters/newsfx/tchanta2.ogg
+
+internal_name: monster.MT_ANT.hit
+name: Torchant - Hurt
+tile: monster.MT_ANT
+sound: diablo_sfx/monsters/newsfx/tchanth1.ogg
+sound: diablo_sfx/monsters/newsfx/tchanth2.ogg
+
+internal_name: monster.MT_ANT.death
+name: Torchant - Death
+tile: monster.MT_ANT
+sound: diablo_sfx/monsters/newsfx/tchantd1.ogg
+sound: diablo_sfx/monsters/newsfx/tchantd2.ogg
+
+internal_name: monster.MT_HORKD.attack
+name: Hork Demon - Attack
+tile: monster.MT_HORKD
+sound: diablo_sfx/monsters/newsfx/hdemona1.ogg
+sound: diablo_sfx/monsters/newsfx/hdemona2.ogg
+
+internal_name: monster.MT_HORKD.hit
+name: Hork Demon - Hurt
+tile: monster.MT_HORKD
+sound: diablo_sfx/monsters/newsfx/hdemonh1.ogg
+sound: diablo_sfx/monsters/newsfx/hdemonh2.ogg
+
+internal_name: monster.MT_HORKD.death
+name: Hork Demon - Death
+tile: monster.MT_HORKD
+sound: diablo_sfx/monsters/newsfx/hdemond1.ogg
+sound: diablo_sfx/monsters/newsfx/hdemond2.ogg
+
+internal_name: monster.MT_BUG.attack
+name: Hell Bug - Attack
+tile: monster.MT_BUG
+sound: diablo_sfx/monsters/newsfx/defilea1.ogg
+sound: diablo_sfx/monsters/newsfx/defilea2.ogg
+
+internal_name: monster.MT_BUG.hit
+name: Hell Bug - Hurt
+tile: monster.MT_BUG
+sound: diablo_sfx/monsters/newsfx/defileh1.ogg
+sound: diablo_sfx/monsters/newsfx/defileh2.ogg
+
+internal_name: monster.MT_BUG.death
+name: Hell Bug - Death
+tile: monster.MT_BUG
+sound: diablo_sfx/monsters/newsfx/defiled1.ogg
+sound: diablo_sfx/monsters/newsfx/defiled2.ogg
+
+internal_name: monster.MT_GRAVDG.attack
+name: Gravedigger - Attack
+tile: monster.MT_GRAVDG
+sound: diablo_sfx/monsters/newsfx/gdiggra1.ogg
+sound: diablo_sfx/monsters/newsfx/gdiggra2.ogg
+
+internal_name: monster.MT_GRAVDG.hit
+name: Gravedigger - Hurt
+tile: monster.MT_GRAVDG
+sound: diablo_sfx/monsters/newsfx/gdiggrh1.ogg
+sound: diablo_sfx/monsters/newsfx/gdiggrh2.ogg
+
+internal_name: monster.MT_GRAVDG.death
+name: Gravedigger - Death
+tile: monster.MT_GRAVDG
+sound: diablo_sfx/monsters/newsfx/gdiggrd1.ogg
+sound: diablo_sfx/monsters/newsfx/gdiggrd2.ogg
+
+internal_name: monster.MT_RAT.attack
+name: Tomb Rat - Attack
+tile: monster.MT_RAT
+sound: diablo_sfx/monsters/newsfx/tmbrata1.ogg
+sound: diablo_sfx/monsters/newsfx/tmbrata2.ogg
+
+internal_name: monster.MT_RAT.hit
+name: Tomb Rat - Hurt
+tile: monster.MT_RAT
+sound: diablo_sfx/monsters/newsfx/tmbrath1.ogg
+sound: diablo_sfx/monsters/newsfx/tmbrath2.ogg
+
+internal_name: monster.MT_RAT.death
+name: Tomb Rat - Death
+tile: monster.MT_RAT
+sound: diablo_sfx/monsters/newsfx/tmbratd1.ogg
+sound: diablo_sfx/monsters/newsfx/tmbratd2.ogg
+
+internal_name: monster.MT_HELLBAT.attack
+name: Firebat - Attack
+tile: monster.MT_HELLBAT
+sound: diablo_sfx/monsters/newsfx/helbata1.ogg
+sound: diablo_sfx/monsters/newsfx/helbata2.ogg
+
+internal_name: monster.MT_HELLBAT.hit
+name: Firebat - Hurt
+tile: monster.MT_HELLBAT
+sound: diablo_sfx/monsters/newsfx/helbath1.ogg
+sound: diablo_sfx/monsters/newsfx/helbath2.ogg
+
+internal_name: monster.MT_HELLBAT.death
+name: Firebat - Death
+tile: monster.MT_HELLBAT
+sound: diablo_sfx/monsters/newsfx/helbatd1.ogg
+sound: diablo_sfx/monsters/newsfx/helbatd2.ogg
+
+internal_name: monster.MT_BONED.attack
+name: Skullwing - Attack
+tile: monster.MT_BONED
+sound: diablo_sfx/monsters/newsfx/swinga1.ogg
+sound: diablo_sfx/monsters/newsfx/swinga2.ogg
+
+internal_name: monster.MT_BONED.hit
+name: Skullwing - Hurt
+tile: monster.MT_BONED
+sound: diablo_sfx/monsters/newsfx/swingh1.ogg
+sound: diablo_sfx/monsters/newsfx/swingh2.ogg
+
+internal_name: monster.MT_BONED.death
+name: Skullwing - Death
+tile: monster.MT_BONED
+sound: diablo_sfx/monsters/newsfx/swingd1.ogg
+sound: diablo_sfx/monsters/newsfx/swingd2.ogg
+
+internal_name: monster.MT_LICH.attack
+name: Lich - Attack
+tile: monster.MT_LICH
+sound: diablo_sfx/monsters/newsfx/licha1.ogg
+sound: diablo_sfx/monsters/newsfx/licha2.ogg
+
+internal_name: monster.MT_LICH.hit
+name: Lich - Hurt
+tile: monster.MT_LICH
+sound: diablo_sfx/monsters/newsfx/lichh1.ogg
+sound: diablo_sfx/monsters/newsfx/lichh2.ogg
+
+internal_name: monster.MT_LICH.death
+name: Lich - Death
+tile: monster.MT_LICH
+sound: diablo_sfx/monsters/newsfx/lichd1.ogg
+sound: diablo_sfx/monsters/newsfx/lichd2.ogg
+
+internal_name: monster.MT_BUBBA.attack
+name: Crypt Demon - Attack
+tile: monster.MT_BUBBA
+sound: diablo_sfx/monsters/newsfx/crypta1.ogg
+sound: diablo_sfx/monsters/newsfx/crypta2.ogg
+
+internal_name: monster.MT_BUBBA.hit
+name: Crypt Demon - Hurt
+tile: monster.MT_BUBBA
+sound: diablo_sfx/monsters/newsfx/crypth1.ogg
+sound: diablo_sfx/monsters/newsfx/crypth2.ogg
+
+internal_name: monster.MT_BUBBA.death
+name: Crypt Demon - Death
+tile: monster.MT_BUBBA
+sound: diablo_sfx/monsters/newsfx/cryptd1.ogg
+sound: diablo_sfx/monsters/newsfx/cryptd2.ogg
+
+internal_name: monster.MT_HELLBAT2.attack
+name: Hellbat - Attack
+tile: monster.MT_HELLBAT2
+sound: diablo_sfx/monsters/newsfx/helbata1.ogg
+sound: diablo_sfx/monsters/newsfx/helbata2.ogg
+
+internal_name: monster.MT_HELLBAT2.hit
+name: Hellbat - Hurt
+tile: monster.MT_HELLBAT2
+sound: diablo_sfx/monsters/newsfx/helbath1.ogg
+sound: diablo_sfx/monsters/newsfx/helbath2.ogg
+
+internal_name: monster.MT_HELLBAT2.death
+name: Hellbat - Death
+tile: monster.MT_HELLBAT2
+sound: diablo_sfx/monsters/newsfx/helbatd1.ogg
+sound: diablo_sfx/monsters/newsfx/helbatd2.ogg
+
+internal_name: monster.MT_BONED2.attack
+name: Bone Demon - Attack
+tile: monster.MT_BONED2
+sound: diablo_sfx/monsters/newsfx/swinga1.ogg
+sound: diablo_sfx/monsters/newsfx/swinga2.ogg
+
+internal_name: monster.MT_BONED2.hit
+name: Bone Demon - Hurt
+tile: monster.MT_BONED2
+sound: diablo_sfx/monsters/newsfx/swingh1.ogg
+sound: diablo_sfx/monsters/newsfx/swingh2.ogg
+
+internal_name: monster.MT_BONED2.death
+name: Bone Demon - Death
+tile: monster.MT_BONED2
+sound: diablo_sfx/monsters/newsfx/swingd1.ogg
+sound: diablo_sfx/monsters/newsfx/swingd2.ogg
+
+internal_name: monster.MT_LICH2.attack
+name: Arch Lich - Attack
+tile: monster.MT_LICH2
+sound: diablo_sfx/monsters/newsfx/licha1.ogg
+sound: diablo_sfx/monsters/newsfx/licha2.ogg
+
+internal_name: monster.MT_LICH2.hit
+name: Arch Lich - Hurt
+tile: monster.MT_LICH2
+sound: diablo_sfx/monsters/newsfx/lichh1.ogg
+sound: diablo_sfx/monsters/newsfx/lichh2.ogg
+
+internal_name: monster.MT_LICH2.death
+name: Arch Lich - Death
+tile: monster.MT_LICH2
+sound: diablo_sfx/monsters/newsfx/lichd1.ogg
+sound: diablo_sfx/monsters/newsfx/lichd2.ogg
+
+internal_name: monster.MT_BYCLPS.attack
+name: Biclops - Attack
+tile: monster.MT_BYCLPS
+sound: diablo_sfx/monsters/newsfx/biclopa1.ogg
+sound: diablo_sfx/monsters/newsfx/biclopa2.ogg
+
+internal_name: monster.MT_BYCLPS.hit
+name: Biclops - Hurt
+tile: monster.MT_BYCLPS
+sound: diablo_sfx/monsters/newsfx/bicloph1.ogg
+sound: diablo_sfx/monsters/newsfx/bicloph2.ogg
+
+internal_name: monster.MT_BYCLPS.death
+name: Biclops - Death
+tile: monster.MT_BYCLPS
+sound: diablo_sfx/monsters/newsfx/biclopd1.ogg
+sound: diablo_sfx/monsters/newsfx/biclopd2.ogg
+
+internal_name: monster.MT_FLESH.attack
+name: Flesh Thing - Attack
+tile: monster.MT_FLESH
+sound: diablo_sfx/monsters/newsfx/fleshta1.ogg
+sound: diablo_sfx/monsters/newsfx/fleshta2.ogg
+
+internal_name: monster.MT_FLESH.hit
+name: Flesh Thing - Hurt
+tile: monster.MT_FLESH
+sound: diablo_sfx/monsters/newsfx/fleshth1.ogg
+sound: diablo_sfx/monsters/newsfx/fleshth2.ogg
+
+internal_name: monster.MT_FLESH.death
+name: Flesh Thing - Death
+tile: monster.MT_FLESH
+sound: diablo_sfx/monsters/newsfx/fleshtd1.ogg
+sound: diablo_sfx/monsters/newsfx/fleshtd2.ogg
+
+internal_name: monster.MT_REAPER.attack
+name: Reaper - Attack
+tile: monster.MT_REAPER
+sound: diablo_sfx/monsters/newsfx/reapera1.ogg
+sound: diablo_sfx/monsters/newsfx/reapera2.ogg
+
+internal_name: monster.MT_REAPER.hit
+name: Reaper - Hurt
+tile: monster.MT_REAPER
+sound: diablo_sfx/monsters/newsfx/reaperh1.ogg
+sound: diablo_sfx/monsters/newsfx/reaperh2.ogg
+
+internal_name: monster.MT_REAPER.death
+name: Reaper - Death
+tile: monster.MT_REAPER
+sound: diablo_sfx/monsters/newsfx/reaperd1.ogg
+sound: diablo_sfx/monsters/newsfx/reaperd2.ogg
+
+internal_name: monster.MT_NKR.attack
+name: Na-Krul - Attack
+tile: monster.MT_NKR
+sound: diablo_sfx/monsters/newsfx/nakrula1.ogg
+sound: diablo_sfx/monsters/newsfx/nakrula2.ogg
+
+internal_name: monster.MT_NKR.hit
+name: Na-Krul - Hurt
+tile: monster.MT_NKR
+sound: diablo_sfx/monsters/newsfx/nakrulh1.ogg
+sound: diablo_sfx/monsters/newsfx/nakrulh2.ogg
+
+internal_name: monster.MT_NKR.death
+name: Na-Krul - Death
+tile: monster.MT_NKR
+sound: diablo_sfx/monsters/newsfx/nakruld1.ogg
+sound: diablo_sfx/monsters/newsfx/nakruld2.ogg

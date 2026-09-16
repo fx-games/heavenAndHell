@@ -27,6 +27,7 @@ const (
 	ISplFastestRecover = 0x00800000
 	ISplFastBlock      = 0x01000000
 	ISplLightArrows    = 0x02000000
+	ISplMultArrows     = 0x10000000
 	ISplThorns         = 0x04000000
 	ISplNoMana         = 0x08000000
 	ISplAbsHalfTrap    = 0x10000000
@@ -57,6 +58,7 @@ type Item struct {
 	SplLvlAdd                          int
 	FMinDam, FMaxDam, LMinDam, LMaxDam int
 	PLEnAc, PLMana, PLHP               int
+	DamAcFlags                         uint32 // Hellfire's ItemSpecialEffectHf
 	PrePower, SufPower                 string
 	Uid                                int // unique index, -1 = none
 	Seed                               int32
@@ -101,6 +103,9 @@ func (g *Generator) itemAttrs(idx, lvl, dlvl int, hell bool) *Item {
 	if it.MiscID == "IMISC_BOOK" {
 		g.bookSpell(it, lvl)
 	}
+	if it.MiscID == "IMISC_OILOF" { // a plain Oil settles into one of the ten as it drops
+		g.getOilType(it, lvl)
+	}
 	if it.Type == ITypeGold {
 		v := 5*dlvl + g.random(10*dlvl)
 		if hell {
@@ -127,9 +132,14 @@ func (g *Generator) isplFlags(s string) uint32 {
 	return 0
 }
 
-// nextSpell walks spells like GetBookSpell/GetStaffSpell, skipping multiplayer-only ones.
+// nextSpell walks spells like GetBookSpell/GetStaffSpell, skipping multiplayer-only ones: D1's 37, or with Hellfire
+// its MAX_SPELLS.
 func (g *Generator) nextSpell(ok func(SpellData) bool) int {
-	rv := g.random(37) + 1
+	n := D1SpellCount
+	if g.D.Hellfire {
+		n = NumSpells
+	}
+	rv := g.random(n) + 1
 	s, bs := 1, 0
 	for rv > 0 {
 		if ok(g.D.Spells[s]) {
@@ -143,7 +153,7 @@ func (g *Generator) nextSpell(ok func(SpellData) bool) int {
 		if s == 34 { // SPL_HEALOTHER
 			s = 35
 		}
-		if s == 37 {
+		if s == n {
 			s = 1
 		}
 	}
@@ -183,7 +193,10 @@ func (g *Generator) savePower(it *Item, power string, p1, p2, minv, maxv, multv 
 		it.PLDam += r
 	case "IPL_DAMP_CURSE":
 		it.PLDam -= r
-	case "IPL_TOHIT_DAMP":
+	case "IPL_DOPPELGANGER", "IPL_TOHIT_DAMP": // Doppelganger's hits are IPL_TOHIT_DAMP that may split the monster
+		if power == "IPL_DOPPELGANGER" {
+			it.DamAcFlags |= IHfDoppelganger
+		}
 		r = g.rndPL(p1, p2)
 		it.PLDam += r
 		r2 := 0
@@ -366,6 +379,41 @@ func (g *Generator) savePower(it *Item, power string, p1, p2, minv, maxv, multv 
 		it.Flags |= ISplInfravision
 	case "IPL_NOMINSTR":
 		it.MinStr = 0
+	case "IPL_MULT_ARROWS":
+		it.Flags |= ISplMultArrows
+	case "IPL_FIREBALL": // Flambeau: arrows that burst like a fireball
+		it.Flags |= ISplLightArrows | ISplFireArrows
+		it.FMinDam, it.FMaxDam = p1, p2
+		it.LMinDam, it.LMaxDam = 0, 0
+	case "IPL_ADDACLIFE": // Blitzen: arrows that hit for the wearer's armour class
+		it.Flags |= ISplLightArrows | ISplFireArrows
+		it.FMinDam, it.FMaxDam = p1, p2
+		it.LMinDam, it.LMaxDam = 1, 0
+	case "IPL_ADDMANAAC": // Thunderclap: hits that hurt for the wearer's mana
+		it.Flags |= ISplLightDam | ISplFireDam
+		it.FMinDam, it.FMaxDam = p1, p2
+		it.LMinDam, it.LMaxDam = 2, 0
+	case "IPL_MANATOLIFE":
+		it.DamAcFlags |= IHfManaToLife
+	case "IPL_LIFETOMANA":
+		it.DamAcFlags |= IHfLifeToMana
+	case "IPL_ACDEMON":
+		it.DamAcFlags |= IHfACVsDemons
+	case "IPL_ACUNDEAD":
+		it.DamAcFlags |= IHfACVsUndead
+	case "IPL_DEVASTATION":
+		it.DamAcFlags |= IHfDevastation
+	case "IPL_PERIL":
+		it.DamAcFlags |= IHfPeril
+	case "IPL_JESTERS":
+		it.DamAcFlags |= IHfJesters
+	case "IPL_DECAY":
+		it.DamAcFlags |= IHfDecay
+		it.PLDam += r
+	case "IPL_CRYSTALLINE": // as IPL_DUR_CURSE, with a huge damage bonus
+		it.PLDam += 140 + 2*r
+		it.MaxDur = max(it.MaxDur-r*it.MaxDur/100, 1)
+		it.Durability = it.MaxDur
 	case "IPL_INVCURS":
 		it.Curs = p1
 		// IPL_ADDACLIFE/ADDMANAAC/FIRERESCLVL aren't ported: in 1.09 only Hellfire's Blitzen and Thunderclap roll the
@@ -415,6 +463,9 @@ func (g *Generator) itemPower(it *Item, minlvl, maxlvl, flgs int, onlygood bool)
 	if pre == 0 {
 		var l []int
 		for j, a := range g.D.Prefixes {
+			if a.Hellfire && !g.D.Hellfire {
+				continue
+			}
 			if a.IType&flgs != 0 && a.MinLvl >= minlvl && a.MinLvl <= maxlvl && (!onlygood || a.Ok) && (flgs != PLTStaff || a.Power != "IPL_CHARGES") {
 				l = append(l, j)
 				if a.Double {
@@ -432,6 +483,9 @@ func (g *Generator) itemPower(it *Item, minlvl, maxlvl, flgs int, onlygood bool)
 	if post != 0 {
 		var l []int
 		for j, a := range g.D.Suffixes {
+			if a.Hellfire && !g.D.Hellfire {
+				continue
+			}
 			if a.IType&flgs != 0 && a.MinLvl >= minlvl && a.MinLvl <= maxlvl && (goe|a.GOE) != 0x11 && (!onlygood || a.Ok) {
 				l = append(l, j)
 			}
@@ -452,7 +506,7 @@ func (g *Generator) itemPower(it *Item, minlvl, maxlvl, flgs int, onlygood bool)
 
 // staffSpell ports GetStaffSpell + GetStaffPower.
 func (g *Generator) staffSpell(it *Item, lvl int, onlygood bool) {
-	if g.random(4) == 0 {
+	if !g.D.Hellfire && g.random(4) == 0 { // Hellfire's staves always carry a spell
 		g.itemPower(it, lvl>>1, lvl, PLTStaff, onlygood)
 		return
 	}
@@ -471,6 +525,9 @@ func (g *Generator) staffSpell(it *Item, lvl int, onlygood bool) {
 	if g.random(10) == 0 || onlygood {
 		var cand []int
 		for j, a := range g.D.Prefixes {
+			if a.Hellfire && !g.D.Hellfire {
+				continue
+			}
 			if a.IType&PLTStaff != 0 && a.MinLvl <= lvl && (!onlygood || a.Ok) {
 				cand = append(cand, j)
 				if a.Double {
@@ -486,6 +543,11 @@ func (g *Generator) staffSpell(it *Item, lvl int, onlygood bool) {
 }
 
 func (g *Generator) itemBonus(it *Item, minlvl, maxlvl int, onlygood bool) {
+	g.itemBonusSpells(it, minlvl, maxlvl, onlygood, true)
+}
+
+// itemBonusSpells is Hellfire's GetItemBonus: without allowSpells a staff rolls a power instead of a spell.
+func (g *Generator) itemBonusSpells(it *Item, minlvl, maxlvl int, onlygood, allowSpells bool) {
 	if it.Class == "ICLASS_GOLD" {
 		return
 	}
@@ -500,7 +562,11 @@ func (g *Generator) itemBonus(it *Item, minlvl, maxlvl int, onlygood bool) {
 	case ITypeLArmor, ITypeHelm, ITypeMArmor, ITypeHArmor:
 		g.itemPower(it, minlvl, maxlvl, PLTArmo, onlygood)
 	case ITypeStaff:
-		g.staffSpell(it, maxlvl, onlygood)
+		if allowSpells {
+			g.staffSpell(it, maxlvl, onlygood)
+		} else {
+			g.itemPower(it, minlvl, maxlvl, PLTStaff, onlygood)
+		}
 	case ITypeRing, ITypeAmulet:
 		g.itemPower(it, minlvl, maxlvl, PLTMisc, onlygood)
 	}
@@ -513,6 +579,9 @@ func (g *Generator) checkUnique(it *Item, lvl, uper int, recreate bool) int {
 	}
 	j := -1
 	for u, ud := range g.D.UniqueItems {
+		if ud.Hellfire && !g.D.Hellfire {
+			continue
+		}
 		if ud.Base == g.D.Items[it.BaseIdx].UniqueBase && lvl >= ud.MinLvl && (recreate || !g.UniqueDropped[u]) {
 			j = u
 		}
@@ -602,6 +671,9 @@ func (g *Generator) rndItem(m *MonsterData, mlvl int) int {
 	}
 	var ril []int
 	for i, b := range g.D.Items {
+		if b.Hellfire && !g.D.Hellfire {
+			continue
+		}
 		if b.Drop == "IDROP_DOUBLE" && mlvl >= b.MinMLvl {
 			ril = append(ril, i)
 		}
@@ -622,6 +694,9 @@ func (g *Generator) rndUItem(m *MonsterData, mlvl, dlvl int) int {
 	}
 	var ril []int
 	for i, b := range g.D.Items {
+		if b.Hellfire && !g.D.Hellfire {
+			continue
+		}
 		ok := b.Drop != "IDROP_NEVER"
 		if m != nil && mlvl < b.MinMLvl || m == nil && 2*dlvl < b.MinMLvl {
 			ok = false
@@ -649,6 +724,9 @@ func (g *Generator) rndAllItems(dlvl int) int {
 	}
 	var ril []int
 	for i, b := range g.D.Items {
+		if b.Hellfire && !g.D.Hellfire {
+			continue
+		}
 		if b.Drop != "IDROP_NEVER" && 2*dlvl >= b.MinMLvl {
 			ril = append(ril, i)
 		}
@@ -663,6 +741,9 @@ func (g *Generator) rndAllItems(dlvl int) int {
 func (g *Generator) rndTypeItems(itype int, imisc string, dlvl int) int {
 	var ril []int
 	for i, b := range g.D.Items {
+		if b.Hellfire && !g.D.Hellfire {
+			continue
+		}
 		if b.Drop != "IDROP_NEVER" && dlvl<<1 >= b.MinMLvl && b.Type == itype && (imisc == "" || b.MiscID == imisc) {
 			ril = append(ril, i)
 		}
@@ -726,7 +807,10 @@ func (g *Generator) FloorItem(dlvl int, onlygood, hell bool) *Item {
 // LevelMonsterTypes ports GetLevelMTypes' random selection (quest additions are handled by the caller).
 func (g *Generator) LevelMonsterTypes(dlvl int) []int {
 	var list []int
-	for i, m := range g.D.Monsters[:111] {
+	for i, m := range g.D.Monsters {
+		if i == D1MonsterCount-1 || m.Hellfire && !g.D.Hellfire { // the Arch-Litch is placed by his quest only
+			continue
+		}
 		minl, maxl := 15*m.MinDLvl/30+1, 15*m.MaxDLvl/30+1
 		if dlvl >= minl && dlvl <= maxl && m.Available {
 			list = append(list, i)
@@ -761,7 +845,7 @@ const shrineThaumaturgic = 8
 // Single-player only, so shrineAvail==2 (multiplayer-only) shrines never appear.
 func (g *Generator) RandomShrine(dlvl int) int {
 	for {
-		rv := g.random(len(ShrineNames))
+		rv := g.random(g.D.numShrines())
 		if rv == shrineThaumaturgic || shrineAvail[rv] == 2 || dlvl > shrineMax[rv] {
 			continue
 		}
@@ -801,6 +885,9 @@ func (g *Generator) PlainItem(idx int) *Item {
 		MinDex: b.MinDex, Uid: -1, Identified: true}
 	if b.MiscID == "IMISC_STAFF" {
 		it.Charges, it.MaxCharges = 40, 40
+	}
+	if it.MiscID == "IMISC_OILOF" { // a plain Oil never stays plain, whichever path made it
+		g.getOilType(it, 1)
 	}
 	return it
 }

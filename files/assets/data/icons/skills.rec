@@ -85,7 +85,7 @@ name: Golem
 icon: 109
 
 internal_name: spell.SPL_BLODBOIL
-name: Blood Boil
+name: Rage
 icon: 37
 
 internal_name: spell.SPL_TELEPORT
@@ -142,4 +142,64 @@ icon: 43
 
 internal_name: spell.SPL_BONESPIRIT
 name: Bone Spirit
+icon: 43
+
+internal_name: spell.SPL_SEARCH
+name: Search
+icon: 43
+
+internal_name: spell.SPL_MANA
+name: Mana
+icon: 43
+
+internal_name: spell.SPL_MAGI
+name: the Magi
+icon: 43
+
+internal_name: spell.SPL_JESTER
+name: the Jester
+icon: 43
+
+internal_name: spell.SPL_LIGHTWALL
+name: Lightning Wall
+icon: 43
+
+internal_name: spell.SPL_IMMOLAT
+name: Immolation
+icon: 109
+
+internal_name: spell.SPL_WARP
+name: Warp
+icon: 43
+
+internal_name: spell.SPL_REFLECT
+name: Reflect
+icon: 43
+
+internal_name: spell.SPL_BERSERK
+name: Berserk
+icon: 43
+
+internal_name: spell.SPL_FIRERING
+name: Ring of Fire
+icon: 109
+
+internal_name: spell.SPL_RUNEFIRE
+name: Rune of Fire
+icon: 109
+
+internal_name: spell.SPL_RUNELIGHT
+name: Rune of Light
+icon: 43
+
+internal_name: spell.SPL_RUNENOVA
+name: Rune of Nova
+icon: 43
+
+internal_name: spell.SPL_RUNEIMMOLAT
+name: Rune of Immolation
+icon: 109
+
+internal_name: spell.SPL_RUNESTONE
+name: Rune of Stone
 icon: 43

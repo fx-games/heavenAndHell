@@ -76,9 +76,16 @@ type spellCtx struct {
 	dealt       map[*Actor]int // whole points, applied once per victim in finish
 	order       []*Actor
 	animations  []Animation
+	from        *geometry.Point // where the spell comes from when not the caster: a rune
+	heroDealt   int             // whole points the hero's own TARGET_BOTH missiles dealt to him
 }
 
-func (c *spellCtx) origin() geometry.Point { return c.caster.MapPosition() }
+func (c *spellCtx) origin() geometry.Point {
+	if c.from != nil {
+		return *c.from
+	}
+	return c.caster.MapPosition()
+}
 
 func (c *spellCtx) monsterAt(p geometry.Point) *Actor {
 	if a, ok := c.m.TryGetActorAt(p); ok && a.d1Monster != nil && !a.d1Monster.Golem && a.GetStats().GetResource(stats.Health).Value() > c.dealt[a] {
@@ -192,12 +199,48 @@ func (c *spellCtx) strike(a *Actor, dam64, ticks int) bool {
 
 func (c *spellCtx) finish() []Action {
 	var actions []Action
+	if player := c.f.State.GetPlayer(); c.heroDealt > 0 && player.IsAlive() {
+		actions = append(actions, NewChangeResourceAction(c.cause, player, stats.Health, -float64(c.heroDealt)))
+	}
 	for _, a := range c.order {
 		if c.dealt[a] > 0 {
 			actions = append(actions, NewChangeResourceAction(c.cause, a, stats.Health, -float64(c.dealt[a])))
 		}
 	}
 	return actions
+}
+
+// hurtHero ports CheckMissileCol's player half for the hero's own TARGET_BOTH missiles (Hellfire's walls and rune
+// blasts): the hero standing at p takes rolls like a trap's, as PlayerMHit has no monster to take a level from.
+func (c *spellCtx) hurtHero(p geometry.Point, mind, maxd int, shift bool, ticks int) {
+	player := c.f.State.GetPlayer()
+	if player.hero == nil || player.MapPosition() != p {
+		return
+	}
+	mis := MisFlashTrap // a magic missile
+	switch d1.SpellResist[c.spell] {
+	case d1.ResistKindFire:
+		mis = MisFireWall
+	case d1.ResistKindLightning:
+		mis = MisLightCtrl
+	}
+	mc := &missileCtx{ctx: c.ctx, from: c.origin(), player: player, c: c}
+	mc.hit(mis, p, c.origin(), mind, maxd, shift, ticks)
+	c.heroDealt += mc.dealt
+}
+
+// fireball ports MI_Fireball: a bolt that bursts on the 3×3 around where it hits, dam whole points.
+func (c *spellCtx) fireball(from, to geometry.Point, dam int) {
+	impact := c.bolt(from, to, func(a *Actor) bool { return c.strike(a, dam<<6, 1) })
+	for dy := -1; dy <= 1; dy++ {
+		for dx := -1; dx <= 1; dx++ {
+			p := impact.Add(geometry.Point{X: dx, Y: dy})
+			if a := c.hitCell(p); a != nil && c.lineClear(from, p) {
+				c.strike(a, dam<<6, 1)
+			}
+		}
+	}
+	c.animations = append(c.animations, NewHitAnimation(impact, 0.4, defs.IconEffectFireBig, 2))
 }
 
 func (c *spellCtx) icon() int32 { return d1SpellIcons[c.f.Generator.D.Spells[c.spell].Type] }
@@ -310,15 +353,38 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		item.RefreshD1()
 		SyncHero(c.caster)
 		f.Msg(fmt.Sprintf("It is %s.", item.Name()))
-	case d1.SplFireWall:
+	case d1.SplSearch: // AddSearch: the Monk senses what is lying around, and remembers where
+		// ponytail: the reveal is permanent, not the timed automap overlay Hellfire draws for
+		// (2*clvl + 10*slvl + 245) ticks; give it a duration once the map can un-explore a cell.
+		found := 0
+		for _, it := range c.m.Items() {
+			if !c.m.IsExplored(it.MapPosition()) {
+				c.m.SetExplored(it.MapPosition())
+				found++
+			}
+		}
+		f.Msg(fmt.Sprintf("You sense %d hidden item(s).", found))
+	case d1.SplRage: // AddRage: no raging while already raging, or while too wounded to survive the hangover
+		if h.Rage != 0 || st.GetResource(stats.Health).Value() <= clvl {
+			c.ctx.Msg("You cannot work yourself up again.")
+			return false
+		}
+		h.Rage = d1.RageTurns(clvl)
+		c.caster.AddParametrizedStatusEffect(f.d1RageEffect(clvl))
+		SyncHero(c.caster)
+	case d1.SplFireWall, d1.SplLightWall: // AddFirewallC, MI_FirewallC / mi_lightning_wall
 		start, ok := c.freeNear(target, func(p geometry.Point) bool {
 			return p != o && c.m.IsTileWalkable(p) && !c.m.IsObjectAt(p) && c.lineClear(o, p)
 		})
 		if !ok {
 			return false
 		}
+		spawn := func(p geometry.Point) { f.spawnD1FireWall(c.caster, p, slvl) }
+		if c.spell == d1.SplLightWall {
+			spawn = func(p geometry.Point) { f.spawnD1LightningWall(c.caster, p, slvl, clvl) }
+		}
 		dir := D1DirTo(o, target)
-		f.spawnD1Fire(c.caster, start, slvl)
+		spawn(start)
 		for _, side := range []int{dir + 2, dir + 6} {
 			p := start
 			for i := 1; i < 7; i++ {
@@ -326,8 +392,60 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 				if !c.m.Contains(p) || !c.m.IsTileWalkable(p) {
 					break
 				}
-				f.spawnD1Fire(c.caster, p, slvl)
+				spawn(p)
 			}
+		}
+	case d1.SplMana: // missiles_rech_mana
+		amount := d1Rng.Intn(10) + 1
+		for i := 0; i < clvl; i++ {
+			amount += d1Rng.Intn(4) + 1
+		}
+		for i := 0; i < slvl; i++ {
+			amount += d1Rng.Intn(6) + 1
+		}
+		switch h.Class {
+		case d1.Sorcerer:
+			amount <<= 1
+		case d1.Rogue, d1.Bard:
+			amount += amount >> 1
+		}
+		h.ManaBase = min(h.ManaBase+amount<<6, h.MaxManaBase)
+		st.GetResource(stats.Mana).Increase(float64(amount))
+	case d1.SplMagi: // missiles_magi
+		h.ManaBase = h.MaxManaBase
+		st.GetResource(stats.Mana).SetToMax()
+	case d1.SplJester: // missiles_jester: one of nine spells at the Jester's spell level
+		c.spell = [10]int{d1.SplFirebolt, d1.SplFirebolt, d1.SplFireball, d1.SplFireWall, d1.SplGuardian, d1.SplChain,
+			d1.SplTown, d1.SplTeleport, d1.SplApocalypse, d1.SplStone}[d1Rng.Intn(10)]
+		c.ctx.Msg(fmt.Sprintf("The Jester casts %s.", f.Generator.D.Spells[c.spell].Name))
+		return c.cast(target)
+	case d1.SplImmolation: // AddNova + mi_fire_nova: a fireball down every Nova ray
+		dam := d1.NovaDamage(d1Rng, clvl, slvl)
+		for _, r := range d1.NovaRays {
+			c.fireball(o, o.Add(geometry.Point{X: r[0], Y: r[1]}), dam)
+		}
+	case d1.SplWarp: // missiles_warp: to the nearest stairs, beside them
+		return f.d1Warp(c)
+	case d1.SplReflect: // missiles_reflection
+		n := slvl
+		if n == 0 {
+			n = 2
+		}
+		h.Reflections += n * clvl
+		c.ctx.Msg(fmt.Sprintf("You will turn back the next %d blows.", h.Reflections))
+	case d1.SplBerserk:
+		return f.d1Berserk(c, target, slvl)
+	case d1.SplRingOfFire: // missiles_ring + mi_fire_ring: fire walls three cells out, until a wall stops missiles
+		lvl := f.State.mapGen.levels[c.m.GetName()]
+		for _, p := range d1Ring(o, 3) {
+			if !c.m.Contains(p) || lvl != nil && lvl.CellSolid(p.X, p.Y) || c.m.IsObjectAt(p) || !c.lineClear(o, p) {
+				continue
+			}
+			if lvl != nil && lvl.CellMissile(p.X, p.Y) {
+				break
+			}
+			f.spawnD1Wall(c.caster, p, d1.SplRingOfFire, d1.FireWallTurns(slvl), true, defs.IconEffectFireSmall,
+				func() int { return d1.FireWallDamage64(d1Rng, clvl) })
 		}
 	case d1.SplTown:
 		return f.openD1Portal(c.caster)
@@ -349,17 +467,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 	case d1.SplManaShield:
 		c.caster.AddStatusEffect(StatusManaShield, -1)
 	case d1.SplFireball:
-		dam := d1.FireballDamage(d1Rng, clvl, slvl)
-		impact := c.bolt(o, target, func(a *Actor) bool { return c.strike(a, dam<<6, 1) })
-		for dy := -1; dy <= 1; dy++ {
-			for dx := -1; dx <= 1; dx++ {
-				p := impact.Add(geometry.Point{X: dx, Y: dy})
-				if a := c.hitCell(p); a != nil && c.lineClear(o, p) {
-					c.strike(a, dam<<6, 1)
-				}
-			}
-		}
-		c.animations = append(c.animations, NewHitAnimation(impact, 0.4, defs.IconEffectFireBig, 2))
+		c.fireball(o, target, d1.FireballDamage(d1Rng, clvl, slvl))
 	case d1.SplGuardian:
 		p, ok := c.freeNear(target, c.emptyFloor)
 		if !ok {
@@ -470,32 +578,53 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 	return true
 }
 
-// spawnD1Fire places one fire wall cell: each turn it burns whoever stands in it (MI_Firewall, 8 ticks a turn).
-func (f *Factory) spawnD1Fire(caster *Actor, p geometry.Point, slvl int) {
+// spawnD1FireWall places one cell of the Fire Wall spell (MI_Firewall); Hellfire's burns the hero too.
+func (f *Factory) spawnD1FireWall(caster *Actor, p geometry.Point, slvl int) {
+	clvl := caster.hero.Level
+	f.spawnD1Wall(caster, p, d1.SplFireWall, d1.FireWallTurns(slvl), f.Generator.D.Hellfire, defs.IconEffectFireSmall,
+		func() int { return d1.FireWallDamage64(d1Rng, clvl) })
+}
+
+// spawnD1LightningWall places one cell of a lightning wall (MIS_LIGHTWALL): 255·(slvl+1) ticks of 16·(2d10 + clvl
+// + 2)/64 a tick, rolled once when it is laid, on monsters and the hero alike.
+func (f *Factory) spawnD1LightningWall(caster *Actor, p geometry.Point, slvl, clvl int) {
+	dam := 16 * (d1Rng.Intn(10) + d1Rng.Intn(10) + clvl + 2)
+	f.spawnD1Wall(caster, p, d1.SplLightWall, 255*(slvl+1)/d1.RefWalkTicks, true, defs.IconEffectLightning, func() int { return dam })
+}
+
+// spawnD1Wall places one wall cell: each turn it hits the monster standing in it, and with both the hero too, for
+// dam64() 1/64 a tick over a turn's 8 ticks.
+func (f *Factory) spawnD1Wall(caster *Actor, p geometry.Point, spell, turns int, both bool, icon int32, dam64 func() int) {
 	m := f.State.GetMap()
-	if m.IsObjectAt(p) {
+	if m.IsObjectAt(p) || turns <= 0 {
 		return
 	}
-	fire := NewFire(0)
-	fire.turnsUntilRemoval = d1.FireWallTurns(slvl)
-	fire.SetDealDamage(func(location geometry.Point, _ func() bool) {})
-	fire.SetOnTurn(func() {
-		if !fire.IsAlive() || f.State.GetMap() != m {
-			m.RemoveObject(fire)
-			fire.turnsUntilRemoval = 0
+	wall := NewFire(0)
+	wall.icon, wall.turnsUntilRemoval = icon, turns
+	wall.SetDealDamage(func(location geometry.Point, _ func() bool) {})
+	wall.SetOnTurn(func() {
+		if !wall.IsAlive() || f.State.GetMap() != m {
+			m.RemoveObject(wall)
+			wall.turnsUntilRemoval = 0
 			return
 		}
-		if a, ok := m.TryGetActorAt(p); ok && a.d1Monster != nil && caster.IsAlive() {
-			f.ActionBroker.Execute(&spellTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
-				caster: caster, spell: d1.SplFireWall, run: func(c *spellCtx) {
-					if v := c.monsterAt(p); v != nil {
-						c.strike(v, d1.FireWallDamage64(d1Rng, caster.hero.Level), d1.RefWalkTicks)
-					}
-				}})
+		a, ok := m.TryGetActorAt(p)
+		if !ok || !caster.IsAlive() || a.d1Monster == nil && !(both && a == f.State.GetPlayer()) {
+			return
 		}
+		f.ActionBroker.Execute(&spellTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
+			caster: caster, spell: spell, run: func(c *spellCtx) {
+				c.from = &p
+				d := dam64()
+				if v := c.monsterAt(p); v != nil {
+					c.strike(v, d, d1.RefWalkTicks)
+				} else if both {
+					c.hurtHero(p, d, d, true, d1.RefWalkTicks)
+				}
+			}})
 	})
-	f.GetTimeKeeper().AddTimed(fire)
-	m.AddObject(fire, p)
+	f.GetTimeKeeper().AddTimed(wall)
+	m.AddObject(wall, p)
 }
 
 // spawnD1Guardian places a Guardian: every other turn it spits a firebolt at the closest monster it can see (MI_Guardian).

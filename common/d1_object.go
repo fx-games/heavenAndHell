@@ -9,6 +9,7 @@ import (
 	"rpg/gridmap"
 	"rpg/stats"
 	"strings"
+	"time"
 )
 
 // D1Object is a D1 dungeon object (decision 12), operated by bumping into it.
@@ -56,7 +57,13 @@ var d1ObjectLights = map[int]int{d1.ObjSKFIRE: 5, d1.ObjCANDLE2: 5, d1.ObjBOOKCA
 
 // d1StoryBookNames ports StoryBookName, indexed by a story book's Var3.
 var d1StoryBookNames = [...]string{"The Great Conflict", "The Wages of Sin are War", "The Tale of the Horadrim",
-	"The Dark Exile", "The Sin War", "The Binding of the Three", "The Realms Beyond", "Tale of the Three", "The Black King"}
+	"The Dark Exile", "The Sin War", "The Binding of the Three", "The Realms Beyond", "Tale of the Three", "The Black King",
+	"Journal: The Ensorcellment", "Journal: The Meeting", "Journal: The Tirade", "Journal: His Power Grows",
+	"Journal: NA-KRUL", "Journal: The End", "A Spellbook"} // Hellfire's Crypt journals and Na-Krul's books
+
+// d1NakrulBookText is the first of Na-Krul's three spell books' texts (Var8 6-8) by the reader's class.
+var d1NakrulBookText = [d1.NumClasses]string{d1.Warrior: "TEXT_BOOKA", d1.Rogue: "TEXT_RBOOKA", d1.Sorcerer: "TEXT_MBOOKA",
+	d1.Monk: "TEXT_OBOOKA", d1.Bard: "TEXT_BBOOKA", d1.Barbarian: "TEXT_BOOKA"}
 
 // d1Containers are the objects that are looted: opening or breaking them may give nothing.
 var d1Containers = map[int]bool{d1.ObjCHEST1: true, d1.ObjCHEST2: true, d1.ObjCHEST3: true,
@@ -65,8 +72,8 @@ var d1Containers = map[int]bool{d1.ObjCHEST1: true, d1.ObjCHEST2: true, d1.ObjCH
 	d1.ObjARMORSTAND: true, d1.ObjWEAPONRACK: true, d1.ObjWARARMOR: true, d1.ObjWARWEAP: true}
 
 func (o *D1Object) Name() string {
-	if player := o.f.State.GetPlayer(); o.O.TrapFlag && player != nil && player.hero != nil && player.hero.Class == d1.Rogue {
-		return "Trapped " + o.name() // GetObjectStr: only a rogue sees the trap
+	if player := o.f.State.GetPlayer(); o.O.TrapFlag && player != nil && player.hero != nil && d1.HasClassFlag(player.hero.Class, d1.ClassTrapSense) {
+		return "Trapped " + o.name() // GetObjectStr: only a rogue's trap sense sees it
 	}
 	return o.name()
 }
@@ -242,7 +249,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		return
 	}
 	dlvl := d1DungeonLevel(f.State)
-	hell := dlvl > 12
+	ilvl, hell := d1.ItemLevel(dlvl), d1.LevelType(dlvl) == d1.DTypeHell
 	drop := func(it *d1.Item) {
 		if it != nil {
 			f.State.AddItemToMapWithDistribution(f.NewD1Item(it), o.pos)
@@ -268,7 +275,18 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 	}
 	if obj.Kind == d1.ObjSTORYBOOK { // OperateStoryBook: the narrator reads it, as often as the hero likes
 		obj.Active = false
-		f.say(o.Name(), fmt.Sprintf("TEXT_BOOK%d%d", obj.Var1+1, obj.Var2+1))
+		if !f.d1CryptJournal(obj) {
+			return
+		}
+		switch id := fmt.Sprintf("TEXT_BOOK%d%d", obj.Var1+1, obj.Var2+1); {
+		case obj.Var8 >= 6: // Na-Krul's books: A, B or C
+			id = d1NakrulBookText[player.hero.Class]
+			f.say(o.Name(), id[:len(id)-1]+string(rune('A'+obj.Var8-6)))
+		case obj.Var2 > 300: // the Crypt's journals, TEXT_BOOK4 (317) to TEXT_BOOK8
+			f.say(o.Name(), fmt.Sprintf("TEXT_BOOK%d", obj.Var2-313))
+		default:
+			f.say(o.Name(), id)
+		}
 		return
 	}
 	if !obj.Active {
@@ -291,15 +309,15 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 	case d1.ObjCHEST1, d1.ObjCHEST2, d1.ObjCHEST3, d1.ObjTCHEST1, d1.ObjTCHEST2, d1.ObjTCHEST3:
 		for j := 0; j < obj.Var1; j++ {
 			if obj.Var2 != 0 {
-				drop(gen.FloorItem(dlvl, false, hell))
+				drop(gen.FloorItem(ilvl, false, hell))
 			} else {
-				drop(gen.UsefulItem(dlvl))
+				drop(gen.UsefulItem(ilvl))
 			}
 		}
 		f.springD1ChestTrap(o, player)
 	case d1.ObjSARC:
 		if obj.Var1 <= 2 {
-			drop(gen.FloorItem(dlvl, false, hell))
+			drop(gen.FloorItem(ilvl, false, hell))
 		}
 		if obj.Var1 >= 8 {
 			f.d1Skeleton(o.PreSpawnType, o.pos, player)
@@ -314,39 +332,45 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		f.d1Shrine(player, gen.RandomShrine(dlvl), o.pos)
 	case d1.ObjSKELBOOK, d1.ObjBOOKSTAND:
 		if d1Rng.Intn(5) != 0 {
-			drop(gen.TypeItem(dlvl, d1.ITypeMisc, "IMISC_SCROLL", false))
+			drop(gen.TypeItem(ilvl, d1.ITypeMisc, "IMISC_SCROLL", false))
 		} else {
-			drop(gen.TypeItem(dlvl, d1.ITypeMisc, "IMISC_BOOK", false))
+			drop(gen.TypeItem(ilvl, d1.ITypeMisc, "IMISC_BOOK", false))
 		}
 	case d1.ObjBOOKCASEL, d1.ObjBOOKCASER:
-		drop(gen.TypeItem(dlvl, d1.ITypeMisc, "IMISC_BOOK", false))
+		drop(gen.TypeItem(ilvl, d1.ITypeMisc, "IMISC_BOOK", false))
 	case d1.ObjDECAP:
-		drop(gen.FloorItem(dlvl, false, hell))
+		drop(gen.FloorItem(ilvl, false, hell))
 	case d1.ObjSLAINHERO: // OperateSlainHero: a class's own reward, and the hero's line about it
 		switch player.hero.Class {
 		case d1.Warrior:
-			drop(gen.MagicItemWithCurs(dlvl, d1.ITypeHArmor, d1.ICursBreastPlate))
+			drop(gen.MagicItemWithCurs(ilvl, d1.ITypeHArmor, d1.ICursBreastPlate))
 		case d1.Rogue:
-			drop(gen.MagicItemWithCurs(dlvl, d1.ITypeBow, d1.ICursLongWarBow))
+			drop(gen.MagicItemWithCurs(ilvl, d1.ITypeBow, d1.ICursLongWarBow))
+		case d1.Monk:
+			drop(gen.MagicItemWithCurs(ilvl, d1.ITypeStaff, d1.ICursWarStaff))
+		case d1.Bard:
+			drop(gen.MagicItemWithCurs(ilvl, d1.ITypeSword, d1.ICursBastardSword))
+		case d1.Barbarian:
+			drop(gen.MagicItemWithCurs(ilvl, d1.ITypeAxe, d1.ICursBattleAxe))
 		default:
-			drop(gen.SpellBook(dlvl, d1.SplLightning))
+			drop(gen.SpellBook(ilvl, d1.SplLightning))
 		}
 		f.playD1HeroSound(9)
 	case d1.ObjARMORSTAND, d1.ObjWARARMOR:
 		unique := d1Rng.Intn(2) != 0
 		switch {
 		case dlvl <= 5:
-			drop(gen.TypeItem(dlvl, d1.ITypeLArmor, "", true))
+			drop(gen.TypeItem(ilvl, d1.ITypeLArmor, "", true))
 		case dlvl <= 9:
-			drop(gen.TypeItem(dlvl, d1.ITypeMArmor, "", unique))
+			drop(gen.TypeItem(ilvl, d1.ITypeMArmor, "", unique))
 		case dlvl <= 12:
-			drop(gen.TypeItem(dlvl, d1.ITypeHArmor, "", false))
+			drop(gen.TypeItem(ilvl, d1.ITypeHArmor, "", false))
 		default:
-			drop(gen.TypeItem(dlvl, d1.ITypeHArmor, "", true))
+			drop(gen.TypeItem(ilvl, d1.ITypeHArmor, "", true))
 		}
 	case d1.ObjWEAPONRACK, d1.ObjWARWEAP:
 		t := [4]int{d1.ITypeSword, d1.ITypeAxe, d1.ITypeBow, d1.ITypeMace}[d1Rng.Intn(4)]
-		drop(gen.TypeItem(dlvl, t, "", dlvl > 4))
+		drop(gen.TypeItem(ilvl, t, "", dlvl > 4))
 	case d1.ObjMURKYFTN:
 		player.AddStatusEffect(StatusInfravision, d1.InfravisionTurns(2*((dlvl-1)/4+1)))
 		msg("You drink from the Murky Pool. You can see in the dark.")
@@ -355,6 +379,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		msg("The Staff of Lazarus falls from its stand.")
 	case d1.ObjLEVER, d1.ObjSWITCHSKL:
 		msg("You pull the lever. Something rumbles in the distance.")
+		f.d1NakrulLever(f.State.GetMap())
 		UpdateD1Quests(f.State, f.State.GetMap())
 	case d1.ObjTEARFTN:
 		from := d1Rng.Intn(4)
@@ -436,10 +461,11 @@ func (f *Factory) breakD1Barrel(o *D1Object, player *Actor) {
 	obj.Active = false // the debris stays, walkable
 	if obj.Kind == d1.ObjBARREL {
 		dlvl := d1DungeonLevel(f.State)
+		ilvl, hell := d1.ItemLevel(dlvl), d1.LevelType(dlvl) == d1.DTypeHell
 		if obj.Var2 <= 1 {
-			it := gen.UsefulItem(dlvl)
+			it := gen.UsefulItem(ilvl)
 			if obj.Var3 != 0 {
-				it = gen.FloorItem(dlvl, false, dlvl > 12)
+				it = gen.FloorItem(ilvl, false, hell)
 			}
 			f.State.AddItemToMapWithDistribution(f.NewD1Item(it), o.pos)
 		}
@@ -534,7 +560,7 @@ func isD1Armor(it *d1.Item) bool {
 func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 	h, gen, m, st := player.hero, f.Generator, f.State.GetMap(), player.GetStats()
 	dlvl := d1DungeonLevel(f.State)
-	lt := (dlvl-1)/4 + 1
+	ilvl, lt := d1.ItemLevel(dlvl), (dlvl-1)/4+1
 	hp, mana := st.GetResource(stats.Health), st.GetResource(stats.Mana)
 	equipped, pack := d1OwnedItems(player)
 	all := append(append([]*Item(nil), equipped...), pack...)
@@ -634,7 +660,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 		f.d1ModifyStat(player, d1.AttrMag, 2)
 	case 14: // Divine
 		drop := func(misc string) {
-			if it := gen.TypeItem(dlvl, d1.ITypeMisc, misc, false); it != nil {
+			if it := gen.TypeItem(ilvl, d1.ITypeMisc, misc, false); it != nil {
 				f.State.AddItemToMapWithDistribution(f.NewD1Item(it), pos)
 			}
 		}
@@ -671,6 +697,55 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 			if it.d1.Magical != 0 {
 				it.d1.Identified = true
 			}
+		}
+	case 26: // Oily
+		for _, a := range map[int][][2]int{d1.Warrior: {{d1.AttrStr, 2}}, d1.Rogue: {{d1.AttrDex, 2}},
+			d1.Sorcerer: {{d1.AttrMag, 2}}, d1.Barbarian: {{d1.AttrVit, 2}}, d1.Monk: {{d1.AttrStr, 1}, {d1.AttrDex, 1}},
+			d1.Bard: {{d1.AttrDex, 1}, {d1.AttrMag, 1}}}[h.Class] {
+			f.d1ModifyStat(player, a[0], a[1])
+		}
+		f.ActionBroker.QueueForExecution(NewTrapMissileAction(pos, MisFireWall, player.MapPosition()))
+	case 27: // Glowing
+		gain, keep := h.Exp/1000, 0
+		if h.Exp > 5000 {
+			gain, keep = 5, int(float64(h.Exp)*0.95)
+		}
+		f.d1ModifyStat(player, d1.AttrMag, gain)
+		h.Exp = keep
+	case 28: // Mendicant's
+		gold := st.GetAttribute(stats.Gold) / 2
+		h.AddExperience(h.Level, gold)
+		st.DecrementBy(stats.Gold, gold)
+	case 29: // Sparkling
+		h.AddExperience(h.Level, 1000*dlvl)
+		f.ActionBroker.QueueForExecution(NewTrapMissileAction(pos, MisFlashTrap, player.MapPosition()))
+	case 30: // Town
+		f.ActionBroker.Execute(NewSpellAction(player, d1.SplTown, 0, player.MapPosition()))
+	case 31: // Shimmering
+		h.ManaBase = h.MaxManaBase
+		mana.SetToMax()
+	case 32: // Solar
+		switch hour := time.Now().Hour(); {
+		case hour > 20 || hour < 4:
+			f.d1ModifyStat(player, d1.AttrVit, 2)
+		case hour > 18:
+			f.d1ModifyStat(player, d1.AttrMag, 2)
+		case hour > 12:
+			f.d1ModifyStat(player, d1.AttrStr, 2)
+		case hour > 4:
+			f.d1ModifyStat(player, d1.AttrDex, 2)
+		}
+	case 33: // Murphy's
+		broke := false
+		for _, it := range equipped {
+			if d := it.d1; d1Rng.Intn(3) == 0 && d.Durability != d1.DurIndestructible && d.Durability != 0 {
+				d.Durability /= 2
+				broke = true
+				break
+			}
+		}
+		if !broke {
+			st.DecrementBy(stats.Gold, st.GetAttribute(stats.Gold)/3)
 		}
 	}
 	for _, it := range all {

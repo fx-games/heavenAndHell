@@ -18,6 +18,24 @@ icon: 21
 internal_name: IconCharacterSorcererFemale
 icon: 49
 
+internal_name: IconCharacterMonkMale
+icon: 22
+
+internal_name: IconCharacterMonkFemale
+icon: 50
+
+internal_name: IconCharacterBardMale
+icon: 23
+
+internal_name: IconCharacterBardFemale
+icon: 51
+
+internal_name: IconCharacterBarbarianMale
+icon: 24
+
+internal_name: IconCharacterBarbarianFemale
+icon: 52
+
 internal_name: IconMonsterBat
 icon: 93
 
@@ -916,3 +934,118 @@ icon: 100
 internal_name: unique.Doomlock
 icon: 101
 
+internal_name: monster.MT_FORK
+name: Hellboar
+icon: 487
+
+internal_name: monster.MT_SCORP
+name: Stinger
+icon: 487
+
+internal_name: monster.MT_EYE
+name: Psychorb
+icon: 487
+
+internal_name: monster.MT_SPIDER
+name: Arachnon
+icon: 487
+
+internal_name: monster.MT_FELLTWIN
+name: Felltwin
+icon: 487
+
+internal_name: monster.MT_SPAWN
+name: Hork Spawn
+icon: 487
+
+internal_name: monster.MT_SCORP2
+name: Venomtail
+icon: 487
+
+internal_name: monster.MT_EYE2
+name: Necromorb
+icon: 487
+
+internal_name: monster.MT_SPIDER2
+name: Spider Lord
+icon: 487
+
+internal_name: monster.MT_LASH
+name: Lashworm
+icon: 487
+
+internal_name: monster.MT_ANT
+name: Torchant
+icon: 487
+
+internal_name: monster.MT_HORKD
+name: Hork Demon
+icon: 487
+
+internal_name: monster.MT_BUG
+name: Hell Bug
+icon: 487
+
+internal_name: monster.MT_GRAVDG
+name: Gravedigger
+icon: 487
+
+internal_name: monster.MT_RAT
+name: Tomb Rat
+icon: 487
+
+internal_name: monster.MT_HELLBAT
+name: Firebat
+icon: 487
+
+internal_name: monster.MT_BONED
+name: Skullwing
+icon: 487
+
+internal_name: monster.MT_LICH
+name: Lich
+icon: 487
+
+internal_name: monster.MT_BUBBA
+name: Crypt Demon
+icon: 487
+
+internal_name: monster.MT_HELLBAT2
+name: Hellbat
+icon: 487
+
+internal_name: monster.MT_BONED2
+name: Bone Demon
+icon: 487
+
+internal_name: monster.MT_LICH2
+name: Arch Lich
+icon: 487
+
+internal_name: monster.MT_BYCLPS
+name: Biclops
+icon: 487
+
+internal_name: monster.MT_FLESH
+name: Flesh Thing
+icon: 487
+
+internal_name: monster.MT_REAPER
+name: Reaper
+icon: 487
+
+internal_name: monster.MT_NKR
+name: Na-Krul
+icon: 487
+
+internal_name: unique.Hork Demon
+name: Hork Demon
+icon: 487
+
+internal_name: unique.The Defiler
+name: The Defiler
+icon: 487
+
+internal_name: unique.Na-Krul
+name: Na-Krul
+icon: 487

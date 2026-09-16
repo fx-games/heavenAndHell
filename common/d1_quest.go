@@ -18,7 +18,8 @@ import (
 // what happened since lives in the saved flags under the quest's key: "quest:<key>" once done, ".active" once
 // active, ".log" once in the quest log, ".v1"/".v2" its _qvar1/_qvar2.
 var d1QuestKeys = [d1.NumQuests]string{"rock", "mushroom", "garbud", "zhar", "veil", "diablo", "butcher", "banner",
-	"blind", "blood", "anvil", "warlord", "leoric", "pwater", "schamb", "lazarus"}
+	"blind", "blood", "anvil", "warlord", "leoric", "pwater", "schamb", "lazarus", "grave", "farmer", "girl", "trader",
+	"defiler", "nakrul", "cornerstone", "jersey"}
 
 // QuestFlag is the flag set once quest q is done.
 func QuestFlag(q int) string { return "quest:" + d1QuestKeys[q] }
@@ -125,14 +126,14 @@ func d1SetLevelOf(mapName string) *D1SetLevel {
 
 // d1TalkList ports towners.cpp's Qtalklist: what each townsperson says about a quest ("" for nothing).
 var d1TalkList = map[VendorType][d1.NumQuests]string{
-	VendorTypeWeapons: {"INFRA6", "MUSH6", "", "", "VEIL5", "", "BUTCH5", "BANNER6", "BLIND5", "BLOOD5", "ANVIL6", "WARLRD5", "KING7", "POISON7", "BONE5", "VILE9"},
-	VendorTypeGeneral: {"INFRA3", "", "", "", "VEIL3", "", "BUTCH3", "BANNER4", "BLIND3", "BLOOD3", "ANVIL3", "WARLRD3", "KING5", "POISON4", "BONE3", "VILE7"},
-	VendorTypeOgden:   {"INFRA2", "MUSH2", "", "", "VEIL2", "", "BUTCH2", "", "BLIND2", "BLOOD2", "ANVIL2", "WARLRD2", "KING3", "POISON2", "BONE2", "VILE4"},
-	VendorTypeCain:    {"INFRA1", "MUSH1", "", "", "VEIL1", "VILE3", "BUTCH1", "BANNER1", "BLIND1", "BLOOD1", "ANVIL1", "WARLRD1", "KING1", "POISON1", "BONE1", "VILE2"},
-	VendorTypeDrunk:   {"INFRA8", "MUSH7", "", "", "VEIL6", "", "BUTCH6", "BANNER7", "BLIND6", "BLOOD6", "ANVIL8", "WARLRD6", "KING8", "POISON8", "BONE6", "VILE10"},
-	VendorTypeWands:   {"INFRA9", "MUSH9", "", "", "VEIL7", "", "BUTCH7", "BANNER8", "BLIND7", "BLOOD7", "ANVIL9", "WARLRD7", "KING9", "POISON9", "BONE7", "VILE11"},
-	VendorTypeBarmaid: {"INFRA4", "MUSH5", "", "", "VEIL4", "", "BUTCH4", "BANNER5", "BLIND4", "BLOOD4", "ANVIL4", "WARLRD4", "KING6", "POISON6", "BONE4", "VILE8"},
-	VendorTypeWirt:    {"INFRA10", "MUSH13", "", "", "VEIL8", "", "BUTCH8", "BANNER9", "BLIND8", "BLOOD8", "ANVIL10", "WARLRD8", "KING10", "POISON10", "BONE8", "VILE12"},
+	VendorTypeWeapons: {"INFRA6", "MUSH6", "", "", "VEIL5", "", "BUTCH5", "BANNER6", "BLIND5", "BLOOD5", "ANVIL6", "WARLRD5", "KING7", "POISON7", "BONE5", "VILE9", "GRAVE2", "", "", "", "", "", "", ""},
+	VendorTypeGeneral: {"INFRA3", "", "", "", "VEIL3", "", "BUTCH3", "BANNER4", "BLIND3", "BLOOD3", "ANVIL3", "WARLRD3", "KING5", "POISON4", "BONE3", "VILE7", "GRAVE3", "", "", "", "", "", "", ""},
+	VendorTypeOgden:   {"INFRA2", "MUSH2", "", "", "VEIL2", "", "BUTCH2", "", "BLIND2", "BLOOD2", "ANVIL2", "WARLRD2", "KING3", "POISON2", "BONE2", "VILE4", "GRAVE5", "", "", "", "", "", "", ""},
+	VendorTypeCain:    {"INFRA1", "MUSH1", "", "", "VEIL1", "VILE3", "BUTCH1", "BANNER1", "BLIND1", "BLOOD1", "ANVIL1", "WARLRD1", "KING1", "POISON1", "BONE1", "VILE2", "GRAVE6", "", "", "", "", "", "", ""},
+	VendorTypeDrunk:   {"INFRA8", "MUSH7", "", "", "VEIL6", "", "BUTCH6", "BANNER7", "BLIND6", "BLOOD6", "ANVIL8", "WARLRD6", "KING8", "POISON8", "BONE6", "VILE10", "GRAVE7", "", "", "", "", "", "", ""},
+	VendorTypeWands:   {"INFRA9", "MUSH9", "", "", "VEIL7", "", "BUTCH7", "BANNER8", "BLIND7", "BLOOD7", "ANVIL9", "WARLRD7", "KING9", "POISON9", "BONE7", "VILE11", "GRAVE1", "", "", "", "", "", "", ""},
+	VendorTypeBarmaid: {"INFRA4", "MUSH5", "", "", "VEIL4", "", "BUTCH4", "BANNER5", "BLIND4", "BLOOD4", "ANVIL4", "WARLRD4", "KING6", "POISON6", "BONE4", "VILE8", "GRAVE8", "", "", "", "", "", "", ""},
+	VendorTypeWirt:    {"INFRA10", "MUSH13", "", "", "VEIL8", "", "BUTCH8", "BANNER9", "BLIND8", "BLOOD8", "ANVIL10", "WARLRD8", "KING10", "POISON10", "BONE8", "VILE12", "GRAVE9", "", "", "", "", "", "", ""},
 }
 
 // d1QuestTopic is what npc says about quest q, if S_TalkEnter lists it: the quest is active and logged. Black
@@ -163,7 +164,7 @@ func (s *State) D1QuestLog() []string {
 	lines := []string{"Quest Log", ""}
 	for q := range d1QuestKeys {
 		if s.QuestActive(q) == d1.QuestActive && s.QuestLog(q) {
-			lines = append(lines, d1.QuestNames[q], "  "+s.d1Text(d1ClassText(s, d1.QuestMsgs[q])), "")
+			lines = append(lines, d1.QuestNames[q], "  "+s.d1Text(d1ClassText(s, s.questMsg(q))), "")
 		}
 	}
 	if len(lines) == 2 {
@@ -174,12 +175,16 @@ func (s *State) D1QuestLog() []string {
 
 func (s *State) d1Text(id string) string { return s.factory.D1().D.Texts[id] }
 
+// d1ClassTextPrefix picks the class each book is read aloud by (OperateBookLever): Hellfire gives the Monk (H) and
+// the Bard (B) their own texts, and its Barbarian reads the Warrior's.
+var d1ClassTextPrefix = [d1.NumClasses]string{d1.Warrior: "", d1.Rogue: "R", d1.Sorcerer: "M", d1.Monk: "H", d1.Bard: "B", d1.Barbarian: ""}
+
 // d1ClassText picks the hero's class version of a book's text (TEXT_BONER, TEXT_RBONER, TEXT_MBONER).
 func d1ClassText(s *State, id string) string {
 	if !strings.HasSuffix(id, "BONER") && !strings.HasSuffix(id, "BLOODY") && !strings.HasSuffix(id, "BLINDING") && !strings.HasSuffix(id, "BLOODWAR") {
 		return id
 	}
-	return "TEXT_" + [3]string{"", "R", "M"}[s.GetPlayer().Hero().Class] + strings.TrimPrefix(id, "TEXT_")
+	return "TEXT_" + d1ClassTextPrefix[s.GetPlayer().Hero().Class] + strings.TrimPrefix(id, "TEXT_")
 }
 
 // say ports InitQTextMsg: a quest text in a text window, and its speech.
@@ -224,6 +229,9 @@ func (f *Factory) d1TownerQuests(npc *Actor) bool {
 	avail := func(q int) bool { return s.D1Quests()[q].Active != d1.QuestNotAvail }
 	active, v1, v2 := s.QuestActive, func(q int) int { return s.QuestVar(q, 1) }, func(q int) int { return s.QuestVar(q, 2) }
 	name := npc.Name()
+	if f.d1HellfireTownerQuests(npc) {
+		return true
+	}
 	switch npc.GetVendorType() {
 	case VendorTypeOgden:
 		if !visited(2) || !avail(d1.QSkelKing) { // 1.09 checks Ogden's Sign only inside Leoric's check
@@ -556,10 +564,14 @@ var (
 // is dead (InitVPTriggers), the portal back from his lair, the map changes that levers, books, the Pedestal of
 // Blood and Snotspill made (ObjChangeMap), and the quest items D1 spawns on arrival (ResyncQuests).
 func UpdateD1Quests(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
+	if m != nil && m.GetName() == string(defs.LevelNameTown) {
+		updateD1Town(s, m)
+	}
 	if m == nil || defs.IsTownLevel(m.GetName()) {
 		return
 	}
 	f := s.factory
+	f.d1HellfireArrival(m)
 	open := func(loc string, tile gridmap.Tile, to gridmap.Transition) {
 		p := m.GetNamedLocation(loc)
 		if _, done := m.GetTransitionAt(p); done || m.GetNamedLocationByPos(p) != loc {
@@ -814,6 +826,7 @@ func d1EndText() []string {
 // d1QuestItemPickedUp ports CheckQuestItem.
 func (f *Factory) d1QuestItemPickedUp(it *d1.Item) {
 	s := f.State
+	f.d1HellfireItemPickedUp(it)
 	switch it.BaseIdx {
 	case d1.IdiOptAmulet:
 		f.completeD1Quest(d1.QBlind)

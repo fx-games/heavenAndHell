@@ -119,8 +119,8 @@ func TestLevelDataLoads(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(ld.dun) != 27 {
-		t.Errorf("%d set pieces, want 27", len(ld.dun))
+	if len(ld.dun) != 29 { // D1's 27 and the Crypt's two set rooms
+		t.Errorf("%d set pieces, want 29", len(ld.dun))
 	}
 	for lt, want := range map[int][2]int{1: {206, 453}, 2: {160, 559}, 3: {156, 560}, 4: {137, 456}} {
 		if got := len(ld.til[lt]) / 8; got != want[0] {

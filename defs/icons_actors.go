@@ -10,6 +10,12 @@ var (
 	IconCharacterWarriorFemale    = actorsIcons["IconCharacterWarriorFemale"]
 	IconCharacterSorcererMale     = actorsIcons["IconCharacterSorcererMale"]
 	IconCharacterSorcererFemale   = actorsIcons["IconCharacterSorcererFemale"]
+	IconCharacterMonkMale         = actorsIcons["IconCharacterMonkMale"]
+	IconCharacterMonkFemale       = actorsIcons["IconCharacterMonkFemale"]
+	IconCharacterBardMale         = actorsIcons["IconCharacterBardMale"]
+	IconCharacterBardFemale       = actorsIcons["IconCharacterBardFemale"]
+	IconCharacterBarbarianMale    = actorsIcons["IconCharacterBarbarianMale"]
+	IconCharacterBarbarianFemale  = actorsIcons["IconCharacterBarbarianFemale"]
 	IconMonsterBat                = actorsIcons["IconMonsterBat"]              // level 1-3
 	IconMonsterSkeleton           = actorsIcons["IconMonsterSkeleton"]         // level 1-3
 	IconMonsterSkeletonWarrior    = actorsIcons["IconMonsterSkeletonWarrior"]  // level 2-4

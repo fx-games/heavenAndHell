@@ -22,12 +22,14 @@ func playthrough() {
 		os.Exit(1)
 	}
 	game.SaveFile = filepath.Join(os.TempDir(), "heavenAndHell_playthrough_save.json")
+	common.D1CornerstoneFile = filepath.Join(os.TempDir(), "heavenAndHell_playthrough_cornerstone.json")
+	os.Remove(common.D1CornerstoneFile)
 	defer os.Remove(game.SaveFile)
 	theGame, _ := createGameAndUIContext() // one instance: ebiten allows a single audio context per process
 	theGame.GetAudio().SetDisablePlayback(true)
-	missiles := &missileCounter{} // registered per check: a new game or a load makes a new broker
-	wallTraps, chestTraps := 0, 0 // traps that fired while objects were operated
-	for run := 1; run <= 3; run++ {
+	missiles := &missileCounter{}                                             // registered per check: a new game or a load makes a new broker
+	wallTraps, chestTraps := 0, 0                                             // traps that fired while objects were operated
+	for run := 1; run <= len(theGame.GetGameData().ClassDefinitions); run++ { // every class, D1's three and Hellfire's
 		theGame.NewGame(theGame.GetGameData().ClassDefinitions[run-1], false, "")
 		state := theGame.GetWorldState()
 		player := state.GetPlayer()
@@ -37,13 +39,17 @@ func playthrough() {
 		if c, rolled := state.GetWaterColor(), state.QuestActive(d1.QPWater) != d1.QuestNotAvail; (c.G > c.B) != rolled {
 			fail("run %d: town water poisoned=%v at game start, but Poisoned Water rolled=%v", run, c.G > c.B, rolled)
 		}
+		runDamage := 0 // milestone 3: over sixteen levels of fighting, something has to get through
 		// the checks park the hero in packs: one turn of a whole pack must not kill a low-HP sorcerer on 14
 		player.Hero().MaxHPBase += 1000 << 6
 		common.SyncHero(player)
 		player.GetStats().GetResource(stats.Health).SetToMax()
-		for dlvl := 1; dlvl <= 16; dlvl++ {
-			name := defs.LevelNameFromDepth(dlvl)
-			state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: "ladder_up"})
+		for dlvl := 1; dlvl <= 24; dlvl++ { // and on through Hellfire's Nest (17-20) and Crypt (21-24)
+			name, entry := defs.LevelNameFromDepth(dlvl), "ladder_up"
+			if dlvl == 17 || dlvl == 21 { // entered from town
+				entry = "warp"
+			}
+			state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: entry})
 			m := state.GetMap()
 			if m.GetName() != name {
 				fail("run %d: expected map %s, got %s", run, name, m.GetName())
@@ -55,7 +61,7 @@ func playthrough() {
 				}
 			}
 			// milestone 6: stairs (and the town warp on 5, 9, 13) reachable on every level type
-			up := m.GetNamedLocation("ladder_up")
+			up := m.GetNamedLocation(entry)
 			reach := reachable(m, up)
 			if dlvl == 4 && state.D1Quests()[d1.QLtBanner].Active != d1.QuestNotAvail { // Snotspill's gang holds the stairs down
 				if reach[m.GetNamedLocation("ladder_down")] {
@@ -82,7 +88,8 @@ func playthrough() {
 			for _, loc := range []string{"ladder_down", "warp"} {
 				p := m.GetNamedLocation(loc)
 				exists := m.GetNamedLocationByPos(p) == loc
-				want := loc == "ladder_down" && dlvl < 16 || loc == "warp" && (dlvl == 5 || dlvl == 9 || dlvl == 13)
+				want := loc == "ladder_down" && dlvl != 16 && dlvl != 20 && dlvl != 24 ||
+					loc == "warp" && (dlvl == 5 || dlvl == 9 || dlvl == 13 || dlvl == 17 || dlvl == 21)
 				if exists != want {
 					fail("run %d dlvl %d: %s exists=%v", run, dlvl, loc, exists)
 				}
@@ -99,8 +106,9 @@ func playthrough() {
 				q    int
 			}
 			if b, ok := map[int]boss{2: {"The Butcher", d1.QButcher}, 8: {"Zhar the Mad", d1.QZhar},
-				13: {"Warlord of Blood", d1.QWarlord}, 16: {"The Dark Lord", d1.QDiablo}}[dlvl]; ok {
-				active := state.D1Quests()[b.q].Active != d1.QuestNotAvail
+				13: {"Warlord of Blood", d1.QWarlord}, 16: {"The Dark Lord", d1.QDiablo},
+				19: {"Hork Demon", -1}, 20: {"The Defiler", -1}, 24: {"Na-Krul", -1}}[dlvl]; ok { // Hellfire's: no quest check
+				active := b.q < 0 || state.D1Quests()[b.q].Active != d1.QuestNotAvail
 				if active && actorNamed(m, b.name) == nil {
 					fail("run %d dlvl %d: %s is missing", run, dlvl, b.name)
 				}
@@ -119,10 +127,24 @@ func playthrough() {
 			if monsters < 10 {
 				fail("run %d dlvl %d: only %d D1 monsters spawned", run, dlvl, monsters)
 			}
-			kills, damageTaken, exp := fight(theGame.GetActionBroker(), state, player)
-			if kills == 0 || damageTaken == 0 || exp == 0 {
-				fail("run %d dlvl %d: fight didn't work (kills=%d damage taken=%d exp=%d)", run, dlvl, kills, damageTaken, exp)
+			switch dlvl {
+			case 3:
+				checkDoppelganger(theGame, fail)
+			case 5:
+				checkRune(theGame, fail)
+			case 21:
+				checkCornerstone(theGame, fail)
+			case 24:
+				checkNakrulBooks(state, player, fail)
 			}
+			kills, damageTaken, exp := fight(theGame.GetActionBroker(), state, player)
+			// past 16 the boosted hero (2·dlvl) outlevels the monsters by 10 and D1 gives no experience
+			if kills == 0 || exp == 0 && dlvl <= 16 {
+				fail("run %d dlvl %d: fight didn't work (kills=%d exp=%d)", run, dlvl, kills, exp)
+			}
+			// a blocking Monk can walk a level untouched, so the hero has to bleed somewhere in the run, not here
+			runDamage += damageTaken
+
 			// milestone 4: open chests, sarcophagi and barrels, use shrines
 			trapped := 0
 			for _, obj := range m.Objects() {
@@ -138,7 +160,7 @@ func playthrough() {
 			}
 			chestTraps += trapped
 			wallTraps += len(common.SnapshotLevel(state, m).Traps)
-			if dlvl < 16 && (objects < 9 || used == 0 || dropped == 0) {
+			if dlvl != 16 && (objects < 9 || used == 0 || dropped == 0) {
 				fail("run %d dlvl %d: objects didn't work (objects=%d used=%d items dropped=%d)", run, dlvl, objects, used, dropped)
 			}
 			fmt.Printf("run %d dlvl %d: %d objects, %d used, %d items dropped\n", run, dlvl, objects, used, dropped)
@@ -155,23 +177,32 @@ func playthrough() {
 				checkCasters(theGame.GetActionBroker(), state, player, missiles, fail)
 			}
 
+			if dlvl == 1 { // every class' skill (_pAblSpells) must fire without blowing up
+				checkClassSkill(theGame.GetFactory(), player, fail)
+				checkDualWield(player, fail)
+			}
+
 			if run == 3 && dlvl == 2 { // milestone 5: the sorcerer casts every spell
 				castAllSpells(theGame.GetFactory(), theGame.GetActionBroker(), state, player, fail)
+				castHellfireSpells(theGame.GetFactory(), theGame.GetActionBroker(), state, player, fail)
 				player = state.GetPlayer()
 			}
 
 			// milestone 2: save, load, and everything that matters is back (a load sees from where the hero stands)
 			theGame.GetActionBroker().Execute(common.NewUpdateFoVAction(common.AbstractCause("playthrough"), player))
 			disarmedDoor := checkDoorDisarm(theGame.GetFactory(), state, player, fail)
+			doors := 0
 			for _, obj := range state.GetMap().Objects() { // a door opened before the save stays open
-				if door, ok := obj.(*common.Door); ok && door.D1 != nil && door.IsClosed() {
-					door.Open()
-					break
+				if door, ok := obj.(*common.Door); ok && door.D1 != nil {
+					doors++
+					if door.IsClosed() {
+						door.Open()
+					}
 				}
 			}
 			before := saveCheckOf(state)
-			if dlvl <= 12 && before.OpenDoors == 0 { // Hell has no doors
-				fail("run %d dlvl %d: no open door to save", run, dlvl)
+			if doors > 0 && before.OpenDoors == 0 { // Hell has no doors, and a seed can lay out a level without one
+				fail("run %d dlvl %d: %d doors on the level, none of them open after opening one", run, dlvl, doors)
 			}
 			theGame.SaveGame()
 			if err := theGame.LoadGame(); err != nil {
@@ -197,8 +228,9 @@ func playthrough() {
 			}
 		}
 	}
-	// milestone 3: the D1 town after a trip down to level 16
+	// milestone 3: the D1 town after a trip down to level 24
 	theGame.GetWorldState().MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"})
+	checkHellfireQuests(theGame, fail)
 	checkTown(theGame.GetWorldState(), fail)
 	if wallTraps == 0 || chestTraps == 0 { // Catacombs and Caves chests are trapped 1 in 10, trap walls 10-25%
 		fail("traps: %d wall traps and %d chest traps fired in 3 runs", wallTraps, chestTraps)
@@ -408,6 +440,227 @@ func saveCheckOf(state *common.State) saveCheck {
 	return c
 }
 
+// checkHellfireQuests walks Farmer's Orchard and Grave Matters through in town: the Nest and the Crypt start shut,
+// Lester hands out the Rune Bomb, which opens the Nest, and pays with the Auric Amulet before he leaves; the
+// Cathedral Map opens the Crypt. Cowquest swaps Lester for the Complete Nut.
+func checkHellfireQuests(theGame *game.GameInstance, fail func(string, ...any)) {
+	state, f := theGame.GetWorldState(), theGame.GetFactory()
+	state.MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"})
+	m, player := state.GetMap(), state.GetPlayer()
+	towner := func(vt common.VendorType) *common.Actor {
+		for _, a := range m.Actors() {
+			if a.GetVendorType() == vt {
+				return a
+			}
+		}
+		return nil
+	}
+	for _, gate := range []string{"to_nest", "to_crypt"} {
+		if _, open := m.GetTransitionAt(m.GetNamedLocation(gate)); open {
+			fail("hellfire: %s is open before its quest", gate)
+		}
+	}
+	lester := towner(common.VendorTypeFarmer)
+	if lester == nil || towner(common.VendorTypeCowFarm) != nil || towner(common.VendorTypeGirl) != nil {
+		fail("hellfire: town has lester=%v nut=%v celia=%v", lester != nil, towner(common.VendorTypeCowFarm) != nil, towner(common.VendorTypeGirl) != nil)
+	}
+	talk := func(a *common.Actor) {
+		theGame.GetActionBroker().Execute(common.NewTalkToAction(common.AbstractCause("playthrough"), a))
+	}
+	take := func(name string) *common.Item {
+		for _, it := range m.Items() {
+			if it.Name() == name {
+				m.RemoveItem(it)
+				player.GetInventory().Add(it)
+				return it
+			}
+		}
+		fail("hellfire: no %s on the ground", name)
+		return nil
+	}
+	use := func(it *common.Item, gate string) {
+		near := m.GetFreeCardinalNeighbors(m.GetNamedLocation(gate))
+		if len(near) == 0 {
+			fail("hellfire: nowhere to stand by %s", gate)
+		}
+		m.MoveActor(player, near[0])
+		it.GetUntargetedAction().Invoke(player, common.EffectSource("playthrough"))
+		if t, open := m.GetTransitionAt(m.GetNamedLocation(gate)); !open || player.GetInventory().Has(it) {
+			fail("hellfire: using %s by %s left it %+v (item kept: %v)", it.Name(), gate, t, player.GetInventory().Has(it))
+		}
+	}
+	talk(lester)
+	if state.QuestActive(d1.QFarmer) != d1.QuestActive {
+		fail("hellfire: Lester didn't start Farmer's Orchard")
+	}
+	use(take("Rune Bomb"), "to_nest")
+	talk(lester)
+	take("Auric Amulet")
+	common.UpdateD1Quests(state, m)
+	if towner(common.VendorTypeFarmer) != nil {
+		fail("hellfire: Lester stays after his reward")
+	}
+	mapItem := f.NewD1Item(f.D1().PlainItem(d1.IdiMapOfDoom))
+	player.GetInventory().Add(mapItem)
+	use(mapItem, "to_crypt")
+	if state.QuestActive(d1.QGrave) != d1.QuestDone {
+		fail("hellfire: Grave Matters isn't done")
+	}
+	state.GetFlags().SetTrue(common.FlagCowQuest)
+	state.ApplyHellfireOptions()
+	if towner(common.VendorTypeCowFarm) == nil || state.D1Quests()[d1.QJersey].Active == d1.QuestNotAvail {
+		fail("hellfire: Cowquest brings no Complete Nut")
+	}
+	state.GetFlags().SetFalse(common.FlagCowQuest)
+	state.ApplyHellfireOptions()
+}
+
+// checkDoppelganger swings a Doppelganger's weapon at an ordinary monster: one blow in ten splits off a copy.
+func checkDoppelganger(theGame *game.GameInstance, fail func(string, ...any)) {
+	state, broker := theGame.GetWorldState(), theGame.GetActionBroker()
+	m, player := state.GetMap(), state.GetPlayer()
+	var weapon *d1.Item
+	for _, it := range player.GetEquipment().AllItems() {
+		if d := it.D1(); d != nil && d.Class == "ICLASS_WEAPON" && d.Type != d1.ITypeBow {
+			weapon = d
+		}
+	}
+	if weapon == nil {
+		return // the class fights with a bow or bare-handed
+	}
+	weapon.DamAcFlags |= d1.IHfDoppelganger
+	defer func() { weapon.DamAcFlags &^= d1.IHfDoppelganger }()
+	count := func(mt int) (n int) {
+		for _, a := range m.Actors() {
+			if mon := a.D1Monster(); mon != nil && mon.Type == mt {
+				n++
+			}
+		}
+		return
+	}
+	for _, a := range m.Actors() {
+		mon := a.D1Monster()
+		if mon == nil || mon.Golem || mon.Unique != nil || !a.IsAlive() || len(m.GetFreeCardinalNeighbors(a.MapPosition())) < 2 {
+			continue
+		}
+		m.MoveActor(player, m.GetFreeCardinalNeighbors(a.MapPosition())[0])
+		before := count(mon.Type)
+		a.AddStatusEffect(common.StatusStone, 1000) // held in place, and every blow lands
+		for swing := 0; swing < 200 && count(mon.Type) == before && a.IsAlive(); swing++ {
+			a.GetStats().GetResource(stats.Health).SetToMax()
+			broker.Execute(common.NewMeleeAttackAction(common.AbstractCause("playthrough"), player, a))
+		}
+		if count(mon.Type) == before {
+			fail("doppelganger: 200 blows at %s split off no copy", a.Name())
+		}
+		a.RemoveStatusEffect(common.StatusStone)
+		return
+	}
+}
+
+// checkRune sets a Rune of Fire under the hero beside a monster: stepping on it (the hero triggers runes too)
+// sets it off. Whether the blast hurts the monster is a to-hit roll, so only the detonation is checked.
+func checkRune(theGame *game.GameInstance, fail func(string, ...any)) {
+	state, f, broker := theGame.GetWorldState(), theGame.GetFactory(), theGame.GetActionBroker()
+	m, player := state.GetMap(), state.GetPlayer()
+	for _, a := range m.Actors() {
+		mon := a.D1Monster()
+		if mon == nil || mon.Golem || !a.IsAlive() || mon.Data.ID == "MT_DIABLO" {
+			continue
+		}
+		free := m.GetFreeCardinalNeighbors(a.MapPosition())
+		if len(free) == 0 {
+			continue
+		}
+		m.MoveActor(player, free[0])
+		rune := f.NewD1Item(f.D1().PlainItem(161)) // Rune of Fire
+		player.GetInventory().Add(rune)
+		rune.GetTargetedAction().Execute(player, player.MapPosition(), player.MapPosition())
+		if player.GetInventory().Has(rune) || !m.IsObjectAt(player.MapPosition()) {
+			fail("rune: the Rune of Fire wasn't set under the hero")
+			return
+		}
+		broker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("playthrough"), 10))
+		if m.IsObjectAt(player.MapPosition()) {
+			fail("rune: the hero stands on the Rune of Fire and it doesn't go off")
+		}
+		return
+	}
+}
+
+// checkCornerstone drops an item beside the Cornerstone of the World: it lands on it, finishes the quest and is
+// there again when the level is built anew.
+func checkCornerstone(theGame *game.GameInstance, fail func(string, ...any)) {
+	state, f := theGame.GetWorldState(), theGame.GetFactory()
+	m, player := state.GetMap(), state.GetPlayer()
+	lvl := state.D1Level(m)
+	if lvl == nil || lvl.Cornerstone == ([2]int{}) {
+		fail("hellfire: level 21 has no Cornerstone of the World")
+		return
+	}
+	stone := geometry.Point{X: lvl.Cornerstone[0] - d1.CellOrigin, Y: lvl.Cornerstone[1] - d1.CellOrigin}
+	var at geometry.Point
+	found := false
+	for _, p := range m.GetFreeCardinalNeighbors(stone) {
+		at, found = p, true
+	}
+	if !found {
+		fail("hellfire: nowhere to stand by the Cornerstone at %v", stone)
+		return
+	}
+	if m.IsItemAt(stone) { // an earlier run's game left its potion on it
+		if m.ItemAt(stone).Name() != "Potion of Healing" {
+			fail("hellfire: the Cornerstone holds %s from nowhere", m.ItemAt(stone).Name())
+		}
+		m.MoveActor(player, stone)
+		theGame.GetActionBroker().Execute(common.NewPickUpAction(common.AbstractCause("playthrough"), player))
+	}
+	m.MoveActor(player, at)
+	it := f.NewD1Item(f.D1().PlainItem(d1.IdxHeal))
+	player.GetInventory().Add(it)
+	theGame.GetActionBroker().Execute(common.NewDropAction(common.AbstractCause("playthrough"), player, it))
+	if !m.IsItemAt(stone) || m.ItemAt(stone) != it || state.QuestActive(d1.QCornstn) != d1.QuestDone {
+		fail("hellfire: the Cornerstone at %v didn't take the %s (quest %d)", stone, it.Name(), state.QuestActive(d1.QCornstn))
+	}
+	m.RemoveItem(it)
+	common.UpdateD1Quests(state, m)
+	if !m.IsItemAt(stone) || m.ItemAt(stone).Name() != it.Name() {
+		fail("hellfire: the Cornerstone forgot its item")
+	}
+}
+
+// checkNakrulBooks reads Na-Krul's three books in their order: his door opens and he loses half his life.
+func checkNakrulBooks(state *common.State, player *common.Actor, fail func(string, ...any)) {
+	m := state.GetMap()
+	var nakrul *common.Actor
+	for _, a := range m.Actors() {
+		if a.D1Monster() != nil && a.D1Monster().Data.ID == "MT_NKR" {
+			nakrul = a
+		}
+	}
+	books := map[int]*common.D1Object{}
+	for _, obj := range m.Objects() {
+		if o, ok := obj.(*common.D1Object); ok && o.O.Kind == d1.ObjSTORYBOOK && o.O.Var8 >= 6 {
+			books[o.O.Var8] = o
+		}
+	}
+	if nakrul == nil || len(books) != 3 {
+		fail("hellfire: level 24 has Na-Krul %v and %d of his books", nakrul != nil, len(books))
+		return
+	}
+	life := nakrul.GetStats().GetAttribute(stats.MaxHealth)
+	for v := 6; v <= 8; v++ {
+		books[v].ActorBumpedInto(player, nil)
+	}
+	if state.QuestActive(d1.QNakrul) != d1.QuestDone || nakrul.GetStats().GetAttribute(stats.MaxHealth) != life/2 {
+		fail("hellfire: Na-Krul's books: quest %d, life %d of %d", state.QuestActive(d1.QNakrul), nakrul.GetStats().GetAttribute(stats.MaxHealth), life)
+	}
+	lvl := state.D1Level(m)
+	if door := (geometry.Point{X: lvl.Uber[0] - d1.CellOrigin, Y: lvl.Uber[1] - d1.CellOrigin}); !m.IsWalkable(door) {
+		fail("hellfire: Na-Krul's door at %v is still shut", door)
+	}
+}
+
 // checkTown: D1 shopkeepers with priced D1 stock, gates by depth, broken gear and repairs.
 func checkTown(state *common.State, fail func(string, ...any)) {
 	m := state.GetMap()
@@ -463,6 +716,92 @@ func checkTown(state *common.State, fail func(string, ...any)) {
 
 // castAllSpells teaches the hero all 26 spells and casts each at the nearest monster; then it walks through the
 // town portal and back, which closes it.
+// castHellfireSpells casts Hellfire's spells from memory: Mana and the Magi fill mana, Reflect stores blows,
+// Berserk turns a monster, the walls and rings leave burning cells, Immolation hurts, Warp lands by the stairs and
+// the Jester casts something.
+func castHellfireSpells(f *common.Factory, broker *common.Broker, state *common.State, player *common.Actor, fail func(string, ...any)) {
+	h, m := player.Hero(), state.GetMap()
+	mana := player.GetStats().GetResource(stats.Mana)
+	for sp := d1.SplMana; sp <= d1.SplSearch; sp++ {
+		h.SpellLevels[sp] = 3
+	}
+	f.RefreshD1Spells(player)
+	nearest := func() *common.Actor {
+		var target *common.Actor
+		for _, a := range m.Actors() {
+			if mon := a.D1Monster(); mon != nil && !mon.Golem && !mon.Berserk && a.IsAlive() && len(m.GetFreeCardinalNeighbors(a.MapPosition())) > 0 && (target == nil ||
+				geometry.DistanceChebyshev(a.MapPosition(), player.MapPosition()) < geometry.DistanceChebyshev(target.MapPosition(), player.MapPosition())) {
+				target = a
+			}
+		}
+		return target
+	}
+	cast := func(sp int, target geometry.Point) {
+		mana.SetToMax()
+		f.CastD1FromMemory(player, sp, target)
+	}
+	burning := func() (n int) {
+		for _, o := range m.Objects() {
+			if _, ok := o.(*common.DamageDealingObject); ok {
+				n++
+			}
+		}
+		return
+	}
+
+	mana.SetToMax()
+	mana.Decrease(mana.Value() / 2)
+	low := mana.Value()
+	f.CastD1FromMemory(player, d1.SplMagi, player.MapPosition())
+	if h.ManaBase != h.MaxManaBase-f.D1().D.ManaCost(h, player.HeroSheet(), d1.SplMagi) {
+		fail("hellfire spells: the Magi left mana base %d of %d (mana %d before)", h.ManaBase, h.MaxManaBase, low)
+	}
+	stored := h.Reflections
+	cast(d1.SplReflect, player.MapPosition())
+	if h.Reflections <= stored || h.Reflections > stored+3*h.Level { // monsters may spend some in the turn the cast takes
+		fail("hellfire spells: Reflect went from %d to %d blows, adding up to %d", stored, h.Reflections, 3*h.Level)
+	}
+	target := nearest()
+	if target == nil {
+		fail("hellfire spells: no monster to cast at")
+		return
+	}
+	if free := m.GetFreeCardinalNeighbors(target.MapPosition()); geometry.DistanceChebyshev(target.MapPosition(), player.MapPosition()) > 1 {
+		m.MoveActor(player, free[0])
+		broker.Execute(common.NewUpdateFoVAction(common.AbstractCause("playthrough"), player))
+	}
+	for tries := 0; tries < 20 && !target.D1Monster().Berserk && target.IsAlive(); tries++ { // resistant monsters shrug it off half the time
+		cast(d1.SplBerserk, target.MapPosition())
+	}
+	if target.IsAlive() && target.D1Monster().MagicRes&d1.ImmuneMagic == 0 && target.D1Monster().Unique == nil && !target.D1Monster().Berserk {
+		fail("hellfire spells: Berserk didn't take %s", target.Name())
+	}
+	before := burning()
+	cast(d1.SplRingOfFire, player.MapPosition())
+	if burning() == before {
+		fail("hellfire spells: Ring of Fire lit nothing")
+	}
+	if target = nearest(); target != nil {
+		before = burning()
+		cast(d1.SplLightWall, target.MapPosition())
+		if burning() == before {
+			fail("hellfire spells: Lightning Wall raised nothing")
+		}
+		cast(d1.SplImmolation, player.MapPosition())
+		cast(d1.SplJester, target.MapPosition())
+	}
+	cast(d1.SplMana, player.MapPosition())
+	lvl := state.D1Level(m)
+	cast(d1.SplWarp, player.MapPosition())
+	near := false
+	for _, t := range lvl.Triggers {
+		near = near || geometry.DistanceChebyshev(player.MapPosition(), geometry.Point{X: t.X - d1.CellOrigin, Y: t.Y - d1.CellOrigin}) <= 6
+	}
+	if !near {
+		fail("hellfire spells: Warp left the hero at %v, away from the stairs", player.MapPosition())
+	}
+}
+
 func castAllSpells(f *common.Factory, broker *common.Broker, state *common.State, player *common.Actor, fail func(string, ...any)) {
 	spells := []int{d1.SplFirebolt, d1.SplHeal, d1.SplLightning, d1.SplFlash, d1.SplIdentify, d1.SplFireWall, d1.SplStone,
 		d1.SplInfra, d1.SplPhasing, d1.SplManaShield, d1.SplFireball, d1.SplGuardian, d1.SplChain, d1.SplWave, d1.SplNova,
@@ -1355,4 +1694,60 @@ func checkItemEffects(broker *common.Broker, state *common.State, fail func(stri
 		a.RemoveStatusEffect(common.StatusStone)
 	}
 	hp.SetToMax()
+}
+
+// checkClassSkill fires the hero's class skill: the Warrior's Item Repair, the Rogue's Trap Disarm, the Sorcerer's
+// Staff Recharge, the Monk's Search, the Bard's Identify and the Barbarian's Rage. Rage is the only one that
+// lingers, so it is ticked through fury and hangover and checked on both sides.
+func checkClassSkill(f *common.Factory, player *common.Actor, fail func(string, ...any)) {
+	h, name := player.Hero(), d1.ClassNames[player.Hero().Class]
+	calm := player.GetStats().GetAttribute(stats.Strength)
+	// D1SpellSkills always puts the class skill first, targeted for the Rogue and untargeted for everyone else
+	switch skills := player.GetUntargetedSkills(); {
+	case len(skills) > 0:
+		skills[0].Invoke(player, common.EffectSource("playthrough"))
+	case len(player.GetTargetedSkills()) > 0:
+		player.GetTargetedSkills()[0].Execute(player, player.MapPosition(), player.MapPosition())
+	default:
+		fail("%s: no class skill to fire", name)
+	}
+	if h.Class != d1.Barbarian {
+		return
+	}
+	raging := player.GetStats().GetAttribute(stats.Strength)
+	if h.Rage <= 0 || raging != calm+2*h.Level {
+		fail("barbarian: Rage gave %d strength instead of %d, %d turns left", raging, calm+2*h.Level, h.Rage)
+	}
+	hung := 0
+	for range 4 * d1.RageTurns(h.Level) { // fury, hangover, and back to normal
+		player.BeforeTurn()
+		if h.Rage < 0 {
+			hung = player.GetStats().GetAttribute(stats.Strength)
+		}
+	}
+	if hung != calm-2*h.Level || h.Rage != 0 || player.GetStats().GetAttribute(stats.Strength) != calm {
+		fail("barbarian: Rage ran %d -> %d -> %d -> %d strength, %d turns left",
+			calm, raging, hung, player.GetStats().GetAttribute(stats.Strength), h.Rage)
+	}
+}
+
+// checkDualWield: only the Bard fills both hands with weapons, and a shield or a two-hander still takes the hand
+// back off him. Everyone else keeps one weapon and an empty off hand.
+func checkDualWield(player *common.Actor, fail func(string, ...any)) {
+	e := player.GetEquipment()
+	main, off := e.GetBySlot(defs.SlotNameMainHand), e.GetBySlot(defs.SlotNameOffHand)
+	isWeapon := func(it *common.Item) bool { return it != nil && it.D1() != nil && it.D1().Class == "ICLASS_WEAPON" }
+	if player.Hero().Class != d1.Bard {
+		if isWeapon(off) {
+			fail("%s: a weapon ended up in the off hand", d1.ClassNames[player.Hero().Class])
+		}
+		return
+	}
+	if !isWeapon(main) || !isWeapon(off) {
+		fail("bard: started with %v / %v instead of a weapon in each hand", main, off)
+	}
+	dual := player.HeroSheet()
+	if !dual.Holds(d1.ITypeSword) || dual.MinDam < 2 {
+		fail("bard: both blades should count, got mask %b damage %d-%d", dual.WeaponMask, dual.MinDam, dual.MaxDam)
+	}
 }

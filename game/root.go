@@ -310,6 +310,7 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 
 	// set references
 	g.state.SetMapGenerator(mapGen)
+	common.UpdateD1Quests(&g.state, g.state.GetMap()) // the town was built before there were quests
 
 	townSpawn := g.state.GetMap().GetNamedLocation("spawn")
 	g.state.SetTownSpawn(townSpawn)
@@ -437,7 +438,13 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	hero := d1.NewHero(d1ClassIndex(playerStartDefinition.InternalName))
 	player.SetHero(hero)
 	gen := g.factory.D1()
-	for _, idx := range map[int][]int{d1.Warrior: {1, 2, 3, 24, 24}, d1.Rogue: {4, 24, 24}, d1.Sorcerer: {5, 25, 25}}[hero.Class] {
+	// CreatePlrItems as Hellfire does it, on its item table (24 is the healing potion, 3 the warrior's spare club):
+	// the Sorcerer's Short Staff of Mana (5) comes with healing potions, the Monk takes IDI_SHORTSTAFF (36), the
+	// Bard IDI_BARDSWORD and IDI_BARDDAGGER (37, 38), and the Barbarian item 139 with the warrior's shield.
+	for _, idx := range map[int][]int{
+		d1.Warrior: {1, 2, 3, 24, 24}, d1.Rogue: {4, 24, 24}, d1.Sorcerer: {5, 24, 24},
+		d1.Monk: {36, 24, 24}, d1.Bard: {37, 38, 24, 24}, d1.Barbarian: {139, 2, 24, 24},
+	}[hero.Class] {
 		item := g.factory.NewD1Item(gen.PlainItem(idx))
 		if item.IsEquippable() && idx != 3 { // CreatePlrItems: the warrior's club goes into the pack
 			g.giveAndEquipItemToActor(player, item)
@@ -466,13 +473,24 @@ func (g *GameInstance) GetWorldState() *common.State {
 	return &g.state
 }
 
+// toggleHellfireOption flips one of Hellfire's command.txt switches and rebuilds the quests from the seed.
+func (g *GameInstance) toggleHellfireOption(flag string) {
+	f := g.state.GetFlags()
+	f.Set(flag, !f.IsSet(flag))
+	g.state.ApplyHellfireOptions()
+	g.PlayerMessage(fmt.Sprintf("%s: %v", flag, f.IsSet(flag)))
+}
+
 // d1DebugItems: go to a level, god mode, complete a quest (decision 16).
 func (g *GameInstance) d1DebugItems() []util.MenuItem {
 	var levels, quests []util.MenuItem
-	for dlvl := 1; dlvl <= 16; dlvl++ {
-		name := defs.LevelNameFromDepth(dlvl)
+	for dlvl := 1; dlvl <= 24; dlvl++ {
+		name, at := defs.LevelNameFromDepth(dlvl), "ladder_up"
+		if dlvl == 17 || dlvl == 21 { // entered from town only
+			at = "warp"
+		}
 		levels = append(levels, util.MenuItem{MainText: fmt.Sprintf("Level %d", dlvl), Action: func() {
-			g.state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: "ladder_up"})
+			g.state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: at})
 		}})
 	}
 	for _, set := range common.D1SetLevels {
@@ -494,6 +512,8 @@ func (g *GameInstance) d1DebugItems() []util.MenuItem {
 	return []util.MenuItem{
 		{MainText: "Go to level", Action: func() { g.uiController.OpenMenu(levels) }},
 		{MainText: "Toggle god mode", Action: func() { g.godMode = !g.godMode }},
+		{MainText: "Toggle Hellfire Cowquest", Action: func() { g.toggleHellfireOption(common.FlagCowQuest) }},
+		{MainText: "Toggle Hellfire Theoquest", Action: func() { g.toggleHellfireOption(common.FlagTheoQuest) }},
 		{MainText: "Complete quest", Action: func() { g.uiController.OpenMenu(quests) }},
 	}
 }
@@ -868,6 +888,12 @@ func d1ClassIndex(internalName string) int {
 		return d1.Rogue
 	case "sorcerer", "mage":
 		return d1.Sorcerer
+	case "monk":
+		return d1.Monk
+	case "bard":
+		return d1.Bard
+	case "barbarian":
+		return d1.Barbarian
 	}
 	return d1.Warrior
 }

@@ -15,6 +15,7 @@ type gameMap = gridmap.GridMap[*common.Actor, *common.Item, common.Object]
 func (g *GameInstance) restockD1Town(m *gameMap) {
 	gen := g.factory.D1()
 	player := g.state.GetPlayer()
+	who := common.D1Shopper(player)
 	lvl := d1.StoreLevel(g.state.GetLastDungeonLevel())
 	clvl := player.Hero().Level
 	g.forgetBoughtD1Stock(m)
@@ -22,7 +23,7 @@ func (g *GameInstance) restockD1Town(m *gameMap) {
 		inv := a.GetInventory()
 		switch a.GetVendorType() {
 		case common.VendorTypeWeapons:
-			gen.RefillPremium(&g.premium, clvl)
+			gen.RefillPremium(&g.premium, clvl, who)
 			g.stock(inv, append(gen.SmithStock(lvl), g.premium.Items[:]...), d1.BuyPrice)
 			for _, item := range inv.Items() {
 				for _, premiumItem := range g.premium.Items {
@@ -34,13 +35,13 @@ func (g *GameInstance) restockD1Town(m *gameMap) {
 		case common.VendorTypeWands:
 			g.stock(inv, gen.WitchStock(lvl, player.Hero().SpellLevels), d1.BuyPrice)
 		case common.VendorTypeGeneral:
-			g.stock(inv, gen.HealerStock(lvl), d1.BuyPrice)
+			g.stock(inv, gen.HealerStock(lvl, who), d1.BuyPrice)
 		case common.VendorTypeWirt:
 			if g.boyItem == nil || g.boyLevel < clvl>>1 {
-				g.boyItem, g.boyLevel = gen.BoyItem(clvl), clvl>>1
+				g.boyItem, g.boyLevel = gen.BoyItem(clvl, who), clvl>>1
 				g.state.GetFlags().SetFalse(common.FlagWirtItemSeen) // a new item costs a new look fee
 			}
-			g.stock(inv, []*d1.Item{g.boyItem}, d1.WirtPrice)
+			g.stock(inv, []*d1.Item{g.boyItem}, gen.D.WirtPrice)
 		}
 	}
 	g.storesShown = true
@@ -105,6 +106,9 @@ func (g *GameInstance) onD1MapChanged(oldMapName, newMapName string) {
 			g.factory.PlaceD1GolemNear(player, common.SaveD1Golem(golem))
 		}
 	}
+	if h := player.Hero(); h != nil {
+		h.Reflections = 0 // FreeMissiles: Reflect ends with the level
+	}
 	common.UpdateD1Quests(&g.state, g.state.GetMap())
 	g.audioPlayer.PlayMusic(d1AreaMusic(newMapName)) // without that track the current music plays on
 	if p := g.state.D1Portal(); p != nil && defs.IsTownLevel(oldMapName) && newMapName == p.Map &&
@@ -115,10 +119,17 @@ func (g *GameInstance) onD1MapChanged(oldMapName, newMapName string) {
 
 // d1AreaMusic names an area's music track, one per area like D1's themes: assets/diablo_music/<name>.ogg
 // (dtowne/dlvla-d converted and renamed, see AGENTS.md) if present, else no track is registered under that name
-// and the current music just keeps playing.
+// and the current music just keeps playing. Hellfire's two areas come from hfmusic.mpq as nest/crypt.
 func d1AreaMusic(mapName string) string {
 	if defs.IsTownLevel(mapName) {
 		return "town"
 	}
-	return [4]string{"cathedral", "catacombs", "caves", "hell"}[min(max(common.LevelFromName(mapName)-1, 0)/4, 3)]
+	dlvl := max(common.LevelFromName(mapName), 1)
+	switch {
+	case dlvl >= 21: // the Crypt
+		return "crypt"
+	case dlvl >= 17: // the Festering Nest
+		return "nest"
+	}
+	return [4]string{"cathedral", "catacombs", "caves", "hell"}[min((dlvl-1)/4, 3)]
 }

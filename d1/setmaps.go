@@ -117,7 +117,7 @@ func (g *gen) objRange(x, y, x1, y1, x2, y2, v int) {
 }
 
 // loadSetMap ports LoadSetMap.
-func (g *gen) loadSetMap(sl int, seeds [17]int32) {
+func (g *gen) loadSetMap(sl int, seeds [NumLevels]int32) {
 	g.setlevel = true
 	switch sl {
 	case SLSkelKing:

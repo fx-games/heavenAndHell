@@ -30,7 +30,9 @@ func (d *DropAction) Execute(context ActionContext) []Action {
 	inventory.Remove(d.item)
 
 	// TODO: currently possible to drop items out of bounds
-	context.GameState.AddItemToMapWithDistribution(d.item, actorPos)
+	if actor != context.GameState.GetPlayer() || !context.GameState.factory.d1CornerstonePlace(d.item, actorPos) {
+		context.GameState.AddItemToMapWithDistribution(d.item, actorPos)
+	}
 
 	name := actor.Name()
 	if context.GameState.GetPlayer() == actor {

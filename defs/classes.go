@@ -8,9 +8,12 @@ import (
 
 // FemaleIconByClass maps a class' internal_name to its female icon; gender only swaps the sprite.
 var FemaleIconByClass = map[string]int32{
-	"warrior":  IconCharacterWarriorFemale,
-	"rogue":    IconCharacterRogueFemale,
-	"sorcerer": IconCharacterSorcererFemale,
+	"warrior":   IconCharacterWarriorFemale,
+	"rogue":     IconCharacterRogueFemale,
+	"sorcerer":  IconCharacterSorcererFemale,
+	"monk":      IconCharacterMonkFemale,
+	"bard":      IconCharacterBardFemale,
+	"barbarian": IconCharacterBarbarianFemale,
 }
 
 type LoadoutDefinition struct {

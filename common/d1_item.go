@@ -62,11 +62,16 @@ func d1ItemIconName(it *d1.Item) string {
 	return "item." + d1ITypeNames[it.Type]
 }
 
-func d1SlotName(it *d1.Item) defs.SlotName {
+// d1SlotName is the slot an item goes in; dualWield (the Bard) puts a one-handed weapon in either free hand,
+// which SlotNameOneHandedWeapon stands for the way SlotNameRing stands for either ring finger.
+func d1SlotName(it *d1.Item, dualWield bool) defs.SlotName {
 	switch it.Loc {
 	case "ILOC_ONEHAND":
 		if it.Type == d1.ITypeShield {
 			return defs.SlotNameOffHand
+		}
+		if dualWield {
+			return defs.SlotNameOneHandedWeapon
 		}
 		return defs.SlotNameMainHand
 	case "ILOC_TWOHAND":
@@ -86,7 +91,7 @@ func d1SlotName(it *d1.Item) defs.SlotName {
 // NewD1Item wraps a rolled D1 item into a game item; the D1 fields stay the source of truth.
 func (g *Factory) NewD1Item(it *d1.Item) *Item {
 	item := NewItem(g.State.GetPlayer, it.Name, d1ItemIcon(it))
-	item.d1 = it
+	item.d1, item.d1Data = it, g.Generator.D
 	item.SetInternalName(it.Name)
 	item.SetBaseCost(it.IValue)
 	durability := stats.NewResource(0, flatFunc(it.MaxDur), it.Durability)
@@ -164,6 +169,12 @@ func (g *Factory) NewD1Item(it *d1.Item) *Item {
 			item.SetCharges(1)
 			item.SetDestroyAfterUse(true)
 			item.SetUntargetedAction(action)
+		default:
+			if d1.IsOil(it.MiscID) { // Hellfire's oils: pick an item out of the pack and pour it on
+				g.d1OilAction(item, it.MiscID, it.Name)
+			}
+			g.d1HellfireItemAction(item, it)
+			g.d1RuneAction(item, it)
 		}
 	}
 	if it.Type == d1.ITypeStaff && it.Spell > 0 && it.MaxCharges > 0 {
@@ -356,6 +367,11 @@ func (e *Equipment) D1CompareForEquipping(candidate *Item) ([]EquippedComparison
 			return []EquippedComparison{{Item: mainHand, Note: NoteUnequipped}}, nil
 		}
 		compare(e.GetBySlot(defs.SlotNameOffHand))
+	case defs.SlotNameOneHandedWeapon: // a dual wielder fills a free hand, so nothing is replaced until both are full
+		if e.isOneSlotAvailable(defs.SlotNameMainHand, defs.SlotNameOffHand) {
+			break
+		}
+		compare(mainHand)
 	default:
 		compare(e.GetBySlot(candidate.SlotName()))
 	}

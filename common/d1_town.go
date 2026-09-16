@@ -22,16 +22,32 @@ const WirtLookCost = 50
 
 // D1VendorBuys ports SmithSellOk/WitchSellOk for the vendor's type.
 func D1VendorBuys(vendor *Actor, item *Item) bool {
-	if item.d1 == nil {
+	if item.d1 == nil || item.d1Data == nil {
 		return false
 	}
 	switch vendor.GetVendorType() {
 	case VendorTypeWeapons:
-		return d1.SmithBuys(item.d1)
+		return item.d1Data.SmithBuys(item.d1)
 	case VendorTypeWands:
-		return d1.WitchBuys(item.d1)
+		return item.d1Data.WitchBuys(item.d1)
 	}
 	return false
+}
+
+// D1Shopper is what Hellfire's stores look at of the player (SpawnOnePremium, SpawnBoy, HealerItemOk).
+func D1Shopper(player *Actor) *d1.Shopper {
+	h, s := player.hero, player.HeroSheet()
+	if h == nil {
+		return nil
+	}
+	who := &d1.Shopper{Class: h.Class, Str: s.Str, Mag: s.Mag, Dex: s.Dex, BaseStr: h.BaseStr, BaseMag: h.BaseMag,
+		BaseDex: h.BaseDex, BaseVit: h.BaseVit}
+	for _, it := range d1HeroItems(player) {
+		if it.d1 != nil {
+			who.Owned = append(who.Owned, it.d1)
+		}
+	}
+	return who
 }
 
 func D1SellPrice(item *Item) int { return d1.SellPrice(item.d1) }
@@ -98,15 +114,23 @@ func d1VendorOptions(ctx ActionContext, vendor *Actor) []util.MenuItem {
 			func(it *d1.Item) { it.Durability = it.MaxDur })}
 	case VendorTypeWands:
 		buy := util.MenuItem{MainText: "Buy items", Action: func() { gui.OpenShopMenu(vendor) }}
-		return []util.MenuItem{buy, sell, d1ServiceOption(ctx, "Recharge staves", d1.CanRecharge, data.RechargeCost,
+		return []util.MenuItem{buy, sell, d1ServiceOption(ctx, "Recharge staves", data.CanRecharge, data.RechargeCost,
 			func(it *d1.Item) { it.Charges = it.MaxCharges })}
 	case VendorTypeGeneral:
-		heal := util.MenuItem{MainText: "Receive healing", Action: func() {
-			ctx.GameState.GetPlayer().HealCompletely()
+		heal := func() {
+			player := ctx.GameState.GetPlayer()
+			if hp := player.GetStats().GetResource(stats.Health); !hp.IsAtMax() {
+				ctx.GameState.factory.playD1Sound("IS_CAST8")
+			}
+			player.HealCompletely()
 			ctx.Msg("Pepin tends to your wounds.")
-		}}
+		}
 		buy := util.MenuItem{MainText: "Buy items", Action: func() { gui.OpenShopMenu(vendor) }}
-		return []util.MenuItem{heal, buy}
+		if data.Hellfire { // S_StartHealer: Hellfire's Pepin heals as you come in
+			heal()
+			return []util.MenuItem{buy}
+		}
+		return []util.MenuItem{{MainText: "Receive healing", Action: heal}, buy}
 	case VendorTypeCain:
 		// D1 charges a flat 100 gold to identify (AddStoreHoldId in stores.cpp), regardless of item value
 		return []util.MenuItem{d1ServiceOption(ctx, "Identify an item", func(it *d1.Item) bool { return it.Magical != 0 && !it.Identified },

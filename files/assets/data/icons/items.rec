@@ -548,3 +548,107 @@ icon: 137
 internal_name: item.Staff of Lazarus
 name: D1 Staff of Lazarus (quest)
 icon: 137
+
+internal_name: item.IMISC_OILOF
+name: D1 Oil (unidentified)
+icon: 333
+
+internal_name: item.IMISC_OILACC
+name: D1 Oil of Accuracy
+icon: 333
+
+internal_name: item.IMISC_OILMAST
+name: D1 Oil of Mastery
+icon: 333
+
+internal_name: item.IMISC_OILSHARP
+name: D1 Oil of Sharpness
+icon: 333
+
+internal_name: item.IMISC_OILDEATH
+name: D1 Oil of Death
+icon: 333
+
+internal_name: item.IMISC_OILSKILL
+name: D1 Oil of Skill
+icon: 333
+
+internal_name: item.IMISC_OILBSMTH
+name: D1 Blacksmith Oil
+icon: 333
+
+internal_name: item.IMISC_OILFORT
+name: D1 Oil of Fortitude
+icon: 333
+
+internal_name: item.IMISC_OILPERM
+name: D1 Oil of Permanence
+icon: 333
+
+internal_name: item.IMISC_OILHARD
+name: D1 Oil of Hardening
+icon: 333
+
+internal_name: item.IMISC_OILIMP
+name: D1 Oil of Imperviousness
+icon: 333
+
+internal_name: item.IMISC_RUNEF
+name: D1 Rune of Fire
+icon: 137
+
+internal_name: item.IMISC_RUNEL
+name: D1 Rune of Lightning
+icon: 137
+
+internal_name: item.IMISC_GR_RUNEF
+name: D1 Greater Rune of Fire
+icon: 137
+
+internal_name: item.IMISC_GR_RUNEL
+name: D1 Greater Rune of Lightning
+icon: 137
+
+internal_name: item.IMISC_RUNES
+name: D1 Rune of Stone
+icon: 137
+
+internal_name: item.IMISC_AURIC
+name: D1 Auric Amulet
+icon: 137
+
+internal_name: item.IMISC_NOTE
+name: D1 Reconstructed Note
+icon: 137
+
+internal_name: item.IMISC_ARENAPOT
+name: D1 Arena Potion
+icon: 332
+
+internal_name: item.Rune Bomb
+name: D1 Rune Bomb
+icon: 137
+
+internal_name: item.Theodore
+name: D1 Theodore
+icon: 137
+
+internal_name: item.Torn Note 1
+name: D1 Torn Note 1
+icon: 139
+
+internal_name: item.Torn Note 2
+name: D1 Torn Note 2
+icon: 139
+
+internal_name: item.Torn Note 3
+name: D1 Torn Note 3
+icon: 139
+
+internal_name: item.Brown Suit
+name: D1 Brown Suit
+icon: 137
+
+internal_name: item.Grey Suit
+name: D1 Grey Suit
+icon: 137

@@ -2,7 +2,8 @@ package d1
 
 import "math/rand"
 
-// Spell ids (SPL_) of the 26 single player spells (decision 6).
+// Spell ids (SPL_) of the 26 single player spells (decision 6), plus Hellfire's. Rage is Hellfire's use of D1's
+// unused SPL_BLODBOIL slot; the rest are Hellfire's table past D1's 37, in its order.
 const (
 	SplFirebolt    = 1
 	SplHeal        = 2
@@ -22,6 +23,7 @@ const (
 	SplNova        = 18
 	SplInferno     = 20
 	SplGolem       = 21
+	SplRage        = 22 // the Barbarian's skill (SPL_BLODBOIL)
 	SplTeleport    = 23
 	SplApocalypse  = 24
 	SplRepair      = 26 // the class skills (_pAblSpells)
@@ -33,6 +35,25 @@ const (
 	SplTelekinesis = 33
 	SplBloodStar   = 35
 	SplBoneSpirit  = 36
+	// Hellfire's
+	SplMana        = 37 // staff only
+	SplMagi        = 38 // staff only
+	SplJester      = 39 // staff only
+	SplLightWall   = 40
+	SplImmolation  = 41
+	SplWarp        = 42
+	SplReflect     = 43
+	SplBerserk     = 44
+	SplRingOfFire  = 45
+	SplSearch      = 46 // also the Monk's skill
+	SplRuneFire    = 47 // the runes' spells; the rune items cast them
+	SplRuneLight   = 48
+	SplRuneNova    = 49
+	SplRuneImmolat = 50
+	SplRuneStone   = 51
+	NumSpells      = 52
+	// D1SpellCount is D1 1.09's MAX_SPELLS; Hellfire's is NumSpells.
+	D1SpellCount = 37
 )
 
 // Missile resistance kinds (missiledata mResist).
@@ -50,6 +71,9 @@ var SpellResist = map[int]int{
 	SplLightning: ResistKindLightning, SplChain: ResistKindLightning, SplNova: ResistKindLightning, SplChargedBolt: ResistKindLightning,
 	SplFlash: ResistKindMagic, SplStone: ResistKindMagic, SplApocalypse: ResistNone, SplBloodStar: ResistKindMagic,
 	SplBoneSpirit: ResistKindMagic, SplHolyBolt: ResistNone,
+	SplLightWall: ResistKindLightning, SplImmolation: ResistKindFire, SplRingOfFire: ResistKindFire,
+	SplRuneFire: ResistKindFire, SplRuneLight: ResistKindLightning, SplRuneNova: ResistKindLightning,
+	SplRuneImmolat: ResistKindFire, SplRuneStone: ResistKindMagic,
 }
 
 // SpellTargeted: spells that need a target cell (sTargeted, plus the ones D1 aims at the cursor anyway).
@@ -57,10 +81,16 @@ var SpellTargeted = map[int]bool{
 	SplFirebolt: true, SplLightning: true, SplFireWall: true, SplStone: true, SplFireball: true, SplGuardian: true,
 	SplChain: true, SplWave: true, SplInferno: true, SplGolem: true, SplTeleport: true, SplElemental: true,
 	SplChargedBolt: true, SplHolyBolt: true, SplTelekinesis: true, SplBloodStar: true, SplBoneSpirit: true,
+	SplJester: true, SplLightWall: true, SplBerserk: true,
 }
 
-// SpellFrames: casting animation length per class (PlrGFXAnimLens[class][5]).
-var SpellFrames = [3]int{20, 16, 12}
+// SpellFrames: casting animation length per class (each class' animations.tsv castingFrames).
+var SpellFrames = func() (f [NumClasses]int) {
+	for c, a := range classAttr {
+		f[c] = a.SpellFrames
+	}
+	return
+}()
 
 // SpellLevel ports GetSpellLevel.
 func (h *Hero) SpellLevel(s Sheet, spell int) int {
@@ -76,12 +106,13 @@ func (d *Data) ManaCost(h *Hero, s Sheet, spell int) int {
 		adj >>= 1
 	}
 	ma := (sd.Mana - adj) << 6
+	if sd.Mana == 255 { // Hellfire's staff-only spells: the low byte of the base max mana, as D1 casts it
+		ma = (int(byte(h.MaxManaBase)) - adj) << 6
+	}
 	if spell == SplHeal {
 		ma = (sd.Mana + 2*h.Level - adj) << 6
 	}
-	if h.Class == Rogue {
-		ma -= ma >> 2
-	}
+	ma = ma * classAttr[h.Class].ManaCost >> 6
 	if sd.MinMana > ma>>6 {
 		ma = sd.MinMana << 6
 	}
@@ -232,3 +263,8 @@ var NovaRays = func() [][2]int {
 	}
 	return rays
 }()
+
+// RageTurns and RageDamage port AddRage/ProcessRage: the Barbarian rages for that many turns, drags through the
+// same again with the bonus reversed, and pays 6 HP per character level at the end.
+func RageTurns(clvl int) int  { return (245 + 2*clvl) / RefWalkTicks }
+func RageDamage(clvl int) int { return 6 * clvl }

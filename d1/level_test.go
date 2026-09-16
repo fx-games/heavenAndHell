@@ -3,6 +3,7 @@ package d1
 import (
 	"fmt"
 	"os"
+	"slices"
 	"testing"
 )
 
@@ -17,8 +18,8 @@ func TestCreateLevels(t *testing.T) {
 		seeds := LevelSeeds(game * 7919)
 		q := InitQuests(seeds)
 		gnr := NewGenerator(d, game)
-		levels := make([]struct{ dlvl, sl int }, 0, 20)
-		for dlvl := 1; dlvl <= 16; dlvl++ {
+		levels := make([]struct{ dlvl, sl int }, 0, 28)
+		for dlvl := 1; dlvl <= 24; dlvl++ { // Hellfire's Nest and Crypt too
 			levels = append(levels, struct{ dlvl, sl int }{dlvl, SLNone})
 		}
 		levels = append(levels, struct{ dlvl, sl int }{3, SLSkelKing}, struct{ dlvl, sl int }{6, SLBoneChamb},
@@ -44,7 +45,8 @@ func TestCreateLevels(t *testing.T) {
 				if lvl.Solid(x, y) && what != "trap" && !closed(x, y) && !doors[[2]int{x, y}] && lv.dlvl != 16 {
 					t.Errorf("game %d level %d/%d: %s on a solid cell %d,%d", game, lv.dlvl, lv.sl, what, x, y)
 				}
-				if prev, ok := used[[2]int{x, y}]; ok && what[:4] == prev[:4] {
+				// two objects' traps can pick the same wall: AddObject doesn't check the cell
+				if prev, ok := used[[2]int{x, y}]; ok && what[:4] == prev[:4] && what != "trap" {
 					t.Errorf("game %d level %d/%d: %s and %s share %d,%d", game, lv.dlvl, lv.sl, what, prev, x, y)
 				}
 				used[[2]int{x, y}] = what
@@ -74,7 +76,7 @@ func TestCreateLevels(t *testing.T) {
 				up, down := 0, 0
 				for _, tr := range lvl.Triggers {
 					switch tr.Msg {
-					case TrigPrevLevel:
+					case TrigPrevLevel, TrigTownWarpUp: // the Nest and the Crypt start with a way back to town
 						up++
 					case TrigNextLevel:
 						down++
@@ -86,6 +88,12 @@ func TestCreateLevels(t *testing.T) {
 				if lv.dlvl < 16 && (monsters < 30 || len(lvl.Objects) < 10) {
 					t.Errorf("game %d level %d: %d monsters, %d objects", game, lv.dlvl, monsters, len(lvl.Objects))
 				}
+			}
+			if lv.sl == SLNone && lv.dlvl == 24 && !slices.ContainsFunc(lvl.Monsters, func(m *Monster) bool { return m != nil && m.Type == MtNAKRUL }) {
+				t.Errorf("game %d: no Na-Krul on level 24", game)
+			}
+			if lv.dlvl >= 21 && lv.dlvl <= 23 && !slices.ContainsFunc(lvl.Items, func(it *PlacedItem) bool { return it.Item.Name == fmt.Sprintf("Torn Note %d", lv.dlvl-20) }) {
+				t.Errorf("game %d level %d: no torn note", game, lv.dlvl)
 			}
 			if game == 1 {
 				t.Logf("level %d/%d: %d monsters, %d objects, %d items, view %v", lv.dlvl, lv.sl, monsters, len(lvl.Objects), len(lvl.Items), lvl.View)

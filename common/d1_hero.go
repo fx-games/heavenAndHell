@@ -186,6 +186,7 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 			}
 			blast = d1ElementalHit(def, kind, h.ArrowHitChance(s, mon.AC, dist), func() int { return h.ArrowBlastDamage(d1Rng, s, mind, maxd) })
 		}
+		dam = d1HellfireHit(ctx, att, def, ranged, s, dam, &extra)
 		dam = max(dam, 0) + blast
 		// D1 stops a monster's healing on melee hits with the "can't heal" bit (0x100) and on hits by fire arrows;
 		// the bit named for monsters (ISPL_NOHEALMON) is never read.
@@ -208,7 +209,7 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 			hit, minDam, maxDam = mon.HitWith[0], mon.HitWith[1], mon.HitWith[2]
 			mon.HitWith = nil
 		}
-		chance := h.MonsterMeleeHitChance(s, hit, mon.Level, dlvl)
+		chance := h.MonsterMeleeHitChance(s, hit, mon.Level, dlvl, mon.Data.Class)
 		if ranged {
 			chance = h.MonsterArrowHitChance(s, hit, mon.Level, dist, dlvl)
 		}
@@ -216,13 +217,26 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 			logMissed(ctx, att, def)
 			return 0, nil, true
 		}
+		// Hellfire's Reflect (M_TryH2HHit): a melee blow, blocked or not, turns 20-29% of its damage on the monster
+		reflect := func(dam64 int) int {
+			if ranged || h.Reflections <= 0 {
+				return 0
+			}
+			h.Reflections--
+			mdam := dam64 * (d1Rng.Intn(10) + 20) / 100
+			extra = append(extra, NewChangeResourceAction(NewActorCause("Reflect", def), att, stats.Health, -float64(mdam)/64))
+			return mdam
+		}
 		if d1Rng.Intn(100) < h.BlockChance(s, mon.Level) {
 			ctx.Msg(fmt.Sprintf("You block the attack of %s.", att.Name()))
 			d1Broke(ctx, def, d1.ShieldDur(def.equippedD1()))
-			return 0, nil, true
+			reflect(d1.MonsterDamage(d1Rng, s, minDam, maxDam))
+			return 0, extra, true
 		}
 		d1Broke(ctx, def, d1.ArmorDur(d1Rng, def.equippedD1()))
-		dam = d1ManaShield(def, d1.MonsterDamage(d1Rng, s, minDam, maxDam)>>6)
+		dam64 := d1.MonsterDamage(d1Rng, s, minDam, maxDam)
+		dam64 -= reflect(dam64)
+		dam = d1ManaShield(def, max(dam64, 0)>>6)
 		if !ranged && s.Flags&d1.ISplThorns != 0 {
 			extra = append(extra, NewChangeResourceAction(NewActorCause("Thorns", def), att, stats.Health, -float64(d1Rng.Intn(3)+1)))
 		}
@@ -290,7 +304,7 @@ func D1CombatForecast(state *State, player, monster *Actor) []string {
 		}
 		pool += mana
 	}
-	monChance := h.MonsterMeleeHitChance(s, mon.Hit, mon.Level, d1DungeonLevel(state)) * (100 - h.BlockChance(s, mon.Level)) / 100
+	monChance := h.MonsterMeleeHitChance(s, mon.Hit, mon.Level, d1DungeonLevel(state), mon.Data.Class) * (100 - h.BlockChance(s, mon.Level)) / 100
 	return []string{"",
 		fmt.Sprintf("You: %d%% to hit, %s", chance, d1BlowsToKill(monster.GetStats().GetResource(stats.Health).Value(), lo, hi)),
 		fmt.Sprintf("It: %d%% to hit you, %s", monChance, d1BlowsToKill(pool, max(mon.MinDam+s.GetHit, 1), max(mon.MaxDam+s.GetHit, 1))),
@@ -418,10 +432,54 @@ func d1OnKill(ctx ActionContext, killer, victim *Actor) []Action {
 	d1FallenFear(state, victim.MapPosition())
 	state.factory.d1AcidDeath(ctx, victim)
 	dlvl := d1DungeonLevel(state)
-	if it := state.factory.d1QuestDrop(mon); it != nil {
+	if state.factory.d1HellfireLoot(mon, victim.MapPosition(), d1.ItemLevel(dlvl)) {
+	} else if it := state.factory.d1QuestDrop(mon); it != nil {
 		state.AddItemToMapWithDistribution(state.factory.NewD1Item(it), victim.MapPosition())
-	} else if it := state.factory.D1().MonsterDrop(mon.Data, mon.Level, mon.Unique != nil, dlvl, dlvl > 12); it != nil {
+	} else if it := state.factory.D1().MonsterDrop(mon.Data, mon.Level, mon.Unique != nil, d1.ItemLevel(dlvl), d1.LevelType(dlvl) == d1.DTypeHell); it != nil {
 		state.AddItemToMapWithDistribution(state.factory.NewD1Item(it), victim.MapPosition())
 	}
 	return nil
+}
+
+// d1HellfireHit applies Hellfire's own damage effects to a landed blow (PlrHitMonst's _iDamAcFlags block):
+// Devastation's rare triple hit, the Jester's wild multiplier, and Peril's double damage paid for in blood.
+// Decay wears the weapon out one hit at a time and is handled in d1DecayWeapons. A Doppelganger's melee blow splits
+// an ordinary monster in two.
+func d1HellfireHit(ctx ActionContext, att, def *Actor, ranged bool, s d1.Sheet, dam int, extra *[]Action) int {
+	if s.DamAcFlags&d1.IHfDevastation != 0 && d1Rng.Intn(100) < 5 {
+		dam *= 3
+	}
+	if mon := def.d1Monster; !ranged && s.DamAcFlags&d1.IHfDoppelganger != 0 && mon.AI != "AI_DIABLO" && mon.Unique == nil && d1Rng.Intn(100) < 10 {
+		ctx.GameState.factory.d1Doppelganger(def)
+	}
+	if s.DamAcFlags&d1.IHfJesters != 0 {
+		dam = d1.JesterDamage(dam, d1Rng.Intn)
+	}
+	if s.DamAcFlags&d1.IHfPeril != 0 {
+		if self := s.GetHit; self > 0 {
+			*extra = append(*extra, NewChangeResourceAction(NewActorCause("Peril", att), att, stats.Health, float64(-self)))
+		}
+		dam *= 2
+	}
+	d1DecayWeapons(ctx, att)
+	return dam
+}
+
+// d1DecayWeapons ports WeaponDecay: a weapon "of decay" loses 5% damage every swing and crumbles at -100%.
+func d1DecayWeapons(ctx ActionContext, att *Actor) {
+	for _, it := range att.GetEquipment().AllItems() {
+		if it.d1 == nil || it.d1.Class != "ICLASS_WEAPON" || it.d1.DamAcFlags&d1.IHfDecay == 0 {
+			continue
+		}
+		it.d1.PLDam -= 5
+		if it.d1.PLDam <= -100 {
+			d1Broke(ctx, att, it.d1)
+			att.GetEquipment().UnEquip(it)
+			att.GetInventory().Remove(it)
+			ctx.Msg(fmt.Sprintf("Your %s crumbles away.", it.Name()))
+			continue
+		}
+		it.RefreshD1()
+	}
+	SyncHero(att)
 }

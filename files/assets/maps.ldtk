@@ -1555,6 +1555,64 @@
 							],
 							"__worldX": -464,
 							"__worldY": -1048
+						},
+						{
+							"__identifier": "Location",
+							"__grid": [55,19],
+							"__pivot": [0,0],
+							"__tags": ["META"],
+							"__tile": null,
+							"__smartColor": "#63C74D",
+							"iid": "631eb117-2b93-41c6-add3-34c6b7032371",
+							"width": 8,
+							"height": 8,
+							"defUid": 46,
+							"px": [440,152],
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "to_nest", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["to_nest"]
+								}] },
+								{ "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_17", "__tile": null, "defUid": 146, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["!gen_dungeon_level_17"]
+								}] },
+								{ "__identifier": "TargetLocation", "__type": "String", "__value": "warp", "__tile": null, "defUid": 147, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["warp"]
+								}] }
+							],
+							"__worldX": -472,
+							"__worldY": -952
+						},
+						{
+							"__identifier": "Location",
+							"__grid": [33,2],
+							"__pivot": [0,0],
+							"__tags": ["META"],
+							"__tile": null,
+							"__smartColor": "#63C74D",
+							"iid": "0dda8535-4ab5-4bc3-9376-762cefafadf5",
+							"width": 8,
+							"height": 8,
+							"defUid": 46,
+							"px": [264,16],
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "to_crypt", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["to_crypt"]
+								}] },
+								{ "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_21", "__tile": null, "defUid": 146, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["!gen_dungeon_level_21"]
+								}] },
+								{ "__identifier": "TargetLocation", "__type": "String", "__value": "warp", "__tile": null, "defUid": 147, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["warp"]
+								}] }
+							],
+							"__worldX": -648,
+							"__worldY": -1088
 						}
 					]
 				},
@@ -1951,6 +2009,108 @@
 							],
 							"__worldX": -664,
 							"__worldY": -944
+						},
+						{
+							"__identifier": "NPC",
+							"__grid": [52,17],
+							"__pivot": [0,0],
+							"__tags": ["NPC"],
+							"__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 },
+							"__smartColor": "#BE4A2F",
+							"iid": "9e61c5c3-8280-4029-9796-a653071faa1c",
+							"width": 8,
+							"height": 8,
+							"defUid": 33,
+							"px": [416,136],
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "Lester the Farmer", "__tile": null, "defUid": 52, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Lester the Farmer"]
+								}] },
+								{ "__identifier": "InternalName", "__type": "String", "__value": "lester", "__tile": null, "defUid": 131, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["lester"]
+								}] },
+								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["184,16,8,8"]
+								}] },
+								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "l", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["l"]
+								}] }
+							],
+							"__worldX": -496,
+							"__worldY": -968
+						},
+						{
+							"__identifier": "NPC",
+							"__grid": [53,17],
+							"__pivot": [0,0],
+							"__tags": ["NPC"],
+							"__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 },
+							"__smartColor": "#BE4A2F",
+							"iid": "5808a27a-2b0a-4d47-9be3-0f510761b650",
+							"width": 8,
+							"height": 8,
+							"defUid": 33,
+							"px": [424,136],
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "Complete Nut", "__tile": null, "defUid": 52, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Complete Nut"]
+								}] },
+								{ "__identifier": "InternalName", "__type": "String", "__value": "nut", "__tile": null, "defUid": 131, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["nut"]
+								}] },
+								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["184,16,8,8"]
+								}] },
+								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "n", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["n"]
+								}] }
+							],
+							"__worldX": -488,
+							"__worldY": -968
+						},
+						{
+							"__identifier": "NPC",
+							"__grid": [24,13],
+							"__pivot": [0,0],
+							"__tags": ["NPC"],
+							"__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 },
+							"__smartColor": "#BE4A2F",
+							"iid": "4a130510-638a-494e-869b-5a398489017c",
+							"width": 8,
+							"height": 8,
+							"defUid": 33,
+							"px": [192,104],
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "Celia", "__tile": null, "defUid": 52, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Celia"]
+								}] },
+								{ "__identifier": "InternalName", "__type": "String", "__value": "celia", "__tile": null, "defUid": 131, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["celia"]
+								}] },
+								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["184,16,8,8"]
+								}] },
+								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "c", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["c"]
+								}] }
+							],
+							"__worldX": -720,
+							"__worldY": -1000
 						},
 						{
 							"__identifier": "NPC",

@@ -118,6 +118,7 @@ type Item struct {
 	internalName      string
 	isQuestItem       bool
 	d1                *d1.Item
+	d1Data            *d1.Data // the tables the item was made from, for the store rules
 }
 
 func NewItem(getPlayerRef func() *Actor, name string, icon int32) *Item {
@@ -336,7 +337,8 @@ func (i *Item) IsRangedWeapon() bool {
 
 func (i *Item) SlotName() defs.SlotName {
 	if i.d1 != nil {
-		return d1SlotName(i.d1)
+		owner := i.getPlayer()
+		return d1SlotName(i.d1, owner != nil && owner.hero != nil && d1.HasClassFlag(owner.hero.Class, d1.ClassDualWield))
 	}
 	if i.IsLightSource() {
 		return defs.SlotNameLightSource

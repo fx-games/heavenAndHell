@@ -20,6 +20,7 @@ const (
 	umtLachdanan  = 7
 	umtWarlord    = 8
 	umtButcher    = 9
+	umtNakrul     = 99 // Hellfire's UMT_NAKRUL, appended after D1's rows
 	aiGargoyleStr = "AI_GARG"
 )
 
@@ -147,6 +148,18 @@ func (g *gen) getLevelMTypes(setLevel int) {
 		g.addMonsterType(MtDIABLO, placeSpecial)
 		return
 	}
+	switch g.currlevel {
+	case 18:
+		g.addMonsterType(MtHORKSPWN, placeScatter)
+	case 19:
+		g.addMonsterType(MtHORKSPWN, placeScatter)
+		g.addMonsterType(MtHORKDMN, placeUnique)
+	case 20:
+		g.addMonsterType(MtDEFILER, placeUnique)
+	case 24:
+		g.addMonsterType(MtARCHLICH, placeScatter)
+		g.addMonsterType(MtNAKRUL, placeSpecial)
+	}
 	if g.setlevel {
 		if setLevel == SLSkelKing {
 			g.addMonsterType(MtSKING, placeUnique)
@@ -162,7 +175,11 @@ func (g *gen) getLevelMTypes(setLevel int) {
 		}
 	}
 	var typelist []int
-	for i := 0; i < numMTypes; i++ {
+	n := numMTypes
+	if g.data.Hellfire {
+		n = len(g.data.Monsters) // Hellfire's NUM_MTYPES counts every type
+	}
+	for i := 0; i < n; i++ {
 		m := &g.data.Monsters[i]
 		if minl, maxl := 15*m.MinDLvl/30+1, 15*m.MaxDLvl/30+1; g.currlevel >= minl && g.currlevel <= maxl && m.Available {
 			typelist = append(typelist, i)
@@ -194,6 +211,9 @@ func (g *gen) initMonster(slot, dir, mt, x, y int) *Monster {
 	var hp int
 	if g.mtypes[mt].mtype == MtDIABLO {
 		hp = (g.rnd(1) + 1666) << 6
+		if g.data.Hellfire {
+			hp = (g.rnd(1) + 3333) << 6
+		}
 	} else {
 		hp = (d.MinHP + g.rnd(d.MaxHP-d.MinHP+1)) << 6
 	}
@@ -293,6 +313,12 @@ func (g *gen) placeUniqueMonst(u, minionType, bosspacksize int) {
 		xp, yp = 38, 49
 	case umtSkelKing:
 		xp, yp = 35, 47
+	case umtNakrul:
+		ux, uy := g.uberRoom()
+		if ux == 0 || uy == 0 {
+			return
+		}
+		xp, yp = ux-2, uy
 	case umtButcher:
 		done := false
 		for yp = 0; yp < 112 && !done; yp++ {
@@ -380,6 +406,19 @@ func (g *gen) placeQuestMonsters(setLevel int) {
 	}
 	if g.available(QZhar) && g.zharlib == -1 {
 		g.quests[QZhar].Active = QuestNotAvail
+	}
+	if g.currlevel == 24 && g.data.Hellfire {
+		for _, t := range g.mtypes {
+			if t.mtype != MtNAKRUL {
+				continue
+			}
+			for _, m := range g.monsters {
+				if m.Unique >= 0 || m.Type == MtNAKRUL {
+					return // D1 takes it as Na-Krul already being here
+				}
+			}
+		}
+		g.placeUniqueMonst(umtNakrul, 0, 0)
 	}
 }
 

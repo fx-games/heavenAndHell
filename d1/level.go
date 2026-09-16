@@ -3,8 +3,11 @@ package d1
 import "fmt"
 
 var (
-	tilFiles = [5]string{"", `Levels\L1Data\L1.TIL`, `Levels\L2Data\L2.TIL`, `Levels\L3Data\L3.TIL`, `Levels\L4Data\L4.TIL`}
-	solFiles = [5]string{"", `Levels\L1Data\L1.SOL`, `Levels\L2Data\L2.SOL`, `Levels\L3Data\L3.SOL`, `Levels\L4Data\L4.SOL`}
+	// 5 is Hellfire's Crypt and 6 its Nest; both live in HELLFIRE.MPQ under NLevels, not DIABDAT.
+	tilFiles = [7]string{"", `Levels\L1Data\L1.TIL`, `Levels\L2Data\L2.TIL`, `Levels\L3Data\L3.TIL`, `Levels\L4Data\L4.TIL`,
+		`NLevels\L5Data\L5.TIL`, `NLevels\L6Data\L6.TIL`}
+	solFiles = [7]string{"", `Levels\L1Data\L1.SOL`, `Levels\L2Data\L2.SOL`, `Levels\L3Data\L3.SOL`, `Levels\L4Data\L4.SOL`,
+		`NLevels\L5Data\L5.SOL`, `NLevels\L6Data\L6.SOL`}
 )
 
 // Trigger messages (_tmsg).
@@ -39,7 +42,18 @@ type Level struct {
 	Objects              []*Object
 	Items                []*PlacedItem
 	DiabloQuads          [4][2]int // level 16: megatile origins of diab1-4
+	Uber, Cornerstone    [2]int    // the Crypt: Na-Krul's door (UberRow/UberCol) and the Cornerstone of the World
 	til                  []byte
+}
+
+// OpenNakrulRoom ports SyncNakrulRoom: Na-Krul's door opens. It reports whether anything changed.
+func (l *Level) OpenNakrulRoom() bool {
+	x, y := l.Uber[0], l.Uber[1]
+	if x == 0 || y == 0 || l.Piece[x][y] == 297 {
+		return false
+	}
+	l.Piece[x][y], l.Piece[x][y-1], l.Piece[x][y-2], l.Piece[x][y+1] = 297, 300, 299, 298
+	return true
 }
 
 // ChangeMap ports ObjChangeMap on the built level: megatiles (x1, y1)..(x2, y2) switch to PDungeon (ObjSetMini).
@@ -110,7 +124,7 @@ func (l *Level) sol(x, y int) byte {
 // CreateLevel builds dungeon level dlvl, or with setLevel the set level entered from it, the way LoadGameLevel does
 // on a first visit: layout, triggers, monster types, themes, monsters, objects, items, theme rooms. It runs on D1's
 // RNG from the level's seed and leaves the generator's own RNG alone.
-func (gnr *Generator) CreateLevel(q *Quests, seeds [17]int32, dlvl, setLevel int, entry Entry) (lvl *Level, err error) {
+func (gnr *Generator) CreateLevel(q *Quests, seeds [NumLevels]int32, dlvl, setLevel int, entry Entry) (lvl *Level, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("creating level %d (set level %d): %v", dlvl, setLevel, r)
@@ -142,7 +156,7 @@ func (gnr *Generator) CreateLevel(q *Quests, seeds [17]int32, dlvl, setLevel int
 		g.createDungeon(seed, entry)
 		g.initTriggers()
 		g.freeUpstairs()
-		g.sol = g.data.levels.sol[g.ltype]
+		g.sol = g.data.levels.sol[g.tileset()]
 		g.rng.SetSeed(seed)
 		g.getLevelMTypes(SLNone)
 		g.initThemes()
@@ -168,12 +182,12 @@ func (q *Quests) setLevelType(sl int) int {
 	return DTypeCathedral
 }
 
-// createDungeon ports CreateDungeon for dungeon levels 1-16.
+// createDungeon ports CreateDungeon for dungeon levels 1-24.
 func (g *gen) createDungeon(seed int32, entry Entry) {
 	g.flags = [112][112]byte{}
 	g.initTrans()
 	g.setPiece, g.setPieceRoom = rect{}, rect{}
-	g.til = g.data.levels.til[g.ltype]
+	g.til = g.data.levels.til[g.tileset()]
 	switch g.ltype {
 	case DTypeCathedral:
 		g.createL1(seed, entry)
@@ -241,13 +255,33 @@ func (g *gen) flagAt(x, y int) byte {
 	return 0
 }
 
-// initTriggers ports InitL1-4Triggers (D1's piece numbers are one more than ours).
+// initTriggers ports InitL1-4Triggers and Hellfire's Crypt and Nest branches (D1's piece numbers are one more than ours).
 func (g *gen) initTriggers() {
 	g.trigs = nil
 	add := func(x, y, msg int) { g.trigs = append(g.trigs, Trigger{x, y, msg}) }
 	for j := 0; j < 112; j++ {
 		for i := 0; i < 112; i++ {
-			switch p := g.piece[i][j] + 1; g.ltype {
+			switch p := g.piece[i][j] + 1; g.tileset() {
+			case 5: // the Crypt
+				if p == 184 {
+					add(i, j, TrigTownWarpUp)
+				}
+				if p == 158 {
+					add(i, j, TrigPrevLevel)
+				}
+				if p == 126 {
+					add(i, j, TrigNextLevel)
+				}
+			case 6: // the Nest
+				if p == 66 {
+					add(i, j, TrigPrevLevel)
+				}
+				if p == 63 {
+					add(i, j, TrigNextLevel)
+				}
+				if p == 80 {
+					add(i, j, TrigTownWarpUp)
+				}
 			case DTypeCathedral:
 				if p == 129 {
 					add(i, j, TrigPrevLevel)
@@ -404,6 +438,17 @@ func (g *gen) output(setLevel int) *Level {
 	}
 	for i, q := range g.l4.quads {
 		l.DiabloQuads[i] = [2]int{q.x, q.y}
+	}
+	if isCrypt(g.currlevel) && !g.setlevel { // CreateL5Dungeon's scan
+		ux, uy := g.uberRoom()
+		l.Uber = [2]int{ux, uy}
+		for j := 16; j < 96; j++ {
+			for i := 16; i < 96; i++ {
+				if g.piece[i][j]+1 == 317 {
+					l.Cornerstone = [2]int{i, j}
+				}
+			}
+		}
 	}
 	l.Monsters = g.monsters
 	for _, oi := range g.objectactive[:g.nobjects] {

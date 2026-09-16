@@ -14,6 +14,7 @@ func (g *MapGenerator) SetSeed(seed int64) {
 	g.seed = seed
 	g.d1Seeds = d1.LevelSeeds(int32(seed))
 	q := d1.InitQuests(g.d1Seeds)
+	q.SetHellfireOptions(false, false) // State.ApplyHellfireOptions once the save's flags are in
 	g.d1Quests = &q
 }
 
@@ -28,7 +29,7 @@ func toCell(px, py int) geometry.Point {
 // d1DoorObjectKinds is repeated from map_gen.go's d1DoorKinds so this file doesn't need to import it twice; see
 // there for why doors are terrain + an H&H Door object, not a D1Object.
 
-// generateD1Map builds dungeon level dlvl (1-16), or a quest set level entered from it, with D1's own generators.
+// generateD1Map builds dungeon level dlvl (1-24), or a quest set level entered from it, with D1's own generators.
 func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMap[*Actor, *Item, Object] {
 	setLevel := d1SetLevelOf(targetMap)
 	sl := d1.SLNone
@@ -80,8 +81,11 @@ func (g *MapGenerator) setPiece(m *gridmap.GridMap[*Actor, *Item, Object]) [4]in
 	return [4]int{}
 }
 
-// D1TownGates are the town locations of the entrances to levels 1, 5, 9 and 13.
-var D1TownGates = map[int]string{1: "to_cathedral", 5: "to_catacombs", 9: "to_caves", 13: "to_hell"}
+// D1TownGates are the town locations of the entrances to levels 1, 5, 9 and 13, and Hellfire's Nest (17) and
+// Crypt (21).
+// ponytail: the Nest and the Crypt are open from the start; Hellfire opens them with the Farmer's and Grave Matters
+// quests, which aren't ported.
+var D1TownGates = map[int]string{1: "to_cathedral", 5: "to_catacombs", 9: "to_caves", 13: "to_hell", 17: "to_nest", 21: "to_crypt"}
 
 // wireD1Triggers places the stairs/warp tiles D1's own generator positioned (Level.Triggers), plus the quest
 // entrances on ordinary dungeon levels (CheckQuests: King Leoric's Tomb, the Chamber of Bone, the Poisoned Water
@@ -185,7 +189,7 @@ func (g *MapGenerator) placeD1Objects(m *gridmap.GridMap[*Actor, *Item, Object],
 				door.D1 = o
 				door.rogue = func() bool {
 					p := g.factory.State.GetPlayer()
-					return p != nil && p.hero != nil && p.hero.Class == d1.Rogue
+					return p != nil && p.hero != nil && d1.HasClassFlag(p.hero.Class, d1.ClassTrapSense)
 				}
 			}
 			continue
