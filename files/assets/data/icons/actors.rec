@@ -57,7 +57,7 @@ icon: 79
 name: Town Wirt
 
 internal_name: npc.wounded_townsman
-icon: 592
+icon: 511
 name: Town Wounded Townsman
 
 internal_name: npc.ogden
@@ -71,6 +71,34 @@ name: Town Farnham
 internal_name: npc.gillian
 icon: 79
 name: Town Gillian
+
+internal_name: npc.griswold
+icon: 79
+name: Town Griswold
+
+internal_name: npc.cain
+icon: 80
+name: Town Deckard Cain
+
+internal_name: npc.adria
+icon: 81
+name: Town Adria
+
+internal_name: npc.pepin
+icon: 82
+name: Town Pepin
+
+internal_name: npc.celia
+icon: 79
+name: Town Celia
+
+internal_name: npc.lester
+icon: 79
+name: Town Lester the Farmer
+
+internal_name: npc.nut
+icon: 79
+name: Town Complete Nut
 
 internal_name: monster.nzombie
 name: Zombie
@@ -1023,3 +1051,4 @@ icon: 487
 internal_name: unique.na_krul
 name: Na-Krul
 icon: 487
+
