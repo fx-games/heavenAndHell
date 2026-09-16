@@ -35,12 +35,14 @@ func TestDrlgFixtures(t *testing.T) {
 	if _, err := os.Stat(fixtureDir); err != nil {
 		t.Skip("DevilutionX fixtures not in reference/")
 	}
-	if _, err := DiabDat(); err != nil {
-		t.Skip(err)
+	d, err := Load(os.DirFS("../files"))
+	if err != nil {
+		t.Fatal(err)
 	}
-	// DevilutionX's tests read set pieces from its fixtures, which differ from the MPQ's for some Hell pieces.
+	// DevilutionX's tests read set pieces from its fixtures, which differ from ours for some Hell pieces.
 	readDunHook = func(name string) []byte {
-		b, err := os.ReadFile(filepath.Join(fixtureDir, "levels", strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, `Levels\`), `\`, "/"))))
+		dir, file, _ := strings.Cut(name, "/") // "l1/sklkng1" -> levels/l1data/sklkng1.dun
+		b, err := os.ReadFile(filepath.Join(fixtureDir, "levels", dir+"data", file+".dun"))
 		if err != nil {
 			return nil
 		}
@@ -66,6 +68,7 @@ func TestDrlgFixtures(t *testing.T) {
 		}
 		for _, e := range f.entries {
 			g := &gen{quests: &q, currlevel: f.dlvl, ltype: LevelType(f.dlvl)}
+			g.data = d
 			g.createDungeon(f.seed, e.entry)
 			if g.ltype == DTypeHell && len(g.themes) > 0 {
 				g.updateL4Trans()

@@ -21,7 +21,6 @@ import (
 	"time"
 )
 
-
 type GameInstance struct {
 	// base infos / config
 	title                       string
@@ -54,14 +53,14 @@ type GameInstance struct {
 	serverLog       *TextServer
 
 	// player state
-	isResting   bool
+	isResting bool
 
 	// game state
 	shouldQuitGame   bool
 	quitToAscii      bool
 	debugModeEnabled bool
-	godMode      bool
-	heroLevel         int // last seen character level, for the level-up sound
+	godMode          bool
+	heroLevel        int // last seen character level, for the level-up sound
 
 	// event handler
 	executeAfterTurn []func()
@@ -77,7 +76,6 @@ type GameInstance struct {
 	boyItem         *d1.Item   // Wirt's item
 	boyLevel        int
 	storesShown     bool // stores were stocked this session, so missing items were bought
-
 
 	actions *Actions
 	factory *common.Factory
@@ -281,7 +279,6 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 		Audio:          g.audioPlayer,
 	}
 
-
 	g.state.SetPlayerMessage(g.PlayerMessage)
 	g.state.SetPlayerTurnHandler(g.onPlayerTurnTaken)
 	g.state.SetAnimator(g.actionBroker)
@@ -290,14 +287,14 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 
 	g.createPlayer(playerStartDefinition)
 	g.actions = NewActions(PlayerActionsContext{
-		Player:        g.state.GetPlayer(),
-		ActionBroker:  g.actionBroker,
-		State:         g.GetWorldState(),
-		UI:            g.GetUserInterface,
-		GetTimeKeeper: g.state.GetTimeKeeper,
-		Msg:           g.PlayerMessage,
-		Animator:      g.actionBroker,
-		Configuration: g.configuration,
+		Player:         g.state.GetPlayer(),
+		ActionBroker:   g.actionBroker,
+		State:          g.GetWorldState(),
+		UI:             g.GetUserInterface,
+		GetTimeKeeper:  g.state.GetTimeKeeper,
+		Msg:            g.PlayerMessage,
+		Animator:       g.actionBroker,
+		Configuration:  g.configuration,
 		QueueAfterTurn: g.queueAfterTurn,
 	})
 	g.state.SetOnMapChanged(g.onMapChanged)
@@ -313,7 +310,6 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 
 	// set references
 	g.state.SetMapGenerator(mapGen)
-
 
 	townSpawn := g.state.GetMap().GetNamedLocation("spawn")
 	g.state.SetTownSpawn(townSpawn)
@@ -366,7 +362,6 @@ func (g *GameInstance) GetUserInterface() common.UserInterface {
 	return g.uiController
 }
 
-
 func (g *GameInstance) handleLightSource() {
 	player := g.state.GetPlayer()
 	if player.GetEquipment().HasLightSourceEquipped() && !g.state.PlayerStandsInLitArea() {
@@ -410,11 +405,10 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 		player.GetStats().GetResource(stats.Mana).SetToMax()
 	}
 
-
 	// automatic pickup & player movement..
 	if g.configuration.AutoPickup && g.state.GetMap().IsItemAt(player.MapPosition()) {
 		itemAtLocation := g.state.GetMap().ItemAt(player.MapPosition())
-		if itemAtLocation != nil && player.CanPickup() && !itemAtLocation.IsDroppedByPlayer() {
+		if itemAtLocation != nil && player.CanPickup(itemAtLocation) && !itemAtLocation.IsDroppedByPlayer() {
 			pickUpAction := common.NewPickUpAction(common.AbstractCause("AutoPickup"), player)
 			endTurnAction := common.NewEndPlayerTurnAction(pickUpAction.Cause(), pickUpAction.GetDelayInAut())
 			g.actionBroker.Execute(pickUpAction)
@@ -466,8 +460,6 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	return player
 }
 
-
-
 func (g *GameInstance) GetFactory() *common.Factory { return g.factory }
 
 func (g *GameInstance) GetWorldState() *common.State {
@@ -517,7 +509,7 @@ func (g *GameInstance) showDebugMenu() {
 		{
 			MainText: "Open class selection",
 			Action: func() {
-				g.openNewGameMenu()
+				g.uiController.OpenNewGameScreen(g.NewGame, func() {}) // back returns to the game
 			},
 		},
 		{
@@ -772,13 +764,12 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 	return 10, func() {}
 }
 
-
 func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 	if defs.IsTownLevel(newMapName) {
 		currentMap := g.state.GetMap()
 		g.state.SetTownMap(currentMap)
 		if newMapName == string(defs.LevelNameTown) {
-			g.setupD1Town(currentMap)
+			g.restockD1Town(currentMap)
 			common.PlaceD1Portal(g.GetWorldState(), currentMap)
 		}
 	} else { // dungeon map
@@ -802,9 +793,6 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 	}
 }
 
-
-
-
 type Turner interface {
 	Turn()
 }
@@ -816,7 +804,6 @@ func (g *GameInstance) getTurnerAction(baseSpeed int, energy int, being Turner) 
 	}
 	return baseSpeed, being.Turn
 }
-
 
 // checkForLevelUp plays the level-up sound once per new character level (CanLevelUp stays true while stat points
 // are unspent). The first turn after a new game or load only records the level.
@@ -831,11 +818,6 @@ func (g *GameInstance) checkForLevelUp() {
 	g.heroLevel = h.Level
 }
 
-
-
-
-
-
 func (g *GameInstance) ErrLog(errorMessage string) {
 	// write to stderr
 	fmt.Fprintln(os.Stderr, errorMessage)
@@ -844,8 +826,6 @@ func (g *GameInstance) ErrLog(errorMessage string) {
 func (g *GameInstance) GetGameData() defs.DataContainer {
 	return g.dataDefinitions
 }
-
-
 
 func (g *GameInstance) GetActions() common.PlayerActions {
 	return g.actions

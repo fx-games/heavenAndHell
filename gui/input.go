@@ -100,6 +100,26 @@ func (u *UIController) handleKeyboardInput() {
 			u.OnCommand(PlayerCommandRight)
 			return
 		}
+		switch u.GetTopModal().(type) {
+		case Keylistener: // letters are hotkeys or typed text there
+		case *BasicLabel:
+			if inpututil.IsKeyJustPressed(ebiten.KeyE) {
+				u.Cancel()
+				return
+			}
+		default:
+			if inpututil.IsKeyJustPressed(ebiten.KeyE) {
+				u.OnCommand(PlayerCommandConfirm)
+				return
+			}
+			// WASD mirror the arrows; unhandled ones still reach letter shortcuts below
+			wasd := map[ebiten.Key]CommandType{ebiten.KeyW: PlayerCommandUp, ebiten.KeyS: PlayerCommandDown, ebiten.KeyA: PlayerCommandLeft, ebiten.KeyD: PlayerCommandRight}
+			for key, command := range wasd {
+				if inpututil.IsKeyJustPressed(key) && u.OnCommand(command) {
+					return
+				}
+			}
+		}
 		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 			u.OnCommand(PlayerCommandConfirm)
 			return
@@ -126,9 +146,6 @@ func (u *UIController) handleKeyboardInput() {
 		} else {
 			act.AimedRangedAttack()
 		}
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyV) {
-		act.AimedThrow()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyE) {
 		u.openSpellMenu()
@@ -183,9 +200,7 @@ func (u *UIController) handleKeyboardInput() {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF11) {
-		u.isFullScreen = !ebiten.IsFullscreen()
-		ebiten.SetFullscreen(u.isFullScreen)
-		u.OnScreenSizeChanged()
+		u.toggleFullscreen()
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF12) {
@@ -193,7 +208,7 @@ func (u *UIController) handleKeyboardInput() {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyT) {
-		//g.actionBroker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("Travel"), 10))
+		act.AimedThrow()
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyU) {
@@ -320,7 +335,7 @@ func (u *UIController) onMapClicked(mouseButton ebiten.MouseButton, mapPos geome
 	act := u.context.PlayerAction()
 	state := u.context.GameState()
 	currentMap := state.GetMap()
-	if mouseButton == ebiten.MouseButtonRight && currentMap.IsActorAt(mapPos) && state.GetPlayer().CanSee(mapPos) {
+	if mouseButton == ebiten.MouseButtonRight && currentMap.IsActorAt(mapPos) && currentMap.ActorAt(mapPos).IsVisible() && state.GetPlayer().CanSee(mapPos) {
 		act.ShowActorInfoAt(mapPos)
 	} else if mouseButton == ebiten.MouseButtonLeft && currentMap.IsExplored(mapPos) {
 		act.CancelAutoMove()

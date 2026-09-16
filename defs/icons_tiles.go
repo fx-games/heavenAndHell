@@ -14,6 +14,10 @@ var (
 	IconWater                      = tilesIcons["IconWater"]
 	IconWoodenBridge               = tilesIcons["IconWoodenBridge"]
 	IconWoodenFence                = tilesIcons["IconWoodenFence"] // first guess
+	IconArch                       = tilesIcons["IconArch"]
+	IconGrate                      = tilesIcons["IconGrate"]
+	IconPillar                     = tilesIcons["IconPillar"] // first guess
+	IconLamp                       = tilesIcons["IconLamp"]   // first guess
 	IconLava                       = tilesIcons["IconLava"]
 	IconWallTorch                  = tilesIcons["IconWallTorch"] // first guess
 	IconBrazier                    = tilesIcons["IconBrazier"]   // a small flame (131 is a ring icon)

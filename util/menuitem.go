@@ -33,6 +33,18 @@ func (t LabelText) String() string {
 	return t.Text
 }
 
+// PlainText is Text without [:color] markup.
+func (t LabelText) PlainText() string {
+	if !t.UseColorCodes || len(t.TextWithColorCodes) == 0 {
+		return t.Text
+	}
+	var b strings.Builder
+	for _, part := range t.TextWithColorCodes {
+		b.WriteString(part.Text)
+	}
+	return b.String()
+}
+
 func (t LabelText) WithColor(textColor color.Color) LabelText {
 	t.TextColor = textColor
 	return t

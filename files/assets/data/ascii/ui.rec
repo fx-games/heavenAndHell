@@ -1,0 +1,30 @@
+%rec: ui
+
+UIBackground: black
+UIForeground: amber_dark
+UIForegroundHighlighted: amber_light
+BorderBackground: black
+BorderForeground: amber_dark
+BorderForegroundFocus: amber_light
+StatusBarBackground: dark_gray_7
+StatusBarForeground: amber_light
+
+%rec: borders
+
+UIBorder_Horizontal: ─
+UIBorder_Vertical: │
+UIBorder_TopLeft: ╭
+UIBorder_TopRight: ╮
+UIBorder_BottomLeft: ╰
+UIBorder_BottomRight: ╯
+UIBorder_LeftT: ├
+UIBorder_RightT: ┤
+UIBorder_TopT: ┬
+UIBorder_BottomT: ┴
+UIBorder_Cross: ┼
+UIBorder_HorizontalFocus: ─
+UIBorder_VerticalFocus: │
+UIBorder_TopLeftFocus: ╭
+UIBorder_TopRightFocus: ╮
+UIBorder_BottomLeftFocus: ╰
+UIBorder_BottomRightFocus: ╯

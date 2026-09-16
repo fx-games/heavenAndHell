@@ -5,8 +5,8 @@ import (
 	"image"
 	"image/color"
 	"log"
-	"rpg/geometry"
 	"rpg/files"
+	"rpg/geometry"
 )
 
 type CellDrawInfo struct {

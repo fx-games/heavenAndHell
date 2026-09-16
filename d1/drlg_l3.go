@@ -813,7 +813,7 @@ func (g *gen) l3Fence() {
 }
 
 func (g *gen) l3PlaceAnvil() bool {
-	d := loadDun(`Levels\L3Data\Anvil.DUN`)
+	d := g.loadDun("l3/anvil")
 	aw, ah := d.w()+2, d.h()+2
 	sx, sy := g.rnd(40-aw), g.rnd(40-ah)
 	for tries := 0; ; tries, sx = tries+1, sx+1 {

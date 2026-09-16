@@ -13,7 +13,7 @@ import (
 func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedAction) {
 	switch player.hero.Class {
 	case d1.Warrior:
-		return nil, f.d1ItemSkill("Item Repair", d1.CanRepair, func(it *Item) {
+		return nil, f.d1ItemSkill("Item Repair", d1.SplRepair, d1.CanRepair, func(it *Item) {
 			if d1.RepairItem(it.d1, player.hero.Level, d1Rng.Intn) {
 				name := it.Name()
 				player.GetEquipment().UnEquip(it)
@@ -24,7 +24,7 @@ func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedActio
 			f.Msg(fmt.Sprintf("You repair your %s.", it.Name()))
 		})
 	case d1.Sorcerer:
-		return nil, f.d1ItemSkill("Staff Recharge", func(it *d1.Item) bool { return it.Type == d1.ITypeStaff && d1.CanRecharge(it) }, func(it *Item) {
+		return nil, f.d1ItemSkill("Staff Recharge", d1.SplRecharge, func(it *d1.Item) bool { return it.Type == d1.ITypeStaff && d1.CanRecharge(it) }, func(it *Item) {
 			f.Generator.D.RechargeItem(it.d1, player.hero.Level, d1Rng.Intn)
 			f.Msg(fmt.Sprintf("You recharge your %s.", it.Name()))
 		})
@@ -33,34 +33,62 @@ func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedActio
 		&HitEffect{Activate: func(caster *Actor, target geometry.Point, _ []geometry.Point) { f.D1Disarm(caster, target) },
 			Description: []util.LabelText{util.LabelTextFromString("Trap Disarm")}},
 		d1SpellTargeting(f, d1.SplDisarm))
-	action.SetIcon(defs.IconEffectHit)
+	action.SetIcon(f.d1SkillIcon(d1.SplDisarm))
 	return action, nil
 }
 
+// d1SkillIcon is the skills.rec icon of a spell or class skill.
+func (f *Factory) d1SkillIcon(spell int) int32 {
+	return defs.Icon("spell." + f.Generator.D.Spells[spell].ID)
+}
+
 // d1ItemSkill lists the pack's items the skill works on and applies it to the one picked, which takes a turn.
-func (f *Factory) d1ItemSkill(name string, applies func(*d1.Item) bool, perform func(*Item)) *UntargetedAction {
-	action := NewUntargetedAction(name, defs.IconEffectHit)
+func (f *Factory) d1ItemSkill(name string, spell int, applies func(*d1.Item) bool, perform func(*Item)) *UntargetedAction {
+	action := NewUntargetedAction(name, f.d1SkillIcon(spell))
 	action.SetEffect(&UntargetedEffect{Effect: func(player *Actor, _ EffectSource) {
-		var items []util.MenuItem
+		var items []*Item
 		for _, it := range d1HeroItems(player) {
-			if it.d1 == nil || !applies(it.d1) {
-				continue
+			if it.d1 != nil && applies(it.d1) {
+				items = append(items, it)
 			}
-			item := it
-			items = append(items, util.MenuItem{MainText: item.Name(), Action: func() {
-				perform(item)
-				item.RefreshD1()
-				SyncHero(player)
-				f.ActionBroker.Execute(NewEndPlayerTurnAction(AbstractCause(ActionName(name)), 10))
-			}})
 		}
 		if len(items) == 0 {
 			f.Msg("You have nothing for that.")
 			return
 		}
-		f.UI().OpenMenu(items)
+		openD1ItemList(f.UI(), player, items, func(item *Item) {
+			perform(item)
+			item.RefreshD1()
+			SyncHero(player)
+			f.ActionBroker.Execute(NewEndPlayerTurnAction(AbstractCause(ActionName(name)), 10))
+		})
 	}, Description: []util.LabelText{util.LabelTextFromString(name)}})
 	return action
+}
+
+// openD1ItemList lets the player pick one of items in the inventory list's look and hotkeys; suffix may be nil.
+func openD1ItemList(ui UserInterface, player *Actor, items []*Item, pick func(*Item)) {
+	inv := player.GetInventory()
+	stacks := make([]InventoryStack, len(items))
+	for i, it := range items {
+		stacks[i] = InventoryStack{it}
+	}
+	SortInventory(stacks)
+	extra := 'A' // equipped items outside the pack have no inventory letter
+	var list []*TextualStack
+	for _, stack := range stacks {
+		item := stack[0]
+		letter := inv.GetLetterForItem(item)
+		if letter == 0 {
+			letter, extra = extra, extra+1
+		}
+		entry := NewTextualStack(stack, letter, func(rune) {
+			ui.PopAll()
+			pick(item)
+		})
+		list = append(list, entry)
+	}
+	ui.OpenItemList(list)
 }
 
 // d1HeroItems are the pack's items and the equipped ones that aren't in it.

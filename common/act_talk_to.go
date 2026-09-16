@@ -7,18 +7,10 @@ import (
 	"rpg/util"
 )
 
-// d1GossipKeyByVendor maps a town vendor to its gossip file's key in d1.Data.Gossip (ported from Diablo's
-// Source/Data/Text/Gossip/*.txt).
-var d1GossipKeyByVendor = map[VendorType]string{
-	VendorTypeWeapons: "griswold", VendorTypeWands: "adria", VendorTypeGeneral: "pepin",
-	VendorTypeCain: "cain", VendorTypeWirt: "wirt", VendorTypeOgden: "ogden",
-	VendorTypeDrunk: "farnham", VendorTypeBarmaid: "gillian",
-}
-
 // d1Gossip picks a random gossip text id for a town NPC (S_TalkEnter's gossipstart..gossipend: all but the
 // greeting), or "" if none is available.
 func d1Gossip(gossip map[string][]string, vendorType VendorType) string {
-	ids := gossip[d1GossipKeyByVendor[vendorType]]
+	ids := gossip[string(vendorType)]
 	if len(ids) < 2 {
 		return ""
 	}
@@ -27,7 +19,7 @@ func d1Gossip(gossip map[string][]string, vendorType VendorType) string {
 
 // d1Greeting is the NPC's TownerTalk line (TEXT_GRISWOLD1...), played as speech when the store opens.
 func d1Greeting(gossip map[string][]string, vendorType VendorType) string {
-	if ids := gossip[d1GossipKeyByVendor[vendorType]]; len(ids) > 0 {
+	if ids := gossip[string(vendorType)]; len(ids) > 0 {
 		return ids[0]
 	}
 	return ""

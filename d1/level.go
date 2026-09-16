@@ -131,8 +131,8 @@ func (gnr *Generator) CreateLevel(q *Quests, seeds [17]int32, dlvl, setLevel int
 	g.initLevelMonsters()
 	if g.setlevel {
 		g.ltype = q.setLevelType(setLevel)
-		g.til = mustReadMPQ(tilFiles[g.ltype])
-		g.sol = mustReadMPQ(solFiles[g.ltype])
+		g.til = g.data.levels.til[g.ltype]
+		g.sol = g.data.levels.sol[g.ltype]
 		g.loadSetMap(setLevel, seeds)
 		g.getLevelMTypes(setLevel)
 		g.initMonsters(setLevel)
@@ -142,7 +142,7 @@ func (gnr *Generator) CreateLevel(q *Quests, seeds [17]int32, dlvl, setLevel int
 		g.createDungeon(seed, entry)
 		g.initTriggers()
 		g.freeUpstairs()
-		g.sol = mustReadMPQ(solFiles[g.ltype])
+		g.sol = g.data.levels.sol[g.ltype]
 		g.rng.SetSeed(seed)
 		g.getLevelMTypes(SLNone)
 		g.initThemes()
@@ -173,7 +173,7 @@ func (g *gen) createDungeon(seed int32, entry Entry) {
 	g.flags = [112][112]byte{}
 	g.initTrans()
 	g.setPiece, g.setPieceRoom = rect{}, rect{}
-	g.til = mustReadMPQ(tilFiles[g.ltype])
+	g.til = g.data.levels.til[g.ltype]
 	switch g.ltype {
 	case DTypeCathedral:
 		g.createL1(seed, entry)

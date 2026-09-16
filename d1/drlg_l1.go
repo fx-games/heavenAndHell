@@ -72,15 +72,15 @@ func (g *gen) l1InitSetPiece() {
 	var name string
 	switch {
 	case g.available(QButcher):
-		name = `Levels\L1Data\rnd6.DUN`
+		name = "l1/rnd6"
 	case g.available(QSkelKing):
-		name = `Levels\L1Data\SKngDO.DUN`
+		name = "l1/skngdo"
 	case g.available(QLtBanner):
-		name = `Levels\L1Data\Banner2.DUN`
+		name = "l1/banner2"
 	default:
 		return
 	}
-	d := loadDun(name)
+	d := g.loadDun(name)
 	x, y := g.l1SelectChamber()
 	g.placeDunTiles(d, x, y, t1Floor)
 	g.setPiece = rect{x, y, d.w(), d.h()}

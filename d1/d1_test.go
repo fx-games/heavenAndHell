@@ -298,3 +298,18 @@ func TestTextSpeech(t *testing.T) {
 		t.Errorf("gossip: farnham %d, gillian %d", len(d.Gossip["farnham"]), len(d.Gossip["gillian"]))
 	}
 }
+
+func TestHealRangeBoundsRolls(t *testing.T) {
+	rng := rand.New(rand.NewSource(1))
+	for _, class := range []int{Warrior, Rogue, Sorcerer} {
+		lo, hi := HealRange64(class, 7, 3)
+		seenLo, seenHi := 1<<30, 0
+		for range 20000 {
+			v := HealAmount64(rng, class, 7, 3)
+			seenLo, seenHi = min(seenLo, v), max(seenHi, v)
+		}
+		if seenLo < lo || seenHi > hi {
+			t.Fatalf("class %d: rolls %d-%d outside %d-%d", class, seenLo, seenHi, lo, hi)
+		}
+	}
+}

@@ -257,9 +257,10 @@ type Data struct {
 	Gossip         map[string][]string // town NPC internal_name -> TEXT_* ids of its gossip, greeting first (assets/data/d1/gossip)
 	Texts          map[string]string   // TEXT_* id -> gossip, quest and book text, paragraphs split by "\n\n"
 	TextSfx        map[string]string   // TEXT_* id -> the speech D1 plays with it (alltext's sfxnr, see SfxFiles)
+	levels         levelData           // set pieces and tile tables (assets/data/d1/levels)
 }
 
-// gossipFiles maps a town NPC's internal name (see common.d1_town.go's VendorType) to its gossip file's base
+// gossipFiles maps a town NPC's internal name (its common.VendorType) to its gossip file's base
 // name in assets/data/d1/gossip, ported from Diablo's own Source/Data/Text/Gossip/*.txt.
 var gossipFiles = map[string]string{
 	"griswold": "griswold", "adria": "adria", "pepin": "pepin", "wirt": "wirt", "cain": "story", "ogden": "ogden",
@@ -429,5 +430,10 @@ func Load(fsys fs.FS) (*Data, error) {
 		return nil, fmt.Errorf("d1 tables: unexpected sizes monsters=%d items=%d spells=%d", len(d.Monsters), len(d.Items), len(d.Spells))
 	}
 	d.Texts, d.TextSfx, d.Gossip = loadTexts(fsys)
+	levels, err := loadLevelData(fsys)
+	if err != nil {
+		return nil, err
+	}
+	d.levels = levels
 	return d, nil
 }

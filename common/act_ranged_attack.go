@@ -9,14 +9,15 @@ import (
 
 type RangedAttackAction struct {
 	BaseAction
-	damageFactor    float64
-	attacker        *Actor
-	damageAmount    int
-	defender        *Actor
-	targetPos       geometry.Point
-	defenders       []*Actor
+	damageFactor           float64
+	attacker               *Actor
+	damageAmount           int
+	defender               *Actor
+	targetPos              geometry.Point
+	defenders              []*Actor
 	additionalOnHitActions func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) []Action
 }
+
 func (d *RangedAttackAction) SetAdditionalOnHitActions(actions func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) []Action) {
 	d.additionalOnHitActions = actions
 }
@@ -61,7 +62,6 @@ func (d *RangedAttackAction) Execute(context ActionContext) []Action {
 
 	hitChance := CalculateRangedWeaponHitChance(d.attacker, d.defender)
 
-
 	if rand.Float64() > hitChance {
 		// missed the attack
 		logMissed(context, d.attacker, d.defender)
@@ -105,7 +105,7 @@ func CalculateRangedDamage(damageRoll int, damageMultiplier float64, attacker, d
 	damage := int(float64(damageRoll) * damageMultiplier)
 	armorPenetration := GetArmorPenetrationOfEquippedRangedWeapon(attacker)
 
-	defenderAC := max(0, defender.GetArmorClass() - armorPenetration)
+	defenderAC := max(0, defender.GetArmorClass()-armorPenetration)
 	defenderADR := ADRFromAC(defenderAC)
 	blockedDamage := int(math.Floor(float64(damage) * defenderADR))
 
@@ -113,7 +113,7 @@ func CalculateRangedDamage(damageRoll int, damageMultiplier float64, attacker, d
 		defenderDex := defender.GetStats().GetAttribute(stats.Dexterity)
 		dndStyleModifier := defaultModifierPattern(defenderDex)
 		shield := defender.GetEquipment().GetShield()
-		shieldAC := max(1, shield.GetArmorStats().GetTotalArmorClass() + dndStyleModifier)
+		shieldAC := max(1, shield.GetArmorStats().GetTotalArmorClass()+dndStyleModifier)
 		if shieldAC > blockedDamage && rand.Float64() > 0.5 {
 			blockedDamage = shieldAC
 		}
@@ -165,11 +165,11 @@ func CalculateRangedWeaponHitChance(attacker, defender *Actor) float64 {
 	if distance > maxRange {
 		dropOffPerTile := 0.3
 		delta := distance - maxRange
-		return min(max(accuracyAtMaxRange - (delta * dropOffPerTile) + dexModifier, 0.0), 1.0)
+		return min(max(accuracyAtMaxRange-(delta*dropOffPerTile)+dexModifier, 0.0), 1.0)
 	}
 
 	if distance <= 1 {
-		return min(max(accuracyAtMinRange + dexModifier, 0.0), 1.0)
+		return min(max(accuracyAtMinRange+dexModifier, 0.0), 1.0)
 	}
 
 	// interpolate
@@ -177,7 +177,7 @@ func CalculateRangedWeaponHitChance(attacker, defender *Actor) float64 {
 	// min range == 2
 	normalizedMaxRange := maxRange - 1
 	percent := (distance - 1) / normalizedMaxRange
-	accuracy := min(max(accuracyAtMinRange + (percent * (accuracyAtMaxRange - accuracyAtMinRange)) + dexModifier, 0.0), 1.0)
+	accuracy := min(max(accuracyAtMinRange+(percent*(accuracyAtMaxRange-accuracyAtMinRange))+dexModifier, 0.0), 1.0)
 
 	return accuracy
 }

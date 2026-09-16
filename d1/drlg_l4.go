@@ -24,7 +24,7 @@ func (g *gen) l4InitSetPiece() {
 	if !g.available(QWarlord) {
 		return
 	}
-	d := loadDun(`Levels\L4Data\Warlord.DUN`)
+	d := g.loadDun("l4/warlord")
 	g.placeDunTiles(d, g.setPieceRoom.x, g.setPieceRoom.y, 6)
 	g.setPiece = rect{g.setPieceRoom.x, g.setPieceRoom.y, d.w(), d.h()}
 }
@@ -350,9 +350,8 @@ func (g *gen) l4LoadDiabQuads(preflag bool) {
 	if preflag {
 		suffix = "b"
 	}
-	for i, name := range [4]string{`Levels\L4Data\diab1.DUN`, `Levels\L4Data\diab2` + suffix + `.DUN`,
-		`Levels\L4Data\diab3` + suffix + `.DUN`, `Levels\L4Data\diab4` + suffix + `.DUN`} {
-		g.placeDunTiles(loadDun(name), g.l4.quads[i].x, g.l4.quads[i].y, 6)
+	for i, name := range [4]string{"l4/diab1", "l4/diab2" + suffix, "l4/diab3" + suffix, "l4/diab4" + suffix} {
+		g.placeDunTiles(g.loadDun(name), g.l4.quads[i].x, g.l4.quads[i].y, 6)
 	}
 }
 

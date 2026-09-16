@@ -57,6 +57,18 @@ var d1DoorKinds = map[int]bool{d1.ObjL1LDOOR: true, d1.ObjL1RDOOR: true, d1.ObjL
 func d1IsLavaMega(v byte) bool  { return v >= 15 && v <= 45 }
 func d1IsFenceMega(v byte) bool { return v >= 121 && v <= 153 }
 
+// d1CathedralSeeThrough is what the Cathedral megatiles with pieces D1's sight passes are drawn as: arches, fences,
+// the pillar and the lamp (drlg_l1_data.go's t1*Arch*, t1*Fence*, t1Pillar, l1LAMPS).
+var d1CathedralSeeThrough = func() map[byte]gridmap.Tile {
+	arch := gridmap.Tile{DefinedIcon: defs.IconArch, DefinedDescription: "an arch", IsTransparent: true}
+	grate := gridmap.Tile{DefinedIcon: defs.IconGrate, DefinedDescription: "a grate", IsTransparent: true}
+	return map[byte]gridmap.Tile{5: arch, 8: arch, 9: arch, 10: arch, 11: arch, 12: arch, 14: arch, 33: arch, 34: arch,
+		39: arch, 40: arch, 42: arch, 147: arch, 149: arch, 153: arch,
+		27: grate, 29: grate, 32: grate, 35: grate, 36: grate, 37: grate, 38: grate,
+		15:  {DefinedIcon: defs.IconPillar, DefinedDescription: "a pillar", IsTransparent: true},
+		128: {DefinedIcon: defs.IconLamp, DefinedDescription: "a lamp", IsTransparent: true}}
+}()
+
 // addBasicTiles ports the wall/floor/lava/fence/door terrain from a generated d1.Level (piece coordinates 16..95,
 // exposed as cells 0..79) onto the gridmap. Doors are placed as objects afterward, once Level.Objects is walked.
 // d1TypeDlvl maps a level TYPE back to a representative dlvl for D1Tilemap, since a set level's own type (Lazarus'
@@ -85,6 +97,10 @@ func (g *MapGenerator) setD1Tiles(m *gridmap.GridMap[*Actor, *Item, Object], lvl
 	for x := max(x1, 0); x <= min(x2, d1.LevelSize-1); x++ {
 		for y := max(y1, 0); y <= min(y2, d1.LevelSize-1); y++ {
 			mapPos := geometry.Point{X: x, Y: y}
+			if _, ok := m.GetTransitionAt(mapPos); ok { // a map change keeps the stairs wireD1Triggers put there
+				continue
+			}
+			seeThroughTile, seeThrough := d1CathedralSeeThrough[lvl.CellMega(x, y)]
 			switch {
 			case door(mapPos):
 				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: tileMap.FloorTile, DefinedDescription: "a floor", IsWalkable: true, IsTransparent: true})
@@ -95,8 +111,11 @@ func (g *MapGenerator) setD1Tiles(m *gridmap.GridMap[*Actor, *Item, Object], lvl
 				m.SetTile(mapPos, g.d1LavaTile(m))
 			case lvl.Type == d1.DTypeCaves && d1IsFenceMega(lvl.CellMega(x, y)) && lvl.CellSolid(x, y) && !lvl.CellBlocks(x, y):
 				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: defs.IconWoodenFence, DefinedDescription: "a wooden fence", IsTransparent: true})
-			case lvl.CellSolid(x, y): // D1's sight and light only stop at pieces that block (arches, grates and railings don't)
-				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: tileMap.ChooseWallTile(mapPos), DefinedDescription: "a wall", IsTransparent: !lvl.CellBlocks(x, y)})
+			case lvl.Type == d1.DTypeCathedral && seeThrough && lvl.CellSolid(x, y) && !lvl.CellBlocks(x, y):
+				m.SetTile(mapPos, seeThroughTile)
+			case lvl.CellSolid(x, y): // opaque unless drawn as something see-through: a see-through plain wall hides that you
+				// can see and shoot into a room
+				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: tileMap.ChooseWallTile(mapPos), DefinedDescription: "a wall"})
 			default:
 				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: tileMap.ChooseFloorTile(mapPos), DefinedDescription: "a floor", IsWalkable: true, IsTransparent: true})
 			}

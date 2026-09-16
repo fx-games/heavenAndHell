@@ -66,15 +66,15 @@ func (g *gen) l2InitSetPiece() {
 	var name string
 	switch {
 	case g.available(QBlind):
-		name = `Levels\L2Data\Blind2.DUN`
+		name = "l2/blind2"
 	case g.available(QBlood):
-		name = `Levels\L2Data\Blood1.DUN`
+		name = "l2/blood1"
 	case g.available(QSchamb):
-		name = `Levels\L2Data\Bonestr2.DUN`
+		name = "l2/bonestr2"
 	default:
 		return
 	}
-	d := loadDun(name)
+	d := g.loadDun(name)
 	g.placeDunTiles(d, g.setPieceRoom.x, g.setPieceRoom.y, 3)
 	g.setPiece = rect{g.setPieceRoom.x, g.setPieceRoom.y, d.w(), d.h()}
 }

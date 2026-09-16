@@ -615,7 +615,7 @@ func replayD1MapChanges(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 			gen.changeD1Map(m, r[0], r[1], r[2], r[3])
 		}
 		if lvl := gen.levels[m.GetName()]; lvl != nil && s.QuestVar(d1.QBlood, 2) >= 3 { // OperatePedistal: Blood2.DUN's torches light the hall
-			for _, o := range d1.DunObjects(`Levels\L2Data\Blood2.DUN`, 2*sp[0], 2*sp[1]) {
+			for _, o := range s.factory.D1().D.DunObjects("l2/blood2", 2*sp[0], 2*sp[1]) {
 				d1PlaceObject(s.factory, m, lvl, o, toCell(o.X, o.Y))
 			}
 			delete(s.glowCache, m)

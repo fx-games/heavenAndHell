@@ -22,7 +22,7 @@ func (d DummyUI) Confirm(message string, onConfirm func()) {
 	onConfirm()
 }
 
-func (d DummyUI) SetDebugActions(actions func()common.DebugActions) {
+func (d DummyUI) SetDebugActions(actions func() common.DebugActions) {
 
 }
 
@@ -96,7 +96,7 @@ func (d DummyUI) OnMapChanged() {
 
 }
 
-func (d DummyUI) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string)) {
+func (d DummyUI) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string), back func()) {
 	//TODO implement me
 
 }
@@ -119,6 +119,11 @@ func (d DummyUI) OpenShopMenuFiltered(npc *common.Actor, filter func(*common.Ite
 func (d DummyUI) BeginPlayerSellingTo(vendor *common.Actor) {
 	//TODO implement me
 
+}
+
+func (d DummyUI) OpenItemList(items []*common.TextualStack) {}
+
+func (d DummyUI) OpenServiceMenu(items []*common.Item, price func(*common.Item) int, pick func(*common.Item)) {
 }
 
 func (d DummyUI) OpenListInventoryForSelection(filter func(element *common.Item) bool, selected func(itemKey rune)) {

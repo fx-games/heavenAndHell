@@ -15,10 +15,9 @@ type VendorType string
 
 const (
 	VendorTypeNone    VendorType = ""
-	VendorTypeGeneral VendorType = "store_general"
-	VendorTypeWands   VendorType = "store_alchemy"
-	VendorTypeArmor   VendorType = "store_armor"
-	VendorTypeWeapons VendorType = "store_weapons"
+	VendorTypeGeneral VendorType = "pepin"
+	VendorTypeWands   VendorType = "adria"
+	VendorTypeWeapons VendorType = "griswold"
 )
 
 type Actor struct {
@@ -38,8 +37,8 @@ type Actor struct {
 	parametrizedStatusEffects []*ParametrizedStatusEffect
 	isAnimatingMovement       bool
 
-	stats      stats.AttributeHolder
-	timeEnergy int
+	stats       stats.AttributeHolder
+	timeEnergy  int
 	hitRecovery int // AUT the D1 hero still loses to a hard hit (PM_GOTHIT)
 
 	state ActorState
@@ -481,8 +480,10 @@ func (a *Actor) SetFlipLook(flip bool) {
 	a.lastMoveWasWest = flip
 }
 
-func (a *Actor) CanPickup() bool {
-	return !a.inventory.IsFull()
+// CanPickup: gold goes to the gold stat and stackable items join an existing stack,
+// so both fit even into a full inventory.
+func (a *Actor) CanPickup(item *Item) bool {
+	return item.IsGold() || !a.inventory.IsFull() || a.inventory.CanStack(item)
 }
 
 func (a *Actor) BeforeTurn() {
@@ -865,8 +866,6 @@ func (a *Actor) GetColor() color.RGBA {
 		switch a.isVendorOfType {
 		case VendorTypeGeneral:
 			return defs.Brown
-		case VendorTypeArmor:
-			return defs.LightGray
 		case VendorTypeWeapons:
 			return defs.DarkGray
 		case VendorTypeWands:

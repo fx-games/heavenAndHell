@@ -29,9 +29,28 @@ func d1ItemIcon(it *d1.Item) int32 {
 	return defs.Icon(d1ItemIconName(it))
 }
 
+// d1GoldIconName picks the gold pile icon by thirds of the spawned range: 5*dlvl + rand(10*dlvl), +1/8 in hell,
+// dlvl 1..16 gives 5..268.
+func d1GoldIconName(value int) string {
+	const lo, hi = 5, 268
+	switch {
+	case value < lo+(hi-lo)/3:
+		return "item.ITYPE_GOLD_SMALL"
+	case value < lo+2*(hi-lo)/3:
+		return "item.ITYPE_GOLD_MEDIUM"
+	}
+	return "item.ITYPE_GOLD_LARGE"
+}
+
 func d1ItemIconName(it *d1.Item) string {
+	if _, ok := defs.IconOK("item." + it.Name); ok { // quest items are IMISC_NONE, so they're keyed by name
+		return "item." + it.Name
+	}
 	if _, ok := defs.IconOK("item." + it.MiscID); ok {
 		return "item." + it.MiscID
+	}
+	if it.Type == d1.ITypeGold {
+		return d1GoldIconName(it.Value)
 	}
 	if suffix, ok := d1RarityIconSuffix[it.Type]; ok && it.Magical > 0 {
 		prefix := "IconItemMagic"
@@ -98,6 +117,11 @@ func (g *Factory) NewD1Item(it *d1.Item) *Item {
 			armorType = defs.ArmorTypeHelmet
 		}
 		item.SetArmorComponent(&ArmorStats{BaseArmor: it.AC, Type: armorType, Durability: durability})
+		item.SetThrowComponent(&ThrowStats{ // house rule, D1 has no throwing
+			Damage:        stats.NewInterval(0, it.AC),
+			ChanceToBreak: 0.25,
+			HitZone:       OneTargetTile(g.State.GetMap, nil),
+		})
 	case d1.ITypeRing:
 		item.SetCategory(defs.ItemCategoryRing)
 	case d1.ITypeAmulet:
@@ -150,6 +174,8 @@ func (g *Factory) NewD1Item(it *d1.Item) *Item {
 	return item
 }
 
+func (i *Item) IsGold() bool { return i.d1 != nil && i.d1.Type == d1.ITypeGold }
+
 // MeetsRequirements reports whether the wielding player's Str/Mag/Dex meet this D1 item's requirements. Always
 // true for non-D1 items.
 func (i *Item) MeetsRequirements() bool {
@@ -175,30 +201,55 @@ func (i *Item) RefreshD1() {
 	if it.Type == d1.ITypeGold {
 		i.name = fmt.Sprintf("%d gold", it.Value)
 	}
+	if it.MaxCharges > 0 && i.HasAction() {
+		i.actionCharges = it.Charges
+	}
+	i.forcedTooltip = util.ToLabelText(append([]string{""}, i.d1TooltipLines(nil)...))
+}
+
+// D1TooltipLinesComparedTo is GetTooltipLines with Damage, Armor and property lines colored by cmp (d1.Item.Compare):
+// green where this item is better, red where it is worse.
+func (i *Item) D1TooltipLinesComparedTo(cmp map[string]int, parseColorCodedText func(string) []util.ColoredTextPart) []util.LabelText {
+	i.RefreshD1()
+	lines := util.ToLabelText(append([]string{i.Name(), ""}, i.d1TooltipLines(cmp)...))
+	lines[0].TextColor = defs.OffWhite
+	return parseColorCodes(lines, parseColorCodedText)
+}
+
+func (i *Item) d1TooltipLines(cmp map[string]int) []string {
+	it := i.d1
 	var lines []string
 	add := func(format string, args ...any) { lines = append(lines, fmt.Sprintf(format, args...)) }
+	colored := func(c int, text string) string {
+		switch c {
+		case 1:
+			return "[:positive]" + text + "[:white]"
+		case -1:
+			return "[:negative]" + text + "[:white]"
+		}
+		return text
+	}
 	if it.Spell > 0 && it.Spell < len(d1.SpellDescriptions) {
 		lines = append(lines, d1.SpellDescriptions[it.Spell])
 	}
 	if it.MaxDam > 0 {
-		add("Damage: %d-%d", it.MinDam, it.MaxDam)
+		add("%s", colored(cmp[d1.KeyDamage], fmt.Sprintf("Damage: %d-%d", it.MinDam, it.MaxDam)))
 	}
 	if it.AC > 0 {
-		add("Armor: %d", it.AC)
+		add("%s", colored(cmp[d1.KeyArmor], fmt.Sprintf("Armor: %d", it.AC)))
 	}
 	if it.MaxDur > 0 && it.MaxDur < 255 {
 		add("Durability: %d/%d", it.Durability, it.MaxDur)
 	}
 	if it.MaxCharges > 0 {
 		add("Charges: %d/%d", it.Charges, it.MaxCharges)
-		if i.HasAction() {
-			i.actionCharges = it.Charges
-		}
 	}
 	if it.Magical > 0 && !it.Identified {
 		add("Not Identified")
 	} else {
-		lines = append(lines, it.Properties()...)
+		for _, l := range it.PropertyLines(cmp) {
+			lines = append(lines, colored(l.Cmp, l.Text))
+		}
 	}
 	if it.Type == d1.ITypeSword || it.Type == d1.ITypeAxe || it.Type == d1.ITypeMace || it.Type == d1.ITypeBow || it.Type == d1.ITypeStaff {
 		if i.SlotName() == defs.SlotNameTwoHandedWeapon {
@@ -222,6 +273,10 @@ func (i *Item) RefreshD1() {
 		h, sh := player.hero, player.HeroSheet()
 		life := func() { lo, hi := h.PotionHealRange(sh.MaxHP); add("Restores %d-%d life", lo>>6, hi>>6) }
 		mana := func() { lo, hi := h.PotionManaRange(sh.MaxMana); add("Restores %d-%d mana", lo>>6, hi>>6) }
+		if it.Spell == d1.SplHeal {
+			lo, hi := d1.HealRange64(h.Class, h.Level, h.SpellLevel(sh, it.Spell))
+			add("Heals %d-%d life", lo>>6, hi>>6)
+		}
 		switch it.MiscID {
 		case "IMISC_HEAL":
 			life()
@@ -245,5 +300,75 @@ func (i *Item) RefreshD1() {
 	if it.Type != d1.ITypeGold {
 		add("Value: %d gold", value)
 	}
-	i.forcedTooltip = util.ToLabelText(append([]string{""}, lines...))
+	return lines
+}
+
+// NoteUnequipped marks an equipped item that equipping another would take off without a replacement.
+const NoteUnequipped = "Would be unequipped"
+
+// EquippedComparison is an equipped item equipping another item would displace, with its values compared to the other
+// item's (Cmp, see d1.Item.Compare) and an optional note.
+type EquippedComparison struct {
+	Item *Item
+	Cmp  map[string]int
+	Note string
+}
+
+// D1CompareForEquipping lists the equipped items candidate (a shop or pack item) would replace (left ring first, weapon before shield) and how
+// candidate's values compare to them: per key better or worse than all of them, else 0. Empty if nothing is displaced.
+func (e *Equipment) D1CompareForEquipping(candidate *Item) ([]EquippedComparison, map[string]int) {
+	if candidate.d1 == nil {
+		return nil, nil
+	}
+	var result []EquippedComparison
+	var candidateCmps []map[string]int
+	compare := func(worn *Item) {
+		if worn == nil || worn.d1 == nil {
+			return
+		}
+		wornKnown := !(worn.d1.Magical > 0 && !worn.d1.Identified)
+		known := wornKnown && !(candidate.d1.Magical > 0 && !candidate.d1.Identified)
+		c := EquippedComparison{Item: worn, Cmp: worn.d1.Compare(candidate.d1, known)}
+		if !wornKnown { // an unidentified candidate says so in its own tooltip
+			c.Note = "Affixes unknown (not identified)"
+		}
+		result = append(result, c)
+		candidateCmps = append(candidateCmps, candidate.d1.Compare(worn.d1, known))
+	}
+	mainHand := e.GetBySlot(defs.SlotNameMainHand)
+	switch candidate.SlotName() {
+	case defs.SlotNameNotEquippable:
+		return nil, nil
+	case defs.SlotNameRing:
+		compare(e.GetBySlot(defs.SlotNameRingLeft))
+		compare(e.GetBySlot(defs.SlotNameRingRight))
+	case defs.SlotNameTwoHandedWeapon:
+		compare(mainHand)
+		if shield := e.GetBySlot(defs.SlotNameOffHand); shield != nil && shield.d1 != nil {
+			lost := shield.d1.Compare(nil, !(shield.d1.Magical > 0 && !shield.d1.Identified))
+			for key := range lost {
+				lost[key] = -lost[key] // everything the shield gives is lost
+			}
+			result = append(result, EquippedComparison{Item: shield, Cmp: lost})
+		}
+	case defs.SlotNameOffHand:
+		if mainHand != nil && mainHand.SlotName() == defs.SlotNameTwoHandedWeapon {
+			return []EquippedComparison{{Item: mainHand, Note: NoteUnequipped}}, nil
+		}
+		compare(e.GetBySlot(defs.SlotNameOffHand))
+	default:
+		compare(e.GetBySlot(candidate.SlotName()))
+	}
+
+	candidateCmp := map[string]int{}
+	for i, c := range candidateCmps {
+		for key, v := range c {
+			if i == 0 {
+				candidateCmp[key] = v
+			} else if candidateCmp[key] != v {
+				candidateCmp[key] = 0
+			}
+		}
+	}
+	return result, candidateCmp
 }

@@ -64,7 +64,6 @@ func (r RangedTargetingRules) GetPreSelectedTarget() geometry.Point {
 	return r.nearestHostileActor()
 }
 
-
 func NewRangedAttackTargetingRules(args util.Arguments) *TargetRulesProvider {
 	hitChanceFunc := CalculateRangedWeaponHitChance
 	if args.Get(0) == "throw" {
@@ -79,7 +78,7 @@ func NewRangedAttackTargetingRules(args util.Arguments) *TargetRulesProvider {
 				},
 				nearestHostileActor: func() geometry.Point {
 					nearestActor := currentMap.GetNearestActor(attacker.MapPosition(), func(actor *Actor) bool {
-						if !actor.IsHostileTo(attacker) || !attacker.CanSee(actor.MapPosition()) || actor.IsVendor() {
+						if !actor.IsVisible() || !actor.IsHostileTo(attacker) || !attacker.CanSee(actor.MapPosition()) || actor.IsVendor() {
 							return false
 						}
 						return true
@@ -116,17 +115,6 @@ type DirectTargetingRules struct {
 	infoForTarget func(geometry.Point) string
 }
 
-
-
-
-
-
-
-
-
-
-
-
 type CustomTargetingRules struct {
 	attacker            *Actor
 	isOnMap             func(target geometry.Point) bool
@@ -135,18 +123,3 @@ type CustomTargetingRules struct {
 	isValidTarget       func(target geometry.Point) bool
 	highlights          func(origin, target geometry.Point, hitPositions []geometry.Point) []TargetHighlight
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -428,8 +428,16 @@ internal_name: item.ITYPE_STAFF
 name: D1 Staff
 icon: 141
 
-internal_name: item.ITYPE_GOLD
-name: D1 Gold
+internal_name: item.ITYPE_GOLD_SMALL
+name: D1 Gold (small pile)
+icon: 271
+
+internal_name: item.ITYPE_GOLD_MEDIUM
+name: D1 Gold (medium pile)
+icon: 272
+
+internal_name: item.ITYPE_GOLD_LARGE
+name: D1 Gold (large pile)
 icon: 273
 
 internal_name: item.ITYPE_RING
@@ -504,3 +512,39 @@ internal_name: item.IMISC_MAPOFDOOM
 name: D1 Map of the Stars (quest)
 icon: 139
 
+
+internal_name: item.Tavern Sign
+name: D1 Tavern Sign (quest)
+icon: 137
+
+internal_name: item.Magic Rock
+name: D1 Magic Rock (quest)
+icon: 137
+
+internal_name: item.Anvil of Fury
+name: D1 Anvil of Fury (quest)
+icon: 137
+
+internal_name: item.Black Mushroom
+name: D1 Black Mushroom (quest)
+icon: 137
+
+internal_name: item.Brain
+name: D1 Brain (quest)
+icon: 137
+
+internal_name: item.Fungal Tome
+name: D1 Fungal Tome (quest)
+icon: 137
+
+internal_name: item.Blood Stone
+name: D1 Blood Stone (quest)
+icon: 137
+
+internal_name: item.Golden Elixir
+name: D1 Golden Elixir (quest)
+icon: 137
+
+internal_name: item.Staff of Lazarus
+name: D1 Staff of Lazarus (quest)
+icon: 137

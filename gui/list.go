@@ -83,7 +83,7 @@ func (i *IconList) OnMouseMoved(x int, y int) (bool, Tooltip) {
 		// we only check the y coordinate, because the x coordinate is always the same
 		if y >= yStart && y <= yEnd {
 			i.selectedIndex = index
-			return true, NewTextTooltip(i.uiController, element.GetTooltipLines(i.uiController.ParseColorCodedText), geometry.Point{X: x, Y: y})
+			return true, NewElementTooltip(i.uiController, element, geometry.Point{X: x, Y: y})
 		}
 
 		yStart = yStart + int(i.lineSpacing) + i.posInfo.ItemSizes[index].Y

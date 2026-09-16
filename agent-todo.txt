@@ -1,0 +1,28 @@
+#1 Add the throw item command back that did exist before. I want to throw a sword at enemies and barrels.
+#2 Add a bool toggle called "Diablo Audio" to the audio sub-menu which needs to be enabled for the diablo sound effects and music to be used.
+#3 Character Sheet changes (when pressing "c"):
+ - Abbreviate Experience to "XP"
+ - Give the Str, Mag and Dex stats their own line each
+ - The "Resists fire 0%" line has something with "light(?)" right after it, cannot read because the screen ends there. Make these things each get their own line.
+#4 The level up message is obstructed by the button we put on top of that. Remove that level button from the ui.
+#5 When going into the level up screen but not spending any points the green message telling us about unspent stat points is gone. Keep it there until we spend all stat points.
+#6 The sound effect when spending stat points in the level up menu is unbearable. Just remove that for now.
+#7 Strength does have an effect on my damage right? Show also these derived values in the character sheet.
+#8 Do we have the exact enemy behaviour that Diablo 1 had?
+#9 How do I know if I can use a shield with a weapon? Shouldn't they have a two-handed flag? I want to see that in the item description popup.
+#10 When I hover over a tile with my mouse I want a description of whatever is below it to be visible. It should be displayed right where the inventory item description is also displayed in the right status/inventory bar.
+#11 Make auto explore also bump chests, barrels, etc. where loot could be, iff the player has enabled "Open Containers" in the new "Auto explore" sub menu, reachable from the main menu. Also add "Pickup loot" as an option to that submenu.
+#12 Scrolls and books should be visually distinct, do they have separate icons and I just need to map them?
+#13 Reading a book without having enough magic does still consume the book. That's no good, change it.
+#14 Items that have requirements the player does not meet should have a red background and also render the missing requirement red in the item description.
+#15 When pressing "ESC" on the main menu after starting the game, it will just start. Prevent that.
+#16 Selling menu has shows no hover color for the currently selected item unlike the buy menu, fix that.
+#17 Sort items in the "Sell" menus by the assigned keyboard shortcut. Also write the item in red color if the requirements for the current character are not met.
+#18 Deckard's "Identify" menu does show "0 Gold" for the identification of any item, that can't be right?
+#19 Add the dialogue options back in. I want all the original dialogue from Diablo 1 to be present add UI where neccessary.
+#20 When durability of an item drops below 50% start showing a health bar under the item icon, in the same way and using the same code that we use to display a health bar below actors.
+#21 I want Unique Items to also use the icons with that prefix "IconItemUnique..."
+#22 Same for Items with affixes of any kind, they should use the icon set prefixed with "IconItemMagic..." where applicable.
+#23 Allow the player at the start of the game to also choose between female and male for his character since we have both variants as tiles.
+#24 I have added lots of subfolders to "/Users/felix/Projects/heavenAndHell/files/assets/diablo_sfx/monsters" wire up them up.
+

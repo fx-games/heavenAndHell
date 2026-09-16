@@ -3,6 +3,7 @@ package gui
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
+	"rpg/common"
 	"rpg/defs"
 	"rpg/geometry"
 )
@@ -10,12 +11,14 @@ import (
 const newGameIconSize = 32 // 8px tiles at scale 4
 
 // NewGameScreen picks class (rows) and gender (columns), permadeath and a name on one screen.
-// Rows 0..len(classes)-1 are the icon grid, then the permadeath checkbox, the name field and the start button.
+// Rows 0..len(classes)-1 are the icon grid, then the permadeath checkbox, the name field, the start and back buttons.
 type NewGameScreen struct {
 	u           *UIController
 	classes     []defs.LoadoutDefinition
 	start       func(class defs.LoadoutDefinition, permadeath bool, name string)
+	back        func()
 	name        *TextInput
+	rolledName  string // last random name we put into the field; anything else was typed by the player
 	class, col  int
 	focus       int
 	permadeath  bool
@@ -26,8 +29,8 @@ type NewGameScreen struct {
 	lineH       int
 }
 
-func (u *UIController) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string)) {
-	s := &NewGameScreen{u: u, classes: u.context.Definitions.ClassDefinitions, start: start}
+func (u *UIController) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string), back func()) {
+	s := &NewGameScreen{u: u, classes: u.context.Definitions.ClassDefinitions, start: start, back: back}
 	s.name = NewTextInput(u, geometry.Point{}, 16, 0, 1, func(EndAction, string) {})
 	s.Layout()
 	u.PushWidget(s)
@@ -36,6 +39,7 @@ func (u *UIController) OpenNewGameScreen(start func(class defs.LoadoutDefinition
 func (s *NewGameScreen) permadeathRow() int { return len(s.classes) }
 func (s *NewGameScreen) nameRow() int       { return len(s.classes) + 1 }
 func (s *NewGameScreen) startRow() int      { return len(s.classes) + 2 }
+func (s *NewGameScreen) backRow() int       { return len(s.classes) + 3 }
 
 func (s *NewGameScreen) Layout() {
 	r := s.u.GetRenderer()
@@ -45,7 +49,7 @@ func (s *NewGameScreen) Layout() {
 		lw, _ := r.MeasureString(c.Name)
 		s.labelW = max(s.labelW, int(lw)+16)
 	}
-	s.size = geometry.Point{X: max(int(w), s.labelW+2*newGameIconSize+8), Y: len(s.classes)*(newGameIconSize+8) + 3*s.lineH}
+	s.size = geometry.Point{X: max(int(w), s.labelW+2*newGameIconSize+8), Y: len(s.classes)*(newGameIconSize+8) + 4*s.lineH}
 	screen := s.u.GetScreenSize()
 	s.topLeft = screen.Sub(s.size).Div(2)
 }
@@ -67,6 +71,15 @@ func (s *NewGameScreen) icon(row, col int) int32 {
 		return defs.FemaleIconByClass[s.classes[row].InternalName]
 	}
 	return s.classes[row].Icon
+}
+
+// rollName puts a random name for the selected gender into the name field unless the player typed one.
+func (s *NewGameScreen) rollName() {
+	if t := s.name.currentText; t != "" && t != s.rolledName {
+		return
+	}
+	s.rolledName = common.RandomHeroName(s.col == 1)
+	s.name.currentText = s.rolledName
 }
 
 func (s *NewGameScreen) Draw() {
@@ -99,7 +112,7 @@ func (s *NewGameScreen) Draw() {
 	if s.focus == s.nameRow() {
 		nameText += "_"
 	}
-	for i, text := range []string{check, nameText, "Start game"} {
+	for i, text := range []string{check, nameText, "Start game", "Back"} {
 		row := s.permadeathRow() + i
 		y := s.rowRect(row, 0).Min.Y + (s.lineH+int(h))/2
 		r.DrawTTFOnScreen(float64(s.topLeft.X), float64(y), text, colorOf(row == s.focus))
@@ -111,25 +124,35 @@ func (s *NewGameScreen) OnCommand(command CommandType) bool {
 	case PlayerCommandUp:
 		s.focus = max(s.focus-1, 0)
 	case PlayerCommandDown:
-		s.focus = min(s.focus+1, s.startRow())
+		s.focus = min(s.focus+1, s.backRow())
 	case PlayerCommandLeft, PlayerCommandRight:
 		if s.focus < len(s.classes) {
 			s.col = 1 - s.col
+			s.rollName()
 		}
 	case PlayerCommandConfirm:
 		s.activate(s.focus)
+		return true
+	case PlayerCommandCancel:
+		s.activate(s.backRow())
 		return true
 	}
 	if s.focus < len(s.classes) {
 		s.class = s.focus
 	}
-	return true // uncancelable, like the start menu
+	return true
 }
 
-// activate toggles the checkbox or starts the game (Enter on a class or the name field starts too).
+// activate toggles the checkbox, goes back to the menu that opened the screen, or starts the game
+// (Enter on a class or the name field starts too).
 func (s *NewGameScreen) activate(row int) {
-	if row == s.permadeathRow() {
+	switch row {
+	case s.permadeathRow():
 		s.permadeath = !s.permadeath
+		return
+	case s.backRow():
+		s.shouldClose = true
+		s.back()
 		return
 	}
 	class := s.classes[s.class]
@@ -161,7 +184,7 @@ func (s *NewGameScreen) OnKeyPressed(key ebiten.Key, shiftPressed bool) {
 
 func (s *NewGameScreen) OnMouseClicked(button ebiten.MouseButton, x int, y int) bool {
 	p := geometry.Point{X: x, Y: y}
-	for row := 0; row <= s.startRow(); row++ {
+	for row := 0; row <= s.backRow(); row++ {
 		for col := 0; col < 2; col++ {
 			if !s.rowRect(row, col).Contains(p) {
 				continue
@@ -169,6 +192,7 @@ func (s *NewGameScreen) OnMouseClicked(button ebiten.MouseButton, x int, y int) 
 			s.focus = row
 			if row < len(s.classes) {
 				s.class, s.col = row, col
+				s.rollName()
 			} else if row != s.nameRow() {
 				s.activate(row)
 			}

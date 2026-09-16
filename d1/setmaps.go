@@ -49,7 +49,7 @@ func (g *gen) loadSetTiles(d dun, floor, dirt byte, protect bool) {
 
 // loadPreL1 ports LoadPreL1Dungeon: the layout before the quest changes it, kept in pdungeon.
 func (g *gen) loadPreL1(name string) {
-	g.loadSetTiles(loadDun(name), t1Floor, t1Dirt, true)
+	g.loadSetTiles(g.loadDun(name), t1Floor, t1Dirt, true)
 	g.l1FillFloor()
 	g.savePdungeon()
 }
@@ -57,7 +57,7 @@ func (g *gen) loadPreL1(name string) {
 // loadL1 ports LoadL1Dungeon.
 func (g *gen) loadL1(name string, vx, vy int) {
 	g.initTrans()
-	d := loadDun(name)
+	d := g.loadDun(name)
 	g.loadSetTiles(d, t1Floor, t1Dirt, true)
 	g.l1FillFloor()
 	g.view = point{vx, vy}
@@ -70,14 +70,14 @@ func (g *gen) loadL1(name string, vx, vy int) {
 // loadPreL2 ports LoadPreL2Dungeon.
 func (g *gen) loadPreL2(name string) {
 	g.initTrans()
-	g.loadSetTiles(loadDun(name), 3, 12, true)
+	g.loadSetTiles(g.loadDun(name), 3, 12, true)
 	g.savePdungeon()
 }
 
 // loadL2 ports LoadL2Dungeon.
 func (g *gen) loadL2(name string, vx, vy int) {
 	g.initTrans()
-	d := loadDun(name)
+	d := g.loadDun(name)
 	g.loadSetTiles(d, 3, 12, true)
 	g.lPass3(12 - 1)
 	g.clearGlobals()
@@ -89,7 +89,7 @@ func (g *gen) loadL2(name string, vx, vy int) {
 // loadL3 ports LoadPreL3Dungeon and LoadL3Dungeon (Poisoned Water loads the same map for both).
 func (g *gen) loadL3(name string) {
 	g.initTrans()
-	d := loadDun(name)
+	d := g.loadDun(name)
 	g.loadSetTiles(d, 7, 8, false)
 	g.savePdungeon()
 	g.initTrans()
@@ -124,8 +124,8 @@ func (g *gen) loadSetMap(sl int, seeds [17]int32) {
 		if q := &g.quests[QSkelKing]; q.Active == QuestInit {
 			q.Active, q.Var1 = QuestActive, 1
 		}
-		g.loadPreL1(`Levels\L1Data\SklKng1.DUN`)
-		g.loadL1(`Levels\L1Data\SklKng2.DUN`, 83, 45)
+		g.loadPreL1("l1/sklkng1")
+		g.loadL1("l1/sklkng2", 83, 45)
 		g.areaTrans(skelKingTrans1)
 		g.listTrans(skelKingTrans2)
 		g.areaTrans(skelKingTrans3)
@@ -139,8 +139,8 @@ func (g *gen) loadSetMap(sl int, seeds [17]int32) {
 		g.objRange(27, 53, 8, 1, 15, 11, 3)
 		g.trigs = []Trigger{{82, 42, TrigReturnLevel}}
 	case SLBoneChamb:
-		g.loadPreL2(`Levels\L2Data\Bonecha2.DUN`)
-		g.loadL2(`Levels\L2Data\Bonecha1.DUN`, 69, 39)
+		g.loadPreL2("l2/bonecha2")
+		g.loadL2("l2/bonecha1", 69, 39)
 		g.listTrans(skelChamTrans1)
 		g.areaTrans(skelChamTrans2)
 		g.listTrans(skelChamTrans3)
@@ -152,7 +152,7 @@ func (g *gen) loadSetMap(sl int, seeds [17]int32) {
 		if q := &g.quests[QPWater]; q.Active == QuestInit {
 			q.Active = QuestActive
 		}
-		g.loadL3(`Levels\L3Data\Foulwatr.DUN`)
+		g.loadL3("l3/foulwatr")
 		g.trigs = []Trigger{{30, 83, TrigReturnLevel}}
 	case SLVileBetrayer:
 		if q := &g.quests[QBetrayer]; q.Active == QuestDone {
@@ -160,13 +160,13 @@ func (g *gen) loadSetMap(sl int, seeds [17]int32) {
 		} else if q.Active == QuestActive {
 			q.Var2 = 3
 		}
-		g.loadPreL1(`Levels\L1Data\Vile1.DUN`)
-		g.loadL1(`Levels\L1Data\Vile2.DUN`, 35, 36)
+		g.loadPreL1("l1/vile1")
+		g.loadL1("l1/vile2", 35, 36)
 		g.addLevelObjs(DTypeCathedral)
 		g.objRange(26, 45, 1, 1, 9, 10, 1)
 		g.objRange(45, 46, 11, 1, 20, 10, 2)
 		g.objRange(35, 36, 7, 11, 13, 18, 3)
-		g.loadTransparency(loadDun(`Levels\L1Data\Vile1.DUN`))
+		g.loadTransparency(g.loadDun("l1/vile1"))
 		g.trigs = nil
 	}
 }

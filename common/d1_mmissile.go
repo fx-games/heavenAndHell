@@ -75,6 +75,8 @@ type missileCtx struct {
 	player *Actor
 	c      *spellCtx // for its grid helpers
 	dealt  int       // whole points
+	taken  int       // 64ths that hit the hero, before mana shield
+	block  bool      // the hero blocked a hit
 }
 
 // hit ports PlayerMHit: `ticks` hit rolls against the player standing at p, from a missile that flew from `from`.
@@ -122,15 +124,15 @@ func (c *missileCtx) hitAs(mis D1Missile, p, from geometry.Point, mind, maxd int
 		total += dam
 	}
 	if blocked && total == 0 {
-		if c.caster == nil {
-			c.ctx.Msg("You block the trap.")
-		} else {
+		c.block = true
+		if c.caster != nil {
 			c.ctx.Msg(fmt.Sprintf("You block the attack of %s.", c.caster.Name()))
 		}
 	}
 	if total == 0 {
 		return false
 	}
+	c.taken += total
 	c.dealt += d1ManaShield(pl, total>>6)
 	c.c.animations = append(c.c.animations, NewHitAnimation(p, 0.3, defs.IconEffectHit, 2))
 	return true

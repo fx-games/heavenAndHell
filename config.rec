@@ -18,9 +18,10 @@ ServeEquipment: true
 ServeLog: true
 ItemNamesInShop: BandStyle
 FlipActorsHorizontally: true
-SoundVolume: 0.6
-MusicVolume: 0.3
-VoiceVolume: 1
+SoundVolume: 0.1
+MusicVolume: 0.1
+VoiceVolume: 0.8
 DiabloAudioEnabled: true
 AutoExploreOpenContainers: true
 WeaponBreakWarning: true
+Fullscreen: false

@@ -60,6 +60,8 @@ type Configuration struct {
 	AutoExploreOpenContainers bool // auto explore also bumps chests/barrels/sarcophagi it finds
 
 	WeaponBreakWarning bool // ask for confirmation before an attack that would destroy a zero-durability weapon
+
+	Fullscreen bool // set in the video menu or with F11
 }
 
 func (c Configuration) ToRecord() recfile.Record {
@@ -142,6 +144,7 @@ func (c Configuration) ToRecord() recfile.Record {
 		{Name: "DiabloAudioEnabled", Value: recfile.BoolStr(c.DiabloAudioEnabled)},
 		{Name: "AutoExploreOpenContainers", Value: recfile.BoolStr(c.AutoExploreOpenContainers)},
 		{Name: "WeaponBreakWarning", Value: recfile.BoolStr(c.WeaponBreakWarning)},
+		{Name: "Fullscreen", Value: recfile.BoolStr(c.Fullscreen)},
 	}
 }
 
@@ -190,6 +193,7 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		DiabloAudioEnabled:        configMap.GetBoolOrTrue("DiabloAudioEnabled"),
 		AutoExploreOpenContainers: configMap.GetBoolOrFalse("AutoExploreOpenContainers"),
 		WeaponBreakWarning:        configMap.GetBoolOrTrue("WeaponBreakWarning"),
+		Fullscreen:                configMap.GetBoolOrFalse("Fullscreen"),
 		WindowSize: geometry.Point{ //1280, Y: 800
 			X: configMap.GetIntOrDefault("WindowWidth", 1280),
 			Y: configMap.GetIntOrDefault("WindowHeight", 800),

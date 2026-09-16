@@ -12,6 +12,7 @@ import (
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/stats"
+	"strings"
 )
 
 // playthrough is the headless smoke test from D1_PLAN.md: it grows with every milestone and fails loudly.
@@ -23,6 +24,7 @@ func playthrough() {
 	game.SaveFile = filepath.Join(os.TempDir(), "heavenAndHell_playthrough_save.json")
 	defer os.Remove(game.SaveFile)
 	theGame, _ := createGameAndUIContext() // one instance: ebiten allows a single audio context per process
+	theGame.GetAudio().SetDisablePlayback(true)
 	missiles := &missileCounter{} // registered per check: a new game or a load makes a new broker
 	wallTraps, chestTraps := 0, 0 // traps that fired while objects were operated
 	for run := 1; run <= 3; run++ {
@@ -31,6 +33,9 @@ func playthrough() {
 		player := state.GetPlayer()
 		if player.Hero() == nil {
 			fail("run %d: player has no D1 hero", run)
+		}
+		if c, rolled := state.GetWaterColor(), state.QuestActive(d1.QPWater) != d1.QuestNotAvail; (c.G > c.B) != rolled {
+			fail("run %d: town water poisoned=%v at game start, but Poisoned Water rolled=%v", run, c.G > c.B, rolled)
 		}
 		// the checks park the hero in packs: one turn of a whole pack must not kill a low-HP sorcerer on 14
 		player.Hero().MaxHPBase += 1000 << 6
@@ -59,6 +64,9 @@ func playthrough() {
 				state.SetQuestVar(d1.QLtBanner, 1, 3)
 				common.UpdateD1Quests(state, m)
 				reach = reachable(m, up)
+				if m.GetCell(m.GetNamedLocation("ladder_down")).TileType.Special != gridmap.SpecialTileStairsDown {
+					fail("run %d dlvl 4: opening Snotspill's hall drew over the stairs down", run)
+				}
 			}
 			if dlvl == 13 && state.D1Quests()[d1.QWarlord].Active != d1.QuestNotAvail { // the way down leads through his hall
 				if reach[m.GetNamedLocation("ladder_down")] {
@@ -100,7 +108,7 @@ func playthrough() {
 			if dlvl == 16 { // Diablo's quarters open lever by lever
 				pullD1Levers(state)
 			}
-			boost(player, dlvl) // a level-1 hero healed every turn gets stun-locked forever by hit recovery
+			boost(player, dlvl)                                // a level-1 hero healed every turn gets stun-locked forever by hit recovery
 			player.RemoveStatusEffect(common.StatusManaShield) // shrines grant it, and it lasts across levels: the fight measures HP
 			monsters := 0
 			for _, a := range m.Actors() {
@@ -477,6 +485,19 @@ func castAllSpells(f *common.Factory, broker *common.Broker, state *common.State
 		}
 		return
 	}
+	if weapons := player.GetEquipment().AllItems(); len(weapons) > 0 && weapons[0].D1() != nil { // the dummy UI's item list never picks: a cancel
+		d := *weapons[0].D1()
+		d.Magical, d.Identified = 1, false
+		unidentified := f.NewD1Item(&d)
+		player.GetInventory().Add(unidentified)
+		mana.SetToMax()
+		full := mana.Value()
+		f.CastD1FromMemory(player, d1.SplIdentify, player.MapPosition())
+		if mana.Value() != full || unidentified.D1().Identified {
+			fail("spells: cancelling Identify's item list took mana (%d/%d) or identified the item", mana.Value(), full)
+		}
+		player.GetInventory().Remove(unidentified)
+	}
 	dealt := 0
 	var failed []string
 	for _, sp := range spells {
@@ -489,6 +510,13 @@ func castAllSpells(f *common.Factory, broker *common.Broker, state *common.State
 		}
 		if target == nil {
 			fail("spells: no monster left to cast at")
+		}
+		if sp == spells[0] {
+			forecast := common.D1CombatForecast(state, player, target)
+			if len(forecast) != 3 || !strings.Contains(forecast[1], "to kill") && !strings.Contains(forecast[1], "can't") {
+				fail("forecast against %s: %q", target.Name(), forecast)
+			}
+			fmt.Printf("forecast against %s: %q\n", target.Name(), forecast[1:])
 		}
 		if geometry.DistanceChebyshev(target.MapPosition(), player.MapPosition()) > 1 {
 			free := m.GetFreeCardinalNeighbors(target.MapPosition())[0]
@@ -1180,8 +1208,13 @@ func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
 	done(d1.QVeil)
 	must(!lachdanan.IsAlive(), "Lachdanan didn't find his rest")
 
+	townWater := func(poisoned bool) { // foul until the quest is done
+		c := state.GetWaterColor()
+		must(defs.IsTownLevel(state.GetMap().GetName()) && (c.G > c.B) == poisoned, "town water poisoned=%v wanted on %s (quest %d), color %v", poisoned, state.GetMap().GetName(), state.QuestActive(d1.QPWater), c)
+	}
 	talkTo(theGame, common.VendorTypeGeneral) // Poisoned Water Supply
 	log(d1.QPWater)
+	townWater(true)
 	travel(2)
 	state.MapTransition(gridmap.Transition{TargetMap: "!gen_pwater_2", TargetLocation: "ladder_up"})
 	water := func(want string) { // the foul water is tinted light green, the clean water blue
@@ -1207,6 +1240,7 @@ func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
 	water("clean water")
 	talkTo(theGame, common.VendorTypeGeneral)
 	reward(d1.UItemTRing)
+	townWater(false)
 	fmt.Println("quest lines: Butcher, Leoric, Ogden's Sign, Gharbad, Magic Rock, Valor, Chamber of Bone, Blind, Zhar, Black Mushroom, Anvil, Warlord, Lachdanan, Poisoned Water OK")
 }
 
@@ -1322,4 +1356,3 @@ func checkItemEffects(broker *common.Broker, state *common.State, fail func(stri
 	}
 	hp.SetToMax()
 }
-

@@ -6,11 +6,11 @@ import (
 	"rpg/recfile"
 )
 
-// Icons live in three independently remappable rec files under files/assets/data/icons/ (8x8 tiles in
+// Icons live in four independently remappable rec files under files/assets/data/icons/ (8x8 tiles in
 // assets/classic_roguelike.png): actors.rec (H&H IconCharacter*/IconMonster*/IconUnique*/IconCorpse*/IconRogue*
 // plus D1's "monster.<ID>", "unique.<Name>" and "npc.<name>"), items.rec (IconItem* plus D1's "item.ITYPE_*"/"item.IMISC_*"),
-// tiles.rec (everything else: terrain, doors, decals, effects, plus D1's "prop.OBJ_*"). Remap them with
-// ./remap_actors.sh, ./remap_items.sh, ./remap_tiles.sh — each rec file is read fresh on every game start, no
+// tiles.rec (everything else: terrain, doors, decals, effects, plus D1's "prop.OBJ_*"), skills.rec (D1's "spell.SPL_*" skill and spell icons). Remap them with
+// ./remap_actors.sh, ./remap_items.sh, ./remap_tiles.sh, ./remap_skills.sh — each rec file is read fresh on every game start, no
 // rebuild needed. The H&H constants (IconGrass, IconItemSword, ...) are package vars, not consts, for the same
 // reason: their value comes from the rec file, not from the Go source.
 func loadIconRec(name string) map[string]int32 {
@@ -37,9 +37,9 @@ func loadIconRec(name string) map[string]int32 {
 }
 
 // IconOK looks up a name not exposed as a Go constant (D1's dynamically keyed "monster.<ID>", "npc.<name>",
-// "item.ITYPE_*"/"item.IMISC_*", "prop.OBJ_*") in all three category files.
+// "item.ITYPE_*"/"item.IMISC_*", "prop.OBJ_*", "spell.SPL_*") in all four category files.
 func IconOK(name string) (int32, bool) {
-	for _, m := range []map[string]int32{actorsIcons, itemsIcons, tilesIcons} {
+	for _, m := range []map[string]int32{actorsIcons, itemsIcons, tilesIcons, skillsIcons} {
 		if icon, ok := m[name]; ok {
 			return icon, true
 		}

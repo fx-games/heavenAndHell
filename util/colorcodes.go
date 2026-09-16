@@ -13,7 +13,6 @@ type ColoredTextPart struct {
 	Height  float64
 }
 
-
 func GetColorFromRGBString(lightColor string) color.RGBA {
 	// looks like "234 12 124"
 	regexpPattern := regexp.MustCompile(`([0-9]{1,3}) +([0-9]{1,3}) +([0-9]{1,3})`)

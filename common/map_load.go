@@ -34,6 +34,17 @@ func (s *State) NewGridMapFromLDTK(mapName string) (*gridmap.GridMap[*Actor, *It
 		loadedMap.SetTile(pos, tileType)
 	}
 
+	// a Location with a TargetMap is a transition, e.g. the town entrances
+	metaLayer := currentMap.LayerByIdentifier("Meta")
+	for _, entity := range metaLayer.Entities {
+		if targetMap := entity.PropertyByIdentifier("TargetMap"); entity.Identifier == "Location" && !targetMap.IsNull() {
+			posX, posY := metaLayer.ToGridPosition(entity.Position[0], entity.Position[1])
+			pos := geometry.Point{X: posX, Y: posY}
+			loadedMap.SetTile(pos, loadedMap.GetCell(pos).TileType.WithSpecial(gridmap.SpecialTileStairsDown))
+			loadedMap.AddTransitionAt(pos, gridmap.Transition{TargetMap: targetMap.AsString(), TargetLocation: entity.PropertyByIdentifier("TargetLocation").AsString()})
+		}
+	}
+
 	for _, entity := range npcLayer.Entities {
 		typeOfEntity := entity.Identifier
 		posX, posY := npcLayer.ToGridPosition(entity.Position[0], entity.Position[1])
@@ -46,6 +57,8 @@ func (s *State) NewGridMapFromLDTK(mapName string) (*gridmap.GridMap[*Actor, *It
 			s.addSignFromEntity(loadedMap, textLines, pos)
 		} else if typeOfEntity == "Door" {
 			loadedMap.AddObject(NewDoor(defs.IconOpenDoor, defs.IconClosedDoor), pos)
+		} else if typeOfEntity == "Stash" {
+			loadedMap.AddObject(s.factory.NewStash(), pos)
 		}
 
 	}
@@ -77,22 +90,14 @@ func addActorFromEntity(ldtkMapProject *ldtk.Project, loadedMap *gridmap.GridMap
 
 	actor.SetDrawPosition(pos.ToPointF())
 
-	if !entity.PropertyByIdentifier("InternalName").IsNull() {
-		actor.SetInternalName(entity.PropertyByIdentifier("InternalName").AsString())
-	}
-
-	npcTypeProp := entity.PropertyByIdentifier("Type").AsString()
-	if strings.HasPrefix(npcTypeProp, "Store") {
-		actor.SetVendorType(VendorType(strings.ToLower(npcTypeProp)))
-		actor.SetNoCorpse()
-		actor.SetDeathStringFormats([]string{
-			"%s teleported away at the last second.",
-		})
-	} else if strings.HasPrefix(npcTypeProp, "Neutral") {
-		actor.SetNeutral()
-	} else if strings.HasPrefix(npcTypeProp, "Aggressive") {
-		actor.SetHostile()
-	}
+	// every NPC is a townsperson: its internal name is its vendor type
+	internalName := entity.PropertyByIdentifier("InternalName").AsString()
+	actor.SetInternalName(internalName)
+	actor.SetVendorType(VendorType(internalName))
+	actor.SetNoCorpse()
+	actor.SetDeathStringFormats([]string{
+		"%s teleported away at the last second.",
+	})
 
 	loadedMap.AddActor(actor, pos)
 	actor.SetFlipLook(flipLook)

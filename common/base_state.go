@@ -155,8 +155,6 @@ func (s *State) IsReachableByPlayer(positionsOfInterest []geometry.Point) bool {
 	return true
 }
 
-
-
 func (s *State) GetMap() *gridmap.GridMap[*Actor, *Item, Object] {
 	return s.currentMap
 }
@@ -240,7 +238,6 @@ func (s *State) IsPlayerInTown() bool {
 	mapName := s.GetMap().GetName()
 	return defs.IsTownLevel(mapName)
 }
-
 
 func (s *State) PlayerStandsInLitArea() bool {
 	currentMap := s.GetMap()
@@ -360,9 +357,13 @@ func (s *State) mixLightSourceColor(drawColor, noLightSource color.RGBA, worldTi
 	}
 	return drawColor
 }
-// GetWaterColor tints water tiles: light green while the Poisoned Water Supply is foul, blue otherwise.
+
+// GetWaterColor tints water tiles: light green in town and in its level while the Poisoned Water Supply was rolled
+// for this game and isn't done yet, blue otherwise.
 func (s *State) GetWaterColor() color.RGBA {
-	if sl := d1SetLevelOf(s.GetMap().GetName()); sl != nil && sl.SL == d1.SLPoisonWater && s.QuestActive(d1.QPWater) != d1.QuestDone {
+	name, q := s.GetMap().GetName(), s.QuestActive(d1.QPWater)
+	sl := d1SetLevelOf(name)
+	if (defs.IsTownLevel(name) || sl != nil && sl.SL == d1.SLPoisonWater) && q != d1.QuestNotAvail && q != d1.QuestDone {
 		return color.RGBA{R: 199, G: 251, B: 161, A: 255}
 	}
 	return color.RGBA{R: 86, G: 112, B: 194, A: 255}
@@ -513,8 +514,6 @@ func (s *State) AddItemToMapWithDistribution(item *Item, pos geometry.Point) {
 func (s *State) SetTimeKeeper(keeper *TimeKeeper) {
 	s.timekeeper = keeper
 }
-
-
 
 func (s *State) RemoveObject(gameObject Object) {
 	s.GetMap().RemoveObject(gameObject)

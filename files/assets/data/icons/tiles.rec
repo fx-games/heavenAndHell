@@ -96,6 +96,18 @@ icon: 9
 internal_name: IconCathedralWall
 icon: 56
 
+internal_name: IconArch
+icon: 346
+
+internal_name: IconGrate
+icon: 345
+
+internal_name: IconPillar
+icon: 75
+
+internal_name: IconLamp
+icon: 247
+
 internal_name: IconCathedralWallWithShading
 icon: 58
 
@@ -106,10 +118,10 @@ internal_name: IconClosedDoor
 icon: 69
 
 internal_name: IconStairsUp
-icon: 74
+icon: 73
 
 internal_name: IconStairsDown
-icon: 73
+icon: 74
 
 internal_name: IconShrine
 icon: 75

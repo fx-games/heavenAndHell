@@ -211,10 +211,10 @@ func (i *Item) BuyPrice() int {
 		chargeMultiplier = i.GetCharges()
 	}
 	if i.HasTargetedAction() {
-		itemPrice += i.targetedAction.GetMonetaryValue()*chargeMultiplier
+		itemPrice += i.targetedAction.GetMonetaryValue() * chargeMultiplier
 	}
 	if i.HasUntargetedAction() {
-		itemPrice += i.untargetedAction.GetMonetaryValue()*chargeMultiplier
+		itemPrice += i.untargetedAction.GetMonetaryValue() * chargeMultiplier
 	}
 	if i.HasModifiers() {
 		for _, m := range i.equippedModifiers {
@@ -243,9 +243,9 @@ func (i *Item) TintColor() color.RGBA {
 	switch i.rarity {
 	case ItemRarityCommon:
 		return i.categoryColor()
-/*	case ItemRarityMagic:
-		return defs.MagicHighlightColor
- */
+		/*	case ItemRarityMagic:
+			return defs.MagicHighlightColor
+		*/
 	case ItemRarityUnique:
 		return defs.InvColorUnique
 	}
@@ -454,7 +454,7 @@ func (i *Item) SetBaseCost(cost int) {
 func (i *Item) Clone() *Item {
 	clone := &Item{
 		name:              i.name,
-		internalName: 	i.internalName,
+		internalName:      i.internalName,
 		pos:               i.pos,
 		icon:              i.icon,
 		weaponComponent:   nil,
@@ -576,14 +576,7 @@ func (i *Item) GetTooltipLines(parseColorCodedText func(string) []util.ColoredTe
 	}
 
 	if len(i.forcedTooltip) > 0 {
-		tooltip := append(info, i.forcedTooltip...)
-		for idx := range tooltip {
-			if strings.Contains(tooltip[idx].Text, "[:") { // e.g. the requirement line's per-stat [:red] markers
-				tooltip[idx].UseColorCodes = true
-				tooltip[idx].TextWithColorCodes = parseColorCodedText(tooltip[idx].Text)
-			}
-		}
-		return tooltip
+		return parseColorCodes(append(info, i.forcedTooltip...), parseColorCodedText)
 	}
 
 	if i.IsWeapon() {
@@ -761,12 +754,19 @@ func flatFunc(i int) func() int {
 
 func (i *Item) BandStyleName() string {
 	name := i.Name()
-	if i.IsWeapon() {
+	if i.d1 != nil { // same D1 fields as the tooltip; D1 has no Angband-style +N enchantment
+		if i.d1.MaxDam > 0 {
+			name = fmt.Sprintf("%s (%d-%d)", name, i.d1.MinDam, i.d1.MaxDam)
+		}
+		if i.d1.AC > 0 {
+			name = fmt.Sprintf("%s [%d]", name, i.d1.AC)
+		}
+	} else if i.IsWeapon() {
 		weaponValues := i.GetWeaponStats().NameParts()
 		name = fmt.Sprintf("%s %s", name, weaponValues)
 	}
 
-	if i.IsArmor() {
+	if i.d1 == nil && i.IsArmor() {
 		armorValues := i.GetArmorStats().NameParts()
 		name = fmt.Sprintf("%s %s", name, armorValues)
 	}
@@ -780,6 +780,9 @@ func (i *Item) BandStyleName() string {
 
 func (i *Item) PlusName() string {
 	name := i.Name()
+	if i.d1 != nil {
+		return name // D1 items have no +N enchantment
+	}
 	if i.IsWeapon() && i.IsArmor() {
 		weaponPlus := fmt.Sprintf("+%d", i.GetWeaponStats().Plus)
 		armorPlus := fmt.Sprintf("+%d", i.GetArmorStats().Plus)
@@ -880,7 +883,17 @@ func (i *Item) IsQuestItem() bool {
 	return i.isQuestItem
 }
 
-
 type Enchantment interface {
 	ToString() string
+}
+
+// parseColorCodes switches lines holding [:color] markup (e.g. the requirement line's per-stat [:red]) to color codes.
+func parseColorCodes(lines []util.LabelText, parseColorCodedText func(string) []util.ColoredTextPart) []util.LabelText {
+	for idx := range lines {
+		if strings.Contains(lines[idx].Text, "[:") {
+			lines[idx].UseColorCodes = true
+			lines[idx].TextWithColorCodes = parseColorCodedText(lines[idx].Text)
+		}
+	}
+	return lines
 }

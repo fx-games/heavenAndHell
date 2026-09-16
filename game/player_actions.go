@@ -81,10 +81,7 @@ func (a *Actions) beginActionTargeting(action *common.TargetedAction, chargedIte
 func (a *Actions) PickUpItem() {
 	state := a.state
 	player := state.GetPlayer()
-	if !player.IsAlive() || !player.CanPickup() {
-		return
-	}
-	if !state.GetMap().IsItemAt(player.MapPosition()) {
+	if !player.IsAlive() || !state.GetMap().IsItemAt(player.MapPosition()) || !player.CanPickup(state.GetMap().ItemAt(player.MapPosition())) {
 		return
 	}
 	pickUpAction := common.NewPickUpAction(common.AbstractCause("PickUpAction"), player)
@@ -106,18 +103,22 @@ type PlayerActionsContext struct {
 
 func NewActions(context PlayerActionsContext) *Actions {
 	return &Actions{
-		player:        context.Player,
-		actionBroker:  context.ActionBroker,
-		state:         context.State,
-		ui:            context.UI,
-		animator:      context.Animator,
-		getTimeKeeper: context.GetTimeKeeper,
-		logError:      context.Msg,
-		config:        context.Configuration,
+		player:         context.Player,
+		actionBroker:   context.ActionBroker,
+		state:          context.State,
+		ui:             context.UI,
+		animator:       context.Animator,
+		getTimeKeeper:  context.GetTimeKeeper,
+		logError:       context.Msg,
+		config:         context.Configuration,
 		queueAfterTurn: context.QueueAfterTurn,
 	}
 }
 func (a *Actions) EquipItem(item *common.Item) {
+	if d := item.D1(); d != nil && !item.MeetsRequirements() {
+		a.logError(fmt.Sprintf("You can't equip %s: it needs %d Str, %d Mag and %d Dex.", item.Name(), d.MinStr, d.MinMag, d.MinDex))
+		return
+	}
 	a.actionBroker.Execute(common.NewEquipItemAction(common.AbstractCause("equip"), a.player, item))
 }
 
@@ -152,12 +153,15 @@ func (a *Actions) ActivateItemActionForPlayer(itemWithAction *common.Item) {
 		}
 
 		a.activateUntargetedAction(user, untargetedAction, common.EffectSource(itemWithAction.GetInternalName()))
+		if itemWithAction.IsPotion() { // potion effects don't end the turn themselves, like spells do
+			a.actionBroker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("Drink"), 10))
+		}
 		/* Actions should end the turn themselves
 		autTaken := untargetedAction.GetTimeNeededInAut()
 		if autTaken > 0 {
 			a.actionBroker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("ActiveItemUse"), autTaken))
 		}
-		 */
+		*/
 	}
 }
 
@@ -196,14 +200,6 @@ func (a *Actions) GetContextActionsForItem(item *common.Item) []util.MenuItem {
 			MainText: item.GetTargetedAction().Name(),
 			Action: func() {
 				a.ActivateItemActionForPlayer(item)
-			},
-		})
-	}
-	if item.IsThrowable() {
-		menuForActions = append(menuForActions, util.MenuItem{
-			MainText: "Throw",
-			Action: func() {
-				//a.
 			},
 		})
 	}
@@ -426,12 +422,11 @@ func (a *Actions) StartPlayerAutoMovement(targetPos geometry.Point) {
 func (a *Actions) getNextAutoExploreTarget() (geometry.Point, bool) {
 	state := a.state
 	player := state.GetPlayer()
-	playerInv := player.GetInventory()
 	playerPos := player.MapPosition()
 
-	if !playerInv.IsFull() && a.config.AutoPickup {
+	if a.config.AutoPickup {
 		nearestItem := state.GetMap().GetNearestExploredItem(playerPos, func(item *common.Item) bool {
-			return !item.IsDroppedByPlayer() && (!item.IsHidden() || state.GetFlags().IsSet(string(common.FlagHasTrueSight)))
+			return player.CanPickup(item) && !item.IsDroppedByPlayer() && (!item.IsHidden() || state.GetFlags().IsSet(string(common.FlagHasTrueSight)))
 		})
 		if nearestItem != playerPos {
 			return nearestItem, true
@@ -629,6 +624,10 @@ func (a *Actions) AimedThrow() {
 		throwFilter := func(element *common.Item) bool {
 			return element.IsThrowable()
 		}
+		if len(inventory.StackedItemsWithFilter(throwFilter)) == 0 {
+			a.logError("You have nothing to throw.")
+			return
+		}
 		onSelected := func(itemKey rune) {
 			userInterface.PopAll()
 			thrownItem := inventory.GetItemByLetter(itemKey)
@@ -729,12 +728,12 @@ func (a *Actions) AutoAttack() {
 
 }
 
-
 func (a *Actions) playerMoveOneStep(player *common.Actor, targetPos geometry.Point) {
 	moveAction := common.NewMoveAction(common.NewActorCause("Move", player), player, targetPos, true)
 	a.actionBroker.Execute(moveAction)
 	a.actionBroker.Execute(common.NewEndPlayerTurnAction(moveAction.Cause(), moveAction.GetDelayInAut()))
 }
+
 // executeAttack runs action and ends the turn, unless it would destroy an already-broken equipped weapon, in
 // which case the player is asked to confirm first (Gameplay menu > Warning: Weapon breaking).
 func (a *Actions) executeAttack(action common.Action, attackType common.AttackType) {
@@ -765,7 +764,7 @@ func (a *Actions) playerRangedAttack(player *common.Actor, targetPos geometry.Po
 		})
 	}
 
-	 */
+	*/
 	a.executeAttack(rangedAttackAction, common.RangedAttack)
 }
 
@@ -776,13 +775,13 @@ func (a *Actions) RestUntilHealed() {
 		return
 	}
 	/*
-	hpRegenRate := state.GetPlayer().GetStats().GetAttributeAsFloat(stats.HealthRegeneration)
-	if hpRegenRate <= 0 {
-		a.isResting = false
-		a.logError("You won't heal through resting")
-		return
-	}
-	 */
+		hpRegenRate := state.GetPlayer().GetStats().GetAttributeAsFloat(stats.HealthRegeneration)
+		if hpRegenRate <= 0 {
+			a.isResting = false
+			a.logError("You won't heal through resting")
+			return
+		}
+	*/
 	healthResource := state.GetPlayer().GetStats().GetResource(stats.Health)
 	if healthResource.IsAtMax() {
 		a.isResting = false
@@ -822,6 +821,7 @@ func (a *Actions) ShowActorInfoAt(mapPos geometry.Point) {
 	actor := state.GetMap().ActorAt(mapPos)
 	infoText := util.ToLabelText(actor.GetInfoText())
 	if actor.D1Monster() != nil {
+		infoText = append(infoText, util.ToLabelText(common.D1CombatForecast(state, player, actor))...)
 		a.ui().OpenTextWindow(infoText)
 		return
 	}
@@ -897,7 +897,6 @@ func (a *Actions) ShowActorInfoAt(mapPos geometry.Point) {
 		playerExpectedMeleeDamageReduced := common.CalculateMeleeDamage(playerExpectedMeleeDamage, 1.0, player, actor)
 		playerMaxMeleeDamageReduced := common.CalculateMeleeDamage(playerMaxMeleeDamage, 1.0, player, actor)
 
-
 		if playerMaxMeleeDamageReduced == 0 {
 			infoText = append(infoText, util.LabelTextFromString(""),
 				util.LabelTextFromStringWithColor("You will not be able to penetrate", defs.DarkGreen),
@@ -968,4 +967,3 @@ func (a *Actions) updateFoV() {
 func (a *Actions) IsPlayerAutoMoving() bool {
 	return len(a.playerPath) > 0
 }
-

@@ -26,6 +26,7 @@ type PositionInfoForShops struct {
 type ShopMenuItem struct {
 	TextColumns []util.LabelText
 	Tooltip     []util.LabelText
+	MakeTooltip func(mousePos geometry.Point) Tooltip // replaces Tooltip if set
 	Action      func()
 	ShortCut    rune
 	Icon        int32
@@ -136,7 +137,10 @@ func (i *ShopMenu) OnMouseMoved(x int, y int) (bool, Tooltip) {
 	for index := 0; index < len(i.items); index++ {
 		if float64(mousePos.Y) >= lowerY && float64(mousePos.Y) <= upperY {
 			i.selectedIndex = index
-			return true, NewTextTooltip(i.uiController, i.items[index].Tooltip, geometry.Point{X: x, Y: y})
+			if makeTooltip := i.items[index].MakeTooltip; makeTooltip != nil {
+				return true, makeTooltip(mousePos)
+			}
+			return true, NewTextTooltip(i.uiController, i.items[index].Tooltip, mousePos)
 		}
 
 		lowerY = upperY + float64(i.posInfo.LineDist)
@@ -230,7 +234,7 @@ func (i *ShopMenu) drawStringArray(lines []ShopMenuItem) {
 					drawColor = defs.LightTextColor
 				}
 
-				uiRenderer.DrawTTFOnScreen(float64(drawX), float64(drawY), column.Text, drawColor)
+				uiRenderer.DrawTTFOnScreen(float64(drawX), float64(drawY), column.PlainText(), drawColor)
 			}
 		}
 		drawY += float64(i.posInfo.LineHeight) + float64(i.posInfo.LineDist)
@@ -306,7 +310,7 @@ func (i *ShopMenu) sizeNeededForMenu(measureString func(line string) (float64, f
 		}
 		for ci, column := range item.TextColumns {
 			columnIndex := ci + 1 // +1 for the letter shortcut column
-			w, h := measureString(column.Text)
+			w, h := measureString(column.PlainText())
 			width := int(w)
 			itemWidths[lineIndex][columnIndex] = w
 			if h > rowHeight {
@@ -338,6 +342,14 @@ func (i *ShopMenu) sizeNeededForMenu(measureString func(line string) (float64, f
 
 	for _, columnWidth := range columnWidths {
 		totalWidth += columnWidth
+	}
+
+	// widen the name column so the "You have: xyz gold" header fits
+	headerLeftW, _ := measureString(i.headerTextLeft)
+	headerRightW, _ := measureString(i.headerTextRight)
+	if headerW := int(headerLeftW+headerRightW) + colDistance; headerW > totalWidth {
+		columnWidths[2] += headerW - totalWidth
+		totalWidth = headerW
 	}
 
 	var xOffsets []int

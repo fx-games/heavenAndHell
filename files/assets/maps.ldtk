@@ -5,13 +5,13 @@
 		"doc": "https://ldtk.io/json",
 		"schema": "https://ldtk.io/files/JSON_SCHEMA.json",
 		"appAuthor": "Sebastien 'deepnight' Benard",
-		"appVersion": "1.4.1",
+		"appVersion": "1.5.3",
 		"url": "https://ldtk.io"
 	},
 	"iid": "0aad30e0-8990-11ee-aa96-5fbb691582f7",
-	"jsonVersion": "1.4.1",
-	"appBuildId": 471015,
-	"nextUid": 146,
+	"jsonVersion": "1.5.3",
+	"appBuildId": 473703,
+	"nextUid": 149,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "Free",
@@ -39,7 +39,7 @@
 	"levelNamePattern": "Level_%idx",
 	"tutorialDesc": null,
 	"customCommands": [],
-	"flags": [],
+	"flags": ["ExportOldTableOfContentData"],
 	"defs": { "layers": [
 		{
 			"__type": "Entities",
@@ -64,13 +64,17 @@
 			"parallaxScaling": true,
 			"requiredTags": ["META"],
 			"excludedTags": [ "NPC", "OBJECT" ],
+			"autoTilesKilledByOtherLayerUid": null,
+			"uiFilterTags": [],
+			"useAsyncRender": false,
 			"intGridValues": [],
 			"intGridValuesGroups": [],
 			"autoRuleGroups": [],
 			"autoSourceLayerDefUid": null,
 			"tilesetDefUid": null,
 			"tilePivotX": 0,
-			"tilePivotY": 0
+			"tilePivotY": 0,
+			"biomeFieldUid": null
 		},
 		{
 			"__type": "Entities",
@@ -95,13 +99,17 @@
 			"parallaxScaling": true,
 			"requiredTags": [ "NPC", "OBJECT" ],
 			"excludedTags": ["META"],
+			"autoTilesKilledByOtherLayerUid": null,
+			"uiFilterTags": [],
+			"useAsyncRender": false,
 			"intGridValues": [],
 			"intGridValuesGroups": [],
 			"autoRuleGroups": [],
 			"autoSourceLayerDefUid": null,
 			"tilesetDefUid": null,
 			"tilePivotX": 0,
-			"tilePivotY": 0
+			"tilePivotY": 0,
+			"biomeFieldUid": null
 		},
 		{
 			"__type": "Tiles",
@@ -126,13 +134,17 @@
 			"parallaxScaling": true,
 			"requiredTags": [],
 			"excludedTags": [],
+			"autoTilesKilledByOtherLayerUid": null,
+			"uiFilterTags": [],
+			"useAsyncRender": false,
 			"intGridValues": [],
 			"intGridValuesGroups": [],
 			"autoRuleGroups": [],
 			"autoSourceLayerDefUid": null,
 			"tilesetDefUid": 44,
 			"tilePivotX": 0,
-			"tilePivotY": 0
+			"tilePivotY": 0,
+			"biomeFieldUid": null
 		}
 	], "entities": [
 		{
@@ -140,6 +152,7 @@
 			"uid": 33,
 			"tags": ["NPC"],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 8,
 			"height": 8,
@@ -189,6 +202,8 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -224,6 +239,8 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -259,6 +276,8 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -275,44 +294,6 @@
 					"allowedRefsEntityUid": null,
 					"allowedRefTags": [],
 					"tilesetUid": 44
-				},
-				{
-					"identifier": "Type",
-					"doc": null,
-					"__type": "LocalEnum.NPCCategory",
-					"uid": 51,
-					"type": "F_Enum(50)",
-					"isArray": false,
-					"canBeNull": false,
-					"arrayMinLength": null,
-					"arrayMaxLength": null,
-					"editorDisplayMode": "Hidden",
-					"editorDisplayScale": 1,
-					"editorDisplayPos": "Above",
-					"editorLinkStyle": "StraightArrow",
-					"editorDisplayColor": null,
-					"editorAlwaysShow": false,
-					"editorShowInWorld": true,
-					"editorCutLongValues": true,
-					"editorTextSuffix": null,
-					"editorTextPrefix": null,
-					"useForSmartColor": false,
-					"min": null,
-					"max": null,
-					"regex": null,
-					"acceptFileTypes": null,
-					"defaultOverride": {
-						"id": "V_String",
-						"params": ["Neutral"]
-					},
-					"textLanguageMode": null,
-					"symmetricalRef": false,
-					"autoChainRef": true,
-					"allowOutOfLevelRef": true,
-					"allowedRefs": "OnlySame",
-					"allowedRefsEntityUid": null,
-					"allowedRefTags": [],
-					"tilesetUid": null
 				},
 				{
 					"identifier": "FlipLookDirection",
@@ -335,41 +316,8 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
-					"min": null,
-					"max": null,
-					"regex": null,
-					"acceptFileTypes": null,
-					"defaultOverride": null,
-					"textLanguageMode": null,
-					"symmetricalRef": false,
-					"autoChainRef": true,
-					"allowOutOfLevelRef": true,
-					"allowedRefs": "OnlySame",
-					"allowedRefsEntityUid": null,
-					"allowedRefTags": [],
-					"tilesetUid": null
-				},
-				{
-					"identifier": "UniqueName",
-					"doc": null,
-					"__type": "String",
-					"uid": 130,
-					"type": "F_String",
-					"isArray": false,
-					"canBeNull": true,
-					"arrayMinLength": null,
-					"arrayMaxLength": null,
-					"editorDisplayMode": "Hidden",
-					"editorDisplayScale": 1,
-					"editorDisplayPos": "Above",
-					"editorLinkStyle": "StraightArrow",
-					"editorDisplayColor": null,
-					"editorAlwaysShow": false,
-					"editorShowInWorld": true,
-					"editorCutLongValues": true,
-					"editorTextSuffix": null,
-					"editorTextPrefix": null,
-					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -405,6 +353,8 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -429,6 +379,7 @@
 			"uid": 46,
 			"tags": ["META"],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 8,
 			"height": 8,
@@ -478,6 +429,82 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "TargetMap",
+					"doc": null,
+					"__type": "String",
+					"uid": 146,
+					"type": "F_String",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "ValueOnly",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": false,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "TargetLocation",
+					"doc": null,
+					"__type": "String",
+					"uid": 147,
+					"type": "F_String",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "ValueOnly",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": false,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -499,6 +526,7 @@
 			"uid": 53,
 			"tags": ["OBJECT"],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 8,
 			"height": 8,
@@ -533,6 +561,7 @@
 			"uid": 61,
 			"tags": ["META"],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 8,
 			"height": 8,
@@ -582,6 +611,8 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -603,6 +634,7 @@
 			"uid": 64,
 			"tags": ["META"],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 8,
 			"height": 8,
@@ -652,6 +684,8 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -673,6 +707,7 @@
 			"uid": 65,
 			"tags": ["META"],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 8,
 			"height": 8,
@@ -722,6 +757,8 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -743,6 +780,7 @@
 			"uid": 66,
 			"tags": ["META"],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 8,
 			"height": 8,
@@ -792,6 +830,8 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -813,6 +853,7 @@
 			"uid": 97,
 			"tags": ["META"],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 8,
 			"height": 8,
@@ -847,6 +888,7 @@
 			"uid": 106,
 			"tags": ["OBJECT"],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 8,
 			"height": 8,
@@ -896,6 +938,8 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -917,6 +961,7 @@
 			"uid": 141,
 			"tags": ["OBJECT"],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 8,
 			"height": 8,
@@ -937,6 +982,41 @@
 			"tilesetId": 44,
 			"tileRenderMode": "FitInside",
 			"tileRect": { "tilesetUid": 44, "x": 104, "y": 16, "w": 8, "h": 8 },
+			"uiTileRect": null,
+			"nineSliceBorders": [],
+			"maxCount": 0,
+			"limitScope": "PerLevel",
+			"limitBehavior": "MoveLastOne",
+			"pivotX": 0,
+			"pivotY": 0,
+			"fieldDefs": []
+		},
+		{
+			"identifier": "Stash",
+			"uid": 148,
+			"tags": ["OBJECT"],
+			"exportToToc": false,
+			"allowOutOfBounds": false,
+			"doc": null,
+			"width": 8,
+			"height": 8,
+			"resizableX": false,
+			"resizableY": false,
+			"minWidth": null,
+			"maxWidth": null,
+			"minHeight": null,
+			"maxHeight": null,
+			"keepAspectRatio": false,
+			"tileOpacity": 1,
+			"fillOpacity": 0.08,
+			"lineOpacity": 0,
+			"hollow": false,
+			"color": "#B8860B",
+			"renderMode": "Tile",
+			"showName": true,
+			"tilesetId": 44,
+			"tileRenderMode": "FitInside",
+			"tileRect": { "tilesetUid": 44, "x": 128, "y": 32, "w": 8, "h": 8 },
 			"uiTileRect": null,
 			"nineSliceBorders": [],
 			"maxCount": 0,
@@ -982,7 +1062,13 @@
 			{ "id": "Store_weapons", "tileRect": null, "color": 15389866 },
 			{ "id": "Store_armor", "tileRect": null, "color": 14984818 },
 			{ "id": "Store_alchemy", "tileRect": null, "color": 7552569 },
-			{ "id": "Store_general", "tileRect": null, "color": 4073265 }
+			{ "id": "Store_general", "tileRect": null, "color": 4073265 },
+			{ "id": "Store_cain", "tileRect": null, "color": 4073265 },
+			{ "id": "Store_wirt", "tileRect": null, "color": 4073265 },
+			{ "id": "Store_ogden", "tileRect": null, "color": 4073265 },
+			{ "id": "Store_deadguy", "tileRect": null, "color": 4073265 },
+			{ "id": "Store_drunk", "tileRect": null, "color": 4073265 },
+			{ "id": "Store_barmaid", "tileRect": null, "color": 4073265 }
 		], "iconTilesetUid": null, "externalRelPath": null, "externalFileChecksum": null, "tags": [] },
 		{ "identifier": "TemplateAreas", "uid": 58, "values": [
 			{ "id": "UseInCathedral", "tileRect": null, "color": 12470831 },
@@ -1012,6 +1098,8 @@
 			"editorTextSuffix": null,
 			"editorTextPrefix": null,
 			"useForSmartColor": false,
+			"exportToToc": false,
+			"searchable": false,
 			"min": null,
 			"max": null,
 			"regex": null,
@@ -1047,6 +1135,8 @@
 			"editorTextSuffix": null,
 			"editorTextPrefix": null,
 			"useForSmartColor": false,
+			"exportToToc": false,
+			"searchable": false,
 			"min": null,
 			"max": null,
 			"regex": null,
@@ -1082,6 +1172,8 @@
 			"editorTextSuffix": null,
 			"editorTextPrefix": null,
 			"useForSmartColor": false,
+			"exportToToc": false,
+			"searchable": false,
 			"min": null,
 			"max": null,
 			"regex": null,
@@ -1117,6 +1209,8 @@
 			"editorTextSuffix": null,
 			"editorTextPrefix": null,
 			"useForSmartColor": false,
+			"exportToToc": false,
+			"searchable": false,
 			"min": null,
 			"max": null,
 			"regex": null,
@@ -1152,6 +1246,8 @@
 			"editorTextSuffix": null,
 			"editorTextPrefix": null,
 			"useForSmartColor": false,
+			"exportToToc": false,
+			"searchable": false,
 			"min": null,
 			"max": null,
 			"regex": null,
@@ -1187,6 +1283,8 @@
 			"editorTextSuffix": null,
 			"editorTextPrefix": null,
 			"useForSmartColor": false,
+			"exportToToc": false,
+			"searchable": false,
 			"min": null,
 			"max": null,
 			"regex": null,
@@ -1222,6 +1320,8 @@
 			"editorTextSuffix": null,
 			"editorTextPrefix": null,
 			"useForSmartColor": false,
+			"exportToToc": false,
+			"searchable": false,
 			"min": null,
 			"max": null,
 			"regex": null,
@@ -1296,22 +1396,49 @@
 					"entityInstances": [
 						{
 							"__identifier": "Location",
-							"__grid": [15,14],
+							"__grid": [17,13],
 							"__pivot": [0,0],
 							"__tags": ["META"],
 							"__tile": null,
 							"__smartColor": "#63C74D",
-							"__worldX": -792,
-							"__worldY": -992,
 							"iid": "0db659c0-8990-11ee-aa96-67e96e998e03",
 							"width": 8,
 							"height": 8,
 							"defUid": 46,
-							"px": [120,112],
-							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "spawn", "__tile": null, "defUid": 47, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["spawn"]
-							}] }]
+							"px": [136,104],
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "spawn", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["spawn"]
+								}] },
+								{ "__identifier": "TargetMap", "__type": "String", "__value": null, "__tile": null, "defUid": 146, "realEditorValues": [] },
+								{ "__identifier": "TargetLocation", "__type": "String", "__value": null, "__tile": null, "defUid": 147, "realEditorValues": [] }
+							],
+							"__worldX": -776,
+							"__worldY": -1000
+						},
+						{
+							"__identifier": "Location",
+							"__grid": [22,10],
+							"__pivot": [0,0],
+							"__tags": ["META"],
+							"__tile": null,
+							"__smartColor": "#63C74D",
+							"iid": "3b63682e-b10d-11f1-8406-6a7cbe9bba66",
+							"width": 8,
+							"height": 8,
+							"defUid": 46,
+							"px": [176,80],
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "portal", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["portal"]
+								}] },
+								{ "__identifier": "TargetMap", "__type": "String", "__value": null, "__tile": null, "defUid": 146, "realEditorValues": [] },
+								{ "__identifier": "TargetLocation", "__type": "String", "__value": null, "__tile": null, "defUid": 147, "realEditorValues": [] }
+							],
+							"__worldX": -736,
+							"__worldY": -1024
 						},
 						{
 							"__identifier": "Location",
@@ -1320,17 +1447,27 @@
 							"__tags": ["META"],
 							"__tile": null,
 							"__smartColor": "#63C74D",
-							"__worldX": -584,
-							"__worldY": -1056,
 							"iid": "10ec0950-8990-11ee-aa96-6177501b75bf",
 							"width": 8,
 							"height": 8,
 							"defUid": 46,
 							"px": [328,48],
-							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "to_cathedral", "__tile": null, "defUid": 47, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["to_cathedral"]
-							}] }]
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "to_cathedral", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["to_cathedral"]
+								}] },
+								{ "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_1", "__tile": null, "defUid": 146, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["!gen_dungeon_level_1"]
+								}] },
+								{ "__identifier": "TargetLocation", "__type": "String", "__value": "ladder_up", "__tile": null, "defUid": 147, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["ladder_up"]
+								}] }
+							],
+							"__worldX": -584,
+							"__worldY": -1056
 						},
 						{
 							"__identifier": "Location",
@@ -1339,17 +1476,27 @@
 							"__tags": ["META"],
 							"__tile": null,
 							"__smartColor": "#63C74D",
-							"__worldX": -512,
-							"__worldY": -944,
 							"iid": "931192c0-b0a0-11ee-92cd-8972df106b5b",
 							"width": 8,
 							"height": 8,
 							"defUid": 46,
 							"px": [400,160],
-							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "to_catacombs", "__tile": null, "defUid": 47, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["to_catacombs"]
-							}] }]
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "to_catacombs", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["to_catacombs"]
+								}] },
+								{ "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_5", "__tile": null, "defUid": 146, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["!gen_dungeon_level_5"]
+								}] },
+								{ "__identifier": "TargetLocation", "__type": "String", "__value": "warp", "__tile": null, "defUid": 147, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["warp"]
+								}] }
+							],
+							"__worldX": -512,
+							"__worldY": -944
 						},
 						{
 							"__identifier": "Location",
@@ -1358,17 +1505,27 @@
 							"__tags": ["META"],
 							"__tile": null,
 							"__smartColor": "#63C74D",
-							"__worldX": -504,
-							"__worldY": -1072,
 							"iid": "999275b0-b0a0-11ee-92cd-259e54ec7271",
 							"width": 8,
 							"height": 8,
 							"defUid": 46,
 							"px": [408,32],
-							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "to_caves", "__tile": null, "defUid": 47, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["to_caves"]
-							}] }]
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "to_caves", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["to_caves"]
+								}] },
+								{ "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_9", "__tile": null, "defUid": 146, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["!gen_dungeon_level_9"]
+								}] },
+								{ "__identifier": "TargetLocation", "__type": "String", "__value": "warp", "__tile": null, "defUid": 147, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["warp"]
+								}] }
+							],
+							"__worldX": -504,
+							"__worldY": -1072
 						},
 						{
 							"__identifier": "Location",
@@ -1377,36 +1534,27 @@
 							"__tags": ["META"],
 							"__tile": null,
 							"__smartColor": "#63C74D",
-							"__worldX": -464,
-							"__worldY": -1048,
 							"iid": "4aa58e74-b02d-11f1-b5b1-6a7cbe9bba66",
 							"width": 8,
 							"height": 8,
 							"defUid": 46,
 							"px": [448,56],
-							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "to_hell", "__tile": null, "defUid": 47, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["to_hell"]
-							}] }]
-						},
-						{
-							"__identifier": "Location",
-							"__grid": [15,12],
-							"__pivot": [0,0],
-							"__tags": ["META"],
-							"__tile": null,
-							"__smartColor": "#63C74D",
-							"__worldX": -792,
-							"__worldY": -1008,
-							"iid": "06ed5170-b0a0-11ee-92cd-d54e66412fab",
-							"width": 8,
-							"height": 8,
-							"defUid": 46,
-							"px": [120,96],
-							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "true_sight_potion", "__tile": null, "defUid": 47, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["true_sight_potion"]
-							}] }]
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "to_hell", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["to_hell"]
+								}] },
+								{ "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_13", "__tile": null, "defUid": 146, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["!gen_dungeon_level_13"]
+								}] },
+								{ "__identifier": "TargetLocation", "__type": "String", "__value": "warp", "__tile": null, "defUid": 147, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["warp"]
+								}] }
+							],
+							"__worldX": -464,
+							"__worldY": -1048
 						}
 					]
 				},
@@ -1441,37 +1589,32 @@
 							"__tags": ["NPC"],
 							"__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": -816,
-							"__worldY": -1032,
 							"iid": "c35de910-8990-11ee-aa96-693095b44882",
 							"width": 8,
 							"height": 8,
 							"defUid": 33,
 							"px": [96,72],
 							"fieldInstances": [
-								{ "__identifier": "Name", "__type": "String", "__value": "Shekel", "__tile": null, "defUid": 52, "realEditorValues": [{
+								{ "__identifier": "Name", "__type": "String", "__value": "Griswold", "__tile": null, "defUid": 52, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["Shekel"]
+									"params": ["Griswold"]
 								}] },
-								{ "__identifier": "InternalName", "__type": "String", "__value": "shekel", "__tile": null, "defUid": 131, "realEditorValues": [{
+								{ "__identifier": "InternalName", "__type": "String", "__value": "griswold", "__tile": null, "defUid": 131, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["shekel"]
+									"params": ["griswold"]
 								}] },
 								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["184,16,8,8"]
 								}] },
-								{ "__identifier": "Type", "__type": "LocalEnum.NPCCategory", "__value": "Store_weapons", "__tile": null, "defUid": 51, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["Store_weapons"]
-								}] },
 								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
-								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] },
 								{ "__identifier": "ASCII", "__type": "String", "__value": "2", "__tile": null, "defUid": 145, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["2"]
 								}] }
-							]
+							],
+							"__worldX": -816,
+							"__worldY": -1032
 						},
 						{
 							"__identifier": "NPC",
@@ -1480,37 +1623,32 @@
 							"__tags": ["NPC"],
 							"__tile": { "tilesetUid": 44, "x": 192, "y": 16, "w": 8, "h": 8 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": -816,
-							"__worldY": -984,
 							"iid": "da811130-8990-11ee-aa96-bd86f90141e0",
 							"width": 8,
 							"height": 8,
 							"defUid": 33,
 							"px": [96,120],
 							"fieldInstances": [
-								{ "__identifier": "Name", "__type": "String", "__value": "Prince Abel", "__tile": null, "defUid": 52, "realEditorValues": [{
+								{ "__identifier": "Name", "__type": "String", "__value": "Deckard Cain", "__tile": null, "defUid": 52, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["Prince Abel"]
+									"params": ["Deckard Cain"]
 								}] },
-								{ "__identifier": "InternalName", "__type": "String", "__value": "abel", "__tile": null, "defUid": 131, "realEditorValues": [{
+								{ "__identifier": "InternalName", "__type": "String", "__value": "cain", "__tile": null, "defUid": 131, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["abel"]
+									"params": ["cain"]
 								}] },
 								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 192, "y": 16, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 192, "y": 16, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["192,16,8,8"]
 								}] },
-								{ "__identifier": "Type", "__type": "LocalEnum.NPCCategory", "__value": "Store_armor", "__tile": null, "defUid": 51, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["Store_armor"]
-								}] },
 								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
-								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] },
 								{ "__identifier": "ASCII", "__type": "String", "__value": "3", "__tile": null, "defUid": 145, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["3"]
 								}] }
-							]
+							],
+							"__worldX": -816,
+							"__worldY": -984
 						},
 						{
 							"__identifier": "NPC",
@@ -1519,40 +1657,51 @@
 							"__tags": ["NPC"],
 							"__tile": { "tilesetUid": 44, "x": 200, "y": 16, "w": 8, "h": 8 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": -760,
-							"__worldY": -968,
 							"iid": "b34d66c0-8990-11ee-aa96-bd32a7aac922",
 							"width": 8,
 							"height": 8,
 							"defUid": 33,
 							"px": [152,136],
 							"fieldInstances": [
-								{ "__identifier": "Name", "__type": "String", "__value": "Elder Kirioth", "__tile": null, "defUid": 52, "realEditorValues": [{
+								{ "__identifier": "Name", "__type": "String", "__value": "Adria", "__tile": null, "defUid": 52, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["Elder Kirioth"]
+									"params": ["Adria"]
 								}] },
-								{ "__identifier": "InternalName", "__type": "String", "__value": "kirioth", "__tile": null, "defUid": 131, "realEditorValues": [{
+								{ "__identifier": "InternalName", "__type": "String", "__value": "adria", "__tile": null, "defUid": 131, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["kirioth"]
+									"params": ["adria"]
 								}] },
 								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 200, "y": 16, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 200, "y": 16, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["200,16,8,8"]
 								}] },
-								{ "__identifier": "Type", "__type": "LocalEnum.NPCCategory", "__value": "Store_alchemy", "__tile": null, "defUid": 51, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["Store_alchemy"]
-								}] },
 								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": true, "__tile": null, "defUid": 54, "realEditorValues": [{
 									"id": "V_Bool",
 									"params": [ true ]
 								}] },
-								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] },
 								{ "__identifier": "ASCII", "__type": "String", "__value": "1", "__tile": null, "defUid": 145, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["1"]
 								}] }
-							]
+							],
+							"__worldX": -760,
+							"__worldY": -968
+						},
+						{
+							"__identifier": "Stash",
+							"__grid": [22,4],
+							"__pivot": [0,0],
+							"__tags": ["OBJECT"],
+							"__tile": { "tilesetUid": 44, "x": 128, "y": 32, "w": 8, "h": 8 },
+							"__smartColor": "#B8860B",
+							"iid": "8e5d3a90-25d3-4b08-a6df-61b42add41a5",
+							"width": 8,
+							"height": 8,
+							"defUid": 148,
+							"px": [176,32],
+							"fieldInstances": [],
+							"__worldX": -736,
+							"__worldY": -1072
 						},
 						{
 							"__identifier": "Sign",
@@ -1561,17 +1710,17 @@
 							"__tags": ["OBJECT"],
 							"__tile": { "tilesetUid": 44, "x": 112, "y": 40, "w": 8, "h": 8 },
 							"__smartColor": "#E4A672",
-							"__worldX": -816,
-							"__worldY": -960,
 							"iid": "c70aa150-b0a0-11ee-92cd-97ba8d980518",
 							"width": 8,
 							"height": 8,
 							"defUid": 106,
 							"px": [96,144],
-							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Deckard Cain", "__tile": null, "defUid": 107, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Deckard Cain\nThe great identifier", "__tile": null, "defUid": 107, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["Deckard Cain"]
-							}] }]
+								"params": ["Deckard Cain\\nThe great identifier"]
+							}] }],
+							"__worldX": -816,
+							"__worldY": -960
 						},
 						{
 							"__identifier": "Sign",
@@ -1580,19 +1729,17 @@
 							"__tags": ["OBJECT"],
 							"__tile": { "tilesetUid": 44, "x": 112, "y": 40, "w": 8, "h": 8 },
 							"__smartColor": "#E4A672",
-							"__worldX": -768,
-							"__worldY": -960,
 							"iid": "c7b0cc60-b0a0-11ee-92cd-39c284f3be82",
 							"width": 8,
 							"height": 8,
 							"defUid": 106,
 							"px": [144,144],
-							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Adria the Witch", "__tile": null, "defUid": 107, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Adria the Witch\nFree healing for every visitor", "__tile": null, "defUid": 107, "realEditorValues": [{
 								"id": "V_String",
-								"params": [
-									"Adria the Witch"
-								]
-							}] }]
+								"params": ["Adria the Witch\\nFree healing for every visitor"]
+							}] }],
+							"__worldX": -768,
+							"__worldY": -960
 						},
 						{
 							"__identifier": "Sign",
@@ -1601,17 +1748,17 @@
 							"__tags": ["OBJECT"],
 							"__tile": { "tilesetUid": 44, "x": 112, "y": 40, "w": 8, "h": 8 },
 							"__smartColor": "#E4A672",
-							"__worldX": -816,
-							"__worldY": -1056,
 							"iid": "c86d3e90-b0a0-11ee-92cd-5b7d356c3dc1",
 							"width": 8,
 							"height": 8,
 							"defUid": 106,
 							"px": [96,48],
-							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Griswold the Blacksmith", "__tile": null, "defUid": 107, "realEditorValues": [{
+							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Griswold the Blacksmith\nOnly the finest armours and weapons", "__tile": null, "defUid": 107, "realEditorValues": [{
 								"id": "V_String",
-								"params": ["Griswold the Blacksmith"]
-							}] }]
+								"params": ["Griswold the Blacksmith\\nOnly the finest armours and weapons"]
+							}] }],
+							"__worldX": -816,
+							"__worldY": -1056
 						},
 						{
 							"__identifier": "Sign",
@@ -1620,8 +1767,6 @@
 							"__tags": ["OBJECT"],
 							"__tile": { "tilesetUid": 44, "x": 112, "y": 40, "w": 8, "h": 8 },
 							"__smartColor": "#E4A672",
-							"__worldX": -640,
-							"__worldY": -960,
 							"iid": "522d64c0-b0a0-11ee-ab14-ed41c454e3d1",
 							"width": 8,
 							"height": 8,
@@ -1630,7 +1775,9 @@
 							"fieldInstances": [{ "__identifier": "Text", "__type": "String", "__value": "Pepin the Healer", "__tile": null, "defUid": 107, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["Pepin the Healer"]
-							}] }]
+							}] }],
+							"__worldX": -640,
+							"__worldY": -960
 						},
 						{
 							"__identifier": "NPC",
@@ -1639,40 +1786,205 @@
 							"__tags": ["NPC"],
 							"__tile": { "tilesetUid": 44, "x": 208, "y": 16, "w": 8, "h": 8 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": -648,
-							"__worldY": -960,
 							"iid": "61a2e9c0-b0a0-11ee-ab14-8936d2289179",
 							"width": 8,
 							"height": 8,
 							"defUid": 33,
 							"px": [264,144],
 							"fieldInstances": [
-								{ "__identifier": "Name", "__type": "String", "__value": "Sister Mary", "__tile": null, "defUid": 52, "realEditorValues": [{
+								{ "__identifier": "Name", "__type": "String", "__value": "Pepin", "__tile": null, "defUid": 52, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["Sister Mary"]
+									"params": ["Pepin"]
 								}] },
-								{ "__identifier": "InternalName", "__type": "String", "__value": "mary", "__tile": null, "defUid": 131, "realEditorValues": [{
+								{ "__identifier": "InternalName", "__type": "String", "__value": "pepin", "__tile": null, "defUid": 131, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["mary"]
+									"params": ["pepin"]
 								}] },
 								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 208, "y": 16, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 208, "y": 16, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["208,16,8,8"]
 								}] },
-								{ "__identifier": "Type", "__type": "LocalEnum.NPCCategory", "__value": "Store_general", "__tile": null, "defUid": 51, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["Store_general"]
-								}] },
 								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": true, "__tile": null, "defUid": 54, "realEditorValues": [{
 									"id": "V_Bool",
 									"params": [ true ]
 								}] },
-								{ "__identifier": "UniqueName", "__type": "String", "__value": null, "__tile": null, "defUid": 130, "realEditorValues": [] },
 								{ "__identifier": "ASCII", "__type": "String", "__value": "4", "__tile": null, "defUid": 145, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["4"]
 								}] }
-							]
+							],
+							"__worldX": -648,
+							"__worldY": -960
+						},
+						{
+							"__identifier": "NPC",
+							"__grid": [41,10],
+							"__pivot": [0,0],
+							"__tags": ["NPC"],
+							"__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 },
+							"__smartColor": "#BE4A2F",
+							"iid": "3cdb655a-b10b-11f1-bcae-6a7cbe9bba66",
+							"width": 8,
+							"height": 8,
+							"defUid": 33,
+							"px": [328,80],
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "Wirt", "__tile": null, "defUid": 52, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Wirt"]
+								}] },
+								{ "__identifier": "InternalName", "__type": "String", "__value": "wirt", "__tile": null, "defUid": 131, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["wirt"]
+								}] },
+								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["184,16,8,8"]
+								}] },
+								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "w", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["w"]
+								}] }
+							],
+							"__worldX": -584,
+							"__worldY": -1024
+						},
+						{
+							"__identifier": "NPC",
+							"__grid": [30,7],
+							"__pivot": [0,0],
+							"__tags": ["NPC"],
+							"__tile": { "tilesetUid": 44, "x": 80, "y": 88, "w": 8, "h": 8 },
+							"__smartColor": "#BE4A2F",
+							"iid": "3cdb66a4-b10b-11f1-bcae-6a7cbe9bba66",
+							"width": 8,
+							"height": 8,
+							"defUid": 33,
+							"px": [240,56],
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "Wounded Townsman", "__tile": null, "defUid": 52, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Wounded Townsman"]
+								}] },
+								{ "__identifier": "InternalName", "__type": "String", "__value": "deadguy", "__tile": null, "defUid": 131, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["deadguy"]
+								}] },
+								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 80, "y": 88, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 80, "y": 88, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["80,88,8,8"]
+								}] },
+								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "t", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["t"]
+								}] }
+							],
+							"__worldX": -672,
+							"__worldY": -1048
+						},
+						{
+							"__identifier": "NPC",
+							"__grid": [16,3],
+							"__pivot": [0,0],
+							"__tags": ["NPC"],
+							"__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 },
+							"__smartColor": "#BE4A2F",
+							"iid": "3cdb676c-b10b-11f1-bcae-6a7cbe9bba66",
+							"width": 8,
+							"height": 8,
+							"defUid": 33,
+							"px": [128,24],
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "Ogden", "__tile": null, "defUid": 52, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Ogden"]
+								}] },
+								{ "__identifier": "InternalName", "__type": "String", "__value": "ogden", "__tile": null, "defUid": 131, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["ogden"]
+								}] },
+								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["184,16,8,8"]
+								}] },
+								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "o", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["o"]
+								}] }
+							],
+							"__worldX": -784,
+							"__worldY": -1080
+						},
+						{
+							"__identifier": "NPC",
+							"__grid": [31,20],
+							"__pivot": [0,0],
+							"__tags": ["NPC"],
+							"__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 },
+							"__smartColor": "#BE4A2F",
+							"iid": "3cdb67ee-b10b-11f1-bcae-6a7cbe9bba66",
+							"width": 8,
+							"height": 8,
+							"defUid": 33,
+							"px": [248,160],
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "Farnham", "__tile": null, "defUid": 52, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Farnham"]
+								}] },
+								{ "__identifier": "InternalName", "__type": "String", "__value": "farnham", "__tile": null, "defUid": 131, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["farnham"]
+								}] },
+								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["184,16,8,8"]
+								}] },
+								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "f", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["f"]
+								}] }
+							],
+							"__worldX": -664,
+							"__worldY": -944
+						},
+						{
+							"__identifier": "NPC",
+							"__grid": [13,21],
+							"__pivot": [0,0],
+							"__tags": ["NPC"],
+							"__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 },
+							"__smartColor": "#BE4A2F",
+							"iid": "3cdb685c-b10b-11f1-bcae-6a7cbe9bba66",
+							"width": 8,
+							"height": 8,
+							"defUid": 33,
+							"px": [104,168],
+							"fieldInstances": [
+								{ "__identifier": "Name", "__type": "String", "__value": "Gillian", "__tile": null, "defUid": 52, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Gillian"]
+								}] },
+								{ "__identifier": "InternalName", "__type": "String", "__value": "gillian", "__tile": null, "defUid": 131, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["gillian"]
+								}] },
+								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 184, "y": 16, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["184,16,8,8"]
+								}] },
+								{ "__identifier": "FlipLookDirection", "__type": "Bool", "__value": false, "__tile": null, "defUid": 54, "realEditorValues": [] },
+								{ "__identifier": "ASCII", "__type": "String", "__value": "g", "__tile": null, "defUid": 145, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["g"]
+								}] }
+							],
+							"__worldX": -808,
+							"__worldY": -936
 						},
 						{
 							"__identifier": "Door",
@@ -1681,14 +1993,14 @@
 							"__tags": ["OBJECT"],
 							"__tile": { "tilesetUid": 44, "x": 104, "y": 16, "w": 8, "h": 8 },
 							"__smartColor": "#733E39",
-							"__worldX": -824,
-							"__worldY": -1040,
 							"iid": "4b973a30-b0a0-11ee-ab14-97a84c841a05",
 							"width": 8,
 							"height": 8,
 							"defUid": 141,
 							"px": [88,64],
-							"fieldInstances": []
+							"fieldInstances": [],
+							"__worldX": -824,
+							"__worldY": -1040
 						},
 						{
 							"__identifier": "Door",
@@ -1697,14 +2009,14 @@
 							"__tags": ["OBJECT"],
 							"__tile": { "tilesetUid": 44, "x": 104, "y": 16, "w": 8, "h": 8 },
 							"__smartColor": "#733E39",
-							"__worldX": -824,
-							"__worldY": -976,
 							"iid": "4c8cbdc0-b0a0-11ee-ab14-83f68755fcf9",
 							"width": 8,
 							"height": 8,
 							"defUid": 141,
 							"px": [88,128],
-							"fieldInstances": []
+							"fieldInstances": [],
+							"__worldX": -824,
+							"__worldY": -976
 						},
 						{
 							"__identifier": "Door",
@@ -1713,14 +2025,14 @@
 							"__tags": ["OBJECT"],
 							"__tile": { "tilesetUid": 44, "x": 104, "y": 16, "w": 8, "h": 8 },
 							"__smartColor": "#733E39",
-							"__worldX": -752,
-							"__worldY": -960,
 							"iid": "4d281360-b0a0-11ee-ab14-6525a5dc3ea0",
 							"width": 8,
 							"height": 8,
 							"defUid": 141,
 							"px": [160,144],
-							"fieldInstances": []
+							"fieldInstances": [],
+							"__worldX": -752,
+							"__worldY": -960
 						}
 					]
 				},
@@ -2136,7 +2448,7 @@
 						{ "px": [304,48], "src": [96,64], "f": 0, "t": 236, "d": [386], "a": 1 },
 						{ "px": [312,48], "src": [96,64], "f": 0, "t": 236, "d": [387], "a": 1 },
 						{ "px": [320,48], "src": [96,64], "f": 0, "t": 236, "d": [388], "a": 1 },
-						{ "px": [328,48], "src": [136,16], "f": 0, "t": 73, "d": [389], "a": 1 },
+						{ "px": [328,48], "src": [144,16], "f": 0, "t": 74, "d": [389], "a": 1 },
 						{ "px": [336,48], "src": [8,16], "f": 0, "t": 57, "d": [390], "a": 1 },
 						{ "px": [344,48], "src": [0,8], "f": 0, "t": 28, "d": [391], "a": 1 },
 						{ "px": [352,48], "src": [0,8], "f": 0, "t": 28, "d": [392], "a": 1 },
@@ -2210,6 +2522,7 @@
 						{ "px": [432,56], "src": [8,0], "f": 0, "t": 1, "d": [460], "a": 1 },
 						{ "px": [440,56], "src": [8,0], "f": 0, "t": 1, "d": [461], "a": 1 },
 						{ "px": [448,56], "src": [8,0], "f": 0, "t": 1, "d": [462], "a": 1 },
+						{ "px": [448,56], "src": [24,16], "f": 0, "t": 59, "d": [462], "a": 1 },
 						{ "px": [456,56], "src": [56,0], "f": 0, "t": 7, "d": [463], "a": 1 },
 						{ "px": [0,64], "src": [8,0], "f": 0, "t": 1, "d": [464], "a": 1 },
 						{ "px": [8,64], "src": [8,0], "f": 0, "t": 1, "d": [465], "a": 1 },

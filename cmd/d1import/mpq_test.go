@@ -1,8 +1,10 @@
-package d1
+package main
 
 import (
 	"encoding/binary"
 	"testing"
+
+	"rpg/d1"
 )
 
 // TestMPQ reads each level type's tile tables and checks they agree: every megatile points at pieces the
@@ -32,7 +34,23 @@ func TestMPQ(t *testing.T) {
 			}
 		}
 	}
-	if d := loadDun(`Levels\L1Data\SklKng2.DUN`); d.w() != 37 || d.h() != 25 || len(d) != 2+37*25+4*4*37*25 {
-		t.Errorf("SklKng2.DUN: %dx%d, %d words", d.w(), d.h(), len(d))
+	b, err := a.ReadFile(`Levels\L1Data\SklKng2.DUN`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if w, h := binary.LittleEndian.Uint16(b), binary.LittleEndian.Uint16(b[2:]); w != 37 || h != 25 {
+		t.Errorf("SklKng2.DUN: %dx%d", w, h)
+	}
+}
+
+// TestImportRoundTrip re-runs the import into a scratch directory. ImportLevels parses back everything it writes
+// and compares it to the MPQ's bytes, so this fails if the text encoding ever stops being lossless.
+func TestImportRoundTrip(t *testing.T) {
+	a, err := DiabDat()
+	if err != nil {
+		t.Skip(err)
+	}
+	if err := d1.ImportLevels(a.ReadFile, t.TempDir()); err != nil {
+		t.Fatal(err)
 	}
 }

@@ -3,6 +3,8 @@ package gui
 import (
 	"fmt"
 	"math"
+
+	"github.com/hajimehoshi/ebiten/v2"
 	"rpg/common"
 	"rpg/util"
 )
@@ -11,6 +13,7 @@ import (
 func (u *UIController) openPauseMenu() {
 	u.OpenMenu([]util.MenuItem{
 		{MainText: "Resume"},
+		{MainText: "Video", Action: u.openVideoMenu},
 		{MainText: "Audio", Action: u.openAudioMenu},
 		{MainText: "Auto explore", Action: u.openAutoExploreMenu},
 		{MainText: "Gameplay", Action: u.openGameplayMenu},
@@ -18,40 +21,41 @@ func (u *UIController) openPauseMenu() {
 	})
 }
 
-// configToggle builds a menu item that flips a boolean config setting, saves it, and reopens reopen.
-func (u *UIController) configToggle(name string, get func() bool, set func(bool), reopen func()) util.MenuItem {
-	label := func() string {
-		state := "Off"
-		if get() {
-			state = "On"
-		}
-		return fmt.Sprintf("%s: %s", name, state)
+func (u *UIController) toggleFullscreen() {
+	u.SetFullscreen(!ebiten.IsFullscreen())
+	u.configuration.Fullscreen = u.isFullScreen
+	u.configuration.SaveToRecFile(common.ConfigFile)
+}
+
+func (u *UIController) SetFullscreen(on bool) {
+	u.isFullScreen = on
+	ebiten.SetFullscreen(on)
+	u.OnScreenSizeChanged()
+}
+
+// openVideoMenu holds display settings.
+func (u *UIController) openVideoMenu() {
+	state := "Off"
+	if u.isFullScreen { // ebiten.IsFullscreen may lag a frame behind SetFullscreen
+		state = "On"
 	}
-	return util.MenuItem{MainText: label(), Action: func() {
-		set(!get())
-		u.configuration.SaveToRecFile(common.ConfigFile)
-		reopen()
-	}}
+	u.OpenMenu([]util.MenuItem{
+		{MainText: "Fullscreen: " + state, Action: func() {
+			u.toggleFullscreen()
+			u.openVideoMenu()
+		}},
+		{MainText: "Back", Action: u.openPauseMenu},
+	})
 }
 
 // openAutoExploreMenu toggles auto-explore behavior, saved to config.rec.
 func (u *UIController) openAutoExploreMenu() {
-	u.OpenMenu([]util.MenuItem{
-		u.configToggle("Open Containers", func() bool { return u.configuration.AutoExploreOpenContainers },
-			func(v bool) { u.configuration.AutoExploreOpenContainers = v }, u.openAutoExploreMenu),
-		u.configToggle("Pickup loot", func() bool { return u.configuration.AutoPickup },
-			func(v bool) { u.configuration.AutoPickup = v }, u.openAutoExploreMenu),
-		{MainText: "Back", Action: u.openPauseMenu},
-	})
+	u.OpenMenu(append(common.AutoExploreSettings(u.configuration, u.openAutoExploreMenu), util.MenuItem{MainText: "Back", Action: u.openPauseMenu}))
 }
 
 // openGameplayMenu holds miscellaneous gameplay toggles, saved to config.rec.
 func (u *UIController) openGameplayMenu() {
-	u.OpenMenu([]util.MenuItem{
-		u.configToggle("Warning: Weapon breaking", func() bool { return u.configuration.WeaponBreakWarning },
-			func(v bool) { u.configuration.WeaponBreakWarning = v }, u.openGameplayMenu),
-		{MainText: "Back", Action: u.openPauseMenu},
-	})
+	u.OpenMenu(append(common.GameplaySettings(u.configuration, u.openGameplayMenu), util.MenuItem{MainText: "Back", Action: u.openPauseMenu}))
 }
 
 // openAudioMenu: volume sliders (left/right change them by 10%, Enter steps up and wraps), saved to config.rec,

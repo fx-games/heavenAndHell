@@ -240,6 +240,78 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 	return 0, nil, false
 }
 
+// D1CombatForecast mirrors resolveD1Attack for the right-click info window: both sides' chance to land a blow
+// (the hero's block counted) and the fewest-most blows to kill at the current health, fewest with the best roll and
+// every weapon blast landing, most with the worst roll.
+// ponytail: the monster's plain attack only, its special attacks and spell missiles roll their own numbers.
+func D1CombatForecast(state *State, player, monster *Actor) []string {
+	h, s, mon := player.hero, player.HeroSheet(), monster.d1Monster
+	if h == nil || mon == nil || mon.Golem {
+		return nil
+	}
+	blastMax := func(kind, dam int) int {
+		if resist, immune := resistBits(kind); mon.MagicRes&immune != 0 {
+			return 0
+		} else if mon.MagicRes&resist != 0 {
+			return max(dam, 0) >> 2
+		}
+		return max(dam, 0)
+	}
+	var chance, lo, hi int
+	if s.WeaponType == d1.ITypeBow {
+		chance = h.ArrowHitChance(s, mon.AC, geometry.DistanceChebyshev(player.MapPosition(), monster.MapPosition()))
+		lo, hi = h.ArrowDamageRange(s, s.MinDam, s.MaxDam)
+		if s.Flags&d1.ISplLightArrows != 0 {
+			_, burst := h.ArrowDamageRange(s, s.LMinDam, s.LMaxDam)
+			hi += blastMax(d1.ResistKindLightning, burst)
+		} else if s.Flags&d1.ISplFireArrows != 0 {
+			_, burst := h.ArrowDamageRange(s, s.FMinDam, s.FMaxDam)
+			hi += blastMax(d1.ResistKindFire, burst)
+		}
+	} else {
+		chance = h.MeleeHitChance(s, mon.AC)
+		lo, hi = h.MeleeDamageRange(s, mon.Data.Class)
+		if s.Flags&d1.ISplFireDam != 0 {
+			hi += blastMax(d1.ResistKindFire, s.FMaxDam)
+		}
+		if s.Flags&d1.ISplLightDam != 0 {
+			hi += blastMax(d1.ResistKindLightning, s.LMaxDam)
+		}
+	}
+	if monster.HasStatusEffect(StatusStone) {
+		chance = 100
+	}
+	st := player.GetStats()
+	pool := st.GetResource(stats.Health).Value()
+	if player.HasStatusEffect(StatusManaShield) { // the shield pays for the damage from mana first, a third off with the spell
+		mana := st.GetResource(stats.Mana).Value()
+		if h.SpellLevel(s, d1.SplManaShield) > 0 {
+			mana = mana * 3 / 2
+		}
+		pool += mana
+	}
+	monChance := h.MonsterMeleeHitChance(s, mon.Hit, mon.Level, d1DungeonLevel(state)) * (100 - h.BlockChance(s, mon.Level)) / 100
+	return []string{"",
+		fmt.Sprintf("You: %d%% to hit, %s", chance, d1BlowsToKill(monster.GetStats().GetResource(stats.Health).Value(), lo, hi)),
+		fmt.Sprintf("It: %d%% to hit you, %s", monChance, d1BlowsToKill(pool, max(mon.MinDam+s.GetHit, 1), max(mon.MaxDam+s.GetHit, 1))),
+	}
+}
+
+// d1BlowsToKill turns a damage range into the fewest-most landed blows that take hp.
+func d1BlowsToKill(hp, lo, hi int) string {
+	switch {
+	case hi <= 0:
+		return "can't do damage"
+	case lo <= 0:
+		return fmt.Sprintf("%d+ hits to kill", (hp+hi-1)/hi)
+	case (hp+hi-1)/hi == 1 && lo >= hp:
+		return "1 hit to kill"
+	case (hp+hi-1)/hi == (hp+lo-1)/lo:
+		return fmt.Sprintf("%d hits to kill", (hp+lo-1)/lo)
+	}
+	return fmt.Sprintf("%d-%d hits to kill", (hp+hi-1)/hi, (hp+lo-1)/lo)
+}
+
 // d1ElementalHit ports MonsterMHit for a fire or lightning blast: its own to-hit roll, nothing against immunity,
 // a quarter against resistance.
 func d1ElementalHit(def *Actor, kind, chance int, roll func() int) int {

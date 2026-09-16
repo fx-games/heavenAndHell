@@ -9,7 +9,6 @@ type Broker struct {
 	context            ActionContext
 }
 
-
 // NewBroker creates a new broker
 // AND will inject a reference to itself into the context
 func NewBroker(context ActionContext) *Broker {

@@ -7,14 +7,14 @@ import (
 	"rpg/util"
 )
 
-// D1 town vendors (decision 10). The H&H vendor types keep their ids; their meaning is D1's.
+// D1 townspeople (decision 10). A vendor type is the NPC's InternalName in maps.ldtk and its gossip key in d1.Data.Gossip.
 const (
-	VendorTypeCain    VendorType = "store_cain"
-	VendorTypeWirt    VendorType = "store_wirt"
-	VendorTypeOgden   VendorType = "store_ogden"   // no store in single player, only talk
-	VendorTypeDeadGuy VendorType = "store_deadguy" // the wounded townsman: only his last words
-	VendorTypeDrunk   VendorType = "store_drunk"   // Farnham: only talk (S_StartDrunk)
-	VendorTypeBarmaid VendorType = "store_barmaid" // Gillian: only talk (S_StartBarmaid)
+	VendorTypeCain    VendorType = "cain"
+	VendorTypeWirt    VendorType = "wirt"
+	VendorTypeOgden   VendorType = "ogden"   // no store in single player, only talk
+	VendorTypeDeadGuy VendorType = "deadguy" // the wounded townsman: only his last words
+	VendorTypeDrunk   VendorType = "farnham" // only talk (S_StartDrunk)
+	VendorTypeBarmaid VendorType = "gillian" // only talk (S_StartBarmaid)
 )
 
 // WirtLookCost is what Wirt charges to show his item.
@@ -46,33 +46,36 @@ func PayGold(ctx ActionContext, player *Actor, cost int) bool {
 	return true
 }
 
-// d1ServiceOption lists the player's items a service applies to, with prices, and performs it on selection.
+// d1ServiceOption lists the player's items a service applies to, with prices, and performs it on selection. Like the
+// sell menu, the list reopens after each purchase until nothing is left for the service.
 func d1ServiceOption(ctx ActionContext, label string, applies func(*d1.Item) bool, cost func(*d1.Item) int, perform func(*d1.Item)) util.MenuItem {
-	return util.MenuItem{MainText: label, Action: func() {
+	var open func(reopen bool)
+	open = func(reopen bool) {
 		player := ctx.GameState.GetPlayer()
-		var items []util.MenuItem
+		var items []*Item
 		for _, item := range d1HeroItems(player) {
-			if item.d1 == nil || !applies(item.d1) {
-				continue
+			if item.d1 != nil && applies(item.d1) {
+				items = append(items, item)
 			}
-			it := item
+		}
+		if len(items) == 0 {
+			if !reopen {
+				ctx.Msg("You have nothing for that.")
+			}
+			return
+		}
+		ctx.UserInterface().OpenServiceMenu(items, func(it *Item) int { return cost(it.d1) }, func(it *Item) {
 			price := cost(it.d1)
-			items = append(items, util.MenuItem{MainText: fmt.Sprintf("%s (%d gold)", it.Name(), price), Action: func() {
-				if !PayGold(ctx, player, price) {
-					return
-				}
+			if PayGold(ctx, player, price) {
 				perform(it.d1)
 				it.RefreshD1()
 				SyncHero(player)
 				ctx.Msg(fmt.Sprintf("%s: done (%d gold)", it.Name(), price))
-			}})
-		}
-		if len(items) == 0 {
-			ctx.Msg("You have nothing for that.")
-			return
-		}
-		ctx.UserInterface().OpenMenu(items)
-	}}
+			}
+			open(true)
+		})
+	}
+	return util.MenuItem{MainText: label, Action: func() { open(false) }}
 }
 
 // d1VendorOptions ports each NPC's S_Start* menu (stores.cpp) with its exact D1 labels and structure: Griswold

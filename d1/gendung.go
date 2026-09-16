@@ -294,34 +294,22 @@ func (d dun) layer(n, i, j int) int {
 	return 0
 }
 
-func loadDun(name string) dun {
-	b := mustReadMPQ(name)
-	d := make(dun, len(b)/2)
-	for i := range d {
-		d[i] = binary.LittleEndian.Uint16(b[2*i:])
+// loadDun returns a set piece by its name under assets/data/d1/levels, e.g. "l1/sklkng1".
+func (g *gen) loadDun(name string) dun {
+	if readDunHook != nil {
+		if b := readDunHook(name); b != nil {
+			return binDun(b)
+		}
+	}
+	d, ok := g.data.levels.dun[name]
+	if !ok {
+		panic(fmt.Errorf("D1 level data: no set piece %q", name))
 	}
 	return d
 }
 
-// readDunHook lets tests supply set pieces; nil or a nil result reads the MPQ.
+// readDunHook lets tests supply set pieces as raw .DUN bytes; nil or a nil result uses the imported text.
 var readDunHook func(name string) []byte
-
-func mustReadMPQ(name string) []byte {
-	if readDunHook != nil {
-		if b := readDunHook(name); b != nil {
-			return b
-		}
-	}
-	a, err := DiabDat()
-	if err != nil {
-		panic(err)
-	}
-	b, err := a.ReadFile(name)
-	if err != nil {
-		panic(fmt.Errorf("D1 data: %w", err))
-	}
-	return b
-}
 
 // placeDunTiles ports PlaceDunTiles: a set piece's tiles, protected; empty cells become floorID if set.
 func (g *gen) placeDunTiles(d dun, x, y int, floorID byte) {

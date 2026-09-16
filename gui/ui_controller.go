@@ -9,7 +9,6 @@ import (
 	"io"
 	"math"
 	"rpg/common"
-	"rpg/d1"
 	"rpg/defs"
 	"rpg/geometry"
 	"rpg/gridmap"
@@ -97,12 +96,12 @@ type UIController struct {
 	uiBar                    *ColoredRect
 	elevatedOverlay          UIWidget
 
-	statsLabel    *BasicLabel
-	inventory     *IconOverlay
-	skills        *IconOverlay
-	timer         *IconOverlay
-	miniMap       *MinimapOverlay
-	message       PrintMessage
+	statsLabel *BasicLabel
+	inventory  *IconOverlay
+	skills     *IconOverlay
+	timer      *IconOverlay
+	miniMap    *MinimapOverlay
+	message    PrintMessage
 
 	configuration *common.Configuration
 
@@ -161,7 +160,7 @@ func (u *UIController) ShowLogMessage(message string) {
 	rawText := common.RemoveColorCodes(message)
 	u.message.rawText = rawText
 	u.message.textForRenderer = u.tileRenderer.ParseColorCodedText(message)
-	ticks := util.SecondsToTicks(3)
+	ticks := util.SecondsToTicks(6)
 	u.message.ticksLeft = ticks
 	u.message.ticksStart = ticks
 }
@@ -256,10 +255,12 @@ func (u *UIController) IsUIModalVisible() bool {
 }
 func (u *UIController) PushWidget(widget UIWidget) {
 	u.modal = widget
+	u.HideTooltip() // a tooltip belongs to the widget it was hovered in
 }
 
 func (u *UIController) PopWidget() {
 	u.modal = nil
+	u.HideTooltip()
 	u.UpdateStatsLabel() // restore the compact stat bar (e.g. the unspent-points reminder) over whatever a menu showed
 }
 
@@ -499,6 +500,7 @@ func (u *UIController) HideTooltip() {
 
 func (u *UIController) PopAll() {
 	u.modal = nil
+	u.HideTooltip()
 }
 
 func (u *UIController) SetTileMapAnimations(mapping map[int32]TilemapAnimInfo) {
@@ -683,12 +685,23 @@ func (u *UIController) addInventoryOverlay(pixelEdgeFromBottomRight geometry.Poi
 			return sortStacksForUI(state.GetPlayer().GetInventory().StackedItems())
 		},
 		OnSelection: u.onItemInInventoryClicked,
+		OnRightClick: func(uiItem UIElement) {
+			if !state.GetPlayer().IsAlive() {
+				return
+			}
+			item := firstItemFromUIStack(uiItem)
+			wasEquipped := state.GetPlayer().GetEquipment().IsEquipped(item)
+			u.context.PlayerAction().DropItem(item)
+			if wasEquipped {
+				u.ShowFullStats()
+			}
+		},
 	}
 	tileSize := u.worldTexture.GetTileSize()
 	return u.OpenInventoryOverlay(pixelEdgeFromBottomRight, tileSize, dataSource)
 }
 
-func firstItemFromUIStack(uiItem UIElement) *common.Item {
+func firstItemFromUIStack(uiItem any) *common.Item {
 	var firstItem *common.Item
 
 	if item, isItem := uiItem.(*common.Item); isItem {
@@ -723,44 +736,12 @@ func (u *UIController) onItemInInventoryClicked(uiItem UIElement) {
 		return
 	}
 
-	// equip
-	if typedItem.IsEquippable() {
-		equip := func() {
-			if wasEquipped {
-				act.UnequipItem(typedItem)
-			} else {
-				act.EquipItem(typedItem)
-			}
-			u.ShowFullStats()
-		}
-		if casts := act.GetContextActionsForItem(typedItem); len(casts) > 0 { // a staff: equip it or cast its spell
-			label := "Equip"
-			if wasEquipped {
-				label = "Unequip"
-			}
-			for i := range casts {
-				casts[i].MainText = "Cast " + casts[i].MainText
-			}
-			u.OpenMenu(append([]util.MenuItem{{MainText: label, Action: equip}}, casts...))
-			return
-		}
-		equip()
-		return
+	actions := common.ItemActions(act, player, typedItem, u.ShowFullStats)
+	if len(actions) == 1 {
+		actions[0].Action()
+	} else if len(actions) > 1 {
+		u.OpenMenu(actions)
 	}
-
-	// use
-	contextActions := u.context.PlayerAction().GetContextActionsForItem(typedItem)
-	if len(contextActions) == 0 {
-		return // maybe open a description? or at least a menu with drop or sth?
-	}
-
-	if len(contextActions) == 1 {
-		actionFunc := contextActions[0].Action
-		actionFunc()
-		// hmm, this will trigger even if unsuc
-		return
-	}
-	u.OpenMenu(contextActions)
 }
 func (u *UIController) ShowFullStats() {
 	u.miniMap.Hide()
@@ -792,19 +773,10 @@ func (u *UIController) BeginPlayerSellingTo(vendor *common.Actor) {
 	var sellItems []ShopMenuItem
 	textParser := u.tileRenderer.ParseColorCodedText
 
-	for _, itemStack := range playerInventory.StackedItems() {
+	for _, itemStack := range common.SellableStacks(vendor, player) {
 		typedItem := itemStack[0]
-		if !common.D1VendorBuys(vendor, typedItem) || player.GetEquipment().IsEquipped(typedItem) {
-			continue // D1: each store buys only its kind of goods, and only from the pack
-		}
 		sellPrice := common.D1SellPrice(typedItem)
-
-		itemName := typedItem.Name()
-		if u.configuration.ItemNamesInShop == common.ItemNamingSchemeEnchantments {
-			itemName = typedItem.PlusName()
-		} else if u.configuration.ItemNamesInShop == common.ItemNamingSchemeBandStyle {
-			itemName = typedItem.BandStyleName()
-		}
+		itemName := common.ShopItemName(u.configuration.ItemNamesInShop, itemStack)
 		if !typedItem.MeetsRequirements() {
 			itemName = fmt.Sprintf("[:red]%s[:white]", itemName)
 		}
@@ -825,14 +797,7 @@ func (u *UIController) BeginPlayerSellingTo(vendor *common.Actor) {
 				},
 			},
 			Action: func() {
-				playerEquip := player.GetEquipment()
-				if playerEquip.IsEquipped(typedItem) {
-					u.context.PlayerAction().UnequipItem(typedItem)
-				}
-				playerInventory.Remove(typedItem)
-				player.GetStats().IncrementBy(stats.Gold, sellPrice)
-				//u.sendInventoryToWindowClient()
-				msg(fmt.Sprintf("You sold [:darkText]%s[:white] for [:darkText]%d[:white] gold", typedItem.Name(), sellPrice))
+				msg(common.SellItem(player, typedItem))
 				u.BeginPlayerSellingTo(vendor)
 			},
 		})
@@ -850,39 +815,7 @@ func (u *UIController) openLevelUpMenu() {
 		return
 	}
 	u.ShowFullStats()
-	var items []util.MenuItem
-	h, sheet := player.Hero(), player.HeroSheet()
-	if h != nil {
-		items = append(items, util.MenuItem{MainText: fmt.Sprintf("%d stat points to spend", h.StatPts), Action: u.openLevelUpMenu}, util.MenuItem{})
-	}
-	for _, choice := range []struct {
-		label string
-		stat  stats.Name
-		attr  int
-	}{{"Strength", stats.Strength, d1.AttrStr}, {"Magic", stats.Magic, d1.AttrMag}, {"Dexterity", stats.Dexterity, d1.AttrDex}, {"Vitality", stats.Vitality, d1.AttrVit}} {
-		stat := choice.stat
-		label := choice.label
-		if h != nil { // base value (what points raise), with items when that differs, and the class maximum
-			base := [4]int{h.BaseStr, h.BaseMag, h.BaseDex, h.BaseVit}[choice.attr]
-			total := [4]int{sheet.Str, sheet.Mag, sheet.Dex, sheet.Vit}[choice.attr]
-			label = fmt.Sprintf("%s %d", label, base)
-			if total != base {
-				label += fmt.Sprintf(" (%d)", total)
-			}
-			label += fmt.Sprintf(" / %d", d1.MaxStats[h.Class][choice.attr])
-		}
-		items = append(items, util.MenuItem{
-			MainText: label,
-			Action: func() {
-				player.LevelUp(stat)
-				if player.CanLevelUp() {
-					u.openLevelUpMenu()
-				} else {
-					u.ShowFullStats()
-				}
-			},
-		})
-	}
+	items := common.LevelUpMenuItems(player, u.openLevelUpMenu, u.ShowFullStats)
 	u.OpenMenu(items)
 }
 func (u *UIController) addMiniMap(offset geometry.Point, maxHeight int, horizontalPadding int) *MinimapOverlay {
@@ -924,41 +857,10 @@ func (u *UIController) addSkillsOverlay(pixelEdgeFromBottomRight geometry.Point)
 
 	return u.OpenSkillsOverlay(pixelEdgeFromBottomRight, tileSize, dataSource)
 }
+
 // openSpellMenu lists the memorized D1 spells; picking one casts it (targeted spells start targeting first).
 func (u *UIController) openSpellMenu() {
-	player := u.context.GameState().GetPlayer()
-	var items []util.MenuItem
-	for _, skill := range player.GetTargetedSkills() {
-		s := skill
-		items = append(items, util.MenuItem{MainText: s.Name(), Action: func() {
-			u.context.PlayerAction().BeginActionTargeting(s)
-		}})
-	}
-	for _, skill := range player.GetUntargetedSkills() {
-		s := skill
-		items = append(items, util.MenuItem{MainText: s.Name(), Action: func() {
-			u.context.PlayerAction().ActivateUntargetedAction(s, common.EffectSource(s.GetInternalName()))
-		}})
-	}
-	// D1's spell list also offers the spells on scrolls and staves in the pack or in hand (one entry each).
-	seen := map[string]bool{}
-	for _, it := range append(player.GetInventory().Items(), player.GetEquipment().AllItems()...) {
-		d := it.D1()
-		if d == nil || d.Spell == 0 || d.MiscID != "IMISC_SCROLL" && d.MiscID != "IMISC_SCROLLT" && d.Type != d1.ITypeStaff {
-			continue
-		}
-		label := fmt.Sprintf("%s (%s)", u.context.GameState().D1SpellName(d.Spell), it.Name())
-		if d.Type == d1.ITypeStaff {
-			label = fmt.Sprintf("%s (%s, %d charges)", u.context.GameState().D1SpellName(d.Spell), it.Name(), d.Charges)
-		}
-		if seen[label] {
-			continue
-		}
-		seen[label] = true
-		for _, action := range u.context.PlayerAction().GetContextActionsForItem(it) {
-			items = append(items, util.MenuItem{MainText: label, Action: action.Action})
-		}
-	}
+	items := common.SpellMenuItems(u.context.GameState(), u.context.PlayerAction())
 	if len(items) == 0 {
 		u.ShowLogMessage("You don't know any spells and carry no scrolls or staves.")
 		return
@@ -1064,6 +966,10 @@ func (u *UIController) getMiniMapColor(mapPos geometry.Point, tileColor *[4]byte
 		*tileColor = [4]byte{10, 10, 10, 255}
 		return
 	}
+	if currentMap.IsSpecialAt(mapPos, gridmap.SpecialTileStairsUp) {
+		*tileColor = [4]byte{255, 255, 0, 255}
+		return
+	}
 	if currentMap.IsStairsAt(mapPos) {
 		*tileColor = [4]byte{235, 52, 229, 255}
 		return
@@ -1080,7 +986,7 @@ func (u *UIController) getMiniMapColor(mapPos geometry.Point, tileColor *[4]byte
 		}
 		return
 	}
-	if currentMap.IsActorAt(mapPos) {
+	if currentMap.IsActorAt(mapPos) && currentMap.ActorAt(mapPos).IsVisible() {
 		actorAt := currentMap.ActorAt(mapPos)
 		if actorAt.IsHostileTo(state.GetPlayer()) {
 			*tileColor = [4]byte{255, 0, 0, 255}
@@ -1125,10 +1031,9 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 		worldTileColor = state.GetWaterColor()
 	}
 
-
 	// animate the worldIcon
 	if u.renderingMode == GraphicRendering && (state.GetPlayer().CanSee(mapPos) || u.disableFogOfWar) {
-		if !u.configuration.DrawTilesBehindActors && currentMap.IsActorAt(mapPos) {
+		if !u.configuration.DrawTilesBehindActors && currentMap.IsActorAt(mapPos) && currentMap.ActorAt(mapPos).IsVisible() {
 			return []renderer.CellDrawInfo{}
 		}
 		if info, ok := u.tilemapAnimations[worldIcon]; ok {
@@ -1387,78 +1292,39 @@ func (u *UIController) UpdateStatsLabel() {
 	label.SetText(statLines)
 	u.miniMap.Show()
 }
-func (u *UIController) showHelpText() {
-	textColor := defs.DarkTextColor
-	var pickupText string
-	if u.configuration.AutoPickup {
+
+// helpLines is the F1 help text.
+func helpLines(autoPickup bool) []string {
+	pickupText := "Press 'g' to pick up items"
+	if autoPickup {
 		pickupText = "Press 'g' to pick up items you dropped"
-	} else {
-		pickupText = "Press 'g' to pick up items"
 	}
-	u.OpenTextWindow([]util.LabelText{
-		{
-			Text:      "Welcome to heaven and hell!",
-			TextColor: textColor,
-		},
-		{Text: "", TextColor: textColor},
-		{
-			Text:      "Use the 'w/a/s/d' keys or Numpad to move around",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Bump into stuff and people to interact with them or attack them",
-			TextColor: textColor,
-		},
-		{Text: "", TextColor: textColor},
-		{
-			Text:      "Press 'q' to quickly fire at the nearest enemy with your ranged weapon",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'f' to aim at a specific enemy with your ranged weapon",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'e' to cast a spell you know (read books to learn more)",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'o' to auto-explore",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'tab' to auto-attack the nearest enemy using your equipped weapon",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'i' to open your inventory",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'c' to show your stats",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'u' to spend stat points after a level up",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'Esc' to pause: audio settings, music player, quit",
-			TextColor: textColor,
-		},
-		{
-			Text:      pickupText,
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'l' to show the last lines of the message log",
-			TextColor: textColor,
-		},
-		{
-			Text:      "Press 'r' to show the quest log",
-			TextColor: textColor,
-		},
-	})
+	return []string{
+		"Welcome to heaven and hell!",
+		"",
+		"Use the 'w/a/s/d' keys or Numpad to move around",
+		"Bump into stuff and people to interact with them or attack them",
+		"",
+		"Press 'q' to quickly fire at the nearest enemy with your ranged weapon",
+		"Press 'f' to aim at a specific enemy with your ranged weapon",
+		"Press 't' to throw something",
+		"Press 'e' to cast a spell you know (read books to learn more)",
+		"Press 'space' to cast your last spell at the nearest enemy",
+		"Press 'o' to auto-explore",
+		"Press 'tab' to auto-attack the nearest enemy using your equipped weapon",
+		"Press 'i' to open your inventory",
+		"Press 'c' to show your stats",
+		"Press 'u' to spend stat points after a level up",
+		"Press 'z' to rest until healed, '.' to wait a turn",
+		"Press 'Esc' to pause: settings, quit",
+		pickupText,
+		"Press 'l' to show the last lines of the message log",
+		"Press 'r' to show the quest log",
+	}
+}
+
+func (u *UIController) showHelpText() {
+	u.OpenTextWindow(util.ToLabelTextWithColor(helpLines(u.configuration.AutoPickup), defs.DarkTextColor))
 }
 func (u *UIController) ShowLog() {
 	buffer := u.context.GetLog()
@@ -1481,6 +1347,56 @@ func (u *UIController) FlashScreen(color color.Color, seconds float64) {
 	u.globalScaleColor = color
 	u.globalFlashColorTicksLeft = int(util.SecondsToTicks(seconds))
 	u.globalFlashColorTicksStart = int(util.SecondsToTicks(seconds))
+}
+
+func (u *UIController) OpenItemList(items []*common.TextualStack) {
+	u.OpenInventoryListModal(u.worldTexture.GetTileSize(), ListDataSource{GetElements: func() []IconListElement {
+		result := make([]IconListElement, len(items))
+		for i, item := range items {
+			result[i] = item
+		}
+		return result
+	}})
+}
+
+// OpenServiceMenu lists items for a paid service (repair, identify, recharge) in the buy/sell menus' layout: name
+// left, price right-aligned and red when unaffordable.
+func (u *UIController) OpenServiceMenu(items []*common.Item, price func(*common.Item) int, pick func(*common.Item)) {
+	stacks := make([]common.InventoryStack, len(items))
+	for i, it := range items {
+		stacks[i] = common.InventoryStack{it}
+	}
+	common.SortInventory(stacks)
+	gold := u.context.GameState().GetPlayer().GetStats().GetAttribute(stats.Gold)
+	var menuItems []ShopMenuItem
+	for idx, stack := range stacks {
+		item, cost := stack[0], price(stack[0])
+		priceColor := "darkText"
+		if cost > gold {
+			priceColor = "negative"
+		}
+		nameColor := item.TintColor()
+		if !item.MeetsRequirements() {
+			nameColor = defs.Red
+		}
+		menuItems = append(menuItems, ShopMenuItem{
+			ShortCut: 'a' + rune(idx),
+			Tooltip:  item.GetTooltipLines(u.ParseColorCodedText),
+			Icon:     item.InventoryIcon(),
+			TextColumns: []util.LabelText{
+				{Text: item.BandStyleName(), TextColor: nameColor},
+				{Text: fmt.Sprintf("%d", cost), TextWithColorCodes: u.ParseColorCodedText(fmt.Sprintf("[:%s]%d", priceColor, cost)), UseColorCodes: true},
+			},
+			Action: func() {
+				u.PopAll()
+				pick(item)
+			},
+		})
+	}
+	menu := NewShopMenu(u, u.worldTexture.GetTileSize())
+	u.PushWidget(menu)
+	menu.SetHeader("You have:", fmt.Sprintf("%d gold", gold))
+	menu.SetItems(menuItems, []Alignment{AlignmentLeft, AlignmentRight})
 }
 
 func (u *UIController) OpenListInventoryForSelection(filter func(element *common.Item) bool, onSelected func(invItemKey rune)) {
@@ -1541,7 +1457,7 @@ func (u *UIController) OpenShopMenu(vendor *common.Actor) {
 // premium items (S_StartSBuy/S_ScrollSBuy split those into two separate menus in D1).
 func (u *UIController) OpenShopMenuFiltered(vendor *common.Actor, filter func(*common.Item) bool) {
 	u.openShopMenuWithHandler(vendor.GetInventory(), filter, func(item *common.Item) {
-		u.tryToBuy(item, vendor)
+		u.tryToBuy(item, vendor, filter)
 	})
 }
 func (u *UIController) openShopMenuWithHandler(inventory *common.Inventory, filter func(*common.Item) bool, handler func(item *common.Item)) {
@@ -1589,15 +1505,15 @@ func (u *UIController) openShopMenuWithHandler(inventory *common.Inventory, filt
 		shortCut := rune('a') + rune(itemIndex)
 
 		menuItems = append(menuItems, ShopMenuItem{
-			ShortCut: shortCut,
-			Tooltip:  item.GetTooltipLines(textParser),
-			Icon:     item.InventoryIcon(),
+			ShortCut:    shortCut,
+			MakeTooltip: func(mousePos geometry.Point) Tooltip { return NewItemCompareTooltip(u, item, mousePos) },
+			Icon:        item.InventoryIcon(),
 			TextColumns: []util.LabelText{
 				{
-					Text:               nameString,
+					Text: nameString,
 					//TextWithColorCodes: textParser(nameStringWithColor),
-					UseColorCodes:      false,
-					TextColor: nameColor,
+					UseColorCodes: false,
+					TextColor:     nameColor,
 				},
 				{
 					Text:               priceString,
@@ -1617,28 +1533,10 @@ func (u *UIController) openShopMenuWithHandler(inventory *common.Inventory, filt
 	menu.SetItems(menuItems, []Alignment{AlignmentLeft, AlignmentRight})
 }
 
-func (u *UIController) tryToBuy(item *common.Item, seller *common.Actor) {
-	player := u.context.GameState().GetPlayer()
-	goldAmount := player.GetStats().GetAttribute(stats.Gold)
-	msg := u.msg
-	cost := item.BuyPrice()
-	cannotPayForItem := cost > goldAmount
-
-	if cannotPayForItem {
-		msg("You don't have enough gold")
-		u.OpenShopMenu(seller)
-		return
-	}
-	player.GetStats().DecrementBy(stats.Gold, cost)
-	seller.GetStats().IncrementBy(stats.Gold, cost)
-
-	seller.GetInventory().Remove(item)
-	player.GetInventory().Add(item)
-
-	msg(fmt.Sprintf("You bought [:darkText]%s[:white] for [:darkText]%d[:white] gold", item.Name(), cost))
-	u.OpenShopMenu(seller)
+func (u *UIController) tryToBuy(item *common.Item, seller *common.Actor, filter func(*common.Item) bool) {
+	u.msg(common.BuyItem(u.context.GameState().GetPlayer(), seller, item))
+	u.OpenShopMenuFiltered(seller, filter)
 }
-
 
 func (u *UIController) showFlags() {
 	state := u.context.GameState()
@@ -1674,7 +1572,7 @@ func (u *UIController) updateMapTileHoverInfo(mapPos geometry.Point) {
 	}
 	var name string
 	switch {
-	case m.IsActorAt(mapPos):
+	case m.IsActorAt(mapPos) && m.ActorAt(mapPos).IsVisible():
 		name = m.ActorAt(mapPos).Name()
 	case m.IsItemAt(mapPos):
 		name = m.ItemAt(mapPos).Name()

@@ -25,10 +25,10 @@ const (
 	ActionNameFireball        ActionName = "ActionNameFireball"
 	ActionNameMonsterMissile  ActionName = "ActionNameMonsterMissile"
 
-	ActionNameDie               ActionName = "ActionNameDie"
-	ActionNameEndTurn           ActionName = "ActionNameEndTurn"
-	ActionNameTransition        ActionName = "ActionNameTransition"
-	ActionNameTalkTo            ActionName = "ActionNameTalkToNpc"
+	ActionNameDie        ActionName = "ActionNameDie"
+	ActionNameEndTurn    ActionName = "ActionNameEndTurn"
+	ActionNameTransition ActionName = "ActionNameTransition"
+	ActionNameTalkTo     ActionName = "ActionNameTalkToNpc"
 )
 
 type Animator interface {
@@ -68,7 +68,7 @@ type UserInterface interface {
 
 	// Specialized
 	OnMapChanged()
-	OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string))
+	OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string), back func())
 
 	// Action specific
 	BeginTargeting(rules TargetRules, onHit *HitEffect)
@@ -79,6 +79,8 @@ type UserInterface interface {
 	BeginPlayerSellingTo(vendor *Actor)
 
 	OpenListInventoryForSelection(filter func(element *Item) bool, selected func(itemKey rune))
+	OpenItemList(items []*TextualStack)                                     // an item selection rendered like the inventory list
+	OpenServiceMenu(items []*Item, price func(*Item) int, pick func(*Item)) // a paid service laid out like the shop menus
 	UpdateMiniMap()
 	OpenPlayerStashInTown()
 	OnPlayerTurnTaken()

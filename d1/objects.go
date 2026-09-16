@@ -1,5 +1,7 @@
 package d1
 
+import "fmt"
+
 // objects.cpp: objects placed on level creation.
 
 const (
@@ -47,16 +49,33 @@ var ShrineNames = [26]string{"Mysterious", "Hidden", "Gloomy", "Weird", "Magical
 	"Thaumaturgic", "Fascinating", "Cryptic", "Magical", "Eldritch", "Eerie", "Divine", "Holy", "Sacred", "Spiritual",
 	"Spooky", "Abandoned", "Creepy", "Quiet", "Secluded", "Ornate", "Glimmering", "Tainted"}
 
-// ShrineMessages are the MsgStrings each shrine shows.
-var ShrineMessages = [26]string{"Some are weakened as one grows strong", "New strength is forged through destruction",
-	"Those who defend seldom attack", "The sword of justice is swift and sharp", "While the spirit is vigilant the body thrives",
-	"The powers of mana refocused renews", "Time cannot diminish the power of steel", "Magic is not always what it seems to be",
-	"What once was opened now is closed", "Intensity comes at the cost of wisdom", "Arcane power brings destruction",
-	"While the spirit is vigilant the body thrives", "Crimson and Azure become as the sun", "Knowledge and wisdom at the cost of self",
-	"Drink and be refreshed", "Wherever you go, there you are", "Energy comes at the cost of wisdom",
-	"Riches abound when least expected", "Where avarice fails, patience gains reward", "The hands of men may be guided by fate",
-	"Strength is bolstered by heavenly faith", "The essence of life flows from within", "The way is made clear when viewed from above",
-	"Salvation comes at the cost of wisdom", "Mysteries are revealed in the light of reason", "Those who are last may yet be first"}
+// ShrineMessages are the MsgStrings each shrine shows, with a note on what the shrine does.
+var ShrineMessages = [26]string{"Some are weakened as one grows strong (-1 all stats, +6 to one random stat permanently)",
+	"New strength is forged through destruction (+10 max durability on equipped items, one random item -20)",
+	"Those who defend seldom attack (+2 armor on all armor, -1 max damage on all weapons)",
+	"The sword of justice is swift and sharp (+1 max damage on all weapons)",
+	"While the spirit is vigilant the body thrives (Mana Shield)",
+	"The powers of mana refocused renews (recharges all staves)",
+	"Time cannot diminish the power of steel (repairs all items)",
+	"Magic is not always what it seems to be (+1 level to known spells, -2 to one random spell)",
+	"What once was opened now is closed (refills all chests on this level)",
+	"Intensity comes at the cost of wisdom (+2 Firebolt levels, -10% max mana permanently)",
+	"Arcane power brings destruction (casts Nova, restores mana)",
+	"While the spirit is vigilant the body thrives (Mana Shield)",
+	"Crimson and Azure become as the sun (healing and mana potions in pack become rejuvenation)",
+	"Knowledge and wisdom at the cost of self (+2 Mag permanently)",
+	"Drink and be refreshed (full life and mana, drops 2 potions)",
+	"Wherever you go, there you are (teleports you to a random spot)",
+	"Energy comes at the cost of wisdom (+2 Charged Bolt levels, -10% max mana permanently)",
+	"Riches abound when least expected (fills empty inventory slots with gold)",
+	"Where avarice fails, patience gains reward (no effect in single player)",
+	"The hands of men may be guided by fate (+2 Dex permanently)",
+	"Strength is bolstered by heavenly faith (+2 Str permanently)",
+	"The essence of life flows from within (+2 Vit permanently)",
+	"The way is made clear when viewed from above (reveals the level map)",
+	"Salvation comes at the cost of wisdom (+2 Holy Bolt levels, -10% max mana permanently)",
+	"Mysteries are revealed in the light of reason (identifies all items)",
+	"Those who are last may yet be first (no effect in single player)"}
 
 // StoryBookNames are D1's StoryBookName.
 var StoryBookNames = [9]string{"The Great Conflict", "The Wages of Sin are War", "The Tale of the Horadrim", "The Dark Exile",
@@ -412,8 +431,11 @@ func (g *gen) loadMapObjects(d dun, startx, starty, x1, y1, w, h, leveridx int) 
 
 // DunObjects lists the objects a set piece file places when D1 loads it into a built level (LoadMapObjs without
 // AddObject's bookkeeping), at piece coordinates from megatile (startx, starty) doubled, as D1 passes them.
-func DunObjects(name string, startx, starty int) []*Object {
-	d := loadDun(name)
+func (data *Data) DunObjects(name string, startx, starty int) []*Object {
+	d, ok := data.levels.dun[name]
+	if !ok {
+		panic(fmt.Errorf("D1 level data: no set piece %q", name))
+	}
 	var objs []*Object
 	for j := 0; j < 2*d.h(); j++ {
 		for i := 0; i < 2*d.w(); i++ {
@@ -440,9 +462,9 @@ func (g *gen) loadMapObjs(d dun, startx, starty int) {
 
 func (g *gen) addDiabObjs() {
 	q := g.l4.quads
-	g.loadMapObjects(loadDun(`Levels\L4Data\diab1.DUN`), 2*q[0].x, 2*q[0].y, q[1].x, q[1].y, 11, 12, 1)
-	g.loadMapObjects(loadDun(`Levels\L4Data\diab2a.DUN`), 2*q[1].x, 2*q[1].y, q[2].x, q[2].y, 11, 11, 2)
-	g.loadMapObjects(loadDun(`Levels\L4Data\diab3a.DUN`), 2*q[2].x, 2*q[2].y, q[3].x, q[3].y, 9, 9, 3)
+	g.loadMapObjects(g.loadDun("l4/diab1"), 2*q[0].x, 2*q[0].y, q[1].x, q[1].y, 11, 12, 1)
+	g.loadMapObjects(g.loadDun("l4/diab2a"), 2*q[1].x, 2*q[1].y, q[2].x, q[2].y, 11, 11, 2)
+	g.loadMapObjects(g.loadDun("l4/diab3a"), 2*q[2].x, 2*q[2].y, q[3].x, q[3].y, 9, 9, 3)
 }
 
 func (g *gen) addStoryBooks(seeds [17]int32) {
@@ -570,7 +592,7 @@ func (g *gen) initObjects(seeds [17]int32) {
 		g.addL2Torches()
 		if g.available(QBlind) {
 			g.addBookLever(sp.x, sp.y, sp.w+sp.x+1, sp.h+sp.y+1, 0)
-			g.loadMapObjs(loadDun(`Levels\L2Data\Blind2.DUN`), 2*sp.x, 2*sp.y)
+			g.loadMapObjs(g.loadDun("l2/blind2"), 2*sp.x, 2*sp.y)
 		}
 		if g.available(QBlood) {
 			g.addBookLever(sp.x, sp.y+3, sp.x+2, sp.y+7, 0)
@@ -583,7 +605,7 @@ func (g *gen) initObjects(seeds [17]int32) {
 	case DTypeHell:
 		if g.available(QWarlord) {
 			g.addBookLever(sp.x, sp.y, sp.x+sp.w, sp.y+sp.h, 0)
-			g.loadMapObjs(loadDun(`Levels\L4Data\Warlord.DUN`), 2*sp.x, 2*sp.y)
+			g.loadMapObjs(g.loadDun("l4/warlord"), 2*sp.x, 2*sp.y)
 		}
 		if g.available(QBetrayer) {
 			g.addLazStand()

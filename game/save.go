@@ -30,6 +30,7 @@ type saveGame struct {
 	Hero           d1.Hero
 	HP, Mana, Gold int
 	Items          []savedInvItem
+	Stash          []d1.Item // the town stash
 	UniqueDropped  []bool
 	Flags          map[string]int
 	Map            string
@@ -56,6 +57,7 @@ func (g *GameInstance) SaveGame() {
 	if !g.autosave || player == nil || !player.IsAlive() || player.Hero() == nil {
 		return
 	}
+	g.forgetBoughtD1Stock(g.state.GetTownMap(string(defs.LevelNameTown)))
 	st := player.GetStats()
 	pos := player.MapPosition()
 	sg := saveGame{
@@ -80,6 +82,11 @@ func (g *GameInstance) SaveGame() {
 	for _, it := range eq.AllItems() {
 		if it.D1() != nil && !inv.Has(it) {
 			sg.Items = append(sg.Items, savedInvItem{Item: *it.D1(), Equipped: true})
+		}
+	}
+	for _, it := range g.state.GetPlayerStashInTown().Items() {
+		if it.D1() != nil {
+			sg.Stash = append(sg.Stash, *it.D1())
 		}
 	}
 	for name, snap := range g.levelSnapshots {
@@ -156,6 +163,9 @@ func (g *GameInstance) LoadGame() error {
 			eq.Equip(item)
 		}
 	}
+	for _, d := range sg.Stash {
+		g.state.GetPlayerStashInTown().Add(g.factory.NewD1Item(&d))
+	}
 	st := player.GetStats()
 	st.SetAttribute(stats.Gold, sg.Gold)
 	common.SyncHero(player)
@@ -187,6 +197,7 @@ func (g *GameInstance) LoadGame() error {
 		player.AddStatusEffect(common.StatusManaShield, -1)
 	}
 	g.actionBroker.Execute(common.NewUpdateFoVAction(common.AbstractCause("Load game"), player))
+	g.uiController.OnPlayerTurnTaken() // the transition drew the UI at the ladder, before the saved position
 	g.autosave = true
 	return nil
 }
@@ -224,11 +235,11 @@ func (g *GameInstance) StartMenuItems(afterDeath bool) []util.MenuItem {
 			}
 		}})
 	}
-	return append(items, util.MenuItem{MainText: "New game", Action: g.openNewGameMenu})
-}
-
-func (g *GameInstance) openNewGameMenu() {
-	g.uiController.OpenNewGameScreen(g.NewGame)
+	back := func() { g.uiController.OpenUncancelableMenu(g.StartMenuItems(false)) }
+	if afterDeath {
+		back = g.uiController.ShowGameOverMenu
+	}
+	return append(items, util.MenuItem{MainText: "New game", Action: func() { g.uiController.OpenNewGameScreen(g.NewGame, back) }})
 }
 
 // ShowStartMenu opens Continue/New game when a save exists; without one the default game autosaves right away.

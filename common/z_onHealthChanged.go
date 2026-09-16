@@ -28,12 +28,12 @@ func (d OnHealthChangedHook) After(action Action, context ActionContext) []Actio
 	changeResource := action.(*ChangeResourceAction)
 	actorFromAction := changeResource.GetActor()
 
-	if changeResource.GetResourceName() == stats.Health && changeResource.GetChangeAmount() < 0 {
-
+	state := context.GameState
+	if changeResource.GetResourceName() == stats.Health && changeResource.GetChangeAmount() < 0 && actorFromAction != state.GetPlayer() {
+		// a hurt player must not turn "hostile", or auto-attack (tab) targets them first at distance 0
 		actorFromAction.SetHostile()
 		actorFromAction.SetState(ActorStateAttacking)
 
-		state := context.GameState
 		if actorFromAction.IsVendor() {
 			for _, otherActor := range state.GetMap().Actors() {
 				if otherActor.IsVendor() {

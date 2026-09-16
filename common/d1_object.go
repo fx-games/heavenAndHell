@@ -18,7 +18,7 @@ type D1Object struct {
 	pos          geometry.Point
 	Disarmed     bool // the rogue disarmed its trap (TryDisarm), kept in saves
 	PreSpawnType int  // -1, or the monster type a sarcophagus/barrel raises when opened (d1.Object's Var2/Var4 slot,
-	                  // resolved to a type at placement time since the monster stays hidden off-map until then)
+	// resolved to a type at placement time since the monster stays hidden off-map until then)
 }
 
 // d1ObjectNames are short display names for the object kinds decision 12 keeps (icons.rec has no display names).
@@ -119,14 +119,14 @@ func (o *D1Object) TintColor() color.RGBA {
 	return defs.White
 }
 
-func (o *D1Object) MapPosition() geometry.Point       { return o.pos }
-func (o *D1Object) SetMapPosition(p geometry.Point)   { o.pos = p }
+func (o *D1Object) MapPosition() geometry.Point     { return o.pos }
+func (o *D1Object) SetMapPosition(p geometry.Point) { o.pos = p }
 func (o *D1Object) IsWalkable(*Actor) bool {
 	return o.broken() || o.O.Kind == d1.ObjMCIRCLE1 || o.O.Kind == d1.ObjMCIRCLE2
 }
-func (o *D1Object) IsTransparent() bool               { return true }
-func (o *D1Object) IsPassableForProjectile() bool     { return true }
-func (o *D1Object) Turn()                             {}
+func (o *D1Object) IsTransparent() bool           { return true }
+func (o *D1Object) IsPassableForProjectile() bool { return true }
+func (o *D1Object) Turn()                         {}
 func (o *D1Object) ActorWalkedOn(actor *Actor, _ func() bool) {
 	if actor == o.f.State.GetPlayer() && (o.O.Kind == d1.ObjMCIRCLE1 || o.O.Kind == d1.ObjMCIRCLE2) {
 		o.f.d1MagicCircle(o, actor)
@@ -394,6 +394,7 @@ func (f *Factory) d1Skeleton(mt int, pos geometry.Point, player *Actor) {
 	a.SetDrawPosition(cells[0].ToPointF())
 	m.AddActor(a, cells[0])
 	f.State.OnActorSpawned(a)
+	f.ActionBroker.Execute(NewUpdateFoVAction(AbstractCause("Skeleton raised"), player)) // tab targets it right away
 	d1Alert(a, player)
 }
 
@@ -425,8 +426,8 @@ type d1BlastAction struct {
 	animations []Animation
 }
 
-func (a *d1BlastAction) Execute(ActionContext) []Action   { return nil }
-func (a *d1BlastAction) GetAnimations() []Animation      { return a.animations }
+func (a *d1BlastAction) Execute(ActionContext) []Action { return nil }
+func (a *d1BlastAction) GetAnimations() []Animation     { return a.animations }
 
 // breakD1Barrel ports BreakBarrel: a normal barrel holds an item or a skeleton, an exploding one burns its 3×3 area
 // and sets off exploding barrels next to it.
@@ -610,7 +611,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 			}
 		}
 	case 9: // Fascinating
-		learn(1)
+		learn(d1.SplFirebolt)
 	case 10: // Cryptic
 		f.ActionBroker.Execute(NewSpellAction(player, d1.SplNova, 2*lt, player.MapPosition()))
 		mana.SetToMax()
@@ -649,7 +650,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 	case 15: // Holy
 		f.d1RandomTeleport(player)
 	case 16: // Sacred
-		learn(14)
+		learn(d1.SplChargedBolt)
 	case 17: // Spiritual
 		inv := player.GetInventory()
 		for n := inv.maxItemStacks - len(inv.StackedItems()); n > 0; n-- {
@@ -664,7 +665,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 	case 22: // Secluded
 		m.SetAllExplored()
 	case 23: // Ornate
-		learn(31)
+		learn(d1.SplHolyBolt)
 	case 24: // Glimmering
 		for _, it := range all {
 			if it.d1.Magical != 0 {

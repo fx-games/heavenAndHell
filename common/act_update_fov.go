@@ -1,6 +1,5 @@
 package common
 
-
 type UpdateFoVAction struct {
 	BaseAction
 	actor *Actor
@@ -94,4 +93,3 @@ func updatePlayerKnowledge(context ActionContext) {
 func (d *UpdateFoVAction) GetAnimations() []Animation {
 	return nil
 }
-

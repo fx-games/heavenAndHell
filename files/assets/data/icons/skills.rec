@@ -1,0 +1,145 @@
+%rec: default
+
+internal_name: spell.SPL_FIREBOLT
+name: Firebolt
+icon: 109
+
+internal_name: spell.SPL_HEAL
+name: Healing
+icon: 43
+
+internal_name: spell.SPL_LIGHTNING
+name: Lightning
+icon: 37
+
+internal_name: spell.SPL_FLASH
+name: Flash
+icon: 37
+
+internal_name: spell.SPL_IDENTIFY
+name: Identify
+icon: 43
+
+internal_name: spell.SPL_FIREWALL
+name: Fire Wall
+icon: 109
+
+internal_name: spell.SPL_TOWN
+name: Town Portal
+icon: 43
+
+internal_name: spell.SPL_STONE
+name: Stone Curse
+icon: 43
+
+internal_name: spell.SPL_INFRA
+name: Infravision
+icon: 43
+
+internal_name: spell.SPL_RNDTELEPORT
+name: Phasing
+icon: 43
+
+internal_name: spell.SPL_MANASHIELD
+name: Mana Shield
+icon: 43
+
+internal_name: spell.SPL_FIREBALL
+name: Fireball
+icon: 109
+
+internal_name: spell.SPL_GUARDIAN
+name: Guardian
+icon: 109
+
+internal_name: spell.SPL_CHAIN
+name: Chain Lightning
+icon: 37
+
+internal_name: spell.SPL_WAVE
+name: Flame Wave
+icon: 109
+
+internal_name: spell.SPL_DOOMSERP
+name: Doom Serpents
+icon: 37
+
+internal_name: spell.SPL_BLODRIT
+name: Blood Ritual
+icon: 43
+
+internal_name: spell.SPL_NOVA
+name: Nova
+icon: 43
+
+internal_name: spell.SPL_INVISIBIL
+name: Invisibility
+icon: 43
+
+internal_name: spell.SPL_FLAME
+name: Inferno
+icon: 109
+
+internal_name: spell.SPL_GOLEM
+name: Golem
+icon: 109
+
+internal_name: spell.SPL_BLODBOIL
+name: Blood Boil
+icon: 37
+
+internal_name: spell.SPL_TELEPORT
+name: Teleport
+icon: 43
+
+internal_name: spell.SPL_APOCA
+name: Apocalypse
+icon: 109
+
+internal_name: spell.SPL_ETHEREALIZE
+name: Etherealize
+icon: 43
+
+internal_name: spell.SPL_REPAIR
+name: Item Repair
+icon: 43
+
+internal_name: spell.SPL_RECHARGE
+name: Staff Recharge
+icon: 43
+
+internal_name: spell.SPL_DISARM
+name: Trap Disarm
+icon: 43
+
+internal_name: spell.SPL_ELEMENT
+name: Elemental
+icon: 109
+
+internal_name: spell.SPL_CBOLT
+name: Charged Bolt
+icon: 37
+
+internal_name: spell.SPL_HBOLT
+name: Holy Bolt
+icon: 43
+
+internal_name: spell.SPL_RESURRECT
+name: Resurrect
+icon: 43
+
+internal_name: spell.SPL_TELEKINESIS
+name: Telekinesis
+icon: 43
+
+internal_name: spell.SPL_HEALOTHER
+name: Heal Other
+icon: 43
+
+internal_name: spell.SPL_FLARE
+name: Blood Star
+icon: 43
+
+internal_name: spell.SPL_BONESPIRIT
+name: Bone Spirit
+icon: 43

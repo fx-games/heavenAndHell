@@ -805,57 +805,6 @@ func (g *Generator) PlainItem(idx int) *Item {
 	return it
 }
 
-// Properties describes an item's magical powers (a compact PrintItemPower).
-func (it *Item) Properties() []string {
-	var p []string
-	add := func(cond bool, format string, args ...any) {
-		if cond {
-			p = append(p, fmt.Sprintf(format, args...))
-		}
-	}
-	add(it.PLToHit != 0, "chance to hit: %+d%%", it.PLToHit)
-	add(it.PLDam != 0, "%+d%% damage", it.PLDam)
-	add(it.PLAC != 0, "%+d%% armor", it.PLAC)
-	if it.PLFR != 0 && it.PLFR == it.PLLR && it.PLLR == it.PLMR {
-		add(true, "Resist All: %+d%%", it.PLFR)
-	} else {
-		add(it.PLFR != 0, "Resist Fire: %+d%%", it.PLFR)
-		add(it.PLLR != 0, "Resist Lightning: %+d%%", it.PLLR)
-		add(it.PLMR != 0, "Resist Magic: %+d%%", it.PLMR)
-	}
-	add(it.PLStr != 0, "%+d to strength", it.PLStr)
-	add(it.PLMag != 0, "%+d to magic", it.PLMag)
-	add(it.PLDex != 0, "%+d to dexterity", it.PLDex)
-	add(it.PLVit != 0, "%+d to vitality", it.PLVit)
-	add(it.PLHP != 0, "Hit Points: %+d", it.PLHP)
-	add(it.PLMana != 0, "Mana: %+d", it.PLMana)
-	add(it.PLDamMod != 0, "adds %d points to damage", it.PLDamMod)
-	add(it.PLGetHit != 0, "%+d damage from enemies", it.PLGetHit)
-	add(it.PLLight != 0, "%+d%% light radius", it.PLLight*10)
-	add(it.SplLvlAdd != 0, "%+d to spell levels", it.SplLvlAdd)
-	add(it.PLEnAc != 0, "decreases target's armor")
-	add(it.Flags&ISplFireDam != 0, "fire hit damage: %d-%d", it.FMinDam, it.FMaxDam)
-	add(it.Flags&ISplLightDam != 0, "lightning hit damage: %d-%d", it.LMinDam, it.LMaxDam)
-	add(it.Flags&ISplFireArrows != 0, "fire arrows damage: %d-%d", it.FMinDam, it.FMaxDam)
-	add(it.Flags&ISplLightArrows != 0, "lightning arrows damage: %d-%d", it.LMinDam, it.LMaxDam)
-	for _, f := range []struct {
-		bit  uint32
-		text string
-	}{{ISplStealLife3, "steals 3% life"}, {ISplStealLife5, "steals 5% life"}, {ISplStealMana3, "steals 3% mana"},
-		{ISplStealMana5, "steals 5% mana"}, {ISplRndStealLife, "hit steals random life"}, {ISplDrainLife, "drains life"},
-		{ISplQuickAttack, "quick attack"}, {ISplFastAttack, "fast attack"}, {ISplFasterAttack, "faster attack"},
-		{ISplFastestAttack, "fastest attack"}, {ISplFastRecover, "fast hit recovery"}, {ISplFasterRecover, "faster hit recovery"},
-		{ISplFastestRecover, "fastest hit recovery"}, {ISplFastBlock, "fast block"}, {ISplKnockback, "knocks target back"},
-		{ISplThorns, "attacker takes 1-3 damage"}, {ISplNoMana, "user loses all mana"}, {ISplNoHealPlr, "you can't heal"},
-		{ISplAbsHalfTrap, "absorbs half of trap damage"}, {ISpl3xDamVsDemons, "+200% damage vs. demons"},
-		{ISplAllResZero, "all resistance equals 0"}, {ISplInfravision, "see with infravision"},
-		{ISplNoHealMon, "hit monster doesn't heal"}, {ISplRndArrowVel, "fires random speed arrows"}} {
-		add(it.Flags&f.bit != 0, "%s", f.text)
-	}
-	add(it.MaxDur == 255, "indestructible")
-	return p
-}
-
 // TypeItem ports CreateTypeItem's roll: an item of an ITYPE (and IMISC, "" = any) at item level 2×dlvl.
 func (g *Generator) TypeItem(dlvl, itype int, imisc string, onlygood bool) *Item {
 	idx := IdxGold

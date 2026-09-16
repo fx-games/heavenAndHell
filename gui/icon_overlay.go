@@ -14,6 +14,7 @@ type IconDataSource struct {
 	IsHighlighted func(UIElement) bool
 	GetElements   func() []UIElement
 	OnSelection   func(UIElement)
+	OnRightClick  func(UIElement) // optional
 }
 
 type IconOverlay struct {
@@ -36,6 +37,7 @@ type IconOverlay struct {
 	showCounter    bool
 
 	onSelection                 func(UIElement)
+	onRightClick                func(UIElement)
 	isActive                    bool
 	offsetFromBottomRightCorner geometry.Point
 	tileSize                    geometry.Point
@@ -52,6 +54,7 @@ func NewIconOverlay(uiController *UIController, offsetFromBottomRightCorner, til
 		isHighlighted:               dataSource.IsHighlighted,
 		getElements:                 dataSource.GetElements,
 		onSelection:                 dataSource.OnSelection,
+		onRightClick:                dataSource.OnRightClick,
 		selectedIndex:               -1,
 		offsetFromBottomRightCorner: offsetFromBottomRightCorner,
 		tileSize:                    tileSize,
@@ -110,6 +113,16 @@ func (o *IconOverlay) OnCommand(command CommandType) bool {
 }
 
 func (o *IconOverlay) OnMouseClicked(button ebiten.MouseButton, x int, y int) bool {
+	if button == ebiten.MouseButtonRight && o.onRightClick != nil {
+		point := geometry.Point{X: x, Y: y}
+		if !o.bounds.Contains(point) {
+			return false
+		}
+		if item, isValid := o.getSelectedItem(o.getItemIndexFromScreenPosition(point)); isValid {
+			o.onRightClick(item)
+		}
+		return true
+	}
 	if button == ebiten.MouseButtonRight {
 		if o.onCancel != nil {
 			o.onCancel()
@@ -155,7 +168,7 @@ func (o *IconOverlay) OnMouseMoved(x int, y int) (bool, Tooltip) {
 		},
 	})
 	//o.layoutLabel(o.uiController, o.infoLabel)
-	return true, NewTextTooltip(o.uiController, item.GetTooltipLines(o.uiController.ParseColorCodedText), point)
+	return true, NewElementTooltip(o.uiController, item, point)
 }
 func (o *IconOverlay) GetBounds() geometry.Rect {
 	return o.bounds
@@ -191,14 +204,14 @@ func (o *IconOverlay) Draw() {
 		if stack, ok := item.(common.InventoryStack); ok && len(stack) > 0 {
 			gameItem = stack[0]
 		}
-		if gameItem != nil && !gameItem.MeetsRequirements() {
-			renderer.DrawColoredRect(itemPosition, o.tileSizeInPixels, color.RGBA{R: 150, G: 0, B: 0, A: 180})
-		}
 		if o.isHighlighted(item) {
 			renderer.DrawColoredBorder(itemPosition, o.tileSizeInPixels, defs.DarkGreen, defs.DarkYellow)
 		} else {
 			renderer.DrawDefaultBorder(itemPosition, o.tileSizeInPixels)
 			//renderer.DrawOnScreenWithScale(itemPosition.X, itemPosition.Y, o.normalBackgroundIcon, o.scale)
+		}
+		if gameItem != nil && !gameItem.MeetsRequirements() {
+			renderer.DrawColoredRect(itemPosition, o.tileSizeInPixels, color.RGBA{R: 75, G: 0, B: 0, A: 255})
 		}
 		renderer.DrawOnScreenWithScale(itemPosition.X, itemPosition.Y, item.InventoryIcon(), o.scale)
 		if gameItem != nil {
@@ -207,8 +220,8 @@ func (o *IconOverlay) Draw() {
 				barTopLeft := geometry.Point{X: itemPosition.X, Y: itemPosition.Y + o.tileSizeInPixels.Y - barHeight}
 				barSize := geometry.Point{X: o.tileSizeInPixels.X, Y: barHeight}
 				fillSize := geometry.Point{X: int(float64(o.tileSizeInPixels.X) * percent), Y: barHeight}
-				renderer.DrawColoredRect(barTopLeft, barSize, color.RGBA{R: 0, G: 0, B: 0, A: 255})
-				renderer.DrawColoredRect(barTopLeft, fillSize, redToGreen(percent))
+				renderer.DrawColoredRect(barTopLeft, barSize, color.RGBA{R: 255, G: 0, B: 0, A: 255}) // same colors as the player's health bar
+				renderer.DrawColoredRect(barTopLeft, fillSize, color.RGBA{R: 0, G: 255, B: 0, A: 255})
 			}
 		}
 		if i == o.selectedIndex {

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"rpg/d1"
 	"rpg/defs"
 	"rpg/geometry"
@@ -68,6 +69,14 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 		c.c.animations = append(c.c.animations, NewHitAnimation(a.from, 0.4, defs.IconEffectLightning, 2))
 	}
 	a.animations = c.c.animations
+	switch {
+	case c.taken > 0:
+		ctx.Msg(fmt.Sprintf("The trap hits you for %d damage.", max(c.taken>>6, 1)))
+	case c.block:
+		ctx.Msg("You block the trap.")
+	default:
+		ctx.Msg("The trap misses you.")
+	}
 	if c.dealt <= 0 || !player.IsAlive() {
 		return nil
 	}

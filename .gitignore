@@ -17,3 +17,9 @@ savegame.json.tmp
 # Diablo 1's own music/sfx (bring your own copy, converted to .ogg with ffmpeg; see AGENTS.md), not redistributable.
 files/assets/diablo_music/
 files/assets/diablo_sfx/
+
+# Third-party sound pack and working scratch, kept on disk but out of the repo.
+files/assets/DASP/
+files/assets/maps/backups/
+jarulf162.pdf
+debug-tints.png

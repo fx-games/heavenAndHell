@@ -198,6 +198,18 @@ func HealAmount64(rng *rand.Rand, class, clvl, slvl int) int {
 	return l
 }
 
+// HealRange64 is HealAmount64's lowest and highest roll.
+func HealRange64(class, clvl, slvl int) (int, int) {
+	lo, hi := (1+clvl+slvl)<<6, (10+4*clvl+6*slvl)<<6
+	switch class {
+	case Warrior:
+		return lo * 2, hi * 2
+	case Rogue:
+		return lo + lo>>1, hi + hi>>1
+	}
+	return lo, hi
+}
+
 // Golem ports SpawnGolum's stats; maxMana in 1/64, HP returned in whole points.
 type Golem struct{ HP, AC, Hit, MinDam, MaxDam int }
 

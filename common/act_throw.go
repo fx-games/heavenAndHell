@@ -59,7 +59,7 @@ func (d *ThrowAction) Execute(context ActionContext) []Action {
 
 		doesHit := hitChance > 0 && hitChance >= rand.Float64()
 		if doesHit && throwInfo.Damage.NotZero() { // deal direct throw damage
-			damage := throwInfo.Damage.PyramidRandom()
+			damage := throwInfo.Damage.LinearRandom()
 			logAttack(context, d.attacker, d.defender, damage)
 			actions = append(actions, NewChangeResourceAction(NewActorCause(ActionNameThrow, d.attacker), d.defender, stats.Health, float64(-damage)))
 			d.damageAmount += damage
@@ -111,8 +111,6 @@ func (d *ThrowAction) GetTargetPos() geometry.Point {
 	return d.targetPos
 }
 
-
-
 func CalculateThrowHitChance(attacker, defender *Actor) float64 {
 	distance := geometry.Distance(defender.MapPosition(), attacker.MapPosition())
 
@@ -121,7 +119,6 @@ func CalculateThrowHitChance(attacker, defender *Actor) float64 {
 	// dex modifier only applies in full to skill based ranged weapons
 	// => in particular, crossbows don't get this penalty
 
-
 	maxRange := 10 + (2 * strModifier)
 	accuracyAtMaxRange := 0.5
 	accuracyAtMinRange := 0.9
@@ -129,11 +126,11 @@ func CalculateThrowHitChance(attacker, defender *Actor) float64 {
 	if distance > maxRange {
 		dropOffPerTile := 0.3
 		delta := distance - maxRange
-		return min(max(accuracyAtMaxRange - (delta * dropOffPerTile) + dexModifier, 0.0), 1.0)
+		return min(max(accuracyAtMaxRange-(delta*dropOffPerTile)+dexModifier, 0.0), 1.0)
 	}
 
 	if distance <= 1 {
-		return min(max(accuracyAtMinRange + dexModifier, 0.0), 1.0)
+		return min(max(accuracyAtMinRange+dexModifier, 0.0), 1.0)
 	}
 
 	// interpolate
@@ -141,7 +138,7 @@ func CalculateThrowHitChance(attacker, defender *Actor) float64 {
 	// min range == 2
 	normalizedMaxRange := maxRange - 1
 	percent := (distance - 1) / normalizedMaxRange
-	accuracy := min(max(accuracyAtMinRange + (percent * (accuracyAtMaxRange - accuracyAtMinRange)) + dexModifier, 0.0), 1.0)
+	accuracy := min(max(accuracyAtMinRange+(percent*(accuracyAtMaxRange-accuracyAtMinRange))+dexModifier, 0.0), 1.0)
 
 	return accuracy
 }

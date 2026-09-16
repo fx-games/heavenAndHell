@@ -22,7 +22,6 @@ type StatusEffect string
 const (
 	// binary
 	StatusInvisible StatusEffect = "invisible" // cannot be seen
-	StatusSeeInvisible StatusEffect = "see_invisible" // can see invisible things
 	StatusStunned   StatusEffect = "stunned"   // cannot act
 	StatusScared    StatusEffect = "scared"    // runs away
 	StatusSilenced  StatusEffect = "silenced"  // cannot cast spells
@@ -43,10 +42,11 @@ const (
 )
 
 type ParametrizedStatusEffect struct {
-	name StatusEffect
-	nextTurn func(a *Actor)
+	name      StatusEffect
+	nextTurn  func(a *Actor)
 	turnsLeft int
 }
+
 func NewParametrizedStatusEffect(name StatusEffect, nextTurn func(a *Actor), turnsLeft int) *ParametrizedStatusEffect {
 	return &ParametrizedStatusEffect{name: name, nextTurn: nextTurn, turnsLeft: turnsLeft}
 }
@@ -65,5 +65,3 @@ func (e *ParametrizedStatusEffect) TurnsLeft() int {
 func (e *ParametrizedStatusEffect) GetName() string {
 	return string(e.name)
 }
-
-

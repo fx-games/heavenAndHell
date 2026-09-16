@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"rpg/d1"
 	"rpg/stats"
 )
 
@@ -33,7 +32,7 @@ func (d *PickUpAction) Execute(context ActionContext) []Action {
 
 	gameMap.RemoveItem(item)
 
-	if item.d1 != nil && item.d1.Type == d1.ITypeGold {
+	if item.IsGold() {
 		actor.GetStats().IncrementBy(stats.Gold, item.d1.Value)
 		context.Msg(fmt.Sprintf("You pick up %d gold", item.d1.Value))
 		return nil

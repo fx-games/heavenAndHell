@@ -60,7 +60,7 @@ func (u *UIController) drawActors() {
 		if !visibleMapOnScreen.Contains(actor.MapPosition()) || !seen {
 			continue
 		}
-		if !actor.IsVisible() && !player.HasStatusEffect(common.StatusSeeInvisible) {
+		if !actor.IsVisible() {
 			continue
 		}
 
@@ -86,7 +86,7 @@ func (u *UIController) drawActors() {
 	}
 
 	for _, actor := range state.GetMap().Actors() {
-		if !visibleMapOnScreen.Contains(actor.MapPosition()) || !playerFieldOfView.Visible(actor.MapPosition()) {
+		if !actor.IsVisible() || !visibleMapOnScreen.Contains(actor.MapPosition()) || !playerFieldOfView.Visible(actor.MapPosition()) {
 			continue
 		}
 		if !actor.GetStats().GetResource(stats.Health).IsAtMax() {
@@ -162,28 +162,24 @@ const (
 func AsciiIconAndColor(t gridmap.Tile) (int32, color.RGBA) {
 	switch t.Special {
 	case gridmap.SpecialTileWater:
-		return int32('~'), defs.Blue
+		return '~', defs.Blue
 	case gridmap.SpecialTileForest:
-		return int32(';'), defs.Brown
+		return ';', defs.Brown
 	case gridmap.SpecialTileMountain:
-		return int32('^'), defs.LightGray
+		return '^', defs.LightGray
 	case gridmap.SpecialTileVoid:
-		return int32(' '), defs.Black
+		return ' ', defs.Black
 	case gridmap.SpecialTileStairsUp:
-		return int32('<'), defs.White
+		return '<', defs.White
 	case gridmap.SpecialTileStairsDown:
-		return int32('>'), defs.White
+		return '>', defs.White
 	case gridmap.SpecialTileDamaging:
-		return int32('~'), defs.Red
+		return '~', defs.Red
 	}
-
 	if t.IsWalkable {
 		return '.', defs.DarkGray
-	} else {
-		return '#', defs.OffWhite
 	}
-
-	//return '?', defs.White
+	return '#', defs.OffWhite
 }
 
 func CodePage437IconAndColor(t gridmap.Tile) (int32, color.RGBA) {

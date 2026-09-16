@@ -183,7 +183,10 @@ func (g *MapGenerator) placeD1Objects(m *gridmap.GridMap[*Actor, *Item, Object],
 				x, y := o.X, o.Y
 				door.onOpen = func() { g.factory.springD1WallTraps(m, x, y) }
 				door.D1 = o
-				door.rogue = func() bool { p := g.factory.State.GetPlayer(); return p != nil && p.hero != nil && p.hero.Class == d1.Rogue }
+				door.rogue = func() bool {
+					p := g.factory.State.GetPlayer()
+					return p != nil && p.hero != nil && p.hero.Class == d1.Rogue
+				}
 			}
 			continue
 		}

@@ -360,19 +360,19 @@ func (g *gen) placeQuestMonsters(setLevel int) {
 	}
 	sp := g.setPiece
 	if g.available(QLtBanner) {
-		g.setMapMonsters(loadDun(`Levels\L1Data\Banner1.DUN`), 2*sp.x, 2*sp.y)
+		g.setMapMonsters(g.loadDun("l1/banner1"), 2*sp.x, 2*sp.y)
 	}
 	if g.available(QBlood) {
-		g.setMapMonsters(loadDun(`Levels\L2Data\Blood2.DUN`), 2*sp.x, 2*sp.y)
+		g.setMapMonsters(g.loadDun("l2/blood2"), 2*sp.x, 2*sp.y)
 	}
 	if g.available(QBlind) {
-		g.setMapMonsters(loadDun(`Levels\L2Data\Blind2.DUN`), 2*sp.x, 2*sp.y)
+		g.setMapMonsters(g.loadDun("l2/blind2"), 2*sp.x, 2*sp.y)
 	}
 	if g.available(QAnvil) {
-		g.setMapMonsters(loadDun(`Levels\L3Data\Anvil.DUN`), 2*sp.x+2, 2*sp.y+2)
+		g.setMapMonsters(g.loadDun("l3/anvil"), 2*sp.x+2, 2*sp.y+2)
 	}
 	if g.available(QWarlord) {
-		g.setMapMonsters(loadDun(`Levels\L4Data\Warlord.DUN`), 2*sp.x, 2*sp.y)
+		g.setMapMonsters(g.loadDun("l4/warlord"), 2*sp.x, 2*sp.y)
 		g.addMonsterType(g.uniqueType(umtWarlord), placeScatter)
 	}
 	if g.available(QVeil) {
@@ -443,8 +443,8 @@ func (g *gen) placeGroup(mt, num, leaderf, leader int) {
 
 // loadDiabMonsts ports LoadDiabMonsts.
 func (g *gen) loadDiabMonsts() {
-	for i, name := range [4]string{`Levels\L4Data\diab1.DUN`, `Levels\L4Data\diab2a.DUN`, `Levels\L4Data\diab3a.DUN`, `Levels\L4Data\diab4a.DUN`} {
-		g.setMapMonsters(loadDun(name), 2*g.l4.quads[i].x, 2*g.l4.quads[i].y)
+	for i, name := range [4]string{"l4/diab1", "l4/diab2a", "l4/diab3a", "l4/diab4a"} {
+		g.setMapMonsters(g.loadDun(name), 2*g.l4.quads[i].x, 2*g.l4.quads[i].y)
 	}
 }
 

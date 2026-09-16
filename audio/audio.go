@@ -133,6 +133,7 @@ type Sound struct {
 func (s *Sound) Unload() {
 	s.Samples = make([][]byte, len(s.Filenames))
 }
+
 // IsLoaded reports whether at least one of the cue's files decoded; the others may be missing.
 func (s *Sound) IsLoaded() bool {
 	return slices.ContainsFunc(s.Samples, func(b []byte) bool { return len(b) > 0 })
@@ -150,6 +151,7 @@ func (s *Sound) Load(ap *Player) bool {
 	}
 	return true
 }
+
 // Next picks the sample to play: a random loaded one for randomized cues, skipping files that failed to load.
 func (s *Sound) Next() []byte {
 	if s.IsRandomized {

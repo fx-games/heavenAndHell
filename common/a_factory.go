@@ -22,6 +22,7 @@ type Factory struct {
 	Generator      *d1.Generator
 	Audio          *audio.Player
 	speech         audio.Handle // the D1 speech playing, stopped by the next (sfx_STREAM)
+	identifyTarget *Item        // the item picked for the Identify cast in progress
 }
 
 // playD1Sound ports PlaySFX for a D1 sound id (d1.SfxFiles). Speech replaces speech still playing, like D1's
@@ -46,6 +47,12 @@ func (g *Factory) D1() *d1.Generator { return g.Generator }
 func (g *Factory) NewSign(inscription []string) *BumpObject {
 	return NewBumpObject("a sign", defs.IconSign, func(actor *Actor, startAnimating func() bool) {
 		g.UI().OpenTextWindow(util.ToLabelText(inscription))
+	})
+}
+
+func (g *Factory) NewStash() *BumpObject {
+	return NewBumpObject("your stash", defs.Icon("prop.OBJ_CHEST1"), func(actor *Actor, startAnimating func() bool) {
+		g.UI().OpenPlayerStashInTown()
 	})
 }
 

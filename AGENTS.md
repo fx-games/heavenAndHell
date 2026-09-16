@@ -91,9 +91,30 @@ Sound effects are **events**, not folders: `files/assets/data/sounds.rec` has on
   only used through the files `sounds.rec` points at.
 - `voice/` — voice lines (`RegisterVoices`), doesn't exist yet; folder absence is fine, same as `ambience/`.
 
+## ASCII mode (`console/`, `textui/`)
+
+`go run -tags development . ascii` plays the game in the terminal, with the same features as the tile UI.
+
+- `textui/` is the terminal UI framework, taken from contractor's `ui_console` (`~/Projects/contractor`) and built on
+  `github.com/memmaker/go` (`cview`, `textiles`, `fxtools`): panels and focus handling, menus and dialogs, the text
+  inventory, key maps, map drawing and targeting. It knows nothing about this game — keep game logic and graphics out.
+- `console/` implements `common.UserInterface` on top of it: game glyphs and colors, commands, shops, stash, inventory.
+- Data in `files/assets/data/ascii/`: `keymap.txt` (key -> command, two layers: `% main` and `% targeting`),
+  `ui.rec` (theme colors by palette name and border runes) and `palette.rec` (contractor's palette).
+  A new command = one line in `keymap.txt` + one entry in `setupCommands` (`console/commands.go`).
+- Menu contents and shop transactions both UIs share live in `common/ui_shared.go`, so the two can't drift apart.
+- Keys and mouse buttons match the tile UI (`gui/input.go`), including Shift to attack what isn't hostile, the arrow
+  keys scrolling the map, `x` centering it and right clicking an inventory line to drop it. No terminal equivalent:
+  `m`/`n` zoom, `F8` rendering mode, `F11` fullscreen, `F12` screen flash. Terminal-only additions: `v` looks around
+  with the keyboard (the tile UI hovers with the mouse), `?` examines an item in a shop, and in the inventory
+  `<CTRL>`+letter examines, `<SHIFT>`+letter drops.
+- Not ported: contractor's own animator (this game's animations come from `common`, drawn through an
+  animation canvas in `console/game_map.go`) and its rec-file themes beyond `ui.rec`.
+
 ## Running
 
 - Game: `go run -tags development .` (assets from `files/`, `config.rec` from the repo root)
+- ASCII mode: `go run -tags development . ascii` (needs a real terminal, F1 lists the keys)
 - D1 unit tests: `go test ./d1`
 - Headless smoke test: `go run -tags development . playthrough` (must print `PLAYTHROUGH OK`)
 - Print a generated D1 level: `go run . dun_gen <dungeon level> [seed]`

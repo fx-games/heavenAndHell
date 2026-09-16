@@ -235,8 +235,17 @@ func (h *Hero) MeleeHitChance(s Sheet, monAC int) int {
 // MeleeDamage ports PlrHitMonst's damage roll (whole points). monClass is MC_UNDEAD/MC_DEMON/MC_ANIMAL.
 func (h *Hero) MeleeDamage(rng *rand.Rand, s Sheet, monClass string) int {
 	d := s.MinDam + rng.Intn(max(s.MaxDam-s.MinDam+1, 1))
+	return h.meleeDamageOf(s, d, h.Class == Warrior && rng.Intn(100) < h.Level, monClass)
+}
+
+// MeleeDamageRange is MeleeDamage's lowest roll without and highest roll with the warrior's double damage.
+func (h *Hero) MeleeDamageRange(s Sheet, monClass string) (lo, hi int) {
+	return h.meleeDamageOf(s, s.MinDam, false, monClass), h.meleeDamageOf(s, s.MaxDam, h.Class == Warrior && h.Level > 0, monClass)
+}
+
+func (h *Hero) meleeDamageOf(s Sheet, d int, double bool, monClass string) int {
 	dam := s.BonusDamMod + s.DamageMod + d*s.BonusDam/100 + d
-	if h.Class == Warrior && rng.Intn(100) < h.Level {
+	if double {
 		dam *= 2
 	}
 	switch {
@@ -294,7 +303,10 @@ func (h *Hero) ArrowDamage(rng *rand.Rand, s Sheet) int {
 // ArrowBlastDamage is MonsterMHit's damage for any arrow missile (mType 0), also the burst of fire and lightning
 // arrows: the roll plus the damage bonuses.
 func (h *Hero) ArrowBlastDamage(rng *rand.Rand, s Sheet, mind, maxd int) int {
-	dam := mind + rng.Intn(max(maxd-mind+1, 1))
+	return h.arrowDamageOf(s, mind+rng.Intn(max(maxd-mind+1, 1)))
+}
+
+func (h *Hero) arrowDamageOf(s Sheet, dam int) int {
 	dam += s.BonusDamMod + dam*s.BonusDam/100
 	if h.Class == Rogue {
 		return dam + s.DamageMod
@@ -312,6 +324,11 @@ func dlvlHitFloor(hper, dlvl int) int {
 		return max(hper, 30)
 	}
 	return hper
+}
+
+// ArrowDamageRange is ArrowBlastDamage's lowest and highest roll.
+func (h *Hero) ArrowDamageRange(s Sheet, mind, maxd int) (lo, hi int) {
+	return h.arrowDamageOf(s, mind), h.arrowDamageOf(s, maxd)
 }
 
 // MonsterMeleeHitChance ports M_TryH2HHit's to-hit against the hero.

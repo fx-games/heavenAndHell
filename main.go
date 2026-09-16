@@ -21,7 +21,6 @@ import (
 	"rpg/util"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func main() {
@@ -248,20 +247,10 @@ func runGameWithConsole(theGame *game.GameInstance, context common.UIContext) {
 	theGame.SetConsoleMode(true)
 	con := console.NewConsole(context)
 	theGame.SetAndInitUserInterface(con)
-	theGame.ShowStartMenu()
 
-	terminationCode := 0
-	loopConfig := util.LoopConfig{
-		TargetFPS:        30,
-		IdleThreshold:    5,
-		CurrentTimeFunc:  func() float64 { return float64(time.Now().UnixNano()) * 1e-9 },
-		ProcessInputFunc: con.HandleInput,
-		UpdateFunc:       con.Update,
-		RenderFunc:       con.Draw,
+	if err := con.Run(theGame.ShowStartMenu); err != nil {
+		log.Fatal(err)
 	}
-
-	loop := util.CreateLoop(loopConfig, &terminationCode)
-	loop()
 	theGame.SaveGame() // decision 11: autosave on quit
 
 }
@@ -292,6 +281,9 @@ func runGameWithEbiten(theGame *game.GameInstance, context common.UIContext) {
 
 	ebiten.SetWindowTitle("Lux Aeterna")
 	ebiten.SetWindowSize(screenSize.X, screenSize.Y)
+	if startInfos.UserConfiguration.Fullscreen {
+		uiController.SetFullscreen(true)
+	}
 	ebiten.SetScreenClearedEveryFrame(true)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetWindowSizeLimits(640, 480, -1, -1)

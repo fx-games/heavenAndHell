@@ -302,7 +302,14 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		}
 		c.animations = append(c.animations, NewHitAnimation(o, 0.4, defs.IconEffectLightning, 2))
 	case d1.SplIdentify:
-		return f.openD1IdentifyMenu(c.caster)
+		item := f.identifyTarget
+		if item == nil {
+			return false
+		}
+		item.d1.Identified = true
+		item.RefreshD1()
+		SyncHero(c.caster)
+		f.Msg(fmt.Sprintf("It is %s.", item.Name()))
 	case d1.SplFireWall:
 		start, ok := c.freeNear(target, func(p geometry.Point) bool {
 			return p != o && c.m.IsTileWalkable(p) && !c.m.IsObjectAt(p) && c.lineClear(o, p)
@@ -570,28 +577,26 @@ func (f *Factory) d1RandomTeleport(player *Actor) {
 	}
 }
 
-func (f *Factory) openD1IdentifyMenu(player *Actor) bool {
-	var items []util.MenuItem
+// pickD1IdentifyTarget lists the unidentified items before Identify costs anything; picking one runs cast with it
+// as the target, so cancelling the list keeps the scroll or mana (D1's cursor mode can be cancelled too).
+func (f *Factory) pickD1IdentifyTarget(player *Actor, cast func()) {
+	var items []*Item
 	for _, it := range d1HeroItems(player) {
-		if it.d1 == nil || it.d1.Magical == 0 || it.d1.Identified {
-			continue
+		if it.d1 != nil && it.d1.Magical != 0 && !it.d1.Identified {
+			items = append(items, it)
 		}
-		item := it
-		items = append(items, util.MenuItem{MainText: item.Name(), Action: func() {
-			item.d1.Identified = true
-			item.RefreshD1()
-			SyncHero(player)
-			f.Msg(fmt.Sprintf("It is %s.", item.Name()))
-		}})
 	}
 	if len(items) == 0 {
 		f.Msg("You have nothing to identify.")
-		return false
+		return
 	}
 	if f.UI != nil {
-		f.UI().OpenMenu(items)
+		openD1ItemList(f.UI(), player, items, func(item *Item) {
+			f.identifyTarget = item
+			cast()
+			f.identifyTarget = nil
+		})
 	}
-	return true
 }
 
 // d1Telekinesis ports the telekinesis cursor: operate an object, fetch an item, or push a monster away.
@@ -696,9 +701,9 @@ type d1PortalObject struct {
 	target gridmap.Transition
 }
 
-func (o *d1PortalObject) Name() string                        { return "Town Portal" }
-func (o *d1PortalObject) MapPosition() geometry.Point         { return o.pos }
-func (o *d1PortalObject) SetMapPosition(p geometry.Point)     { o.pos = p }
+func (o *d1PortalObject) Name() string                    { return "Town Portal" }
+func (o *d1PortalObject) MapPosition() geometry.Point     { return o.pos }
+func (o *d1PortalObject) SetMapPosition(p geometry.Point) { o.pos = p }
 func (o *d1PortalObject) Icon(tick uint64) int32 {
 	return []int32{defs.Icon("prop.portal"), defs.Icon("prop.portal.2")}[util.GetLoopingFrameFromTick(tick, 0.3, 2)]
 }
@@ -729,7 +734,8 @@ func (f *Factory) openD1Portal(player *Actor) bool {
 	return true
 }
 
-// PlaceD1Portal puts the town portal's two ends on a map when it has one: at the dungeon spot, or near the town spawn.
+// PlaceD1Portal puts the town portal's two ends on a map when it has one: at the dungeon spot, or at the town's
+// "portal" Location in maps.ldtk.
 func PlaceD1Portal(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 	p := s.d1Portal
 	if p == nil {
@@ -739,18 +745,9 @@ func PlaceD1Portal(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 	var target gridmap.Transition
 	switch {
 	case m.GetName() == p.Map:
-		// the town end is placed on arrival, after the transition looked up its target, so aim at the spawn next to it
-		pos, target = geometry.Point{X: p.X, Y: p.Y}, gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"}
+		pos, target = geometry.Point{X: p.X, Y: p.Y}, gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: d1PortalLocation}
 	case m.GetName() == string(defs.LevelNameTown):
-		spawn := m.GetNamedLocation("spawn")
-		cells := freeCellsNear(m, spawn, 3, func(q geometry.Point) bool {
-			_, isTransition := m.GetTransitionAt(q)
-			return m.CanPlaceActorHere(q) && !m.IsObjectAt(q) && !isTransition
-		})
-		if len(cells) < 3 {
-			return
-		}
-		pos, target = cells[2], gridmap.Transition{TargetMap: p.Map, TargetLocation: d1PortalLocation}
+		pos, target = m.GetNamedLocation(d1PortalLocation), gridmap.Transition{TargetMap: p.Map, TargetLocation: d1PortalLocation}
 	default:
 		return
 	}
@@ -808,10 +805,10 @@ func (f *Factory) D1SpellSkills(player *Actor) ([]*TargetedAction, []*Untargeted
 				&HitEffect{Activate: func(caster *Actor, target geometry.Point, _ []geometry.Point) { f.CastD1FromMemory(caster, sp, target) },
 					Description: []util.LabelText{util.LabelTextFromString(sd.Name)}},
 				d1SpellTargeting(f, sp))
-			action.SetIcon(d1SpellIcons[sd.Type])
+			action.SetIcon(defs.Icon("spell." + sd.ID))
 			targeted = append(targeted, action)
 		} else {
-			action := NewUntargetedAction(name, d1SpellIcons[sd.Type])
+			action := NewUntargetedAction(name, defs.Icon("spell."+sd.ID))
 			action.SetEffect(&UntargetedEffect{Effect: func(caster *Actor, _ EffectSource) { f.CastD1FromMemory(caster, sp, caster.MapPosition()) },
 				Description: []util.LabelText{util.LabelTextFromString(sd.Name)}})
 			untargeted = append(untargeted, action)
@@ -835,7 +832,7 @@ func d1SpellTargeting(f *Factory, spell int) *TargetRulesProvider {
 				isOnMap:  m.Contains,
 				nearestHostileActor: func() geometry.Point {
 					if a := m.GetNearestActor(attacker.MapPosition(), func(a *Actor) bool {
-						return a.IsHostileTo(attacker) && attacker.CanSee(a.MapPosition()) && !a.IsVendor()
+						return a.IsVisible() && a.IsHostileTo(attacker) && attacker.CanSee(a.MapPosition()) && !a.IsVendor()
 					}); a != nil {
 						return a.MapPosition()
 					}
@@ -868,6 +865,10 @@ func (f *Factory) CastD1FromMemory(caster *Actor, spell int, target geometry.Poi
 		f.Msg("Not enough mana.")
 		return
 	}
+	if spell == d1.SplIdentify && f.identifyTarget == nil {
+		f.pickD1IdentifyTarget(caster, func() { f.CastD1FromMemory(caster, spell, target) })
+		return
+	}
 	if f.castD1(caster, spell, h.SpellLevel(s, spell), target) {
 		mana.Decrease(cost >> 6)
 		h.ManaBase -= cost
@@ -888,7 +889,8 @@ func (f *Factory) castD1(caster *Actor, spell, slvl int, target geometry.Point) 
 func (f *Factory) d1SpellItemAction(item *Item) {
 	it := item.d1
 	sd := f.Generator.D.Spells[it.Spell]
-	use := func(caster *Actor, target geometry.Point) {
+	var use func(caster *Actor, target geometry.Point)
+	use = func(caster *Actor, target geometry.Point) {
 		h := caster.hero
 		if h == nil {
 			return
@@ -900,9 +902,25 @@ func (f *Factory) d1SpellItemAction(item *Item) {
 				inv.Add(item)
 			}
 		}
+		if it.MaxDur > 0 && it.Durability == 0 { // broken items do nothing until repaired, like in Hero.Sheet
+			f.Msg(fmt.Sprintf("Your %s is broken.", item.Name()))
+			refund()
+			return
+		}
 		if s.Mag < it.MinMag {
 			f.Msg(fmt.Sprintf("You need %d magic to use that.", it.MinMag))
 			refund()
+			return
+		}
+		if it.Spell == d1.SplIdentify && f.identifyTarget == nil {
+			refund()
+			f.pickD1IdentifyTarget(caster, func() {
+				item.UseCharge()
+				if !item.HasChargesLeft() && item.SelfDestructs() {
+					caster.GetInventory().Remove(item)
+				}
+				use(caster, target)
+			})
 			return
 		}
 		if !f.castD1(caster, it.Spell, h.SpellLevel(s, it.Spell), target) {

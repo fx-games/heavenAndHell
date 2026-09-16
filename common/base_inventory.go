@@ -126,6 +126,15 @@ func (i *Inventory) IsEmpty() bool {
 	return len(i.items) == 0
 }
 
+func (i *Inventory) CanStack(item *Item) bool {
+	for _, invItem := range i.items {
+		if invItem.CanStackWith(item) {
+			return true
+		}
+	}
+	return false
+}
+
 func (i *Inventory) IsFull() bool {
 	return len(i.StackedItems()) == i.maxItemStacks
 }
@@ -326,6 +335,14 @@ func NewTextualStack(stack InventoryStack, letter rune, selected func(invItemKey
 			selected(letter)
 		},
 	}
+}
+
+// TintColor marks items whose requirements aren't met in red.
+func (t *TextualStack) TintColor() color.RGBA {
+	if !t.InventoryStack[0].MeetsRequirements() {
+		return defs.Red
+	}
+	return t.InventoryStack.TintColor()
 }
 
 func (t *TextualStack) Name() string {
