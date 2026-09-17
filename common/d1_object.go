@@ -425,13 +425,25 @@ func (f *Factory) d1Skeleton(mt int, pos geometry.Point, player *Actor) {
 
 // SpawnRandomD1Unique places a random unique monster next to pos, for the "Spawn random unique" debug command.
 // nil if there's nowhere free to put it.
+// d1NeverFightsWithoutQuest are UniqueMonsterData.AI values whose brain (game/ai_d1.go's think()) only ever
+// fights after its own quest has set it up first: AI_LACHDAN never fights at all (by design, ported from
+// MAI_Lachdanan), and AI_SNOTSPIL/AI_LAZHELP gate their attack on quest variables (D1TalkerTurn) that a debug
+// spawn never advances, so they'd stand there forever. Excluded from SpawnRandomD1Unique for that reason.
+var d1NeverFightsWithoutQuest = map[string]bool{"AI_LACHDAN": true, "AI_SNOTSPIL": true, "AI_LAZHELP": true}
+
 func (f *Factory) SpawnRandomD1Unique(pos geometry.Point) *Actor {
 	m := f.State.GetMap()
 	cells := freeCellsNear(m, pos, 2, m.CanPlaceActorHere)
 	if len(cells) == 0 {
 		return nil
 	}
-	a := f.NewD1UniqueMonster(d1Rng.Intn(len(f.Generator.D.UniqueMonsters)))
+	var pickable []int
+	for i, um := range f.Generator.D.UniqueMonsters {
+		if !d1NeverFightsWithoutQuest[um.AI] {
+			pickable = append(pickable, i)
+		}
+	}
+	a := f.NewD1UniqueMonster(pickable[d1Rng.Intn(len(pickable))])
 	a.d1Monster.SpawnIndex = -1 // saved in LevelSnapshot.Spawned
 	a.SetDrawPosition(cells[0].ToPointF())
 	m.AddActor(a, cells[0])

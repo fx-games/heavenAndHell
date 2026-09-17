@@ -49,18 +49,20 @@ func (u *UIController) Draw(screen *ebiten.Image) {
 	}
 }
 
-// uniqueGlowOffsets are drawn behind a unique monster's sprite, one tinted-gold copy per direction, to fake an
-// outline glow without a shader.
-var uniqueGlowOffsets = []geometry.Point{{X: -1, Y: 0}, {X: 1, Y: 0}, {X: 0, Y: -1}, {X: 0, Y: 1}}
-
-// drawUniqueGlow makes a unique monster stand out: a soft gold halo, pulsing with worldTicks, drawn a pixel out
-// in every direction behind its normal sprite.
+// drawUniqueGlow makes a unique monster hard to miss: a saturated gold silhouette, pulsing between 1.15x and
+// 1.7x its normal size, drawn centered behind its normal sprite so it visibly bleeds out around every edge
+// (a single offset-by-a-pixel copy, tried first, was too subtle to notice against most tiles).
 func (u *UIController) drawUniqueGlow(screenX, screenY float64, atlas renderer.TextureAtlas, icon int32, flippedX bool) {
-	pulse := 0.5 + 0.5*math.Sin(float64(u.worldTicks)*0.05)
-	glow := color.RGBA{R: 255, G: 215, B: 60, A: uint8(90 + 90*pulse)}
-	for _, o := range uniqueGlowOffsets {
-		u.tileRenderer.DrawDefaultScaleTileWithFlip(screenX+float64(o.X), screenY+float64(o.Y), atlas, icon, glow, flippedX)
-	}
+	pulse := 0.5 + 0.5*math.Sin(float64(u.worldTicks)*0.08)
+	growth := 1.15 + 0.55*pulse // 1.15x .. 1.7x
+	glow := color.RGBA{R: 255, G: 205, B: 40, A: uint8(160 + 95*pulse)}
+
+	tileSize := u.worldTexture.GetTileSize()
+	tileScale := u.GetTileScaleFactor()
+	normalW, normalH := float64(tileSize.X)*tileScale, float64(tileSize.Y)*tileScale
+	offsetX, offsetY := normalW*(growth-1)/2, normalH*(growth-1)/2
+
+	u.tileRenderer.DrawScaledTileWithFlip(screenX-offsetX, screenY-offsetY, atlas, icon, geometry.PointF{X: growth, Y: growth}, glow, flippedX)
 }
 
 func (u *UIController) drawActors() {
