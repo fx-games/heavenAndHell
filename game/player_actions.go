@@ -820,6 +820,19 @@ func (a *Actions) RestUntilHealed() {
 func (a *Actions) SetQueueAfterTurn(afterTurn func(call func())) {
 	a.queueAfterTurn = afterTurn
 }
+// ShowObjectInfoAt opens the description popup for a shrine at mapPos, analogous to ShowActorInfoAt. No-op for
+// anything that isn't a previewable shrine.
+func (a *Actions) ShowObjectInfoAt(mapPos geometry.Point) {
+	obj, ok := a.state.GetMap().ObjectAt(mapPos).(*common.D1Object)
+	if !ok {
+		return
+	}
+	lines, ok := common.D1ShrineInfoText(obj)
+	if !ok {
+		return
+	}
+	a.ui().OpenTextWindow(util.ToLabelText(lines))
+}
 func (a *Actions) ShowActorInfoAt(mapPos geometry.Point) {
 	state := a.state
 	player := state.GetPlayer()

@@ -529,6 +529,14 @@ func (g *GameInstance) d1DebugItems() []util.MenuItem {
 		{MainText: "Toggle Hellfire Cowquest", Action: func() { g.toggleHellfireOption(common.FlagCowQuest) }},
 		{MainText: "Toggle Hellfire Theoquest", Action: func() { g.toggleHellfireOption(common.FlagTheoQuest) }},
 		{MainText: "Complete quest", Action: func() { g.uiController.OpenMenu(quests) }},
+		{MainText: "Spawn random unique", Action: func() {
+			player := g.state.GetPlayer()
+			if a := g.factory.SpawnRandomD1Unique(player.MapPosition()); a != nil {
+				g.uiController.ShowLogMessage(fmt.Sprintf("Spawned %s", a.Name()))
+			} else {
+				g.uiController.ShowLogMessage("No free space to spawn it")
+			}
+		}},
 	}
 }
 

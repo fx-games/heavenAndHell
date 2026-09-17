@@ -46,6 +46,7 @@ func (f *Factory) d1RuneAction(item *Item, it *d1.Item) {
 		}, Description: []util.LabelText{util.LabelTextFromString(fmt.Sprintf("A trap that goes off as %s", rune.name))}},
 		d1SpellTargeting(f, rune.spell))
 	item.SetTargetedAction(action)
+	item.SetCharges(1) // single use, like scrolls/potions/books; the Activate closure above removes it from the pack itself
 }
 
 // spawnD1Rune lays a rune: every turn it checks its cell and goes off under the first monster or hero on it.

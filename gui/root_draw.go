@@ -3,6 +3,7 @@ package gui
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
+	"math"
 	"rpg/common"
 	"rpg/defs"
 	"rpg/geometry"
@@ -33,6 +34,10 @@ func (u *UIController) Draw(screen *ebiten.Image) {
 	u.drawUI()
 
 	if u.message.ticksLeft > 0 {
+		const pad = 3.0
+		w, h := u.tileRenderer.MeasureString(u.message.GetText())
+		u.tileRenderer.DrawColoredRect(geometry.Point{X: 0, Y: int(u.message.GetHeight() - h - pad)},
+			geometry.Point{X: int(w + 2*pad), Y: int(h + 2*pad)}, color.RGBA{A: 160})
 
 		//u.tileRenderer.DrawTTFOnScreen(1, height+2, common.RemoveColorCodes(u.message.GetText()), color.Black)
 		u.tileRenderer.DrawTTFOnScreenWithColorCodes(1, u.message.GetHeight(), u.message.GetColorcodedText())
@@ -41,6 +46,20 @@ func (u *UIController) Draw(screen *ebiten.Image) {
 
 	if u.currentTooltip != nil && !u.currentTooltip.IsNull() && u.ticksUntilTooltipAppears == 0 {
 		u.currentTooltip.Draw()
+	}
+}
+
+// uniqueGlowOffsets are drawn behind a unique monster's sprite, one tinted-gold copy per direction, to fake an
+// outline glow without a shader.
+var uniqueGlowOffsets = []geometry.Point{{X: -1, Y: 0}, {X: 1, Y: 0}, {X: 0, Y: -1}, {X: 0, Y: 1}}
+
+// drawUniqueGlow makes a unique monster stand out: a soft gold halo, pulsing with worldTicks, drawn a pixel out
+// in every direction behind its normal sprite.
+func (u *UIController) drawUniqueGlow(screenX, screenY float64, atlas renderer.TextureAtlas, icon int32, flippedX bool) {
+	pulse := 0.5 + 0.5*math.Sin(float64(u.worldTicks)*0.05)
+	glow := color.RGBA{R: 255, G: 215, B: 60, A: uint8(90 + 90*pulse)}
+	for _, o := range uniqueGlowOffsets {
+		u.tileRenderer.DrawDefaultScaleTileWithFlip(screenX+float64(o.X), screenY+float64(o.Y), atlas, icon, glow, flippedX)
 	}
 }
 
@@ -74,6 +93,12 @@ func (u *UIController) drawActors() {
 		if actor.IsHurt() {
 			percentage := actor.GetHurtTicksAsPercentage() // goes from 1.0 to 0.0
 			drawColor = util.LerpColor(defs.Red, actorColor, percentage)
+		}
+		if actor.IsUnique() {
+			screenPos := u.mapRenderer.MapFloatToScreen(actor.DrawPosition())
+			flippedX := actor.FlipX() && u.configuration.FlipActorsHorizontally
+			icon := u.getActorIcon(actor, u.worldTicks)
+			u.drawUniqueGlow(float64(screenPos.X), float64(screenPos.Y), actorAtlas, icon, flippedX)
 		}
 		if u.configuration.ActorBobbingEnabled {
 			u.drawActorWithBobbingAnimation(actor, actorAtlas, drawColor)

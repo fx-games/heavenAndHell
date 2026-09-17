@@ -98,21 +98,29 @@ var d1VariantTints = []color.RGBA{{255, 255, 255, 255}, {160, 200, 255, 255}, {2
 
 // NewD1Monster ports InitMonster for monster type mt.
 func (g *Factory) NewD1Monster(mt int) *Actor {
+	return g.newD1Monster(mt, nil)
+}
+
+// newD1Monster is NewD1Monster's shared core. Given um, it builds the actor as that unique right away, with the
+// unique's own "unique.<name>" icon and untinted color from the start, instead of building a plain monster and
+// overriding its icon/color/name afterward.
+func (g *Factory) newD1Monster(mt int, um *d1.UniqueMonsterData) *Actor {
 	d := g.Generator.D
 	m := &d.Monsters[mt]
-	variant := 0
-	for i := 0; i < mt; i++ {
-		if d.Monsters[i].Family == m.Family {
-			variant++
-		}
+	name, icon, tint := m.Name, defs.IconID("monster", m.ID), g.d1VariantTint(mt, m)
+	if um != nil {
+		name, icon, tint = um.Name, defs.IconID("unique", um.Name), defs.White
 	}
-	a := NewActor(defs.Icon(defs.IconID("monster", m.ID)))
-	a.SetName(m.Name)
+	a := NewActor(defs.Icon(icon))
+	a.SetName(name)
 	a.SetInternalName(m.ID)
 	a.SetHostile()
-	a.SetAsciiIcon(rune(strings.ToLower(m.Name)[0]))
-	a.SetColor(d1VariantTints[variant%len(d1VariantTints)])
-	a.d1Monster = &D1Monster{Type: mt, Data: m, Level: m.Level, Exp: m.Exp, Int: m.Int, Hit: m.Hit, MinDam: m.MinDam,
+	a.SetAsciiIcon(rune(strings.ToLower(name)[0]))
+	a.SetColor(tint)
+	if um != nil {
+		a.SetUnique()
+	}
+	a.d1Monster = &D1Monster{Type: mt, Data: m, Unique: um, Level: m.Level, Exp: m.Exp, Int: m.Int, Hit: m.Hit, MinDam: m.MinDam,
 		MaxDam: m.MaxDam, Hit2: m.Hit2, MinDam2: m.MinDam2, MaxDam2: m.MaxDam2, AC: m.AC, MagicRes: m.MagicRes, AI: m.AI, D1MonsterState: D1MonsterState{Goal: 1}}
 	st := a.GetStats()
 	st.SetAttribute(stats.MaxHealth, g.Generator.MonsterHP(m))
@@ -128,20 +136,23 @@ func (g *Factory) NewD1Monster(mt int) *Actor {
 	return a
 }
 
-// setD1Unique marks a as unique um, drawn untinted with its own "unique.<name>" icon from icons/actors.rec.
-func setD1Unique(a *Actor, um *d1.UniqueMonsterData) {
-	a.SetName(um.Name)
-	a.SetUnique()
-	a.SetColor(defs.White)
-	a.SetIcon(defs.Icon(defs.IconID("unique", um.Name)))
+// d1VariantTint is InitMonster's tint pick for monster type mt: the Nth color in d1VariantTints, N being how
+// many earlier types share its graphics family.
+func (g *Factory) d1VariantTint(mt int, m *d1.MonsterData) color.RGBA {
+	variant := 0
+	for i := 0; i < mt; i++ {
+		if g.Generator.D.Monsters[i].Family == m.Family {
+			variant++
+		}
+	}
+	return d1VariantTints[variant%len(d1VariantTints)]
 }
 
 // NewD1UniqueMonster ports PlaceUniqueMonst's stat changes for UniqMonst[u].
 func (g *Factory) NewD1UniqueMonster(u int) *Actor {
 	um := &g.Generator.D.UniqueMonsters[u]
-	a := g.NewD1Monster(g.Generator.D.MonsterByID(um.Type))
+	a := g.newD1Monster(g.Generator.D.MonsterByID(um.Type), um)
 	mon := a.d1Monster
-	mon.Unique = um
 	if um.Level != 0 {
 		mon.Level = 2 * um.Level
 	} else {
@@ -156,7 +167,6 @@ func (g *Factory) NewD1UniqueMonster(u int) *Actor {
 	if um.UnqAttr&8 != 0 {
 		mon.AC = um.UnqVar1
 	}
-	setD1Unique(a, um)
 	st := a.GetStats()
 	st.SetAttribute(stats.MaxHealth, max(um.MaxHP>>1, 1))
 	st.GetResource(stats.Health).SetToMax()
@@ -169,13 +179,14 @@ func (g *Factory) NewD1UniqueMonster(u int) *Actor {
 // Monsters), using its precomputed HP/AI/damage/resist instead of rerolling them: mon.HP is 1/64 units like D1's
 // _mmaxhp, so >>6 gives whole hit points.
 func (g *Factory) NewD1MonsterFromLevel(mon *d1.Monster) *Actor {
-	a := g.NewD1Monster(mon.Type)
+	var um *d1.UniqueMonsterData
+	if mon.Unique >= 0 {
+		um = &g.Generator.D.UniqueMonsters[mon.Unique]
+	}
+	a := g.newD1Monster(mon.Type, um)
 	dm := a.d1Monster
 	dm.AI, dm.Int, dm.MinDam, dm.MaxDam, dm.MagicRes, dm.Level = mon.AI, mon.Int, mon.MinDam, mon.MaxDam, mon.MagicRes, mon.Level
-	if mon.Unique >= 0 {
-		um := &g.Generator.D.UniqueMonsters[mon.Unique]
-		dm.Unique = um
-		setD1Unique(a, um)
+	if um != nil {
 		dm.TalkMsg = um.TalkMsg
 	}
 	dm.Dir = mon.Dir
@@ -206,10 +217,17 @@ func MakeD1Minion(minion, leader *Actor, leaderf int) {
 func (a *Actor) d1MonsterInfoText() []string {
 	mon := a.d1Monster
 	class := strings.ToLower(strings.TrimPrefix(mon.Data.Class, "MC_"))
-	lines := []string{a.name, fmt.Sprintf("Level %d %s", mon.Level, class), "",
+	title := fmt.Sprintf("Level %d %s", mon.Level, class)
+	if mon.Unique != nil {
+		title = "Unique " + title
+	}
+	lines := []string{a.name, title, "",
 		fmt.Sprintf("HP: %s", a.GetStats().GetResource(stats.Health).ToString()),
 		fmt.Sprintf("Armor class: %d", mon.AC),
 		fmt.Sprintf("Damage: %d-%d", mon.MinDam, mon.MaxDam),
+	}
+	if mon.MaxDam2 > 0 && (mon.MinDam2 != mon.MinDam || mon.MaxDam2 != mon.MaxDam) {
+		lines = append(lines, fmt.Sprintf("Secondary attack: %d-%d", mon.MinDam2, mon.MaxDam2))
 	}
 	for _, r := range []struct {
 		bit  int
@@ -220,7 +238,35 @@ func (a *Actor) d1MonsterInfoText() []string {
 			lines = append(lines, r.text)
 		}
 	}
+	if behavior := d1MonsterAIDescriptions[mon.AI]; behavior != "" {
+		lines = append(lines, "", behavior)
+	}
 	return lines
+}
+
+// d1MonsterAIDescriptions is a plain-English gloss of each AI_* brain in game/ai_d1.go's think(), kept here
+// (common can't import game, which imports common) so the actor description popup can show it. Not code-shared
+// with the AI itself: if a brain's behavior changes, update its line here too.
+var d1MonsterAIDescriptions = map[string]string{
+	"AI_ZOMBIE": "Shambles slowly toward you.", "AI_FALLEN": "Weak alone but rallies in packs; flees and may mutate when panicked.",
+	"AI_SCAV": "Feeds on nearby corpses to heal itself.", "AI_SKELBOW": "Keeps its distance and fires arrows.",
+	"AI_GOATBOW": "Keeps its distance and fires arrows.", "AI_SNEAK": "Lurks at the edge of sight and strikes from stealth.",
+	"AI_GOATMC": "Charges in for melee.", "AI_BAT": "Flies erratically.",
+	"AI_SUCC": "Keeps its distance, hurling magic bolts.", "AI_ACIDUNIQ": "Keeps its distance, spitting acid.",
+	"AI_LICH": "Keeps its distance, hurling magic bolts.", "AI_ARCHLICH": "Keeps its distance, hurling magic bolts.",
+	"AI_PSYCHORB": "Keeps its distance, hurling magic bolts.", "AI_NECROMORB": "Keeps its distance, hurling magic bolts.",
+	"AI_FIREBAT": "Flies at range, firing bolts of fire.", "AI_HELLBAT": "Flies at range, hurling fireballs.",
+	"AI_HORKDEMON": "Fights in melee.", "AI_BONED": "Circles at range, launching bone-spirit bolts with an occasional special attack.",
+	"AI_MAGMA": "Circles at range, hurling magma balls.", "AI_STORM": "Circles at range, casting lightning.",
+	"AI_ACID": "Circles at range, spitting corrosive acid.", "AI_MEGA": "Circles at range, breathing gouts of flame.",
+	"AI_GARG": "Lies dormant until approached, then takes flight to attack.", "AI_RHINO": "Charges in a straight line.",
+	"AI_COUNSLR": "Keeps its distance, casting spells.", "AI_CLEAVER": "Waits until provoked, then charges relentlessly.",
+	"AI_SKELKING": "Occasionally raises a skeleton from the ground; otherwise fights in melee.",
+	"AI_ZHAR": "Speaks first, then fights as a spellcaster.", "AI_LAZURUS": "Speaks first, then fights as a spellcaster.",
+	"AI_LAZHELP": "Joins the fight as a ranged caster once Lazarus has spoken.",
+	"AI_WARLORD": "Speaks first, then attacks with a blade.", "AI_GARBUD": "Speaks first, then charges in for melee.",
+	"AI_SNOTSPIL": "Speaks first, then fights like a Fallen One.", "AI_LACHDAN": "Never fights.",
+	"AI_DIABLO": "Unleashes devastating Apocalypse spells from a distance.",
 }
 
 func (a *Actor) RemoveStatusEffect(effect StatusEffect) {

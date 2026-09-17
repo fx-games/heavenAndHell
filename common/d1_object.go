@@ -423,6 +423,22 @@ func (f *Factory) d1Skeleton(mt int, pos geometry.Point, player *Actor) {
 	d1Alert(a, player)
 }
 
+// SpawnRandomD1Unique places a random unique monster next to pos, for the "Spawn random unique" debug command.
+// nil if there's nowhere free to put it.
+func (f *Factory) SpawnRandomD1Unique(pos geometry.Point) *Actor {
+	m := f.State.GetMap()
+	cells := freeCellsNear(m, pos, 2, m.CanPlaceActorHere)
+	if len(cells) == 0 {
+		return nil
+	}
+	a := f.NewD1UniqueMonster(d1Rng.Intn(len(f.Generator.D.UniqueMonsters)))
+	a.d1Monster.SpawnIndex = -1 // saved in LevelSnapshot.Spawned
+	a.SetDrawPosition(cells[0].ToPointF())
+	m.AddActor(a, cells[0])
+	f.State.OnActorSpawned(a)
+	return a
+}
+
 // hitD1Object breaks an intact barrel or crucified skeleton at p (_oBreak 1): anything that hits its cell does,
 // like D1's missile collisions (BreakObject).
 func (f *Factory) hitD1Object(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point, attacker *Actor) {
@@ -554,6 +570,20 @@ func isD1Armor(it *d1.Item) bool {
 		return true
 	}
 	return false
+}
+
+// D1ShrineInfoText describes a shrine's effect for the right-click description popup, analogous to
+// d1MonsterInfoText. false for anything else, including a goat shrine/cauldron, whose effect is rolled fresh
+// each time it's touched rather than fixed at level generation.
+func D1ShrineInfoText(o *D1Object) ([]string, bool) {
+	switch o.O.Kind {
+	case d1.ObjSHRINEL, d1.ObjSHRINER:
+		shrine := o.O.Var1
+		return []string{d1.ShrineNames[shrine] + " Shrine", "", d1.ShrineMessages[shrine]}, true
+	case d1.ObjGOATSHRINE, d1.ObjCAULDRON:
+		return []string{o.Name(), "", "Its effect is chosen at random when touched."}, true
+	}
+	return nil, false
 }
 
 // d1Shrine ports OperateShrine for single player.

@@ -337,6 +337,8 @@ func (u *UIController) onMapClicked(mouseButton ebiten.MouseButton, mapPos geome
 	currentMap := state.GetMap()
 	if mouseButton == ebiten.MouseButtonRight && currentMap.IsActorAt(mapPos) && currentMap.ActorAt(mapPos).IsVisible() && state.GetPlayer().CanSee(mapPos) {
 		act.ShowActorInfoAt(mapPos)
+	} else if mouseButton == ebiten.MouseButtonRight && currentMap.IsObjectAt(mapPos) && state.GetPlayer().CanSee(mapPos) {
+		act.ShowObjectInfoAt(mapPos)
 	} else if mouseButton == ebiten.MouseButtonLeft && currentMap.IsExplored(mapPos) {
 		act.CancelAutoMove()
 		act.StartPlayerAutoMovement(mapPos)

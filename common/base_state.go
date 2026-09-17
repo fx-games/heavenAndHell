@@ -39,6 +39,7 @@ type PlayerActions interface {
 	RestUntilHealed()
 	AutoAttack()
 	ShowActorInfoAt(mapPos geometry.Point)
+	ShowObjectInfoAt(mapPos geometry.Point)
 }
 type State struct {
 	currentMap     *gridmap.GridMap[*Actor, *Item, Object]
