@@ -757,6 +757,30 @@ func (a *Actions) playerMeleeAttack(player *common.Actor, defender *common.Actor
 	meleeAction := common.NewMeleeAttackAction(common.NewActorCause("Melee attack", player), player, defender)
 	a.executeAttack(meleeAction, common.MeleeAttack)
 }
+// RangedAttackAt fires the player's equipped ranged weapon at the hostile actor at mapPos, if there is a clear
+// shot. What a left-click on a distant enemy does; false (do nothing) for anything else, so the caller falls
+// back to its normal click handling (move/auto-explore).
+func (a *Actions) RangedAttackAt(mapPos geometry.Point) bool {
+	state := a.state
+	player := state.GetPlayer()
+	if !player.IsAlive() || !player.GetEquipment().HasRangedWeaponEquipped() {
+		return false
+	}
+	if !player.CanSee(mapPos) || !state.GetMap().IsActorAt(mapPos) {
+		return false
+	}
+	if state.GetMap().MoveDistance(player.MapPosition(), mapPos) <= 1 {
+		return false // adjacent: let the normal click-to-move-into-melee handling take it
+	}
+	target := state.GetMap().ActorAt(mapPos)
+	if !target.IsVisible() || !target.IsHostileTo(player) || target.IsVendor() {
+		return false
+	}
+	a.stopAutoMove()
+	a.playerRangedAttack(player, mapPos)
+	return true
+}
+
 func (a *Actions) playerRangedAttack(player *common.Actor, targetPos geometry.Point) {
 	rangedAttackAction := common.NewRangedAttackAction(common.NewActorCause("Ranged attack", player), player, targetPos)
 	/* TODO

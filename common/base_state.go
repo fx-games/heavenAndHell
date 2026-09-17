@@ -40,6 +40,7 @@ type PlayerActions interface {
 	AutoAttack()
 	ShowActorInfoAt(mapPos geometry.Point)
 	ShowObjectInfoAt(mapPos geometry.Point)
+	RangedAttackAt(mapPos geometry.Point) bool
 }
 type State struct {
 	currentMap     *gridmap.GridMap[*Actor, *Item, Object]

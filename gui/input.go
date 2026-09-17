@@ -339,6 +339,8 @@ func (u *UIController) onMapClicked(mouseButton ebiten.MouseButton, mapPos geome
 		act.ShowActorInfoAt(mapPos)
 	} else if mouseButton == ebiten.MouseButtonRight && currentMap.IsObjectAt(mapPos) && state.GetPlayer().CanSee(mapPos) {
 		act.ShowObjectInfoAt(mapPos)
+	} else if mouseButton == ebiten.MouseButtonLeft && currentMap.IsExplored(mapPos) && act.RangedAttackAt(mapPos) {
+		// fired at the hostile actor under the cursor
 	} else if mouseButton == ebiten.MouseButtonLeft && currentMap.IsExplored(mapPos) {
 		act.CancelAutoMove()
 		act.StartPlayerAutoMovement(mapPos)
