@@ -48,10 +48,14 @@ func LerpPointF(start, end geometry.PointF, percent float64) geometry.PointF {
 func LerpColor(start, end color.Color, percent float64) color.Color {
 	r1, g1, b1, a1 := start.RGBA()
 	r2, g2, b2, a2 := end.RGBA()
+	c := func(a, b uint32) uint8 {
+		lo, hi := float64(a>>8), float64(b>>8)
+		return uint8(max(min(lo+(hi-lo)*percent, 255), 0))
+	}
 	return color.RGBA{
-		R: uint8(float64(r1) + float64(r2-r1)*percent),
-		G: uint8(float64(g1) + float64(g2-g1)*percent),
-		B: uint8(float64(b1) + float64(b2-b1)*percent),
-		A: uint8(float64(a1) + float64(a2-a1)*percent),
+		R: c(r1, r2),
+		G: c(g1, g2),
+		B: c(b1, b2),
+		A: c(a1, a2),
 	}
 }
