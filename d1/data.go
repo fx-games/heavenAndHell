@@ -116,14 +116,14 @@ type UniqueMonsterData struct {
 
 // hellfireItemOrder lays the item table out as Hellfire's AllItemsList: the table file is D1 1.09's with Hellfire's
 // rows in D1's empty slots 35-47 and its new rows appended, but Hellfire inserts its oils after the Potion of Full
-// Rejuvenation and the Scroll of Search after the Scroll of Healing, puts the Bovine Plate in Lightforge's slot and
+// Rejuvenation and the Scroll of Vision after the Scroll of Healing, puts the Bovine Plate in Lightforge's slot and
 // ends with the runes. Every roll that walks the table (RndItem, RndTypeItems, the stores) depends on this order.
 // The Sorcerer's staff is Hellfire's Short Staff of Mana, the unused Map of the Stars its Cathedral Map, and
 // DevilutionX's Arena Potion isn't in Hellfire's table.
 func hellfireItemOrder(d1Items []ItemData) []ItemData {
 	const (
 		oils    = D1ItemCount     // Blacksmith Oil .. Oil, 4 rows
-		search  = D1ItemCount + 4 // Scroll of Search
+		vision  = D1ItemCount + 4 // Scroll of Vision
 		runes   = D1ItemCount + 5 // Rune of Fire .. Rune of Stone, 5 rows
 		bovine  = D1ItemCount + 10
 		fullRej = 82 // Potion of Full Rejuvenation
@@ -133,7 +133,7 @@ func hellfireItemOrder(d1Items []ItemData) []ItemData {
 	out = append(out, d1Items[:fullRej+1]...)
 	out = append(out, d1Items[oils:oils+4]...)
 	out = append(out, d1Items[fullRej+1:healing+1]...)
-	out = append(out, d1Items[search])
+	out = append(out, d1Items[vision])
 	out = append(out, d1Items[healing+1:D1ItemCount]...)
 	out = append(out, d1Items[runes:runes+5]...)
 	out[32] = d1Items[bovine]
@@ -242,7 +242,7 @@ var spellNames = []string{"", "Firebolt", "Healing", "Lightning", "Flash", "Iden
 	"Blood Ritual", "Nova", "Invisibility", "Inferno", "Golem", "Rage", "Teleport", "Apocalypse", "Etherealize",
 	"Item Repair", "Staff Recharge", "Trap Disarm", "Elemental", "Charged Bolt", "Holy Bolt", "Resurrect",
 	"Telekinesis", "Heal Other", "Blood Star", "Bone Spirit", "Mana", "the Magi", "the Jester", "Lightning Wall",
-	"Immolation", "Warp", "Reflect", "Berserk", "Ring of Fire", "Search", "Rune of Fire", "Rune of Light", "Rune of Nova",
+	"Immolation", "Warp", "Reflect", "Berserk", "Ring of Fire", "Vision", "Rune of Fire", "Rune of Light", "Rune of Nova",
 	"Rune of Immolation", "Rune of Stone"}
 
 // SpellDescriptions holds one short item-tooltip sentence per spell, indexed like spellNames.

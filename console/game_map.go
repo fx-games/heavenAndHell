@@ -59,8 +59,7 @@ func (c *Console) visibleActorAt(pos geometry.Point) *common.Actor {
 		return nil
 	}
 	actor := currentMap.ActorAt(pos)
-	infravision := player.HasInfravision() && geometry.DistanceChebyshev(pos, player.MapPosition()) <= 15
-	if !actor.IsVisible() || !c.canSeeCell(pos) && !infravision {
+	if !actor.IsVisible() || !c.disableFog && !player.CanPerceive(pos) {
 		return nil
 	}
 	return actor

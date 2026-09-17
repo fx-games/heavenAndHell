@@ -20,10 +20,21 @@ ItemNamesInShop: BandStyle
 FlipActorsHorizontally: true
 SoundVolume: 0.1
 MusicVolume: 0.1
-VoiceVolume: 0.8
+VoiceVolume: 0.2
 DiabloAudioEnabled: true
 AutoExploreOpenContainers: true
 WeaponBreakWarning: true
 Fullscreen: false
 Hellfire: true
-
+MiniMapColor: floor=4d3c66
+MiniMapColor: floorUnlit=231e33
+MiniMapColor: hostileActor=ff0000
+MiniMapColor: peacefulActor=dc784b
+MiniMapColor: player=64ff64
+MiniMapColor: stairsDown=ffffff
+MiniMapColor: stairsUp=ffcc00
+MiniMapColor: unexplored=0a0a0a
+MiniMapColor: wall=aabfe0
+MiniMapColor: wallUnlit=555f70
+MiniMapColor: water=5670c2
+MiniMapColor: waterUnlit=2b3861

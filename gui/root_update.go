@@ -59,7 +59,7 @@ func (u *UIController) Update() error {
 	if !player.IsAlive() {
 		return nil
 	}
-	if !u.setToExactFit && u.configuration.KeepPlayerCentered {
+	if !u.setToExactFit && u.configuration.KeepPlayerCentered && !u.manualScroll {
 		u.mapRenderer.CenterOnFloat(player.DrawPosition())
 	}
 

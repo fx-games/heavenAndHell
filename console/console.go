@@ -224,10 +224,11 @@ func (c *Console) Cancel() {
 func (c *Console) PopAll() { c.ui.CloseAllModals() }
 
 func (c *Console) ShowGameOverMenu() {
-	items := append(c.context.StartMenuItems(true), util.MenuItem{MainText: "Quit", Action: c.ui.QuitGame})
+	items := c.context.StartMenuItems(true)
 	c.ui.OpenMenuNotClosable("You died", menuItems(items))
 }
 
+func (c *Console) QuitGame()                        { c.ui.QuitGame() }
 func (c *Console) OpenMenu(options []util.MenuItem) { c.ui.OpenMenu(menuItems(options)) }
 
 func (c *Console) OpenUncancelableMenu(options []util.MenuItem) {

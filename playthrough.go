@@ -1697,8 +1697,8 @@ func checkItemEffects(broker *common.Broker, state *common.State, fail func(stri
 }
 
 // checkClassSkill fires the hero's class skill: the Warrior's Item Repair, the Rogue's Trap Disarm, the Sorcerer's
-// Staff Recharge, the Monk's Search, the Bard's Identify and the Barbarian's Rage. Rage is the only one that
-// lingers, so it is ticked through fury and hangover and checked on both sides.
+// Staff Recharge, the Monk's Vision, the Bard's Identify and the Barbarian's Rage. Rage lingers ticked through
+// fury and hangover and checked on both sides; Vision lingers until the level changes.
 func checkClassSkill(f *common.Factory, player *common.Actor, fail func(string, ...any)) {
 	h, name := player.Hero(), d1.ClassNames[player.Hero().Class]
 	calm := player.GetStats().GetAttribute(stats.Strength)

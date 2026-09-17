@@ -341,10 +341,25 @@ func d1ElementalHit(def *Actor, kind, chance int, roll func() int) int {
 	return dam
 }
 
-// d1Alert wakes a monster that is attacked before it noticed the player (MonsterMHit).
+// Fight or flight, rolled every time the player attacks. Hellspawn don't scare easily: only one already close
+// to death breaks, uniques never do, and the run is short. Knobs, not laws - tune them for how the game plays.
+const (
+	d1FleeBelowHealth = 0.2
+	d1FleeChance      = 40
+	d1FleeTurns       = 6
+)
+
+// d1Alert wakes a monster the player attacks (MonsterMHit) and makes it choose fight or flight. Attacked is
+// enough: a monster that has been swung at fights back rather than idling or wandering off, which in a
+// turn-based game is the difference between D1's AI and a punching bag. The health it rolls against is the
+// health before this blow lands, so a monster breaks one hit later than it would - close enough for a threshold.
 func d1Alert(victim, attacker *Actor) {
-	if mon := victim.d1Monster; mon.Squelch == 0 {
-		mon.Squelch, mon.Last = 255, attacker.MapPosition()
+	mon := victim.d1Monster
+	mon.Squelch, mon.Last, mon.Enraged = 255, attacker.MapPosition(), true
+	if mon.Flee == 0 && mon.Unique == nil &&
+		victim.GetStats().GetResource(stats.Health).IsLessThanPercent(d1FleeBelowHealth) &&
+		d1Rng.Intn(100) < d1FleeChance {
+		mon.Flee = d1FleeTurns
 	}
 }
 

@@ -35,6 +35,8 @@ type D1MonsterState struct {
 	Squelch, PathCount                 int
 	Last                               geometry.Point
 	Dir                                int  // index into D1Dirs
+	Enraged                            bool // the player attacked it: it fights back instead of idling or wandering off
+	Flee                               int  // turns left of a fight-or-flight retreat
 	Dormant                            bool // _mFlags & 4 on gargoyles: waiting in stone until the enemy comes close
 	NoHeal                             bool // _mFlags & 8 (MFLAG_NOHEAL): hit by a weapon that stops healing
 	Berserk                            bool // Hellfire's MFLAG_BERSERK | MFLAG_GOLEM: turned on its own kind

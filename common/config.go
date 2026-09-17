@@ -3,9 +3,12 @@ package common
 import (
 	"fmt"
 	"io/fs"
+	"maps"
 	"os"
 	"rpg/geometry"
 	"rpg/recfile"
+	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -64,10 +67,32 @@ type Configuration struct {
 	Fullscreen bool // set in the video menu or with F11
 
 	Hellfire bool // new games get Hellfire's classes, items, monsters, quests and levels; Continue upgrades a D1 save
+
+	// MiniMapColors overrides minimap pixel colors by name, from repeated
+	// "MiniMapColor: name=rrggbb" lines. Unknown names are kept and written back, but never drawn.
+	MiniMapColors map[string][4]byte
+}
+
+// parseMiniMapColors reads the comma-joined "name=rrggbb" values of the MiniMapColor field.
+func parseMiniMapColors(joined string) map[string][4]byte {
+	colors := make(map[string][4]byte)
+	for _, entry := range strings.Split(joined, ",") {
+		name, hex, ok := strings.Cut(strings.TrimSpace(entry), "=")
+		if !ok {
+			continue
+		}
+		hex = strings.TrimPrefix(strings.TrimSpace(hex), "#")
+		rgb, err := strconv.ParseUint(hex, 16, 32)
+		if err != nil || len(hex) != 6 {
+			continue
+		}
+		colors[strings.TrimSpace(name)] = [4]byte{byte(rgb >> 16), byte(rgb >> 8), byte(rgb), 255}
+	}
+	return colors
 }
 
 func (c Configuration) ToRecord() recfile.Record {
-	return recfile.Record{
+	record := recfile.Record{
 		{
 			Name:  "AudioEnabled",
 			Value: recfile.BoolStr(c.AudioEnabled),
@@ -149,6 +174,12 @@ func (c Configuration) ToRecord() recfile.Record {
 		{Name: "Fullscreen", Value: recfile.BoolStr(c.Fullscreen)},
 		{Name: "Hellfire", Value: recfile.BoolStr(c.Hellfire)},
 	}
+	// written back on every save, so a menu toggle cannot drop the user's palette
+	for _, name := range slices.Sorted(maps.Keys(c.MiniMapColors)) {
+		rgba := c.MiniMapColors[name]
+		record = append(record, recfile.Field{Name: "MiniMapColor", Value: fmt.Sprintf("%s=%02x%02x%02x", name, rgba[0], rgba[1], rgba[2])})
+	}
+	return record
 }
 
 func (c Configuration) SaveToRecFile(recFilename string) {
@@ -198,6 +229,7 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		WeaponBreakWarning:        configMap.GetBoolOrTrue("WeaponBreakWarning"),
 		Fullscreen:                configMap.GetBoolOrFalse("Fullscreen"),
 		Hellfire:                  configMap.GetBoolOrTrue("Hellfire"),
+		MiniMapColors:             parseMiniMapColors(configMap.GetStringOrDefault("MiniMapColor", "")),
 		WindowSize: geometry.Point{ //1280, Y: 800
 			X: configMap.GetIntOrDefault("WindowWidth", 1280),
 			Y: configMap.GetIntOrDefault("WindowHeight", 800),

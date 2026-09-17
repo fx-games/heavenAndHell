@@ -17,7 +17,8 @@ func (u *UIController) openPauseMenu() {
 		{MainText: "Audio", Action: u.openAudioMenu},
 		{MainText: "Auto explore", Action: u.openAutoExploreMenu},
 		{MainText: "Gameplay", Action: u.openGameplayMenu},
-		{MainText: "Quit game", Action: func() { u.shouldQuitGame = true }},
+		{MainText: "Back to main menu", Action: u.context.BackToMainMenu},
+		{MainText: "Quit game", Action: u.QuitGame},
 	})
 }
 

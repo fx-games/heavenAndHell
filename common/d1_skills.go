@@ -10,12 +10,12 @@ import (
 )
 
 // The class skills (_pAblSpells): the Warrior's Item Repair, the Rogue's Trap Disarm, the Sorcerer's Staff
-// Recharge and, from Hellfire, the Monk's Search, the Bard's Identify and the Barbarian's Rage. They cost no
+// Recharge and, from Hellfire, the Monk's Vision, the Bard's Identify and the Barbarian's Rage. They cost no
 // mana; like D1's cursor, repair, recharge and identify ask for an item and disarm for an object.
 func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedAction) {
 	switch player.hero.Class {
 	case d1.Monk:
-		return nil, f.d1CastSkill("Search", d1.SplSearch)
+		return nil, f.d1CastSkill("Vision", d1.SplSearch)
 	case d1.Barbarian:
 		return nil, f.d1CastSkill("Rage", d1.SplRage)
 	case d1.Bard:

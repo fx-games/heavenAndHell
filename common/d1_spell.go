@@ -354,17 +354,8 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		item.RefreshD1()
 		SyncHero(c.caster)
 		f.Msg(fmt.Sprintf("It is %s.", item.Name()))
-	case d1.SplSearch: // AddSearch: the Monk senses what is lying around, and remembers where
-		// ponytail: the reveal is permanent, not the timed automap overlay Hellfire draws for
-		// (2*clvl + 10*slvl + 245) ticks; give it a duration once the map can un-explore a cell.
-		found := 0
-		for _, it := range c.m.Items() {
-			if !c.m.IsExplored(it.MapPosition()) {
-				c.m.SetExplored(it.MapPosition())
-				found++
-			}
-		}
-		f.Msg(fmt.Sprintf("You sense %d hidden item(s).", found))
+	case d1.SplSearch: // renamed Vision: reveals every entity on the level until the level changes
+		c.caster.AddStatusEffect(StatusVision, -1) // negative turnCount: never decays on its own, see State.MapTransition
 	case d1.SplRage: // AddRage: no raging while already raging, or while too wounded to survive the hangover
 		if h.Rage != 0 || st.GetResource(stats.Health).Value() <= clvl {
 			c.ctx.Msg("You cannot work yourself up again.")

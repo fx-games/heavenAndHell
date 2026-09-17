@@ -184,6 +184,13 @@ func (a *Actor) CanSee(pos geometry.Point) bool {
 	return a.fov.Visible(pos)
 }
 
+// CanPerceive is CanSee plus the actors clairvoyance and D1 infravision reveal through walls: exactly what the map
+// draws, so hover text and right-click info answer for everything the player can look at.
+func (a *Actor) CanPerceive(pos geometry.Point) bool {
+	return a.CanSee(pos) || a.HasStatusEffect(StatusVision) ||
+		a.HasInfravision() && geometry.DistanceChebyshev(pos, a.MapPosition()) <= 15
+}
+
 func (a *Actor) GetFOV() *geometry.FOV {
 	return a.fov
 }

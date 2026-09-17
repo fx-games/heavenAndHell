@@ -375,35 +375,49 @@ func (s *SetOfPoints) ToSlice() []geometry.Point {
 	}
 	return result
 }
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestUnexploredWalkablePosition(currentPosition geometry.Point) geometry.Point {
-	distribution := m.GetFreeCellsForDistribution(currentPosition, 1, func(p geometry.Point) bool {
-		return m.Contains(p) && m.IsTileWalkable(p) && !m.IsExplored(p)
-	})
-	if len(distribution) > 0 {
-		return distribution[0]
+func lessByCoordinate(a, b geometry.Point) bool {
+	return a.Y < b.Y || (a.Y == b.Y && a.X < b.X)
+}
+
+// NearestByPathCost floods the explored, walkable part of the map once from
+// currentPosition and returns the candidate with the lowest path cost, or
+// currentPosition if there is none. Straight-line distance is the wrong metric
+// in a dungeon: the closest candidate as the crow flies is regularly the one
+// behind a wall, three rooms away by foot.
+func (m *GridMap[ActorType, ItemType, ObjectType]) NearestByPathCost(currentPosition geometry.Point, isCandidate func(p geometry.Point) bool) geometry.Point {
+	// ponytail: full flood per call; cache it per turn if profiling ever cares.
+	nearest, lowestCost := currentPosition, math.MaxInt32
+	for loc, cost := range m.GetDijkstraMapForExploredWithActorsNotBlocking(currentPosition, 1000) {
+		// Map iteration order is random, so ties need a deterministic winner:
+		// without one the target flips between equidistant candidates.
+		better := cost < lowestCost || (cost == lowestCost && lessByCoordinate(loc, nearest))
+		if better && loc != currentPosition && isCandidate(loc) {
+			nearest, lowestCost = loc, cost
+		}
 	}
-	return currentPosition
+	return nearest
+}
+
+// GetNearestUnexploredWalkablePosition returns the nearest frontier tile: an
+// explored tile that borders the unknown. The unexplored tile itself is not a
+// reachable target through known terrain, its explored neighbor is.
+func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestUnexploredWalkablePosition(currentPosition geometry.Point) geometry.Point {
+	return m.NearestByPathCost(currentPosition, func(p geometry.Point) bool {
+		return len(m.GetFilteredNeighbors(p, func(n geometry.Point) bool {
+			return m.IsTileWalkable(n) && !m.IsExplored(n)
+		})) > 0
+	})
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestExploredItem(currentPosition geometry.Point, filter func(item ItemType) bool) geometry.Point {
-	distribution := m.GetFreeCellsForDistribution(currentPosition, 1, func(p geometry.Point) bool {
-		isValidItemAtPos := m.Contains(p) && m.IsTileWalkable(p) && m.IsExplored(p) && m.IsItemAt(p)
-		return isValidItemAtPos && filter(m.ItemAt(p))
+	return m.NearestByPathCost(currentPosition, func(p geometry.Point) bool {
+		return m.IsItemAt(p) && filter(m.ItemAt(p))
 	})
-	if len(distribution) > 0 {
-		return distribution[0]
-	}
-	return currentPosition
 }
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestExploredObject(currentPosition geometry.Point, filter func(object ObjectType) bool) geometry.Point {
-	distribution := m.GetFreeCellsForDistribution(currentPosition, 1, func(p geometry.Point) bool {
-		isValidObjectAtPos := m.Contains(p) && m.IsExplored(p) && m.IsObjectAt(p)
-		return isValidObjectAtPos && filter(m.ObjectAt(p))
+	return m.NearestByPathCost(currentPosition, func(p geometry.Point) bool {
+		return m.IsObjectAt(p) && filter(m.ObjectAt(p))
 	})
-	if len(distribution) > 0 {
-		return distribution[0]
-	}
-	return currentPosition
 }
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetFreeCellsForDistribution(position geometry.Point, neededCellCount int, freePredicate func(p geometry.Point) bool) []geometry.Point {
 	foundFreeCells := make(SetOfPoints)
@@ -839,6 +853,9 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) CurrentlyPassableAndSafeForAc
 	return func(p geometry.Point) bool {
 		if !m.Contains(p) ||
 			(m.IsActorAt(p) && m.ActorAt(p) != person) {
+			return false
+		}
+		if _, isTransition := m.GetTransitionAt(p); isTransition { // a path walked for the player never crosses a portal or stairs
 			return false
 		}
 		return m.IsWalkableFor(p, person) && !m.IsObviousHazardAt(p)

@@ -239,6 +239,30 @@ func (i *Item) d1TooltipLines(cmp map[string]int) []string {
 	if it.Spell > 0 && it.Spell < len(d1.SpellDescriptions) {
 		lines = append(lines, d1.SpellDescriptions[it.Spell])
 	}
+	switch it.MiscID {
+	case "IMISC_OILACC":
+		add("Increases a weapon's chance to hit by 1-2%%")
+	case "IMISC_OILMAST":
+		add("Increases a weapon's chance to hit by 3-5%%")
+	case "IMISC_OILSHARP":
+		add("Adds 1 to a weapon's maximum damage")
+	case "IMISC_OILDEATH":
+		add("Adds 1-2 to a weapon's minimum and maximum damage")
+	case "IMISC_OILSKILL":
+		add("Lowers an item's Str, Mag and Dex requirements by 5-10")
+	case "IMISC_OILBSMTH":
+		add("Repairs 20%% of an item's durability")
+	case "IMISC_OILFORT":
+		add("Adds 10-50 to an item's max durability")
+	case "IMISC_OILPERM":
+		add("Makes an item indestructible")
+	case "IMISC_OILHARD":
+		add("Adds 1-2 Armor Class to a helm, shield or armor")
+	case "IMISC_OILIMP":
+		add("Adds 3-5 Armor Class to armor or a shield")
+	case "IMISC_OILOF":
+		add("Applies a random enchantment to an item in your pack")
+	}
 	if it.MaxDam > 0 {
 		add("%s", colored(cmp[d1.KeyDamage], fmt.Sprintf("Damage: %d-%d", it.MinDam, it.MaxDam)))
 	}

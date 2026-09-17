@@ -295,6 +295,41 @@ func (g *TileRenderer) DrawTile(screenX float64, screenY float64, atlas TextureA
 	g.op.GeoM.Translate(tx, screenY*g.deviceScale)
 	g.currentRenderTarget.DrawImage(ExtractSubImageFromAtlas(index, atlas), g.op)
 }
+
+// DrawScaledTileWithShader draws a tile like DrawScaledTileWithFlip, but through a custom Kage shader instead
+// of a flat tint. It's the only draw call for the tile (not an overlay on top of a plain draw), so the shader
+// is responsible for applying tintColor itself via the Tint uniform it always receives. Callers add their own
+// uniforms on top (e.g. animation time). Shaders here want the `//kage:unit pixels` directive, so that srcPos
+// and imageSrc0Origin/imageSrc0Size line up with the tile's pixel rect.
+func (g *TileRenderer) DrawScaledTileWithShader(screenX, screenY float64, atlas TextureAtlas, index int32, scale geometry.PointF, tintColor color.Color, flipX bool, shader *ebiten.Shader, uniforms map[string]interface{}) {
+	subImg := ExtractSubImageFromAtlas(index, atlas)
+	b := subImg.Bounds()
+
+	rVal, gVal, bVal, aVal := tintColor.RGBA()
+	merged := map[string]interface{}{
+		"Tint": []float32{float32(rVal) / 65535, float32(gVal) / 65535, float32(bVal) / 65535, float32(aVal) / 65535},
+	}
+	for k, v := range uniforms {
+		merged[k] = v
+	}
+
+	op := &ebiten.DrawRectShaderOptions{}
+	op.Images[0] = subImg
+	op.Uniforms = merged
+
+	tileScale := scale.Mul(g.tileScale).Mul(g.deviceScale)
+	tx := screenX * g.deviceScale
+	if flipX {
+		op.GeoM.Scale(-tileScale.X, tileScale.Y)
+		tx += float64(atlas.tileSizeX) * tileScale.X
+	} else {
+		op.GeoM.Scale(tileScale.X, tileScale.Y)
+	}
+	op.GeoM.Translate(tx, screenY*g.deviceScale)
+
+	g.currentRenderTarget.DrawRectShader(b.Dx(), b.Dy(), shader, op)
+}
+
 func (g *TileRenderer) DrawDefaultScaleCharOnScreen(screenX, screenY float64, char rune, textColor color.Color) {
 	g.DrawCharOnScreen(int(screenX), int(screenY), char, g.fontScale, textColor)
 }

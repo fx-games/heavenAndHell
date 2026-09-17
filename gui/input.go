@@ -79,7 +79,7 @@ func (u *UIController) handleKeyboardInput() {
 		return
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
-		if u.IsUIModalVisible() || u.targeter != nil || u.inventory.IsActive() {
+		if u.canCancel() {
 			u.Cancel()
 		} else {
 			u.openPauseMenu()
@@ -168,6 +168,7 @@ func (u *UIController) handleKeyboardInput() {
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyX) {
 		u.mapRenderer.CenterOnFloat(u.context.GameState().GetPlayer().DrawPosition())
+		u.manualScroll = false
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyB) {
 		u.showFlags()
@@ -183,7 +184,7 @@ func (u *UIController) handleKeyboardInput() {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyC) {
-		u.ShowFullStats()
+		u.ToggleFullStats()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		u.context.DebugActions().KillLevel()
@@ -230,20 +231,16 @@ func (u *UIController) handleKeyboardInput() {
 		u.context.DebugActions().GoOneLevelDown()
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
-		u.mapRenderer.ScrollBy(geometry.Point{X: 8, Y: 0})
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
-		u.mapRenderer.ScrollBy(geometry.Point{X: -8, Y: 0})
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
-		u.mapRenderer.ScrollBy(geometry.Point{X: 0, Y: -8})
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
-		u.mapRenderer.ScrollBy(geometry.Point{X: 0, Y: 8})
+	for key, direction := range map[ebiten.Key]geometry.Point{
+		ebiten.KeyArrowRight: {X: 8, Y: 0},
+		ebiten.KeyArrowLeft:  {X: -8, Y: 0},
+		ebiten.KeyArrowUp:    {X: 0, Y: -8},
+		ebiten.KeyArrowDown:  {X: 0, Y: 8},
+	} {
+		if ebiten.IsKeyPressed(key) {
+			u.mapRenderer.ScrollBy(direction)
+			u.manualScroll = true
+		}
 	}
 
 	if isBeingPressedRepeatedly(ebiten.KeyW) {
@@ -335,7 +332,7 @@ func (u *UIController) onMapClicked(mouseButton ebiten.MouseButton, mapPos geome
 	act := u.context.PlayerAction()
 	state := u.context.GameState()
 	currentMap := state.GetMap()
-	if mouseButton == ebiten.MouseButtonRight && currentMap.IsActorAt(mapPos) && currentMap.ActorAt(mapPos).IsVisible() && state.GetPlayer().CanSee(mapPos) {
+	if mouseButton == ebiten.MouseButtonRight && currentMap.IsActorAt(mapPos) && currentMap.ActorAt(mapPos).IsVisible() && state.GetPlayer().CanPerceive(mapPos) {
 		act.ShowActorInfoAt(mapPos)
 	} else if mouseButton == ebiten.MouseButtonRight && currentMap.IsObjectAt(mapPos) && state.GetPlayer().CanSee(mapPos) {
 		act.ShowObjectInfoAt(mapPos)

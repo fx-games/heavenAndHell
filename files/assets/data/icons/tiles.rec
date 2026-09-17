@@ -282,11 +282,11 @@ icon: 293
 
 internal_name: prop.decap
 name: Decapitated Body
-icon: 135
+icon: 836
 
 internal_name: prop.decap.used
 name: Decapitated Body (searched)
-icon: 135
+icon: 836
 
 internal_name: prop.purifyingftn
 name: Purifying Spring
@@ -482,55 +482,55 @@ icon: 241
 
 internal_name: prop.nudew2r
 name: Tortured Body (woman)
-icon: 101
+icon: 838
 
 internal_name: prop.tnudem1
 name: Tortured Body (man 1)
-icon: 101
+icon: 837
 
 internal_name: prop.tnudem2
 name: Tortured Body (man 2)
-icon: 101
+icon: 837
 
 internal_name: prop.tnudem3
 name: Tortured Body (man 3)
-icon: 101
+icon: 837
 
 internal_name: prop.tnudem4
 name: Tortured Body (man 4)
-icon: 101
+icon: 837
 
 internal_name: prop.tnudew1
 name: Tortured Body (woman 1)
-icon: 101
+icon: 838
 
 internal_name: prop.tnudew2
 name: Tortured Body (woman 2)
-icon: 101
+icon: 838
 
 internal_name: prop.tnudew3
 name: Tortured Body (woman 3)
-icon: 101
+icon: 838
 
 internal_name: prop.torture1
 name: Hooked Body 1
-icon: 97
+icon: 835
 
 internal_name: prop.torture2
 name: Hooked Body 2
-icon: 97
+icon: 835
 
 internal_name: prop.torture3
 name: Hooked Body 3
-icon: 97
+icon: 835
 
 internal_name: prop.torture4
 name: Hooked Body 4
-icon: 97
+icon: 835
 
 internal_name: prop.torture5
 name: Hooked Body 5
-icon: 97
+icon: 835
 
 internal_name: prop.flamehole
 name: Flame Hole
@@ -546,4 +546,5 @@ icon: 347
 
 internal_name: prop.mcircle
 name: Magic Circle
-icon: 216
+icon: 215
+

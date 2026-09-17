@@ -58,6 +58,7 @@ type UserInterface interface {
 	Cancel()
 	PopAll()
 	ShowGameOverMenu()
+	QuitGame()
 	OpenMenu(options []util.MenuItem)
 	OpenUncancelableMenu(options []util.MenuItem) // like OpenMenu, but ESC/cancel does nothing (e.g. the start menu)
 	OpenTextWindow(msg []util.LabelText)

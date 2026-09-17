@@ -438,10 +438,6 @@ func (s *State) MapTransition(to gridmap.Transition) {
 			return false
 		}
 	})
-	// TODO: add these back somewhere?
-	//s.CancelAutoMove()
-	//g.actionBroker.CancelAllAnimations()
-
 	//oldPosOnOldMap := g.state.GetPlayer().MapPosition()
 	// remove player from current map
 	oldMapName := ""
@@ -451,6 +447,9 @@ func (s *State) MapTransition(to gridmap.Transition) {
 	}
 
 	player := s.GetPlayer()
+	if player != nil {
+		player.GetStatusEffects().SetFalse(string(StatusVision))
+	}
 
 	// change map
 	targetMap := to.TargetMap

@@ -56,6 +56,8 @@ func (d DummyUI) PopAll() {
 
 }
 
+func (d DummyUI) QuitGame() {}
+
 func (d DummyUI) ShowGameOverMenu() {
 	//TODO implement me
 

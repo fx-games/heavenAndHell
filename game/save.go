@@ -247,7 +247,15 @@ func (g *GameInstance) StartMenuItems(afterDeath bool) []util.MenuItem {
 		back = g.uiController.ShowGameOverMenu
 	}
 	return append(items, util.MenuItem{MainText: "New game", Action: func() { g.uiController.OpenNewGameScreen(g.NewGame, back) }},
-		common.HellfireSetting(g.configuration, back))
+		common.HellfireSetting(g.configuration, back),
+		util.MenuItem{MainText: "Quit", Action: g.uiController.QuitGame})
+}
+
+// BackToMainMenu leaves a running game for the start menu. It saves first, so that picking Continue puts the
+// player back where they left off rather than at the last level change (the same promise as quitting, decision 11).
+func (g *GameInstance) BackToMainMenu() {
+	g.SaveGame()
+	g.uiController.OpenUncancelableMenu(g.StartMenuItems(false))
 }
 
 // ShowStartMenu opens Continue/New game when a save exists; without one the default game autosaves right away.

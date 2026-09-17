@@ -48,7 +48,7 @@ func TestLoadAndGenerate(t *testing.T) {
 	}
 	// Hellfire's AllItemsList order (1.09's itemdat.cpp under HELLFIRE)
 	for idx, name := range map[int]string{5: "Short Staff of Mana", 22: "Cathedral Map", 32: "Bovine Plate", 83: "Blacksmith Oil",
-		86: "Oil", 87: "Elixir of Strength", 91: "Scroll of Healing", 92: "Scroll of Search", 114: "Book of ", 118: "Dagger",
+		86: "Oil", 87: "Elixir of Strength", 91: "Scroll of Healing", 92: "Scroll of Vision", 114: "Book of ", 118: "Dagger",
 		160: "Amulet", 161: "Rune of Fire", 165: "Rune of Stone"} {
 		if d.Items[idx].Name != name {
 			t.Errorf("hellfire item %d is %q, want %q", idx, d.Items[idx].Name, name)

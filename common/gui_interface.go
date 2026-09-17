@@ -17,6 +17,8 @@ type UIContext struct {
 	Definitions  defs.DataContainer
 	// StartMenuItems lists Continue/Load and New game; afterDeath ends autosaving (decision 11).
 	StartMenuItems func(afterDeath bool) []util.MenuItem
+	// BackToMainMenu saves the running game and reopens the start menu.
+	BackToMainMenu func()
 }
 
 func SortStacksForTextUITyped(stacks []InventoryStack, getLetterForStack func(stack InventoryStack) rune, selected func(invItemKey rune)) []*TextualStack {

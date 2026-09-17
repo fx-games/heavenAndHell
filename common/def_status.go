@@ -33,6 +33,7 @@ const (
 	StatusBerserk   StatusEffect = "berserk"   // random attacks
 	StatusHaywire   StatusEffect = "haywire"   // random magic
 	StatusFlying    StatusEffect = "flying"    // can move over some obstacles, chance to dodge melee attacks
+	StatusVision    StatusEffect = "vision"    // all entities on the level are visible, ignoring fog of war and line of sight
 	// parametrized
 	StatusBlinded        StatusEffect = "blinded"          // are really timed modifiers
 	StatusSlow           StatusEffect = "slow"             // are really timed modifiers

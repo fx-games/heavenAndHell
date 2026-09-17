@@ -106,6 +106,7 @@ type UIController struct {
 	configuration *common.Configuration
 
 	setToExactFit    bool
+	manualScroll     bool // arrow keys panned the map; suspends auto-centering until recentered
 	isFullScreen     bool
 	logHook          func(string)
 	worldTicks       uint64
@@ -653,6 +654,7 @@ func (u *UIController) setupUI() {
 		"Health: 999",
 		"Mana: 999",
 		"Gold: 999",
+		"Stat points: 9 (u)", // reserve the level-up row so the minimap never overlaps it
 	}))
 	statsBounds := u.statsLabel.GetBounds()
 
@@ -743,6 +745,22 @@ func (u *UIController) onItemInInventoryClicked(uiItem UIElement) {
 		u.OpenMenu(actions)
 	}
 }
+
+// isCharacterSheetShowing reports whether the expanded sidebar ('c') is up: it replaces
+// the minimap and skill icons with the full stat list.
+func (u *UIController) isCharacterSheetShowing() bool {
+	return u.miniMap.isHidden
+}
+
+// ToggleFullStats opens the character sheet, or returns to the normal collapsed sidebar.
+func (u *UIController) ToggleFullStats() {
+	if u.isCharacterSheetShowing() {
+		u.UpdateStatsLabel() // collapses the bar and shows the minimap and skills again
+		return
+	}
+	u.ShowFullStats()
+}
+
 func (u *UIController) ShowFullStats() {
 	u.miniMap.Hide()
 	label := u.statsLabel
@@ -955,56 +973,82 @@ func (u *UIController) OnMapChanged() {
 
 	u.OnPlayerTurnTaken()
 }
+
+// defaultMiniMapColors are the built-in minimap colors; config.rec's
+// "MiniMapColor: <name>=rrggbb" lines override them by name.
+var defaultMiniMapColors = map[string][4]byte{
+	"player":        {100, 255, 100, 255},
+	"unexplored":    {10, 10, 10, 255},
+	"stairsUp":      {255, 204, 0, 255},
+	"stairsDown":    {255, 255, 255, 255},
+	"waterUnlit":    {43, 56, 97, 255},
+	"floorUnlit":    {35, 30, 51, 255},
+	"wallUnlit":     {85, 95, 112, 255},
+	"hostileActor":  {255, 0, 0, 255},
+	"peacefulActor": {220, 120, 75, 255},
+	"water":         {86, 112, 194, 255},
+	"floor":         {77, 60, 102, 255},
+	"wall":          {170, 191, 224, 255},
+}
+
+// miniMapColor resolves a minimap color name against config.rec, falling back to the built-in.
+func (u *UIController) miniMapColor(name string) [4]byte {
+	if fromConfig, ok := u.configuration.MiniMapColors[name]; ok {
+		return fromConfig
+	}
+	return defaultMiniMapColors[name]
+}
+
 func (u *UIController) getMiniMapColor(mapPos geometry.Point, tileColor *[4]byte) {
 	state := u.context.GameState()
 	currentMap := state.GetMap()
 	if state.GetPlayer().MapPosition() == mapPos {
-		*tileColor = [4]byte{100, 255, 100, 255}
+		*tileColor = u.miniMapColor("player")
 		return
 	}
 	if !currentMap.IsExplored(mapPos) {
-		*tileColor = [4]byte{10, 10, 10, 255}
+		*tileColor = u.miniMapColor("unexplored")
 		return
 	}
 	if currentMap.IsSpecialAt(mapPos, gridmap.SpecialTileStairsUp) {
-		*tileColor = [4]byte{255, 255, 0, 255}
+		*tileColor = u.miniMapColor("stairsUp")
 		return
 	}
-	if currentMap.IsStairsAt(mapPos) {
-		*tileColor = [4]byte{235, 52, 229, 255}
+	if currentMap.IsSpecialAt(mapPos, gridmap.SpecialTileStairsDown) {
+		*tileColor = u.miniMapColor("stairsDown")
 		return
 	}
 	if !state.GetPlayer().CanSee(mapPos) {
 		if currentMap.IsSpecialAt(mapPos, gridmap.SpecialTileWater) {
-			*tileColor = [4]byte{86 / 2, 112 / 2, 194 / 2, 255}
+			*tileColor = u.miniMapColor("waterUnlit")
 			return
 		}
 		if currentMap.IsWalkable(mapPos) {
-			*tileColor = [4]byte{35, 30, 51, 255}
+			*tileColor = u.miniMapColor("floorUnlit")
 		} else {
-			*tileColor = [4]byte{85, 95, 112, 255}
+			*tileColor = u.miniMapColor("wallUnlit")
 		}
 		return
 	}
 	if currentMap.IsActorAt(mapPos) && currentMap.ActorAt(mapPos).IsVisible() {
 		actorAt := currentMap.ActorAt(mapPos)
 		if actorAt.IsHostileTo(state.GetPlayer()) {
-			*tileColor = [4]byte{255, 0, 0, 255}
+			*tileColor = u.miniMapColor("hostileActor")
 			return
 		}
-		*tileColor = [4]byte{220, 120, 75, 255}
+		*tileColor = u.miniMapColor("peacefulActor")
 		return
 	}
 
 	if currentMap.IsSpecialAt(mapPos, gridmap.SpecialTileWater) {
-		*tileColor = [4]byte{86, 112, 194, 255}
+		*tileColor = u.miniMapColor("water")
 		return
 	}
 
 	if currentMap.IsWalkable(mapPos) {
-		*tileColor = [4]byte{77, 60, 102, 255}
+		*tileColor = u.miniMapColor("floor")
 	} else {
-		*tileColor = [4]byte{170, 191, 224, 255}
+		*tileColor = u.miniMapColor("wall")
 	}
 }
 
@@ -1149,6 +1193,12 @@ func (u *UIController) GetTileScaleFactor() float64 {
 	return u.tileScale
 }
 
+// canCancel reports whether Cancel has something to back out of, so Esc knows
+// not to fall through to the pause menu. Keep in step with Cancel below.
+func (u *UIController) canCancel() bool {
+	return u.IsUIModalVisible() || u.targeter != nil || u.inventory.IsActive() || u.isCharacterSheetShowing()
+}
+
 func (u *UIController) Cancel() {
 	if u.IsUIModalVisible() {
 		u.OnCommand(PlayerCommandCancel)
@@ -1160,6 +1210,10 @@ func (u *UIController) Cancel() {
 	}
 	if u.inventory.IsActive() {
 		u.inventory.Deactivate()
+		return
+	}
+	if u.isCharacterSheetShowing() {
+		u.UpdateStatsLabel()
 		return
 	}
 }
@@ -1199,13 +1253,11 @@ func (u *UIController) BeginTargeting(targetRules common.TargetRules, onHit *com
 }
 
 func (u *UIController) ShowGameOverMenu() {
-	items := u.context.StartMenuItems(true)
-	u.OpenUncancelableMenu(append(items, util.MenuItem{
-		MainText: "Quit",
-		Action: func() {
-			u.shouldQuitGame = true
-		},
-	}))
+	u.OpenUncancelableMenu(u.context.StartMenuItems(true))
+}
+
+func (u *UIController) QuitGame() {
+	u.shouldQuitGame = true
 }
 
 func (u *UIController) OpenPlayerStashInTown() {
@@ -1228,6 +1280,11 @@ func (u *UIController) OnPlayerTurnTaken() {
 	u.UpdateMiniMap()
 	u.UpdateStatsLabel()
 	player := u.context.GameState().GetPlayer()
+
+	// Panning with the arrows is a look-around, not a camera mode: taking a turn hands the view back.
+	// (The border check below can't do that job - on a map only a little wider than the window, like
+	// the town, scrolling is clamped before the player ever leaves the visible rect.)
+	u.manualScroll = false
 
 	if (!u.setToExactFit && !u.configuration.KeepPlayerCentered) || u.configuration.KeepPlayerCentered {
 		distFromBorder := 4
@@ -1293,38 +1350,149 @@ func (u *UIController) UpdateStatsLabel() {
 	u.miniMap.Show()
 }
 
-// helpLines is the F1 help text.
-func helpLines(autoPickup bool) []string {
-	pickupText := "Press 'g' to pick up items"
+// helpSection is one titled block of "key -> what it does" lines in the F1 help.
+type helpSection struct {
+	title   string
+	entries [][2]string
+}
+
+// helpColumns is every hotkey the game binds, split into the two columns of the help window.
+func helpColumns(autoPickup bool) [2][]helpSection {
+	pickup := "Pick up items"
 	if autoPickup {
-		pickupText = "Press 'g' to pick up items you dropped"
+		pickup = "Pick up dropped"
 	}
-	return []string{
-		"Welcome to heaven and hell!",
-		"",
-		"Use the 'w/a/s/d' keys or Numpad to move around",
-		"Bump into stuff and people to interact with them or attack them",
-		"",
-		"Press 'q' to quickly fire at the nearest enemy with your ranged weapon",
-		"Press 'f' to aim at a specific enemy with your ranged weapon",
-		"Press 't' to throw something",
-		"Press 'e' to cast a spell you know (read books to learn more)",
-		"Press 'space' to cast your last spell at the nearest enemy",
-		"Press 'o' to auto-explore",
-		"Press 'tab' to auto-attack the nearest enemy using your equipped weapon",
-		"Press 'i' to open your inventory",
-		"Press 'c' to show your stats",
-		"Press 'u' to spend stat points after a level up",
-		"Press 'z' to rest until healed, '.' to wait a turn",
-		"Press 'Esc' to pause: settings, quit",
-		pickupText,
-		"Press 'l' to show the last lines of the message log",
-		"Press 'r' to show the quest log",
+	return [2][]helpSection{
+		{
+			{"MOVE & LOOK", [][2]string{
+				{"w a s d", "Move or attack"},
+				{"Left click", "Walk there"},
+				{"Right click", "Look at it"},
+				{"Arrow keys", "Scroll the view"},
+				{"x", "Center on you"},
+				{"m / n", "Zoom in / out"},
+			}},
+			{"FIGHT", [][2]string{
+				{"tab", "Attack nearest"},
+				{"q", "Quick shot"},
+				{"f", "Aim a shot"},
+				{"t", "Throw an item"},
+				{"e", "Cast a spell"},
+				{"space", "Recast at nearest"},
+			}},
+			{"DEBUG", [][2]string{
+				{"F8", "Rendering mode"},
+				{"F9", "Fog of war"},
+				{"F10", "Debug menu"},
+				{"F12", "Flash screen"},
+				{"p", "Kill the level"},
+			}},
+		},
+		{
+			{"EXPLORE", [][2]string{
+				{"g", pickup},
+				{"o", "Auto-explore"},
+				{"j / k", "Stairs up / down"},
+				{"z", "Rest until healed"},
+				{".", "Wait a turn"},
+			}},
+			{"CHARACTER", [][2]string{
+				{"i", "Inventory"},
+				{"c", "Character stats"},
+				{"u", "Spend stat points"},
+				{"l", "Message log"},
+				{"r", "Quest log"},
+				{"b", "Story flags"},
+			}},
+			{"SYSTEM", [][2]string{
+				{"F1", "This help"},
+				{"Esc", "Cancel or pause"},
+				{"F11", "Fullscreen"},
+			}},
+			{"IN MENUS", [][2]string{
+				{"Arrows/wasd", "Move selection"},
+				{"e or Enter", "Confirm"},
+				{"Letter", "Pick that entry"},
+				{"Esc", "Close the menu"},
+			}},
+		},
 	}
 }
 
+// helpLines lays the hotkeys out in two columns. Every part is placed at a measured x offset instead of
+// being padded with spaces, so the columns line up in any font and the text window leaves them alone
+// (it only word-wraps lines without color parts, which would collapse the padding).
+func helpLines(measure func(string) (float64, float64), autoPickup bool) []util.LabelText {
+	columns := helpColumns(autoPickup)
+	spaceWidth, _ := measure(" ")
+	widest := func(pick func(entry [2]string) string) float64 {
+		widest := 0.0
+		for _, sections := range columns {
+			for _, section := range sections {
+				for _, entry := range section.entries {
+					if w, _ := measure(pick(entry)); w > widest {
+						widest = w
+					}
+				}
+			}
+		}
+		return widest
+	}
+	keyOffset := 2 * spaceWidth
+	descriptionOffset := keyOffset + widest(func(e [2]string) string { return e[0] }) + 2*spaceWidth
+	columnWidth := descriptionOffset + widest(func(e [2]string) string { return e[1] }) + 3*spaceWidth
+
+	part := func(text string, xOffset float64, textColor color.RGBA) util.ColoredTextPart {
+		_, height := measure(text)
+		return util.ColoredTextPart{Text: text, Color: textColor, XOffset: xOffset, Height: height}
+	}
+	var rows [2][][]util.ColoredTextPart
+	for column, sections := range columns {
+		left := float64(column) * columnWidth
+		for i, section := range sections {
+			if i > 0 {
+				rows[column] = append(rows[column], nil) // a blank row between sections
+			}
+			rows[column] = append(rows[column], []util.ColoredTextPart{part(section.title, left, defs.White)})
+			for _, entry := range section.entries {
+				rows[column] = append(rows[column], []util.ColoredTextPart{
+					part(entry[0], left+keyOffset, defs.LightTextColor),
+					part(entry[1], left+descriptionOffset, defs.DarkTextColor),
+				})
+			}
+		}
+	}
+
+	const title = "HEAVEN AND HELL - CONTROLS"
+	titleWidth, _ := measure(title)
+	lines := []util.LabelText{helpLine([]util.ColoredTextPart{part(title, (2*columnWidth-titleWidth)/2, defs.LightTextColor)}), {}}
+	for row := 0; row < max(len(rows[0]), len(rows[1])); row++ {
+		lines = append(lines, helpLine(append(helpRow(rows[0], row), helpRow(rows[1], row)...)))
+	}
+	return lines
+}
+
+func helpRow(rows [][]util.ColoredTextPart, row int) []util.ColoredTextPart {
+	if row >= len(rows) {
+		return nil
+	}
+	return rows[row]
+}
+
+func helpLine(parts []util.ColoredTextPart) util.LabelText {
+	if len(parts) == 0 {
+		return util.LabelText{}
+	}
+	texts := make([]string, len(parts))
+	for i, p := range parts {
+		texts[i] = p.Text
+	}
+	// Text is what the label measures the line height with; the parts are what it draws
+	return util.LabelText{Text: strings.Join(texts, " "), UseColorCodes: true, TextWithColorCodes: parts}
+}
+
 func (u *UIController) showHelpText() {
-	u.OpenTextWindow(util.ToLabelTextWithColor(helpLines(u.configuration.AutoPickup), defs.DarkTextColor))
+	u.OpenTextWindow(helpLines(u.GetRenderer().MeasureString, u.configuration.AutoPickup))
 }
 func (u *UIController) ShowLog() {
 	buffer := u.context.GetLog()
@@ -1566,14 +1734,15 @@ func (u *UIController) updateMapTileHoverInfo(mapPos geometry.Point) {
 	}
 	player := u.context.GameState().GetPlayer()
 	m := u.context.GameState().GetMap()
-	if player == nil || !m.Contains(mapPos) || !player.CanSee(mapPos) {
+	if player == nil || !m.Contains(mapPos) || !player.CanPerceive(mapPos) {
 		u.inventory.infoLabel.ClearText()
 		return
 	}
 	var name string
-	switch {
+	switch { // infravision reveals the monster, not the floor it stands on
 	case m.IsActorAt(mapPos) && m.ActorAt(mapPos).IsVisible():
 		name = m.ActorAt(mapPos).Name()
+	case !player.CanSee(mapPos):
 	case m.IsItemAt(mapPos):
 		name = m.ItemAt(mapPos).Name()
 	case m.IsObjectAt(mapPos):

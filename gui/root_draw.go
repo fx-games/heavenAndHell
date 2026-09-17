@@ -3,7 +3,6 @@ package gui
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
-	"math"
 	"rpg/common"
 	"rpg/defs"
 	"rpg/geometry"
@@ -49,36 +48,77 @@ func (u *UIController) Draw(screen *ebiten.Image) {
 	}
 }
 
-// drawUniqueGlow makes a unique monster hard to miss: a saturated gold silhouette, pulsing between 1.15x and
-// 1.7x its normal size, drawn centered behind its normal sprite so it visibly bleeds out around every edge
-// (a single offset-by-a-pixel copy, tried first, was too subtle to notice against most tiles).
-func (u *UIController) drawUniqueGlow(screenX, screenY float64, atlas renderer.TextureAtlas, icon int32, flippedX bool) {
-	pulse := 0.5 + 0.5*math.Sin(float64(u.worldTicks)*0.08)
-	growth := 1.15 + 0.55*pulse // 1.15x .. 1.7x
-	glow := color.RGBA{R: 255, G: 205, B: 40, A: uint8(160 + 95*pulse)}
+// uniqueSweepShaderSrc draws a unique monster's sprite with a specular sheen: a diagonal band of light that
+// sweeps across the sprite once every uniqueSweepIntervalTicks, then is gone until the next pass. The highlight
+// is added on top of the lit sprite rather than blended into it, so it reads as light catching the surface and
+// stays visible in dim rooms, where a color blend would just be swallowed by the ambient lighting tint.
+//
+// The pixel-unit directive is required: in Kage's default texel mode srcPos and imageSrc0Origin are normalized
+// against the internal GPU atlas, so the local 0..1 coordinates below would be meaningless.
+const uniqueSweepShaderSrc = `//kage:unit pixels
 
-	tileSize := u.worldTexture.GetTileSize()
-	tileScale := u.GetTileScaleFactor()
-	normalW, normalH := float64(tileSize.X)*tileScale, float64(tileSize.Y)*tileScale
-	offsetX, offsetY := normalW*(growth-1)/2, normalH*(growth-1)/2
+package main
 
-	u.tileRenderer.DrawScaledTileWithFlip(screenX-offsetX, screenY-offsetY, atlas, icon, geometry.PointF{X: growth, Y: growth}, glow, flippedX)
+var Time float
+var IntervalTicks float
+var SweepFraction float
+var Tint vec4
+
+func Fragment(dstPos vec4, srcPos vec2, color vec4) vec4 {
+	c := imageSrc0UnsafeAt(srcPos)
+	lit := c * Tint
+
+	local := (srcPos - imageSrc0Origin()) / imageSrc0Size()
+	acrossSprite := (local.x + local.y) * 0.5 // 0 at the top-left corner, 1 at the bottom-right one
+
+	sheen := 0.0
+	phase := mod(Time, IntervalTicks) / IntervalTicks
+	if phase < SweepFraction {
+		center := 1.2 - (phase/SweepFraction)*1.4 // travels past both corners, so the sweep enters and exits cleanly
+		falloff := clamp(1.0-abs(acrossSprite-center)/0.16, 0.0, 1.0)
+		sheen = falloff * falloff // squared: a tight bright core with soft edges, like a highlight
+	}
+
+	highlight := vec3(1.0, 0.92, 0.6) * sheen * lit.a // scaled by coverage to stay premultiplied, and so it fades out with the sprite
+	return vec4(lit.rgb+highlight, lit.a)
+}
+`
+
+var uniqueSweepShader = mustCompileShader(uniqueSweepShaderSrc)
+
+func mustCompileShader(src string) *ebiten.Shader {
+	shader, err := ebiten.NewShader([]byte(src))
+	if err != nil {
+		panic(err)
+	}
+	return shader
+}
+
+const uniqueSweepIntervalTicks = 150
+const uniqueSweepFraction = 0.35
+
+// drawUniqueSpecularSheen makes a unique monster hard to miss: a band of light sweeps diagonally across its
+// sprite every uniqueSweepIntervalTicks ticks, then is gone until the next pass. It replaces the normal tinted
+// sprite draw for unique actors (not an overlay on top of one) so there's no second, unlit copy of the sprite
+// sitting on top and hiding the lighting/hurt tint.
+func (u *UIController) drawUniqueSpecularSheen(screenX, screenY float64, atlas renderer.TextureAtlas, icon int32, scale geometry.PointF, tint color.Color, flippedX bool) {
+	u.tileRenderer.DrawScaledTileWithShader(screenX, screenY, atlas, icon, scale, tint, flippedX, uniqueSweepShader, map[string]interface{}{
+		"Time":          float32(u.worldTicks),
+		"IntervalTicks": float32(uniqueSweepIntervalTicks),
+		"SweepFraction": float32(uniqueSweepFraction),
+	})
 }
 
 func (u *UIController) drawActors() {
 	visibleMapOnScreen := u.mapRenderer.GetVisibleMap()
 	state := u.context.GameState()
 	player := state.GetPlayer()
-	playerFieldOfView := player.GetFOV()
 
 	enemyColor := defs.White
 	actorAtlas := u.GetCurrentAtlas()
 
-	infravision := player.HasInfravision()
 	for _, actor := range state.GetMap().Actors() {
-		seen := playerFieldOfView.Visible(actor.MapPosition()) ||
-			infravision && geometry.DistanceChebyshev(actor.MapPosition(), player.MapPosition()) <= 15 // D1 infravision: monsters through walls
-		if !visibleMapOnScreen.Contains(actor.MapPosition()) || !seen {
+		if !visibleMapOnScreen.Contains(actor.MapPosition()) || !player.CanPerceive(actor.MapPosition()) {
 			continue
 		}
 		if !actor.IsVisible() {
@@ -96,24 +136,22 @@ func (u *UIController) drawActors() {
 			percentage := actor.GetHurtTicksAsPercentage() // goes from 1.0 to 0.0
 			drawColor = util.LerpColor(defs.Red, actorColor, percentage)
 		}
-		if actor.IsUnique() {
-			screenPos := u.mapRenderer.MapFloatToScreen(actor.DrawPosition())
-			flippedX := actor.FlipX() && u.configuration.FlipActorsHorizontally
-			icon := u.getActorIcon(actor, u.worldTicks)
-			u.drawUniqueGlow(float64(screenPos.X), float64(screenPos.Y), actorAtlas, icon, flippedX)
-		}
 		if u.configuration.ActorBobbingEnabled {
-			u.drawActorWithBobbingAnimation(actor, actorAtlas, drawColor)
+			u.drawActorWithBobbingAnimation(actor, actorAtlas, drawColor, actor.IsUnique())
 		} else {
 			screenPos := u.mapRenderer.MapFloatToScreen(actor.DrawPosition())
 			flippedX := actor.FlipX() && u.configuration.FlipActorsHorizontally
 			icon := u.getActorIcon(actor, u.worldTicks)
-			u.tileRenderer.DrawDefaultScaleTileWithFlip(float64(screenPos.X), float64(screenPos.Y), actorAtlas, icon, drawColor, flippedX)
+			if actor.IsUnique() {
+				u.drawUniqueSpecularSheen(float64(screenPos.X), float64(screenPos.Y), actorAtlas, icon, geometry.PointF{X: 1, Y: 1}, drawColor, flippedX)
+			} else {
+				u.tileRenderer.DrawDefaultScaleTileWithFlip(float64(screenPos.X), float64(screenPos.Y), actorAtlas, icon, drawColor, flippedX)
+			}
 		}
 	}
 
 	for _, actor := range state.GetMap().Actors() {
-		if !actor.IsVisible() || !visibleMapOnScreen.Contains(actor.MapPosition()) || !playerFieldOfView.Visible(actor.MapPosition()) {
+		if !actor.IsVisible() || !visibleMapOnScreen.Contains(actor.MapPosition()) || !player.CanPerceive(actor.MapPosition()) {
 			continue
 		}
 		if !actor.GetStats().GetResource(stats.Health).IsAtMax() {
@@ -122,7 +160,7 @@ func (u *UIController) drawActors() {
 	}
 }
 
-func (u *UIController) drawActorWithBobbingAnimation(actor *common.Actor, atlas renderer.TextureAtlas, drawColor color.Color) {
+func (u *UIController) drawActorWithBobbingAnimation(actor *common.Actor, atlas renderer.TextureAtlas, drawColor color.Color, isUnique bool) {
 	screenPos := u.mapRenderer.MapFloatToScreen(actor.DrawPosition())
 	actorTickOffset := actor.MapPosition().X + actor.MapPosition().Y + len(actor.Name())
 	tileSize := u.mapRenderer.GetScaledTileSize()
@@ -142,7 +180,11 @@ func (u *UIController) drawActorWithBobbingAnimation(actor *common.Actor, atlas 
 	icon := u.getActorIcon(actor, ticksForAnimation)
 
 	flippedX := actor.FlipX() && u.configuration.FlipActorsHorizontally
-	u.tileRenderer.DrawScaledTileWithFlip(float64(screenPos.X)+xOffset, float64(screenPos.Y)+yOffset, atlas, icon, currentScale, drawColor, flippedX)
+	if isUnique {
+		u.drawUniqueSpecularSheen(float64(screenPos.X)+xOffset, float64(screenPos.Y)+yOffset, atlas, icon, currentScale, drawColor, flippedX)
+	} else {
+		u.tileRenderer.DrawScaledTileWithFlip(float64(screenPos.X)+xOffset, float64(screenPos.Y)+yOffset, atlas, icon, currentScale, drawColor, flippedX)
+	}
 }
 
 func (u *UIController) getActorIcon(actor *common.Actor, ticksForAnimation uint64) int32 {

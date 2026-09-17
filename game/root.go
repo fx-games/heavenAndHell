@@ -807,6 +807,8 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 }
 
 func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
+	g.actions.stopAutoMove() // path & queued moves belong to the old map
+
 	if defs.IsTownLevel(newMapName) {
 		currentMap := g.state.GetMap()
 		g.state.SetTownMap(currentMap)

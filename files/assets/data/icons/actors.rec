@@ -25,27 +25,27 @@ icon: 49
 name: Class Sorcerer (female)
 
 internal_name: class.monk_male
-icon: 22
+icon: 25
 name: Class Monk (male)
 
 internal_name: class.monk_female
-icon: 50
+icon: 53
 name: Class Monk (female)
 
 internal_name: class.bard_male
-icon: 23
+icon: 313
 name: Class Bard (male)
 
 internal_name: class.bard_female
-icon: 51
+icon: 341
 name: Class Bard (female)
 
 internal_name: class.barbarian_male
-icon: 24
+icon: 312
 name: Class Barbarian (male)
 
 internal_name: class.barbarian_female
-icon: 52
+icon: 340
 name: Class Barbarian (female)
 
 internal_name: corpse.default
@@ -539,7 +539,7 @@ icon: 480
 internal_name: monster.balrog
 reference_image: reference/d1_sprites/monsters/monster.balrog.png
 name: Balrog
-icon: 436
+icon: 261
 
 internal_name: monster.nsnake
 reference_image: reference/d1_sprites/monsters/monster.nsnake.png
@@ -564,7 +564,7 @@ icon: 528
 internal_name: monster.nblack
 reference_image: reference/d1_sprites/monsters/monster.nblack.png
 name: Black Knight
-icon: 500
+icon: 721
 
 internal_name: monster.rtblack
 reference_image: reference/d1_sprites/monsters/monster.rtblack.png
@@ -688,7 +688,7 @@ name: Red Vex
 
 internal_name: unique.blackjade
 reference_image: reference/d1_sprites/monsters/unique.blackjade.png
-icon: 436
+icon: 438
 name: BlackJade
 
 internal_name: unique.lachdanan
@@ -828,7 +828,7 @@ name: Blightstone the Weak
 
 internal_name: unique.bilefroth_the_pit_master
 reference_image: reference/d1_sprites/monsters/unique.bilefroth_the_pit_master.png
-icon: 764
+icon: 452
 name: Bilefroth the Pit Master
 
 internal_name: unique.bloodskin_darkbow
@@ -1032,7 +1032,7 @@ name: Witchfire the Unholy
 
 internal_name: unique.blackskull
 reference_image: reference/d1_sprites/monsters/unique.blackskull.png
-icon: 436
+icon: 260
 name: Blackskull
 
 internal_name: unique.soulslash

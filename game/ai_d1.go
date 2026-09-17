@@ -82,6 +82,13 @@ func (g *GameInstance) d1MonsterAction(a *common.Actor) (int, func()) {
 		mon.Squelch = max(mon.Squelch-d1.RefWalkTicks, 0)
 	}
 
+	if mon.Flee > 0 {
+		mon.Flee--
+		if act, ok := b.flee(); ok {
+			return b.commit(act)
+		}
+		mon.Flee = 0 // cornered: turn and fight
+	}
 	act, ok := noAct, false
 	for tick := 0; tick < d1.RefWalkTicks && !ok; tick++ {
 		if mon.Data.Flags&d1.MFlagSearch != 0 {
@@ -96,13 +103,35 @@ func (g *GameInstance) d1MonsterAction(a *common.Actor) (int, func()) {
 			mon.StandTicks++
 		}
 	}
+	// A monster the player has attacked doesn't get to spend a turn dithering: its own AI had every tick to
+	// pick something, so now it swings or closes in.
+	if !ok && mon.Enraged {
+		if act, ok = b.attack(); !ok {
+			act, ok = b.callWalk(b.dirTo(b.enemy))
+		}
+	}
 	if !ok {
 		return 10, func() {}
 	}
+	return b.commit(act)
+}
+
+func (b *d1Brain) commit(act d1Act) (int, func()) {
 	return act.cost, func() {
 		act.run()
-		mon.LastMode, mon.StandTicks = act.mode, 0
+		b.mon.LastMode, b.mon.StandTicks = act.mode, 0
 	}
+}
+
+// flee runs from the player on their own dijkstra map, so a broken monster rounds corners and takes doors
+// instead of backing into the nearest wall. False when there is nowhere left to run.
+func (b *d1Brain) flee() (d1Act, bool) {
+	if away := b.g.GetMoveAwayFromPlayer(b.pos); away != b.pos {
+		if _, ok := b.step(b.dirTo(away)); ok {
+			return b.walkTo(away), true
+		}
+	}
+	return b.callWalk(b.dirTo(b.enemy) + 4)
 }
 
 func (b *d1Brain) think() (d1Act, bool) {
@@ -465,7 +494,7 @@ func (b *d1Brain) zombie() (d1Act, bool) {
 	if v >= 2*mon.Int+10 {
 		return noAct, false
 	}
-	if b.near(2*mon.Int + 4) {
+	if b.near(2*mon.Int+4) || mon.Enraged { // MAI_Zombie only homes in from close by; being shot at counts too
 		return b.callWalk(b.dirTo(b.enemy))
 	}
 	md := mon.Dir
