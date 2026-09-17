@@ -406,6 +406,12 @@ func (u *UIController) OpenTextWindow(buffer []util.LabelText) {
 	textWindow.SetBorderPadding(geometry.Point{X: 15, Y: 15})
 	u.PushWidget(textWindow)
 }
+
+// ShowItemInfo shows the item's hover tooltip as a text window, for when the player needs to read it, not glance at it.
+func (u *UIController) ShowItemInfo(item *common.Item) {
+	u.OpenTextWindow(item.GetTooltipLines(u.ParseColorCodedText))
+}
+
 func (u *UIController) OpenInventoryOverlay(pos, tileSize geometry.Point, dataSource IconDataSource) *IconOverlay {
 	inventory := NewIconOverlay(u, pos, tileSize, dataSource)
 	inventory.SetShowEmptySlots(true)

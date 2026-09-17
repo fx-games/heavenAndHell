@@ -64,7 +64,8 @@ func PayGold(ctx ActionContext, player *Actor, cost int) bool {
 
 // d1ServiceOption lists the player's items a service applies to, with prices, and performs it on selection. Like the
 // sell menu, the list reopens after each purchase until nothing is left for the service.
-func d1ServiceOption(ctx ActionContext, label string, applies func(*d1.Item) bool, cost func(*d1.Item) int, perform func(*d1.Item)) util.MenuItem {
+// showAfter, when set, opens the item's description once the service menu is back up, so the window lands on top of it.
+func d1ServiceOption(ctx ActionContext, label string, applies func(*d1.Item) bool, cost func(*d1.Item) int, perform func(*d1.Item), showAfter ...bool) util.MenuItem {
 	var open func(reopen bool)
 	open = func(reopen bool) {
 		player := ctx.GameState.GetPlayer()
@@ -82,13 +83,17 @@ func d1ServiceOption(ctx ActionContext, label string, applies func(*d1.Item) boo
 		}
 		ctx.UserInterface().OpenServiceMenu(items, func(it *Item) int { return cost(it.d1) }, func(it *Item) {
 			price := cost(it.d1)
-			if PayGold(ctx, player, price) {
+			done := PayGold(ctx, player, price)
+			if done {
 				perform(it.d1)
 				it.RefreshD1()
 				SyncHero(player)
 				ctx.Msg(fmt.Sprintf("%s: done (%d gold)", it.Name(), price))
 			}
 			open(true)
+			if done && len(showAfter) > 0 && showAfter[0] {
+				ctx.UserInterface().ShowItemInfo(it)
+			}
 		})
 	}
 	return util.MenuItem{MainText: label, Action: func() { open(false) }}
@@ -134,7 +139,7 @@ func d1VendorOptions(ctx ActionContext, vendor *Actor) []util.MenuItem {
 	case VendorTypeCain:
 		// D1 charges a flat 100 gold to identify (AddStoreHoldId in stores.cpp), regardless of item value
 		return []util.MenuItem{d1ServiceOption(ctx, "Identify an item", func(it *d1.Item) bool { return it.Magical != 0 && !it.Identified },
-			func(*d1.Item) int { return 100 }, func(it *d1.Item) { it.Identified = true })}
+			func(*d1.Item) int { return 100 }, func(it *d1.Item) { it.Identified = true }, true)}
 	case VendorTypeWirt: // the look fee is paid once per item: looking again is free until Wirt has a new one
 		if vendor.GetInventory().IsEmpty() {
 			return nil

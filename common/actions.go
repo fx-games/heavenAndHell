@@ -62,6 +62,8 @@ type UserInterface interface {
 	OpenMenu(options []util.MenuItem)
 	OpenUncancelableMenu(options []util.MenuItem) // like OpenMenu, but ESC/cancel does nothing (e.g. the start menu)
 	OpenTextWindow(msg []util.LabelText)
+	// ShowItemInfo opens the hover tooltip's lines as a text window the player has to close.
+	ShowItemInfo(item *Item)
 
 	CancelTargeting()
 	ShowFullStats()
