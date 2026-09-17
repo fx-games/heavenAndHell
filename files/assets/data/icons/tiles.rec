@@ -129,7 +129,7 @@ icon: 56
 name: Cathedral Wall
 
 internal_name: tile.arch
-icon: 346
+icon: 181
 name: Arch
 
 internal_name: tile.grate
