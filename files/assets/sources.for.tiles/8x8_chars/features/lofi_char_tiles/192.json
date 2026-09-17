@@ -1,0 +1,62 @@
+{
+  "id": "lofi_char_tiles/192",
+  "perceptual": {
+    "silhouette": [
+      "low horizontal body silhouette",
+      "tall curved projection rising on left and curling over",
+      "head at right end",
+      "four short legs"
+    ],
+    "shape": [
+      "long horizontal body",
+      "vertical hooked extension at rear",
+      "small bump on back",
+      "dark spot at front right"
+    ],
+    "orientation": [
+      "side-facing",
+      "facing right"
+    ],
+    "pose": [
+      "four-legged stance",
+      "tail raised"
+    ],
+    "colors": [
+      "mostly brown",
+      "one black pixel at front right"
+    ],
+    "major_regions": [
+      "brown body",
+      "curled tail",
+      "black eye or nose spot"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "quadrupedal",
+      "arthropod-like"
+    ],
+    "possible_features": [
+      "curled rear extension could be a stinger tail or a raised animal tail",
+      "black pixel could be an eye",
+      "legs spaced beneath body"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "scorpion",
+      "small beast",
+      "rodent-like animal"
+    ],
+    "visual_symbols": [
+      "curled tail",
+      "legs"
+    ],
+    "priority_features": [
+      "tail curling up and over",
+      "low horizontal body",
+      "facing right",
+      "short legs"
+    ]
+  }
+}

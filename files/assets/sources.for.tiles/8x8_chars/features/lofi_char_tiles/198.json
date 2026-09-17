@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/198",
+  "perceptual": {
+    "silhouette": [
+      "low body with tall curved tail arching up on left and over",
+      "legs along bottom"
+    ],
+    "shape": [
+      "thin vertical curved band",
+      "horizontal body",
+      "orange hooked tip at top",
+      "small dots along underside"
+    ],
+    "orientation": [
+      "side-facing",
+      "facing right"
+    ],
+    "pose": [
+      "tail raised",
+      "crawling"
+    ],
+    "colors": [
+      "pale yellow body",
+      "orange stinger and legs",
+      "two red eye pixels"
+    ],
+    "major_regions": [
+      "yellow arched tail",
+      "yellow low body with red eyes",
+      "orange legs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "arthropod"
+    ],
+    "possible_features": [
+      "arched tail with orange tip could be a stinger",
+      "red pixels could be eyes",
+      "orange dots underneath could be legs"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "scorpion",
+      "desert arthropod"
+    ],
+    "visual_symbols": [
+      "stinger tail",
+      "many legs",
+      "red eyes"
+    ],
+    "priority_features": [
+      "arched stinger tail",
+      "low elongated body",
+      "red eyes at front right",
+      "multiple small legs"
+    ]
+  }
+}

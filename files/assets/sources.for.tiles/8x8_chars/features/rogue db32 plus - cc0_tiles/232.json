@@ -1,0 +1,67 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/232",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "yellow mass on top and left side",
+   "wide shoulders",
+   "short legs"
+  ],
+  "shape": [
+   "large head with side hair",
+   "green rectangular torso",
+   "white teeth at mouth",
+   "tan legs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms at sides"
+  ],
+  "colors": [
+   "orange skin",
+   "yellow hair",
+   "blue eyes",
+   "white tusks",
+   "green tunic",
+   "tan legs"
+  ],
+  "major_regions": [
+   "yellow hair wrapping head",
+   "orange face with tusks",
+   "green tunic",
+   "tan legs"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "white mouth pixels could be tusks",
+   "yellow could be long hair"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "ogre",
+   "orc",
+   "troll",
+   "female ogre"
+  ],
+  "visual_symbols": [
+   "tusks",
+   "long yellow hair",
+   "green tunic"
+  ],
+  "priority_features": [
+   "orange face with tusks",
+   "yellow hair",
+   "green tunic",
+   "blue eyes"
+  ]
+ }
+}

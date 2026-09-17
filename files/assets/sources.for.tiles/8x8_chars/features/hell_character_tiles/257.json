@@ -1,0 +1,59 @@
+{
+  "id": "hell_character_tiles/257",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "hooded head",
+      "brown pole right"
+    ],
+    "shape": [
+      "square hood",
+      "rectangular body",
+      "horizontal waist band",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "light blue hood and robe",
+      "green face with black eyes",
+      "white belt"
+    ],
+    "major_regions": [
+      "blue hood framing green face",
+      "black eyes",
+      "white belt",
+      "green hands",
+      "staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "green face could suggest goblin or zombie skin",
+      "right bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin mage",
+      "green-skinned wizard"
+    ],
+    "visual_symbols": [
+      "hood",
+      "green face",
+      "staff"
+    ],
+    "priority_features": [
+      "green face in blue hood",
+      "white belt",
+      "staff"
+    ]
+  }
+}

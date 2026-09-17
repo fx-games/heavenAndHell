@@ -1,0 +1,63 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/203",
+  "perceptual": {
+    "silhouette": [
+      "wide low silhouette",
+      "bulky rounded upper mass",
+      "row of thin leg-like projections below"
+    ],
+    "shape": [
+      "large irregular body mass",
+      "smaller head-like mass at right",
+      "multiple short vertical projections"
+    ],
+    "orientation": [
+      "facing right",
+      "ambiguous"
+    ],
+    "pose": [
+      "crawling",
+      "multi-legged stance"
+    ],
+    "colors": [
+      "mostly brown",
+      "darker brown mottling",
+      "bright red/pink eye pixels"
+    ],
+    "major_regions": [
+      "brown hairy-looking body",
+      "red eyes at right",
+      "dark legs below"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "multi-legged",
+      "arachnid-like",
+      "quadrupedal"
+    ],
+    "possible_features": [
+      "red pixels could be eyes",
+      "lower projections could be spider legs",
+      "mottled texture could be fur"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "giant spider",
+      "tarantula",
+      "beast",
+      "hairy creature"
+    ],
+    "visual_symbols": [
+      "glowing red eyes",
+      "many legs",
+      "furry body"
+    ],
+    "priority_features": [
+      "brown bulky body",
+      "red eyes",
+      "many short legs"
+    ]
+  }
+}

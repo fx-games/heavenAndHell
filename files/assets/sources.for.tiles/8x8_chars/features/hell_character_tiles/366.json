@@ -1,0 +1,68 @@
+{
+  "id": "hell_character_tiles/366",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "gray capped head with white top",
+      "large gray block on left",
+      "vertical line on right"
+    ],
+    "shape": [
+      "head block",
+      "gray rectangular mass on left side",
+      "body with orange band",
+      "thin pole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding object on each side"
+    ],
+    "colors": [
+      "gray and white head",
+      "yellow face",
+      "gray left block",
+      "orange band",
+      "white lower body",
+      "brown line right"
+    ],
+    "major_regions": [
+      "gray helmet/cap with white",
+      "gray block covering left",
+      "orange belt",
+      "white robe",
+      "brown pole right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "gray left block could be a shield",
+      "gray head covering could be a helmet or hood",
+      "brown line could be a staff or spear"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "paladin",
+      "cleric",
+      "armored priest"
+    ],
+    "visual_symbols": [
+      "shield",
+      "helmet",
+      "staff"
+    ],
+    "priority_features": [
+      "large gray shield on left",
+      "gray head covering",
+      "white robe with orange belt",
+      "staff on right"
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/176",
+  "perceptual": {
+    "silhouette": [
+      "triangular mound silhouette",
+      "wide flat base",
+      "pointed rounded top"
+    ],
+    "shape": [
+      "triangle/pyramid mass",
+      "small bright spot near apex",
+      "diagonal lighter streak on left side"
+    ],
+    "orientation": [
+      "front-facing",
+      "ambiguous"
+    ],
+    "pose": [
+      "stationary",
+      "resting on ground"
+    ],
+    "colors": [
+      "mostly black",
+      "dark gray highlight streak",
+      "single white eye pixel"
+    ],
+    "major_regions": [
+      "black mound",
+      "one white eye near top"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "amorphous",
+      "limbless mound"
+    ],
+    "possible_features": [
+      "white pixel could be a single eye",
+      "gray streak could be a sheen suggesting slime",
+      "mound could be a pile, hill, or hooded shape"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dark slime",
+      "shadow creature",
+      "living mound"
+    ],
+    "visual_symbols": [
+      "single glowing eye",
+      "mound shape"
+    ],
+    "priority_features": [
+      "triangular mound",
+      "single bright eye",
+      "dark body",
+      "wide base"
+    ]
+  }
+}

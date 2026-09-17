@@ -1,0 +1,59 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/212",
+  "perceptual": {
+    "silhouette": [
+      "compact quadrupedal silhouette",
+      "large dome-like mass upper left",
+      "head projecting right",
+      "short legs below"
+    ],
+    "shape": [
+      "large rounded dark body mass",
+      "small head at right",
+      "four short leg-like projections"
+    ],
+    "orientation": [
+      "facing right"
+    ],
+    "pose": [
+      "four-legged stance",
+      "walking"
+    ],
+    "colors": [
+      "dark purple-brown body with orange-brown mottling",
+      "bright green head and legs"
+    ],
+    "major_regions": [
+      "mottled dark dome",
+      "green head and limbs protruding"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "quadrupedal",
+      "reptilian",
+      "shelled"
+    ],
+    "possible_features": [
+      "dome could be a shell",
+      "green protrusions could be head and legs"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "turtle",
+      "tortoise",
+      "reptile"
+    ],
+    "visual_symbols": [
+      "shell",
+      "green head",
+      "stubby legs"
+    ],
+    "priority_features": [
+      "dark domed shell",
+      "green head at right",
+      "green stubby legs"
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/69",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "rounded dark helmet",
+      "long straight gray bar at right"
+    ],
+    "shape": [
+      "dark gray helmet",
+      "blue face with red points",
+      "white torso",
+      "thin vertical blade"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding blade upright"
+    ],
+    "colors": [
+      "dark gray helmet",
+      "blue face",
+      "bright red eyes",
+      "white body"
+    ],
+    "major_regions": [
+      "dark helmet over blue face",
+      "red eyes",
+      "white tunic",
+      "gray sword at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "blue face with red dots could be non-human skin or glowing eyes",
+      "gray bar could be a sword",
+      "blue side pixels could be hands"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "demonic or corrupted knight",
+      "undead soldier",
+      "blue-skinned warrior"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "red eyes",
+      "sword",
+      "white tabard"
+    ],
+    "priority_features": [
+      "blue face with red eyes",
+      "dark helmet",
+      "white tunic",
+      "upright sword"
+    ]
+  }
+}

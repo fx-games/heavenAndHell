@@ -1,0 +1,58 @@
+{
+  "id": "hell_character_tiles/259",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "hooded head",
+      "dark bar on right"
+    ],
+    "shape": [
+      "square head",
+      "wide body",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "red hood and robe",
+      "green face with black eyes",
+      "orange belt"
+    ],
+    "major_regions": [
+      "red hood framing green face",
+      "black eyes",
+      "orange belt",
+      "red robe",
+      "green hands at sides"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "green face could suggest goblin or orc skin",
+      "right bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin cultist",
+      "green-skinned hooded figure"
+    ],
+    "visual_symbols": [
+      "hood",
+      "green face",
+      "belt"
+    ],
+    "priority_features": [
+      "green face in red hood",
+      "red robe",
+      "orange belt"
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/57",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "wide head covering with bright top band",
+      "no side item"
+    ],
+    "shape": [
+      "wide blue and yellow top mass",
+      "pale face",
+      "teal torso",
+      "brown waist band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "yellow and blue headgear",
+      "pale cyan face",
+      "teal body",
+      "brown belt"
+    ],
+    "major_regions": [
+      "blue hat with yellow crown-like accent",
+      "pale face",
+      "teal tunic with brown belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "yellow on blue top could be a crown or decorated hat",
+      "pale face could suggest frost or pallor",
+      "light side pixels could be hands"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "frost noble or prince",
+      "ice king",
+      "cleric"
+    ],
+    "visual_symbols": [
+      "crown-like headgear",
+      "tunic"
+    ],
+    "priority_features": [
+      "yellow crown-like accent on blue hat",
+      "pale icy face",
+      "unarmed stance"
+    ]
+  }
+}

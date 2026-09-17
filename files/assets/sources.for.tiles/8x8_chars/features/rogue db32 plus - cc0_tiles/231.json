@@ -1,0 +1,68 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/231",
+ "perceptual": {
+  "silhouette": [
+   "stocky humanoid silhouette",
+   "broad pale head top",
+   "wide shoulders",
+   "short legs"
+  ],
+  "shape": [
+   "large rounded head mass",
+   "wide torso",
+   "small white teeth shapes at mouth",
+   "brown leg blocks"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms at sides"
+  ],
+  "colors": [
+   "orange skin",
+   "tan/pale top of head",
+   "blue eyes",
+   "white teeth",
+   "red chest",
+   "brown legs"
+  ],
+  "major_regions": [
+   "pale bald head top",
+   "orange face with blue eyes",
+   "dark mouth with white tusks",
+   "red torso"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "white pixels at mouth could be tusks or fangs",
+   "pale top could be bald head",
+   "red could be clothing or skin"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "ogre",
+   "orc",
+   "troll",
+   "brute"
+  ],
+  "visual_symbols": [
+   "tusks",
+   "bald head",
+   "big face"
+  ],
+  "priority_features": [
+   "orange face with white tusks",
+   "pale bald top",
+   "blue eyes",
+   "red torso"
+  ]
+ }
+}

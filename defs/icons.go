@@ -58,6 +58,32 @@ func IconID(kind, raw string) string {
 	return kind + "." + slug
 }
 
+// propFolds folds D1 objects into one icon where the top-down view can't tell them apart: the same sprite under
+// another ID (trapped chests, quest copies), or the same thing drawn from another isometric angle (left/right
+// walls). A fold to a ".used" key is an object that looks like another's used state (an empty bookcase).
+var propFolds = map[string]string{
+	"tchest1": "chest1", "tchest2": "chest2", "tchest3": "chest3", "signchest": "chest3",
+	"shrinel": "shrine", "shriner": "shrine",
+	"bookcasel": "bookcase", "bookcaser": "bookcase", "bookshelf": "bookcase.used",
+	"bannerl": "banner", "bannerm": "banner", "bannerr": "banner",
+	"crux1": "crux", "crux2": "crux", "crux3": "crux",
+	"blindbook": "book1", "bloodbook": "book1", "steeltome": "book1", "booklvr": "book1",
+	"book2l": "book2", "book2r": "book2", "skelbook": "book2", "bookstand": "book2",
+	"flamelvr": "lever", "bookcandle": "candle2", "storycandle": "candle2", "tbcross": "bcross",
+	"mcircle1": "mcircle", "mcircle2": "mcircle",
+	"wararmor": "armorstand", "armorstandn": "armorstand.used",
+	"warweap": "weaponrack", "weaprack": "weaponrack", "weaponrackn": "weaponrack.used",
+}
+
+// PropIconID is IconID("prop", obj) after propFolds.
+func PropIconID(obj string) string {
+	id := IconID("prop", obj)
+	if f, ok := propFolds[strings.TrimPrefix(id, "prop.")]; ok {
+		return "prop." + f
+	}
+	return id
+}
+
 // IconOK looks up a name not exposed as a Go constant (D1's dynamically keyed "monster.<id>", "npc.<name>",
 // "item.<name>", "prop.<name>", "spell.<name>", built with IconID) in all four category files.
 func IconOK(name string) (int32, bool) {

@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/599",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "wide head filling upper half",
+      "two small protrusions at top corners",
+      "narrow lower body with leg gaps"
+    ],
+    "shape": [
+      "large squarish head",
+      "small rectangular torso",
+      "thin vertical object at right edge"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "mostly green",
+      "red lower-face region",
+      "brown top-corner accents",
+      "two yellow eye pixels"
+    ],
+    "major_regions": [
+      "green head with yellow eyes",
+      "red region over mouth/chest",
+      "gray vertical strip at right side"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "brown top corners could be horns or pointed ears",
+      "red region could be a beard, open mouth or blood",
+      "gray strip could be a weapon"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin",
+      "orc",
+      "humanoid monster"
+    ],
+    "visual_symbols": [
+      "glowing eyes",
+      "horns or pointed ears",
+      "weapon"
+    ],
+    "priority_features": [
+      "green skin",
+      "yellow eyes",
+      "red lower face",
+      "small top-corner horns"
+    ]
+  }
+}

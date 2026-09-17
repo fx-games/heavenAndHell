@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/260",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "helmet-like head",
+      "gray blade right",
+      "small feet"
+    ],
+    "shape": [
+      "square head",
+      "banded body",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon"
+    ],
+    "colors": [
+      "yellow helmet and lower body",
+      "green face with black eyes",
+      "orange belt with gray buckle",
+      "gray blade"
+    ],
+    "major_regions": [
+      "yellow helmet over green face",
+      "black eyes",
+      "belt with buckle",
+      "yellow skirt",
+      "gray sword at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "green face could suggest goblin or orc",
+      "yellow top could be a helmet",
+      "gray bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin warrior",
+      "orc fighter"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "green face",
+      "sword"
+    ],
+    "priority_features": [
+      "green face under yellow helmet",
+      "gray sword right",
+      "belted tunic"
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+{
+ "id": "lofi_char_tiles/126",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "small protrusion at top left of head",
+   "tall bar along upper right"
+  ],
+  "shape": [
+   "rounded head",
+   "blocky torso",
+   "vertical bar right",
+   "arm extended"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "weapon raised"
+  ],
+  "colors": [
+   "pale blue body",
+   "dark blue eyes"
+  ],
+  "major_regions": [
+   "pale head with dark eyes",
+   "blue body",
+   "tall raised weapon at right"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid"
+  ],
+  "possible_features": [
+   "top protrusion could be a plume or helmet crest",
+   "right bar could be a sword or spear"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "knight",
+   "warrior",
+   "ghost soldier"
+  ],
+  "visual_symbols": [
+   "helmet crest",
+   "sword or spear"
+  ],
+  "priority_features": [
+   "raised long weapon at right",
+   "crested helmet",
+   "pale blue body"
+  ]
+ }
+}

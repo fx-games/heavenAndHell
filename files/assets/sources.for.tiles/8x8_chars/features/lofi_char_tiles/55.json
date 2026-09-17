@@ -1,0 +1,59 @@
+{
+  "id": "lofi_char_tiles/55",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "tapered cap",
+      "tall pole with light tip at right"
+    ],
+    "shape": [
+      "large head with cap",
+      "pale face",
+      "blocky teal torso",
+      "long brown shaft with gray top"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole upright"
+    ],
+    "colors": [
+      "mostly teal/cyan",
+      "very pale face",
+      "brown shaft"
+    ],
+    "major_regions": [
+      "teal cap over pale face",
+      "teal tunic with brown belt",
+      "brown spear-like pole at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "pole with gray tip could be a spear or staff",
+      "pale bluish face could suggest ice or undead pallor"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "frost spearman",
+      "guard",
+      "pale-skinned adventurer"
+    ],
+    "visual_symbols": [
+      "hood or cap",
+      "spear",
+      "tunic"
+    ],
+    "priority_features": [
+      "pale icy face",
+      "teal outfit",
+      "upright spear-like pole"
+    ]
+  }
+}

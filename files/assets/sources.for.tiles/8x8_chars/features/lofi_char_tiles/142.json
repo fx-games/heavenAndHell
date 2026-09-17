@@ -1,0 +1,60 @@
+{
+ "id": "lofi_char_tiles/142",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "flat top on head",
+   "side protrusions at head level",
+   "squared body"
+  ],
+  "shape": [
+   "dark green top cap",
+   "bright horizontal band",
+   "wide green head",
+   "blue rectangular body"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "green skin and cap",
+   "yellow-green band",
+   "blue clothing"
+  ],
+  "major_regions": [
+   "green head with bright band and dark eyes",
+   "blue torso and legs with overall-like straps",
+   "green arms at sides"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "stocky biped"
+  ],
+  "possible_features": [
+   "top band could be a hat brim or headband",
+   "blue body could be overalls or tunic",
+   "side points could be ears"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "goblin",
+   "green-skinned humanoid",
+   "peasant or worker"
+  ],
+  "visual_symbols": [
+   "cap",
+   "overalls"
+  ],
+  "priority_features": [
+   "green skin",
+   "blue clothing",
+   "bright band on head"
+  ]
+ }
+}

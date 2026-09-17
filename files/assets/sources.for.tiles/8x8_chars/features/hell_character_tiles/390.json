@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/390",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "bald head",
+      "brown shape top right",
+      "bare legs"
+    ],
+    "shape": [
+      "yellow head block",
+      "brown bands across torso",
+      "dark belt with gray buckle",
+      "yellow legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "yellow skin",
+      "brown straps",
+      "dark belt",
+      "brown right region"
+    ],
+    "major_regions": [
+      "bald head",
+      "brown harness",
+      "dark belt with buckle",
+      "bare legs",
+      "brown object at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "brown bands could be leather straps",
+      "brown right shape could be a club",
+      "bare skin suggests fighter"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "barbarian",
+      "brawler",
+      "wrestler"
+    ],
+    "visual_symbols": [
+      "harness",
+      "belt",
+      "bald head"
+    ],
+    "priority_features": [
+      "bald head",
+      "brown straps",
+      "bare skin",
+      "dark belt"
+    ]
+  }
+}

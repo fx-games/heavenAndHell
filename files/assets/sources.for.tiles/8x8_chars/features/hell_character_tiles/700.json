@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/700",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "squarish head",
+      "dark vertical bar at right edge",
+      "wide lower body"
+    ],
+    "shape": [
+      "rectangular head with horizontal band",
+      "rectangular torso",
+      "thin vertical extension on right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object at side"
+    ],
+    "colors": [
+      "red head band and body",
+      "white face region",
+      "orange horizontal belt",
+      "dark bar at right"
+    ],
+    "major_regions": [
+      "red band across top of head",
+      "white face with dark eyes",
+      "red torso split by orange band"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red band could be a headband or bandana",
+      "orange stripe could be a belt or sash",
+      "dark vertical bar could be a staff or spear"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "warrior or monk",
+      "humanoid adventurer",
+      "bandit"
+    ],
+    "visual_symbols": [
+      "headband",
+      "belt/sash",
+      "staff"
+    ],
+    "priority_features": [
+      "red headband",
+      "red body with orange belt",
+      "vertical pole at right"
+    ]
+  }
+}

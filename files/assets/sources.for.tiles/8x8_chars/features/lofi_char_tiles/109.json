@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/109",
+ "perceptual": {
+  "silhouette": [
+   "tall dark humanoid silhouette",
+   "vertical stick on right side",
+   "flat top"
+  ],
+  "shape": [
+   "large black body mass",
+   "gray cap on top",
+   "thin vertical bar at right"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding staff"
+  ],
+  "colors": [
+   "mostly black",
+   "red eyes",
+   "brown staff",
+   "gray top"
+  ],
+  "major_regions": [
+   "black cloaked body",
+   "two red eye spots in dark face",
+   "brown vertical staff"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid"
+  ],
+  "possible_features": [
+   "dark mass could be a hood or robe",
+   "red spots could be glowing eyes",
+   "brown bar could be a staff or spear"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "dark mage",
+   "cultist",
+   "assassin",
+   "shadow figure"
+  ],
+  "visual_symbols": [
+   "glowing red eyes",
+   "hooded robe",
+   "staff"
+  ],
+  "priority_features": [
+   "black robed silhouette",
+   "red glowing eyes",
+   "staff at side"
+  ]
+ }
+}

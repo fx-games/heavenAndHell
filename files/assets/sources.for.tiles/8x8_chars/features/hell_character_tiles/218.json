@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/218",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "squared helmet-like head",
+      "gray vertical blade at right",
+      "two small feet"
+    ],
+    "shape": [
+      "square head",
+      "layered horizontal bands on body",
+      "thin gray vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "yellow head and lower body",
+      "dark face band with pink eyes",
+      "orange-red waist band",
+      "gray buckle and blade"
+    ],
+    "major_regions": [
+      "yellow helmet/hood",
+      "dark face with pink eyes",
+      "orange belt with gray buckle",
+      "yellow skirt",
+      "gray blade at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "yellow top could be a helmet or hood",
+      "gray right bar could be a sword or spear",
+      "belt with buckle suggests armor or tunic"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "warrior",
+      "fighter",
+      "armored humanoid"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "sword",
+      "belt buckle"
+    ],
+    "priority_features": [
+      "yellow helmet and tunic",
+      "dark face with pink eyes",
+      "gray blade on right",
+      "belt with buckle"
+    ]
+  }
+}

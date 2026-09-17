@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/132",
+ "perceptual": {
+  "silhouette": [
+   "stocky humanoid silhouette",
+   "crenellated yellow band on top",
+   "orange mass on right shoulder"
+  ],
+  "shape": [
+   "yellow notched top band",
+   "yellow face",
+   "orange side masses",
+   "gray belt",
+   "brown lower body"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "bright yellow top",
+   "yellow skin",
+   "orange sides",
+   "gray belt",
+   "brown legs"
+  ],
+  "major_regions": [
+   "notched bright top over face",
+   "face with dark eyes",
+   "gray belt",
+   "brown trousers"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid"
+  ],
+  "possible_features": [
+   "notched top could be a crown or spiky blond hair",
+   "orange side masses could be a cape or arms"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "king",
+   "prince",
+   "noble villager"
+  ],
+  "visual_symbols": [
+   "crown",
+   "belt"
+  ],
+  "priority_features": [
+   "crown-like notched top",
+   "yellow face with dark eyes",
+   "gray belt"
+  ]
+ }
+}

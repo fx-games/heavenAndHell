@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/449",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with top points",
+      "orange-brown mass upper right"
+    ],
+    "shape": [
+      "square head",
+      "yellow-striped torso with red band",
+      "orange-brown region beside head"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding object at side"
+    ],
+    "colors": [
+      "steel-blue head",
+      "yellow stripes",
+      "red belt",
+      "orange-brown accent"
+    ],
+    "major_regions": [
+      "blue horned face",
+      "yellow and red banded clothing",
+      "orange-brown region at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "orange-brown region could be hair, a club or axe head",
+      "top points could be horns",
+      "yellow bands could be straps"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "blue demon warrior",
+      "horned brute"
+    ],
+    "visual_symbols": [
+      "horns",
+      "striped clothing",
+      "club or hair"
+    ],
+    "priority_features": [
+      "blue horned head",
+      "yellow-banded torso",
+      "orange-brown shape upper right"
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/620",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large head",
+      "wide red shape across lower face and chest"
+    ],
+    "shape": [
+      "pink dome head",
+      "large red triangular region below eyes",
+      "dark green body",
+      "gray strip at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "pink head",
+      "red lower face/chest",
+      "green and dark green body",
+      "gray vertical strip"
+    ],
+    "major_regions": [
+      "pink head with dark eyes",
+      "red mask or beard covering mouth and chest",
+      "green clothing",
+      "gray weapon at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red region could be a bandana/mask, beard or blood",
+      "gray strip could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "bandit",
+      "warrior",
+      "humanoid"
+    ],
+    "visual_symbols": [
+      "face mask or beard",
+      "weapon"
+    ],
+    "priority_features": [
+      "pink bald head",
+      "red lower-face covering",
+      "green body",
+      "weapon at right"
+    ]
+  }
+}

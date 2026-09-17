@@ -1,0 +1,60 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/218",
+  "perceptual": {
+    "silhouette": [
+      "bulky humanoid silhouette",
+      "vertical extension at right side",
+      "wide shoulders",
+      "short legs"
+    ],
+    "shape": [
+      "large blocky torso",
+      "small head region",
+      "shorter gray bar at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon"
+    ],
+    "colors": [
+      "mostly brown",
+      "dark purple lower body",
+      "gray/pale blue object"
+    ],
+    "major_regions": [
+      "brown bulky body",
+      "tan face spot",
+      "gray weapon-like object at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bulky biped"
+    ],
+    "possible_features": [
+      "gray bar could be a sword or club",
+      "tan spot could be a face"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ogre",
+      "troll",
+      "brute warrior",
+      "barbarian"
+    ],
+    "visual_symbols": [
+      "weapon",
+      "bulky body"
+    ],
+    "priority_features": [
+      "bulky brown humanoid",
+      "gray weapon at right",
+      "wide body"
+    ]
+  }
+}

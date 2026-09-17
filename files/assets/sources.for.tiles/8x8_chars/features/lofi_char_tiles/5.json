@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/5",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "hooded head",
+      "small white sparkle at top-left",
+      "gray bar on right"
+    ],
+    "shape": [
+      "yellow hood",
+      "square face",
+      "tunic body",
+      "legs",
+      "thin vertical bar right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding sword upright"
+    ],
+    "colors": [
+      "bright yellow hood and tunic",
+      "gray blade",
+      "white sparkle pixel",
+      "brown belt"
+    ],
+    "major_regions": [
+      "yellow head covering and body",
+      "yellow face",
+      "gray blade on right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "white pixel could be a sparkle or halo glint",
+      "gray bar could be a sword",
+      "yellow top could be a hood or helmet"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "paladin",
+      "holy warrior",
+      "light-themed fighter"
+    ],
+    "visual_symbols": [
+      "sword",
+      "hood",
+      "sparkle"
+    ],
+    "priority_features": [
+      "all-yellow outfit",
+      "sword on right",
+      "white sparkle"
+    ]
+  }
+}

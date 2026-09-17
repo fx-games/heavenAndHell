@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/56",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "wide rounded head covering",
+      "thin arc shape at right"
+    ],
+    "shape": [
+      "broad blue top mass",
+      "pale face",
+      "teal torso with lighter chest band",
+      "thin brown arc"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding item at side"
+    ],
+    "colors": [
+      "blue-violet head covering",
+      "pale cyan face",
+      "teal body",
+      "brown side item"
+    ],
+    "major_regions": [
+      "blue hood over pale face",
+      "teal body with light band",
+      "brown bow-like arc at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "blue rounded top could be a hood or helmet",
+      "brown arc could be a bow",
+      "pale face could suggest ice or pallor"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "hooded archer",
+      "frost ranger",
+      "cold-themed adventurer"
+    ],
+    "visual_symbols": [
+      "hood",
+      "bow"
+    ],
+    "priority_features": [
+      "blue hood",
+      "pale icy face",
+      "brown bow-like arc at side"
+    ]
+  }
+}

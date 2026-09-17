@@ -1,0 +1,65 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/245",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "large white hood-like top",
+   "arms out with yellow ends",
+   "thin legs"
+  ],
+  "shape": [
+   "tall white rounded head/hood mass",
+   "green eye squares",
+   "yellow shoulder band",
+   "tan chest"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms slightly out"
+  ],
+  "colors": [
+   "white head",
+   "green eyes",
+   "yellow accents",
+   "tan skin"
+  ],
+  "major_regions": [
+   "white hooded head with green eyes",
+   "yellow arms/collar",
+   "tan torso and feet"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "white top could be a hood or helmet",
+   "yellow could be gold trim or bracers",
+   "green eyes could glow"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "hooded cleric",
+   "monk",
+   "desert warrior",
+   "spirit"
+  ],
+  "visual_symbols": [
+   "hood",
+   "gold trim",
+   "green eyes"
+  ],
+  "priority_features": [
+   "white hood",
+   "green eyes",
+   "yellow arm accents",
+   "tan torso"
+  ]
+ }
+}

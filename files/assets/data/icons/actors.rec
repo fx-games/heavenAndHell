@@ -102,203 +102,203 @@ name: Town Complete Nut
 
 internal_name: monster.nzombie
 name: Zombie
-icon: 487
+icon: 319
 
 internal_name: monster.bzombie
 name: Ghoul
-icon: 487
+icon: 368
 
 internal_name: monster.gzombie
 name: Rotting Carcass
-icon: 487
+icon: 368
 
 internal_name: monster.yzombie
 name: Black Death
-icon: 453
+icon: 368
 
 internal_name: monster.rfallsp
 name: Fallen One (FalSpear)
-icon: 428
+icon: 371
 
 internal_name: monster.dfallsp
 name: Carver (FalSpear)
-icon: 428
+icon: 372
 
 internal_name: monster.yfallsp
 name: Devil Kin (FalSpear)
-icon: 428
+icon: 373
 
 internal_name: monster.bfallsp
 name: Dark One (FalSpear)
-icon: 428
+icon: 371
 
 internal_name: monster.wskelax
 name: Skeleton (SkelAxe)
-icon: 397
+icon: 374
 
 internal_name: monster.tskelax
 name: Corpse Axe
-icon: 397
+icon: 374
 
 internal_name: monster.rskelax
 name: Burning Dead (SkelAxe)
-icon: 397
+icon: 374
 
 internal_name: monster.xskelax
 name: Horror (SkelAxe)
-icon: 397
+icon: 374
 
 internal_name: monster.rfallsd
 name: Fallen One (FalSword)
-icon: 427
+icon: 375
 
 internal_name: monster.dfallsd
 name: Carver (FalSword)
-icon: 427
+icon: 396
 
 internal_name: monster.yfallsd
 name: Devil Kin (FalSword)
-icon: 427
+icon: 403
 
 internal_name: monster.bfallsd
 name: Dark One (FalSword)
-icon: 427
+icon: 375
 
 internal_name: monster.nscav
 name: Scavenger
-icon: 540
+icon: 404
 
 internal_name: monster.bscav
 name: Plague Eater
-icon: 540
+icon: 405
 
 internal_name: monster.wscav
 name: Shadow Beast
-icon: 540
+icon: 404
 
 internal_name: monster.yscav
 name: Bone Gasher
-icon: 540
+icon: 404
 
 internal_name: monster.wskelbw
 name: Skeleton (SkelBow)
-icon: 401
+icon: 374
 
 internal_name: monster.tskelbw
 name: Corpse Bow
-icon: 401
+icon: 374
 
 internal_name: monster.rskelbw
 name: Burning Dead (SkelBow)
-icon: 401
+icon: 374
 
 internal_name: monster.xskelbw
 name: Horror (SkelBow)
-icon: 401
+icon: 374
 
 internal_name: monster.wskelsd
 name: Skeleton Captain
-icon: 400
+icon: 406
 
 internal_name: monster.tskelsd
 name: Corpse Captain
-icon: 400
+icon: 406
 
 internal_name: monster.rskelsd
 name: Burning Dead Captain
-icon: 400
+icon: 406
 
 internal_name: monster.xskelsd
 name: Horror Captain
-icon: 400
+icon: 406
 
 internal_name: monster.invilord
 name: Invisible Lord
-icon: 432
+icon: 424
 
 internal_name: monster.sneak
 name: Hidden
-icon: 432
+icon: 368
 
 internal_name: monster.stalker
 name: Stalker
-icon: 432
+icon: 434
 
 internal_name: monster.unseen
 name: Unseen
-icon: 432
+icon: 435
 
 internal_name: monster.illweav
 name: Illusion Weaver
-icon: 432
+icon: 435
 
 internal_name: monster.lrdsaytr
 name: Lord Sayter
-icon: 95
+icon: 436
 
 internal_name: monster.ngoatmc
 name: Flesh Clan (GoatMace)
-icon: 95
+icon: 437
 
 internal_name: monster.bgoatmc
 name: Stone Clan (GoatMace)
-icon: 95
+icon: 437
 
 internal_name: monster.rgoatmc
 name: Fire Clan (GoatMace)
-icon: 95
+icon: 437
 
 internal_name: monster.ggoatmc
 name: Night Clan (GoatMace)
-icon: 95
+icon: 437
 
 internal_name: monster.fiend
 name: Fiend
-icon: 93
+icon: 438
 
 internal_name: monster.blink
 name: Blink
-icon: 93
+icon: 438
 
 internal_name: monster.gloom
 name: Gloom
-icon: 93
+icon: 438
 
 internal_name: monster.familiar
 name: Familiar
-icon: 93
+icon: 442
 
 internal_name: monster.ngoatbw
 name: Flesh Clan (GoatBow)
-icon: 88
+icon: 443
 
 internal_name: monster.bgoatbw
 name: Stone Clan (GoatBow)
-icon: 88
+icon: 373
 
 internal_name: monster.rgoatbw
 name: Fire Clan (GoatBow)
-icon: 88
+icon: 434
 
 internal_name: monster.ggoatbw
 name: Night Clan (GoatBow)
-icon: 88
+icon: 444
 
 internal_name: monster.nacid
 name: Acid Beast
-icon: 90
+icon: 445
 
 internal_name: monster.racid
 name: Poison Spitter
-icon: 90
+icon: 446
 
 internal_name: monster.bacid
 name: Pit Beast
-icon: 90
+icon: 446
 
 internal_name: monster.xacid
 name: Lava Maw
-icon: 90
+icon: 447
 
 internal_name: monster.sking
 name: Skeleton King
@@ -306,23 +306,23 @@ icon: 259
 
 internal_name: monster.cleaver
 name: The Butcher
-icon: 258
+icon: 437
 
 internal_name: monster.fat
 name: Overlord
-icon: 99
+icon: 452
 
 internal_name: monster.mudman
 name: Mud Man
-icon: 99
+icon: 443
 
 internal_name: monster.toad
 name: Toad Demon
-icon: 99
+icon: 466
 
 internal_name: monster.flayed
 name: Flayed One
-icon: 99
+icon: 470
 
 internal_name: monster.wyrm
 name: Wyrm
@@ -342,214 +342,214 @@ icon: 92
 
 internal_name: monster.nmagma
 name: Magma Demon
-icon: 431
+icon: 471
 
 internal_name: monster.ymagma
 name: Blood Stone
-icon: 431
+icon: 471
 
 internal_name: monster.bmagma
 name: Hell Stone
-icon: 431
+icon: 471
 
 internal_name: monster.wmagma
 name: Lava Lord
-icon: 431
+icon: 471
 
 internal_name: monster.horned
 name: Horned Demon
-icon: 100
+icon: 472
 
 internal_name: monster.mudrun
 name: Mud Runner
-icon: 100
+icon: 443
 
 internal_name: monster.frostc
 name: Frost Charger
-icon: 100
+icon: 472
 
 internal_name: monster.oblord
 name: Obsidian Lord
-icon: 100
+icon: 443
 
 internal_name: monster.bonedmn
 name: Bone Demon
-icon: 397
+icon: 374
 
 internal_name: monster.reddth
 name: Red Death
-icon: 101
+icon: 434
 
 internal_name: monster.ltchdmn
 name: Litch Demon
-icon: 101
+icon: 434
 
 internal_name: monster.udedblrg
 name: Undead Balrog
-icon: 101
+icon: 434
 
 internal_name: monster.incin
 name: Incinerator
-icon: 103
+icon: 473
 
 internal_name: monster.flamlrd
 name: Flame Lord
-icon: 103
+icon: 473
 
 internal_name: monster.doomfire
 name: Doom Fire
-icon: 103
+icon: 473
 
 internal_name: monster.hellburn
 name: Hell Burner
-icon: 103
+icon: 473
 
 internal_name: monster.storm
 name: Red Storm
-icon: 101
+icon: 434
 
 internal_name: monster.rstorm
 name: Storm Rider
-icon: 101
+icon: 474
 
 internal_name: monster.storml
 name: Storm Lord
-icon: 101
+icon: 475
 
 internal_name: monster.mael
 name: Maelstorm
-icon: 101
+icon: 444
 
 internal_name: monster.bigfall
 name: Devil Kin Brute
-icon: 429
+icon: 437
 
 internal_name: monster.winged
 name: Winged-Demon
-icon: 105
+icon: 436
 
 internal_name: monster.gargoyle
 name: Gargoyle
-icon: 105
+icon: 436
 
 internal_name: monster.bloodclw
 name: Blood Claw
-icon: 105
+icon: 436
 
 internal_name: monster.deathw
 name: Death Wing
-icon: 105
+icon: 480
 
 internal_name: monster.mega
 name: Slayer
-icon: 98
+icon: 436
 
 internal_name: monster.guard
 name: Guardian
-icon: 98
+icon: 438
 
 internal_name: monster.vtexlrd
 name: Vortex Lord
-icon: 98
+icon: 480
 
 internal_name: monster.balrog
 name: Balrog
-icon: 98
+icon: 436
 
 internal_name: monster.nsnake
 name: Cave Viper
-icon: 262
+icon: 494
 
 internal_name: monster.rsnake
 name: Fire Drake
-icon: 262
+icon: 494
 
 internal_name: monster.bsnake
 name: Gold Viper
-icon: 262
+icon: 499
 
 internal_name: monster.gsnake
 name: Azure Drake
-icon: 262
+icon: 494
 
 internal_name: monster.nblack
 name: Black Knight
-icon: 481
+icon: 500
 
 internal_name: monster.rtblack
 name: Doom Guard
-icon: 481
+icon: 501
 
 internal_name: monster.btblack
 name: Steel Lord
-icon: 481
+icon: 500
 
 internal_name: monster.rblack
 name: Blood Knight
-icon: 481
+icon: 500
 
 internal_name: monster.unrav
 name: Unraveler
-icon: 482
+icon: 502
 
 internal_name: monster.holowone
 name: Hollow One
-icon: 482
+icon: 502
 
 internal_name: monster.painmstr
 name: Pain Master
-icon: 482
+icon: 502
 
 internal_name: monster.realweav
 name: Reality Weaver
-icon: 482
+icon: 502
 
 internal_name: monster.succubus
 name: Succubus
-icon: 454
+icon: 436
 
 internal_name: monster.snowwich
 name: Snow Witch
-icon: 454
+icon: 480
 
 internal_name: monster.hlspwn
 name: Hell Spawn
-icon: 454
+icon: 436
 
 internal_name: monster.solbrnr
 name: Soul Burner
-icon: 454
+icon: 503
 
 internal_name: monster.counslr
 name: Counselor
-icon: 453
+icon: 512
 
 internal_name: monster.magistr
 name: Magistrate
-icon: 453
+icon: 513
 
 internal_name: monster.cabalist
 name: Cabalist
-icon: 453
+icon: 512
 
 internal_name: monster.advocate
 name: Advocate
-icon: 453
+icon: 514
 
 internal_name: monster.golem
 name: Golem
-icon: 97
+icon: 471
 
 internal_name: monster.diablo
 name: The Dark Lord
-icon: 261
+icon: 475
 
 internal_name: monster.darkmage
 name: The Arch-Litch Malignus
-icon: 453
+icon: 515
 
 internal_name: unique.gharbad_the_weak
-icon: 95
+icon: 437
 name: Gharbad the Weak
 
 internal_name: unique.skeleton_king
@@ -557,163 +557,163 @@ icon: 259
 name: Skeleton King
 
 internal_name: unique.zhar_the_mad
-icon: 453
+icon: 516
 name: Zhar the Mad
 
 internal_name: unique.snotspill
-icon: 428
+icon: 371
 name: Snotspill
 
 internal_name: unique.arch_bishop_lazarus
-icon: 453
+icon: 514
 name: Arch-Bishop Lazarus
 
 internal_name: unique.red_vex
-icon: 454
+icon: 436
 name: Red Vex
 
 internal_name: unique.blackjade
-icon: 454
+icon: 436
 name: BlackJade
 
 internal_name: unique.lachdanan
-icon: 481
+icon: 500
 name: Lachdanan
 
 internal_name: unique.warlord_of_blood
-icon: 481
+icon: 517
 name: Warlord of Blood
 
 internal_name: unique.the_butcher
-icon: 258
+icon: 437
 name: The Butcher
 
 internal_name: unique.bonehead_keenaxe
-icon: 397
+icon: 374
 name: Bonehead Keenaxe
 
 internal_name: unique.bladeskin_the_slasher
-icon: 427
+icon: 406
 name: Bladeskin the Slasher
 
 internal_name: unique.soulpus
-icon: 487
+icon: 475
 name: Soulpus
 
 internal_name: unique.pukerat_the_unclean
-icon: 428
+icon: 372
 name: Pukerat the Unclean
 
 internal_name: unique.boneripper
-icon: 397
+icon: 374
 name: Boneripper
 
 internal_name: unique.rotfeast_the_hungry
-icon: 487
+icon: 319
 name: Rotfeast the Hungry
 
 internal_name: unique.gutshank_the_quick
-icon: 427
+icon: 396
 name: Gutshank the Quick
 
 internal_name: unique.brokenhead_bangshield
-icon: 400
+icon: 406
 name: Brokenhead Bangshield
 
 internal_name: unique.bongo
-icon: 428
+icon: 373
 name: Bongo
 
 internal_name: unique.rotcarnage
-icon: 487
+icon: 368
 name: Rotcarnage
 
 internal_name: unique.shadowbite
-icon: 540
+icon: 404
 name: Shadowbite
 
 internal_name: unique.deadeye
-icon: 401
+icon: 374
 name: Deadeye
 
 internal_name: unique.madeye_the_dead
-icon: 397
+icon: 374
 name: Madeye the Dead
 
 internal_name: unique.el_chupacabras
-icon: 540
+icon: 405
 name: El Chupacabras
 
 internal_name: unique.skullfire
-icon: 401
+icon: 374
 name: Skullfire
 
 internal_name: unique.warpskull
-icon: 432
+icon: 424
 name: Warpskull
 
 internal_name: unique.goretongue
-icon: 487
+icon: 475
 name: Goretongue
 
 internal_name: unique.pulsecrawler
-icon: 540
+icon: 404
 name: Pulsecrawler
 
 internal_name: unique.moonbender
-icon: 93
+icon: 438
 name: Moonbender
 
 internal_name: unique.wrathraven
-icon: 93
+icon: 438
 name: Wrathraven
 
 internal_name: unique.spineeater
-icon: 540
+icon: 404
 name: Spineeater
 
 internal_name: unique.blackash_the_burning
-icon: 401
+icon: 374
 name: Blackash the Burning
 
 internal_name: unique.shadowcrow
-icon: 427
+icon: 406
 name: Shadowcrow
 
 internal_name: unique.blightstone_the_weak
-icon: 95
+icon: 436
 name: Blightstone the Weak
 
 internal_name: unique.bilefroth_the_pit_master
-icon: 99
+icon: 443
 name: Bilefroth the Pit Master
 
 internal_name: unique.bloodskin_darkbow
-icon: 88
+icon: 474
 name: Bloodskin Darkbow
 
 internal_name: unique.foulwing
-icon: 93
+icon: 438
 name: Foulwing
 
 internal_name: unique.shadowdrinker
-icon: 400
+icon: 406
 name: Shadowdrinker
 
 internal_name: unique.hazeshifter
-icon: 432
+icon: 434
 name: Hazeshifter
 
 internal_name: unique.deathspit
-icon: 90
+icon: 446
 name: Deathspit
 
 internal_name: unique.bloodgutter
-icon: 95
+icon: 437
 name: Bloodgutter
 
 internal_name: unique.deathshade_fleshmaul
-icon: 95
+icon: 437
 name: Deathshade Fleshmaul
 
 internal_name: unique.warmaggot_the_mad
@@ -721,334 +721,334 @@ icon: 92
 name: Warmaggot the Mad
 
 internal_name: unique.glasskull_the_jagged
-icon: 101
+icon: 434
 name: Glasskull the Jagged
 
 internal_name: unique.blightfire
-icon: 88
+icon: 434
 name: Blightfire
 
 internal_name: unique.nightwing_the_cold
-icon: 105
+icon: 436
 name: Nightwing the Cold
 
 internal_name: unique.gorestone
-icon: 88
+icon: 444
 name: Gorestone
 
 internal_name: unique.bronzefist_firestone
-icon: 431
+icon: 518
 name: Bronzefist Firestone
 
 internal_name: unique.wrathfire_the_doomed
-icon: 103
+icon: 473
 name: Wrathfire the Doomed
 
 internal_name: unique.firewound_the_grim
-icon: 431
+icon: 471
 name: Firewound the Grim
 
 internal_name: unique.baron_sludge
-icon: 99
+icon: 519
 name: Baron Sludge
 
 internal_name: unique.blighthorn_steelmace
-icon: 95
+icon: 437
 name: Blighthorn Steelmace
 
 internal_name: unique.chaoshowler
-icon: 90
+icon: 446
 name: Chaoshowler
 
 internal_name: unique.doomgrin_the_rotting
-icon: 101
+icon: 434
 name: Doomgrin the Rotting
 
 internal_name: unique.madburner
-icon: 103
+icon: 473
 name: Madburner
 
 internal_name: unique.bonesaw_the_litch
-icon: 101
+icon: 434
 name: Bonesaw the Litch
 
 internal_name: unique.breakspine
-icon: 100
+icon: 443
 name: Breakspine
 
 internal_name: unique.devilskull_sharpbone
-icon: 101
+icon: 434
 name: Devilskull Sharpbone
 
 internal_name: unique.brokenstorm
-icon: 101
+icon: 434
 name: Brokenstorm
 
 internal_name: unique.stormbane
-icon: 101
+icon: 444
 name: Stormbane
 
 internal_name: unique.oozedrool
-icon: 99
+icon: 443
 name: Oozedrool
 
 internal_name: unique.goldblight_of_the_flame
-icon: 105
+icon: 436
 name: Goldblight of the Flame
 
 internal_name: unique.blackstorm
-icon: 100
+icon: 443
 name: Blackstorm
 
 internal_name: unique.plaguewrath
-icon: 90
+icon: 446
 name: Plaguewrath
 
 internal_name: unique.the_flayer
-icon: 101
+icon: 444
 name: The Flayer
 
 internal_name: unique.bluehorn
-icon: 100
+icon: 472
 name: Bluehorn
 
 internal_name: unique.warpfire_hellspawn
-icon: 103
+icon: 473
 name: Warpfire Hellspawn
 
 internal_name: unique.fangspeir
-icon: 262
+icon: 499
 name: Fangspeir
 
 internal_name: unique.festerskull
-icon: 101
+icon: 434
 name: Festerskull
 
 internal_name: unique.lionskull_the_bent
-icon: 481
+icon: 501
 name: Lionskull the Bent
 
 internal_name: unique.blacktongue
-icon: 453
+icon: 516
 name: Blacktongue
 
 internal_name: unique.viletouch
-icon: 105
+icon: 438
 name: Viletouch
 
 internal_name: unique.viperflame
-icon: 262
+icon: 494
 name: Viperflame
 
 internal_name: unique.fangskin
-icon: 262
+icon: 499
 name: Fangskin
 
 internal_name: unique.witchfire_the_unholy
-icon: 454
+icon: 436
 name: Witchfire the Unholy
 
 internal_name: unique.blackskull
-icon: 98
+icon: 436
 name: Blackskull
 
 internal_name: unique.soulslash
-icon: 482
+icon: 520
 name: Soulslash
 
 internal_name: unique.windspawn
-icon: 98
+icon: 438
 name: Windspawn
 
 internal_name: unique.lord_of_the_pit
-icon: 262
+icon: 494
 name: Lord of the Pit
 
 internal_name: unique.rustweaver
-icon: 481
+icon: 501
 name: Rustweaver
 
 internal_name: unique.howlingire_the_shade
-icon: 482
+icon: 520
 name: Howlingire the Shade
 
 internal_name: unique.doomcloud
-icon: 101
+icon: 444
 name: Doomcloud
 
 internal_name: unique.bloodmoon_soulfire
-icon: 482
+icon: 502
 name: Bloodmoon Soulfire
 
 internal_name: unique.witchmoon
-icon: 454
+icon: 436
 name: Witchmoon
 
 internal_name: unique.gorefeast
-icon: 98
+icon: 438
 name: Gorefeast
 
 internal_name: unique.graywar_the_slayer
-icon: 481
+icon: 501
 name: Graywar the Slayer
 
 internal_name: unique.dreadjudge
-icon: 453
+icon: 521
 name: Dreadjudge
 
 internal_name: unique.stareye_the_witch
-icon: 454
+icon: 503
 name: Stareye the Witch
 
 internal_name: unique.steelskull_the_hunter
-icon: 481
+icon: 517
 name: Steelskull the Hunter
 
 internal_name: unique.sir_gorash
-icon: 481
+icon: 517
 name: Sir Gorash
 
 internal_name: unique.the_vizier
-icon: 453
+icon: 516
 name: The Vizier
 
 internal_name: unique.zamphir
-icon: 482
+icon: 502
 name: Zamphir
 
 internal_name: unique.bloodlust
-icon: 454
+icon: 503
 name: Bloodlust
 
 internal_name: unique.webwidow
-icon: 454
+icon: 503
 name: Webwidow
 
 internal_name: unique.fleshdancer
-icon: 454
+icon: 436
 name: Fleshdancer
 
 internal_name: unique.grimspike
-icon: 100
+icon: 443
 name: Grimspike
 
 internal_name: unique.doomlock
-icon: 101
+icon: 522
 name: Doomlock
 
 internal_name: monster.fork
 name: Hellboar
-icon: 487
+icon: 523
 
 internal_name: monster.scorp
 name: Stinger
-icon: 487
+icon: 524
 
 internal_name: monster.eye
 name: Psychorb
-icon: 487
+icon: 525
 
 internal_name: monster.spider
 name: Arachnon
-icon: 487
+icon: 445
 
 internal_name: monster.felltwin
 name: Felltwin
-icon: 487
+icon: 424
 
 internal_name: monster.spawn
 name: Hork Spawn
-icon: 487
+icon: 526
 
 internal_name: monster.scorp2
 name: Venomtail
-icon: 487
+icon: 524
 
 internal_name: monster.eye2
 name: Necromorb
-icon: 487
+icon: 525
 
 internal_name: monster.spider2
 name: Spider Lord
-icon: 487
+icon: 527
 
 internal_name: monster.lash
 name: Lashworm
-icon: 487
+icon: 524
 
 internal_name: monster.ant
 name: Torchant
-icon: 487
+icon: 528
 
 internal_name: monster.horkd
 name: Hork Demon
-icon: 487
+icon: 518
 
 internal_name: monster.bug
 name: Hell Bug
-icon: 487
+icon: 524
 
 internal_name: monster.gravdg
 name: Gravedigger
-icon: 487
+icon: 319
 
 internal_name: monster.rat
 name: Tomb Rat
-icon: 487
+icon: 404
 
 internal_name: monster.hellbat
 name: Firebat
-icon: 487
+icon: 442
 
 internal_name: monster.boned
 name: Skullwing
-icon: 487
+icon: 374
 
 internal_name: monster.lich
 name: Lich
-icon: 487
+icon: 529
 
 internal_name: monster.bubba
 name: Crypt Demon
-icon: 487
+icon: 444
 
 internal_name: monster.hellbat2
 name: Hellbat
-icon: 487
+icon: 438
 
 internal_name: monster.boned2
 name: Bone Demon
-icon: 487
+icon: 374
 
 internal_name: monster.lich2
 name: Arch Lich
-icon: 487
+icon: 530
 
 internal_name: monster.byclps
 name: Biclops
-icon: 487
+icon: 531
 
 internal_name: monster.flesh
 name: Flesh Thing
-icon: 487
+icon: 524
 
 internal_name: monster.reaper
 name: Reaper
-icon: 487
+icon: 436
 
 internal_name: monster.nkr
 name: Na-Krul
-icon: 487
+icon: 553
 
 internal_name: unique.hork_demon
 name: Hork Demon
-icon: 487
+icon: 518
 
 internal_name: unique.the_defiler
 name: The Defiler
-icon: 487
+icon: 524
 
 internal_name: unique.na_krul
 name: Na-Krul
-icon: 487
+icon: 553
 

@@ -1,0 +1,62 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/254",
+  "perceptual": {
+    "silhouette": [
+      "irregular flame-like blob silhouette",
+      "ragged edges with side flecks",
+      "wide upper-middle",
+      "tapering trail toward lower-left"
+    ],
+    "shape": [
+      "large mottled mass",
+      "small detached edge pixels",
+      "narrowing lower portion"
+    ],
+    "orientation": [
+      "front-facing face",
+      "ambiguous"
+    ],
+    "pose": [
+      "floating",
+      "flickering/hovering"
+    ],
+    "colors": [
+      "red and pink mottled",
+      "white eyes"
+    ],
+    "major_regions": [
+      "two white eyes near top",
+      "white mouth-like spot",
+      "red mottled body"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "amorphous",
+      "elemental blob"
+    ],
+    "possible_features": [
+      "white pixels could be eyes and mouth",
+      "ragged edges could be flames or embers",
+      "trailing lower part could be a flame tail"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "fire elemental",
+      "flame spirit",
+      "blood blob",
+      "amorphous monster"
+    ],
+    "visual_symbols": [
+      "glowing eyes",
+      "flame-like body",
+      "embers"
+    ],
+    "priority_features": [
+      "formless red body with white eyes",
+      "flickering ragged outline",
+      "trailing tail toward lower-left"
+    ]
+  }
+}

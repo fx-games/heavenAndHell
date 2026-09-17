@@ -1,0 +1,60 @@
+{
+ "id": "lofi_char_tiles/127",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette with domed helm",
+   "full-height pole at right",
+   "broad shoulders"
+  ],
+  "shape": [
+   "domed head",
+   "dark T-shaped visor",
+   "wide armored torso",
+   "long vertical bar right"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding polearm"
+  ],
+  "colors": [
+   "pale blue armor",
+   "dark blue T visor"
+  ],
+  "major_regions": [
+   "full helm with T-shaped slit",
+   "armored torso",
+   "tall pole at right"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "armored humanoid"
+  ],
+  "possible_features": [
+   "T-shaped dark area could be a great-helm visor",
+   "tall bar could be a spear or lance",
+   "faceless helm could indicate heavy armor"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "heavy knight",
+   "paladin",
+   "armored guard"
+  ],
+  "visual_symbols": [
+   "T-visor helmet",
+   "spear",
+   "plate armor"
+  ],
+  "priority_features": [
+   "T-shaped visor on domed helm",
+   "full-height spear",
+   "broad armored body"
+  ]
+ }
+}

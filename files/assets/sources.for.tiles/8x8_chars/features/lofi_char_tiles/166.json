@@ -1,0 +1,58 @@
+{
+ "id": "lofi_char_tiles/166",
+ "perceptual": {
+  "silhouette": [
+   "blocky rectangular humanoid silhouette",
+   "slightly narrowed top",
+   "short block arms",
+   "two stubby legs"
+  ],
+  "shape": [
+   "tall bright green body",
+   "square arm blocks",
+   "small leg blocks"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "bright green body",
+   "darker green eyes and limbs",
+   "dark pixel between feet"
+  ],
+  "major_regions": [
+   "bright green body with two dark green eyes",
+   "darker green arm blocks and feet"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "construct",
+   "amorphous"
+  ],
+  "possible_features": [
+   "uniform green body could be slime, jelly or a plant-based golem",
+   "blocky form suggests golem"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "golem",
+   "slime creature",
+   "plant elemental"
+  ],
+  "visual_symbols": [
+   "blocky body",
+   "two small eyes"
+  ],
+  "priority_features": [
+   "bright green blocky body",
+   "stubby block arms",
+   "low-contrast eyes"
+  ]
+ }
+}

@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/486",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "vertical strip on right edge"
+    ],
+    "shape": [
+      "white hair or hood mass on top",
+      "light face with dark eyes",
+      "yellow lower block",
+      "orange belt"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "white top",
+      "light gray face",
+      "black eyes",
+      "bright yellow body",
+      "orange belt",
+      "brown right strip"
+    ],
+    "major_regions": [
+      "white hair or hood",
+      "pale face with dark eyes",
+      "yellow robe with orange belt",
+      "brown pole at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "white top could be hair or hood",
+      "brown strip could be a staff",
+      "yellow mass could be a robe"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "robed mage",
+      "elder or priest",
+      "human adventurer"
+    ],
+    "visual_symbols": [
+      "staff",
+      "robe",
+      "white hair"
+    ],
+    "priority_features": [
+      "yellow robe",
+      "white hair or hood",
+      "dark eyes on pale face",
+      "staff"
+    ]
+  }
+}

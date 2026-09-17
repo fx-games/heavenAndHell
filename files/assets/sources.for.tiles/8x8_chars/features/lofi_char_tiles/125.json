@@ -1,0 +1,58 @@
+{
+ "id": "lofi_char_tiles/125",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "short bar projecting at mid right",
+   "rounded head"
+  ],
+  "shape": [
+   "rounded head mass",
+   "blocky torso",
+   "small vertical bar right of torso",
+   "two legs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding short weapon"
+  ],
+  "colors": [
+   "pale blue body",
+   "dark blue eyes"
+  ],
+  "major_regions": [
+   "pale helmeted head with dark eyes",
+   "blue body",
+   "short item at right hand"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid"
+  ],
+  "possible_features": [
+   "short bar could be a dagger or short sword",
+   "head shape could be a helmet",
+   "pale blue may suggest ghost or ice"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "soldier",
+   "rogue",
+   "ghost warrior"
+  ],
+  "visual_symbols": [
+   "short blade",
+   "helmet"
+  ],
+  "priority_features": [
+   "short weapon at right hand",
+   "helmeted head with dark eyes",
+   "pale blue body"
+  ]
+ }
+}

@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/428",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with two small top points",
+      "gray strip right"
+    ],
+    "shape": [
+      "square head",
+      "yellow band at top of head",
+      "green torso with yellow bands"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "weapon at side"
+    ],
+    "colors": [
+      "green head and body",
+      "yellow horizontal stripes",
+      "red belt",
+      "gray accent"
+    ],
+    "major_regions": [
+      "green face with yellow headband",
+      "yellow-striped green torso with red belt",
+      "gray blade strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "yellow top band could be a headband or crown",
+      "yellow stripes could be clothing straps",
+      "gray strip could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin warrior",
+      "orc",
+      "green-skinned brute"
+    ],
+    "visual_symbols": [
+      "headband",
+      "striped clothing",
+      "blade"
+    ],
+    "priority_features": [
+      "green body with yellow stripes",
+      "yellow headband",
+      "gray weapon"
+    ]
+  }
+}

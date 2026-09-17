@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/765",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "rounded pale head",
+      "block on left side",
+      "thin pole at right"
+    ],
+    "shape": [
+      "large pale head",
+      "gray rectangular block at left",
+      "white torso",
+      "orange horizontal band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding shield and staff"
+    ],
+    "colors": [
+      "pale cyan head",
+      "red eyes",
+      "white body",
+      "orange belt",
+      "gray shield"
+    ],
+    "major_regions": [
+      "pale head with red eyes",
+      "gray shield at left",
+      "white body with orange belt",
+      "brown pole at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "left gray block could be a shield",
+      "right pole could be a spear or staff",
+      "pale skin could be undead or otherworldly"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "paladin",
+      "undead warrior",
+      "templar"
+    ],
+    "visual_symbols": [
+      "shield",
+      "spear or staff",
+      "red eyes"
+    ],
+    "priority_features": [
+      "gray shield at left",
+      "white body",
+      "red eyes in pale face",
+      "orange belt"
+    ]
+  }
+}

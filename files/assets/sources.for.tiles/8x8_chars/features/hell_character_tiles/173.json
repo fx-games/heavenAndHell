@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/173",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "pointed/raised headwear region",
+      "vertical brown bar at right"
+    ],
+    "shape": [
+      "light blue cap mass on head",
+      "yellow face",
+      "white horizontal band",
+      "long thin vertical extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object"
+    ],
+    "colors": [
+      "light blue hat and robe",
+      "yellow face and arms",
+      "white sash"
+    ],
+    "major_regions": [
+      "light blue hat",
+      "yellow face with dark eyes",
+      "white belt band",
+      "blue lower robe",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "blue top region could be a wizard hat or cap",
+      "white band could be a sash or beard",
+      "brown bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "wizard",
+      "mage",
+      "apprentice"
+    ],
+    "visual_symbols": [
+      "hat",
+      "staff",
+      "sash",
+      "robe"
+    ],
+    "priority_features": [
+      "light blue hat",
+      "white band across middle",
+      "brown staff",
+      "yellow face"
+    ]
+  }
+}

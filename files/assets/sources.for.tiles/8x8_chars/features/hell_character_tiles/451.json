@@ -1,0 +1,59 @@
+{
+  "id": "hell_character_tiles/451",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with top points",
+      "orange-brown bar right"
+    ],
+    "shape": [
+      "square head",
+      "green torso with red band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole"
+    ],
+    "colors": [
+      "steel-blue head",
+      "bright green body",
+      "red belt",
+      "orange-brown pole"
+    ],
+    "major_regions": [
+      "blue horned face",
+      "green clothing with red belt",
+      "orange staff strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "top points could be horns",
+      "vertical bar could be a staff or spear",
+      "green bands could be tunic"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "blue demon",
+      "horned ranger"
+    ],
+    "visual_symbols": [
+      "horns",
+      "staff",
+      "green clothing"
+    ],
+    "priority_features": [
+      "blue horned head",
+      "green tunic with red belt",
+      "orange pole on right"
+    ]
+  }
+}

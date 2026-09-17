@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/137",
+ "perceptual": {
+  "silhouette": [
+   "blocky humanoid silhouette",
+   "wide square head",
+   "horizontal band across middle",
+   "two short legs"
+  ],
+  "shape": [
+   "large square head block",
+   "flat bright top band",
+   "dark patch at upper right",
+   "horizontal torso band",
+   "small legs"
+  ],
+  "orientation": [
+   "front-facing, slightly turned right"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "yellow top band",
+   "tan face",
+   "brown at upper right",
+   "purple body bands"
+  ],
+  "major_regions": [
+   "bright yellow band on top of head",
+   "tan face with single dark eye",
+   "purple torso with dark belt and gray buckle"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid"
+  ],
+  "possible_features": [
+   "yellow top band could be a crown or cap",
+   "brown upper-right patch could be hair or a hood",
+   "dark band with gray pixel could be a belt with buckle"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "human character",
+   "king or noble",
+   "villager"
+  ],
+  "visual_symbols": [
+   "crown or cap",
+   "belt"
+  ],
+  "priority_features": [
+   "yellow head band on top",
+   "large tan head",
+   "purple clothing with belt"
+  ]
+ }
+}

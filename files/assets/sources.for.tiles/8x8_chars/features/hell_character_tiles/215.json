@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/215",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "rounded hooded head",
+      "thin vertical bar at right edge"
+    ],
+    "shape": [
+      "square head mass",
+      "rectangular body",
+      "long thin vertical extension on right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding long object at side"
+    ],
+    "colors": [
+      "mostly bright blue",
+      "dark horizontal band across face",
+      "small pink eye pixels",
+      "white waist band"
+    ],
+    "major_regions": [
+      "blue hood/head",
+      "dark face band with two pink dots",
+      "white belt across middle",
+      "brown vertical pole at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "dark band with pink dots could be a masked face or shadowed eyes",
+      "rounded top could be a hood",
+      "right vertical bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "robed mage",
+      "hooded figure",
+      "ninja-like figure"
+    ],
+    "visual_symbols": [
+      "hood",
+      "mask band",
+      "staff",
+      "belt"
+    ],
+    "priority_features": [
+      "hooded head with dark face band",
+      "blue robe",
+      "white belt",
+      "staff on right"
+    ]
+  }
+}

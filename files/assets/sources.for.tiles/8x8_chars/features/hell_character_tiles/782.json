@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/782",
+  "perceptual": {
+    "silhouette": [
+      "robed humanoid silhouette",
+      "hooded head",
+      "wide robe",
+      "thin brown pole at right"
+    ],
+    "shape": [
+      "bright blue hood framing tan face",
+      "blue robe",
+      "white horizontal band",
+      "vertical pole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "bright blue hood and robe",
+      "tan face",
+      "dark eyes",
+      "white sash"
+    ],
+    "major_regions": [
+      "blue hood over tan face",
+      "blue robe with white sash",
+      "staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "blue top could be a hood",
+      "white band could be a sash",
+      "pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mage",
+      "water or ice wizard",
+      "monk"
+    ],
+    "visual_symbols": [
+      "hood",
+      "staff",
+      "sash"
+    ],
+    "priority_features": [
+      "bright blue hood and robe",
+      "white sash",
+      "tan face",
+      "staff at right"
+    ]
+  }
+}

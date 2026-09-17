@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/807",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "long robe to bottom",
+      "staff on right edge"
+    ],
+    "shape": [
+      "gray cap",
+      "square face",
+      "wide robed lower body",
+      "thin vertical line"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "white robe",
+      "light blue face",
+      "orange belt",
+      "gray cap",
+      "brown staff"
+    ],
+    "major_regions": [
+      "white robe body",
+      "pale face with bright eyes",
+      "orange sash"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "white robe could indicate a cleric",
+      "right line could be a staff",
+      "gray top could be a cap or hair"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "cleric",
+      "white mage",
+      "priest"
+    ],
+    "visual_symbols": [
+      "white robe",
+      "staff",
+      "sash"
+    ],
+    "priority_features": [
+      "white robe",
+      "orange sash",
+      "staff",
+      "pale blue face"
+    ]
+  }
+}

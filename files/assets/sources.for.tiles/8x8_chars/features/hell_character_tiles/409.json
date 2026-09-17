@@ -1,0 +1,59 @@
+{
+  "id": "hell_character_tiles/409",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head",
+      "long vertical bar on right edge"
+    ],
+    "shape": [
+      "square head",
+      "green and orange horizontal bands",
+      "brown vertical pole right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole upright"
+    ],
+    "colors": [
+      "yellow head",
+      "bright green and orange banded torso",
+      "brown vertical strip"
+    ],
+    "major_regions": [
+      "yellow face with two dark eyes",
+      "green/orange striped clothing",
+      "brown staff-like strip on right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "brown strip could be a staff, spear shaft or bow",
+      "green bands could be tunic and trousers"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "human peasant",
+      "ranger or hunter",
+      "adventurer"
+    ],
+    "visual_symbols": [
+      "staff or pole",
+      "green clothing",
+      "big head"
+    ],
+    "priority_features": [
+      "brown vertical pole on right",
+      "green banded clothing",
+      "large yellow head"
+    ]
+  }
+}

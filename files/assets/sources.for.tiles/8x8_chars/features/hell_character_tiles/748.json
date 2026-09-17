@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/748",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "capped head",
+      "gray bulky torso",
+      "vertical gray bar on right"
+    ],
+    "shape": [
+      "square head",
+      "wide gray torso block",
+      "thin vertical extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "yellow-green cap",
+      "skin face",
+      "gray body",
+      "dark legs"
+    ],
+    "major_regions": [
+      "gray armored torso",
+      "light cap",
+      "gray vertical blade at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray torso could be armor or chainmail",
+      "right bar could be a sword",
+      "cap could be a helmet"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "soldier",
+      "guard",
+      "armored human"
+    ],
+    "visual_symbols": [
+      "armor",
+      "sword",
+      "cap or helmet"
+    ],
+    "priority_features": [
+      "gray armored body",
+      "gray sword at right",
+      "yellow cap",
+      "human face"
+    ]
+  }
+}

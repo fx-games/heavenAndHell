@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/220",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "hooded head",
+      "brown pole on right",
+      "small feet"
+    ],
+    "shape": [
+      "square head",
+      "banded body",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "bright green head and body",
+      "dark face band with pink eyes",
+      "orange-brown belt with gray buckle",
+      "brown pole"
+    ],
+    "major_regions": [
+      "green hood",
+      "dark face with pink eyes",
+      "brown belt with gray buckle",
+      "green tunic",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "green top could be a hood",
+      "right bar could be a staff or bow",
+      "buckle suggests belted tunic"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ranger",
+      "hooded adventurer",
+      "druid-like figure"
+    ],
+    "visual_symbols": [
+      "hood",
+      "staff",
+      "belt buckle"
+    ],
+    "priority_features": [
+      "green hood and tunic",
+      "dark face with pink eyes",
+      "belt with buckle",
+      "staff on right"
+    ]
+  }
+}

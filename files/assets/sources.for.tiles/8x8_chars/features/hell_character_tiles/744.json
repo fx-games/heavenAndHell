@@ -1,0 +1,67 @@
+{
+  "id": "hell_character_tiles/744",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "gray headwear with yellow-green top",
+      "gray vertical bar at right edge",
+      "white torso"
+    ],
+    "shape": [
+      "rounded head covering",
+      "tan face",
+      "white torso",
+      "dark lower body",
+      "thin blade-like extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding upright weapon at side"
+    ],
+    "colors": [
+      "gray and yellow-green head top",
+      "tan face",
+      "white torso",
+      "orange belt",
+      "dark legs",
+      "gray bar"
+    ],
+    "major_regions": [
+      "gray helmet or band over tan face",
+      "white shirt",
+      "orange belt",
+      "dark trousers",
+      "gray sword"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray top could be a helmet or headband",
+      "gray bar with brown base could be a sword",
+      "orange stripe could be a belt"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "swordsman",
+      "adventurer",
+      "soldier"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "sword",
+      "belt"
+    ],
+    "priority_features": [
+      "gray helmet/band",
+      "white torso with orange belt",
+      "upright sword at right"
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/118",
+ "perceptual": {
+  "silhouette": [
+   "rounded egg-like blob",
+   "small nub at left",
+   "tapering lower-left tail"
+  ],
+  "shape": [
+   "large oval gray mass",
+   "small light spot at top",
+   "vertical dark slot on right"
+  ],
+  "orientation": [
+   "facing right",
+   "ambiguous"
+  ],
+  "pose": [
+   "hovering",
+   "ambiguous"
+  ],
+  "colors": [
+   "mostly mid gray",
+   "black vertical mark",
+   "white highlight"
+  ],
+  "major_regions": [
+   "gray rounded body",
+   "black vertical eye or mouth on right side",
+   "white highlight near top"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "amorphous",
+   "ghost-like"
+  ],
+  "possible_features": [
+   "black vertical slot could be an eye or mouth",
+   "white spot could be a highlight or second eye",
+   "nub could be a small arm or tail"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "ghost",
+   "stone creature",
+   "blob",
+   "spirit"
+  ],
+  "visual_symbols": [
+   "rounded ghost body",
+   "single dark eye"
+  ],
+  "priority_features": [
+   "rounded gray blob silhouette",
+   "black vertical slot on right",
+   "small side nub"
+  ]
+ }
+}

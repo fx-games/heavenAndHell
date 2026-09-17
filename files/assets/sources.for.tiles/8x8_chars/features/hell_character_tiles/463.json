@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/463",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "dark outline framing head",
+      "squat body"
+    ],
+    "shape": [
+      "square gray head",
+      "two bright eye squares",
+      "wide rectangular robe"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "gray head",
+      "glowing yellow-green eyes",
+      "purple body",
+      "red belt with gray buckle"
+    ],
+    "major_regions": [
+      "gray head with bright eyes",
+      "purple lower body",
+      "red horizontal belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "bright squares could be glowing eyes",
+      "purple mass could be a robe",
+      "dark edges could be a hood"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "robed cultist",
+      "mage",
+      "gray-skinned humanoid monster"
+    ],
+    "visual_symbols": [
+      "glowing eyes",
+      "robe",
+      "belt buckle"
+    ],
+    "priority_features": [
+      "glowing yellow-green eyes",
+      "gray face",
+      "purple robe",
+      "red belt"
+    ]
+  }
+}

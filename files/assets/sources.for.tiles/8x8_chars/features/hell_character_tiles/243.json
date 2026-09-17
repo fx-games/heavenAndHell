@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/243",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "hooded head",
+      "gray bar right",
+      "small feet"
+    ],
+    "shape": [
+      "square head",
+      "banded body",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon"
+    ],
+    "colors": [
+      "brown hood",
+      "red face with black eyes",
+      "dark gray tunic",
+      "gray blade"
+    ],
+    "major_regions": [
+      "brown hood framing red face",
+      "black eyes",
+      "brown belt with gray buckle",
+      "dark tunic",
+      "gray sword at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red face could be demonic skin",
+      "right bar could be a sword or dagger"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "demon rogue",
+      "red-faced bandit"
+    ],
+    "visual_symbols": [
+      "hood",
+      "red face",
+      "sword"
+    ],
+    "priority_features": [
+      "red face in brown hood",
+      "dark tunic",
+      "gray blade"
+    ]
+  }
+}

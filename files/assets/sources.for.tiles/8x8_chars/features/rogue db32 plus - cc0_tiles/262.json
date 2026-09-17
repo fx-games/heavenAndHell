@@ -1,0 +1,62 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/262",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "spiky top edge",
+      "bright yellow vertical element at right edge",
+      "short legs"
+    ],
+    "shape": [
+      "wide green head",
+      "blue torso",
+      "thin yellow extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding item"
+    ],
+    "colors": [
+      "green head",
+      "blue torso",
+      "yellow accent right side"
+    ],
+    "major_regions": [
+      "green head with dark eyes and red nose",
+      "blue tunic with gray",
+      "yellow vertical item on right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "small humanoid"
+    ],
+    "possible_features": [
+      "jagged top could be ears",
+      "yellow extension could be a blade, staff or torch",
+      "blue region could be robes or armor"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin",
+      "goblin shaman",
+      "armed small humanoid"
+    ],
+    "visual_symbols": [
+      "pointed ears",
+      "green skin",
+      "staff or blade"
+    ],
+    "priority_features": [
+      "green head with dark eyes",
+      "blue tunic",
+      "yellow item on right side",
+      "small humanoid stance"
+    ]
+  }
+}

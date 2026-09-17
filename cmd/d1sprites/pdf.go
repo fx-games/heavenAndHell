@@ -9,22 +9,27 @@ import (
 	"strings"
 )
 
-// card is one sprite with its caption lines; unique cards get a brown backdrop.
+// card is one sprite with its caption lines; unique cards get a brown backdrop. file is where main saves the
+// sprite as a PNG, relative to the document's image folder; png, when set, is saved there instead of img.
 type card struct {
 	img    *image.NRGBA // nil draws a "no graphics" placeholder
+	png    *image.NRGBA
+	file   string
 	lines  []string
 	unique bool
 }
 
+// section is a titled grid of cards, with optional note lines under the title.
 type section struct {
 	title string
+	notes []string
 	cards []card
 }
 
 const (
 	pageW, pageH, margin = 595.0, 842.0, 36.0
 	cellW, imgH, lineH   = 130.0, 110.0, 10.0
-	pxPt                 = 2.0 / scale // one original pixel = 2pt
+	pxPt                 = 2.0 // points per sprite pixel
 )
 
 // writePDF lays sections out as a grid of cards on A4 pages. It is a bare PDF 1.4 writer: base-14 Helvetica
@@ -39,7 +44,6 @@ func writePDF(path, title string, sections []section) error {
 	var pages []int
 	var page strings.Builder
 	var images []string
-	textH := lineH * 4
 	y := pageH - margin
 	flush := func() {
 		var xo strings.Builder
@@ -66,14 +70,22 @@ func writePDF(path, title string, sections []section) error {
 	y -= 30
 	cols := 4
 	for _, s := range sections {
-		rowH := imgH + textH + 6
+		lines := 0
+		for _, c := range s.cards {
+			lines = max(lines, len(c.lines))
+		}
+		rowH := imgH + lineH*float64(lines) + 6
+		head := 22 + lineH*float64(len(s.notes))
 		rows := (len(s.cards) + cols - 1) / cols
 		// a section longer than a page starts on a fresh one and breaks row by row from there
-		if y-22-rowH < margin || (y-22-float64(rows)*rowH < margin && float64(rows)*rowH < pageH-2*margin-22) {
+		if y-head-rowH < margin || (y-head-float64(rows)*rowH < margin && float64(rows)*rowH < pageH-2*margin-head) {
 			flush()
 		}
 		text(margin, y-12, true, 12, s.title)
-		y -= 22
+		for i, n := range s.notes {
+			text(margin, y-22-lineH*float64(i)-6, false, 8, n)
+		}
+		y -= head
 		for i, c := range s.cards {
 			if i%cols == 0 && i > 0 {
 				y -= rowH
@@ -100,7 +112,7 @@ func writePDF(path, title string, sections []section) error {
 				fmt.Fprintf(&page, "q %g 0 0 %g %g %g cm /%s Do Q\n", iw, ih, x+(cellW-6-iw)/2, y-imgH+(imgH-ih)/2, name)
 			}
 			for j, l := range c.lines {
-				if len(l) > 30 {
+				if len(l) > 31 {
 					l = l[:29] + "..."
 				}
 				size := 7.5
@@ -139,16 +151,21 @@ func (w *pdfWriter) stream(dict string, data []byte) int {
 	return w.obj(fmt.Sprintf("<< %s /Filter /FlateDecode /Length %d >>\nstream\n%s\nendstream", dict, z.Len(), z.String()))
 }
 
-// image adds img as an RGB XObject with its alpha as a soft mask and returns the XObject's object number.
+// image adds img as an RGB XObject with its alpha as a soft mask and returns the XObject's object number. Small
+// sprites get a nearest-neighbour upscale baked in, so viewers never smooth their pixels when enlarging them.
 func (w *pdfWriter) image(img *image.NRGBA) int {
 	b := img.Bounds()
-	rgb := make([]byte, 0, b.Dx()*b.Dy()*3)
-	alpha := make([]byte, 0, b.Dx()*b.Dy())
-	for i := 0; i < len(img.Pix); i += 4 {
-		rgb = append(rgb, img.Pix[i:i+3]...)
-		alpha = append(alpha, img.Pix[i+3])
+	scale := min(4, max(1, 256/max(b.Dx(), b.Dy())))
+	rgb := make([]byte, 0, b.Dx()*b.Dy()*3*scale*scale)
+	alpha := make([]byte, 0, b.Dx()*b.Dy()*scale*scale)
+	for y := 0; y < b.Dy()*scale; y++ {
+		for x := 0; x < b.Dx()*scale; x++ {
+			c := img.NRGBAAt(b.Min.X+x/scale, b.Min.Y+y/scale)
+			rgb = append(rgb, c.R, c.G, c.B)
+			alpha = append(alpha, c.A)
+		}
 	}
-	dims := fmt.Sprintf("/Type /XObject /Subtype /Image /Width %d /Height %d /BitsPerComponent 8 /Interpolate false", b.Dx(), b.Dy())
+	dims := fmt.Sprintf("/Type /XObject /Subtype /Image /Width %d /Height %d /BitsPerComponent 8 /Interpolate false", b.Dx()*scale, b.Dy()*scale)
 	mask := w.stream(dims+" /ColorSpace /DeviceGray", alpha)
 	return w.stream(fmt.Sprintf("%s /ColorSpace /DeviceRGB /SMask %d 0 R", dims, mask), rgb)
 }

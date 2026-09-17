@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/698",
+  "perceptual": {
+    "silhouette": [
+      "hooded humanoid silhouette",
+      "hood rising at top",
+      "robed body with white bands",
+      "pole at right"
+    ],
+    "shape": [
+      "light blue hood mass",
+      "white face with dark eye holes",
+      "white horizontal bands across body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "mostly light blue",
+      "white face and bands",
+      "dark facial holes"
+    ],
+    "major_regions": [
+      "light blue hood around skull-like face",
+      "white arm/sash bands",
+      "light blue robe",
+      "staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "skeletal humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "white face with dark holes could be a skull",
+      "white bands could be bony arms or a sash",
+      "pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "lich",
+      "undead cleric",
+      "skeleton"
+    ],
+    "visual_symbols": [
+      "hood",
+      "skull-like face",
+      "staff"
+    ],
+    "priority_features": [
+      "skull face in light blue hood",
+      "white sash",
+      "staff"
+    ]
+  }
+}

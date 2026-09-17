@@ -1,0 +1,64 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/192",
+  "perceptual": {
+    "silhouette": [
+      "compact rounded bird-like silhouette",
+      "raised head at upper right",
+      "pointed projection to the right",
+      "short legs below"
+    ],
+    "shape": [
+      "large rounded body mass",
+      "small round head mass",
+      "small triangular beak-like point",
+      "small wing-like patch on body"
+    ],
+    "orientation": [
+      "facing right"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "mostly bright yellow",
+      "orange beak-like point",
+      "pale tan wing region",
+      "dark single eye pixel"
+    ],
+    "major_regions": [
+      "yellow body and head",
+      "orange projection at right of head",
+      "tan patch on lower body",
+      "red/orange feet"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "avian",
+      "small bipedal"
+    ],
+    "possible_features": [
+      "orange point could be a beak",
+      "tan patch could be a folded wing",
+      "dark pixel could be an eye"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "chick",
+      "duckling",
+      "small bird",
+      "canary"
+    ],
+    "visual_symbols": [
+      "beak",
+      "round body",
+      "small wing"
+    ],
+    "priority_features": [
+      "bright yellow round body",
+      "orange beak at right",
+      "small bird silhouette"
+    ]
+  }
+}

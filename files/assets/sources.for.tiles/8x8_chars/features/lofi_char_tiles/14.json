@@ -1,0 +1,65 @@
+{
+  "id": "lofi_char_tiles/14",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "cap with red tip at top-left",
+      "curved object lower right",
+      "two legs"
+    ],
+    "shape": [
+      "green cap",
+      "red feather pixels",
+      "square face",
+      "tunic body",
+      "small brown shape right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding bow or quiver"
+    ],
+    "colors": [
+      "green cap and tunic",
+      "red top accent",
+      "yellow face",
+      "brown and orange right object"
+    ],
+    "major_regions": [
+      "green hat with red feather",
+      "green tunic",
+      "brown object on right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "red pixels could be a feather",
+      "right brown shape could be a bow or quiver",
+      "green cap could be a hunter's hat"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "archer",
+      "ranger",
+      "hunter"
+    ],
+    "visual_symbols": [
+      "feathered cap",
+      "bow",
+      "tunic"
+    ],
+    "priority_features": [
+      "green feathered cap",
+      "red feather",
+      "green tunic",
+      "bow on right"
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/740",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "bright blue head covering",
+      "white shapes flanking head",
+      "blue and white lower body"
+    ],
+    "shape": [
+      "rounded hat mass",
+      "tan face",
+      "broad lower mass"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "bright blue hat and lower body",
+      "tan face",
+      "white belt",
+      "white upper flanks"
+    ],
+    "major_regions": [
+      "bright blue cap over tan face",
+      "white belt",
+      "blue lower body",
+      "white regions beside head"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "blue top could be a cap or hood",
+      "white band could be a belt or sash"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "villager",
+      "adventurer",
+      "robed humanoid"
+    ],
+    "visual_symbols": [
+      "cap",
+      "belt"
+    ],
+    "priority_features": [
+      "bright blue cap",
+      "tan face with dark eyes",
+      "white belt",
+      "blue lower body"
+    ]
+  }
+}

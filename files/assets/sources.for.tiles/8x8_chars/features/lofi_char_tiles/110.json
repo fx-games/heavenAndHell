@@ -1,0 +1,60 @@
+{
+ "id": "lofi_char_tiles/110",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "pale head over dark robed body",
+   "pale hands at sides"
+  ],
+  "shape": [
+   "pale cyan round head",
+   "black cloak framing body",
+   "small yellow central spot"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms at sides"
+  ],
+  "colors": [
+   "black cloak",
+   "pale cyan face and hands",
+   "gray/yellow chest detail"
+  ],
+  "major_regions": [
+   "pale skull-like head",
+   "dark robe",
+   "light hands at flanks"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "skeletal humanoid",
+   "robed humanoid"
+  ],
+  "possible_features": [
+   "pale head with dark sockets could be a skull",
+   "yellow spot could be an amulet or gem",
+   "black outline could be a hooded cloak"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "lich",
+   "necromancer",
+   "undead mage"
+  ],
+  "visual_symbols": [
+   "skull-like face",
+   "dark robe",
+   "amulet"
+  ],
+  "priority_features": [
+   "pale skull face in dark hood",
+   "black robe",
+   "small yellow chest gem"
+  ]
+ }
+}

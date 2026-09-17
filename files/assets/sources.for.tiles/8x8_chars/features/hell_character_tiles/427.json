@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/427",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with two small top points",
+      "gray strip right"
+    ],
+    "shape": [
+      "square head",
+      "red band across top of head",
+      "red torso with orange band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "weapon at side"
+    ],
+    "colors": [
+      "green face",
+      "mostly red body",
+      "orange belt",
+      "gray accent"
+    ],
+    "major_regions": [
+      "green face under red headband",
+      "red clothing with orange belt",
+      "gray blade strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "red band on head could be a headband",
+      "top gray points could be horns",
+      "gray strip could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin warrior",
+      "orc berserker",
+      "monk fighter"
+    ],
+    "visual_symbols": [
+      "headband",
+      "horns",
+      "blade"
+    ],
+    "priority_features": [
+      "red headband on green head",
+      "red body with orange belt",
+      "gray weapon"
+    ]
+  }
+}

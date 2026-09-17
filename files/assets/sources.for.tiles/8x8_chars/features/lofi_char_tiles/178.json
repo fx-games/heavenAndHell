@@ -1,0 +1,57 @@
+{
+  "id": "lofi_char_tiles/178",
+  "perceptual": {
+    "silhouette": [
+      "triangular mound silhouette",
+      "wide flat base",
+      "narrow top"
+    ],
+    "shape": [
+      "pyramid-like mass",
+      "ringed eye near apex",
+      "light green diagonal streak on left"
+    ],
+    "orientation": [
+      "front-facing",
+      "ambiguous"
+    ],
+    "pose": [
+      "stationary"
+    ],
+    "colors": [
+      "bright green",
+      "lighter green highlight",
+      "black ring with white eye center"
+    ],
+    "major_regions": [
+      "green mound",
+      "one eye near top"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "amorphous",
+      "limbless blob"
+    ],
+    "possible_features": [
+      "green sheen suggests slime or ooze",
+      "ring could be a single eye"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "slime",
+      "ooze",
+      "acidic blob"
+    ],
+    "visual_symbols": [
+      "single eye",
+      "slime mound"
+    ],
+    "priority_features": [
+      "green mound",
+      "single eye near apex",
+      "glossy highlight streak"
+    ]
+  }
+}

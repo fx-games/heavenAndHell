@@ -1,0 +1,60 @@
+{
+ "id": "lofi_char_tiles/119",
+ "perceptual": {
+  "silhouette": [
+   "rounded egg-like blob",
+   "small nub at left",
+   "tapering lower-left tail"
+  ],
+  "shape": [
+   "large oval blue mass",
+   "small white spot at top",
+   "vertical black slot on right"
+  ],
+  "orientation": [
+   "facing right",
+   "ambiguous"
+  ],
+  "pose": [
+   "hovering",
+   "ambiguous"
+  ],
+  "colors": [
+   "mostly steel blue",
+   "black vertical mark",
+   "white highlight"
+  ],
+  "major_regions": [
+   "blue rounded body",
+   "black vertical eye or mouth on right",
+   "white highlight near top"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "amorphous",
+   "ghost-like"
+  ],
+  "possible_features": [
+   "black slot could be an eye or mouth",
+   "nub could be a small arm or tail",
+   "rounded shape could be a ghost or slime"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "ghost",
+   "water spirit",
+   "blob"
+  ],
+  "visual_symbols": [
+   "rounded ghost body",
+   "single dark eye"
+  ],
+  "priority_features": [
+   "rounded blue blob silhouette",
+   "black vertical slot on right",
+   "small side nub"
+  ]
+ }
+}

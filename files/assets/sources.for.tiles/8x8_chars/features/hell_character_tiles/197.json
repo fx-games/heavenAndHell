@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/197",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "bright crest on head",
+      "vertical gray bar at right"
+    ],
+    "shape": [
+      "bright yellow helmet",
+      "yellow face with one eye",
+      "red belt",
+      "yellow-green lower body"
+    ],
+    "orientation": [
+      "side-facing",
+      "facing right"
+    ],
+    "pose": [
+      "standing",
+      "holding upright blade"
+    ],
+    "colors": [
+      "yellow head",
+      "red belt",
+      "yellow-green legs",
+      "gray bar"
+    ],
+    "major_regions": [
+      "bright yellow helmet or crown",
+      "profile face",
+      "red belt with gray buckle",
+      "yellow-green trousers",
+      "gray sword"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "bright top could be a helmet, crown or blond hair",
+      "gray bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "warrior",
+      "hero",
+      "noble fighter"
+    ],
+    "visual_symbols": [
+      "helmet or crown",
+      "sword",
+      "belt"
+    ],
+    "priority_features": [
+      "bright yellow headwear",
+      "gray sword",
+      "yellow-green legs",
+      "profile face"
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/175",
+  "perceptual": {
+    "silhouette": [
+      "rounded upright body",
+      "short arm blocks at sides",
+      "two small feet"
+    ],
+    "shape": [
+      "large rounded central mass",
+      "cross-shaped eye in upper right",
+      "darker side blocks"
+    ],
+    "orientation": [
+      "front-facing",
+      "slightly turned right"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "mostly red",
+      "darker red limbs",
+      "black ring around bright red eye center"
+    ],
+    "major_regions": [
+      "red body",
+      "single eye with red pupil",
+      "darker arms and feet"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "single-eyed blob creature",
+      "bipedal"
+    ],
+    "possible_features": [
+      "single eye could mark a cyclops or demonic eye creature",
+      "side blocks could be arms"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "cyclops",
+      "demon-like blob",
+      "one-eyed monster"
+    ],
+    "visual_symbols": [
+      "single eye",
+      "red body",
+      "stubby arms"
+    ],
+    "priority_features": [
+      "single central eye",
+      "red rounded body",
+      "stubby arms",
+      "small feet"
+    ]
+  }
+}

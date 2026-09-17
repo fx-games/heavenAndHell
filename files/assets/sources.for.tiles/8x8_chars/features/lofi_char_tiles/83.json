@@ -1,0 +1,63 @@
+{
+  "id": "lofi_char_tiles/83",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette with horn-like points",
+      "wide red lower body",
+      "tall staff at right"
+    ],
+    "shape": [
+      "green head mass",
+      "red trapezoidal robe",
+      "long vertical extension with yellow tip"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "green head",
+      "red robe",
+      "brown horn tips and staff",
+      "yellow staff top"
+    ],
+    "major_regions": [
+      "green face with bright eyes",
+      "brown upper-corner horns",
+      "red robe covering lower half",
+      "brown staff with yellow head at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "top points could be horns or ears",
+      "vertical stick with yellow tip could be a magic staff",
+      "red mass could be a robe"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin shaman",
+      "orc mage",
+      "imp caster"
+    ],
+    "visual_symbols": [
+      "horns",
+      "staff",
+      "robe"
+    ],
+    "priority_features": [
+      "green head",
+      "red robe",
+      "staff with bright tip",
+      "horn-like points"
+    ]
+  }
+}

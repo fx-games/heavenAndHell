@@ -1,0 +1,65 @@
+{
+  "id": "lofi_char_tiles/85",
+  "perceptual": {
+    "silhouette": [
+      "blocky square-bodied silhouette",
+      "red rectangle at left",
+      "tall red vertical block at right",
+      "two light top spikes"
+    ],
+    "shape": [
+      "square green body",
+      "red rectangular shield-like block at left",
+      "long red vertical extension at right with yellow base"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding items in both hands"
+    ],
+    "colors": [
+      "mostly lime green",
+      "red side objects",
+      "white top spikes",
+      "black eyes",
+      "brown belt"
+    ],
+    "major_regions": [
+      "green head-body block with black eyes",
+      "red block at left",
+      "red vertical blade at right with yellow hilt",
+      "white horn-like points"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "squat bipedal"
+    ],
+    "possible_features": [
+      "left red block could be a shield",
+      "right red vertical could be a sword",
+      "top spikes could be horns"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin warrior",
+      "armed small monster",
+      "horned fighter"
+    ],
+    "visual_symbols": [
+      "shield",
+      "sword",
+      "horns"
+    ],
+    "priority_features": [
+      "lime green body",
+      "red shield and sword",
+      "white horns",
+      "black eyes"
+    ]
+  }
+}

@@ -64,6 +64,10 @@ The handful of always-present H&H icons (`IconGrass`, `IconCharacterWarriorMale`
 package vars (`defs/icons_actors.go` / `icons_tiles.go`), read directly; their rec key now just follows the same
 convention. Everything else has no Go identifier; look it up with `defs.Icon(defs.IconID("monster", m.ID))`
 (panics on a typo) or `defs.IconOK(id)` when the name is optional (`common/d1_item.go`'s IMISC fallback).
+D1 objects go through `defs.PropIconID`, which folds objects our top-down view can't tell apart (same sprite
+under another ID: trapped/quest chests, Warlord's racks; or another isometric angle: left/right shrines,
+bookcases, banners, crux skeletons, lectern books) into one `prop.*` record via `propFolds` in `defs/icons.go`;
+`prop_folds_test.go` keeps it and `tiles.rec` in sync.
 
 Remap visually with `./remap_actors.sh`, `./remap_items.sh`, `./remap_tiles.sh`, `./remap_skills.sh` (each opens
 the remapper on its rec file: click a name on the left, a tile on the right, `s` saves, `F10` quits). Adding a new
@@ -147,4 +151,4 @@ Sound effects are **events**, not folders: `files/assets/data/sounds.rec` has on
 - Print a generated D1 level: `go run . dun_gen <dungeon level> [seed]`
 - Import level data: `go run ./cmd/d1import` (adds the Crypt's and the Nest's tile tables when HELLFIRE.MPQ is there)
 - Extract sounds: `go run ./cmd/d1import -sfx`, then convert with the ffmpeg line above
-- Sprite reference PDFs for picking icons: `go run ./cmd/d1sprites -out /tmp` (monsters and uniques in their TRN recolors, items, spell icons, each with its current icons/*.rec mapping)
+- Sprite references for picking icons: `go run -tags development ./cmd/d1sprites` writes `reference/d1_{monsters,items,skills,tiles}.pdf` (one per icons/*.rec, each sprite labelled with its current icon) and every sprite as a PNG under `reference/d1_sprites/`: monsters and uniques in their TRN recolors, items, spell and skill icons, objects and each level type's megatiles

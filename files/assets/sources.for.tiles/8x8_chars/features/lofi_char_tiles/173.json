@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/173",
+  "perceptual": {
+    "silhouette": [
+      "rounded blob silhouette",
+      "slight bumps on top",
+      "short side stubs",
+      "two short lower stubs"
+    ],
+    "shape": [
+      "large rounded central mass",
+      "small side projections",
+      "two narrow feet"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms slightly out"
+    ],
+    "colors": [
+      "mostly light gray",
+      "white highlights on top",
+      "two black eyes"
+    ],
+    "major_regions": [
+      "pale gray body",
+      "two black eyes near top"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "amorphous blob with stubby limbs"
+    ],
+    "possible_features": [
+      "pale coloring could suggest a ghost or spirit",
+      "side stubs could be small arms",
+      "dark squares read as eyes"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ghost",
+      "pale blob monster",
+      "spirit"
+    ],
+    "visual_symbols": [
+      "two dark eyes",
+      "pale body",
+      "stubby arms"
+    ],
+    "priority_features": [
+      "pale rounded body",
+      "two black eyes",
+      "stubby arms",
+      "short legs"
+    ]
+  }
+}

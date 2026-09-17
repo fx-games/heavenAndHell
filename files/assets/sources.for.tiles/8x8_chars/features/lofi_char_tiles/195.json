@@ -1,0 +1,59 @@
+{
+  "id": "lofi_char_tiles/195",
+  "perceptual": {
+    "silhouette": [
+      "wide low silhouette",
+      "two claw-like projections raised at upper corners",
+      "legs along bottom"
+    ],
+    "shape": [
+      "wide rounded body",
+      "pincer shapes top left and right",
+      "two vertical dark marks in middle"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "claws raised",
+      "standing"
+    ],
+    "colors": [
+      "mostly orange",
+      "two brown vertical marks"
+    ],
+    "major_regions": [
+      "orange body",
+      "raised pincers",
+      "dark eye marks"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "arthropod",
+      "crustacean-like"
+    ],
+    "possible_features": [
+      "upper projections could be pincers",
+      "dark vertical marks could be eyes",
+      "bottom stubs could be legs"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "crab",
+      "crustacean",
+      "arthropod monster"
+    ],
+    "visual_symbols": [
+      "pincers",
+      "many legs"
+    ],
+    "priority_features": [
+      "two raised pincers",
+      "wide low body",
+      "multiple legs",
+      "orange color"
+    ]
+  }
+}

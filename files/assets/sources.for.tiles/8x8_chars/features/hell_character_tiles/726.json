@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/726",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "brown cap over head",
+      "gray vertical bar at right edge",
+      "cyan body"
+    ],
+    "shape": [
+      "rounded head covering",
+      "wide cyan torso",
+      "thin blade-like extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding upright weapon at side"
+    ],
+    "colors": [
+      "brown head top",
+      "cyan face and body",
+      "white eyes",
+      "gray bar"
+    ],
+    "major_regions": [
+      "brown hair or hat",
+      "cyan face with white eyes",
+      "cyan body",
+      "gray sword"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "brown top could be hair or a hat",
+      "gray bar with brown base could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "swordsman",
+      "humanoid monster",
+      "adventurer"
+    ],
+    "visual_symbols": [
+      "hair or hat",
+      "sword",
+      "glowing eyes"
+    ],
+    "priority_features": [
+      "brown hair/hat",
+      "cyan body with white eyes",
+      "sword at right"
+    ]
+  }
+}

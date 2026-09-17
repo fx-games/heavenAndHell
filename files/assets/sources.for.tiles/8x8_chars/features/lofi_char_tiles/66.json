@@ -1,0 +1,62 @@
+{
+  "id": "lofi_char_tiles/66",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "rounded helmet",
+      "tall thin brown pole at right"
+    ],
+    "shape": [
+      "gray dome helmet",
+      "yellow face",
+      "white torso",
+      "dark lower body",
+      "long brown vertical shaft"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole upright"
+    ],
+    "colors": [
+      "gray helmet",
+      "yellow face",
+      "white body",
+      "brown pole"
+    ],
+    "major_regions": [
+      "gray helmet over yellow face",
+      "white tunic",
+      "dark gray legs",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "brown pole could be a spear shaft, staff or polearm",
+      "white torso could be a tabard or surcoat"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "soldier or guard",
+      "knight",
+      "pilgrim or cleric"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "staff or spear",
+      "white tabard"
+    ],
+    "priority_features": [
+      "gray helmet",
+      "white tunic",
+      "tall brown pole at side"
+    ]
+  }
+}

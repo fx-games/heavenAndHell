@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/488",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "vertical strip on right edge"
+    ],
+    "shape": [
+      "light blue hood mass",
+      "pale face with dark eyes",
+      "light blue robe",
+      "white belt"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "azure hood and body",
+      "pale gray face",
+      "black eyes",
+      "white belt",
+      "brown right strip"
+    ],
+    "major_regions": [
+      "azure hood",
+      "pale face",
+      "azure robe with white sash",
+      "brown pole at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "top could be a hood or cap",
+      "brown strip could be a staff",
+      "white band could be a sash"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mage",
+      "priest",
+      "human adventurer"
+    ],
+    "visual_symbols": [
+      "hood",
+      "sash",
+      "staff"
+    ],
+    "priority_features": [
+      "azure hood and robe",
+      "white sash",
+      "pale face",
+      "staff"
+    ]
+  }
+}

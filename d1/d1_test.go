@@ -354,7 +354,7 @@ func TestTextSpeech(t *testing.T) {
 			t.Errorf("%s: speech %q has no file", id, sfx)
 		}
 	}
-	for _, n := range []int{8, 9, 13, 24, 61, 62, 80, 82, 83, 87, 88, 89, 91, 94, 95} {
+	for _, n := range []int{8, 9, 13, 14, 15, 16, 24, 27, 35, 61, 69, 71, 62, 80, 82, 83, 87, 88, 89, 91, 94, 95, 97, 98, 99} {
 		for _, class := range []string{"WARR", "ROGUE", "MAGE"} {
 			if id := "PS_" + class + fmt.Sprint(n); SfxFiles[id] == "" {
 				t.Errorf("hero line %s has no file", id)

@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/364",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "hooded head with light top",
+      "dark column on right"
+    ],
+    "shape": [
+      "hood block",
+      "wide body",
+      "orange horizontal band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "mostly red",
+      "white at top of head",
+      "yellow face",
+      "orange band"
+    ],
+    "major_regions": [
+      "red hood around yellow face with white top",
+      "red robe",
+      "orange belt band",
+      "no visible weapon"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "red covering could be a hood or headband",
+      "white top could be a hat brim or hair",
+      "orange band could be a sash"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ninja-like figure",
+      "red-robed mage",
+      "hooded human"
+    ],
+    "visual_symbols": [
+      "hood",
+      "sash"
+    ],
+    "priority_features": [
+      "red hood and robe",
+      "orange waist band",
+      "white top of head",
+      "no weapon"
+    ]
+  }
+}

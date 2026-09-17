@@ -1,0 +1,65 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/226",
+ "perceptual": {
+  "silhouette": [
+   "stocky humanoid silhouette",
+   "large wide head",
+   "arms slightly out",
+   "short legs"
+  ],
+  "shape": [
+   "large squarish head",
+   "dark eye squares",
+   "brown rectangular belt with blue center",
+   "two purple leg blocks"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms at sides"
+  ],
+  "colors": [
+   "red/salmon body",
+   "brown belt",
+   "small blue center dot",
+   "purple legs"
+  ],
+  "major_regions": [
+   "large red head with dark eyes",
+   "brown waist band",
+   "purple legs",
+   "red arms"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "dark squares could be eyes",
+   "brown band with blue dot could be a belt with buckle",
+   "purple lower could be trousers"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "ogre",
+   "brute",
+   "red-skinned humanoid monster"
+  ],
+  "visual_symbols": [
+   "belt buckle",
+   "dark eyes",
+   "big head"
+  ],
+  "priority_features": [
+   "large red head",
+   "brown belt with blue buckle",
+   "purple legs",
+   "stocky body"
+  ]
+ }
+}

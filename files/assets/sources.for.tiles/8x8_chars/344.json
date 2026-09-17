@@ -1,0 +1,67 @@
+{
+  "id": "lofi_char_tiles/344",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "helmeted head",
+      "wide gray body",
+      "short legs"
+    ],
+    "shape": [
+      "bright yellow dome at top of head",
+      "gray face with single dark square hole visible",
+      "large gray torso and arms block",
+      "gray legs",
+      "gray and light vertical strip plus brown pixel at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms outstretched",
+      "holding weapon at side"
+    ],
+    "colors": [
+      "mostly gray body",
+      "bright yellow helmet",
+      "dark eye hole",
+      "small brown accent"
+    ],
+    "major_regions": [
+      "yellow helmet over gray face",
+      "large gray body",
+      "vertical weapon-like bar at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "undead humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "yellow top could be a helmet or hard hat",
+      "gray body could be undead skin or armor",
+      "right bar with brown pixel could be a sword with hilt"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead soldier",
+      "zombie warrior",
+      "golem guard"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "hollow eye",
+      "weapon"
+    ],
+    "priority_features": [
+      "yellow helmet",
+      "gray body",
+      "dark eye hole",
+      "weapon at right"
+    ]
+  }
+}

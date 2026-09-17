@@ -1,0 +1,67 @@
+{
+  "id": "hell_character_tiles/326",
+  "perceptual": {
+    "silhouette": [
+      "stocky humanoid silhouette",
+      "capped head",
+      "wide central mass",
+      "short legs"
+    ],
+    "shape": [
+      "white cap at top",
+      "tan face",
+      "large red mass covering lower face and chest",
+      "dark green lower body",
+      "gray block at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon at side"
+    ],
+    "colors": [
+      "large red central region",
+      "white cap",
+      "tan face and hands",
+      "dark green legs",
+      "gray accent"
+    ],
+    "major_regions": [
+      "white-capped tan head",
+      "big red region from chin to chest",
+      "dark green trousers",
+      "gray object at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "stocky humanoid"
+    ],
+    "possible_features": [
+      "red mass from face to chest could be a large beard",
+      "gray block could be an axe head or weapon",
+      "white top could be a helmet or hair"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dwarf",
+      "bearded warrior",
+      "miner"
+    ],
+    "visual_symbols": [
+      "beard",
+      "axe-like weapon",
+      "cap"
+    ],
+    "priority_features": [
+      "large red beard-like region",
+      "stocky short body",
+      "white cap",
+      "gray weapon at right"
+    ]
+  }
+}

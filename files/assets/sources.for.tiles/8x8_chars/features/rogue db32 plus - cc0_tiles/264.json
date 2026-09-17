@@ -1,0 +1,63 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/264",
+  "perceptual": {
+    "silhouette": [
+      "boxy rectangular silhouette",
+      "two small bumps on top",
+      "short legs at bottom corners"
+    ],
+    "shape": [
+      "large rectangle with thick frame",
+      "light inner panel",
+      "two feet"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "gray frame",
+      "pale blue-gray face panel",
+      "dark and red horizontal band"
+    ],
+    "major_regions": [
+      "gray outer frame",
+      "pale inner panel",
+      "two dark eye marks near top",
+      "dark horizontal mouth band with red ends"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "box-shaped creature",
+      "construct"
+    ],
+    "possible_features": [
+      "box shape could be a chest, crate or robot body",
+      "horizontal dark band could be a mouth",
+      "top bumps could be hinges, antennae or ears",
+      "bottom projections could be legs"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mimic",
+      "robot",
+      "golem",
+      "animated object"
+    ],
+    "visual_symbols": [
+      "box body",
+      "wide mouth",
+      "legs"
+    ],
+    "priority_features": [
+      "rectangular box body",
+      "wide horizontal mouth band",
+      "two eyes near top",
+      "short legs"
+    ]
+  }
+}

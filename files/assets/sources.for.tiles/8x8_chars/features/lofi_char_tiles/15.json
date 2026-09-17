@@ -1,0 +1,67 @@
+{
+  "id": "lofi_char_tiles/15",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "flat brimmed hat",
+      "bare arms extended",
+      "gray bar upper right"
+    ],
+    "shape": [
+      "olive hat",
+      "brown brim band",
+      "square face",
+      "vest body",
+      "legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms slightly out",
+      "holding blade"
+    ],
+    "colors": [
+      "olive-brown hat",
+      "brown vest",
+      "yellow bare skin on arms",
+      "gray blade"
+    ],
+    "major_regions": [
+      "brimmed hat",
+      "yellow face and arms",
+      "brown vest",
+      "gray sword"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "hat could be an adventurer's hat",
+      "gray bar could be a sword",
+      "exposed arms could suggest light clothing"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "adventurer",
+      "bandit",
+      "barbarian"
+    ],
+    "visual_symbols": [
+      "brimmed hat",
+      "sword",
+      "vest"
+    ],
+    "priority_features": [
+      "brimmed hat",
+      "bare yellow arms",
+      "brown vest",
+      "sword"
+    ]
+  }
+}

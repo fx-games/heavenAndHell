@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/803",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "rounded cap on top",
+      "long robe",
+      "vertical staff on right edge"
+    ],
+    "shape": [
+      "dome-like top mass",
+      "square face",
+      "robed body",
+      "thin vertical line"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "bright blue hat and robe",
+      "light blue face",
+      "white belt",
+      "brown staff"
+    ],
+    "major_regions": [
+      "blue hat above face",
+      "blue robe with white band",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "top blue mass could be a hat or hood",
+      "right line could be a staff",
+      "white band could be a sash"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mage",
+      "water or ice caster",
+      "robed humanoid"
+    ],
+    "visual_symbols": [
+      "hat",
+      "staff",
+      "robe",
+      "sash"
+    ],
+    "priority_features": [
+      "bright blue hat and robe",
+      "white waist sash",
+      "brown staff",
+      "pale blue face"
+    ]
+  }
+}

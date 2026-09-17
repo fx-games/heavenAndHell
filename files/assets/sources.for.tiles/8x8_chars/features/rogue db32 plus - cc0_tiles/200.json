@@ -1,0 +1,64 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/200",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large pale shapes spreading upward from shoulders",
+      "narrow lower body with legs"
+    ],
+    "shape": [
+      "two large upper wing-like masses",
+      "small central head",
+      "compact torso",
+      "thin legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "wings raised"
+    ],
+    "colors": [
+      "pale lavender/white upper wings",
+      "cyan accents",
+      "blue head",
+      "pink and purple torso",
+      "green accents"
+    ],
+    "major_regions": [
+      "pale wing-like regions at top sides",
+      "blue head",
+      "green collar/shoulders",
+      "purple body"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "winged humanoid",
+      "insectoid humanoid"
+    ],
+    "possible_features": [
+      "pale upper masses could be wings",
+      "green pixels could be antennae or limbs",
+      "blue head could be a face or mask"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "fairy",
+      "moth-person",
+      "winged sprite",
+      "pixie"
+    ],
+    "visual_symbols": [
+      "wings",
+      "humanoid body"
+    ],
+    "priority_features": [
+      "large pale wings above shoulders",
+      "small humanoid body",
+      "colorful front-facing figure"
+    ]
+  }
+}

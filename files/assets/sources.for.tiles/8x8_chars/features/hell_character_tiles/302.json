@@ -1,0 +1,67 @@
+{
+  "id": "hell_character_tiles/302",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "yellow top with light corner tips",
+      "gray blade at right"
+    ],
+    "shape": [
+      "yellow cap",
+      "gray face",
+      "orange belt with gray buckle",
+      "olive lower band",
+      "dark legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "yellow cap",
+      "gray face",
+      "orange belt",
+      "olive lower body",
+      "gray blade"
+    ],
+    "major_regions": [
+      "yellow cap with tips",
+      "gray face with black eyes",
+      "orange belt",
+      "olive-yellow lower body",
+      "gray sword"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "stocky humanoid"
+    ],
+    "possible_features": [
+      "corner tips could be helmet horns",
+      "gray face could be pale or undead skin",
+      "gray shape could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dwarf",
+      "pale warrior",
+      "undead fighter"
+    ],
+    "visual_symbols": [
+      "horned helmet",
+      "sword",
+      "belt"
+    ],
+    "priority_features": [
+      "yellow cap with tips",
+      "gray face",
+      "upright sword",
+      "orange belt"
+    ]
+  }
+}

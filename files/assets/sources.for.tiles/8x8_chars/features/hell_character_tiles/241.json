@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/241",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "hooded head",
+      "brown pole right",
+      "small feet"
+    ],
+    "shape": [
+      "square head",
+      "banded body",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "green hood and tunic",
+      "red face with black eyes",
+      "brown belt with gray buckle"
+    ],
+    "major_regions": [
+      "green hood framing red face",
+      "black eyes",
+      "brown belt",
+      "red hands at sides",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red face could be demonic skin",
+      "green hood could be ranger garb",
+      "right bar could be a staff or bow"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "demon ranger",
+      "red-faced hooded figure"
+    ],
+    "visual_symbols": [
+      "hood",
+      "red face",
+      "staff"
+    ],
+    "priority_features": [
+      "red face in green hood",
+      "green tunic",
+      "staff"
+    ]
+  }
+}

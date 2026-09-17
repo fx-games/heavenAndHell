@@ -1,0 +1,64 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/193",
+  "perceptual": {
+    "silhouette": [
+      "small bird-like silhouette",
+      "rounded body with head at upper right",
+      "pointed projection right",
+      "tail/wing tip at lower left"
+    ],
+    "shape": [
+      "rounded central body",
+      "small head mass",
+      "short horizontal beak-like point",
+      "light edge pixels outlining wing"
+    ],
+    "orientation": [
+      "facing right"
+    ],
+    "pose": [
+      "perched",
+      "standing"
+    ],
+    "colors": [
+      "mostly teal/dark cyan",
+      "lighter blue highlight edges",
+      "orange beak and feet",
+      "small brown crest-like pixel"
+    ],
+    "major_regions": [
+      "teal body",
+      "orange beak-like extension",
+      "light blue wing outline",
+      "orange legs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "avian"
+    ],
+    "possible_features": [
+      "orange point could be a beak",
+      "light blue edges could be wing feathers",
+      "brown pixel above head could be a crest"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "small bird",
+      "bluebird",
+      "songbird",
+      "kingfisher-like bird"
+    ],
+    "visual_symbols": [
+      "beak",
+      "wing",
+      "bird silhouette"
+    ],
+    "priority_features": [
+      "teal-blue body",
+      "orange beak",
+      "small perched bird shape"
+    ]
+  }
+}

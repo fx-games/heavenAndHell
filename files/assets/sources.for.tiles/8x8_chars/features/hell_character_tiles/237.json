@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/237",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "hooded head",
+      "dark bar at right"
+    ],
+    "shape": [
+      "square head",
+      "body split by dark vertical stripe",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "red head/hood",
+      "black eyes",
+      "blue forehead pixel",
+      "teal robe",
+      "dark center stripe"
+    ],
+    "major_regions": [
+      "red face/hood with black eyes",
+      "blue gem-like pixel on head",
+      "teal robe with dark center split",
+      "red hand at left",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "blue pixel could be a forehead gem or circlet",
+      "red head could be demonic skin",
+      "right bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "demon priest",
+      "red-skinned cleric",
+      "cultist"
+    ],
+    "visual_symbols": [
+      "forehead gem",
+      "red face",
+      "robe",
+      "staff"
+    ],
+    "priority_features": [
+      "red head with blue gem",
+      "teal split robe",
+      "staff"
+    ]
+  }
+}

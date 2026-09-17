@@ -1,0 +1,67 @@
+{
+  "id": "hell_character_tiles/277",
+  "perceptual": {
+    "silhouette": [
+      "hooded humanoid silhouette",
+      "pointed hood top",
+      "brown pole at right"
+    ],
+    "shape": [
+      "blue hood framing face",
+      "yellow face",
+      "white beard wedge",
+      "orange block at left"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding object"
+    ],
+    "colors": [
+      "deep blue hood and robe",
+      "yellow face",
+      "white beard",
+      "orange object"
+    ],
+    "major_regions": [
+      "blue hood and robe",
+      "yellow face with black eyes",
+      "white beard",
+      "orange-red held item",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "blue top could be a wizard hood or hat",
+      "white area could be a beard",
+      "orange block could be a spellbook",
+      "brown pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "wizard",
+      "mage",
+      "old sage"
+    ],
+    "visual_symbols": [
+      "hood",
+      "beard",
+      "staff",
+      "book"
+    ],
+    "priority_features": [
+      "blue hood and robe",
+      "white beard",
+      "staff",
+      "held book"
+    ]
+  }
+}

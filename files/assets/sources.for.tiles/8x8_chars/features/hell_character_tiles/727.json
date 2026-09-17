@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/727",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "dome-shaped cyan head",
+      "gray vertical bar at right edge",
+      "gray lower body"
+    ],
+    "shape": [
+      "rounded head mass",
+      "dark horizontal band",
+      "broad gray lower mass",
+      "thin blade-like extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding upright weapon at side"
+    ],
+    "colors": [
+      "cyan upper body",
+      "white eyes",
+      "dark belt",
+      "gray lower body",
+      "gray bar"
+    ],
+    "major_regions": [
+      "cyan domed head with white eyes",
+      "black belt",
+      "gray armored lower body",
+      "gray sword"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "blob-like humanoid"
+    ],
+    "possible_features": [
+      "gray lower body could be armor or trousers",
+      "gray bar with brown base could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "armored humanoid monster",
+      "warrior",
+      "alien-like figure"
+    ],
+    "visual_symbols": [
+      "sword",
+      "armor",
+      "glowing eyes"
+    ],
+    "priority_features": [
+      "cyan dome head with white eyes",
+      "gray lower armor",
+      "sword at right"
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/811",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "wide skirt-like base",
+      "gray pole on right"
+    ],
+    "shape": [
+      "gray cap",
+      "square face",
+      "gray armored body",
+      "wide bottom row"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon"
+    ],
+    "colors": [
+      "mostly gray body",
+      "light blue face",
+      "black belt",
+      "gray pole"
+    ],
+    "major_regions": [
+      "gray body with black waist band",
+      "pale face with bright eyes",
+      "gray weapon line"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray body could be chainmail or plate armor",
+      "gray line could be a sword or spear",
+      "wide base could be a robe or armored skirt"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "armored soldier",
+      "guard",
+      "knight"
+    ],
+    "visual_symbols": [
+      "armor",
+      "weapon",
+      "belt"
+    ],
+    "priority_features": [
+      "gray armored body",
+      "gray weapon on right",
+      "pale blue face with bright eyes"
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/244",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large rounded head",
+      "gray bar right"
+    ],
+    "shape": [
+      "large square head",
+      "wide gray body",
+      "dark belt band",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "bright red head",
+      "black eye dots",
+      "gray body",
+      "dark belt with white center"
+    ],
+    "major_regions": [
+      "red head with black eyes",
+      "gray armored torso",
+      "dark belt with bright buckle",
+      "brown pixel at right hand",
+      "gray blade"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "red head could be a bare demonic head",
+      "gray body could be plate armor",
+      "right bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "demon knight",
+      "armored demon",
+      "red-skinned warrior"
+    ],
+    "visual_symbols": [
+      "red face",
+      "plate armor",
+      "sword"
+    ],
+    "priority_features": [
+      "red head with black eyes",
+      "gray armored body",
+      "sword on right"
+    ]
+  }
+}

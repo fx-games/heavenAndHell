@@ -1,0 +1,66 @@
+{
+  "id": "hell_character_tiles/367",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "hooded head",
+      "vertical line on right",
+      "small feet"
+    ],
+    "shape": [
+      "hood block",
+      "tunic body",
+      "thin pole",
+      "brown boots"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole at side"
+    ],
+    "colors": [
+      "mostly bright green",
+      "yellow face",
+      "brown belt",
+      "brown vertical line"
+    ],
+    "major_regions": [
+      "green hood around yellow face",
+      "green tunic",
+      "brown belt with gray buckle",
+      "brown pole on right",
+      "brown boots"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "green covering could be a hood",
+      "brown line could be a bow or staff",
+      "brown bottom pixels could be boots"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ranger",
+      "elf",
+      "woodsman"
+    ],
+    "visual_symbols": [
+      "hood",
+      "staff or bow",
+      "boots"
+    ],
+    "priority_features": [
+      "green hood and tunic",
+      "brown pole on right",
+      "brown belt",
+      "boots"
+    ]
+  }
+}

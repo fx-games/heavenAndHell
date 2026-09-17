@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/67",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "enclosed helmet",
+      "gray shape at upper right"
+    ],
+    "shape": [
+      "gray helmet covering most of head",
+      "small dark eye slits with yellow below",
+      "white torso",
+      "gray block on right side"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding item raised at side"
+    ],
+    "colors": [
+      "gray helmet",
+      "small yellow face areas",
+      "white body",
+      "gray weapon"
+    ],
+    "major_regions": [
+      "full gray helmet with visor-like dark band",
+      "white tunic",
+      "gray weapon-like block at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray head with dark band could be a closed helm with visor",
+      "gray right-side block could be an axe, hammer or shield edge"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "armored knight",
+      "heavy soldier",
+      "crusader"
+    ],
+    "visual_symbols": [
+      "closed helmet",
+      "axe or hammer",
+      "white tabard"
+    ],
+    "priority_features": [
+      "full gray helmet with visor",
+      "white tunic",
+      "gray weapon at upper right"
+    ]
+  }
+}

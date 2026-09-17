@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/406",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "bald head",
+      "wide robe",
+      "hand visible at right"
+    ],
+    "shape": [
+      "yellow head block",
+      "robe body",
+      "orange band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "yellow head",
+      "mostly red robe",
+      "orange band",
+      "yellow hand pixel right"
+    ],
+    "major_regions": [
+      "bald head",
+      "red robe",
+      "orange sash",
+      "yellow hand at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "bare head could be bald",
+      "orange band could be a sash",
+      "side pixel could be a hand"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "monk",
+      "acolyte",
+      "red-robed human"
+    ],
+    "visual_symbols": [
+      "bald head",
+      "robe",
+      "sash"
+    ],
+    "priority_features": [
+      "bald head",
+      "red robe",
+      "orange sash",
+      "empty hands"
+    ]
+  }
+}

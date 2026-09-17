@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/429",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with top points",
+      "wide gray block left",
+      "brown strip right"
+    ],
+    "shape": [
+      "square head",
+      "gray rectangular slab left",
+      "white torso with orange band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "shield held"
+    ],
+    "colors": [
+      "green head",
+      "gray left block",
+      "white body",
+      "orange belt",
+      "brown right accent"
+    ],
+    "major_regions": [
+      "green horned face with dark eyes",
+      "gray shield-like block",
+      "white tunic with orange belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "gray block could be a shield",
+      "top gray points could be horns",
+      "brown strip could be a staff or hair"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin defender",
+      "orc soldier"
+    ],
+    "visual_symbols": [
+      "shield",
+      "horns",
+      "belt"
+    ],
+    "priority_features": [
+      "gray shield on left",
+      "green horned head",
+      "white tunic with orange belt"
+    ]
+  }
+}

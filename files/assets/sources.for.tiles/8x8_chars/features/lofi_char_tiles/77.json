@@ -1,0 +1,61 @@
+{
+  "id": "lofi_char_tiles/77",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "wide rounded head mass on top",
+      "thin vertical line at right edge"
+    ],
+    "shape": [
+      "large blocky head",
+      "rectangular torso",
+      "long thin vertical extension beside body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding long object at side"
+    ],
+    "colors": [
+      "yellow top region",
+      "green body",
+      "black eye pixels"
+    ],
+    "major_regions": [
+      "yellow cap-like region over head",
+      "green face and torso",
+      "brown horizontal band at waist",
+      "thin brown vertical stick at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "yellow top mass could be blond hair or a hat",
+      "vertical stick could be a staff, bow or spear",
+      "brown band could be a belt"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "adventurer",
+      "elf-like humanoid",
+      "ranger or druid"
+    ],
+    "visual_symbols": [
+      "hair or hood",
+      "staff or bow",
+      "belt"
+    ],
+    "priority_features": [
+      "yellow hair/hat over green face",
+      "humanoid holding tall stick",
+      "green tunic"
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/6",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette with large block on left",
+      "wide robed base",
+      "brown bar on right"
+    ],
+    "shape": [
+      "yellow hair tuft on top",
+      "gray hat band",
+      "square face",
+      "large gray rectangle left",
+      "wide white body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding shield and staff"
+    ],
+    "colors": [
+      "white body",
+      "yellow face and hair",
+      "gray block on left",
+      "orange belt",
+      "brown staff"
+    ],
+    "major_regions": [
+      "large gray shield-like block",
+      "white robe body",
+      "brown pole on right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray block could be a shield or book",
+      "brown bar could be a staff or mace",
+      "white body could be a robe"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "cleric",
+      "priest",
+      "defender"
+    ],
+    "visual_symbols": [
+      "shield",
+      "staff",
+      "white robe"
+    ],
+    "priority_features": [
+      "white robe",
+      "large gray shield on left",
+      "brown staff",
+      "yellow head"
+    ]
+  }
+}

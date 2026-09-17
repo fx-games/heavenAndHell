@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/116",
+ "perceptual": {
+  "silhouette": [
+   "squat humanoid silhouette",
+   "one arm extended right",
+   "two short legs"
+  ],
+  "shape": [
+   "dark brown body mass",
+   "red outline",
+   "horizontal arm projection",
+   "leg stubs"
+  ],
+  "orientation": [
+   "front-facing",
+   "slightly facing right"
+  ],
+  "pose": [
+   "standing",
+   "arm extended"
+  ],
+  "colors": [
+   "dark brown body",
+   "red outline",
+   "single white eye"
+  ],
+  "major_regions": [
+   "dark body with red border",
+   "single white eye"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "single white spot could be one eye",
+   "right extension could be an arm reaching"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "demon imp",
+   "fire shadow",
+   "cyclops"
+  ],
+  "visual_symbols": [
+   "single eye",
+   "red outline",
+   "extended arm"
+  ],
+  "priority_features": [
+   "single white eye",
+   "red-outlined dark body",
+   "extended arm",
+   "short legs"
+  ]
+ }
+}

@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/697",
+  "perceptual": {
+    "silhouette": [
+      "hooded humanoid silhouette",
+      "hood rising at top",
+      "robed body",
+      "pole at right"
+    ],
+    "shape": [
+      "blue hood mass",
+      "white face with dark eye holes",
+      "blue body",
+      "red-orange horizontal band",
+      "white side projections"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "mostly deep blue",
+      "white face",
+      "red-orange belt"
+    ],
+    "major_regions": [
+      "blue hood around skull-like face",
+      "white bony hands at sides",
+      "blue robe with red belt",
+      "staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "skeletal humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "white face with dark holes could be a skull",
+      "white side pixels could be bony arms",
+      "pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "lich",
+      "undead mage",
+      "skeleton"
+    ],
+    "visual_symbols": [
+      "hood",
+      "skull-like face",
+      "staff"
+    ],
+    "priority_features": [
+      "skull face in blue hood",
+      "blue robe",
+      "staff"
+    ]
+  }
+}

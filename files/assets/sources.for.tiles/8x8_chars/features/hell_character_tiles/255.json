@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/255",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "head with two pointed upper corners",
+      "brown pole right"
+    ],
+    "shape": [
+      "large square head",
+      "banded body",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "green head",
+      "white corner points",
+      "black eyes",
+      "yellow robe",
+      "orange belt"
+    ],
+    "major_regions": [
+      "green head with white tips",
+      "black eyes",
+      "yellow robe",
+      "orange belt",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "white corners could be ears or horns",
+      "right bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin shaman",
+      "orc",
+      "green-skinned mage"
+    ],
+    "visual_symbols": [
+      "pointed ears",
+      "green face",
+      "staff",
+      "robe"
+    ],
+    "priority_features": [
+      "green head with pointed tips",
+      "yellow robe",
+      "staff"
+    ]
+  }
+}

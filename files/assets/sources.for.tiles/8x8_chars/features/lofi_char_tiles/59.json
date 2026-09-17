@@ -1,0 +1,61 @@
+{
+  "id": "lofi_char_tiles/59",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "wide dark head covering",
+      "long straight gray bar at right"
+    ],
+    "shape": [
+      "broad dark purple top mass",
+      "black face band with red points",
+      "purple torso",
+      "thin vertical blade"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding blade upright"
+    ],
+    "colors": [
+      "mostly dark purple",
+      "black face",
+      "bright red eyes",
+      "gray blade"
+    ],
+    "major_regions": [
+      "dark hood over shadowed face",
+      "glowing red eyes",
+      "purple body with brown belt",
+      "gray sword-like bar at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red dots in black face could be glowing eyes under a hood",
+      "gray bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dark hooded warrior",
+      "shadow knight",
+      "assassin or cultist"
+    ],
+    "visual_symbols": [
+      "hood",
+      "glowing red eyes",
+      "sword"
+    ],
+    "priority_features": [
+      "glowing red eyes in black face",
+      "dark purple hood",
+      "upright gray sword"
+    ]
+  }
+}

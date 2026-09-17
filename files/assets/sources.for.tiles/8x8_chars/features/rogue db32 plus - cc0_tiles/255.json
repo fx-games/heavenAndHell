@@ -1,0 +1,62 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/255",
+  "perceptual": {
+    "silhouette": [
+      "irregular blob silhouette",
+      "ragged outline with edge flecks",
+      "wide in upper-middle",
+      "tapers to lower-left"
+    ],
+    "shape": [
+      "lumpy central mass",
+      "small side projections",
+      "narrow tail-like base"
+    ],
+    "orientation": [
+      "front-facing face",
+      "ambiguous"
+    ],
+    "pose": [
+      "floating",
+      "hovering"
+    ],
+    "colors": [
+      "bright green and light green mottled",
+      "white eyes"
+    ],
+    "major_regions": [
+      "two white eyes near top center",
+      "white mouth-like spot",
+      "green mottled body"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "amorphous",
+      "elemental blob"
+    ],
+    "possible_features": [
+      "white pixels could be eyes and mouth",
+      "side flecks could be spores, leaves or droplets",
+      "tapering base could be a wisp or slime trail"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "air or nature elemental",
+      "poison cloud creature",
+      "slime",
+      "wisp"
+    ],
+    "visual_symbols": [
+      "glowing eyes",
+      "formless body",
+      "trailing wisp"
+    ],
+    "priority_features": [
+      "formless green body with white eyes",
+      "ragged edge flecks",
+      "tapered lower-left trail"
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+ "id": "lofi_char_tiles/164",
+ "perceptual": {
+  "silhouette": [
+   "blocky rectangular humanoid silhouette",
+   "two small knobs at top corners",
+   "short block arms",
+   "two stubby legs"
+  ],
+  "shape": [
+   "tall orange body",
+   "corner knobs above head",
+   "diamond-shaped eye mark",
+   "square arm blocks"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "mostly golden orange",
+   "darker brown limbs",
+   "dark ring with light center on face"
+  ],
+  "major_regions": [
+   "orange body with single ringed marking",
+   "dark brown arm blocks",
+   "dark feet",
+   "small knobs at top"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "construct"
+  ],
+  "possible_features": [
+   "top knobs could be ears or horns",
+   "ringed marking could be a single eye or emblem",
+   "blocky body could be a wooden or honey golem"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "golem",
+   "construct",
+   "bear-like creature"
+  ],
+  "visual_symbols": [
+   "single ringed eye",
+   "ear knobs",
+   "blocky body"
+  ],
+  "priority_features": [
+   "corner knobs on top",
+   "single ringed eye mark",
+   "blocky orange body"
+  ]
+ }
+}

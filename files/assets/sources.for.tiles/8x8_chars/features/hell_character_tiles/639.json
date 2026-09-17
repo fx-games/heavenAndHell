@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/639",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large rounded head",
+      "large gray block at left side"
+    ],
+    "shape": [
+      "yellow dome head",
+      "blue eyes",
+      "gray rectangular slab at left",
+      "white torso",
+      "orange waist band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding object at side"
+    ],
+    "colors": [
+      "yellow head",
+      "white body",
+      "gray left block",
+      "orange belt",
+      "brown right edge"
+    ],
+    "major_regions": [
+      "yellow head with blue eyes",
+      "gray shield-like block at left",
+      "white tunic with orange belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray left block could be a shield",
+      "brown right strip could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "guard",
+      "warrior",
+      "bald humanoid"
+    ],
+    "visual_symbols": [
+      "shield",
+      "belt"
+    ],
+    "priority_features": [
+      "large yellow head",
+      "blue eyes",
+      "gray shield at left",
+      "white clothing"
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/198",
+  "perceptual": {
+    "silhouette": [
+      "symmetrical X-shaped silhouette",
+      "four wing-like lobes",
+      "narrow central body"
+    ],
+    "shape": [
+      "two upper triangular lobes",
+      "two lower smaller lobes",
+      "thin vertical central bar"
+    ],
+    "orientation": [
+      "top-down",
+      "front-facing"
+    ],
+    "pose": [
+      "wings spread"
+    ],
+    "colors": [
+      "mostly yellow",
+      "orange central body",
+      "tan tips on lobes"
+    ],
+    "major_regions": [
+      "yellow wing lobes",
+      "orange body stripe",
+      "tan accents at wing edges"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "winged insect"
+    ],
+    "possible_features": [
+      "lobes could be butterfly wings",
+      "central bar could be insect body",
+      "upper tips could be antennae"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "butterfly",
+      "moth",
+      "insect"
+    ],
+    "visual_symbols": [
+      "butterfly wings",
+      "symmetry"
+    ],
+    "priority_features": [
+      "X-shaped four-lobed wings",
+      "yellow wings",
+      "thin central body"
+    ]
+  }
+}

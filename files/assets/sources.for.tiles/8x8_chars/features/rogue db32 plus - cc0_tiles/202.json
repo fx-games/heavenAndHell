@@ -1,0 +1,62 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/202",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "wide yellow shapes at top sides",
+      "narrow legs below"
+    ],
+    "shape": [
+      "two upper wing-like masses",
+      "small brown head",
+      "blue rectangular torso",
+      "thin legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "wings raised"
+    ],
+    "colors": [
+      "yellow upper wings",
+      "pink wing spots",
+      "brown head",
+      "blue body",
+      "teal limbs"
+    ],
+    "major_regions": [
+      "yellow wing regions with pink spots",
+      "brown head",
+      "blue torso"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "winged humanoid",
+      "insectoid humanoid"
+    ],
+    "possible_features": [
+      "yellow masses could be butterfly wings",
+      "pink spots could be wing markings",
+      "blue block could be clothing"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "fairy",
+      "butterfly-person",
+      "pixie"
+    ],
+    "visual_symbols": [
+      "wings",
+      "humanoid figure"
+    ],
+    "priority_features": [
+      "yellow spotted wings",
+      "blue torso",
+      "small winged humanoid"
+    ]
+  }
+}

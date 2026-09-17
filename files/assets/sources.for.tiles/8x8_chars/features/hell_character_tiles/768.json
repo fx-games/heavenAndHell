@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/768",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "rounded pale head",
+      "brown banded body",
+      "gray bar at right"
+    ],
+    "shape": [
+      "large pale head",
+      "brown horizontal bands",
+      "dark middle band with gray center",
+      "thin vertical blade"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "pale cyan head",
+      "red eyes",
+      "brown clothing",
+      "dark belt",
+      "gray blade"
+    ],
+    "major_regions": [
+      "pale head with red eyes",
+      "brown tunic",
+      "gray sword at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray bar could be a sword",
+      "gray center could be a buckle",
+      "pale skin with red eyes could be undead"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead fighter",
+      "ghoul",
+      "corrupted peasant"
+    ],
+    "visual_symbols": [
+      "sword",
+      "red eyes",
+      "plain tunic"
+    ],
+    "priority_features": [
+      "red eyes in pale face",
+      "brown tunic",
+      "gray sword at right"
+    ]
+  }
+}

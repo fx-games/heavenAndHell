@@ -28,6 +28,7 @@ func (d *DieAction) Execute(context ActionContext) []Action {
 	ui := context.UserInterface()
 	if actor == state.GetPlayer() {
 		msg(fmt.Sprintf("You die. CoD: %s", d.cause.ToString()))
+		state.factory.PlayD1HeroSound(71)
 		ui.ShowGameOverMenu()
 	} else {
 		gameMap.RemoveActor(actor)

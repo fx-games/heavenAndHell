@@ -1,0 +1,62 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/261",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "spiky top edge",
+      "orange object protruding at upper right",
+      "legs with a brown shaft at lower right"
+    ],
+    "shape": [
+      "wide green head",
+      "purple torso",
+      "thin vertical extension on right side"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding item raised"
+    ],
+    "colors": [
+      "green head",
+      "purple torso",
+      "orange and brown accents"
+    ],
+    "major_regions": [
+      "green head with dark eyes and pink nose",
+      "purple tunic",
+      "orange-brown object on right edge"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "small humanoid"
+    ],
+    "possible_features": [
+      "jagged top could be ears",
+      "right-side orange/brown shape could be a club, torch or weapon",
+      "purple region could be clothing"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin",
+      "orc",
+      "armed small humanoid"
+    ],
+    "visual_symbols": [
+      "pointed ears",
+      "green skin",
+      "club or torch"
+    ],
+    "priority_features": [
+      "green head with dark eyes",
+      "purple tunic",
+      "weapon-like object on right side",
+      "small humanoid stance"
+    ]
+  }
+}

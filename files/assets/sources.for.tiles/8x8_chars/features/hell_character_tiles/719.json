@@ -1,0 +1,66 @@
+{
+  "id": "hell_character_tiles/719",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "bright blue rounded top",
+      "brown vertical bar at right edge",
+      "blue lower body"
+    ],
+    "shape": [
+      "rounded head covering",
+      "cyan face and arm band",
+      "white horizontal band",
+      "broad lower mass"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms extended",
+      "holding vertical object at side"
+    ],
+    "colors": [
+      "bright blue hat and lower body",
+      "cyan face and arms",
+      "white belt",
+      "brown bar"
+    ],
+    "major_regions": [
+      "blue cap or hood over cyan face",
+      "white eyes",
+      "white belt",
+      "blue lower robe",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "blue top could be a cap, hood or hair",
+      "white band could be a belt or sash",
+      "brown bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "humanoid monster",
+      "mage",
+      "robed humanoid"
+    ],
+    "visual_symbols": [
+      "cap or hood",
+      "staff",
+      "glowing eyes"
+    ],
+    "priority_features": [
+      "blue head covering",
+      "cyan skin with white eyes",
+      "white belt",
+      "staff at right"
+    ]
+  }
+}

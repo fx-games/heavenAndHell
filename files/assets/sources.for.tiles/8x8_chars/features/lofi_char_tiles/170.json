@@ -1,0 +1,57 @@
+{
+ "id": "lofi_char_tiles/170",
+ "perceptual": {
+  "silhouette": [
+   "irregular flickering humanoid silhouette",
+   "jagged edges",
+   "short arms and legs"
+  ],
+  "shape": [
+   "red central mass",
+   "orange and yellow edge pixels",
+   "ragged top and bottom"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing or hovering"
+  ],
+  "colors": [
+   "red core",
+   "orange and yellow outer edges",
+   "dark eyes"
+  ],
+  "major_regions": [
+   "red body with two dark eyes",
+   "orange-yellow flickering border",
+   "orange lower fragments"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "elemental"
+  ],
+  "possible_features": [
+   "jagged warm-colored edges could be flames",
+   "red core could be a burning body"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "fire elemental",
+   "flame creature",
+   "living fire"
+  ],
+  "visual_symbols": [
+   "flames",
+   "two eyes"
+  ],
+  "priority_features": [
+   "red core with orange-yellow edges",
+   "flickering jagged outline",
+   "two dark eyes"
+  ]
+ }
+}

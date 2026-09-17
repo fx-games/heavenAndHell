@@ -356,6 +356,7 @@ func d1HitRecovery(ctx ActionContext, victim *Actor, dam int) {
 	case victim.hero != nil && dam >= victim.hero.Level:
 		if victim.hitRecovery == 0 {
 			ctx.Msg("You are staggered!")
+			ctx.GameState.factory.PlayD1HeroSound(69)
 		}
 		victim.hitRecovery = max(victim.hitRecovery, d1TicksToAUT(d1.HitRecoveryTicks(victim.hero.Class, victim.HeroSheet().Flags)))
 	case victim.d1Monster != nil:

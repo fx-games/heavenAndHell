@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/790",
+  "perceptual": {
+    "silhouette": [
+      "bulky humanoid silhouette",
+      "large helmeted head",
+      "gray body",
+      "gold corner pixels"
+    ],
+    "shape": [
+      "white helmet mass with dark T-shaped slot",
+      "wide gray torso",
+      "dark band across body",
+      "thin vertical extension at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon"
+    ],
+    "colors": [
+      "white helmet",
+      "dark T-visor",
+      "gray armor",
+      "gold accents"
+    ],
+    "major_regions": [
+      "white helmet with T-visor",
+      "gray armored body",
+      "gold pixels at shoulders and hands"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "T-shaped slot could be a great helm visor",
+      "gold pixels could be trim or gauntlets",
+      "right bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "knight",
+      "crusader",
+      "armored soldier"
+    ],
+    "visual_symbols": [
+      "great helm visor",
+      "plate armor",
+      "gold trim"
+    ],
+    "priority_features": [
+      "white T-visor helmet",
+      "gray plate armor",
+      "gold accents",
+      "bulky armored silhouette"
+    ]
+  }
+}

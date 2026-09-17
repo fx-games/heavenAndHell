@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand/v2"
 	"rpg/d1"
+	"rpg/defs"
 	"rpg/files"
 	"rpg/stats"
 	"rpg/util"
@@ -146,6 +147,19 @@ func AutoExploreSettings(cfg *Configuration, reopen func()) []util.MenuItem {
 		configToggle(cfg, "Open Containers", &cfg.AutoExploreOpenContainers, reopen),
 		configToggle(cfg, "Pickup loot", &cfg.AutoPickup, reopen),
 	}
+}
+
+// HellfireSetting is the start menu's Hellfire toggle.
+func HellfireSetting(cfg *Configuration, reopen func()) util.MenuItem {
+	return configToggle(cfg, "Hellfire content", &cfg.Hellfire, reopen)
+}
+
+// PlayableClasses drops Hellfire's Monk, Bard and Barbarian (classes.rec's last three) when Hellfire is off.
+func PlayableClasses(cfg *Configuration, classes []defs.LoadoutDefinition) []defs.LoadoutDefinition {
+	if cfg.Hellfire {
+		return classes
+	}
+	return classes[:d1.Monk]
 }
 
 // GameplaySettings are the pause menu's gameplay toggles.

@@ -1,0 +1,66 @@
+{
+  "id": "hell_character_tiles/212",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "squared head",
+      "gray block at left",
+      "gray bar at right"
+    ],
+    "shape": [
+      "orange helmet mass",
+      "T-shaped dark visor",
+      "gray rectangle left",
+      "dark legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding shield and sword"
+    ],
+    "colors": [
+      "orange-brown armor",
+      "gray shield and blade",
+      "small dark navy hand pixel"
+    ],
+    "major_regions": [
+      "orange helmet with T visor",
+      "gray shield",
+      "orange torso with gray buckle",
+      "gray sword",
+      "dark hand"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "T slit could be a helmet visor",
+      "dark navy hand could indicate a corrupted or undead wearer",
+      "gray left block could be a shield"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead knight",
+      "armored warrior",
+      "corrupted soldier"
+    ],
+    "visual_symbols": [
+      "closed helmet",
+      "T-visor",
+      "shield",
+      "sword"
+    ],
+    "priority_features": [
+      "T-visor orange helmet",
+      "gray shield",
+      "sword on right",
+      "dark hand pixel"
+    ]
+  }
+}

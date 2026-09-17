@@ -101,7 +101,7 @@ func (o *D1Object) broken() bool {
 func isD1Crux(kind int) bool { return kind >= d1.ObjCRUX1 && kind <= d1.ObjCRUX3 }
 
 func (o *D1Object) iconName() string {
-	name := defs.IconID("prop", o.f.Generator.D.Objects[o.O.Kind].Name)
+	name := defs.PropIconID(o.f.Generator.D.Objects[o.O.Kind].Name)
 	if !o.O.Active && o.O.Kind != d1.ObjBLOODFTN && o.O.Kind != d1.ObjPURIFYINGFTN { // used objects have their own icon
 		return name + ".used"
 	}
@@ -205,7 +205,7 @@ func (o *d1WallLight) ActorBumpedInto(*Actor, func() bool) {}
 // list, everything else as an interactive D1Object.
 func d1PlaceObject(f *Factory, m *gridmap.GridMap[*Actor, *Item, Object], lvl *d1.Level, o *d1.Object, p geometry.Point) {
 	if lvl.CellSolid(p.X, p.Y) && f.Generator.D.Objects[o.Kind].SelFlag == 0 && !d1WallLightKinds[o.Kind] { // hangs on a wall
-		m.AddDecal(p, defs.Icon(defs.IconID("prop", f.Generator.D.Objects[o.Kind].Name)))
+		m.AddDecal(p, defs.Icon(defs.PropIconID(f.Generator.D.Objects[o.Kind].Name)))
 		return
 	}
 	if d1WallLightKinds[o.Kind] {
@@ -355,7 +355,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		default:
 			drop(gen.SpellBook(ilvl, d1.SplLightning))
 		}
-		f.playD1HeroSound(9)
+		f.PlayD1HeroSound(9)
 	case d1.ObjARMORSTAND, d1.ObjWARARMOR:
 		unique := d1Rng.Intn(2) != 0
 		switch {

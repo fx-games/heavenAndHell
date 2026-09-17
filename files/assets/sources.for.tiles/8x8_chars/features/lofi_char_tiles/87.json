@@ -1,0 +1,62 @@
+{
+  "id": "lofi_char_tiles/87",
+  "perceptual": {
+    "silhouette": [
+      "blocky square-bodied silhouette",
+      "two gray upward spikes",
+      "tall gray vertical line at right"
+    ],
+    "shape": [
+      "large square body",
+      "two top spikes",
+      "long thin vertical extension at right with red base",
+      "short legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding upright weapon"
+    ],
+    "colors": [
+      "mostly red",
+      "gray spikes and blade",
+      "black eyes and belt"
+    ],
+    "major_regions": [
+      "red head-body block with black eyes",
+      "gray horn-like points",
+      "black belt with gray buckle",
+      "gray vertical blade at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "squat bipedal"
+    ],
+    "possible_features": [
+      "top spikes could be horns",
+      "gray vertical line could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "devil warrior",
+      "armed imp",
+      "red demon"
+    ],
+    "visual_symbols": [
+      "horns",
+      "sword",
+      "belt"
+    ],
+    "priority_features": [
+      "red blocky body",
+      "gray horns",
+      "sword at right",
+      "black eyes"
+    ]
+  }
+}

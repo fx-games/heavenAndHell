@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/610",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large rounded head",
+      "narrow lower body"
+    ],
+    "shape": [
+      "large pink dome head",
+      "dark eye holes",
+      "purple robe-like body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "pink head",
+      "purple body",
+      "red belt band",
+      "yellow pixel at side",
+      "gray belt buckle"
+    ],
+    "major_regions": [
+      "bald pink head with dark eyes",
+      "purple robe",
+      "red sash with gray center"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "pink dome could be a bald head",
+      "dark eyes could be deep sockets or mask holes",
+      "yellow pixel could be a held object"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "bald humanoid",
+      "monk",
+      "cultist",
+      "ghoul"
+    ],
+    "visual_symbols": [
+      "bald head",
+      "dark eyes",
+      "robe",
+      "belt"
+    ],
+    "priority_features": [
+      "large pink bald head",
+      "dark eye holes",
+      "purple robe",
+      "belt"
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/717",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large dome-shaped cyan head",
+      "brown vertical bar at right edge",
+      "wide yellow base"
+    ],
+    "shape": [
+      "rounded head-body mass",
+      "horizontal band",
+      "broad lower mass",
+      "thin vertical extension on right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object at side"
+    ],
+    "colors": [
+      "cyan upper body",
+      "two white eyes",
+      "orange belt",
+      "yellow lower body",
+      "brown bar"
+    ],
+    "major_regions": [
+      "cyan domed head with white eyes",
+      "orange band",
+      "yellow skirt or legs",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "blob-like humanoid"
+    ],
+    "possible_features": [
+      "white squares could be eyes",
+      "yellow lower region could be a robe or trousers",
+      "brown bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "humanoid monster",
+      "alien-like figure",
+      "staff wielder"
+    ],
+    "visual_symbols": [
+      "large eyes",
+      "staff"
+    ],
+    "priority_features": [
+      "cyan dome head with white eyes",
+      "yellow lower body",
+      "staff at right"
+    ]
+  }
+}

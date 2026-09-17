@@ -1,0 +1,67 @@
+{
+  "id": "lofi_char_tiles/11",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "red cloth top with dark hair",
+      "gray line upper right",
+      "two legs"
+    ],
+    "shape": [
+      "red top band",
+      "dark hair/face region",
+      "small yellow patch",
+      "brown tunic",
+      "legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding blade upward"
+    ],
+    "colors": [
+      "red headwear",
+      "black hair",
+      "brown clothing",
+      "yellow skin partially visible",
+      "gray blade"
+    ],
+    "major_regions": [
+      "red bandana over dark hair",
+      "dark partly obscured face",
+      "brown body",
+      "gray blade upper right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "red top could be a bandana",
+      "dark face area could be hair, beard or an eyepatch",
+      "gray line could be a cutlass"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "pirate",
+      "bandit",
+      "rogue"
+    ],
+    "visual_symbols": [
+      "bandana",
+      "blade",
+      "dark hair"
+    ],
+    "priority_features": [
+      "red bandana",
+      "dark hair covering face",
+      "brown clothes",
+      "sword"
+    ]
+  }
+}

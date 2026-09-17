@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/747",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "broad hat-like top",
+      "vertical gray bar on right",
+      "dark legs"
+    ],
+    "shape": [
+      "wide brown top band",
+      "skin-toned face block",
+      "rectangular torso",
+      "thin blade extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "brown hat",
+      "skin face",
+      "brown shirt",
+      "gray blade",
+      "dark legs"
+    ],
+    "major_regions": [
+      "brown headwear over face",
+      "brown torso",
+      "gray vertical blade at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "top could be a hat or leather cap",
+      "gray bar could be a sword",
+      "dark pixels could be eyes"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "human fighter",
+      "peasant militia",
+      "bandit"
+    ],
+    "visual_symbols": [
+      "hat",
+      "sword",
+      "plain clothing"
+    ],
+    "priority_features": [
+      "brown hat",
+      "brown clothing",
+      "gray sword at right",
+      "human face"
+    ]
+  }
+}

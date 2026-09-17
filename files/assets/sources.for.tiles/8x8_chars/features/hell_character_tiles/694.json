@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/694",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "pale head",
+      "robed body",
+      "small white side projections"
+    ],
+    "shape": [
+      "white rounded head with dark eye holes and nose gap",
+      "purple body mass",
+      "red horizontal band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "white head",
+      "purple robe",
+      "red belt",
+      "dark facial holes"
+    ],
+    "major_regions": [
+      "skull-like white head",
+      "purple robe",
+      "red belt",
+      "small white hand-like bits at sides"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "skeletal humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "white head with dark holes could be a skull",
+      "side white pixels could be bony hands",
+      "red band could be a belt"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead",
+      "skeleton",
+      "lich",
+      "cultist"
+    ],
+    "visual_symbols": [
+      "skull-like head",
+      "robe",
+      "belt"
+    ],
+    "priority_features": [
+      "white skull-like face",
+      "purple robe",
+      "red belt"
+    ]
+  }
+}

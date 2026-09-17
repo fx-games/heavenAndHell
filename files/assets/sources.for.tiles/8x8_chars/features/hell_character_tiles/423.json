@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/423",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with two small top points",
+      "brown vertical bar right"
+    ],
+    "shape": [
+      "square head",
+      "small gray top protrusions",
+      "yellow torso with orange band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole"
+    ],
+    "colors": [
+      "green head",
+      "yellow body",
+      "orange belt",
+      "brown pole"
+    ],
+    "major_regions": [
+      "green face with two small horns",
+      "bright yellow tunic",
+      "brown staff-like strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "top points could be horns",
+      "brown strip could be a staff or spear",
+      "green skin suggests goblin or orc"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin",
+      "orc",
+      "imp"
+    ],
+    "visual_symbols": [
+      "small horns",
+      "staff",
+      "yellow clothing"
+    ],
+    "priority_features": [
+      "green horned head",
+      "yellow tunic with orange belt",
+      "brown pole on right"
+    ]
+  }
+}

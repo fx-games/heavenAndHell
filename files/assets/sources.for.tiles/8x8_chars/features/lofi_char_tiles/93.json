@@ -1,0 +1,67 @@
+{
+  "id": "lofi_char_tiles/93",
+  "perceptual": {
+    "silhouette": [
+      "hooded humanoid silhouette",
+      "long robe widening at bottom",
+      "black vertical line at right"
+    ],
+    "shape": [
+      "black hood mass",
+      "blue face",
+      "red chest band",
+      "wide red robe base",
+      "thin black vertical extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "black hood",
+      "blue face and hands",
+      "red eyes",
+      "red robe"
+    ],
+    "major_regions": [
+      "black hood around blue face",
+      "red eyes",
+      "red robe with black band",
+      "black staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed"
+    ],
+    "possible_features": [
+      "black top could be a hood",
+      "wide red base could be a long robe",
+      "vertical line could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dark mage",
+      "necromancer",
+      "cultist",
+      "robed caster"
+    ],
+    "visual_symbols": [
+      "hood",
+      "robe",
+      "staff",
+      "red eyes"
+    ],
+    "priority_features": [
+      "black hood",
+      "blue face with red eyes",
+      "long red robe",
+      "staff"
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "id": "lofi_char_tiles/190",
+  "perceptual": {
+    "silhouette": [
+      "square block silhouette",
+      "stepped offset on top-left edges"
+    ],
+    "shape": [
+      "large square face",
+      "pale green top face",
+      "darker green side face"
+    ],
+    "orientation": [
+      "angled",
+      "three-quarter view"
+    ],
+    "pose": [
+      "static"
+    ],
+    "colors": [
+      "bright green front",
+      "pale green top",
+      "darker green side",
+      "pale blue corner highlight"
+    ],
+    "major_regions": [
+      "green cube front",
+      "light top",
+      "dark side"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "non-creature object",
+      "geometric cube"
+    ],
+    "possible_features": [
+      "bright green suggests gelatinous or slime cube",
+      "no eyes or limbs"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "gelatinous cube",
+      "slime cube",
+      "block"
+    ],
+    "visual_symbols": [
+      "cube"
+    ],
+    "priority_features": [
+      "cube shape",
+      "3D perspective",
+      "green coloring",
+      "no limbs"
+    ]
+  }
+}

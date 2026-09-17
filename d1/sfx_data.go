@@ -780,6 +780,7 @@ var SfxFiles = map[string]string{
 	"PS_NAR7":       "narrator/nar07.ogg",
 	"PS_NAR8":       "narrator/nar08.ogg",
 	"PS_NAR9":       "narrator/nar09.ogg",
+	"PS_DIABLVLINT": "misc/lvl16int.ogg",
 	"USFX_CLEAVER":  "monsters/butcher.ogg",
 	"USFX_GARBUD1":  "monsters/garbud01.ogg",
 	"USFX_GARBUD2":  "monsters/garbud02.ogg",

@@ -1,0 +1,70 @@
+{
+  "id": "hell_character_tiles/360",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "rounded head",
+      "robed body",
+      "vertical staff at right"
+    ],
+    "shape": [
+      "pale yellow rounded head with white patch at upper left",
+      "two dark square eye holes",
+      "bright yellow body",
+      "orange horizontal waist band",
+      "thin brown vertical line at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "pale yellow head",
+      "bright yellow robe",
+      "orange belt",
+      "black eyes",
+      "white highlight",
+      "brown staff"
+    ],
+    "major_regions": [
+      "pale head with dark eyes and white highlight",
+      "yellow robe",
+      "orange sash",
+      "brown pole"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "white patch could be a highlight on a bald head or hair",
+      "dark holes could be eyes or hollow sockets",
+      "brown line could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "monk",
+      "mage",
+      "priest",
+      "pale spirit"
+    ],
+    "visual_symbols": [
+      "robe",
+      "staff",
+      "sash",
+      "bald head"
+    ],
+    "priority_features": [
+      "yellow robe",
+      "pale round head with dark eyes",
+      "staff at right",
+      "orange sash"
+    ]
+  }
+}

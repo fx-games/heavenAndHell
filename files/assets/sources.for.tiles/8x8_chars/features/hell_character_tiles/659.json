@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/659",
+  "perceptual": {
+    "silhouette": [
+      "stocky humanoid silhouette",
+      "wide flat-topped head covering",
+      "broad squat body",
+      "thin gray bar at right"
+    ],
+    "shape": [
+      "yellow dome/brim shape over head",
+      "brown face",
+      "yellow block below face",
+      "red-orange lower mass"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon at side"
+    ],
+    "colors": [
+      "yellow headgear",
+      "brown face",
+      "red-orange lower body",
+      "gray right bar"
+    ],
+    "major_regions": [
+      "yellow helmet-like top",
+      "brown face with dark eye",
+      "yellow beard-like region",
+      "gray blade at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "short stocky humanoid"
+    ],
+    "possible_features": [
+      "yellow top could be a helmet or hard hat",
+      "yellow region below face could be a beard",
+      "gray bar could be a sword or axe haft"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dwarf",
+      "warrior",
+      "miner"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "beard",
+      "blade"
+    ],
+    "priority_features": [
+      "yellow helmet",
+      "beard-like block",
+      "stocky build",
+      "gray blade"
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/216",
+  "perceptual": {
+    "silhouette": [
+      "broad bulky humanoid silhouette",
+      "two small protrusions at top corners",
+      "wide shoulders",
+      "short legs"
+    ],
+    "shape": [
+      "large blocky torso",
+      "head merged into body",
+      "small ear-like tips",
+      "thick arms at sides"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "hunched"
+    ],
+    "colors": [
+      "mostly brown",
+      "tan highlights",
+      "dark purple shading"
+    ],
+    "major_regions": [
+      "brown body",
+      "tan face/belly patch",
+      "tan ear-like tips",
+      "dark legs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bulky biped",
+      "bear-like"
+    ],
+    "possible_features": [
+      "top tips could be ears or small horns",
+      "bulky mass could be fur or muscle",
+      "tan center could be face or belly"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ogre",
+      "bear",
+      "troll",
+      "brute",
+      "beastman"
+    ],
+    "visual_symbols": [
+      "ears",
+      "bulky body"
+    ],
+    "priority_features": [
+      "broad bulky brown body",
+      "small top ear tips",
+      "hunched stance"
+    ]
+  }
+}

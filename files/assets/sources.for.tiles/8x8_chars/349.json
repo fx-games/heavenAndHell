@@ -1,0 +1,68 @@
+{
+  "id": "lofi_char_tiles/349",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "large rounded head",
+      "wide arms",
+      "legs",
+      "vertical bar at right"
+    ],
+    "shape": [
+      "gray rounded head with two dark square eye holes",
+      "gray arm band",
+      "dark horizontal waist band",
+      "gray lower body",
+      "gray vertical strip with brown pixel at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms outstretched",
+      "holding weapon at side"
+    ],
+    "colors": [
+      "almost entirely gray",
+      "black eye holes",
+      "dark belt",
+      "small brown accent"
+    ],
+    "major_regions": [
+      "gray hollow-eyed head",
+      "gray body split by dark belt",
+      "weapon-like bar at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "undead humanoid"
+    ],
+    "possible_features": [
+      "gray head with holes could be a skull, mask or undead face",
+      "dark band could be a belt",
+      "right bar could be a sword with hilt"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "zombie",
+      "undead soldier",
+      "golem",
+      "ghoul"
+    ],
+    "visual_symbols": [
+      "hollow eyes",
+      "belt",
+      "sword-like bar"
+    ],
+    "priority_features": [
+      "uniform gray body",
+      "two dark eye holes",
+      "dark belt",
+      "weapon at right"
+    ]
+  }
+}

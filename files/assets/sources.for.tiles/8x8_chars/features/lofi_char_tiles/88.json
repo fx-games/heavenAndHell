@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/88",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette with pointed hood top",
+      "wide band across middle",
+      "small gray object at right"
+    ],
+    "shape": [
+      "purple hood mass with two small points",
+      "yellow face block",
+      "purple torso",
+      "short legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding small item at side"
+    ],
+    "colors": [
+      "purple hood and body",
+      "yellow face and hands",
+      "black eye band",
+      "orange belt"
+    ],
+    "major_regions": [
+      "purple hood with corner points",
+      "yellow face crossed by black mask-like eyes",
+      "purple tunic with orange belt",
+      "gray blade-like pixels at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "hood points could be ears or cowl tips",
+      "black band across face could be a mask",
+      "gray pixels could be a dagger"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "rogue",
+      "thief",
+      "jester",
+      "hooded humanoid"
+    ],
+    "visual_symbols": [
+      "hood",
+      "mask",
+      "dagger"
+    ],
+    "priority_features": [
+      "purple hood",
+      "yellow face with dark mask",
+      "small blade at right"
+    ]
+  }
+}

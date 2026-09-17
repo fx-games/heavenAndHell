@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/135",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette with rounded helmet",
+   "item over right shoulder",
+   "short dark legs"
+  ],
+  "shape": [
+   "gray dome helmet",
+   "yellow face with one eye",
+   "brown belt",
+   "brown bar top right"
+  ],
+  "orientation": [
+   "facing right",
+   "three-quarter view"
+  ],
+  "pose": [
+   "standing",
+   "carrying item on shoulder"
+  ],
+  "colors": [
+   "gray helmet",
+   "yellow face",
+   "brown belt and item",
+   "black legs"
+  ],
+  "major_regions": [
+   "gray helmet over yellow face",
+   "brown club at shoulder",
+   "brown belt"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid"
+  ],
+  "possible_features": [
+   "gray dome could be a metal helmet",
+   "brown bar could be a club, axe or hammer handle"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "soldier",
+   "guard",
+   "dwarf warrior",
+   "militia"
+  ],
+  "visual_symbols": [
+   "helmet",
+   "club or axe on shoulder"
+  ],
+  "priority_features": [
+   "gray round helmet",
+   "brown weapon over shoulder",
+   "single eye side view"
+  ]
+ }
+}

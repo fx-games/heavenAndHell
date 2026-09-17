@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/97",
+  "perceptual": {
+    "silhouette": [
+      "pale humanoid silhouette with light gray outline",
+      "brown rounded block at left",
+      "tall gray vertical line at right"
+    ],
+    "shape": [
+      "white head with V-shaped dark eye mark",
+      "brown rectangular object at left",
+      "thin gray vertical extension",
+      "sparse gray limb edges"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding shield and staff"
+    ],
+    "colors": [
+      "mostly white/light gray",
+      "black eyes",
+      "brown left object",
+      "gray pole"
+    ],
+    "major_regions": [
+      "pale body with black eyes",
+      "brown shield-like block at left",
+      "gray vertical staff or spear at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "skeletal humanoid",
+      "ghostly humanoid"
+    ],
+    "possible_features": [
+      "pale body could be bone or spirit",
+      "brown block could be a wooden shield",
+      "gray vertical could be a spear or staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "skeleton warrior",
+      "ghost soldier",
+      "undead guard"
+    ],
+    "visual_symbols": [
+      "shield",
+      "spear",
+      "dark eyes"
+    ],
+    "priority_features": [
+      "pale body",
+      "brown shield at left",
+      "spear at right",
+      "black V eyes"
+    ]
+  }
+}

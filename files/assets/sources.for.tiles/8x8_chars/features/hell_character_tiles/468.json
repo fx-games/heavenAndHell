@@ -1,0 +1,58 @@
+{
+  "id": "hell_character_tiles/468",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "small bright pixel on forehead"
+    ],
+    "shape": [
+      "square gray head",
+      "teal lower block split by dark vertical line"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "gray head",
+      "blue forehead pixel",
+      "yellow-green eyes",
+      "teal body",
+      "dark center stripe"
+    ],
+    "major_regions": [
+      "gray head with blue forehead mark",
+      "teal robe",
+      "dark vertical stripe down front"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "blue forehead pixel could be a gem or circlet",
+      "dark vertical stripe could be a robe opening",
+      "brown right strip could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "robed mage",
+      "priest",
+      "gray-skinned humanoid"
+    ],
+    "visual_symbols": [
+      "forehead gem",
+      "open robe",
+      "glowing eyes"
+    ],
+    "priority_features": [
+      "teal robe with center split",
+      "blue forehead gem",
+      "glowing eyes"
+    ]
+  }
+}

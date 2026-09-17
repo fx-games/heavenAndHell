@@ -1,0 +1,63 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/201",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "wide blue shapes at top sides",
+      "narrow legs below"
+    ],
+    "shape": [
+      "two upper wing-like masses",
+      "small head with light top",
+      "broad brown torso",
+      "thin legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms spread",
+      "wings raised"
+    ],
+    "colors": [
+      "blue upper wings",
+      "yellow hair/crown pixels",
+      "tan skin",
+      "brown body"
+    ],
+    "major_regions": [
+      "blue wing-like regions",
+      "yellow top of head",
+      "tan face",
+      "brown torso"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "winged humanoid"
+    ],
+    "possible_features": [
+      "blue masses could be wings",
+      "yellow pixels could be blond hair",
+      "tan side pixels could be hands"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "fairy",
+      "pixie",
+      "winged sprite",
+      "small winged humanoid"
+    ],
+    "visual_symbols": [
+      "wings",
+      "humanoid figure"
+    ],
+    "priority_features": [
+      "blue wings above shoulders",
+      "blond head",
+      "small brown-bodied humanoid"
+    ]
+  }
+}

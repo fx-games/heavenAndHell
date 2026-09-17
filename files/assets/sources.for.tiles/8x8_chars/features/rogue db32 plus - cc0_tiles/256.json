@@ -1,0 +1,66 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/256",
+  "perceptual": {
+    "silhouette": [
+      "squat roughly humanoid silhouette",
+      "rounded dome top",
+      "wide shoulders spanning full width",
+      "short legs with gap between"
+    ],
+    "shape": [
+      "rounded head/helmet mass",
+      "broad torso row",
+      "light blocky lower patches",
+      "thin legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "cyan and blue dominant",
+      "gray and pale highlights",
+      "two dark eye pixels"
+    ],
+    "major_regions": [
+      "cyan dome head with two dark eyes",
+      "gray shoulder-like blocks",
+      "pale lower hand/foot blocks",
+      "dark central stripe down lower body"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "squat armored humanoid"
+    ],
+    "possible_features": [
+      "dome top could be a hood or helmet",
+      "dark pixels could be eyes or visor slits",
+      "gray side blocks could be shoulder pads or arms",
+      "pale lower blocks could be gauntlets or feet"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "armored creature",
+      "golem",
+      "hooded figure",
+      "robot"
+    ],
+    "visual_symbols": [
+      "helmet or hood",
+      "dark eye slits",
+      "shoulder armor"
+    ],
+    "priority_features": [
+      "rounded hooded/helmeted head with two dark eyes",
+      "wide armored shoulders",
+      "symmetrical squat body",
+      "blue coloring"
+    ]
+  }
+}

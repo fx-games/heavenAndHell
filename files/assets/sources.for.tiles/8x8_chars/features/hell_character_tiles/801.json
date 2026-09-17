@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/801",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "long body to bottom edge",
+      "tall thin vertical line along right edge"
+    ],
+    "shape": [
+      "square head",
+      "wide robe mass",
+      "full-height thin vertical staff-like line"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object on right"
+    ],
+    "colors": [
+      "bright yellow robe",
+      "light blue face",
+      "red belt",
+      "brown right-edge pole",
+      "dark background"
+    ],
+    "major_regions": [
+      "yellow lower body",
+      "pale blue head with bright eyes",
+      "brown vertical line on right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "right line could be a staff",
+      "long yellow mass could be a robe",
+      "gray top could be a cap"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mage",
+      "priest or monk",
+      "robed humanoid"
+    ],
+    "visual_symbols": [
+      "staff",
+      "robe",
+      "bright eyes"
+    ],
+    "priority_features": [
+      "yellow robe",
+      "brown staff",
+      "pale blue face with yellow-green eyes"
+    ]
+  }
+}

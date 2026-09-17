@@ -1,0 +1,65 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/204",
+  "perceptual": {
+    "silhouette": [
+      "wide squat silhouette",
+      "bulky upper body",
+      "row of thin leg-like projections below"
+    ],
+    "shape": [
+      "large rounded body mass",
+      "head-like region at right",
+      "horizontal band across middle",
+      "multiple short vertical projections"
+    ],
+    "orientation": [
+      "facing right",
+      "ambiguous"
+    ],
+    "pose": [
+      "crawling",
+      "multi-legged stance"
+    ],
+    "colors": [
+      "mostly gray",
+      "light blue-white highlight pixels",
+      "red eye pixels",
+      "dark blue band"
+    ],
+    "major_regions": [
+      "mottled gray body",
+      "red eyes in pale head area",
+      "blue band below eyes",
+      "gray legs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "multi-legged",
+      "arachnid-like"
+    ],
+    "possible_features": [
+      "red pixels could be eyes",
+      "lower projections could be spider legs",
+      "light speckles could be fur or web"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "giant spider",
+      "cave spider",
+      "frost spider",
+      "beast"
+    ],
+    "visual_symbols": [
+      "red eyes",
+      "many legs",
+      "hairy body"
+    ],
+    "priority_features": [
+      "gray bulky body",
+      "red eyes",
+      "many short legs"
+    ]
+  }
+}

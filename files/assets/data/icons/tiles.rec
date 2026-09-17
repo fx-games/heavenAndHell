@@ -220,14 +220,6 @@ internal_name: prop.chest1.used
 name: Small Chest (opened)
 icon: 127
 
-internal_name: prop.tchest1
-name: Small Chest (trapped)
-icon: 128
-
-internal_name: prop.tchest1.used
-name: Small Chest (trapped, opened)
-icon: 127
-
 internal_name: prop.chest2
 name: Chest
 icon: 128
@@ -236,28 +228,12 @@ internal_name: prop.chest2.used
 name: Chest (opened)
 icon: 127
 
-internal_name: prop.tchest2
-name: Chest (trapped)
-icon: 128
-
-internal_name: prop.tchest2.used
-name: Chest (trapped, opened)
-icon: 127
-
 internal_name: prop.chest3
 name: Large Chest
 icon: 128
 
 internal_name: prop.chest3.used
 name: Large Chest (opened)
-icon: 127
-
-internal_name: prop.tchest3
-name: Large Chest (trapped)
-icon: 128
-
-internal_name: prop.tchest3.used
-name: Large Chest (trapped, opened)
 icon: 127
 
 internal_name: prop.sarc
@@ -276,52 +252,28 @@ internal_name: prop.barrelex
 name: Explosive Barrel
 icon: 320
 
-internal_name: prop.shrinel
-name: Shrine (left wall)
+internal_name: prop.shrine
+name: Shrine
 icon: 75
 
-internal_name: prop.shrinel.used
-name: Shrine (left wall, used)
+internal_name: prop.shrine.used
+name: Shrine (used)
 icon: 75
 
-internal_name: prop.shriner
-name: Shrine (right wall)
-icon: 75
-
-internal_name: prop.shriner.used
-name: Shrine (right wall, used)
-icon: 75
-
-internal_name: prop.skelbook
-name: Skeleton Tome (book on stand)
+internal_name: prop.book2
+name: Book on Skull Lectern (Ancient/Mythical Book, Skeleton Tome, Library Book)
 icon: 321
 
-internal_name: prop.skelbook.used
-name: Skeleton Tome (read)
+internal_name: prop.book2.used
+name: Book on Skull Lectern (read)
 icon: 322
 
-internal_name: prop.bookcasel
-name: Bookcase (left wall)
+internal_name: prop.bookcase
+name: Bookcase
 icon: 321
 
-internal_name: prop.bookcasel.used
-name: Bookcase (left wall, searched)
-icon: 322
-
-internal_name: prop.bookcaser
-name: Bookcase (right wall)
-icon: 321
-
-internal_name: prop.bookcaser.used
-name: Bookcase (right wall, searched)
-icon: 322
-
-internal_name: prop.bookstand
-name: Library Book (on lectern)
-icon: 321
-
-internal_name: prop.bookstand.used
-name: Library Book (read)
+internal_name: prop.bookcase.used
+name: Bookcase (searched, or plain Bookshelf)
 icon: 322
 
 internal_name: prop.bloodftn
@@ -341,7 +293,7 @@ name: Purifying Spring
 icon: 292
 
 internal_name: prop.armorstand
-name: Armor Stand (with armor)
+name: Armor Stand (incl. Warlord's)
 icon: 348
 
 internal_name: prop.armorstand.used
@@ -381,7 +333,7 @@ name: Fountain of Tears (used)
 icon: 292
 
 internal_name: prop.weaponrack
-name: Weapon Rack (with weapon)
+name: Weapon Rack (incl. Warlord's, Weapon Stand)
 icon: 376
 
 internal_name: prop.weaponrack.used
@@ -389,7 +341,7 @@ name: Weapon Rack (empty)
 icon: 377
 
 internal_name: prop.lever
-name: Lever
+name: Lever (incl. Flame Trap Lever)
 icon: 266
 
 internal_name: prop.lever.used
@@ -420,36 +372,12 @@ internal_name: prop.mushpatch.used
 name: Mushroom Patch (searched)
 icon: 46
 
-internal_name: prop.signchest
-name: Large Chest (Ogden's Sign quest)
-icon: 128
-
-internal_name: prop.signchest.used
-name: Large Chest (Ogden's Sign quest, opened)
-icon: 127
-
-internal_name: prop.blindbook
-name: Book of the Blind (Halls of the Blind quest)
+internal_name: prop.book1
+name: Book on Stone Lectern (Blind, Blood, Steel Tome, Book Lever)
 icon: 321
 
-internal_name: prop.blindbook.used
-name: Book of the Blind (read)
-icon: 322
-
-internal_name: prop.bloodbook
-name: Book of Blood (Valor quest)
-icon: 321
-
-internal_name: prop.bloodbook.used
-name: Book of Blood (read)
-icon: 322
-
-internal_name: prop.steeltome
-name: Steel Tome (Warlord of Blood quest)
-icon: 321
-
-internal_name: prop.steeltome.used
-name: Steel Tome (read)
+internal_name: prop.book1.used
+name: Book on Stone Lectern (read)
 icon: 322
 
 internal_name: prop.pedistal
@@ -459,22 +387,6 @@ icon: 39
 internal_name: prop.pedistal.used
 name: Pedestal of Blood (stones placed)
 icon: 40
-
-internal_name: prop.book2l
-name: Ancient Tome (Chamber of Bone / Lazarus lair)
-icon: 321
-
-internal_name: prop.book2l.used
-name: Ancient Tome (read)
-icon: 322
-
-internal_name: prop.book2r
-name: Mythical Book (Chamber of Bone quest)
-icon: 321
-
-internal_name: prop.book2r.used
-name: Mythical Book (read)
-icon: 322
 
 internal_name: prop.storybook
 name: Story Book (levels 4, 8, 12)
@@ -520,24 +432,8 @@ internal_name: prop.candleo
 name: Candle
 icon: 110
 
-internal_name: prop.bookcandle
-name: Candle (library)
-icon: 110
-
-internal_name: prop.storycandle
-name: Candle (story book, Lazarus' staff)
-icon: 110
-
-internal_name: prop.bannerl
-name: Banner (left)
-icon: 61
-
-internal_name: prop.bannerm
-name: Banner (middle)
-icon: 61
-
-internal_name: prop.bannerr
-name: Banner (right)
+internal_name: prop.banner
+name: Banner
 icon: 61
 
 internal_name: prop.skpile
@@ -564,28 +460,12 @@ internal_name: prop.skstick5
 name: Skull on a Stick 5
 icon: 251
 
-internal_name: prop.crux1
-name: Crucified Skeleton 1
+internal_name: prop.crux
+name: Crucified Skeleton
 icon: 240
 
-internal_name: prop.crux2
-name: Crucified Skeleton 2
-icon: 240
-
-internal_name: prop.crux3
-name: Crucified Skeleton 3
-icon: 240
-
-internal_name: prop.crux1.used
-name: Crucified Skeleton 1 (broken)
-icon: 250
-
-internal_name: prop.crux2.used
-name: Crucified Skeleton 2 (broken)
-icon: 250
-
-internal_name: prop.crux3.used
-name: Crucified Skeleton 3 (broken)
+internal_name: prop.crux.used
+name: Crucified Skeleton (broken)
 icon: 250
 
 internal_name: prop.stand
@@ -598,10 +478,6 @@ icon: 106
 
 internal_name: prop.bcross
 name: Burning Cross
-icon: 241
-
-internal_name: prop.tbcross
-name: Burning Cross (theme room)
 icon: 241
 
 internal_name: prop.nudew2r
@@ -660,66 +536,14 @@ internal_name: prop.flamehole
 name: Flame Hole
 icon: 32
 
-internal_name: prop.flamelvr
-name: Flame Trap Lever
-icon: 266
-
-internal_name: prop.flamelvr.used
-name: Flame Trap Lever (pulled)
-icon: 267
-
 internal_name: prop.water
 name: Water
 icon: 28
-
-internal_name: prop.booklvr
-name: Book Lever
-icon: 321
-
-internal_name: prop.booklvr.used
-name: Book Lever (read)
-icon: 322
-
-internal_name: prop.bookshelf
-name: Bookshelf
-icon: 321
-
-internal_name: prop.weaprack
-name: Weapon Stand
-icon: 377
-
-internal_name: prop.armorstandn
-name: Armor Stand (empty)
-icon: 349
-
-internal_name: prop.weaponrackn
-name: Weapon Rack (empty)
-icon: 377
 
 internal_name: prop.altboy
 name: Altar (Lazarus' lair)
 icon: 347
 
-internal_name: prop.mcircle1
+internal_name: prop.mcircle
 name: Magic Circle
 icon: 216
-
-internal_name: prop.mcircle2
-name: Magic Circle
-icon: 216
-
-internal_name: prop.wararmor
-name: Armor Stand (Warlord, with armor)
-icon: 348
-
-internal_name: prop.wararmor.used
-name: Armor Stand (Warlord, empty)
-icon: 349
-
-internal_name: prop.warweap
-name: Weapon Rack (Warlord, with weapon)
-icon: 376
-
-internal_name: prop.warweap.used
-name: Weapon Rack (Warlord, empty)
-icon: 377

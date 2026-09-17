@@ -1,0 +1,66 @@
+{
+  "id": "hell_character_tiles/759",
+  "perceptual": {
+    "silhouette": [
+      "robed humanoid silhouette",
+      "rounded pale head",
+      "wide flared lower body",
+      "tall thin bar at right edge"
+    ],
+    "shape": [
+      "large pale head mass",
+      "broad yellow robe mass",
+      "horizontal orange band",
+      "vertical dark brown pole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "pale cyan head",
+      "red eyes",
+      "bright yellow robe",
+      "orange sash",
+      "brown pole"
+    ],
+    "major_regions": [
+      "pale head with red eyes",
+      "yellow robe",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "pale head could be a bald or ghostly face",
+      "right pole could be a staff",
+      "orange band could be a sash"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mage",
+      "priest or monk",
+      "cultist",
+      "sorcerer"
+    ],
+    "visual_symbols": [
+      "staff",
+      "robe",
+      "glowing red eyes"
+    ],
+    "priority_features": [
+      "yellow robe",
+      "red eyes in pale face",
+      "staff at right",
+      "orange sash"
+    ]
+  }
+}

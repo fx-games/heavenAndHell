@@ -1,0 +1,74 @@
+{
+  "id": "lofi_char_tiles/340",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "hat-topped head",
+      "wide arms",
+      "robed lower body",
+      "vertical staff at right"
+    ],
+    "shape": [
+      "blue cap band at top",
+      "gray face block with two dark square holes",
+      "gray arm band",
+      "red waist band",
+      "blue lower body",
+      "thin brown vertical line at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms outstretched",
+      "holding staff"
+    ],
+    "colors": [
+      "dark blue hat and robe",
+      "gray face and arms",
+      "two black eyes",
+      "red belt",
+      "brown staff"
+    ],
+    "major_regions": [
+      "blue hat over gray hollow-eyed face",
+      "gray arms",
+      "red sash",
+      "blue robe",
+      "brown pole"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid",
+      "undead humanoid"
+    ],
+    "possible_features": [
+      "gray face with dark holes could be a skull or undead face",
+      "blue top could be a hood or hat",
+      "brown line could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead wizard",
+      "lich",
+      "zombie mage",
+      "necromancer"
+    ],
+    "visual_symbols": [
+      "hood",
+      "hollow eyes",
+      "robe",
+      "staff"
+    ],
+    "priority_features": [
+      "gray face with two dark eye holes",
+      "blue hood and robe",
+      "staff at right",
+      "red sash"
+    ]
+  }
+}

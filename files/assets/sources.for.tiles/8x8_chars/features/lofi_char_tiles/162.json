@@ -1,0 +1,57 @@
+{
+ "id": "lofi_char_tiles/162",
+ "perceptual": {
+  "silhouette": [
+   "blocky rectangular humanoid silhouette",
+   "slightly narrowed top",
+   "short block arms",
+   "two stubby legs"
+  ],
+  "shape": [
+   "tall ochre rectangular body",
+   "square arm blocks",
+   "small leg blocks"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "mostly ochre or tan",
+   "darker brown limbs",
+   "black eyes"
+  ],
+  "major_regions": [
+   "large ochre body-head block with two dark eyes",
+   "darker olive-brown arm blocks",
+   "dark feet"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "construct"
+  ],
+  "possible_features": [
+   "blocky body could be a clay, sand or mud golem"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "golem",
+   "clay construct",
+   "earth elemental"
+  ],
+  "visual_symbols": [
+   "blocky body",
+   "two small eyes"
+  ],
+  "priority_features": [
+   "single rectangular ochre body",
+   "stubby block arms",
+   "two dark eyes"
+  ]
+ }
+}

@@ -1,0 +1,65 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/236",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "very large wide head",
+   "wide flared lower body",
+   "thin legs"
+  ],
+  "shape": [
+   "large squarish head",
+   "white band at lower face",
+   "pink-purple torso",
+   "teal wide skirt-like band"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms at sides"
+  ],
+  "colors": [
+   "tan skin",
+   "dark eyes",
+   "white mouth band",
+   "pink/purple top",
+   "teal skirt"
+  ],
+  "major_regions": [
+   "large tan head",
+   "pink purple blouse",
+   "teal skirt",
+   "tan legs"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "teal band could be a skirt or dress",
+   "white band could be teeth or a grin"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "townswoman",
+   "human commoner",
+   "dwarf woman"
+  ],
+  "visual_symbols": [
+   "dress",
+   "big head",
+   "grin"
+  ],
+  "priority_features": [
+   "large tan head",
+   "pink top",
+   "teal skirt",
+   "white mouth band"
+  ]
+ }
+}

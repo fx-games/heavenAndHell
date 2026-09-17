@@ -1,0 +1,65 @@
+{
+  "id": "lofi_char_tiles/3",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "hood over head",
+      "red mass covering lower face and chest",
+      "short gray bar on right"
+    ],
+    "shape": [
+      "blue hood",
+      "eye strip",
+      "red scarf mass",
+      "short vertical line right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding small blade"
+    ],
+    "colors": [
+      "blue hood and body",
+      "red mask/scarf",
+      "yellow eyes band",
+      "gray blade"
+    ],
+    "major_regions": [
+      "blue hood",
+      "red face covering extending down chest",
+      "gray small weapon"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "red mass could be a mask or scarf",
+      "short gray bar could be a dagger",
+      "blue top could be a hood"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "thief",
+      "ninja",
+      "bandit",
+      "assassin"
+    ],
+    "visual_symbols": [
+      "mask",
+      "hood",
+      "dagger"
+    ],
+    "priority_features": [
+      "red face mask",
+      "blue hood",
+      "small dagger",
+      "eyes-only face"
+    ]
+  }
+}

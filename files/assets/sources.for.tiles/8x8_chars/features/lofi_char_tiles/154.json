@@ -1,0 +1,64 @@
+{
+ "id": "lofi_char_tiles/154",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette with domed head",
+   "wide shoulders",
+   "tall thin line at right"
+  ],
+  "shape": [
+   "gray dome on head",
+   "black horizontal visor band",
+   "brown belt band",
+   "gray lower body",
+   "long thin vertical bar"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding upright weapon"
+  ],
+  "colors": [
+   "gray and white armor",
+   "black visor",
+   "brown belt",
+   "gray weapon"
+  ],
+  "major_regions": [
+   "gray helmet with black visor and eye slits",
+   "gray armored torso with brown belt",
+   "gray vertical bar at right"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "armored biped"
+  ],
+  "possible_features": [
+   "dome and black band could be a helmet with visor",
+   "vertical bar could be a sword or spear",
+   "brown band could be a belt"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "knight",
+   "armored soldier",
+   "guard"
+  ],
+  "visual_symbols": [
+   "helmet",
+   "visor",
+   "sword or spear"
+  ],
+  "priority_features": [
+   "gray helmet with black visor",
+   "armored body",
+   "vertical weapon",
+   "brown belt"
+  ]
+ }
+}

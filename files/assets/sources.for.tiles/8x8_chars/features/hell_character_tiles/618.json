@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/618",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large rounded head",
+      "large gray rectangle at left side"
+    ],
+    "shape": [
+      "gray band on head",
+      "pink face and body",
+      "gray rectangular slab on left",
+      "orange waist band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding object at side"
+    ],
+    "colors": [
+      "pink body",
+      "gray band and left slab",
+      "orange belt",
+      "white accents",
+      "brown pole at right"
+    ],
+    "major_regions": [
+      "gray headband over pink head",
+      "gray shield-like block at left",
+      "pink/white torso with orange belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray left block could be a shield",
+      "gray head band could be a helmet rim",
+      "brown line could be a spear"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "warrior",
+      "guard",
+      "bald humanoid"
+    ],
+    "visual_symbols": [
+      "shield",
+      "headband or helmet",
+      "spear"
+    ],
+    "priority_features": [
+      "pink bald head",
+      "gray shield at left",
+      "orange belt",
+      "staff at right"
+    ]
+  }
+}

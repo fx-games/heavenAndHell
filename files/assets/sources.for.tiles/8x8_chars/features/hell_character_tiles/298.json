@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/298",
+  "perceptual": {
+    "silhouette": [
+      "hooded humanoid silhouette",
+      "hood outline",
+      "brown pole at right"
+    ],
+    "shape": [
+      "blue hood",
+      "gray face band",
+      "orange belt with gray buckle",
+      "blue robe"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "deep blue hood and robe",
+      "gray face",
+      "orange belt"
+    ],
+    "major_regions": [
+      "blue hood framing gray face",
+      "black eyes",
+      "orange-red belt",
+      "gray hand pixels",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "gray face could be pale or undead skin",
+      "brown pole could be a staff",
+      "gray side pixels could be hands"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "wizard",
+      "pale mage",
+      "undead sorcerer"
+    ],
+    "visual_symbols": [
+      "hood",
+      "staff",
+      "robe",
+      "belt"
+    ],
+    "priority_features": [
+      "blue hood and robe",
+      "gray face",
+      "orange belt",
+      "staff"
+    ]
+  }
+}

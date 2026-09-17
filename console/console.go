@@ -256,7 +256,7 @@ func (c *Console) OnMapChanged() {
 // OpenNewGameScreen asks for class, look, name and permadeath one after the other.
 func (c *Console) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string), back func()) {
 	var items []textui.MenuItem
-	for _, class := range c.context.Definitions.ClassDefinitions {
+	for _, class := range common.PlayableClasses(c.config, c.context.Definitions.ClassDefinitions) {
 		items = append(items, textui.MenuItem{Name: class.Name, CloseMenus: true, Action: func() {
 			c.ui.OpenChoiceDialogue("New game", "Choose a look for your "+class.Name, []string{"Male", "Female", "Back"}, func(index int, _ string) {
 				if index == 2 {

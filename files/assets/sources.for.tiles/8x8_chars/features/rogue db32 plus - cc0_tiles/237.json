@@ -1,0 +1,66 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/237",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "very large wide head",
+   "pale vertical shape at right edge",
+   "arms slightly out"
+  ],
+  "shape": [
+   "large squarish head",
+   "white band at lower face",
+   "olive torso",
+   "long pale gray strip at right"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding upright weapon"
+  ],
+  "colors": [
+   "tan skin",
+   "dark eyes",
+   "white beard/mouth",
+   "orange shoulders",
+   "olive tunic",
+   "pale gray blade"
+  ],
+  "major_regions": [
+   "large tan head",
+   "white beard band",
+   "olive body",
+   "gray blade at right"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "white band could be a beard",
+   "pale strip could be a sword or axe blade"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "dwarf warrior",
+   "bearded fighter",
+   "human soldier"
+  ],
+  "visual_symbols": [
+   "beard",
+   "sword or blade",
+   "big head"
+  ],
+  "priority_features": [
+   "large tan head",
+   "white beard",
+   "gray blade at right",
+   "olive tunic"
+  ]
+ }
+}

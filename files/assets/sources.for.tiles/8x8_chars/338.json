@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/338",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "squarish head",
+      "wide gray body",
+      "short legs"
+    ],
+    "shape": [
+      "orange rectangular head with dark T-shaped cutout",
+      "wide gray torso and arms band",
+      "gray legs with dark gap",
+      "gray vertical strip and brown pixel at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms outstretched"
+    ],
+    "colors": [
+      "orange head",
+      "gray body",
+      "dark outline",
+      "small brown accent"
+    ],
+    "major_regions": [
+      "orange helmet with T-slit",
+      "gray armored body",
+      "gray bar at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "T-slit could be a closed helmet visor",
+      "gray body could be plate armor or gray skin",
+      "brown pixel could be a weapon hilt"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "knight",
+      "armored warrior",
+      "undead knight"
+    ],
+    "visual_symbols": [
+      "closed helmet",
+      "T-visor",
+      "armor",
+      "weapon bar"
+    ],
+    "priority_features": [
+      "orange closed helmet with T-visor",
+      "gray body",
+      "vertical bar on right"
+    ]
+  }
+}

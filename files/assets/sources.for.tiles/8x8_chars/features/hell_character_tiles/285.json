@@ -1,0 +1,67 @@
+{
+  "id": "hell_character_tiles/285",
+  "perceptual": {
+    "silhouette": [
+      "hooded humanoid silhouette",
+      "hood outline",
+      "gray blade at right"
+    ],
+    "shape": [
+      "brown hood",
+      "yellow face",
+      "white beard",
+      "dark block at left",
+      "brown belt",
+      "brown body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "brown hood and clothing",
+      "yellow face",
+      "white beard",
+      "gray blade",
+      "dark held object"
+    ],
+    "major_regions": [
+      "brown hood framing yellow face",
+      "white beard",
+      "dark item at left",
+      "brown belt",
+      "gray sword"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "white area could be a beard",
+      "dark block could be a book or pouch",
+      "gray shape could be a sword",
+      "brown hood could be a monk cowl"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "bearded warrior monk",
+      "hooded traveler",
+      "old fighter"
+    ],
+    "visual_symbols": [
+      "hood",
+      "beard",
+      "sword"
+    ],
+    "priority_features": [
+      "brown hood",
+      "white beard",
+      "upright sword"
+    ]
+  }
+}

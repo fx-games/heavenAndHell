@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/404",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "bald head",
+      "vertical line at right",
+      "hand at right"
+    ],
+    "shape": [
+      "yellow head block",
+      "robe body",
+      "white band",
+      "thin pole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole"
+    ],
+    "colors": [
+      "yellow head",
+      "light blue robe",
+      "white band",
+      "brown line"
+    ],
+    "major_regions": [
+      "bald head",
+      "light blue robe",
+      "white sash",
+      "hand with brown pole"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "white band could be a sash",
+      "brown line could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "cleric",
+      "monk",
+      "robed human"
+    ],
+    "visual_symbols": [
+      "bald head",
+      "staff",
+      "sash"
+    ],
+    "priority_features": [
+      "bald head",
+      "light blue robe",
+      "white sash",
+      "staff on right"
+    ]
+  }
+}

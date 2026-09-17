@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/466",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "vertical strip on right edge"
+    ],
+    "shape": [
+      "square gray head",
+      "blue rectangular lower body",
+      "belt band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "gray head",
+      "yellow-green eyes",
+      "deep blue body",
+      "brown belt with gray buckle"
+    ],
+    "major_regions": [
+      "gray head with bright eyes",
+      "blue robe body",
+      "brown belt",
+      "brown right strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "bright squares could be glowing eyes",
+      "blue mass could be a robe",
+      "right strip could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "robed humanoid",
+      "mage",
+      "gray-skinned creature"
+    ],
+    "visual_symbols": [
+      "glowing eyes",
+      "robe",
+      "staff"
+    ],
+    "priority_features": [
+      "deep blue robe",
+      "gray face",
+      "glowing eyes",
+      "brown belt"
+    ]
+  }
+}

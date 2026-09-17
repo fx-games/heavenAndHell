@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/165",
+ "perceptual": {
+  "silhouette": [
+   "blocky rectangular humanoid silhouette",
+   "white rounded top",
+   "short block arms",
+   "two stubby legs"
+  ],
+  "shape": [
+   "tall pale blue body",
+   "white cap region",
+   "square arm blocks",
+   "small leg blocks"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "pale icy blue body",
+   "white top",
+   "bright blue eyes and limbs"
+  ],
+  "major_regions": [
+   "pale blue body with two blue eyes",
+   "white area atop head",
+   "brighter blue arms and feet",
+   "dark blue pixel between feet"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "construct"
+  ],
+  "possible_features": [
+   "white top could be snow or frost",
+   "pale blue body could be ice",
+   "blocky form suggests golem"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "ice golem",
+   "snow creature",
+   "frost elemental"
+  ],
+  "visual_symbols": [
+   "icy body",
+   "snow cap"
+  ],
+  "priority_features": [
+   "pale blue blocky body",
+   "white top",
+   "blue limbs"
+  ]
+ }
+}

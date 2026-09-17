@@ -1,0 +1,64 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/250",
+ "perceptual": {
+  "silhouette": [
+   "tall ghostly silhouette",
+   "rounded top",
+   "side projections like arms",
+   "wispy tapered bottom"
+  ],
+  "shape": [
+   "white rounded head mass",
+   "gray eye squares",
+   "pale blue outline pixels",
+   "narrow trailing tail"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "floating",
+   "arms slightly raised"
+  ],
+  "colors": [
+   "mostly white",
+   "pale blue edges",
+   "gray eyes",
+   "dark background"
+  ],
+  "major_regions": [
+   "white sheet-like body",
+   "gray eye spots",
+   "tapering lower wisp"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "ghostly",
+   "amorphous humanoid"
+  ],
+  "possible_features": [
+   "tapered bottom could be a spectral tail",
+   "side bumps could be arms"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "ghost",
+   "specter",
+   "wraith",
+   "spirit"
+  ],
+  "visual_symbols": [
+   "sheet ghost",
+   "hollow eyes",
+   "wispy tail"
+  ],
+  "priority_features": [
+   "white ghost body",
+   "gray eyes",
+   "tapered wispy bottom",
+   "arms out"
+  ]
+ }
+}

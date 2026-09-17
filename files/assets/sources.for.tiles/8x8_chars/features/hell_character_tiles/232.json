@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/232",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large rounded head",
+      "small side projections at waist"
+    ],
+    "shape": [
+      "large square head",
+      "rectangular body",
+      "small protrusions left and right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "bright red head",
+      "two black eye holes",
+      "purple robe",
+      "red-brown belt with gray buckle"
+    ],
+    "major_regions": [
+      "red face/head with black eyes",
+      "purple robe body",
+      "dark red belt",
+      "small red hand pixels at sides"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red head with black holes could be a demonic face or mask",
+      "side red pixels could be hands"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "demon",
+      "imp",
+      "red-skinned cultist",
+      "monk"
+    ],
+    "visual_symbols": [
+      "red face",
+      "hollow eyes",
+      "robe",
+      "belt"
+    ],
+    "priority_features": [
+      "red head with two black eyes",
+      "purple robe",
+      "belt with buckle"
+    ]
+  }
+}

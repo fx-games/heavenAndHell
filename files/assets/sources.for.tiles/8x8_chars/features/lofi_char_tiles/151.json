@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/151",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "narrow bright top on head",
+   "arms slightly out",
+   "legs apart"
+  ],
+  "shape": [
+   "small yellow head top",
+   "tan square head",
+   "lavender torso",
+   "dark purple hips",
+   "short legs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "walking stance"
+  ],
+  "colors": [
+   "yellow hair or cap",
+   "tan skin",
+   "lavender shirt",
+   "dark purple pants"
+  ],
+  "major_regions": [
+   "yellow top over tan face with dark eyes",
+   "light purple torso",
+   "dark purple lower body"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "biped"
+  ],
+  "possible_features": [
+   "yellow top could be blond hair or a cap",
+   "dark eye pixels could be goggles or large eyes"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "human character",
+   "villager",
+   "peasant"
+  ],
+  "visual_symbols": [
+   "cap or hair"
+  ],
+  "priority_features": [
+   "yellow head top",
+   "tan face with dark eyes",
+   "purple clothing"
+  ]
+ }
+}

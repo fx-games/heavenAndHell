@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/148",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette with horned head",
+   "wide bright base",
+   "arms angled out"
+  ],
+  "shape": [
+   "large red head",
+   "gray horn points",
+   "tapering torso",
+   "wide yellow lower block"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing or floating on base"
+  ],
+  "colors": [
+   "red body",
+   "yellow lower region",
+   "gray horns",
+   "yellow-green eyes"
+  ],
+  "major_regions": [
+   "red horned head with bright eyes",
+   "red torso",
+   "yellow block at bottom"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "small biped"
+  ],
+  "possible_features": [
+   "yellow base could be fire, a skirt or a golden garment",
+   "gray points could be horns"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "fire demon",
+   "imp",
+   "devil"
+  ],
+  "visual_symbols": [
+   "horns",
+   "flames or golden garment",
+   "glowing eyes"
+  ],
+  "priority_features": [
+   "gray horns",
+   "red body",
+   "yellow lower region",
+   "bright eyes"
+  ]
+ }
+}

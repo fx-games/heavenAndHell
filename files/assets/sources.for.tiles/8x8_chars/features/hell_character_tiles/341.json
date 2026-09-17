@@ -1,0 +1,73 @@
+{
+  "id": "hell_character_tiles/341",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "hat-topped head",
+      "wide arms",
+      "robed lower body",
+      "vertical staff at right"
+    ],
+    "shape": [
+      "light blue cap shape at top",
+      "gray face with two dark square holes",
+      "gray arm band",
+      "white waist band",
+      "light blue lower body",
+      "thin brown vertical line"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms outstretched",
+      "holding staff"
+    ],
+    "colors": [
+      "azure blue hat and robe",
+      "gray face and arms",
+      "black eye holes",
+      "white belt",
+      "brown staff"
+    ],
+    "major_regions": [
+      "light blue hat over gray hollow-eyed face",
+      "gray arms",
+      "white sash",
+      "light blue robe"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid",
+      "undead humanoid"
+    ],
+    "possible_features": [
+      "gray face with dark holes could be a skull or undead face",
+      "blue top could be a pointed hat or hood",
+      "brown line could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead wizard",
+      "zombie mage",
+      "lich",
+      "ghoul"
+    ],
+    "visual_symbols": [
+      "hat",
+      "hollow eyes",
+      "robe",
+      "staff"
+    ],
+    "priority_features": [
+      "gray face with hollow eyes",
+      "light blue hat and robe",
+      "white sash",
+      "staff at right"
+    ]
+  }
+}

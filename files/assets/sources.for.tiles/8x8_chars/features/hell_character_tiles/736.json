@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/736",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "pointed crown-like top",
+      "white shapes flanking head",
+      "wide purple base"
+    ],
+    "shape": [
+      "small head with jagged top",
+      "rectangular face",
+      "broad robe mass"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "lime-green top",
+      "tan face",
+      "purple robe",
+      "red belt",
+      "white areas beside head"
+    ],
+    "major_regions": [
+      "lime crown or hat above tan face with dark eyes",
+      "purple robe with red belt",
+      "white flanking regions"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "jagged lime top could be a crown or pointed hat",
+      "white flanks could be a collar, hair or wings",
+      "purple lower body could be a robe"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "king or noble",
+      "robed humanoid",
+      "mage"
+    ],
+    "visual_symbols": [
+      "crown",
+      "robe",
+      "belt"
+    ],
+    "priority_features": [
+      "crown-like top",
+      "tan face",
+      "purple robe",
+      "white flanking shapes"
+    ]
+  }
+}

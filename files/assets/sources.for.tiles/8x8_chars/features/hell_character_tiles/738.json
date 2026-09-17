@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/738",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "yellow-green head covering",
+      "white shapes flanking head",
+      "wide yellow-green lower body"
+    ],
+    "shape": [
+      "small rounded hat mass",
+      "tan face",
+      "broad lower mass"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "yellow-green hat and lower body",
+      "tan face",
+      "orange belt",
+      "white upper flanks"
+    ],
+    "major_regions": [
+      "yellow-green cap over tan face with dark eyes",
+      "orange belt",
+      "yellow-green robe or trousers",
+      "white regions beside head"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "top could be a cap or hood",
+      "white flanks could be a collar or cape",
+      "orange stripe could be a belt"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "villager",
+      "robed humanoid",
+      "adventurer"
+    ],
+    "visual_symbols": [
+      "cap",
+      "belt",
+      "robe"
+    ],
+    "priority_features": [
+      "yellow-green cap",
+      "tan face with dark eyes",
+      "orange belt",
+      "yellow-green lower body"
+    ]
+  }
+}

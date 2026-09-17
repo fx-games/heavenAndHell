@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/696",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "large pale head",
+      "wide robed body",
+      "pole at right"
+    ],
+    "shape": [
+      "white head with dark eye holes and nose gap",
+      "yellow body",
+      "orange horizontal band",
+      "white side projections"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "white head",
+      "yellow robe",
+      "orange sash",
+      "dark facial holes"
+    ],
+    "major_regions": [
+      "skull-like white head",
+      "yellow robe with orange sash",
+      "white bony hands at sides",
+      "brown staff right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "skeletal humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "white head with dark holes could be a skull",
+      "white side pixels could be bony hands",
+      "pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead monk",
+      "skeleton",
+      "lich"
+    ],
+    "visual_symbols": [
+      "skull-like head",
+      "robe",
+      "staff"
+    ],
+    "priority_features": [
+      "white skull face",
+      "yellow robe with orange sash",
+      "staff"
+    ]
+  }
+}

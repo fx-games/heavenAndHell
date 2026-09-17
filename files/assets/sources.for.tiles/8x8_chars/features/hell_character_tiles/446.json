@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/446",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with top points",
+      "brown strip right"
+    ],
+    "shape": [
+      "square head",
+      "light blue torso with white band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "steel-blue head",
+      "light blue body",
+      "white sash",
+      "brown pole"
+    ],
+    "major_regions": [
+      "blue horned face",
+      "light blue robe with white sash",
+      "brown staff strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "white band could be a sash",
+      "top points could be horns",
+      "brown strip could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "blue demon",
+      "frost imp",
+      "horned priest"
+    ],
+    "visual_symbols": [
+      "horns",
+      "sash",
+      "staff"
+    ],
+    "priority_features": [
+      "white sash on light blue body",
+      "blue horned head",
+      "brown staff"
+    ]
+  }
+}

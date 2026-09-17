@@ -1,0 +1,66 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/258",
+  "perceptual": {
+    "silhouette": [
+      "short squat humanoid silhouette",
+      "rounded dome top",
+      "wide middle spanning full width",
+      "legs spread at bottom"
+    ],
+    "shape": [
+      "rounded head mass",
+      "wide torso band",
+      "small leg stubs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "crouched low"
+    ],
+    "colors": [
+      "blue dominant",
+      "gray and light blue center",
+      "dark eye pixels"
+    ],
+    "major_regions": [
+      "blue dome head with dark eyes",
+      "gray-cyan torso band",
+      "pale hand-like blocks",
+      "dark legs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "squat armored humanoid",
+      "possibly beetle-like"
+    ],
+    "possible_features": [
+      "dome could be a helmet or shell",
+      "dark pixels could be eyes",
+      "wide middle band could be arms or armor",
+      "smaller stature suggests a lesser or young version"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "small armored creature",
+      "golem",
+      "hooded dwarf-like figure",
+      "beetle-like creature"
+    ],
+    "visual_symbols": [
+      "shell or helmet",
+      "dark eyes",
+      "wide armored torso"
+    ],
+    "priority_features": [
+      "short squat dome-headed body",
+      "two dark eyes",
+      "wide torso band",
+      "blue coloring"
+    ]
+  }
+}

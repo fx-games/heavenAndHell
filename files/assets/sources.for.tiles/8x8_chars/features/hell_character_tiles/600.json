@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/600",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "broad head with covered top",
+      "narrow legs"
+    ],
+    "shape": [
+      "large head mass",
+      "brown cap-like band on top",
+      "compact torso"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "mostly green",
+      "brown top region",
+      "dark gray waist band",
+      "yellow eyes",
+      "light gray side edges"
+    ],
+    "major_regions": [
+      "brown helmet/hair over green face",
+      "green body with dark belt",
+      "light gray strip at right edge"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "brown top could be a helmet, hood or hair",
+      "dark band could be a belt",
+      "gray edge could be a weapon or shield"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin",
+      "orc warrior",
+      "humanoid monster"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "glowing eyes",
+      "belt"
+    ],
+    "priority_features": [
+      "green skin",
+      "brown headgear",
+      "yellow eyes",
+      "stocky humanoid"
+    ]
+  }
+}

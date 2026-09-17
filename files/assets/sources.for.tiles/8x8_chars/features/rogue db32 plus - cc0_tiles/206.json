@@ -1,0 +1,62 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/206",
+  "perceptual": {
+    "silhouette": [
+      "oval symmetric silhouette",
+      "short projections along both sides",
+      "slightly pointed bottom"
+    ],
+    "shape": [
+      "large oval central mass",
+      "dark vertical dividing line",
+      "small side projections",
+      "two bright pixels at bottom"
+    ],
+    "orientation": [
+      "top-down",
+      "facing down"
+    ],
+    "pose": [
+      "crawling"
+    ],
+    "colors": [
+      "mostly brown",
+      "darker brown outline",
+      "bright yellow pixels at bottom"
+    ],
+    "major_regions": [
+      "brown shell with center seam",
+      "dark leg pixels on sides",
+      "two yellow glowing eye-like pixels"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "insectoid",
+      "beetle-like"
+    ],
+    "possible_features": [
+      "center line could be split wing covers",
+      "yellow pixels could be glowing eyes",
+      "side pixels could be legs"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "beetle",
+      "fire beetle",
+      "bug",
+      "giant insect"
+    ],
+    "visual_symbols": [
+      "carapace",
+      "glowing eyes",
+      "legs"
+    ],
+    "priority_features": [
+      "oval brown shell with center seam",
+      "yellow glowing eyes",
+      "side legs"
+    ]
+  }
+}

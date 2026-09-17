@@ -1,0 +1,59 @@
+{
+ "id": "lofi_char_tiles/112",
+ "perceptual": {
+  "silhouette": [
+   "rounded blob with flickering edges",
+   "irregular jagged top",
+   "wider base"
+  ],
+  "shape": [
+   "large rounded red mass",
+   "ragged outer rim",
+   "small protrusion at right"
+  ],
+  "orientation": [
+   "front-facing",
+   "ambiguous"
+  ],
+  "pose": [
+   "ambiguous",
+   "hovering"
+  ],
+  "colors": [
+   "red core",
+   "orange and yellow outer rim",
+   "black eyes"
+  ],
+  "major_regions": [
+   "red central body",
+   "orange-yellow flame-like fringe",
+   "two dark eyes"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "amorphous",
+   "elemental"
+  ],
+  "possible_features": [
+   "jagged yellow-orange rim could be flames",
+   "right protrusion could be an arm or flame tongue"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "fire elemental",
+   "flame spirit",
+   "fire slime"
+  ],
+  "visual_symbols": [
+   "flames",
+   "dark eyes"
+  ],
+  "priority_features": [
+   "flame-edged outline",
+   "red body",
+   "two black eyes"
+  ]
+ }
+}

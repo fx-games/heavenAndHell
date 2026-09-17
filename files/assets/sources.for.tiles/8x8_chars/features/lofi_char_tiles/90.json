@@ -1,0 +1,65 @@
+{
+  "id": "lofi_char_tiles/90",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette with horned helmet",
+      "wide shoulders",
+      "gray blade at right"
+    ],
+    "shape": [
+      "gray helmet with corner points",
+      "yellow face",
+      "gray armored torso",
+      "short legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon"
+    ],
+    "colors": [
+      "gray helmet and body",
+      "yellow face and hands",
+      "black eye band",
+      "orange belt and feet"
+    ],
+    "major_regions": [
+      "gray horned helmet",
+      "yellow face with black eyes",
+      "gray armor with orange belt",
+      "gray vertical blade at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "helmet points could be horns",
+      "gray body could be armor",
+      "right item could be a sword or dagger"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "warrior",
+      "viking",
+      "dwarf",
+      "armored rogue"
+    ],
+    "visual_symbols": [
+      "horned helmet",
+      "armor",
+      "sword"
+    ],
+    "priority_features": [
+      "gray horned helmet",
+      "yellow face",
+      "gray armor",
+      "weapon at right"
+    ]
+  }
+}

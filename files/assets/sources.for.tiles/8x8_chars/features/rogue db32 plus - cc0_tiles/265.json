@@ -1,0 +1,64 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/265",
+  "perceptual": {
+    "silhouette": [
+      "triangular wedge silhouette",
+      "stepped diagonal edge descending to lower-left",
+      "occupies upper-left region",
+      "empty lower-right"
+    ],
+    "shape": [
+      "horizontal stacked bands",
+      "wide top narrowing downward",
+      "thin left column"
+    ],
+    "orientation": [
+      "facing left",
+      "ambiguous"
+    ],
+    "pose": [
+      "ambiguous",
+      "possibly flying or swooping"
+    ],
+    "colors": [
+      "white and pale blue dominant",
+      "blue accent pixels near top",
+      "dark background"
+    ],
+    "major_regions": [
+      "pale stacked bands forming wedge",
+      "blue spots near top",
+      "gray-blue left edge column"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "abstract",
+      "possibly winged"
+    ],
+    "possible_features": [
+      "stepped bands could be feathers of a wing",
+      "wedge could be a ghostly trail",
+      "blue spots could be eyes",
+      "could be a cloud or icy shape"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ghost",
+      "wing",
+      "cloud spirit",
+      "ice elemental"
+    ],
+    "visual_symbols": [
+      "wing-like shape",
+      "pale wispy form"
+    ],
+    "priority_features": [
+      "pale triangular stepped wedge",
+      "horizontal banded layers",
+      "upper-left placement",
+      "white-blue coloring"
+    ]
+  }
+}

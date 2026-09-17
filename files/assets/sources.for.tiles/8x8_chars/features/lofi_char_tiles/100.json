@@ -1,0 +1,67 @@
+{
+  "id": "lofi_char_tiles/100",
+  "perceptual": {
+    "silhouette": [
+      "pale humanoid silhouette with notched crown top",
+      "blue band and robe below"
+    ],
+    "shape": [
+      "yellow-green crown block with notches",
+      "white head with dark eyes",
+      "blue shoulder band",
+      "orange central square",
+      "blue robe base"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "lime-yellow crown",
+      "mostly white head",
+      "blue robe",
+      "orange center",
+      "black eyes"
+    ],
+    "major_regions": [
+      "yellow-green crown",
+      "pale head with black eyes",
+      "blue mantle and robe",
+      "orange amulet-like pixel"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed",
+      "skeletal humanoid"
+    ],
+    "possible_features": [
+      "notched top could be a crown",
+      "pale head could be a skull",
+      "orange square could be an amulet"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "lich king",
+      "undead king",
+      "ghost royalty"
+    ],
+    "visual_symbols": [
+      "crown",
+      "robe",
+      "skull-like head",
+      "amulet"
+    ],
+    "priority_features": [
+      "crown",
+      "pale skull-like head",
+      "blue robe",
+      "orange amulet"
+    ]
+  }
+}

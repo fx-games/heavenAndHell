@@ -1,0 +1,59 @@
+{
+  "id": "hell_character_tiles/256",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "hooded head",
+      "brown pole right",
+      "side hand pixels"
+    ],
+    "shape": [
+      "square hood",
+      "rectangular body",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "indigo hood and robe",
+      "green face with black eyes",
+      "brown belt with gray buckle"
+    ],
+    "major_regions": [
+      "indigo hood framing green face",
+      "black eyes",
+      "belt with buckle",
+      "green hands at sides",
+      "staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "green face could suggest goblin or orc skin",
+      "right bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin mage",
+      "hooded green-skinned figure"
+    ],
+    "visual_symbols": [
+      "hood",
+      "green face",
+      "staff"
+    ],
+    "priority_features": [
+      "green face in indigo hood",
+      "staff on right",
+      "belt"
+    ]
+  }
+}

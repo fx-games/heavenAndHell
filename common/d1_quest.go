@@ -270,7 +270,7 @@ func (f *Factory) d1TownerQuests(npc *Actor) bool {
 			s.SetQuestVar(q, 1, 1)
 			f.say(name, "TEXT_BUTCH9")
 		} else if active(q) == d1.QuestActive {
-			f.playD1HeroSound(8) // his last words are said
+			f.PlayD1HeroSound(8) // his last words are said
 		}
 		return true
 	case VendorTypeWeapons:
@@ -801,7 +801,7 @@ func d1QuestKill(ctx ActionContext, mon *D1Monster) {
 	}
 	f.completeD1Quest(q)
 	if n, ok := map[int]int{d1.QSkelKing: 82, d1.QButcher: 80, d1.QGarbud: 61, d1.QZhar: 62, d1.QBetrayer: 83, d1.QWarlord: 94}[q]; ok {
-		f.playD1HeroSound(n)
+		f.PlayD1HeroSound(n)
 	}
 	switch q {
 	case d1.QBetrayer:
@@ -832,7 +832,7 @@ func (f *Factory) d1QuestItemPickedUp(it *d1.Item) {
 		f.completeD1Quest(d1.QBlind)
 	case d1.IdiMushroom:
 		if s.QuestActive(d1.QMushroom) == d1.QuestActive && s.QuestVar(d1.QMushroom, 1) == d1.QSMushSpawned {
-			f.playD1HeroSound(95)
+			f.PlayD1HeroSound(95)
 			s.SetQuestVar(d1.QMushroom, 1, d1.QSMushPicked)
 		}
 	case d1.IdiAnvil, d1.IdiRock:
@@ -842,13 +842,13 @@ func (f *Factory) d1QuestItemPickedUp(it *d1.Item) {
 			s.SetQuestVar(q, 1, 1)
 		}
 		if s.QuestLog(q) {
-			f.playD1HeroSound(map[int]int{d1.QAnvil: 89, d1.QRock: 87}[q])
+			f.PlayD1HeroSound(map[int]int{d1.QAnvil: 89, d1.QRock: 87}[q])
 		}
 	case d1.IdiGldnElix:
-		f.playD1HeroSound(88)
+		f.PlayD1HeroSound(88)
 	case d1.IdiArmOfVal:
 		f.completeD1Quest(d1.QBlood)
-		f.playD1HeroSound(91)
+		f.PlayD1HeroSound(91)
 	}
 }
 
@@ -870,7 +870,7 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 	switch obj.Kind {
 	case d1.ObjMUSHPATCH: // OperateMushPatch
 		if q := d1.QMushroom; s.QuestActive(q) != d1.QuestActive || s.QuestVar(q, 1) < d1.QSTomeGiven {
-			f.playD1HeroSound(13)
+			f.PlayD1HeroSound(13)
 			f.Msg("I can't open this yet.")
 		} else if obj.Active {
 			obj.Active = false
@@ -879,7 +879,7 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 		}
 	case d1.ObjSIGNCHEST: // OperateInnSignChest
 		if s.QuestVar(d1.QLtBanner, 1) != 2 {
-			f.playD1HeroSound(24)
+			f.PlayD1HeroSound(24)
 			f.Msg("I can't open this yet.")
 		} else if obj.Active {
 			obj.Active = false

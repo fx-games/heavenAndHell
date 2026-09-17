@@ -1,0 +1,74 @@
+{
+  "id": "hell_character_tiles/342",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "large rounded head",
+      "wide arms",
+      "robed lower body",
+      "vertical staff at right"
+    ],
+    "shape": [
+      "gray rounded head with small blue square on forehead",
+      "two dark square eye holes",
+      "gray arm band",
+      "dark teal band",
+      "teal lower body",
+      "thin brown vertical line"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms outstretched",
+      "holding staff"
+    ],
+    "colors": [
+      "gray head and arms",
+      "blue forehead pixel",
+      "black eye holes",
+      "teal robe",
+      "brown staff"
+    ],
+    "major_regions": [
+      "gray head with blue forehead mark",
+      "hollow eyes",
+      "gray arms",
+      "teal robe",
+      "brown pole"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid",
+      "undead humanoid"
+    ],
+    "possible_features": [
+      "blue forehead pixel could be a gem or third eye",
+      "gray head with holes could be a skull or undead face",
+      "brown line could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead priest",
+      "zombie monk",
+      "ghoul mystic",
+      "lich"
+    ],
+    "visual_symbols": [
+      "forehead gem",
+      "hollow eyes",
+      "robe",
+      "staff"
+    ],
+    "priority_features": [
+      "gray hollow-eyed head",
+      "blue forehead gem",
+      "teal robe",
+      "staff at right"
+    ]
+  }
+}

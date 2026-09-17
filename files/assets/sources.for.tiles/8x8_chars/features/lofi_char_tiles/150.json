@@ -1,0 +1,57 @@
+{
+ "id": "lofi_char_tiles/150",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette with large rounded head",
+   "arms extended slightly to sides",
+   "short legs"
+  ],
+  "shape": [
+   "big rounded head mass",
+   "horizontal belt band",
+   "rectangular lower body"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "pink head and hands",
+   "yellow clothing",
+   "dark belt with gray buckle"
+  ],
+  "major_regions": [
+   "large pink head with two dark eyes",
+   "yellow torso and legs",
+   "dark belt band"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "big-headed biped"
+  ],
+  "possible_features": [
+   "oversized pink head could be a bald head or blob-like creature",
+   "yellow clothing could be a tunic or robe"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "human character",
+   "brute",
+   "pink-skinned humanoid"
+  ],
+  "visual_symbols": [
+   "large head",
+   "belt"
+  ],
+  "priority_features": [
+   "oversized pink head",
+   "yellow clothing",
+   "dark belt with buckle"
+  ]
+ }
+}

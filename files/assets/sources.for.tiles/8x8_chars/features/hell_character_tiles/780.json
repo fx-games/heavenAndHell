@@ -1,0 +1,66 @@
+{
+  "id": "hell_character_tiles/780",
+  "perceptual": {
+    "silhouette": [
+      "robed humanoid silhouette",
+      "head with two small top corners",
+      "wide robe",
+      "thin brown pole at right"
+    ],
+    "shape": [
+      "ochre head mass with corner points",
+      "yellow robe mass",
+      "orange horizontal band",
+      "vertical pole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "ochre head",
+      "dark eyes",
+      "green central pixel",
+      "bright yellow robe",
+      "orange sash"
+    ],
+    "major_regions": [
+      "ochre hooded head",
+      "yellow robe",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "top corners could be ears or hood points",
+      "green central pixel could be a nose, gem or mouth",
+      "pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mage",
+      "monk",
+      "goblin shaman",
+      "beastfolk mystic"
+    ],
+    "visual_symbols": [
+      "staff",
+      "robe",
+      "pointed hood or ears"
+    ],
+    "priority_features": [
+      "ochre head with top corners",
+      "yellow robe",
+      "green face pixel",
+      "staff at right"
+    ]
+  }
+}

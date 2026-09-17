@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/121",
+ "perceptual": {
+  "silhouette": [
+   "symmetric crenellated silhouette",
+   "two upward prongs at top center",
+   "raised arms at outer edges",
+   "legs below"
+  ],
+  "shape": [
+   "wide horizontal band body",
+   "vertical columns at sides",
+   "paired central top protrusions",
+   "three leg-like stubs below"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "arms raised",
+   "standing"
+  ],
+  "colors": [
+   "uniform pale blue"
+  ],
+  "major_regions": [
+   "wide central bar",
+   "two raised side columns",
+   "top antenna-like prongs"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "abstract",
+   "humanoid",
+   "insect-like"
+  ],
+  "possible_features": [
+   "top prongs could be antennae or ears",
+   "outer columns could be raised arms or claws",
+   "gaps may be eyes"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "space-invader-like alien",
+   "crab creature",
+   "abstract spirit"
+  ],
+  "visual_symbols": [
+   "antennae",
+   "raised arms",
+   "symmetrical invader shape"
+  ],
+  "priority_features": [
+   "symmetric crenellated shape",
+   "raised side arms",
+   "two top prongs"
+  ]
+ }
+}

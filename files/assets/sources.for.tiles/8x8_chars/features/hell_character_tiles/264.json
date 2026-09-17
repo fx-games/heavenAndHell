@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/264",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "hood-like top with light corner tips",
+      "gray blade shape on right edge"
+    ],
+    "shape": [
+      "brown hood mass",
+      "green face window",
+      "horizontal brown belt band",
+      "dark lower body",
+      "thin right extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "brown hood and belt",
+      "green face",
+      "dark gray torso",
+      "gray blade"
+    ],
+    "major_regions": [
+      "brown hood framing green face",
+      "black eyes",
+      "brown belt band",
+      "dark armor-like lower body",
+      "gray upright blade"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "brown top could be a hood or leather cap",
+      "white tips could be horns or ears",
+      "gray shape could be a sword",
+      "green face suggests orc or goblin"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin warrior",
+      "orc in leather gear",
+      "hooded rogue"
+    ],
+    "visual_symbols": [
+      "hood",
+      "sword",
+      "green face"
+    ],
+    "priority_features": [
+      "brown hood around green face",
+      "gray sword on right",
+      "brown belt"
+    ]
+  }
+}

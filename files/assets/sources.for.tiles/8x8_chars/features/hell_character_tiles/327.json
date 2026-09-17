@@ -1,0 +1,67 @@
+{
+  "id": "hell_character_tiles/327",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "rounded head",
+      "broad bare torso",
+      "vertical bar at right"
+    ],
+    "shape": [
+      "rust-brown dome over head",
+      "tan face and torso block",
+      "dark gray waist band",
+      "brown lower legs",
+      "gray vertical strip at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon at side"
+    ],
+    "colors": [
+      "rust brown hair or hood",
+      "tan skin-colored body",
+      "yellow-green eyes",
+      "dark belt",
+      "gray bar"
+    ],
+    "major_regions": [
+      "brown head covering over tan face",
+      "large tan torso",
+      "dark belt",
+      "gray vertical object at right edge"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "brown top could be hair or a hood",
+      "large tan area could be a bare chest",
+      "gray strip could be a sword or blade"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "barbarian",
+      "rogue",
+      "bandit",
+      "fighter"
+    ],
+    "visual_symbols": [
+      "bare chest",
+      "sword-like bar",
+      "hair or hood"
+    ],
+    "priority_features": [
+      "tan bare torso",
+      "brown hair or hood",
+      "gray weapon at right",
+      "dark belt"
+    ]
+  }
+}

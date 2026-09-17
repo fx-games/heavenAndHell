@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/13",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "cap with small blue tip",
+      "wide robe base",
+      "full-height line on right"
+    ],
+    "shape": [
+      "orange cap",
+      "small blue top pixel",
+      "square face",
+      "wide robed lower body",
+      "thin vertical staff"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "orange hat and robe",
+      "yellow face",
+      "blue top pixel",
+      "brown staff"
+    ],
+    "major_regions": [
+      "orange hat and robe",
+      "yellow face",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "blue top pixel could be a feather or gem",
+      "right line could be a staff",
+      "wide base could be a robe"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "monk",
+      "mage",
+      "pilgrim"
+    ],
+    "visual_symbols": [
+      "hat",
+      "staff",
+      "robe",
+      "feather or gem"
+    ],
+    "priority_features": [
+      "orange robe and hat",
+      "staff",
+      "blue top accent"
+    ]
+  }
+}

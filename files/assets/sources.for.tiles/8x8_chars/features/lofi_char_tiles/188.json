@@ -1,0 +1,58 @@
+{
+  "id": "lofi_char_tiles/188",
+  "perceptual": {
+    "silhouette": [
+      "square block silhouette",
+      "stepped offset on top-left edges"
+    ],
+    "shape": [
+      "large square face",
+      "thin top and side faces giving 3D depth"
+    ],
+    "orientation": [
+      "angled",
+      "three-quarter view"
+    ],
+    "pose": [
+      "static"
+    ],
+    "colors": [
+      "bright red top",
+      "dark red front face",
+      "brown-maroon left side",
+      "orange corner highlights"
+    ],
+    "major_regions": [
+      "dark red cube front",
+      "bright red top strip",
+      "dark side strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "non-creature object",
+      "geometric cube"
+    ],
+    "possible_features": [
+      "could be a gelatinous cube",
+      "could be a crate or block",
+      "no eyes or limbs"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "gelatinous cube",
+      "cube monster",
+      "block"
+    ],
+    "visual_symbols": [
+      "cube"
+    ],
+    "priority_features": [
+      "cube shape",
+      "3D perspective faces",
+      "red coloring",
+      "no limbs"
+    ]
+  }
+}

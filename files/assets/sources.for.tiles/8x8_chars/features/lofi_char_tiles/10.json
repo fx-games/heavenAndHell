@@ -1,0 +1,62 @@
+{
+  "id": "lofi_char_tiles/10",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "enclosed helm with two small top protrusions",
+      "pole on right"
+    ],
+    "shape": [
+      "pale helm",
+      "T-shaped black visor",
+      "two corner points at top",
+      "armored body with legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding spear"
+    ],
+    "colors": [
+      "pale yellow and olive tones",
+      "black visor",
+      "monochrome yellowish palette"
+    ],
+    "major_regions": [
+      "pale yellow helm with T visor",
+      "olive armored body",
+      "olive pole"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "top corner points could be small horns or helmet ornaments",
+      "T-shaped black could be a visor",
+      "pole could be a spear"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "golden knight",
+      "horned warrior",
+      "armored soldier"
+    ],
+    "visual_symbols": [
+      "T visor",
+      "horn-like points",
+      "spear"
+    ],
+    "priority_features": [
+      "T-shaped visor",
+      "small horn-like points on helm",
+      "pale gold armor",
+      "spear"
+    ]
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "id": "lofi_char_tiles/347",
+  "perceptual": {
+    "silhouette": [
+      "stocky humanoid silhouette",
+      "large rounded head",
+      "wide central mass",
+      "short legs",
+      "vertical bar at right"
+    ],
+    "shape": [
+      "gray head with two dark square eye holes",
+      "large red wedge from lower face down to chest",
+      "gray arms and legs",
+      "gray vertical strip with brown pixel at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon at side"
+    ],
+    "colors": [
+      "mostly gray",
+      "large red central wedge",
+      "black eye holes",
+      "small brown accent"
+    ],
+    "major_regions": [
+      "gray hollow-eyed head",
+      "red triangular region below face",
+      "gray body",
+      "weapon-like bar at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "stocky humanoid",
+      "undead humanoid"
+    ],
+    "possible_features": [
+      "red wedge could be a large beard",
+      "gray body could be undead skin or stone",
+      "right bar with brown pixel could be an axe or sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead dwarf",
+      "zombie warrior",
+      "stone dwarf",
+      "ghoul"
+    ],
+    "visual_symbols": [
+      "beard",
+      "hollow eyes",
+      "weapon"
+    ],
+    "priority_features": [
+      "red beard-like wedge",
+      "gray body",
+      "two dark eye holes",
+      "weapon at right"
+    ]
+  }
+}

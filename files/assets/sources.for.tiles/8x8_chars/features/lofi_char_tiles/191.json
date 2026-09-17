@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/191",
+  "perceptual": {
+    "silhouette": [
+      "boxy stacked silhouette",
+      "head block on top offset right",
+      "wider body block below",
+      "small side protrusion right"
+    ],
+    "shape": [
+      "rectangular head",
+      "rectangular torso",
+      "dark face panel",
+      "dark chest panel"
+    ],
+    "orientation": [
+      "front-facing",
+      "slightly turned right"
+    ],
+    "pose": [
+      "standing",
+      "ambiguous"
+    ],
+    "colors": [
+      "mostly brown",
+      "black face with two red eyes",
+      "dark gray panel with yellow light"
+    ],
+    "major_regions": [
+      "brown boxy frame",
+      "black face with red eyes",
+      "chest panel with yellow light"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "mechanical",
+      "humanoid-like construct",
+      "hooded figure"
+    ],
+    "possible_features": [
+      "red dots read as glowing eyes",
+      "dark face could be a hood opening or visor",
+      "yellow square could be a light or lamp"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "robot",
+      "golem/construct",
+      "hooded creature"
+    ],
+    "visual_symbols": [
+      "glowing red eyes",
+      "boxy body",
+      "chest light"
+    ],
+    "priority_features": [
+      "boxy head and body",
+      "black face with red eyes",
+      "chest panel with yellow light"
+    ]
+  }
+}

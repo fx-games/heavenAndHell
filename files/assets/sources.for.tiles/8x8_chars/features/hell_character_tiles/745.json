@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/745",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "capped head",
+      "vertical bar on right side",
+      "short dark legs"
+    ],
+    "shape": [
+      "square head-like mass",
+      "rectangular torso",
+      "thin vertical extension at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding long object upright"
+    ],
+    "colors": [
+      "yellow-green cap",
+      "skin-toned face",
+      "green torso",
+      "brown belt and pole"
+    ],
+    "major_regions": [
+      "light cap over skin face",
+      "green body band",
+      "brown vertical bar at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "top region could be a hood or cap",
+      "right bar could be a bow, staff or spear",
+      "two dark pixels could be eyes"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "human adventurer",
+      "ranger or hunter",
+      "villager"
+    ],
+    "visual_symbols": [
+      "cap or hood",
+      "staff or bow",
+      "green tunic"
+    ],
+    "priority_features": [
+      "green tunic",
+      "yellow-green cap",
+      "vertical brown pole at right",
+      "human face"
+    ]
+  }
+}

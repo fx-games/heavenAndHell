@@ -1,0 +1,63 @@
+{
+  "id": "lofi_char_tiles/186",
+  "perceptual": {
+    "silhouette": [
+      "upright stocky silhouette",
+      "two ear-like protrusions on top",
+      "arms extended to sides",
+      "two legs"
+    ],
+    "shape": [
+      "rectangular body",
+      "two upward nubs",
+      "horizontal arm bars",
+      "lighter oval belly patch"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms outstretched"
+    ],
+    "colors": [
+      "mostly brown",
+      "tan belly",
+      "black eyes"
+    ],
+    "major_regions": [
+      "brown body with two ears",
+      "lighter belly",
+      "two black eyes"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "bipedal",
+      "humanoid-like animal"
+    ],
+    "possible_features": [
+      "top nubs could be ears",
+      "lighter belly patch suggests a bear or furry animal",
+      "arms spread outward"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "bear",
+      "furry beast",
+      "teddy-bear creature"
+    ],
+    "visual_symbols": [
+      "round ears",
+      "light belly",
+      "outstretched arms"
+    ],
+    "priority_features": [
+      "two ears on top",
+      "light belly patch",
+      "arms spread",
+      "stocky brown body"
+    ]
+  }
+}

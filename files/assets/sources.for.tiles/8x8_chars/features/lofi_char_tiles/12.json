@@ -1,0 +1,61 @@
+{
+  "id": "lofi_char_tiles/12",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "hooded head",
+      "long wide robe base",
+      "full-height line on right"
+    ],
+    "shape": [
+      "dark gray hood",
+      "square face",
+      "wide robed lower body",
+      "thin vertical staff"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "dark gray hood and robe",
+      "yellow face",
+      "brown staff and belt"
+    ],
+    "major_regions": [
+      "dark hood and robe",
+      "yellow face",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "top could be a hood",
+      "right line could be a staff",
+      "wide bottom could be a robe"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "monk",
+      "dark mage",
+      "hooded wanderer"
+    ],
+    "visual_symbols": [
+      "hood",
+      "staff",
+      "robe"
+    ],
+    "priority_features": [
+      "dark gray hood and robe",
+      "staff",
+      "yellow face"
+    ]
+  }
+}

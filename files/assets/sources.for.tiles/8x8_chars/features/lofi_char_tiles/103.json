@@ -1,0 +1,62 @@
+{
+  "id": "lofi_char_tiles/103",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "small head",
+      "arms spread outward",
+      "narrow legs"
+    ],
+    "shape": [
+      "pale blue head with single light hole",
+      "rectangular torso",
+      "horizontal arm extensions",
+      "darker blue patches on left edge"
+    ],
+    "orientation": [
+      "front-facing",
+      "slightly angled"
+    ],
+    "pose": [
+      "standing",
+      "arms spread"
+    ],
+    "colors": [
+      "mostly pale blue",
+      "darker blue shading on left",
+      "white pixel in head"
+    ],
+    "major_regions": [
+      "pale blue body",
+      "single bright pixel in head",
+      "darker blue edge patches"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "uniform pale blue could represent ice, water or a spirit",
+      "white pixel could be an eye or hollow"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ice elemental",
+      "ghost",
+      "spirit",
+      "water elemental"
+    ],
+    "visual_symbols": [
+      "translucent body",
+      "single eye"
+    ],
+    "priority_features": [
+      "uniform pale blue humanoid",
+      "arms spread",
+      "featureless body"
+    ]
+  }
+}

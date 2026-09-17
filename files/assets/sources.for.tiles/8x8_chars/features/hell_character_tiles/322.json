@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/322",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "squarish head",
+      "wide body",
+      "two short legs"
+    ],
+    "shape": [
+      "tan head with red horizontal band across top",
+      "red rectangular torso",
+      "orange horizontal waist band",
+      "tan hands at sides"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "mostly red",
+      "tan head and hands",
+      "orange belt",
+      "yellow-green eyes"
+    ],
+    "major_regions": [
+      "tan head with red headband",
+      "red body",
+      "orange belt",
+      "red legs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red band over head could be a headband or bandana",
+      "plain body without weapon could suggest unarmed fighter",
+      "bright eye pixels could be eyes"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "monk",
+      "martial artist",
+      "brawler",
+      "peasant"
+    ],
+    "visual_symbols": [
+      "headband",
+      "belt",
+      "unarmed"
+    ],
+    "priority_features": [
+      "red outfit",
+      "red headband on tan head",
+      "orange belt",
+      "no weapon"
+    ]
+  }
+}

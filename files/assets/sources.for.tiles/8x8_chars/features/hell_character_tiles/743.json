@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/743",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "yellow jagged top",
+      "gray vertical bar at right edge",
+      "yellow torso"
+    ],
+    "shape": [
+      "small head with pointed top",
+      "tan face",
+      "yellow torso",
+      "dark legs",
+      "thin blade-like extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding upright weapon at side"
+    ],
+    "colors": [
+      "yellow head top and torso",
+      "tan face and hands",
+      "red-brown belt",
+      "gray bar"
+    ],
+    "major_regions": [
+      "yellow crown or spiky hair above tan face",
+      "yellow torso",
+      "red belt",
+      "gray sword with brown hilt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "jagged yellow top could be a crown or spiky hair",
+      "gray bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "warrior king",
+      "swordsman",
+      "adventurer"
+    ],
+    "visual_symbols": [
+      "crown or spiky hair",
+      "sword",
+      "belt"
+    ],
+    "priority_features": [
+      "yellow jagged headwear",
+      "yellow torso",
+      "upright sword at right"
+    ]
+  }
+}

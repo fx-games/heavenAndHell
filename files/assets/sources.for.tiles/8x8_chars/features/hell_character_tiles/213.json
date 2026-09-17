@@ -1,0 +1,66 @@
+{
+  "id": "hell_character_tiles/213",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "squared dark head",
+      "vertical brown bar at right"
+    ],
+    "shape": [
+      "dark navy head mass",
+      "two pink eyes",
+      "yellow robe",
+      "orange belt",
+      "long thin vertical extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object"
+    ],
+    "colors": [
+      "dark navy head",
+      "pink eyes",
+      "yellow robe",
+      "orange belt"
+    ],
+    "major_regions": [
+      "dark head with pink eyes",
+      "yellow robe",
+      "orange sash",
+      "dark navy hands",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "dark head with bright eyes could be undead, shadow or masked",
+      "brown bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead monk",
+      "shadow creature",
+      "corrupted pilgrim"
+    ],
+    "visual_symbols": [
+      "glowing eyes",
+      "dark face",
+      "staff",
+      "robe"
+    ],
+    "priority_features": [
+      "dark head with pink eyes",
+      "yellow robe",
+      "brown staff",
+      "orange sash"
+    ]
+  }
+}

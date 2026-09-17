@@ -1,0 +1,61 @@
+{
+  "id": "lofi_char_tiles/183",
+  "perceptual": {
+    "silhouette": [
+      "tall broad silhouette",
+      "green leafy clusters around top and sides",
+      "narrow trunk base"
+    ],
+    "shape": [
+      "trunk-like column",
+      "green scattered foliage blocks",
+      "two yellow eye spots",
+      "dark mouth hole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "branches spread"
+    ],
+    "colors": [
+      "green foliage",
+      "brown trunk and branches",
+      "yellow eyes",
+      "black mouth"
+    ],
+    "major_regions": [
+      "green leafy canopy",
+      "brown trunk with face"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "plant/tree creature"
+    ],
+    "possible_features": [
+      "green blocks could be leaves",
+      "yellow spots read as eyes",
+      "dark hole could be a mouth"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "treant",
+      "living tree",
+      "forest spirit"
+    ],
+    "visual_symbols": [
+      "leaves",
+      "face on trunk",
+      "glowing eyes"
+    ],
+    "priority_features": [
+      "leafy canopy",
+      "tree trunk face",
+      "two yellow eyes",
+      "mouth hole"
+    ]
+  }
+}

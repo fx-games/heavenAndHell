@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/94",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette with crenellated top",
+      "wide robe at bottom"
+    ],
+    "shape": [
+      "yellow crown-shaped top with notches",
+      "blue face",
+      "red chest band",
+      "wide red robe"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "yellow top",
+      "blue face and hands",
+      "red eyes and robe",
+      "black band"
+    ],
+    "major_regions": [
+      "yellow crown with black gaps",
+      "blue face with red eyes",
+      "red robe with black belt and gray buckle"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed"
+    ],
+    "possible_features": [
+      "notched yellow top could be a crown",
+      "red eyes suggest a monstrous ruler"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "king",
+      "monster lord",
+      "royal figure"
+    ],
+    "visual_symbols": [
+      "crown",
+      "robe",
+      "red eyes"
+    ],
+    "priority_features": [
+      "yellow crown",
+      "blue face with red eyes",
+      "red robe"
+    ]
+  }
+}

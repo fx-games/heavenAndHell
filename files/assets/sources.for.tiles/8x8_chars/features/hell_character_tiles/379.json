@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/379",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "large bald rounded head",
+      "wide robe"
+    ],
+    "shape": [
+      "big yellow head block",
+      "small brown spot on head",
+      "rectangular robe body",
+      "red band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "yellow head",
+      "mostly purple body",
+      "red belt with gray center"
+    ],
+    "major_regions": [
+      "large bare yellow head",
+      "purple robe",
+      "red belt with gray buckle"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "bare head could be bald",
+      "brown spot could be hair tuft or ear",
+      "band could be a belt"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "monk",
+      "bald human",
+      "commoner"
+    ],
+    "visual_symbols": [
+      "bald head",
+      "robe",
+      "belt"
+    ],
+    "priority_features": [
+      "large bald head",
+      "purple robe",
+      "red belt"
+    ]
+  }
+}

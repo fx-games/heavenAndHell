@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/808",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "hood covering head",
+      "short tunic with feet",
+      "forked pole on right edge"
+    ],
+    "shape": [
+      "green hood mass",
+      "face window",
+      "tunic body",
+      "thin vertical line with small fork at top"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole"
+    ],
+    "colors": [
+      "bright green hood and tunic",
+      "light blue face and feet",
+      "dark belt",
+      "orange-brown pole"
+    ],
+    "major_regions": [
+      "green hood and body",
+      "pale face with bright eyes",
+      "reddish-brown pole on right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "green top could be a hood",
+      "right line could be a spear, bow or trident",
+      "fork at top could be a pitchfork or spear tip"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ranger",
+      "hunter",
+      "goblin",
+      "forest humanoid"
+    ],
+    "visual_symbols": [
+      "hood",
+      "spear or bow",
+      "tunic"
+    ],
+    "priority_features": [
+      "green hood and tunic",
+      "orange-brown pole weapon",
+      "pale blue face"
+    ]
+  }
+}

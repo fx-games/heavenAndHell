@@ -1,0 +1,59 @@
+{
+  "id": "lofi_char_tiles/177",
+  "perceptual": {
+    "silhouette": [
+      "triangular mound silhouette",
+      "wide flat base",
+      "narrow top"
+    ],
+    "shape": [
+      "pyramid-like mass",
+      "ringed eye near apex",
+      "lighter diagonal streak on left"
+    ],
+    "orientation": [
+      "front-facing",
+      "ambiguous"
+    ],
+    "pose": [
+      "stationary",
+      "resting on ground"
+    ],
+    "colors": [
+      "mostly brown",
+      "ochre highlight streak",
+      "black ring with white eye center"
+    ],
+    "major_regions": [
+      "brown mound",
+      "single eye near top"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "amorphous",
+      "limbless mound"
+    ],
+    "possible_features": [
+      "mound could be mud, dirt, or dung pile",
+      "central ring could be an eye",
+      "streak could be a wet sheen"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mud creature",
+      "earth elemental",
+      "living dirt mound"
+    ],
+    "visual_symbols": [
+      "single eye",
+      "mound"
+    ],
+    "priority_features": [
+      "brown triangular mound",
+      "single eye near apex",
+      "wide base"
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/199",
+  "perceptual": {
+    "silhouette": [
+      "low body with tall curved tail arching up on left and over",
+      "legs along bottom"
+    ],
+    "shape": [
+      "thin curved tail band",
+      "horizontal body",
+      "hooked tip at top",
+      "small dots underneath"
+    ],
+    "orientation": [
+      "side-facing",
+      "facing right"
+    ],
+    "pose": [
+      "tail raised",
+      "crawling"
+    ],
+    "colors": [
+      "mostly dark gray",
+      "two red eye pixels",
+      "darker tail tip"
+    ],
+    "major_regions": [
+      "gray arched tail",
+      "gray body with red eyes",
+      "dark legs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "arthropod"
+    ],
+    "possible_features": [
+      "arched tail could be a stinger",
+      "red pixels could be eyes",
+      "dots below could be legs"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "scorpion",
+      "dark arthropod"
+    ],
+    "visual_symbols": [
+      "stinger tail",
+      "legs",
+      "red eyes"
+    ],
+    "priority_features": [
+      "arched stinger tail",
+      "low body",
+      "red eyes",
+      "small legs"
+    ]
+  }
+}

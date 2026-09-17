@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/741",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "yellow-green top with blue spot",
+      "white shapes flanking head",
+      "teal robe-like base"
+    ],
+    "shape": [
+      "small head covering",
+      "tan face",
+      "broad teal lower mass with dark center stripe"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "yellow-green head top",
+      "blue forehead spot",
+      "tan face",
+      "teal robe"
+    ],
+    "major_regions": [
+      "yellow-green circlet or hat with blue gem",
+      "tan face with dark eyes",
+      "teal robe with dark central stripe"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "blue spot could be a gem on a circlet or crown",
+      "teal lower body could be a robe",
+      "dark stripe could be a robe opening"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mage",
+      "cleric",
+      "noble"
+    ],
+    "visual_symbols": [
+      "forehead gem",
+      "circlet",
+      "robe"
+    ],
+    "priority_features": [
+      "blue forehead gem",
+      "yellow-green headwear",
+      "teal robe"
+    ]
+  }
+}

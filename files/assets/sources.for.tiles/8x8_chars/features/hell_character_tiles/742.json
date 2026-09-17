@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/742",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "red band under yellow top",
+      "white shapes flanking head",
+      "blue lower body"
+    ],
+    "shape": [
+      "rounded head with band",
+      "tan face",
+      "broad blue lower mass"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "yellow hair or cap",
+      "red headband",
+      "tan face",
+      "white belt",
+      "blue lower body"
+    ],
+    "major_regions": [
+      "yellow top with red headband",
+      "tan face with dark eyes",
+      "white belt",
+      "blue trousers or robe"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red band could be a headband",
+      "yellow top could be blond hair",
+      "white band could be a belt"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "martial artist",
+      "adventurer",
+      "villager"
+    ],
+    "visual_symbols": [
+      "headband",
+      "belt"
+    ],
+    "priority_features": [
+      "red headband",
+      "yellow hair",
+      "blue lower body with white belt"
+    ]
+  }
+}

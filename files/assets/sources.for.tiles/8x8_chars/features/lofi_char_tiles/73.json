@@ -1,0 +1,61 @@
+{
+  "id": "lofi_char_tiles/73",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "jagged bright top",
+      "no side item"
+    ],
+    "shape": [
+      "yellow crenellated top mass",
+      "blue face with red points",
+      "white torso",
+      "dark lower body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "bright yellow crown",
+      "blue face",
+      "bright red eyes",
+      "white body"
+    ],
+    "major_regions": [
+      "yellow crown-like shape on head",
+      "blue face with red eyes",
+      "white tunic",
+      "dark legs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "jagged yellow top could be a crown",
+      "blue skin with red dots could suggest a demon or corrupted being"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "demon king",
+      "corrupted ruler",
+      "evil noble"
+    ],
+    "visual_symbols": [
+      "crown",
+      "red eyes",
+      "white robe"
+    ],
+    "priority_features": [
+      "yellow crown",
+      "blue face with red eyes",
+      "unarmed stance"
+    ]
+  }
+}

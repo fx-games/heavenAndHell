@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/8",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "fully enclosed rounded helmet",
+      "full-height pole on right",
+      "two legs"
+    ],
+    "shape": [
+      "gray dome helm",
+      "T-shaped black visor",
+      "armored torso",
+      "long vertical line"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding spear"
+    ],
+    "colors": [
+      "gray helmet",
+      "dark gray armor and pole",
+      "black visor",
+      "no visible skin"
+    ],
+    "major_regions": [
+      "gray helm with T visor",
+      "dark armored body",
+      "full-height dark pole"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "T-shaped black area could be a helmet visor",
+      "pole could be a spear or halberd",
+      "no skin suggests full plate"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "heavy knight",
+      "guard",
+      "armored soldier"
+    ],
+    "visual_symbols": [
+      "great helm",
+      "T visor",
+      "spear"
+    ],
+    "priority_features": [
+      "T-shaped visor",
+      "full enclosed helmet",
+      "full-height spear",
+      "gray armor"
+    ]
+  }
+}

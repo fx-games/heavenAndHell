@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/492",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "gray column on left"
+    ],
+    "shape": [
+      "gray hood top",
+      "pale face with dark eyes",
+      "white lower block",
+      "orange belt",
+      "gray left column"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "gray top",
+      "pale face",
+      "black eyes",
+      "white body",
+      "orange belt",
+      "brown right edge"
+    ],
+    "major_regions": [
+      "gray hood",
+      "pale face",
+      "white robe with orange belt",
+      "gray column at left"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray top could be hood or hair",
+      "gray left column could be an arm or shield",
+      "white mass could be a robe"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "priest or cleric",
+      "robed human",
+      "monk"
+    ],
+    "visual_symbols": [
+      "robe",
+      "hood",
+      "belt"
+    ],
+    "priority_features": [
+      "white robe",
+      "orange belt",
+      "gray hood",
+      "gray left column"
+    ]
+  }
+}

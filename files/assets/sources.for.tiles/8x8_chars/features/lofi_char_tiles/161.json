@@ -1,0 +1,57 @@
+{
+ "id": "lofi_char_tiles/161",
+ "perceptual": {
+  "silhouette": [
+   "blocky rectangular humanoid silhouette",
+   "wide horizontal shoulder band",
+   "two stubby legs"
+  ],
+  "shape": [
+   "tall gray body",
+   "dark square framing single eye",
+   "dark horizontal arm band"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "medium gray body",
+   "dark gray eye frame and arms",
+   "black single eye"
+  ],
+  "major_regions": [
+   "gray body with one large dark-framed eye",
+   "dark gray band across shoulders and arms",
+   "dark feet"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "construct"
+  ],
+  "possible_features": [
+   "single framed eye could be a cyclopean eye or a lens",
+   "blocky body suggests stone or metal golem"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "cyclops golem",
+   "construct",
+   "sentinel"
+  ],
+  "visual_symbols": [
+   "single eye",
+   "blocky body"
+  ],
+  "priority_features": [
+   "single large eye",
+   "blocky gray body",
+   "dark shoulder band"
+  ]
+ }
+}

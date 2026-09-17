@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/98",
+  "perceptual": {
+    "silhouette": [
+      "pale humanoid silhouette with brown cap on top",
+      "brown block at left",
+      "tall gray vertical line at right"
+    ],
+    "shape": [
+      "brown helmet-like mass with raised center",
+      "white face with dark eyes",
+      "brown shield block",
+      "thin gray vertical extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding shield and weapon"
+    ],
+    "colors": [
+      "mostly white/light gray",
+      "brown helmet and shield",
+      "black eyes",
+      "gray pole"
+    ],
+    "major_regions": [
+      "brown helmet on pale head",
+      "black eyes",
+      "brown shield at left",
+      "gray spear or staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "skeletal humanoid"
+    ],
+    "possible_features": [
+      "brown top could be a leather helmet",
+      "pale body could be bone",
+      "gray vertical could be a spear"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "skeleton warrior",
+      "undead soldier",
+      "ghost guard"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "shield",
+      "spear"
+    ],
+    "priority_features": [
+      "brown helmet",
+      "pale body",
+      "brown shield",
+      "spear at right"
+    ]
+  }
+}

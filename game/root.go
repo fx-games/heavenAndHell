@@ -67,7 +67,9 @@ type GameInstance struct {
 
 	// data definitions
 	dataDefinitions defs.DataContainer
-	d1Data          *d1.Data
+	d1Data          *d1.Data // with Hellfire
+	d1Classic       *d1.Data // plain D1 1.09
+	hellfire        bool     // which of the two this game runs on
 	levelSeed       int64
 	levelSnapshots  map[string]*common.LevelSnapshot
 	autosave        bool // on once a game was started or loaded through the menus
@@ -191,6 +193,10 @@ func NewGameInstance(startInfo common.StartInfo, uiController common.UserInterfa
 		panic(err)
 	}
 	g.d1Data = d1Data
+	if g.d1Classic, err = d1.LoadD1(files.GetFileSystem()); err != nil {
+		panic(err)
+	}
+	g.hellfire = cfg.Hellfire
 	g.ResetGame(g.dataDefinitions.ClassDefinitions[0])
 	return g
 }
@@ -275,7 +281,7 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 		GetTimeKeeper:  g.state.GetTimeKeeper,
 		Msg:            g.PlayerMessage,
 		QueueAfterTurn: g.queueAfterTurn,
-		Generator:      d1.NewGenerator(g.d1Data, g.randomSource.Int31()),
+		Generator:      d1.NewGenerator(g.gameData(), g.randomSource.Int31()),
 		Audio:          g.audioPlayer,
 	}
 
@@ -310,6 +316,7 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 
 	// set references
 	g.state.SetMapGenerator(mapGen)
+	g.state.ApplyHellfireOptions()                    // D1 only: no Hellfire quests or towners
 	common.UpdateD1Quests(&g.state, g.state.GetMap()) // the town was built before there were quests
 
 	townSpawn := g.state.GetMap().GetNamedLocation("spawn")
@@ -465,6 +472,13 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	})
 	player.GetInventory().SetOnChangeHandler(g.sendInventoryToWindowClient)
 	return player
+}
+
+func (g *GameInstance) gameData() *d1.Data {
+	if g.hellfire {
+		return g.d1Data
+	}
+	return g.d1Classic
 }
 
 func (g *GameInstance) GetFactory() *common.Factory { return g.factory }

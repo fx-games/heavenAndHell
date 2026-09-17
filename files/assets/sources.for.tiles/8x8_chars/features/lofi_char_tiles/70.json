@@ -1,0 +1,62 @@
+{
+  "id": "lofi_char_tiles/70",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "rounded head with side bulges",
+      "blocky gray shape at upper right on shaft"
+    ],
+    "shape": [
+      "blue rounded head wider at sides",
+      "red points in face",
+      "white torso",
+      "gray block on brown shaft"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon raised at side"
+    ],
+    "colors": [
+      "bright blue head",
+      "bright red eyes",
+      "white body",
+      "gray weapon head"
+    ],
+    "major_regions": [
+      "blue head with red eyes",
+      "white tunic",
+      "gray block-headed weapon at upper right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "blue head could be blue skin or a blue hood",
+      "side bulges could be ears",
+      "red dots could be glowing eyes",
+      "gray block on shaft could be an axe or hammer"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "demon or blue-skinned monster humanoid",
+      "corrupted warrior",
+      "axe-wielding brute"
+    ],
+    "visual_symbols": [
+      "red eyes",
+      "axe or hammer",
+      "white tabard"
+    ],
+    "priority_features": [
+      "blue head with red eyes",
+      "gray block-headed weapon",
+      "white tunic"
+    ]
+  }
+}

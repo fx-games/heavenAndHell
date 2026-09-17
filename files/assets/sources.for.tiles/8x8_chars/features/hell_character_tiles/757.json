@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/757",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "rounded pale head",
+      "wide robed body",
+      "small side projections"
+    ],
+    "shape": [
+      "large pale head mass",
+      "wide purple lower mass",
+      "horizontal belt band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "pale cyan head",
+      "red eyes",
+      "purple body",
+      "dark red belt"
+    ],
+    "major_regions": [
+      "pale head with red eyes",
+      "purple robe",
+      "red belt with gray center"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "pale head could be a hood, bald head or ghostly face",
+      "red eyes suggest supernatural being",
+      "gray center could be a buckle"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "cultist",
+      "ghostly figure",
+      "undead mage",
+      "demon-possessed human"
+    ],
+    "visual_symbols": [
+      "glowing red eyes",
+      "robe",
+      "pale face"
+    ],
+    "priority_features": [
+      "glowing red eyes",
+      "pale cyan head",
+      "purple robe",
+      "belt band"
+    ]
+  }
+}

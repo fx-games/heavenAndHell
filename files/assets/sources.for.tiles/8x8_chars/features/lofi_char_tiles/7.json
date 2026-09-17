@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/7",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "helmet with white tip on top",
+      "gray bar upper right",
+      "two legs"
+    ],
+    "shape": [
+      "gray helmet with plume pixel",
+      "square face",
+      "dark armored body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding sword upright"
+    ],
+    "colors": [
+      "dark gray armor",
+      "medium gray helmet",
+      "yellow face",
+      "white top pixel",
+      "gray blade"
+    ],
+    "major_regions": [
+      "dark gray body",
+      "gray helmet",
+      "gray sword on right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "white top pixel could be a plume",
+      "gray bar could be a sword",
+      "dark body could be heavy armor"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "knight",
+      "dark soldier",
+      "guard"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "plume",
+      "sword",
+      "armor"
+    ],
+    "priority_features": [
+      "dark gray armor",
+      "helmet with plume",
+      "upright sword"
+    ]
+  }
+}

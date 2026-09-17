@@ -30,7 +30,7 @@ type NewGameScreen struct {
 }
 
 func (u *UIController) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string), back func()) {
-	s := &NewGameScreen{u: u, classes: u.context.Definitions.ClassDefinitions, start: start, back: back}
+	s := &NewGameScreen{u: u, classes: common.PlayableClasses(u.configuration, u.context.Definitions.ClassDefinitions), start: start, back: back}
 	s.name = NewTextInput(u, geometry.Point{}, 16, 0, 1, func(EndAction, string) {})
 	s.Layout()
 	u.PushWidget(s)

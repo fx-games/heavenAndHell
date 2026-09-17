@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/0",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "pointed cap on top",
+      "curved thin line along right side",
+      "two legs"
+    ],
+    "shape": [
+      "green cap tilted",
+      "square yellow face",
+      "tunic body",
+      "legs separated",
+      "curved vertical line right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding bow-like object"
+    ],
+    "colors": [
+      "green cap and tunic",
+      "yellow skin",
+      "brown belt",
+      "orange-brown curved line",
+      "transparent background"
+    ],
+    "major_regions": [
+      "green hat and tunic",
+      "yellow face with black eyes",
+      "brown curved object on right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "curved right line could be a bow",
+      "green cap could be a feathered hunter hat or hood"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "archer",
+      "ranger",
+      "elf"
+    ],
+    "visual_symbols": [
+      "bow",
+      "pointed cap",
+      "tunic"
+    ],
+    "priority_features": [
+      "green cap and tunic",
+      "bow on right",
+      "yellow face"
+    ]
+  }
+}

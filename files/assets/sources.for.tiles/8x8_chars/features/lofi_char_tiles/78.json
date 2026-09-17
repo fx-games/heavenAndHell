@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/78",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "square head",
+      "wide shoulders",
+      "two short legs"
+    ],
+    "shape": [
+      "square head mass",
+      "wide rectangular torso band",
+      "small side arm projections"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "blue head and limbs",
+      "gray top of head",
+      "green-olive torso",
+      "red eyes"
+    ],
+    "major_regions": [
+      "gray cap on blue head",
+      "two bright red eye pixels",
+      "olive green armor band",
+      "brown belt region with gray buckle"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "gray top could be a helmet or hair",
+      "red eyes suggest a monstrous face",
+      "olive band could be armor or tunic"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "humanoid monster",
+      "troll or orc",
+      "armored brute"
+    ],
+    "visual_symbols": [
+      "glowing red eyes",
+      "helmet",
+      "belt"
+    ],
+    "priority_features": [
+      "blue skin",
+      "red eyes",
+      "olive green armor band",
+      "blocky humanoid"
+    ]
+  }
+}

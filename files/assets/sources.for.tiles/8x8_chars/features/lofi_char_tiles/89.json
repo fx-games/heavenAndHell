@@ -1,0 +1,66 @@
+{
+  "id": "lofi_char_tiles/89",
+  "perceptual": {
+    "silhouette": [
+      "sparse fragmented silhouette",
+      "floating face region",
+      "belt band without visible body",
+      "separate feet pixels"
+    ],
+    "shape": [
+      "yellow face block",
+      "black eye band",
+      "orange horizontal belt",
+      "gray vertical item at right",
+      "two small feet"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "ambiguous"
+    ],
+    "colors": [
+      "mostly empty/white",
+      "yellow face",
+      "black eyes",
+      "orange belt and feet",
+      "gray object"
+    ],
+    "major_regions": [
+      "yellow face with black mask band",
+      "orange belt floating mid-height",
+      "gray object at right",
+      "orange feet at bottom"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "invisible or partially visible humanoid"
+    ],
+    "possible_features": [
+      "missing body could indicate invisibility or white clothing",
+      "black band could be a mask",
+      "gray vertical could be a dagger"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "invisible man",
+      "ghostly rogue",
+      "phantom thief"
+    ],
+    "visual_symbols": [
+      "mask",
+      "floating clothing pieces",
+      "dagger"
+    ],
+    "priority_features": [
+      "mostly absent body",
+      "yellow face with dark mask",
+      "floating orange belt"
+    ]
+  }
+}

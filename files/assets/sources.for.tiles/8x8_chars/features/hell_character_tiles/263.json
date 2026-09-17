@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/263",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "pointed light tips at top corners of head",
+      "gray blade-like shape at upper right",
+      "dark legs below"
+    ],
+    "shape": [
+      "green head",
+      "red wedge across lower face",
+      "dark lower body",
+      "tall thin right extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "green head and shoulders",
+      "bright red lower-face region",
+      "dark green lower body",
+      "gray blade at right"
+    ],
+    "major_regions": [
+      "green head with black eyes",
+      "red triangular cloth over mouth area",
+      "dark trousers",
+      "gray upright blade"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "white corner tips could be pointed ears",
+      "red wedge could be a scarf or bandana mask",
+      "gray shape could be a sword or dagger",
+      "orange pixel at left could be a hand"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin bandit",
+      "masked rogue",
+      "green-skinned humanoid"
+    ],
+    "visual_symbols": [
+      "pointed ears",
+      "face mask",
+      "sword"
+    ],
+    "priority_features": [
+      "red mask over lower face",
+      "green head with pointed ear tips",
+      "upright gray blade"
+    ]
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "id": "hell_character_tiles/380",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "bald head",
+      "gray block on left",
+      "brown shape at top right"
+    ],
+    "shape": [
+      "yellow head block",
+      "gray rectangular mass left",
+      "body with brown and gray bands",
+      "yellow bare legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding shield and weapon"
+    ],
+    "colors": [
+      "yellow skin",
+      "gray left block",
+      "brown straps",
+      "dark gray belt",
+      "brown top-right object"
+    ],
+    "major_regions": [
+      "bald yellow head",
+      "gray shield-like block",
+      "brown/gray belt region",
+      "bare yellow legs",
+      "brown shape right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "gray block could be a shield",
+      "brown top-right shape could be an axe or club",
+      "bare legs suggest minimal clothing"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "barbarian",
+      "warrior",
+      "brawler"
+    ],
+    "visual_symbols": [
+      "shield",
+      "axe or club",
+      "bald head"
+    ],
+    "priority_features": [
+      "bald head",
+      "gray shield on left",
+      "brown weapon on right",
+      "bare skin"
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "id": "hell_character_tiles/716",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "orange helmet with dark T slit",
+      "gray vertical bar at right edge",
+      "cyan body"
+    ],
+    "shape": [
+      "rounded helmet mass",
+      "rectangular cyan torso",
+      "thin blade-like extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding upright weapon at side"
+    ],
+    "colors": [
+      "orange head",
+      "cyan body",
+      "gray bar with brown hilt"
+    ],
+    "major_regions": [
+      "orange helmet with dark T-shaped visor",
+      "cyan torso and arms",
+      "gray sword-like bar at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "T-shaped dark mark could be a helmet visor",
+      "cyan body could be skin or cloth",
+      "gray bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "knight",
+      "helmeted warrior",
+      "humanoid monster"
+    ],
+    "visual_symbols": [
+      "T-visor helmet",
+      "sword"
+    ],
+    "priority_features": [
+      "orange T-visor helmet",
+      "cyan body",
+      "upright sword at right"
+    ]
+  }
+}

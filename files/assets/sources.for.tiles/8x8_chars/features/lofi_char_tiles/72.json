@@ -1,0 +1,62 @@
+{
+  "id": "lofi_char_tiles/72",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "enclosed helmet",
+      "gray shape at upper right"
+    ],
+    "shape": [
+      "dark gray helmet covering head",
+      "blue face with red points",
+      "white torso",
+      "gray block on right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding item raised at side"
+    ],
+    "colors": [
+      "dark gray helmet",
+      "blue face",
+      "bright red eyes",
+      "white body"
+    ],
+    "major_regions": [
+      "closed dark helmet with red eyes",
+      "blue face and hands",
+      "white tunic",
+      "gray weapon-like block at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "dark helmet framing face could be a closed helm",
+      "gray block could be an axe, hammer or shield edge",
+      "red dots could be glowing eyes"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "corrupted knight",
+      "demonic armored warrior",
+      "undead soldier"
+    ],
+    "visual_symbols": [
+      "closed helmet",
+      "red eyes",
+      "axe or hammer"
+    ],
+    "priority_features": [
+      "closed dark helmet",
+      "blue face with red eyes",
+      "gray weapon at upper right"
+    ]
+  }
+}

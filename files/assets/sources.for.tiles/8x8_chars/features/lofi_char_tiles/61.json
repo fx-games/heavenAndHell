@@ -1,0 +1,63 @@
+{
+  "id": "lofi_char_tiles/61",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "wide gray head covering",
+      "thin arc shape at right"
+    ],
+    "shape": [
+      "broad gray top mass",
+      "black face with red points",
+      "purple chest band",
+      "brown belt",
+      "thin brown arc"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding item at side"
+    ],
+    "colors": [
+      "gray head covering",
+      "black face",
+      "bright red eyes",
+      "dark purple body"
+    ],
+    "major_regions": [
+      "gray hood or helmet over black face",
+      "glowing red eyes",
+      "dark purple body",
+      "brown bow-like arc at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray top could be a hood, helmet or gray hair",
+      "red dots in black could be glowing eyes",
+      "brown arc could be a bow"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dark archer",
+      "shadow ranger",
+      "undead or wraith-like hooded figure"
+    ],
+    "visual_symbols": [
+      "hood or helmet",
+      "glowing red eyes",
+      "bow"
+    ],
+    "priority_features": [
+      "glowing red eyes in black face",
+      "gray hood",
+      "brown bow-like arc at side"
+    ]
+  }
+}

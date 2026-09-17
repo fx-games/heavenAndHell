@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/469",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "band across top of head"
+    ],
+    "shape": [
+      "square gray face",
+      "red top band",
+      "red rectangular body",
+      "orange belt"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "red headband and body",
+      "gray face",
+      "yellow-green eyes",
+      "orange belt"
+    ],
+    "major_regions": [
+      "red band over head",
+      "gray face with bright eyes",
+      "red body with orange belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red top band could be a headband or bandana",
+      "bright squares could be glowing eyes",
+      "red body could be a robe or gi"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "fighter or monk",
+      "bandit",
+      "gray-skinned humanoid"
+    ],
+    "visual_symbols": [
+      "headband",
+      "belt",
+      "glowing eyes"
+    ],
+    "priority_features": [
+      "red headband",
+      "red body",
+      "orange belt",
+      "glowing eyes"
+    ]
+  }
+}

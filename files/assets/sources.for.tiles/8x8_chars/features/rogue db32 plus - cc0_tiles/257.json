@@ -1,0 +1,64 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/257",
+  "perceptual": {
+    "silhouette": [
+      "squat symmetrical humanoid silhouette",
+      "rounded top",
+      "full-width shoulder row",
+      "two short legs"
+    ],
+    "shape": [
+      "rounded head mass",
+      "broad torso",
+      "blocky lower limbs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "pink and red dominant",
+      "gray and pale accents",
+      "dark eyes"
+    ],
+    "major_regions": [
+      "pink dome head with two dark eyes",
+      "gray shoulder blocks",
+      "red body with pale patches",
+      "red legs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "squat armored humanoid"
+    ],
+    "possible_features": [
+      "dome could be a hood or helmet",
+      "dark pixels could be eyes",
+      "gray side blocks could be pauldrons or arms",
+      "red-pink body could be robes or flesh"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "armored creature",
+      "golem",
+      "hooded cultist",
+      "flesh construct"
+    ],
+    "visual_symbols": [
+      "hood or helmet",
+      "dark eyes",
+      "shoulder pads"
+    ],
+    "priority_features": [
+      "rounded head with two dark eyes",
+      "wide shoulders",
+      "symmetrical squat body",
+      "pink-red coloring"
+    ]
+  }
+}

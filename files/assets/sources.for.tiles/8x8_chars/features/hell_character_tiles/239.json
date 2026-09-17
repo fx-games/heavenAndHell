@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/239",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "helmet-like head",
+      "gray blade right",
+      "small feet"
+    ],
+    "shape": [
+      "square head",
+      "banded body",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon"
+    ],
+    "colors": [
+      "yellow helmet and lower body",
+      "red face with black eyes",
+      "orange-red belt with gray buckle",
+      "gray blade"
+    ],
+    "major_regions": [
+      "yellow helmet over red face",
+      "black eye dots",
+      "belt with buckle",
+      "yellow skirt",
+      "gray sword at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red face could be demonic skin",
+      "yellow top could be a helmet",
+      "gray bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "demon warrior",
+      "red-skinned fighter"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "red face",
+      "sword"
+    ],
+    "priority_features": [
+      "red face under yellow helmet",
+      "gray sword right",
+      "belted tunic"
+    ]
+  }
+}

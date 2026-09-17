@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/153",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "large dark shapes flanking top",
+   "arms and legs spread"
+  ],
+  "shape": [
+   "blue head",
+   "black side masses at upper corners",
+   "red rectangular torso",
+   "small blue limbs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms spread"
+  ],
+  "colors": [
+   "blue skin",
+   "red body",
+   "black upper side shapes",
+   "red eyes"
+  ],
+  "major_regions": [
+   "blue head with red eyes",
+   "black masses at upper left and right",
+   "red torso",
+   "blue hands and feet"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "winged humanoid"
+  ],
+  "possible_features": [
+   "black masses could be wings, hood or horns",
+   "red eyes suggest a hostile or glowing gaze"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "demon",
+   "imp",
+   "blue-skinned monster"
+  ],
+  "visual_symbols": [
+   "glowing red eyes",
+   "dark wings or hood"
+  ],
+  "priority_features": [
+   "blue head with red eyes",
+   "red torso",
+   "black flanking shapes at top"
+  ]
+ }
+}

@@ -1,0 +1,58 @@
+{
+  "id": "lofi_char_tiles/196",
+  "perceptual": {
+    "silhouette": [
+      "coiled curved silhouette",
+      "S or C shaped curve",
+      "head at top right",
+      "tail tip lower left"
+    ],
+    "shape": [
+      "thick curved band",
+      "rounded head end",
+      "horizontal lower body segment"
+    ],
+    "orientation": [
+      "side-facing",
+      "facing right"
+    ],
+    "pose": [
+      "coiled"
+    ],
+    "colors": [
+      "mostly purple",
+      "darker purple tail tip",
+      "two black eyes"
+    ],
+    "major_regions": [
+      "purple coiled body",
+      "head with black eyes at top right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "serpentine"
+    ],
+    "possible_features": [
+      "curved band suggests a snake or worm body",
+      "black squares read as eyes",
+      "no limbs"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "snake",
+      "worm",
+      "serpent"
+    ],
+    "visual_symbols": [
+      "coiled body",
+      "eyes"
+    ],
+    "priority_features": [
+      "S-shaped coiled body",
+      "head with two eyes top right",
+      "no limbs"
+    ]
+  }
+}

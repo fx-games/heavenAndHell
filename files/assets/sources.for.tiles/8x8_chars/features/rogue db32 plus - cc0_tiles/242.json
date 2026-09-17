@@ -1,0 +1,64 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/242",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "two white upward points at top corners",
+   "wide head",
+   "thin arms out",
+   "narrow segmented body"
+  ],
+  "shape": [
+   "broad head mass",
+   "two white corner protrusions",
+   "checkered narrow torso",
+   "thin limbs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms slightly out"
+  ],
+  "colors": [
+   "light blue body",
+   "white top points",
+   "dark maroon eyes",
+   "dark blue and teal torso pattern"
+  ],
+  "major_regions": [
+   "blue head with dark eyes",
+   "white horn-like points",
+   "blue patterned body"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "white corner points could be horns",
+   "blue coloring could suggest ice or water"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "demon",
+   "imp",
+   "ice devil"
+  ],
+  "visual_symbols": [
+   "horns",
+   "dark eyes",
+   "patterned torso"
+  ],
+  "priority_features": [
+   "two white horns",
+   "light blue head",
+   "dark eyes",
+   "thin patterned body"
+  ]
+ }
+}

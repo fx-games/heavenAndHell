@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/369",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "wide flat-topped head covering",
+      "gray bar at right"
+    ],
+    "shape": [
+      "wide brim-like block over head",
+      "face block",
+      "dark body with brown band",
+      "gray blade"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "mostly brown",
+      "yellow face",
+      "dark gray body",
+      "gray vertical bar"
+    ],
+    "major_regions": [
+      "brown wide hat over face",
+      "brown horizontal band across body",
+      "dark clothing",
+      "gray bar right",
+      "brown boots"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "wide brown top could be a brimmed hat",
+      "gray bar could be a sword",
+      "brown bands could be straps or belt"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "rogue",
+      "adventurer",
+      "hunter"
+    ],
+    "visual_symbols": [
+      "brimmed hat",
+      "blade",
+      "belt"
+    ],
+    "priority_features": [
+      "wide brown hat",
+      "gray blade on right",
+      "dark clothes with brown bands"
+    ]
+  }
+}

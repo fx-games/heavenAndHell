@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/783",
+  "perceptual": {
+    "silhouette": [
+      "robed humanoid silhouette",
+      "head with top accent",
+      "wide robe",
+      "thin brown pole at right"
+    ],
+    "shape": [
+      "ochre head mass with teal forehead mark",
+      "teal robe mass",
+      "dark vertical line down robe center",
+      "vertical pole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "ochre head",
+      "teal forehead mark",
+      "green face pixel",
+      "teal robe"
+    ],
+    "major_regions": [
+      "ochre hood with teal gem",
+      "teal robe with dark seam",
+      "staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "teal forehead pixel could be a gem or circlet",
+      "dark center line could be robe opening",
+      "ochre top could be hood or hair"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mage",
+      "mystic",
+      "sorcerer"
+    ],
+    "visual_symbols": [
+      "forehead gem",
+      "staff",
+      "robe"
+    ],
+    "priority_features": [
+      "teal robe",
+      "forehead gem",
+      "ochre head",
+      "staff at right"
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/407",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large square head filling upper half",
+      "vertical bar along right edge",
+      "two short legs at bottom"
+    ],
+    "shape": [
+      "large rounded-square head",
+      "horizontal banded torso",
+      "thin vertical gray strip on right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding item upright at side"
+    ],
+    "colors": [
+      "yellow head and hands",
+      "yellow and orange torso bands",
+      "olive lower body",
+      "gray vertical accent"
+    ],
+    "major_regions": [
+      "big pale-yellow bald head with two dark eyes",
+      "striped belt region",
+      "gray blade-like strip right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "gray vertical strip could be a sword or blade",
+      "bands could be a belt or sash",
+      "hairless head could be bald or a simple face"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "human warrior",
+      "villager or peasant fighter",
+      "chibi adventurer"
+    ],
+    "visual_symbols": [
+      "upright blade",
+      "belt",
+      "big head"
+    ],
+    "priority_features": [
+      "oversized yellow head",
+      "gray vertical weapon on right",
+      "horizontal belt bands"
+    ]
+  }
+}

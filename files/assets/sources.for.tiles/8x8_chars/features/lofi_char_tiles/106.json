@@ -1,0 +1,59 @@
+{
+  "id": "lofi_char_tiles/106",
+  "perceptual": {
+    "silhouette": [
+      "faint sparse silhouette",
+      "scattered gray blocks",
+      "dark eyes near top"
+    ],
+    "shape": [
+      "broken gray fragments",
+      "two black eye pixels",
+      "irregular limb-like patches"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "ambiguous"
+    ],
+    "colors": [
+      "mostly white/light",
+      "mid gray patches",
+      "black eyes"
+    ],
+    "major_regions": [
+      "pale body largely empty",
+      "gray fragments forming outline",
+      "black eyes in upper center"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "ghostly",
+      "amorphous"
+    ],
+    "possible_features": [
+      "fragmented gray could be a fading spirit or dust",
+      "black pixels could be eyes"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ghost",
+      "dust spirit",
+      "wisp",
+      "phantom"
+    ],
+    "visual_symbols": [
+      "dark eyes",
+      "fragmented body"
+    ],
+    "priority_features": [
+      "mostly empty pale body",
+      "black eyes",
+      "scattered gray fragments"
+    ]
+  }
+}

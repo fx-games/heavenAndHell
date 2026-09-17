@@ -43,6 +43,7 @@ type saveGame struct {
 	Portal         *common.D1Portal
 	Golem          *common.SavedGolem // the golem follows the hero (onD1MapChanged)
 	ManaShield     bool
+	D1Only         bool // played without Hellfire; false for saves from before the toggle
 }
 
 func HasSave() bool {
@@ -67,7 +68,7 @@ func (g *GameInstance) SaveGame() {
 		UniqueDropped: g.factory.D1().UniqueDropped, Flags: g.state.GetFlags().AllEntries(),
 		Map: g.state.GetMap().GetName(), X: pos.X, Y: pos.Y, Levels: map[string]*common.LevelSnapshot{},
 		Deepest: g.state.GetLastDungeonLevel(), Premium: g.premium, Boy: g.boyItem, BoyLevel: g.boyLevel, Portal: g.state.D1Portal(),
-		ManaShield: player.HasStatusEffect(common.StatusManaShield),
+		ManaShield: player.HasStatusEffect(common.StatusManaShield), D1Only: !g.hellfire,
 	}
 	if golem := common.D1Golem(g.state.GetMap()); golem != nil {
 		saved := common.SaveD1Golem(golem)
@@ -134,6 +135,10 @@ func (g *GameInstance) LoadGame() error {
 	if sg.Female {
 		class.Icon = defs.FemaleIconByClass[class.InternalName]
 	}
+	g.hellfire = !sg.D1Only || g.configuration.Hellfire // turning Hellfire on upgrades a D1 save, never back
+	if sg.D1Only && g.hellfire {                        // Hellfire rolls levels 1-16 differently: the snapshots wouldn't fit, start over in town
+		sg.Levels, sg.Portal, sg.Map = nil, nil, string(defs.LevelNameTown)
+	}
 	g.resetGame(class, sg.Seed)
 	g.permadeath = sg.Permadeath
 
@@ -142,9 +147,7 @@ func (g *GameInstance) LoadGame() error {
 		player.SetName(sg.Name)
 	}
 	*player.Hero() = sg.Hero
-	if gen := g.factory.D1(); len(sg.UniqueDropped) == len(gen.UniqueDropped) {
-		copy(gen.UniqueDropped, sg.UniqueDropped)
-	}
+	copy(g.factory.D1().UniqueDropped, sg.UniqueDropped) // Hellfire's uniques come after D1's
 	for k, v := range sg.Flags {
 		g.state.GetFlags().SetToValue(k, v)
 	}
@@ -208,6 +211,7 @@ func (g *GameInstance) LoadGame() error {
 // NewGame starts a fresh game and enables autosaving.
 func (g *GameInstance) NewGame(class defs.LoadoutDefinition, permadeath bool, name string) {
 	g.autosave = false
+	g.hellfire = g.configuration.Hellfire
 	g.resetGame(class, g.randomSource.Int63())
 	if name != "" {
 		g.state.GetPlayer().SetName(name)
@@ -242,7 +246,8 @@ func (g *GameInstance) StartMenuItems(afterDeath bool) []util.MenuItem {
 	if afterDeath {
 		back = g.uiController.ShowGameOverMenu
 	}
-	return append(items, util.MenuItem{MainText: "New game", Action: func() { g.uiController.OpenNewGameScreen(g.NewGame, back) }})
+	return append(items, util.MenuItem{MainText: "New game", Action: func() { g.uiController.OpenNewGameScreen(g.NewGame, back) }},
+		common.HellfireSetting(g.configuration, back))
 }
 
 // ShowStartMenu opens Continue/New game when a save exists; without one the default game autosaves right away.

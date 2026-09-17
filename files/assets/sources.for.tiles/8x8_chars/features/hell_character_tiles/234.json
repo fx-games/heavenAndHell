@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/234",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large rounded head",
+      "brown pole at right"
+    ],
+    "shape": [
+      "large square head",
+      "banded body",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "red head",
+      "black eye dots",
+      "yellow body",
+      "orange belt",
+      "brown pole"
+    ],
+    "major_regions": [
+      "red face/head with black eyes",
+      "yellow robe",
+      "orange belt",
+      "red hand pixels at sides",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red head could be demonic skin or a red mask",
+      "right bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "demon",
+      "imp",
+      "red-skinned monk"
+    ],
+    "visual_symbols": [
+      "red face",
+      "hollow eyes",
+      "staff",
+      "robe"
+    ],
+    "priority_features": [
+      "red head with black eyes",
+      "yellow robe",
+      "staff on right"
+    ]
+  }
+}

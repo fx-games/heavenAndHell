@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/443",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with top points",
+      "gray block left",
+      "orange mass on upper right"
+    ],
+    "shape": [
+      "square head",
+      "gray rectangle left",
+      "orange L-shaped region right",
+      "gray torso band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "shield held"
+    ],
+    "colors": [
+      "blue skin",
+      "gray block",
+      "orange accents",
+      "dark gray body"
+    ],
+    "major_regions": [
+      "blue horned face",
+      "gray shield-like block",
+      "orange hair or cape at right",
+      "orange belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "gray block could be a shield",
+      "orange region could be hair, cape or weapon",
+      "top points could be horns"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "blue demon warrior",
+      "horned soldier"
+    ],
+    "visual_symbols": [
+      "shield",
+      "horns",
+      "orange cloak or hair"
+    ],
+    "priority_features": [
+      "blue horned head",
+      "gray shield on left",
+      "orange region on right"
+    ]
+  }
+}

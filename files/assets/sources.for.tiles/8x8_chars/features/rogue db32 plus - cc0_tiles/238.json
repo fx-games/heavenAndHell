@@ -1,0 +1,67 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/238",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "very large wide head",
+   "brown vertical pole at right",
+   "bright shoulders"
+  ],
+  "shape": [
+   "large squarish head",
+   "white band at lower face",
+   "lime-green shoulder band",
+   "olive torso",
+   "thin brown line right"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding upright pole"
+  ],
+  "colors": [
+   "tan skin",
+   "dark eyes",
+   "white beard/mouth",
+   "lime green shoulders",
+   "olive tunic",
+   "brown staff"
+  ],
+  "major_regions": [
+   "large tan head",
+   "white beard band",
+   "lime and olive body",
+   "brown staff at right"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "white band could be a beard",
+   "vertical brown line could be a staff or spear"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "dwarf",
+   "bearded humanoid",
+   "hermit or druid"
+  ],
+  "visual_symbols": [
+   "beard",
+   "staff",
+   "big head"
+  ],
+  "priority_features": [
+   "large tan head",
+   "white beard",
+   "brown staff at right",
+   "green shoulders"
+  ]
+ }
+}

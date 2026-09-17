@@ -1,0 +1,59 @@
+{
+  "id": "lofi_char_tiles/105",
+  "perceptual": {
+    "silhouette": [
+      "dark silhouette with small head",
+      "wide flaring base",
+      "short side projections"
+    ],
+    "shape": [
+      "black head mass",
+      "black body widening toward bottom",
+      "small arm nubs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "hovering",
+      "ambiguous"
+    ],
+    "colors": [
+      "mostly black",
+      "red eyes"
+    ],
+    "major_regions": [
+      "solid black cloaked shape",
+      "two red eye squares"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed",
+      "amorphous"
+    ],
+    "possible_features": [
+      "widening base could be a cloak or robe",
+      "red eyes suggest a malevolent spirit"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "wraith",
+      "shadow",
+      "reaper",
+      "dark spirit"
+    ],
+    "visual_symbols": [
+      "glowing red eyes",
+      "cloak"
+    ],
+    "priority_features": [
+      "solid black cloaked shape",
+      "red eyes",
+      "flared base"
+    ]
+  }
+}

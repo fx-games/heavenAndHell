@@ -1,0 +1,63 @@
+{
+  "id": "lofi_char_tiles/84",
+  "perceptual": {
+    "silhouette": [
+      "blocky square-bodied silhouette",
+      "two thin upward protrusions",
+      "short stubby legs"
+    ],
+    "shape": [
+      "large square body",
+      "two small light spikes on top",
+      "wide horizontal band at lower middle",
+      "small side nubs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "mostly lime green",
+      "white/light gray top spikes",
+      "black eyes",
+      "brown band with red and gray"
+    ],
+    "major_regions": [
+      "lime green head-body block",
+      "two black eye squares",
+      "white horn-like points",
+      "brown belt with red and gray accents"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "squat bipedal"
+    ],
+    "possible_features": [
+      "top spikes could be horns",
+      "band could be a belt",
+      "no distinct neck suggests a blob-like body"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin",
+      "small monster",
+      "horned imp"
+    ],
+    "visual_symbols": [
+      "horns",
+      "belt",
+      "large eyes"
+    ],
+    "priority_features": [
+      "lime green blocky body",
+      "white horns",
+      "black eyes",
+      "brown belt"
+    ]
+  }
+}

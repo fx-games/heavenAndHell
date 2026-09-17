@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/430",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with top points",
+      "orange-brown vertical bar right"
+    ],
+    "shape": [
+      "square head",
+      "green bare-looking torso",
+      "red horizontal band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole"
+    ],
+    "colors": [
+      "mostly bright green",
+      "red belt",
+      "orange-brown pole"
+    ],
+    "major_regions": [
+      "green head and body merging together",
+      "red belt band",
+      "orange-brown staff strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "uniform green could be bare skin",
+      "top points could be horns",
+      "vertical bar could be a club or staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin",
+      "orc brute",
+      "savage"
+    ],
+    "visual_symbols": [
+      "bare green skin",
+      "belt",
+      "staff or club"
+    ],
+    "priority_features": [
+      "all-green body",
+      "red belt",
+      "orange pole on right",
+      "small horns"
+    ]
+  }
+}

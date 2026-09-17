@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/301",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "white top with red band",
+      "dark area at right"
+    ],
+    "shape": [
+      "red headband",
+      "gray face",
+      "orange waist stripe",
+      "red body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "red headband and robe",
+      "gray face",
+      "white hair",
+      "orange belt"
+    ],
+    "major_regions": [
+      "white hair above red band",
+      "gray face with black eyes",
+      "red robe",
+      "orange belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "red band could be a headband",
+      "gray face could be pale or undead skin",
+      "white top could be hair"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "monk",
+      "fire mage",
+      "pale cultist"
+    ],
+    "visual_symbols": [
+      "headband",
+      "robe",
+      "belt"
+    ],
+    "priority_features": [
+      "red headband",
+      "red robe",
+      "gray face",
+      "orange belt"
+    ]
+  }
+}

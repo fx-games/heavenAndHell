@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/382",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "bald head",
+      "vertical line on right"
+    ],
+    "shape": [
+      "yellow head block",
+      "robe body",
+      "brown band with gray center",
+      "thin pole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole at side"
+    ],
+    "colors": [
+      "yellow head",
+      "dark blue robe",
+      "brown belt",
+      "brown vertical line"
+    ],
+    "major_regions": [
+      "bald head",
+      "dark blue robe",
+      "brown belt with buckle",
+      "brown pole right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "bare head could be bald",
+      "brown line could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "unhooded mage",
+      "monk",
+      "robed human"
+    ],
+    "visual_symbols": [
+      "bald head",
+      "staff",
+      "belt"
+    ],
+    "priority_features": [
+      "bald head",
+      "dark blue robe",
+      "staff on right"
+    ]
+  }
+}

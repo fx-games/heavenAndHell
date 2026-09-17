@@ -1,0 +1,66 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/229",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "brown cap-like top",
+   "pale vertical shape at right",
+   "blue feet"
+  ],
+  "shape": [
+   "wide head with brown top",
+   "purple torso block",
+   "light blue strip right",
+   "blue foot blocks"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding upright weapon"
+  ],
+  "colors": [
+   "green skin",
+   "brown top",
+   "white eyes",
+   "purple torso",
+   "pale blue weapon"
+  ],
+  "major_regions": [
+   "brown hair/hood",
+   "green face with white eyes",
+   "purple tunic",
+   "pale blade at right"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "brown top could be hair or hood",
+   "pale strip could be a sword or dagger",
+   "side brown pixels could be ears"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "goblin",
+   "orc warrior",
+   "green-skinned humanoid"
+  ],
+  "visual_symbols": [
+   "blade",
+   "white eyes",
+   "hood or hair"
+  ],
+  "priority_features": [
+   "green face with brown top",
+   "pale blade at right",
+   "purple tunic",
+   "blue feet"
+  ]
+ }
+}

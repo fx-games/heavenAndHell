@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/787",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "hooded head",
+      "green banded body",
+      "thin reddish-brown bar at right"
+    ],
+    "shape": [
+      "bright green hood framing ochre face",
+      "green horizontal bands",
+      "red belt band with gray center",
+      "thin vertical bar"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding long object"
+    ],
+    "colors": [
+      "bright green hood and tunic",
+      "ochre face",
+      "dark eyes",
+      "red belt",
+      "brown bar"
+    ],
+    "major_regions": [
+      "green hood over ochre face",
+      "green tunic",
+      "red belt",
+      "bow or pole at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "green top could be a hood",
+      "right bar could be a bow or staff",
+      "gold side pixels could be hands"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ranger",
+      "archer",
+      "woodsman"
+    ],
+    "visual_symbols": [
+      "hood",
+      "bow or staff",
+      "tunic"
+    ],
+    "priority_features": [
+      "bright green hood",
+      "green tunic",
+      "brown bar at right",
+      "red belt"
+    ]
+  }
+}

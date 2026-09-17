@@ -1,0 +1,64 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/241",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "two white upward points at top corners",
+   "wide head",
+   "thin arms out",
+   "narrow segmented body"
+  ],
+  "shape": [
+   "broad head mass",
+   "two white corner protrusions",
+   "checkered narrow torso",
+   "thin limbs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms slightly out"
+  ],
+  "colors": [
+   "bright green body",
+   "white top points",
+   "dark maroon eyes",
+   "dark green checker torso"
+  ],
+  "major_regions": [
+   "green head with dark eyes",
+   "white horn-like points",
+   "checkered green body"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "white corner points could be horns",
+   "checker pattern could be ribs or scales"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "demon",
+   "imp",
+   "goblin devil"
+  ],
+  "visual_symbols": [
+   "horns",
+   "dark eyes",
+   "patterned torso"
+  ],
+  "priority_features": [
+   "two white horns",
+   "green head",
+   "dark eyes",
+   "thin patterned body"
+  ]
+ }
+}

@@ -1,0 +1,59 @@
+{
+ "id": "lofi_char_tiles/160",
+ "perceptual": {
+  "silhouette": [
+   "blocky rectangular humanoid silhouette",
+   "no distinct neck",
+   "short block arms at sides",
+   "two stubby legs"
+  ],
+  "shape": [
+   "tall gray rectangular body",
+   "square arm blocks",
+   "small leg blocks"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "mostly medium gray",
+   "darker gray limbs",
+   "black eyes"
+  ],
+  "major_regions": [
+   "large gray body-head block with two dark eyes",
+   "darker gray arm blocks",
+   "dark gray feet"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "construct"
+  ],
+  "possible_features": [
+   "blocky undivided body could be a stone golem",
+   "square limbs suggest heavy construct"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "golem",
+   "stone construct",
+   "statue creature"
+  ],
+  "visual_symbols": [
+   "blocky body",
+   "two small eyes"
+  ],
+  "priority_features": [
+   "single rectangular gray body",
+   "stubby block arms",
+   "two dark eyes",
+   "no neck"
+  ]
+ }
+}

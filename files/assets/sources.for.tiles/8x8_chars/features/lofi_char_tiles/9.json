@@ -1,0 +1,63 @@
+{
+  "id": "lofi_char_tiles/9",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "enclosed helmet with spike/crest pixel",
+      "full-height pole on right"
+    ],
+    "shape": [
+      "red dome helm",
+      "T-shaped black visor",
+      "armored torso",
+      "long vertical line"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding spear"
+    ],
+    "colors": [
+      "red helmet and armor",
+      "black visor",
+      "dark gray pole",
+      "pink highlight on body"
+    ],
+    "major_regions": [
+      "red helm with T visor",
+      "red armored body",
+      "dark pole"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "T-shaped black area could be a visor",
+      "side pixel on helm could be a crest",
+      "pole could be a spear"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "red knight",
+      "royal guard",
+      "armored soldier"
+    ],
+    "visual_symbols": [
+      "great helm",
+      "T visor",
+      "spear",
+      "red armor"
+    ],
+    "priority_features": [
+      "red full armor",
+      "T-shaped visor",
+      "full-height spear"
+    ]
+  }
+}

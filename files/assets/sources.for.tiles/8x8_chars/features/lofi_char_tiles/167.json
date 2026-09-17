@@ -1,0 +1,57 @@
+{
+ "id": "lofi_char_tiles/167",
+ "perceptual": {
+  "silhouette": [
+   "blocky rectangular humanoid silhouette",
+   "slightly narrowed top",
+   "short block arms",
+   "two stubby legs"
+  ],
+  "shape": [
+   "tall magenta body",
+   "square arm blocks",
+   "small leg blocks"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "bright magenta body",
+   "darker purple eyes and limbs",
+   "dark pixel between feet"
+  ],
+  "major_regions": [
+   "magenta body with two dark purple eyes",
+   "darker purple arm blocks and feet"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "construct"
+  ],
+  "possible_features": [
+   "vivid magenta body could indicate crystal, magic or flesh golem",
+   "blocky form suggests golem"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "golem",
+   "magical construct",
+   "arcane elemental"
+  ],
+  "visual_symbols": [
+   "blocky body",
+   "two small eyes"
+  ],
+  "priority_features": [
+   "magenta blocky body",
+   "stubby block arms",
+   "low-contrast eyes"
+  ]
+ }
+}

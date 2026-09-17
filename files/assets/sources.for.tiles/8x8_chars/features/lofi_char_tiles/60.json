@@ -1,0 +1,61 @@
+{
+  "id": "lofi_char_tiles/60",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "wide dark head covering",
+      "tall pole with light tip at right"
+    ],
+    "shape": [
+      "broad dark purple top mass",
+      "black face band with red points",
+      "purple torso",
+      "long brown shaft with gray top"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole upright"
+    ],
+    "colors": [
+      "mostly dark purple",
+      "black face",
+      "bright red eyes",
+      "brown shaft"
+    ],
+    "major_regions": [
+      "dark hood over shadowed face",
+      "glowing red eyes",
+      "purple body with brown belt",
+      "brown spear-like pole at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red dots could be glowing eyes under a hood",
+      "pole with gray tip could be a spear, scythe shaft or staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dark hooded figure",
+      "shadow spearman",
+      "cultist or wraith-like being"
+    ],
+    "visual_symbols": [
+      "hood",
+      "glowing red eyes",
+      "spear"
+    ],
+    "priority_features": [
+      "glowing red eyes in black face",
+      "dark purple hood",
+      "upright spear-like pole"
+    ]
+  }
+}

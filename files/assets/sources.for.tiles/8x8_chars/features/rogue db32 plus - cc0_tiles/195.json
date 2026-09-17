@@ -1,0 +1,64 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/195",
+  "perceptual": {
+    "silhouette": [
+      "bird-like silhouette with long neck",
+      "head raised high at upper right",
+      "wide rounded body",
+      "legs below"
+    ],
+    "shape": [
+      "wide rounded body mass",
+      "narrow neck",
+      "small head",
+      "yellow bill-like point"
+    ],
+    "orientation": [
+      "facing right"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "mostly white",
+      "yellow bill",
+      "pale blue shading",
+      "orange/brown legs"
+    ],
+    "major_regions": [
+      "white body and neck",
+      "yellow bill at top right",
+      "pale blue belly shading",
+      "orange feet"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "avian",
+      "waterfowl-like"
+    ],
+    "possible_features": [
+      "yellow point could be a bill",
+      "long neck could suggest goose or swan",
+      "light blue pixels could be wing shading"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goose",
+      "duck",
+      "swan",
+      "white bird"
+    ],
+    "visual_symbols": [
+      "bill",
+      "long neck",
+      "white plumage"
+    ],
+    "priority_features": [
+      "white body",
+      "raised neck and head",
+      "yellow bill"
+    ]
+  }
+}

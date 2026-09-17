@@ -1,0 +1,58 @@
+{
+  "id": "lofi_char_tiles/201",
+  "perceptual": {
+    "silhouette": [
+      "dome-topped silhouette",
+      "many thin vertical strands hanging below"
+    ],
+    "shape": [
+      "wide rounded upper mass",
+      "irregular thin leg-like strips"
+    ],
+    "orientation": [
+      "front-facing",
+      "slightly turned right"
+    ],
+    "pose": [
+      "standing",
+      "dangling legs"
+    ],
+    "colors": [
+      "mostly dark red",
+      "two yellow-olive eye pixels"
+    ],
+    "major_regions": [
+      "red dome body",
+      "hanging legs",
+      "yellow eyes"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "multi-legged",
+      "arachnid-like",
+      "tentacled"
+    ],
+    "possible_features": [
+      "strips could be legs or tentacles",
+      "yellow pixels could be eyes"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "spider",
+      "octopus",
+      "squid-like creature"
+    ],
+    "visual_symbols": [
+      "many legs",
+      "eyes",
+      "dome body"
+    ],
+    "priority_features": [
+      "red dome body",
+      "many hanging legs",
+      "two yellow eyes"
+    ]
+  }
+}

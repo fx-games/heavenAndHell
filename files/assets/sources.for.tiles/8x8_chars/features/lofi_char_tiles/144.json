@@ -1,0 +1,62 @@
+{
+ "id": "lofi_char_tiles/144",
+ "perceptual": {
+  "silhouette": [
+   "narrow tapering silhouette",
+   "wide dark shapes flanking top",
+   "thin dangling lower extensions"
+  ],
+  "shape": [
+   "red central head-body column",
+   "two large black side masses at top",
+   "narrow lower body",
+   "thin leg-like strands"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "hovering or standing",
+   "ambiguous"
+  ],
+  "colors": [
+   "red body",
+   "black upper side shapes",
+   "bright yellow eyes"
+  ],
+  "major_regions": [
+   "red head with two yellow eyes",
+   "black masses at upper left and right",
+   "thin red lower appendages"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "winged creature",
+   "tentacled creature"
+  ],
+  "possible_features": [
+   "black side masses could be wings, hood or horns",
+   "yellow eyes suggest glowing gaze",
+   "thin lower strands could be legs or tentacles"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "demon",
+   "imp",
+   "fiery spirit"
+  ],
+  "visual_symbols": [
+   "glowing eyes",
+   "dark wings"
+  ],
+  "priority_features": [
+   "red body",
+   "two yellow glowing eyes",
+   "black flanking shapes at top",
+   "thin tapering lower body"
+  ]
+ }
+}

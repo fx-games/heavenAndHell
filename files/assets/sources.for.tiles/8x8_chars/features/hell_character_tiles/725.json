@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/725",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "dome-shaped head",
+      "gray vertical bar at right edge",
+      "red triangular shape over face"
+    ],
+    "shape": [
+      "rounded cyan head-body mass",
+      "red downward triangle",
+      "thin blade-like extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding upright weapon at side"
+    ],
+    "colors": [
+      "cyan body",
+      "red central region",
+      "white eyes",
+      "gray bar"
+    ],
+    "major_regions": [
+      "cyan head with white eyes above red mask",
+      "cyan body",
+      "gray sword with brown hilt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "blob-like humanoid"
+    ],
+    "possible_features": [
+      "red triangle could be a bandana, mask or scarf",
+      "gray bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "bandit",
+      "masked humanoid monster",
+      "assassin"
+    ],
+    "visual_symbols": [
+      "face mask",
+      "sword",
+      "glowing eyes"
+    ],
+    "priority_features": [
+      "red mask over lower face",
+      "cyan body with white eyes",
+      "sword at right"
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/210",
+  "perceptual": {
+    "silhouette": [
+      "low horizontal silhouette",
+      "wide flat body",
+      "curved upward projection at left end",
+      "small raised bump at right"
+    ],
+    "shape": [
+      "flat elongated body mass",
+      "white curved hook shape at upper left",
+      "small head region at right"
+    ],
+    "orientation": [
+      "facing right"
+    ],
+    "pose": [
+      "crawling",
+      "low stance"
+    ],
+    "colors": [
+      "mostly gray",
+      "white hook-like projection",
+      "yellow, red and yellow accents at right end"
+    ],
+    "major_regions": [
+      "gray flat body",
+      "white curved shape at left",
+      "yellow and red pixels at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "arthropod",
+      "scorpion-like",
+      "slug-like"
+    ],
+    "possible_features": [
+      "white hook could be a stinger tail",
+      "colored pixels at right could be head, eye or claws"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "scorpion",
+      "slug",
+      "crawling vermin"
+    ],
+    "visual_symbols": [
+      "curled tail",
+      "low body"
+    ],
+    "priority_features": [
+      "low flat gray body",
+      "white hooked tail at left",
+      "colorful head pixels at right"
+    ]
+  }
+}

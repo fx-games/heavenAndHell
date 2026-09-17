@@ -1,0 +1,62 @@
+{
+  "id": "lofi_char_tiles/74",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "rounded helmet",
+      "broad gray body",
+      "small dark block at lower right"
+    ],
+    "shape": [
+      "dark gray helmet",
+      "dark face with red points",
+      "large gray torso",
+      "gray right-side mass"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding item at side"
+    ],
+    "colors": [
+      "mostly gray",
+      "dark face",
+      "bright red eyes",
+      "brown hand accents"
+    ],
+    "major_regions": [
+      "dark helmet with red eyes",
+      "gray armored torso",
+      "gray shield or weapon-like shape at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "overall gray body could be full plate armor",
+      "red dots in dark face could be glowing eyes in a visor",
+      "gray right-side mass could be a shield or weapon"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dark armored knight",
+      "animated armor",
+      "death knight-like warrior"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "red eyes",
+      "plate armor"
+    ],
+    "priority_features": [
+      "full gray armor",
+      "red eyes in dark helmet",
+      "bulky armored body"
+    ]
+  }
+}

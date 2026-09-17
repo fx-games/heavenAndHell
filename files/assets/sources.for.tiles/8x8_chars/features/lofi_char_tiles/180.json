@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/180",
+  "perceptual": {
+    "silhouette": [
+      "round orb silhouette",
+      "narrowing lower edge",
+      "bumpy top"
+    ],
+    "shape": [
+      "round crimson mass",
+      "pink arc across top",
+      "light blue oval spot in center"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "floating",
+      "static"
+    ],
+    "colors": [
+      "mostly red",
+      "pink upper band",
+      "light blue center with white surround"
+    ],
+    "major_regions": [
+      "red lower sphere",
+      "pink upper arc",
+      "blue-white central eye"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "floating eye",
+      "amorphous orb"
+    ],
+    "possible_features": [
+      "central blue spot could be an iris",
+      "pink arc could be an eyelid or brain-like top",
+      "red could be flesh"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "floating eyeball",
+      "flesh orb",
+      "beholder-like creature"
+    ],
+    "visual_symbols": [
+      "eye",
+      "round fleshy body"
+    ],
+    "priority_features": [
+      "round red body",
+      "central blue eye",
+      "pink upper arc",
+      "no limbs"
+    ]
+  }
+}

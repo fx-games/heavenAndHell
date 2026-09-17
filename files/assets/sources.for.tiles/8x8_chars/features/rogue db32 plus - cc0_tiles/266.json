@@ -1,0 +1,65 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/266",
+  "perceptual": {
+    "silhouette": [
+      "rounded blob silhouette",
+      "fills most of tile",
+      "slightly irregular edges",
+      "bulge lower-left"
+    ],
+    "shape": [
+      "large round mass",
+      "face occupying center"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "ambiguous",
+      "stationary"
+    ],
+    "colors": [
+      "bright yellow dominant",
+      "orange and pink outline",
+      "dark red eyes",
+      "white highlights"
+    ],
+    "major_regions": [
+      "yellow round face",
+      "two dark red eyes",
+      "orange mouth region",
+      "white teeth-like pixels below"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "floating head",
+      "amorphous"
+    ],
+    "possible_features": [
+      "round mass could be a floating head or sun",
+      "dark red spots could be angry eyes",
+      "orange band with white could be a toothed mouth",
+      "yellow-orange could suggest fire or light"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "fire spirit",
+      "sun face",
+      "floating head",
+      "will-o-wisp"
+    ],
+    "visual_symbols": [
+      "glowing face",
+      "eyes",
+      "toothy mouth"
+    ],
+    "priority_features": [
+      "large round yellow face",
+      "two dark red eyes",
+      "wide mouth with teeth",
+      "bright fiery coloring"
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/445",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with top points",
+      "brown strip right"
+    ],
+    "shape": [
+      "square head",
+      "deep blue robe block",
+      "red horizontal band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "steel-blue head",
+      "royal blue robe",
+      "red belt",
+      "brown pole"
+    ],
+    "major_regions": [
+      "blue horned face",
+      "blue robe with red belt",
+      "brown staff strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "top points could be horns",
+      "robe-like torso suggests caster",
+      "brown strip could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "blue demon mage",
+      "imp sorcerer"
+    ],
+    "visual_symbols": [
+      "horns",
+      "robe",
+      "staff"
+    ],
+    "priority_features": [
+      "blue horned head",
+      "blue robe with red belt",
+      "brown staff"
+    ]
+  }
+}

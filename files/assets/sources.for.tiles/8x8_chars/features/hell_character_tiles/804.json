@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/804",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette with oversized bald head",
+      "collar flaring out to left",
+      "staff on right edge"
+    ],
+    "shape": [
+      "large rounded head occupying upper half",
+      "small blue dot on forehead",
+      "robe with dark vertical center line"
+    ],
+    "orientation": [
+      "front-facing",
+      "slightly turned"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "light blue head",
+      "teal robe",
+      "dark teal center stripe",
+      "small blue forehead mark",
+      "brown staff"
+    ],
+    "major_regions": [
+      "large pale head with forehead gem",
+      "teal robe body split by dark line",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "forehead dot could be a gem, third eye or tattoo",
+      "bald large head could suggest a mystic",
+      "center line could be an open robe"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mystic",
+      "priest or sage",
+      "psychic humanoid"
+    ],
+    "visual_symbols": [
+      "forehead gem or third eye",
+      "staff",
+      "robe"
+    ],
+    "priority_features": [
+      "bald oversized pale head",
+      "forehead mark",
+      "teal robe",
+      "staff"
+    ]
+  }
+}

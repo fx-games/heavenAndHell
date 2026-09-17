@@ -1,0 +1,60 @@
+{
+ "id": "lofi_char_tiles/113",
+ "perceptual": {
+  "silhouette": [
+   "rounded blob with jagged upper fringe",
+   "wide flat base",
+   "small protrusion at right"
+  ],
+  "shape": [
+   "large rounded blue mass",
+   "ragged lighter rim",
+   "two square eye holes"
+  ],
+  "orientation": [
+   "front-facing",
+   "ambiguous"
+  ],
+  "pose": [
+   "hovering",
+   "ambiguous"
+  ],
+  "colors": [
+   "deep blue core",
+   "lighter blue/violet fringe",
+   "white eyes"
+  ],
+  "major_regions": [
+   "blue body",
+   "pale flickering outline",
+   "two white eyes"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "amorphous",
+   "elemental"
+  ],
+  "possible_features": [
+   "jagged rim could be cold flames or wisps",
+   "right protrusion could be an arm or flame tongue"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "blue flame spirit",
+   "water elemental",
+   "wisp",
+   "ghostly blob"
+  ],
+  "visual_symbols": [
+   "flame-like fringe",
+   "glowing eyes"
+  ],
+  "priority_features": [
+   "flame-like jagged outline",
+   "blue body",
+   "two white eyes"
+  ]
+ }
+}

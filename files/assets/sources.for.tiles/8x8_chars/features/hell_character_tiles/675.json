@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/675",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "large round head",
+      "wide body",
+      "thin pole at right"
+    ],
+    "shape": [
+      "large brown head mass",
+      "broad yellow body",
+      "orange horizontal band across body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "brown head",
+      "yellow body",
+      "orange sash band"
+    ],
+    "major_regions": [
+      "bald brown head with dark eyes",
+      "yellow robe",
+      "orange belt or sash",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "round head without covering could be bald",
+      "orange band could be a sash",
+      "right pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "monk",
+      "friar",
+      "villager"
+    ],
+    "visual_symbols": [
+      "robe",
+      "sash",
+      "staff"
+    ],
+    "priority_features": [
+      "yellow robe with orange sash",
+      "bald round head",
+      "staff"
+    ]
+  }
+}

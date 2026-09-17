@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/325",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "capped head",
+      "body with belt",
+      "long vertical object at right"
+    ],
+    "shape": [
+      "green cap or hair shape on top of head",
+      "tan face",
+      "green torso",
+      "dark red waist band",
+      "orange-brown vertical strip at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding long object"
+    ],
+    "colors": [
+      "bright green cap and clothing",
+      "tan face and hands",
+      "dark red belt",
+      "orange-brown pole"
+    ],
+    "major_regions": [
+      "green cap over tan face",
+      "green tunic",
+      "red belt",
+      "orange vertical object at right edge"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "green head shape could be a hood, cap or hair",
+      "orange vertical strip could be a bow or staff",
+      "green clothing could suggest woodland outfit"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ranger",
+      "elf",
+      "archer",
+      "hunter"
+    ],
+    "visual_symbols": [
+      "green cap",
+      "bow-like pole",
+      "tunic"
+    ],
+    "priority_features": [
+      "green cap and tunic",
+      "orange vertical bow or staff at right",
+      "tan face"
+    ]
+  }
+}

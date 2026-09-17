@@ -1,0 +1,57 @@
+{
+ "id": "lofi_char_tiles/108",
+ "perceptual": {
+  "silhouette": [
+   "broad rounded top",
+   "wide head with side flaps",
+   "narrower lower body"
+  ],
+  "shape": [
+   "wide yellow dome",
+   "side extensions at head level",
+   "small pale face",
+   "gray torso"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "yellow upper region",
+   "white face",
+   "gray lower body"
+  ],
+  "major_regions": [
+   "large yellow mass framing head",
+   "pale face with two dark eyes",
+   "gray body below"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid"
+  ],
+  "possible_features": [
+   "yellow framing mass could be a mane, hair or golden helmet",
+   "side flaps could be ears or helmet guards"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "lion-like humanoid",
+   "golden warrior",
+   "beast-man"
+  ],
+  "visual_symbols": [
+   "mane or helmet",
+   "dark eyes"
+  ],
+  "priority_features": [
+   "large yellow framing mass around face",
+   "small pale face with dark eyes",
+   "gray body"
+  ]
+ }
+}

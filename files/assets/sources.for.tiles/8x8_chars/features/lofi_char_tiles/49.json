@@ -1,0 +1,59 @@
+{
+  "id": "lofi_char_tiles/49",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "pointed cap",
+      "long straight light blade shape at right"
+    ],
+    "shape": [
+      "large head with cap",
+      "blocky green torso",
+      "long thin gray vertical bar"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding blade upright"
+    ],
+    "colors": [
+      "mostly green",
+      "yellow face",
+      "gray vertical blade"
+    ],
+    "major_regions": [
+      "green cap over yellow face",
+      "green tunic with brown belt",
+      "gray sword-like bar at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray vertical bar could be a sword blade",
+      "tapered cap could be a pointed hat or hood",
+      "yellow pixel at side could be an ear or hand"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "elf warrior",
+      "swordsman",
+      "green-clad adventurer"
+    ],
+    "visual_symbols": [
+      "pointed cap",
+      "sword",
+      "tunic"
+    ],
+    "priority_features": [
+      "green pointed cap",
+      "green tunic",
+      "upright gray sword"
+    ]
+  }
+}

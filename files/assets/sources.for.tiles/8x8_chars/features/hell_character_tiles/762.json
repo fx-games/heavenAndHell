@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/762",
+  "perceptual": {
+    "silhouette": [
+      "robed humanoid silhouette",
+      "rounded pale head with top accent",
+      "wide robe",
+      "thin brown pole at right"
+    ],
+    "shape": [
+      "large pale head",
+      "small blue mark on forehead",
+      "teal robe mass",
+      "dark vertical line in robe center"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "pale cyan head",
+      "red eyes",
+      "blue forehead gem",
+      "dark teal robe"
+    ],
+    "major_regions": [
+      "pale head with blue forehead mark",
+      "teal robe with dark central seam",
+      "staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "blue forehead pixel could be a gem, third eye or circlet",
+      "dark center line could be robe opening",
+      "pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mage",
+      "sorcerer",
+      "mystic"
+    ],
+    "visual_symbols": [
+      "forehead gem",
+      "staff",
+      "robe",
+      "red eyes"
+    ],
+    "priority_features": [
+      "blue forehead gem",
+      "teal robe",
+      "red eyes",
+      "staff at right"
+    ]
+  }
+}

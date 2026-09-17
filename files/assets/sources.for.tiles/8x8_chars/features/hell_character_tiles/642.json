@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/642",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large rounded head",
+      "gray vertical strip at right"
+    ],
+    "shape": [
+      "yellow dome head",
+      "blue eyes",
+      "brown banded torso",
+      "dark gray midsection",
+      "gray buckle"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object"
+    ],
+    "colors": [
+      "yellow head",
+      "brown and dark gray clothing",
+      "gray weapon"
+    ],
+    "major_regions": [
+      "yellow head with blue eyes",
+      "brown leather-like tunic",
+      "gray weapon at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray strip could be a sword or spear",
+      "brown bands could be leather armor"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "warrior",
+      "peasant",
+      "bald humanoid"
+    ],
+    "visual_symbols": [
+      "weapon",
+      "belt"
+    ],
+    "priority_features": [
+      "large yellow head",
+      "blue eyes",
+      "brown clothing",
+      "gray weapon"
+    ]
+  }
+}

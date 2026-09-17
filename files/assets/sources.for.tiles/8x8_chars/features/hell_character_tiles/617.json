@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/617",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "head with bright helmet on top",
+      "vertical object at right edge"
+    ],
+    "shape": [
+      "yellow cap/helmet shape on head",
+      "pink face",
+      "orange/brown banded torso",
+      "olive lower body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object"
+    ],
+    "colors": [
+      "yellow headgear",
+      "pink face",
+      "orange and brown torso",
+      "olive-yellow legs",
+      "gray vertical strip"
+    ],
+    "major_regions": [
+      "yellow helmet over pink face",
+      "orange banded torso",
+      "gray weapon strip at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "yellow top could be a helmet or crown",
+      "gray strip could be a sword or spear"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "warrior",
+      "soldier",
+      "guard"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "weapon",
+      "belt"
+    ],
+    "priority_features": [
+      "yellow helmet",
+      "pink face with dark eyes",
+      "orange torso",
+      "gray weapon at right"
+    ]
+  }
+}

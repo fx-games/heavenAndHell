@@ -1,0 +1,59 @@
+{
+ "id": "lofi_char_tiles/111",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette with flat crown top",
+   "pale face over dark robed body"
+  ],
+  "shape": [
+   "yellow crown band with notches",
+   "pale cyan head",
+   "black robe",
+   "yellow central spot"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "yellow crown",
+   "pale cyan face and hands",
+   "black robe"
+  ],
+  "major_regions": [
+   "crown above head",
+   "pale skull-like face",
+   "dark robed body with gem"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "skeletal humanoid",
+   "robed humanoid"
+  ],
+  "possible_features": [
+   "yellow band could be a crown",
+   "pale face could be a skull",
+   "yellow chest spot could be an amulet"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "lich king",
+   "undead royalty",
+   "necromancer"
+  ],
+  "visual_symbols": [
+   "crown",
+   "skull-like face",
+   "dark robe"
+  ],
+  "priority_features": [
+   "crown on head",
+   "pale skull face",
+   "black robe"
+  ]
+ }
+}

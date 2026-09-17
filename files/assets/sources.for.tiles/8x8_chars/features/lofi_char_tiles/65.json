@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/65",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "rounded bare head",
+      "blocky gray shape at upper right on thin shaft"
+    ],
+    "shape": [
+      "yellow rounded head",
+      "white torso",
+      "dark gray arm band",
+      "gray square block atop brown shaft"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon raised at side"
+    ],
+    "colors": [
+      "yellow head",
+      "white body",
+      "dark gray limbs",
+      "gray weapon head"
+    ],
+    "major_regions": [
+      "yellow head with no headgear",
+      "white tunic",
+      "gray block-headed weapon at upper right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "yellow rounded head could be bald or blond hair",
+      "gray block on shaft could be an axe or hammer head",
+      "white torso could be a tabard"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "warrior",
+      "axeman or hammer-wielder",
+      "crusader-like soldier"
+    ],
+    "visual_symbols": [
+      "axe or hammer",
+      "white tabard"
+    ],
+    "priority_features": [
+      "gray block-headed weapon raised",
+      "white tunic",
+      "bare yellow head"
+    ]
+  }
+}

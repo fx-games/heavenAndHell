@@ -1,0 +1,63 @@
+{
+  "id": "lofi_char_tiles/82",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette with gray outline at top and sides",
+      "helmet-like head frame with points"
+    ],
+    "shape": [
+      "gray cap mass over head",
+      "green face and torso",
+      "gray side columns for arms"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "green body",
+      "gray helmet and arms",
+      "light gray tips",
+      "yellow-green eyes",
+      "dark red waist"
+    ],
+    "major_regions": [
+      "gray helmet with light pointed tips",
+      "green face with bright eyes",
+      "gray armored arms",
+      "red loincloth band"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "gray top could be a horned helmet",
+      "gray sides could be armor or pauldrons",
+      "bright eyes suggest a goblin face"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "armored goblin",
+      "orc soldier",
+      "horned warrior"
+    ],
+    "visual_symbols": [
+      "horned helmet",
+      "armor",
+      "glowing eyes"
+    ],
+    "priority_features": [
+      "gray horned helmet",
+      "green face",
+      "gray armored arms",
+      "bright eyes"
+    ]
+  }
+}

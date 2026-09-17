@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/278",
+  "perceptual": {
+    "silhouette": [
+      "hooded humanoid silhouette",
+      "hood outline with rounded top",
+      "brown pole at right"
+    ],
+    "shape": [
+      "light blue hood",
+      "yellow face",
+      "white beard",
+      "gray block at left"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding object"
+    ],
+    "colors": [
+      "light blue hood and robe",
+      "yellow face",
+      "white beard",
+      "gray held object"
+    ],
+    "major_regions": [
+      "light blue hood and robe",
+      "yellow face with black eyes",
+      "white beard",
+      "gray item at left",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "white area could be a beard",
+      "gray block could be a book or tome",
+      "brown pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "wizard",
+      "mage",
+      "ice or water mage"
+    ],
+    "visual_symbols": [
+      "hood",
+      "beard",
+      "staff"
+    ],
+    "priority_features": [
+      "light blue robe and hood",
+      "white beard",
+      "staff",
+      "gray held item"
+    ]
+  }
+}

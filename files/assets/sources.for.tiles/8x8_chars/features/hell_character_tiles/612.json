@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/612",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large rounded head",
+      "wide lower body"
+    ],
+    "shape": [
+      "pink dome head",
+      "yellow torso",
+      "orange waist band",
+      "brown vertical object at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object"
+    ],
+    "colors": [
+      "pink head",
+      "bright yellow body",
+      "orange belt",
+      "brown pole"
+    ],
+    "major_regions": [
+      "pink head with dark eyes",
+      "yellow robe/tunic",
+      "orange sash",
+      "brown pole at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "brown vertical line could be a wooden staff or spear",
+      "yellow body could be robes"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "bald humanoid",
+      "monk",
+      "peasant"
+    ],
+    "visual_symbols": [
+      "bald head",
+      "staff",
+      "robe"
+    ],
+    "priority_features": [
+      "large pink bald head",
+      "yellow clothing",
+      "orange sash",
+      "wooden staff"
+    ]
+  }
+}

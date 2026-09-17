@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/388",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "bald head",
+      "vertical line on right",
+      "bare legs"
+    ],
+    "shape": [
+      "yellow head block",
+      "green tunic body",
+      "brown band",
+      "thin pole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole at side"
+    ],
+    "colors": [
+      "yellow skin",
+      "bright green tunic",
+      "brown belt",
+      "brown vertical line"
+    ],
+    "major_regions": [
+      "bald head",
+      "green tunic",
+      "brown belt with gray buckle",
+      "yellow legs",
+      "brown pole right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "brown line could be a bow or staff",
+      "green tunic could be woodland garb"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ranger",
+      "woodsman",
+      "peasant"
+    ],
+    "visual_symbols": [
+      "tunic",
+      "staff or bow",
+      "belt"
+    ],
+    "priority_features": [
+      "bald head",
+      "green tunic",
+      "brown pole on right"
+    ]
+  }
+}

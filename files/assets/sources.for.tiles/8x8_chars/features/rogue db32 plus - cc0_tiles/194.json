@@ -1,0 +1,64 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/194",
+  "perceptual": {
+    "silhouette": [
+      "small bird-like silhouette",
+      "rounded body",
+      "head at upper right with beak projection",
+      "tail at lower left"
+    ],
+    "shape": [
+      "rounded central body",
+      "small head",
+      "bright horizontal beak-like shape",
+      "pink wing edge pixels"
+    ],
+    "orientation": [
+      "facing right"
+    ],
+    "pose": [
+      "perched",
+      "standing"
+    ],
+    "colors": [
+      "mostly orange",
+      "yellow beak-like region",
+      "pink/red highlights on wing and crown",
+      "tan accent"
+    ],
+    "major_regions": [
+      "orange body",
+      "yellow beak",
+      "pinkish wing marks",
+      "yellow foot"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "avian"
+    ],
+    "possible_features": [
+      "yellow block could be a beak",
+      "pink pixels could be wing feathers or crest",
+      "lower pixels could be feet"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "small bird",
+      "robin-like bird",
+      "finch",
+      "firebird"
+    ],
+    "visual_symbols": [
+      "beak",
+      "wing",
+      "bird silhouette"
+    ],
+    "priority_features": [
+      "orange body",
+      "yellow beak",
+      "small perched bird shape"
+    ]
+  }
+}

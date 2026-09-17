@@ -1,0 +1,65 @@
+{
+  "id": "lofi_char_tiles/80",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette with two outward horn-like points at top corners",
+      "arms spread wide",
+      "two legs"
+    ],
+    "shape": [
+      "rounded head-torso mass",
+      "two small curved protrusions at top",
+      "diagonal arm projections",
+      "narrow legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms spread outward"
+    ],
+    "colors": [
+      "mostly green",
+      "brown top protrusions",
+      "pale yellow-green eyes",
+      "dark red waist"
+    ],
+    "major_regions": [
+      "green head with bright eyes",
+      "brown horn-like tips at upper corners",
+      "dark red loincloth band",
+      "green splayed limbs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "top protrusions could be horns or pointed ears",
+      "red band could be a loincloth",
+      "splayed limbs could be clawed arms"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin",
+      "orc",
+      "small demon",
+      "imp"
+    ],
+    "visual_symbols": [
+      "horns or pointed ears",
+      "glowing eyes",
+      "loincloth"
+    ],
+    "priority_features": [
+      "green skin",
+      "brown horn-like points",
+      "glowing yellow eyes",
+      "spread arms"
+    ]
+  }
+}

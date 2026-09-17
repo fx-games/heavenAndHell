@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/370",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "rounded head with horizontal dark slit",
+      "broad armored body"
+    ],
+    "shape": [
+      "large pale head block",
+      "narrow dark visor line",
+      "wide gray torso",
+      "small side hand pixels"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "mostly gray and white",
+      "dark visor slit",
+      "yellow hands",
+      "small brown pixel at right"
+    ],
+    "major_regions": [
+      "white/gray helmet with dark slit",
+      "gray armored body",
+      "yellow hands at sides",
+      "brown object at right hand"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "dark slit could be a helmet visor",
+      "gray body could be plate armor",
+      "brown pixel could be a weapon handle"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "knight",
+      "armored warrior",
+      "soldier"
+    ],
+    "visual_symbols": [
+      "closed helmet",
+      "visor",
+      "armor"
+    ],
+    "priority_features": [
+      "full helmet with visor slit",
+      "gray armor",
+      "no visible face"
+    ]
+  }
+}

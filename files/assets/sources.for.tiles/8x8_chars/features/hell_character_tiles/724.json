@@ -1,0 +1,58 @@
+{
+  "id": "hell_character_tiles/724",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "dome-shaped head merging into body",
+      "orange-brown vertical bar at right edge",
+      "irregular legs"
+    ],
+    "shape": [
+      "large rounded cyan mass",
+      "small leg-like stubs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object at side"
+    ],
+    "colors": [
+      "almost entirely cyan",
+      "two white eyes",
+      "orange-brown bar"
+    ],
+    "major_regions": [
+      "large uniform cyan body with white eyes",
+      "orange staff-like bar at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "blob-like humanoid",
+      "ghost-like figure"
+    ],
+    "possible_features": [
+      "uniform body could be bare skin, a slime or ghost",
+      "white squares could be eyes",
+      "vertical bar could be a staff or spear"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ghost",
+      "slime-like creature",
+      "humanoid monster"
+    ],
+    "visual_symbols": [
+      "glowing eyes",
+      "staff"
+    ],
+    "priority_features": [
+      "uniform cyan body",
+      "two white eyes",
+      "orange vertical staff"
+    ]
+  }
+}

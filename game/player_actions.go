@@ -81,7 +81,11 @@ func (a *Actions) beginActionTargeting(action *common.TargetedAction, chargedIte
 func (a *Actions) PickUpItem() {
 	state := a.state
 	player := state.GetPlayer()
-	if !player.IsAlive() || !state.GetMap().IsItemAt(player.MapPosition()) || !player.CanPickup(state.GetMap().ItemAt(player.MapPosition())) {
+	if !player.IsAlive() || !state.GetMap().IsItemAt(player.MapPosition()) {
+		return
+	}
+	if !player.CanPickup(state.GetMap().ItemAt(player.MapPosition())) {
+		state.Factory().PlayD1HeroSound(14 + rand.Intn(3)) // AutoGetItem: "I can't carry any more"
 		return
 	}
 	pickUpAction := common.NewPickUpAction(common.AbstractCause("PickUpAction"), player)
@@ -117,6 +121,7 @@ func NewActions(context PlayerActionsContext) *Actions {
 func (a *Actions) EquipItem(item *common.Item) {
 	if d := item.D1(); d != nil && !item.MeetsRequirements() {
 		a.logError(fmt.Sprintf("You can't equip %s: it needs %d Str, %d Mag and %d Dex.", item.Name(), d.MinStr, d.MinMag, d.MinDex))
+		a.state.Factory().PlayD1HeroSound(13)
 		return
 	}
 	a.actionBroker.Execute(common.NewEquipItemAction(common.AbstractCause("equip"), a.player, item))

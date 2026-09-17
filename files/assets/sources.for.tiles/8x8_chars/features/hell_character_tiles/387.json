@@ -1,0 +1,67 @@
+{
+  "id": "hell_character_tiles/387",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "bald head",
+      "gray block on left",
+      "vertical line on right"
+    ],
+    "shape": [
+      "yellow head block",
+      "gray rectangle left",
+      "white robe with orange band",
+      "thin pole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding shield and pole"
+    ],
+    "colors": [
+      "yellow head",
+      "gray left block",
+      "white robe",
+      "orange band",
+      "brown line right"
+    ],
+    "major_regions": [
+      "bald head",
+      "gray shield-like block",
+      "white robe",
+      "orange belt",
+      "brown pole right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "gray block could be a shield",
+      "brown line could be a staff or mace",
+      "white robe could be priestly garb"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "cleric",
+      "priest",
+      "paladin"
+    ],
+    "visual_symbols": [
+      "shield",
+      "staff",
+      "robe"
+    ],
+    "priority_features": [
+      "gray shield on left",
+      "white robe",
+      "bald head",
+      "staff on right"
+    ]
+  }
+}

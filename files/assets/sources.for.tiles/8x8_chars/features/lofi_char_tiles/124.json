@@ -1,0 +1,58 @@
+{
+ "id": "lofi_char_tiles/124",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "long vertical pole along right edge",
+   "arm extended to pole"
+  ],
+  "shape": [
+   "rounded head",
+   "blocky torso",
+   "full-height thin bar right",
+   "legs below"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding polearm"
+  ],
+  "colors": [
+   "pale blue body",
+   "darker blue pole and eyes"
+  ],
+  "major_regions": [
+   "pale helmeted head",
+   "blue body",
+   "tall pole at right"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid"
+  ],
+  "possible_features": [
+   "tall bar could be a spear, halberd or staff",
+   "head could be a helmet",
+   "pale coloration may suggest ghost or frost"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "spearman",
+   "guard",
+   "ghost soldier"
+  ],
+  "visual_symbols": [
+   "spear or polearm",
+   "helmet"
+  ],
+  "priority_features": [
+   "full-height polearm",
+   "helmeted head with dark eyes",
+   "pale blue body"
+  ]
+ }
+}

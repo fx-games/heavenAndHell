@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/679",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "round head with band",
+      "broad body",
+      "pole at right"
+    ],
+    "shape": [
+      "brown head with red horizontal band",
+      "red body mass",
+      "orange horizontal band mid-body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "mostly red",
+      "brown head",
+      "orange belt band"
+    ],
+    "major_regions": [
+      "red headband",
+      "brown face with eyes",
+      "red robe",
+      "orange sash",
+      "staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red band on head could be a headband",
+      "orange band could be a belt or sash",
+      "pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "monk",
+      "martial artist",
+      "robed figure"
+    ],
+    "visual_symbols": [
+      "headband",
+      "sash",
+      "staff"
+    ],
+    "priority_features": [
+      "red headband",
+      "red robe with orange sash",
+      "staff"
+    ]
+  }
+}

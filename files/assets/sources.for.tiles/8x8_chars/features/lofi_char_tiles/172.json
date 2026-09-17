@@ -1,0 +1,61 @@
+{
+  "id": "lofi_char_tiles/172",
+  "perceptual": {
+    "silhouette": [
+      "rounded blob silhouette",
+      "small bumps along top edge",
+      "short side stubs",
+      "two short leg-like projections below"
+    ],
+    "shape": [
+      "large rounded central mass",
+      "small stub projections at sides",
+      "two narrow lower stubs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms slightly out"
+    ],
+    "colors": [
+      "mostly blue",
+      "darker blue shading",
+      "two black eye pixels"
+    ],
+    "major_regions": [
+      "blue rounded body",
+      "two black eyes in upper half"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "amorphous blob with stubby limbs",
+      "possibly bipedal"
+    ],
+    "possible_features": [
+      "top bumps could be a wavy crest or tentacle tips",
+      "side stubs could be small arms",
+      "two dark squares read as eyes"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "slime creature",
+      "blob monster",
+      "small ghost-like creature"
+    ],
+    "visual_symbols": [
+      "two dark eyes",
+      "stubby arms",
+      "rounded body"
+    ],
+    "priority_features": [
+      "rounded blob body",
+      "two black eyes",
+      "stubby side arms",
+      "short legs"
+    ]
+  }
+}

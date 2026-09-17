@@ -1,0 +1,56 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/248",
+ "perceptual": {
+  "silhouette": [
+   "compact round silhouette",
+   "two short stalks rising from top",
+   "no lower limbs"
+  ],
+  "shape": [
+   "large circle",
+   "dark pupil in center",
+   "two thin upward stalks with dark blue tips"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "floating"
+  ],
+  "colors": [
+   "pale blue-white sphere",
+   "dark maroon pupil",
+   "dark blue stalk tips"
+  ],
+  "major_regions": [
+   "large pale eye sphere",
+   "two stalks above",
+   "dark pupil"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "floating eye creature"
+  ],
+  "possible_features": [
+   "top stalks could be eyestalks or antennae",
+   "sphere with dark center could be an eyeball"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "floating eye",
+   "eye tyrant",
+   "aberration"
+  ],
+  "visual_symbols": [
+   "eyeball",
+   "eyestalks"
+  ],
+  "priority_features": [
+   "round eye body",
+   "two top stalks",
+   "dark pupil"
+  ]
+ }
+}

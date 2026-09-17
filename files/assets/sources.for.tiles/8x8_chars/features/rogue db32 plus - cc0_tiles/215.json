@@ -1,0 +1,64 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/215",
+  "perceptual": {
+    "silhouette": [
+      "wide squat symmetric silhouette",
+      "two upward protrusions at top corners",
+      "short projections below"
+    ],
+    "shape": [
+      "broad central body mass",
+      "raised corner tips",
+      "dark blue lower band",
+      "thin legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "crouching",
+      "claws raised",
+      "multi-legged stance"
+    ],
+    "colors": [
+      "mostly pink/salmon",
+      "dark eye pixels",
+      "purple and blue lower regions"
+    ],
+    "major_regions": [
+      "pink body and tips",
+      "dark eyes",
+      "purple/blue band lower body",
+      "pink legs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "crab-like",
+      "multi-legged",
+      "monstrous face"
+    ],
+    "possible_features": [
+      "corner tips could be claws or horns",
+      "dark pixels could be eyes",
+      "lower band could be mouth or underside"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "crab",
+      "beast",
+      "demon face"
+    ],
+    "visual_symbols": [
+      "claws or horns",
+      "eyes",
+      "wide body"
+    ],
+    "priority_features": [
+      "pink wide body",
+      "raised corner tips",
+      "blue lower band"
+    ]
+  }
+}

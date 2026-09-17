@@ -1,0 +1,59 @@
+{
+  "id": "lofi_char_tiles/52",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "wide head covering with bright top",
+      "no side item"
+    ],
+    "shape": [
+      "wide white and yellow top mass",
+      "yellow face",
+      "green torso",
+      "brown band at waist"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "white and yellow top",
+      "yellow face",
+      "green body",
+      "brown belt"
+    ],
+    "major_regions": [
+      "white/yellow headgear over face",
+      "green tunic with brown belt",
+      "legs in green"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "bright yellow on white top could be a crown, halo or decorated hat",
+      "yellow side pixels could be hands"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "noble or prince",
+      "cleric",
+      "villager"
+    ],
+    "visual_symbols": [
+      "crown-like headgear",
+      "tunic"
+    ],
+    "priority_features": [
+      "white hat with yellow crown-like accent",
+      "green tunic",
+      "unarmed stance"
+    ]
+  }
+}

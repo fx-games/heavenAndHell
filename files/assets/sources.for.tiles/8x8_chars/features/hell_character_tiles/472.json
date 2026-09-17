@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/472",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "orange strip on right edge"
+    ],
+    "shape": [
+      "square gray head",
+      "green rectangular body",
+      "reddish belt band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "gray head",
+      "yellow-green eyes",
+      "bright green body",
+      "red-brown belt",
+      "orange right strip"
+    ],
+    "major_regions": [
+      "gray head",
+      "green tunic",
+      "red-brown belt with buckle",
+      "orange strip at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "green mass could be tunic or robe",
+      "orange strip could be hair or a staff",
+      "bright squares could be eyes"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ranger-like humanoid",
+      "gray-skinned creature"
+    ],
+    "visual_symbols": [
+      "tunic",
+      "belt",
+      "staff or hair"
+    ],
+    "priority_features": [
+      "bright green body",
+      "gray face",
+      "red-brown belt",
+      "orange right strip"
+    ]
+  }
+}

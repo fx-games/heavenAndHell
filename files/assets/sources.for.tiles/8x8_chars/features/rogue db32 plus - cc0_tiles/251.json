@@ -1,0 +1,63 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/251",
+ "perceptual": {
+  "silhouette": [
+   "hooded humanoid silhouette",
+   "dark wide robed mass",
+   "tall vertical pole at right with pale top"
+  ],
+  "shape": [
+   "broad dark robe mass",
+   "two red eye squares",
+   "red mouth spot",
+   "vertical gray line at right with light top section"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing or floating",
+   "holding upright polearm"
+  ],
+  "colors": [
+   "very dark maroon body",
+   "red eyes and mouth",
+   "gray pole",
+   "pale blue-gray blade tip"
+  ],
+  "major_regions": [
+   "dark hooded robe",
+   "glowing red face points",
+   "gray staff with pale head at right"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "robed figure"
+  ],
+  "possible_features": [
+   "red spots could be glowing eyes",
+   "pale top of pole could be a scythe blade or spearhead",
+   "dark mass could be a cloak"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "reaper",
+   "wraith",
+   "dark cultist",
+   "death figure"
+  ],
+  "visual_symbols": [
+   "hood",
+   "glowing red eyes",
+   "scythe or polearm"
+  ],
+  "priority_features": [
+   "dark hooded robe",
+   "red glowing eyes",
+   "polearm at right with pale blade"
+  ]
+ }
+}

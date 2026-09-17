@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/411",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head",
+      "vertical gray strip on right"
+    ],
+    "shape": [
+      "square head",
+      "two brown horizontal bands on dark torso",
+      "thin gray bar right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "weapon at side"
+    ],
+    "colors": [
+      "yellow head",
+      "dark torso",
+      "brown straps",
+      "gray accent"
+    ],
+    "major_regions": [
+      "yellow face with two dark eyes",
+      "dark body crossed by brown belt/straps",
+      "gray blade-like strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "brown bands could be leather belts or straps",
+      "gray strip could be a sword",
+      "dark body could be leather armor"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "human fighter",
+      "mercenary",
+      "rogue"
+    ],
+    "visual_symbols": [
+      "belts or straps",
+      "blade",
+      "dark clothing"
+    ],
+    "priority_features": [
+      "dark body with brown straps",
+      "gray vertical weapon",
+      "large yellow head"
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/361",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "rounded hooded head",
+      "tall vertical line on right side"
+    ],
+    "shape": [
+      "large head block with face opening",
+      "rectangular robed body",
+      "thin vertical pole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole at side"
+    ],
+    "colors": [
+      "mostly dark blue",
+      "yellow face",
+      "brown vertical line",
+      "brown band across middle"
+    ],
+    "major_regions": [
+      "dark blue hood framing yellow face",
+      "dark blue robe",
+      "brown belt with gray center",
+      "brown pole on right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "blue covering around face could be a hood",
+      "vertical brown line could be a staff",
+      "band with gray center could be a belt with buckle"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "hooded mage",
+      "wizard",
+      "robed human"
+    ],
+    "visual_symbols": [
+      "hood",
+      "staff",
+      "belt"
+    ],
+    "priority_features": [
+      "blue hood around face",
+      "long robe",
+      "staff on right",
+      "two dark eyes"
+    ]
+  }
+}

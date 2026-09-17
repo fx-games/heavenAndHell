@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/425",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "hooded head",
+      "brown vertical bar right"
+    ],
+    "shape": [
+      "hood shape over head",
+      "green face strip",
+      "light blue robe with white horizontal band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "light and mid blue",
+      "green face",
+      "white sash band",
+      "brown pole"
+    ],
+    "major_regions": [
+      "blue hood with green face and dark eyes",
+      "light blue robe with white sash",
+      "brown staff strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "blue shape around face could be a hood",
+      "white band could be a sash or belt",
+      "brown strip could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "hooded mage",
+      "goblin shaman",
+      "priest"
+    ],
+    "visual_symbols": [
+      "hood",
+      "robe",
+      "sash",
+      "staff"
+    ],
+    "priority_features": [
+      "blue hood with green face",
+      "white sash on light blue robe",
+      "brown staff"
+    ]
+  }
+}

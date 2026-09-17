@@ -1,0 +1,57 @@
+{
+ "id": "lofi_char_tiles/163",
+ "perceptual": {
+  "silhouette": [
+   "irregular rounded silhouette with jagged edges",
+   "small protrusions at corners",
+   "wide body"
+  ],
+  "shape": [
+   "checkered textured mass",
+   "scattered edge nubs",
+   "small legs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "ambiguous"
+  ],
+  "colors": [
+   "mixed light and dark green checker pattern",
+   "black eyes"
+  ],
+  "major_regions": [
+   "mottled green body with two dark eyes",
+   "ragged green outline",
+   "dark green lower lumps"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "amorphous",
+   "humanoid"
+  ],
+  "possible_features": [
+   "checkered texture could be moss, leaves or scales",
+   "jagged edge nubs could be foliage or spines"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "plant creature",
+   "moss golem",
+   "swamp monster"
+  ],
+  "visual_symbols": [
+   "foliage texture",
+   "two eyes"
+  ],
+  "priority_features": [
+   "mottled green checker texture",
+   "ragged outline",
+   "two dark eyes"
+  ]
+ }
+}

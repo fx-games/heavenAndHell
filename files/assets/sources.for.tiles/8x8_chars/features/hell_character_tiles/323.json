@@ -1,0 +1,67 @@
+{
+  "id": "hell_character_tiles/323",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "tall head covering",
+      "broad body",
+      "vertical bar at right"
+    ],
+    "shape": [
+      "bright yellow dome head covering",
+      "tan face band",
+      "yellow torso",
+      "red horizontal waist band",
+      "gray vertical strip at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon at side"
+    ],
+    "colors": [
+      "bright yellow helmet and body",
+      "tan face",
+      "red belt",
+      "gray bar"
+    ],
+    "major_regions": [
+      "yellow helmet or hat over tan face",
+      "yellow chest",
+      "red belt",
+      "gray vertical object at right edge"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "yellow head mass could be a helmet or hat",
+      "gray vertical strip could be a sword or spear",
+      "tan side pixels could be hands"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "warrior",
+      "soldier",
+      "guard",
+      "golden knight"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "weapon",
+      "belt"
+    ],
+    "priority_features": [
+      "yellow helmet and armor",
+      "gray weapon at right",
+      "red belt",
+      "tan face"
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+ "id": "lofi_char_tiles/107",
+ "perceptual": {
+  "silhouette": [
+   "roughly humanoid silhouette",
+   "three-pointed band on top",
+   "blocky head over irregular lower body"
+  ],
+  "shape": [
+   "notched rectangular top band",
+   "square head-like mass",
+   "scattered blocky lower region"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "ambiguous"
+  ],
+  "colors": [
+   "yellow-green top band",
+   "pale white/gray body",
+   "black eye spots"
+  ],
+  "major_regions": [
+   "bright crown-like band above head",
+   "pale head with two dark eyes",
+   "mottled gray-white lower body"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "skeletal humanoid"
+  ],
+  "possible_features": [
+   "pointed top band could be a crown",
+   "dark eye spots on pale head could be skull eye sockets",
+   "gray gaps in body could be ribs or bones"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "undead king",
+   "skeleton",
+   "royal monster"
+  ],
+  "visual_symbols": [
+   "crown",
+   "skull-like head",
+   "bony body"
+  ],
+  "priority_features": [
+   "crown on top",
+   "pale skull-like face with dark eyes",
+   "patchy pale body"
+  ]
+ }
+}

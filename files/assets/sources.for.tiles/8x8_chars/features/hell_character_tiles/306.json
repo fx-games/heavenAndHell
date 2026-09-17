@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/306",
+  "perceptual": {
+    "silhouette": [
+      "hooded humanoid silhouette",
+      "hood outline",
+      "gray blade at right"
+    ],
+    "shape": [
+      "brown hood",
+      "gray face",
+      "brown belt band",
+      "dark lower torso",
+      "brown lower band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "brown hood and belt",
+      "gray face",
+      "dark gray body",
+      "gray blade"
+    ],
+    "major_regions": [
+      "brown hood framing gray face",
+      "black eyes",
+      "brown belt",
+      "dark armor-like torso",
+      "gray sword"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "brown top could be a hood",
+      "gray face could be pale or undead skin",
+      "gray shape could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "hooded warrior",
+      "pale rogue",
+      "undead fighter"
+    ],
+    "visual_symbols": [
+      "hood",
+      "sword"
+    ],
+    "priority_features": [
+      "brown hood",
+      "gray face",
+      "upright sword",
+      "brown belt"
+    ]
+  }
+}

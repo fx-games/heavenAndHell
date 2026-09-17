@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/174",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "rounded head with bright forehead dot",
+      "vertical brown bar at right"
+    ],
+    "shape": [
+      "yellow head mass",
+      "small blue square on forehead",
+      "teal torso and legs with dark center line",
+      "long thin vertical extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object"
+    ],
+    "colors": [
+      "teal robe",
+      "yellow head",
+      "single blue accent on forehead"
+    ],
+    "major_regions": [
+      "yellow head with blue forehead gem",
+      "teal robe split by dark vertical line",
+      "brown staff on right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "blue forehead pixel could be a gem, circlet or third eye",
+      "dark vertical center line could be a robe opening",
+      "brown bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "sorcerer",
+      "mystic",
+      "priest"
+    ],
+    "visual_symbols": [
+      "forehead gem",
+      "staff",
+      "long robe"
+    ],
+    "priority_features": [
+      "blue forehead gem",
+      "teal robe",
+      "bald yellow head",
+      "brown staff"
+    ]
+  }
+}

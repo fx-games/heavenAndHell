@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/635",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large rounded head",
+      "wide body"
+    ],
+    "shape": [
+      "yellow dome head",
+      "blue eyes",
+      "light blue torso",
+      "white waist band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object"
+    ],
+    "colors": [
+      "yellow head",
+      "light blue body",
+      "white sash",
+      "brown pole"
+    ],
+    "major_regions": [
+      "yellow head with blue eyes",
+      "light blue tunic with white sash",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "white band could be a sash",
+      "brown pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "monk",
+      "villager",
+      "bald humanoid"
+    ],
+    "visual_symbols": [
+      "bald head",
+      "staff",
+      "sash"
+    ],
+    "priority_features": [
+      "large yellow head",
+      "blue eyes",
+      "light blue clothing",
+      "white sash"
+    ]
+  }
+}

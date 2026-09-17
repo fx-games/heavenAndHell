@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/421",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with two small upward points",
+      "gray strip on right"
+    ],
+    "shape": [
+      "square head",
+      "two small gray corner protrusions on top",
+      "purple torso block"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "weapon at side"
+    ],
+    "colors": [
+      "green head",
+      "gray top protrusions",
+      "purple body",
+      "red belt band"
+    ],
+    "major_regions": [
+      "green face with two dark eyes",
+      "two gray horn-like points",
+      "purple clothing with red belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "gray top corners could be small horns or helmet horns",
+      "green skin suggests non-human",
+      "gray strip could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin",
+      "orc",
+      "green-skinned demon"
+    ],
+    "visual_symbols": [
+      "small horns",
+      "green skin",
+      "blade"
+    ],
+    "priority_features": [
+      "green head",
+      "two small gray horns",
+      "purple body with red belt"
+    ]
+  }
+}

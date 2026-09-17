@@ -1,0 +1,60 @@
+{
+ "id": "lofi_char_tiles/147",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette with horned head",
+   "gray vertical blocks on both sides",
+   "short legs"
+  ],
+  "shape": [
+   "large red head",
+   "gray horn points",
+   "gray rectangular side masses",
+   "tapering torso"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "red body",
+   "gray side elements and horns",
+   "yellow-green eyes"
+  ],
+  "major_regions": [
+   "red horned head with bright eyes",
+   "gray blocks flanking torso",
+   "red limbs"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "winged humanoid"
+  ],
+  "possible_features": [
+   "gray side blocks could be folded wings, shoulder armor or shields",
+   "gray points could be horns"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "demon",
+   "armored imp",
+   "devil"
+  ],
+  "visual_symbols": [
+   "horns",
+   "wings or armor",
+   "glowing eyes"
+  ],
+  "priority_features": [
+   "gray horns",
+   "gray side blocks",
+   "red body",
+   "bright eyes"
+  ]
+ }
+}

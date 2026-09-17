@@ -1,0 +1,65 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/223",
+ "perceptual": {
+  "silhouette": [
+   "stocky humanoid silhouette",
+   "two small light points at top",
+   "tall light vertical shape along right edge",
+   "broad torso"
+  ],
+  "shape": [
+   "wide blocky body",
+   "squarish head mass",
+   "long thin pale extension on right",
+   "dark brown lower band"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding upright weapon"
+  ],
+  "colors": [
+   "red/salmon body",
+   "tan and pink points on top",
+   "pale gray-blue vertical element",
+   "brown waist"
+  ],
+  "major_regions": [
+   "red head and torso",
+   "small tan protrusions above head",
+   "pale blade-like strip at right",
+   "brown hip region"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "top points could be horns",
+   "pale strip could be a sword or blade",
+   "brown band could be a belt or loincloth"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "demon",
+   "imp",
+   "red-skinned warrior"
+  ],
+  "visual_symbols": [
+   "small horns",
+   "sword or blade",
+   "belt"
+  ],
+  "priority_features": [
+   "red stocky body",
+   "pale long weapon at right",
+   "small top horns",
+   "brown waist"
+  ]
+ }
+}

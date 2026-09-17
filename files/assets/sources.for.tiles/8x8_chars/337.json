@@ -1,0 +1,70 @@
+{
+  "id": "lofi_char_tiles/337",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "large rounded head",
+      "wide shoulders",
+      "robed lower body"
+    ],
+    "shape": [
+      "large gray rounded head with two dark square holes",
+      "gray horizontal arm band",
+      "red horizontal band",
+      "purple rectangular lower body",
+      "gray vertical strip at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms outstretched"
+    ],
+    "colors": [
+      "gray head and arms",
+      "two black eye holes",
+      "red belt",
+      "purple robe",
+      "small brown accent"
+    ],
+    "major_regions": [
+      "gray blank-faced head with two dark eyes",
+      "gray arms",
+      "red sash",
+      "purple robe"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid",
+      "undead humanoid"
+    ],
+    "possible_features": [
+      "gray head with dark holes could be a skull, mask or hood",
+      "gray color could suggest undead or stone skin",
+      "horizontal gray band could be outstretched arms"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "zombie",
+      "ghoul",
+      "undead cultist",
+      "golem",
+      "masked figure"
+    ],
+    "visual_symbols": [
+      "hollow eyes",
+      "robe",
+      "gray skin"
+    ],
+    "priority_features": [
+      "gray head with two dark eye holes",
+      "purple robe",
+      "red sash",
+      "gray outstretched arms"
+    ]
+  }
+}

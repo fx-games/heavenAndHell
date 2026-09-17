@@ -1,0 +1,58 @@
+{
+  "id": "lofi_char_tiles/76",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "hood wrapping head",
+      "thin arc shape at right"
+    ],
+    "shape": [
+      "olive-green hood around yellow face",
+      "green torso with lighter center",
+      "thin brown arc"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding item at side"
+    ],
+    "colors": [
+      "olive green hood",
+      "yellow face",
+      "green body",
+      "brown side item"
+    ],
+    "major_regions": [
+      "green hood framing yellow face",
+      "green tunic with brown belt",
+      "brown bow-like arc at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "green wrap around face could be a hood or cowl",
+      "brown arc could be a bow"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "hooded ranger",
+      "archer",
+      "forest scout"
+    ],
+    "visual_symbols": [
+      "hood",
+      "bow"
+    ],
+    "priority_features": [
+      "green hood framing face",
+      "green tunic",
+      "brown bow-like arc at side"
+    ]
+  }
+}

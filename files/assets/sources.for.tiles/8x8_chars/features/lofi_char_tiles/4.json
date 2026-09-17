@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/4",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "hood covering head",
+      "dark face inside hood",
+      "robe body"
+    ],
+    "shape": [
+      "red hood mass",
+      "black face opening",
+      "two yellow eye dots",
+      "robe with legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "red hood and robe",
+      "black face",
+      "yellow glowing eyes",
+      "brown belt"
+    ],
+    "major_regions": [
+      "red hood and robe",
+      "black shadowed face with two bright eyes"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "black face with bright eyes could be a shadowed hood or faceless being",
+      "red covering could be a hooded robe"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "black mage",
+      "cultist",
+      "shadowy caster"
+    ],
+    "visual_symbols": [
+      "hood",
+      "glowing eyes",
+      "shadowed face",
+      "robe"
+    ],
+    "priority_features": [
+      "black face with yellow eyes",
+      "red hood and robe",
+      "no visible weapon"
+    ]
+  }
+}

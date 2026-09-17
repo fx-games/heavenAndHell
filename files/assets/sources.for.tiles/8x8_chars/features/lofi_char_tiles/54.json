@@ -1,0 +1,59 @@
+{
+  "id": "lofi_char_tiles/54",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "tapered cap",
+      "long straight gray bar at right"
+    ],
+    "shape": [
+      "large head with cap",
+      "pale face",
+      "blocky teal torso",
+      "long thin vertical blade"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding blade upright"
+    ],
+    "colors": [
+      "mostly teal/cyan",
+      "very pale face",
+      "gray blade"
+    ],
+    "major_regions": [
+      "teal cap over pale face",
+      "teal tunic with brown belt",
+      "gray sword-like bar at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray bar could be a sword",
+      "pale bluish face could suggest ice or undead pallor"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "frost warrior",
+      "swordsman",
+      "pale-skinned adventurer"
+    ],
+    "visual_symbols": [
+      "hood or cap",
+      "sword",
+      "tunic"
+    ],
+    "priority_features": [
+      "pale icy face",
+      "teal outfit",
+      "upright gray sword"
+    ]
+  }
+}

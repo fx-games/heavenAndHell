@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/81",
+  "perceptual": {
+    "silhouette": [
+      "horned humanoid silhouette",
+      "arms spread",
+      "gray vertical object at right hand"
+    ],
+    "shape": [
+      "rounded head mass",
+      "two top-corner protrusions",
+      "gray rectangular extension at right",
+      "thin legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms spread",
+      "holding weapon"
+    ],
+    "colors": [
+      "mostly green",
+      "brown horn tips",
+      "gray object at right",
+      "dark red waist"
+    ],
+    "major_regions": [
+      "green body with bright eyes",
+      "brown horn-like points",
+      "gray blade-like block at right",
+      "red loincloth"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "top protrusions could be horns or ears",
+      "gray block could be a blade, club or dagger"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin warrior",
+      "orc",
+      "armed imp"
+    ],
+    "visual_symbols": [
+      "horns",
+      "weapon",
+      "glowing eyes"
+    ],
+    "priority_features": [
+      "green skin",
+      "horn-like points",
+      "gray weapon at right",
+      "spread arms"
+    ]
+  }
+}

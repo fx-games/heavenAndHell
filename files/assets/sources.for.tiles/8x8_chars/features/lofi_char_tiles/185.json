@@ -1,0 +1,61 @@
+{
+  "id": "lofi_char_tiles/185",
+  "perceptual": {
+    "silhouette": [
+      "rounded dome-topped silhouette",
+      "wide body",
+      "four short spikes along bottom"
+    ],
+    "shape": [
+      "large rounded mass",
+      "two white eye spots near top",
+      "black triangle cluster below"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "hovering"
+    ],
+    "colors": [
+      "mostly pink/magenta",
+      "white eyes",
+      "black triangular mark"
+    ],
+    "major_regions": [
+      "pink body",
+      "white eyes",
+      "black mark in lower middle"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "blob creature",
+      "ghost-like with fringed bottom"
+    ],
+    "possible_features": [
+      "white spots could be eyes",
+      "black triangle could be a mouth",
+      "bottom spikes could be legs or a ragged edge"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ghost",
+      "jelly blob",
+      "cute monster"
+    ],
+    "visual_symbols": [
+      "fringed bottom",
+      "eyes",
+      "mouth mark"
+    ],
+    "priority_features": [
+      "pink domed body",
+      "fringed bottom edge",
+      "two white eyes",
+      "black triangular mouth"
+    ]
+  }
+}

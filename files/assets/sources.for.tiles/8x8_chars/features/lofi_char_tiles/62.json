@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/62",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "wide gray head covering with bright top",
+      "no side item"
+    ],
+    "shape": [
+      "gray and yellow top mass",
+      "black face with red points",
+      "dark purple torso",
+      "brown waist band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "gray and yellow headgear",
+      "black face",
+      "bright red eyes",
+      "dark purple body"
+    ],
+    "major_regions": [
+      "gray hat with yellow crown-like accent",
+      "black shadowed face with red eyes",
+      "purple robe with brown belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "yellow accent on top could be a crown",
+      "black face with red dots could be glowing eyes in shadow"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dark king or lich-like ruler",
+      "evil noble",
+      "shadow cleric"
+    ],
+    "visual_symbols": [
+      "crown-like headgear",
+      "glowing red eyes",
+      "robe"
+    ],
+    "priority_features": [
+      "yellow crown-like accent",
+      "glowing red eyes in black face",
+      "dark purple robe"
+    ]
+  }
+}

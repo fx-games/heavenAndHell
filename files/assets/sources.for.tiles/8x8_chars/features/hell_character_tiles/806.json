@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/806",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "tall hat top",
+      "short tunic with two feet",
+      "gray pole top-right and brown item at hand"
+    ],
+    "shape": [
+      "yellow top mass",
+      "square face",
+      "tunic body",
+      "legs split at bottom",
+      "thin vertical line upper right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon at side"
+    ],
+    "colors": [
+      "bright yellow hat and tunic",
+      "light blue face and feet",
+      "rust belt",
+      "gray pole"
+    ],
+    "major_regions": [
+      "yellow hat and tunic",
+      "pale blue face",
+      "gray weapon line on right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "gray vertical line could be a sword or spear",
+      "yellow top could be a hat or helmet",
+      "visible feet suggest short tunic"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "adventurer",
+      "soldier",
+      "goblin fighter"
+    ],
+    "visual_symbols": [
+      "hat",
+      "blade or spear",
+      "tunic"
+    ],
+    "priority_features": [
+      "yellow hat and tunic",
+      "gray weapon upper right",
+      "pale blue face and feet"
+    ]
+  }
+}

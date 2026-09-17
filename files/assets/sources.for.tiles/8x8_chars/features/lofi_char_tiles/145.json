@@ -1,0 +1,56 @@
+{
+ "id": "lofi_char_tiles/145",
+ "perceptual": {
+  "silhouette": [
+   "mostly blank or white silhouette",
+   "gray shapes at upper left and right edge",
+   "two dark eyes"
+  ],
+  "shape": [
+   "gray block at upper left",
+   "thin gray strip at upper right",
+   "two small black squares in center"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "ambiguous"
+  ],
+  "colors": [
+   "mostly white",
+   "light gray accents",
+   "two black eyes"
+  ],
+  "major_regions": [
+   "white body blending with background",
+   "two black eyes",
+   "gray patches at top"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "amorphous",
+   "ghost-like"
+  ],
+  "possible_features": [
+   "white body with only eyes visible could be a ghost or invisible creature",
+   "gray patches could be a hood or shadow"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "ghost",
+   "invisible creature",
+   "spirit"
+  ],
+  "visual_symbols": [
+   "two dark eyes on blank body"
+  ],
+  "priority_features": [
+   "near-empty white body",
+   "two black eyes",
+   "gray upper-left patch"
+  ]
+ }
+}

@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/235",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "hooded head",
+      "brown pole at right",
+      "side hand pixels"
+    ],
+    "shape": [
+      "square hood",
+      "rectangular body",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "indigo hood and robe",
+      "red face with black eyes",
+      "orange-brown belt with gray buckle",
+      "brown pole"
+    ],
+    "major_regions": [
+      "indigo hood framing red face",
+      "black eye dots",
+      "belt with buckle",
+      "red hands at sides",
+      "staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red face in hood could suggest demonic skin",
+      "right bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "demon mage",
+      "hooded cultist",
+      "red-skinned sorcerer"
+    ],
+    "visual_symbols": [
+      "hood",
+      "red face",
+      "staff",
+      "belt"
+    ],
+    "priority_features": [
+      "indigo hood around red face",
+      "black eyes",
+      "staff on right"
+    ]
+  }
+}

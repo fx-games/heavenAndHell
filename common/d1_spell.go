@@ -306,6 +306,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 	inTown := defs.IsTownLevel(c.m.GetName())
 	if inTown && !f.Generator.D.Spells[c.spell].Town {
 		c.ctx.Msg("That spell doesn't work in town.")
+		f.PlayD1HeroSound(27)
 		return false
 	}
 	if d1.SpellTargeted[c.spell] && target == o && c.spell != d1.SplTeleport && c.spell != d1.SplGolem {
@@ -992,6 +993,7 @@ func (f *Factory) CastD1FromMemory(caster *Actor, spell int, target geometry.Poi
 	mana := caster.GetStats().GetResource(stats.Mana)
 	if mana.Value() < cost>>6 || s.Flags&d1.ISplNoMana != 0 && cost > 0 {
 		f.Msg("Not enough mana.")
+		f.PlayD1HeroSound(35)
 		return
 	}
 	if spell == d1.SplIdentify && f.identifyTarget == nil {

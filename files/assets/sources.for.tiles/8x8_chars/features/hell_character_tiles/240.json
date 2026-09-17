@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/240",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "gray block on left",
+      "brown bar right"
+    ],
+    "shape": [
+      "square head",
+      "wide gray block left",
+      "banded body",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "shield held at side"
+    ],
+    "colors": [
+      "red face with black eyes",
+      "gray hood and left block",
+      "white body",
+      "orange belt"
+    ],
+    "major_regions": [
+      "gray hood over red face",
+      "large gray block at left",
+      "white tunic with orange belt",
+      "red hand at right",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray left block could be a shield or cloak",
+      "red face could be demonic",
+      "right bar could be a spear or staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "demon warrior",
+      "red-faced guard"
+    ],
+    "visual_symbols": [
+      "shield",
+      "red face",
+      "staff",
+      "hood"
+    ],
+    "priority_features": [
+      "red face under gray hood",
+      "gray shield-like block",
+      "orange belt"
+    ]
+  }
+}

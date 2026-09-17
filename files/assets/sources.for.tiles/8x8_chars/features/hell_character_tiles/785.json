@@ -1,0 +1,66 @@
+{
+  "id": "hell_character_tiles/785",
+  "perceptual": {
+    "silhouette": [
+      "robed humanoid silhouette",
+      "hooded head",
+      "wide shoulders with light collar",
+      "gray pole at right"
+    ],
+    "shape": [
+      "yellow hood mass framing ochre face",
+      "yellow collar band",
+      "orange and olive lower bands",
+      "vertical gray pole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "yellow hood and collar",
+      "ochre face",
+      "green face pixel",
+      "orange belt",
+      "olive robe"
+    ],
+    "major_regions": [
+      "yellow hood over ochre face",
+      "orange belt with gray buckle",
+      "olive robe",
+      "gray staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "yellow top could be a hood or golden helm",
+      "gray pole could be a staff or spear",
+      "gold side pixels could be hands"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "high priest",
+      "mage",
+      "lightning sorcerer"
+    ],
+    "visual_symbols": [
+      "hood",
+      "staff",
+      "collar"
+    ],
+    "priority_features": [
+      "yellow hood",
+      "olive-yellow robe",
+      "orange belt",
+      "gray staff at right"
+    ]
+  }
+}

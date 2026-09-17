@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/654",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "rounded head",
+      "wide lower body",
+      "thin vertical pole at right"
+    ],
+    "shape": [
+      "round dark-brown head mass",
+      "broad yellow lower mass",
+      "narrow brown vertical line"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "brown head",
+      "yellow body",
+      "small orange accent at left"
+    ],
+    "major_regions": [
+      "brown head with two dark eyes",
+      "yellow robe-like body",
+      "brown staff at right edge"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "right pole could be a staff",
+      "yellow mass could be a robe",
+      "orange block could be a held item or sash"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "monk",
+      "robed figure",
+      "villager"
+    ],
+    "visual_symbols": [
+      "staff",
+      "robe",
+      "bald or hooded head"
+    ],
+    "priority_features": [
+      "yellow robe",
+      "staff at right",
+      "round brown head"
+    ]
+  }
+}

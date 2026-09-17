@@ -1,0 +1,62 @@
+{
+  "id": "lofi_char_tiles/16",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "long hair framing face",
+      "wide dress base",
+      "line on right"
+    ],
+    "shape": [
+      "orange-blonde hair mass",
+      "square face",
+      "magenta dress",
+      "thin vertical staff"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "orange-yellow hair",
+      "magenta and purple dress",
+      "yellow face",
+      "brown staff"
+    ],
+    "major_regions": [
+      "blonde hair around face",
+      "bright magenta dress",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "hair mass could be long hair",
+      "magenta body could be a dress or robe",
+      "right line could be a staff or wand"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "female mage",
+      "sorceress",
+      "princess"
+    ],
+    "visual_symbols": [
+      "long hair",
+      "dress",
+      "staff"
+    ],
+    "priority_features": [
+      "long blonde hair",
+      "magenta dress",
+      "staff"
+    ]
+  }
+}

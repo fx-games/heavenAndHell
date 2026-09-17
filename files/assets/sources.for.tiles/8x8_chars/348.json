@@ -1,0 +1,65 @@
+{
+  "id": "lofi_char_tiles/348",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "rounded head with top covering",
+      "wide gray body",
+      "short legs",
+      "vertical bar at right"
+    ],
+    "shape": [
+      "rust-brown cap shape on top of head",
+      "gray face with two dark square holes",
+      "large gray torso and arms",
+      "gray vertical strip with brown pixel at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon at side"
+    ],
+    "colors": [
+      "mostly gray",
+      "rust brown top",
+      "black eye holes",
+      "small brown accent"
+    ],
+    "major_regions": [
+      "brown hair or hood over gray face",
+      "gray body",
+      "weapon-like bar at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "undead humanoid"
+    ],
+    "possible_features": [
+      "brown top could be hair or a hood",
+      "gray body could be undead skin",
+      "right bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead barbarian",
+      "zombie",
+      "ghoul warrior"
+    ],
+    "visual_symbols": [
+      "hair or hood",
+      "hollow eyes",
+      "sword-like bar"
+    ],
+    "priority_features": [
+      "gray body",
+      "brown hair or hood",
+      "two dark eye holes",
+      "weapon at right"
+    ]
+  }
+}

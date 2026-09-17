@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/181",
+  "perceptual": {
+    "silhouette": [
+      "round orb silhouette",
+      "rimmed outline",
+      "small notches at sides"
+    ],
+    "shape": [
+      "round white-gray disc",
+      "large black central region",
+      "white highlight inside dark center",
+      "dark horizontal band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "floating",
+      "static"
+    ],
+    "colors": [
+      "white and light gray rim",
+      "black center",
+      "dark gray lower shading"
+    ],
+    "major_regions": [
+      "pale rim",
+      "black pupil-like center"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "floating eye",
+      "amorphous orb"
+    ],
+    "possible_features": [
+      "black center with highlight could be a pupil",
+      "could be an eyeball, a lens, or a skull-like orb",
+      "horizontal band could be a slit"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "floating eyeball",
+      "orb",
+      "watcher"
+    ],
+    "visual_symbols": [
+      "large pupil",
+      "round eye"
+    ],
+    "priority_features": [
+      "round pale orb",
+      "large black center",
+      "small white highlight",
+      "no limbs"
+    ]
+  }
+}

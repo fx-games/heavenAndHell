@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/660",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "head with horizontal band",
+      "large gray block at left",
+      "thin pole at right"
+    ],
+    "shape": [
+      "gray horizontal band across head",
+      "brown face",
+      "tall gray rectangle left",
+      "yellow chest block",
+      "white lower region"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding shield and staff"
+    ],
+    "colors": [
+      "brown face",
+      "gray headband and left panel",
+      "yellow chest",
+      "white lower body"
+    ],
+    "major_regions": [
+      "gray band over brown head",
+      "gray shield-like panel left",
+      "yellow and white torso",
+      "brown pole right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray band could be a helmet rim or headband",
+      "left gray panel could be a shield",
+      "right pole could be a spear or staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "guard",
+      "paladin",
+      "soldier"
+    ],
+    "visual_symbols": [
+      "shield",
+      "spear or staff",
+      "helmet rim"
+    ],
+    "priority_features": [
+      "large left shield",
+      "gray head band",
+      "yellow and white body"
+    ]
+  }
+}

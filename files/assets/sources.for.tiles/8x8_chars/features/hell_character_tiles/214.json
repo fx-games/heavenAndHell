@@ -1,0 +1,66 @@
+{
+  "id": "hell_character_tiles/214",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "hooded squared head",
+      "vertical brown bar at right"
+    ],
+    "shape": [
+      "blue hood mass",
+      "dark navy face with two pink eyes",
+      "red belt",
+      "long thin vertical extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object"
+    ],
+    "colors": [
+      "deep blue hood and robe",
+      "dark navy face",
+      "pink eyes",
+      "red belt"
+    ],
+    "major_regions": [
+      "blue hood",
+      "dark face with pink glowing eyes",
+      "red belt with gray buckle",
+      "blue robe",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "blue mass could be a hood",
+      "dark face with bright eyes could be shadow or undead",
+      "brown bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "hooded wraith",
+      "undead mage",
+      "shadow cultist"
+    ],
+    "visual_symbols": [
+      "hood",
+      "glowing eyes",
+      "shadowed face",
+      "staff"
+    ],
+    "priority_features": [
+      "blue hood",
+      "dark face with pink eyes",
+      "blue robe",
+      "brown staff"
+    ]
+  }
+}

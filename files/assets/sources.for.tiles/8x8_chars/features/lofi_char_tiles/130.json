@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/130",
+ "perceptual": {
+  "silhouette": [
+   "stocky humanoid silhouette",
+   "raised pieces at top corners",
+   "wide body"
+  ],
+  "shape": [
+   "orange hood-like frame around head",
+   "yellow face",
+   "gray belt",
+   "brown lower body"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "orange upper body",
+   "yellow face and legs",
+   "gray belt",
+   "brown lower"
+  ],
+  "major_regions": [
+   "orange hood or hair surrounding face",
+   "yellow face with dark eyes",
+   "gray belt",
+   "brown trousers"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid"
+  ],
+  "possible_features": [
+   "orange frame could be a hood, hair or beast mane",
+   "top corner bumps could be ears",
+   "gray band could be a belt"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "monk",
+   "villager",
+   "beast-man"
+  ],
+  "visual_symbols": [
+   "hood",
+   "belt",
+   "possible ears"
+  ],
+  "priority_features": [
+   "orange hood framing face",
+   "gray belt",
+   "stocky body"
+  ]
+ }
+}

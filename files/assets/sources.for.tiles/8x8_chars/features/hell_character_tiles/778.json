@@ -1,0 +1,67 @@
+{
+  "id": "hell_character_tiles/778",
+  "perceptual": {
+    "silhouette": [
+      "robed humanoid silhouette",
+      "hooded head",
+      "dark face opening",
+      "wide robe"
+    ],
+    "shape": [
+      "purple hood mass",
+      "black face region with two red points",
+      "wide purple robe",
+      "horizontal red belt band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "mostly purple",
+      "black face",
+      "red eyes",
+      "red belt",
+      "small gold accents"
+    ],
+    "major_regions": [
+      "purple hood with black shadowed face",
+      "red glowing eyes",
+      "red belt with gray center",
+      "gold pixels at sides"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "black face could be a shadowed hood interior",
+      "red points could be glowing eyes",
+      "gold side pixels could be hands or bracelets"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dark cultist",
+      "hooded wraith",
+      "sorcerer",
+      "shadow priest"
+    ],
+    "visual_symbols": [
+      "hood",
+      "faceless darkness",
+      "glowing red eyes",
+      "robe"
+    ],
+    "priority_features": [
+      "purple hood",
+      "black face with red eyes",
+      "purple robe",
+      "red belt"
+    ]
+  }
+}

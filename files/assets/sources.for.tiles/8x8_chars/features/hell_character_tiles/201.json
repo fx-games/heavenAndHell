@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/201",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "rounded head",
+      "vertical gray bar at right"
+    ],
+    "shape": [
+      "yellow head mass with one eye",
+      "brown horizontal band",
+      "dark belt",
+      "brown lower body"
+    ],
+    "orientation": [
+      "side-facing",
+      "facing right"
+    ],
+    "pose": [
+      "standing",
+      "holding blade-like object"
+    ],
+    "colors": [
+      "yellow skin",
+      "brown bands and trousers",
+      "gray bar"
+    ],
+    "major_regions": [
+      "yellow head in profile",
+      "brown strap across torso",
+      "dark belt with gray buckle",
+      "brown trousers",
+      "gray sword"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "brown band could be a strap or arm",
+      "gray bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "adventurer",
+      "fighter",
+      "commoner warrior"
+    ],
+    "visual_symbols": [
+      "sword",
+      "belt"
+    ],
+    "priority_features": [
+      "yellow profile head",
+      "gray sword",
+      "brown trousers",
+      "brown strap"
+    ]
+  }
+}

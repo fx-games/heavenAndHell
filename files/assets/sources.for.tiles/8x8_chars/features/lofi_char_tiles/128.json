@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/128",
+ "perceptual": {
+  "silhouette": [
+   "stocky humanoid silhouette",
+   "irregular hair outline on top",
+   "side flaps at shoulders"
+  ],
+  "shape": [
+   "rounded yellow head",
+   "orange hair/side masses",
+   "gray horizontal belt",
+   "brown lower body"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "yellow skin",
+   "orange hair",
+   "gray belt",
+   "brown lower body"
+  ],
+  "major_regions": [
+   "yellow face with black eyes",
+   "orange hair and shoulders",
+   "gray belt band",
+   "brown legs area"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid"
+  ],
+  "possible_features": [
+   "orange top could be messy hair",
+   "gray band could be a belt",
+   "side orange masses could be arms or hair"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "peasant",
+   "villager",
+   "dwarf",
+   "barbarian"
+  ],
+  "visual_symbols": [
+   "belt",
+   "wild hair"
+  ],
+  "priority_features": [
+   "orange hair over yellow face",
+   "gray belt band",
+   "stocky body"
+  ]
+ }
+}

@@ -1,0 +1,66 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/228",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "yellow cap-like mass on top",
+   "vertical pole along right side",
+   "wide head"
+  ],
+  "shape": [
+   "wide head with flat yellow top",
+   "rectangular torso",
+   "thin brown vertical line right",
+   "small leg stubs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding upright pole"
+  ],
+  "colors": [
+   "green skin",
+   "yellow top region",
+   "red/pink chest",
+   "purple waist",
+   "brown pole"
+  ],
+  "major_regions": [
+   "yellow hair region",
+   "green face with white eyes",
+   "red chest",
+   "brown staff at right"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "yellow top could be hair or helmet",
+   "vertical brown line could be a staff or spear",
+   "white spots could be eyes"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "goblin",
+   "orc",
+   "green-skinned humanoid shaman"
+  ],
+  "visual_symbols": [
+   "yellow hair",
+   "staff",
+   "white eyes"
+  ],
+  "priority_features": [
+   "green face with yellow top",
+   "staff at right",
+   "red chest",
+   "purple waist"
+  ]
+ }
+}

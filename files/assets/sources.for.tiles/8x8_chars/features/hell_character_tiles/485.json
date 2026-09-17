@@ -1,0 +1,59 @@
+{
+  "id": "hell_character_tiles/485",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "gray side columns"
+    ],
+    "shape": [
+      "rust-orange helmet block",
+      "dark T-shaped slit",
+      "gray side columns",
+      "dark belt"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "rust orange head and body",
+      "black T visor",
+      "gray sides",
+      "dark brown belt"
+    ],
+    "major_regions": [
+      "orange helmet with dark T slit",
+      "gray arms or cloak at left",
+      "orange torso",
+      "dark belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "T slit could be a helmet visor",
+      "gray sides could be arms or chainmail",
+      "orange could be bronze or rusty armor"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "knight",
+      "armored warrior"
+    ],
+    "visual_symbols": [
+      "T-visor helmet",
+      "armor"
+    ],
+    "priority_features": [
+      "orange T-visor helmet",
+      "orange armor",
+      "gray side arms"
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/810",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "hood or helmet covering head",
+      "short tunic with feet",
+      "gray pole on right"
+    ],
+    "shape": [
+      "brown top mass",
+      "face window",
+      "tunic body",
+      "thin vertical line upper right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon"
+    ],
+    "colors": [
+      "brown hood and tunic",
+      "light blue face and feet",
+      "dark belt",
+      "gray pole"
+    ],
+    "major_regions": [
+      "brown head covering and body",
+      "pale face with bright eyes",
+      "gray weapon line"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "brown top could be a hood or leather helmet",
+      "gray line could be a sword or spear"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "rogue",
+      "bandit",
+      "peasant fighter",
+      "goblin"
+    ],
+    "visual_symbols": [
+      "hood",
+      "blade or spear",
+      "tunic"
+    ],
+    "priority_features": [
+      "brown hood and tunic",
+      "gray weapon on right",
+      "pale blue face"
+    ]
+  }
+}

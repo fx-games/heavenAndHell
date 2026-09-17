@@ -1,0 +1,66 @@
+{
+  "id": "hell_character_tiles/680",
+  "perceptual": {
+    "silhouette": [
+      "stocky humanoid silhouette",
+      "wide flat-topped head covering",
+      "squat body",
+      "gray bar at right"
+    ],
+    "shape": [
+      "yellow brimmed headgear",
+      "brown face",
+      "red-orange belt band with gray center",
+      "yellow lower mass"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon"
+    ],
+    "colors": [
+      "yellow headgear and lower body",
+      "brown face",
+      "red-orange belt",
+      "gray blade"
+    ],
+    "major_regions": [
+      "yellow helmet",
+      "brown face",
+      "belt with buckle",
+      "yellow legs/lower body",
+      "gray weapon right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "short stocky humanoid"
+    ],
+    "possible_features": [
+      "yellow top could be a helmet or hard hat",
+      "band could be a belt with buckle",
+      "gray bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dwarf",
+      "miner",
+      "warrior"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "belt buckle",
+      "blade"
+    ],
+    "priority_features": [
+      "yellow helmet",
+      "belt with buckle",
+      "stocky build",
+      "gray blade"
+    ]
+  }
+}

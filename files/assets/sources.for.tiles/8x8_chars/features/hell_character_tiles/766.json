@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/766",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "rounded pale head",
+      "green body bands",
+      "thin reddish-brown bar at right"
+    ],
+    "shape": [
+      "large pale head",
+      "two green horizontal bands",
+      "red belt band with gray center",
+      "thin vertical bar"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding long object"
+    ],
+    "colors": [
+      "pale cyan head",
+      "red eyes",
+      "bright green tunic",
+      "dark red belt",
+      "brown bar"
+    ],
+    "major_regions": [
+      "pale head with red eyes",
+      "green tunic",
+      "brown bow or pole at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "right bar could be a bow or staff",
+      "gray center could be a buckle",
+      "pale head suggests undead or otherworldly skin"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead ranger",
+      "ghoul archer",
+      "corrupted hunter"
+    ],
+    "visual_symbols": [
+      "bow or staff",
+      "green tunic",
+      "red eyes"
+    ],
+    "priority_features": [
+      "green tunic",
+      "red eyes in pale face",
+      "brown bar at right",
+      "red belt"
+    ]
+  }
+}

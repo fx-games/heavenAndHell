@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/426",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with two small top points",
+      "brown bar right"
+    ],
+    "shape": [
+      "square head",
+      "small bright blue square on forehead",
+      "teal robe with dark central stripe"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "green head",
+      "teal robe",
+      "bright blue forehead pixel",
+      "brown pole"
+    ],
+    "major_regions": [
+      "green horned head with blue forehead mark",
+      "teal robe split by dark vertical line",
+      "brown staff strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "blue forehead pixel could be a gem, third eye or circlet",
+      "top points could be horns",
+      "dark center line could be robe opening"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin shaman",
+      "orc mage",
+      "demon sorcerer"
+    ],
+    "visual_symbols": [
+      "forehead gem",
+      "horns",
+      "robe",
+      "staff"
+    ],
+    "priority_features": [
+      "blue forehead gem",
+      "green horned head",
+      "teal robe",
+      "brown staff"
+    ]
+  }
+}

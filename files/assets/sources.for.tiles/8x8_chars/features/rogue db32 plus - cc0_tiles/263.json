@@ -1,0 +1,62 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/263",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "spiky top edge",
+      "wide shoulders",
+      "short legs"
+    ],
+    "shape": [
+      "wide green head",
+      "pink-red torso",
+      "thin legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "green head and arms",
+      "pink-red torso",
+      "dark eyes and red nose"
+    ],
+    "major_regions": [
+      "green head with dark eyes",
+      "red nose pixel",
+      "pink-red tunic with gray",
+      "green feet"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "small humanoid"
+    ],
+    "possible_features": [
+      "jagged top could be pointed ears",
+      "red pixel could be a nose",
+      "pink region could be clothing"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin",
+      "orc",
+      "small humanoid monster"
+    ],
+    "visual_symbols": [
+      "pointed ears",
+      "green skin",
+      "tunic"
+    ],
+    "priority_features": [
+      "green head with jagged top",
+      "dark eyes and red nose",
+      "pink-red tunic",
+      "unarmed humanoid stance"
+    ]
+  }
+}

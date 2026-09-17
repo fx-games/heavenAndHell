@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/51",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "rounded white head covering",
+      "thin curved shape at right"
+    ],
+    "shape": [
+      "large rounded white top mass",
+      "yellow face",
+      "green torso",
+      "thin arc-like brown extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding item at side"
+    ],
+    "colors": [
+      "white head covering",
+      "yellow face",
+      "green body",
+      "brown side item"
+    ],
+    "major_regions": [
+      "white hood or turban over yellow face",
+      "green tunic with brown belt",
+      "brown bow-like arc at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "white rounded top could be a hood, turban or white hair",
+      "brown arc could be a bow"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "archer",
+      "ranger",
+      "desert or robed adventurer"
+    ],
+    "visual_symbols": [
+      "white hood",
+      "bow",
+      "tunic"
+    ],
+    "priority_features": [
+      "white head covering",
+      "green tunic",
+      "brown bow-like arc at side"
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/723",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "gray band across head",
+      "brown vertical bar at right edge",
+      "white lower body"
+    ],
+    "shape": [
+      "rounded head with band",
+      "cyan torso",
+      "white lower mass"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object at side"
+    ],
+    "colors": [
+      "cyan head and torso",
+      "gray headband",
+      "orange belt",
+      "white lower body",
+      "brown bar"
+    ],
+    "major_regions": [
+      "cyan face with gray band and white eyes",
+      "orange belt",
+      "white trousers or robe",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray band could be a headband or visor",
+      "white lower region could be pale robes",
+      "brown bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "monk",
+      "humanoid monster",
+      "robed humanoid"
+    ],
+    "visual_symbols": [
+      "headband",
+      "belt",
+      "staff"
+    ],
+    "priority_features": [
+      "gray headband",
+      "cyan skin with white eyes",
+      "orange belt",
+      "staff at right"
+    ]
+  }
+}

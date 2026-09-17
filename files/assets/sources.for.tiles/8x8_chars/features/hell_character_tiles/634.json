@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/634",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large rounded head",
+      "wide body"
+    ],
+    "shape": [
+      "yellow dome head",
+      "blue eyes",
+      "dark blue torso",
+      "red belt with gray buckle"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object"
+    ],
+    "colors": [
+      "yellow head",
+      "dark blue body",
+      "red belt",
+      "brown pole"
+    ],
+    "major_regions": [
+      "yellow head with blue eyes",
+      "blue tunic",
+      "red belt",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "brown pole could be a staff or spear",
+      "gray center could be a buckle"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "guard",
+      "villager",
+      "bald humanoid"
+    ],
+    "visual_symbols": [
+      "bald head",
+      "staff",
+      "belt"
+    ],
+    "priority_features": [
+      "large yellow head",
+      "blue eyes",
+      "dark blue clothing",
+      "red belt"
+    ]
+  }
+}

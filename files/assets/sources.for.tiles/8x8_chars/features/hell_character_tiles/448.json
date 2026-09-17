@@ -1,0 +1,57 @@
+{
+  "id": "hell_character_tiles/448",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with top points and red band",
+      "plain dark right edge"
+    ],
+    "shape": [
+      "square head",
+      "red headband",
+      "red torso with orange band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "steel-blue face",
+      "mostly red body",
+      "orange belt"
+    ],
+    "major_regions": [
+      "blue horned face under red headband",
+      "red clothing with orange belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "red band could be a headband",
+      "top points could be horns",
+      "no weapon clearly visible"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "blue demon brawler",
+      "horned monk"
+    ],
+    "visual_symbols": [
+      "headband",
+      "horns",
+      "red clothing"
+    ],
+    "priority_features": [
+      "red headband on blue head",
+      "red body with orange belt",
+      "no weapon"
+    ]
+  }
+}

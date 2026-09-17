@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/221",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "dark head",
+      "gray bar at right",
+      "gold pixel at left side"
+    ],
+    "shape": [
+      "square head",
+      "broad torso",
+      "dark lower mass",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon"
+    ],
+    "colors": [
+      "dark navy head",
+      "pink eye dots",
+      "green torso with large red central shape",
+      "dark green lower body",
+      "gray blade"
+    ],
+    "major_regions": [
+      "dark hood/head with pink eyes",
+      "red chest emblem on green torso",
+      "gold spot on left",
+      "dark lower body",
+      "gray blade at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red chest shape could be a heraldic emblem or tabard",
+      "gold left pixel could be a shield boss or hand",
+      "gray right bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "knight",
+      "crusader",
+      "warrior"
+    ],
+    "visual_symbols": [
+      "chest emblem",
+      "sword",
+      "dark helmet"
+    ],
+    "priority_features": [
+      "red emblem on green torso",
+      "dark head with pink eyes",
+      "gray blade on right"
+    ]
+  }
+}

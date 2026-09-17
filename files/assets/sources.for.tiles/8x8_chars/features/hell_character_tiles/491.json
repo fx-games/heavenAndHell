@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/491",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "vertical gray strip at right",
+      "dark feet at bottom"
+    ],
+    "shape": [
+      "yellow cap mass",
+      "pale face with dark eyes",
+      "yellow shoulders",
+      "brown-orange belt",
+      "yellow-green skirt"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "yellow cap and shoulders",
+      "pale face",
+      "gray right strip",
+      "orange-brown belt",
+      "dark legs"
+    ],
+    "major_regions": [
+      "yellow helmet or cap",
+      "pale face",
+      "yellow and brown torso",
+      "gray blade-like strip at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "yellow top could be a helmet or hat",
+      "gray right strip could be a sword",
+      "dark bottom pixels could be boots"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "warrior",
+      "adventurer",
+      "soldier"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "sword",
+      "belt"
+    ],
+    "priority_features": [
+      "yellow helmet",
+      "gray sword-like strip",
+      "pale face with dark eyes"
+    ]
+  }
+}

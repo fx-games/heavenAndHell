@@ -1,0 +1,62 @@
+{
+ "id": "lofi_char_tiles/141",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette with wide head",
+   "body widening into robe",
+   "long vertical line at right"
+  ],
+  "shape": [
+   "wide green head",
+   "pointed side extensions",
+   "wide brown lower mass",
+   "thin vertical bar at right"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding staff"
+  ],
+  "colors": [
+   "bright green skin",
+   "dark brown clothing",
+   "brown vertical staff"
+  ],
+  "major_regions": [
+   "green head with dark eyes",
+   "brown robe covering body with white collar",
+   "brown pole at right side"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "stocky biped"
+  ],
+  "possible_features": [
+   "brown lower mass could be a robe",
+   "vertical brown line could be a staff",
+   "side points could be ears"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "goblin shaman",
+   "green-skinned mage",
+   "monster spellcaster"
+  ],
+  "visual_symbols": [
+   "robe",
+   "staff",
+   "pointed ears"
+  ],
+  "priority_features": [
+   "green skin",
+   "brown robe",
+   "long staff",
+   "wide head"
+  ]
+ }
+}

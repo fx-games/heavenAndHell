@@ -1,0 +1,61 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/267",
+  "perceptual": {
+    "silhouette": [
+      "irregular sprawling blob silhouette",
+      "ragged outline",
+      "no clear limbs",
+      "gaps and holes in shape"
+    ],
+    "shape": [
+      "loose irregular mass",
+      "scattered lighter pixels",
+      "extends to right and bottom edges"
+    ],
+    "orientation": [
+      "ambiguous"
+    ],
+    "pose": [
+      "ambiguous",
+      "flowing"
+    ],
+    "colors": [
+      "medium blue dominant",
+      "darker blue shading",
+      "cyan highlight flecks"
+    ],
+    "major_regions": [
+      "mottled blue mass",
+      "scattered cyan highlight pixels",
+      "dark gaps within body"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "amorphous"
+    ],
+    "possible_features": [
+      "mottled shape could be water, slime or ooze",
+      "cyan flecks could be bubbles or glints",
+      "no face visible"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "water elemental",
+      "ooze",
+      "slime",
+      "liquid mass"
+    ],
+    "visual_symbols": [
+      "splash",
+      "formless body",
+      "bubbles"
+    ],
+    "priority_features": [
+      "formless irregular blue mass",
+      "scattered cyan highlights",
+      "no visible face or limbs"
+    ]
+  }
+}

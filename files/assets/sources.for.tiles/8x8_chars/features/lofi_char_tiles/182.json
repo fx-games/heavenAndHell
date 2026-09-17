@@ -1,0 +1,63 @@
+{
+  "id": "lofi_char_tiles/182",
+  "perceptual": {
+    "silhouette": [
+      "tall broad silhouette",
+      "many thin spiky branches radiating upward and outward",
+      "narrow trunk base"
+    ],
+    "shape": [
+      "central trunk-like column",
+      "branch-like spikes around top",
+      "two glowing eye spots",
+      "dark hole mouth below eyes"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "branches spread"
+    ],
+    "colors": [
+      "dark brown branches",
+      "lighter brown lower trunk",
+      "yellow-green eyes",
+      "black mouth"
+    ],
+    "major_regions": [
+      "brown branching upper region",
+      "two glowing eyes in center",
+      "trunk base"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "plant/tree creature",
+      "limbless trunk"
+    ],
+    "possible_features": [
+      "radiating spikes could be bare branches",
+      "yellow-green spots read as eyes",
+      "dark hole could be a mouth or knot"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "treant",
+      "dead tree monster",
+      "haunted tree"
+    ],
+    "visual_symbols": [
+      "glowing eyes",
+      "bare branches",
+      "trunk face"
+    ],
+    "priority_features": [
+      "spiky branch silhouette",
+      "two glowing eyes",
+      "trunk with mouth hole",
+      "no leaves"
+    ]
+  }
+}

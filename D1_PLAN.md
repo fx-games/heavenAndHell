@@ -93,6 +93,10 @@ Every D1 single-player quest runs as D1 1.09 progresses it (`common/d1_quest.go`
 
 ## Defaults (not grilled)
 
+- **Hellfire is a switch** (`Hellfire` in `config.rec`, "Hellfire content" in the start menu, default on). Off, a new
+  game runs on `LoadD1`'s tables with D1's three classes, no Hellfire quests or towners, so the Nest and the Crypt
+  never open. The save keeps `D1Only`; turning the switch on upgrades that save on Continue (never back), dropping
+  its level snapshots, since Hellfire rolls levels 1-16 differently.
 - Hellfire's six-class roster is in: Monk, Bard and Barbarian, with their skills (Search, Identify, Rage), their
   attribute tables (devilutionX `txtdata/classes/<class>/attributes.tsv`, which also reproduces D1 1.09's) and
   their class traits (critical strike, trap sense, iron skin, natural resistance, the Monk's bare-handed block).

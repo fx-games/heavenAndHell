@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/739",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "dark blue hood-like head",
+      "white shapes flanking head",
+      "blue robe-like base"
+    ],
+    "shape": [
+      "rounded hood mass",
+      "tan face",
+      "broad lower robe"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "dark blue hood and robe",
+      "tan face and hands",
+      "red-brown belt",
+      "white upper flanks"
+    ],
+    "major_regions": [
+      "dark blue hood around tan face with dark eyes",
+      "blue robe with red belt",
+      "white regions beside head"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "blue top could be a hood or hat",
+      "blue lower body could be a robe",
+      "white flanks could be a collar or cape"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mage",
+      "robed humanoid",
+      "cleric"
+    ],
+    "visual_symbols": [
+      "hood",
+      "robe",
+      "belt"
+    ],
+    "priority_features": [
+      "dark blue hood",
+      "tan face",
+      "blue robe with red belt"
+    ]
+  }
+}

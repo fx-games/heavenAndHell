@@ -1,0 +1,65 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/230",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "yellow cap-like mass on top",
+   "arms slightly out",
+   "no held object"
+  ],
+  "shape": [
+   "wide head with yellow top",
+   "long purple torso",
+   "pink band below torso",
+   "short legs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms at sides"
+  ],
+  "colors": [
+   "green skin",
+   "yellow top",
+   "white eyes",
+   "purple torso",
+   "pink lower band"
+  ],
+  "major_regions": [
+   "yellow hair",
+   "green face with white eyes",
+   "purple robe/tunic",
+   "pink skirt band"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "yellow top could be hair",
+   "purple and pink could be dress or robe"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "goblin",
+   "green-skinned humanoid",
+   "female goblin"
+  ],
+  "visual_symbols": [
+   "yellow hair",
+   "white eyes",
+   "robe"
+  ],
+  "priority_features": [
+   "green face with yellow hair",
+   "purple tunic",
+   "pink lower band",
+   "unarmed"
+  ]
+ }
+}

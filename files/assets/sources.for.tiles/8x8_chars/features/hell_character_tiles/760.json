@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/760",
+  "perceptual": {
+    "silhouette": [
+      "robed humanoid silhouette",
+      "rounded pale head",
+      "wide robe",
+      "thin brown pole at right"
+    ],
+    "shape": [
+      "large pale head",
+      "dark blue robe mass",
+      "red belt band with gray center",
+      "vertical pole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "pale cyan head",
+      "red eyes",
+      "deep blue robe",
+      "dark red belt"
+    ],
+    "major_regions": [
+      "pale head with red eyes",
+      "blue robe",
+      "red belt with buckle",
+      "staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "pole could be a staff",
+      "gray center could be a buckle",
+      "pale skin could be undead or magical"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mage",
+      "wizard",
+      "cultist"
+    ],
+    "visual_symbols": [
+      "staff",
+      "robe",
+      "red eyes"
+    ],
+    "priority_features": [
+      "deep blue robe",
+      "red eyes in pale face",
+      "staff at right",
+      "red belt"
+    ]
+  }
+}

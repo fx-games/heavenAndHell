@@ -1,0 +1,64 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/225",
+ "perceptual": {
+  "silhouette": [
+   "stocky humanoid silhouette",
+   "rounded head",
+   "arms slightly out from body",
+   "no held object"
+  ],
+  "shape": [
+   "squarish head mass",
+   "wide torso",
+   "purple rectangular lower band",
+   "two leg stubs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms at sides"
+  ],
+  "colors": [
+   "red/salmon body",
+   "pink eye spots",
+   "purple waist band",
+   "dark background"
+  ],
+  "major_regions": [
+   "red head with pink eyes",
+   "dark maroon chest",
+   "purple hip band",
+   "red legs"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "pink spots could be eyes",
+   "purple band could be a loincloth"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "demon",
+   "imp",
+   "red-skinned monster",
+   "brute"
+  ],
+  "visual_symbols": [
+   "glowing eyes",
+   "loincloth",
+   "bare body"
+  ],
+  "priority_features": [
+   "red stocky unarmed body",
+   "pink eyes",
+   "purple waist band"
+  ]
+ }
+}

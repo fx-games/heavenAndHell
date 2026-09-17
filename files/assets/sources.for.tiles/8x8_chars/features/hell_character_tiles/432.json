@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/432",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with top points",
+      "brown strip right"
+    ],
+    "shape": [
+      "square head",
+      "dark torso crossed by two brown bands"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole"
+    ],
+    "colors": [
+      "green head",
+      "dark torso",
+      "brown straps",
+      "brown pole"
+    ],
+    "major_regions": [
+      "green horned face with dark eyes",
+      "dark body with brown straps",
+      "brown staff strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "brown bands could be leather straps",
+      "dark torso could be leather armor",
+      "top points could be horns"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin",
+      "orc rogue",
+      "mercenary"
+    ],
+    "visual_symbols": [
+      "straps",
+      "horns",
+      "pole weapon"
+    ],
+    "priority_features": [
+      "dark body with brown straps",
+      "green horned head",
+      "brown pole on right"
+    ]
+  }
+}

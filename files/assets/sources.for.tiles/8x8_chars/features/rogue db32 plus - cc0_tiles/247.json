@@ -1,0 +1,58 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/247",
+ "perceptual": {
+  "silhouette": [
+   "compact round silhouette",
+   "single centered circular mass",
+   "no limbs"
+  ],
+  "shape": [
+   "circle",
+   "dark square pupil offset right",
+   "small white highlight"
+  ],
+  "orientation": [
+   "front-facing",
+   "looking slightly right"
+  ],
+  "pose": [
+   "floating",
+   "ambiguous"
+  ],
+  "colors": [
+   "pale blue-white sphere",
+   "dark maroon center",
+   "gray edges"
+  ],
+  "major_regions": [
+   "large pale sphere",
+   "dark pupil region"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "amorphous",
+   "floating eye"
+  ],
+  "possible_features": [
+   "circle with dark center could be an eyeball",
+   "white pixel could be a specular highlight"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "floating eye",
+   "eyeball monster",
+   "orb"
+  ],
+  "visual_symbols": [
+   "eyeball",
+   "pupil"
+  ],
+  "priority_features": [
+   "round pale sphere",
+   "large dark pupil",
+   "no limbs"
+  ]
+ }
+}

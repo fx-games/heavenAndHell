@@ -1,0 +1,65 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/244",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "large white hood-like top",
+   "arms out to sides",
+   "thin legs"
+  ],
+  "shape": [
+   "tall white rounded head/hood mass",
+   "small gray eye squares",
+   "pale blue torso",
+   "thin limbs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms slightly out"
+  ],
+  "colors": [
+   "white head",
+   "gray eyes",
+   "pale blue body",
+   "dark background"
+  ],
+  "major_regions": [
+   "white hooded head",
+   "pale blue torso",
+   "gray limbs"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal",
+   "ghostly humanoid"
+  ],
+  "possible_features": [
+   "white top could be a hood or pale skull",
+   "pale colors could suggest a ghost or ice creature"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "ghost",
+   "specter",
+   "ice spirit",
+   "hooded figure"
+  ],
+  "visual_symbols": [
+   "hood",
+   "pale body",
+   "hollow eyes"
+  ],
+  "priority_features": [
+   "white hood/head",
+   "pale blue body",
+   "gray eye spots",
+   "arms out"
+  ]
+ }
+}

@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/346",
+  "perceptual": {
+    "silhouette": [
+      "blob-like humanoid silhouette",
+      "large rounded head merging into body",
+      "wide arms",
+      "two legs"
+    ],
+    "shape": [
+      "large uniform gray mass",
+      "two dark square eye holes",
+      "dark gap between legs",
+      "orange vertical dashed strip at right edge"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms outstretched"
+    ],
+    "colors": [
+      "almost entirely gray",
+      "black eye holes",
+      "orange vertical accent"
+    ],
+    "major_regions": [
+      "featureless gray body with hollow eyes",
+      "orange vertical object along right edge"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "amorphous humanoid",
+      "undead humanoid"
+    ],
+    "possible_features": [
+      "gray mass with two holes could be a ghost, golem or zombie",
+      "orange vertical strip could be a bow or staff",
+      "lack of clothing detail could suggest a blank or naked form"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ghost",
+      "golem",
+      "zombie",
+      "clay creature",
+      "shade"
+    ],
+    "visual_symbols": [
+      "hollow eyes",
+      "blank body",
+      "bow-like pole"
+    ],
+    "priority_features": [
+      "uniform gray body",
+      "two dark eye holes",
+      "orange vertical object at right"
+    ]
+  }
+}

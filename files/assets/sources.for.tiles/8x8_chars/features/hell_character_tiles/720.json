@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/720",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "dome-shaped cyan head",
+      "brown vertical bar at right edge",
+      "teal lower body"
+    ],
+    "shape": [
+      "rounded head mass",
+      "horizontal dark band",
+      "broad lower mass"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object at side"
+    ],
+    "colors": [
+      "cyan upper body",
+      "blue forehead spot",
+      "white eyes",
+      "dark teal lower body"
+    ],
+    "major_regions": [
+      "cyan domed head with blue forehead mark and white eyes",
+      "dark teal belt",
+      "teal robe",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "blob-like humanoid"
+    ],
+    "possible_features": [
+      "blue spot could be a gem or third eye",
+      "white squares could be eyes",
+      "brown bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "mage",
+      "humanoid monster",
+      "alien-like figure"
+    ],
+    "visual_symbols": [
+      "forehead gem",
+      "staff",
+      "robe"
+    ],
+    "priority_features": [
+      "blue forehead spot",
+      "cyan head with white eyes",
+      "teal robe",
+      "staff at right"
+    ]
+  }
+}

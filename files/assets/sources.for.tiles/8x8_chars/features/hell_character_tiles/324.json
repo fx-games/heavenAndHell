@@ -1,0 +1,69 @@
+{
+  "id": "hell_character_tiles/324",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "rounded head",
+      "robed body",
+      "vertical staff at right"
+    ],
+    "shape": [
+      "tan head",
+      "gray horizontal band across head",
+      "white rectangular body",
+      "orange horizontal waist band",
+      "thin brown vertical line at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "tan head",
+      "gray headband",
+      "white robe",
+      "orange belt",
+      "brown staff"
+    ],
+    "major_regions": [
+      "tan head with gray band",
+      "white robe",
+      "orange belt",
+      "brown pole at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "gray band could be a headband or circlet",
+      "white body could be a robe or gi",
+      "brown line could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "monk",
+      "cleric",
+      "pilgrim",
+      "healer"
+    ],
+    "visual_symbols": [
+      "white robe",
+      "staff",
+      "headband",
+      "belt"
+    ],
+    "priority_features": [
+      "white robe",
+      "orange belt",
+      "staff at right",
+      "gray headband"
+    ]
+  }
+}

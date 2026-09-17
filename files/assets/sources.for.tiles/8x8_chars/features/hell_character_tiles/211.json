@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/211",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "squared dark head",
+      "wide robed body",
+      "dark bar at right"
+    ],
+    "shape": [
+      "dark navy head mass",
+      "two pink square eyes",
+      "purple robe",
+      "red belt"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "dark navy head",
+      "pink eyes",
+      "purple robe",
+      "red belt"
+    ],
+    "major_regions": [
+      "dark head with pink eyes",
+      "small light pixel at top-left of head",
+      "purple robe",
+      "red belt with gray buckle",
+      "dark hands"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "dark head with bright eyes could be a shadow, undead or masked face",
+      "dark hand pixels could be gloves or corrupted skin"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead cultist",
+      "shadow creature",
+      "corrupted mage"
+    ],
+    "visual_symbols": [
+      "glowing eyes",
+      "dark face",
+      "robe"
+    ],
+    "priority_features": [
+      "dark navy head",
+      "two pink glowing eyes",
+      "purple robe",
+      "red belt"
+    ]
+  }
+}

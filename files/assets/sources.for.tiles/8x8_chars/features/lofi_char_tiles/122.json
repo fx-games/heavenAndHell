@@ -1,0 +1,59 @@
+{
+ "id": "lofi_char_tiles/122",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "vertical pole at right",
+   "helmeted head"
+  ],
+  "shape": [
+   "rounded head mass",
+   "blocky torso",
+   "long thin vertical bar on right"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding weapon upright"
+  ],
+  "colors": [
+   "pale blue body",
+   "darker blue eyes",
+   "mid-blue lower body"
+  ],
+  "major_regions": [
+   "pale helmeted head with dark eyes",
+   "blue armored body",
+   "vertical weapon at right"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid"
+  ],
+  "possible_features": [
+   "head shape could be a helmet",
+   "vertical bar could be a spear or sword",
+   "pale color may suggest ghostly or icy nature"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "knight",
+   "guard",
+   "ghost warrior",
+   "ice soldier"
+  ],
+  "visual_symbols": [
+   "helmet",
+   "spear or sword"
+  ],
+  "priority_features": [
+   "upright weapon at right",
+   "helmeted head with dark eyes",
+   "pale blue armored body"
+  ]
+ }
+}

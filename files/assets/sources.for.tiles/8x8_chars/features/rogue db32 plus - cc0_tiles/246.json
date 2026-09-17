@@ -1,0 +1,64 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/246",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "large white hood-like top",
+   "arms out to sides",
+   "thin legs"
+  ],
+  "shape": [
+   "tall white rounded head/hood mass",
+   "dark green eye squares",
+   "lime green torso",
+   "thin limbs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms slightly out"
+  ],
+  "colors": [
+   "white head",
+   "dark green eyes",
+   "bright lime body"
+  ],
+  "major_regions": [
+   "white hooded head",
+   "lime green body and limbs",
+   "green central glow"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal",
+   "ghostly humanoid"
+  ],
+  "possible_features": [
+   "white top could be a hood or pale skull",
+   "green body could suggest poison or spirit energy"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "spirit",
+   "ghost",
+   "hooded cultist",
+   "poison elemental"
+  ],
+  "visual_symbols": [
+   "hood",
+   "green glow",
+   "hollow eyes"
+  ],
+  "priority_features": [
+   "white hood/head",
+   "lime green body",
+   "dark eye spots",
+   "arms out"
+  ]
+ }
+}

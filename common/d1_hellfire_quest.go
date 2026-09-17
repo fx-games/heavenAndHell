@@ -39,11 +39,18 @@ func (s *State) ApplyHellfireOptions() {
 	g := s.mapGen
 	q := d1.InitQuests(g.d1Seeds)
 	q.SetHellfireOptions(s.GetFlags().IsSet(FlagCowQuest), s.GetFlags().IsSet(FlagTheoQuest))
+	if !s.hellfire() {
+		for i := d1.QGrave; i < d1.NumQuests; i++ {
+			q[i].Active = d1.QuestNotAvail
+		}
+	}
 	*g.d1Quests = q
 	if town := s.GetTownMap(string(defs.LevelNameTown)); town != nil {
 		updateD1Town(s, town)
 	}
 }
+
+func (s *State) hellfire() bool { return s.mapGen.factory.D1().D.Hellfire }
 
 // D1Level is the generated D1 level behind a built map, nil for any other.
 func (s *State) D1Level(m *gridmap.GridMap[*Actor, *Item, Object]) *d1.Level {
@@ -192,11 +199,11 @@ func updateD1Town(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 			m.RemoveTransitionAt(p)
 		}
 	}
-	flags := s.GetFlags()
+	flags, hf := s.GetFlags(), s.hellfire()
 	present := map[VendorType]bool{
-		VendorTypeFarmer:  !flags.IsSet(FlagCowQuest) && s.QuestVar(d1.QFarmer, 2) != 1,
-		VendorTypeCowFarm: flags.IsSet(FlagCowQuest),
-		VendorTypeGirl:    flags.IsSet(FlagTheoQuest) && s.GetLastDungeonLevel() >= 17 && s.QuestActive(d1.QGirl) != d1.QuestDone,
+		VendorTypeFarmer:  hf && !flags.IsSet(FlagCowQuest) && s.QuestVar(d1.QFarmer, 2) != 1,
+		VendorTypeCowFarm: hf && flags.IsSet(FlagCowQuest),
+		VendorTypeGirl:    hf && flags.IsSet(FlagTheoQuest) && s.GetLastDungeonLevel() >= 17 && s.QuestActive(d1.QGirl) != d1.QuestDone,
 	}
 	if s.awayTowners == nil {
 		s.awayTowners = map[VendorType]awayTowner{}
@@ -273,7 +280,7 @@ func (f *Factory) d1HellfireItemPickedUp(it *d1.Item) {
 			s.SetQuestActive(d1.QGrave, d1.QuestActive)
 		}
 		if s.QuestVar(d1.QGrave, 1) != 1 {
-			f.playD1HeroSound(79)
+			f.PlayD1HeroSound(79)
 			s.SetQuestVar(d1.QGrave, 1, 1)
 		}
 	case d1.IdiNote1, d1.IdiNote1 + 1, d1.IdiNote1 + 2:
@@ -285,7 +292,7 @@ func (f *Factory) d1HellfireItemPickedUp(it *d1.Item) {
 		for n := d1.IdiNote1; n <= d1.IdiNote1+2; n++ {
 			d1TakeItem(player, n)
 		}
-		f.playD1HeroSound(46)
+		f.PlayD1HeroSound(46)
 		player.GetInventory().Add(f.NewD1Item(f.Generator.PlainItem(d1.IdiFullNote)))
 	}
 }
@@ -341,8 +348,8 @@ func (f *Factory) D1MonsterGreeting(a *Actor) {
 }
 
 // d1HellfireArrival ports the level-entry parts: CheckQuests' activation of Grave Matters, the Defiler, Na-Krul
-// and The Jersey's Jersey one level above theirs, and PlayDungMsgs' Defiler lines on 17 and 19 and the hero's
-// "place of great power" on 21, each once.
+// and The Jersey's Jersey one level above theirs, and PlayDungMsgs: the hero's line on first entering 1, 5, 9 and
+// 13, Diablo's on 16, the Defiler's on 17 and 19 and the hero's "place of great power" on 21, each once.
 func (f *Factory) d1HellfireArrival(m *gridmap.GridMap[*Actor, *Item, Object]) {
 	s := f.State
 	dlvl := LevelFromName(m.GetName())
@@ -363,13 +370,17 @@ func (f *Factory) d1HellfireArrival(m *gridmap.GridMap[*Actor, *Item, Object]) {
 		return true
 	}
 	switch {
+	case (dlvl == 1 || dlvl == 5 || dlvl == 9 || dlvl == 13) && once(fmt.Sprint(dlvl)): // D1's own: cathedral, catacombs, caves, hell
+		f.PlayD1HeroSound(map[int]int{1: 97, 5: 96, 9: 98, 13: 99}[dlvl])
+	case dlvl == 16 && once("16"): // Diablo's greeting; 1.09 checks _pLvlVisited[15] by mistake and never plays it
+		f.playD1Sound("PS_DIABLVLINT")
 	case dlvl == 17 && once("17"):
 		s.logQuest(d1.QDefiler, 0)
 		f.say("The Defiler", "TEXT_DEFILER1")
 	case dlvl == 19 && once("19"):
 		f.say("The Defiler", "TEXT_DEFILER3")
 	case dlvl == 21 && once("21"):
-		f.playD1HeroSound(92)
+		f.PlayD1HeroSound(92)
 	}
 	if dlvl == 21 {
 		f.d1CornerstoneLoad(m)

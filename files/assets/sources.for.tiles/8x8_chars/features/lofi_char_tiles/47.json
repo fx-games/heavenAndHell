@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/47",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "large head with covering",
+      "tall thin vertical line at right side"
+    ],
+    "shape": [
+      "square head-like mass",
+      "hood-like dark cap framing face",
+      "blocky torso",
+      "thin vertical pole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding upright pole"
+    ],
+    "colors": [
+      "mostly dark gray",
+      "yellow face",
+      "brown pole and belt"
+    ],
+    "major_regions": [
+      "dark gray hood around yellow face",
+      "gray body with brown waist band",
+      "brown vertical staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "dark covering around face could be a hood or helmet",
+      "vertical brown line could be a staff or spear",
+      "small brown patch on top could be a hood peak or crest"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "hooded adventurer",
+      "rogue or monk",
+      "dwarf-like warrior"
+    ],
+    "visual_symbols": [
+      "hood",
+      "staff",
+      "belt"
+    ],
+    "priority_features": [
+      "dark gray hood framing yellow face",
+      "upright staff at side",
+      "stocky humanoid body"
+    ]
+  }
+}

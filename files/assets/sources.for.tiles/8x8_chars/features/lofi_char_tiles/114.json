@@ -1,0 +1,59 @@
+{
+ "id": "lofi_char_tiles/114",
+ "perceptual": {
+  "silhouette": [
+   "rounded blob with jagged upper fringe",
+   "wide flat base",
+   "small protrusion at right"
+  ],
+  "shape": [
+   "large rounded teal mass",
+   "lighter cyan rim",
+   "two square eye holes"
+  ],
+  "orientation": [
+   "front-facing",
+   "ambiguous"
+  ],
+  "pose": [
+   "hovering",
+   "ambiguous"
+  ],
+  "colors": [
+   "teal core",
+   "light cyan fringe",
+   "white eyes"
+  ],
+  "major_regions": [
+   "teal body",
+   "pale cyan flickering outline",
+   "two white eyes"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "amorphous",
+   "elemental"
+  ],
+  "possible_features": [
+   "jagged rim could be frost, water or flames",
+   "right protrusion could be an arm"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "ice elemental",
+   "water spirit",
+   "frost wisp"
+  ],
+  "visual_symbols": [
+   "flame-like fringe",
+   "glowing eyes"
+  ],
+  "priority_features": [
+   "jagged flame-like outline",
+   "cyan/teal body",
+   "two white eyes"
+  ]
+ }
+}

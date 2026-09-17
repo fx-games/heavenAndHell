@@ -23,9 +23,9 @@ func (g *Factory) DebugTints() []TintedTile {
 		}
 	}
 	for _, o := range g.Generator.D.Objects {
-		fresh, ok := defs.IconOK(defs.IconID("prop", o.Name))
-		if used, hasUsed := defs.IconOK(defs.IconID("prop", o.Name) + ".used"); ok && hasUsed && fresh == used {
-			out = append(out, TintedTile{used, D1UsedTint, defs.IconID("prop", o.Name) + ".used", "used object: same icon as fresh"})
+		fresh, ok := defs.IconOK(defs.PropIconID(o.Name))
+		if used, hasUsed := defs.IconOK(defs.PropIconID(o.Name) + ".used"); ok && hasUsed && fresh == used {
+			out = append(out, TintedTile{used, D1UsedTint, defs.PropIconID(o.Name) + ".used", "used object: same icon as fresh"})
 		}
 	}
 	return out

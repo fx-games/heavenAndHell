@@ -1,0 +1,59 @@
+{
+  "id": "hell_character_tiles/474",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "squat body"
+    ],
+    "shape": [
+      "square gray head",
+      "gray torso",
+      "two brown bands",
+      "dark belt"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "mostly gray",
+      "yellow-green eyes",
+      "brown straps",
+      "dark belt with light buckle"
+    ],
+    "major_regions": [
+      "gray head with bright eyes",
+      "gray body crossed by brown straps",
+      "dark belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "brown bands could be harness straps",
+      "gray could be armor or stone skin",
+      "bright squares could be glowing eyes"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "warrior",
+      "golem-like humanoid",
+      "gray-skinned creature"
+    ],
+    "visual_symbols": [
+      "harness straps",
+      "glowing eyes"
+    ],
+    "priority_features": [
+      "all-gray body",
+      "brown strap bands",
+      "glowing eyes"
+    ]
+  }
+}

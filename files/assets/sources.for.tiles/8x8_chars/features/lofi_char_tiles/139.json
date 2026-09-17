@@ -1,0 +1,63 @@
+{
+ "id": "lofi_char_tiles/139",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette with capped head",
+   "side protrusions at head level",
+   "tall vertical extension at right"
+  ],
+  "shape": [
+   "gray cap on head",
+   "wide green head",
+   "stocky body",
+   "long thin vertical bar at right"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding upright weapon"
+  ],
+  "colors": [
+   "bright green skin",
+   "gray headgear and weapon",
+   "brown body covering"
+  ],
+  "major_regions": [
+   "gray helmet over green head",
+   "brown torso with white pixels",
+   "gray vertical pole at right"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "stocky biped"
+  ],
+  "possible_features": [
+   "gray cap could be a helmet",
+   "side protrusions could be ears",
+   "white pixels could be tusks",
+   "vertical gray bar could be a spear or sword"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "orc warrior",
+   "goblin soldier",
+   "green-skinned monster"
+  ],
+  "visual_symbols": [
+   "helmet",
+   "tusks",
+   "spear"
+  ],
+  "priority_features": [
+   "gray helmet",
+   "green skin",
+   "vertical gray weapon",
+   "brown tunic"
+  ]
+ }
+}

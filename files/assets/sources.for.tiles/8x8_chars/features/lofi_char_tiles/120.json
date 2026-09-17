@@ -1,0 +1,56 @@
+{
+ "id": "lofi_char_tiles/120",
+ "perceptual": {
+  "silhouette": [
+   "outline barely visible",
+   "isolated dark facial marks on light field"
+  ],
+  "shape": [
+   "two small dark squares",
+   "one vertical dark bar below",
+   "small gray square at left"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "ambiguous"
+  ],
+  "colors": [
+   "mostly white or blank",
+   "black facial marks",
+   "small gray spot"
+  ],
+  "major_regions": [
+   "two black eyes above a black vertical mouth",
+   "pale or invisible body"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "ambiguous",
+   "ghost-like"
+  ],
+  "possible_features": [
+   "white body may blend with background, suggesting a white ghost",
+   "vertical black bar could be an open mouth",
+   "gray spot could be a hand or detail"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "ghost",
+   "spirit",
+   "invisible creature"
+  ],
+  "visual_symbols": [
+   "eyes and open mouth",
+   "pale body"
+  ],
+  "priority_features": [
+   "floating dark face marks",
+   "two eyes plus open mouth",
+   "near-invisible white body"
+  ]
+ }
+}

@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/303",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "squarish head",
+      "tall gray slab at left",
+      "brown bar at right"
+    ],
+    "shape": [
+      "gray head",
+      "gray brow band",
+      "tall left rectangle",
+      "orange waist stripe",
+      "white lower body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding shield"
+    ],
+    "colors": [
+      "mostly gray and white",
+      "orange stripe",
+      "brown pole"
+    ],
+    "major_regions": [
+      "gray face with black eyes",
+      "gray helmet band",
+      "gray shield-like slab at left",
+      "white torso with orange belt",
+      "brown pole at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "band could be a helmet rim",
+      "left slab could be a shield",
+      "gray face could be pale or undead skin",
+      "right bar could be a spear"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "guard",
+      "pale soldier",
+      "undead warrior"
+    ],
+    "visual_symbols": [
+      "shield",
+      "helmet"
+    ],
+    "priority_features": [
+      "large gray shield at left",
+      "gray face",
+      "orange belt",
+      "helmet band"
+    ]
+  }
+}

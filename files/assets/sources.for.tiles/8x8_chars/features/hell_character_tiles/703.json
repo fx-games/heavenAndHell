@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/703",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large white rounded head",
+      "orange-brown vertical bar at right edge",
+      "fragmented dark-and-white body"
+    ],
+    "shape": [
+      "large rounded head mass",
+      "narrower broken lower body",
+      "thin vertical extension on right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object at side"
+    ],
+    "colors": [
+      "mostly white on black",
+      "orange-brown vertical bar",
+      "no strong body color"
+    ],
+    "major_regions": [
+      "white skull-like head with dark eye sockets",
+      "sparse white rib-like lower body",
+      "orange staff-like bar at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "skeletal humanoid",
+      "humanoid"
+    ],
+    "possible_features": [
+      "white head with dark holes could be a skull",
+      "gaps in lower body could be ribs or bones",
+      "vertical bar could be a staff or spear"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead",
+      "skeleton",
+      "skeletal mage"
+    ],
+    "visual_symbols": [
+      "skull-like head",
+      "bones",
+      "staff"
+    ],
+    "priority_features": [
+      "white skull-like head",
+      "sparse bony body",
+      "orange vertical staff"
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/174",
+  "perceptual": {
+    "silhouette": [
+      "rounded upright body",
+      "short arm-like blocks at both sides",
+      "two small feet at bottom"
+    ],
+    "shape": [
+      "large rounded central mass",
+      "single cross-shaped eye region in upper right",
+      "darker side blocks"
+    ],
+    "orientation": [
+      "front-facing",
+      "slightly turned right"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "mostly yellow",
+      "olive-brown arms and feet",
+      "black ring with white center eye"
+    ],
+    "major_regions": [
+      "yellow body",
+      "one large eye in upper body",
+      "darker limbs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "single-eyed blob creature",
+      "bipedal"
+    ],
+    "possible_features": [
+      "one large central eye could indicate a cyclops or eye creature",
+      "side blocks could be arms",
+      "no distinct head separate from body"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "cyclops",
+      "one-eyed monster",
+      "blob creature"
+    ],
+    "visual_symbols": [
+      "single large eye",
+      "stubby arms"
+    ],
+    "priority_features": [
+      "single large eye",
+      "rounded body without neck",
+      "stubby darker arms",
+      "small feet"
+    ]
+  }
+}

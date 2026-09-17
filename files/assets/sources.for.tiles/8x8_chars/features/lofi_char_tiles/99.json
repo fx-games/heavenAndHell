@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/99",
+  "perceptual": {
+    "silhouette": [
+      "pale humanoid silhouette",
+      "wide purple band across chest",
+      "purple wider lower body"
+    ],
+    "shape": [
+      "white head with dark V eye mark",
+      "purple horizontal shoulder band",
+      "small orange central square",
+      "purple trapezoid base"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "mostly white/light gray",
+      "purple cloak/robe",
+      "orange center",
+      "black eyes"
+    ],
+    "major_regions": [
+      "pale head with black eyes",
+      "purple mantle across shoulders",
+      "orange amulet-like pixel",
+      "purple robe with magenta center"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed",
+      "skeletal humanoid"
+    ],
+    "possible_features": [
+      "pale head could be a skull",
+      "orange square could be an amulet or clasp",
+      "purple bands could be a robe"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "lich",
+      "undead mage",
+      "ghostly priest"
+    ],
+    "visual_symbols": [
+      "robe",
+      "amulet",
+      "skull-like head"
+    ],
+    "priority_features": [
+      "pale skull-like head",
+      "purple robe",
+      "orange amulet"
+    ]
+  }
+}

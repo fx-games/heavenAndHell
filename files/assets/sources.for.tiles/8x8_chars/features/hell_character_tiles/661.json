@@ -1,0 +1,66 @@
+{
+  "id": "hell_character_tiles/661",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "capped head",
+      "broad body",
+      "vertical pole at right"
+    ],
+    "shape": [
+      "yellow cap on head",
+      "brown face",
+      "yellow block below face",
+      "green body band",
+      "orange-brown pole"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole"
+    ],
+    "colors": [
+      "green body",
+      "yellow cap and chest",
+      "brown face",
+      "orange pole"
+    ],
+    "major_regions": [
+      "yellow cap",
+      "brown face with dark eyes",
+      "yellow beard-like chest",
+      "green tunic",
+      "pole at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "yellow block could be a beard",
+      "pole could be a staff, bow or spear",
+      "green region could be a tunic"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dwarf",
+      "ranger",
+      "villager"
+    ],
+    "visual_symbols": [
+      "cap",
+      "beard",
+      "staff"
+    ],
+    "priority_features": [
+      "green tunic",
+      "yellow beard-like block",
+      "yellow cap",
+      "right pole"
+    ]
+  }
+}

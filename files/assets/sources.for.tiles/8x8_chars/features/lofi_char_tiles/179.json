@@ -1,0 +1,63 @@
+{
+  "id": "lofi_char_tiles/179",
+  "perceptual": {
+    "silhouette": [
+      "compact rounded square silhouette",
+      "ring-like outline",
+      "hollow-looking center"
+    ],
+    "shape": [
+      "gray square ring",
+      "dark blue square center",
+      "white gaps between ring and center"
+    ],
+    "orientation": [
+      "front-facing",
+      "top-down",
+      "ambiguous"
+    ],
+    "pose": [
+      "static",
+      "ambiguous"
+    ],
+    "colors": [
+      "light gray outer ring",
+      "dark blue center square",
+      "white inner gaps"
+    ],
+    "major_regions": [
+      "gray outer ring",
+      "blue core"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "non-creature object",
+      "possibly eye-like",
+      "amorphous"
+    ],
+    "possible_features": [
+      "could be a floating eyeball with blue iris",
+      "could be an orb, portal, or ring",
+      "no limbs visible"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "floating eye",
+      "orb",
+      "magical sphere"
+    ],
+    "visual_symbols": [
+      "ring",
+      "central core",
+      "eye-like shape"
+    ],
+    "priority_features": [
+      "concentric ring shape",
+      "dark blue center",
+      "no limbs",
+      "gray outer border"
+    ]
+  }
+}

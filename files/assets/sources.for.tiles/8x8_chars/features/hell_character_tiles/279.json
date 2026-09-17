@@ -1,0 +1,66 @@
+{
+  "id": "hell_character_tiles/279",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "bald head with small blue mark",
+      "brown pole at right"
+    ],
+    "shape": [
+      "yellow head",
+      "blue square on forehead",
+      "white beard",
+      "teal robe body with dark center stripe"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "yellow head",
+      "teal robe",
+      "white beard",
+      "blue forehead gem"
+    ],
+    "major_regions": [
+      "yellow bald head with blue gem",
+      "white beard",
+      "teal robe with dark center seam",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "blue square could be a forehead gem or circlet",
+      "white area could be a beard",
+      "dark center stripe could be a robe opening",
+      "brown pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "sage",
+      "priest",
+      "mystic",
+      "wizard"
+    ],
+    "visual_symbols": [
+      "forehead gem",
+      "beard",
+      "staff",
+      "robe"
+    ],
+    "priority_features": [
+      "blue forehead gem",
+      "white beard",
+      "teal robe",
+      "staff"
+    ]
+  }
+}

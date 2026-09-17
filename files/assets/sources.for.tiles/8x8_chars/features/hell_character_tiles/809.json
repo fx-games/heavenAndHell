@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/809",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "red mass covering lower face and chest",
+      "gray pole on right",
+      "two feet at bottom"
+    ],
+    "shape": [
+      "square head with gray cap",
+      "red triangular mass below eyes",
+      "brown shoulders",
+      "thin vertical line"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon"
+    ],
+    "colors": [
+      "red lower face/chest",
+      "light blue upper face",
+      "brown shoulders and hands",
+      "gray pole"
+    ],
+    "major_regions": [
+      "red beard-like mass from mouth to belly",
+      "pale face with bright eyes",
+      "gray weapon line"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "possibly short stocky humanoid"
+    ],
+    "possible_features": [
+      "red mass could be a large beard or scarf",
+      "gray line could be an axe haft, spear or sword",
+      "gray top could be a cap or helmet"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dwarf",
+      "bearded warrior",
+      "bandit"
+    ],
+    "visual_symbols": [
+      "beard",
+      "weapon",
+      "cap"
+    ],
+    "priority_features": [
+      "large red beard-like mass",
+      "gray weapon on right",
+      "pale blue face with bright eyes"
+    ]
+  }
+}

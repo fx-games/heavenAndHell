@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/684",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "capped head",
+      "broad body",
+      "gray bar at right"
+    ],
+    "shape": [
+      "orange-brown cap",
+      "brown face",
+      "orange horizontal band",
+      "dark gray band with lighter center"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon"
+    ],
+    "colors": [
+      "orange-brown and brown dominant",
+      "dark gray belt",
+      "gray blade"
+    ],
+    "major_regions": [
+      "orange headgear",
+      "brown face",
+      "orange sash",
+      "dark belt with buckle",
+      "gray blade right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "top could be a cap or hood",
+      "dark band could be a belt with buckle",
+      "gray bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "warrior",
+      "adventurer",
+      "dwarf"
+    ],
+    "visual_symbols": [
+      "cap",
+      "belt buckle",
+      "sword"
+    ],
+    "priority_features": [
+      "orange cap",
+      "dark belt with buckle",
+      "gray blade"
+    ]
+  }
+}

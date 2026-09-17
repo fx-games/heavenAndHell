@@ -1,0 +1,58 @@
+{
+  "id": "lofi_char_tiles/104",
+  "perceptual": {
+    "silhouette": [
+      "dark humanoid silhouette",
+      "large head",
+      "arms angled downward and out",
+      "two legs"
+    ],
+    "shape": [
+      "black rounded head mass",
+      "black torso",
+      "diagonal limb projections"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms spread"
+    ],
+    "colors": [
+      "mostly black",
+      "red eyes"
+    ],
+    "major_regions": [
+      "solid black body",
+      "two bright red eye squares"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "solid black could be a shadow or dark creature",
+      "red eyes suggest hostility"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "shadow",
+      "shade",
+      "demon",
+      "dark spirit"
+    ],
+    "visual_symbols": [
+      "glowing red eyes",
+      "shadow body"
+    ],
+    "priority_features": [
+      "solid black silhouette",
+      "red eyes",
+      "spread limbs"
+    ]
+  }
+}

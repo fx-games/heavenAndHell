@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/297",
+  "perceptual": {
+    "silhouette": [
+      "rounded humanoid silhouette",
+      "gray head with light top tuft",
+      "brown pole at right"
+    ],
+    "shape": [
+      "gray head",
+      "white patch at top",
+      "yellow body",
+      "orange waist stripe"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "gray skin",
+      "yellow robe",
+      "orange belt",
+      "white hair patch"
+    ],
+    "major_regions": [
+      "gray face with black eyes",
+      "white hair at top",
+      "bright yellow robe",
+      "orange belt",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "gray face could be pale, stone, or undead skin",
+      "white top could be hair",
+      "brown pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "old monk",
+      "pale sage",
+      "undead priest"
+    ],
+    "visual_symbols": [
+      "staff",
+      "robe",
+      "pale face"
+    ],
+    "priority_features": [
+      "gray face",
+      "yellow robe",
+      "orange belt",
+      "staff"
+    ]
+  }
+}

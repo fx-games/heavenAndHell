@@ -1,0 +1,62 @@
+{
+ "id": "lofi_char_tiles/138",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette with wide head",
+   "side protrusions at head level",
+   "elongated object raised at upper right"
+  ],
+  "shape": [
+   "wide head mass",
+   "pointed side extensions",
+   "squat body",
+   "long thin diagonal extension at right"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arm raised holding object"
+  ],
+  "colors": [
+   "bright green skin",
+   "brown body covering",
+   "brown object at upper right"
+  ],
+  "major_regions": [
+   "large green head with two dark eyes",
+   "brown torso region with small white pixels",
+   "brown raised object on right"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "small stocky biped"
+  ],
+  "possible_features": [
+   "side protrusions could be pointed ears",
+   "white pixels could be tusks or teeth",
+   "raised brown extension could be a club"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "goblin",
+   "orc",
+   "green-skinned monster"
+  ],
+  "visual_symbols": [
+   "pointed ears",
+   "tusks",
+   "club"
+  ],
+  "priority_features": [
+   "green skin",
+   "wide head with ear points",
+   "raised brown club",
+   "brown tunic"
+  ]
+ }
+}

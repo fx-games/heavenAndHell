@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/129",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "hair on top",
+   "wide robed body"
+  ],
+  "shape": [
+   "yellow face",
+   "orange hair mass",
+   "purple wide body",
+   "gray belt"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "purple robe",
+   "yellow skin",
+   "orange hair",
+   "gray belt"
+  ],
+  "major_regions": [
+   "yellow face with dark eyes",
+   "orange hair",
+   "purple robe with gray sash"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid"
+  ],
+  "possible_features": [
+   "purple mass could be a robe or dress",
+   "gray band could be a belt or sash",
+   "orange top could be hair"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "mage",
+   "sorceress",
+   "villager",
+   "monk"
+  ],
+  "visual_symbols": [
+   "robe",
+   "belt"
+  ],
+  "priority_features": [
+   "purple robe",
+   "orange hair",
+   "yellow face with dark eyes",
+   "gray belt"
+  ]
+ }
+}

@@ -1,0 +1,63 @@
+{
+  "id": "lofi_char_tiles/1",
+  "perceptual": {
+    "silhouette": [
+      "small humanoid silhouette",
+      "rounded helmet top",
+      "straight gray bar upper right",
+      "two legs"
+    ],
+    "shape": [
+      "gray dome helmet",
+      "square yellow face",
+      "armored body",
+      "legs split"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding sword upright"
+    ],
+    "colors": [
+      "gray helmet and armor",
+      "yellow face",
+      "brown belt and boots",
+      "transparent background"
+    ],
+    "major_regions": [
+      "gray helmet and body",
+      "yellow face",
+      "gray blade above right hand"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "gray dome could be a helmet",
+      "right bar could be a sword",
+      "gray body could be armor"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "knight",
+      "soldier",
+      "fighter"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "sword",
+      "armor"
+    ],
+    "priority_features": [
+      "gray helmet",
+      "upright sword",
+      "gray armored body"
+    ]
+  }
+}

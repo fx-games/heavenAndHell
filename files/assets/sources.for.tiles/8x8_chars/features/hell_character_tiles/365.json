@@ -1,0 +1,67 @@
+{
+  "id": "hell_character_tiles/365",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "helmeted head with light patch",
+      "gray vertical shape at right"
+    ],
+    "shape": [
+      "head block",
+      "tunic body",
+      "gray blade-like vertical bar",
+      "small feet at bottom"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "mostly yellow",
+      "white top-left patch",
+      "orange belt",
+      "yellow-green lower body",
+      "gray vertical bar",
+      "brown feet"
+    ],
+    "major_regions": [
+      "yellow hood/helmet around face",
+      "orange belt with gray buckle",
+      "yellow-green skirt",
+      "gray bar on right",
+      "brown boots"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "yellow head covering could be a hood or cap",
+      "gray bar could be a sword blade",
+      "brown bottom pixels could be boots"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "adventurer",
+      "fighter",
+      "rogue"
+    ],
+    "visual_symbols": [
+      "sword",
+      "belt",
+      "boots"
+    ],
+    "priority_features": [
+      "yellow head covering",
+      "gray blade on right",
+      "orange belt",
+      "yellow-green tunic"
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/258",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "hooded head",
+      "dark bar at right"
+    ],
+    "shape": [
+      "square head",
+      "body split by dark vertical stripe",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "green head",
+      "blue forehead pixel",
+      "black eyes",
+      "teal robe with dark center stripe"
+    ],
+    "major_regions": [
+      "green face/hood with black eyes",
+      "blue gem-like pixel on head",
+      "teal split robe",
+      "green hand at left",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "blue pixel could be a forehead gem",
+      "green skin suggests goblin, orc or zombie",
+      "right bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "goblin priest",
+      "green-skinned cleric"
+    ],
+    "visual_symbols": [
+      "forehead gem",
+      "green face",
+      "robe",
+      "staff"
+    ],
+    "priority_features": [
+      "green head with blue gem",
+      "teal split robe",
+      "staff"
+    ]
+  }
+}

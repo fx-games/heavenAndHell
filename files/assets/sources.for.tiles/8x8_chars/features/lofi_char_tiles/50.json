@@ -1,0 +1,58 @@
+{
+  "id": "lofi_char_tiles/50",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "pointed cap",
+      "tall vertical pole with light tip at right"
+    ],
+    "shape": [
+      "large head with cap",
+      "blocky green torso",
+      "long thin brown shaft with gray top"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole upright"
+    ],
+    "colors": [
+      "mostly green",
+      "yellow face",
+      "brown shaft with gray tip"
+    ],
+    "major_regions": [
+      "green cap over yellow face",
+      "green tunic with brown belt",
+      "brown pole with gray head at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "brown pole with gray tip could be a spear or staff",
+      "tapered cap could be a pointed hat or hood"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "elf or ranger",
+      "spearman",
+      "green-clad adventurer"
+    ],
+    "visual_symbols": [
+      "pointed cap",
+      "spear",
+      "tunic"
+    ],
+    "priority_features": [
+      "green pointed cap",
+      "green tunic",
+      "upright spear-like pole with gray tip"
+    ]
+  }
+}

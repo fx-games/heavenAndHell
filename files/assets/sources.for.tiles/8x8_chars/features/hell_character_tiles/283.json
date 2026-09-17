@@ -1,0 +1,68 @@
+{
+  "id": "hell_character_tiles/283",
+  "perceptual": {
+    "silhouette": [
+      "hooded humanoid silhouette",
+      "hood outline",
+      "orange pole at right"
+    ],
+    "shape": [
+      "green hood framing face",
+      "yellow face",
+      "white beard",
+      "orange block at left",
+      "green robe"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding object"
+    ],
+    "colors": [
+      "bright green hood and robe",
+      "yellow face",
+      "white beard",
+      "orange object"
+    ],
+    "major_regions": [
+      "green hood and robe",
+      "yellow face with black eyes",
+      "white beard",
+      "orange held item",
+      "orange-brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "white area could be a beard",
+      "orange block could be a book",
+      "right pole could be a staff",
+      "green hood could suggest a druid"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "druid",
+      "wizard",
+      "hermit"
+    ],
+    "visual_symbols": [
+      "hood",
+      "beard",
+      "staff",
+      "book"
+    ],
+    "priority_features": [
+      "green hood and robe",
+      "white beard",
+      "staff",
+      "held orange item"
+    ]
+  }
+}

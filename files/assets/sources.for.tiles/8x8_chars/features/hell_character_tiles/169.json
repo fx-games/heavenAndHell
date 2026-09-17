@@ -1,0 +1,66 @@
+{
+  "id": "hell_character_tiles/169",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "squared hood-like head",
+      "wide robed body",
+      "tall dark vertical bar at right edge"
+    ],
+    "shape": [
+      "rectangular head mass",
+      "dark recessed face area",
+      "horizontal belt band",
+      "long thin vertical extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object at side"
+    ],
+    "colors": [
+      "mostly purple",
+      "black face with two red points",
+      "small yellow hand-like pixels"
+    ],
+    "major_regions": [
+      "purple hood and robe",
+      "dark face with red eyes",
+      "red belt with gray buckle",
+      "dark staff-like bar on right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "purple mass around face could be a hood",
+      "two red pixels could be glowing eyes in shadow",
+      "vertical dark bar could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "hooded cultist",
+      "dark mage",
+      "sinister robed figure"
+    ],
+    "visual_symbols": [
+      "hood",
+      "glowing red eyes",
+      "shadowed face",
+      "staff",
+      "belt"
+    ],
+    "priority_features": [
+      "hooded head with black face",
+      "two glowing red eyes",
+      "purple robe",
+      "staff at side"
+    ]
+  }
+}

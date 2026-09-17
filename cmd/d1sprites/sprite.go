@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-)
+	"image/draw"
 
-// scale is the nearest-neighbour upscale baked into every sprite, so PDF viewers never smooth the pixels.
-const scale = 4
+	xdraw "golang.org/x/image/draw"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/basicfont"
+	"golang.org/x/image/math/fixed"
+)
 
 var le = binary.LittleEndian
 
@@ -71,18 +74,10 @@ func appendN(px []int, p, n int) []int {
 	return px
 }
 
-// render turns bottom-up palette indices into an image cropped to its opaque pixels, recolored by each table in
-// turn and upscaled by scale.
+// render turns bottom-up palette indices into an image, recolored by each table in turn; -1 is transparent.
 func render(px []int, width int, pal []byte, recolor ...func(int) int) *image.NRGBA {
 	h := (len(px) + width - 1) / width
-	at := func(k int) image.Point { return image.Pt(k%width, h-1-k/width) }
-	var r image.Rectangle
-	for k, p := range px {
-		if p >= 0 {
-			r = r.Union(image.Rectangle{at(k), at(k).Add(image.Pt(1, 1))})
-		}
-	}
-	img := image.NewNRGBA(image.Rect(0, 0, r.Dx()*scale, r.Dy()*scale))
+	img := image.NewNRGBA(image.Rect(0, 0, width, h))
 	for k, p := range px {
 		if p < 0 {
 			continue
@@ -90,15 +85,81 @@ func render(px []int, width int, pal []byte, recolor ...func(int) int) *image.NR
 		for _, f := range recolor {
 			p = f(p)
 		}
-		c := color.NRGBA{pal[p*3], pal[p*3+1], pal[p*3+2], 255}
-		o := at(k).Sub(r.Min).Mul(scale)
-		for y := 0; y < scale; y++ {
-			for x := 0; x < scale; x++ {
-				img.SetNRGBA(o.X+x, o.Y+y, c)
+		img.SetNRGBA(k%width, h-1-k/width, color.NRGBA{pal[p*3], pal[p*3+1], pal[p*3+2], 255})
+	}
+	return img
+}
+
+// crop cuts img down to its opaque pixels.
+func crop(img *image.NRGBA) *image.NRGBA {
+	r := opaque(img)
+	out := image.NewNRGBA(image.Rect(0, 0, r.Dx(), r.Dy()))
+	draw.Draw(out, out.Bounds(), img, r.Min, draw.Src)
+	return out
+}
+
+func opaque(img *image.NRGBA) image.Rectangle {
+	var r image.Rectangle
+	b := img.Bounds()
+	for y := b.Min.Y; y < b.Max.Y; y++ {
+		for x := b.Min.X; x < b.Max.X; x++ {
+			if img.NRGBAAt(x, y).A != 0 {
+				r = r.Union(image.Rect(x, y, x+1, y+1))
 			}
 		}
 	}
-	return img
+	return r
+}
+
+// sideBySide crops same-sized frames to their opaque pixels and lays them out left to right, gap pixels apart,
+// keeping their shared ground line.
+func sideBySide(gap int, frames ...*image.NRGBA) *image.NRGBA {
+	var rs []image.Rectangle
+	var y image.Rectangle
+	w := gap * (len(frames) - 1)
+	for _, f := range frames {
+		r := opaque(f)
+		rs = append(rs, r)
+		y = y.Union(image.Rect(0, r.Min.Y, 1, r.Max.Y))
+		w += r.Dx()
+	}
+	out := image.NewNRGBA(image.Rect(0, 0, w, y.Dy()))
+	x := 0
+	for i, f := range frames {
+		draw.Draw(out, image.Rect(x, 0, x+rs[i].Dx(), y.Dy()), f, image.Pt(rs[i].Min.X, y.Min.Y), draw.Src)
+		x += rs[i].Dx() + gap
+	}
+	return out
+}
+
+// poster scales img up by scale and writes lines centred under it at twice the size of basicfont, white with a
+// black outline so they read on any background.
+func poster(img *image.NRGBA, scale int, lines []string) *image.NRGBA {
+	face := basicfont.Face7x13
+	tw := 0
+	for _, l := range lines {
+		tw = max(tw, font.MeasureString(face, l).Ceil())
+	}
+	text := image.NewNRGBA(image.Rect(0, 0, tw+2, len(lines)*face.Height+2))
+	d := font.Drawer{Dst: text, Face: face}
+	for i, l := range lines {
+		for _, o := range []image.Point{{-1, -1}, {0, -1}, {1, -1}, {-1, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}, {}} {
+			d.Src = image.Black
+			if o == (image.Point{}) {
+				d.Src = image.White
+			}
+			d.Dot = fixed.P(1+o.X, 1+face.Ascent+i*face.Height+o.Y)
+			d.DrawString(l)
+		}
+	}
+	const textScale, pad = 2, 16
+	sw, sh := img.Bounds().Dx()*scale, img.Bounds().Dy()*scale
+	tw, th := text.Bounds().Dx()*textScale, text.Bounds().Dy()*textScale
+	w := max(sw, tw)
+	out := image.NewNRGBA(image.Rect(0, 0, w, sh+pad+th))
+	xdraw.NearestNeighbor.Scale(out, image.Rect((w-sw)/2, 0, (w-sw)/2+sw, sh), img, img.Bounds(), draw.Over, nil)
+	xdraw.NearestNeighbor.Scale(out, image.Rect((w-tw)/2, sh+pad, (w-tw)/2+tw, sh+pad+th), text, text.Bounds(), draw.Over, nil)
+	return out
 }
 
 // monsterTrn is a monster type's TRN as InitMonsterTRN bakes it into the sprite: entries of 255 become 0.

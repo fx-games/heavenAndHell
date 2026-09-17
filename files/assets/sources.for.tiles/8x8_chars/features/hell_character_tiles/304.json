@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/304",
+  "perceptual": {
+    "silhouette": [
+      "broad hooded humanoid silhouette",
+      "hood outline",
+      "orange pole at right"
+    ],
+    "shape": [
+      "green hood",
+      "gray face band",
+      "orange belt with gray buckle",
+      "green robe"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "bright green hood and robe",
+      "gray face",
+      "orange belt"
+    ],
+    "major_regions": [
+      "green hood framing gray face",
+      "black eyes",
+      "orange belt",
+      "gray hand pixels",
+      "orange-brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "gray face could be pale or undead skin",
+      "right pole could be a staff",
+      "green hood could suggest a druid"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "druid",
+      "pale mage",
+      "hooded cultist"
+    ],
+    "visual_symbols": [
+      "hood",
+      "staff",
+      "robe",
+      "belt"
+    ],
+    "priority_features": [
+      "green hood and robe",
+      "gray face",
+      "orange belt",
+      "staff"
+    ]
+  }
+}

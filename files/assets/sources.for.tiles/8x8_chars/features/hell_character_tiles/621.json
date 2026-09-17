@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/621",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large rounded head",
+      "gray vertical strip at right"
+    ],
+    "shape": [
+      "pink dome head",
+      "brown banded torso",
+      "gray belt buckle",
+      "gray vertical object"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object"
+    ],
+    "colors": [
+      "pink head",
+      "brown clothing",
+      "gray accents"
+    ],
+    "major_regions": [
+      "pink head with dark eyes",
+      "brown leather-like tunic with bands",
+      "gray weapon at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray strip could be a sword or spear",
+      "brown bands could be leather armor"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "bald humanoid",
+      "peasant",
+      "warrior"
+    ],
+    "visual_symbols": [
+      "bald head",
+      "weapon",
+      "belt"
+    ],
+    "priority_features": [
+      "large pink bald head",
+      "brown clothing",
+      "gray weapon",
+      "belt buckle"
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "id": "lofi_char_tiles/68",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "jagged bright top",
+      "no side item"
+    ],
+    "shape": [
+      "yellow crenellated top mass",
+      "yellow face",
+      "white torso",
+      "dark lower body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "bright yellow head top",
+      "white body",
+      "dark gray legs",
+      "brown accent at left"
+    ],
+    "major_regions": [
+      "yellow crown-like shape on head",
+      "white tunic",
+      "dark legs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "jagged yellow top could be a crown",
+      "white torso could be a royal robe or tabard"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "king or queen",
+      "noble",
+      "paladin lord"
+    ],
+    "visual_symbols": [
+      "crown",
+      "white robe"
+    ],
+    "priority_features": [
+      "yellow crown-shaped top",
+      "white tunic",
+      "unarmed stance"
+    ]
+  }
+}

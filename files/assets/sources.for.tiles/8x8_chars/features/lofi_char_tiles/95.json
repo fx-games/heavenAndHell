@@ -1,0 +1,65 @@
+{
+  "id": "lofi_char_tiles/95",
+  "perceptual": {
+    "silhouette": [
+      "hooded humanoid silhouette",
+      "long robe",
+      "tall yellow vertical line at right"
+    ],
+    "shape": [
+      "yellow hood/hair mass",
+      "blue face",
+      "red chest band",
+      "wide red robe",
+      "long yellow vertical extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "yellow hood and staff",
+      "blue face",
+      "red eyes and robe",
+      "black band"
+    ],
+    "major_regions": [
+      "yellow head covering",
+      "blue face with red eyes",
+      "red robe with black belt",
+      "yellow staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed"
+    ],
+    "possible_features": [
+      "yellow top could be a golden hood or hair",
+      "yellow vertical could be a golden staff or scepter"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "wizard",
+      "high priest",
+      "monster mage",
+      "royal caster"
+    ],
+    "visual_symbols": [
+      "hood",
+      "golden staff",
+      "robe"
+    ],
+    "priority_features": [
+      "yellow hood",
+      "blue face with red eyes",
+      "red robe",
+      "golden staff"
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "id": "lofi_char_tiles/79",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette with hooded outline",
+      "vertical stick along right side"
+    ],
+    "shape": [
+      "hood-like frame around head",
+      "square face",
+      "rectangular torso",
+      "long thin vertical extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding tall object"
+    ],
+    "colors": [
+      "green hood and body",
+      "blue face and hands",
+      "red eyes",
+      "brown stick"
+    ],
+    "major_regions": [
+      "green hood enclosing blue face",
+      "two red eye pixels",
+      "olive robe with brown waist band",
+      "brown vertical stick at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "green frame could be a hood or cowl",
+      "vertical stick could be a staff",
+      "red eyes suggest a non-human face"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "hooded caster",
+      "monstrous shaman",
+      "cultist"
+    ],
+    "visual_symbols": [
+      "hood",
+      "staff",
+      "glowing red eyes"
+    ],
+    "priority_features": [
+      "green hood",
+      "blue face with red eyes",
+      "staff at right"
+    ]
+  }
+}

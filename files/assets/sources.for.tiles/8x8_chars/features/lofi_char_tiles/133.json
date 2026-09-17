@@ -1,0 +1,62 @@
+{
+ "id": "lofi_char_tiles/133",
+ "perceptual": {
+  "silhouette": [
+   "large-headed humanoid silhouette",
+   "item over right shoulder",
+   "two short dark legs"
+  ],
+  "shape": [
+   "large rounded yellow head",
+   "brown diagonal/vertical bar top right",
+   "brown belt band",
+   "black lower torso"
+  ],
+  "orientation": [
+   "facing right",
+   "three-quarter view"
+  ],
+  "pose": [
+   "standing",
+   "carrying item on shoulder"
+  ],
+  "colors": [
+   "yellow head and skin",
+   "brown belt and shouldered item",
+   "black legs"
+  ],
+  "major_regions": [
+   "big bald yellow head with one visible eye",
+   "brown club at shoulder",
+   "dark legs"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid"
+  ],
+  "possible_features": [
+   "single visible eye suggests side view",
+   "brown bar could be a club, sack or axe handle",
+   "large bald head could indicate ogre or dwarf"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "peasant",
+   "ogre",
+   "brute",
+   "dwarf"
+  ],
+  "visual_symbols": [
+   "club over shoulder",
+   "bald head"
+  ],
+  "priority_features": [
+   "large bald head",
+   "brown item over shoulder",
+   "single eye side view",
+   "short dark legs"
+  ]
+ }
+}

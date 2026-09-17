@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/53",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "tapered cap",
+      "thin arc shape at right"
+    ],
+    "shape": [
+      "large head with cap",
+      "pale face region",
+      "blocky teal torso",
+      "thin brown arc"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding item at side"
+    ],
+    "colors": [
+      "mostly teal/cyan",
+      "very pale cyan face",
+      "brown side item and belt"
+    ],
+    "major_regions": [
+      "teal cap over pale face",
+      "teal tunic with brown belt",
+      "brown bow-like arc at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "very pale bluish face could suggest ice, frost or undead pallor",
+      "brown arc could be a bow",
+      "tapered cap could be a hood"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "frost elf or ice ranger",
+      "archer",
+      "pale-skinned adventurer"
+    ],
+    "visual_symbols": [
+      "hood or cap",
+      "bow",
+      "tunic"
+    ],
+    "priority_features": [
+      "pale icy face",
+      "teal cap and tunic",
+      "brown bow-like arc at side"
+    ]
+  }
+}

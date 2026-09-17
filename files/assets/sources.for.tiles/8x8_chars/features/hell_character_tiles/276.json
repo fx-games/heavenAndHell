@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/276",
+  "perceptual": {
+    "silhouette": [
+      "rounded humanoid silhouette",
+      "bald or capped head",
+      "brown pole on right edge"
+    ],
+    "shape": [
+      "yellow head mass",
+      "white lower-face region",
+      "small orange block at left",
+      "wide yellow body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding object in left hand"
+    ],
+    "colors": [
+      "pale yellow skin and robe",
+      "white beard region",
+      "orange object",
+      "brown pole"
+    ],
+    "major_regions": [
+      "yellow head with black eyes",
+      "white beard below face",
+      "orange held object",
+      "yellow robe",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "white area could be a long beard",
+      "orange block could be a book or scroll",
+      "brown pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "old sage",
+      "monk",
+      "wizard"
+    ],
+    "visual_symbols": [
+      "beard",
+      "staff",
+      "book"
+    ],
+    "priority_features": [
+      "white beard",
+      "staff at right",
+      "yellow robe",
+      "orange held item"
+    ]
+  }
+}

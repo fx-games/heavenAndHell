@@ -1,0 +1,61 @@
+{
+ "id": "lofi_char_tiles/140",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette with large rectangular block on left",
+   "tall thin bar on right"
+  ],
+  "shape": [
+   "wide green head",
+   "large gray rectangle covering left body",
+   "narrow vertical bar right",
+   "small legs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "guarding with shield"
+  ],
+  "colors": [
+   "bright green skin",
+   "dark gray equipment",
+   "brown torso"
+  ],
+  "major_regions": [
+   "green head with dark eyes",
+   "large gray block over left side",
+   "gray vertical bar at right edge"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "stocky biped"
+  ],
+  "possible_features": [
+   "gray rectangle could be a shield",
+   "right bar could be a sword or spear",
+   "side points could be ears"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "goblin warrior",
+   "orc guard",
+   "green-skinned monster"
+  ],
+  "visual_symbols": [
+   "shield",
+   "weapon",
+   "pointed ears"
+  ],
+  "priority_features": [
+   "large gray shield",
+   "green skin",
+   "vertical weapon",
+   "squat body"
+  ]
+ }
+}

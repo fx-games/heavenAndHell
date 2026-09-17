@@ -1,0 +1,70 @@
+{
+  "id": "lofi_char_tiles/343",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "large rounded head",
+      "wide arms",
+      "lower body with legs",
+      "vertical pole at right"
+    ],
+    "shape": [
+      "gray head with red horizontal band across top",
+      "two dark square eye holes",
+      "gray arm band",
+      "orange waist band",
+      "red lower body",
+      "thin brown vertical line"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms outstretched"
+    ],
+    "colors": [
+      "gray head and arms",
+      "red headband and trousers",
+      "orange belt",
+      "black eye holes"
+    ],
+    "major_regions": [
+      "gray head with red band",
+      "hollow eyes",
+      "gray arms",
+      "orange belt",
+      "red lower body"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "undead humanoid"
+    ],
+    "possible_features": [
+      "red band could be a headband",
+      "gray head with holes could be an undead face or skull",
+      "brown line could be a staff or background edge"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead monk",
+      "zombie",
+      "ghoul",
+      "undead brawler"
+    ],
+    "visual_symbols": [
+      "headband",
+      "hollow eyes",
+      "belt"
+    ],
+    "priority_features": [
+      "gray hollow-eyed head",
+      "red headband",
+      "red outfit",
+      "orange belt"
+    ]
+  }
+}

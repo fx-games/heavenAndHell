@@ -1,0 +1,64 @@
+{
+  "id": "lofi_char_tiles/96",
+  "perceptual": {
+    "silhouette": [
+      "faint sparse silhouette",
+      "mostly light gray scattered pixels",
+      "V-shaped dark eye mark",
+      "spread lower projections"
+    ],
+    "shape": [
+      "small dark V-shaped facial mark",
+      "scattered light gray outline points",
+      "two darker gray side patches"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "arms spread",
+      "ambiguous"
+    ],
+    "colors": [
+      "mostly white/very light gray",
+      "black eyes",
+      "mid gray patches"
+    ],
+    "major_regions": [
+      "pale near-invisible body",
+      "black V-shaped eyes/nose near top",
+      "gray patches at hand or hip positions",
+      "light gray limb tips"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "amorphous",
+      "ghostly"
+    ],
+    "possible_features": [
+      "pale body could indicate a ghost or spirit",
+      "V-shaped dark mark could be angry eyes",
+      "gray patches could be hands"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ghost",
+      "spirit",
+      "invisible creature",
+      "snow creature"
+    ],
+    "visual_symbols": [
+      "pale body",
+      "dark eyes",
+      "faint outline"
+    ],
+    "priority_features": [
+      "near-invisible pale body",
+      "black V eyes",
+      "spread limbs"
+    ]
+  }
+}

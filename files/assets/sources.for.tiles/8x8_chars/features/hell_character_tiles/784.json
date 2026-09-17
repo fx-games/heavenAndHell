@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/784",
+  "perceptual": {
+    "silhouette": [
+      "robed humanoid silhouette",
+      "hooded head",
+      "wide robe",
+      "small gold side projections"
+    ],
+    "shape": [
+      "red hood mass framing tan face",
+      "wide red robe",
+      "orange horizontal band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "mostly red",
+      "tan face",
+      "dark eyes",
+      "green face pixel",
+      "orange sash",
+      "gold hands"
+    ],
+    "major_regions": [
+      "red hood over tan face",
+      "red robe with orange sash",
+      "gold pixels at sides"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "red top could be a hood",
+      "gold side pixels could be hands",
+      "green pixel could be a nose or gem"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "red-robed cultist",
+      "fire mage",
+      "priest"
+    ],
+    "visual_symbols": [
+      "hood",
+      "robe",
+      "sash"
+    ],
+    "priority_features": [
+      "red hood and robe",
+      "tan face",
+      "orange sash"
+    ]
+  }
+}

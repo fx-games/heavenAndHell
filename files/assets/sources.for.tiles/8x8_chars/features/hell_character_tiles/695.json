@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/695",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "helmeted head",
+      "gray block at left",
+      "white patterned lower body"
+    ],
+    "shape": [
+      "orange helmet with dark slit",
+      "tall gray rectangle left",
+      "white body with dark gaps",
+      "brown small block right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding shield"
+    ],
+    "colors": [
+      "orange helmet",
+      "white/black striped body",
+      "gray left panel"
+    ],
+    "major_regions": [
+      "orange T-visor helm",
+      "gray shield-like panel",
+      "white body broken by dark gaps suggesting ribs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "skeletal humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "dark gaps in white body could be ribs",
+      "left panel could be a shield",
+      "dark slit could be a visor or eye sockets"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "skeleton warrior",
+      "undead knight"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "shield",
+      "ribcage"
+    ],
+    "priority_features": [
+      "orange helm",
+      "white ribbed body",
+      "shield at left"
+    ]
+  }
+}

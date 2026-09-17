@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/75",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "flat-topped head covering",
+      "short gray vertical shape at right"
+    ],
+    "shape": [
+      "olive flat-topped cap",
+      "yellow face",
+      "green torso with lighter green center",
+      "short gray blade at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding small blade at side"
+    ],
+    "colors": [
+      "olive/khaki head covering",
+      "yellow face",
+      "green body",
+      "brown belt"
+    ],
+    "major_regions": [
+      "olive cap over yellow face",
+      "green tunic with light green chest",
+      "short gray blade at right hand"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "flat olive top could be a cap or brimmed hat",
+      "short gray bar could be a dagger or short sword",
+      "light green center could be a scarf or shirt"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "rogue or scout",
+      "hunter",
+      "peasant adventurer"
+    ],
+    "visual_symbols": [
+      "cap",
+      "dagger"
+    ],
+    "priority_features": [
+      "olive cap",
+      "green tunic",
+      "short gray blade"
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/767",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "pale head top",
+      "large red shape covering face",
+      "gray bar at right"
+    ],
+    "shape": [
+      "pale cap-like top",
+      "irregular red mass over face and chest",
+      "green torso",
+      "thin vertical blade"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "pale cyan top",
+      "large red face region",
+      "green body",
+      "gray blade"
+    ],
+    "major_regions": [
+      "red mask or blood over face",
+      "green body",
+      "gray vertical blade at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red region could be a face mask or bloodied face",
+      "gray bar could be a sword",
+      "small gold pixel at left could be a hand or item"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead bandit",
+      "masked rogue",
+      "bloody killer"
+    ],
+    "visual_symbols": [
+      "mask",
+      "blade"
+    ],
+    "priority_features": [
+      "large red face covering",
+      "green body",
+      "gray blade at right",
+      "pale head top"
+    ]
+  }
+}

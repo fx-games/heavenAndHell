@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/452",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with top points",
+      "gray strip right"
+    ],
+    "shape": [
+      "square head",
+      "red triangle over lower face",
+      "green torso",
+      "dark green legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "weapon at side"
+    ],
+    "colors": [
+      "steel-blue head",
+      "red face covering",
+      "green body",
+      "gray accent"
+    ],
+    "major_regions": [
+      "blue horned face with red mask",
+      "green tunic",
+      "gray blade strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "red triangle could be a bandana",
+      "top points could be horns",
+      "gray strip could be a dagger or sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "blue demon bandit",
+      "horned thief"
+    ],
+    "visual_symbols": [
+      "face mask",
+      "horns",
+      "blade"
+    ],
+    "priority_features": [
+      "red bandana over blue face",
+      "small horns",
+      "green tunic",
+      "gray weapon"
+    ]
+  }
+}

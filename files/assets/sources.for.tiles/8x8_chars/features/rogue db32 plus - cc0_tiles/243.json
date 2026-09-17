@@ -1,0 +1,65 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/243",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "two white upward points at top corners",
+   "wide head",
+   "thin arms out",
+   "narrow segmented body"
+  ],
+  "shape": [
+   "broad head mass",
+   "two white corner protrusions",
+   "checkered narrow torso",
+   "thin limbs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms slightly out"
+  ],
+  "colors": [
+   "pale gray body",
+   "white top points",
+   "maroon eyes",
+   "gray-brown checker torso"
+  ],
+  "major_regions": [
+   "gray head with dark red eyes",
+   "white horn-like points",
+   "gray patterned body"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "white corner points could be horns",
+   "gray color could suggest stone or undead"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "demon",
+   "imp",
+   "gargoyle",
+   "stone devil"
+  ],
+  "visual_symbols": [
+   "horns",
+   "red eyes",
+   "patterned torso"
+  ],
+  "priority_features": [
+   "two white horns",
+   "gray head",
+   "red eyes",
+   "thin patterned body"
+  ]
+ }
+}

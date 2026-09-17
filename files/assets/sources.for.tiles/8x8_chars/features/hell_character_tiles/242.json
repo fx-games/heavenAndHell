@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/242",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large rounded head",
+      "gray bar right",
+      "gold pixel left"
+    ],
+    "shape": [
+      "large square head",
+      "broad torso",
+      "dark lower mass",
+      "thin vertical extension right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon"
+    ],
+    "colors": [
+      "red head and chest",
+      "black eye dots",
+      "green torso sides",
+      "dark green lower body",
+      "gray blade"
+    ],
+    "major_regions": [
+      "red head merging into red chest shape",
+      "green torso",
+      "gold spot at left",
+      "dark lower body with brown feet",
+      "gray sword at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red head merging with chest could be a demon with red tabard",
+      "gold pixel could be a shield boss or hand",
+      "gray bar could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "demon knight",
+      "red-skinned warrior"
+    ],
+    "visual_symbols": [
+      "red face",
+      "chest emblem",
+      "sword"
+    ],
+    "priority_features": [
+      "red head flowing into red chest",
+      "green torso",
+      "sword on right"
+    ]
+  }
+}

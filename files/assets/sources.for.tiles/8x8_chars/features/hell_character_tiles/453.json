@@ -1,0 +1,58 @@
+{
+  "id": "hell_character_tiles/453",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "two small upward points at top corners",
+      "broad square head"
+    ],
+    "shape": [
+      "large square head-torso mass",
+      "horizontal band across middle",
+      "narrow vertical strip on right edge"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "mostly steel blue",
+      "brown-orange band and right edge",
+      "dark eye pixels"
+    ],
+    "major_regions": [
+      "blue head and body",
+      "brown horizontal belt band",
+      "brown strip down right side"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "two small gray top-corner points could be horns or ears",
+      "dark squares could be eyes",
+      "right brown strip could be hair, cape or held pole"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "humanoid monster",
+      "imp or demon",
+      "blue-skinned creature"
+    ],
+    "visual_symbols": [
+      "small horns",
+      "belt"
+    ],
+    "priority_features": [
+      "blue skin",
+      "small corner horns",
+      "brown belt band",
+      "blocky head"
+    ]
+  }
+}

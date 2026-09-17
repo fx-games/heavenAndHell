@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/788",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "ochre head with top corners",
+      "large red shape covering face",
+      "gray bar at right"
+    ],
+    "shape": [
+      "ochre head mass",
+      "irregular red mass over lower face and chest",
+      "green torso",
+      "thin vertical blade"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "ochre head",
+      "dark eyes",
+      "large red face covering",
+      "green body",
+      "gray blade"
+    ],
+    "major_regions": [
+      "red mask over ochre face",
+      "green body",
+      "gray blade at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red region could be a bandana or face mask",
+      "gray bar could be a sword or dagger",
+      "top corners could be hood points or ears"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "bandit",
+      "rogue",
+      "masked thief"
+    ],
+    "visual_symbols": [
+      "mask",
+      "blade"
+    ],
+    "priority_features": [
+      "large red face covering",
+      "green body",
+      "gray blade at right",
+      "ochre head"
+    ]
+  }
+}

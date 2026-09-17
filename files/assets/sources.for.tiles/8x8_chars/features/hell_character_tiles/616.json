@@ -1,0 +1,59 @@
+{
+  "id": "hell_character_tiles/616",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "head with red cap on top",
+      "wide body"
+    ],
+    "shape": [
+      "red band across top of head",
+      "pink face with dark eyes",
+      "red torso",
+      "orange waist band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "mostly red",
+      "pink face",
+      "orange belt"
+    ],
+    "major_regions": [
+      "red hat/headband over pink head",
+      "red clothing",
+      "orange sash"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "red top could be a cap, headband or hood",
+      "orange band could be a belt"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "humanoid",
+      "peasant",
+      "bandit",
+      "monk"
+    ],
+    "visual_symbols": [
+      "cap or headband",
+      "belt"
+    ],
+    "priority_features": [
+      "red headwear",
+      "pink face with dark eyes",
+      "red clothing",
+      "orange belt"
+    ]
+  }
+}

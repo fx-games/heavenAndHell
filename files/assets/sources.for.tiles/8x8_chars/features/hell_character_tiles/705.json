@@ -1,0 +1,59 @@
+{
+  "id": "hell_character_tiles/705",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "brown top of head",
+      "gray vertical bar at right edge",
+      "white body with dark gaps"
+    ],
+    "shape": [
+      "wide brown top mass",
+      "rectangular face and torso",
+      "thin blade-like extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding upright weapon at side"
+    ],
+    "colors": [
+      "brown head top",
+      "white face and body",
+      "gray bar with brown hilt"
+    ],
+    "major_regions": [
+      "brown hat or hair",
+      "white face with dark eyes",
+      "white body",
+      "gray blade at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "brown top could be hair or a hat",
+      "gray bar with brown base could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "swordsman",
+      "humanoid adventurer",
+      "villager warrior"
+    ],
+    "visual_symbols": [
+      "hair or hat",
+      "sword"
+    ],
+    "priority_features": [
+      "brown hair/hat",
+      "white body",
+      "upright sword at right"
+    ]
+  }
+}

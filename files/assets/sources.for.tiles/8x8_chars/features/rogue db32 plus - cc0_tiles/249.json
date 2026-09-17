@@ -1,0 +1,58 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/249",
+ "perceptual": {
+  "silhouette": [
+   "irregular round silhouette",
+   "multiple stalks radiating around body",
+   "asymmetric spread"
+  ],
+  "shape": [
+   "central circle",
+   "dark pupil",
+   "several short radiating projections with teal tips"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "floating",
+   "stalks spread"
+  ],
+  "colors": [
+   "pale blue-white body",
+   "dark maroon pupil",
+   "teal stalk tips",
+   "gray accents"
+  ],
+  "major_regions": [
+   "central eye sphere",
+   "ring of stalks around it"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "floating eye creature",
+   "radial aberration"
+  ],
+  "possible_features": [
+   "radiating projections could be eyestalks or tentacles",
+   "central dark spot could be a large eye"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "beholder-like eye tyrant",
+   "aberration",
+   "floating eye"
+  ],
+  "visual_symbols": [
+   "central eye",
+   "many eyestalks"
+  ],
+  "priority_features": [
+   "central eyeball",
+   "many radiating stalks",
+   "pale round body"
+  ]
+ }
+}

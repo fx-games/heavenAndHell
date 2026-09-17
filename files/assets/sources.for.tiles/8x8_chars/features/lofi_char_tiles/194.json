@@ -1,0 +1,60 @@
+{
+  "id": "lofi_char_tiles/194",
+  "perceptual": {
+    "silhouette": [
+      "side-view animal silhouette",
+      "two pointed ears on right",
+      "tail raised on left",
+      "four legs"
+    ],
+    "shape": [
+      "horizontal body block",
+      "small head with ears at upper right",
+      "thin upright tail"
+    ],
+    "orientation": [
+      "side-facing",
+      "facing right"
+    ],
+    "pose": [
+      "four-legged stance",
+      "tail up"
+    ],
+    "colors": [
+      "mostly black",
+      "red eye"
+    ],
+    "major_regions": [
+      "black body",
+      "red glowing eye on head"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "quadrupedal"
+    ],
+    "possible_features": [
+      "pointed ears suggest a cat",
+      "raised thin tail",
+      "red spot reads as a glowing eye"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "black cat",
+      "demonic cat",
+      "small beast"
+    ],
+    "visual_symbols": [
+      "pointed ears",
+      "raised tail",
+      "red eye"
+    ],
+    "priority_features": [
+      "pointed ears",
+      "raised tail",
+      "black body",
+      "red eye"
+    ]
+  }
+}

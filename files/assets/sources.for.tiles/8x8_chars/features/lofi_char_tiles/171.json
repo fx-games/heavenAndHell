@@ -1,0 +1,55 @@
+{
+ "id": "lofi_char_tiles/171",
+ "perceptual": {
+  "silhouette": [
+   "solid dark humanoid silhouette",
+   "rounded head",
+   "wide body with arm blocks"
+  ],
+  "shape": [
+   "black head mass",
+   "wide black torso",
+   "short stubby limbs"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "almost entirely black",
+   "single white pixel"
+  ],
+  "major_regions": [
+   "black body",
+   "one white eye-like pixel on head"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "amorphous"
+  ],
+  "possible_features": [
+   "single white pixel could be one glowing eye",
+   "solid black body could be a shadow or darkness"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "shadow creature",
+   "darkness elemental",
+   "wraith"
+  ],
+  "visual_symbols": [
+   "single glowing eye",
+   "shadow body"
+  ],
+  "priority_features": [
+   "all-black silhouette",
+   "single white eye",
+   "blocky humanoid form"
+  ]
+ }
+}

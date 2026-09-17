@@ -1,0 +1,60 @@
+{
+  "id": "hell_character_tiles/643",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large rounded head",
+      "wide lower body"
+    ],
+    "shape": [
+      "yellow dome head",
+      "blue eyes",
+      "gray torso",
+      "black belt with white buckle"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "yellow head",
+      "gray body",
+      "black belt",
+      "white buckle",
+      "brown pixel at right"
+    ],
+    "major_regions": [
+      "yellow head with blue eyes",
+      "gray armored body",
+      "dark belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "gray body could be chainmail or plate armor",
+      "white pixel could be a buckle"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "soldier",
+      "guard",
+      "bald humanoid"
+    ],
+    "visual_symbols": [
+      "armor",
+      "belt"
+    ],
+    "priority_features": [
+      "large yellow head",
+      "blue eyes",
+      "gray armored body",
+      "dark belt"
+    ]
+  }
+}

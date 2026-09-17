@@ -1,0 +1,66 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/222",
+ "perceptual": {
+  "silhouette": [
+   "stocky humanoid silhouette",
+   "two small light upward points at top",
+   "vertical pole shape along right side",
+   "broad torso"
+  ],
+  "shape": [
+   "wide blocky upper body",
+   "large squarish head mass",
+   "thin vertical line at right",
+   "rectangular lower band"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding upright pole"
+  ],
+  "colors": [
+   "mostly red/salmon body",
+   "tan points on top",
+   "purple lower band",
+   "dark background"
+  ],
+  "major_regions": [
+   "red head and torso",
+   "two tan protrusions above head",
+   "brown vertical staff at right",
+   "purple hip region"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "tan top points could be small horns",
+   "vertical line could be a staff or spear",
+   "purple band could be a loincloth"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "demon",
+   "imp",
+   "red-skinned brute",
+   "tribal monster"
+  ],
+  "visual_symbols": [
+   "small horns",
+   "staff",
+   "loincloth"
+  ],
+  "priority_features": [
+   "red stocky body",
+   "two small horns",
+   "staff held at right",
+   "purple waist band"
+  ]
+ }
+}

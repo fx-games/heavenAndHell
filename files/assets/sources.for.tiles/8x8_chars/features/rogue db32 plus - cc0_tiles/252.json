@@ -1,0 +1,64 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/252",
+  "perceptual": {
+    "silhouette": [
+      "irregular blob silhouette",
+      "widest at upper-middle",
+      "ragged jagged side edges",
+      "body tapers and trails toward lower-left"
+    ],
+    "shape": [
+      "large lumpy central mass",
+      "narrow top",
+      "tapering tail-like lower portion"
+    ],
+    "orientation": [
+      "front-facing face",
+      "ambiguous body direction"
+    ],
+    "pose": [
+      "floating or hovering",
+      "ambiguous"
+    ],
+    "colors": [
+      "mottled brown and dark brown",
+      "white eye pixels against brown"
+    ],
+    "major_regions": [
+      "two white eyes near top center",
+      "single white spot below eyes",
+      "brown mottled body"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "amorphous",
+      "elemental blob"
+    ],
+    "possible_features": [
+      "two white pixels could be eyes",
+      "lower white pixel could be a mouth",
+      "jagged edges could be rock chunks or mud drips",
+      "trailing lower part could be a tail or wisp"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "earth elemental",
+      "mud creature",
+      "amorphous monster",
+      "living rock"
+    ],
+    "visual_symbols": [
+      "glowing eyes",
+      "lumpy formless body",
+      "trailing wisp"
+    ],
+    "priority_features": [
+      "formless blob body with two white eyes",
+      "ragged side projections",
+      "brown earthy coloring",
+      "tapering lower-left trail"
+    ]
+  }
+}

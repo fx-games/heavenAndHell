@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/800",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette with large block on left side",
+      "thin vertical projection on right",
+      "two feet at bottom"
+    ],
+    "shape": [
+      "square head",
+      "tall gray rectangle left of body",
+      "thin gray vertical line top-right",
+      "horizontal body bands"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding objects on both sides"
+    ],
+    "colors": [
+      "light blue face and feet",
+      "orange-rust tunic",
+      "gray left block and gray right pole",
+      "dark background"
+    ],
+    "major_regions": [
+      "large gray shield-like block on left",
+      "light blue head with bright eyes",
+      "orange striped torso"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armed humanoid"
+    ],
+    "possible_features": [
+      "left gray block could be a shield",
+      "right gray line could be a sword or spear",
+      "gray top could be a helmet or cap"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "warrior",
+      "soldier",
+      "goblin fighter"
+    ],
+    "visual_symbols": [
+      "shield",
+      "blade or pole weapon",
+      "bright eyes"
+    ],
+    "priority_features": [
+      "gray shield on left",
+      "pale blue face with yellow-green eyes",
+      "orange tunic",
+      "weapon on right"
+    ]
+  }
+}

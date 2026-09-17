@@ -1,0 +1,63 @@
+{
+  "id": "hell_character_tiles/299",
+  "perceptual": {
+    "silhouette": [
+      "hooded humanoid silhouette",
+      "hood outline",
+      "brown pole at right"
+    ],
+    "shape": [
+      "light blue hood",
+      "gray face band",
+      "white horizontal band",
+      "light blue robe"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "light blue hood and robe",
+      "gray face",
+      "white band"
+    ],
+    "major_regions": [
+      "light blue hood",
+      "gray face with black eyes",
+      "white sash or beard band",
+      "blue robe",
+      "brown staff"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid"
+    ],
+    "possible_features": [
+      "white band could be a sash or beard",
+      "gray face could be pale or undead skin",
+      "brown pole could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "ice mage",
+      "wizard",
+      "pale sorcerer"
+    ],
+    "visual_symbols": [
+      "hood",
+      "staff",
+      "robe"
+    ],
+    "priority_features": [
+      "light blue hood and robe",
+      "gray face",
+      "white band",
+      "staff"
+    ]
+  }
+}

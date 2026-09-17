@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/496",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "rectangular helmet head",
+      "small brown mark at right"
+    ],
+    "shape": [
+      "white square head",
+      "dark T-shaped slit",
+      "gray body",
+      "black belt"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "white head",
+      "black T visor",
+      "gray body",
+      "black belt",
+      "small brown right pixel",
+      "light left pixel"
+    ],
+    "major_regions": [
+      "white helmet with dark T slit",
+      "gray armored body",
+      "black belt with white buckle"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "T slit could be a helmet visor",
+      "brown pixel could be a held item",
+      "gray body could be plate armor"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "knight",
+      "armored soldier"
+    ],
+    "visual_symbols": [
+      "T-visor helmet",
+      "plate armor"
+    ],
+    "priority_features": [
+      "white T-visor helmet",
+      "gray armor body",
+      "black belt"
+    ]
+  }
+}

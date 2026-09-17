@@ -1,0 +1,63 @@
+{
+  "id": "lofi_char_tiles/71",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "rounded dark helmet",
+      "tall thin brown pole at right"
+    ],
+    "shape": [
+      "dark gray helmet",
+      "blue face with red points",
+      "white torso",
+      "long brown vertical shaft"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole upright"
+    ],
+    "colors": [
+      "dark gray helmet",
+      "blue face",
+      "bright red eyes",
+      "white body",
+      "brown pole"
+    ],
+    "major_regions": [
+      "dark helmet over blue face",
+      "red eyes",
+      "white tunic",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "blue face with red dots could be non-human skin with glowing eyes",
+      "brown pole could be a spear, staff or polearm"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "corrupted soldier",
+      "demonic guard",
+      "undead spearman"
+    ],
+    "visual_symbols": [
+      "helmet",
+      "red eyes",
+      "staff or spear"
+    ],
+    "priority_features": [
+      "blue face with red eyes",
+      "dark helmet",
+      "tall brown pole",
+      "white tunic"
+    ]
+  }
+}

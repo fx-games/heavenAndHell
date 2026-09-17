@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/433",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "helmeted head with dark T-shaped slot",
+      "brown bar right"
+    ],
+    "shape": [
+      "square helmet head",
+      "gray torso block",
+      "green side pixel"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding pole"
+    ],
+    "colors": [
+      "white and gray",
+      "dark visor",
+      "small green hand pixel",
+      "brown pole"
+    ],
+    "major_regions": [
+      "white helmet with dark T visor",
+      "gray armored torso",
+      "brown staff strip"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "T-shaped slot could be a helmet visor",
+      "green pixel could be green-skinned hand",
+      "brown strip could be a spear or staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "knight",
+      "armored orc",
+      "guard"
+    ],
+    "visual_symbols": [
+      "closed helmet",
+      "plate armor",
+      "spear"
+    ],
+    "priority_features": [
+      "white helmet with T visor",
+      "gray armor",
+      "brown pole on right"
+    ]
+  }
+}

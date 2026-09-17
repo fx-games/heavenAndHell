@@ -1,0 +1,62 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/220",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "wide rounded head",
+      "arms extended to sides",
+      "short legs"
+    ],
+    "shape": [
+      "broad head/shoulder mass",
+      "smaller dark torso",
+      "thin side arm projections"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms spread"
+    ],
+    "colors": [
+      "mostly brown",
+      "tan face and hands",
+      "dark purple body"
+    ],
+    "major_regions": [
+      "brown head",
+      "tan face spot",
+      "dark body",
+      "tan hands at sides"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "primate-like"
+    ],
+    "possible_features": [
+      "tan side pixels could be hands",
+      "brown mass could be fur or hair",
+      "dark center could be torso or clothing"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "monkey",
+      "ape",
+      "goblin",
+      "small beastman"
+    ],
+    "visual_symbols": [
+      "outstretched arms",
+      "furry head"
+    ],
+    "priority_features": [
+      "wide brown head",
+      "arms spread",
+      "small dark body"
+    ]
+  }
+}

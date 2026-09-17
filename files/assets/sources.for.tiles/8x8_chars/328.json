@@ -1,0 +1,67 @@
+{
+  "id": "lofi_char_tiles/328",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large squarish head",
+      "broad shoulders",
+      "short legs"
+    ],
+    "shape": [
+      "white rectangular head with dark T-shaped cutout",
+      "gray horizontal torso band",
+      "tan side squares",
+      "gray vertical strip at right",
+      "gray legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "white head",
+      "gray body and legs",
+      "tan hands",
+      "dark outline"
+    ],
+    "major_regions": [
+      "white helmet with T-slit",
+      "gray armored body",
+      "tan hands at both sides",
+      "gray bar at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "T-slit could be a great-helm visor",
+      "tan squares could be hands or gauntlets",
+      "right gray strip could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "knight",
+      "armored warrior",
+      "paladin"
+    ],
+    "visual_symbols": [
+      "closed helmet",
+      "T-visor",
+      "armor",
+      "sword-like bar"
+    ],
+    "priority_features": [
+      "white closed helmet with T-visor",
+      "gray armor",
+      "tan hands",
+      "vertical bar on right"
+    ]
+  }
+}

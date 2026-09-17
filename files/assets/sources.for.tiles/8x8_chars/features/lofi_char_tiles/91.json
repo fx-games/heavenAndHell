@@ -1,0 +1,67 @@
+{
+  "id": "lofi_char_tiles/91",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette with dark top",
+      "wide red band across middle",
+      "long dark vertical line at right"
+    ],
+    "shape": [
+      "black hair/hat mass",
+      "blue face",
+      "red horizontal scarf band",
+      "red lower body",
+      "thin black vertical extension"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding staff"
+    ],
+    "colors": [
+      "black top and vest",
+      "blue face and hands",
+      "red eyes",
+      "red band and lower body",
+      "brown feet"
+    ],
+    "major_regions": [
+      "black head covering",
+      "blue face with red eyes",
+      "red sash across chest",
+      "black waist with gray buckle",
+      "black staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "black top could be hair or a hat",
+      "red eyes suggest non-human face",
+      "black line could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dark mage",
+      "monstrous humanoid",
+      "cultist"
+    ],
+    "visual_symbols": [
+      "dark hood or hair",
+      "red eyes",
+      "staff"
+    ],
+    "priority_features": [
+      "blue face with red eyes",
+      "black top",
+      "red sash",
+      "dark staff"
+    ]
+  }
+}

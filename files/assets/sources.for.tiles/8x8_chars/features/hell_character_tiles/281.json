@@ -1,0 +1,68 @@
+{
+  "id": "hell_character_tiles/281",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "light tips at top corners of head",
+      "gray blade at right"
+    ],
+    "shape": [
+      "yellow cap/head",
+      "white beard region",
+      "orange block at left",
+      "olive belt band",
+      "dark lower body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "yellow head",
+      "white beard",
+      "olive belt",
+      "gray blade",
+      "orange object"
+    ],
+    "major_regions": [
+      "yellow capped head with black eyes",
+      "white beard",
+      "orange item at left",
+      "olive-yellow belt",
+      "dark trousers",
+      "gray sword"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "stocky humanoid"
+    ],
+    "possible_features": [
+      "corner tips could be horns on a helmet",
+      "white area could be a beard",
+      "gray shape could be a sword or axe blade"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "dwarf",
+      "bearded warrior",
+      "human fighter"
+    ],
+    "visual_symbols": [
+      "beard",
+      "horned helmet",
+      "sword"
+    ],
+    "priority_features": [
+      "white beard",
+      "yellow cap with tips",
+      "upright blade",
+      "olive belt"
+    ]
+  }
+}

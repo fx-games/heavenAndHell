@@ -1,0 +1,64 @@
+{
+ "id": "lofi_char_tiles/143",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette with crenellated top",
+   "side protrusions at head level",
+   "tall vertical line at right"
+  ],
+  "shape": [
+   "bright notched band atop head",
+   "wide green head",
+   "blue rectangular body",
+   "thin brown vertical bar"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "holding staff"
+  ],
+  "colors": [
+   "green skin",
+   "yellow-green crown-like top",
+   "blue clothing",
+   "brown staff"
+  ],
+  "major_regions": [
+   "notched bright band on head",
+   "green face with dark eyes",
+   "blue body with strap shapes",
+   "brown pole at right edge"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "stocky biped"
+  ],
+  "possible_features": [
+   "notched band could be a crown",
+   "vertical brown bar could be a staff or scepter",
+   "side points could be ears"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "goblin king",
+   "goblin chieftain",
+   "green-skinned ruler"
+  ],
+  "visual_symbols": [
+   "crown",
+   "staff",
+   "pointed ears"
+  ],
+  "priority_features": [
+   "crown on green head",
+   "green skin",
+   "blue clothing",
+   "vertical staff"
+  ]
+ }
+}

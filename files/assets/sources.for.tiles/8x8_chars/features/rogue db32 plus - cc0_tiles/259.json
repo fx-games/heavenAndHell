@@ -1,0 +1,66 @@
+{
+  "id": "rogue db32 plus - cc0_tiles/259",
+  "perceptual": {
+    "silhouette": [
+      "very small squat silhouette",
+      "rounded dome top",
+      "wide middle",
+      "low to the ground"
+    ],
+    "shape": [
+      "small rounded head mass",
+      "broad torso band",
+      "tiny legs"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "crouching"
+    ],
+    "colors": [
+      "orange dominant",
+      "red and gray accents",
+      "pale highlights"
+    ],
+    "major_regions": [
+      "orange dome head with dark eyes",
+      "red and gray torso band",
+      "pale lower blocks",
+      "short orange legs"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "squat creature",
+      "possibly beetle-like"
+    ],
+    "possible_features": [
+      "dome could be a hood, helmet or shell",
+      "dark pixels could be eyes",
+      "wide band could be arms or carapace",
+      "very small size could indicate a minor creature"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "small armored creature",
+      "imp-like minion",
+      "beetle",
+      "small golem"
+    ],
+    "visual_symbols": [
+      "dome head",
+      "dark eyes",
+      "wide body"
+    ],
+    "priority_features": [
+      "tiny squat dome-headed figure",
+      "two dark eyes",
+      "orange coloring",
+      "wide torso band"
+    ]
+  }
+}

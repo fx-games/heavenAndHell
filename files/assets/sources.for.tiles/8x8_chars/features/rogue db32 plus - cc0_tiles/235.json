@@ -1,0 +1,66 @@
+{
+ "id": "rogue db32 plus - cc0_tiles/235",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "very large wide head",
+   "arms spread outward",
+   "narrow legs"
+  ],
+  "shape": [
+   "large squarish head",
+   "white horizontal band across lower face",
+   "olive rectangular torso",
+   "green legs with brown feet"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing",
+   "arms slightly spread"
+  ],
+  "colors": [
+   "tan skin",
+   "dark eyes",
+   "white lower-face band",
+   "orange shoulders",
+   "olive tunic",
+   "green legs"
+  ],
+  "major_regions": [
+   "large tan head",
+   "white mouth/beard band",
+   "orange shoulder band",
+   "olive and green body"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid",
+   "bipedal"
+  ],
+  "possible_features": [
+   "white band could be a beard or grin",
+   "orange band could be a collar or sleeves"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "dwarf",
+   "human peasant",
+   "bearded humanoid"
+  ],
+  "visual_symbols": [
+   "beard",
+   "big head",
+   "tunic"
+  ],
+  "priority_features": [
+   "large tan head",
+   "white beard band",
+   "orange shoulders",
+   "olive-green body"
+  ]
+ }
+}

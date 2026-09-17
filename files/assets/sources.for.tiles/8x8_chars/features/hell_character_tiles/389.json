@@ -1,0 +1,66 @@
+{
+  "id": "hell_character_tiles/389",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "bald head",
+      "red shape over lower face",
+      "gray bar on right"
+    ],
+    "shape": [
+      "yellow head block",
+      "red triangular mass below eyes",
+      "green tunic",
+      "dark lower band",
+      "gray blade"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "yellow skin",
+      "red lower face",
+      "green tunic",
+      "dark green legs",
+      "gray bar"
+    ],
+    "major_regions": [
+      "bald head",
+      "red mask over mouth",
+      "green tunic",
+      "dark trousers",
+      "gray bar right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "red shape could be a bandana mask",
+      "gray bar could be a dagger or sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "bandit",
+      "thief",
+      "outlaw"
+    ],
+    "visual_symbols": [
+      "face mask",
+      "blade"
+    ],
+    "priority_features": [
+      "red mask over lower face",
+      "bald head",
+      "green tunic",
+      "gray blade"
+    ]
+  }
+}

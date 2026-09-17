@@ -532,6 +532,8 @@ func (s *State) SetActionBroker(broker *Broker) {
 	s.actions = broker
 }
 
+func (s *State) Factory() *Factory { return s.factory }
+
 func (s *State) SetFactory(factory *Factory) {
 	s.factory = factory
 }

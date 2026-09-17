@@ -1,0 +1,59 @@
+{
+  "id": "lofi_char_tiles/101",
+  "perceptual": {
+    "silhouette": [
+      "round head-like silhouette with flame arc on upper left",
+      "no body"
+    ],
+    "shape": [
+      "pale round mass at lower right",
+      "arc of orange and yellow pixels trailing up and left",
+      "red lower jaw region"
+    ],
+    "orientation": [
+      "facing right or front",
+      "ambiguous"
+    ],
+    "pose": [
+      "floating"
+    ],
+    "colors": [
+      "orange and yellow upper arc",
+      "white center",
+      "black eye holes",
+      "red lower region"
+    ],
+    "major_regions": [
+      "white skull-like face with black eyes",
+      "orange-yellow flame crest",
+      "red jaw or base"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "disembodied head",
+      "skull"
+    ],
+    "possible_features": [
+      "pale mass with dark holes could be a skull",
+      "orange-yellow arc could be flames",
+      "red area could be a jaw or fire"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "flaming skull",
+      "fire spirit",
+      "undead head"
+    ],
+    "visual_symbols": [
+      "skull",
+      "flames"
+    ],
+    "priority_features": [
+      "skull-like face",
+      "orange-yellow flames trailing up-left",
+      "no body"
+    ]
+  }
+}

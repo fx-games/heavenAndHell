@@ -44,9 +44,13 @@ func (g *Factory) playD1Sound(id string) {
 // the Monk falls silent rather than breaking.
 var d1HeroVoice = [d1.NumClasses]string{d1.Warrior: "WARR", d1.Rogue: "ROGUE", d1.Sorcerer: "MAGE", d1.Monk: "MONK", d1.Bard: "ROGUE", d1.Barbarian: "WARR"}
 
-// playD1HeroSound plays the hero's class version of a hero line: n 8 is PS_WARR8, PS_ROGUE8 or PS_MAGE8.
-func (g *Factory) playD1HeroSound(n int) {
-	g.playD1Sound(fmt.Sprintf("PS_%s%d", d1HeroVoice[g.State.GetPlayer().Hero().Class], n))
+// PlayD1HeroSound plays the hero's class version of a hero line: n 8 is PS_WARR8, PS_ROGUE8 or PS_MAGE8.
+func (g *Factory) PlayD1HeroSound(n int) {
+	id := fmt.Sprintf("PS_%s%d", d1HeroVoice[g.State.GetPlayer().Hero().Class], n)
+	if id == "PS_WARR96" { // the warrior's catacombs line is PS_WARR96B
+		id += "B"
+	}
+	g.playD1Sound(id)
 }
 
 func (g *Factory) D1() *d1.Generator { return g.Generator }

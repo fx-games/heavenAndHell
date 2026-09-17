@@ -1,0 +1,63 @@
+{
+  "id": "lofi_char_tiles/187",
+  "perceptual": {
+    "silhouette": [
+      "upright stocky silhouette",
+      "two ear-like protrusions on top",
+      "arms extended",
+      "two legs"
+    ],
+    "shape": [
+      "rectangular body",
+      "two upward nubs",
+      "arm bars at sides",
+      "lighter belly patch"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms outstretched"
+    ],
+    "colors": [
+      "mostly dark gray",
+      "light gray belly",
+      "black eyes"
+    ],
+    "major_regions": [
+      "gray body with ears",
+      "pale belly",
+      "black eyes"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "bipedal",
+      "humanoid-like animal"
+    ],
+    "possible_features": [
+      "top nubs could be ears",
+      "belly patch suggests a furry animal",
+      "could be a bear, rat, or gremlin"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "gray bear",
+      "furry beast",
+      "rodent-like creature"
+    ],
+    "visual_symbols": [
+      "ears",
+      "light belly",
+      "outstretched arms"
+    ],
+    "priority_features": [
+      "two ears",
+      "pale belly patch",
+      "arms spread",
+      "gray stocky body"
+    ]
+  }
+}

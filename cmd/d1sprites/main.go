@@ -1,14 +1,18 @@
-// Command d1sprites renders Diablo's and Hellfire's monster, item and spell graphics out of the MPQs into
-// reference PDFs for picking icons: every monster type and unique in the game's own TRN recolors (the stand
-// animation's front-facing frame), every base and unique item's inventory graphic, and every spell icon, each
-// labelled with the icon it is currently mapped to in files/assets/data/icons.
+// Command d1sprites renders Diablo's and Hellfire's graphics out of the MPQs into reference PDFs for picking
+// icons, one per icons/*.rec: every monster type and unique in the game's own TRN recolors (the stand animation's
+// front and right-facing frames), every base and unique item's inventory graphic, every spell and skill icon, and every
+// object and dungeon megatile, each labelled with the icon it is currently mapped to. Every sprite is also saved
+// at its original size as a PNG under <out>/d1_sprites/<document>/, named after its icon ID where it has one;
+// monsters at 4x with their name, ID and weapon written under them.
 //
-//	go run ./cmd/d1sprites -out /tmp
+//	go run -tags development ./cmd/d1sprites
 package main
 
 import (
 	"flag"
 	"fmt"
+	"image"
+	"image/png"
 	"log"
 	"os"
 	"path/filepath"
@@ -22,7 +26,7 @@ import (
 type reader func(string) ([]byte, error)
 
 func main() {
-	out := flag.String("out", ".", "directory to write d1_monsters.pdf, d1_items.pdf and d1_spells.pdf to")
+	out := flag.String("out", "reference", "directory for the PDFs and the d1_sprites image folders")
 	flag.Parse()
 
 	dat, err := mpq.DiabDat()
@@ -36,22 +40,61 @@ func main() {
 		log.Fatal(err)
 	}
 	for _, doc := range []struct {
-		file, title string
+		name, title string
 		build       func(reader, []byte) ([]section, error)
 	}{
-		{"d1_monsters.pdf", "D1 + Hellfire monsters and uniques (front view)", monsters},
-		{"d1_items.pdf", "D1 + Hellfire items and unique items", items},
-		{"d1_spells.pdf", "D1 + Hellfire spell and skill icons", spells},
+		{"monsters", "D1 + Hellfire monsters and uniques (front and side views)", monsters},
+		{"items", "D1 + Hellfire items and unique items", items},
+		{"skills", "D1 + Hellfire spell and skill icons", spells},
+		{"tiles", "D1 + Hellfire objects and dungeon megatiles", tiles},
 	} {
+		pdf := filepath.Join(*out, "d1_"+doc.name+".pdf")
 		sections, err := doc.build(read, pal)
 		if err == nil {
-			err = writePDF(filepath.Join(*out, doc.file), doc.title, sections)
+			err = savePNGs(filepath.Join(*out, "d1_sprites", doc.name), sections)
+		}
+		if err == nil {
+			err = writePDF(pdf, doc.title, sections)
 		}
 		if err != nil {
-			log.Fatalf("%s: %v", doc.file, err)
+			log.Fatalf("%s: %v", pdf, err)
 		}
-		fmt.Println("wrote", filepath.Join(*out, doc.file))
+		fmt.Println("wrote", pdf, "and", filepath.Join(*out, "d1_sprites", doc.name))
 	}
+}
+
+// savePNGs writes every card's sprite to dir/card.file, replacing what an earlier run left there.
+func savePNGs(dir string, sections []section) error {
+	if err := os.RemoveAll(dir); err != nil {
+		return err
+	}
+	for _, s := range sections {
+		for _, c := range s.cards {
+			if c.img == nil {
+				continue
+			}
+			path := filepath.Join(dir, c.file)
+			if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+				return err
+			}
+			f, err := os.Create(path)
+			if err != nil {
+				return err
+			}
+			img := c.img
+			if c.png != nil {
+				img = c.png
+			}
+			err = png.Encode(f, img)
+			if cerr := f.Close(); err == nil {
+				err = cerr
+			}
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // monsters groups the monster types by sprite family, each unique after the types sharing its graphics.
@@ -67,11 +110,6 @@ func monsters(read reader, pal []byte) ([]section, error) {
 		if m.cl2 == nil {
 			return c
 		}
-		g := m.cl2[le.Uint32(m.cl2):] // direction 0 faces the viewer
-		f, err := celFrame(g, 0, true)
-		if err != nil {
-			log.Fatal(err)
-		}
 		var recolor []func(int) int
 		if m.trn != nil {
 			recolor = append(recolor, monsterTrn(m.trn))
@@ -79,8 +117,26 @@ func monsters(read reader, pal []byte) ([]section, error) {
 		if uniqueTrn != nil {
 			recolor = append(recolor, drawTrn(uniqueTrn))
 		}
-		c.img = render(decodeCl2(f), m.width, pal, recolor...)
+		frame := func(dir int) *image.NRGBA {
+			f, err := celFrame(m.cl2[le.Uint32(m.cl2[4*dir:]):], 0, true)
+			if err != nil {
+				log.Fatal(err)
+			}
+			return render(decodeCl2(f), m.width, pal, recolor...)
+		}
+		c.img = sideBySide(12, frame(0), frame(6)) // DIR_S faces the viewer, DIR_E faces right
 		return c
+	}
+	// the PNG is the PDF card at 4x with its name, ID and weapon written under it
+	withPoster := func(c *card, fam string) {
+		if c.img == nil {
+			return
+		}
+		lines := c.lines[:2]
+		if w := weapons[fam]; w != "" {
+			lines = append(lines, "weapon: "+w)
+		}
+		c.png = poster(c.img, 4, lines)
 	}
 
 	types := map[string]monster{}
@@ -110,7 +166,9 @@ func monsters(read reader, pal []byte) ([]section, error) {
 			order = append(order, fam)
 		}
 		c := sprite(m, nil)
+		c.file = defs.IconID("monster", id) + ".png"
 		c.lines = []string{icons.name(defs.IconID("monster", id), r.s("mName")), id, "TRN: " + trn, "icon: " + icons.icon(defs.IconID("monster", id))}
+		withPoster(c, fam)
 		cards[fam] = append(cards[fam], *c)
 	}
 	for _, r := range table("xl_umon") {
@@ -123,8 +181,9 @@ func monsters(read reader, pal []byte) ([]section, error) {
 			return nil, fmt.Errorf("%s: %v", name, err)
 		}
 		c := sprite(types[id], t)
-		c.unique = true
+		c.unique, c.file = true, defs.IconID("unique", name)+".png"
 		c.lines = []string{name, "unique " + id, "TRN: " + r.s("mTrnName") + " on top", "icon: " + icons.icon(defs.IconID("unique", name))}
+		withPoster(c, familyOf[id])
 		cards[familyOf[id]] = append(cards[familyOf[id]], *c)
 	}
 	var sections []section
@@ -132,6 +191,23 @@ func monsters(read reader, pal []byte) ([]section, error) {
 		sections = append(sections, section{title: fam, cards: cards[fam]})
 	}
 	return sections, nil
+}
+
+// weapons is what each sprite family attacks with, as its graphics (and missiles) show it; the game data doesn't
+// record it.
+var weapons = map[string]string{
+	"Zombie": "fists", "FalSpear": "spear", "SkelAxe": "axe", "FalSword": "sword and shield", "Scav": "claws",
+	"SkelBow": "bow", "SkelSd": "sword and shield", "TSneak": "claws", "Sneak": "claws", "GoatLord": "polearm",
+	"GoatMace": "mace", "Bat": "claws", "GoatBow": "bow", "Acid": "acid spit", "SKing": "two-handed sword",
+	"FatC": "cleaver", "Fat": "fists", "Magma": "fists, fire bolts", "Rhino": "horns", "Demskel": "claws",
+	"Thin": "claws, lightning", "Fireman": "flames", "BigFall": "club", "Gargoyle": "claws", "Mega": "claws, fire",
+	"Snake": "blades", "Black": "sword", "Unrav": "claws", "Succ": "magic bolts", "Mage": "staff, spells",
+	"Golem": "fists", "Diablo": "claws, spells", "DarkMage": "staff, spells", "Fork": "tusks", "Scorp": "stinger",
+	"Eye": "magic bolts", "Spider": "fangs", "Spawn": "bite", "WScorp": "stinger", "Eye2": "magic bolts",
+	"bSpidr": "fangs, acid", "Clasp": "pincers", "AntWorm": "fire spit", "HorkD": "fists", "Hellbug": "mandibles",
+	"Gravdg": "shovel", "Rat": "claws, bite", "Hellbat": "fire bolts", "Lich": "magic bolts", "Bubba": "claws",
+	"Hellbat2": "claws", "Lich2": "magic bolts", "Byclps": "axe", "Flesh": "claws", "Reaper": "scythe",
+	"Nkr": "claws, spells",
 }
 
 var iTypeNames = []string{"ITYPE_MISC", "ITYPE_SWORD", "ITYPE_AXE", "ITYPE_BOW", "ITYPE_MACE", "ITYPE_SHIELD",
@@ -170,7 +246,7 @@ func items(read reader, pal []byte) ([]section, error) {
 		if err != nil {
 			return nil, fmt.Errorf("cursor %d: %v", curs, err)
 		}
-		return &card{img: render(decodeCel(f), sheets[sheet].widths[frame], pal)}, nil
+		return &card{img: crop(render(decodeCel(f), sheets[sheet].widths[frame], pal))}, nil
 	}
 
 	cards := make([][]card, len(iTypeNames))
@@ -194,6 +270,7 @@ func items(read reader, pal []byte) ([]section, error) {
 		if err != nil {
 			return nil, fmt.Errorf("%s: %v", r.s("iName"), err)
 		}
+		c.file = fmt.Sprintf("%s.curs%d.png", defs.IconID("item", r.s("iName")), r.i("iCurs"))
 		c.lines = []string{r.s("iName"), fmt.Sprintf("curs %d  %s", r.i("iCurs"), r.s("iMiscId")), key, "icon: " + icons.icon(key)}
 		cards[r.i("itype")] = append(cards[r.i("itype")], *c)
 	}
@@ -216,7 +293,7 @@ func items(read reader, pal []byte) ([]section, error) {
 		if err != nil {
 			return nil, fmt.Errorf("%s: %v", r.s("UIName"), err)
 		}
-		c.unique = true
+		c.unique, c.file = true, defs.IconID("item", r.s("UIName"))+".unique.png"
 		c.lines = []string{r.s("UIName"), fmt.Sprintf("curs %d  unique %s", curs, base.s("iName")), key, "icon: " + icons.icon(key)}
 		cards[base.i("itype")] = append(cards[base.i("itype")], *c)
 	}
@@ -243,7 +320,7 @@ func spells(read reader, pal []byte) ([]section, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &card{img: render(decodeCel(f), 56, pal)}, nil
+		return &card{img: crop(render(decodeCel(f), 56, pal))}, nil
 	}
 	var used, unused section
 	used.title, unused.title = "Spells and skills", "SpelIcon.CEL frames no spell uses"
@@ -260,6 +337,7 @@ func spells(read reader, pal []byte) ([]section, error) {
 			return nil, err
 		}
 		id := r.s("sName")
+		c.file = defs.IconID("spell", id) + ".png"
 		c.lines = []string{r.s("sNameText"), id, fmt.Sprintf("frame %d", frame), "icon: " + icons.icon(defs.IconID("spell", id))}
 		used.cards = append(used.cards, *c)
 	}
@@ -269,6 +347,7 @@ func spells(read reader, pal []byte) ([]section, error) {
 			if err != nil {
 				return nil, err
 			}
+			c.file = fmt.Sprintf("unused/frame%02d.png", frame)
 			c.lines = []string{fmt.Sprintf("frame %d", frame)}
 			unused.cards = append(unused.cards, *c)
 		}

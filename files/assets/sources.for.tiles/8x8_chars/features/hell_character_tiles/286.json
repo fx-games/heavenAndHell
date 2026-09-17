@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/286",
+  "perceptual": {
+    "silhouette": [
+      "blocky armored humanoid silhouette",
+      "squarish head",
+      "gray blade at right"
+    ],
+    "shape": [
+      "white head mass",
+      "black T-shaped slot",
+      "gray horizontal band",
+      "gray lower body"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding weapon upright"
+    ],
+    "colors": [
+      "white helmet",
+      "black visor slit",
+      "gray armor",
+      "yellow hand pixel"
+    ],
+    "major_regions": [
+      "white helmet with black T-shaped visor",
+      "gray belt and armor body",
+      "gray sword",
+      "brown hilt pixel"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "white head with T-shaped slit could be a closed helmet",
+      "could also read as a skull-like face",
+      "gray lower body could be plate armor",
+      "gray shape could be a sword"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "knight",
+      "paladin",
+      "armored warrior"
+    ],
+    "visual_symbols": [
+      "closed helmet",
+      "T-visor",
+      "sword",
+      "plate armor"
+    ],
+    "priority_features": [
+      "white helmet with T-visor",
+      "gray plate armor",
+      "upright sword"
+    ]
+  }
+}

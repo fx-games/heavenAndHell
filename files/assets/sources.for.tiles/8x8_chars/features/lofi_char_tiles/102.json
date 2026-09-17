@@ -1,0 +1,58 @@
+{
+  "id": "lofi_char_tiles/102",
+  "perceptual": {
+    "silhouette": [
+      "round head-like silhouette with flame arc on upper left",
+      "no body"
+    ],
+    "shape": [
+      "pale round mass at lower right",
+      "arc of light and mid blue pixels trailing up and left",
+      "dark blue lower region"
+    ],
+    "orientation": [
+      "facing right or front",
+      "ambiguous"
+    ],
+    "pose": [
+      "floating"
+    ],
+    "colors": [
+      "blue shades",
+      "white center",
+      "black eye holes"
+    ],
+    "major_regions": [
+      "white skull-like face with black eyes",
+      "light blue flame crest",
+      "dark blue jaw or base"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "disembodied head",
+      "skull"
+    ],
+    "possible_features": [
+      "pale mass with dark holes could be a skull",
+      "blue arc could be cold or spectral flames"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "blue flaming skull",
+      "spectral skull",
+      "ice spirit",
+      "undead head"
+    ],
+    "visual_symbols": [
+      "skull",
+      "blue flames"
+    ],
+    "priority_features": [
+      "skull-like face",
+      "blue flames trailing up-left",
+      "no body"
+    ]
+  }
+}

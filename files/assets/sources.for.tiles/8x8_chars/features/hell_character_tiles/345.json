@@ -1,0 +1,73 @@
+{
+  "id": "hell_character_tiles/345",
+  "perceptual": {
+    "silhouette": [
+      "humanoid silhouette",
+      "large rounded head",
+      "wide arms",
+      "robed lower body",
+      "vertical staff at right"
+    ],
+    "shape": [
+      "gray head with lighter gray band across top",
+      "two dark square eye holes",
+      "gray arm band",
+      "orange waist band",
+      "white lower body",
+      "thin brown vertical line"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms outstretched",
+      "holding staff"
+    ],
+    "colors": [
+      "gray head and arms",
+      "light gray headband",
+      "orange belt",
+      "white robe",
+      "brown staff"
+    ],
+    "major_regions": [
+      "gray hollow-eyed head",
+      "gray arms",
+      "orange sash",
+      "white robe",
+      "brown pole"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "robed humanoid",
+      "undead humanoid"
+    ],
+    "possible_features": [
+      "lighter band could be a headband or circlet",
+      "gray head with holes could be a skull or undead face",
+      "brown line could be a staff"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "undead monk",
+      "zombie cleric",
+      "ghoul pilgrim"
+    ],
+    "visual_symbols": [
+      "hollow eyes",
+      "white robe",
+      "staff",
+      "headband"
+    ],
+    "priority_features": [
+      "gray hollow-eyed head",
+      "white robe",
+      "orange sash",
+      "staff at right"
+    ]
+  }
+}

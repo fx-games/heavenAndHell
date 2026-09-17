@@ -1,0 +1,64 @@
+{
+  "id": "hell_character_tiles/613",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large rounded head",
+      "wide body"
+    ],
+    "shape": [
+      "pink dome head",
+      "blue torso",
+      "dark red waist band",
+      "brown pole at right"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding vertical object"
+    ],
+    "colors": [
+      "pink head",
+      "blue body",
+      "dark red belt",
+      "gray buckle",
+      "brown pole"
+    ],
+    "major_regions": [
+      "pink head with dark eyes",
+      "blue tunic",
+      "red belt with gray center",
+      "brown staff at right"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "brown line could be a staff or spear",
+      "gray center pixel could be a buckle"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "bald humanoid",
+      "guard",
+      "monk",
+      "peasant"
+    ],
+    "visual_symbols": [
+      "bald head",
+      "staff",
+      "belt"
+    ],
+    "priority_features": [
+      "large pink bald head",
+      "blue clothing",
+      "red belt",
+      "wooden staff"
+    ]
+  }
+}

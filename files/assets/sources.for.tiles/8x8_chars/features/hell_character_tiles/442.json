@@ -1,0 +1,59 @@
+{
+  "id": "hell_character_tiles/442",
+  "perceptual": {
+    "silhouette": [
+      "blocky humanoid silhouette",
+      "large head with two small top points",
+      "plain dark right edge"
+    ],
+    "shape": [
+      "square head",
+      "gray top protrusions",
+      "purple torso with red band"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "blue skin",
+      "purple body",
+      "red belt",
+      "gray horn pixels"
+    ],
+    "major_regions": [
+      "blue horned face with dark eyes",
+      "purple clothing with red belt"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "bipedal"
+    ],
+    "possible_features": [
+      "top points could be horns",
+      "blue skin suggests demon or undead",
+      "no weapon clearly visible"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "blue demon",
+      "imp",
+      "frost goblin"
+    ],
+    "visual_symbols": [
+      "horns",
+      "blue skin",
+      "belt"
+    ],
+    "priority_features": [
+      "blue horned head",
+      "purple body with red belt",
+      "no weapon"
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "id": "hell_character_tiles/799",
+  "perceptual": {
+    "silhouette": [
+      "compact humanoid silhouette",
+      "large square head",
+      "robe widening to bottom",
+      "no held object"
+    ],
+    "shape": [
+      "square head block",
+      "small flat cap on top",
+      "rectangular robed body",
+      "single-pixel hands at sides"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "arms at sides"
+    ],
+    "colors": [
+      "light blue face",
+      "yellow-green eyes",
+      "dark purple robe",
+      "red belt",
+      "dark background fills tile"
+    ],
+    "major_regions": [
+      "light blue head with two bright eyes",
+      "purple robe body",
+      "red horizontal band at waist"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "possibly small-bodied humanoid"
+    ],
+    "possible_features": [
+      "pale blue skin could indicate a non-human such as goblin or undead",
+      "gray top could be a skullcap or hair",
+      "long lower mass could be a robe"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "robed humanoid",
+      "mage or monk",
+      "goblin-like humanoid"
+    ],
+    "visual_symbols": [
+      "robe",
+      "bright eyes",
+      "belt"
+    ],
+    "priority_features": [
+      "pale blue big head",
+      "glowing yellow-green eyes",
+      "purple robe",
+      "no weapon"
+    ]
+  }
+}

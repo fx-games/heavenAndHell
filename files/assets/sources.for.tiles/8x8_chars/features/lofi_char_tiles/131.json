@@ -1,0 +1,59 @@
+{
+ "id": "lofi_char_tiles/131",
+ "perceptual": {
+  "silhouette": [
+   "humanoid silhouette",
+   "pointed rounded top of head",
+   "wide skirt-like base"
+  ],
+  "shape": [
+   "yellow head tapering upward",
+   "orange side masses",
+   "gray belt",
+   "wide brown lower mass"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "standing"
+  ],
+  "colors": [
+   "yellow head",
+   "orange hair/sides",
+   "gray belt",
+   "brown skirt"
+  ],
+  "major_regions": [
+   "yellow face with dark eyes",
+   "orange framing at sides",
+   "brown wide lower body"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "humanoid"
+  ],
+  "possible_features": [
+   "wide brown base could be a robe or skirt",
+   "orange sides could be hair or sleeves",
+   "pointed top could be a topknot or bald head"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "villager",
+   "monk",
+   "friar"
+  ],
+  "visual_symbols": [
+   "robe",
+   "belt"
+  ],
+  "priority_features": [
+   "brown robe-like lower body",
+   "gray belt",
+   "yellow face with orange sides"
+  ]
+ }
+}

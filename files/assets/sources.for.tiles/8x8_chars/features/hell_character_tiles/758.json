@@ -1,0 +1,62 @@
+{
+  "id": "hell_character_tiles/758",
+  "perceptual": {
+    "silhouette": [
+      "bulky humanoid silhouette",
+      "large helmeted head",
+      "block on left side",
+      "small light tip on right"
+    ],
+    "shape": [
+      "large helmet mass with T-shaped slot",
+      "rectangular gray block at left",
+      "orange torso"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing",
+      "holding shield"
+    ],
+    "colors": [
+      "orange armor",
+      "dark T-shaped visor",
+      "gray shield",
+      "cyan accent"
+    ],
+    "major_regions": [
+      "orange helmet with dark visor",
+      "gray shield at left",
+      "orange body"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid",
+      "armored humanoid"
+    ],
+    "possible_features": [
+      "T-shaped dark shape could be a helmet visor",
+      "left gray block could be a shield",
+      "right cyan pixel could be a weapon tip"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "knight",
+      "armored warrior",
+      "gladiator"
+    ],
+    "visual_symbols": [
+      "helmet visor",
+      "shield",
+      "armor"
+    ],
+    "priority_features": [
+      "T-visor helmet",
+      "orange armor",
+      "gray shield at left"
+    ]
+  }
+}

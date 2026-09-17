@@ -1,0 +1,61 @@
+{
+  "id": "hell_character_tiles/631",
+  "perceptual": {
+    "silhouette": [
+      "roughly humanoid silhouette",
+      "large rounded head",
+      "narrow lower body"
+    ],
+    "shape": [
+      "yellow dome head",
+      "blue eye squares",
+      "purple robe body",
+      "red belt"
+    ],
+    "orientation": [
+      "front-facing"
+    ],
+    "pose": [
+      "standing"
+    ],
+    "colors": [
+      "yellow head",
+      "blue eyes",
+      "purple body",
+      "red belt with gray buckle"
+    ],
+    "major_regions": [
+      "yellow head with blue eyes",
+      "purple robe",
+      "red sash"
+    ]
+  },
+  "interpreted_features": {
+    "body_plan": [
+      "humanoid"
+    ],
+    "possible_features": [
+      "yellow dome could be a bald head or blond hair",
+      "blue squares could be eyes or goggles"
+    ]
+  },
+  "iconography": {
+    "semantic_concepts": [
+      "bald humanoid",
+      "monk",
+      "cultist"
+    ],
+    "visual_symbols": [
+      "bald head",
+      "blue eyes",
+      "robe",
+      "belt"
+    ],
+    "priority_features": [
+      "large yellow head",
+      "blue eyes",
+      "purple robe",
+      "red belt"
+    ]
+  }
+}

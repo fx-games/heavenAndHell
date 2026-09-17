@@ -1,0 +1,56 @@
+{
+ "id": "lofi_char_tiles/168",
+ "perceptual": {
+  "silhouette": [
+   "sparse fragmented silhouette",
+   "scattered pixels forming loose body",
+   "dark eyes near top"
+  ],
+  "shape": [
+   "broken checker-like pattern of light pixels",
+   "no solid mass",
+   "two black pixels forming eyes"
+  ],
+  "orientation": [
+   "front-facing"
+  ],
+  "pose": [
+   "hovering",
+   "ambiguous"
+  ],
+  "colors": [
+   "pale light gray",
+   "black eyes"
+  ],
+  "major_regions": [
+   "loose light gray pixel cloud",
+   "black eye pixels in upper middle"
+  ]
+ },
+ "interpreted_features": {
+  "body_plan": [
+   "amorphous",
+   "elemental"
+  ],
+  "possible_features": [
+   "fragmented pattern could be smoke, mist, dust or wind",
+   "faint form could be a ghost"
+  ]
+ },
+ "iconography": {
+  "semantic_concepts": [
+   "air elemental",
+   "smoke creature",
+   "ghost"
+  ],
+  "visual_symbols": [
+   "wispy body",
+   "dark eyes"
+  ],
+  "priority_features": [
+   "fragmented pale gray pattern",
+   "two black eyes",
+   "no solid outline"
+  ]
+ }
+}
