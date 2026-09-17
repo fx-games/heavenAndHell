@@ -25,3 +25,5 @@ DiabloAudioEnabled: true
 AutoExploreOpenContainers: true
 WeaponBreakWarning: true
 Fullscreen: false
+Hellfire: true
+

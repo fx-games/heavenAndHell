@@ -102,7 +102,7 @@ name: Town Complete Nut
 
 internal_name: monster.nzombie
 name: Zombie
-icon: 319
+icon: 480
 
 internal_name: monster.bzombie
 name: Ghoul
@@ -114,7 +114,7 @@ icon: 554
 
 internal_name: monster.yzombie
 name: Black Death
-icon: 555
+icon: 680
 
 internal_name: monster.rfallsp
 name: Fallen One (FalSpear)
@@ -134,7 +134,7 @@ icon: 474
 
 internal_name: monster.wskelax
 name: Skeleton (SkelAxe)
-icon: 374
+icon: 398
 
 internal_name: monster.tskelax
 name: Corpse Axe
@@ -182,7 +182,7 @@ icon: 594
 
 internal_name: monster.wskelbw
 name: Skeleton (SkelBow)
-icon: 595
+icon: 401
 
 internal_name: monster.tskelbw
 name: Corpse Bow
@@ -198,7 +198,7 @@ icon: 675
 
 internal_name: monster.wskelsd
 name: Skeleton Captain
-icon: 406
+icon: 400
 
 internal_name: monster.tskelsd
 name: Corpse Captain
@@ -306,7 +306,7 @@ icon: 259
 
 internal_name: monster.cleaver
 name: The Butcher
-icon: 710
+icon: 258
 
 internal_name: monster.fat
 name: Overlord
@@ -553,7 +553,7 @@ icon: 730
 name: Gharbad the Weak
 
 internal_name: unique.skeleton_king
-icon: 731
+icon: 259
 name: Skeleton King
 
 internal_name: unique.zhar_the_mad
@@ -585,7 +585,7 @@ icon: 739
 name: Warlord of Blood
 
 internal_name: unique.the_butcher
-icon: 740
+icon: 258
 name: The Butcher
 
 internal_name: unique.bonehead_keenaxe
