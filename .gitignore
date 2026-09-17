@@ -24,3 +24,6 @@ files/assets/maps/backups/
 jarulf162.pdf
 debug-tints.png
 __pycache__/
+
+# Written by the game when run with files/ as the working directory (see the tracked config.rec at the repo root).
+files/config.rec
