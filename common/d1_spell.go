@@ -354,6 +354,9 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		item.RefreshD1()
 		SyncHero(c.caster)
 		f.Msg(fmt.Sprintf("It is %s.", item.Name()))
+		if f.UI != nil {
+			f.UI().ShowItemInfo(item)
+		}
 	case d1.SplSearch: // renamed Vision: reveals every entity on the level until the level changes
 		c.caster.AddStatusEffect(StatusVision, -1) // negative turnCount: never decays on its own, see State.MapTransition
 	case d1.SplRage: // AddRage: no raging while already raging, or while too wounded to survive the hangover

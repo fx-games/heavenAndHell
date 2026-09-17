@@ -73,6 +73,8 @@ func (d DummyUI) OpenUncancelableMenu(options []util.MenuItem) {
 
 }
 
+func (d DummyUI) ShowItemInfo(item *common.Item) {}
+
 func (d DummyUI) OpenTextWindow(msg []util.LabelText) {
 	//TODO implement me
 

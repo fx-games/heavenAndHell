@@ -241,6 +241,10 @@ func (c *Console) OpenTextWindow(msg []util.LabelText) {
 	}
 }
 
+func (c *Console) ShowItemInfo(item *common.Item) {
+	c.OpenTextWindow(item.GetTooltipLines(func(string) []util.ColoredTextPart { return nil }))
+}
+
 func (c *Console) CancelTargeting() { c.ui.CancelTargeting() }
 
 func (c *Console) ShowFullStats() { c.fullStats, c.panelsDirty = true, true }

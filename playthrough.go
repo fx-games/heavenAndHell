@@ -835,6 +835,16 @@ func castAllSpells(f *common.Factory, broker *common.Broker, state *common.State
 		if mana.Value() != full || unidentified.D1().Identified {
 			fail("spells: cancelling Identify's item list took mana (%d/%d) or identified the item", mana.Value(), full)
 		}
+		// picking an item must identify it and open its description window
+		realUI := f.UI
+		picker := &identifyPickUI{UserInterface: realUI()}
+		f.UI = func() common.UserInterface { return picker }
+		mana.SetToMax()
+		f.CastD1FromMemory(player, d1.SplIdentify, player.MapPosition())
+		f.UI = realUI
+		if !unidentified.D1().Identified || picker.shown != unidentified {
+			fail("spells: Identify left the item unidentified (%v) or showed no description window (%v)", unidentified.D1().Identified, picker.shown)
+		}
 		player.GetInventory().Remove(unidentified)
 	}
 	dealt := 0
@@ -1751,3 +1761,17 @@ func checkDualWield(player *common.Actor, fail func(string, ...any)) {
 		fail("bard: both blades should count, got mask %b damage %d-%d", dual.WeaponMask, dual.MinDam, dual.MaxDam)
 	}
 }
+
+// identifyPickUI picks the first offered item and records the description window Identify opens for it.
+type identifyPickUI struct {
+	common.UserInterface
+	shown *common.Item
+}
+
+func (u *identifyPickUI) OpenItemList(items []*common.TextualStack) {
+	if len(items) > 0 {
+		items[0].OnSelected()
+	}
+}
+
+func (u *identifyPickUI) ShowItemInfo(item *common.Item) { u.shown = item }
