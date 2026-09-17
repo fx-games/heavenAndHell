@@ -1,206 +1,257 @@
 %rec: default
 
 internal_name: spell.firebolt
+reference_image: reference/d1_sprites/skills/spell.firebolt.png
 name: Firebolt
 icon: 109
 
 internal_name: spell.heal
+reference_image: reference/d1_sprites/skills/spell.heal.png
 name: Healing
 icon: 332
 
 internal_name: spell.lightning
+reference_image: reference/d1_sprites/skills/spell.lightning.png
 name: Lightning
 icon: 37
 
 internal_name: spell.flash
+reference_image: reference/d1_sprites/skills/spell.flash.png
 name: Flash
 icon: 37
 
 internal_name: spell.identify
+reference_image: reference/d1_sprites/skills/spell.identify.png
 name: Identify
 icon: 270
 
 internal_name: spell.firewall
+reference_image: reference/d1_sprites/skills/spell.firewall.png
 name: Fire Wall
 icon: 33
 
 internal_name: spell.town
+reference_image: reference/d1_sprites/skills/spell.town.png
 name: Town Portal
 icon: 294
 
 internal_name: spell.stone
+reference_image: reference/d1_sprites/skills/spell.stone.png
 name: Stone Curse
 icon: 43
 
 internal_name: spell.infra
+reference_image: reference/d1_sprites/skills/spell.infra.png
 name: Infravision
 icon: 215
 
 internal_name: spell.rndteleport
+reference_image: reference/d1_sprites/skills/spell.rndteleport.png
 name: Phasing
 icon: 108
 
 internal_name: spell.manashield
+reference_image: reference/d1_sprites/skills/spell.manashield.png
 name: Mana Shield
 icon: 381
 
 internal_name: spell.fireball
+reference_image: reference/d1_sprites/skills/spell.fireball.png
 name: Fireball
 icon: 109
 
 internal_name: spell.guardian
+reference_image: reference/d1_sprites/skills/spell.guardian.png
 name: Guardian
 icon: 97
 
 internal_name: spell.chain
+reference_image: reference/d1_sprites/skills/spell.chain.png
 name: Chain Lightning
 icon: 37
 
 internal_name: spell.wave
+reference_image: reference/d1_sprites/skills/spell.wave.png
 name: Flame Wave
 icon: 33
 
 internal_name: spell.doomserp
+reference_image: reference/d1_sprites/skills/spell.doomserp.png
 name: Doom Serpents
 icon: 92
 
 internal_name: spell.blodrit
+reference_image: reference/d1_sprites/skills/spell.blodrit.png
 name: Blood Ritual
 icon: 43
 
 internal_name: spell.nova
+reference_image: reference/d1_sprites/skills/spell.nova.png
 name: Nova
 icon: 41
 
 internal_name: spell.invisibil
+reference_image: reference/d1_sprites/skills/spell.invisibil.png
 name: Invisibility
 icon: 39
 
 internal_name: spell.flame
+reference_image: reference/d1_sprites/skills/spell.flame.png
 name: Inferno
 icon: 109
 
 internal_name: spell.golem
+reference_image: reference/d1_sprites/skills/spell.golem.png
 name: Golem
 icon: 369
 
 internal_name: spell.blodboil
+reference_image: reference/d1_sprites/skills/spell.blodboil.png
 name: Rage
 icon: 258
 
 internal_name: spell.teleport
+reference_image: reference/d1_sprites/skills/spell.teleport.png
 name: Teleport
 icon: 39
 
 internal_name: spell.apoca
+reference_image: reference/d1_sprites/skills/spell.apoca.png
 name: Apocalypse
 icon: 109
 
 internal_name: spell.etherealize
+reference_image: reference/d1_sprites/skills/spell.etherealize.png
 name: Etherealize
 icon: 108
 
 internal_name: spell.repair
+reference_image: reference/d1_sprites/skills/spell.repair.png
 name: Item Repair
 icon: 498
 
 internal_name: spell.recharge
+reference_image: reference/d1_sprites/skills/spell.recharge.png
 name: Staff Recharge
 icon: 124
 
 internal_name: spell.disarm
+reference_image: reference/d1_sprites/skills/spell.disarm.png
 name: Trap Disarm
 icon: 268
 
 internal_name: spell.element
+reference_image: reference/d1_sprites/skills/spell.element.png
 name: Elemental
 icon: 109
 
 internal_name: spell.cbolt
+reference_image: reference/d1_sprites/skills/spell.cbolt.png
 name: Charged Bolt
 icon: 37
 
 internal_name: spell.hbolt
+reference_image: reference/d1_sprites/skills/spell.hbolt.png
 name: Holy Bolt
 icon: 123
 
 internal_name: spell.resurrect
+reference_image: reference/d1_sprites/skills/spell.resurrect.png
 name: Resurrect
 icon: 432
 
 internal_name: spell.telekinesis
+reference_image: reference/d1_sprites/skills/spell.telekinesis.png
 name: Telekinesis
 icon: 39
 
 internal_name: spell.healother
+reference_image: reference/d1_sprites/skills/spell.healother.png
 name: Heal Other
 icon: 332
 
 internal_name: spell.flare
+reference_image: reference/d1_sprites/skills/spell.flare.png
 name: Blood Star
 icon: 775
 
 internal_name: spell.bonespirit
+reference_image: reference/d1_sprites/skills/spell.bonespirit.png
 name: Bone Spirit
 icon: 250
 
 internal_name: spell.search
+reference_image: reference/d1_sprites/skills/spell.search.png
 name: Search
 icon: 240
 
 internal_name: spell.mana
+reference_image: reference/d1_sprites/skills/spell.mana.png
 name: Mana
 icon: 329
 
 internal_name: spell.magi
+reference_image: reference/d1_sprites/skills/spell.magi.png
 name: the Magi
 icon: 43
 
 internal_name: spell.jester
+reference_image: reference/d1_sprites/skills/spell.jester.png
 name: the Jester
 icon: 43
 
 internal_name: spell.lightwall
+reference_image: reference/d1_sprites/skills/spell.lightwall.png
 name: Lightning Wall
 icon: 38
 
 internal_name: spell.immolat
+reference_image: reference/d1_sprites/skills/spell.immolat.png
 name: Immolation
 icon: 109
 
 internal_name: spell.warp
+reference_image: reference/d1_sprites/skills/spell.warp.png
 name: Warp
 icon: 215
 
 internal_name: spell.reflect
+reference_image: reference/d1_sprites/skills/spell.reflect.png
 name: Reflect
 icon: 410
 
 internal_name: spell.berserk
+reference_image: reference/d1_sprites/skills/spell.berserk.png
 name: Berserk
 icon: 43
 
 internal_name: spell.firering
+reference_image: reference/d1_sprites/skills/spell.firering.png
 name: Ring of Fire
 icon: 109
 
 internal_name: spell.runefire
+reference_image: reference/d1_sprites/skills/spell.runefire.png
 name: Rune of Fire
 icon: 109
 
 internal_name: spell.runelight
+reference_image: reference/d1_sprites/skills/spell.runelight.png
 name: Rune of Light
 icon: 247
 
 internal_name: spell.runenova
+reference_image: reference/d1_sprites/skills/spell.runenova.png
 name: Rune of Nova
 icon: 43
 
 internal_name: spell.runeimmolat
+reference_image: reference/d1_sprites/skills/spell.runeimmolat.png
 name: Rune of Immolation
 icon: 109
 
 internal_name: spell.runestone
+reference_image: reference/d1_sprites/skills/spell.runestone.png
 name: Rune of Stone
 icon: 775
 
