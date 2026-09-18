@@ -3,7 +3,6 @@ package game
 import (
 	"cmp"
 	"fmt"
-	"math"
 	"math/rand"
 	"rpg/audio"
 	"rpg/common"
@@ -757,23 +756,31 @@ func (a *Actions) playerMeleeAttack(player *common.Actor, defender *common.Actor
 	meleeAction := common.NewMeleeAttackAction(common.NewActorCause("Melee attack", player), player, defender)
 	a.executeAttack(meleeAction, common.MeleeAttack)
 }
-// RangedAttackAt fires the player's equipped ranged weapon at the hostile actor at mapPos, if there is a clear
-// shot. What a left-click on a distant enemy does; false (do nothing) for anything else, so the caller falls
-// back to its normal click handling (move/auto-explore).
+
+// RangedAttackAt fires the player's equipped ranged weapon at mapPos, if there is a clear shot at something worth
+// shooting: a hostile actor, or an intact barrel. What a left-click on a distant enemy or barrel does; false (do
+// nothing) for anything else, so the caller falls back to its normal click handling (move/auto-explore).
 func (a *Actions) RangedAttackAt(mapPos geometry.Point) bool {
 	state := a.state
 	player := state.GetPlayer()
+	currentMap := state.GetMap()
 	if !player.IsAlive() || !player.GetEquipment().HasRangedWeaponEquipped() {
 		return false
 	}
-	if !player.CanSee(mapPos) || !state.GetMap().IsActorAt(mapPos) {
+	if !player.CanSee(mapPos) {
 		return false
 	}
-	if state.GetMap().MoveDistance(player.MapPosition(), mapPos) <= 1 {
+	if currentMap.MoveDistance(player.MapPosition(), mapPos) <= 1 {
 		return false // adjacent: let the normal click-to-move-into-melee handling take it
 	}
-	target := state.GetMap().ActorAt(mapPos)
-	if !target.IsVisible() || !target.IsHostileTo(player) || target.IsVendor() {
+	switch {
+	case currentMap.IsActorAt(mapPos):
+		target := currentMap.ActorAt(mapPos)
+		if !target.IsVisible() || !target.IsHostileTo(player) || target.IsVendor() {
+			return false
+		}
+	case common.IsD1Barrel(currentMap, mapPos):
+	default:
 		return false
 	}
 	a.stopAutoMove()
@@ -844,6 +851,7 @@ func (a *Actions) RestUntilHealed() {
 func (a *Actions) SetQueueAfterTurn(afterTurn func(call func())) {
 	a.queueAfterTurn = afterTurn
 }
+
 // ShowObjectInfoAt opens the description popup for a shrine at mapPos, analogous to ShowActorInfoAt. No-op for
 // anything that isn't a previewable shrine.
 func (a *Actions) ShowObjectInfoAt(mapPos geometry.Point) {
@@ -857,147 +865,11 @@ func (a *Actions) ShowObjectInfoAt(mapPos geometry.Point) {
 	}
 	a.ui().OpenTextWindow(util.ToLabelText(lines))
 }
+
+// ShowActorInfoAt opens the description window for the actor at mapPos.
 func (a *Actions) ShowActorInfoAt(mapPos geometry.Point) {
-	state := a.state
-	player := state.GetPlayer()
-	actor := state.GetMap().ActorAt(mapPos)
-	infoText := util.ToLabelText(actor.GetInfoText())
-	if actor.D1Monster() != nil {
-		infoText = append(infoText, util.ToLabelText(common.D1CombatForecast(state, player, actor))...)
-		a.ui().OpenTextWindow(infoText)
-		return
-	}
-	if actor != player && actor.IsHostile() {
-		otherHasRanged := actor.GetEquipment().HasRangedWeaponEquipped()
-		playerHasRanged := player.GetEquipment().HasRangedWeaponEquipped()
-
-		otherMeleeDamage := actor.GetDamageDice(common.MeleeAttack)
-
-		expectedMeleeDamage := otherMeleeDamage.ExpectedValue()
-		maxMeleeDamage := otherMeleeDamage.Max()
-
-		expectedMeleeDamageReduced := common.CalculateMeleeDamage(expectedMeleeDamage, 1.0, actor, player)
-		maxMeleeDamageReduced := common.CalculateMeleeDamage(maxMeleeDamage, 1.0, actor, player)
-
-		if maxMeleeDamageReduced == 0 {
-			infoText = append(infoText, util.LabelTextFromString(""),
-				util.LabelTextFromStringWithColor("This creature will not be able to penetrate", defs.Red),
-				util.LabelTextFromStringWithColor("your armor with a regular attack.", defs.Red),
-			)
-		} else if expectedMeleeDamageReduced == 0 {
-			infoText = append(infoText, util.LabelTextFromString(""),
-				util.LabelTextFromStringWithColor("It will be hard for this creature", defs.Red),
-				util.LabelTextFromStringWithColor("to penetrate your armor with a regular attack.", defs.Red),
-			)
-			infoText = append(infoText, util.LabelTextFromString(""), util.LabelTextFromStringWithColor(fmt.Sprintf("Enemy could at worst hit for %d damage per melee attack,", maxMeleeDamageReduced), defs.Red))
-			infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("that's %d%% of your current health,", maxMeleeDamageReduced*100/player.GetStats().GetResource(stats.Health).Value()), defs.Red))
-			hitsForMeleeKill := int(math.Ceil(float64(player.GetStats().GetResource(stats.Health).Value()) / float64(maxMeleeDamageReduced)))
-			infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("and at worst could defeat you in %d hits.", hitsForMeleeKill), defs.Red))
-		} else {
-			infoText = append(infoText, util.LabelTextFromString(""), util.LabelTextFromStringWithColor(fmt.Sprintf("Enemy typically hits for %d damage per melee attack,", expectedMeleeDamageReduced), defs.Red))
-			infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("that's %d%% of your current health,", expectedMeleeDamageReduced*100/player.GetStats().GetResource(stats.Health).Value()), defs.Red))
-			hitsForMeleeKill := int(math.Ceil(float64(player.GetStats().GetResource(stats.Health).Value()) / float64(maxMeleeDamageReduced)))
-			infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("and at worst could defeat you in %d hits.", hitsForMeleeKill), defs.Red))
-		}
-
-		if otherHasRanged {
-			otherRangedDamage := actor.GetDamageDice(common.RangedAttack)
-
-			expectedRangedDamage := otherRangedDamage.ExpectedValue()
-			maxRangedDamage := otherRangedDamage.Max()
-
-			expectedRangedDamageReduced := common.CalculateRangedDamage(expectedRangedDamage, 1.0, actor, player)
-			maxRangedDamageReduced := common.CalculateRangedDamage(maxRangedDamage, 1.0, actor, player)
-
-			if maxRangedDamageReduced == 0 {
-				infoText = append(infoText, util.LabelTextFromString(""),
-					util.LabelTextFromStringWithColor("This creature will not be able to penetrate", defs.Red),
-					util.LabelTextFromStringWithColor("your armor with a ranged attack.", defs.Red),
-				)
-			} else if expectedRangedDamageReduced == 0 {
-				infoText = append(infoText, util.LabelTextFromString(""),
-					util.LabelTextFromStringWithColor("It will be hard for this creature", defs.Red),
-					util.LabelTextFromStringWithColor("to penetrate your armor with a ranged attack.", defs.Red),
-				)
-				infoText = append(infoText, util.LabelTextFromString(""), util.LabelTextFromStringWithColor(fmt.Sprintf("Enemy could at worst hit for %d damage per ranged attack,", maxRangedDamageReduced), defs.Red))
-				infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("that's %d%% of your current health,", maxRangedDamageReduced*100/player.GetStats().GetResource(stats.Health).Value()), defs.Red))
-				hitsForRangedKill := int(math.Ceil(float64(player.GetStats().GetResource(stats.Health).Value()) / float64(maxRangedDamageReduced)))
-				infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("and at worst could defeat you in %d hits.", hitsForRangedKill), defs.Red))
-			} else {
-				infoText = append(infoText, util.LabelTextFromString(""), util.LabelTextFromStringWithColor(fmt.Sprintf("Enemy typically hits for %d damage per ranged attack,", expectedRangedDamageReduced), defs.Red))
-				infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("that's %d%% of your current health,", expectedRangedDamageReduced*100/player.GetStats().GetResource(stats.Health).Value()), defs.Red))
-				hitsForRangedKill := int(math.Ceil(float64(player.GetStats().GetResource(stats.Health).Value()) / float64(maxRangedDamageReduced)))
-				infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("and at worst could defeat you in %d hits.", hitsForRangedKill), defs.Red))
-			}
-		}
-
-		playerMeleeDamage := player.GetDamageDice(common.MeleeAttack)
-
-		playerExpectedMeleeDamage := playerMeleeDamage.ExpectedValue()
-		playerMaxMeleeDamage := playerMeleeDamage.Max()
-
-		playerExpectedMeleeDamageReduced := common.CalculateMeleeDamage(playerExpectedMeleeDamage, 1.0, player, actor)
-		playerMaxMeleeDamageReduced := common.CalculateMeleeDamage(playerMaxMeleeDamage, 1.0, player, actor)
-
-		if playerMaxMeleeDamageReduced == 0 {
-			infoText = append(infoText, util.LabelTextFromString(""),
-				util.LabelTextFromStringWithColor("You will not be able to penetrate", defs.DarkGreen),
-				util.LabelTextFromStringWithColor("the enemy's armor with a regular attack.", defs.DarkGreen),
-			)
-		} else if playerExpectedMeleeDamageReduced == 0 {
-			infoText = append(infoText, util.LabelTextFromString(""),
-				util.LabelTextFromStringWithColor("It will be hard for you", defs.DarkGreen),
-				util.LabelTextFromStringWithColor("to penetrate the enemy's armor with a regular attack.", defs.DarkGreen),
-			)
-			infoText = append(infoText, util.LabelTextFromString(""), util.LabelTextFromStringWithColor(fmt.Sprintf("You could at best hit for %d damage per melee attack,", playerMaxMeleeDamageReduced), defs.DarkGreen))
-			infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("that's %d%% of the enemy's current health,", playerMaxMeleeDamageReduced*100/actor.GetStats().GetResource(stats.Health).Value()), defs.DarkGreen))
-			hitsForMeleeKill := int(math.Ceil(float64(actor.GetStats().GetResource(stats.Health).Value()) / float64(playerMaxMeleeDamageReduced)))
-			infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("and at best could defeat the enemy in %d hits.", hitsForMeleeKill), defs.DarkGreen))
-		} else {
-			infoText = append(infoText, util.LabelTextFromString(""), util.LabelTextFromStringWithColor(fmt.Sprintf("You typically hit for %d damage per melee attack,", playerExpectedMeleeDamageReduced), defs.DarkGreen))
-			infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("that's %d%% of the enemy's current health,", playerExpectedMeleeDamageReduced*100/actor.GetStats().GetResource(stats.Health).Value()), defs.DarkGreen))
-			hitsForMeleeKill := int(math.Ceil(float64(actor.GetStats().GetResource(stats.Health).Value()) / float64(playerMaxMeleeDamageReduced)))
-			infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("and at best could defeat the enemy in %d hits.", hitsForMeleeKill), defs.DarkGreen))
-		}
-
-		if playerHasRanged {
-
-			playerHitChance := common.CalculateRangedWeaponHitChance(player, actor)
-
-			infoText = append(infoText, util.LabelTextFromString(""), util.LabelTextFromStringWithColor(fmt.Sprintf("You have a %d%% chance to hit with a ranged attack.", int(playerHitChance*100)), defs.DarkGreen))
-
-			playerRangedDamage := player.GetDamageDice(common.RangedAttack)
-
-			playerExpectedRangedDamage := playerRangedDamage.ExpectedValue()
-			playerMaxRangedDamage := playerRangedDamage.Max()
-
-			playerExpectedRangedDamageReduced := common.CalculateRangedDamage(playerExpectedRangedDamage, 1.0, player, actor)
-			playerMaxRangedDamageReduced := common.CalculateRangedDamage(playerMaxRangedDamage, 1.0, player, actor)
-
-			if playerMaxRangedDamageReduced == 0 {
-				infoText = append(infoText, util.LabelTextFromString(""),
-					util.LabelTextFromStringWithColor("You will not be able to penetrate", defs.DarkGreen),
-					util.LabelTextFromStringWithColor("the enemy's armor with a ranged attack.", defs.DarkGreen),
-				)
-			} else if playerExpectedRangedDamageReduced == 0 {
-				infoText = append(infoText, util.LabelTextFromString(""),
-					util.LabelTextFromStringWithColor("It will be hard for you", defs.DarkGreen),
-					util.LabelTextFromStringWithColor("to penetrate the enemy's armor with a ranged attack.", defs.DarkGreen),
-				)
-				infoText = append(infoText, util.LabelTextFromString(""), util.LabelTextFromStringWithColor(fmt.Sprintf("You could at best hit for %d damage per ranged attack,", playerMaxRangedDamageReduced), defs.DarkGreen))
-				infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("that's %d%% of the enemy's current health,", playerMaxRangedDamageReduced*100/actor.GetStats().GetResource(stats.Health).Value()), defs.DarkGreen))
-				hitsForRangedKill := int(math.Ceil(float64(actor.GetStats().GetResource(stats.Health).Value()) / float64(playerMaxRangedDamageReduced)))
-				infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("and at best could defeat the enemy in %d hits.", hitsForRangedKill), defs.DarkGreen))
-			} else {
-				infoText = append(infoText, util.LabelTextFromString(""), util.LabelTextFromStringWithColor(fmt.Sprintf("You typically hit for %d damage per ranged attack,", playerExpectedRangedDamageReduced), defs.DarkGreen))
-				infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("that's %d%% of the enemy's current health,", playerExpectedRangedDamageReduced*100/actor.GetStats().GetResource(stats.Health).Value()), defs.DarkGreen))
-				hitsForRangedKill := int(math.Ceil(float64(actor.GetStats().GetResource(stats.Health).Value()) / float64(playerMaxRangedDamageReduced)))
-				infoText = append(infoText, util.LabelTextFromStringWithColor(fmt.Sprintf("and at best could defeat the enemy in %d hits.", hitsForRangedKill), defs.DarkGreen))
-			}
-		}
-	}
-
-	a.ui().OpenTextWindow(infoText)
+	title, sections := common.ActorInfoSections(a.state, a.state.GetMap().ActorAt(mapPos))
+	a.ui().OpenInfoWindow(title, sections)
 }
 
 func (a *Actions) updateFoV() {

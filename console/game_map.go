@@ -83,7 +83,7 @@ func (c *Console) VisibleIconAt(loc mgeom.Point) textiles.TextIcon {
 	} else {
 		icon = c.tileIcon(pos)
 	}
-	if !c.disableFog {
+	if !c.disableFog && !(c.visibleActorAt(pos) != nil && state.LitByVision(pos)) {
 		icon.Fg = state.ApplyLighting(pos, icon.Fg, c.ticks)
 	}
 	icon.Bg = color.RGBA{A: 255}

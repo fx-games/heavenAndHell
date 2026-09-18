@@ -66,18 +66,20 @@ type GameInstance struct {
 	executeAfterTurn []func()
 
 	// data definitions
-	dataDefinitions defs.DataContainer
-	d1Data          *d1.Data // with Hellfire
-	d1Classic       *d1.Data // plain D1 1.09
-	hellfire        bool     // which of the two this game runs on
-	levelSeed       int64
-	levelSnapshots  map[string]*common.LevelSnapshot
-	autosave        bool // on once a game was started or loaded through the menus
-	permadeath      bool
-	premium         d1.Premium // Griswold's premium stock
-	boyItem         *d1.Item   // Wirt's item
-	boyLevel        int
-	storesShown     bool // stores were stocked this session, so missing items were bought
+	dataDefinitions  defs.DataContainer
+	d1Data           *d1.Data // with Hellfire
+	d1Classic        *d1.Data // plain D1 1.09
+	hellfire         bool     // which of the two this game runs on
+	levelSeed        int64
+	levelSnapshots   map[string]*common.LevelSnapshot
+	autosave         bool // on once a game was started or loaded through the menus
+	slot             int  // the save slot this game autosaves into; 0 for the throwaway game behind the start menu
+	refreshThumbnail bool // the slot's screenshot predates this game; the first player turn saves once more
+	permadeath       bool
+	premium          d1.Premium // Griswold's premium stock
+	boyItem          *d1.Item   // Wirt's item
+	boyLevel         int
+	storesShown      bool // stores were stocked this session, so missing items were bought
 
 	actions *Actions
 	factory *common.Factory
@@ -427,6 +429,11 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 	}
 
 	g.uiController.OnPlayerTurnTaken()
+
+	if g.refreshThumbnail { // once, so the new hero's slot shows their own game and not the menu behind it
+		g.refreshThumbnail = false
+		g.SaveGame()
+	}
 }
 
 func (g *GameInstance) updateStatsDisplay() {
@@ -561,10 +568,8 @@ func (g *GameInstance) showDebugMenu() {
 			},
 		},
 		{
-			MainText: "Map Info",
-			Action: func() {
-				g.uiController.OpenTextWindow(util.ToLabelText(g.state.GetMap().GetMetaString()))
-			},
+			MainText: "Toggle Map Info",
+			Action:   g.uiController.ToggleMapInfo,
 		},
 		{
 			MainText: "Enchant Stash to +10",
@@ -818,6 +823,7 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 		}
 	} else { // dungeon map
 		g.state.SetDungeonMap(newMapName, g.state.GetMap())
+		g.state.GetFlags().SetTrue(common.FlagBeenUnderground) // town brightens up once the player has been below
 		if dlvl := common.LevelFromName(newMapName); dlvl > g.state.GetLastDungeonLevel() {
 			g.state.SetLastDungeonLevel(dlvl) // opens town gates, raises store item levels
 		}

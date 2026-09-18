@@ -10,7 +10,6 @@ type MinimapOverlay struct {
 	topLeft                  geometry.Point
 	offsetFromTopRightCorner geometry.Point
 	bounds                   geometry.Rect
-	isHidden                 bool
 	isMouseOver              bool
 	miniMapImage             *ebiten.Image
 	availableWidth           int
@@ -20,16 +19,10 @@ type MinimapOverlay struct {
 }
 
 func (o *MinimapOverlay) OnCommand(command CommandType) bool {
-	if o.isHidden {
-		return false
-	}
 	return false
 }
 
 func (o *MinimapOverlay) OnMouseClicked(button ebiten.MouseButton, x int, y int) bool {
-	if o.isHidden {
-		return false
-	}
 	mousePos := geometry.Point{X: x, Y: y}
 	if !o.bounds.Contains(mousePos) {
 		return false
@@ -49,9 +42,6 @@ func (o *MinimapOverlay) OnMouseClicked(button ebiten.MouseButton, x int, y int)
 
 func (o *MinimapOverlay) OnMouseMoved(x int, y int) (bool, Tooltip) {
 	o.isMouseOver = false
-	if o.isHidden {
-		return false, NoTooltip{}
-	}
 	mousePos := geometry.Point{X: x, Y: y}
 	if o.bounds.Contains(mousePos) {
 		o.isMouseOver = true
@@ -60,9 +50,6 @@ func (o *MinimapOverlay) OnMouseMoved(x int, y int) (bool, Tooltip) {
 }
 
 func (o *MinimapOverlay) OnMouseWheel(x int, y int, dy float64) bool {
-	if o.isHidden {
-		return false
-	}
 	return false
 
 }
@@ -100,9 +87,6 @@ func (o *MinimapOverlay) layoutFromTopRightCorner(offsetFromTopRightCorner geome
 }
 
 func (o *MinimapOverlay) Draw() {
-	if o.isHidden {
-		return
-	}
 	renderer := o.uiController.tileRenderer
 
 	mapSizeP := o.bounds.Size()
@@ -117,14 +101,6 @@ func (o *MinimapOverlay) SetAction(action func()) {
 
 func (o *MinimapOverlay) SetTooltip(tooltipText string) {
 	//o.tooltipText = tooltipText
-}
-
-func (o *MinimapOverlay) Hide() {
-	o.isHidden = true
-}
-
-func (o *MinimapOverlay) Show() {
-	o.isHidden = false
 }
 
 func (o *MinimapOverlay) SetMiniMapImage(image *ebiten.Image) {

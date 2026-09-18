@@ -54,7 +54,8 @@ func (a *UntargetedAction) SetMonetaryValue(value int) {
 }
 
 func (a *UntargetedAction) GetTooltipLines(func(string) []util.ColoredTextPart) []util.LabelText {
-	return a.GetDescription()
+	name := []util.LabelText{{Text: a.name, TextColor: color.White}}
+	return append(name, a.GetDescription()...)
 }
 
 func (a *UntargetedAction) InventoryIcon() int32 {

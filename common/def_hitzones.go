@@ -11,6 +11,5 @@ func OneTargetTile(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args 
 		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
 			return []geometry.Point{target}
 		},
-		Description: []util.LabelText{util.LabelTextFromString("The tile you target")},
 	}
 }

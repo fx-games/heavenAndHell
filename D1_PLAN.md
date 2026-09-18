@@ -28,7 +28,7 @@ From D1: loot, enemies, dungeon generation. Kept from H&H: graphics, UI, time ma
 1. [x] **Cathedral slice** — D1 table loading, character sheet, D1 combat, L1 generator, levels 1–4 with D1 monsters + AIs, loot drops (affixes, uniques), speed tiers, sprite mapping; `playthrough` for 1–4.
    Notes: sprite icons/tints are first guesses (`common/d1_monster.go`, `common/d1_item.go`). Old H&H content still feeds town shops and levels 5+, so its deletion moved to milestones 3 and 6. Shortcuts are marked `ponytail:` in code.
 2. [x] **Saving** — snapshot save, Continue/New game, permadeath toggle, load on death.
-   Notes: `savegame.json` in the working directory (`game/save.go`); levels rebuild from `levelSeed` + `LevelSnapshot`. Not saved: non-D1 (old H&H) items. Explored cells, monster AI state, corpses, disarmed traps, the golem and Mana Shield were added later (see "Gap fixes").
+   Notes: five save slots under `saves/` in the working directory (`saves/slot<N>.json` plus `slot<N>.png`, `game/save.go`); levels rebuild from `levelSeed` + `LevelSnapshot`. Not saved: non-D1 (old H&H) items. Explored cells, monster AI state, corpses, disarmed traps, the golem and Mana Shield were added later (see "Gap fixes"), slots after that (see "Save slots").
 3. [x] **Town** — Griswold, Adria, Pepin, Cain, Wirt; D1 store gen; identify, durability, repair; town entrances unlock; delete H&H items/vendor defs.
    Notes: `maps.ldtk` is the town's single source: every townsperson, sign, door and entrance (a `Location` with `TargetMap`) is placed there, code adds nothing to the town map but store stock and the town portal; entrances below the cathedral stay shut until their level was reached (`z_onMove.go`). Abel's spot became Cain, Wirt stands near the cathedral entrance. Griswold's premium items share his BUY list. Deliberate differences from D1 (per decisions 9/10): broken items stay until repaired (Cain's identify price now matches D1 exactly: 100 gold flat). H&H's town stash is gone (D1 has none). The Hell gate (level 13) comes with milestone 6.
 4. [x] **Objects** — containers, shrines, fountains.
@@ -85,6 +85,23 @@ Every D1 single-player quest runs as D1 1.09 progresses it (`common/d1_quest.go`
 - **Golem and Mana Shield** outlast level changes (unlike D1): the golem walks along with the hero onto the new level, both are saved.
 - **Quests:** the Wounded Townsman says his line once, then the hero's PS_WARR8 line plays; Ogden's Sign is checked inside Leoric's check and quests only get `_qvar1` 1 when they start from QUEST_INIT, like 1.09. D1's `_tMsgSaid` is reset on every talk, so our one-line-per-talk returns already match it. Speech plays with every quest, book and gossip text and each townsperson's greeting, plus the hero's quest lines (kills, quest items, mushroom patch, sign chest) and IS_QUESTDN (`d1.SfxFiles`, generated from 1.09's sound table; needs `diablo_sfx`). The third blood stone lights the hall with Blood2.DUN's torches (LoadMapObjs).
 
+## Save slots
+
+- **Five slots** (`game/save.go`): `saves/slot<N>.json` with the screenshot the game was last saved at beside it
+  as `slot<N>.png`. `ListSaveSlots` reads each file's header only, so the screen shows who is in a slot, their
+  level, the deepest dungeon they reached and when it was last played (`common.SaveSlot`) without loading a game.
+  A pre-slots `savegame.json` moves into slot 1 the first time the slots are listed, and only when `SaveDir` is
+  the real one, so a test never walks off with the player's game.
+- **Nothing is overwritten unasked** (`confirmOverwrite`): an empty slot and the running game's own slot are
+  written straight away, any other slot asks first. A new game takes the first free slot; with all five taken it
+  opens the slot screen and asks which hero to replace. Autosaving keeps writing into the slot the running game
+  came from, which is what "Continue" (the most recently played slot) reloads.
+- **Not in permadeath**: a permadeath game still autosaves into its slot and still loses it on death, but the
+  Save/Load entries are left out of the pause menu - being able to reload is the one thing permadeath forbids.
+- **The screenshot** is the last frame with no menu over it, scaled to 176px wide and refreshed every 20 ticks
+  (`UIController.captureThumbnail`), saved as PNG next to the slot. The terminal UI has no framebuffer and so no
+  screenshots; its slot screen is a menu of one-line summaries.
+
 ## Traps, decoration and Lazarus' lair
 
 - **Traps** (`common/d1_trap.go`): the wall traps AddObjTraps hides next to doors, chests, sarcophagi and levers fire once when their object is opened or used (Obj_Trap: arrow, fire bolt or lightning by depth, aimed at the hero next to the object); trapped chests shoot an arrow, a fire arrow or a nova at the hero who opens them (OperateChest). Missiles from no monster use PlayerMHit's own rolls: currlevel-based damage, 100 − AC/2 to-hit for arrows, 40 for magic, half damage with "absorbs half trap damage". Fired and disarmed wall traps (and so their targets' trap flags) and open doors are saved (`LevelSnapshot.Traps`, `Doors`). Simplifications: a fire arrow's burst and a nova hit once. Flame holes and their levers aren't placed by any single-player level.
@@ -131,6 +148,14 @@ Every D1 single-player quest runs as D1 1.09 progresses it (`common/d1_quest.go`
 - **Still out**: the Wandering Trader (nothing in Hellfire runs it), the Auric Amulet's gold capacity (H&H has no
   gold cap), town cows, Nest/Crypt tile icons, the stores' 48-line list cap and belt selling (H&H has neither),
   multiplayer-only items/spells/shrines and difficulty levels (Nightmare/Hell).
+- **Actor descriptions** (right click, `common.ActorInfoSections`) are titled blocks of label/value rows, laid
+  out like the character sheet and drawn by the same code (`gui/info_window.go`, `drawSectionBlock`): what the
+  creature is, its numbers, what it resists, how it behaves, and the matchup forecast with the rules behind it.
+  The terminal UI flattens the same sections (`common.SectionLines`). H&H's old wall of combat prose for a
+  non-D1 hostile (a provoked townsperson) is gone along with its formulas; such an actor now shows its numbers
+  and gear, and no forecast.
+- **Potions are refused, not wasted** (`common.D1PotionWasted`): drinking a healing, mana or rejuvenation potion
+  while the resources it refills are already full says so and keeps the potion. Elixirs always do something.
 - UI stays: H&H stack inventory, hotkeys, menus; no D1 grid inventory, belt, automap.
 - Unrelated H&H subsystems (`osr`, `console` ASCII mode, `creator`, window-client IPC) left untouched.
 

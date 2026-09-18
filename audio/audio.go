@@ -198,10 +198,17 @@ const (
 	SampleRate44100 SampleRate = 44100
 )
 
+// audioContext is ebiten's single audio context: creating a second one panics, so a process that builds more
+// than one game instance (every test past the first) shares this one.
+var audioContext *audio.Context
+
 func NewAudioPlayer(fileSystem fs.ReadDirFS, sampleRate SampleRate) *Player {
+	if audioContext == nil {
+		audioContext = audio.NewContext(int(sampleRate))
+	}
 	return &Player{
 		files:           fileSystem,
-		context:         audio.NewContext(int(sampleRate)),
+		context:         audioContext,
 		availableSounds: make(map[string]*Sound),
 		activeSounds:    make(map[string][]*ActiveSound),
 		sfxVolume:       1,

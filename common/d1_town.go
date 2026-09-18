@@ -3,8 +3,10 @@ package common
 import (
 	"fmt"
 	"rpg/d1"
+	"rpg/defs"
 	"rpg/stats"
 	"rpg/util"
+	"sort"
 )
 
 // D1 townspeople (decision 10). A vendor type is the NPC's InternalName in maps.ldtk and its gossip key in d1.Data.Gossip.
@@ -140,6 +142,23 @@ func d1VendorOptions(ctx ActionContext, vendor *Actor) []util.MenuItem {
 		// D1 charges a flat 100 gold to identify (AddStoreHoldId in stores.cpp), regardless of item value
 		return []util.MenuItem{d1ServiceOption(ctx, "Identify an item", func(it *d1.Item) bool { return it.Magical != 0 && !it.Identified },
 			func(*d1.Item) int { return 100 }, func(it *d1.Item) { it.Identified = true }, true)}
+	case VendorTypeBarmaid: // once Diablo is dead she collects for the town, and the dungeon fills back up
+		if ctx.GameState.QuestActive(d1.QDiablo) != d1.QuestDone {
+			return nil
+		}
+		levels := ctx.GameState.ExploredD1DungeonLevels()
+		if levels == 0 {
+			return nil
+		}
+		cost := D1GillianDonationPerLevel * levels
+		return []util.MenuItem{{MainText: fmt.Sprintf("Give her %d gold.", cost), Action: func() {
+			if !PayGold(ctx, ctx.GameState.GetPlayer(), cost) {
+				return
+			}
+			n := ctx.GameState.RespawnD1Monsters()
+			gui.OpenTextWindow(util.ToLabelText([]string{vendor.Name(), "", "I am very grateful. This will go to a good cause."}))
+			ctx.Msg(fmt.Sprintf("Something stirs on %d dungeon levels.", n))
+		}}}
 	case VendorTypeWirt: // the look fee is paid once per item: looking again is free until Wirt has a new one
 		if vendor.GetInventory().IsEmpty() {
 			return nil
@@ -203,3 +222,67 @@ func destroyBrokenWeapon(ctx ActionContext, owner *Actor, weapon *Item) {
 
 // FlagWirtItemSeen is set once the look fee for Wirt's current item is paid; a new item clears it (saved with the flags).
 const FlagWirtItemSeen = "wirt_item_seen"
+
+// D1GillianDonationPerLevel is what Gillian collects per explored dungeon level.
+const D1GillianDonationPerLevel = 200
+
+// exploredD1DungeonNames are the dungeon levels the player has been to: the ones still loaded plus the ones a
+// save only kept a snapshot of.
+func (s *State) exploredD1DungeonNames() []string {
+	seen := map[string]bool{}
+	for name := range s.dungeonMaps {
+		seen[name] = true
+	}
+	for name := range s.mapGen.snapshots {
+		if !defs.IsTownLevel(name) {
+			seen[name] = true
+		}
+	}
+	names := make([]string, 0, len(seen))
+	for name := range seen {
+		names = append(names, name)
+	}
+	sort.Strings(names) // a Go map's order isn't stable, and the respawn count is shown to the player
+	return names
+}
+
+// ExploredD1DungeonLevels is how many dungeon levels the player has been to.
+func (s *State) ExploredD1DungeonLevels() int { return len(s.exploredD1DungeonNames()) }
+
+// RespawnD1Monsters puts every monster the generator placed back on each explored dungeon level, at full health.
+// Levels that are loaded are refilled right away; the rest are marked so they refill the next time they are
+// built (LevelSnapshot.RespawnMonsters). Returns how many levels it touched.
+func (s *State) RespawnD1Monsters() int {
+	g := s.mapGen
+	if g.snapshots == nil { // a State built without SetSnapshots still has to be able to mark a level
+		g.snapshots = map[string]*LevelSnapshot{}
+	}
+	names := s.exploredD1DungeonNames()
+	for _, name := range names {
+		m, loaded := s.dungeonMaps[name]
+		lvl := g.levels[name]
+		if !loaded || lvl == nil {
+			if snap := g.snapshots[name]; snap != nil {
+				snap.RespawnMonsters = true
+			} else {
+				g.snapshots[name] = &LevelSnapshot{Monsters: map[int]SavedMonster{}, RespawnMonsters: true}
+			}
+			continue
+		}
+		for _, a := range append([]*Actor(nil), m.Actors()...) {
+			if a.d1Monster != nil && !a.d1Monster.Golem {
+				m.RemoveActor(a)
+			}
+		}
+		for _, a := range append([]*Actor(nil), m.DownedActors()...) {
+			m.RemoveDownedActor(a)
+		}
+		g.placeD1Monsters(m, lvl)
+		for _, a := range append(append([]*Actor(nil), m.Actors()...), g.walledIn[name]...) {
+			if a.d1Monster != nil {
+				g.factory.initD1Talk(a)
+			}
+		}
+	}
+	return len(names)
+}

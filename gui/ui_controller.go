@@ -92,7 +92,6 @@ type UIController struct {
 	ticksUntilTooltipAppears uint64
 	screenSize               geometry.Point
 	uiBarWidth               int
-	baseUIBarWidth           int // uiBarWidth while the character sheet is closed
 	uiBar                    *ColoredRect
 	elevatedOverlay          UIWidget
 
@@ -110,6 +109,7 @@ type UIController struct {
 	isFullScreen     bool
 	logHook          func(string)
 	worldTicks       uint64
+	thumbnail        *ebiten.Image // the last unobstructed frame, scaled down, for a save slot's screenshot
 	shouldQuitGame   bool
 	mousePosInPixels geometry.Point
 
@@ -122,6 +122,7 @@ type UIController struct {
 	globalScaleColor           color.Color
 	disableFogOfWar            bool
 	mousePosOnMap              geometry.Point
+	showMapInfo                bool
 	msg                        func(message string) // this might be a smell already? Should the UI really generate messages to the player?
 	renderingMode              RenderingMode
 	globalFadeColorTicksLeft   int
@@ -148,6 +149,11 @@ func (u *UIController) SetDebugActions(actions func() common.DebugActions) {
 
 func (u *UIController) IsPlayerForcingAggression() bool {
 	return u.shiftIsBeingPressedThisTick
+}
+
+func (u *UIController) ToggleMapInfo() {
+	u.showMapInfo = !u.showMapInfo
+	u.updateMapTileHoverInfo(u.mousePosOnMap)
 }
 
 func (u *UIController) GetVisibleMap() geometry.Rect {
@@ -647,9 +653,8 @@ func (u *UIController) setupUI() {
 	inventoryBoxSize := u.inventory.GetBounds().Size()
 
 	u.uiBarWidth = inventoryBoxSize.X + (2 * paddingLeftAndRight)
-	u.baseUIBarWidth = u.uiBarWidth
 	u.uiBar = u.SetUIBarWidth(u.uiBarWidth)
-	u.statsLabel = NewCustomLabel(u, func(u *UIController, l *BasicLabel) { // follows the bar as the character sheet resizes it
+	u.statsLabel = NewCustomLabel(u, func(u *UIController, l *BasicLabel) {
 		l.posInfo = SizeNeededForText(u.GetRenderer().MeasureString, l.textLines, 10)
 		l.layoutFromTopLeftPos(geometry.Point{X: u.uiBarWidth - paddingLeftAndRight, Y: paddingLeftAndRight})
 	})
@@ -752,38 +757,15 @@ func (u *UIController) onItemInInventoryClicked(uiItem UIElement) {
 	}
 }
 
-// isCharacterSheetShowing reports whether the expanded sidebar ('c') is up: it replaces
-// the minimap and skill icons with the full stat list.
-func (u *UIController) isCharacterSheetShowing() bool {
-	return u.miniMap.isHidden
-}
+// ToggleFullStats opens the character sheet window, or closes it again ('c').
+func (u *UIController) ToggleFullStats() { u.OpenCharacterSheet() }
 
-// ToggleFullStats opens the character sheet, or returns to the normal collapsed sidebar.
-func (u *UIController) ToggleFullStats() {
-	if u.isCharacterSheetShowing() {
-		u.UpdateStatsLabel() // collapses the bar and shows the minimap and skills again
-		return
-	}
-	u.ShowFullStats()
-}
-
+// ShowFullStats relays out the character sheet if it is open. Equipping and dropping gear call it because the
+// numbers changed; the window itself is opened with 'c' or by the level-up prompt.
 func (u *UIController) ShowFullStats() {
-	u.miniMap.Hide()
-	label := u.statsLabel
-
-	player := u.context.GameState().GetPlayer()
-	label.SetText(player.GetFullStats())
-	u.resizeUIBar(max(u.baseUIBarWidth, label.GetBounds().Size().X+12)) // 6px padding on both sides, as in setupUI
-}
-
-// resizeUIBar sets the right sidebar's width and shrinks or grows the map view to match.
-func (u *UIController) resizeUIBar(width int) {
-	if u.uiBarWidth == width {
-		return
+	if sheet, open := u.modal.(*CharacterSheet); open {
+		sheet.Layout()
 	}
-	u.uiBarWidth = width
-	u.uiBar.distanceToScreen = width
-	u.OnScreenSizeChanged()
 }
 
 func (u *UIController) BeginPlayerSellingTo(vendor *common.Actor) {
@@ -808,6 +790,8 @@ func (u *UIController) BeginPlayerSellingTo(vendor *common.Actor) {
 			ShortCut: playerInventory.GetLetterForItemStack(itemStack),
 			Icon:     typedItem.InventoryIcon(),
 			Tooltip:  typedItem.GetTooltipLines(textParser),
+			// selling is a decision about gear too: show how it stacks up against what is worn
+			MakeTooltip: func(mousePos geometry.Point) Tooltip { return NewItemTooltip(u, typedItem, mousePos) },
 			TextColumns: []util.LabelText{
 				{
 					Text:               itemName,
@@ -833,14 +817,15 @@ func (u *UIController) BeginPlayerSellingTo(vendor *common.Actor) {
 	menu.SetHeader("You have:", fmt.Sprintf("%d gold", goldAmount))
 	menu.SetItems(sellItems, []Alignment{AlignmentLeft, AlignmentRight})
 }
+
+// openLevelUpMenu is the same window as 'c': it has a "+" next to every attribute a point can still go into.
 func (u *UIController) openLevelUpMenu() {
-	player := u.context.GameState().GetPlayer()
-	if !player.CanLevelUp() {
+	if !u.context.GameState().GetPlayer().CanLevelUp() {
 		return
 	}
-	u.ShowFullStats()
-	items := common.LevelUpMenuItems(player, u.openLevelUpMenu, u.ShowFullStats)
-	u.OpenMenu(items)
+	if _, open := u.modal.(*CharacterSheet); !open {
+		u.OpenCharacterSheet()
+	}
 }
 func (u *UIController) addMiniMap(offset geometry.Point, maxHeight int, horizontalPadding int) *MinimapOverlay {
 	miniMap := u.AddMinimap(offset.Sub(geometry.Point{X: horizontalPadding}), maxHeight, offset.X-(horizontalPadding*2), u.mapRenderer.GetMiniMap())
@@ -854,9 +839,6 @@ func (u *UIController) addSkillsOverlay(pixelEdgeFromBottomRight geometry.Point)
 	getList := func() []UIElement {
 		player := state.GetPlayer()
 		items := make([]UIElement, 0)
-		if u.miniMap.isHidden { // the character sheet ('c') is showing
-			return items
-		}
 		for _, item := range u.GetActiveSkillsForUI(player) {
 			items = append(items, item)
 		}
@@ -1202,7 +1184,7 @@ func (u *UIController) GetTileScaleFactor() float64 {
 // canCancel reports whether Cancel has something to back out of, so Esc knows
 // not to fall through to the pause menu. Keep in step with Cancel below.
 func (u *UIController) canCancel() bool {
-	return u.IsUIModalVisible() || u.targeter != nil || u.inventory.IsActive() || u.isCharacterSheetShowing()
+	return u.IsUIModalVisible() || u.targeter != nil || u.inventory.IsActive()
 }
 
 func (u *UIController) Cancel() {
@@ -1216,10 +1198,6 @@ func (u *UIController) Cancel() {
 	}
 	if u.inventory.IsActive() {
 		u.inventory.Deactivate()
-		return
-	}
-	if u.isCharacterSheetShowing() {
-		u.UpdateStatsLabel()
 		return
 	}
 }
@@ -1351,9 +1329,7 @@ func (u *UIController) UpdateStatsLabel() {
 	}
 	statLines := append(mapNameParts, statusParts...)
 
-	u.resizeUIBar(u.baseUIBarWidth)
 	label.SetText(statLines)
-	u.miniMap.Show()
 }
 
 // helpSection is one titled block of "key -> what it does" lines in the F1 help.
@@ -1740,6 +1716,10 @@ func (u *UIController) updateMapTileHoverInfo(mapPos geometry.Point) {
 	}
 	player := u.context.GameState().GetPlayer()
 	m := u.context.GameState().GetMap()
+	if u.showMapInfo { // debug readout: the cell under the cursor, perceivable or not
+		u.inventory.infoLabel.SetText([]util.LabelText{{Text: fmt.Sprintf("(%d, %d)", mapPos.X, mapPos.Y), TextColor: color.White}})
+		return
+	}
 	if player == nil || !m.Contains(mapPos) || !player.CanPerceive(mapPos) {
 		u.inventory.infoLabel.ClearText()
 		return

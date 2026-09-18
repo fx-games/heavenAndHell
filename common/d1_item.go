@@ -161,6 +161,13 @@ func (g *Factory) NewD1Item(it *d1.Item) *Item {
 				Effect:      func(user *Actor, _ EffectSource) { UseD1Potion(user, miscID) },
 				Description: []util.LabelText{util.LabelTextFromString(it.Name)},
 			})
+			action.SetCondition(func(user *Actor) bool {
+				if msg, wasted := D1PotionWasted(user, miscID); wasted {
+					g.Msg(msg)
+					return false
+				}
+				return true
+			})
 			item.SetCategory(defs.ItemCategoryPotion)
 			item.SetCharges(1)
 			item.SetDestroyAfterUse(true)
@@ -269,8 +276,18 @@ func (i *Item) d1TooltipLines(cmp map[string]int) []string {
 	if it.AC > 0 {
 		add("%s", colored(cmp[d1.KeyArmor], fmt.Sprintf("Armor: %d", it.AC)))
 	}
+	// what the weapon's kind does on its own, before any affix: PlrHitMonst's sword/mace rule
+	switch it.Type {
+	case d1.ITypeSword:
+		add("[:positive]+50%% damage vs. animals[:white], [:negative]-50%% vs. the undead[:white]")
+	case d1.ITypeMace:
+		add("[:positive]+50%% damage vs. the undead[:white], [:negative]-50%% vs. animals[:white]")
+	}
 	if it.MaxDur > 0 && it.MaxDur < 255 {
 		add("Durability: %d/%d", it.Durability, it.MaxDur)
+		if it.Durability == 0 {
+			add("[:red]Broken: using it now destroys it[:white]")
+		}
 	}
 	if it.MaxCharges > 0 {
 		add("Charges: %d/%d", it.Charges, it.MaxCharges)
@@ -279,6 +296,10 @@ func (i *Item) d1TooltipLines(cmp map[string]int) []string {
 		add("Not Identified")
 	} else {
 		for _, l := range it.PropertyLines(cmp) {
+			if l.Cmp == 0 { // affixes stand out from the base stats; a comparison's green/red wins over the blue
+				lines = append(lines, "[:magic]"+l.Text+"[:white]")
+				continue
+			}
 			lines = append(lines, colored(l.Cmp, l.Text))
 		}
 	}

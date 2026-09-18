@@ -99,9 +99,6 @@ func NewRangedAttackTargetingRules(args util.Arguments) *TargetRulesProvider {
 				},
 			}
 		},
-		Description: []util.LabelText{
-			util.LabelTextFromString("Ranged attack"),
-		},
 	}
 }
 

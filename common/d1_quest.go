@@ -811,8 +811,12 @@ func d1QuestKill(ctx ActionContext, mon *D1Monster) {
 		UpdateD1Quests(state, state.GetMap())
 	case d1.QDiablo:
 		if ui := ctx.UserInterface(); ui != nil {
-			ui.OpenTextWindow(util.ToLabelText(d1EndText()))
+			ui.OpenTextWindow(util.ToLabelText(append(d1EndText(), "",
+				"Yet what dwells below has taken his measure. Every level of the dungeon now breeds",
+				"stronger things, and richer spoils. Gillian collects for the town, should you wish",
+				"to see them walk again.")))
 		}
+		ctx.Msg("The dungeon stirs: monsters and loot below are stronger now.")
 	}
 }
 

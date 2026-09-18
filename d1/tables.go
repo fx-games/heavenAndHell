@@ -134,3 +134,12 @@ const (
 	MtARCHLICH = 133
 	MtNAKRUL   = 137
 )
+
+// D1's own Nightmare bonuses (InitMonster, Monster::level/exp/toHit and the gold roll in devilutionX). This game
+// has no difficulty selection; it applies them once Diablo has been beaten, so a second run still has teeth.
+const (
+	NightmareLevelBonus     = 15
+	NightmareAcBonus        = 50
+	NightmareToHitBonus     = 85
+	NightmareItemLevelBonus = 16
+)

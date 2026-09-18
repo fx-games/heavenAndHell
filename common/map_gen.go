@@ -69,6 +69,15 @@ var d1CathedralSeeThrough = func() map[byte]gridmap.Tile {
 		128: {DefinedIcon: defs.IconLamp, DefinedDescription: "a lamp", IsTransparent: true}}
 }()
 
+// d1CathedralColumns are Cathedral megatiles whose art is a free-standing column, exactly like the arch pieces
+// that stand next to them in an arcade, but whose cell blocks sight in D1's own SOL table - so they fell through
+// to the plain wall icon and a row of arches ended in a wall. t1Corner (3) is the one that shows: an arcade
+// running down a wall corner uses it, while the same arcade mirrored uses t1HArchEnd (8), which does draw as an
+// arch. They keep blocking sight, only the icon changes.
+// ponytail: t1VCorner (16) and t1HCorner (17) look like columns too, but they cap wall runs rather than arcades,
+// so they stay walls; move them here if wall ends should look like arches as well.
+var d1CathedralColumns = map[byte]bool{3: true}
+
 // addBasicTiles ports the wall/floor/lava/fence/door terrain from a generated d1.Level (piece coordinates 16..95,
 // exposed as cells 0..79) onto the gridmap. Doors are placed as objects afterward, once Level.Objects is walked.
 // d1TypeDlvl maps a level TYPE back to a representative dlvl for D1Tilemap, since a set level's own type (Lazarus'
@@ -117,6 +126,8 @@ func (g *MapGenerator) setD1Tiles(m *gridmap.GridMap[*Actor, *Item, Object], lvl
 				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: defs.IconWoodenFence, DefinedDescription: "a wooden fence", IsTransparent: true})
 			case lvl.Type == d1.DTypeCathedral && seeThrough && lvl.CellSolid(x, y) && !lvl.CellBlocks(x, y):
 				m.SetTile(mapPos, seeThroughTile)
+			case lvl.Type == d1.DTypeCathedral && d1CathedralColumns[lvl.CellMega(x, y)] && lvl.CellSolid(x, y):
+				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: defs.IconArch, DefinedDescription: "an arch"})
 			case lvl.CellSolid(x, y): // opaque unless drawn as something see-through: a see-through plain wall hides that you
 				// can see and shoot into a room
 				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: tileMap.ChooseWallTile(mapPos), DefinedDescription: "a wall"})

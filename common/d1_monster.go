@@ -100,7 +100,7 @@ var d1VariantTints = []color.RGBA{{255, 255, 255, 255}, {160, 200, 255, 255}, {2
 
 // NewD1Monster ports InitMonster for monster type mt.
 func (g *Factory) NewD1Monster(mt int) *Actor {
-	return g.newD1Monster(mt, nil)
+	return g.scaleD1NewGamePlus(g.newD1Monster(mt, nil))
 }
 
 // newD1Monster is NewD1Monster's shared core. Given um, it builds the actor as that unique right away, with the
@@ -153,7 +153,7 @@ func (g *Factory) d1VariantTint(mt int, m *d1.MonsterData) color.RGBA {
 // NewD1UniqueMonster ports PlaceUniqueMonst's stat changes for UniqMonst[u].
 func (g *Factory) NewD1UniqueMonster(u int) *Actor {
 	um := &g.Generator.D.UniqueMonsters[u]
-	a := g.newD1Monster(g.Generator.D.MonsterByID(um.Type), um)
+	a := g.scaleD1NewGamePlus(g.newD1Monster(g.Generator.D.MonsterByID(um.Type), um))
 	mon := a.d1Monster
 	if um.Level != 0 {
 		mon.Level = 2 * um.Level
@@ -197,7 +197,7 @@ func (g *Factory) NewD1MonsterFromLevel(mon *d1.Monster) *Actor {
 	st.SetAttribute(stats.MaxHealth, hp)
 	st.GetResource(stats.Health).SetToMax()
 	st.SetAttribute(stats.Level, dm.Level)
-	return a
+	return g.scaleD1NewGamePlus(a)
 }
 
 // MakeD1Minion ports PlaceGroup's leader handling (leaderf bit 1: stronger, bit 2: follows the leader's AI).
@@ -216,34 +216,45 @@ func MakeD1Minion(minion, leader *Actor, leaderf int) {
 	}
 }
 
-func (a *Actor) d1MonsterInfoText() []string {
+// D1MonsterSections describes a monster for the info window: what it is, its numbers, what it shrugs off and
+// how it fights.
+func (a *Actor) D1MonsterSections() []D1SheetSection {
 	mon := a.d1Monster
 	class := strings.ToLower(strings.TrimPrefix(mon.Data.Class, "MC_"))
-	title := fmt.Sprintf("Level %d %s", mon.Level, class)
+	kind := fmt.Sprintf("Level %d %s", mon.Level, class)
 	if mon.Unique != nil {
-		title = "Unique " + title
+		kind = "Unique " + kind
 	}
-	lines := []string{a.name, title, "",
-		fmt.Sprintf("HP: %s", a.GetStats().GetResource(stats.Health).ToString()),
-		fmt.Sprintf("Armor class: %d", mon.AC),
-		fmt.Sprintf("Damage: %d-%d", mon.MinDam, mon.MaxDam),
+	rows := [][2]string{
+		{"Kind", kind},
+		{"Life", a.GetStats().GetResource(stats.Health).ToString()},
+		{"Armor class", fmt.Sprintf("%d", mon.AC)},
+		{"Damage", fmt.Sprintf("%d-%d", mon.MinDam, mon.MaxDam)},
 	}
 	if mon.MaxDam2 > 0 && (mon.MinDam2 != mon.MinDam || mon.MaxDam2 != mon.MaxDam) {
-		lines = append(lines, fmt.Sprintf("Secondary attack: %d-%d", mon.MinDam2, mon.MaxDam2))
+		rows = append(rows, [2]string{"Secondary attack", fmt.Sprintf("%d-%d", mon.MinDam2, mon.MaxDam2)})
 	}
+	sections := []D1SheetSection{{Title: "Creature", Rows: rows}}
+	var resists [][2]string
 	for _, r := range []struct {
-		bit  int
-		text string
-	}{{d1.ResistMagic, "Resists magic"}, {d1.ResistFire, "Resists fire"}, {d1.ResistLightning, "Resists lightning"},
-		{d1.ImmuneMagic, "Immune to magic"}, {d1.ImmuneFire, "Immune to fire"}, {d1.ImmuneLightning, "Immune to lightning"}} {
-		if mon.MagicRes&r.bit != 0 {
-			lines = append(lines, r.text)
+		element      string
+		resist, immn int
+	}{{"Fire", d1.ResistFire, d1.ImmuneFire}, {"Lightning", d1.ResistLightning, d1.ImmuneLightning},
+		{"Magic", d1.ResistMagic, d1.ImmuneMagic}} {
+		switch {
+		case mon.MagicRes&r.immn != 0:
+			resists = append(resists, [2]string{r.element, "immune"})
+		case mon.MagicRes&r.resist != 0:
+			resists = append(resists, [2]string{r.element, "resistant"})
 		}
 	}
-	if behavior := d1MonsterAIDescriptions[mon.AI]; behavior != "" {
-		lines = append(lines, "", behavior)
+	if len(resists) > 0 {
+		sections = append(sections, D1SheetSection{Title: "Resistances", Rows: resists})
 	}
-	return lines
+	if behavior := d1MonsterAIDescriptions[mon.AI]; behavior != "" {
+		sections = append(sections, D1SheetSection{Title: "Behavior", Notes: []string{behavior}})
+	}
+	return sections
 }
 
 // d1MonsterAIDescriptions is a plain-English gloss of each AI_* brain in game/ai_d1.go's think(), kept here
@@ -264,7 +275,7 @@ var d1MonsterAIDescriptions = map[string]string{
 	"AI_GARG": "Lies dormant until approached, then takes flight to attack.", "AI_RHINO": "Charges in a straight line.",
 	"AI_COUNSLR": "Keeps its distance, casting spells.", "AI_CLEAVER": "Waits until provoked, then charges relentlessly.",
 	"AI_SKELKING": "Occasionally raises a skeleton from the ground; otherwise fights in melee.",
-	"AI_ZHAR": "Speaks first, then fights as a spellcaster.", "AI_LAZURUS": "Speaks first, then fights as a spellcaster.",
+	"AI_ZHAR":     "Speaks first, then fights as a spellcaster.", "AI_LAZURUS": "Speaks first, then fights as a spellcaster.",
 	"AI_LAZHELP": "Joins the fight as a ranged caster once Lazarus has spoken.",
 	"AI_WARLORD": "Speaks first, then attacks with a blade.", "AI_GARBUD": "Speaks first, then charges in for melee.",
 	"AI_SNOTSPIL": "Speaks first, then fights like a Fallen One.", "AI_LACHDAN": "Never fights.",
@@ -273,4 +284,36 @@ var d1MonsterAIDescriptions = map[string]string{
 
 func (a *Actor) RemoveStatusEffect(effect StatusEffect) {
 	a.statusEffects.SetFalse(string(effect))
+}
+
+// D1NewGamePlus is on once Diablo has been beaten: monsters that spawn and loot that drops from then on use D1's
+// own Nightmare numbers, so the dungeon Gillian's donation refills is a match for a hero who already cleared it.
+func (s *State) D1NewGamePlus() bool { return s.QuestActive(d1.QDiablo) == d1.QuestDone }
+
+// D1ItemLevel is the level loot rolls at on dungeon level dlvl.
+func (s *State) D1ItemLevel(dlvl int) int {
+	if s.D1NewGamePlus() {
+		return d1.ItemLevel(dlvl) + d1.NightmareItemLevelBonus
+	}
+	return d1.ItemLevel(dlvl)
+}
+
+// scaleD1NewGamePlus ports InitMonster's DIFF_NIGHTMARE scaling onto a monster that was just built. The golem is
+// the player's own and is created through newD1Monster, which skips this.
+func (g *Factory) scaleD1NewGamePlus(a *Actor) *Actor {
+	if a.d1Monster == nil || g.State == nil || !g.State.D1NewGamePlus() {
+		return a
+	}
+	m, st := a.d1Monster, a.GetStats()
+	st.SetAttribute(stats.MaxHealth, st.GetAttribute(stats.MaxHealth)*3+100)
+	st.GetResource(stats.Health).SetToMax()
+	m.MinDam, m.MaxDam = 2*(m.MinDam+2), 2*(m.MaxDam+2)
+	m.MinDam2, m.MaxDam2 = 2*(m.MinDam2+2), 2*(m.MaxDam2+2)
+	m.AC += d1.NightmareAcBonus
+	m.Hit, m.Hit2 = m.Hit+d1.NightmareToHitBonus, m.Hit2+d1.NightmareToHitBonus
+	m.Level += d1.NightmareLevelBonus
+	m.Exp = 2 * (m.Exp + 1000)
+	st.SetAttribute(stats.Level, m.Level)
+	st.SetAttribute(stats.Experience, m.Exp)
+	return a
 }

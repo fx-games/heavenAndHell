@@ -83,6 +83,9 @@ func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 		AudioPlayer:    theGame.GetAudio(),
 		StartMenuItems: theGame.StartMenuItems,
 		BackToMainMenu: theGame.BackToMainMenu,
+		OpenSaveMenu:   theGame.OpenSaveMenu,
+		OpenLoadMenu:   theGame.OpenLoadMenu,
+		IsPermadeath:   theGame.IsPermadeath,
 		Animator: func() common.Animator {
 			return theGame.GetActionBroker()
 		},

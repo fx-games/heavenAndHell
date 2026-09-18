@@ -385,11 +385,10 @@ func (h *Hero) meleeDamageOf(s Sheet, d int, double bool, monClass string) int {
 	if double {
 		dam *= 2
 	}
-	sword, mace := s.Holds(ITypeSword), !s.Holds(ITypeSword) && s.Holds(ITypeMace) // phanditype: a sword in either hand wins
-	switch {
-	case monClass == "MC_UNDEAD" && sword, monClass == "MC_ANIMAL" && mace:
+	switch s.WeaponVsMonsterClass(monClass) {
+	case -50:
 		dam -= dam >> 1
-	case monClass == "MC_UNDEAD" && mace, monClass == "MC_ANIMAL" && sword:
+	case 50:
 		dam += dam >> 1
 	}
 	if s.Flags&ISpl3xDamVsDemons != 0 && monClass == "MC_DEMON" {
@@ -397,6 +396,33 @@ func (h *Hero) meleeDamageOf(s Sheet, d int, double bool, monClass string) int {
 	}
 	return dam
 }
+
+// WeaponVsMonsterClass is what the weapon in hand does to melee damage against a monster class, as a percentage
+// (+50, -50 or 0): PlrHitMonst's phanditype rule - swords cut flesh and maces crush bone. A sword in either hand
+// wins over a mace. Nothing else, staves and axes included, cares what it is hitting.
+func (s Sheet) WeaponVsMonsterClass(monClass string) int {
+	sword, mace := s.Holds(ITypeSword), !s.Holds(ITypeSword) && s.Holds(ITypeMace)
+	switch {
+	case monClass == "MC_UNDEAD" && sword, monClass == "MC_ANIMAL" && mace:
+		return -50
+	case monClass == "MC_UNDEAD" && mace, monClass == "MC_ANIMAL" && sword:
+		return 50
+	}
+	return 0
+}
+
+// CriticalStrikeChance is the percentage of melee swings that land twice (MeleeDamage's crit roll): the
+// character's level, for the classes that have it, and 0 for the rest.
+func (h *Hero) CriticalStrikeChance() int {
+	if !HasClassFlag(h.Class, ClassCriticalStrike) {
+		return 0
+	}
+	return min(h.Level, 100)
+}
+
+// FullMissileDamageBonus reports a class that adds its whole Str/Dex damage bonus to missiles instead of half of
+// it (arrowDamageOf).
+func FullMissileDamageBonus(class int) bool { return class == Rogue || class == Bard }
 
 // HitLeech ports PlrHitMonst's life/mana steal; dam in whole points, returns gains in 1/64.
 func (h *Hero) HitLeech(rng *rand.Rand, s Sheet, dam int) (hp, mana int) {

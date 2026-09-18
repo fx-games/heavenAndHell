@@ -4,6 +4,7 @@ package console
 import (
 	"bytes"
 	"fmt"
+	"image"
 	"image/color"
 	"log"
 	"regexp"
@@ -193,6 +194,8 @@ func (c *Console) visibleActorsText() string {
 
 // common.UserInterface
 
+func (c *Console) ToggleMapInfo() {}
+
 func (c *Console) GetVisibleMap() geometry.Rect {
 	r := c.ui.VisibleMap()
 	return geometry.NewRect(r.Min.X, r.Min.Y, r.Max.X, r.Max.Y)
@@ -241,6 +244,11 @@ func (c *Console) OpenTextWindow(msg []util.LabelText) {
 	}
 }
 
+// OpenInfoWindow renders the sections as plain indented lines in a text window.
+func (c *Console) OpenInfoWindow(title string, sections []common.D1SheetSection) {
+	c.ui.OpenTextWindow(strings.Join(common.SectionLines(title, sections), "\n"))
+}
+
 func (c *Console) ShowItemInfo(item *common.Item) {
 	c.OpenTextWindow(item.GetTooltipLines(func(string) []util.ColoredTextPart { return nil }))
 }
@@ -282,6 +290,20 @@ func (c *Console) OpenNewGameScreen(start func(class defs.LoadoutDefinition, per
 	items = append(items, textui.MenuItem{Name: "Back", Action: back, CloseMenus: true})
 	c.ui.OpenMenuNotClosable("Choose a class", items)
 }
+
+// OpenSaveSlots lists the slots as a menu; the terminal draws no frames, so there is no screenshot to show.
+func (c *Console) OpenSaveSlots(title string, slots []common.SaveSlot, pick func(slot int), back func()) {
+	var items []textui.MenuItem
+	for _, slot := range slots {
+		chosen := slot.Slot
+		items = append(items, textui.MenuItem{Name: slot.Summary(), CloseMenus: true, Action: func() { pick(chosen) }})
+	}
+	items = append(items, textui.MenuItem{Name: "Back", Action: back, CloseMenus: true})
+	c.ui.OpenMenuNotClosable(title, items)
+}
+
+// CaptureThumbnail: the terminal UI has no framebuffer to screenshot.
+func (c *Console) CaptureThumbnail() image.Image { return nil }
 
 func (c *Console) BeginTargeting(rules common.TargetRules, onHit *common.HitEffect) {
 	var candidates []mgeom.Point

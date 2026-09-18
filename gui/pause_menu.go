@@ -10,16 +10,22 @@ import (
 )
 
 // openPauseMenu is ESC during the game. The game is turn-based, so nothing moves while a menu is open.
+// Saving and loading are left out of a permadeath game, which has one life and one autosave by definition.
 func (u *UIController) openPauseMenu() {
-	u.OpenMenu([]util.MenuItem{
-		{MainText: "Resume"},
+	items := []util.MenuItem{{MainText: "Resume"}}
+	if !u.context.IsPermadeath() {
+		items = append(items,
+			util.MenuItem{MainText: "Save game", Action: func() { u.context.OpenSaveMenu(u.openPauseMenu) }},
+			util.MenuItem{MainText: "Load game", Action: func() { u.context.OpenLoadMenu(u.openPauseMenu) }})
+	}
+	u.OpenMenu(append(items, []util.MenuItem{
 		{MainText: "Video", Action: u.openVideoMenu},
 		{MainText: "Audio", Action: u.openAudioMenu},
 		{MainText: "Auto explore", Action: u.openAutoExploreMenu},
 		{MainText: "Gameplay", Action: u.openGameplayMenu},
 		{MainText: "Back to main menu", Action: u.context.BackToMainMenu},
 		{MainText: "Quit game", Action: u.QuitGame},
-	})
+	}...))
 }
 
 func (u *UIController) toggleFullscreen() {

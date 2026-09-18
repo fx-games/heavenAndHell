@@ -29,6 +29,9 @@ type LevelSnapshot struct {
 	Spawned  []SavedMonster       // skeletons from sarcophagi and barrels
 	Corpses  []SavedMonster       // dead monsters, which scavengers feed on
 	Explored []byte               // explored cells, one bit per cell row by row
+	// RespawnMonsters makes the level forget its dead the next time it is built: Gillian's donation sets it on
+	// every explored level that isn't loaded right now (State.RespawnD1Monsters).
+	RespawnMonsters bool
 }
 
 func SnapshotLevel(state *State, m *gridmap.GridMap[*Actor, *Item, Object]) *LevelSnapshot {
@@ -147,44 +150,49 @@ func (s *LevelSnapshot) apply(f *Factory, m *gridmap.GridMap[*Actor, *Item, Obje
 		}
 	}
 	replayD1MapChanges(f.State, m)
-	// take the monsters off the map first, so none finds its saved cell taken by one that hasn't moved yet
-	var restore []*Actor
-	var at []SavedMonster
-	for _, a := range append([]*Actor(nil), m.Actors()...) {
-		mon := a.d1Monster
-		if mon == nil {
-			continue
-		}
-		m.RemoveActor(a)
-		if saved, alive := s.Monsters[mon.SpawnIndex]; alive {
-			restore, at = append(restore, a), append(at, saved)
-		}
-	}
-	for _, saved := range s.Spawned {
-		a := f.NewD1Monster(saved.Type)
-		a.d1Monster.SpawnIndex = -1
-		restore, at = append(restore, a), append(at, saved)
-	}
-	for i, a := range restore {
-		p := geometry.Point{X: at[i].X, Y: at[i].Y}
-		if !m.CanPlaceActorHere(p) {
-			if near := freeCellsNear(m, p, 1, m.CanPlaceActorHere); len(near) > 0 {
-				p = near[0]
+	if s.RespawnMonsters { // the level keeps the monsters the generator just placed, and buries its corpses
+		s.RespawnMonsters = false
+		s.Monsters, s.Spawned, s.Corpses = map[int]SavedMonster{}, nil, nil
+	} else {
+		// take the monsters off the map first, so none finds its saved cell taken by one that hasn't moved yet
+		var restore []*Actor
+		var at []SavedMonster
+		for _, a := range append([]*Actor(nil), m.Actors()...) {
+			mon := a.d1Monster
+			if mon == nil {
+				continue
+			}
+			m.RemoveActor(a)
+			if saved, alive := s.Monsters[mon.SpawnIndex]; alive {
+				restore, at = append(restore, a), append(at, saved)
 			}
 		}
-		SetResource(a.GetStats().GetResource(stats.Health), at[i].HP)
-		if at[i].State != nil {
-			a.d1Monster.D1MonsterState = *at[i].State
+		for _, saved := range s.Spawned {
+			a := f.NewD1Monster(saved.Type)
+			a.d1Monster.SpawnIndex = -1
+			restore, at = append(restore, a), append(at, saved)
 		}
-		a.SetDrawPosition(p.ToPointF())
-		m.AddActor(a, p)
-	}
-	for _, c := range s.Corpses {
-		a := f.NewD1Monster(c.Type)
-		SetResource(a.GetStats().GetResource(stats.Health), 0)
-		a.SetDrawPosition(geometry.Point{X: c.X, Y: c.Y}.ToPointF())
-		a.SetMapPosition(geometry.Point{X: c.X, Y: c.Y})
-		m.AddDownedActor(a, geometry.Point{X: c.X, Y: c.Y})
+		for i, a := range restore {
+			p := geometry.Point{X: at[i].X, Y: at[i].Y}
+			if !m.CanPlaceActorHere(p) {
+				if near := freeCellsNear(m, p, 1, m.CanPlaceActorHere); len(near) > 0 {
+					p = near[0]
+				}
+			}
+			SetResource(a.GetStats().GetResource(stats.Health), at[i].HP)
+			if at[i].State != nil {
+				a.d1Monster.D1MonsterState = *at[i].State
+			}
+			a.SetDrawPosition(p.ToPointF())
+			m.AddActor(a, p)
+		}
+		for _, c := range s.Corpses {
+			a := f.NewD1Monster(c.Type)
+			SetResource(a.GetStats().GetResource(stats.Health), 0)
+			a.SetDrawPosition(geometry.Point{X: c.X, Y: c.Y}.ToPointF())
+			a.SetMapPosition(geometry.Point{X: c.X, Y: c.Y})
+			m.AddDownedActor(a, geometry.Point{X: c.X, Y: c.Y})
+		}
 	}
 	for i := range min(len(s.Explored)*8, d1.LevelSize*d1.LevelSize) {
 		if s.Explored[i/8]&(1<<(i%8)) != 0 {

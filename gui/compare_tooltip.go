@@ -21,10 +21,19 @@ const compareTooltipGap = 10
 func NewElementTooltip(u *UIController, element interface {
 	GetTooltipLines(func(string) []util.ColoredTextPart) []util.LabelText
 }, mousePos geometry.Point) Tooltip {
-	if item := firstItemFromUIStack(element); item != nil && !u.context.GameState().GetPlayer().GetEquipment().IsEquipped(item) {
-		return NewItemCompareTooltip(u, item, mousePos)
+	if item := firstItemFromUIStack(element); item != nil {
+		return NewItemTooltip(u, item, mousePos)
 	}
 	return NewTextTooltip(u, element.GetTooltipLines(u.ParseColorCodedText), mousePos)
+}
+
+// NewItemTooltip is an item's tooltip, compared to the gear it would replace. An item already worn has nothing to
+// compare against, so it gets the plain tooltip.
+func NewItemTooltip(u *UIController, item *common.Item, mousePos geometry.Point) Tooltip {
+	if u.context.GameState().GetPlayer().GetEquipment().IsEquipped(item) {
+		return NewTextTooltip(u, item.GetTooltipLines(u.ParseColorCodedText), mousePos)
+	}
+	return NewItemCompareTooltip(u, item, mousePos)
 }
 
 // NewItemCompareTooltip returns the plain tooltip if equipping item displaces nothing.

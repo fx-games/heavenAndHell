@@ -11,7 +11,7 @@ import (
 
 // Hellfire off: no Hellfire quests or towners; switched on, Continue upgrades the D1 save.
 func TestHellfireToggle(t *testing.T) {
-	game.SaveFile = filepath.Join(t.TempDir(), "save.json")
+	game.SaveDir = filepath.Join(t.TempDir(), "saves")
 	theGame, ctx := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
 	cfg := ctx.StartInfos.UserConfiguration

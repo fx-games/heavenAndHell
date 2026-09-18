@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image"
 	"rpg/common"
 	"rpg/defs"
 	"rpg/geometry"
@@ -25,6 +26,8 @@ func (d DummyUI) Confirm(message string, onConfirm func()) {
 func (d DummyUI) SetDebugActions(actions func() common.DebugActions) {
 
 }
+
+func (d DummyUI) ToggleMapInfo() {}
 
 func (d DummyUI) GetVisibleMap() geometry.Rect {
 	//TODO implement me
@@ -74,6 +77,28 @@ func (d DummyUI) OpenUncancelableMenu(options []util.MenuItem) {
 }
 
 func (d DummyUI) ShowItemInfo(item *common.Item) {}
+
+func (d DummyUI) OpenInfoWindow(title string, sections []common.D1SheetSection) {}
+
+// OpenSaveSlots can't ask anyone, so it answers with the slot a player asked to replace one would most likely
+// pick: the first free one, or the least recently played game. Headless runs never stall on the question.
+func (d DummyUI) OpenSaveSlots(title string, slots []common.SaveSlot, pick func(slot int), back func()) {
+	choice := common.SaveSlot{}
+	for _, slot := range slots {
+		if !slot.Used {
+			pick(slot.Slot)
+			return
+		}
+		if choice.Slot == 0 || slot.SavedAt.Before(choice.SavedAt) {
+			choice = slot
+		}
+	}
+	if choice.Slot != 0 {
+		pick(choice.Slot)
+	}
+}
+
+func (d DummyUI) CaptureThumbnail() image.Image { return nil }
 
 func (d DummyUI) OpenTextWindow(msg []util.LabelText) {
 	//TODO implement me

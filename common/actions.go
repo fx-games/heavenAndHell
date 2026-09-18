@@ -1,6 +1,7 @@
 package common
 
 import (
+	"image"
 	"rpg/audio"
 	"rpg/defs"
 	"rpg/geometry"
@@ -46,6 +47,8 @@ type DebugActions struct {
 type UserInterface interface {
 	// Queries
 	GetVisibleMap() geometry.Rect
+	// ToggleMapInfo switches the debug readout of the map position under the cursor on and off.
+	ToggleMapInfo()
 	IsPlayerForcingAggression() bool
 	HasOverlays() bool
 
@@ -62,6 +65,8 @@ type UserInterface interface {
 	OpenMenu(options []util.MenuItem)
 	OpenUncancelableMenu(options []util.MenuItem) // like OpenMenu, but ESC/cancel does nothing (e.g. the start menu)
 	OpenTextWindow(msg []util.LabelText)
+	// OpenInfoWindow lays out titled sections of label/value rows (ActorInfoSections) as a window.
+	OpenInfoWindow(title string, sections []D1SheetSection)
 	// ShowItemInfo opens the hover tooltip's lines as a text window the player has to close.
 	ShowItemInfo(item *Item)
 
@@ -72,6 +77,12 @@ type UserInterface interface {
 	// Specialized
 	OnMapChanged()
 	OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string), back func())
+	// OpenSaveSlots shows the save slots with their screenshots and metadata; pick gets the chosen slot, back
+	// closes the screen without touching anything.
+	OpenSaveSlots(title string, slots []SaveSlot, pick func(slot int), back func())
+	// CaptureThumbnail is a small image of the last frame the player saw, for the save slot; nil when the UI
+	// draws no frames (the terminal UI, the headless tests).
+	CaptureThumbnail() image.Image
 
 	// Action specific
 	BeginTargeting(rules TargetRules, onHit *HitEffect)

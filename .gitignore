@@ -13,6 +13,7 @@ assets/oryx/
 reference/
 savegame.json
 savegame.json.tmp
+saves/
 
 # Diablo 1's own music/sfx (bring your own copy, converted to .ogg with ffmpeg; see AGENTS.md), not redistributable.
 files/assets/diablo_music/

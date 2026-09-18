@@ -249,7 +249,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		return
 	}
 	dlvl := d1DungeonLevel(f.State)
-	ilvl, hell := d1.ItemLevel(dlvl), d1.LevelType(dlvl) == d1.DTypeHell
+	ilvl, hell := f.State.D1ItemLevel(dlvl), d1.LevelType(dlvl) == d1.DTypeHell
 	drop := func(it *d1.Item) {
 		if it != nil {
 			f.State.AddItemToMapWithDistribution(f.NewD1Item(it), o.pos)
@@ -451,6 +451,13 @@ func (f *Factory) SpawnRandomD1Unique(pos geometry.Point) *Actor {
 	return a
 }
 
+// IsD1Barrel reports an intact barrel at p. A ranged attack that lands on the cell breaks it (hitD1Object), so a
+// left-click on one with a bow fires at it instead of walking over.
+func IsD1Barrel(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point) bool {
+	o := d1ObjectAt(m, p)
+	return o != nil && o.O.Active && (o.O.Kind == d1.ObjBARREL || o.O.Kind == d1.ObjBARRELEX)
+}
+
 // hitD1Object breaks an intact barrel or crucified skeleton at p (_oBreak 1): anything that hits its cell does,
 // like D1's missile collisions (BreakObject).
 func (f *Factory) hitD1Object(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point, attacker *Actor) {
@@ -489,7 +496,7 @@ func (f *Factory) breakD1Barrel(o *D1Object, player *Actor) {
 	obj.Active = false // the debris stays, walkable
 	if obj.Kind == d1.ObjBARREL {
 		dlvl := d1DungeonLevel(f.State)
-		ilvl, hell := d1.ItemLevel(dlvl), d1.LevelType(dlvl) == d1.DTypeHell
+		ilvl, hell := f.State.D1ItemLevel(dlvl), d1.LevelType(dlvl) == d1.DTypeHell
 		if obj.Var2 <= 1 {
 			it := gen.UsefulItem(ilvl)
 			if obj.Var3 != 0 {
@@ -602,7 +609,7 @@ func D1ShrineInfoText(o *D1Object) ([]string, bool) {
 func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 	h, gen, m, st := player.hero, f.Generator, f.State.GetMap(), player.GetStats()
 	dlvl := d1DungeonLevel(f.State)
-	ilvl, lt := d1.ItemLevel(dlvl), (dlvl-1)/4+1
+	ilvl, lt := f.State.D1ItemLevel(dlvl), (dlvl-1)/4+1
 	hp, mana := st.GetResource(stats.Health), st.GetResource(stats.Mana)
 	equipped, pack := d1OwnedItems(player)
 	all := append(append([]*Item(nil), equipped...), pack...)

@@ -30,7 +30,7 @@ func itemNamed(items []util.MenuItem, name string) *util.MenuItem {
 // The start menu offers a way out of the game, and the pause menu's way back to it saves first,
 // so that Continue resumes where the player stopped rather than at the last level change.
 func TestStartMenuQuitsAndBackToMainMenuSavesFirst(t *testing.T) {
-	game.SaveFile = filepath.Join(t.TempDir(), "save.json")
+	game.SaveDir = filepath.Join(t.TempDir(), "saves")
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
 	ui := &recordingUI{DummyUI: NewDummyUI()}
@@ -47,7 +47,7 @@ func TestStartMenuQuitsAndBackToMainMenuSavesFirst(t *testing.T) {
 	}
 
 	// Leaving for the main menu must not throw away progress since the last save.
-	if err := os.Remove(game.SaveFile); err != nil {
+	if err := os.RemoveAll(game.SaveDir); err != nil {
 		t.Fatal(err)
 	}
 	theGame.BackToMainMenu()

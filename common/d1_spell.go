@@ -775,7 +775,7 @@ type SavedGolem struct {
 }
 
 func (f *Factory) placeD1Golem(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point, g SavedGolem) *Actor {
-	a := f.NewD1Monster(f.Generator.D.MonsterByID("MT_GOLEM"))
+	a := f.newD1Monster(f.Generator.D.MonsterByID("MT_GOLEM"), nil) // the player's own: no Nightmare scaling
 	a.isHostile = false
 	mon := a.d1Monster
 	mon.Golem, mon.SpawnIndex, mon.AC, mon.Hit, mon.MinDam, mon.MaxDam = true, -1, g.AC, g.Hit, g.MinDam, g.MaxDam
@@ -922,23 +922,35 @@ func (f *Factory) D1SpellSkills(player *Actor) ([]*TargetedAction, []*Untargeted
 			continue
 		}
 		sd := f.Generator.D.Spells[spell]
-		name := fmt.Sprintf("%s (lvl %d, %d mana)", sd.Name, h.SpellLevel(s, spell), f.Generator.D.ManaCost(h, s, spell)>>6)
 		sp := spell
+		// only the name on the skill bar - the sidebar is too narrow for more; level and mana go in the tooltip
+		desc := d1SpellTooltip(sp, d1.SpellDescriptions[sp], h.SpellLevel(s, spell), f.Generator.D.ManaCost(h, s, spell)>>6)
 		if d1.SpellTargeted[spell] {
-			action := NewTargetedAction(name, OneTargetTile(f.State.GetMap, util.Arguments{}),
+			action := NewTargetedAction(sd.Name, OneTargetTile(f.State.GetMap, util.Arguments{}),
 				&HitEffect{Activate: func(caster *Actor, target geometry.Point, _ []geometry.Point) { f.CastD1FromMemory(caster, sp, target) },
-					Description: []util.LabelText{util.LabelTextFromString(d1.SpellDescriptions[sp])}},
+					Description: desc},
 				d1SpellTargeting(f, sp))
 			action.SetIcon(defs.Icon(defs.IconID("spell", sd.ID)))
 			targeted = append(targeted, action)
 		} else {
-			action := NewUntargetedAction(name, defs.Icon(defs.IconID("spell", sd.ID)))
+			action := NewUntargetedAction(sd.Name, defs.Icon(defs.IconID("spell", sd.ID)))
 			action.SetEffect(&UntargetedEffect{Effect: func(caster *Actor, _ EffectSource) { f.CastD1FromMemory(caster, sp, caster.MapPosition()) },
-				Description: []util.LabelText{util.LabelTextFromString(d1.SpellDescriptions[sp])}})
+				Description: desc})
 			untargeted = append(untargeted, action)
 		}
 	}
 	return targeted, untargeted
+}
+
+// d1SpellTooltip is a memorized spell's popup: what it does, then its spell level and what a cast costs.
+func d1SpellTooltip(spell int, text string, slvl, mana int) []util.LabelText {
+	lines := []util.LabelText{util.LabelTextFromStringWithColor(text, defs.OffWhite), util.LabelTextFromString("")}
+	lines = append(lines, util.LabelTextFromStringWithColor(fmt.Sprintf("Spell level %d", slvl), defs.LightGray))
+	cost := fmt.Sprintf("Mana cost: %d", mana)
+	if mana == 0 {
+		cost = "Costs no mana"
+	}
+	return append(lines, util.LabelTextFromStringWithColor(cost, defs.LightGray))
 }
 
 // RefreshD1Spells updates the player's spell skills after learning or changing gear.
@@ -972,7 +984,6 @@ func d1SpellTargeting(f *Factory, spell int) *TargetRulesProvider {
 				},
 			}
 		},
-		Description: []util.LabelText{util.LabelTextFromString(f.Generator.D.Spells[spell].Name)},
 	}
 }
 
@@ -1057,16 +1068,17 @@ func (f *Factory) d1SpellItemAction(item *Item) {
 			item.RefreshD1()
 		}
 	}
+	desc := []util.LabelText{util.LabelTextFromStringWithColor(d1.SpellDescriptions[it.Spell], defs.OffWhite)}
 	if d1.SpellTargeted[it.Spell] {
 		action := NewTargetedAction(sd.Name, OneTargetTile(f.State.GetMap, util.Arguments{}),
 			&HitEffect{Activate: func(caster *Actor, target geometry.Point, _ []geometry.Point) { use(caster, target) },
-				Description: []util.LabelText{util.LabelTextFromString(sd.Name)}},
+				Description: desc},
 			d1SpellTargeting(f, it.Spell))
 		item.SetTargetedAction(action)
 	} else {
 		action := NewUntargetedAction(sd.Name, item.icon)
 		action.SetEffect(&UntargetedEffect{Effect: func(caster *Actor, _ EffectSource) { use(caster, caster.MapPosition()) },
-			Description: []util.LabelText{util.LabelTextFromString(sd.Name)}})
+			Description: desc})
 		item.SetUntargetedAction(action)
 	}
 }

@@ -40,33 +40,200 @@ func SyncHero(a *Actor) {
 	st.SetAttributeAsFloat(stats.AttackSpeedFactor, d1.SpeedTier(d1.RefAttackTicks, s.AttackFrames))
 }
 
-func (a *Actor) heroInfoText() []string {
+// D1SheetAttribute is one of the four attributes on the character sheet: the base value stat points buy, the
+// value with items on, the class maximum, and how to spend a point on it when one is left.
+type D1SheetAttribute struct {
+	Label    string
+	Base     int
+	Total    int
+	Max      int
+	CanRaise bool
+	Raise    func()
+}
+
+// D1SheetSection is a titled block of label/value rows on the character sheet or in an info window. Notes are
+// full-width prose lines under the rows, for what doesn't fit a label and a value (a monster's behavior, the
+// rules behind a forecast).
+type D1SheetSection struct {
+	Title string
+	Rows  [][2]string
+	Notes []string
+}
+
+// D1SheetAttributes are the four attributes in D1's order, for the character sheet and for levelling up.
+func (a *Actor) D1SheetAttributes() []D1SheetAttribute {
+	h, s := a.hero, a.HeroSheet()
+	if h == nil {
+		return nil
+	}
+	base := [4]int{h.BaseStr, h.BaseMag, h.BaseDex, h.BaseVit}
+	total := [4]int{s.Str, s.Mag, s.Dex, s.Vit}
+	names := [4]stats.Name{stats.Strength, stats.Magic, stats.Dexterity, stats.Vitality}
+	var out []D1SheetAttribute
+	for i, label := range [4]string{"Strength", "Magic", "Dexterity", "Vitality"} {
+		attr, name, maximum := i, names[i], d1.MaxStats[h.Class][i]
+		out = append(out, D1SheetAttribute{Label: label, Base: base[attr], Total: total[attr], Max: maximum,
+			CanRaise: h.StatPts > 0 && base[attr] < maximum,
+			Raise:    func() { a.LevelUp(name) }})
+	}
+	return out
+}
+
+// D1SheetSections is everything on the character sheet apart from the four attributes.
+func (a *Actor) D1SheetSections() []D1SheetSection {
 	h, s, st := a.hero, a.HeroSheet(), a.GetStats()
-	lines := []string{a.name, fmt.Sprintf("Level %d %s", h.Level, d1.ClassNames[h.Class]), "",
-		fmt.Sprintf("HP: %s", st.GetResource(stats.Health).ToString()),
-		fmt.Sprintf("Mana: %s", st.GetResource(stats.Mana).ToString()),
-		fmt.Sprintf("XP: %d / %d", h.Exp, d1.ExpLvls[min(h.Level, 50)]),
-		"",
-		fmt.Sprintf("Str %d", s.Str),
-		fmt.Sprintf("Mag %d", s.Mag),
-		fmt.Sprintf("Dex %d", s.Dex),
-		fmt.Sprintf("Vit %d", s.Vit),
-	}
-	if h.StatPts > 0 {
-		lines = append(lines, fmt.Sprintf("Unspent stat points: %d", h.StatPts))
-	}
 	minD := s.MinDam + s.MinDam*s.BonusDam/100 + s.BonusDamMod + s.DamageMod
 	maxD := s.MaxDam + s.MaxDam*s.BonusDam/100 + s.BonusDamMod + s.DamageMod
-	return append(lines, "",
-		fmt.Sprintf("Armor class: %d", s.AC+s.BonusAC+s.Dex/5),
-		fmt.Sprintf("To hit: %d%%", h.MeleeHitChance(s, 0)),
-		fmt.Sprintf("Damage: %d-%d", minD, maxD),
-		fmt.Sprintf("Damage bonus from Str/Dex: +%d", s.DamageMod),
-		fmt.Sprintf("Resist fire %d%%", s.FR),
-		fmt.Sprintf("Resist lightning %d%%", s.LR),
-		fmt.Sprintf("Resist magic %d%%", s.MR),
-		fmt.Sprintf("Gold: %d", st.GetAttribute(stats.Gold)),
-	)
+	return []D1SheetSection{
+		{Title: "Character", Rows: [][2]string{
+			{"Name", a.name},
+			{"Class", d1.ClassNames[h.Class]},
+			{"Level", fmt.Sprintf("%d", h.Level)},
+			{"Experience", fmt.Sprintf("%d / %d", h.Exp, d1.ExpLvls[min(h.Level, 50)])},
+			{"Gold", fmt.Sprintf("%d", st.GetAttribute(stats.Gold))},
+		}},
+		{Title: "Condition", Rows: [][2]string{
+			{"Life", st.GetResource(stats.Health).ToString()},
+			{"Mana", st.GetResource(stats.Mana).ToString()},
+		}},
+		{Title: "Combat", Rows: append([][2]string{
+			{"Armor class", fmt.Sprintf("%d", s.AC+s.BonusAC+s.Dex/5)},
+			{"Chance to block", fmt.Sprintf("%d%% vs. own level", h.BlockChance(s, h.Level))},
+			{"Chance to hit", fmt.Sprintf("%d%%", h.MeleeHitChance(s, 0))},
+			{"Damage", fmt.Sprintf("%d-%d", minD, maxD)},
+			{"Bonus from Str/Dex", fmt.Sprintf("+%d", s.DamageMod)},
+		}, a.d1DamageVsClassRows()...)},
+		{Title: "Resistances", Rows: [][2]string{
+			{"Fire", fmt.Sprintf("%d%%", s.FR)},
+			{"Lightning", fmt.Sprintf("%d%%", s.LR)},
+			{"Magic", fmt.Sprintf("%d%%", s.MR)},
+		}},
+		{Title: "Traits", Rows: a.d1TraitRows()},
+	}
+}
+
+// D1ThreatSection says out loud that the dungeon got harder after Diablo, since nothing else announces it. It
+// needs the world (the quest flags), so it is not part of the player's own D1SheetSections.
+func (s *State) D1ThreatSection() D1SheetSection {
+	threat := "Normal"
+	if s.D1NewGamePlus() {
+		threat = "Nightmare: Diablo is beaten"
+	}
+	return D1SheetSection{Title: "World", Rows: [][2]string{{"Threat", threat}}}
+}
+
+// d1DamageVsClassRows spells out the melee damage the weapon in hand does against each kind of monster, but only
+// where the kind changes it: the sword/mace rule and the "+200% vs. demons" affix are otherwise invisible.
+func (a *Actor) d1DamageVsClassRows() [][2]string {
+	h, s := a.hero, a.HeroSheet()
+	base := [2]int{}
+	base[0], base[1] = h.MeleeDamageRange(s, "")
+	var rows [][2]string
+	for _, kind := range []struct{ class, label string }{{"MC_UNDEAD", "vs. the undead"}, {"MC_ANIMAL", "vs. animals"}, {"MC_DEMON", "vs. demons"}} {
+		lo, hi := h.MeleeDamageRange(s, kind.class)
+		if lo == base[0] && hi == base[1] {
+			continue
+		}
+		rows = append(rows, [2]string{kind.label, fmt.Sprintf("%d-%d", lo, hi)})
+	}
+	return rows
+}
+
+// d1TraitRows are the class' own rules, which nothing else in the game says out loud.
+func (a *Actor) d1TraitRows() [][2]string {
+	h, s := a.hero, a.HeroSheet()
+	rows := [][2]string{{"Missile damage bonus", "half of Str/Dex"}}
+	if d1.FullMissileDamageBonus(h.Class) {
+		rows[0][1] = "all of Str/Dex"
+	}
+	if crit := h.CriticalStrikeChance(); crit > 0 {
+		rows = append(rows, [2]string{"Critical strike", fmt.Sprintf("%d%% of swings hit twice", crit)})
+	}
+	if d1.HasClassFlag(h.Class, d1.ClassTrapSense) {
+		rows = append(rows, [2]string{"Trap sense", "sees traps on doors and chests"})
+	}
+	if d1.HasClassFlag(h.Class, d1.ClassIronSkin) {
+		rows = append(rows, [2]string{"Iron skin", fmt.Sprintf("+%d armor class from level", h.Level/4)})
+	}
+	if d1.HasClassFlag(h.Class, d1.ClassNaturalResistance) {
+		rows = append(rows, [2]string{"Natural resistance", fmt.Sprintf("+%d%% to every resistance", h.Level)})
+	}
+	if s.Flags&d1.ISplNoMana != 0 {
+		rows = append(rows, [2]string{"No mana", "cannot cast spells that cost mana"})
+	}
+	if a.HasStatusEffect(StatusManaShield) {
+		absorbed := "all damage paid from mana"
+		if h.SpellLevel(s, d1.SplManaShield) > 0 {
+			absorbed = "a third less damage, paid from mana"
+		}
+		rows = append(rows, [2]string{"Mana shield", absorbed})
+	}
+	return rows
+}
+
+// heroInfoText is the character sheet as plain lines, for the terminal UI and the stats server.
+func (a *Actor) heroInfoText() []string {
+	var lines []string
+	for _, sec := range a.D1SheetSections() {
+		if len(lines) > 0 {
+			lines = append(lines, "")
+		}
+		lines = append(lines, sec.Title)
+		for _, row := range sec.Rows {
+			lines = append(lines, fmt.Sprintf("%s: %s", row[0], row[1]))
+		}
+		if sec.Title != "Condition" {
+			continue
+		}
+		lines = append(lines, "", "Attributes")
+		for _, at := range a.D1SheetAttributes() {
+			value := fmt.Sprintf("%d", at.Base)
+			if at.Total != at.Base {
+				value += fmt.Sprintf(" (%d)", at.Total)
+			}
+			lines = append(lines, fmt.Sprintf("%s: %s / %d", at.Label, value, at.Max))
+		}
+		if a.hero.StatPts > 0 {
+			lines = append(lines, fmt.Sprintf("Unspent stat points: %d", a.hero.StatPts))
+		}
+	}
+	return lines
+}
+
+// D1PotionWasted reports a potion the hero has no room for, and the message saying so. Drinking one is refused
+// rather than silently throwing it away; elixirs always do something, so they are never wasted. A rejuvenation
+// potion still counts as useful while either resource is short.
+func D1PotionWasted(user *Actor, miscID string) (string, bool) {
+	if user.hero == nil {
+		return "", false
+	}
+	var health, mana bool
+	switch miscID {
+	case "IMISC_HEAL", "IMISC_FULLHEAL":
+		health = true
+	case "IMISC_MANA", "IMISC_FULLMANA":
+		mana = true
+	case "IMISC_REJUV", "IMISC_FULLREJUV":
+		health, mana = true, true
+	default:
+		return "", false
+	}
+	st := user.GetStats()
+	// a hero who cannot hold mana at all (the Warrior's no-mana gear) has no room for it either
+	noMana := user.HeroSheet().Flags&d1.ISplNoMana != 0
+	if health && !st.GetResource(stats.Health).IsAtMax() {
+		return "", false
+	}
+	if mana && !noMana && !st.GetResource(stats.Mana).IsAtMax() {
+		return "", false
+	}
+	switch {
+	case health && mana:
+		return "You are at full health and mana.", true
+	case mana:
+		return "You are at full mana.", true
+	}
+	return "You are at full health.", true
 }
 
 // UseD1Potion ports UseItem for potions and elixirs.
@@ -254,14 +421,14 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 	return 0, nil, false
 }
 
-// D1CombatForecast mirrors resolveD1Attack for the right-click info window: both sides' chance to land a blow
+// D1ForecastSection mirrors resolveD1Attack for the right-click info window: both sides' chance to land a blow
 // (the hero's block counted) and the fewest-most blows to kill at the current health, fewest with the best roll and
-// every weapon blast landing, most with the worst roll.
+// every weapon blast landing, most with the worst roll. ok is false when the pair isn't a hero against a monster.
 // ponytail: the monster's plain attack only, its special attacks and spell missiles roll their own numbers.
-func D1CombatForecast(state *State, player, monster *Actor) []string {
+func D1ForecastSection(state *State, player, monster *Actor) (D1SheetSection, bool) {
 	h, s, mon := player.hero, player.HeroSheet(), monster.d1Monster
 	if h == nil || mon == nil || mon.Golem {
-		return nil
+		return D1SheetSection{}, false
 	}
 	blastMax := func(kind, dam int) int {
 		if resist, immune := resistBits(kind); mon.MagicRes&immune != 0 {
@@ -305,10 +472,51 @@ func D1CombatForecast(state *State, player, monster *Actor) []string {
 		pool += mana
 	}
 	monChance := h.MonsterMeleeHitChance(s, mon.Hit, mon.Level, d1DungeonLevel(state), mon.Data.Class) * (100 - h.BlockChance(s, mon.Level)) / 100
-	return []string{"",
-		fmt.Sprintf("You: %d%% to hit, %s", chance, d1BlowsToKill(monster.GetStats().GetResource(stats.Health).Value(), lo, hi)),
-		fmt.Sprintf("It: %d%% to hit you, %s", monChance, d1BlowsToKill(pool, max(mon.MinDam+s.GetHit, 1), max(mon.MaxDam+s.GetHit, 1))),
+	return D1SheetSection{Title: "Matchup", Rows: [][2]string{
+		{"You", fmt.Sprintf("%d%% to hit, %s", chance, d1BlowsToKill(monster.GetStats().GetResource(stats.Health).Value(), lo, hi))},
+		{"It", fmt.Sprintf("%d%% to hit you, %s", monChance, d1BlowsToKill(pool, max(mon.MinDam+s.GetHit, 1), max(mon.MaxDam+s.GetHit, 1)))},
+	}, Notes: d1WhyTheseNumbers(h, s, mon, geometry.DistanceChebyshev(player.MapPosition(), monster.MapPosition()))}, true
+}
+
+// d1MonsterClassNames turns D1's monster classes into the words the rules are written in.
+var d1MonsterClassNames = map[string]string{"MC_UNDEAD": "the undead", "MC_ANIMAL": "animals", "MC_DEMON": "demons"}
+
+// d1WhyTheseNumbers names the rules behind the forecast above it, so the player can see why this monster is an
+// easy or a bad matchup instead of having to guess: the weapon's kind, the affixes that only fire against this
+// kind, and what distance is doing to a bow's accuracy.
+func d1WhyTheseNumbers(h *d1.Hero, s d1.Sheet, mon *D1Monster, dist int) []string {
+	kind := d1MonsterClassNames[mon.Data.Class]
+	if kind == "" {
+		return nil
 	}
+	var why []string
+	if pct := s.WeaponVsMonsterClass(mon.Data.Class); pct != 0 {
+		other := "a mace would do the opposite"
+		if pct < 0 {
+			other = "a mace in hand would turn this around"
+			if !s.Holds(d1.ITypeSword) {
+				other = "a sword in hand would turn this around"
+			}
+		}
+		why = append(why, fmt.Sprintf("Your weapon: %+d%% damage vs. %s (%s)", pct, kind, other))
+	}
+	if s.Flags&d1.ISpl3xDamVsDemons != 0 && mon.Data.Class == "MC_DEMON" {
+		why = append(why, "Your gear triples melee damage against demons")
+	}
+	if s.DamAcFlags&d1.IHfACVsUndead != 0 && mon.Data.Class == "MC_UNDEAD" {
+		why = append(why, "Your armor is worth +20 AC against the undead")
+	}
+	if s.DamAcFlags&d1.IHfACVsDemons != 0 && mon.Data.Class == "MC_DEMON" {
+		why = append(why, "Your armor is worth +40 AC against demons")
+	}
+	if crit := h.CriticalStrikeChance(); crit > 0 {
+		why = append(why, fmt.Sprintf("%d%% of your melee swings hit twice", crit))
+	}
+	if s.WeaponType == d1.ITypeBow {
+		closer := h.ArrowHitChance(s, mon.AC, max(dist-1, 1))
+		why = append(why, fmt.Sprintf("Arrows lose accuracy with distance: %d tiles away, %d%% one step closer", dist, closer))
+	}
+	return why
 }
 
 // d1BlowsToKill turns a damage range into the fewest-most landed blows that take hp.
@@ -448,10 +656,10 @@ func d1OnKill(ctx ActionContext, killer, victim *Actor) []Action {
 	d1FallenFear(state, victim.MapPosition())
 	state.factory.d1AcidDeath(ctx, victim)
 	dlvl := d1DungeonLevel(state)
-	if state.factory.d1HellfireLoot(mon, victim.MapPosition(), d1.ItemLevel(dlvl)) {
+	if state.factory.d1HellfireLoot(mon, victim.MapPosition(), state.D1ItemLevel(dlvl)) {
 	} else if it := state.factory.d1QuestDrop(mon); it != nil {
 		state.AddItemToMapWithDistribution(state.factory.NewD1Item(it), victim.MapPosition())
-	} else if it := state.factory.D1().MonsterDrop(mon.Data, mon.Level, mon.Unique != nil, d1.ItemLevel(dlvl), d1.LevelType(dlvl) == d1.DTypeHell); it != nil {
+	} else if it := state.factory.D1().MonsterDrop(mon.Data, mon.Level, mon.Unique != nil, state.D1ItemLevel(dlvl), d1.LevelType(dlvl) == d1.DTypeHell); it != nil {
 		state.AddItemToMapWithDistribution(state.factory.NewD1Item(it), victim.MapPosition())
 	}
 	return nil

@@ -19,6 +19,11 @@ type UIContext struct {
 	StartMenuItems func(afterDeath bool) []util.MenuItem
 	// BackToMainMenu saves the running game and reopens the start menu.
 	BackToMainMenu func()
+	// OpenSaveMenu and OpenLoadMenu put the running game into a save slot, or load one; back reopens the menu
+	// they were reached from. Both are hidden in permadeath games (IsPermadeath).
+	OpenSaveMenu func(back func())
+	OpenLoadMenu func(back func())
+	IsPermadeath func() bool
 }
 
 func SortStacksForTextUITyped(stacks []InventoryStack, getLetterForStack func(stack InventoryStack) rune, selected func(invItemKey rune)) []*TextualStack {

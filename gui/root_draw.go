@@ -30,6 +30,7 @@ func (u *UIController) Draw(screen *ebiten.Image) {
 		}
 	}
 
+	u.captureThumbnail(screen) // before the UI: a save slot's screenshot shows the world, not the menus
 	u.drawUI()
 
 	if u.message.ticksLeft > 0 {
@@ -46,6 +47,7 @@ func (u *UIController) Draw(screen *ebiten.Image) {
 	if u.currentTooltip != nil && !u.currentTooltip.IsNull() && u.ticksUntilTooltipAppears == 0 {
 		u.currentTooltip.Draw()
 	}
+
 }
 
 // uniqueSweepShaderSrc draws a unique monster's sprite with a specular sheen: a diagonal band of light that
@@ -131,6 +133,9 @@ func (u *UIController) drawActors() {
 		}
 		var drawColor color.Color
 		drawColor = state.ApplyLighting(actor.MapPosition(), actorColor, u.worldTicks)
+		if state.LitByVision(actor.MapPosition()) {
+			drawColor = actorColor
+		}
 
 		if actor.IsHurt() {
 			percentage := actor.GetHurtTicksAsPercentage() // goes from 1.0 to 0.0

@@ -10,7 +10,6 @@ import (
 
 type AoEResolver struct {
 	GetHitPositions func(origin, target geometry.Point) []geometry.Point
-	Description     []util.LabelText
 }
 type HitEffect struct {
 	Activate    func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point)
@@ -18,7 +17,6 @@ type HitEffect struct {
 }
 type TargetRulesProvider struct {
 	GetTargetRules func(attacker *Actor, hitPositions *AoEResolver, currentMap *gridmap.GridMap[*Actor, *Item, Object]) TargetRules
-	Description    []util.LabelText
 }
 
 type TargetRules interface {
@@ -113,25 +111,16 @@ func (t *TargetedAction) GetTimeNeededInAut() int {
 	return t.timeNeededInAut
 }
 
+// GetDescription is the effect's own description, like UntargetedAction's. The old modular breakdown
+// (Targeting / Area of Effect / Effect) is gone: every spell writes its own text.
 func (t *TargetedAction) GetDescription() []util.LabelText {
-	var desc []util.LabelText
-	desc = append(desc, util.LabelTextFromString(""))
-	desc = append(desc, util.LabelTextFromString("Targeting"))
-	desc = append(desc, colorize(t.rulesProvider.Description, defs.OffWhite)...)
-	desc = append(desc, util.LabelTextFromString(""))
-	desc = append(desc, util.LabelTextFromString("Area of Effect"))
-	desc = append(desc, colorize(t.aoeResolver.Description, defs.OffWhite)...)
-	desc = append(desc, util.LabelTextFromString(""))
-	desc = append(desc, util.LabelTextFromString("Effect"))
-	desc = append(desc, colorize(t.onHitEffect.Description, defs.OffWhite)...)
-	return desc
-}
-
-func colorize(description []util.LabelText, white color.RGBA) []util.LabelText {
-	for i := range description {
-		description[i].TextColor = white
+	desc := append([]util.LabelText(nil), t.onHitEffect.Description...)
+	for i := range desc {
+		if desc[i].TextColor == nil {
+			desc[i].TextColor = defs.OffWhite
+		}
 	}
-	return description
+	return desc
 }
 
 func (t *TargetedAction) GetMonetaryValue() int {

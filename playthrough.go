@@ -21,15 +21,17 @@ func playthrough() {
 		fmt.Printf("PLAYTHROUGH FAILED: "+format+"\n", args...)
 		os.Exit(1)
 	}
-	game.SaveFile = filepath.Join(os.TempDir(), "heavenAndHell_playthrough_save.json")
+	game.SaveDir = filepath.Join(os.TempDir(), "heavenAndHell_playthrough_saves")
+	os.RemoveAll(game.SaveDir)
 	common.D1CornerstoneFile = filepath.Join(os.TempDir(), "heavenAndHell_playthrough_cornerstone.json")
 	os.Remove(common.D1CornerstoneFile)
-	defer os.Remove(game.SaveFile)
+	defer os.RemoveAll(game.SaveDir)
 	theGame, _ := createGameAndUIContext() // one instance: ebiten allows a single audio context per process
 	theGame.GetAudio().SetDisablePlayback(true)
 	missiles := &missileCounter{}                                             // registered per check: a new game or a load makes a new broker
 	wallTraps, chestTraps := 0, 0                                             // traps that fired while objects were operated
 	for run := 1; run <= len(theGame.GetGameData().ClassDefinitions); run++ { // every class, D1's three and Hellfire's
+		os.RemoveAll(game.SaveDir) // every run starts in slot 1: a new game never writes over a slot that is taken
 		theGame.NewGame(theGame.GetGameData().ClassDefinitions[run-1], false, "")
 		state := theGame.GetWorldState()
 		player := state.GetPlayer()
@@ -245,6 +247,7 @@ func playthrough() {
 	questLines(theGame, fail)
 
 	// milestone 2: a permadeath save is gone once the death menu is built
+	os.RemoveAll(game.SaveDir)
 	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], true, "")
 	if !game.HasSave() {
 		fail("permadeath: new game wrote no save")
@@ -861,11 +864,11 @@ func castAllSpells(f *common.Factory, broker *common.Broker, state *common.State
 			fail("spells: no monster left to cast at")
 		}
 		if sp == spells[0] {
-			forecast := common.D1CombatForecast(state, player, target)
-			if len(forecast) != 3 || !strings.Contains(forecast[1], "to kill") && !strings.Contains(forecast[1], "can't") {
-				fail("forecast against %s: %q", target.Name(), forecast)
+			forecast, ok := common.D1ForecastSection(state, player, target)
+			if !ok || len(forecast.Rows) != 2 || !strings.Contains(forecast.Rows[0][1], "to kill") && !strings.Contains(forecast.Rows[0][1], "can't") {
+				fail("forecast against %s: %v", target.Name(), forecast)
 			}
-			fmt.Printf("forecast against %s: %q\n", target.Name(), forecast[1:])
+			fmt.Printf("forecast against %s: %v\n", target.Name(), forecast.Rows)
 		}
 		if geometry.DistanceChebyshev(target.MapPosition(), player.MapPosition()) > 1 {
 			free := m.GetFreeCardinalNeighbors(target.MapPosition())[0]

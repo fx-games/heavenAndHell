@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"image/color"
+	"math"
 	"math/rand"
 	"rpg/d1"
 	"rpg/defs"
@@ -75,7 +76,7 @@ type State struct {
 	SelectedClass defs.LoadoutDefinition
 	worldTexture  renderer.TextureAtlas
 
-	glowCache map[*gridmap.GridMap[*Actor, *Item, Object]]map[geometry.Point]float64 // decorative light per map (d1Glow)
+	glowCache map[*gridmap.GridMap[*Actor, *Item, Object]]map[geometry.Point]d1Glow // decorative light per map (d1GlowAt)
 }
 
 func (s *State) GetWorldTexture() renderer.TextureAtlas {
@@ -254,6 +255,11 @@ func (s *State) PlayerCanSeeNeighbors() bool {
 func (s *State) IsDaylight() bool {
 	return s.IsPlayerInTown() && !s.GetFlags().IsSet("town_changed_to_night")
 }
+
+// FlagBeenUnderground is set the first time the player enters a dungeon level. Until then the town draws gloomy,
+// so the church's red light carries the opening; coming back up, the town is bright daylight.
+const FlagBeenUnderground = "been_underground"
+
 func (s *State) GetPlayerVisionRange() int {
 	actor := s.GetPlayer()
 	visionRange := actor.GetStats().GetAttribute(stats.VisionRange) // used in town (=day light)
@@ -279,7 +285,44 @@ func (s *State) GetPlayerVisionRange() int {
 	return visionRange
 }
 
+// LitByVision reports a cell the Vision spell exposes but the player cannot actually see. What stands there is
+// drawn unlit, which makes it nearly invisible, so the map draws it at full brightness instead.
+func (s *State) LitByVision(mapPos geometry.Point) bool {
+	p := s.GetPlayer()
+	return p != nil && p.HasStatusEffect(StatusVision) && !p.CanSee(mapPos)
+}
+
+// ApplyLighting shades what is drawn at mapPos: distance from the player, lit and unlit dungeon rooms, torches,
+// and on top of all of it the church's red light, which has to show in the town's daylight too.
 func (s *State) ApplyLighting(mapPos geometry.Point, drawColor color.RGBA, worldTick uint64) color.RGBA {
+	return s.applyRedLight(mapPos, s.applyLighting(mapPos, drawColor, worldTick), worldTick)
+}
+
+// applyRedLight tints a cell inside the demon-possessed church (and the ground the light falls on outside its
+// door) red, pulsing slowly, and lifts it out of the dark so the glow reads as a light source and not as shadow.
+func (s *State) applyRedLight(mapPos geometry.Point, drawColor color.RGBA, worldTick uint64) color.RGBA {
+	glow := s.d1GlowAt(mapPos)
+	if !glow.red || glow.v <= 0 || !s.GetMap().IsExplored(mapPos) {
+		return drawColor
+	}
+	pulse := 0.85 + 0.15*math.Sin(float64(worldTick)/45.0)
+	// red light: the red channel is lifted above what the cell would otherwise show, the other two pushed down
+	lit := color.RGBA{
+		R: uint8(min(float64(drawColor.R)+190*glow.v, 255)),
+		G: uint8(float64(drawColor.G) * 0.25),
+		B: uint8(float64(drawColor.B) * 0.18),
+		A: drawColor.A,
+	}
+	return lerpRGBA(drawColor, lit, min(glow.v*1.8, 1.0)*pulse)
+}
+
+// lerpRGBA mixes two colors; util.LerpColor underflows on a channel that goes down.
+func lerpRGBA(from, to color.RGBA, t float64) color.RGBA {
+	c := func(a, b uint8) uint8 { return uint8(max(min(float64(a)+(float64(b)-float64(a))*t, 255), 0)) }
+	return color.RGBA{R: c(from.R, to.R), G: c(from.G, to.G), B: c(from.B, to.B), A: from.A}
+}
+
+func (s *State) applyLighting(mapPos geometry.Point, drawColor color.RGBA, worldTick uint64) color.RGBA {
 	state := s
 	distanceToPlayer := geometry.Distance(state.GetPlayer().MapPosition(), mapPos)
 	maxDistance := float64(state.GetPlayerVisionRange() + 1)
@@ -288,6 +331,10 @@ func (s *State) ApplyLighting(mapPos geometry.Point, drawColor color.RGBA, world
 	if state.IsDaylight() {
 		darkPercentage = 0.75
 		lightPercentage = 0.95
+		if !state.GetFlags().IsSet(FlagBeenUnderground) { // gloomy first visit, before the first descent
+			darkPercentage = 0.10
+			lightPercentage = 0.30
+		}
 	}
 
 	currentMap := state.GetMap()
@@ -316,9 +363,9 @@ func (s *State) ApplyLighting(mapPos geometry.Point, drawColor color.RGBA, world
 	} else {
 		percentageLightness := float64(distanceToPlayer) / float64(maxDistance)
 		percentageLightness = 1.0 - util.EaseInExpo(percentageLightness)
-		if glow := s.d1GlowAt(mapPos); glow > 0 { // wall torches and braziers, each flickering out of step
+		if glow := s.d1GlowAt(mapPos); glow.v > 0 && !glow.red { // wall torches and braziers, each flickering out of step
 			frame := util.GetLoopingFrameFromTick(worldTick+uint64(mapPos.X*7+mapPos.Y*13), d1HeroTorch.FlickerFrameDelay, len(d1HeroTorch.FlickerPattern))
-			if g := glow * d1HeroTorch.FlickerPattern[frame]; g > percentageLightness {
+			if g := glow.v * d1HeroTorch.FlickerPattern[frame]; g > percentageLightness {
 				percentageLightness = g
 				drawColor = multiplyColors(drawColor, d1HeroTorch.LightColor)
 			}
@@ -623,20 +670,39 @@ type QuestFlags struct {
 	RewardedFlag string
 }
 
-// d1GlowAt is how much decorative light (wall torches, braziers) falls on a cell, 0..1: brightest at the light,
-// fading to nothing at its D1 light radius, only where the light has a clear line. Built once per map.
-func (s *State) d1GlowAt(p geometry.Point) float64 {
+// d1Glow is a light source's reach on one cell: how much of it lands there (0..1) and whether it is the church's
+// red light rather than ordinary torch light.
+type d1Glow struct {
+	v   float64
+	red bool
+}
+
+// d1ChurchLightRadius is how far the red light inside the demon-possessed church reaches. Its source sits inside
+// the nave, so the light bathes the church and spills back out of the doorway; the line-of-sight check below
+// stops it at the church walls, lighting the windows from the inside.
+const d1ChurchLightRadius = 19
+
+// d1ChurchLightPos is where the red light burns: inside the cathedral, a few tiles behind its entrance at (41,6).
+var d1ChurchLightPos = geometry.Point{X: 37, Y: 6}
+
+// d1GlowAt is how much decorative light (wall torches, braziers, the church's red light) falls on a cell, 0..1:
+// brightest at the light, fading to nothing at its radius, only where the light has a clear line. Built once per map.
+func (s *State) d1GlowAt(p geometry.Point) d1Glow {
 	m := s.GetMap()
 	if s.glowCache == nil {
-		s.glowCache = map[*gridmap.GridMap[*Actor, *Item, Object]]map[geometry.Point]float64{}
+		s.glowCache = map[*gridmap.GridMap[*Actor, *Item, Object]]map[geometry.Point]d1Glow{}
 	}
 	glow, ok := s.glowCache[m]
 	if !ok {
-		glow = map[geometry.Point]float64{}
+		glow = map[geometry.Point]d1Glow{}
+		church := geometry.Point{X: -1, Y: -1}
+		if defs.IsTownLevel(m.GetName()) {
+			church = d1ChurchLightPos
+		}
 		for y := 0; y < m.MapSize().Y; y++ {
 			for x := 0; x < m.MapSize().X; x++ {
 				src := geometry.Point{X: x, Y: y}
-				r := 0
+				r, red := 0, false
 				if icon, has := m.GetDecal(src); has && icon == defs.IconWallTorch {
 					r = d1LightRadius(icon)
 				}
@@ -647,6 +713,9 @@ func (s *State) d1GlowAt(p geometry.Point) float64 {
 						r = d1ObjectLights[o.O.Kind]
 					}
 				}
+				if src == church {
+					r, red = d1ChurchLightRadius, true
+				}
 				for dy := -r; dy <= r && r > 0; dy++ {
 					for dx := -r; dx <= r; dx++ {
 						q := src.Add(geometry.Point{X: dx, Y: dy})
@@ -656,7 +725,9 @@ func (s *State) d1GlowAt(p geometry.Point) float64 {
 						}
 						los := geometry.LineOfSight(src, q, func(c geometry.Point) bool { return c == src || m.IsTransparent(c) })
 						if len(los) > 0 && los[len(los)-1] == q {
-							glow[q] = max(glow[q], 1-d/float64(r))
+							if v := 1 - d/float64(r); v > glow[q].v {
+								glow[q] = d1Glow{v: v, red: red}
+							}
 						}
 					}
 				}
