@@ -1,6 +1,9 @@
 package defs
 
 import (
+	"fmt"
+	"math/rand"
+	"rpg/stats"
 	"rpg/util"
 )
 
@@ -60,4 +63,26 @@ Each attack does x0-6 damage. Usually 2x. (Not against unique monsters)
 type ModRow[T1 any, T2 any] struct {
 	QualityLevel int
 	MinMax       util.Tuple[T1, T2]
+}
+
+func AddToBaseAttributeRandomly(source *rand.Rand, randomAttribute stats.Name, minMax util.Tuple[int, int]) *stats.Modifier {
+	return AddToBaseAttribute(source, randomAttribute, randIntervalValue(source, minMax))
+}
+
+func AddToBaseAttribute(source *rand.Rand, randomAttribute stats.Name, bonusValue float64) *stats.Modifier {
+	return &stats.Modifier{
+		Attribute:      randomAttribute,
+		Description:    fmt.Sprintf("of %s", randomAttribute),
+		Value:          bonusValue,
+		Mode:           stats.ModifyAdditive,
+		IsPercentBased: false,
+	}
+}
+
+func randIntervalValue(source *rand.Rand, minMax util.Tuple[int, int]) float64 {
+	intervalMin, intervalMax := minMax.Item1, minMax.Item2
+	if intervalMin == intervalMax {
+		return float64(intervalMin)
+	}
+	return float64(source.Intn(intervalMax-intervalMin+1) + intervalMin)
 }

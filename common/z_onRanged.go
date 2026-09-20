@@ -17,6 +17,16 @@ func (d OnRangedHook) Name() string {
 	return "OnRangedHook"
 }
 
+func NewOnRangedHook(description string, after func(itemContext *ItemContext, action Action, context ActionContext) []Action) *OnRangedHook {
+	return &OnRangedHook{
+		ItemHook: ItemHook{
+			HookedAction: ActionNameRangedAttack,
+			AfterHook:    after,
+		},
+		hookDescription: description,
+	}
+}
+
 func NewMainOnRangedHook() *OnRangedHook {
 	return &OnRangedHook{
 		ItemHook: ItemHook{
