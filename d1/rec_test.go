@@ -33,6 +33,33 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		}
 	}
 
+	if len(ShrineNames) != 34 || len(ShrineMessages) != 34 || len(shrineMax) != 34 || len(shrineAvail) != 34 {
+		t.Fatalf("shrine tables = %d/%d/%d/%d, want 34 each",
+			len(ShrineNames), len(ShrineMessages), len(shrineMax), len(shrineAvail))
+	}
+	// The generator rolls an index into these, so the level caps and the multiplayer-only markers decide which
+	// shrines a dungeon level can hold.
+	for _, c := range []struct {
+		i          int
+		name       string
+		max, avail int
+	}{
+		{0, "Mysterious", 24, 0},
+		{7, "Enchanted", 8, 0}, // the one shrine with a shallower cap
+		{18, "Spooky", 24, 2},  // multiplayer only
+		{25, "Tainted", 24, 2}, // multiplayer only
+		{32, "Solar", 24, 1},
+		{33, "Murphy's", 24, 0},
+	} {
+		if ShrineNames[c.i] != c.name || shrineMax[c.i] != c.max || shrineAvail[c.i] != c.avail {
+			t.Errorf("shrine %d = %s/%d/%d, want %s/%d/%d",
+				c.i, ShrineNames[c.i], shrineMax[c.i], shrineAvail[c.i], c.name, c.max, c.avail)
+		}
+	}
+	if len(StoryBookNames) != 9 || StoryBookNames[0] != "The Great Conflict" || StoryBookNames[8] != "The Black King" {
+		t.Errorf("StoryBookNames = %v", StoryBookNames)
+	}
+
 	if len(SfxFiles) != 746 {
 		t.Errorf("SfxFiles = %d entries, want 746", len(SfxFiles))
 	}

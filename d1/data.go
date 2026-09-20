@@ -534,5 +534,8 @@ func loadRecTables(fsys fs.FS) error {
 	if SfxFiles, err = loadSfxFiles(fsys); err != nil {
 		return err
 	}
+	if err = loadObjectTables(fsys); err != nil {
+		return err
+	}
 	return nil
 }

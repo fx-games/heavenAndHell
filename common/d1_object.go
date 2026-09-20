@@ -55,10 +55,6 @@ var d1ObjectNames = map[int]string{
 var d1ObjectLights = map[int]int{d1.ObjSKFIRE: 5, d1.ObjCANDLE2: 5, d1.ObjBOOKCANDLE: 5, d1.ObjSTORYCANDLE: 3,
 	d1.ObjBCROSS: 10, d1.ObjTBCROSS: 10}
 
-// d1StoryBookNames ports StoryBookName, indexed by a story book's Var3.
-var d1StoryBookNames = [...]string{"The Great Conflict", "The Wages of Sin are War", "The Tale of the Horadrim",
-	"The Dark Exile", "The Sin War", "The Binding of the Three", "The Realms Beyond", "Tale of the Three", "The Black King"}
-
 // d1Containers are the objects that are looted: opening or breaking them may give nothing.
 var d1Containers = map[int]bool{d1.ObjCHEST1: true, d1.ObjCHEST2: true, d1.ObjCHEST3: true,
 	d1.ObjTCHEST1: true, d1.ObjTCHEST2: true, d1.ObjTCHEST3: true, d1.ObjSARC: true, d1.ObjBARREL: true,
@@ -76,8 +72,8 @@ func (o *D1Object) name() string {
 	if k := o.O.Kind; k == d1.ObjSHRINEL || k == d1.ObjSHRINER {
 		return d1.ShrineNames[o.O.Var1] + " Shrine"
 	}
-	if o.O.Kind == d1.ObjSTORYBOOK && o.O.Var3 >= 0 && o.O.Var3 < len(d1StoryBookNames) {
-		return d1StoryBookNames[o.O.Var3]
+	if o.O.Kind == d1.ObjSTORYBOOK && o.O.Var3 >= 0 && o.O.Var3 < len(d1.StoryBookNames) {
+		return d1.StoryBookNames[o.O.Var3]
 	}
 	if o.O.Kind == d1.ObjBOOK2L && o.f.State.GetMap().GetName() == D1LazarusLevel {
 		return "Book of Vileness"
