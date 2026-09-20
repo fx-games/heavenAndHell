@@ -27,6 +27,9 @@ const (
 	ActionNameFireball        ActionName = "ActionNameFireball"
 	ActionNameMonsterMissile  ActionName = "ActionNameMonsterMissile"
 
+	ActionNameApplyStatusEffect ActionName = "ActionNameApplyStatusEffect"
+	ActionNameSpawnObject       ActionName = "ActionNameSpawnObject"
+
 	ActionNameDie        ActionName = "ActionNameDie"
 	ActionNameEndTurn    ActionName = "ActionNameEndTurn"
 	ActionNameTransition ActionName = "ActionNameTransition"

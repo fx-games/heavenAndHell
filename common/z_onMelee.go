@@ -31,6 +31,26 @@ func (d *OnMeleeHook) Before(action Action, context ActionContext) []Action {
 	return d.ItemHook.Before(action, context)
 }
 
+func NewOnAfterMeleeHook(description string, after func(itemContext *ItemContext, action Action, context ActionContext) []Action) *OnMeleeHook {
+	return &OnMeleeHook{
+		ItemHook: ItemHook{
+			HookedAction: ActionNameMeleeAttack,
+			AfterHook:    after,
+		},
+		effectDescription: description,
+	}
+}
+
+func NewOnBeforeMeleeHook(description string, before func(itemContext *ItemContext, action Action, context ActionContext) []Action) *OnMeleeHook {
+	return &OnMeleeHook{
+		ItemHook: ItemHook{
+			HookedAction: ActionNameMeleeAttack,
+			BeforeHook:   before,
+		},
+		effectDescription: description,
+	}
+}
+
 func NewMainOnMeleeHook() *OnMeleeHook {
 	return &OnMeleeHook{
 		ItemHook: ItemHook{

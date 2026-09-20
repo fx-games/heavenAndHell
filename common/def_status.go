@@ -17,6 +17,14 @@ Status Effects
   - Increased/reduced stats/resources temporarily
 */
 
+func IsValidStatusEffect(name string) bool {
+	switch StatusEffect(name) {
+	case StatusInvisible, StatusStunned, StatusPoisoned, StatusImmobile, StatusBlinded, StatusSlow, StatusHasted, StatusScared, StatusSilenced, StatusPacified, StatusDamageOverTime, StatusConfused, StatusCharmed, StatusBerserk, StatusHaywire, StatusFlying, StatusWinCondition:
+		return true
+	}
+	return false
+}
+
 type StatusEffect string
 
 const (
