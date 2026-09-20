@@ -45,6 +45,32 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		}
 	}
 
+	if len(spellNames) != NumSpells || len(SpellDescriptions) != NumSpells {
+		t.Fatalf("spell slots = %d names / %d descriptions, want %d each",
+			len(spellNames), len(SpellDescriptions), NumSpells)
+	}
+	// Slot 0 is D1's "no spell" and must stay blank, or every unset spell would name itself.
+	if spellNames[0] != "" || SpellDescriptions[0] != "" {
+		t.Errorf("slot 0 = %q/%q, want blank", spellNames[0], SpellDescriptions[0])
+	}
+	if spellNames[SplFirebolt] != "Firebolt" || spellNames[SplRage] != "Rage" ||
+		spellNames[NumSpells-1] != "Stone Trap" || spellNames[16] != "Doom Serpents" {
+		t.Errorf("spellNames did not survive spells.rec")
+	}
+	if SpellDescriptions[SplFirebolt] != "Hurls a bolt of fire at the target." {
+		t.Errorf("SpellDescriptions[Firebolt] = %q", SpellDescriptions[SplFirebolt])
+	}
+
+	if len(RuneTraps) != 5 || RuneTraps["IMISC_RUNEF"] != (RuneTrap{SplRuneFire, "a fire explosion"}) ||
+		RuneTraps["IMISC_GR_RUNEL"] != (RuneTrap{SplRuneNova, "a lightning nova"}) {
+		t.Errorf("RuneTraps did not survive spells.rec: %v", RuneTraps)
+	}
+
+	if len(MonsterAIDescriptions) != 35 || MonsterAIDescriptions["AI_ZOMBIE"] != "Shambles slowly toward you." ||
+		MonsterAIDescriptions["AI_LACHDAN"] != "Never fights." {
+		t.Errorf("MonsterAIDescriptions did not survive monsters.rec (%d entries)", len(MonsterAIDescriptions))
+	}
+
 	if len(ObjectDisplays) != 89 {
 		t.Errorf("ObjectDisplays = %d, want 89", len(ObjectDisplays))
 	}

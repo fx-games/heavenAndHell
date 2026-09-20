@@ -134,12 +134,12 @@ var resistKindByName = map[string]int{"none": ResistNone, "fire": ResistKindFire
 	"lightning": ResistKindLightning, "magic": ResistKindMagic}
 
 func loadSpellTables(fsys fs.FS) error {
-	recs, err := readRec(fsys, "spells.rec")
+	recs, err := readRecMulti(fsys, "spells.rec")
 	if err != nil {
 		return err
 	}
 	SpellResist, SpellTargeted, SpellSfx = map[int]int{}, map[int]bool{}, map[int][3]string{}
-	for _, r := range recs {
+	for _, r := range recs["default"] {
 		m := r.ToMap("")
 		name := m.GetStringOrDefault("id", "")
 		spell, ok := spellIDByName[name]
@@ -159,8 +159,37 @@ func loadSpellTables(fsys fs.FS) error {
 		SpellSfx[spell] = [3]string{m.GetStringOrDefault("cast_sfx", ""),
 			m.GetStringOrDefault("launch_sfx", ""), m.GetStringOrDefault("impact_sfx", "")}
 	}
+	spellNames, SpellDescriptions = nil, nil
+	for _, r := range recs["slot"] {
+		m := r.ToMap("")
+		spellNames = append(spellNames, m.GetStringOrDefault("name", ""))
+		SpellDescriptions = append(SpellDescriptions, m.GetStringOrDefault("description", ""))
+	}
+	if len(spellNames) != NumSpells {
+		return fmt.Errorf("spells.rec: %d spell slots, want %d", len(spellNames), NumSpells)
+	}
+	RuneTraps = map[string]RuneTrap{}
+	for _, r := range recs["rune"] {
+		m := r.ToMap("")
+		name := m.GetStringOrDefault("spell", "")
+		spell, ok := spellIDByName[name]
+		if !ok {
+			return fmt.Errorf("spells.rec: rune: unknown spell %q", name)
+		}
+		RuneTraps[m.GetStringOrDefault("id", "")] = RuneTrap{Spell: spell, Effect: m.GetStringOrDefault("effect", "")}
+	}
 	return nil
 }
+
+// RuneTrap is one of Hellfire's placeable traps (the runes), by the IMISC_ id of the item that places it: the
+// SPL_ it goes off as, and what the player is told happens.
+type RuneTrap struct {
+	Spell  int
+	Effect string
+}
+
+// RuneTraps is filled by Load from the rune section of spells.rec.
+var RuneTraps map[string]RuneTrap
 
 // SpellFrames: casting animation length per class (each class' animations.tsv castingFrames). Derived from the
 // class table by Load, not at init: classAttr is empty until hero.rec has been read.

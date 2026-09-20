@@ -249,35 +249,10 @@ func (a *Actor) D1MonsterSections() []D1SheetSection {
 	if len(resists) > 0 {
 		sections = append(sections, D1SheetSection{Title: "Resistances", Rows: resists})
 	}
-	if behavior := d1MonsterAIDescriptions[mon.AI]; behavior != "" {
+	if behavior := d1.MonsterAIDescriptions[mon.AI]; behavior != "" {
 		sections = append(sections, D1SheetSection{Title: "Behavior", Notes: []string{behavior}})
 	}
 	return sections
-}
-
-// d1MonsterAIDescriptions is a plain-English gloss of each AI_* brain in game/ai_d1.go's think(), kept here
-// (common can't import game, which imports common) so the actor description popup can show it. Not code-shared
-// with the AI itself: if a brain's behavior changes, update its line here too.
-var d1MonsterAIDescriptions = map[string]string{
-	"AI_ZOMBIE": "Shambles slowly toward you.", "AI_FALLEN": "Weak alone but rallies in packs; flees and may mutate when panicked.",
-	"AI_SCAV": "Feeds on nearby corpses to heal itself.", "AI_SKELBOW": "Keeps its distance and fires arrows.",
-	"AI_GOATBOW": "Keeps its distance and fires arrows.", "AI_SNEAK": "Lurks at the edge of sight and strikes from stealth.",
-	"AI_GOATMC": "Charges in for melee.", "AI_BAT": "Flies erratically.",
-	"AI_SUCC": "Keeps its distance, hurling magic bolts.", "AI_ACIDUNIQ": "Keeps its distance, spitting acid.",
-	"AI_LICH": "Keeps its distance, hurling magic bolts.", "AI_ARCHLICH": "Keeps its distance, hurling magic bolts.",
-	"AI_PSYCHORB": "Keeps its distance, hurling magic bolts.", "AI_NECROMORB": "Keeps its distance, hurling magic bolts.",
-	"AI_FIREBAT": "Flies at range, firing bolts of fire.", "AI_HELLBAT": "Flies at range, hurling fireballs.",
-	"AI_HORKDEMON": "Fights in melee.", "AI_BONED": "Circles at range, launching bone-spirit bolts with an occasional special attack.",
-	"AI_MAGMA": "Circles at range, hurling magma balls.", "AI_STORM": "Circles at range, casting lightning.",
-	"AI_ACID": "Circles at range, spitting corrosive acid.", "AI_MEGA": "Circles at range, breathing gouts of flame.",
-	"AI_GARG": "Lies dormant until approached, then takes flight to attack.", "AI_RHINO": "Charges in a straight line.",
-	"AI_COUNSLR": "Keeps its distance, casting spells.", "AI_CLEAVER": "Waits until provoked, then charges relentlessly.",
-	"AI_SKELKING": "Occasionally raises a skeleton from the ground; otherwise fights in melee.",
-	"AI_ZHAR":     "Speaks first, then fights as a spellcaster.", "AI_LAZURUS": "Speaks first, then fights as a spellcaster.",
-	"AI_LAZHELP": "Joins the fight as a ranged caster once Lazarus has spoken.",
-	"AI_WARLORD": "Speaks first, then attacks with a blade.", "AI_GARBUD": "Speaks first, then charges in for melee.",
-	"AI_SNOTSPIL": "Speaks first, then fights like a Fallen One.", "AI_LACHDAN": "Never fights.",
-	"AI_DIABLO": "Unleashes devastating Apocalypse spells from a distance.",
 }
 
 func (a *Actor) RemoveStatusEffect(effect StatusEffect) {
