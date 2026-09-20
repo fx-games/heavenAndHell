@@ -1,0 +1,54 @@
+%rec: default
+# Hellfire's oils (items.cpp OilNames/OilLevels/OilValues/OilMagic). Order is load-bearing: a plain
+# "Oil" rolls among the entries a level allows, and GetOilType indexes this list.
+
+misc_id: IMISC_OILACC
+name: Oil of Accuracy
+min_lvl: 1
+value: 500
+
+misc_id: IMISC_OILMAST
+name: Oil of Mastery
+min_lvl: 10
+value: 2500
+
+misc_id: IMISC_OILSHARP
+name: Oil of Sharpness
+min_lvl: 1
+value: 500
+
+misc_id: IMISC_OILDEATH
+name: Oil of Death
+min_lvl: 10
+value: 2500
+
+misc_id: IMISC_OILSKILL
+name: Oil of Skill
+min_lvl: 4
+value: 1500
+
+misc_id: IMISC_OILBSMTH
+name: Blacksmith Oil
+min_lvl: 1
+value: 100
+
+misc_id: IMISC_OILFORT
+name: Oil of Fortitude
+min_lvl: 5
+value: 2500
+
+misc_id: IMISC_OILPERM
+name: Oil of Permanence
+min_lvl: 17
+value: 15000
+
+misc_id: IMISC_OILHARD
+name: Oil of Hardening
+min_lvl: 1
+value: 500
+
+misc_id: IMISC_OILIMP
+name: Oil of Imperviousness
+min_lvl: 10
+value: 2500
+
