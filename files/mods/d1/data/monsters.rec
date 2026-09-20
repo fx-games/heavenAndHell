@@ -1,0 +1,109 @@
+%rec: ai
+# A plain-English gloss of each AI_* brain, shown in the actor description popup. Not shared with the AI
+# itself (game/ai_d1.go's think()): if a brain's behaviour changes, update its line here too.
+
+id: AI_ZOMBIE
+description: Shambles slowly toward you.
+
+id: AI_FALLEN
+description: Weak alone but rallies in packs; flees and may mutate when panicked.
+
+id: AI_SCAV
+description: Feeds on nearby corpses to heal itself.
+
+id: AI_SKELBOW
+description: Keeps its distance and fires arrows.
+
+id: AI_GOATBOW
+description: Keeps its distance and fires arrows.
+
+id: AI_SNEAK
+description: Lurks at the edge of sight and strikes from stealth.
+
+id: AI_GOATMC
+description: Charges in for melee.
+
+id: AI_BAT
+description: Flies erratically.
+
+id: AI_SUCC
+description: Keeps its distance, hurling magic bolts.
+
+id: AI_ACIDUNIQ
+description: Keeps its distance, spitting acid.
+
+id: AI_LICH
+description: Keeps its distance, hurling magic bolts.
+
+id: AI_ARCHLICH
+description: Keeps its distance, hurling magic bolts.
+
+id: AI_PSYCHORB
+description: Keeps its distance, hurling magic bolts.
+
+id: AI_NECROMORB
+description: Keeps its distance, hurling magic bolts.
+
+id: AI_FIREBAT
+description: Flies at range, firing bolts of fire.
+
+id: AI_HELLBAT
+description: Flies at range, hurling fireballs.
+
+id: AI_HORKDEMON
+description: Fights in melee.
+
+id: AI_BONED
+description: Circles at range, launching bone-spirit bolts with an occasional special attack.
+
+id: AI_MAGMA
+description: Circles at range, hurling magma balls.
+
+id: AI_STORM
+description: Circles at range, casting lightning.
+
+id: AI_ACID
+description: Circles at range, spitting corrosive acid.
+
+id: AI_MEGA
+description: Circles at range, breathing gouts of flame.
+
+id: AI_GARG
+description: Lies dormant until approached, then takes flight to attack.
+
+id: AI_RHINO
+description: Charges in a straight line.
+
+id: AI_COUNSLR
+description: Keeps its distance, casting spells.
+
+id: AI_CLEAVER
+description: Waits until provoked, then charges relentlessly.
+
+id: AI_SKELKING
+description: Occasionally raises a skeleton from the ground; otherwise fights in melee.
+
+id: AI_ZHAR
+description: Speaks first, then fights as a spellcaster.
+
+id: AI_LAZURUS
+description: Speaks first, then fights as a spellcaster.
+
+id: AI_LAZHELP
+description: Joins the fight as a ranged caster once Lazarus has spoken.
+
+id: AI_WARLORD
+description: Speaks first, then attacks with a blade.
+
+id: AI_GARBUD
+description: Speaks first, then charges in for melee.
+
+id: AI_SNOTSPIL
+description: Speaks first, then fights like a Fallen One.
+
+id: AI_LACHDAN
+description: Never fights.
+
+id: AI_DIABLO
+description: Unleashes devastating Apocalypse spells from a distance.
+

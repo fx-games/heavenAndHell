@@ -2,6 +2,7 @@ package d1
 
 import (
 	"fmt"
+	"io/fs"
 )
 
 // objects.cpp: objects placed on level creation.
@@ -46,56 +47,80 @@ type Object struct {
 	Active       bool     // game state (not part of D1's placement): true until opened, broken or pulled
 }
 
-// ShrineNames are D1's shrinestrs.
-var ShrineNames = [34]string{"Mysterious", "Hidden", "Gloomy", "Weird", "Magical", "Stone", "Religious", "Enchanted",
-	"Thaumaturgic", "Fascinating", "Cryptic", "Magical", "Eldritch", "Eerie", "Divine", "Holy", "Sacred", "Spiritual",
-	"Spooky", "Abandoned", "Creepy", "Quiet", "Secluded", "Ornate", "Glimmering", "Tainted",
-	"Oily", "Glowing", "Mendicant's", "Sparkling", "Town", "Shimmering", "Solar", "Murphy's"} // Hellfire's last eight
-
-// ShrineMessages are the MsgStrings each shrine shows, with a note on what the shrine does.
-var ShrineMessages = [34]string{"Some are weakened as one grows strong (-1 all stats, +6 to one random stat permanently)",
-	"New strength is forged through destruction (+10 max durability on equipped items, one random item -20)",
-	"Those who defend seldom attack (+2 armor on all armor, -1 max damage on all weapons)",
-	"The sword of justice is swift and sharp (+1 max damage on all weapons)",
-	"While the spirit is vigilant the body thrives (Mana Shield)",
-	"The powers of mana refocused renews (recharges all staves)",
-	"Time cannot diminish the power of steel (repairs all items)",
-	"Magic is not always what it seems to be (+1 level to known spells, -2 to one random spell)",
-	"What once was opened now is closed (refills all chests on this level)",
-	"Intensity comes at the cost of wisdom (+2 Firebolt levels, -10% max mana permanently)",
-	"Arcane power brings destruction (casts Nova, restores mana)",
-	"While the spirit is vigilant the body thrives (Mana Shield)",
-	"Crimson and Azure become as the sun (healing and mana potions in pack become rejuvenation)",
-	"Knowledge and wisdom at the cost of self (+2 Mag permanently)",
-	"Drink and be refreshed (full life and mana, drops 2 potions)",
-	"Wherever you go, there you are (teleports you to a random spot)",
-	"Energy comes at the cost of wisdom (+2 Charged Bolt levels, -10% max mana permanently)",
-	"Riches abound when least expected (fills empty inventory slots with gold)",
-	"Where avarice fails, patience gains reward (no effect in single player)",
-	"The hands of men may be guided by fate (+2 Dex permanently)",
-	"Strength is bolstered by heavenly faith (+2 Str permanently)",
-	"The essence of life flows from within (+2 Vit permanently)",
-	"The way is made clear when viewed from above (reveals the level map)",
-	"Salvation comes at the cost of wisdom (+2 Holy Bolt levels, -10% max mana permanently)",
-	"Mysteries are revealed in the light of reason (identifies all items)",
-	"Those who are last may yet be first (no effect in single player)",
-	"That which does not kill you... (+2 to your class' main stat, sets off a fire wall)",
-	"Knowledge is power (+1 Mag per 1000 XP, up to +5 for 5% of your XP)",
-	"Give and you shall receive (half your gold becomes XP)",
-	"Some experience is gained by touch (1000 XP per dungeon level, sets off a flash)",
-	"There's no place like home (opens a town portal)",
-	"Spirtual energy is restored (full mana)",
-	"The sun's position decides (+2 Dex, Str, Mag or Vit by the time of day)",
-	"That which can break will (halves an equipped item's durability, or takes a third of your gold)"}
-
-// StoryBookNames are D1's StoryBookName.
-var StoryBookNames = [9]string{"The Great Conflict", "The Wages of Sin are War", "The Tale of the Horadrim", "The Dark Exile",
-	"The Sin War", "The Binding of the Three", "The Realms Beyond", "Tale of the Three", "The Black King"}
-
+// The shrine table (names, messages, level caps and availability) and the story book names live in
+// mods/d1/data/objects.rec and are filled by Load.
 var (
-	shrineMax   = [34]int{24, 24, 24, 24, 24, 24, 24, 8, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24}
-	shrineAvail = [34]int{0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 0} // 2 = multiplayer only
+	// ShrineNames are D1's shrinestrs.
+	ShrineNames []string
+	// ShrineMessages are the MsgStrings each shrine shows, with a note on what the shrine does.
+	ShrineMessages []string
+	// StoryBookNames are D1's StoryBookName, indexed by a story book's Var3.
+	StoryBookNames []string
+
+	shrineMax   []int // deepest dungeon level a shrine may be generated on
+	shrineAvail []int // 2 = multiplayer only
 )
+
+// shrineCount is how many shrines D1 and Hellfire have between them; the generator rolls an index into the table,
+// so a short or overlong objects.rec would quietly change which shrines appear.
+const shrineCount = 34
+
+// ObjectDisplay is what the game shows and plays for an object kind: the parts of it that are presentation
+// rather than placement, which D1 spread over a handful of small tables.
+type ObjectDisplay struct {
+	Name      string // display name; "" for decoration the game never names
+	Light     int    // light radius of the ones that glow (ProcessObjects' Obj_Light), 0 for the rest
+	Container bool   // looted by opening or breaking, and may give nothing
+	WallLight bool   // a decorative light D1 places directly
+	Sfx       string // the sound it makes as it is used
+}
+
+// ObjectDisplays is keyed by object kind (Obj*); filled by Load from the object section of objects.rec.
+var ObjectDisplays map[int]ObjectDisplay
+
+func loadObjectTables(fsys fs.FS, d *Data) error {
+	recs, err := readRecMulti(fsys, "objects.rec")
+	if err != nil {
+		return err
+	}
+	kindByName := make(map[string]int, len(d.Objects))
+	for i, o := range d.Objects {
+		kindByName[o.Name] = i
+	}
+	ObjectDisplays = make(map[int]ObjectDisplay, len(recs["object"]))
+	for _, r := range recs["object"] {
+		m := r.ToMap("")
+		id := m.GetStringOrDefault("id", "")
+		kind, ok := kindByName[id]
+		if !ok {
+			return fmt.Errorf("objects.rec: unknown object %q", id)
+		}
+		ObjectDisplays[kind] = ObjectDisplay{
+			Name:      m.GetStringOrDefault("name", ""),
+			Light:     m.GetIntOrDefault("light", 0),
+			Container: m.GetBoolOrFalse("container"),
+			WallLight: m.GetBoolOrFalse("wall_light"),
+			Sfx:       m.GetStringOrDefault("sfx", ""),
+		}
+	}
+	ShrineNames, ShrineMessages = nil, nil
+	shrineMax, shrineAvail = nil, nil
+	for _, r := range recs["shrine"] {
+		m := r.ToMap("")
+		ShrineNames = append(ShrineNames, m.GetStringOrDefault("name", ""))
+		ShrineMessages = append(ShrineMessages, m.GetStringOrDefault("message", ""))
+		shrineMax = append(shrineMax, m.GetIntOrDefault("max_lvl", 0))
+		shrineAvail = append(shrineAvail, m.GetIntOrDefault("avail", 0))
+	}
+	if len(ShrineNames) != shrineCount {
+		return fmt.Errorf("objects.rec: %d shrines, want %d", len(ShrineNames), shrineCount)
+	}
+	StoryBookNames = nil
+	for _, r := range recs["storybook"] {
+		StoryBookNames = append(StoryBookNames, r.ToMap("").GetStringOrDefault("name", ""))
+	}
+	return nil
+}
 
 func (g *gen) clrAllObjects() {
 	g.objects = [maxObjects]*Object{}

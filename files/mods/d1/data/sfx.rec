@@ -1,0 +1,2246 @@
+%rec: default
+# Every speech and quest sound id D1 has (_sfx_id, effects.cpp's sgSFX), mapped to the file it was in Diablo
+# (the .wav path lowercased, as .ogg). Generated from devilution 1.09's enums.h and effects.cpp. D1's own audio
+# is not in this game: the ids are the records of assets/data/voices.rec, which is what the game plays, and the
+# file names are only the key into reference/d1_voice_transcripts.tsv, the transcriptions of the cut lines.
+
+id: IS_SARC
+file: items/sarc.ogg
+
+# Hellfire's Monk, from hfmonk.mpq / hfvoice.mpq. The expansion leaves most of his lines as silence
+# ("Sfx\Misc\blank.wav" in EFFECTS.H), so only the ones with real audio are here.
+id: PS_MONK1
+file: monk/monk01.ogg
+
+id: PS_MONK8
+file: monk/monk08.ogg
+
+id: PS_MONK9
+file: monk/monk09.ogg
+
+id: PS_MONK10
+file: monk/monk10.ogg
+
+id: PS_MONK11
+file: monk/monk11.ogg
+
+id: PS_MONK12
+file: monk/monk12.ogg
+
+id: PS_MONK52
+file: monk/monk52.ogg
+
+id: PS_MONK54
+file: monk/monk54.ogg
+
+id: PS_MONK55
+file: monk/monk55.ogg
+
+id: PS_MONK56
+file: monk/monk56.ogg
+
+id: PS_MONK61
+file: monk/monk61.ogg
+
+id: PS_MONK62
+file: monk/monk62.ogg
+
+id: PS_MONK80
+file: monk/monk80.ogg
+
+id: PS_MONK82
+file: monk/monk82.ogg
+
+id: PS_MONK83
+file: monk/monk83.ogg
+
+id: PS_MONK87
+file: monk/monk87.ogg
+
+id: PS_MONK88
+file: monk/monk88.ogg
+
+id: PS_MONK89
+file: monk/monk89.ogg
+
+id: PS_MONK91
+file: monk/monk91.ogg
+
+id: PS_MONK92
+file: monk/monk92.ogg
+
+id: PS_MONK94
+file: monk/monk94.ogg
+
+id: PS_MONK95
+file: monk/monk95.ogg
+
+id: PS_MONK96
+file: monk/monk96.ogg
+
+id: PS_MONK97
+file: monk/monk97.ogg
+
+id: PS_MONK98
+file: monk/monk98.ogg
+
+id: PS_MONK99
+file: monk/monk99.ogg
+
+id: IS_QUESTDN
+file: misc/questdon.ogg
+
+id: TSFX_BMAID1
+file: towners/bmaid01.ogg
+
+id: TSFX_BMAID2
+file: towners/bmaid02.ogg
+
+id: TSFX_BMAID3
+file: towners/bmaid03.ogg
+
+id: TSFX_BMAID4
+file: towners/bmaid04.ogg
+
+id: TSFX_BMAID5
+file: towners/bmaid05.ogg
+
+id: TSFX_BMAID6
+file: towners/bmaid06.ogg
+
+id: TSFX_BMAID7
+file: towners/bmaid07.ogg
+
+id: TSFX_BMAID8
+file: towners/bmaid08.ogg
+
+id: TSFX_BMAID9
+file: towners/bmaid09.ogg
+
+id: TSFX_BMAID10
+file: towners/bmaid10.ogg
+
+id: TSFX_BMAID11
+file: towners/bmaid11.ogg
+
+id: TSFX_BMAID12
+file: towners/bmaid12.ogg
+
+id: TSFX_BMAID13
+file: towners/bmaid13.ogg
+
+id: TSFX_BMAID14
+file: towners/bmaid14.ogg
+
+id: TSFX_BMAID15
+file: towners/bmaid15.ogg
+
+id: TSFX_BMAID16
+file: towners/bmaid16.ogg
+
+id: TSFX_BMAID17
+file: towners/bmaid17.ogg
+
+id: TSFX_BMAID18
+file: towners/bmaid18.ogg
+
+id: TSFX_BMAID19
+file: towners/bmaid19.ogg
+
+id: TSFX_BMAID20
+file: towners/bmaid20.ogg
+
+id: TSFX_BMAID21
+file: towners/bmaid21.ogg
+
+id: TSFX_BMAID22
+file: towners/bmaid22.ogg
+
+id: TSFX_BMAID23
+file: towners/bmaid23.ogg
+
+id: TSFX_BMAID24
+file: towners/bmaid24.ogg
+
+id: TSFX_BMAID25
+file: towners/bmaid25.ogg
+
+id: TSFX_BMAID26
+file: towners/bmaid26.ogg
+
+id: TSFX_BMAID27
+file: towners/bmaid27.ogg
+
+id: TSFX_BMAID28
+file: towners/bmaid28.ogg
+
+id: TSFX_BMAID29
+file: towners/bmaid29.ogg
+
+id: TSFX_BMAID30
+file: towners/bmaid30.ogg
+
+id: TSFX_BMAID31
+file: towners/bmaid31.ogg
+
+id: TSFX_BMAID32
+file: towners/bmaid32.ogg
+
+id: TSFX_BMAID33
+file: towners/bmaid33.ogg
+
+id: TSFX_BMAID34
+file: towners/bmaid34.ogg
+
+id: TSFX_BMAID35
+file: towners/bmaid35.ogg
+
+id: TSFX_BMAID36
+file: towners/bmaid36.ogg
+
+id: TSFX_BMAID37
+file: towners/bmaid37.ogg
+
+id: TSFX_BMAID38
+file: towners/bmaid38.ogg
+
+id: TSFX_BMAID39
+file: towners/bmaid39.ogg
+
+id: TSFX_BMAID40
+file: towners/bmaid40.ogg
+
+id: TSFX_SMITH1
+file: towners/bsmith01.ogg
+
+id: TSFX_SMITH2
+file: towners/bsmith02.ogg
+
+id: TSFX_SMITH3
+file: towners/bsmith03.ogg
+
+id: TSFX_SMITH4
+file: towners/bsmith04.ogg
+
+id: TSFX_SMITH5
+file: towners/bsmith05.ogg
+
+id: TSFX_SMITH6
+file: towners/bsmith06.ogg
+
+id: TSFX_SMITH7
+file: towners/bsmith07.ogg
+
+id: TSFX_SMITH8
+file: towners/bsmith08.ogg
+
+id: TSFX_SMITH9
+file: towners/bsmith09.ogg
+
+id: TSFX_SMITH10
+file: towners/bsmith10.ogg
+
+id: TSFX_SMITH11
+file: towners/bsmith11.ogg
+
+id: TSFX_SMITH12
+file: towners/bsmith12.ogg
+
+id: TSFX_SMITH13
+file: towners/bsmith13.ogg
+
+id: TSFX_SMITH14
+file: towners/bsmith14.ogg
+
+id: TSFX_SMITH15
+file: towners/bsmith15.ogg
+
+id: TSFX_SMITH16
+file: towners/bsmith16.ogg
+
+id: TSFX_SMITH17
+file: towners/bsmith17.ogg
+
+id: TSFX_SMITH18
+file: towners/bsmith18.ogg
+
+id: TSFX_SMITH19
+file: towners/bsmith19.ogg
+
+id: TSFX_SMITH20
+file: towners/bsmith20.ogg
+
+id: TSFX_SMITH21
+file: towners/bsmith21.ogg
+
+id: TSFX_SMITH22
+file: towners/bsmith22.ogg
+
+id: TSFX_SMITH23
+file: towners/bsmith23.ogg
+
+id: TSFX_SMITH24
+file: towners/bsmith24.ogg
+
+id: TSFX_SMITH25
+file: towners/bsmith25.ogg
+
+id: TSFX_SMITH26
+file: towners/bsmith26.ogg
+
+id: TSFX_SMITH27
+file: towners/bsmith27.ogg
+
+id: TSFX_SMITH28
+file: towners/bsmith28.ogg
+
+id: TSFX_SMITH29
+file: towners/bsmith29.ogg
+
+id: TSFX_SMITH30
+file: towners/bsmith30.ogg
+
+id: TSFX_SMITH31
+file: towners/bsmith31.ogg
+
+id: TSFX_SMITH32
+file: towners/bsmith32.ogg
+
+id: TSFX_SMITH33
+file: towners/bsmith33.ogg
+
+id: TSFX_SMITH34
+file: towners/bsmith34.ogg
+
+id: TSFX_SMITH35
+file: towners/bsmith35.ogg
+
+id: TSFX_SMITH36
+file: towners/bsmith36.ogg
+
+id: TSFX_SMITH37
+file: towners/bsmith37.ogg
+
+id: TSFX_SMITH38
+file: towners/bsmith38.ogg
+
+id: TSFX_SMITH39
+file: towners/bsmith39.ogg
+
+id: TSFX_SMITH40
+file: towners/bsmith40.ogg
+
+id: TSFX_SMITH41
+file: towners/bsmith41.ogg
+
+id: TSFX_SMITH42
+file: towners/bsmith42.ogg
+
+id: TSFX_SMITH43
+file: towners/bsmith43.ogg
+
+id: TSFX_SMITH44
+file: towners/bsmith44.ogg
+
+id: TSFX_SMITH45
+file: towners/bsmith45.ogg
+
+id: TSFX_SMITH46
+file: towners/bsmith46.ogg
+
+id: TSFX_SMITH47
+file: towners/bsmith47.ogg
+
+id: TSFX_SMITH48
+file: towners/bsmith48.ogg
+
+id: TSFX_SMITH49
+file: towners/bsmith49.ogg
+
+id: TSFX_SMITH50
+file: towners/bsmith50.ogg
+
+id: TSFX_SMITH51
+file: towners/bsmith51.ogg
+
+id: TSFX_SMITH52
+file: towners/bsmith52.ogg
+
+id: TSFX_SMITH53
+file: towners/bsmith53.ogg
+
+id: TSFX_SMITH54
+file: towners/bsmith54.ogg
+
+id: TSFX_SMITH55
+file: towners/bsmith55.ogg
+
+id: TSFX_SMITH56
+file: towners/bsmith56.ogg
+
+id: TSFX_COW1
+file: towners/cow1.ogg
+
+id: TSFX_COW2
+file: towners/cow2.ogg
+
+id: TSFX_DEADGUY
+file: towners/deadguy2.ogg
+
+id: TSFX_DRUNK1
+file: towners/drunk01.ogg
+
+id: TSFX_DRUNK2
+file: towners/drunk02.ogg
+
+id: TSFX_DRUNK3
+file: towners/drunk03.ogg
+
+id: TSFX_DRUNK4
+file: towners/drunk04.ogg
+
+id: TSFX_DRUNK5
+file: towners/drunk05.ogg
+
+id: TSFX_DRUNK6
+file: towners/drunk06.ogg
+
+id: TSFX_DRUNK7
+file: towners/drunk07.ogg
+
+id: TSFX_DRUNK8
+file: towners/drunk08.ogg
+
+id: TSFX_DRUNK9
+file: towners/drunk09.ogg
+
+id: TSFX_DRUNK10
+file: towners/drunk10.ogg
+
+id: TSFX_DRUNK11
+file: towners/drunk11.ogg
+
+id: TSFX_DRUNK12
+file: towners/drunk12.ogg
+
+id: TSFX_DRUNK13
+file: towners/drunk13.ogg
+
+id: TSFX_DRUNK14
+file: towners/drunk14.ogg
+
+id: TSFX_DRUNK15
+file: towners/drunk15.ogg
+
+id: TSFX_DRUNK16
+file: towners/drunk16.ogg
+
+id: TSFX_DRUNK17
+file: towners/drunk17.ogg
+
+id: TSFX_DRUNK18
+file: towners/drunk18.ogg
+
+id: TSFX_DRUNK19
+file: towners/drunk19.ogg
+
+id: TSFX_DRUNK20
+file: towners/drunk20.ogg
+
+id: TSFX_DRUNK21
+file: towners/drunk21.ogg
+
+id: TSFX_DRUNK22
+file: towners/drunk22.ogg
+
+id: TSFX_DRUNK23
+file: towners/drunk23.ogg
+
+id: TSFX_DRUNK24
+file: towners/drunk24.ogg
+
+id: TSFX_DRUNK25
+file: towners/drunk25.ogg
+
+id: TSFX_DRUNK26
+file: towners/drunk26.ogg
+
+id: TSFX_DRUNK27
+file: towners/drunk27.ogg
+
+id: TSFX_DRUNK28
+file: towners/drunk28.ogg
+
+id: TSFX_DRUNK29
+file: towners/drunk29.ogg
+
+id: TSFX_DRUNK30
+file: towners/drunk30.ogg
+
+id: TSFX_DRUNK31
+file: towners/drunk31.ogg
+
+id: TSFX_DRUNK32
+file: towners/drunk32.ogg
+
+id: TSFX_DRUNK33
+file: towners/drunk33.ogg
+
+id: TSFX_DRUNK34
+file: towners/drunk34.ogg
+
+id: TSFX_DRUNK35
+file: towners/drunk35.ogg
+
+id: TSFX_HEALER1
+file: towners/healer01.ogg
+
+id: TSFX_HEALER2
+file: towners/healer02.ogg
+
+id: TSFX_HEALER3
+file: towners/healer03.ogg
+
+id: TSFX_HEALER4
+file: towners/healer04.ogg
+
+id: TSFX_HEALER5
+file: towners/healer05.ogg
+
+id: TSFX_HEALER6
+file: towners/healer06.ogg
+
+id: TSFX_HEALER7
+file: towners/healer07.ogg
+
+id: TSFX_HEALER8
+file: towners/healer08.ogg
+
+id: TSFX_HEALER9
+file: towners/healer09.ogg
+
+id: TSFX_HEALER10
+file: towners/healer10.ogg
+
+id: TSFX_HEALER11
+file: towners/healer11.ogg
+
+id: TSFX_HEALER12
+file: towners/healer12.ogg
+
+id: TSFX_HEALER13
+file: towners/healer13.ogg
+
+id: TSFX_HEALER14
+file: towners/healer14.ogg
+
+id: TSFX_HEALER15
+file: towners/healer15.ogg
+
+id: TSFX_HEALER16
+file: towners/healer16.ogg
+
+id: TSFX_HEALER17
+file: towners/healer17.ogg
+
+id: TSFX_HEALER18
+file: towners/healer18.ogg
+
+id: TSFX_HEALER19
+file: towners/healer19.ogg
+
+id: TSFX_HEALER20
+file: towners/healer20.ogg
+
+id: TSFX_HEALER21
+file: towners/healer21.ogg
+
+id: TSFX_HEALER22
+file: towners/healer22.ogg
+
+id: TSFX_HEALER23
+file: towners/healer23.ogg
+
+id: TSFX_HEALER24
+file: towners/healer24.ogg
+
+id: TSFX_HEALER25
+file: towners/healer25.ogg
+
+id: TSFX_HEALER26
+file: towners/healer26.ogg
+
+id: TSFX_HEALER27
+file: towners/healer27.ogg
+
+id: TSFX_HEALER28
+file: towners/healer28.ogg
+
+id: TSFX_HEALER29
+file: towners/healer29.ogg
+
+id: TSFX_HEALER30
+file: towners/healer30.ogg
+
+id: TSFX_HEALER31
+file: towners/healer31.ogg
+
+id: TSFX_HEALER32
+file: towners/healer32.ogg
+
+id: TSFX_HEALER33
+file: towners/healer33.ogg
+
+id: TSFX_HEALER34
+file: towners/healer34.ogg
+
+id: TSFX_HEALER35
+file: towners/healer35.ogg
+
+id: TSFX_HEALER36
+file: towners/healer36.ogg
+
+id: TSFX_HEALER37
+file: towners/healer37.ogg
+
+id: TSFX_HEALER38
+file: towners/healer38.ogg
+
+id: TSFX_HEALER39
+file: towners/healer39.ogg
+
+id: TSFX_HEALER40
+file: towners/healer40.ogg
+
+id: TSFX_HEALER41
+file: towners/healer41.ogg
+
+id: TSFX_HEALER42
+file: towners/healer42.ogg
+
+id: TSFX_HEALER43
+file: towners/healer43.ogg
+
+id: TSFX_HEALER44
+file: towners/healer44.ogg
+
+id: TSFX_HEALER45
+file: towners/healer45.ogg
+
+id: TSFX_HEALER46
+file: towners/healer46.ogg
+
+id: TSFX_HEALER47
+file: towners/healer47.ogg
+
+id: TSFX_PEGBOY1
+file: towners/pegboy01.ogg
+
+id: TSFX_PEGBOY2
+file: towners/pegboy02.ogg
+
+id: TSFX_PEGBOY3
+file: towners/pegboy03.ogg
+
+id: TSFX_PEGBOY4
+file: towners/pegboy04.ogg
+
+id: TSFX_PEGBOY5
+file: towners/pegboy05.ogg
+
+id: TSFX_PEGBOY6
+file: towners/pegboy06.ogg
+
+id: TSFX_PEGBOY7
+file: towners/pegboy07.ogg
+
+id: TSFX_PEGBOY8
+file: towners/pegboy08.ogg
+
+id: TSFX_PEGBOY9
+file: towners/pegboy09.ogg
+
+id: TSFX_PEGBOY10
+file: towners/pegboy10.ogg
+
+id: TSFX_PEGBOY11
+file: towners/pegboy11.ogg
+
+id: TSFX_PEGBOY12
+file: towners/pegboy12.ogg
+
+id: TSFX_PEGBOY13
+file: towners/pegboy13.ogg
+
+id: TSFX_PEGBOY14
+file: towners/pegboy14.ogg
+
+id: TSFX_PEGBOY15
+file: towners/pegboy15.ogg
+
+id: TSFX_PEGBOY16
+file: towners/pegboy16.ogg
+
+id: TSFX_PEGBOY17
+file: towners/pegboy17.ogg
+
+id: TSFX_PEGBOY18
+file: towners/pegboy18.ogg
+
+id: TSFX_PEGBOY19
+file: towners/pegboy19.ogg
+
+id: TSFX_PEGBOY20
+file: towners/pegboy20.ogg
+
+id: TSFX_PEGBOY21
+file: towners/pegboy21.ogg
+
+id: TSFX_PEGBOY22
+file: towners/pegboy22.ogg
+
+id: TSFX_PEGBOY23
+file: towners/pegboy23.ogg
+
+id: TSFX_PEGBOY24
+file: towners/pegboy24.ogg
+
+id: TSFX_PEGBOY25
+file: towners/pegboy25.ogg
+
+id: TSFX_PEGBOY26
+file: towners/pegboy26.ogg
+
+id: TSFX_PEGBOY27
+file: towners/pegboy27.ogg
+
+id: TSFX_PEGBOY28
+file: towners/pegboy28.ogg
+
+id: TSFX_PEGBOY29
+file: towners/pegboy29.ogg
+
+id: TSFX_PEGBOY30
+file: towners/pegboy30.ogg
+
+id: TSFX_PEGBOY31
+file: towners/pegboy31.ogg
+
+id: TSFX_PEGBOY32
+file: towners/pegboy32.ogg
+
+id: TSFX_PEGBOY33
+file: towners/pegboy33.ogg
+
+id: TSFX_PEGBOY34
+file: towners/pegboy34.ogg
+
+id: TSFX_PEGBOY35
+file: towners/pegboy35.ogg
+
+id: TSFX_PEGBOY36
+file: towners/pegboy36.ogg
+
+id: TSFX_PEGBOY37
+file: towners/pegboy37.ogg
+
+id: TSFX_PEGBOY38
+file: towners/pegboy38.ogg
+
+id: TSFX_PEGBOY39
+file: towners/pegboy39.ogg
+
+id: TSFX_PEGBOY40
+file: towners/pegboy40.ogg
+
+id: TSFX_PEGBOY41
+file: towners/pegboy41.ogg
+
+id: TSFX_PEGBOY42
+file: towners/pegboy42.ogg
+
+id: TSFX_PEGBOY43
+file: towners/pegboy43.ogg
+
+id: TSFX_PRIEST0
+file: towners/priest00.ogg
+
+id: TSFX_PRIEST1
+file: towners/priest01.ogg
+
+id: TSFX_PRIEST2
+file: towners/priest02.ogg
+
+id: TSFX_PRIEST3
+file: towners/priest03.ogg
+
+id: TSFX_PRIEST4
+file: towners/priest04.ogg
+
+id: TSFX_PRIEST5
+file: towners/priest05.ogg
+
+id: TSFX_PRIEST6
+file: towners/priest06.ogg
+
+id: TSFX_PRIEST7
+file: towners/priest07.ogg
+
+id: TSFX_STORY0
+file: towners/storyt00.ogg
+
+id: TSFX_STORY1
+file: towners/storyt01.ogg
+
+id: TSFX_STORY2
+file: towners/storyt02.ogg
+
+id: TSFX_STORY3
+file: towners/storyt03.ogg
+
+id: TSFX_STORY4
+file: towners/storyt04.ogg
+
+id: TSFX_STORY5
+file: towners/storyt05.ogg
+
+id: TSFX_STORY6
+file: towners/storyt06.ogg
+
+id: TSFX_STORY7
+file: towners/storyt07.ogg
+
+id: TSFX_STORY8
+file: towners/storyt08.ogg
+
+id: TSFX_STORY9
+file: towners/storyt09.ogg
+
+id: TSFX_STORY10
+file: towners/storyt10.ogg
+
+id: TSFX_STORY11
+file: towners/storyt11.ogg
+
+id: TSFX_STORY12
+file: towners/storyt12.ogg
+
+id: TSFX_STORY13
+file: towners/storyt13.ogg
+
+id: TSFX_STORY14
+file: towners/storyt14.ogg
+
+id: TSFX_STORY15
+file: towners/storyt15.ogg
+
+id: TSFX_STORY16
+file: towners/storyt16.ogg
+
+id: TSFX_STORY17
+file: towners/storyt17.ogg
+
+id: TSFX_STORY18
+file: towners/storyt18.ogg
+
+id: TSFX_STORY19
+file: towners/storyt19.ogg
+
+id: TSFX_STORY20
+file: towners/storyt20.ogg
+
+id: TSFX_STORY21
+file: towners/storyt21.ogg
+
+id: TSFX_STORY22
+file: towners/storyt22.ogg
+
+id: TSFX_STORY23
+file: towners/storyt23.ogg
+
+id: TSFX_STORY24
+file: towners/storyt24.ogg
+
+id: TSFX_STORY25
+file: towners/storyt25.ogg
+
+id: TSFX_STORY26
+file: towners/storyt26.ogg
+
+id: TSFX_STORY27
+file: towners/storyt27.ogg
+
+id: TSFX_STORY28
+file: towners/storyt28.ogg
+
+id: TSFX_STORY29
+file: towners/storyt29.ogg
+
+id: TSFX_STORY30
+file: towners/storyt30.ogg
+
+id: TSFX_STORY31
+file: towners/storyt31.ogg
+
+id: TSFX_STORY32
+file: towners/storyt32.ogg
+
+id: TSFX_STORY33
+file: towners/storyt33.ogg
+
+id: TSFX_STORY34
+file: towners/storyt34.ogg
+
+id: TSFX_STORY35
+file: towners/storyt35.ogg
+
+id: TSFX_STORY36
+file: towners/storyt36.ogg
+
+id: TSFX_STORY37
+file: towners/storyt37.ogg
+
+id: TSFX_STORY38
+file: towners/storyt38.ogg
+
+id: TSFX_TAVERN0
+file: towners/tavown00.ogg
+
+id: TSFX_TAVERN1
+file: towners/tavown01.ogg
+
+id: TSFX_TAVERN2
+file: towners/tavown02.ogg
+
+id: TSFX_TAVERN3
+file: towners/tavown03.ogg
+
+id: TSFX_TAVERN4
+file: towners/tavown04.ogg
+
+id: TSFX_TAVERN5
+file: towners/tavown05.ogg
+
+id: TSFX_TAVERN6
+file: towners/tavown06.ogg
+
+id: TSFX_TAVERN7
+file: towners/tavown07.ogg
+
+id: TSFX_TAVERN8
+file: towners/tavown08.ogg
+
+id: TSFX_TAVERN9
+file: towners/tavown09.ogg
+
+id: TSFX_TAVERN10
+file: towners/tavown10.ogg
+
+id: TSFX_TAVERN11
+file: towners/tavown11.ogg
+
+id: TSFX_TAVERN12
+file: towners/tavown12.ogg
+
+id: TSFX_TAVERN13
+file: towners/tavown13.ogg
+
+id: TSFX_TAVERN14
+file: towners/tavown14.ogg
+
+id: TSFX_TAVERN15
+file: towners/tavown15.ogg
+
+id: TSFX_TAVERN16
+file: towners/tavown16.ogg
+
+id: TSFX_TAVERN17
+file: towners/tavown17.ogg
+
+id: TSFX_TAVERN18
+file: towners/tavown18.ogg
+
+id: TSFX_TAVERN19
+file: towners/tavown19.ogg
+
+id: TSFX_TAVERN20
+file: towners/tavown20.ogg
+
+id: TSFX_TAVERN21
+file: towners/tavown21.ogg
+
+id: TSFX_TAVERN22
+file: towners/tavown22.ogg
+
+id: TSFX_TAVERN23
+file: towners/tavown23.ogg
+
+id: TSFX_TAVERN24
+file: towners/tavown24.ogg
+
+id: TSFX_TAVERN25
+file: towners/tavown25.ogg
+
+id: TSFX_TAVERN26
+file: towners/tavown26.ogg
+
+id: TSFX_TAVERN27
+file: towners/tavown27.ogg
+
+id: TSFX_TAVERN28
+file: towners/tavown28.ogg
+
+id: TSFX_TAVERN29
+file: towners/tavown29.ogg
+
+id: TSFX_TAVERN30
+file: towners/tavown30.ogg
+
+id: TSFX_TAVERN31
+file: towners/tavown31.ogg
+
+id: TSFX_TAVERN32
+file: towners/tavown32.ogg
+
+id: TSFX_TAVERN33
+file: towners/tavown33.ogg
+
+id: TSFX_TAVERN34
+file: towners/tavown34.ogg
+
+id: TSFX_TAVERN35
+file: towners/tavown35.ogg
+
+id: TSFX_TAVERN36
+file: towners/tavown36.ogg
+
+id: TSFX_TAVERN37
+file: towners/tavown37.ogg
+
+id: TSFX_TAVERN38
+file: towners/tavown38.ogg
+
+id: TSFX_TAVERN39
+file: towners/tavown39.ogg
+
+id: TSFX_TAVERN40
+file: towners/tavown40.ogg
+
+id: TSFX_TAVERN41
+file: towners/tavown41.ogg
+
+id: TSFX_TAVERN42
+file: towners/tavown42.ogg
+
+id: TSFX_TAVERN43
+file: towners/tavown43.ogg
+
+id: TSFX_TAVERN44
+file: towners/tavown44.ogg
+
+id: TSFX_TAVERN45
+file: towners/tavown45.ogg
+
+id: TSFX_WITCH1
+file: towners/witch01.ogg
+
+id: TSFX_WITCH2
+file: towners/witch02.ogg
+
+id: TSFX_WITCH3
+file: towners/witch03.ogg
+
+id: TSFX_WITCH4
+file: towners/witch04.ogg
+
+id: TSFX_WITCH5
+file: towners/witch05.ogg
+
+id: TSFX_WITCH6
+file: towners/witch06.ogg
+
+id: TSFX_WITCH7
+file: towners/witch07.ogg
+
+id: TSFX_WITCH8
+file: towners/witch08.ogg
+
+id: TSFX_WITCH9
+file: towners/witch09.ogg
+
+id: TSFX_WITCH10
+file: towners/witch10.ogg
+
+id: TSFX_WITCH11
+file: towners/witch11.ogg
+
+id: TSFX_WITCH12
+file: towners/witch12.ogg
+
+id: TSFX_WITCH13
+file: towners/witch13.ogg
+
+id: TSFX_WITCH14
+file: towners/witch14.ogg
+
+id: TSFX_WITCH15
+file: towners/witch15.ogg
+
+id: TSFX_WITCH16
+file: towners/witch16.ogg
+
+id: TSFX_WITCH17
+file: towners/witch17.ogg
+
+id: TSFX_WITCH18
+file: towners/witch18.ogg
+
+id: TSFX_WITCH19
+file: towners/witch19.ogg
+
+id: TSFX_WITCH20
+file: towners/witch20.ogg
+
+id: TSFX_WITCH21
+file: towners/witch21.ogg
+
+id: TSFX_WITCH22
+file: towners/witch22.ogg
+
+id: TSFX_WITCH23
+file: towners/witch23.ogg
+
+id: TSFX_WITCH24
+file: towners/witch24.ogg
+
+id: TSFX_WITCH25
+file: towners/witch25.ogg
+
+id: TSFX_WITCH26
+file: towners/witch26.ogg
+
+id: TSFX_WITCH27
+file: towners/witch27.ogg
+
+id: TSFX_WITCH28
+file: towners/witch28.ogg
+
+id: TSFX_WITCH29
+file: towners/witch29.ogg
+
+id: TSFX_WITCH30
+file: towners/witch30.ogg
+
+id: TSFX_WITCH31
+file: towners/witch31.ogg
+
+id: TSFX_WITCH32
+file: towners/witch32.ogg
+
+id: TSFX_WITCH33
+file: towners/witch33.ogg
+
+id: TSFX_WITCH34
+file: towners/witch34.ogg
+
+id: TSFX_WITCH35
+file: towners/witch35.ogg
+
+id: TSFX_WITCH36
+file: towners/witch36.ogg
+
+id: TSFX_WITCH37
+file: towners/witch37.ogg
+
+id: TSFX_WITCH38
+file: towners/witch38.ogg
+
+id: TSFX_WITCH39
+file: towners/witch39.ogg
+
+id: TSFX_WITCH40
+file: towners/witch40.ogg
+
+id: TSFX_WITCH41
+file: towners/witch41.ogg
+
+id: TSFX_WITCH42
+file: towners/witch42.ogg
+
+id: TSFX_WITCH43
+file: towners/witch43.ogg
+
+id: TSFX_WITCH44
+file: towners/witch44.ogg
+
+id: TSFX_WITCH45
+file: towners/witch45.ogg
+
+id: TSFX_WITCH46
+file: towners/witch46.ogg
+
+id: TSFX_WITCH47
+file: towners/witch47.ogg
+
+id: TSFX_WITCH48
+file: towners/witch48.ogg
+
+id: TSFX_WITCH49
+file: towners/witch49.ogg
+
+id: TSFX_WITCH50
+file: towners/witch50.ogg
+
+id: TSFX_WOUND
+file: towners/wound01.ogg
+
+id: PS_MAGE1
+file: sorceror/mage01.ogg
+
+id: PS_MAGE2
+file: sorceror/mage02.ogg
+
+id: PS_MAGE3
+file: sorceror/mage03.ogg
+
+id: PS_MAGE4
+file: sorceror/mage04.ogg
+
+id: PS_MAGE5
+file: sorceror/mage05.ogg
+
+id: PS_MAGE6
+file: sorceror/mage06.ogg
+
+id: PS_MAGE7
+file: sorceror/mage07.ogg
+
+id: PS_MAGE8
+file: sorceror/mage08.ogg
+
+id: PS_MAGE9
+file: sorceror/mage09.ogg
+
+id: PS_MAGE10
+file: sorceror/mage10.ogg
+
+id: PS_MAGE11
+file: sorceror/mage11.ogg
+
+id: PS_MAGE12
+file: sorceror/mage12.ogg
+
+id: PS_MAGE13
+file: sorceror/mage13.ogg
+
+id: PS_MAGE14
+file: sorceror/mage14.ogg
+
+id: PS_MAGE15
+file: sorceror/mage15.ogg
+
+id: PS_MAGE16
+file: sorceror/mage16.ogg
+
+id: PS_MAGE17
+file: sorceror/mage17.ogg
+
+id: PS_MAGE18
+file: sorceror/mage18.ogg
+
+id: PS_MAGE19
+file: sorceror/mage19.ogg
+
+id: PS_MAGE20
+file: sorceror/mage20.ogg
+
+id: PS_MAGE21
+file: sorceror/mage21.ogg
+
+id: PS_MAGE22
+file: sorceror/mage22.ogg
+
+id: PS_MAGE23
+file: sorceror/mage23.ogg
+
+id: PS_MAGE24
+file: sorceror/mage24.ogg
+
+id: PS_MAGE25
+file: sorceror/mage25.ogg
+
+id: PS_MAGE26
+file: sorceror/mage26.ogg
+
+id: PS_MAGE27
+file: sorceror/mage27.ogg
+
+id: PS_MAGE28
+file: sorceror/mage28.ogg
+
+id: PS_MAGE29
+file: sorceror/mage29.ogg
+
+id: PS_MAGE30
+file: sorceror/mage30.ogg
+
+id: PS_MAGE31
+file: sorceror/mage31.ogg
+
+id: PS_MAGE32
+file: sorceror/mage32.ogg
+
+id: PS_MAGE33
+file: sorceror/mage33.ogg
+
+id: PS_MAGE34
+file: sorceror/mage34.ogg
+
+id: PS_MAGE35
+file: sorceror/mage35.ogg
+
+id: PS_MAGE36
+file: sorceror/mage36.ogg
+
+id: PS_MAGE37
+file: sorceror/mage37.ogg
+
+id: PS_MAGE38
+file: sorceror/mage38.ogg
+
+id: PS_MAGE39
+file: sorceror/mage39.ogg
+
+id: PS_MAGE40
+file: sorceror/mage40.ogg
+
+id: PS_MAGE41
+file: sorceror/mage41.ogg
+
+id: PS_MAGE42
+file: sorceror/mage42.ogg
+
+id: PS_MAGE43
+file: sorceror/mage43.ogg
+
+id: PS_MAGE44
+file: sorceror/mage44.ogg
+
+id: PS_MAGE45
+file: sorceror/mage45.ogg
+
+id: PS_MAGE46
+file: sorceror/mage46.ogg
+
+id: PS_MAGE47
+file: sorceror/mage47.ogg
+
+id: PS_MAGE48
+file: sorceror/mage48.ogg
+
+id: PS_MAGE49
+file: sorceror/mage49.ogg
+
+id: PS_MAGE50
+file: sorceror/mage50.ogg
+
+id: PS_MAGE51
+file: sorceror/mage51.ogg
+
+id: PS_MAGE52
+file: sorceror/mage52.ogg
+
+id: PS_MAGE53
+file: sorceror/mage53.ogg
+
+id: PS_MAGE54
+file: sorceror/mage54.ogg
+
+id: PS_MAGE55
+file: sorceror/mage55.ogg
+
+id: PS_MAGE56
+file: sorceror/mage56.ogg
+
+id: PS_MAGE57
+file: sorceror/mage57.ogg
+
+id: PS_MAGE58
+file: sorceror/mage58.ogg
+
+id: PS_MAGE59
+file: sorceror/mage59.ogg
+
+id: PS_MAGE60
+file: sorceror/mage60.ogg
+
+id: PS_MAGE61
+file: sorceror/mage61.ogg
+
+id: PS_MAGE62
+file: sorceror/mage62.ogg
+
+id: PS_MAGE63
+file: sorceror/mage63.ogg
+
+id: PS_MAGE64
+file: sorceror/mage64.ogg
+
+id: PS_MAGE65
+file: sorceror/mage65.ogg
+
+id: PS_MAGE66
+file: sorceror/mage66.ogg
+
+id: PS_MAGE67
+file: sorceror/mage67.ogg
+
+id: PS_MAGE68
+file: sorceror/mage68.ogg
+
+id: PS_MAGE69
+file: sorceror/mage69.ogg
+
+id: PS_MAGE69B
+file: sorceror/mage69b.ogg
+
+id: PS_MAGE70
+file: sorceror/mage70.ogg
+
+id: PS_MAGE71
+file: sorceror/mage71.ogg
+
+id: PS_MAGE72
+file: sorceror/mage72.ogg
+
+id: PS_MAGE73
+file: sorceror/mage73.ogg
+
+id: PS_MAGE74
+file: sorceror/mage74.ogg
+
+id: PS_MAGE75
+file: sorceror/mage75.ogg
+
+id: PS_MAGE76
+file: sorceror/mage76.ogg
+
+id: PS_MAGE77
+file: sorceror/mage77.ogg
+
+id: PS_MAGE78
+file: sorceror/mage78.ogg
+
+id: PS_MAGE79
+file: sorceror/mage79.ogg
+
+id: PS_MAGE80
+file: sorceror/mage80.ogg
+
+id: PS_MAGE81
+file: sorceror/mage81.ogg
+
+id: PS_MAGE82
+file: sorceror/mage82.ogg
+
+id: PS_MAGE83
+file: sorceror/mage83.ogg
+
+id: PS_MAGE84
+file: sorceror/mage84.ogg
+
+id: PS_MAGE85
+file: sorceror/mage85.ogg
+
+id: PS_MAGE86
+file: sorceror/mage86.ogg
+
+id: PS_MAGE87
+file: sorceror/mage87.ogg
+
+id: PS_MAGE88
+file: sorceror/mage88.ogg
+
+id: PS_MAGE89
+file: sorceror/mage89.ogg
+
+id: PS_MAGE90
+file: sorceror/mage90.ogg
+
+id: PS_MAGE91
+file: sorceror/mage91.ogg
+
+id: PS_MAGE92
+file: sorceror/mage92.ogg
+
+id: PS_MAGE93
+file: sorceror/mage93.ogg
+
+id: PS_MAGE94
+file: sorceror/mage94.ogg
+
+id: PS_MAGE95
+file: sorceror/mage95.ogg
+
+id: PS_MAGE96
+file: sorceror/mage96.ogg
+
+id: PS_MAGE97
+file: sorceror/mage97.ogg
+
+id: PS_MAGE98
+file: sorceror/mage98.ogg
+
+id: PS_MAGE99
+file: sorceror/mage99.ogg
+
+id: PS_MAGE100
+file: sorceror/mage100.ogg
+
+id: PS_MAGE101
+file: sorceror/mage101.ogg
+
+id: PS_MAGE102
+file: sorceror/mage102.ogg
+
+id: PS_ROGUE1
+file: rogue/rogue01.ogg
+
+id: PS_ROGUE2
+file: rogue/rogue02.ogg
+
+id: PS_ROGUE3
+file: rogue/rogue03.ogg
+
+id: PS_ROGUE4
+file: rogue/rogue04.ogg
+
+id: PS_ROGUE5
+file: rogue/rogue05.ogg
+
+id: PS_ROGUE6
+file: rogue/rogue06.ogg
+
+id: PS_ROGUE7
+file: rogue/rogue07.ogg
+
+id: PS_ROGUE8
+file: rogue/rogue08.ogg
+
+id: PS_ROGUE9
+file: rogue/rogue09.ogg
+
+id: PS_ROGUE10
+file: rogue/rogue10.ogg
+
+id: PS_ROGUE11
+file: rogue/rogue11.ogg
+
+id: PS_ROGUE12
+file: rogue/rogue12.ogg
+
+id: PS_ROGUE13
+file: rogue/rogue13.ogg
+
+id: PS_ROGUE14
+file: rogue/rogue14.ogg
+
+id: PS_ROGUE15
+file: rogue/rogue15.ogg
+
+id: PS_ROGUE16
+file: rogue/rogue16.ogg
+
+id: PS_ROGUE17
+file: rogue/rogue17.ogg
+
+id: PS_ROGUE18
+file: rogue/rogue18.ogg
+
+id: PS_ROGUE19
+file: rogue/rogue19.ogg
+
+id: PS_ROGUE20
+file: rogue/rogue20.ogg
+
+id: PS_ROGUE21
+file: rogue/rogue21.ogg
+
+id: PS_ROGUE22
+file: rogue/rogue22.ogg
+
+id: PS_ROGUE23
+file: rogue/rogue23.ogg
+
+id: PS_ROGUE24
+file: rogue/rogue24.ogg
+
+id: PS_ROGUE25
+file: rogue/rogue25.ogg
+
+id: PS_ROGUE26
+file: rogue/rogue26.ogg
+
+id: PS_ROGUE27
+file: rogue/rogue27.ogg
+
+id: PS_ROGUE28
+file: rogue/rogue28.ogg
+
+id: PS_ROGUE29
+file: rogue/rogue29.ogg
+
+id: PS_ROGUE30
+file: rogue/rogue30.ogg
+
+id: PS_ROGUE31
+file: rogue/rogue31.ogg
+
+id: PS_ROGUE32
+file: rogue/rogue32.ogg
+
+id: PS_ROGUE33
+file: rogue/rogue33.ogg
+
+id: PS_ROGUE34
+file: rogue/rogue34.ogg
+
+id: PS_ROGUE35
+file: rogue/rogue35.ogg
+
+id: PS_ROGUE36
+file: rogue/rogue36.ogg
+
+id: PS_ROGUE37
+file: rogue/rogue37.ogg
+
+id: PS_ROGUE38
+file: rogue/rogue38.ogg
+
+id: PS_ROGUE39
+file: rogue/rogue39.ogg
+
+id: PS_ROGUE40
+file: rogue/rogue40.ogg
+
+id: PS_ROGUE41
+file: rogue/rogue41.ogg
+
+id: PS_ROGUE42
+file: rogue/rogue42.ogg
+
+id: PS_ROGUE43
+file: rogue/rogue43.ogg
+
+id: PS_ROGUE44
+file: rogue/rogue44.ogg
+
+id: PS_ROGUE45
+file: rogue/rogue45.ogg
+
+id: PS_ROGUE46
+file: rogue/rogue46.ogg
+
+id: PS_ROGUE47
+file: rogue/rogue47.ogg
+
+id: PS_ROGUE48
+file: rogue/rogue48.ogg
+
+id: PS_ROGUE49
+file: rogue/rogue49.ogg
+
+id: PS_ROGUE50
+file: rogue/rogue50.ogg
+
+id: PS_ROGUE51
+file: rogue/rogue51.ogg
+
+id: PS_ROGUE52
+file: rogue/rogue52.ogg
+
+id: PS_ROGUE53
+file: rogue/rogue53.ogg
+
+id: PS_ROGUE54
+file: rogue/rogue54.ogg
+
+id: PS_ROGUE55
+file: rogue/rogue55.ogg
+
+id: PS_ROGUE56
+file: rogue/rogue56.ogg
+
+id: PS_ROGUE57
+file: rogue/rogue57.ogg
+
+id: PS_ROGUE58
+file: rogue/rogue58.ogg
+
+id: PS_ROGUE59
+file: rogue/rogue59.ogg
+
+id: PS_ROGUE60
+file: rogue/rogue60.ogg
+
+id: PS_ROGUE61
+file: rogue/rogue61.ogg
+
+id: PS_ROGUE62
+file: rogue/rogue62.ogg
+
+id: PS_ROGUE63
+file: rogue/rogue63.ogg
+
+id: PS_ROGUE64
+file: rogue/rogue64.ogg
+
+id: PS_ROGUE65
+file: rogue/rogue65.ogg
+
+id: PS_ROGUE66
+file: rogue/rogue66.ogg
+
+id: PS_ROGUE67
+file: rogue/rogue67.ogg
+
+id: PS_ROGUE68
+file: rogue/rogue68.ogg
+
+id: PS_ROGUE69
+file: rogue/rogue69.ogg
+
+id: PS_ROGUE69B
+file: rogue/rogue69b.ogg
+
+id: PS_ROGUE70
+file: rogue/rogue70.ogg
+
+id: PS_ROGUE71
+file: rogue/rogue71.ogg
+
+id: PS_ROGUE72
+file: rogue/rogue72.ogg
+
+id: PS_ROGUE73
+file: rogue/rogue73.ogg
+
+id: PS_ROGUE74
+file: rogue/rogue74.ogg
+
+id: PS_ROGUE75
+file: rogue/rogue75.ogg
+
+id: PS_ROGUE76
+file: rogue/rogue76.ogg
+
+id: PS_ROGUE77
+file: rogue/rogue77.ogg
+
+id: PS_ROGUE78
+file: rogue/rogue78.ogg
+
+id: PS_ROGUE79
+file: rogue/rogue79.ogg
+
+id: PS_ROGUE80
+file: rogue/rogue80.ogg
+
+id: PS_ROGUE81
+file: rogue/rogue81.ogg
+
+id: PS_ROGUE82
+file: rogue/rogue82.ogg
+
+id: PS_ROGUE83
+file: rogue/rogue83.ogg
+
+id: PS_ROGUE84
+file: rogue/rogue84.ogg
+
+id: PS_ROGUE85
+file: rogue/rogue85.ogg
+
+id: PS_ROGUE86
+file: rogue/rogue86.ogg
+
+id: PS_ROGUE87
+file: rogue/rogue87.ogg
+
+id: PS_ROGUE88
+file: rogue/rogue88.ogg
+
+id: PS_ROGUE89
+file: rogue/rogue89.ogg
+
+id: PS_ROGUE90
+file: rogue/rogue90.ogg
+
+id: PS_ROGUE91
+file: rogue/rogue91.ogg
+
+id: PS_ROGUE92
+file: rogue/rogue92.ogg
+
+id: PS_ROGUE93
+file: rogue/rogue93.ogg
+
+id: PS_ROGUE94
+file: rogue/rogue94.ogg
+
+id: PS_ROGUE95
+file: rogue/rogue95.ogg
+
+id: PS_ROGUE96
+file: rogue/rogue96.ogg
+
+id: PS_ROGUE97
+file: rogue/rogue97.ogg
+
+id: PS_ROGUE98
+file: rogue/rogue98.ogg
+
+id: PS_ROGUE99
+file: rogue/rogue99.ogg
+
+id: PS_ROGUE100
+file: rogue/rogue100.ogg
+
+id: PS_ROGUE101
+file: rogue/rogue101.ogg
+
+id: PS_ROGUE102
+file: rogue/rogue102.ogg
+
+id: PS_WARR1
+file: warrior/warior01.ogg
+
+id: PS_WARR2
+file: warrior/warior02.ogg
+
+id: PS_WARR3
+file: warrior/warior03.ogg
+
+id: PS_WARR4
+file: warrior/warior04.ogg
+
+id: PS_WARR5
+file: warrior/warior05.ogg
+
+id: PS_WARR6
+file: warrior/warior06.ogg
+
+id: PS_WARR7
+file: warrior/warior07.ogg
+
+id: PS_WARR8
+file: warrior/warior08.ogg
+
+id: PS_WARR9
+file: warrior/warior09.ogg
+
+id: PS_WARR10
+file: warrior/warior10.ogg
+
+id: PS_WARR11
+file: warrior/warior11.ogg
+
+id: PS_WARR12
+file: warrior/warior12.ogg
+
+id: PS_WARR13
+file: warrior/warior13.ogg
+
+id: PS_WARR14
+file: warrior/warior14.ogg
+
+id: PS_WARR14B
+file: warrior/wario14b.ogg
+
+id: PS_WARR14C
+file: warrior/wario14c.ogg
+
+id: PS_WARR15
+file: warrior/warior15.ogg
+
+id: PS_WARR15B
+file: warrior/wario15b.ogg
+
+id: PS_WARR15C
+file: warrior/wario15c.ogg
+
+id: PS_WARR16
+file: warrior/warior16.ogg
+
+id: PS_WARR16B
+file: warrior/wario16b.ogg
+
+id: PS_WARR16C
+file: warrior/wario16c.ogg
+
+id: PS_WARR17
+file: warrior/warior17.ogg
+
+id: PS_WARR18
+file: warrior/warior18.ogg
+
+id: PS_WARR19
+file: warrior/warior19.ogg
+
+id: PS_WARR20
+file: warrior/warior20.ogg
+
+id: PS_WARR21
+file: warrior/warior21.ogg
+
+id: PS_WARR22
+file: warrior/warior22.ogg
+
+id: PS_WARR23
+file: warrior/warior23.ogg
+
+id: PS_WARR24
+file: warrior/warior24.ogg
+
+id: PS_WARR25
+file: warrior/warior25.ogg
+
+id: PS_WARR26
+file: warrior/warior26.ogg
+
+id: PS_WARR27
+file: warrior/warior27.ogg
+
+id: PS_WARR28
+file: warrior/warior28.ogg
+
+id: PS_WARR29
+file: warrior/warior29.ogg
+
+id: PS_WARR30
+file: warrior/warior30.ogg
+
+id: PS_WARR31
+file: warrior/warior31.ogg
+
+id: PS_WARR32
+file: warrior/warior32.ogg
+
+id: PS_WARR33
+file: warrior/warior33.ogg
+
+id: PS_WARR34
+file: warrior/warior34.ogg
+
+id: PS_WARR35
+file: warrior/warior35.ogg
+
+id: PS_WARR36
+file: warrior/warior36.ogg
+
+id: PS_WARR37
+file: warrior/warior37.ogg
+
+id: PS_WARR38
+file: warrior/warior38.ogg
+
+id: PS_WARR39
+file: warrior/warior39.ogg
+
+id: PS_WARR40
+file: warrior/warior40.ogg
+
+id: PS_WARR41
+file: warrior/warior41.ogg
+
+id: PS_WARR42
+file: warrior/warior42.ogg
+
+id: PS_WARR43
+file: warrior/warior43.ogg
+
+id: PS_WARR44
+file: warrior/warior44.ogg
+
+id: PS_WARR45
+file: warrior/warior45.ogg
+
+id: PS_WARR46
+file: warrior/warior46.ogg
+
+id: PS_WARR47
+file: warrior/warior47.ogg
+
+id: PS_WARR48
+file: warrior/warior48.ogg
+
+id: PS_WARR49
+file: warrior/warior49.ogg
+
+id: PS_WARR50
+file: warrior/warior50.ogg
+
+id: PS_WARR51
+file: warrior/warior51.ogg
+
+id: PS_WARR52
+file: warrior/warior52.ogg
+
+id: PS_WARR53
+file: warrior/warior53.ogg
+
+id: PS_WARR54
+file: warrior/warior54.ogg
+
+id: PS_WARR55
+file: warrior/warior55.ogg
+
+id: PS_WARR56
+file: warrior/warior56.ogg
+
+id: PS_WARR57
+file: warrior/warior57.ogg
+
+id: PS_WARR58
+file: warrior/warior58.ogg
+
+id: PS_WARR59
+file: warrior/warior59.ogg
+
+id: PS_WARR60
+file: warrior/warior60.ogg
+
+id: PS_WARR61
+file: warrior/warior61.ogg
+
+id: PS_WARR62
+file: warrior/warior62.ogg
+
+id: PS_WARR63
+file: warrior/warior63.ogg
+
+id: PS_WARR64
+file: warrior/warior64.ogg
+
+id: PS_WARR65
+file: warrior/warior65.ogg
+
+id: PS_WARR66
+file: warrior/warior66.ogg
+
+id: PS_WARR67
+file: warrior/warior67.ogg
+
+id: PS_WARR68
+file: warrior/warior68.ogg
+
+id: PS_WARR69
+file: warrior/warior69.ogg
+
+id: PS_WARR69B
+file: warrior/wario69b.ogg
+
+id: PS_WARR70
+file: warrior/warior70.ogg
+
+id: PS_WARR71
+file: warrior/warior71.ogg
+
+id: PS_WARR72
+file: warrior/warior72.ogg
+
+id: PS_WARR73
+file: warrior/warior73.ogg
+
+id: PS_WARR74
+file: warrior/warior74.ogg
+
+id: PS_WARR75
+file: warrior/warior75.ogg
+
+id: PS_WARR76
+file: warrior/warior76.ogg
+
+id: PS_WARR77
+file: warrior/warior77.ogg
+
+id: PS_WARR78
+file: warrior/warior78.ogg
+
+id: PS_WARR79
+file: warrior/warior79.ogg
+
+id: PS_WARR80
+file: warrior/warior80.ogg
+
+id: PS_WARR81
+file: warrior/warior81.ogg
+
+id: PS_WARR82
+file: warrior/warior82.ogg
+
+id: PS_WARR83
+file: warrior/warior83.ogg
+
+id: PS_WARR84
+file: warrior/warior84.ogg
+
+id: PS_WARR85
+file: warrior/warior85.ogg
+
+id: PS_WARR86
+file: warrior/warior86.ogg
+
+id: PS_WARR87
+file: warrior/warior87.ogg
+
+id: PS_WARR88
+file: warrior/warior88.ogg
+
+id: PS_WARR89
+file: warrior/warior89.ogg
+
+id: PS_WARR90
+file: warrior/warior90.ogg
+
+id: PS_WARR91
+file: warrior/warior91.ogg
+
+id: PS_WARR92
+file: warrior/warior92.ogg
+
+id: PS_WARR93
+file: warrior/warior93.ogg
+
+id: PS_WARR94
+file: warrior/warior94.ogg
+
+id: PS_WARR95
+file: warrior/warior95.ogg
+
+id: PS_WARR95B
+file: warrior/wario95b.ogg
+
+id: PS_WARR95C
+file: warrior/wario95c.ogg
+
+id: PS_WARR95D
+file: warrior/wario95d.ogg
+
+id: PS_WARR95E
+file: warrior/wario95e.ogg
+
+id: PS_WARR95F
+file: warrior/wario95f.ogg
+
+id: PS_WARR96B
+file: warrior/wario96b.ogg
+
+id: PS_WARR97
+file: warrior/wario97.ogg
+
+id: PS_WARR98
+file: warrior/wario98.ogg
+
+id: PS_WARR99
+file: warrior/warior99.ogg
+
+id: PS_WARR100
+file: warrior/wario100.ogg
+
+id: PS_WARR101
+file: warrior/wario101.ogg
+
+id: PS_WARR102
+file: warrior/wario102.ogg
+
+id: PS_NAR1
+file: narrator/nar01.ogg
+
+id: PS_NAR2
+file: narrator/nar02.ogg
+
+id: PS_NAR3
+file: narrator/nar03.ogg
+
+id: PS_NAR4
+file: narrator/nar04.ogg
+
+id: PS_NAR5
+file: narrator/nar05.ogg
+
+id: PS_NAR6
+file: narrator/nar06.ogg
+
+id: PS_NAR7
+file: narrator/nar07.ogg
+
+id: PS_NAR8
+file: narrator/nar08.ogg
+
+id: PS_NAR9
+file: narrator/nar09.ogg
+
+id: PS_DIABLVLINT
+file: misc/lvl16int.ogg
+
+id: USFX_CLEAVER
+file: monsters/butcher.ogg
+
+id: USFX_GARBUD1
+file: monsters/garbud01.ogg
+
+id: USFX_GARBUD2
+file: monsters/garbud02.ogg
+
+id: USFX_GARBUD3
+file: monsters/garbud03.ogg
+
+id: USFX_GARBUD4
+file: monsters/garbud04.ogg
+
+id: USFX_IZUAL1
+file: monsters/izual01.ogg
+
+id: USFX_LACH1
+file: monsters/lach01.ogg
+
+id: USFX_LACH2
+file: monsters/lach02.ogg
+
+id: USFX_LACH3
+file: monsters/lach03.ogg
+
+id: USFX_LAZ1
+file: monsters/laz01.ogg
+
+id: USFX_LAZ2
+file: monsters/laz02.ogg
+
+id: USFX_SKING1
+file: monsters/sking01.ogg
+
+id: USFX_SNOT1
+file: monsters/snot01.ogg
+
+id: USFX_SNOT2
+file: monsters/snot02.ogg
+
+id: USFX_SNOT3
+file: monsters/snot03.ogg
+
+id: USFX_WARLRD1
+file: monsters/warlrd01.ogg
+
+id: USFX_WLOCK1
+file: monsters/wlock01.ogg
+
+id: USFX_ZHAR1
+file: monsters/zhar01.ogg
+
+id: USFX_ZHAR2
+file: monsters/zhar02.ogg
+
+id: USFX_DIABLOD
+file: monsters/diablod.ogg
+

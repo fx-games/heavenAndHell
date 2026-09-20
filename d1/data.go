@@ -1,4 +1,4 @@
-// Package d1 holds Diablo 1's data tables (loaded verbatim from assets/data/d1) and its generation rules.
+// Package d1 holds Diablo 1's data tables (loaded verbatim from mods/d1/data) and its generation rules.
 // Enum columns stay strings (e.g. "IPL_TOHIT", "AI_ZOMBIE"); only bitfields are numbers.
 package d1
 
@@ -30,8 +30,16 @@ func (r row) arr(k string) (out [6]int) {
 	return
 }
 
+// dataPath locates one of this mod's data files. Diablo 1 is a mod like any other: its tables, texts and level
+// data live under files/mods/d1/data, where they shadow assets/data for a game that selects this mod. Package d1
+// reads them from their real home rather than through the overlay, so a caller with a plain fs.FS rooted at
+// files/ (every test does this) gets the same bytes as the running game.
+func dataPath(elem ...string) string {
+	return path.Join(append([]string{"mods", "d1", "data"}, elem...)...)
+}
+
 func readTable(fsys fs.FS, name string) ([]row, error) {
-	f, err := fsys.Open(path.Join("assets", "data", "d1", name))
+	f, err := fsys.Open(dataPath(name))
 	if err != nil {
 		return nil, err
 	}
@@ -231,73 +239,18 @@ type SpellData struct {
 	Town                                    bool
 }
 
-// D1's spelldata names; the TSV only carries some of them.
-var spellNames = []string{"", "Firebolt", "Healing", "Lightning", "Flash", "Identify", "Fire Wall", "Town Portal", "Stone Curse",
-	"Vision", "Phasing", "Mana Shield", "Fireball", "Guardian", "Chain Lightning", "Flame Wave", "Doom Serpents",
-	"Blood Ritual", "Nova", "Invisibility", "Inferno", "Golem", "Rage", "Teleport", "Apocalypse", "Etherealize",
-	"Item Repair", "Staff Recharge", "Trap Disarm", "Elemental", "Charged Bolt", "Holy Bolt", "Resurrect",
-	"Telekinesis", "Heal Other", "Blood Star", "Bone Spirit", "Mana", "the Magi", "the Jester", "Lightning Wall",
-	"Immolation", "Warp", "Reflect", "Berserk", "Ring of Fire", "Vision", "Fire Trap", "Lightning Trap", "Nova Trap",
-	"Immolation Trap", "Stone Trap"}
-
-// SpellDescriptions holds one short item-tooltip sentence per spell, indexed like spellNames.
-var SpellDescriptions = []string{"",
-	"Hurls a bolt of fire at the target.",
-	"Restores some of your life.",
-	"Fires a crackling line of lightning at the target.",
-	"Unleashes a burst of light that damages everything within 1 square of you.",
-	"Reveals the magical properties of an item.",
-	"Raises a wall of flame that burns anything passing through.",
-	"Opens a portal back to town and returns you to where you were.",
-	"Turns a monster to stone for a short while.",
-	"Shows every living thing on the level and lets you see them through walls.",
-	"Teleports you to a random nearby spot.",
-	"Uses your mana to absorb damage instead of life.",
-	"Launches an exploding ball of fire at the target.",
-	"Summons a fire-breathing guardian that attacks nearby monsters.",
-	"Sends lightning arcing into every monster in sight.",
-	"Sends a wave of flame rolling toward the target.",
-	"Summons serpents that hunt your enemies.",
-	"Sacrifices your own blood for power.",
-	"Blasts lightning in a ring all around you.",
-	"Makes you unseen by monsters.",
-	"Breathes a short stream of fire at the target.",
-	"Summons a golem that fights at your side.",
-	"Doubles your fury for a while; the hangover costs as much again.",
-	"Instantly moves you to the chosen spot.",
-	"Rains fire on every monster in sight.",
-	"Makes you ethereal so physical attacks pass through you.",
-	"Repairs an item at the cost of some of its durability.",
-	"Restores a staff's charges at the cost of some of its maximum.",
-	"Disarms a trapped door or chest.",
-	"Launches a fireball that seeks out the nearest monster.",
-	"Releases sparks of lightning that wander toward monsters.",
-	"Fires a holy bolt that is deadly to the undead.",
-	"Brings a dead ally back to life.",
-	"Lets you pick up items and trigger objects from afar.",
-	"Restores life to another player.",
-	"Fires a star of blood that drains your life when mana runs out.",
-	"Sends a spirit that tears away a third of a monster's life.",
-	"Restores some mana.",
-	"Restores all mana.",
-	"Casts a random spell: firebolt, fireball, fire wall, guardian, chain lightning, town portal, teleport, apocalypse or stone curse.",
-	"Raises a wall of lightning.",
-	"Hurls fireballs in every direction.",
-	"Teleports you to the nearest stairs.",
-	"Turns part of the damage of blows back on the attacker.",
-	"Drives a monster berserk, turning it on its own kind.",
-	"Surrounds you with a ring of fire walls.",
-	"Shows every living thing on the level and lets you see them through walls.",
-	"Sets a trap that explodes in fire when stepped on.",
-	"Sets a trap that raises a wall of lightning when stepped on.",
-	"Sets a trap that releases a lightning nova when stepped on.",
-	"Sets a trap that releases fireballs in every direction when stepped on.",
-	"Sets a trap that turns to stone whoever steps on it."}
+// spellNames are D1's spelldata names and SpellDescriptions one short item-tooltip sentence each, both indexed
+// by spell slot. Filled by Load from the slot section of mods/d1/data/spells.rec.
+var (
+	spellNames        []string
+	SpellDescriptions []string
+)
 
 // D1MonsterCount is how many entries D1 1.09's table has; everything past it is Hellfire's, appended.
 const D1MonsterCount = 112
 
-// monstdat.cpp MonstAvailTbl: 0 = never spawns at random.
+// monstdat.cpp MonstAvailTbl: 0 = never spawns at random. A parallel column of xl_monst rather than a table of
+// its own, so it stays here until that TSV can carry it.
 var monstAvail = [112]byte{
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 0, 2, 2, 2, 2, 1, 1,
@@ -316,14 +269,14 @@ type Data struct {
 	UniqueItems    []UniqueItemData
 	Spells         []SpellData         // index = SPL_ value
 	Objects        []ObjData           // index = OBJ_ value
-	Gossip         map[string][]string // town NPC internal_name -> TEXT_* ids of its gossip, greeting first (assets/data/d1/gossip)
+	Gossip         map[string][]string // town NPC internal_name -> TEXT_* ids of its gossip, greeting first (mods/d1/data/gossip)
 	Texts          map[string]string   // TEXT_* id -> gossip, quest and book text, paragraphs split by "\n\n"
 	TextSfx        map[string]string   // TEXT_* id -> the speech D1 plays with it (alltext's sfxnr, see SfxFiles)
-	levels         levelData           // set pieces and tile tables (assets/data/d1/levels)
+	levels         levelData           // set pieces and tile tables (mods/d1/data/levels)
 }
 
 // gossipFiles maps a town NPC's internal name (its common.VendorType) to its gossip file's base
-// name in assets/data/d1/gossip, ported from Diablo's own Source/Data/Text/Gossip/*.txt.
+// name in mods/d1/data/gossip, ported from Diablo's own Source/Data/Text/Gossip/*.txt.
 var gossipFiles = map[string]string{
 	"griswold": "griswold", "adria": "adria", "pepin": "pepin", "wirt": "wirt", "cain": "story", "ogden": "ogden",
 	"farnham": "farnham", "gillian": "gillian",
@@ -355,9 +308,9 @@ func parseTexts(data string) (ids, texts, sfx []string) {
 func loadTexts(fsys fs.FS) (texts, sfx map[string]string, gossip map[string][]string) {
 	texts, sfx, gossip = map[string]string{}, map[string]string{}, map[string][]string{}
 	for _, dir := range []string{"gossip", "text"} {
-		files, _ := fs.ReadDir(fsys, path.Join("assets", "data", "d1", dir))
+		files, _ := fs.ReadDir(fsys, dataPath(dir))
 		for _, f := range files {
-			data, err := fs.ReadFile(fsys, path.Join("assets", "data", "d1", dir, f.Name()))
+			data, err := fs.ReadFile(fsys, dataPath(dir, f.Name()))
 			if err != nil {
 				continue
 			}
@@ -507,5 +460,42 @@ func load(fsys fs.FS) (*Data, error) {
 		return nil, err
 	}
 	d.levels = levels
+	if err := loadRecTables(fsys, d); err != nil {
+		return nil, err
+	}
 	return d, nil
+}
+
+// loadRecTables fills the package-level tables that used to be Go literals. They stay package-level because the
+// code reading them (ItemSnds and friends) is called from all over and has no Data to hand.
+func loadRecTables(fsys fs.FS, d *Data) error {
+	var err error
+	if oils, err = loadOils(fsys); err != nil {
+		return err
+	}
+	if itemCAnimTbl, itemDropSnds, itemInvSnds, err = loadItemSounds(fsys); err != nil {
+		return err
+	}
+	if SfxFiles, err = loadSfxFiles(fsys); err != nil {
+		return err
+	}
+	if err = loadObjectTables(fsys, d); err != nil {
+		return err
+	}
+	if err = loadHeroTables(fsys); err != nil {
+		return err
+	}
+	if err = loadSpellTables(fsys); err != nil {
+		return err
+	}
+	if propertyDefs, err = loadPropertyDefs(fsys); err != nil {
+		return err
+	}
+	if err = loadStoreTables(fsys); err != nil {
+		return err
+	}
+	if err = loadMonsterTables(fsys); err != nil {
+		return err
+	}
+	return nil
 }

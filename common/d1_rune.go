@@ -8,24 +8,9 @@ import (
 	"rpg/util"
 )
 
-// The placeable traps (Hellfire's runes: AddRuneOf*, MI_Rune): used on a cell in line of sight, a trap lies on
-// the nearest free cell until a monster or the hero steps on it, then goes off there. The Go and data
-// identifiers keep D1's own SPL_RUNE*/IMISC_RUNE* enum names, as every other ported table does; everything the
-// player reads says trap.
-var d1RuneSpells = map[string]struct {
-	spell int // SPL_RUNE*: what the trap goes off as, for the damage and resistance
-	name  string
-}{
-	"IMISC_RUNEF":    {d1.SplRuneFire, "a fire explosion"},                // MIS_HIVEEXP
-	"IMISC_RUNEL":    {d1.SplRuneLight, "a lightning wall"},               // DevilutionX's MissileID::LightningWall
-	"IMISC_GR_RUNEF": {d1.SplRuneImmolat, "fireballs in every direction"}, // MIS_IMMOLATION
-	"IMISC_GR_RUNEL": {d1.SplRuneNova, "a lightning nova"},                // MIS_NOVA
-	"IMISC_RUNES":    {d1.SplRuneStone, "a flash of petrification"},       // MIS_STONE
-}
-
 // d1RuneAction makes a trap item placeable.
 func (f *Factory) d1RuneAction(item *Item, it *d1.Item) {
-	rune, ok := d1RuneSpells[it.MiscID]
+	rune, ok := d1.RuneTraps[it.MiscID]
 	if !ok {
 		return
 	}
@@ -45,8 +30,8 @@ func (f *Factory) d1RuneAction(item *Item, it *d1.Item) {
 			caster.GetInventory().Remove(item)
 			f.spawnD1Rune(caster, misc, p)
 			f.Msg(fmt.Sprintf("You set the %s.", it.Name))
-		}, Description: []util.LabelText{util.LabelTextFromString(fmt.Sprintf("A trap that goes off as %s", rune.name))}},
-		d1SpellTargeting(f, rune.spell))
+		}, Description: []util.LabelText{util.LabelTextFromString(fmt.Sprintf("A trap that goes off as %s", rune.Effect))}},
+		d1SpellTargeting(f, rune.Spell))
 	item.SetTargetedAction(action)
 	item.SetCharges(1) // single use, like scrolls/potions/books; the Activate closure above removes it from the pack itself
 }
@@ -67,7 +52,7 @@ func (f *Factory) spawnD1Rune(caster *Actor, misc string, p geometry.Point) {
 		}
 		m.RemoveObject(rune)
 		rune.turnsUntilRemoval = 0
-		spell := d1RuneSpells[misc].spell
+		spell := d1.RuneTraps[misc].Spell
 		from := p
 		f.ActionBroker.Execute(&spellTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
 			caster: caster, spell: spell, run: func(c *spellCtx) {

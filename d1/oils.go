@@ -1,23 +1,33 @@
 package d1
 
-// Hellfire's oils (items.cpp OilNames/OilLevels/OilValues/OilMagic): a "Oil" picks one of these when it rolls,
-// and using it edits one item in the pack.
-var oils = []struct {
+import "io/fs"
+
+// oil is one of Hellfire's oils; the table lives in mods/d1/data/oils.rec and is loaded by Load.
+type oil struct {
 	MiscID string
 	Name   string
 	MinLvl int
 	Value  int
-}{
-	{"IMISC_OILACC", "Oil of Accuracy", 1, 500},
-	{"IMISC_OILMAST", "Oil of Mastery", 10, 2500},
-	{"IMISC_OILSHARP", "Oil of Sharpness", 1, 500},
-	{"IMISC_OILDEATH", "Oil of Death", 10, 2500},
-	{"IMISC_OILSKILL", "Oil of Skill", 4, 1500},
-	{"IMISC_OILBSMTH", "Blacksmith Oil", 1, 100},
-	{"IMISC_OILFORT", "Oil of Fortitude", 5, 2500},
-	{"IMISC_OILPERM", "Oil of Permanence", 17, 15000},
-	{"IMISC_OILHARD", "Oil of Hardening", 1, 500},
-	{"IMISC_OILIMP", "Oil of Imperviousness", 10, 2500},
+}
+
+var oils []oil
+
+func loadOils(fsys fs.FS) ([]oil, error) {
+	recs, err := readRec(fsys, "oils.rec")
+	if err != nil {
+		return nil, err
+	}
+	out := make([]oil, 0, len(recs))
+	for _, r := range recs {
+		m := r.ToMap("")
+		out = append(out, oil{
+			MiscID: m.GetStringOrDefault("misc_id", ""),
+			Name:   m.GetStringOrDefault("name", ""),
+			MinLvl: m.GetIntOrDefault("min_lvl", 0),
+			Value:  m.GetIntOrDefault("value", 0),
+		})
+	}
+	return out, nil
 }
 
 // IsOil reports one of Hellfire's oils (IMISC_OILFIRST < id < IMISC_OILLAST), the generic "Oil" included.

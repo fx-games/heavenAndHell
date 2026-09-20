@@ -22,48 +22,9 @@ type D1Object struct {
 	// resolved to a type at placement time since the monster stays hidden off-map until then)
 }
 
-// d1ObjectNames are short display names for the object kinds decision 12 keeps (icons.rec has no display names).
-var d1ObjectNames = map[int]string{
-	d1.ObjCHEST1: "Small Chest", d1.ObjCHEST2: "Chest", d1.ObjCHEST3: "Large Chest",
-	d1.ObjTCHEST1: "Small Chest", d1.ObjTCHEST2: "Chest", d1.ObjTCHEST3: "Large Chest",
-	d1.ObjSARC: "Sarcophagus", d1.ObjBARREL: "Barrel", d1.ObjBARRELEX: "Barrel",
-	d1.ObjSHRINEL: "Shrine", d1.ObjSHRINER: "Shrine", d1.ObjSKELBOOK: "Skeleton Tome",
-	d1.ObjBOOKCASEL: "Bookcase", d1.ObjBOOKCASER: "Bookcase", d1.ObjBOOKSTAND: "Library Book",
-	d1.ObjBLOODFTN: "Blood Fountain", d1.ObjDECAP: "Decapitated Body", d1.ObjPURIFYINGFTN: "Purifying Spring",
-	d1.ObjARMORSTAND: "Armor", d1.ObjGOATSHRINE: "Goat Shrine", d1.ObjCAULDRON: "Cauldron",
-	d1.ObjMURKYFTN: "Murky Pool", d1.ObjTEARFTN: "Fountain of Tears", d1.ObjWEAPONRACK: "Weapon Rack",
-	d1.ObjLEVER: "Lever", d1.ObjLAZSTAND: "Staff Stand", d1.ObjSWITCHSKL: "Skull Lever", d1.ObjMUSHPATCH: "Mushroom Patch",
-	d1.ObjSIGNCHEST: "Large Chest", d1.ObjBLINDBOOK: "Book of the Blind", d1.ObjBLOODBOOK: "Book of Blood",
-	d1.ObjSTEELTOME: "Steel Tome", d1.ObjPEDISTAL: "Pedestal of Blood", d1.ObjBOOK2R: "Mythical Book",
-	d1.ObjBOOK2L: "Ancient Tome", d1.ObjSLAINHERO: "Slain Hero", d1.ObjWARARMOR: "Armor", d1.ObjWARWEAP: "Weapon Rack",
-	// decoration (D1 shows no name for these)
-	d1.ObjSKFIRE: "Skull Fire", d1.ObjCANDLE1: "Candle", d1.ObjCANDLE2: "Candle", d1.ObjCANDLEO: "Candle",
-	d1.ObjBOOKCANDLE: "Candle", d1.ObjSTORYCANDLE: "Candle", d1.ObjBANNERL: "Banner", d1.ObjBANNERM: "Banner",
-	d1.ObjBANNERR: "Banner", d1.ObjSKPILE: "Skull Pile", d1.ObjSKSTICK1: "Skull on a Stick", d1.ObjSKSTICK2: "Skull on a Stick",
-	d1.ObjSKSTICK3: "Skull on a Stick", d1.ObjSKSTICK4: "Skull on a Stick", d1.ObjSKSTICK5: "Skull on a Stick",
-	d1.ObjCRUX1: "Crucified Skeleton", d1.ObjCRUX2: "Crucified Skeleton", d1.ObjCRUX3: "Crucified Skeleton",
-	d1.ObjSTAND: "Stand", d1.ObjANGEL: "Angel Statue", d1.ObjBCROSS: "Burning Cross", d1.ObjTBCROSS: "Burning Cross",
-	d1.ObjNUDEW2R: "Tortured Body", d1.ObjTNUDEM1: "Tortured Body", d1.ObjTNUDEM2: "Tortured Body", d1.ObjTNUDEM3: "Tortured Body",
-	d1.ObjTNUDEM4: "Tortured Body", d1.ObjTNUDEW1: "Tortured Body", d1.ObjTNUDEW2: "Tortured Body", d1.ObjTNUDEW3: "Tortured Body",
-	d1.ObjTORTURE1: "Hooked Body", d1.ObjTORTURE2: "Hooked Body", d1.ObjTORTURE3: "Hooked Body", d1.ObjTORTURE4: "Hooked Body",
-	d1.ObjTORTURE5: "Hooked Body", d1.ObjBOOKSHELF: "Bookshelf", d1.ObjWEAPRACK: "Weapon Stand", d1.ObjARMORSTANDN: "Armor Stand",
-	d1.ObjWEAPONRACKN: "Weapon Rack", d1.ObjALTBOY: "Altar", d1.ObjMCIRCLE1: "Magic Circle", d1.ObjMCIRCLE2: "Magic Circle",
-	d1.ObjFLAMEHOLE: "Flame Hole", d1.ObjFLAMELVR: "Lever", d1.ObjWATER: "Water", d1.ObjBOOKLVR: "Book",
-}
-
-// d1ObjectLights are the light radii of the decorative objects that glow (ProcessObjects' Obj_Light).
-var d1ObjectLights = map[int]int{d1.ObjSKFIRE: 5, d1.ObjCANDLE2: 5, d1.ObjBOOKCANDLE: 5, d1.ObjSTORYCANDLE: 3,
-	d1.ObjBCROSS: 10, d1.ObjTBCROSS: 10}
-
-// d1StoryBookNames ports StoryBookName, indexed by a story book's Var3.
-var d1StoryBookNames = [...]string{"The Great Conflict", "The Wages of Sin are War", "The Tale of the Horadrim",
-	"The Dark Exile", "The Sin War", "The Binding of the Three", "The Realms Beyond", "Tale of the Three", "The Black King"}
-
-// d1Containers are the objects that are looted: opening or breaking them may give nothing.
-var d1Containers = map[int]bool{d1.ObjCHEST1: true, d1.ObjCHEST2: true, d1.ObjCHEST3: true,
-	d1.ObjTCHEST1: true, d1.ObjTCHEST2: true, d1.ObjTCHEST3: true, d1.ObjSARC: true, d1.ObjBARREL: true,
-	d1.ObjSKELBOOK: true, d1.ObjBOOKCASEL: true, d1.ObjBOOKCASER: true, d1.ObjBOOKSTAND: true, d1.ObjDECAP: true,
-	d1.ObjARMORSTAND: true, d1.ObjWEAPONRACK: true, d1.ObjWARARMOR: true, d1.ObjWARWEAP: true}
+// The object display table -- names, light radii, which are looted, which are wall lights and what each one
+// sounds like -- lives in mods/d1/data/objects.rec and is reached through d1.ObjectDisplays.
+func d1ObjectDisplay(kind int) d1.ObjectDisplay { return d1.ObjectDisplays[kind] }
 
 func (o *D1Object) Name() string {
 	if player := o.f.State.GetPlayer(); o.O.TrapFlag && player != nil && player.hero != nil && d1.HasClassFlag(player.hero.Class, d1.ClassTrapSense) {
@@ -76,17 +37,19 @@ func (o *D1Object) name() string {
 	if k := o.O.Kind; k == d1.ObjSHRINEL || k == d1.ObjSHRINER {
 		return d1.ShrineNames[o.O.Var1] + " Shrine"
 	}
-	if o.O.Kind == d1.ObjSTORYBOOK && o.O.Var3 >= 0 && o.O.Var3 < len(d1StoryBookNames) {
-		return d1StoryBookNames[o.O.Var3]
+	if o.O.Kind == d1.ObjSTORYBOOK && o.O.Var3 >= 0 && o.O.Var3 < len(d1.StoryBookNames) {
+		return d1.StoryBookNames[o.O.Var3]
 	}
 	if o.O.Kind == d1.ObjBOOK2L && o.f.State.GetMap().GetName() == D1LazarusLevel {
 		return "Book of Vileness"
 	}
-	return d1ObjectNames[o.O.Kind]
+	return d1ObjectDisplay(o.O.Kind).Name
 }
 
 // IsUnlootedContainer is what auto explore's Open Containers option bumps.
-func (o *D1Object) IsUnlootedContainer() bool { return o.O.Active && d1Containers[o.O.Kind] }
+func (o *D1Object) IsUnlootedContainer() bool {
+	return o.O.Active && d1ObjectDisplay(o.O.Kind).Container
+}
 
 func (o *D1Object) broken() bool {
 	return !o.O.Active && (o.O.Kind == d1.ObjBARREL || o.O.Kind == d1.ObjBARRELEX)
@@ -162,11 +125,6 @@ func d1ObjectAt(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point) *D1
 	return o
 }
 
-// d1WallLightKinds are the decorative lights D1 places directly (an exact replacement for the old random-oneIn
-// heuristic): Cathedral braziers standing on the floor, Catacomb torches mounted on a wall face.
-var d1WallLightKinds = map[int]bool{d1.ObjL1LIGHT: true, d1.ObjTORCHL: true, d1.ObjTORCHR: true,
-	d1.ObjTORCHL2: true, d1.ObjTORCHR2: true}
-
 // d1LightRadius is D1's decorative light radius for braziers vs. torches (used by d1GlowAt).
 func d1LightRadius(icon int32) int {
 	if icon == defs.IconWallTorch {
@@ -198,11 +156,11 @@ func (o *d1WallLight) ActorBumpedInto(*Actor, func() bool) {}
 // pre-spawned sarcophagus/barrel skeleton resolved to its monster type from the level's (still-hidden) monster
 // list, everything else as an interactive D1Object.
 func d1PlaceObject(f *Factory, m *gridmap.GridMap[*Actor, *Item, Object], lvl *d1.Level, o *d1.Object, p geometry.Point) {
-	if lvl.CellSolid(p.X, p.Y) && f.Generator.D.Objects[o.Kind].SelFlag == 0 && !d1WallLightKinds[o.Kind] { // hangs on a wall
+	if lvl.CellSolid(p.X, p.Y) && f.Generator.D.Objects[o.Kind].SelFlag == 0 && !d1ObjectDisplay(o.Kind).WallLight { // hangs on a wall
 		m.AddDecal(p, defs.Icon(defs.PropIconID(f.Generator.D.Objects[o.Kind].Name)))
 		return
 	}
-	if d1WallLightKinds[o.Kind] {
+	if d1ObjectDisplay(o.Kind).WallLight {
 		icon := defs.IconBrazier
 		onFloor := !lvl.CellSolid(p.X, p.Y)
 		if o.Kind != d1.ObjL1LIGHT {
@@ -278,11 +236,11 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		return
 	}
 	obj.Active = false
-	f.PlayD1Sfx(d1ObjectSfx[obj.Kind], o.pos)
+	f.PlayD1Sfx(d1ObjectDisplay(obj.Kind).Sfx, o.pos)
 	if d1TrapTargets[obj.Kind] { // Obj_Trap notices the used object on the next tick
 		defer f.springD1WallTraps(f.State.GetMap(), obj.X, obj.Y)
 	}
-	if d1Containers[obj.Kind] { // looting that yields no item and no monster still says so
+	if d1ObjectDisplay(obj.Kind).Container { // looting that yields no item and no monster still says so
 		m := f.State.GetMap()
 		items, actors := len(m.Items()), len(m.Actors())
 		defer func() {
@@ -376,17 +334,6 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		f.d1ModifyStat(player, to, 1)
 		msg("You drink from the Fountain of Tears.")
 	}
-}
-
-// d1ObjectSfx is the sound an object makes as it is used (OperateChest's IS_CHEST, OperateShrine's sType, ...).
-// Fountains, story books, barrels and crucified skeletons play theirs where they are handled.
-var d1ObjectSfx = map[int]string{
-	d1.ObjCHEST1: "IS_CHEST", d1.ObjCHEST2: "IS_CHEST", d1.ObjCHEST3: "IS_CHEST",
-	d1.ObjTCHEST1: "IS_CHEST", d1.ObjTCHEST2: "IS_CHEST", d1.ObjTCHEST3: "IS_CHEST",
-	d1.ObjSARC: "IS_SARC", d1.ObjSHRINEL: "IS_MAGIC", d1.ObjSHRINER: "IS_MAGIC",
-	d1.ObjGOATSHRINE: "LS_GSHRINE", d1.ObjCAULDRON: "LS_CALDRON",
-	d1.ObjSKELBOOK: "IS_ISCROL", d1.ObjBOOKSTAND: "IS_ISCROL", d1.ObjBOOKCASEL: "IS_ISCROL", d1.ObjBOOKCASER: "IS_ISCROL",
-	d1.ObjLEVER: "IS_LEVER", d1.ObjSWITCHSKL: "IS_LEVER", d1.ObjMURKYFTN: "LS_FOUNTAIN", d1.ObjTEARFTN: "LS_FOUNTAIN",
 }
 
 // d1BarrelSfx is BreakBarrel's sound: a barrel breaking or blowing up.

@@ -26,8 +26,8 @@ func TestD1SfxHaveSoundEvents(t *testing.T) {
 	for _, s := range d1MissileSfx {
 		ids = append(ids, s[:]...)
 	}
-	for _, id := range d1ObjectSfx {
-		ids = append(ids, id)
+	for _, d := range d1.ObjectDisplays {
+		ids = append(ids, d.Sfx)
 	}
 	for _, kind := range []int{d1.ObjBARREL, d1.ObjBARRELEX} {
 		ids = append(ids, d1BarrelSfx(kind))
@@ -56,6 +56,9 @@ func TestD1SpeechHaveVoiceEvents(t *testing.T) {
 	}
 	defer f.Close()
 	b, _ := io.ReadAll(f)
+	if len(d1.SfxFiles) == 0 {
+		t.Fatal("d1.SfxFiles is empty") // TestMain loads it; an empty map would check nothing
+	}
 	for id := range d1.SfxFiles {
 		if !strings.Contains(string(b), "internal_name: "+id+"\n") {
 			t.Errorf("voices.rec has no %s", id)
