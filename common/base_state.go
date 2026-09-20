@@ -752,7 +752,7 @@ func (s *State) d1GlowAt(p geometry.Point) d1Glow {
 					if wl, ok := m.ObjectAt(src).(*d1WallLight); ok {
 						r = d1LightRadius(wl.icon)
 					} else if o, ok := m.ObjectAt(src).(*D1Object); ok {
-						r = d1ObjectLights[o.O.Kind]
+						r = d1ObjectDisplay(o.O.Kind).Light
 					} else if _, ok := m.ObjectAt(src).(*d1PortalObject); ok {
 						r, kind = d1PortalLightRadius, glowPortal
 					}

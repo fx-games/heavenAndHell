@@ -45,6 +45,24 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		}
 	}
 
+	if len(ObjectDisplays) != 89 {
+		t.Errorf("ObjectDisplays = %d, want 89", len(ObjectDisplays))
+	}
+	for _, c := range []struct {
+		kind int
+		want ObjectDisplay
+	}{
+		{ObjCHEST1, ObjectDisplay{Name: "Small Chest", Container: true, Sfx: "IS_CHEST"}},
+		{ObjL1LIGHT, ObjectDisplay{WallLight: true}},
+		{ObjSKFIRE, ObjectDisplay{Name: "Skull Fire", Light: 5}},
+		{ObjGOATSHRINE, ObjectDisplay{Name: "Goat Shrine", Sfx: "LS_GSHRINE"}},
+		{ObjBCROSS, ObjectDisplay{Name: "Burning Cross", Light: 10}},
+	} {
+		if got := ObjectDisplays[c.kind]; got != c.want {
+			t.Errorf("ObjectDisplays[%d] = %+v, want %+v", c.kind, got, c.want)
+		}
+	}
+
 	if len(propertyDefs) != 41 {
 		t.Errorf("propertyDefs = %d, want 41", len(propertyDefs))
 	}

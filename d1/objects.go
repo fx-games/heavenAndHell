@@ -65,10 +65,43 @@ var (
 // so a short or overlong objects.rec would quietly change which shrines appear.
 const shrineCount = 34
 
-func loadObjectTables(fsys fs.FS) error {
+// ObjectDisplay is what the game shows and plays for an object kind: the parts of it that are presentation
+// rather than placement, which D1 spread over a handful of small tables.
+type ObjectDisplay struct {
+	Name      string // display name; "" for decoration the game never names
+	Light     int    // light radius of the ones that glow (ProcessObjects' Obj_Light), 0 for the rest
+	Container bool   // looted by opening or breaking, and may give nothing
+	WallLight bool   // a decorative light D1 places directly
+	Sfx       string // the sound it makes as it is used
+}
+
+// ObjectDisplays is keyed by object kind (Obj*); filled by Load from the object section of objects.rec.
+var ObjectDisplays map[int]ObjectDisplay
+
+func loadObjectTables(fsys fs.FS, d *Data) error {
 	recs, err := readRecMulti(fsys, "objects.rec")
 	if err != nil {
 		return err
+	}
+	kindByName := make(map[string]int, len(d.Objects))
+	for i, o := range d.Objects {
+		kindByName[o.Name] = i
+	}
+	ObjectDisplays = make(map[int]ObjectDisplay, len(recs["object"]))
+	for _, r := range recs["object"] {
+		m := r.ToMap("")
+		id := m.GetStringOrDefault("id", "")
+		kind, ok := kindByName[id]
+		if !ok {
+			return fmt.Errorf("objects.rec: unknown object %q", id)
+		}
+		ObjectDisplays[kind] = ObjectDisplay{
+			Name:      m.GetStringOrDefault("name", ""),
+			Light:     m.GetIntOrDefault("light", 0),
+			Container: m.GetBoolOrFalse("container"),
+			WallLight: m.GetBoolOrFalse("wall_light"),
+			Sfx:       m.GetStringOrDefault("sfx", ""),
+		}
 	}
 	ShrineNames, ShrineMessages = nil, nil
 	shrineMax, shrineAvail = nil, nil

@@ -515,7 +515,7 @@ func load(fsys fs.FS) (*Data, error) {
 		return nil, err
 	}
 	d.levels = levels
-	if err := loadRecTables(fsys); err != nil {
+	if err := loadRecTables(fsys, d); err != nil {
 		return nil, err
 	}
 	return d, nil
@@ -523,7 +523,7 @@ func load(fsys fs.FS) (*Data, error) {
 
 // loadRecTables fills the package-level tables that used to be Go literals. They stay package-level because the
 // code reading them (ItemSnds and friends) is called from all over and has no Data to hand.
-func loadRecTables(fsys fs.FS) error {
+func loadRecTables(fsys fs.FS, d *Data) error {
 	var err error
 	if oils, err = loadOils(fsys); err != nil {
 		return err
@@ -534,7 +534,7 @@ func loadRecTables(fsys fs.FS) error {
 	if SfxFiles, err = loadSfxFiles(fsys); err != nil {
 		return err
 	}
-	if err = loadObjectTables(fsys); err != nil {
+	if err = loadObjectTables(fsys, d); err != nil {
 		return err
 	}
 	if err = loadHeroTables(fsys); err != nil {
