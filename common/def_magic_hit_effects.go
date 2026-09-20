@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"math/rand"
 	"rpg/defs"
 	"rpg/geometry"
 	"rpg/gridmap"
@@ -63,13 +62,6 @@ Angband Categories
 
 
 */
-
-// ponytail: main picked from defs.TargetedActionDefinition read from targeted.rec. That data is
-// content and is not on this branch, so there is nothing to pick from. Returns nil until a
-// targeted-action definition source exists again.
-func (g *Factory) GetRandomTargetedAction(randomSource *rand.Rand, dungeonLevel int) *TargetedAction {
-	return nil
-}
 
 func (g *Factory) NewTargetedActionFromDefinition(definition defs.TargetedActionDefinition, args util.Arguments) *TargetedAction {
 	targetedAction := NewTargetedAction(
