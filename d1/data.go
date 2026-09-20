@@ -1,4 +1,4 @@
-// Package d1 holds Diablo 1's data tables (loaded verbatim from assets/data/d1) and its generation rules.
+// Package d1 holds Diablo 1's data tables (loaded verbatim from mods/d1/data) and its generation rules.
 // Enum columns stay strings (e.g. "IPL_TOHIT", "AI_ZOMBIE"); only bitfields are numbers.
 package d1
 
@@ -30,8 +30,16 @@ func (r row) arr(k string) (out [6]int) {
 	return
 }
 
+// dataPath locates one of this mod's data files. Diablo 1 is a mod like any other: its tables, texts and level
+// data live under files/mods/d1/data, where they shadow assets/data for a game that selects this mod. Package d1
+// reads them from their real home rather than through the overlay, so a caller with a plain fs.FS rooted at
+// files/ (every test does this) gets the same bytes as the running game.
+func dataPath(elem ...string) string {
+	return path.Join(append([]string{"mods", "d1", "data"}, elem...)...)
+}
+
 func readTable(fsys fs.FS, name string) ([]row, error) {
-	f, err := fsys.Open(path.Join("assets", "data", "d1", name))
+	f, err := fsys.Open(dataPath(name))
 	if err != nil {
 		return nil, err
 	}
@@ -316,14 +324,14 @@ type Data struct {
 	UniqueItems    []UniqueItemData
 	Spells         []SpellData         // index = SPL_ value
 	Objects        []ObjData           // index = OBJ_ value
-	Gossip         map[string][]string // town NPC internal_name -> TEXT_* ids of its gossip, greeting first (assets/data/d1/gossip)
+	Gossip         map[string][]string // town NPC internal_name -> TEXT_* ids of its gossip, greeting first (mods/d1/data/gossip)
 	Texts          map[string]string   // TEXT_* id -> gossip, quest and book text, paragraphs split by "\n\n"
 	TextSfx        map[string]string   // TEXT_* id -> the speech D1 plays with it (alltext's sfxnr, see SfxFiles)
-	levels         levelData           // set pieces and tile tables (assets/data/d1/levels)
+	levels         levelData           // set pieces and tile tables (mods/d1/data/levels)
 }
 
 // gossipFiles maps a town NPC's internal name (its common.VendorType) to its gossip file's base
-// name in assets/data/d1/gossip, ported from Diablo's own Source/Data/Text/Gossip/*.txt.
+// name in mods/d1/data/gossip, ported from Diablo's own Source/Data/Text/Gossip/*.txt.
 var gossipFiles = map[string]string{
 	"griswold": "griswold", "adria": "adria", "pepin": "pepin", "wirt": "wirt", "cain": "story", "ogden": "ogden",
 	"farnham": "farnham", "gillian": "gillian",
@@ -355,9 +363,9 @@ func parseTexts(data string) (ids, texts, sfx []string) {
 func loadTexts(fsys fs.FS) (texts, sfx map[string]string, gossip map[string][]string) {
 	texts, sfx, gossip = map[string]string{}, map[string]string{}, map[string][]string{}
 	for _, dir := range []string{"gossip", "text"} {
-		files, _ := fs.ReadDir(fsys, path.Join("assets", "data", "d1", dir))
+		files, _ := fs.ReadDir(fsys, dataPath(dir))
 		for _, f := range files {
-			data, err := fs.ReadFile(fsys, path.Join("assets", "data", "d1", dir, f.Name()))
+			data, err := fs.ReadFile(fsys, dataPath(dir, f.Name()))
 			if err != nil {
 				continue
 			}

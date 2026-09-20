@@ -21,6 +21,10 @@ import "embed"
 //go:embed assets/ang_sfx
 //go:embed assets/ambience
 //go:embed assets/music/*.ogg
+//
+// Mods ship with the binary too: a mod is one complete game, and files/mods/<name> is where its data lives.
+//
+//go:embed mods
 var embeddedFS embed.FS
 
 func init() {

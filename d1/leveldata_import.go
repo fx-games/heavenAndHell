@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// ImportLevels converts Diablo's level data into the text files under assets/data/d1/levels. read pulls a member
+// ImportLevels converts Diablo's level data into the text files under mods/d1/data/levels. read pulls a member
 // out of a DIABDAT.MPQ (cmd/d1import wires it up); destDir is the levels directory to write.
 //
 // Every file is parsed back and compared to the bytes it came from before it is written, so an encoding slip

@@ -297,7 +297,7 @@ func (d dun) layer(n, i, j int) int {
 	return 0
 }
 
-// loadDun returns a set piece by its name under assets/data/d1/levels, e.g. "l1/sklkng1".
+// loadDun returns a set piece by its name under mods/d1/data/levels, e.g. "l1/sklkng1".
 func (g *gen) loadDun(name string) dun {
 	if readDunHook != nil {
 		if b := readDunHook(name); b != nil {

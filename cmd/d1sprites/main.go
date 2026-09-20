@@ -373,10 +373,10 @@ func (r row) i(col string) int {
 	return n
 }
 
-// table reads files/assets/data/d1/<name>.txt. Column names drop their "(i)"-style type and a leading "#";
+// table reads files/mods/d1/data/<name>.txt. Column names drop their "(i)"-style type and a leading "#";
 // values lose their quotes and the doubled backslashes.
 func table(name string) []row {
-	b, err := os.ReadFile("files/assets/data/d1/" + name + ".txt")
+	b, err := os.ReadFile("files/mods/d1/data/" + name + ".txt")
 	if err != nil {
 		log.Fatal(err)
 	}

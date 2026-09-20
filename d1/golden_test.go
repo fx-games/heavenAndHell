@@ -11,7 +11,7 @@ import (
 )
 
 // goldenFile pins what CreateLevel builds. It is generated from DIABDAT.MPQ and must keep matching after the level
-// data moved into assets/data/d1/levels: a one-tile encoding slip shows up here as a changed hash.
+// data moved into mods/d1/data/levels: a one-tile encoding slip shows up here as a changed hash.
 const goldenFile = "testdata/levels.golden"
 
 func hashLevel(l *Level) string {

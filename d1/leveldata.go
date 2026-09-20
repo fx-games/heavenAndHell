@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Level-building data lives in assets/data/d1/levels, imported from Diablo's DIABDAT.MPQ by cmd/d1import: a .txt
+// Level-building data lives in mods/d1/data/levels, imported from Diablo's DIABDAT.MPQ by cmd/d1import: a .txt
 // per set piece (D1's .DUN) and til/sol tables per level type. The parsed shapes match the MPQ's byte layouts
 // exactly, so the generators read them the way they always did.
 //
@@ -17,7 +17,7 @@ import (
 // dungeon row per line; "[items]", "[monsters]" and "[objects]" are TSVs of the layer's non-zero cells, which are
 // sparse enough that listing them beats writing out the mostly-empty grid.
 //
-//go:generate go run ../cmd/d1import -dest ../files/assets/data/d1/levels
+//go:generate go run ../cmd/d1import -dest ../files/mods/d1/data/levels
 type levelData struct {
 	dun      map[string]dun             // "l1/sklkng1" -> set piece
 	til, sol [len(levelTypeDirs)][]byte // by level type (DType*)
@@ -31,7 +31,7 @@ func loadLevelData(fsys fs.FS) (levelData, error) {
 	ld := levelData{dun: map[string]dun{}}
 	for lt := 1; lt < len(levelTypeDirs); lt++ {
 		dir := levelTypeDirs[lt]
-		base := path.Join("assets", "data", "d1", levelDir, dir)
+		base := dataPath(levelDir, dir)
 		entries, err := fs.ReadDir(fsys, base)
 		if err != nil {
 			return ld, fmt.Errorf("level data: %w", err)

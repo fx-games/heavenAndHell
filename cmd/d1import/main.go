@@ -1,5 +1,5 @@
 // Command d1import extracts Diablo's level data from a DIABDAT.MPQ into the text files the game reads from
-// assets/data/d1/levels. You need your own copy of Diablo; the game itself does not, which is the point.
+// mods/d1/data/levels. You need your own copy of Diablo; the game itself does not, which is the point.
 //
 //	go run ./cmd/d1import -mpq reference/DIABDAT.MPQ
 package main
@@ -17,7 +17,7 @@ import (
 
 func main() {
 	mpqPath := flag.String("mpq", "", "path to DIABDAT.MPQ (default: look in "+fmt.Sprint(mpq.MPQPaths)+")")
-	dest := flag.String("dest", "", "directory to write (default: assets/data/d1/levels)")
+	dest := flag.String("dest", "", "directory to write (default: mods/d1/data/levels)")
 	flag.Parse()
 
 	if *mpqPath != "" {
@@ -29,7 +29,7 @@ func main() {
 	}
 	read := mpq.ReadFrom([]*mpq.MPQ{a})
 	if *dest == "" {
-		*dest = "files/assets/data/d1/levels"
+		*dest = "files/mods/d1/data/levels"
 	}
 	if err := d1.ImportLevels(read, *dest); err != nil {
 		log.Fatal(err)
