@@ -33,6 +33,27 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		}
 	}
 
+	if len(SpellResist) != 25 || len(SpellTargeted) != 20 || len(SpellSfx) != 45 {
+		t.Errorf("spell tables = %d/%d/%d, want 25/20/45", len(SpellResist), len(SpellTargeted), len(SpellSfx))
+	}
+	if SpellResist[SplFirebolt] != ResistKindFire || SpellResist[SplChain] != ResistKindLightning ||
+		SpellResist[SplBoneSpirit] != ResistKindMagic || SpellResist[SplRuneStone] != ResistKindMagic {
+		t.Error("SpellResist did not survive spells.rec")
+	}
+	if !SpellTargeted[SplFirebolt] || !SpellTargeted[SplBerserk] || SpellTargeted[SplHeal] {
+		t.Error("SpellTargeted did not survive spells.rec")
+	}
+	if SpellSfx[SplFirebolt] != [3]string{"IS_CAST2", "LS_FBOLT1", "LS_FIRIMP2"} ||
+		SpellSfx[SplHeal] != [3]string{"IS_CAST8", "", ""} ||
+		SpellSfx[SplHolyBolt] != [3]string{"IS_CAST2", "LS_HOLYBOLT", "LS_ELECIMP1"} {
+		t.Errorf("SpellSfx did not survive spells.rec: %v", SpellSfx[SplFirebolt])
+	}
+	// SpellFrames and MaxStats are derived from the class table; both used to be computed at package init, which
+	// would now run before it is loaded.
+	if SpellFrames != [NumClasses]int{20, 16, 12, 18, 16, 20} {
+		t.Errorf("SpellFrames = %v", SpellFrames)
+	}
+
 	if ClassNames != [NumClasses]string{"Warrior", "Rogue", "Sorcerer", "Monk", "Bard", "Barbarian"} {
 		t.Errorf("ClassNames = %v", ClassNames)
 	}

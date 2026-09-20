@@ -2,6 +2,7 @@ package d1
 
 import (
 	"fmt"
+	"io/fs"
 	"math"
 	"math/rand"
 	"strings"
@@ -69,33 +70,101 @@ const (
 	ResistKindMagic
 )
 
-// SpellResist is the resistance kind of each spell's damaging missile.
-var SpellResist = map[int]int{
-	SplFirebolt: ResistKindFire, SplFireWall: ResistKindFire, SplFireball: ResistKindFire, SplGuardian: ResistKindFire,
-	SplWave: ResistKindFire, SplInferno: ResistKindFire, SplElemental: ResistKindFire,
-	SplLightning: ResistKindLightning, SplChain: ResistKindLightning, SplNova: ResistKindLightning, SplChargedBolt: ResistKindLightning,
-	SplFlash: ResistKindMagic, SplStone: ResistKindMagic, SplApocalypse: ResistNone, SplBloodStar: ResistKindMagic,
-	SplBoneSpirit: ResistKindMagic, SplHolyBolt: ResistNone,
-	SplLightWall: ResistKindLightning, SplImmolation: ResistKindFire, SplRingOfFire: ResistKindFire,
-	SplRuneFire: ResistKindFire, SplRuneLight: ResistKindLightning, SplRuneNova: ResistKindLightning,
-	SplRuneImmolat: ResistKindFire, SplRuneStone: ResistKindMagic,
+// SpellResist is the resistance kind of each spell's damaging missile, SpellTargeted the spells that need a
+// target cell, and SpellSfx what D1 plays for a hero's spell as _sfx_id names ("" is silent; sounds.rec's
+// sfx.<id> events): the cast, the launch of its missile and the impact where its bolt stops. All three are
+// columns of mods/d1/data/spells.rec, filled by Load.
+var (
+	SpellResist   map[int]int
+	SpellTargeted map[int]bool
+	SpellSfx      map[int][3]string
+)
+
+// spellIDByName binds D1's SPL_ ids to this package's constants, so spells.rec can be keyed by the name D1 uses
+// instead of by the raw slot number.
+var spellIDByName = map[string]int{
+	"SPL_FIREBOLT":    SplFirebolt,
+	"SPL_HEAL":        SplHeal,
+	"SPL_LIGHTNING":   SplLightning,
+	"SPL_FLASH":       SplFlash,
+	"SPL_IDENTIFY":    SplIdentify,
+	"SPL_FIREWALL":    SplFireWall,
+	"SPL_TOWN":        SplTown,
+	"SPL_STONE":       SplStone,
+	"SPL_INFRA":       SplInfra,
+	"SPL_RNDTELEPORT": SplPhasing,
+	"SPL_MANASHIELD":  SplManaShield,
+	"SPL_FIREBALL":    SplFireball,
+	"SPL_GUARDIAN":    SplGuardian,
+	"SPL_CHAIN":       SplChain,
+	"SPL_WAVE":        SplWave,
+	"SPL_NOVA":        SplNova,
+	"SPL_INFERNO":     SplInferno,
+	"SPL_GOLEM":       SplGolem,
+	"SPL_BLODBOIL":    SplRage,
+	"SPL_TELEPORT":    SplTeleport,
+	"SPL_APOCA":       SplApocalypse,
+	"SPL_REPAIR":      SplRepair,
+	"SPL_RECHARGE":    SplRecharge,
+	"SPL_DISARM":      SplDisarm,
+	"SPL_ELEMENT":     SplElemental,
+	"SPL_CBOLT":       SplChargedBolt,
+	"SPL_HBOLT":       SplHolyBolt,
+	"SPL_RESURRECT":   SplTelekinesis,
+	"SPL_BLODSTAR":    SplBloodStar,
+	"SPL_BONESPIRIT":  SplBoneSpirit,
+	"SPL_MANA":        SplMana,
+	"SPL_MAGI":        SplMagi,
+	"SPL_JESTER":      SplJester,
+	"SPL_LIGHTWALL":   SplLightWall,
+	"SPL_IMMOLAT":     SplImmolation,
+	"SPL_WARP":        SplWarp,
+	"SPL_REFLECT":     SplReflect,
+	"SPL_BERSERK":     SplBerserk,
+	"SPL_RING":        SplRingOfFire,
+	"SPL_SEARCH":      SplSearch,
+	"SPL_RUNEFIRE":    SplRuneFire,
+	"SPL_RUNELIGHT":   SplRuneLight,
+	"SPL_RUNENOVA":    SplRuneNova,
+	"SPL_RUNEIMMOLAT": SplRuneImmolat,
+	"SPL_RUNESTONE":   SplRuneStone,
 }
 
-// SpellTargeted: spells that need a target cell (sTargeted, plus the ones D1 aims at the cursor anyway).
-var SpellTargeted = map[int]bool{
-	SplFirebolt: true, SplLightning: true, SplFireWall: true, SplStone: true, SplFireball: true, SplGuardian: true,
-	SplChain: true, SplWave: true, SplInferno: true, SplGolem: true, SplTeleport: true, SplElemental: true,
-	SplChargedBolt: true, SplHolyBolt: true, SplTelekinesis: true, SplBloodStar: true, SplBoneSpirit: true,
-	SplJester: true, SplLightWall: true, SplBerserk: true,
-}
+var resistKindByName = map[string]int{"none": ResistNone, "fire": ResistKindFire,
+	"lightning": ResistKindLightning, "magic": ResistKindMagic}
 
-// SpellFrames: casting animation length per class (each class' animations.tsv castingFrames).
-var SpellFrames = func() (f [NumClasses]int) {
-	for c, a := range classAttr {
-		f[c] = a.SpellFrames
+func loadSpellTables(fsys fs.FS) error {
+	recs, err := readRec(fsys, "spells.rec")
+	if err != nil {
+		return err
 	}
-	return
-}()
+	SpellResist, SpellTargeted, SpellSfx = map[int]int{}, map[int]bool{}, map[int][3]string{}
+	for _, r := range recs {
+		m := r.ToMap("")
+		name := m.GetStringOrDefault("id", "")
+		spell, ok := spellIDByName[name]
+		if !ok {
+			return fmt.Errorf("spells.rec: unknown spell %q", name)
+		}
+		if v := m.GetStringOrDefault("resist", ""); v != "" {
+			kind, known := resistKindByName[v]
+			if !known {
+				return fmt.Errorf("spells.rec: %s: unknown resist %q", name, v)
+			}
+			SpellResist[spell] = kind
+		}
+		if m.GetBoolOrFalse("targeted") {
+			SpellTargeted[spell] = true
+		}
+		SpellSfx[spell] = [3]string{m.GetStringOrDefault("cast_sfx", ""),
+			m.GetStringOrDefault("launch_sfx", ""), m.GetStringOrDefault("impact_sfx", "")}
+	}
+	return nil
+}
+
+// SpellFrames: casting animation length per class (each class' animations.tsv castingFrames). Derived from the
+// class table by Load, not at init: classAttr is empty until hero.rec has been read.
+var SpellFrames [NumClasses]int
 
 // SpellLevel ports GetSpellLevel.
 func (h *Hero) SpellLevel(s Sheet, spell int) int {
@@ -389,26 +458,6 @@ func SpellMissileVel(spell, slvl int) int {
 		return 32
 	}
 	return 16 // Elemental, Bone Spirit, Blood Star, Flame Wave
-}
-
-// SpellSfx is what D1 plays for a hero's spell, as _sfx_id names ("" is silent; sounds.rec's sfx.<id> events): the cast (spelldat's
-// sSFX), the launch of its missile (misdat's mlSFX; for walls and Lightning, of the missiles its controller lays)
-// and the impact where its bolt stops (miSFX, played by CheckMissileCol).
-var SpellSfx = map[int][3]string{
-	SplFirebolt: {"IS_CAST2", "LS_FBOLT1", "LS_FIRIMP2"}, SplHeal: {"IS_CAST8"}, SplLightning: {"IS_CAST4", "LS_LNING1"},
-	SplFlash: {"IS_CAST4", "LS_NOVA"}, SplIdentify: {"IS_CAST6"}, SplFireWall: {"IS_CAST2", "LS_WALLLOOP"}, SplTown: {"IS_CAST6", "LS_SENTINEL"},
-	SplStone: {"IS_CAST2", "LS_SCURIMP"}, SplInfra: {"IS_CAST8", "LS_INFRAVIS"}, SplPhasing: {"IS_CAST2", "LS_TELEPORT"},
-	SplManaShield: {"IS_CAST2", "LS_MSHIELD"}, SplFireball: {"IS_CAST2", "LS_FBOLT1", "LS_FIRIMP2"}, SplGuardian: {"IS_CAST2", "LS_GUARD"},
-	SplChain: {"IS_CAST2", "LS_LNING1"}, SplWave: {"IS_CAST2", "LS_FLAMWAVE"}, SplNova: {"IS_CAST4", "LS_NOVA"},
-	SplInferno: {"IS_CAST2", "LS_SPOUTSTR"}, SplGolem: {"IS_CAST2", "LS_GOLUM"}, SplRage: {"IS_CAST8"}, SplTeleport: {"IS_CAST6", "LS_ELEMENTL"},
-	SplApocalypse: {"IS_CAST2", "LS_APOC"}, SplRepair: {"IS_CAST6"}, SplRecharge: {"IS_CAST6"}, SplDisarm: {"IS_CAST6", "LS_TRAPDIS"},
-	SplElemental: {"IS_CAST2", "LS_ELEMENTL"}, SplChargedBolt: {"IS_CAST2", "LS_CBOLT"}, SplHolyBolt: {"IS_CAST2", "LS_HOLYBOLT", "LS_ELECIMP1"},
-	SplTelekinesis: {"IS_CAST2", "LS_ETHEREAL"}, SplBloodStar: {"IS_CAST2"}, SplBoneSpirit: {"IS_CAST2", "LS_BONESP", "LS_BSIMPCT"},
-	// Hellfire's
-	SplMana: {"IS_CAST8"}, SplMagi: {"IS_CAST8"}, SplJester: {"IS_CAST8"}, SplLightWall: {"IS_CAST4", "LS_LMAG"},
-	SplImmolation: {"IS_CAST2", "LS_FBOLT1", "LS_FIRIMP2"}, SplWarp: {"IS_CAST6", "LS_ETHEREAL"}, SplReflect: {"IS_CAST6", "LS_MSHIELD"},
-	SplBerserk: {"IS_CAST6"}, SplRingOfFire: {"IS_CAST2"}, SplSearch: {"IS_CAST6"}, SplRuneFire: {"IS_CAST8"}, SplRuneLight: {"IS_CAST8"},
-	SplRuneNova: {"IS_CAST8"}, SplRuneImmolat: {"IS_CAST8"}, SplRuneStone: {"IS_CAST8"},
 }
 
 // ChargedBoltFlight ports MI_Cbolt's wander: every 17 ticks the spark turns to dir plus a bpath step (from rnd, which

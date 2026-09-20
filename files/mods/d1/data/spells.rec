@@ -1,0 +1,220 @@
+%rec: default
+# Per-spell data the xl_spell table has no columns for, keyed by the spell's SPL_ id.
+# resist is the resistance its damaging missile is checked against (none/fire/lightning/magic; absent means
+# the spell deals no resistible damage). targeted marks the spells that need a target cell (sTargeted, plus
+# the ones D1 aims at the cursor anyway). The three sounds are the cast (spelldat's sSFX), the launch of its
+# missile (misdat's mlSFX) and the impact where its bolt stops (miSFX); blank is silent.
+
+id: SPL_FIREBOLT
+resist: fire
+targeted: true
+cast_sfx: IS_CAST2
+launch_sfx: LS_FBOLT1
+impact_sfx: LS_FIRIMP2
+
+id: SPL_HEAL
+cast_sfx: IS_CAST8
+
+id: SPL_LIGHTNING
+resist: lightning
+targeted: true
+cast_sfx: IS_CAST4
+launch_sfx: LS_LNING1
+
+id: SPL_FLASH
+resist: magic
+cast_sfx: IS_CAST4
+launch_sfx: LS_NOVA
+
+id: SPL_IDENTIFY
+cast_sfx: IS_CAST6
+
+id: SPL_FIREWALL
+resist: fire
+targeted: true
+cast_sfx: IS_CAST2
+launch_sfx: LS_WALLLOOP
+
+id: SPL_TOWN
+cast_sfx: IS_CAST6
+launch_sfx: LS_SENTINEL
+
+id: SPL_STONE
+resist: magic
+targeted: true
+cast_sfx: IS_CAST2
+launch_sfx: LS_SCURIMP
+
+id: SPL_INFRA
+cast_sfx: IS_CAST8
+launch_sfx: LS_INFRAVIS
+
+id: SPL_RNDTELEPORT
+cast_sfx: IS_CAST2
+launch_sfx: LS_TELEPORT
+
+id: SPL_MANASHIELD
+cast_sfx: IS_CAST2
+launch_sfx: LS_MSHIELD
+
+id: SPL_FIREBALL
+resist: fire
+targeted: true
+cast_sfx: IS_CAST2
+launch_sfx: LS_FBOLT1
+impact_sfx: LS_FIRIMP2
+
+id: SPL_GUARDIAN
+resist: fire
+targeted: true
+cast_sfx: IS_CAST2
+launch_sfx: LS_GUARD
+
+id: SPL_CHAIN
+resist: lightning
+targeted: true
+cast_sfx: IS_CAST2
+launch_sfx: LS_LNING1
+
+id: SPL_WAVE
+resist: fire
+targeted: true
+cast_sfx: IS_CAST2
+launch_sfx: LS_FLAMWAVE
+
+id: SPL_NOVA
+resist: lightning
+cast_sfx: IS_CAST4
+launch_sfx: LS_NOVA
+
+id: SPL_INFERNO
+resist: fire
+targeted: true
+cast_sfx: IS_CAST2
+launch_sfx: LS_SPOUTSTR
+
+id: SPL_GOLEM
+targeted: true
+cast_sfx: IS_CAST2
+launch_sfx: LS_GOLUM
+
+id: SPL_BLODBOIL
+cast_sfx: IS_CAST8
+
+id: SPL_TELEPORT
+targeted: true
+cast_sfx: IS_CAST6
+launch_sfx: LS_ELEMENTL
+
+id: SPL_APOCA
+resist: none
+cast_sfx: IS_CAST2
+launch_sfx: LS_APOC
+
+id: SPL_REPAIR
+cast_sfx: IS_CAST6
+
+id: SPL_RECHARGE
+cast_sfx: IS_CAST6
+
+id: SPL_DISARM
+cast_sfx: IS_CAST6
+launch_sfx: LS_TRAPDIS
+
+id: SPL_ELEMENT
+resist: fire
+targeted: true
+cast_sfx: IS_CAST2
+launch_sfx: LS_ELEMENTL
+
+id: SPL_CBOLT
+resist: lightning
+targeted: true
+cast_sfx: IS_CAST2
+launch_sfx: LS_CBOLT
+
+id: SPL_HBOLT
+resist: none
+targeted: true
+cast_sfx: IS_CAST2
+launch_sfx: LS_HOLYBOLT
+impact_sfx: LS_ELECIMP1
+
+id: SPL_RESURRECT
+targeted: true
+cast_sfx: IS_CAST2
+launch_sfx: LS_ETHEREAL
+
+id: SPL_BLODSTAR
+resist: magic
+targeted: true
+cast_sfx: IS_CAST2
+
+id: SPL_BONESPIRIT
+resist: magic
+targeted: true
+cast_sfx: IS_CAST2
+launch_sfx: LS_BONESP
+impact_sfx: LS_BSIMPCT
+
+id: SPL_MANA
+cast_sfx: IS_CAST8
+
+id: SPL_MAGI
+cast_sfx: IS_CAST8
+
+id: SPL_JESTER
+targeted: true
+cast_sfx: IS_CAST8
+
+id: SPL_LIGHTWALL
+resist: lightning
+targeted: true
+cast_sfx: IS_CAST4
+launch_sfx: LS_LMAG
+
+id: SPL_IMMOLAT
+resist: fire
+cast_sfx: IS_CAST2
+launch_sfx: LS_FBOLT1
+impact_sfx: LS_FIRIMP2
+
+id: SPL_WARP
+cast_sfx: IS_CAST6
+launch_sfx: LS_ETHEREAL
+
+id: SPL_REFLECT
+cast_sfx: IS_CAST6
+launch_sfx: LS_MSHIELD
+
+id: SPL_BERSERK
+targeted: true
+cast_sfx: IS_CAST6
+
+id: SPL_RING
+resist: fire
+cast_sfx: IS_CAST2
+
+id: SPL_SEARCH
+cast_sfx: IS_CAST6
+
+id: SPL_RUNEFIRE
+resist: fire
+cast_sfx: IS_CAST8
+
+id: SPL_RUNELIGHT
+resist: lightning
+cast_sfx: IS_CAST8
+
+id: SPL_RUNENOVA
+resist: lightning
+cast_sfx: IS_CAST8
+
+id: SPL_RUNEIMMOLAT
+resist: fire
+cast_sfx: IS_CAST8
+
+id: SPL_RUNESTONE
+resist: magic
+cast_sfx: IS_CAST8
+

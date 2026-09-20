@@ -126,6 +126,7 @@ func loadHeroTables(fsys fs.FS) error {
 		ClassNames[i] = m.GetStringOrDefault("name", "")
 		classAttr[i] = a
 		MaxStats[i] = [4]int{a.MaxStr, a.MaxMag, a.MaxDex, a.MaxVit}
+		SpellFrames[i] = a.SpellFrames
 	}
 	var exp []int
 	for _, r := range recs["experience"] {
