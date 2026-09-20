@@ -1,6 +1,9 @@
 package d1
 
-import "fmt"
+import (
+	"fmt"
+	"io/fs"
+)
 
 // Property is one of an item's magical powers: Key identifies it across items, Min/Max hold its value (equal for
 // single values, 1 for flags).
@@ -14,9 +17,6 @@ type propertyDef struct {
 	better int // +1: higher is better (or good to have), -1: lower is better (or harmful), 0: never compared
 }
 
-func signed(format string) func(int, int) string {
-	return func(v, _ int) string { return fmt.Sprintf(format, v) }
-}
 func ranged(format string) func(int, int) string {
 	return func(lo, hi int) string { return fmt.Sprintf(format, lo, hi) }
 }
@@ -31,48 +31,43 @@ const (
 	KeyArmor  = "armor"
 )
 
-var propertyDefs = map[string]propertyDef{
-	KeyDamage:        {ranged("Damage: %d-%d"), 1},
-	KeyArmor:         {signed("Armor: %d"), 1},
-	"tohit":          {signed("chance to hit: %+d%%"), 1},
-	"dam%":           {signed("%+d%% damage"), 1},
-	"ac%":            {signed("%+d%% armor"), 1},
-	"fr":             {signed("Resist Fire: %+d%%"), 1},
-	"lr":             {signed("Resist Lightning: %+d%%"), 1},
-	"mr":             {signed("Resist Magic: %+d%%"), 1},
-	"str":            {signed("%+d to strength"), 1},
-	"mag":            {signed("%+d to magic"), 1},
-	"dex":            {signed("%+d to dexterity"), 1},
-	"vit":            {signed("%+d to vitality"), 1},
-	"hp":             {signed("Hit Points: %+d"), 1},
-	"mana":           {signed("Mana: %+d"), 1},
-	"dammod":         {signed("adds %d points to damage"), 1},
-	"gethit":         {signed("%+d damage from enemies"), -1},
-	"light":          {func(v, _ int) string { return fmt.Sprintf("%+d%% light radius", v*10) }, 1},
-	"spelllevels":    {signed("%+d to spell levels"), 1},
-	"enac":           {text("decreases target's armor"), 1},
-	"firedam":        {ranged("fire hit damage: %d-%d"), 1},
-	"lightdam":       {ranged("lightning hit damage: %d-%d"), 1},
-	"firearrows":     {ranged("fire arrows damage: %d-%d"), 1},
-	"lightarrows":    {ranged("lightning arrows damage: %d-%d"), 1},
-	"stealslife":     {signed("steals %d%% life"), 1},
-	"stealsmana":     {signed("steals %d%% mana"), 1},
-	"rndstealslife":  {text("hit steals random life"), 1},
-	"drainlife":      {text("drains life"), 1},
-	"attackspeed":    {tiers("quick attack", "fast attack", "faster attack", "fastest attack"), 1},
-	"recovery":       {tiers("fast hit recovery", "faster hit recovery", "fastest hit recovery"), 1},
-	"fastblock":      {text("fast block"), 1},
-	"knockback":      {text("knocks target back"), 1},
-	"thorns":         {text("attacker takes 1-3 damage"), 1},
-	"nomana":         {text("user loses all mana"), -1},
-	"nohealplr":      {text("you can't heal"), -1},
-	"abshalftrap":    {text("absorbs half of trap damage"), 1},
-	"3xdemons":       {text("+200% damage vs. demons"), 1},
-	"allreszero":     {text("all resistance equals 0"), -1},
-	"infravision":    {text("see with infravision"), 1},
-	"nohealmon":      {text("hit monster doesn't heal"), 1},
-	"rndarrowvel":    {text("fires random speed arrows"), 0},
-	"indestructible": {text("indestructible"), 1},
+// propertyDefs is filled by Load from mods/d1/data/properties.rec. The wording lives there; the four ways a
+// value turns into a line stay here, because they are code.
+var propertyDefs map[string]propertyDef
+
+func loadPropertyDefs(fsys fs.FS) (map[string]propertyDef, error) {
+	recs, err := readRec(fsys, "properties.rec")
+	if err != nil {
+		return nil, err
+	}
+	out := make(map[string]propertyDef, len(recs))
+	for _, r := range recs {
+		m := r.ToMap("")
+		key := m.GetStringOrDefault("key", "")
+		if key == "" {
+			return nil, fmt.Errorf("properties.rec: record with no key")
+		}
+		format, scale := m.GetStringOrDefault("format", ""), m.GetIntOrDefault("scale", 1)
+		d := propertyDef{better: m.GetIntOrDefault("better", 0)}
+		switch kind := m.GetStringOrDefault("kind", ""); kind {
+		case "signed":
+			d.format = func(v, _ int) string { return fmt.Sprintf(format, v*scale) }
+		case "ranged":
+			d.format = ranged(format)
+		case "text":
+			d.format = text(format)
+		case "tiers":
+			names := fieldsNamed(r, "tier")
+			if len(names) == 0 {
+				return nil, fmt.Errorf("properties.rec: %s: tiers with no tier lines", key)
+			}
+			d.format = tiers(names...)
+		default:
+			return nil, fmt.Errorf("properties.rec: %s: unknown kind %q", key, kind)
+		}
+		out[key] = d
+	}
+	return out, nil
 }
 
 // Text formats the property as its tooltip line.

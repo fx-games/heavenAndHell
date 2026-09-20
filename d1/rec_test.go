@@ -1,9 +1,21 @@
 package d1
 
 import (
+	"fmt"
 	"os"
 	"testing"
 )
+
+// The tables are loaded, not compiled in, so a test that touches one needs Load to have run. Doing it here means
+// a single test run in isolation behaves like the whole package, rather than depending on some earlier test
+// having loaded the data first.
+func TestMain(m *testing.M) {
+	if _, err := Load(os.DirFS("../files")); err != nil {
+		fmt.Println("d1.Load:", err)
+		os.Exit(1)
+	}
+	os.Exit(m.Run())
+}
 
 // The tables below moved out of Go source into mods/d1/data/*.rec. These are the values the literals had, spot
 // checked at the ends and the awkward middles, so a mangled .rec fails here rather than in the game.
@@ -31,6 +43,34 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		if got.MiscID != c.miscID || got.Name != c.name || got.MinLvl != c.lvl || got.Value != c.value {
 			t.Errorf("oils[%d] = %+v, want %s/%s/%d/%d", c.i, got, c.miscID, c.name, c.lvl, c.value)
 		}
+	}
+
+	if len(propertyDefs) != 41 {
+		t.Errorf("propertyDefs = %d, want 41", len(propertyDefs))
+	}
+	// One of each formatter kind, including the light radius, the only property that scales its value.
+	for _, c := range []struct {
+		p    Property
+		want string
+	}{
+		{Property{"str", 5, 5}, "+5 to strength"},
+		{Property{KeyDamage, 6, 9}, "Damage: 6-9"},
+		{Property{"knockback", 1, 1}, "knocks target back"},
+		{Property{"attackspeed", 3, 3}, "faster attack"},
+		{Property{"light", 2, 2}, "+20% light radius"},
+	} {
+		if got := c.p.Text(); got != c.want {
+			t.Errorf("%s text = %q, want %q", c.p.Key, got, c.want)
+		}
+	}
+	if propertyDefs["gethit"].better != -1 || propertyDefs["rndarrowvel"].better != 0 || propertyDefs["str"].better != 1 {
+		t.Error("property better did not survive properties.rec")
+	}
+
+	if boyShuns[Warrior] == nil || len(boyShuns[Rogue]) != 5 ||
+		boyShuns[Warrior][0] != ITypeBow || boyShuns[Warrior][1] != ITypeStaff ||
+		boyShuns[Monk][1] != ITypeMArmor {
+		t.Errorf("boyShuns did not survive stores.rec: %v", boyShuns)
 	}
 
 	if len(SpellResist) != 25 || len(SpellTargeted) != 20 || len(SpellSfx) != 45 {

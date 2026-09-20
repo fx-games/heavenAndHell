@@ -2,8 +2,11 @@ package d1
 
 import (
 	"cmp"
+	"fmt"
+	"io/fs"
 	"math/rand"
 	"slices"
+	"strings"
 )
 
 // Item indexes (IDI_) used by stores and starting gear.
@@ -110,14 +113,37 @@ func (who *Shopper) fits(it *Item, maxVal, floorValue int) bool {
 	return it.IValue <= maxVal && it.MinStr <= str && it.MinMag <= mag && it.MinDex <= dex && it.IValue >= floorValue
 }
 
-// boyShuns are the item types Hellfire's Wirt keeps away from each class (for his first 200 tries).
-var boyShuns = [NumClasses][]int{
-	Warrior:   {ITypeBow, ITypeStaff},
-	Rogue:     {ITypeSword, ITypeStaff, ITypeAxe, ITypeMace, ITypeShield},
-	Sorcerer:  {ITypeStaff, ITypeAxe, ITypeBow, ITypeMace},
-	Monk:      {ITypeBow, ITypeMArmor, ITypeShield, ITypeMace},
-	Bard:      {ITypeAxe, ITypeMace, ITypeStaff},
-	Barbarian: {ITypeBow, ITypeStaff},
+// boyShuns are the item types Hellfire's Wirt keeps away from each class (for his first 200 tries). Filled by
+// Load from the boy_shuns section of mods/d1/data/stores.rec.
+var boyShuns [NumClasses][]int
+
+// itemTypeByName names the ITYPE_ values the store tables refer to.
+var itemTypeByName = map[string]int{"misc": ITypeMisc, "sword": ITypeSword, "axe": ITypeAxe, "bow": ITypeBow,
+	"mace": ITypeMace, "shield": ITypeShield, "larmor": ITypeLArmor, "helm": ITypeHelm, "marmor": ITypeMArmor,
+	"harmor": ITypeHArmor, "staff": ITypeStaff, "gold": ITypeGold, "ring": ITypeRing, "amulet": ITypeAmulet,
+	"food": ITypeFood}
+
+func loadStoreTables(fsys fs.FS) error {
+	recs, err := readRecMulti(fsys, "stores.rec")
+	if err != nil {
+		return err
+	}
+	shuns := recs["boy_shuns"]
+	if len(shuns) != NumClasses {
+		return fmt.Errorf("stores.rec: %d boy_shuns rows, want %d", len(shuns), NumClasses)
+	}
+	for i, r := range shuns {
+		m := r.ToMap("")
+		boyShuns[i] = nil
+		for _, name := range strings.Fields(m.GetStringOrDefault("shuns", "")) {
+			t, ok := itemTypeByName[name]
+			if !ok {
+				return fmt.Errorf("stores.rec: unknown item type %q", name)
+			}
+			boyShuns[i] = append(boyShuns[i], t)
+		}
+	}
+	return nil
 }
 
 // storeIdx ports RndSmithItem/RndWitchItem/RndHealerItem/RndBoyItem.

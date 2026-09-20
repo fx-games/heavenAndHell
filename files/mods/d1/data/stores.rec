@@ -1,0 +1,21 @@
+%rec: boy_shuns
+# The item types Hellfire's Wirt keeps away from each class, for his first 200 tries (SpawnBoy).
+# One record per class, in PC_ order; shuns is a list of weapon and armour types.
+
+class: Warrior
+shuns: bow staff
+
+class: Rogue
+shuns: sword staff axe mace shield
+
+class: Sorcerer
+shuns: staff axe bow mace
+
+class: Monk
+shuns: bow marmor shield mace
+
+class: Bard
+shuns: axe mace staff
+
+class: Barbarian
+shuns: bow staff

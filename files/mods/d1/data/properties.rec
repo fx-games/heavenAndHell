@@ -1,0 +1,220 @@
+%rec: default
+# Every magical power an item can show, by the key PropertyList tags it with. kind picks the formatter:
+#   signed  - format takes the value once  ("%+d to strength")
+#   ranged  - format takes min and max     ("fire hit damage: %d-%d")
+#   text    - format is the whole line, no value
+#   tiers   - one line per tier, lowest first; the value picks one
+# scale multiplies the value before formatting (only the light radius needs it). better is how Compare
+# rates a bigger value: 1 better, -1 worse, 0 never compared.
+
+key: damage
+kind: ranged
+format: Damage: %d-%d
+better: 1
+
+key: armor
+kind: signed
+format: Armor: %d
+better: 1
+
+key: tohit
+kind: signed
+format: chance to hit: %+d%%
+better: 1
+
+key: dam%
+kind: signed
+format: %+d%% damage
+better: 1
+
+key: ac%
+kind: signed
+format: %+d%% armor
+better: 1
+
+key: fr
+kind: signed
+format: Resist Fire: %+d%%
+better: 1
+
+key: lr
+kind: signed
+format: Resist Lightning: %+d%%
+better: 1
+
+key: mr
+kind: signed
+format: Resist Magic: %+d%%
+better: 1
+
+key: str
+kind: signed
+format: %+d to strength
+better: 1
+
+key: mag
+kind: signed
+format: %+d to magic
+better: 1
+
+key: dex
+kind: signed
+format: %+d to dexterity
+better: 1
+
+key: vit
+kind: signed
+format: %+d to vitality
+better: 1
+
+key: hp
+kind: signed
+format: Hit Points: %+d
+better: 1
+
+key: mana
+kind: signed
+format: Mana: %+d
+better: 1
+
+key: dammod
+kind: signed
+format: adds %d points to damage
+better: 1
+
+key: gethit
+kind: signed
+format: %+d damage from enemies
+better: -1
+
+key: light
+kind: signed
+format: %+d%% light radius
+scale: 10
+better: 1
+
+key: spelllevels
+kind: signed
+format: %+d to spell levels
+better: 1
+
+key: enac
+kind: text
+format: decreases target's armor
+better: 1
+
+key: firedam
+kind: ranged
+format: fire hit damage: %d-%d
+better: 1
+
+key: lightdam
+kind: ranged
+format: lightning hit damage: %d-%d
+better: 1
+
+key: firearrows
+kind: ranged
+format: fire arrows damage: %d-%d
+better: 1
+
+key: lightarrows
+kind: ranged
+format: lightning arrows damage: %d-%d
+better: 1
+
+key: stealslife
+kind: signed
+format: steals %d%% life
+better: 1
+
+key: stealsmana
+kind: signed
+format: steals %d%% mana
+better: 1
+
+key: rndstealslife
+kind: text
+format: hit steals random life
+better: 1
+
+key: drainlife
+kind: text
+format: drains life
+better: 1
+
+key: attackspeed
+kind: tiers
+tier: quick attack
+tier: fast attack
+tier: faster attack
+tier: fastest attack
+better: 1
+
+key: recovery
+kind: tiers
+tier: fast hit recovery
+tier: faster hit recovery
+tier: fastest hit recovery
+better: 1
+
+key: fastblock
+kind: text
+format: fast block
+better: 1
+
+key: knockback
+kind: text
+format: knocks target back
+better: 1
+
+key: thorns
+kind: text
+format: attacker takes 1-3 damage
+better: 1
+
+key: nomana
+kind: text
+format: user loses all mana
+better: -1
+
+key: nohealplr
+kind: text
+format: you can't heal
+better: -1
+
+key: abshalftrap
+kind: text
+format: absorbs half of trap damage
+better: 1
+
+key: 3xdemons
+kind: text
+format: +200% damage vs. demons
+better: 1
+
+key: allreszero
+kind: text
+format: all resistance equals 0
+better: -1
+
+key: infravision
+kind: text
+format: see with infravision
+better: 1
+
+key: nohealmon
+kind: text
+format: hit monster doesn't heal
+better: 1
+
+key: rndarrowvel
+kind: text
+format: fires random speed arrows
+better: 0
+
+key: indestructible
+kind: text
+format: indestructible
+better: 1
+

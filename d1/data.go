@@ -543,5 +543,11 @@ func loadRecTables(fsys fs.FS) error {
 	if err = loadSpellTables(fsys); err != nil {
 		return err
 	}
+	if propertyDefs, err = loadPropertyDefs(fsys); err != nil {
+		return err
+	}
+	if err = loadStoreTables(fsys); err != nil {
+		return err
+	}
 	return nil
 }
