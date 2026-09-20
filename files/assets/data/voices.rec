@@ -4,154 +4,204 @@
 # Diablo (reference/d1_voice_transcripts.tsv). No sound: means silent — assign one with ./remap_voices.sh.
 
 internal_name: TSFX_WITCH1
-name: Adria: (no transcript)
+name: Adria: The dead who walk among the living follow the cursed king. He...
+text: The dead who walk among the living follow the cursed king. He holds the power to raise yet more warriors for an ever-growing army of the undead. If you do not stop his reign, he will surely march across this land and slay all who still live here.
 
 internal_name: TSFX_WITCH2
-name: Adria: (no transcript)
+name: Adria: No mortal can truly understand the mind of the demon. Never l...
+text: No mortal can truly understand the mind of the demon. Never let their erratic actions confuse you, as that too may be their plan.
 
 internal_name: TSFX_WITCH3
-name: Adria: (no transcript)
+name: Adria: I did not know this Lazarus of whom you speak, but I do sense...
+text: I did not know this Lazarus of whom you speak, but I do sense a great conflict within his being. He poses a great danger and will stop at nothing to serve the powers of darkness which have claimed him as theirs.
 
 internal_name: TSFX_WITCH4
-name: Adria: (no transcript)
+name: Adria: The people of Tristram will die if you cannot restore fresh w...
+text: The people of Tristram will die if you cannot restore fresh water to their wells. Know this. Demons are at the heart of this matter, but they remain ignorant of what they have spawned.
 
 internal_name: TSFX_WITCH5
-name: Adria: (no transcript)
+name: Adria: Seek out the domicile to which Pepin the Healer has directed...
+text: Seek out the domicile to which Pepin the Healer has directed you. It is there that your missions will become clear and your methods evident.
 
 internal_name: TSFX_WITCH6
-name: Adria: (no transcript)
+name: Adria: The succubus is a demon that feasts upon the essence of morta...
+text: The succubus is a demon that feasts upon the essence of mortal men. You will find that Andariel has quite an appetite. The town will soon be devoid of any adult males unless you stop her feeding. Now.
 
 internal_name: TSFX_WITCH7
-name: Adria: (no transcript)
+name: Adria: You will become an eternal servant of the Dark Lords should y...
+text: You will become an eternal servant of the Dark Lords should you perish within this cursed domain. Enter the Chamber of Bone at your own peril.
 
 internal_name: TSFX_WITCH8
-name: Adria: (no transcript)
+name: Adria: You must destroy the two demons that Horazon has trapped with...
+text: You must destroy the two demons that Horazon has trapped within his sanctum at all costs. Should they escape from their imprisonment, they will create a link to this world that will make what lies below the cathedral seem like a children's tale.
 
 internal_name: TSFX_WITCH9
-name: Adria: (no transcript)
+name: Adria: The once proud Iswal is trapped deep beneath the surface of t...
+text: The once proud Iswal is trapped deep beneath the surface of this world. His honor stripped and his visage altered. He is trapped in immortal torment, charged to conceal the very thing that could free him.
 
 internal_name: TSFX_WITCH10
-name: Adria: (no transcript)
+name: Adria: The butcher is a sadistic creature that delights in the tortu...
+text: The butcher is a sadistic creature that delights in the torture and pain of others. You have seen his handiwork in the drunkard Farnham. His destruction will do much to ensure the safety of this village.
 
 internal_name: TSFX_WITCH11
-name: Adria: (no transcript)
+name: Adria: The lair of the butcher is steeped in demonic power, and cast...
+text: The lair of the butcher is steeped in demonic power, and casting any spell of passage there could cause unexpected results.
 
 internal_name: TSFX_WITCH12
-name: Adria: (no transcript)
+name: Adria: This is a place of great anguish and terror, and so serves it...
+text: This is a place of great anguish and terror, and so serves its master well. Tread carefully, or you may yourself be staying much longer than you had anticipated.
 
 internal_name: TSFX_WITCH13
-name: Adria: (no transcript)
+name: Adria: You may meet people who are trapped within the Labyrinth, suc...
+text: You may meet people who are trapped within the Labyrinth, such as Lachdanan. I sense in him honor and great guilt. Aid him, and you aid all of Tristram.
 
 internal_name: TSFX_WITCH14
-name: Adria: (no transcript)
+name: Adria: There are many artifacts within the labyrinth that hold power...
+text: There are many artifacts within the labyrinth that hold powers beyond the comprehension of mortals. Some of these hold fantastic power that can be used by either the light or the darkness. Securing the anvil from below could shift the course of the Sinnwar towards the light.
 
 internal_name: TSFX_WITCH15
-name: Adria: (no transcript)
+name: Adria: Should you find these stones of blood, use them carefully. Th...
+text: Should you find these stones of blood, use them carefully. The way is fraught with danger, and your only hope rests within your self-trust.
 
 internal_name: TSFX_WITCH16
-name: Adria: (no transcript)
+name: Adria: This legendary place is real, and great rewards await you sho...
+text: This legendary place is real, and great rewards await you should you find it. Nothing more can I say.
 
 internal_name: TSFX_WITCH17
-name: Adria: (no transcript)
+name: Adria: You must be ever watchful, for Flesh Doom is an enemy who is...
+text: You must be ever watchful, for Flesh Doom is an enemy who is both cruel and quick. His ebon blade is composed of the essence of evil. If you can destroy both of them, it would do much to weaken his dark master.
 
 internal_name: TSFX_WITCH18
-name: Adria: (no transcript)
+name: Adria: His prowess with the blade is awesome, and he has lived for t...
+text: His prowess with the blade is awesome, and he has lived for thousands of years knowing only warfare. I am sorry. I cannot see if you will defeat him.
 
 internal_name: TSFX_WITCH19
-name: Adria: (no transcript)
+name: Adria: Maintain your quest. Finding a treasure that is lost is not e...
+text: Maintain your quest. Finding a treasure that is lost is not easy. Finding a treasure that is hidden, less so. I will leave you with this. Do not let the sands of time confuse your search.
 
 internal_name: TSFX_WITCH20
-name: Adria: (no transcript)
+name: Adria: The Heaven Stone is very powerful, and were it any but Griswo...
+text: The Heaven Stone is very powerful, and were it any but Griswold who bid you find it, I would prevent it. He will harness its powers, and its use will be for the good of us all.
 
 internal_name: TSFX_WITCH21
-name: Adria: (no transcript)
+name: Adria: Oh, I'm afraid this does not bode well at all. This map of th...
+text: Oh, I'm afraid this does not bode well at all. This map of the stars portends great disaster, but its secrets are not mine to tell. The time has come for you to have a very serious conversation with the storyteller.
 
 internal_name: TSFX_WITCH22
-name: Adria: (no transcript)
+name: Adria: What do we have here? Interesting. It looks like a book of re...
+text: What do we have here? Interesting. It looks like a book of reagents. Keep your eyes open for a black mushroom. It should be fairly large and easy to identify. If you find it, bring it to me, won't you?
 
 internal_name: TSFX_WITCH23
-name: Adria: (no transcript)
+name: Adria: It's a big black mushroom that I need. Now run off and get it...
+text: It's a big black mushroom that I need. Now run off and get it for me so that I can use it for a special concoction that I am working on.
 
 internal_name: TSFX_WITCH24
-name: Adria: (no transcript)
+name: Adria: Yes, this will be perfect for a brew that I am creating. By t...
+text: Yes, this will be perfect for a brew that I am creating. By the way, the healer is looking for the brain of some demon or another so he can treat those who have been afflicted by their poisonous venom. I believe that he intends to make an elixir from it. If you help him find what he needs, please see if you can get a sample of the elixir for me.
 
 internal_name: TSFX_WITCH25
-name: Adria: (no transcript)
+name: Adria: Why have you brought that here? I have no need for a demon's...
+text: Why have you brought that here? I have no need for a demon's brain at this time. I do need some of the elixir that the healer is working on. He needs that grotesque organ that you are holding. And then bring me the elixir. Simple when you think about it, isn't it?
 
 internal_name: TSFX_WITCH26
-name: Adria: (no transcript)
+name: Adria: What? Now you bring me that elixir from the healer? Oh, I was...
+text: What? Now you bring me that elixir from the healer? Oh, I was able to finish my brew without it. Why don't you just keep it?
 
 internal_name: TSFX_WITCH27
-name: Adria: (no transcript)
+name: Adria: Hello, good friend. I have been working on a means to increas...
+text: Hello, good friend. I have been working on a means to increase the strength of my potions. I believe that I could brew better potions if you could just find me the correct reagents.
 
 internal_name: TSFX_WITCH28
-name: Adria: (no transcript)
+name: Adria: Remember, with the correct reagents, my potions are more powe...
+text: Remember, with the correct reagents, my potions are more powerful.
 
 internal_name: TSFX_WITCH29
-name: Adria: (no transcript)
+name: Adria: Excellent. Just a pinch should do it. Ah, here is a sample.
+text: Excellent. Just a pinch should do it. Ah, here is a sample.
 
 internal_name: TSFX_WITCH30
-name: Adria: (no transcript)
+name: Adria: It seems that there are many uses for the scrolls which are f...
+text: It seems that there are many uses for the scrolls which are found beneath the church. I should be able to scribe a book of magic if I had enough of the proper scrolls to study.
 
 internal_name: TSFX_WITCH31
-name: Adria: (no transcript)
+name: Adria: Remember, with enough scrolls, I can create a book of magic f...
+text: Remember, with enough scrolls, I can create a book of magic for you.
 
 internal_name: TSFX_WITCH32
-name: Adria: (no transcript)
+name: Adria: Yes, I can see that when I combine these scrolls just so, I w...
+text: Yes, I can see that when I combine these scrolls just so, I will teach you what I have learned so that you may also know more secrets of this magic.
 
 internal_name: TSFX_WITCH33
-name: Adria: (no transcript)
+name: Adria: I have a quest for you, if you are brave enough to accept it....
+text: I have a quest for you, if you are brave enough to accept it. Great power can be found in some of the devices that may be hidden below the church. With the right ones, I could work wonders.
 
 internal_name: TSFX_WITCH34
-name: Adria: (no transcript)
+name: Adria: Remember, the right device in my hands can become quite power...
+text: Remember, the right device in my hands can become quite powerful.
 
 internal_name: TSFX_WITCH35
-name: Adria: (no transcript)
+name: Adria: This is amazing. The mystic energies in this crystal are powe...
+text: This is amazing. The mystic energies in this crystal are powerful, but unfocused. If you could find for me a specific staff to channel its power through...
 
 internal_name: TSFX_WITCH36
-name: Adria: (no transcript)
+name: Adria: The crystal holds a magic that is strong, but you need to fin...
+text: The crystal holds a magic that is strong, but you need to find the correct staff with which to focus its energy.
 
 internal_name: TSFX_WITCH37
-name: Adria: (no transcript)
+name: Adria: Hand me that staff and stand back. Vitate chlorum on dunium....
+text: Hand me that staff and stand back. Vitate chlorum on dunium. It is complete.
 
 internal_name: TSFX_WITCH38
-name: Adria: (no transcript)
+name: Adria: I sense a soul in search of answers.
+text: I sense a soul in search of answers.
 
 internal_name: TSFX_WITCH39
-name: Adria: (no transcript)
+name: Adria: Wisdom is earned, not given. If you discover a tome of knowle...
+text: Wisdom is earned, not given. If you discover a tome of knowledge, devour its words. Should you already have knowledge of the arcane mysteries scribed within a book, remember that level of mastery can always increase.
 
 internal_name: TSFX_WITCH40
-name: Adria: (no transcript)
+name: Adria: The greatest power is often the shortest lived. You may find...
+text: The greatest power is often the shortest lived. You may find ancient words of power written upon scrolls of parchment. The strength of these scrolls lies in the ability of either apprentice or adept to cast them with equal ability. Their weakness is that they must first be read aloud and can never be kept at the ready in your mind. Use them with care.
 
 internal_name: TSFX_WITCH41
-name: Adria: (no transcript)
+name: Adria: Though the heat of the sun is beyond measure, the mere flame...
+text: Though the heat of the sun is beyond measure, the mere flame of a candle is of greater danger. No energies, no matter how great, can be used without the proper focus. For many spells, ensorcelled staves may be charged with magical energies many times over. I have the ability to restore their power, but know that nothing is done without a price.
 
 internal_name: TSFX_WITCH42
-name: Adria: (no transcript)
+name: Adria: The sum of our knowledge is in the sum of its people. Should...
+text: The sum of our knowledge is in the sum of its people. Should you find a book or scroll that you cannot decipher, do not hesitate to bring it to me. If I can make sense of it, I will share what I find.
 
 internal_name: TSFX_WITCH43
-name: Adria: (no transcript)
+name: Adria: To a man who only knows iron, there is no greater magic than...
+text: To a man who only knows iron, there is no greater magic than steel. The blacksmith Griswold is more of a sorcerer than he knows. His ability to meld fire and metal is unequaled in this land.
 
 internal_name: TSFX_WITCH44
-name: Adria: (no transcript)
+name: Adria: Corruption has the strength of deceit, but innocence holds th...
+text: Corruption has the strength of deceit, but innocence holds the power of purity. The young woman Jillian has a pure heart, placing the needs of her matriarch over her own. She fears me, but it is only because she does not understand me.
 
 internal_name: TSFX_WITCH45
-name: Adria: (no transcript)
+name: Adria: A chest opened in darkness holds no greater treasure than whe...
+text: A chest opened in darkness holds no greater treasure than when it is opened in the light. The storyteller Cain is an enigma, but only to those who do not look. His knowledge of what lies beneath the cathedral is far greater than even he allows himself to realize.
 
 internal_name: TSFX_WITCH46
-name: Adria: (no transcript)
+name: Adria: The higher you place your faith in one man, the farther it ha...
+text: The higher you place your faith in one man, the farther it has to fall. Farnam has lost his soul, but not to any demon. It was lost when he saw his fellow townspeople betrayed by the Archbishop Lazarus. He has knowledge to be gleaned, but you must separate fact from fantasy.
 
 internal_name: TSFX_WITCH47
-name: Adria: (no transcript)
+name: Adria: The hand, the heart, and the mind can perform miracles when t...
+text: The hand, the heart, and the mind can perform miracles when they are in perfect harmony. The healer Pepin sees into the body in a way that even I cannot. His ability to restore the sick and injured is magnified by his understanding of the creation of elixirs and potions. He is as great an ally as you have in Tristram.
 
 internal_name: TSFX_WITCH48
-name: Adria: (no transcript)
+name: Adria: Faith is absolute belief in the unseen. The priest Tremaine i...
+text: Faith is absolute belief in the unseen. The priest Tremaine is from a holy order long asleep in this land. He keeps a promise and a charge issued ages ago and sustains a union with realms that even my vision cannot reach. He knows much, but not as much as he believes.
 
 internal_name: TSFX_WITCH49
-name: Adria: (no transcript)
+name: Adria: There is much about the future we cannot see, but when it com...
+text: There is much about the future we cannot see, but when it comes, it will be the children who wield it. The boy word has a blackness upon his soul, but he poses no threat to the town or its people. His secretive dealings with the urchins and unspoken guilds of nearby towns gain him access to many devices that cannot be easily found in Tristram. It can provide assistance for your battle against the encroaching darkness.
 
 internal_name: TSFX_WITCH50
-name: Adria: (no transcript)
+name: Adria: Earth and walls and thatched canopy do not a home create. The...
+text: Earth and walls and thatched canopy do not a home create. The innkeeper Ogden serves more of a purpose in this town than many understand. He provides shelter for Jillian and her matriarch, maintains what life Farnam has left to him, and provides an anchor for all who are left in the town to what Tristram once was. It is that memory that continues to feed their hopes for your success.
 
 internal_name: USFX_LAZ1
 name: Arch-Bishop Lazarus: Abandon your foolish quest. All that awaits you is the wrath...
@@ -162,127 +212,168 @@ name: Arch-Bishop Lazarus: You are too late to save the child. Now you will join
 text: You are too late to save the child. Now you will join him in hell.
 
 internal_name: TSFX_STORY0
-name: Cain: (no transcript)
+name: Cain: The evil that you move against is the Dark Lord of Terror, kn...
+text: The evil that you move against is the Dark Lord of Terror, known to mortal men as Diablo. It was he who was imprisoned within the labyrinth many centuries ago. Find Diablo, or we may never have a chance to rid the world of his evil again.
 
 internal_name: TSFX_STORY1
-name: Cain: (no transcript)
+name: Cain: Ah, the story of our king, is it? The tragic fall of Leoric w...
+text: Ah, the story of our king, is it? The tragic fall of Leoric was a harsh blow to this land. The people always loved the king, and now they live in mortal fear of him. The question that I keep asking myself is how he could have fallen so far from the light, as Leoric had always been the holiest of men. Only the vilest powers of hell could so utterly destroy a man from within.
 
 internal_name: TSFX_STORY2
-name: Cain: (no transcript)
+name: Cain: I see that this strange behavior puzzles you as well. I would...
+text: I see that this strange behavior puzzles you as well. I would surmise that since many demons fear the light of the sun and believe that it holds great power, it may be that the rising sun depicted on the sign you speak of has led them to believe that it too holds some arcane powers. Perhaps they are not all as smart as we had feared.
 
 internal_name: TSFX_STORY3
-name: Cain: (no transcript)
+name: Cain: Yes, you speak of Lazarus, one who was once well-respected in...
+text: Yes, you speak of Lazarus, one who was once well-respected in our land. Even before King Leoric descended into madness and lost his son, the Archbishop Lazarus was acting strangely. Lazarus seemed to be motivated by unseen forces clinging to shadows and acting out some dark plan that was not his own.
 
 internal_name: TSFX_STORY4
-name: Cain: (no transcript)
+name: Cain: Hmm, I don't know what I can really tell you about this that...
+text: Hmm, I don't know what I can really tell you about this that will be of any help. The water that fills our wells comes from an underground spring. I have heard of a tunnel that leads to a great lake. Perhaps they are one and the same. Unfortunately, I do not know what would cause our water supply to be tainted.
 
 internal_name: TSFX_STORY5
-name: Cain: (no transcript)
+name: Cain: Worms that rise up from the ground? Many of the ancient writi...
+text: Worms that rise up from the ground? Many of the ancient writings speak of poisonous insects and foul creatures of the skies and seas plaguing mankind. It is no surprise that the very earth would offer up a similar peril now that the denizens of the underworld are upon us.
 
 internal_name: TSFX_STORY6
-name: Cain: (no transcript)
+name: Cain: While the barmaid may seem a bit confused at times, it is tru...
+text: While the barmaid may seem a bit confused at times, it is true that men have been disappearing from the village. It reminds me of ancient writings about a demonic temptress called Andariel. Known as the Maiden of Anguish, her thirst for mortal blood was so great that she sought to learn a spell to breach the mortal realm. She took the knowledge she needed and so began to lure mortal men into her dark corner of hell. If these legends are true, she is not a creature to be taken lightly.
 
 internal_name: TSFX_STORY7
-name: Cain: (no transcript)
+name: Cain: A book that speaks of a chamber of human bones? Well, a chamb...
+text: A book that speaks of a chamber of human bones? Well, a chamber of bone is mentioned in certain archaic writings that I studied in the libraries of the East. These tomes inferred that when the lords of the underworld desired to protect great treasures, they would create domains where those who died in the attempt to steal that treasure would be forever bound to defend it. but strangely fitting and...
 
 internal_name: TSFX_STORY8
-name: Cain: (no transcript)
+name: Cain: So, you seek knowledge concerning the wars of hell, do you? C...
+text: So, you seek knowledge concerning the wars of hell, do you? Cryptic tomes speak of great battles that determine which of the demonic lords are to rule over hell. They also mention a bitter rivalry between two of these lords. Osmodon, who led the Horned Death against the Armies of Light, and Belial, known as the Lord of Lies. Their hatred of each other is eternal. For their loathing, lost even to themselves. Tales abound that the mad wizard Horazon somehow trapped the lieutenants of these two lords of hell within his sanctum. There can be no more dangerous a path to tread than the one that falls alongside of demons. Should you also seek this path, watch your life and your soul very carefully, my friend.
 
 internal_name: TSFX_STORY9
-name: Cain: (no transcript)
+name: Cain: Farnum has taken to drinking quite heavily since his encounte...
+text: Farnum has taken to drinking quite heavily since his encounters in the labyrinth, but within the ramblings of this drunken man rests a legend well steeped in myth and mystery. Sit for a moment, my friend, and let me tell you of Iswal and Azurath. The saga of Iswal takes place during the lost battles in Hell. Iswal was an angel. Who was given charge of the holy rune blade, Azurath. Leading a daring assault on the Hellforge, Iswal was set upon by hundreds of blackened demons and was fatally wounded. The fiends cast the dying angel into a dark pit where the powers of chaos transformed him as he drowned in a whirlpool of burning blood. Evil possessed Iswal. The feathers of his wings burned away to reveal leathery skin and horns ripped through the flesh of his head. When he finally arose from that black pit, Iswal was an angel no more. Transformed into a creature of evil, he was once again given charge of Azurath, assuring that the blade would never again be used against the denizens of Hell.
 
 internal_name: TSFX_STORY10
-name: Cain: (no transcript)
+name: Cain: It seems that the Archbishop Lazarus goaded many of the towns...
+text: It seems that the Archbishop Lazarus goaded many of the townsmen into venturing into the labyrinth to find the king's missing son. He played upon their fears and whipped them into a frenzied mob. None of them were prepared for what lay within the cold earth. Lazarus abandoned them down there, left in the clutches of unspeakable horrors, to die.
 
 internal_name: TSFX_STORY11
-name: Cain: (no transcript)
+name: Cain: You must have been speaking with Wirt. His is a sad story ind...
+text: You must have been speaking with Wirt. His is a sad story indeed. That poor child was taken into the labyrinth by the demons, ripped from the very arms of his mother, Canus. May her soul rest in peace. The boy managed to escape, but only after they had chewed off his leg, and he has not been quite sane since. He often speaks in riddles, may hold some truth.
 
 internal_name: TSFX_STORY12
-name: Cain: (no transcript)
+name: Cain: You recite an interesting rhyme written in a style that remin...
+text: You recite an interesting rhyme written in a style that reminds me of other works. Let me think now. What was it? Darkness shrouds the hidden, eyes glowing unseen, with only the sounds of razor claws briefly scraping to torment those poor souls who have been made sightless for all eternity. Calls of the Blind.
 
 internal_name: TSFX_STORY13
-name: Cain: (no transcript)
+name: Cain: You claim to have spoken with Lachdanen? He was a great hero...
+text: You claim to have spoken with Lachdanen? He was a great hero during his life. Lachdanen was an honorable and just man who served his king faithfully for years. But of course you already know that. For those who were caught within the grasp of the king's curse, Lachdanen would be the least likely to submit to the darkness without a fight. So I suppose that your story could be true. If I were in your place, my friend, I would find a way to release him from his torture.
 
 internal_name: TSFX_STORY14
-name: Cain: (no transcript)
+name: Cain: Griswold speaks of the Anvil of Fury, a legendary artifact lo...
+text: Griswold speaks of the Anvil of Fury, a legendary artifact long searched for, but never found. Crafted from the metallic bones of the razor-pit demons, the Anvil of Fury was smelt around the skulls of the five most powerful magi of the underworld. Carved with runes of power and chaos, any weapon or armor forged upon this anvil will be immersed into the realm of chaos. Embedding it with magical properties. It is said that the unpredictable nature of chaos makes it difficult to know what the outcome of this smithing will be.
 
 internal_name: TSFX_STORY15
-name: Cain: (no transcript)
+name: Cain: The Gateway of Blood and the Halls of Fire are landmarks of m...
+text: The Gateway of Blood and the Halls of Fire are landmarks of mystic origin. Wherever this book you read from resides, it is surely a place of great power. Legends speak of a pedestal that is carved from obsidian stone and has a pool of boiling blood atop its bone-encrusted surface. There are also allusions to stones of blood that will open a door that guards an ancient treasure. The nature of this treasure is shrouded in speculation, my friend. But it is said that the ancient hero Arcane placed the holy armor Valor in a secret vault. Arcane was the first mortal to turn the tide of the Sinwar and chase the legions of darkness back to the burning hells. Just before Arcane died, his armor was hidden away in a secret vault. When this holy armor is again needed, a hero will arise to don Valor once more. Perhaps you are that hero.
 
 internal_name: TSFX_STORY16
-name: Cain: (no transcript)
+name: Cain: Hmm, an island where angels watched? Although Farnham's memor...
+text: Hmm, an island where angels watched? Although Farnham's memory is often cloudy these days, that does seem familiar. Perhaps the ancient chronicles of the Sin War can help us. Ah, yes, here is something. In a time long forgotten, a sea of blue rested on the edge of a fiery netherworld. Angels and warriors of light could use this place to heal themselves and gather their strength. It was also a staging area where they could train and prepare for the Sin War. Legends speak of a trinity of rocks that hide the path to this island of the sunless sea.
 
 internal_name: TSFX_STORY17
-name: Cain: (no transcript)
+name: Cain: The priest Tremaine is a holy man from an ancient order. Thei...
+text: The priest Tremaine is a holy man from an ancient order. Their dealings with the evil forces at work are well-respected and well-documented. I, too, have heard legends that speak of the cursed demon blade called Shadowfang. It is said to consume the tortured souls of its victims. These souls are trapped within its ebon blade and augment its unholy power. I have also read of a great hell-forge where even the mightiest weapon could be created or destroyed. Tread carefully when dealing with Shadowfang and its master, lest you be drawn into the sword as well.
 
 internal_name: TSFX_STORY18
-name: Cain: (no transcript)
+name: Cain: I know of only one legend that speaks of such a warrior as yo...
+text: I know of only one legend that speaks of such a warrior as you describe. His story is found within the ancient chronicles of the Sin War. Stained by a thousand years of war, blood, and death, the Warlord of Blood stands upon a mountain of his tattered victims. His dark blade screams a black curse to the living, a tortured invitation to any who would stand before this execution. It is also written that although he was once a mortal who fought beside the Legion of Darkness during the Sin War, he lost his humanity to his insatiable hunger for blood.
 
 internal_name: TSFX_STORY19
-name: Cain: (no transcript)
+name: Cain: There was a time when this town was a frequent stop for trave...
+text: There was a time when this town was a frequent stop for travelers from far and wide. Much has changed since then, but hidden caves and buried treasure are common fantasies of any child. Wirt seldom indulges in youthful games, so it may just be his imagination.
 
 internal_name: TSFX_STORY20
-name: Cain: (no transcript)
+name: Cain: Griswold speaks of the Heaven Stone that was destined for the...
+text: Griswold speaks of the Heaven Stone that was destined for the Enclave located in the east. It was being taken there for further study. This stone glowed with an energy that somehow granted vision beyond that which a normal man could possess. I do not know what secrets it holds, my friend, but finding this stone would certainly prove most valuable.
 
 internal_name: TSFX_STORY21
-name: Cain: (no transcript)
+name: Cain: The witch, Adria, seeks a black mushroom? I know as much abou...
+text: The witch, Adria, seeks a black mushroom? I know as much about black mushrooms as I do about red herrings. Perhaps Pepin the healer could tell you more. But this is something that cannot be found in any of my stories or books.
 
 internal_name: TSFX_STORY22
-name: Cain: (no transcript)
+name: Cain: So the legend of the map is real. Even I never truly believed...
+text: So the legend of the map is real. Even I never truly believed any of it. I suppose it is time that I told you the truth about who I am, my friend. You see, I am not all that I seem. My true name is Deckard Cain, the Elder, and I am the last descendant of an ancient brotherhood that was dedicated to keeping and safeguarding the secrets of a timeless evil. An evil that quite obviously has now been released. The evil that you move against is the Dark Lord of Terror, known to mortal men as Diablo. It was he who was imprisoned within the labyrinth many centuries ago. The map that you hold now was created ages ago to mark the time when Diablo would rise again from his imprisonment. The stars on that map align. Diablo will be at the height of his power. He will be all but invincible. You are now in a race against time, my friend. Find Diablo and destroy him before the stars align. We may never have a chance to rid the world of his evil again.
 
 internal_name: TSFX_STORY23
-name: Cain: (no transcript)
+name: Cain: Our time is running short. I sense his dark power building, a...
+text: Our time is running short. I sense his dark power building, and only you can stop him from attaining his full might.
 
 internal_name: TSFX_STORY24
-name: Cain: (no transcript)
+name: Cain: I'm sure that you tried your best, but I fear that even your...
+text: I'm sure that you tried your best, but I fear that even your strength and will may not be enough. Diablo is now at the height of his earthly power, and you will need all your courage and strength to defeat him. May the light protect and guide you, my friend. I will help in any way that I am able.
 
 internal_name: TSFX_STORY25
-name: Cain: (no transcript)
+name: Cain: Hello, my friend. Stay a while and listen.
+text: Hello, my friend. Stay a while and listen.
 
 internal_name: TSFX_STORY26
-name: Cain: (no transcript)
+name: Cain: While you are venturing deeper into the labyrinth, you may fi...
+text: While you are venturing deeper into the labyrinth, you may find tomes of great knowledge hidden there. Read them carefully, for they can tell you things that even I cannot.
 
 internal_name: TSFX_STORY27
-name: Cain: (no transcript)
+name: Cain: I know of many myths and legends that may contain answers to...
+text: I know of many myths and legends that may contain answers to questions that may arise in your journeys into the labyrinth. If you come across challenges and questions to which you seek knowledge, seek me out, and I will tell you what I can.
 
 internal_name: TSFX_STORY28
-name: Cain: (no transcript)
+name: Cain: "Griswold, a man of great action and great courage. I bet he...
+text: "Griswold, a man of great action and great courage. I bet he never told you about the time he went into the labyrinth to save Wirt, did he? He knows his fair share of the dangers to be found there, but then again, so do you. He is a skilled craftsman, and if he claims to be able to help you in any way, you can count on his honesty and his skill."
 
 internal_name: TSFX_STORY29
-name: Cain: (no transcript)
+name: Cain: Ogden has owned and run the Rising Sun Inn and Tavern for alm...
+text: Ogden has owned and run the Rising Sun Inn and Tavern for almost four years now. He purchased it just a few short months before everything here went to hell. He and his wife Garda do not have the money to leave as they invested all they had in making a life for themselves here. He is a good man with a deep sense of responsibility.
 
 internal_name: TSFX_STORY30
-name: Cain: (no transcript)
+name: Cain: Poor Farnum. He is a disquieting reminder of the doomed assem...
+text: Poor Farnum. He is a disquieting reminder of the doomed assembly that entered into the cathedral with Lazarus on that dark day. He escaped with his life, but his courage and much of his sanity were left in some dark pit. He finds comfort only at the bottom of his tankard nowadays, but there are occasional bits of truth buried within his constant ramblings.
 
 internal_name: TSFX_STORY31
-name: Cain: (no transcript)
+name: Cain: The witch, Adria, is an anomaly here in Tristram. She arrived...
+text: The witch, Adria, is an anomaly here in Tristram. She arrived shortly after the cathedral was desecrated, while most everyone else was fleeing. She had a small hut constructed at the edge of town, seemingly overnight, and has access to many strange and arcane artifacts and tomes of knowledge that even I have never seen before.
 
 internal_name: TSFX_STORY32
-name: Cain: (no transcript)
+name: Cain: Tremaine is an occasional visitor to our town and seems to ha...
+text: Tremaine is an occasional visitor to our town and seems to have little problem coming and going. It is strange how at times anyone who tries to leave Tristram is hunted down and slain by the cloaked riders, and at other times it is a simple matter to leave. I think it is that uncertain fear that keeps some of us here, but we are glad for Tremaine's bravery and luck in keeping some contact with the rest of the kingdom. Thank you.
 
 internal_name: TSFX_STORY33
-name: Cain: (no transcript)
+name: Cain: The story of Wirt is a frightening and tragic one. He was tak...
+text: The story of Wirt is a frightening and tragic one. He was taken from the arms of his mother and dragged into the labyrinth by the small, foul demons that wield wicked spears. There were many other children taken that day, including the son of King Leoric. The knights of the palace went below, but never returned. The blacksmith found the boy, but only after the foul beasts had begun to torture him for their sadistic pleasures.
 
 internal_name: TSFX_STORY34
-name: Cain: (no transcript)
+name: Cain: Ah, Pepin! I count him as a true friend, perhaps the closest...
+text: Ah, Pepin! I count him as a true friend, perhaps the closest I have here. He is a bit addled at times, but never a more caring or considerate soul has existed. His knowledge and skills are equal by few, and his door is always open.
 
 internal_name: TSFX_STORY35
-name: Cain: (no transcript)
+name: Cain: Oh, Jillian is a fine woman, much adored for her high spirits...
+text: Oh, Jillian is a fine woman, much adored for her high spirits and her quick laugh. She holds a special place in my heart. She stays on at the tavern to support her elderly grandmother who is too sick to travel. I sometimes fear for her safety, but I know that any man in the village would rather die than see her harmed.
 
 internal_name: TSFX_STORY36
-name: Cain: (no transcript)
+name: Cain: This does not bode well, for it confirms my darkest fears. Wh...
+text: This does not bode well, for it confirms my darkest fears. While I did not allow myself to believe the ancient legends, I cannot deny them now. Perhaps the time has come to reveal who I am. My true name is Deckard Cain the Elder, and I am the last descendant of an ancient brotherhood that was dedicated to safeguarding the secrets of a timeless evil. An evil that quite obviously has now been released. The Archbishop Lazarus, once King Leoric's most trusted advisor, led a party of simple townsfolk into the labyrinth to find the king's missing son, Albrecht. Quite some time passed before they returned, and only a few of them escaped with their lives. Curse me for a fool! I should have suspected his veiled treachery then. It must have been Lazarus himself who kidnapped Albrecht and has since hidden him within the labyrinth. I do not understand why the Archbishop turned to the darkness, or what his interest is in the child, unless he means to sacrifice him to his dark masters. That must be what he has planned. The survivors of his rescue party say that Lazarus was last seen running into the deepest bowels of the labyrinth. and save the prince from the sacrificial blade of this demented fiend.
 
 internal_name: TSFX_STORY37
-name: Cain: (no transcript)
+name: Cain: You must hurry and rescue Albrecht from the hands of Lazarus....
+text: You must hurry and rescue Albrecht from the hands of Lazarus. The prince and the people of this kingdom are counting on you.
 
 internal_name: TSFX_STORY38
-name: Cain: (no transcript)
+name: Cain: Your story is quite grim, my friend. Lazarus will surely burn...
+text: Your story is quite grim, my friend. Lazarus will surely burn in hell for his horrific deed. The boy that you describe is not our prince. But I believe that Albrecht may yet be in danger. The symbol of power that you speak of must be a portal in the very heart of the labyrinth. Know this, my friend. The evil that you move against is the Dark Lord of Terror. He is known to mortal men... as Diablo. It was he who was imprisoned within the labyrinth many centuries ago. And I fear that he seeks to once again sow chaos in the realm of mankind. You must venture through the portal and destroy Diablo before it is too late.
 
 internal_name: TSFX_COW1
-name: Cow: (no transcript)
+name: Cow: *Mario grunts*
+text: *Mario grunts*
 
 internal_name: TSFX_COW2
-name: Cow: (no transcript)
+name: Cow: Grrrr!
+text: Grrrr!
 
 internal_name: USFX_DIABLOD
 name: Diablo: *Dramatic music*
@@ -293,109 +384,144 @@ name: Diablo: I'm your man, I shall pass over to you.
 text: I'm your man, I shall pass over to you.
 
 internal_name: TSFX_DRUNK1
-name: Farnham: (no transcript)
+name: Farnham: I don't care about that. Listen, no skeleton is gonna be my k...
+text: I don't care about that. Listen, no skeleton is gonna be my king. Leoric is king. King! So you hear me? Hail to the king!
 
 internal_name: TSFX_DRUNK2
-name: Farnham: (no transcript)
+name: Farnham: You know what I think? Somebody took that sign, they're going...
+text: You know what I think? Somebody took that sign, they're going to want lots of money for it. If I was Ogden, well, I'm not. But if I was, I'd just buy a new sign with some pretty drawing on it. Maybe a nice mug of ale or a piece of cheese.
 
 internal_name: TSFX_DRUNK3
-name: Farnham: (no transcript)
+name: Farnham: They stab, then bite, then they're all around you. Liar! Liar...
+text: They stab, then bite, then they're all around you. Liar! Liar! They're all dead. Dead! Do you hear me? They just keep falling and falling. The blood spilling out all over the floor. All his fault.
 
 internal_name: TSFX_DRUNK4
-name: Farnham: (no transcript)
+name: Farnham: You drink water?
+text: You drink water?
 
 internal_name: TSFX_DRUNK5
-name: Farnham: (no transcript)
+name: Farnham: Listen, listen. I don't even like worms. Don't tell me about...
+text: Listen, listen. I don't even like worms. Don't tell me about your worms. I don't want your worms. Nope. No thanks. No worms for me.
 
 internal_name: TSFX_DRUNK6
-name: Farnham: (no transcript)
+name: Farnham: Nom, nom, nom, nom, nom.
+text: Nom, nom, nom, nom, nom.
 
 internal_name: TSFX_DRUNK7
-name: Farnham: (no transcript)
+name: Farnham: Okay, so listen, there's this chamber of wood, see, and his w...
+text: Okay, so listen, there's this chamber of wood, see, and his wife, you know, her, tells the tree, because she got away. Then I says that might work against him, but if you think I'm going to pay for this, you, yeah.
 
 internal_name: TSFX_DRUNK8
-name: Farnham: (no transcript)
+name: Farnham: Sounds like a good idea to me. You better get started right a...
+text: Sounds like a good idea to me. You better get started right away.
 
 internal_name: TSFX_DRUNK9
-name: Farnham: (no transcript)
+name: Farnham: Did you ever hear the one with the canetails? I love that one.
+text: Did you ever hear the one with the canetails? I love that one.
 
 internal_name: TSFX_DRUNK10
-name: Farnham: (no transcript)
+name: Farnham: Big. Big Cleaver. Killing all my friends. Couldn't stab him....
+text: Big. Big Cleaver. Killing all my friends. Couldn't stab him. Had to run away. Couldn't save them. Trapped in a room with so many bodies. So many friends. No!
 
 internal_name: TSFX_DRUNK11
-name: Farnham: (no transcript)
+name: Farnham: No, you can't let me go back there. I won't let you take me....
+text: No, you can't let me go back there. I won't let you take me. Too much pain. Don't let you dead. Can't get the blood out of my eyes. My mouth.
 
 internal_name: TSFX_DRUNK12
-name: Farnham: (no transcript)
+name: Farnham: Look here. That's pretty funny, huh? Get it? Blind? Look here.
+text: Look here. That's pretty funny, huh? Get it? Blind? Look here.
 
 internal_name: TSFX_DRUNK13
-name: Farnham: (no transcript)
+name: Farnham: Like Darren and it's dead. Everybody knows that. And you can'...
+text: Like Darren and it's dead. Everybody knows that. And you can't fool me into thinking any other way. You can't talk to the dead. I know.
 
 internal_name: TSFX_DRUNK14
-name: Farnham: (no transcript)
+name: Farnham: Griswold can't throw his anvil. What will he do then? And I'd...
+text: Griswold can't throw his anvil. What will he do then? And I'd be angry, too, if someone took my anvil.
 
 internal_name: TSFX_DRUNK15
-name: Farnham: (no transcript)
+name: Farnham: Hey, I'm here, I'm here, I'm here.
+text: Hey, I'm here, I'm here, I'm here.
 
 internal_name: TSFX_DRUNK16
-name: Farnham: (no transcript)
+name: Farnham: You're gonna hunt down a demon? Is that what you said? I know...
+text: You're gonna hunt down a demon? Is that what you said? I know I didn't hear that. Cause nobody hunts down demons. Nope. Nobody.
 
 internal_name: TSFX_DRUNK17
-name: Farnham: (no transcript)
+name: Farnham: Always you gotta talk about blood. What about flowers and sun...
+text: Always you gotta talk about blood. What about flowers and sunshine? And that pretty girl that brings the drinks. Listen here, friend. You're obsessive, you know that?
 
 internal_name: TSFX_DRUNK18
-name: Farnham: (no transcript)
+name: Farnham: Hey, let me see that. Thanks.
+text: Hey, let me see that. Thanks.
 
 internal_name: TSFX_DRUNK19
-name: Farnham: (no transcript)
+name: Farnham: I used to have a nice ring. It was a really expensive one. Bl...
+text: I used to have a nice ring. It was a really expensive one. Blue and green and red and silver. Don't remember what happened to it, though. I really miss that ring.
 
 internal_name: TSFX_DRUNK20
-name: Farnham: (no transcript)
+name: Farnham: Ogden Mitt is a mean black mushroom, but I get sick if I drin...
+text: Ogden Mitt is a mean black mushroom, but I get sick if I drink that. Listen, listen, here's the secret. Moderation is the key.
 
 internal_name: TSFX_DRUNK21
-name: Farnham: (no transcript)
+name: Farnham: Listen here. Come close. I don't know if you know what I know...
+text: Listen here. Come close. I don't know if you know what I know, but you have really got something here. That's a map.
 
 internal_name: TSFX_DRUNK22
-name: Farnham: (no transcript)
+name: Farnham: Hey, you there. Come here, listen up. You know about the isla...
+text: Hey, you there. Come here, listen up. You know about the island where angels watch? Pick the right rocks. But you better shield your eyes. Shield everything. I know, because I've been there and... Mm. Ale.
 
 internal_name: TSFX_DRUNK23
-name: Farnham: (no transcript)
+name: Farnham: I want to tell you something, because I know all about this s...
+text: I want to tell you something, because I know all about this stuff. It's my specialty. This here is the best. The best. That other of you ain't no good since I'm so stupid, dog.
 
 internal_name: TSFX_DRUNK24
-name: Farnham: (no transcript)
+name: Farnham: No one ever listens to me. Somewhere, I ain't too sure, but s...
+text: No one ever listens to me. Somewhere, I ain't too sure, but somewhere out of the church, a whole pile of gold gleaming, shining, just waiting for someone to get it.
 
 internal_name: TSFX_DRUNK25
-name: Farnham: (no transcript)
+name: Farnham: I know you got your own ideas, and I know you're not going to...
+text: I know you got your own ideas, and I know you're not going to believe this, but that weapon you got there, it just ain't no good against those big brutes. Oh, I don't care what Griswold says. They can't make anything like they used in the old days.
 
 internal_name: TSFX_DRUNK26
-name: Farnham: (no transcript)
+name: Farnham: If I was you, and I ain't, but if I was, I'd sell all that st...
+text: If I was you, and I ain't, but if I was, I'd sell all that stuff you got and get out of here. That boy out there, he's always got something good, but you gotta give him some gold, or he won't even show you what it's got.
 
 internal_name: TSFX_DRUNK27
-name: Farnham: (no transcript)
+name: Farnham: Can't a fellow drink in peace?
+text: Can't a fellow drink in peace?
 
 internal_name: TSFX_DRUNK28
-name: Farnham: (no transcript)
+name: Farnham: The guy who brings the drinks? Oh, yeah. What a pretty lady....
+text: The guy who brings the drinks? Oh, yeah. What a pretty lady. So nice, too.
 
 internal_name: TSFX_DRUNK29
-name: Farnham: (no transcript)
+name: Farnham: Why don't that old crumb do something for a change? Sure, sur...
+text: Why don't that old crumb do something for a change? Sure, sure, she's got stuff. If you listen to me, she's unnatural. I ain't never seen her eat or drink. And you can't trust somebody who doesn't drink at least a little.
 
 internal_name: TSFX_DRUNK30
-name: Farnham: (no transcript)
+name: Farnham: Kane isn't what he says he is. Sure, sure, he talks a good st...
+text: Kane isn't what he says he is. Sure, sure, he talks a good story. Some of them are real scary or funny. But I think he knows more than he knows he knows.
 
 internal_name: TSFX_DRUNK31
-name: Farnham: (no transcript)
+name: Farnham: Griswold? Good old Griswold. I love him like a brother. We fo...
+text: Griswold? Good old Griswold. I love him like a brother. We fought together, you know, back when we... Lazarus. Lazarus. Lazarus!
 
 internal_name: TSFX_DRUNK32
-name: Farnham: (no transcript)
+name: Farnham: I like Pepper. He really tries, you know. Listen here. You sh...
+text: I like Pepper. He really tries, you know. Listen here. You should make sure you get to know him. Good fellow like that with people always wanting help. Hey, I guess I'd be kind of like you, a hero. I was a hero, too, you know.
 
 internal_name: TSFX_DRUNK33
-name: Farnham: (no transcript)
+name: Farnham: I have an elderly priest around here. If I did, I'd kick him...
+text: I have an elderly priest around here. If I did, I'd kick him right in the... Can't even keep a church free of those hell spawned bastards. What good are they on? Those holy men. Liars. Liars!
 
 internal_name: TSFX_DRUNK34
-name: Farnham: (no transcript)
+name: Farnham: Word is a kid with more problems than even me. And I know all...
+text: Word is a kid with more problems than even me. And I know all about problems. Listen here. That kid's got a sweet deal. He's been there, you know. Lost a leg. Gotta walk around on a piece of wood. So sad. So sad.
 
 internal_name: TSFX_DRUNK35
-name: Farnham: (no transcript)
+name: Farnham: Ogden is the best man in town. I don't think his wife likes m...
+text: Ogden is the best man in town. I don't think his wife likes me much, but as long as she keeps tapping kegs, I'll like her just fine. Seems like I've been spending more time with Ogden than most, but he's so good to me.
 
 internal_name: USFX_GARBUD1
 name: Gharbad the Weak: Please, no hurt, no kill. Keep alive, and next time, good bri...
@@ -414,292 +540,388 @@ name: Gharbad the Weak: This too good for you. Very powerful. You want, you take
 text: This too good for you. Very powerful. You want, you take.
 
 internal_name: TSFX_BMAID1
-name: Gillian: (no transcript)
+name: Gillian: I don't like to think about how the king died. I like to reme...
+text: I don't like to think about how the king died. I like to remember him for the kind and just ruler that he was. His death was so sad and seemed very wrong somehow.
 
 internal_name: TSFX_BMAID2
-name: Gillian: (no transcript)
+name: Gillian: Oh my, is that where the sign went? My grandmother and I must...
+text: Oh my, is that where the sign went? My grandmother and I must have slept right through the whole thing. Thank the light that those monsters didn't attack the inn.
 
 internal_name: TSFX_BMAID3
-name: Gillian: (no transcript)
+name: Gillian: I remember Lazarus as being a very kind and giving man. He sp...
+text: I remember Lazarus as being a very kind and giving man. He spoke at my mother's funeral and was supportive of my grandmother and myself in a very troubled time. I pray every night that somehow he is still alive and safe.
 
 internal_name: TSFX_BMAID4
-name: Gillian: (no transcript)
+name: Gillian: My grandmother is very weak, and Garda says that we cannot dr...
+text: My grandmother is very weak, and Garda says that we cannot drink the water from the wells. Please, can you do something to help us?
 
 internal_name: TSFX_BMAID5
-name: Gillian: (no transcript)
+name: Gillian: Wait, before you say anything, my grandmother had a dream wit...
+text: Wait, before you say anything, my grandmother had a dream with giant slithering creatures in it. She also saw Pepin running from a house in the town. Do you think this means anything?
 
 internal_name: TSFX_BMAID6
-name: Gillian: (no transcript)
+name: Gillian: I'm afraid that I haven't heard anything about that. Perhaps...
+text: I'm afraid that I haven't heard anything about that. Perhaps Cain the storyteller could be of some help.
 
 internal_name: TSFX_BMAID7
-name: Gillian: (no transcript)
+name: Gillian: This is something that is far beyond anything I have ever lea...
+text: This is something that is far beyond anything I have ever learned. I can only think of one person in all of Tristram who could help you. Cain, of course.
 
 internal_name: TSFX_BMAID8
-name: Gillian: (no transcript)
+name: Gillian: When Farnham said something about a butcher killing people, I...
+text: When Farnham said something about a butcher killing people, I immediately discounted it. But since you brought it up, maybe it is true.
 
 internal_name: TSFX_BMAID9
-name: Gillian: (no transcript)
+name: Gillian: How could you even think of going back to that place? What co...
+text: How could you even think of going back to that place? What could be so important?
 
 internal_name: TSFX_BMAID10
-name: Gillian: (no transcript)
+name: Gillian: If you have questions about blindness, you should talk to Pep...
+text: If you have questions about blindness, you should talk to Pepin. I know that he gave my grandmother a potion that helped clear her vision, so maybe he can help you too.
 
 internal_name: TSFX_BMAID11
-name: Gillian: (no transcript)
+name: Gillian: I've never heard of a Lakhdanan before. Sorry, but I don't th...
+text: I've never heard of a Lakhdanan before. Sorry, but I don't think that I can be of much help to you.
 
 internal_name: TSFX_BMAID12
-name: Gillian: (no transcript)
+name: Gillian: Griswold's father used to tell some of us when we were growin...
+text: Griswold's father used to tell some of us when we were growing up about a giant anvil that was used to make mighty weapons. He said that when a hammer was struck upon this anvil, the ground would shake with a great fury. Whenever the earth moves, I always remember that story.
 
 internal_name: TSFX_BMAID13
-name: Gillian: (no transcript)
+name: Gillian: The story of the magic armor called Valor is something I ofte...
+text: The story of the magic armor called Valor is something I often heard the boys talk about. You had better ask one of the men in the village.
 
 internal_name: TSFX_BMAID14
-name: Gillian: (no transcript)
+name: Gillian: Those are the words of a drunkard. I don't see how they could...
+text: Those are the words of a drunkard. I don't see how they could be true.
 
 internal_name: TSFX_BMAID15
-name: Gillian: (no transcript)
+name: Gillian: I heard that the priest Tremaine was going to perform an exor...
+text: I heard that the priest Tremaine was going to perform an exorcism, but I didn't go. I don't see why we all have to spend every moment captive to what is lurking underneath our town. I know that many have died at the hands of these monsters, but we need to try to go on. I know that you have come here to free Tristram from the clutches of darkness, and I hope that one day we can live in peace again.
 
 internal_name: TSFX_BMAID16
-name: Gillian: (no transcript)
+name: Gillian: If you are to battle such a fierce opponent, may Light be you...
+text: If you are to battle such a fierce opponent, may Light be your guide and your defender. I will keep you in my thoughts.
 
 internal_name: TSFX_BMAID17
-name: Gillian: (no transcript)
+name: Gillian: A treasure map? Do you have it with you? Let me see. Hmm. It...
+text: A treasure map? Do you have it with you? Let me see. Hmm. It looks like this is pretty old, and some of the buildings in the town are not on this map. Oh, I wish I could go and look for the treasure with you, but I have to start work soon.
 
 internal_name: TSFX_BMAID18
-name: Gillian: (no transcript)
+name: Gillian: Well, a caravan of some very important people did stop here,...
+text: Well, a caravan of some very important people did stop here, but that was quite a while ago. They had strange accents and were starting on a long journey, as I recall. I don't see how you could hope to find anything that they would have been carrying.
 
 internal_name: TSFX_BMAID19
-name: Gillian: (no transcript)
+name: Gillian: I think Ogden might have some mushrooms in the storage cellar...
+text: I think Ogden might have some mushrooms in the storage cellar. Why don't you ask him?
 
 internal_name: TSFX_BMAID20
-name: Gillian: (no transcript)
+name: Gillian: The best person to ask about that sort of thing would be our...
+text: The best person to ask about that sort of thing would be our storyteller. Cain is very knowledgeable about ancient writings, and that is easily the oldest-looking piece of paper that I have ever seen.
 
 internal_name: TSFX_BMAID21
-name: Gillian: (no transcript)
+name: Gillian: "'Beg pardon, but have you heard what has been happening? Som...
+text: "'Beg pardon, but have you heard what has been happening? Some of the men have vanished from the village. Deesa's sons, Aeneas and Roof, claim to have seen strange lights glowing deep within the woods a few days ago, but no one has heard from them since. I, too, have seen a crimson shimmering from beyond the ash groves, but I have been too afraid to approach it. I fear that Ogden or our healer Pepin may be next. Won't you please find out what has happened?'
 
 internal_name: TSFX_BMAID22
-name: Gillian: (no transcript)
+name: Gillian: Have you looked into what has caused those strange lights yet...
+text: Have you looked into what has caused those strange lights yet? There are more men missing since last we spoke, and I'm beginning to fear that soon we may all vanish.
 
 internal_name: TSFX_BMAID23
-name: Gillian: (no transcript)
+name: Gillian: Demons that assume the form of beautiful women, you say? That...
+text: Demons that assume the form of beautiful women, you say? That's horrible. Thank the light that you solved this mystery before any more of our men were lured to their deaths. Thank you for keeping us safe from the powers of darkness once again.
 
 internal_name: TSFX_BMAID24
-name: Gillian: (no transcript)
+name: Gillian: Pray your pardon, but I have something to tell you that you m...
+text: Pray your pardon, but I have something to tell you that you may find interesting. It was the strangest thing. While drinking at the tavern, Farnum was rambling about something called Azurath. He also said something about a fallen angel. It was hard to understand him because he was very drunk and disoriented, but I seemed to remember something about a key in a barrel. He also kept covering his face and repeating the word Iswal over and over again.
 
 internal_name: TSFX_BMAID25
-name: Gillian: (no transcript)
+name: Gillian: You know, now that I think about it, maybe it wasn't a key in...
+text: You know, now that I think about it, maybe it wasn't a key in a barrel, but a barrel that was the key. Does that make any more sense?
 
 internal_name: TSFX_BMAID26
-name: Gillian: (no transcript)
+name: Gillian: Azurath and Izual. I don't know why I didn't remember that st...
+text: Azurath and Izual. I don't know why I didn't remember that story earlier. I've heard it often enough from my grandmother and Cain the storyteller. Well, I hope that my information was still more of a help than a hindrance. May light guide you, my friend.
 
 internal_name: TSFX_BMAID27
-name: Gillian: (no transcript)
+name: Gillian: My grandmother often tells me stories about the strange force...
+text: My grandmother often tells me stories about the strange forces that inhabit the graveyard outside of the church, and it may well interest you to hear one of them. She said that if you were to leave the proper offering in the cemetery, enter the cathedral to pray for the dead, and then return, the offering would be altered in some strange way. I don't know if this is just the talk of an old sick woman, but anything seems possible these days.
 
 internal_name: TSFX_BMAID28
-name: Gillian: (no transcript)
+name: Gillian: I know that my grandmother's story seems strange, but the gra...
+text: I know that my grandmother's story seems strange, but the graveyard does have many mysteries surrounding it. It couldn't hurt you to put something there and see what happens, could it? Maybe you will find out something that will help us all.
 
 internal_name: TSFX_BMAID29
-name: Gillian: (no transcript)
+name: Gillian: My grandmother had a dream about you last night. She said tha...
+text: My grandmother had a dream about you last night. She said that in her dream you used your bare hands to defeat one of those foul monsters that lurk under the church. When it died, it exploded into fabulous treasure. Although she was a bit frightened by her dream, she was able to describe the beast quite clearly to me.
 
 internal_name: TSFX_BMAID30
-name: Gillian: (no transcript)
+name: Gillian: My grandmother had that exact same dream again. She said you...
+text: My grandmother had that exact same dream again. She said you were quite brave and seemed very pleased with your prize.
 
 internal_name: TSFX_BMAID31
-name: Gillian: (no transcript)
+name: Gillian: Good day. How may I serve you?
+text: Good day. How may I serve you?
 
 internal_name: TSFX_BMAID32
-name: Gillian: (no transcript)
+name: Gillian: My grandmother had a dream that you would come and talk to me...
+text: My grandmother had a dream that you would come and talk to me. She has visions, you know, and can see into the future.
 
 internal_name: TSFX_BMAID33
-name: Gillian: (no transcript)
+name: Gillian: The woman at the edge of town is a witch. She seems nice enou...
+text: The woman at the edge of town is a witch. She seems nice enough and her name Adria is very pleasing to the ear, but I'm very afraid of her. It would take someone quite brave like you to see what she is doing out there.
 
 internal_name: TSFX_BMAID34
-name: Gillian: (no transcript)
+name: Gillian: Our blacksmith is a point of pride to the people of Tristram....
+text: Our blacksmith is a point of pride to the people of Tristram. Not only is he a master craftsman who has won many contests within his guild, but he received praises from our King Leoric himself. May his soul rest in peace. Griswold is also a great hero. Just ask Cain.
 
 internal_name: TSFX_BMAID35
-name: Gillian: (no transcript)
+name: Gillian: Cain has been the storyteller of Tristram for as long as I ca...
+text: Cain has been the storyteller of Tristram for as long as I can remember. He knows so much and can tell you just about anything, about almost everything.
 
 internal_name: TSFX_BMAID36
-name: Gillian: (no transcript)
+name: Gillian: Farnam is a drunkard who fills his belly with ale and everyon...
+text: Farnam is a drunkard who fills his belly with ale and everyone else's ears with nonsense. I know that both Pepin and Ogden feel sympathy for him, but I get so frustrated watching him slip farther and farther into a befuddled stupor every night.
 
 internal_name: TSFX_BMAID37
-name: Gillian: (no transcript)
+name: Gillian: Pepin saved my grandmother's life, and I know that I can neve...
+text: Pepin saved my grandmother's life, and I know that I can never repay him for that. His ability to heal any sickness is more powerful than the mightiest sword and more mysterious than any spell you can name. If you ever are in need of healing, Pepin can help you.
 
 internal_name: TSFX_BMAID38
-name: Gillian: (no transcript)
+name: Gillian: i really don't know much about the priest remain he never vis...
+text: i really don't know much about the priest remain he never visits the tavern preferring to keep to the company of pepin and cain perhaps it is because they too have more scholarly pursuits
 
 internal_name: TSFX_BMAID39
-name: Gillian: (no transcript)
+name: Gillian: I grew up with Wirt's mother, Canis. Although she was only sl...
+text: I grew up with Wirt's mother, Canis. Although she was only slightly hurt when those hideous creatures stole him, she never recovered. I think she died of a broken heart. Wirt has become a mean-spirited youngster, looking only to profit from the sweat of others. I know that he suffered and has seen horrors that I cannot even imagine. But some of that darkness hangs over him still.
 
 internal_name: TSFX_BMAID40
-name: Gillian: (no transcript)
+name: Gillian: Ogden and his wife have taken me and my grandmother into thei...
+text: Ogden and his wife have taken me and my grandmother into their home and have even let me earn a few gold pieces by working at the inn. I owe so much to them and hope one day to leave this place and help them start a grand hotel in the east.
 
 internal_name: TSFX_SMITH1
-name: Griswold: (no transcript)
+name: Griswold: I made many of the weapons and most of the armor that King Le...
+text: I made many of the weapons and most of the armor that King Leoric used to outfit his knights. I even crafted a huge two-handed sword of the finest mithril for him, as well as a field crown to match. I still can't believe how he died, but it must have been some sinister force that drove him insane.
 
 internal_name: TSFX_SMITH2
-name: Griswold: (no transcript)
+name: Griswold: Demons stole Ogden's sign, you say? That doesn't sound much l...
+text: Demons stole Ogden's sign, you say? That doesn't sound much like the atrocities I've heard of or seen. Demons are concerned with ripping out your heart, not your signpost.
 
 internal_name: TSFX_SMITH3
-name: Griswold: (no transcript)
+name: Griswold: Ah, I was there when Lazarus led us into the labyrinth. He sp...
+text: Ah, I was there when Lazarus led us into the labyrinth. He spoke of holy retribution. But when we started fighting those hellspawn, he did not so much as lift his mace against them. He just ran deeper into the dim, endless chambers that were filled with the servants of darkness.
 
 internal_name: TSFX_SMITH4
-name: Griswold: (no transcript)
+name: Griswold: Pippin has told you the truth. We will need fresh water badly...
+text: Pippin has told you the truth. We will need fresh water badly, and soon. I've tried to clear one of the smaller wells, but it reeks of stagnant filth. It must be getting clogged at the source.
 
 internal_name: TSFX_SMITH5
-name: Griswold: (no transcript)
+name: Griswold: I've seen no such things in my shop, but I will keep a close...
+text: I've seen no such things in my shop, but I will keep a close watch for them. Perhaps if they come this way, they won't take kindly to the fires of my forge.
 
 internal_name: TSFX_SMITH6
-name: Griswold: (no transcript)
+name: Griswold: I admit that I too have seen these strange lights, but I have...
+text: I admit that I too have seen these strange lights, but I have not felt pulled towards them. I'll be sure to steer clear of them, and will tell everyone that visits here to do likewise.
 
 internal_name: TSFX_SMITH7
-name: Griswold: (no transcript)
+name: Griswold: Ach, no, nothing of this place. But you may try asking Cain....
+text: Ach, no, nothing of this place. But you may try asking Cain. He talks about many things, and we're not surprised maybe he had some answers to your question.
 
 internal_name: TSFX_SMITH8
-name: Griswold: (no transcript)
+name: Griswold: A bold tale indeed. My limited time beneath the cathedral lea...
+text: A bold tale indeed. My limited time beneath the cathedral leaves me purely equipped to offer you any help with this. But, as always, you'll find Cain well versed in legends and folklore.
 
 internal_name: TSFX_SMITH9
-name: Griswold: (no transcript)
+name: Griswold: The blade Azurath, oh, it's legend. It was cast by the angeli...
+text: The blade Azurath, oh, it's legend. It was cast by the angelic weaponsmith, Synedade, and tempered within the fires of judgment. Whoever wields this weapon will find the legions of hell at his feet. If you found this blade, I would begin to truly believe that you can end the nightmare that has befallen our town.
 
 internal_name: TSFX_SMITH10
-name: Griswold: (no transcript)
+name: Griswold: I saw what Furnum calls the butcher as it swathed a path thro...
+text: I saw what Furnum calls the butcher as it swathed a path through the bodies of my friends. He swung a cleaver as large as an axe, hewing limbs and cutting down brave men where they stood. I was separated from the fray by a host of small screeching demons and somehow found the stairway leading out. I never saw that hideous beast again, but his bloodstained visage haunts me to this day.
 
 internal_name: TSFX_SMITH11
-name: Griswold: (no transcript)
+name: Griswold: When I found Wirt, he was very near a room that sounds like t...
+text: When I found Wirt, he was very near a room that sounds like the vile pitch I've described. The stench of death was heavy in the air and consumed as I was with getting the lad to safety. I did not go further than I had to. If he claims to know something of that place, I would not discount his word easily.
 
 internal_name: TSFX_SMITH12
-name: Griswold: (no transcript)
+name: Griswold: I'm afraid that I've neither heard nor seen a place that matc...
+text: I'm afraid that I've neither heard nor seen a place that matches your vivid description, my friend. Perhaps Cain the Storyteller could be of some help.
 
 internal_name: TSFX_SMITH13
-name: Griswold: (no transcript)
+name: Griswold: If it is actually Lachdanon that you've met, then I would adv...
+text: If it is actually Lachdanon that you've met, then I would advise that you aid him. I dealt with him on several occasions and found him to be honest and loyal in nature. The curse that fell upon the followers of King Lyoric would fall especially hard upon him.
 
 internal_name: TSFX_SMITH14
-name: Griswold: (no transcript)
+name: Griswold: The armor known as Valor could be what tips the scales in you...
+text: The armor known as Valor could be what tips the scales in your favor. I'll tell you that many have looked for it, including myself. Arcane hid it well, my friend, and it'll take more than a bit of luck to unlock the secrets that have kept it concealed, oh, lo, these many years.
 
 internal_name: TSFX_SMITH15
-name: Griswold: (no transcript)
+name: Griswold: Farnham speaks of a place that exists, at least in legend. Wa...
+text: Farnham speaks of a place that exists, at least in legend. Warriors would go to a place at the edge of hell to gird themselves for battle against the armies of darkness. If the stories are true, untold treasures could lie upon this island of the sunless sea.
 
 internal_name: TSFX_SMITH16
-name: Griswold: (no transcript)
+name: Griswold: Ah, you speak of an ancient and evil weapon. Tread lightly in...
+text: Ah, you speak of an ancient and evil weapon. Tread lightly in this area. The legends of Shadowfang are as black as a moonless winter night. Crafted within the Hellforge, Shadowfang can rend the very soul from whoever it strikes. Ah, I do not envy you if it is in your mind to defeat the one who wields it. May light protect you, brave hero.
 
 internal_name: TSFX_SMITH17
-name: Griswold: (no transcript)
+name: Griswold: Dark and wicked legend surrounds the one warlord of blood. Be...
+text: Dark and wicked legend surrounds the one warlord of blood. Be well prepared, my friend, for he shows no mercy or quarter.
 
 internal_name: TSFX_SMITH18
-name: Griswold: (no transcript)
+name: Griswold: A what? This is foolishness. There's no treasure buried here...
+text: A what? This is foolishness. There's no treasure buried here in Tristram. Let me see that. Look, these drawings are inaccurate. They don't match our town at all. I'd keep my mind on what lies below the cathedral and not what lies below our topsoil.
 
 internal_name: TSFX_SMITH19
-name: Griswold: (no transcript)
+name: Griswold: If Adria doesn't have one of these, I can bet that's a rare t...
+text: If Adria doesn't have one of these, I can bet that's a rare thing indeed. I can offer you no more help than that. But that sounds like a huge, gargantuan, swollen, bloated mushroom. Well, good hunting, I suppose.
 
 internal_name: TSFX_SMITH20
-name: Griswold: (no transcript)
+name: Griswold: I've never seen a map of this sort before. Where'd you get it...
+text: I've never seen a map of this sort before. Where'd you get it? Ugh, although I have no idea how to read this, Cain or Adrian may be able to provide the answers that you seek.
 
 internal_name: TSFX_SMITH21
-name: Griswold: (no transcript)
+name: Griswold: Greetings! It's always a pleasure to see one of my best custo...
+text: Greetings! It's always a pleasure to see one of my best customers. I know that you've been venturing deeper into the labyrinth, and there's a story I was told that you may find worth the time to listen to. One of the men who returned from the labyrinth told me about a mystic anvil that he came across during his escape. His description reminded me of legends I had heard in my youth about the burning Hellforge, where powerful weapons of magic are crafted. The legend had it that deep within the Hellforge rested the Anvil of Fury. This anvil contained within it the very essence of the demonic underworld. It is said that any weapon crafted upon the burning anvil is imbued with great power. If this anvil is indeed the Anvil of Fury, I may be able to make you a weapon capable of defeating even the darkest lord of hell. Find the anvil for me, and I'll get to work.
 
 internal_name: TSFX_SMITH22
-name: Griswold: (no transcript)
+name: Griswold: Nothing yet, eh? Well, keep searching. A whipping force upon...
+text: Nothing yet, eh? Well, keep searching. A whipping force upon the anvil could be your best hope. And I'm sure that I can make you one of legendary proportions.
 
 internal_name: TSFX_SMITH23
-name: Griswold: (no transcript)
+name: Griswold: Oh, I can hardly believe it. This is the Anvil of Fury. Good...
+text: Oh, I can hardly believe it. This is the Anvil of Fury. Good work, my friend. Now, we'll show those bastards that there are no weapons in hell more deadly than those made by men. Take this, and may light protect you.
 
 internal_name: TSFX_SMITH24
-name: Griswold: (no transcript)
+name: Griswold: Stay for a moment. I have a story you might find interesting....
+text: Stay for a moment. I have a story you might find interesting. A caravan that was bound for the Eastern Kingdoms passed through here some time ago. It was supposedly carrying a piece of the heavens that had fallen to Earth. The caravan was ambushed by cloaked riders just north of here along the roadway. I searched the wreckage for this sky rock, but it was nowhere to be found. If you should find it, I believe that I can fashion something useful from it.
 
 internal_name: TSFX_SMITH25
-name: Griswold: (no transcript)
+name: Griswold: I'm still waiting for you to bring me that stone from the hea...
+text: I'm still waiting for you to bring me that stone from the heavens. I know that I can make something powerful out of it.
 
 internal_name: TSFX_SMITH26
-name: Griswold: (no transcript)
+name: Griswold: Let me see that. Aye, aye, it is as I believed. Give me a mom...
+text: Let me see that. Aye, aye, it is as I believed. Give me a moment. Ah, here you are. I arranged pieces of the stone within a silver ring that my father left me. Ah, I hope it serves you well.
 
 internal_name: TSFX_SMITH27
-name: Griswold: (no transcript)
+name: Griswold: I'm in luck! A caravan has stopped just outside the village a...
+text: I'm in luck! A caravan has stopped just outside the village and has taken supplies to the lands of the east. Certain items will bring a special price, if you can get them for me.
 
 internal_name: TSFX_SMITH28
-name: Griswold: (no transcript)
+name: Griswold: We can both turn a nice profit if he can deliver the right go...
+text: We can both turn a nice profit if he can deliver the right goods to me. What do you say?
 
 internal_name: TSFX_SMITH29
-name: Griswold: (no transcript)
+name: Griswold: Ah, you're just in time. The caravan is leaving tonight. Here...
+text: Ah, you're just in time. The caravan is leaving tonight. Here is your cut, friend.
 
 internal_name: TSFX_SMITH30
-name: Griswold: (no transcript)
+name: Griswold: I believe that I may have found a way to greatly improve some...
+text: I believe that I may have found a way to greatly improve some weapons. If you can bring me what I need, I'd be willing to try out my idea. And if it works, it's yours.
 
 internal_name: TSFX_SMITH31
-name: Griswold: (no transcript)
+name: Griswold: I still think I can improve the right weapon!
+text: I still think I can improve the right weapon!
 
 internal_name: TSFX_SMITH32
-name: Griswold: (no transcript)
+name: Griswold: Let me just do this, and this, and this. Ah, it works! Take t...
+text: Let me just do this, and this, and this. Ah, it works! Take this back and give it a try.
 
 internal_name: TSFX_SMITH33
-name: Griswold: (no transcript)
+name: Griswold: I'm working on a method for strengthening armor. Unfortunatel...
+text: I'm working on a method for strengthening armor. Unfortunately, I don't have what I need just now. If you could possibly bring me what I require, the first one is yours.
 
 internal_name: TSFX_SMITH34
-name: Griswold: (no transcript)
+name: Griswold: I still think I can strengthen the right armor. You know what...
+text: I still think I can strengthen the right armor. You know what you need to bring me.
 
 internal_name: TSFX_SMITH35
-name: Griswold: (no transcript)
+name: Griswold: Good find! See if this works any better for you.
+text: Good find! See if this works any better for you.
 
 internal_name: TSFX_SMITH36
-name: Griswold: (no transcript)
+name: Griswold: If you come across any enchanted equipment, I could try to le...
+text: If you come across any enchanted equipment, I could try to learn how it was crafted and then use those methods for my own creations. I should probably start with something easy.
 
 internal_name: TSFX_SMITH37
-name: Griswold: (no transcript)
+name: Griswold: I still think that I can strip the knowledge of enchantments...
+text: I still think that I can strip the knowledge of enchantments if you bring me a certain item.
 
 internal_name: TSFX_SMITH38
-name: Griswold: (no transcript)
+name: Griswold: Thank you, oh great and mighty customer, uh, uh, champion. Th...
+text: Thank you, oh great and mighty customer, uh, uh, champion. This will take some study. Done.
 
 internal_name: TSFX_SMITH39
-name: Griswold: (no transcript)
+name: Griswold: Keep your eyes open for a figurine made of iron. I have uncov...
+text: Keep your eyes open for a figurine made of iron. I have uncovered some old records concerning a specific type of figurine and the secrets of metal crafting that it holds.
 
 internal_name: TSFX_SMITH40
-name: Griswold: (no transcript)
+name: Griswold: I know that the right figurine could be quite powerful. If yo...
+text: I know that the right figurine could be quite powerful. If you see what I'm looking for, get it and bring it to me straight away.
 
 internal_name: TSFX_SMITH41
-name: Griswold: (no transcript)
+name: Griswold: Oh, the secrets of this metal are fantastic! Oh, how I could...
+text: Oh, the secrets of this metal are fantastic! Oh, how I could make the right item gleam with power!
 
 internal_name: TSFX_SMITH42
-name: Griswold: (no transcript)
+name: Griswold: If you deliver to me the right item so I can combine it with...
+text: If you deliver to me the right item so I can combine it with this metal, I could craft something worthy of the warriors of heaven!
 
 internal_name: TSFX_SMITH43
-name: Griswold: (no transcript)
+name: Griswold: Your efforts are not in vain. It seems that all is as I had h...
+text: Your efforts are not in vain. It seems that all is as I had hoped. I trust you will find this useful in your battles below?
 
 internal_name: TSFX_SMITH44
-name: Griswold: (no transcript)
+name: Griswold: Whoa, what can I do for you?
+text: Whoa, what can I do for you?
 
 internal_name: TSFX_SMITH45
-name: Griswold: (no transcript)
+name: Griswold: If you're looking for a good weapon, let me show this to you....
+text: If you're looking for a good weapon, let me show this to you. Take your basic blunt weapon, such as a mace. Works like a charm against most of those undying horrors down there. And there's nothing better to shatter skinny little skeletons.
 
 internal_name: TSFX_SMITH46
-name: Griswold: (no transcript)
+name: Griswold: The axe? Aye, that's a good weapon. Balanced against any foe....
+text: The axe? Aye, that's a good weapon. Balanced against any foe. Look how it cleaves the air. And then imagine a nice fat demon head in its path. Keep in mind, however, that it is slow to swing. But talk about dealing a heavy blow!
 
 internal_name: TSFX_SMITH47
-name: Griswold: (no transcript)
+name: Griswold: Look at that edge, that balance! A sword in the right hands,...
+text: Look at that edge, that balance! A sword in the right hands, and against the right foe, is the master of all weapons! Its keen blade finds little to hack or pierce on the undead, but against a living, breathing enemy, a sword will bitter slice their flesh!
 
 internal_name: TSFX_SMITH48
-name: Griswold: (no transcript)
+name: Griswold: Your weapons and armor will show the signs of your struggles...
+text: Your weapons and armor will show the signs of your struggles against the darkness. If you bring them to me, with a bit of work and a hot forge, I can restore them to top fighting form.
 
 internal_name: TSFX_SMITH49
-name: Griswold: (no transcript)
+name: Griswold: while I have to practically smuggle in the metals and tools I...
+text: while I have to practically smuggle in the metals and tools I need from caravans that skirt the edges of our damned town. That witch, Adria, always seems to get whatever she needs. If I knew even the smallest bit about how to harness magic as she did, I could make some truly incredible things.
 
 internal_name: TSFX_SMITH50
-name: Griswold: (no transcript)
+name: Griswold: Oh, Jillian is a nice lass. Shame that her gammer is in such...
+text: Oh, Jillian is a nice lass. Shame that her gammer is in such poor health, or I would arrange to get both of them out of here on one of the trading caravans.
 
 internal_name: TSFX_SMITH51
-name: Griswold: (no transcript)
+name: Griswold: Sometimes I think that Cain talks too much, but I guess that'...
+text: Sometimes I think that Cain talks too much, but I guess that's his calling in life. If I can bend steel as well as he can bend your ear, I can make a suit of court plate good enough for an emperor.
 
 internal_name: TSFX_SMITH52
-name: Griswold: (no transcript)
+name: Griswold: I was with Farnum that night that Lazarus led us into the lab...
+text: I was with Farnum that night that Lazarus led us into the labyrinth. I never saw the Archbishop again, and I may not have survived if Farnum was not at my side. I fear that the attack left his soul as crippled as, well, another did my leg. I cannot fight this battle for him now. But I would if I could.
 
 internal_name: TSFX_SMITH53
-name: Griswold: (no transcript)
+name: Griswold: A good man who puts the needs of others above his own. You wo...
+text: A good man who puts the needs of others above his own. You won't find anyone left in Tristram, or anyone else for that matter, who has a bad thing to say about the healer.
 
 internal_name: TSFX_SMITH54
-name: Griswold: (no transcript)
+name: Griswold: The priest, Tremaine, he's a solitary fellow who has no time...
+text: The priest, Tremaine, he's a solitary fellow who has no time for most of us. He seems to prefer the company of Pepin or Cain. That's fine by me. I respect his passion and his commitment to his order, but I've no time for his prattling.
 
 internal_name: TSFX_SMITH55
-name: Griswold: (no transcript)
+name: Griswold: That lad is gonna get himself into serious trouble. Or I gues...
+text: That lad is gonna get himself into serious trouble. Or I guess I should say, again. I've tried to interest him in working here and learning an honest trade. But he prefers the high profits of dealing in goods of devious origin. I kinda hold that against him after what happened to him. But I do wish he would at least be careful.
 
 internal_name: TSFX_SMITH56
-name: Griswold: (no transcript)
+name: Griswold: The innkeeper has little business and no real way of turning...
+text: The innkeeper has little business and no real way of turning a profit. He manages to make inns meet by providing food and lodging for those who occasionally drift through the village, but they're as likely to sneak off into the night as they are to pay him. If it weren't for the stores of grains and dried meats he kept in his cellar, why most of us would have starved during that first year when the entire countryside was overrun by demons.
 
 internal_name: PS_MONK1
 name: Hero: Monk: Beyond the Hall of Heroes lies the Chamber of Bone. Eternal d...
@@ -1286,253 +1508,336 @@ name: Hero: Sorcerer: No way.
 text: No way.
 
 internal_name: PS_MAGE18
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Not a chance.
+text: Not a chance.
 
 internal_name: PS_MAGE19
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I would never use this.
+text: I would never use this.
 
 internal_name: PS_MAGE20
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I would have to equip that.
+text: I would have to equip that.
 
 internal_name: PS_MAGE21
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I cannot move this.
+text: I cannot move this.
 
 internal_name: PS_MAGE22
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I cannot move this, yet.
+text: I cannot move this, yet.
 
 internal_name: PS_MAGE23
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I cannot open this.
+text: I cannot open this.
 
 internal_name: PS_MAGE24
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I cannot open this yet.
+text: I cannot open this yet.
 
 internal_name: PS_MAGE25
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I cannot lift this.
+text: I cannot lift this.
 
 internal_name: PS_MAGE26
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I cannot lift this yet.
+text: I cannot lift this yet.
 
 internal_name: PS_MAGE27
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I cannot cast that here.
+text: I cannot cast that here.
 
 internal_name: PS_MAGE28
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I cannot cast that yet.
+text: I cannot cast that yet.
 
 internal_name: PS_MAGE29
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: That did not do anything.
+text: That did not do anything.
 
 internal_name: PS_MAGE30
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I can already do that.
+text: I can already do that.
 
 internal_name: PS_MAGE31
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I do not need that.
+text: I do not need that.
 
 internal_name: PS_MAGE32
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I do not need to do that.
+text: I do not need to do that.
 
 internal_name: PS_MAGE33
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I do not want that.
+text: I do not want that.
 
 internal_name: PS_MAGE34
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I do not have a spell ready.
+text: I do not have a spell ready.
 
 internal_name: PS_MAGE35
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Not enough mana.
+text: Not enough mana.
 
 internal_name: PS_MAGE36
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: That would kill me.
+text: That would kill me.
 
 internal_name: PS_MAGE37
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I cannot do that.
+text: I cannot do that.
 
 internal_name: PS_MAGE38
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: No.
+text: No.
 
 internal_name: PS_MAGE39
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Yes.
+text: Yes.
 
 internal_name: PS_MAGE40
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: That will not work.
+text: That will not work.
 
 internal_name: PS_MAGE41
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: That will not work here.
+text: That will not work here.
 
 internal_name: PS_MAGE42
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: That will not work yet.
+text: That will not work yet.
 
 internal_name: PS_MAGE43
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I cannot get there from here.
+text: I cannot get there from here.
 
 internal_name: PS_MAGE44
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: It is too heavy.
+text: It is too heavy.
 
 internal_name: PS_MAGE45
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: It is too big.
+text: It is too big.
 
 internal_name: PS_MAGE46
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Just what I was looking for.
+text: Just what I was looking for.
 
 internal_name: PS_MAGE47
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I have a bad feeling about this.
+text: I have a bad feeling about this.
 
 internal_name: PS_MAGE48
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Got milk?
+text: Got milk?
 
 internal_name: PS_MAGE49
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I am not thirsty.
+text: I am not thirsty.
 
 internal_name: PS_MAGE50
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I am no milkmaid.
+text: I am no milkmaid.
 
 internal_name: PS_MAGE51
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I could blow up the whole village.
+text: I could blow up the whole village.
 
 internal_name: PS_MAGE52
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Yes, that is a cow, all right.
+text: Yes, that is a cow, all right.
 
 internal_name: PS_MAGE53
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Too heavy.
+text: Too heavy.
 
 internal_name: PS_MAGE54
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: In spiritu sanctum.
+text: In spiritu sanctum.
 
 internal_name: PS_MAGE55
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Predictum Otium.
+text: Predictum Otium.
 
 internal_name: PS_MAGE56
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Efficio obitus ut inimicus.
+text: Efficio obitus ut inimicus.
 
 internal_name: PS_MAGE57
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: The enchantment is gone.
+text: The enchantment is gone.
 
 internal_name: PS_MAGE58
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: All too easy.
+text: All too easy.
 
 internal_name: PS_MAGE59
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Back to the grave.
+text: Back to the grave.
 
 internal_name: PS_MAGE60
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Time to die.
+text: Time to die.
 
 internal_name: PS_MAGE61
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I am not impressed.
+text: I am not impressed.
 
 internal_name: PS_MAGE62
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I am sorry. Did I break your concentration?
+text: I am sorry. Did I break your concentration?
 
 internal_name: PS_MAGE63
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Vengeance is mine.
+text: Vengeance is mine.
 
 internal_name: PS_MAGE64
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: DIE!
+text: DIE!
 
 internal_name: PS_MAGE65
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Yes.
+text: Yes.
 
 internal_name: PS_MAGE66
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Ah.
+text: Ah.
 
 internal_name: PS_MAGE67
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Phew.
+text: Phew.
 
 internal_name: PS_MAGE68
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: AHHHHHHHHH!
+text: AHHHHHHHHH!
 
 internal_name: PS_MAGE69
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: *Gasp*
+text: *Gasp*
 
 internal_name: PS_MAGE69B
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: *GASP*
+text: *GASP*
 
 internal_name: PS_MAGE70
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: AHHHHH!
+text: AHHHHH!
 
 internal_name: PS_MAGE71
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: *Gunshot*
+text: *Gunshot*
 
 internal_name: PS_MAGE72
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: *Sigh* *Sigh*
+text: *Sigh* *Sigh*
 
 internal_name: PS_MAGE73
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Hmm.
+text: Hmm.
 
 internal_name: PS_MAGE74
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Oh.
+text: Oh.
 
 internal_name: PS_MAGE75
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Thank the light.
+text: Thank the light.
 
 internal_name: PS_MAGE76
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: What was that?
+text: What was that?
 
 internal_name: PS_MAGE77
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Hmm?
+text: Hmm?
 
 internal_name: PS_MAGE78
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Hmm.
+text: Hmm.
 
 internal_name: PS_MAGE79
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Hmm. Hmm.
+text: Hmm. Hmm.
 
 internal_name: PS_MAGE80
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: The spirits of the dead are now avenged.
+text: The spirits of the dead are now avenged.
 
 internal_name: PS_MAGE81
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: The town is safe from these foul spawn.
+text: The town is safe from these foul spawn.
 
 internal_name: PS_MAGE82
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Rest well, Leoric. I'll find your son.
+text: Rest well, Leoric. I'll find your son.
 
 internal_name: PS_MAGE83
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Your madness ends here, betrayer.
+text: Your madness ends here, betrayer.
 
 internal_name: PS_MAGE84
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: You'll lure no more men to their deaths.
+text: You'll lure no more men to their deaths.
 
 internal_name: PS_MAGE85
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Return to heaven, warrior of light.
+text: Return to heaven, warrior of light.
 
 internal_name: PS_MAGE86
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I can see why they fear this weapon.
+text: I can see why they fear this weapon.
 
 internal_name: PS_MAGE87
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: This must be what Griswold wanted.
+text: This must be what Griswold wanted.
 
 internal_name: PS_MAGE88
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I need to get this to Lachdanen.
+text: I need to get this to Lachdanen.
 
 internal_name: PS_MAGE89
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I need to get this to Griswold.
+text: I need to get this to Griswold.
 
 internal_name: PS_MAGE90
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I've never been here before.
+text: I've never been here before.
 
 internal_name: PS_MAGE91
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: May the spirit of Arkane protect me.
+text: May the spirit of Arkane protect me.
 
 internal_name: PS_MAGE92
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: This is a place of great power.
+text: This is a place of great power.
 
 internal_name: PS_MAGE93
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: This blade must be destroyed!
+text: This blade must be destroyed!
 
 internal_name: PS_MAGE94
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Your reign of pain has ended.
+text: Your reign of pain has ended.
 
 internal_name: PS_MAGE95
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: Now that is a big mushroom.
+text: Now that is a big mushroom.
 
 internal_name: PS_MAGE96
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: The smell of death surrounds me.
+text: The smell of death surrounds me.
 
 internal_name: PS_MAGE97
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: The sanctity of this place has been fouled.
+text: The sanctity of this place has been fouled.
 
 internal_name: PS_MAGE98
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: It is hot down here.
+text: It is hot down here.
 
 internal_name: PS_MAGE99
-name: Hero: Sorcerer: (no transcript)
+name: Hero: Sorcerer: I must be getting close.
+text: I must be getting close.
 
 internal_name: PS_MAGE100
 name: Hero: Sorcerer: Maybe it is locked from the inside.
@@ -1547,346 +1852,460 @@ name: Hero: Sorcerer: Maybe there is another way.
 text: Maybe there is another way.
 
 internal_name: PS_WARR14B
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I gotta pawn some of this stuff.
+text: I gotta pawn some of this stuff.
 
 internal_name: PS_WARR14C
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Too much baggage.
+text: Too much baggage.
 
 internal_name: PS_WARR15B
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I have no room for this crap.
+text: I have no room for this crap.
 
 internal_name: PS_WARR15C
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I gotta get rid of some of this crap.
+text: I gotta get rid of some of this crap.
 
 internal_name: PS_WARR16B
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Where do you want me to put this?
+text: Where do you want me to put this?
 
 internal_name: PS_WARR16C
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: What am I, a pack rat?
+text: What am I, a pack rat?
 
 internal_name: PS_WARR69B
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: *Ugh*
+text: *Ugh*
 
 internal_name: PS_WARR95B
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: That's not such a big mushroom.
+text: That's not such a big mushroom.
 
 internal_name: PS_WARR95C
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I've never seen a mushroom that size.
+text: I've never seen a mushroom that size.
 
 internal_name: PS_WARR95D
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: That mushroom's the size of a Cadillac.
+text: That mushroom's the size of a Cadillac.
 
 internal_name: PS_WARR95E
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Damn, what a mushroom.
+text: Damn, what a mushroom.
 
 internal_name: PS_WARR95F
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: What a mushroom.
+text: What a mushroom.
 
 internal_name: PS_WARR96B
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: The smell of death surrounds me.
+text: The smell of death surrounds me.
 
 internal_name: PS_WARR97
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: The sanctity of this place has been fouled.
+text: The sanctity of this place has been fouled.
 
 internal_name: PS_WARR98
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: It's hot down here.
+text: It's hot down here.
 
 internal_name: PS_WARR100
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Maybe it's locked from the inside.
+text: Maybe it's locked from the inside.
 
 internal_name: PS_WARR101
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Looks like it's rusted shut.
+text: Looks like it's rusted shut.
 
 internal_name: PS_WARR102
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Maybe there's another way.
+text: Maybe there's another way.
 
 internal_name: PS_WARR1
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Beyond the Hall of Heroes lies the Chamber of Bone. Eternal d...
+text: Beyond the Hall of Heroes lies the Chamber of Bone. Eternal death awaits any who would seek to steal the treasures secured within this room. So speaks the Lord of Terror, and so it is written.
 
 internal_name: PS_WARR2
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Let this tome serve as your warning. This is a forbidden plac...
+text: Let this tome serve as your warning. This is a forbidden place. Return from whence you came and your life will be spared. Horazon, master of the disciplines that summon and bind creatures to this plane, promises death to those who pass beyond the five pillars. You have been admonished.
 
 internal_name: PS_WARR3
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Then, by binding the spirit to the crafted rock, it is given...
+text: Then, by binding the spirit to the crafted rock, it is given life. This sounds like a spell of some kind.
 
 internal_name: PS_WARR4
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: The Creature of Flame by Horazon. Should be interesting reading.
+text: The Creature of Flame by Horazon. Should be interesting reading.
 
 internal_name: PS_WARR5
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Morta, Vespa, Gaia, Innumino. Evegin, Jatan, Lua, Gretan.
+text: Morta, Vespa, Gaia, Innumino. Evegin, Jatan, Lua, Gretan.
 
 internal_name: PS_WARR6
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: The lieutenant of Belial is known as Grimspike. Beware this d...
+text: The lieutenant of Belial is known as Grimspike. Beware this demon, for his strength appears immeasurable. Reading this scroll and therefore speaking his name near an arcane circle of binding will surely summon him there. Hmm. Near a circle of binding.
 
 internal_name: PS_WARR7
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: This looks like some sort of journal. It seems that I may hav...
+text: This looks like some sort of journal. It seems that I may have brought something to this plane that even I cannot control. The creature that fell into my astral trap is a very deadly demon. I have been able to bind it at the bottom of a pit, but it kills everything that I have sent there in attempts to defeat it. While it cannot escape, it does block the tunnels that lead to my protected haven. I am tempted to use the switch to open the tunnels to see if it will just leave, but I fear it is smarter than most of the lesser demons I have trapped before. If I could just lure it somewhere else.
 
 internal_name: PS_WARR8
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Your death will be avenged.
+text: Your death will be avenged.
 
 internal_name: PS_WARR9
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Rest in peace, my friend.
+text: Rest in peace, my friend.
 
 internal_name: PS_WARR10
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: And so, locked beyond the Gateway of Blood and past the Hall...
+text: And so, locked beyond the Gateway of Blood and past the Hall of Fire, valor awaits for the Hero of Light to awaken.
 
 internal_name: PS_WARR11
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can see what you see not. Vision milky, then eyes rot. When...
+text: I can see what you see not. Vision milky, then eyes rot. When you turn, they will be gone, whispering their hidden song. Then you see what cannot be. Shadows move where light should be. Out of darkness, out of mind, cast down into the halls of the blind.
 
 internal_name: PS_WARR12
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: The armories of hell are home to the warlord of blood. In his...
+text: The armories of hell are home to the warlord of blood. In his wake lay the mutilated bodies of thousands. Angels and man alike have been cut down to fulfill his endless sacrifices to the dark ones who scream for one thing. Blood.
 
 internal_name: PS_WARR13
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can't use this yet.
+text: I can't use this yet.
 
 internal_name: PS_WARR14
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can't carry anymore.
+text: I can't carry anymore.
 
 internal_name: PS_WARR15
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I have no room.
+text: I have no room.
 
 internal_name: PS_WARR16
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Where would I put this?
+text: Where would I put this?
 
 internal_name: PS_WARR17
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: No way.
+text: No way.
 
 internal_name: PS_WARR18
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Not a chance.
+text: Not a chance.
 
 internal_name: PS_WARR19
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I'd never use this.
+text: I'd never use this.
 
 internal_name: PS_WARR20
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I'd have to equip that.
+text: I'd have to equip that.
 
 internal_name: PS_WARR21
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can't move this.
+text: I can't move this.
 
 internal_name: PS_WARR22
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can't move this yet.
+text: I can't move this yet.
 
 internal_name: PS_WARR23
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can't open this.
+text: I can't open this.
 
 internal_name: PS_WARR24
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can't open this yet.
+text: I can't open this yet.
 
 internal_name: PS_WARR25
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can't lift this.
+text: I can't lift this.
 
 internal_name: PS_WARR26
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can't lift this yet.
+text: I can't lift this yet.
 
 internal_name: PS_WARR27
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can't cast that here.
+text: I can't cast that here.
 
 internal_name: PS_WARR28
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can't cast that yet.
+text: I can't cast that yet.
 
 internal_name: PS_WARR29
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: That didn't do anything.
+text: That didn't do anything.
 
 internal_name: PS_WARR30
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can already do that.
+text: I can already do that.
 
 internal_name: PS_WARR31
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I don't need that.
+text: I don't need that.
 
 internal_name: PS_WARR32
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I don't need to do that.
+text: I don't need to do that.
 
 internal_name: PS_WARR33
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I don't want that.
+text: I don't want that.
 
 internal_name: PS_WARR34
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I don't have a spell ready.
+text: I don't have a spell ready.
 
 internal_name: PS_WARR35
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Not enough manna.
+text: Not enough manna.
 
 internal_name: PS_WARR36
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: That would kill me.
+text: That would kill me.
 
 internal_name: PS_WARR37
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can't do that.
+text: I can't do that.
 
 internal_name: PS_WARR38
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: No.
+text: No.
 
 internal_name: PS_WARR39
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Yes.
+text: Yes.
 
 internal_name: PS_WARR40
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: That won't work.
+text: That won't work.
 
 internal_name: PS_WARR41
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: That won't work here.
+text: That won't work here.
 
 internal_name: PS_WARR42
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: That won't work yet.
+text: That won't work yet.
 
 internal_name: PS_WARR43
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can't get there from here.
+text: I can't get there from here.
 
 internal_name: PS_WARR44
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: It's too heavy.
+text: It's too heavy.
 
 internal_name: PS_WARR45
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: It's too big.
+text: It's too big.
 
 internal_name: PS_WARR46
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Just what I was looking for.
+text: Just what I was looking for.
 
 internal_name: PS_WARR47
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I've got a bad feeling about this.
+text: I've got a bad feeling about this.
 
 internal_name: PS_WARR48
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Got milk?
+text: Got milk?
 
 internal_name: PS_WARR49
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I'm not thirsty.
+text: I'm not thirsty.
 
 internal_name: PS_WARR50
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I'm no milkmaid.
+text: I'm no milkmaid.
 
 internal_name: PS_WARR51
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I could blow up the whole village.
+text: I could blow up the whole village.
 
 internal_name: PS_WARR52
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Yep, that's a cow all right.
+text: Yep, that's a cow all right.
 
 internal_name: PS_WARR53
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Too heavy.
+text: Too heavy.
 
 internal_name: PS_WARR54
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: IN SPIRITU SANCTUM
+text: IN SPIRITU SANCTUM
 
 internal_name: PS_WARR55
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Predictum Oteum.
+text: Predictum Oteum.
 
 internal_name: PS_WARR56
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Ephesio orbitus ut inimicus.
+text: Ephesio orbitus ut inimicus.
 
 internal_name: PS_WARR57
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: The enchantment is gone.
+text: The enchantment is gone.
 
 internal_name: PS_WARR58
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: All too easy.
+text: All too easy.
 
 internal_name: PS_WARR59
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Back to the grave.
+text: Back to the grave.
 
 internal_name: PS_WARR60
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Time to die.
+text: Time to die.
 
 internal_name: PS_WARR61
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I'm not impressed.
+text: I'm not impressed.
 
 internal_name: PS_WARR62
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I'm sorry, did I break your concentration?
+text: I'm sorry, did I break your concentration?
 
 internal_name: PS_WARR63
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Vengeance is mine.
+text: Vengeance is mine.
 
 internal_name: PS_WARR64
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Die.
+text: Die.
 
 internal_name: PS_WARR65
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Yeah.
+text: Yeah.
 
 internal_name: PS_WARR66
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: AHHHHHHHHH
+text: AHHHHHHHHH
 
 internal_name: PS_WARR67
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Whew!
+text: Whew!
 
 internal_name: PS_WARR68
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Ah!
+text: Ah!
 
 internal_name: PS_WARR69
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Ah!
+text: Ah!
 
 internal_name: PS_WARR70
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: UGH!
+text: UGH!
 
 internal_name: PS_WARR71
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Oh, ah.
+text: Oh, ah.
 
 internal_name: PS_WARR72
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: *crying*
+text: *crying*
 
 internal_name: PS_WARR73
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Ooooooh.
+text: Ooooooh.
 
 internal_name: PS_WARR74
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Whoa.
+text: Whoa.
 
 internal_name: PS_WARR75
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Thank the light.
+text: Thank the light.
 
 internal_name: PS_WARR76
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: What was that?
+text: What was that?
 
 internal_name: PS_WARR77
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Hmm?
+text: Hmm?
 
 internal_name: PS_WARR78
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Hmm.
+text: Hmm.
 
 internal_name: PS_WARR79
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Uh-huh.
+text: Uh-huh.
 
 internal_name: PS_WARR80
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: The spirits of the dead are now avenged.
+text: The spirits of the dead are now avenged.
 
 internal_name: PS_WARR81
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: The town is safe from these foul spawn.
+text: The town is safe from these foul spawn.
 
 internal_name: PS_WARR82
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Rest well, Leoric. I'll find your son.
+text: Rest well, Leoric. I'll find your son.
 
 internal_name: PS_WARR83
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Your madness ends here, betrayer.
+text: Your madness ends here, betrayer.
 
 internal_name: PS_WARR84
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: You'll lure no more men to their deaths.
+text: You'll lure no more men to their deaths.
 
 internal_name: PS_WARR85
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Return to heaven, warrior of light.
+text: Return to heaven, warrior of light.
 
 internal_name: PS_WARR86
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I can see why they fear this weapon.
+text: I can see why they fear this weapon.
 
 internal_name: PS_WARR87
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: This must be what Griswold wanted.
+text: This must be what Griswold wanted.
 
 internal_name: PS_WARR88
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I need to get this to Lock Donnen.
+text: I need to get this to Lock Donnen.
 
 internal_name: PS_WARR89
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I need to get this to Griswold.
+text: I need to get this to Griswold.
 
 internal_name: PS_WARR90
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I've never been here before.
+text: I've never been here before.
 
 internal_name: PS_WARR91
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: May the spirit of Arcane protect me.
+text: May the spirit of Arcane protect me.
 
 internal_name: PS_WARR92
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: This is a place of great power.
+text: This is a place of great power.
 
 internal_name: PS_WARR93
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: This blade must be destroyed.
+text: This blade must be destroyed.
 
 internal_name: PS_WARR94
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Your reign of pain has ended.
+text: Your reign of pain has ended.
 
 internal_name: PS_WARR95
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: Now that's one big mushroom.
+text: Now that's one big mushroom.
 
 internal_name: PS_WARR99
-name: Hero: Warrior: (no transcript)
+name: Hero: Warrior: I must be getting close.
+text: I must be getting close.
 
 internal_name: USFX_IZUAL1
 name: Izual: How much suffering, mortal, does it take before you lose your...
@@ -1941,283 +2360,376 @@ name: Narrator: Hail and sacrifice to Diablo, lord of terror and destroyer of...
 text: Hail and sacrifice to Diablo, lord of terror and destroyer of souls. When I awoke my master from his sleep, he attempted to possess a mortal's form. Diablo attempted to claim the body of King Leoric, but my master was too weak from his imprisonment. My lord required a simple and innocent anchor to this world, and so found the boy Albrecht to be perfect for the task. While the good King Leoric was left maddened by Diablo's unsuccessful possession, I kidnapped his son Albrecht and brought him before my master. I now await Diablo's call and pray that I will be rewarded when he at last emerges as the lord of this world.
 
 internal_name: TSFX_TAVERN0
-name: Ogden: (no transcript)
+name: Ogden: Thank goodness you've returned. Much has changed since you li...
+text: Thank goodness you've returned. Much has changed since you lived here, my friend. All was peaceful until the dark riders came and destroyed our village. Many were cut down where they stood, and those who took up arms were slain or dragged away to become slaves, or worse. The church at the edge of town has been desecrated and is being used for dark rituals. The screams that echo in the night are inhuman, but some of our townsfolk may yet survive. Perhaps I can tell you more if we speak again. Good luck.
 
 internal_name: TSFX_TAVERN1
-name: Ogden: (no transcript)
+name: Ogden: Lazarus was the archbishop who led many of the townspeople in...
+text: Lazarus was the archbishop who led many of the townspeople into the labyrinth. I lost many good friends that day, and Lazarus never returned. I suppose he was killed along with most of the others. If you would do me a favor, good master, please do not talk to Farnam about that day.
 
 internal_name: TSFX_TAVERN2
-name: Ogden: (no transcript)
+name: Ogden: I have always tried to keep a large supply of foodstuffs and...
+text: I have always tried to keep a large supply of foodstuffs and drink in our storage cellar, but with the entire town having no source of fresh water, even our stores will soon run dry. Please, do what you can or I don't know what we will do.
 
 internal_name: TSFX_TAVERN3
-name: Ogden: (no transcript)
+name: Ogden: That sounds quite disgusting, and I am afraid that I haven't...
+text: That sounds quite disgusting, and I am afraid that I haven't heard anything about any worms. Perhaps Cain, the storyteller, could be of some help.
 
 internal_name: TSFX_TAVERN4
-name: Ogden: (no transcript)
+name: Ogden: Jillian has been going on and on about strange lights in the...
+text: Jillian has been going on and on about strange lights in the trees, but I haven't been able to make heads and tails of her story. I certainly haven't seen any strange lights, and if I did, they would be the least of my worries.
 
 internal_name: TSFX_TAVERN5
-name: Ogden: (no transcript)
+name: Ogden: I am afraid that I don't know anything about that good master...
+text: I am afraid that I don't know anything about that good master. Cain has many books that may be of some help.
 
 internal_name: TSFX_TAVERN6
-name: Ogden: (no transcript)
+name: Ogden: These sound like dark creatures indeed. I am ignorant in matt...
+text: These sound like dark creatures indeed. I am ignorant in matters of this nature, but I would assume that our storyteller may know of such legends.
 
 internal_name: TSFX_TAVERN7
-name: Ogden: (no transcript)
+name: Ogden: There is an old story of an angel named Iswal, but I don't re...
+text: There is an old story of an angel named Iswal, but I don't remember much more than that.
 
 internal_name: TSFX_TAVERN8
-name: Ogden: (no transcript)
+name: Ogden: Yes, Farnam has mumbled something about a hulking brute who w...
+text: Yes, Farnam has mumbled something about a hulking brute who wielded a fierce weapon. I believe he called him a butcher.
 
 internal_name: TSFX_TAVERN9
-name: Ogden: (no transcript)
+name: Ogden: Wurt is talking backwards again? I hate it when he does that....
+text: Wurt is talking backwards again? I hate it when he does that. I don't have time to help you decipher his riddle, but I will tell you one thing. Don't get involved with that rapscallion.
 
 internal_name: TSFX_TAVERN10
-name: Ogden: (no transcript)
+name: Ogden: I never much cared for poetry. Occasionally I had calls to hi...
+text: I never much cared for poetry. Occasionally I had calls to hire minstrels when the inn was doing well, but that seems like such a long time ago now. What? Oh, yes, well, I suppose you could see what someone else knows.
 
 internal_name: TSFX_TAVERN11
-name: Ogden: (no transcript)
+name: Ogden: You speak of a brave warrior long dead. I'll have no such tal...
+text: You speak of a brave warrior long dead. I'll have no such talk of speaking with departed souls in my in-yard, thank you very much.
 
 internal_name: TSFX_TAVERN12
-name: Ogden: (no transcript)
+name: Ogden: Don't you think that Griswold would be a better person to ask...
+text: Don't you think that Griswold would be a better person to ask about this? He's quite handy, you know.
 
 internal_name: TSFX_TAVERN13
-name: Ogden: (no transcript)
+name: Ogden: Every child hears the story of the warrior Arcane and his mys...
+text: Every child hears the story of the warrior Arcane and his mystic armor known as Valor. If you could find its resting place, you would be well protected against the evil in the labyrinth.
 
 internal_name: TSFX_TAVERN14
-name: Ogden: (no transcript)
+name: Ogden: You know, sometimes I wonder how much faith you can put into...
+text: You know, sometimes I wonder how much faith you can put into what Farnum says. He spends so much time reliving his memories of the labyrinth and just being plain drunk that he doesn't always make much sense. I guess you could ask around, though.
 
 internal_name: TSFX_TAVERN15
-name: Ogden: (no transcript)
+name: Ogden: I saw the exorcism. It was incredible how Tremaine drove the...
+text: I saw the exorcism. It was incredible how Tremaine drove the evil spirit from that man's wracked and tortured body. I pray that something that horrific never happens to anyone here ever again.
 
 internal_name: TSFX_TAVERN16
-name: Ogden: (no transcript)
+name: Ogden: I'm afraid that I haven't heard anything about such a vicious...
+text: I'm afraid that I haven't heard anything about such a vicious warrior, good master. I hope that you do not have to fight him, for he sounds extremely dangerous.
 
 internal_name: TSFX_TAVERN17
-name: Ogden: (no transcript)
+name: Ogden: I'll bet that Wurt saw you coming and put on an act just so h...
+text: I'll bet that Wurt saw you coming and put on an act just so he could laugh at you later when you're running around the town with your nose in the dirt. I'd ignore it.
 
 internal_name: TSFX_TAVERN18
-name: Ogden: (no transcript)
+name: Ogden: The caravan stopped here to take on some supplies for their j...
+text: The caravan stopped here to take on some supplies for their journey to the east. I sold them quite an array of fresh fruits and some excellent sweetbreads that Garda had just finished baking. Shame what happened to them.
 
 internal_name: TSFX_TAVERN19
-name: Ogden: (no transcript)
+name: Ogden: Let me just say this. Both Garda and I would never, ever serv...
+text: Let me just say this. Both Garda and I would never, ever serve black mushrooms to our honored guests. If Adria wants some mushrooms in her stew, then that is her business. But I can't help you find any black mushrooms. Disgusting.
 
 internal_name: TSFX_TAVERN20
-name: Ogden: (no transcript)
+name: Ogden: If the witch can't help you and suggest that you see Cain, wh...
+text: If the witch can't help you and suggest that you see Cain, what makes you think that I would know anything? It sounds like this is a very serious matter. You should hurry along and see the storyteller, as Adria suggests.
 
 internal_name: TSFX_TAVERN21
-name: Ogden: (no transcript)
+name: Ogden: The village needs your help, good master. Some months ago, Ki...
+text: The village needs your help, good master. Some months ago, King Leoric's son, Prince Albrecht, was kidnapped. The king went into a rage and scoured the village for his missing child. With each passing day, Leoric seemed to slip deeper into madness. He sought to blame innocent townsfolk for the boy's disappearance and had them brutally executed. Less than half of us survived his insanity. The king's knights and priests tried to placate him, but he turned against them and, sadly, to kill him. With his dying breath, the king called down a terrible curse upon his former followers. He vowed that they would serve him in darkness forever. This is where things take an even darker twist than I thought possible. Our former king has risen from his eternal sleep and now commands a legion of undead minions within the labyrinth. His body was buried in a tomb three levels beneath the cathedral. Please, good master, put his soul at ease by destroying his now cursed form.
 
 internal_name: TSFX_TAVERN22
-name: Ogden: (no transcript)
+name: Ogden: As I told you, good master, the king was entombed three level...
+text: As I told you, good master, the king was entombed three levels below. He's down there, waiting in the putrid darkness for his chance to destroy this land.
 
 internal_name: TSFX_TAVERN23
-name: Ogden: (no transcript)
+name: Ogden: The curse of our king is past, but I fear that it was only pa...
+text: The curse of our king is past, but I fear that it was only part of a greater evil at work. However, we may yet be saved from the darkness that consumes our land, for your victory is a good omen. May light guide you on your way, good master.
 
 internal_name: TSFX_TAVERN24
-name: Ogden: (no transcript)
+name: Ogden: Master, I have a strange experience to relate. I know that yo...
+text: Master, I have a strange experience to relate. I know that you have a great knowledge of those monstrosities that inhabit the labyrinth, and this is something that I cannot understand for the very life of me. I was awakened during the night by a scraping sound just outside of my tavern. When I looked out from my bedroom, I saw the shapes of small demon-like creatures in the inn yard. After a short time they ran off, but not before stealing the sign to my inn. I don't know why the demons would steal my sign, but leave my family in peace. It is strange now.
 
 internal_name: TSFX_TAVERN25
-name: Ogden: (no transcript)
+name: Ogden: Oh, we didn't have to bring back my sign, but I suppose that...
+text: Oh, we didn't have to bring back my sign, but I suppose that it does save me the expense of having another one made. Well, let me see. What could I give you as a fee for finding it? Hmm, what have we here? Oh, yes, this cap was left in one of the rooms by a magician who stayed here some time ago. Perhaps it may be of some value to you.
 
 internal_name: TSFX_TAVERN26
-name: Ogden: (no transcript)
+name: Ogden: Your brave tales of fighting demons have reminded me of somet...
+text: Your brave tales of fighting demons have reminded me of something, good master. A traveler passed through here some time ago. He was quite proud of a very unique weapon he held, and while becoming quite drunk, boasted of its power. I never saw him again, and I suspect that he ventured too close to the cathedral.
 
 internal_name: TSFX_TAVERN27
-name: Ogden: (no transcript)
+name: Ogden: Have you ever seen that traveler I told you about? The one wi...
+text: Have you ever seen that traveler I told you about? The one with the enchanted weapon? Well, I suppose that he left our village as so many others have. Or he must be dead.
 
 internal_name: TSFX_TAVERN28
-name: Ogden: (no transcript)
+name: Ogden: Yes, that is certainly the weapon that he wore. You know, I'v...
+text: Yes, that is certainly the weapon that he wore. You know, I've been thinking about something else that Traveller said. He inferred that the true powers of the weapon would be unleashed only when it tasted the blood of a very specific kind of creature.
 
 internal_name: TSFX_TAVERN29
-name: Ogden: (no transcript)
+name: Ogden: Were the stories the traveler told us true? Oh, I see you don...
+text: Were the stories the traveler told us true? Oh, I see you don't know yet. Well, I clearly recall that he said by slaying a certain monster, the weapon you found would become something quite special.
 
 internal_name: TSFX_TAVERN30
-name: Ogden: (no transcript)
+name: Ogden: While I understand that your purpose may be of a higher calli...
+text: While I understand that your purpose may be of a higher calling, surely some well-earned gold would be welcomed. Some townspeople from a nearby village have offered a reward for the destruction of a creature that raised their homes and property. They demand positive proof that the creature has been slain, and I can only think of one way to do that.
 
 internal_name: TSFX_TAVERN31
-name: Ogden: (no transcript)
+name: Ogden: You can say whatever you want, but without proof I cannot giv...
+text: You can say whatever you want, but without proof I cannot give you the reward.
 
 internal_name: TSFX_TAVERN32
-name: Ogden: (no transcript)
+name: Ogden: Oh, disgusting, but certainly proof enough for anyone. Here's...
+text: Oh, disgusting, but certainly proof enough for anyone. Here's reward as promised.
 
 internal_name: TSFX_TAVERN33
-name: Ogden: (no transcript)
+name: Ogden: Good master, a moment of your time, please. My tavern was bro...
+text: Good master, a moment of your time, please. My tavern was broken into during the night. No one was hurt, but many items were stolen, including a chest belonging to a mysterious wanderer who once stayed here. I found the body of a thief near the cathedral with telltale wounds from one of the creatures below marking his broken body. Some of the stolen goods were near the body, but the chest and the key to open it were nowhere in sight. Recover them. Then, if you find the chest, you can open it and see what secrets it contains. Perhaps it will be something that can help you on your quests.
 
 internal_name: TSFX_TAVERN34
-name: Ogden: (no transcript)
+name: Ogden: Remember, good master, the chest is locked and is useless wit...
+text: Remember, good master, the chest is locked and is useless without the key. If you do find the chest and get the key, you should see what's inside. I don't expect the owner back here again.
 
 internal_name: TSFX_TAVERN35
-name: Ogden: (no transcript)
+name: Ogden: I see that you have found the key. Now you just need to find...
+text: I see that you have found the key. Now you just need to find the chest that it belongs to.
 
 internal_name: TSFX_TAVERN36
-name: Ogden: (no transcript)
+name: Ogden: Greetings, Good Master. Welcome to the Tavern of the Rising Sun.
+text: Greetings, Good Master. Welcome to the Tavern of the Rising Sun.
 
 internal_name: TSFX_TAVERN37
-name: Ogden: (no transcript)
+name: Ogden: Many adventurers have graced the tables of my tavern, and ten...
+text: Many adventurers have graced the tables of my tavern, and ten times as many stories have been told over as much ale. The only thing that I ever heard any of them agree on was this old axiom. Perhaps it will help you. You can cut the flesh, but you must crush the bone.
 
 internal_name: TSFX_TAVERN38
-name: Ogden: (no transcript)
+name: Ogden: Griswold the blacksmith is extremely knowledgeable about weap...
+text: Griswold the blacksmith is extremely knowledgeable about weapons and armor. If you ever need work done on your gear, he is definitely the man to see.
 
 internal_name: TSFX_TAVERN39
-name: Ogden: (no transcript)
+name: Ogden: Farnam spends far too much time here drowning his sorrows in...
+text: Farnam spends far too much time here drowning his sorrows in cheap ale. I would make him leave, but he did suffer so during his time in the labyrinth.
 
 internal_name: TSFX_TAVERN40
-name: Ogden: (no transcript)
+name: Ogden: Adria is wise beyond her years, but I must admit, she frighte...
+text: Adria is wise beyond her years, but I must admit, she frightens me a little. Well, no matter. If you ever have need to trade in items of sorcery, she maintains a strangely well-stocked hut just across the river.
 
 internal_name: TSFX_TAVERN41
-name: Ogden: (no transcript)
+name: Ogden: If you want to know more about the history of our village, th...
+text: If you want to know more about the history of our village, the storyteller Kane knows quite a bit about the past.
 
 internal_name: TSFX_TAVERN42
-name: Ogden: (no transcript)
+name: Ogden: The priest Tremaine is a bit of a mystery. He certainly never...
+text: The priest Tremaine is a bit of a mystery. He certainly never stays here and he often comes and goes to many of the nearby towns.
 
 internal_name: TSFX_TAVERN43
-name: Ogden: (no transcript)
+name: Ogden: Wirt is a rapscallion and a little scoundrel. He was always g...
+text: Wirt is a rapscallion and a little scoundrel. He was always getting into trouble, and it's no surprise what happened to him. He probably went fooling about someplace that he shouldn't have been. I feel sorry for the boy, but I don't abide the company that he keeps.
 
 internal_name: TSFX_TAVERN44
-name: Ogden: (no transcript)
+name: Ogden: Pepin is a good man, and certainly the most generous in the v...
+text: Pepin is a good man, and certainly the most generous in the village. He's always attending to the needs of others, but trouble of some sort or another does seem to follow him wherever he goes.
 
 internal_name: TSFX_TAVERN45
-name: Ogden: (no transcript)
+name: Ogden: Jillian, my barmaid? If it were not for her sense of duty to...
+text: Jillian, my barmaid? If it were not for her sense of duty to her grandam, she would have fled from here long ago. Goodness knows I begged her to leave, telling her that I would watch after the old woman, but she is too sweet and caring to have done so.
 
 internal_name: TSFX_HEALER1
-name: Pepin: (no transcript)
+name: Pepin: The loss of his son was too much for King Leoric. I did what...
+text: The loss of his son was too much for King Leoric. I did what I could to ease his madness, but in the end, it overcame him. A black curse has hung over this kingdom from that day forward, but perhaps if you were to free his spirit from his earthly prison, the curse would be lifted.
 
 internal_name: TSFX_HEALER2
-name: Pepin: (no transcript)
+name: Pepin: My goodness, demons running about the village at night, pilla...
+text: My goodness, demons running about the village at night, pillaging our homes, is nothing sacred? I hope that Ogden and Garda are all right. I suppose that they would come to see me if they were hurt.
 
 internal_name: TSFX_HEALER3
-name: Pepin: (no transcript)
+name: Pepin: I was shocked when I heard of what the townspeople were plann...
+text: I was shocked when I heard of what the townspeople were planning to do that night. I thought that of all people, Lazarus would have had more sense than that. He was an archbishop and always seemed to care so much for the townsfolk of Tristram. So many were injured, I could not save them all.
 
 internal_name: TSFX_HEALER4
-name: Pepin: (no transcript)
+name: Pepin: Ruf and Aeneas are missing? Light protect us. Is there no pla...
+text: Ruf and Aeneas are missing? Light protect us. Is there no place that is safe? Our only hope of returning to a peaceful life rests in you. Please, you must find those boys and bring them home to their family.
 
 internal_name: TSFX_HEALER5
-name: Pepin: (no transcript)
+name: Pepin: This sounds like a very dangerous place. If you venture there...
+text: This sounds like a very dangerous place. If you venture there, please take great care.
 
 internal_name: TSFX_HEALER6
-name: Pepin: (no transcript)
+name: Pepin: Horazon was insane. There are forces with which one does not...
+text: Horazon was insane. There are forces with which one does not interfere. It would not surprise me if you found only the charred remains of this damned fool.
 
 internal_name: TSFX_HEALER7
-name: Pepin: (no transcript)
+name: Pepin: Farnam is often confused, but he speaks a powerful name when...
+text: Farnam is often confused, but he speaks a powerful name when the word Iswal passes his lips. Cain would be able to tell you in much greater detail the legend of this warrior.
 
 internal_name: TSFX_HEALER8
-name: Pepin: (no transcript)
+name: Pepin: By the light, I know of this vile demon. There were many that...
+text: By the light, I know of this vile demon. There were many that bore the scars of his wrath upon their bodies when the few survivors of the charge led by Lazarus crawled from the cathedral. I don't know what he used to slice open his victims, but it could not have been of this world. It left wounds festering with disease, and even I found them almost impossible to treat. Beware if you plan to battle this fiend.
 
 internal_name: TSFX_HEALER9
-name: Pepin: (no transcript)
+name: Pepin: I suppose it isn't beyond the realm of possibility if you cou...
+text: I suppose it isn't beyond the realm of possibility if you could bear being in that room again. Your description of the atrocities committed there would be enough to keep me far from it.
 
 internal_name: TSFX_HEALER10
-name: Pepin: (no transcript)
+name: Pepin: This does seem familiar somehow. I seem to recall reading som...
+text: This does seem familiar somehow. I seem to recall reading something very much like that poem while researching the history of demonic afflictions. It spoke of a place of great evil that... Wait, you're not going there, are you?
 
 internal_name: TSFX_HEALER11
-name: Pepin: (no transcript)
+name: Pepin: A golden elixir, you say? I have never concocted a potion of...
+text: A golden elixir, you say? I have never concocted a potion of that color before, so I can't tell you how it would affect you if you were to try to drink it. As your healer, I strongly advise that should you find such an elixir, do as Lockdownen asks, and do not try to use it.
 
 internal_name: TSFX_HEALER12
-name: Pepin: (no transcript)
+name: Pepin: If you had been looking for information on the Pestle of Curi...
+text: If you had been looking for information on the Pestle of Curing or the Silver Chalice of Purification, I could have assisted you, my friend. However, in this matter, you would be better served to speak to either Griswold or Cain.
 
 internal_name: TSFX_HEALER13
-name: Pepin: (no transcript)
+name: Pepin: Hmm, it sounds like something I should remember, but I've bee...
+text: Hmm, it sounds like something I should remember, but I've been so busy learning new cures and creating better elixirs that I must have forgotten. Sorry.
 
 internal_name: TSFX_HEALER14
-name: Pepin: (no transcript)
+name: Pepin: For once, I can vouch for Farnam's extraordinary claim. There...
+text: For once, I can vouch for Farnam's extraordinary claim. There are many mentions in the books that I've been reading about a place of great healing where warriors of light would go to mend the wounds sustained in the Sin War. If you could find this place, it would most assuredly be to the benefit of us all.
 
 internal_name: TSFX_HEALER15
-name: Pepin: (no transcript)
+name: Pepin: I was asked to assist in the exorcism. My skills were able to...
+text: I was asked to assist in the exorcism. My skills were able to ease the poor man's suffering as Tremaine drove the demon from his body. While I was treating him for an exceptionally high fever, he spoke of a place of searing heat. The tortured fellow cried out about hell and falling into a pit of flame. I could not make any sense of it, and thankfully he soon recovered.
 
 internal_name: TSFX_HEALER16
-name: Pepin: (no transcript)
+name: Pepin: Cain would be able to tell you much more about something like...
+text: Cain would be able to tell you much more about something like this than I would ever wish to know.
 
 internal_name: TSFX_HEALER17
-name: Pepin: (no transcript)
+name: Pepin: I really don't have time to discuss some map you are looking...
+text: I really don't have time to discuss some map you are looking for. I have many sick people that require my help, and yours as well.
 
 internal_name: TSFX_HEALER18
-name: Pepin: (no transcript)
+name: Pepin: I don't know what it is they thought they could see with that...
+text: I don't know what it is they thought they could see with that rock, but I will say this. If rocks are falling from the sky, you would better be careful.
 
 internal_name: TSFX_HEALER19
-name: Pepin: (no transcript)
+name: Pepin: I can't make much of the writing on this map, but perhaps Adr...
+text: I can't make much of the writing on this map, but perhaps Adria or Cain could help you decipher what this refers to. I can see that it is a map of the stars in our sky, but any more than that is beyond my talents.
 
 internal_name: TSFX_HEALER20
-name: Pepin: (no transcript)
+name: Pepin: I'm glad I caught up to you in time. Our wells have become br...
+text: I'm glad I caught up to you in time. Our wells have become brackish and stagnant, and some of the townspeople have become ill drinking from them. Our reserves of fresh water are quickly running dry. I believe that there is a passage that leads to the springs that serve our town. Please find what has caused this calamity, or we all will surely perish.
 
 internal_name: TSFX_HEALER21
-name: Pepin: (no transcript)
+name: Pepin: Please, you must hurry. Every hour that passes brings us clos...
+text: Please, you must hurry. Every hour that passes brings us closer to having no water to drink. We cannot survive for long without your help.
 
 internal_name: TSFX_HEALER22
-name: Pepin: (no transcript)
+name: Pepin: What's that you say? The mere presence of the demons has caus...
+text: What's that you say? The mere presence of the demons has caused the water to become tainted? Oh, truly a great evil lurks beneath our town, but your perseverance and courage gives us hope. Please, take this ring. Perhaps it will aid you in the destruction of such vile creatures.
 
 internal_name: TSFX_HEALER23
-name: Pepin: (no transcript)
+name: Pepin: Good hero, a moment of your time, please. While attending one...
+text: Good hero, a moment of your time, please. While attending one of the townsfolk who had taken quite ill, I noticed something odd about his home. There were strange sounds and a sickly sweet smell rising from the cellar. Thinking perhaps these fumes had something to do with his sickness, I investigated. In his cellar were monstrous worms shifting and squirming up from the underground. And make their way into the town. I left the door to his house open for you. It is the one opposite of mine.
 
 internal_name: TSFX_HEALER24
-name: Pepin: (no transcript)
+name: Pepin: I fear that the worms could soon overrun the village. I know...
+text: I fear that the worms could soon overrun the village. I know that they are coming up from under the house that is opposite mine. Just the thought of those slimy beasts oozing into my house makes me want to be ill. Please, rid us of them.
 
 internal_name: TSFX_HEALER25
-name: Pepin: (no transcript)
+name: Pepin: Once again you have saved this humble town from the encroachi...
+text: Once again you have saved this humble town from the encroaching evil. We are, as always, forever in your debt.
 
 internal_name: TSFX_HEALER26
-name: Pepin: (no transcript)
+name: Pepin: The witch told me that you were searching for the brain of a...
+text: The witch told me that you were searching for the brain of a demon to assist me in creating my elixir. It should be of great value to the many who were injured by those foul beasts if I can just unlock the secrets I suspect that its alchemy holds. If you can remove the brain of a demon when you kill it, I would be grateful if you could bring it to me.
 
 internal_name: TSFX_HEALER27
-name: Pepin: (no transcript)
+name: Pepin: Excellent! This is just what I had in mind. I was able to fin...
+text: Excellent! This is just what I had in mind. I was able to finish the elixir without this, but it can't hurt to have this to study. Would you please carry this to the witch? I believe that she is expecting it.
 
 internal_name: TSFX_HEALER28
-name: Pepin: (no transcript)
+name: Pepin: My friend, I must speak with you. While going to help a sick...
+text: My friend, I must speak with you. While going to help a sick villager, I came upon a demon in the town. I fled from the house and accidentally left the door open in my haste. I pray that the vile creature is still in there. Please, help us before it comes for us all.
 
 internal_name: TSFX_HEALER29
-name: Pepin: (no transcript)
+name: Pepin: These creatures must be banished from our town. To my shame,...
+text: These creatures must be banished from our town. To my shame, I left the door open, but that should make it all the easier for you to find the house.
 
 internal_name: TSFX_HEALER30
-name: Pepin: (no transcript)
+name: Pepin: Once again, the town is in your debt. It is only your strengt...
+text: Once again, the town is in your debt. It is only your strength and force of will that can lead us out of this evil time.
 
 internal_name: TSFX_HEALER31
-name: Pepin: (no transcript)
+name: Pepin: Once again, I require your strong arm and quick wits to aid t...
+text: Once again, I require your strong arm and quick wits to aid the people of this town. I am in need of certain reagents to help fight the plagues that the demons have unleashed on the land by their very presence. If you could gather these few items, it will save many lives.
 
 internal_name: TSFX_HEALER32
-name: Pepin: (no transcript)
+name: Pepin: The disease is spread quickly and many are dying. Please help...
+text: The disease is spread quickly and many are dying. Please help me by finding the reagents so that I can use them to make an antidote.
 
 internal_name: TSFX_HEALER33
-name: Pepin: (no transcript)
+name: Pepin: Thank you so much. You bring hope and light to these dark and...
+text: Thank you so much. You bring hope and light to these dark and troubled times. I wish for you to have this in the hopes that it will aid you in your battle against the darkness.
 
 internal_name: TSFX_HEALER34
-name: Pepin: (no transcript)
+name: Pepin: I know that I ask much of you, but I must now ask that you fi...
+text: I know that I ask much of you, but I must now ask that you find a pool of clear water. Take these containers, fill them, and return them to me as soon as you can. With the clear water, I can create an elixir of wondrous power that will benefit us all.
 
 internal_name: TSFX_HEALER35
-name: Pepin: (no transcript)
+name: Pepin: Have you brought what I need? The clear water will allow me t...
+text: Have you brought what I need? The clear water will allow me to create a very powerful elixir. Fill the containers that I gave you and return with them.
 
 internal_name: TSFX_HEALER36
-name: Pepin: (no transcript)
+name: Pepin: Very good, my friend. Very good! Just give me a minute to mix...
+text: Very good, my friend. Very good! Just give me a minute to mix these ingredients. Perfect! Here are some of the elixir, as promised.
 
 internal_name: TSFX_HEALER37
-name: Pepin: (no transcript)
+name: Pepin: What ails you, my friend?
+text: What ails you, my friend?
 
 internal_name: TSFX_HEALER38
-name: Pepin: (no transcript)
+name: Pepin: I have made a very interesting discovery. Unlike us, the crea...
+text: I have made a very interesting discovery. Unlike us, the creatures in the labyrinth can heal themselves without the aid of potions or magic. If you hurt one of the monsters, make sure it is dead, or it very well may regenerate itself.
 
 internal_name: TSFX_HEALER39
-name: Pepin: (no transcript)
+name: Pepin: Before it was taken over by, well, whatever looks below, the...
+text: Before it was taken over by, well, whatever looks below, the cathedral was a place of great learning. There are many books to be found there. If you find any, you should read them all, for some may hold secrets to the workings of the labyrinth.
 
 internal_name: TSFX_HEALER40
-name: Pepin: (no transcript)
+name: Pepin: Griswold knows as much about the art of war as I do about the...
+text: Griswold knows as much about the art of war as I do about the art of healing. He is a shrewd merchant, but his work is second to none. Oh, I suppose that may be because he's the only blacksmith left here.
 
 internal_name: TSFX_HEALER41
-name: Pepin: (no transcript)
+name: Pepin: Cain is a true friend and a wise sage. He maintains a vast li...
+text: Cain is a true friend and a wise sage. He maintains a vast library and has an innate ability to discern the true nature of many things. If you ever have any questions, he is the person to go to.
 
 internal_name: TSFX_HEALER42
-name: Pepin: (no transcript)
+name: Pepin: Even my skills have been unable to fully heal Farnum. Oh, I h...
+text: Even my skills have been unable to fully heal Farnum. Oh, I have been able to mend his body, but his mind and spirit are beyond anything I can do.
 
 internal_name: TSFX_HEALER43
-name: Pepin: (no transcript)
+name: Pepin: While I use some limited forms of magic to create the potions...
+text: While I use some limited forms of magic to create the potions and elixirs I store here, Adria is a true sorceress. She never seems to sleep, and she always has access to many mystic tomes and artifacts. I believe her hut may be much more than the hovel it appears to be, but I can never seem to get inside the place.
 
 internal_name: TSFX_HEALER44
-name: Pepin: (no transcript)
+name: Pepin: His holiness is a wondrous man of great knowledge and underst...
+text: His holiness is a wondrous man of great knowledge and understanding. He has shown me many cures for rare and deadly diseases. He brings me books and reagents for my work whenever he can, but I fear that he may someday take on some task that is too great even for him.
 
 internal_name: TSFX_HEALER45
-name: Pepin: (no transcript)
+name: Pepin: Poor Wirt. I did all that was possible for the child, but I k...
+text: Poor Wirt. I did all that was possible for the child, but I know he despises that wooden peg that I was forced to attach to his leg. His wounds were hideous. No one, and especially such a young child, should have to suffer the way he did.
 
 internal_name: TSFX_HEALER46
-name: Pepin: (no transcript)
+name: Pepin: I really don't understand why Ogden stays here in Tristram. H...
+text: I really don't understand why Ogden stays here in Tristram. He suffers from a slight nervous condition, but he is an intelligent and industrious man who would do very well wherever he went. I suppose it may be the fear of the many murders that happen in the surrounding countryside, or perhaps the wishes of his wife that keep him and his family where they are.
 
 internal_name: TSFX_HEALER47
-name: Pepin: (no transcript)
+name: Pepin: Ogden's barmaid is a sweet girl. Her grandmother is quite ill...
+text: Ogden's barmaid is a sweet girl. Her grandmother is quite ill and suffers from delusions. She claims that they are visions, but I have no proof of that one way or the other.
 
 internal_name: IS_QUESTDN
 name: Quest Done: you
@@ -2248,28 +2760,36 @@ name: The Butcher: Ah, fresh meat.
 text: Ah, fresh meat.
 
 internal_name: TSFX_PRIEST0
-name: Tremain the Priest: (no transcript)
+name: Tremain the Priest: All I can do now is pray for us all.
+text: All I can do now is pray for us all.
 
 internal_name: TSFX_PRIEST1
-name: Tremain the Priest: (no transcript)
+name: Tremain the Priest: I seek a champion to undertake a serious duty, and the people...
+text: I seek a champion to undertake a serious duty, and the people of this town speak well of your courage and skill. The Archbishop Lazarus, once King Leoric's most trusted advisor and a member of our order, has taken the path of evil. Not long ago, Lazarus led a party of simple townsfolk into the labyrinth to find the king's missing son, Albrecht. Only a few of them escaped with their lives. Fool! I should have suspected his veiled treachery then, for I have learned that it was Lazarus himself who kidnapped Leoric's son and has since hidden him within the labyrinth. I still don't understand why the Archbishop has turned to the darkness, or what his interest is in Albrecht. Unless he means to sacrifice him at the full moon. That must be what he has planned. The survivors of his rescue party, say that Lazarus was last seen in the deepest bowels of the labyrinth, some sixteen levels beneath the cathedral. You must hurry and save the prince from the sacrificial blade of this demented fiend.
 
 internal_name: TSFX_PRIEST2
-name: Tremain the Priest: (no transcript)
+name: Tremain the Priest: Why do you delay? Time is of the essence. The prince and the...
+text: Why do you delay? Time is of the essence. The prince and the people of this kingdom are counting on you.
 
 internal_name: TSFX_PRIEST3
-name: Tremain the Priest: (no transcript)
+name: Tremain the Priest: So, Lazarus has paid the price for his betrayal, and justice...
+text: So, Lazarus has paid the price for his betrayal, and justice is served. For your services this day, I bestow this mace unto you. Its name is Lightforge, and it is the holiest of our Order's artifacts. As I am the last of this Order, I entrust it to you. May the Light guide you.
 
 internal_name: TSFX_PRIEST4
-name: Tremain the Priest: (no transcript)
+name: Tremain the Priest: This is terrible. Lazarus will surely burn in hell for his ho...
+text: This is terrible. Lazarus will surely burn in hell for his horrific deed. Although the boy that you describe may not be our prince, I believe that Albrecht may yet be in danger. Whatever vile power lies beneath the ground has assuredly secured its foothold in our world. All I can do now is pray for us all.
 
 internal_name: TSFX_PRIEST5
-name: Tremain the Priest: (no transcript)
+name: Tremain the Priest: I have had a most disturbing experience that I must share wit...
+text: I have had a most disturbing experience that I must share with you, my friend. Earlier today, I was called upon to help one of the men that escaped from the labyrinth. He was deranged, violent, and kept lashing out at all of those who tried to calm him. I suspected that he was possessed by some sort of demonic entity, and so began to drive the evil from within him. After many hours, I was able to exorcise a demon who called himself Fleshdoom, but the hellion fled into the labyrinth. You may think that I am mad, but after speaking with the man and battling with Fleshdoom, I believe that the labyrinth has somehow become a gateway to the underworld. As you descend deeper, you may find yourself upon the doorstep of hell itself. Finally, the man who was possessed retained memories of an ancient demon blade named Shadowfang. The man who was possessed by the devil's sword. While I fear the dangers below grow even greater, you must find Fleshdoom and slay him. Bring the sword to me and I can destroy it, but do not wield it, for its power can corrupt absolutely.
 
 internal_name: TSFX_PRIEST6
-name: Tremain the Priest: (no transcript)
+name: Tremain the Priest: Flesh Dome's demise is a great good to the world, yet Shadowf...
+text: Flesh Dome's demise is a great good to the world, yet Shadowfang remains. It must be found and destroyed. Do not attempt to use the Demon Blade, champion. It will corrupt and madden any mortal who wields it. I alone can end its dark evil.
 
 internal_name: TSFX_PRIEST7
-name: Tremain the Priest: (no transcript)
+name: Tremain the Priest: Light be praised! You've found the cursed demon blade! Only i...
+text: Light be praised! You've found the cursed demon blade! Only its destruction can ensure the safety of us all! Wait! What treachery is this? Ah! It burns! Hellfire! Consuming me! You must take this to the Hellforge and cast it in before a... No!
 
 internal_name: USFX_WLOCK1
 name: Warlock: Mortal, free me from my imprisonment and your reward will be...
@@ -2280,139 +2800,184 @@ name: Warlord of Blood: My blade sings for your blood, mortal. And by my dark ma
 text: My blade sings for your blood, mortal. And by my dark masters it shall not be denied.
 
 internal_name: TSFX_PEGBOY1
-name: Wirt: (no transcript)
+name: Wirt: Look, I'm running a business here. I don't sell information,...
+text: Look, I'm running a business here. I don't sell information, and I don't care about some king that's been dead longer than I've been alive. If you need something to use against this king of the undead, then I can help you out.
 
 internal_name: TSFX_PEGBOY2
-name: Wirt: (no transcript)
+name: Wirt: What? Is he saying I took that? I suppose that Griswold is on...
+text: What? Is he saying I took that? I suppose that Griswold is on his side too. Look, I got over simple sign stealing months ago. You can't turn a profit on a piece of wood.
 
 internal_name: TSFX_PEGBOY3
-name: Wirt: (no transcript)
+name: Wirt: Yes, the righteous Lazarus, who is so effective against those...
+text: Yes, the righteous Lazarus, who is so effective against those monsters down there. Didn't help save my leg, did it? Look, I'll give you a free piece of advice. Ask Farnum. He was there.
 
 internal_name: TSFX_PEGBOY4
-name: Wirt: (no transcript)
+name: Wirt: For once, I'm with you. My business runs dry, so to speak, if...
+text: For once, I'm with you. My business runs dry, so to speak, if I have no market to sell to. You better find out what is going on, and soon.
 
 internal_name: TSFX_PEGBOY5
-name: Wirt: (no transcript)
+name: Wirt: They have you hunting worms now? What's next? Leaf collecting...
+text: They have you hunting worms now? What's next? Leaf collecting? Picking up mushrooms? Look, friend, you have a whole church full of demons over there to worry about. I don't see how a few little worms could be so bad.
 
 internal_name: TSFX_PEGBOY6
-name: Wirt: (no transcript)
+name: Wirt: You know, I've been looking for those lights, but I can't fin...
+text: You know, I've been looking for those lights, but I can't find them. If Jillian says they are there, I believe her, but I have yet to see them for myself.
 
 internal_name: TSFX_PEGBOY7
-name: Wirt: (no transcript)
+name: Wirt: A vast and mysterious treasure, you say? Maybe I could be int...
+text: A vast and mysterious treasure, you say? Maybe I could be interested in picking up a few things from you. Or better yet, don't you need some rare and expensive supplies to get you through this ordeal?
 
 internal_name: TSFX_PEGBOY8
-name: Wirt: (no transcript)
+name: Wirt: The care and feeding of demons is definitely not an interest...
+text: The care and feeding of demons is definitely not an interest of mine. Here is a piece of friendly advice. If you get the chance, kill anything you see down there.
 
 internal_name: TSFX_PEGBOY9
-name: Wirt: (no transcript)
+name: Wirt: If you were to find any trace of Iswal or the Blade Azurath,...
+text: If you were to find any trace of Iswal or the Blade Azurath, even I would be impressed. That is definitely one of a kind.
 
 internal_name: TSFX_PEGBOY10
-name: Wirt: (no transcript)
+name: Wirt: I know more than you think about that grizzly fiend. His litt...
+text: I know more than you think about that grizzly fiend. His little friends got a hold of me and managed to get my leg before Griswold pulled me out of that hole. I'll put it bluntly. Kill him before he kills you and adds your corpse to his collection.
 
 internal_name: TSFX_PEGBOY11
-name: Wirt: (no transcript)
+name: Wirt: Let's see. Am I selling you something? No. Are you giving me...
+text: Let's see. Am I selling you something? No. Are you giving me money to tell you about this? No. Are you now leaving and going to talk to the storyteller who lives for this kind of thing? Yes.
 
 internal_name: TSFX_PEGBOY12
-name: Wirt: (no transcript)
+name: Wirt: Wait, let me guess. Kane was swallowed up in a gigantic fissu...
+text: Wait, let me guess. Kane was swallowed up in a gigantic fissure that opened beneath him. He was incinerated in a ball of hellfire and can't answer your questions anymore. Oh, that isn't what happened? Then I guess you'll be buying something, or you'll be on your way.
 
 internal_name: TSFX_PEGBOY13
-name: Wirt: (no transcript)
+name: Wirt: If you were to find this artifact for Griswold, it could put...
+text: If you were to find this artifact for Griswold, it could put a serious damper on my business here. Ah, you'll never find it.
 
 internal_name: TSFX_PEGBOY14
-name: Wirt: (no transcript)
+name: Wirt: You intend to find the armor known as Valor? No one has ever...
+text: You intend to find the armor known as Valor? No one has ever figured out where Arcane stashed the stuff. And if my contacts couldn't find it, I seriously doubt you ever will either.
 
 internal_name: TSFX_PEGBOY15
-name: Wirt: (no transcript)
+name: Wirt: This is one time that you should listen to Farnham. I have he...
+text: This is one time that you should listen to Farnham. I have heard of this place, and I know a few sorcerers who have tried to create a portal to get there.
 
 internal_name: TSFX_PEGBOY16
-name: Wirt: (no transcript)
+name: Wirt: I don't know who this flesh doom is, but I have heard rumors...
+text: I don't know who this flesh doom is, but I have heard rumors of an ebon blade that cleaves a soul from the body. Even I would not try to sell that thing, no matter what the profit. If you find it, you should do as Tremaine says, and destroy it as quickly as possible.
 
 internal_name: TSFX_PEGBOY17
-name: Wirt: (no transcript)
+name: Wirt: I haven't ever dealt with this warlord you speak of, but he s...
+text: I haven't ever dealt with this warlord you speak of, but he sounds like he's going through a lot of swords. Wouldn't mind supplying his armies.
 
 internal_name: TSFX_PEGBOY18
-name: Wirt: (no transcript)
+name: Wirt: If anyone can make something out of that rock, Griswold can....
+text: If anyone can make something out of that rock, Griswold can. He knows what he is doing. And as much as I try to steal his customers, I respect the quality of his work.
 
 internal_name: TSFX_PEGBOY19
-name: Wirt: (no transcript)
+name: Wirt: I don't have any mushrooms of any size or color for sale. How...
+text: I don't have any mushrooms of any size or color for sale. How about something a bit more useful?
 
 internal_name: TSFX_PEGBOY20
-name: Wirt: (no transcript)
+name: Wirt: I've been looking for a map, but that certainly isn't it. You...
+text: I've been looking for a map, but that certainly isn't it. You should show that to Adria. She can probably tell you what it is. I'll say one thing. It looks old. And old usually means valuable.
 
 internal_name: TSFX_PEGBOY21
-name: Wirt: (no transcript)
+name: Wirt: Hear over, pssst! Chamber Butcher, the From Spell Portal, tow...
+text: Hear over, pssst! Chamber Butcher, the From Spell Portal, town the cast! Saying, am I what C?
 
 internal_name: TSFX_PEGBOY22
-name: Wirt: (no transcript)
+name: Wirt: Get out, it figured you haven't! Understand, could you even s...
+text: Get out, it figured you haven't! Understand, could you even so simple it make to try die? Chamber butcher the From Spell Portal town the cast!
 
 internal_name: TSFX_PEGBOY23
-name: Wirt: (no transcript)
+name: Wirt: Where is that stupid map? It was supposed to be between the r...
+text: Where is that stupid map? It was supposed to be between the rock and the tree before the bridge. Should be right. Oh, hello there. Didn't see you standing there.
 
 internal_name: TSFX_PEGBOY24
-name: Wirt: (no transcript)
+name: Wirt: Rock? Tree? Bridge? I have no idea what you're talking about.
+text: Rock? Tree? Bridge? I have no idea what you're talking about.
 
 internal_name: TSFX_PEGBOY25
-name: Wirt: (no transcript)
+name: Wirt: Look, I know my prices are high, but one of my contacts had a...
+text: Look, I know my prices are high, but one of my contacts had an accident, and I need some help refilling my more mundane inventory. I'll trade you a quality item if you can just complete this little list for me.
 
 internal_name: TSFX_PEGBOY26
-name: Wirt: (no transcript)
+name: Wirt: Listen, I'll make it worth your time if you will get me what...
+text: Listen, I'll make it worth your time if you will get me what I asked you for. Besides, you know you want to find out what I'm going to give you in return.
 
 internal_name: TSFX_PEGBOY27
-name: Wirt: (no transcript)
+name: Wirt: Thanks. This should hold me over until I can find a new erran...
+text: Thanks. This should hold me over until I can find a new errand boy. Too bad you're so busy. Oh yeah, here's your part of the bargain.
 
 internal_name: TSFX_PEGBOY28
-name: Wirt: (no transcript)
+name: Wirt: Psst, over here. I have something very special for sale today...
+text: Psst, over here. I have something very special for sale today. I'm not exactly sure what it is, but I can just tell that it's great. I'm gonna offer you a bargain. A thousand gold takes it. Right now, no questions and no returns.
 
 internal_name: TSFX_PEGBOY29
-name: Wirt: (no transcript)
+name: Wirt: Hey, you! Yeah, I'm talking to you. I acquired this strange b...
+text: Hey, you! Yeah, I'm talking to you. I acquired this strange book. I know it must do something big, but you need a crystal eyepiece to read it, so it's useless to me. However, I would be willing to trade you this rare and mystical tome for just a few things.
 
 internal_name: TSFX_PEGBOY30
-name: Wirt: (no transcript)
+name: Wirt: Look, this very special book that I have can be yours for so...
+text: Look, this very special book that I have can be yours for so little. Don't tell anyone what a great deal I'm giving you or it would ruin my reputation.
 
 internal_name: TSFX_PEGBOY31
-name: Wirt: (no transcript)
+name: Wirt: Amazing! You actually found everything I wanted. Well, here's...
+text: Amazing! You actually found everything I wanted. Well, here's the book, but you're going to have to find a crystal eyepiece to read it. Good luck!
 
 internal_name: TSFX_PEGBOY32
-name: Wirt: (no transcript)
+name: Wirt: Psst! Over here!
+text: Psst! Over here!
 
 internal_name: TSFX_PEGBOY33
-name: Wirt: (no transcript)
+name: Wirt: Not everyone in Tristram has a use or a market for everything...
+text: Not everyone in Tristram has a use or a market for everything you'll find in the labyrinth. Not even me, as hard as that is to believe. Sometimes only you will be able to find a purpose for some things.
 
 internal_name: TSFX_PEGBOY34
-name: Wirt: (no transcript)
+name: Wirt: Don't trust everything the drunk says. Too many ales have fog...
+text: Don't trust everything the drunk says. Too many ales have fogged his vision and his good sense.
 
 internal_name: TSFX_PEGBOY35
-name: Wirt: (no transcript)
+name: Wirt: In case you haven't noticed, I don't buy anything from Tristr...
+text: In case you haven't noticed, I don't buy anything from Tristram. I am an importer of quality goods. If you want to peddle your junk, you'll have to see Griswold, Pepin, or that witch Adria. I'm sure they'll snap up whatever you can bring them.
 
 internal_name: TSFX_PEGBOY36
-name: Wirt: (no transcript)
+name: Wirt: I guess I owe the blacksmith my life. What there is of it. Su...
+text: I guess I owe the blacksmith my life. What there is of it. Sure, Griswold offered me an apprenticeship at the smithy. He's a nice enough guy, but I'll never get enough money to... Well, let's just say that I have definite plans that require a large amount of gold.
 
 internal_name: TSFX_PEGBOY37
-name: Wirt: (no transcript)
+name: Wirt: If I were a few years older, I would shower her with whatever...
+text: If I were a few years older, I would shower her with whatever riches I could muster. And let me assure you, I could get my hands on some very nice stuff. Jillian is a beautiful girl who should get out of Tristram as soon as it is safe. Hmm, maybe I'll take her with me when I go.
 
 internal_name: TSFX_PEGBOY38
-name: Wirt: (no transcript)
+name: Wirt: Kane knows too much. He scares the life out of me, even more...
+text: Kane knows too much. He scares the life out of me, even more than that woman across the river. He keeps telling me about how lucky I am to be alive and how my story is foretold in legend. I think he's off his crock.
 
 internal_name: TSFX_PEGBOY39
-name: Wirt: (no transcript)
+name: Wirt: "Farnum, now there is a man with serious problems, and I know...
+text: "Farnum, now there is a man with serious problems, and I know all about how serious problems can be. He trusted too much in the integrity of one man, and Lazarus led him into the very jaws of death. Oh, I know what it's like down there, so don't even start telling me about your plans to destroy the evil that dwells in that labyrinth. Just watch your legs.
 
 internal_name: TSFX_PEGBOY40
-name: Wirt: (no transcript)
+name: Wirt: As long as you don't need anything reattached, old Pepin is a...
+text: As long as you don't need anything reattached, old Pepin is as good as they come. If I'd have had some of those potions he brews, I might still have my leg.
 
 internal_name: TSFX_PEGBOY41
-name: Wirt: (no transcript)
+name: Wirt: Yeah, Tremaine. He gets around, doesn't he? Or haven't you he...
+text: Yeah, Tremaine. He gets around, doesn't he? Or haven't you heard? My friends in some of the other towns say that he passes through, picking up a few books here, a pinch of bat claw there. Never seems to have the problems most do getting in and out of Tristram, that's for sure.
 
 internal_name: TSFX_PEGBOY42
-name: Wirt: (no transcript)
+name: Wirt: Adria truly bothers me. Sure, Cain is creepy in what he can t...
+text: Adria truly bothers me. Sure, Cain is creepy in what he can tell you about the past, but that witch can see into your past. She always has some way to get whatever she needs, too. Adria gets her hands on more merchandise than I've seen pass through the gates of the King's Bazaar during High Festival.
 
 internal_name: TSFX_PEGBOY43
-name: Wirt: (no transcript)
+name: Wirt: Ogden is a fool for staying here. I could get him out of town...
+text: Ogden is a fool for staying here. I could get him out of town for a very reasonable price, but he insists on trying to make a go of it with that stupid tavern. I guess at the least he gives Jillian a place to work, and his wife Garda does make a superb shepherd's pie.
 
 internal_name: TSFX_DEADGUY
-name: Wounded Townsman: (no transcript)
+name: Wounded Townsman: Please help. I barely escaped from the butcher. He killed my...
+text: Please help. I barely escaped from the butcher. He killed my wife, my children. I beg of you, in the name of God, avenge them.
 
 internal_name: TSFX_WOUND
-name: Wounded Townsman: (no transcript)
+name: Wounded Townsman: Please, listen to me. The Archbishop Lazarus, he led us down...
+text: Please, listen to me. The Archbishop Lazarus, he led us down here to find the lost prince. The bastard led us into a trap. Now everyone is dead, killed by a demon he called the Butcher. Avenge us! Find this butcher and slay him, so that our souls may finally rest.
 
 internal_name: USFX_ZHAR1
 name: Zhar the Mad: What? Why are you here? All these interruptions are enough to...

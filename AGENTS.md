@@ -98,7 +98,12 @@ A new sound event = one `PlayCue("<name>")` call + one record in `sounds.rec`. D
 `playD1SfxAt` / `Factory.PlayD1Sfx` with D1's distance fade and pan (`common/d1_sound.go`), its speech through
 `playD1Sound`; `TestD1SfxHaveSoundEvents` and `TestD1SpeechHaveVoiceEvents` fail when a record is missing.
 
-- `sfx/`, `ang_sfx/` — this game's own and the Angband-sourced effects, referenced from `sounds.rec`.
+- `sfx/`, `ang_sfx/` — this game's own effects and the Dubtrain Angband Sound Pack (CC BY-NC, credited in
+  `LEGAL.md`), referenced from `sounds.rec`. The pack's unconverted `.wav` originals sit in `CC-BY-DASP/`
+  (gitignored) next to its `sound.cfg`, which says what each sample was meant for and is what our wiring follows;
+  a sample we use is converted flat into `ang_sfx/<name>.ogg`. 474 of the 488 events have files this way — the
+  skeletons' `hit` and `sfx.PS_WALK1` are left silent on purpose (they fall back to `skeleton_hit`, and a step on
+  every tile grates, which is why `sound.cfg` leaves `walk` empty too).
 - `music/` — our own tracks (`town.ogg`, wired up in `music.rec`).
 - `ambience/` — extra tracks and ambient loops, registered by directory (`RegisterMusic`) and picked manually from
   the pause menu's Music Player. They are not area themes; `music.rec` is.

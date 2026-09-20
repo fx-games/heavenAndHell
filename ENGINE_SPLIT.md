@@ -14,6 +14,20 @@ they cannot ship new behaviour. No scripting runtime, no mod-defined generators.
 
 `files/mod.go` resolves `assets/x` to `mods/<active>/x` first, engine second.
 
+## The engine is not split along the mod axis
+
+Subsystems are unified, never forked per game. There is ONE dungeon generation
+subsystem, ONE spell effect subsystem, ONE item subsystem. A mod never gets its
+own branch of engine code and the engine never knows a mod's name.
+
+- Generation algorithms follow a strategy pattern: each registers a NAME and a
+  parameter set. A mod declares `level 3: generator=caves, params...`.
+- One abstract effect system expresses every effect. A mod maps effects onto
+  scrolls, books, innate skills or learnable skills; it does not define effects.
+
+Corollary: no `d1`-shaped concepts in engine APIs, and no engine code that
+resolves a path containing a mod name.
+
 ## Boundary
 
 Engine (Go):
