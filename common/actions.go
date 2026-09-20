@@ -2,6 +2,7 @@ package common
 
 import (
 	"image"
+	"image/color"
 	"rpg/audio"
 	"rpg/defs"
 	"rpg/geometry"
@@ -49,6 +50,11 @@ type UserInterface interface {
 	GetVisibleMap() geometry.Rect
 	// ToggleMapInfo switches the debug readout of the map position under the cursor on and off.
 	ToggleMapInfo()
+	// FlashScreen washes the whole screen in a colour for a moment (Flash, and anything else blinding).
+	FlashScreen(c color.Color, seconds float64)
+	// ToggleFogOfWar and CycleRenderingMode are debug views of the map (debug menu, formerly F9 and F8).
+	ToggleFogOfWar()
+	CycleRenderingMode()
 	IsPlayerForcingAggression() bool
 	HasOverlays() bool
 
@@ -76,7 +82,7 @@ type UserInterface interface {
 
 	// Specialized
 	OnMapChanged()
-	OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath, hellfire bool, name string), back func())
+	OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string), back func())
 	// OpenSaveSlots shows the save slots with their screenshots and metadata; pick gets the chosen slot, back
 	// closes the screen without touching anything.
 	OpenSaveSlots(title string, slots []SaveSlot, pick func(slot int), back func())

@@ -291,9 +291,9 @@ func (s *State) D1NewGamePlus() bool { return s.QuestActive(d1.QDiablo) == d1.Qu
 // D1ItemLevel is the level loot rolls at on dungeon level dlvl.
 func (s *State) D1ItemLevel(dlvl int) int {
 	if s.D1NewGamePlus() {
-		return d1.ItemLevel(dlvl) + d1.NightmareItemLevelBonus
+		return dlvl + d1.NightmareItemLevelBonus
 	}
-	return d1.ItemLevel(dlvl)
+	return dlvl
 }
 
 // scaleD1NewGamePlus ports InitMonster's DIFF_NIGHTMARE scaling onto a monster that was just built. The golem is

@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"image/color"
 	"rpg/d1"
 	"rpg/defs"
 	"rpg/geometry"
@@ -437,16 +438,20 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 				c.beam(a.MapPosition())
 			}
 		}
-	case d1.SplFlash:
+	case d1.SplFlash: // a burst of light over every cell within one square of the caster (d1.FlashRadius)
 		low, high := d1.FlashDamage64(d1Rng, clvl, slvl)
-		for dx := -1; dx <= 1; dx++ {
+		for dx := -d1.FlashRadius; dx <= d1.FlashRadius; dx++ {
 			for dy, dam := range map[int]int{-1: high, 0: low, 1: low} {
-				if a := c.hitCell(o.Add(geometry.Point{X: dx, Y: dy})); a != nil {
+				p := o.Add(geometry.Point{X: dx, Y: dy})
+				if a := c.hitCell(p); a != nil {
 					c.strike(a, dam, d1.FlashTicks)
 				}
+				c.animations = append(c.animations, NewHitAnimation(p, 0.4, defs.IconEffectLightning, 2))
 			}
 		}
-		c.animations = append(c.animations, NewHitAnimation(o, 0.4, defs.IconEffectLightning, 2))
+		if f.UI != nil {
+			f.UI().FlashScreen(color.RGBA{R: 255, G: 255, B: 255, A: 255}, 0.25)
+		}
 	case d1.SplIdentify:
 		item := f.identifyTarget
 		if item == nil {
@@ -459,8 +464,10 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		if f.UI != nil {
 			f.UI().ShowItemInfo(item)
 		}
-	case d1.SplSearch: // renamed Vision: reveals every entity on the level until the level changes
+	case d1.SplSearch, d1.SplInfra: // Vision: Infravision merged into it. Everything alive on the level shows
+		// until the level changes, and seeing through walls outlasts that by Infravision's own duration.
 		c.caster.AddStatusEffect(StatusVision, -1) // negative turnCount: never decays on its own, see State.MapTransition
+		c.caster.AddStatusEffect(StatusInfravision, d1.InfravisionTurns(slvl))
 	case d1.SplRage: // AddRage: no raging while already raging, or while too wounded to survive the hangover
 		if h.Rage != 0 || st.GetResource(stats.Health).Value() <= clvl {
 			c.ctx.Msg("You cannot work yourself up again.")
@@ -557,8 +564,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		}
 		victim.AddStatusEffect(StatusStone, d1.StoneTurns(slvl))
 		c.animations = append(c.animations, NewHitAnimation(victim.MapPosition(), 0.4, defs.IconEffectHit, 2))
-	case d1.SplInfra:
-		c.caster.AddStatusEffect(StatusInfravision, d1.InfravisionTurns(slvl))
 	case d1.SplPhasing:
 		f.d1RandomTeleport(c.caster)
 	case d1.SplManaShield:
@@ -668,11 +673,8 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 // Hellfire's burns the hero too, dlvl·16 ticks longer, and for a flat 8·clvl/64 a tick (AddFirewall's bug).
 func (f *Factory) spawnD1FireWall(caster *Actor, p geometry.Point, spell, slvl, layers int) {
 	clvl := caster.hero.Level
-	turns, dam64 := d1.FireWallTurns(slvl, 0), func() int { return d1.FireWallDamage64(d1Rng, clvl) }
-	if f.Generator.D.Hellfire {
-		turns, dam64 = d1.FireWallTurns(slvl, d1DungeonLevel(f.State)), func() int { return d1.HellfireFireWallDamage64(clvl) }
-	}
-	f.spawnD1Wall(caster, p, spell, turns, f.Generator.D.Hellfire, layers, defs.IconEffectFireSmall, dam64)
+	turns := d1.FireWallTurns(slvl, d1DungeonLevel(f.State))
+	f.spawnD1Wall(caster, p, spell, turns, true, layers, defs.IconEffectFireSmall, func() int { return d1.HellfireFireWallDamage64(clvl) })
 }
 
 // spawnD1LightningWall places one cell of a lightning wall (MIS_LIGHTWALL): 255·(slvl+1) ticks of 16·(2d10 + clvl

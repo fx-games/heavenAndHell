@@ -87,8 +87,8 @@ func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 		OpenLoadMenu:   theGame.OpenLoadMenu,
 		IsPermadeath:   theGame.IsPermadeath,
 		QuitSaves:      theGame.QuitSaves,
-		IsHellfire:     theGame.IsHellfire,
-		EnableHellfire: theGame.EnableHellfire,
+		QuickSave:      theGame.QuickSave,
+		QuickLoad:      theGame.QuickLoad,
 		Animator: func() common.Animator {
 			return theGame.GetActionBroker()
 		},

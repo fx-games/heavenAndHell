@@ -1,58 +1,11 @@
 package d1
 
-// SfxFiles maps D1's speech and quest sound ids (_sfx_id, effects.cpp's sgSFX) to their converted file under
-// assets/diablo_sfx (the .wav path lowercased, as .ogg). Generated from devilution 1.09's enums.h and effects.cpp.
+// SfxFiles is every speech and quest sound id D1 has (_sfx_id, effects.cpp's sgSFX), mapped to the file it was in
+// Diablo (the .wav path lowercased, as .ogg). Generated from devilution 1.09's enums.h and effects.cpp. D1's own
+// audio is not in this game: the ids are the records of assets/data/voices.rec, which is what the game plays, and
+// the file names are only the key into reference/d1_voice_transcripts.tsv, the transcriptions of the cut lines.
 var SfxFiles = map[string]string{
-	// Hellfire's new quest speech (Sfx\Hellfire), from hellfire.mpq / hfvoice.mpq
-	"PS_NARATR3":    "hellfire/naratr3.ogg",
-	"PS_NARATR4":    "hellfire/naratr4.ogg",
-	"PS_NARATR5":    "hellfire/naratr5.ogg",
-	"PS_NARATR6":    "hellfire/naratr6.ogg",
-	"PS_NARATR7":    "hellfire/naratr7.ogg",
-	"PS_NARATR8":    "hellfire/naratr8.ogg",
-	"PS_NARATR9":    "hellfire/naratr9.ogg",
-	"TSFX_COWSUT1":  "hellfire/cowsut1.ogg",
-	"TSFX_COWSUT10": "hellfire/cowsut10.ogg",
-	"TSFX_COWSUT11": "hellfire/cowsut11.ogg",
-	"TSFX_COWSUT12": "hellfire/cowsut12.ogg",
-	"TSFX_COWSUT2":  "hellfire/cowsut2.ogg",
-	"TSFX_COWSUT3":  "hellfire/cowsut3.ogg",
-	"TSFX_COWSUT4":  "hellfire/cowsut4.ogg",
-	"TSFX_COWSUT4A": "hellfire/cowsut4a.ogg",
-	"TSFX_COWSUT5":  "hellfire/cowsut5.ogg",
-	"TSFX_COWSUT6":  "hellfire/cowsut6.ogg",
-	"TSFX_COWSUT7":  "hellfire/cowsut7.ogg",
-	"TSFX_COWSUT8":  "hellfire/cowsut8.ogg",
-	"TSFX_COWSUT9":  "hellfire/cowsut9.ogg",
-	"TSFX_FARMER1":  "hellfire/farmer1.ogg",
-	"TSFX_FARMER2":  "hellfire/farmer2.ogg",
-	"TSFX_FARMER2A": "hellfire/farmer2a.ogg",
-	"TSFX_FARMER3":  "hellfire/farmer3.ogg",
-	"TSFX_FARMER4":  "hellfire/farmer4.ogg",
-	"TSFX_FARMER5":  "hellfire/farmer5.ogg",
-	"TSFX_FARMER6":  "hellfire/farmer6.ogg",
-	"TSFX_FARMER7":  "hellfire/farmer7.ogg",
-	"TSFX_FARMER8":  "hellfire/farmer8.ogg",
-	"TSFX_FARMER9":  "hellfire/farmer9.ogg",
-	"TSFX_TEDDYBR1": "hellfire/teddybr1.ogg",
-	"TSFX_TEDDYBR2": "hellfire/teddybr2.ogg",
-	"TSFX_TEDDYBR3": "hellfire/teddybr3.ogg",
-	"TSFX_TEDDYBR4": "hellfire/teddybr4.ogg",
-	"TSFX_TRADER1":  "hellfire/trader1.ogg",
-	"USFX_DEFILER2": "hellfire/defiler2.ogg",
-	"USFX_DEFILER4": "hellfire/defiler4.ogg",
-	"USFX_DEFILER6": "hellfire/defiler6.ogg",
-	"USFX_DEFILER7": "hellfire/defiler7.ogg",
-	"USFX_DEFILER8": "hellfire/defiler8.ogg",
-	"USFX_NAKRUL6":  "hellfire/nakrul6.ogg",
-	"IS_SARC":       "items/sarc.ogg",
-	"IS_CROPEN":     "items/cropen.ogg",
-	"USFX_NAKRUL1":  "hellfire/nakrul1.ogg",
-	"USFX_NAKRUL2":  "hellfire/nakrul2.ogg",
-	"USFX_NAKRUL3":  "hellfire/nakrul3.ogg",
-	"USFX_NAKRUL4":  "hellfire/nakrul4.ogg",
-	"USFX_NAKRUL5":  "hellfire/nakrul5.ogg",
-	"USFX_SKLJRN1":  "hellfire/skljrn1.ogg",
+	"IS_SARC": "items/sarc.ogg",
 	// Hellfire's Monk, from hfmonk.mpq / hfvoice.mpq. The expansion leaves most of his lines as silence
 	// ("Sfx\Misc\blank.wav" in EFFECTS.H), so only the ones with real audio are here.
 	"PS_MONK1":  "monk/monk01.ogg",

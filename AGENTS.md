@@ -10,8 +10,8 @@ Design decisions and deferred scope for the D1 rebuild: `D1_PLAN.md`.
 | `reference/devilution/2020_03_31` | [galaxyhaxz/devilution](https://github.com/galaxyhaxz/devilution): readable rewrite with the original table files in `Source/Data/Excel/xl_*.txt` | Readable second opinion; source of our `files/assets/data/d1/xl_*.txt` (copied verbatim). `2018_03_14` is an older snapshot, skip it. |
 | `reference/devilutionX` | [diasurgical/devilutionX](https://github.com/diasurgical/devilutionX): modern, maintained port | Bug-fixed logic in `Source/` (`levels/`, `monsters/`, `items/`, `quests/`...), data tables as TSV in `assets/txtdata/`, and **test fixtures** in `test/` (see below). It fixes vanilla bugs and adds QoL; when it disagrees with 1.09, 1.09 wins unless `D1_PLAN.md` says otherwise. |
 | `reference/DIABDAT.MPQ` | Diablo's own data archive (bring your own copy, ~500 MB) | Level data the sources don't contain: set pieces (`Levels\L1Data\SklKng1.DUN`...), `.TIL`/`.SOL` tile tables. Read with `d1.DiabDat()` / `mustReadMPQ` (`d1/mpq.go`, looks in `.`, `reference/`, `../reference/`). |
-| `reference/diablo-hellfire` | [pvpgn/diablo-hellfire](https://github.com/pvpgn/diablo-hellfire): Synergistic Software's own Hellfire source (VC++ 6, `src/*.CPP`, uppercase filenames) | **Ground truth for Hellfire**, the way `devilution-109` is for D1. `ITEMDAT.CPP`, `MONSTDAT.CPP`, `SPELLDAT.CPP`, `MISDAT.CPP` and `OBJDAT.CPP` hold the real tables with the original comments; `PLAYER.CPP` the class tables. The Nest generator is `DRLG_L6` in `DRLG_L3.CPP` and the Crypt's is `DRLG_L5` in `DRLG_L1.CPP`. Note Hellfire numbers its own levels 17-24 internally as 32-35 (Nest) and 21-24 (Crypt) in places — check `MonstAvailTbl` / `DRLG` callers before trusting a number. |
-| `reference/HELLFIRE.MPQ`, `HFVOICE.MPQ`, `HFMONK.MPQ`, `HFMUSIC.MPQ` | Hellfire's four archives, straight off the expansion's disc (`hdiutil attach Hellfire.iso`, they sit in the root). `hfvoice` holds the expansion's speech at full quality and `hfmonk` the Monk's lines (neither is in `hellfire.mpq`), `hfmusic` the Nest's and the Crypt's tracks | Only what the sources don't contain: the Crypt's and the Nest's tile tables (`NLevels\L5Data\L5.SOL/.TIL/.MIN`, `NLevels\L6Data\L6.*`) and `NLevels\TownData\*`, i.e. the two dungeon types, if they ever get built. **Not** needed for Hellfire's items, monsters or classes: those are numbers in the tables above, and this game draws them from its own tileset through `files/assets/data/icons/*.rec`. Opens with the same `OpenMPQ` as DIABDAT (`cmd/internal/mpq`). |
+| `reference/diablo-hellfire` | [pvpgn/diablo-hellfire](https://github.com/pvpgn/diablo-hellfire): Synergistic Software's own Hellfire source (VC++ 6, `src/*.CPP`, uppercase filenames) | **Ground truth for Hellfire**, the way `devilution-109` is for D1. `ITEMDAT.CPP`, `MONSTDAT.CPP`, `SPELLDAT.CPP`, `MISDAT.CPP` and `OBJDAT.CPP` hold the real tables with the original comments; `PLAYER.CPP` the class tables. Hellfire's own levels (the Nest and the Crypt), its quests, towners and the monsters that only spawn there are **cut** from this game (`D1_PLAN.md`); its items, affixes, spells, classes and store behaviour are in and always on. |
+| `reference/HELLFIRE.MPQ`, `HFVOICE.MPQ`, `HFMONK.MPQ`, `HFMUSIC.MPQ` | Hellfire's four archives, straight off the expansion's disc (`hdiutil attach Hellfire.iso`, they sit in the root). `hfvoice` holds the expansion's speech at full quality and `hfmonk` the Monk's lines (neither is in `hellfire.mpq`), `hfmusic` the expansion's tracks | Hellfire's item/spell sprites for `cmd/d1sprites`. Its audio is **not** used at all (no `diablo_sfx/`, see Audio), and neither are its items or classes: those are numbers in the tables above, and this game draws them from its own tileset through `files/assets/data/icons/*.rec`. Opens with the same `OpenMPQ` as DIABDAT (`cmd/internal/mpq`). |
 
 ### How to port with them
 
@@ -55,7 +55,7 @@ same-category items clustered together when picking icons.
 
 | File | Covers |
 |---|---|
-| `actors.rec` | monsters (D1's and Hellfire's), uniques, player classes, corpses, D1 npcs |
+| `actors.rec` | monsters, uniques, player classes, corpses, D1 npcs |
 | `items.rec` | weapons (by family), armor, potions, scrolls, rings, quest items... |
 | `tiles.rec` | terrain, doors, decals, effects, dungeon objects |
 | `skills.rec` | class skill and spell icons |
@@ -82,50 +82,35 @@ the atlas; `go run -tags development ./cmd/d1sprites` writes those fields into a
 
 ## Audio (`files/assets/`)
 
-Sound effects are **events**, not folders: `files/assets/data/sounds.rec` has one record per event the game plays
-(`internal_name` = the cue passed to `PlayCue`, e.g. `open_door` or `monster.nzombie.hit`; `name` = list label;
-`tile` = icon name; one `sound:` per file relative to `files/assets/`, one picked at random at run time). Loaded by
-`audio.Player.RegisterSoundEvents` on start; missing files are dropped (and `diablo_*` ones when
-`DiabloAudioEnabled` is off), so a fresh clone without the Diablo folders still runs. Assign files visually with
-`./remap_sounds.sh` (`sfxmapper`, source `~/Projects/remapper/sfxmapper`, install with
-`go build -o ~/bin/sfxmapper ./sfxmapper`). A new sound event = one `PlayCue("<name>")` call + one record here.
-D1's sound effects are events named `sfx.<_sfx_id>` (`sfx.IS_CAST2`, `sfx.PS_SWING`; RndSFX's variants are the
-event's extra files), played through `playD1SfxAt` / `Factory.PlayD1Sfx` with D1's distance fade and pan
-(`common/d1_sound.go`); monster sounds are `monster.<id>.attack|hit|death|special`. A new D1 sound = one call + one
-record; `TestD1SfxHaveSoundEvents` fails when the record is missing.
+Every cue the game plays comes from a rec file under `files/assets/data/`, read fresh on every start (no rebuild to
+see a remap take effect) and assigned visually with `sfxmapper` (source `~/Projects/remapper/sfxmapper`, install
+with `go build -o ~/bin/sfxmapper ./sfxmapper`): click a record on the left, browse `files/assets/` on the right,
+"Add", `s` saves, `F10` quits. A record with no `sound:` is simply silent — nothing breaks, `HasCue` says no and
+callers fall back.
+
+| Rec file | Script | What it holds | Registered by |
+|---|---|---|---|
+| `data/sounds.rec` | `./remap_sounds.sh` | sound effects, one record per event: `internal_name` = the cue `PlayCue` takes (`open_door`), D1's effects as `sfx.<_sfx_id>` (`sfx.IS_CAST2`, `sfx.PS_SWING`), monsters as `monster.<id>.attack\|hit\|death\|special`. Several `sound:` lines = one picked at random | `RegisterSoundEvents` |
+| `data/voices.rec` | `./remap_voices.sh` | D1's speech, one record per `_sfx_id` (`TSFX_BMAID1`, `PS_WARR8`, `USFX_GARBUD1`). `text:` is what the original line said, so you know what to record in its place | `RegisterVoiceEvents` (voice volume) |
+| `data/music.rec` | `./remap_music.sh` | the five area themes `town`/`cathedral`/`catacombs`/`caves`/`hell` that `d1AreaMusic` (`game/town_d1.go`) switches between | `RegisterMusicEvents` (looped, listed in the Music Player) |
+
+A new sound event = one `PlayCue("<name>")` call + one record in `sounds.rec`. D1's effects go through
+`playD1SfxAt` / `Factory.PlayD1Sfx` with D1's distance fade and pan (`common/d1_sound.go`), its speech through
+`playD1Sound`; `TestD1SfxHaveSoundEvents` and `TestD1SpeechHaveVoiceEvents` fail when a record is missing.
 
 - `sfx/`, `ang_sfx/` — this game's own and the Angband-sourced effects, referenced from `sounds.rec`.
-- `ambience/` — background music tracks and ambient loops, shown in the pause menu's Music Player
-  (`RegisterMusic`); `d1AreaMusic` (`game/town_d1.go`) needs cues named exactly `town`/`cathedral`/`catacombs`/
-  `caves`/`hell`, which `ambience/` doesn't provide (they're `calm_music_*`/`battle_music_*`/`amb_*`) — so D1's
-  auto area music only plays once `diablo_music/` supplies those names (below); `ambience/` tracks are still
-  picked manually from the Music Player.
-- `diablo_music/`, `diablo_sfx/` — **not in git** (`.gitignore`; bring your own copy of Diablo, like
-  `reference/DIABDAT.MPQ`). Convert D1's own `.wav` files to `.ogg` (the engine only decodes Vorbis) and drop
-  them in; they're picked up automatically next run, no code change:
-  ```
-  brew install vorbis-tools   # oggenc, once
-  find files/assets/diablo_music files/assets/diablo_sfx -iname '*.wav' -print0 | \
-    xargs -0 -I{} oggenc -Q -q 4 -o {}.ogg {}
-  ```
-  Use `oggenc`, not `ffmpeg -c:a vorbis`: ffmpeg's own Vorbis encoder is its unmaintained experimental one
-  (needs `-strict -2` to even run) and produces audibly corrupted output — a wall of static — on some of D1's
-  speech files; `oggenc` is the Xiph reference encoder and doesn't have that problem. It also keeps mono
-  sources mono (no `-ac 2` needed).
+- `music/` — our own tracks (`town.ogg`, wired up in `music.rec`).
+- `ambience/` — extra tracks and ambient loops, registered by directory (`RegisterMusic`) and picked manually from
+  the pause menu's Music Player. They are not area themes; `music.rec` is.
+- `voice/` — voice lines registered by directory (`RegisterVoices`), doesn't exist yet; folder absence is fine.
 
-  `go run ./cmd/d1import -sfx` pulls those `.wav` files straight out of every archive in `reference/` into
-  `files/assets/diablo_sfx/`, in the layout `sounds.rec` expects, so you only have to run the ffmpeg line above
-  afterwards. It also drops the Nest's and the Crypt's music into `diablo_music/` as `nest.wav` / `crypt.wav`,
-  already named the way `d1AreaMusic` wants them. It takes everything `sounds.rec` points at plus `d1.SfxFiles`'
-  speech plus all of Hellfire's own sounds, and quietly skips whatever your archives don't have — no MPQ is
-  required. Where a sound is in several archives the better copy wins: `hfvoice` first, then `hfmonk`, `hfmusic`,
-  `hellfire`, and DIABDAT last. Without `hfmonk`/`hfvoice` the Monk simply has no lines; the Bard and the
-  Barbarian always borrow the Rogue's and the Warrior's, which is what Hellfire itself does. `diablo_music/`'s 6 tracks
-  (`dtowne`/`dlvla`/`dlvlb`/`dlvlc`/`dlvld`/`dintro`) must be renamed to `town`/`cathedral`/`catacombs`/`caves`/
-  `hell`/`intro` after conversion — that's what supplies `d1AreaMusic`'s cues. `diablo_sfx/`'s ~900 files
-  (`misc/`, `monsters/`, `items/`, `warrior/`, `rogue/`, `sorceror/`, `towners/`, `narrator/`, `animals/`) are
-  only used through the files `sounds.rec` points at.
-- `voice/` — voice lines (`RegisterVoices`), doesn't exist yet; folder absence is fine, same as `ambience/`.
+Diablo's and Hellfire's own audio is **not in this game**: no `diablo_sfx/`, no `diablo_music/`, no importer, no
+audio menu option. The events stayed — every effect, every speech id and every theme is a record waiting for a
+file, and `d1.SfxFiles` still records which D1 `.wav` each speech id used to be, keyed the same way as the
+transcriptions of the cut lines in `reference/d1_voice_transcripts.tsv` (one `file<TAB>what it said` per line,
+produced with `transcribe`). Drop your own `.ogg` under `files/assets/` and wire it up with the scripts above; the
+engine only decodes Vorbis, so convert with `oggenc -Q -q 4` (not `ffmpeg -c:a vorbis`: its experimental Vorbis
+encoder produces audible static on speech).
 
 ## ASCII mode (`console/`, `textui/`)
 
@@ -154,6 +139,5 @@ record; `TestD1SfxHaveSoundEvents` fails when the record is missing.
 - D1 unit tests: `go test ./d1`
 - Headless smoke test: `go run -tags development . playthrough` (must print `PLAYTHROUGH OK`)
 - Print a generated D1 level: `go run . dun_gen <dungeon level> [seed]`
-- Import level data: `go run ./cmd/d1import` (adds the Crypt's and the Nest's tile tables when HELLFIRE.MPQ is there)
-- Extract sounds: `go run ./cmd/d1import -sfx`, then convert with the ffmpeg line above
+- Import level data: `go run ./cmd/d1import`
 - Sprite references for picking icons: `go run -tags development ./cmd/d1sprites` writes `reference/d1_{monsters,items,skills,tiles}.pdf` (one per icons/*.rec, each sprite labelled with its current icon) and every sprite as a PNG under `reference/d1_sprites/`: monsters and uniques in their TRN recolors, items, spell and skill icons, objects and each level type's megatiles

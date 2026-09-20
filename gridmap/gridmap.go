@@ -1350,12 +1350,23 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) TryGetItemAt(pos geometry.Poi
 	return m.ItemAt(pos), isItemAt
 }
 
-func (m *GridMap[ActorType, ItemType, ObjectType]) AddActor(actor ActorType, spawnPos geometry.Point) {
-	if m.IsActorAt(spawnPos) {
-		return
+// AddActor puts an actor on the map at spawnPos and reports whether that worked. Spawning is not walking: an
+// actor may start on a cell whose object would block a step into it (D1 places its monsters before its objects),
+// but never on top of another actor and never off the map. Placing it here is what puts it in allActors, so an
+// actor that is on the map always owns exactly one cell, and one cell never holds two actors. Going through
+// MoveActor instead used to append the actor and then silently refuse the move, leaving a monster that acted and
+// was drawn but that nothing could find by its position.
+func (m *GridMap[ActorType, ItemType, ObjectType]) AddActor(actor ActorType, spawnPos geometry.Point) bool {
+	if !m.Contains(spawnPos) || m.IsActorAt(spawnPos) {
+		return false
 	}
 	m.allActors = append(m.allActors, actor)
-	m.MoveActor(actor, spawnPos)
+	if from := actor.MapPosition(); m.Contains(from) {
+		m.cells[from.X+from.Y*m.mapWidth] = m.cells[from.X+from.Y*m.mapWidth].WithActorHereRemoved(actor)
+	}
+	actor.SetMapPosition(spawnPos)
+	m.cells[spawnPos.X+spawnPos.Y*m.mapWidth] = m.cells[spawnPos.X+spawnPos.Y*m.mapWidth].WithActor(actor)
+	return true
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) AddDownedActor(actor ActorType, spawnPos geometry.Point) {

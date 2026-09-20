@@ -117,12 +117,12 @@ func (g *gen) placeRolledItem(x, y int, roll func() *Item) {
 func (g *gen) createRndItem(x, y int, onlygood bool) {
 	var idx int
 	if onlygood {
-		idx = g.igen.rndUItem(nil, 0, ItemLevel(g.currlevel))
+		idx = g.igen.rndUItem(nil, 0, g.currlevel)
 	} else {
-		idx = g.igen.rndAllItems(ItemLevel(g.currlevel))
+		idx = g.igen.rndAllItems(g.currlevel)
 	}
 	g.placeRolledItem(x, y, func() *Item {
-		return g.igen.setupAllItems(idx, g.rng.Seed(), 2*ItemLevel(g.currlevel), ItemLevel(g.currlevel), 1, onlygood, false, true, g.ltype == DTypeHell)
+		return g.igen.setupAllItems(idx, g.rng.Seed(), 2*g.currlevel, g.currlevel, 1, onlygood, false, true, g.ltype == DTypeHell)
 	})
 }
 
@@ -130,10 +130,10 @@ func (g *gen) createRndItem(x, y int, onlygood bool) {
 func (g *gen) createTypeItem(x, y int, onlygood bool, itype int, imisc string) {
 	idx := IdxGold
 	if itype != ITypeGold {
-		idx = g.igen.rndTypeItems(itype, imisc, ItemLevel(g.currlevel))
+		idx = g.igen.rndTypeItems(itype, imisc, g.currlevel)
 	}
 	g.placeRolledItem(x, y, func() *Item {
-		return g.igen.setupAllItems(idx, g.rng.Seed(), 2*ItemLevel(g.currlevel), ItemLevel(g.currlevel), 1, onlygood, false, true, g.ltype == DTypeHell)
+		return g.igen.setupAllItems(idx, g.rng.Seed(), 2*g.currlevel, g.currlevel, 1, onlygood, false, true, g.ltype == DTypeHell)
 	})
 }
 
@@ -145,7 +145,7 @@ func (g *gen) spawnQuestItem(idx, x, y, selflag int) {
 	p := &PlacedItem{X: x, Y: y, SelFlag: selflag}
 	ii := g.newItemSlot(p)
 	g.setDItem(x, y, ii+1)
-	p.Item = g.igen.itemAttrs(idx, ItemLevel(g.currlevel), ItemLevel(g.currlevel), g.ltype == DTypeHell)
+	p.Item = g.igen.itemAttrs(idx, g.currlevel, g.currlevel, g.ltype == DTypeHell)
 	g.numitems++
 }
 
@@ -168,19 +168,8 @@ func (g *gen) initItems() {
 	if g.available(QAnvil) {
 		g.spawnQuestItem(IdiAnvil, 2*g.setPiece.x+27, 2*g.setPiece.y+27, 1)
 	}
-	if suit := map[int]int{20: IdiBrownSuit, 19: IdiGreySuit}[g.currlevel]; suit != 0 && g.quests[QJersey].Active != QuestNotAvail {
-		x, y := g.questItemSpot(3) // UseCowFarmer: the cow suits lie in the Nest
-		g.spawnQuestItem(suit, x, y, 1)
-	}
 	if g.currlevel > 0 && g.currlevel < 16 {
 		g.addInitItems()
-	}
-	if g.currlevel >= 21 && g.currlevel <= 23 { // SpawnNote: a torn note on each of the Crypt's first three levels
-		x, y := g.rnd(80)+16, g.rnd(80)+16
-		for !g.itemPlace(x, y) {
-			x, y = g.rnd(80)+16, g.rnd(80)+16
-		}
-		g.spawnQuestItem(IdiNote1+g.currlevel-21, x, y, 1)
 	}
 }
 
@@ -202,17 +191,6 @@ func (g *gen) questItemSpot(randarea int) (x, y int) {
 			return
 		}
 	}
-}
-
-// ItemLevel ports Hellfire's items_get_currlevel: the Nest's items roll as levels 9-12, the Crypt's as 14-17.
-func ItemLevel(dlvl int) int {
-	switch {
-	case dlvl >= 21:
-		return dlvl - 7
-	case dlvl >= 17:
-		return dlvl - 8
-	}
-	return dlvl
 }
 
 // addInitItems ports AddInitItems: 3-5 potions lying around.

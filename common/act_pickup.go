@@ -31,7 +31,6 @@ func (d *PickUpAction) Execute(context ActionContext) []Action {
 	item := gameMap.ItemAt(actorPos)
 
 	gameMap.RemoveItem(item)
-	state.factory.d1CornerstoneTaken(actorPos)
 
 	playD1ItemInvSfx(context, item, actor)
 	if item.IsGold() {

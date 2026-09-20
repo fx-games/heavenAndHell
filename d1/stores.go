@@ -20,24 +20,16 @@ const (
 	premiumSlots = 15 // Hellfire's SMITH_PREMIUM_ITEMS; D1 uses the first 6
 )
 
-// storeLimits are defs.h's store sizes and value caps: D1's, or Hellfire's.
+// storeLimits are defs.h's store sizes and value caps (Hellfire's).
 type storeLimits struct {
 	smithItems, witchItems, premiumItems int
 	maxVal, boyMaxVal                    int
 	premiumLvlAdd                        []int
 }
 
-var (
-	d1StoreLimits = storeLimits{20, 20, 6, 140000, 90000, []int{-1, -1, 0, 0, 1, 2}}
-	hfStoreLimits = storeLimits{25, 25, 15, 200000, 200000, []int{-1, -1, -1, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3}}
-)
+var hfStoreLimits = storeLimits{25, 25, 15, 200000, 200000, []int{-1, -1, -1, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3}}
 
-func (g *Generator) limits() storeLimits {
-	if g.D.Hellfire {
-		return hfStoreLimits
-	}
-	return d1StoreLimits
-}
+func (g *Generator) limits() storeLimits { return hfStoreLimits }
 
 // Shopper is what Hellfire's stores look at of the hero: its class and stats for what it could use, and what it
 // already owns, so nothing offered is worse than its best item of a kind.
@@ -49,19 +41,18 @@ type Shopper struct {
 }
 
 func (g *Generator) smithItemOk(b ItemData) bool {
-	staff := b.Type == ITypeStaff && (!g.D.Hellfire || b.Spell != "SPL_NULL") // Hellfire's smith sells plain staves
+	staff := b.Type == ITypeStaff && b.Spell != "SPL_NULL" // Hellfire's smith sells plain staves
 	return b.Type != ITypeMisc && b.Type != ITypeGold && !staff && b.Type != ITypeRing && b.Type != ITypeAmulet
 }
 
 func (g *Generator) premiumItemOk(b ItemData) bool {
-	return b.Type != ITypeMisc && b.Type != ITypeGold && (g.D.Hellfire || b.Type != ITypeStaff)
+	return b.Type != ITypeMisc && b.Type != ITypeGold
 }
 
 func (g *Generator) witchItemOk(b ItemData) bool {
 	switch {
 	case b.MiscID == "IMISC_MANA", b.MiscID == "IMISC_FULLMANA", b.MiscID == "IMISC_HEAL", b.MiscID == "IMISC_FULLHEAL",
-		b.Spell == "SPL_TOWN", b.Spell == "SPL_RESURRECT", b.Spell == "SPL_HEALOTHER",
-		g.D.Hellfire && IsOil(b.MiscID):
+		b.Spell == "SPL_TOWN", b.Spell == "SPL_RESURRECT", b.Spell == "SPL_HEALOTHER", IsOil(b.MiscID):
 		return false
 	}
 	return b.Type == ITypeMisc || b.Type == ITypeStaff
@@ -74,7 +65,7 @@ func (g *Generator) healerItemOk(b ItemData, who *Shopper) bool {
 	}
 	switch b.MiscID {
 	case "IMISC_ELIXSTR", "IMISC_ELIXMAG", "IMISC_ELIXDEX", "IMISC_ELIXVIT":
-		if !g.D.Hellfire || who == nil {
+		if who == nil {
 			return true
 		}
 		a := classAttr[who.Class]
@@ -134,7 +125,7 @@ func (g *Generator) storeIdx(lvl int, ok func(ItemData) bool, double bool) int {
 	var l []int
 	for i := 1; i < len(g.D.Items); i++ {
 		b := g.D.Items[i]
-		if b.Drop != "IDROP_NEVER" && ok(b) && lvl >= b.MinMLvl && (g.D.Hellfire || !b.Hellfire) {
+		if b.Drop != "IDROP_NEVER" && ok(b) && lvl >= b.MinMLvl {
 			l = append(l, i)
 			if double && b.Drop == "IDROP_DOUBLE" {
 				l = append(l, i)
@@ -186,9 +177,9 @@ func (g *Generator) PremiumItem(plvl int, who *Shopper) *Item {
 			}
 		}
 		it := g.storeItem(l[g.random(len(l))], plvl)
-		g.itemBonusSpells(it, plvl>>1, plvl, true, !g.D.Hellfire)
+		g.itemBonusSpells(it, plvl>>1, plvl, true, false)
 		ok := it.IValue <= lim.maxVal
-		if g.D.Hellfire && who != nil {
+		if who != nil {
 			ok = who.fits(it, lim.maxVal, who.bestOwned(it)*8/10) || count >= 150
 		}
 		if ok {
@@ -218,13 +209,6 @@ func (g *Generator) RefillPremium(p *Premium, clvl int, who *Shopper) {
 	for p.Level < clvl {
 		p.Level++
 		it := &p.Items
-		if !g.D.Hellfire {
-			it[0], it[1], it[2] = it[2], it[3], it[4]
-			it[3] = g.PremiumItem(p.Level+add[3], who)
-			it[4] = it[5]
-			it[5] = g.PremiumItem(p.Level+add[5], who)
-			continue
-		}
 		copy(it[0:10], it[3:13])
 		it[10] = g.PremiumItem(p.Level+add[10], who)
 		it[11] = it[13]
@@ -239,13 +223,10 @@ func (g *Generator) RefillPremium(p *Premium, clvl int, who *Shopper) {
 // spellLevels are the hero's, for WitchBookLevel.
 func (g *Generator) WitchStock(lvl int, spellLevels [NumSpells]int) []*Item {
 	lim := g.limits()
-	count, books := 0, 0
-	if g.D.Hellfire {
-		count, books = g.random(lim.witchItems-10)+10, g.random(4)
-	}
+	count, books := g.random(lim.witchItems-10)+10, g.random(4)
 	out := []*Item{g.storeItem(IdxMana, 1), g.storeItem(IdxFullMana, 1), g.storeItem(IdxPortal, 1)}
 	var rnd []*Item
-	for i := 114; g.D.Hellfire && i <= 117 && len(rnd) < books; i++ { // Hellfire's "Book of" rows
+	for i := 114; i <= 117 && len(rnd) < books; i++ { // Hellfire's "Book of" rows
 		if b := g.D.Items[i]; g.witchItemOk(b) && lvl >= b.MinMLvl {
 			g.random(1) // SpawnWitch's volatile junk roll
 			it := g.storeItem(i, lvl)
@@ -253,9 +234,6 @@ func (g *Generator) WitchStock(lvl int, spellLevels [NumSpells]int) []*Item {
 			g.witchBookLevel(it, spellLevels)
 			rnd = append(rnd, it)
 		}
-	}
-	if !g.D.Hellfire {
-		count = g.random(8) + 10
 	}
 	for n := count - len(rnd); n > 3; n-- {
 		var it *Item
@@ -298,10 +276,7 @@ func (g *Generator) witchBookLevel(it *Item, spellLevels [NumSpells]int) {
 func (g *Generator) HealerStock(lvl int, who *Shopper) []*Item {
 	out := []*Item{g.storeItem(IdxHeal, 1), g.storeItem(IdxFullHeal, 1)}
 	var rnd []*Item
-	n := g.random(8) + 10
-	if g.D.Hellfire {
-		n = g.random(10) + 10
-	}
+	n := g.random(10) + 10
 	ok := func(b ItemData) bool { return g.healerItemOk(b, who) }
 	for ; n > 2; n-- {
 		rnd = append(rnd, g.storeItem(g.storeIdx(lvl, ok, false), lvl))
@@ -318,7 +293,7 @@ func (g *Generator) BoyItem(clvl int, who *Shopper) *Item {
 		it := g.storeItem(g.storeIdx(clvl, g.premiumItemOk, false), clvl)
 		g.itemBonus(it, clvl, 2*clvl, true)
 		ok := it.IValue <= lim.boyMaxVal
-		if g.D.Hellfire && who != nil {
+		if who != nil {
 			floor := who.bestOwned(it) * 8 / 10
 			if count < 200 && slices.Contains(boyShuns[who.Class], it.Type) {
 				floor = 1 << 62
@@ -335,13 +310,8 @@ func (g *Generator) BoyItem(clvl int, who *Shopper) *Item {
 // BuyPrice is what a store charges (the identified value).
 func BuyPrice(it *Item) int { return it.IValue }
 
-// WirtPrice ports S_BBuyEnter: D1's Wirt adds 50%, Hellfire's takes 25% off.
-func (d *Data) WirtPrice(it *Item) int {
-	if d.Hellfire {
-		return it.IValue - it.IValue>>2
-	}
-	return it.IValue + it.IValue>>1
-}
+// WirtPrice ports S_BBuyEnter: Hellfire's Wirt takes 25% off.
+func (d *Data) WirtPrice(it *Item) int { return it.IValue - it.IValue>>2 }
 
 // SellPrice ports S_StartSSell/S_StartWSell: a quarter of the (identified) value, at least 1.
 func SellPrice(it *Item) int {
@@ -358,24 +328,18 @@ func isQuestItem(it *Item) bool {
 
 // SmithBuys ports SmithSellOk; Hellfire's Griswold also buys oils and plain staves, but no quest items.
 func (d *Data) SmithBuys(it *Item) bool {
-	if d.Hellfire {
-		switch {
-		case IsOil(it.MiscID):
-			return true
-		case it.Type == ITypeMisc, it.Type == ITypeGold, it.Type == ITypeStaff && it.Spell != 0, it.Class == "ICLASS_QUEST":
-			return false
-		}
-		return it.BaseIdx != IdxLazStaff
+	switch {
+	case IsOil(it.MiscID):
+		return true
+	case it.Type == ITypeMisc, it.Type == ITypeGold, it.Type == ITypeStaff && it.Spell != 0, it.Class == "ICLASS_QUEST":
+		return false
 	}
-	return it.Type != ITypeMisc && it.Type != ITypeGold && it.Type != ITypeStaff && it.BaseIdx != IdxLazStaff
+	return it.BaseIdx != IdxLazStaff
 }
 
 // WitchBuys ports WitchSellOk; Hellfire's Adria takes no oils or quest items, and only staves with a spell.
 func (d *Data) WitchBuys(it *Item) bool {
-	ok := it.Type == ITypeMisc || it.Type == ITypeStaff
-	if d.Hellfire {
-		ok = it.Type == ITypeMisc && !IsOil(it.MiscID) && it.Class != "ICLASS_QUEST" || it.Type == ITypeStaff && it.Spell != 0
-	}
+	ok := it.Type == ITypeMisc && !IsOil(it.MiscID) && it.Class != "ICLASS_QUEST" || it.Type == ITypeStaff && it.Spell != 0
 	return ok && !isQuestItem(it)
 }
 
@@ -449,7 +413,7 @@ func RepairCost(it *Item) int {
 
 // CanRecharge ports WitchRechargeOk; Hellfire's Adria also recharges uniques with charges.
 func (d *Data) CanRecharge(it *Item) bool {
-	if d.Hellfire && (it.MiscID == "IMISC_UNIQUE" || it.MiscID == "IMISC_STAFF") && it.Charges < it.MaxCharges {
+	if (it.MiscID == "IMISC_UNIQUE" || it.MiscID == "IMISC_STAFF") && it.Charges < it.MaxCharges {
 		return true
 	}
 	return it.Type == ITypeStaff && it.MaxCharges > 0 && it.Charges != it.MaxCharges

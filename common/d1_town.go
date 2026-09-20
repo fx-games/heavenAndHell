@@ -133,12 +133,8 @@ func d1VendorOptions(ctx ActionContext, vendor *Actor) []util.MenuItem {
 			player.HealCompletely()
 			ctx.Msg("Pepin tends to your wounds.")
 		}
-		buy := util.MenuItem{MainText: "Buy items", Action: func() { gui.OpenShopMenu(vendor) }}
-		if data.Hellfire { // S_StartHealer: Hellfire's Pepin heals as you come in
-			heal()
-			return []util.MenuItem{buy}
-		}
-		return []util.MenuItem{{MainText: "Receive healing", Action: heal}, buy}
+		heal() // S_StartHealer: Hellfire's Pepin heals as you come in
+		return []util.MenuItem{{MainText: "Buy items", Action: func() { gui.OpenShopMenu(vendor) }}}
 	case VendorTypeCain:
 		// D1 charges a flat 100 gold to identify (AddStoreHoldId in stores.cpp), regardless of item value
 		return []util.MenuItem{d1ServiceOption(ctx, "Identify an item", func(it *d1.Item) bool { return it.Magical != 0 && !it.Identified },

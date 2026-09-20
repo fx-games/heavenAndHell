@@ -34,11 +34,24 @@ CC=/usr/local/Cellar/mingw-w64/11.0.1/toolchain-x86_64/bin/x86_64-w64-mingw32-gc
 # - builds/win/LuxAeterna.exe
 # - builds/linux/LuxAeterna
 
-# copy assets
-cp -r files/assets builds/mac/assets
-cp -r files/assets builds/linux/assets
-cp -r files/assets builds/win/assets
-cp -r files/assets builds/win7/assets
+# copy assets: exactly what the game reads at run time, the same list files/data_embedded.go embeds.
+# Working material
+# (assets/sources.for.tiles, assets/maps/backups, the raw music packs) has no business in a build either.
+RUNTIME_ASSETS="Bm437_IBM_CGA.png classic_roguelike.png maps.ldtk endMessage.txt names-female.txt names-male.txt data fonts sfx ang_sfx ambience voice"
+
+copy_assets() {
+  dest="$1/assets"
+  mkdir -p "$dest"
+  for entry in $RUNTIME_ASSETS; do
+    [ -e "files/assets/$entry" ] && cp -R "files/assets/$entry" "$dest/"
+  done
+  cp files/config.rec "$1/config.rec"
+}
+
+copy_assets builds/mac
+copy_assets builds/linux
+copy_assets builds/win
+copy_assets builds/win7
 
 # copy rogue windows
 cp exclude/RogueWindows/rw-windows-amd64.exe builds/win/RogueWindows.exe

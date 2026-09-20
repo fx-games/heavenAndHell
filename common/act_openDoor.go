@@ -45,11 +45,7 @@ func (d *OpenDoorAction) Execute(context ActionContext) []Action {
 		NewUpdateFoVAction(d.Cause(), d.actor),
 	}
 
-	openSfx := "IS_DOOROPEN" // OperateL1RDoor and kin; the Crypt's doors are IS_CROPEN
-	if d1DungeonLevel(context.GameState) >= 21 {
-		openSfx = "IS_CROPEN"
-	}
-	if !playD1SfxAt(context, openSfx, d.doorPos) {
+	if !playD1SfxAt(context, "IS_DOOROPEN", d.doorPos) { // OperateL1RDoor and kin
 		context.AudioPlayer.PlayCue("open_door")
 	}
 

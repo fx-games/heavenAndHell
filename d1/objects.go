@@ -2,7 +2,6 @@ package d1
 
 import (
 	"fmt"
-	"math"
 )
 
 // objects.cpp: objects placed on level creation.
@@ -94,7 +93,6 @@ var StoryBookNames = [9]string{"The Great Conflict", "The Wages of Sin are War",
 	"The Sin War", "The Binding of the Three", "The Realms Beyond", "Tale of the Three", "The Black King"}
 
 var (
-	// Hellfire's MAX_LVLS (24); D1's 16 never cuts a shrine D1 could roll
 	shrineMax   = [34]int{24, 24, 24, 24, 24, 24, 24, 8, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24}
 	shrineAvail = [34]int{0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 0} // 2 = multiplayer only
 )
@@ -296,15 +294,6 @@ func (g *gen) addLevelObjs(ltype int) {
 	for j := 0; j < 112; j++ {
 		for i := 0; i < 112; i++ {
 			pn := g.piece[i][j] + 1
-			if isCrypt(g.currlevel) { // add_crypt_objs
-				if pn == 77 {
-					g.addObject(ObjL1LDOOR, i, j)
-				}
-				if pn == 80 {
-					g.addObject(ObjL1RDOOR, i, j)
-				}
-				continue
-			}
 			if ltype == DTypeCathedral && pn == 270 {
 				g.addObject(ObjL1LIGHT, i, j)
 			}
@@ -426,10 +415,7 @@ func (g *gen) addChestTraps() {
 				if g.ltype == DTypeCatacombs {
 					o.Var4 = g.rnd(2)
 				} else {
-					o.Var4 = g.rnd(3)
-					if g.data.Hellfire {
-						o.Var4 = g.rnd(6)
-					}
+					o.Var4 = g.rnd(6)
 				}
 			}
 		}
@@ -591,18 +577,6 @@ func (g *gen) initObjects(seeds [NumLevels]int32) {
 	if g.currlevel == 4 || g.currlevel == 8 || g.currlevel == 12 {
 		g.addStoryBooks(seeds)
 	}
-	switch g.currlevel {
-	case 21:
-		g.addCryptStoryBook(1)
-	case 22:
-		g.addCryptStoryBook(2)
-		g.addCryptStoryBook(3)
-	case 23:
-		g.addCryptStoryBook(4)
-		g.addCryptStoryBook(5)
-	case 24:
-		g.addNakrulGate()
-	}
 	sp := g.setPiece
 	switch g.ltype {
 	case DTypeCathedral:
@@ -746,11 +720,6 @@ func (g *gen) addObject(kind, ox, oy int) {
 		o.AnimFrame = 1
 	case ObjTRAPL, ObjTRAPR:
 		mt := g.currlevel/3 + 1
-		if g.currlevel > 20 { // Hellfire rates the Nest as levels 13-16 and the Crypt as 13-16 too
-			mt = (g.currlevel-8)/3 + 1
-		} else if g.currlevel > 16 {
-			mt = (g.currlevel-4)/3 + 1
-		}
 		switch g.rnd(mt) {
 		case 0:
 			o.Var3 = misArrow
@@ -771,7 +740,7 @@ func (g *gen) addObject(kind, ox, oy int) {
 	case ObjSHRINEL, ObjSHRINER:
 		o.PreFlag = true
 		for {
-			v := g.rnd(g.data.numShrines())
+			v := g.rnd(len(ShrineNames))
 			if g.currlevel <= shrineMax[v] && shrineAvail[v] != 2 {
 				o.Var1 = v
 				break
@@ -872,61 +841,65 @@ func (g *gen) preSpawnSkeleton() int {
 	return slot
 }
 
-// addCryptStoryBook ports AddCryptStoryBook: the Crypt's book s (1-5), between six candles.
-func (g *gen) addCryptStoryBook(s int) {
-	xp, yp, ok := g.findLoc(-3, -2, 3, 2, 20000)
-	if !ok {
-		return
-	}
-	g.addCryptBook(s, xp, yp)
-	for _, c := range [][2]int{{-2, 1}, {-2, 0}, {-1, -1}, {1, -1}, {2, 0}, {2, 1}} {
-		g.addObject(ObjSTORYCANDLE, xp+c[0], yp+c[1])
-	}
-}
-
-// addCryptBook ports AddCryptBook and AddCryptObject: a story book that doesn't roll its narration. Books 6-8 are
-// Na-Krul's three spell books (Var8), whose text D1 picks by the reader's class; Var2 is the Warrior's.
-func (g *gen) addCryptBook(s, x, y int) {
-	g.addObject(ObjSTORYBOOK, x, y)
-	o := g.objAt(x, y)
-	if o == nil {
-		return
-	}
-	o.Var1, o.Var2, o.Var3, o.Var8 = 1, s+316, s+9, 0
-	if s > 5 {
-		o.Var2, o.Var3, o.Var8 = 317+s, 15, s
-	}
-	o.AnimFrame = 3
-	o.Var4 = 4
-}
-
-// addNakrulGate ports AddNakrulGate: the lever beside Na-Krul's room and his three books in a random order.
-func (g *gen) addNakrulGate() {
-	ux, uy := g.uberRoom()
-	g.findLoc(-1, -1, 1, 1, math.MaxInt) // AddNakrulLeaver looks for a free spot and then doesn't use it
-	g.addObject(ObjLEVER, ux+3, uy-1)
-	order := [6][3]int{{6, 7, 8}, {6, 8, 7}, {7, 6, 8}, {7, 8, 6}, {8, 7, 6}, {8, 6, 7}}[g.rnd(6)]
-	g.addCryptBook(order[0], ux+3, uy)
-	g.addCryptBook(order[1], ux+2, uy-3)
-	g.addCryptBook(order[2], ux+2, uy+2)
-}
-
-// uberRoom is UberRow/UberCol: the piece CreateL5Dungeon finds Na-Krul's door at (D1 piece 290).
-func (g *gen) uberRoom() (x, y int) {
-	for j := 16; j < 96; j++ {
-		for i := 16; i < 96; i++ {
-			if g.piece[i][j]+1 == 290 {
-				x, y = i, j
+// moveMonstersOffObjects keeps monsters and solid objects off the same cell. D1 places monsters before the
+// layout's doors, so a monster can end up standing inside one; objects win (the door's cell is the wall's), so
+// the monster is nudged to the first free neighbour instead. Done after placement, with no RNG of its own, so
+// a level built from a seed still matches D1 everywhere else.
+func (g *gen) moveMonstersOffObjects() {
+	for _, m := range g.monsters {
+		o := g.objectAt(m.X, m.Y)
+		if o == nil || !o.Solid && !o.DoorFlag {
+			continue
+		}
+		for i := range offsetX {
+			x, y := m.X+offsetX[i], m.Y+offsetY[i]
+			if !g.monstPlace(x, y) || g.objectAt(x, y) != nil {
+				continue
 			}
+			slot := g.dMon(m.X, m.Y)
+			if fx, fy, ok := flat(m.X, m.Y); ok {
+				g.dMonster[fx][fy] = 0
+			}
+			if fx, fy, ok := flat(x, y); ok {
+				g.dMonster[fx][fy] = slot
+			}
+			m.X, m.Y = x, y
+			break
 		}
 	}
-	return
 }
 
-// numShrines is NUM_SHRINETYPE: Hellfire adds eight.
-func (d *Data) numShrines() int {
-	if d.Hellfire {
-		return len(ShrineNames)
+// objectAt is the object standing on a cell, or nil.
+func (g *gen) objectAt(x, y int) *Object {
+	if oi := g.dObj(x, y); oi > 0 && int(oi) <= maxObjects {
+		return g.objects[oi-1]
 	}
-	return 26
+	return nil
+}
+
+// hangTorchesOnWalls moves the two wall torches AddL2Torches hangs off a wall onto the wall itself. D1 puts
+// them on the floor cell in front, where its 3/4 view still draws them against the wall behind; top-down that
+// leaves a torch standing in the open. Run after every object is placed, so nothing else shifts.
+func (g *gen) hangTorchesOnWalls() {
+	back := map[int][2]int{ObjTORCHL: {1, 0}, ObjTORCHR: {0, 1}} // the cell AddL2Torches stepped off
+	for _, o := range g.objects {
+		d, ok := back[objKindOrNone(o)]
+		if !ok {
+			continue
+		}
+		x, y := o.X+d[0], o.Y+d[1]
+		if !g.solidLoc(x, y) || g.dObj(x, y) != 0 {
+			continue
+		}
+		g.setDObject(o.X, o.Y, 0)
+		g.setDObject(x, y, o.Index+1)
+		o.X, o.Y = x, y
+	}
+}
+
+func objKindOrNone(o *Object) int {
+	if o == nil {
+		return -1
+	}
+	return o.Kind
 }

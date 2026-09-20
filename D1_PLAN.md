@@ -83,7 +83,7 @@ Every D1 single-player quest runs as D1 1.09 progresses it (`common/d1_quest.go`
 - **Terrain:** cave islands, cracks and the Hall of Heroes fix were already part of the exact generator. The Cathedral's arches, fences, pillars and lamps are see-through `IconArch`/`IconGrate`/`IconPillar`/`IconLamp` cells where D1's sight passes them (`d1CathedralSeeThrough`, like the Caves lava/fence); every other solid piece is an opaque wall, even where D1's SOL doesn't block light (stairs surrounds, catacomb/hell wall variants), since a see-through cell drawn as a plain wall lets you see and shoot into what looks like a closed room. The Poisoned Water Supply shows its lava pieces as water tiles, tinted light green until the quest is done and blue after (D1's L3pfoul/L3pwater palettes, `State.GetWaterColor`); water is the one tint besides monster variants and used objects.
 - **Saves:** each level snapshot keeps monster AI state (`D1MonsterState`: goals, talk squelch, direction, dormant gargoyles, NoHeal), corpses (for scavengers), explored cells and disarmed traps. Old saves still load.
 - **Golem and Mana Shield** outlast level changes (unlike D1): the golem walks along with the hero onto the new level, both are saved.
-- **Quests:** the Wounded Townsman says his line once, then the hero's PS_WARR8 line plays; Ogden's Sign is checked inside Leoric's check and quests only get `_qvar1` 1 when they start from QUEST_INIT, like 1.09. D1's `_tMsgSaid` is reset on every talk, so our one-line-per-talk returns already match it. Speech plays with every quest, book and gossip text and each townsperson's greeting, plus the hero's quest lines (kills, quest items, mushroom patch, sign chest) and IS_QUESTDN (`d1.SfxFiles`, generated from 1.09's sound table; needs `diablo_sfx`). The third blood stone lights the hall with Blood2.DUN's torches (LoadMapObjs).
+- **Quests:** the Wounded Townsman says his line once, then the hero's PS_WARR8 line plays; Ogden's Sign is checked inside Leoric's check and quests only get `_qvar1` 1 when they start from QUEST_INIT, like 1.09. D1's `_tMsgSaid` is reset on every talk, so our one-line-per-talk returns already match it. Speech plays with every quest, book and gossip text and each townsperson's greeting, plus the hero's quest lines (kills, quest items, mushroom patch, sign chest) and IS_QUESTDN (`d1.SfxFiles`, generated from 1.09's sound table; silent until `voices.rec` has files). The third blood stone lights the hall with Blood2.DUN's torches (LoadMapObjs).
 
 ## Save slots
 
@@ -110,11 +110,10 @@ Every D1 single-player quest runs as D1 1.09 progresses it (`common/d1_quest.go`
 
 ## Defaults (not grilled)
 
-- **Hellfire is per save** ("Hellfire content" checkbox on the new-game screen, default off). Off, a new
-  game runs on `LoadD1`'s tables with D1's three classes, no Hellfire quests or towners, so the Nest and the Crypt
-  never open. The save keeps `D1Only`; "Enable Hellfire content" in the pause menu upgrades that slot for good
-  (never back), only in town (else it would reroll an unwanted level), dropping its level snapshots, since
-  Hellfire rolls levels 1-16 differently.
+- **Hellfire is always on, and has no toggle.** Everything of the expansion this game keeps is merged into the
+  default code paths: one item table in Hellfire's `AllItemsList` order, its affixes, spells, classes, stores,
+  shrines and chest traps, and its Cathedral stairs. There is no "Hellfire content" checkbox, no `D1Only` save
+  field and no mid-game upgrade; a save from before the cut loads as full content.
 - Hellfire's six-class roster is in: Monk, Bard and Barbarian, with their skills (Search, Identify, Rage), their
   attribute tables (devilutionX `txtdata/classes/<class>/attributes.tsv`, which also reproduces D1 1.09's) and
   their class traits (critical strike, trap sense, iron skin, natural resistance, the Monk's bare-handed block).
@@ -122,32 +121,25 @@ Every D1 single-player quest runs as D1 1.09 progresses it (`common/d1_quest.go`
 - **Hellfire's items** are in: the thirteen it drops into D1's empty table slots 35-47, the oils, runes, Scroll of
   Search and Bovine Plate appended past 156 in `xl_item.txt`, 20 uniques, 3 prefixes and 3 suffixes. `Load` lays the
   table out in Hellfire's own AllItemsList order (`hellfireItemOrder`: oils after Full Rejuvenation, Search after
-  Healing, Bovine Plate in Lightforge's slot, runes last, the Short Staff of Mana), which every item roll walks. `Data.Hellfire` gates
-  everything droppable, so `LoadD1` still rolls exactly like 1.09 and `TestGoldenLevels` keeps pinning it.
-- **Hellfire's monsters** are in: 26 new types, 3 new unique monsters and the seven new AIs, all of which turn out
-  to be `MAI_Ranged`/`MAI_RoundRanged` with a differently coloured flare.
-- **The Nest (17-20) and the Crypt (21-24)** are in. Hellfire keeps D1's level types and branches inside the Caves
-  and Cathedral generators (`d1/drlg_l6.go`, `d1/drlg_l5.go`); both match all of DevilutionX's Hellfire fixtures, as
-  do Hellfire's changed Cathedral stairs. Downstream: their triggers, crypt doors, story journals, Na-Krul's lever
-  and books, Hork Demon / Defiler / Na-Krul placement, Hellfire's 34 shrines, six chest traps, item levels
-  (`ItemLevel`) and speech.
-- **Hellfire's quests** are in (`common/d1_hellfire_quest.go`): Farmer's Orchard (Lester, the Rune Bomb opens the
-  Nest, the Auric Amulet), Grave Matters (the Defiler's Cathedral Map opens the Crypt, Gillian's hint), The Defiler,
-  Na-Krul (journals, the three books in order open his door and weaken him, or the lever), the Cornerstone of the
-  World (its item is kept between games in `cornerstone.json`), and behind the debug menu's Cowquest / Theoquest
-  switches The Jersey's Jersey (Complete Nut, cow suits, Bovine Plate) and the Little Girl (Celia, Theodore).
-  Shrines fire their missiles (Oily, Sparkling), chests lay the ring of fire, and the five runes are placeable traps
-  (Rune of Lightning as DevilutionX's lightning wall; the fire blast and the wall hurt the hero too).
+  Healing, Bovine Plate in Lightforge's slot, runes last, the Short Staff of Mana), which every item roll walks.
+- **Hellfire's levels, quests, towners and monsters are cut.** The Nest (17-20) and the Crypt (21-24) are gone
+  (`DRLG_L6`/`DRLG_L5` and their tile tables), so the dungeon stops at 16; with them went Farmer's Orchard,
+  Grave Matters, The Defiler, Na-Krul, the Cornerstone of the World, The Jersey's Jersey and the Little Girl, the
+  towners Lester, the Complete Nut and Celia, their quest items, and all 26 of Hellfire's monsters and its three
+  new unique monsters — every one of those only spawned on 17-24, and all seven of their AIs turn out to be
+  `MAI_Ranged`/`MAI_RoundRanged` with a differently coloured flare, so nothing behavioural was lost. Hellfire's
+  quest-item rows stay in `xl_item.txt` (all `IDROP_NEVER`, so unreachable) rather than renumber the table.
 - **Hellfire's spells** are in, in Hellfire's spell table order (37-51, Search moved to 46): Mana, the Magi, the
   Jester, Lightning Wall, Immolation, Warp, Reflect, Berserk and Ring of Fire, with Hellfire's book and staff rolls
   (MAX_SPELLS 52, staves always carry a spell, Nova and Apocalypse books) and its fire wall that burns the hero.
-  Doppelganger's weapons split ordinary monsters (AddDoppelganger).
+  Doppelganger's weapons split ordinary monsters (AddDoppelganger). The five runes are placeable **traps**
+  (Rune of Lightning as DevilutionX's lightning wall; the fire blast and the wall hurt the hero too); the Go and
+  data identifiers keep D1's own `SPL_RUNE*` / `IMISC_RUNE*` names.
 - **Hellfire's stores** are in (`d1/stores.go`): bigger stocks and value caps, 15 premium items rotating three a
   level and picked for the hero's class, stats and best gear, Wirt's class-aware item at 25% off, Adria's up to three
   guaranteed books, no oils at Adria but oils and plain staves at Griswold, uniques recharged, elixirs only below
   the class maximum, and Pepin healing as you walk in.
-- **Still out**: the Wandering Trader (nothing in Hellfire runs it), the Auric Amulet's gold capacity (H&H has no
-  gold cap), town cows, Nest/Crypt tile icons, the stores' 48-line list cap and belt selling (H&H has neither),
+- **Still out**: town cows, the stores' 48-line list cap and belt selling (H&H has neither),
   multiplayer-only items/spells/shrines and difficulty levels (Nightmare/Hell).
 - **Actor descriptions** (right click, `common.ActorInfoSections`) are titled blocks of label/value rows, laid
   out like the character sheet and drawn by the same code (`gui/info_window.go`, `drawSectionBlock`): what the

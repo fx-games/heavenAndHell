@@ -80,7 +80,6 @@ type MonsterData struct {
 	Class                                 string // MC_UNDEAD, MC_DEMON, MC_ANIMAL
 	MagicRes, MagicRes2, Treasure, Exp    int
 	Available                             bool // MonstAvailTbl != 0
-	Hellfire                              bool // added by the expansion: only placed when Data.Hellfire is on
 }
 
 // Monster flag bits (_mFlags).
@@ -124,7 +123,7 @@ func hellfireItemOrder(d1Items []ItemData) []ItemData {
 	const (
 		oils    = D1ItemCount     // Blacksmith Oil .. Oil, 4 rows
 		vision  = D1ItemCount + 4 // Scroll of Vision
-		runes   = D1ItemCount + 5 // Rune of Fire .. Rune of Stone, 5 rows
+		runes   = D1ItemCount + 5 // the five placeable traps (Hellfire's runes), 5 rows
 		bovine  = D1ItemCount + 10
 		fullRej = 82 // Potion of Full Rejuvenation
 		healing = 87 // Scroll of Healing
@@ -138,7 +137,6 @@ func hellfireItemOrder(d1Items []ItemData) []ItemData {
 	out = append(out, d1Items[runes:runes+5]...)
 	out[32] = d1Items[bovine]
 	out[5].Name, out[5].Spell = "Short Staff of Mana", "SPL_MANA"
-	out[IdiMapOfDoom].Name = "Cathedral Map"
 	return out
 }
 
@@ -156,7 +154,6 @@ type ItemData struct {
 	MinStr, MinMag, MinDex       int
 	Flags, MiscID, Spell         string
 	Value                        int
-	Hellfire                     bool // added by the expansion: only rolled when Data.Hellfire is on
 }
 
 // ITYPE_ values.
@@ -213,7 +210,6 @@ type Affix struct {
 	GOE                     int
 	Double, Ok              bool
 	MinVal, MaxVal, MultVal int
-	Hellfire                bool // added by the expansion: only rolled when Data.Hellfire is on
 }
 
 type Power struct {
@@ -222,7 +218,6 @@ type Power struct {
 }
 
 type UniqueItemData struct {
-	Hellfire             bool // added by the expansion: only rolled when Data.Hellfire is on
 	Name, Base           string
 	MinLvl, NumPL, Value int
 	Powers               [6]Power
@@ -238,24 +233,24 @@ type SpellData struct {
 
 // D1's spelldata names; the TSV only carries some of them.
 var spellNames = []string{"", "Firebolt", "Healing", "Lightning", "Flash", "Identify", "Fire Wall", "Town Portal", "Stone Curse",
-	"Infravision", "Phasing", "Mana Shield", "Fireball", "Guardian", "Chain Lightning", "Flame Wave", "Doom Serpents",
+	"Vision", "Phasing", "Mana Shield", "Fireball", "Guardian", "Chain Lightning", "Flame Wave", "Doom Serpents",
 	"Blood Ritual", "Nova", "Invisibility", "Inferno", "Golem", "Rage", "Teleport", "Apocalypse", "Etherealize",
 	"Item Repair", "Staff Recharge", "Trap Disarm", "Elemental", "Charged Bolt", "Holy Bolt", "Resurrect",
 	"Telekinesis", "Heal Other", "Blood Star", "Bone Spirit", "Mana", "the Magi", "the Jester", "Lightning Wall",
-	"Immolation", "Warp", "Reflect", "Berserk", "Ring of Fire", "Vision", "Rune of Fire", "Rune of Light", "Rune of Nova",
-	"Rune of Immolation", "Rune of Stone"}
+	"Immolation", "Warp", "Reflect", "Berserk", "Ring of Fire", "Vision", "Fire Trap", "Lightning Trap", "Nova Trap",
+	"Immolation Trap", "Stone Trap"}
 
 // SpellDescriptions holds one short item-tooltip sentence per spell, indexed like spellNames.
 var SpellDescriptions = []string{"",
 	"Hurls a bolt of fire at the target.",
 	"Restores some of your life.",
 	"Fires a crackling line of lightning at the target.",
-	"Unleashes a burst of light that damages everything around you.",
+	"Unleashes a burst of light that damages everything within 1 square of you.",
 	"Reveals the magical properties of an item.",
 	"Raises a wall of flame that burns anything passing through.",
 	"Opens a portal back to town and returns you to where you were.",
 	"Turns a monster to stone for a short while.",
-	"Lets you see monsters through the darkness.",
+	"Shows every living thing on the level and lets you see them through walls.",
 	"Teleports you to a random nearby spot.",
 	"Uses your mana to absorb damage instead of life.",
 	"Launches an exploding ball of fire at the target.",
@@ -292,34 +287,27 @@ var SpellDescriptions = []string{"",
 	"Turns part of the damage of blows back on the attacker.",
 	"Drives a monster berserk, turning it on its own kind.",
 	"Surrounds you with a ring of fire walls.",
-	"Senses every item hidden on the level.",
-	"Sets a rune that explodes in fire when stepped on.",
-	"Sets a rune that raises lightning when stepped on.",
-	"Sets a rune that releases a lightning nova when stepped on.",
-	"Sets a rune that releases fireballs in every direction when stepped on.",
-	"Sets a rune that turns to stone whoever steps on it."}
+	"Shows every living thing on the level and lets you see them through walls.",
+	"Sets a trap that explodes in fire when stepped on.",
+	"Sets a trap that raises a wall of lightning when stepped on.",
+	"Sets a trap that releases a lightning nova when stepped on.",
+	"Sets a trap that releases fireballs in every direction when stepped on.",
+	"Sets a trap that turns to stone whoever steps on it."}
 
 // D1MonsterCount is how many entries D1 1.09's table has; everything past it is Hellfire's, appended.
 const D1MonsterCount = 112
 
-// monstdat.cpp MonstAvailTbl: 0 = never spawns at random. The last 26 are Hellfire's (MAT_YES except the Hork
-// Demon, the Hell Bug and Na-Krul, which only quests place).
-var monstAvail = [138]byte{
+// monstdat.cpp MonstAvailTbl: 0 = never spawns at random.
+var monstAvail = [112]byte{
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 0, 2, 2, 2, 2, 1, 1,
 	1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0,
 	2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2,
 	0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0,
 	0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0,
-	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
-	0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	2, 0,
 }
 
 type Data struct {
-	// Hellfire turns the expansion's content on: its items, monsters and levels. Off, the tables behave exactly
-	// like D1 1.09's, which is what the golden level fixtures pin.
-	Hellfire       bool
 	Monsters       []MonsterData
 	UniqueMonsters []UniqueMonsterData
 	Items          []ItemData
@@ -405,19 +393,17 @@ func family(graphic string) string {
 	return parts[1]
 }
 
-// Load reads the tables with Hellfire's content enabled; LoadD1 leaves it off.
+// Load reads the tables.
 func Load(fsys fs.FS) (*Data, error) {
-	d, err := LoadD1(fsys)
+	d, err := load(fsys)
 	if d != nil {
-		d.Hellfire = true
 		d.Items = hellfireItemOrder(d.Items)
 		d.Spells[SplNova].BookLvl, d.Spells[SplApocalypse].BookLvl = 14, 19 // Hellfire's books of Nova and Apocalypse
 	}
 	return d, err
 }
 
-// LoadD1 reads the tables as plain Diablo 1.09, with none of Hellfire's additions rolled.
-func LoadD1(fsys fs.FS) (*Data, error) {
+func load(fsys fs.FS) (*Data, error) {
 	d := &Data{}
 	tables := map[string][]row{}
 	for _, n := range []string{"xl_monst", "xl_umon", "xl_item", "xl_ipre", "xl_isuf", "xl_uitem", "xl_spell", "xl_obj"} {
@@ -436,7 +422,6 @@ func LoadD1(fsys fs.FS) (*Data, error) {
 			Hit2: r.i("mHit2"), AFNum2: r.i("mAFNum2"), MinDam2: r.i("mMinDamage2"), MaxDam2: r.i("mMaxDamage2"),
 			AC: r.i("mArmorClass"), Class: r.s("mMonstClass"), MagicRes: r.i("mMagicRes"), MagicRes2: r.i("mMagicRes2"),
 			Treasure: r.i("mTreasure"), Exp: r.i("mExp"), Available: n < len(monstAvail) && monstAvail[n] != 0,
-			Hellfire: n >= D1MonsterCount,
 		})
 	}
 	for _, r := range tables["xl_umon"] {
@@ -454,15 +439,14 @@ func LoadD1(fsys fs.FS) (*Data, error) {
 			break
 		}
 		d.Items = append(d.Items, ItemData{
-			Hellfire: len(d.Items) >= D1ItemCount,
-			Drop:     r.s("iRnd"), Class: r.s("iClass"), Loc: r.s("iLoc"), Curs: r.i("iCurs"), Type: r.i("itype"),
+			Drop: r.s("iRnd"), Class: r.s("iClass"), Loc: r.s("iLoc"), Curs: r.i("iCurs"), Type: r.i("itype"),
 			UniqueBase: r.s("iItemId"), Name: r.s("iName"), ShortName: r.s("iSName"), MinMLvl: r.i("iMinMLvl"),
 			Durability: r.i("iDurability"), MinDam: r.i("iMinDam"), MaxDam: r.i("iMaxDam"), MinAC: r.i("iMinAC"), MaxAC: r.i("iMaxAC"),
 			MinStr: r.i("iMinStr"), MinMag: r.i("iMinMag"), MinDex: r.i("iMinDex"),
 			Flags: r.s("iFlags"), MiscID: r.s("iMiscId"), Spell: r.s("iSpell"), Value: r.i("iValue"),
 		})
 	}
-	affixes := func(rows []row, d1Count int) (out []Affix) {
+	affixes := func(rows []row) (out []Affix) {
 		for _, r := range rows {
 			if r.s("PLPower") == "IPL_INVALID" {
 				break
@@ -475,19 +459,17 @@ func LoadD1(fsys fs.FS) (*Data, error) {
 				Name: r.s("PLName"), Power: r.s("PLPower"), P1: r.i("PLParam1"), P2: r.i("PLParam2"), MinLvl: r.i("PLMinLvl"),
 				IType: itype, GOE: r.i("PLGOE"), Double: r.i("PLDouble") != 0, Ok: r.i("PLOk") != 0,
 				MinVal: r.i("PLMinVal"), MaxVal: r.i("PLMaxVal"), MultVal: r.i("PLMultVal"),
-				Hellfire: len(out) >= d1Count,
 			})
 		}
 		return
 	}
-	d.Prefixes = affixes(tables["xl_ipre"], D1PrefixCount)
-	d.Suffixes = affixes(tables["xl_isuf"], D1SuffixCount)
+	d.Prefixes = affixes(tables["xl_ipre"])
+	d.Suffixes = affixes(tables["xl_isuf"])
 	for _, r := range tables["xl_uitem"] {
 		if r.s("UIItemId") == "UITYPE_INVALID" {
 			break
 		}
-		u := UniqueItemData{Name: r.s("UIName"), Base: r.s("UIItemId"), MinLvl: r.i("UIMinLvl"), NumPL: r.i("UINumPL"), Value: r.i("UIValue"),
-			Hellfire: len(d.UniqueItems) >= D1UniqueItemCount}
+		u := UniqueItemData{Name: r.s("UIName"), Base: r.s("UIItemId"), MinLvl: r.i("UIMinLvl"), NumPL: r.i("UINumPL"), Value: r.i("UIValue")}
 		for p := 0; p < 6; p++ {
 			u.Powers[p] = Power{r.s(fmt.Sprintf("UIPower%d", p+1)), r.i(fmt.Sprintf("UIParam%d", 2*p+1)), r.i(fmt.Sprintf("UIParam%d", 2*p+2))}
 		}

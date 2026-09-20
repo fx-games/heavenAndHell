@@ -11,7 +11,7 @@ import (
 func TestD1StartPlrHit(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 	state := theGame.GetWorldState()
 	player, f := state.GetPlayer(), state.Factory()
 	player.Hero().Level = 5

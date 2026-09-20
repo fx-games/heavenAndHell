@@ -132,14 +132,9 @@ func (g *Generator) isplFlags(s string) uint32 {
 	return 0
 }
 
-// nextSpell walks spells like GetBookSpell/GetStaffSpell, skipping multiplayer-only ones: D1's 37, or with Hellfire
-// its MAX_SPELLS.
+// nextSpell walks spells like GetBookSpell/GetStaffSpell, skipping multiplayer-only ones (Hellfire's MAX_SPELLS).
 func (g *Generator) nextSpell(ok func(SpellData) bool) int {
-	n := D1SpellCount
-	if g.D.Hellfire {
-		n = NumSpells
-	}
-	rv := g.random(n) + 1
+	rv := g.random(NumSpells) + 1
 	s, bs := 1, 0
 	for rv > 0 {
 		if ok(g.D.Spells[s]) {
@@ -153,7 +148,7 @@ func (g *Generator) nextSpell(ok func(SpellData) bool) int {
 		if s == 34 { // SPL_HEALOTHER
 			s = 35
 		}
-		if s == n {
+		if s == NumSpells {
 			s = 1
 		}
 	}
@@ -463,9 +458,6 @@ func (g *Generator) itemPower(it *Item, minlvl, maxlvl, flgs int, onlygood bool)
 	if pre == 0 {
 		var l []int
 		for j, a := range g.D.Prefixes {
-			if a.Hellfire && !g.D.Hellfire {
-				continue
-			}
 			if a.IType&flgs != 0 && a.MinLvl >= minlvl && a.MinLvl <= maxlvl && (!onlygood || a.Ok) && (flgs != PLTStaff || a.Power != "IPL_CHARGES") {
 				l = append(l, j)
 				if a.Double {
@@ -483,9 +475,6 @@ func (g *Generator) itemPower(it *Item, minlvl, maxlvl, flgs int, onlygood bool)
 	if post != 0 {
 		var l []int
 		for j, a := range g.D.Suffixes {
-			if a.Hellfire && !g.D.Hellfire {
-				continue
-			}
 			if a.IType&flgs != 0 && a.MinLvl >= minlvl && a.MinLvl <= maxlvl && (goe|a.GOE) != 0x11 && (!onlygood || a.Ok) {
 				l = append(l, j)
 			}
@@ -506,10 +495,7 @@ func (g *Generator) itemPower(it *Item, minlvl, maxlvl, flgs int, onlygood bool)
 
 // staffSpell ports GetStaffSpell + GetStaffPower.
 func (g *Generator) staffSpell(it *Item, lvl int, onlygood bool) {
-	if !g.D.Hellfire && g.random(4) == 0 { // Hellfire's staves always carry a spell
-		g.itemPower(it, lvl>>1, lvl, PLTStaff, onlygood)
-		return
-	}
+	// Hellfire's staves always carry a spell
 	l := max(lvl>>1, 1)
 	bs := g.nextSpell(func(s SpellData) bool { return s.StaffLvl != -1 && l >= s.StaffLvl })
 	sp := g.D.Spells[bs]
@@ -525,9 +511,6 @@ func (g *Generator) staffSpell(it *Item, lvl int, onlygood bool) {
 	if g.random(10) == 0 || onlygood {
 		var cand []int
 		for j, a := range g.D.Prefixes {
-			if a.Hellfire && !g.D.Hellfire {
-				continue
-			}
 			if a.IType&PLTStaff != 0 && a.MinLvl <= lvl && (!onlygood || a.Ok) {
 				cand = append(cand, j)
 				if a.Double {
@@ -579,9 +562,6 @@ func (g *Generator) checkUnique(it *Item, lvl, uper int, recreate bool) int {
 	}
 	j := -1
 	for u, ud := range g.D.UniqueItems {
-		if ud.Hellfire && !g.D.Hellfire {
-			continue
-		}
 		if ud.Base == g.D.Items[it.BaseIdx].UniqueBase && lvl >= ud.MinLvl && (recreate || !g.UniqueDropped[u]) {
 			j = u
 		}
@@ -671,9 +651,6 @@ func (g *Generator) rndItem(m *MonsterData, mlvl int) int {
 	}
 	var ril []int
 	for i, b := range g.D.Items {
-		if b.Hellfire && !g.D.Hellfire {
-			continue
-		}
 		if b.Drop == "IDROP_DOUBLE" && mlvl >= b.MinMLvl {
 			ril = append(ril, i)
 		}
@@ -694,9 +671,6 @@ func (g *Generator) rndUItem(m *MonsterData, mlvl, dlvl int) int {
 	}
 	var ril []int
 	for i, b := range g.D.Items {
-		if b.Hellfire && !g.D.Hellfire {
-			continue
-		}
 		ok := b.Drop != "IDROP_NEVER"
 		if m != nil && mlvl < b.MinMLvl || m == nil && 2*dlvl < b.MinMLvl {
 			ok = false
@@ -724,9 +698,6 @@ func (g *Generator) rndAllItems(dlvl int) int {
 	}
 	var ril []int
 	for i, b := range g.D.Items {
-		if b.Hellfire && !g.D.Hellfire {
-			continue
-		}
 		if b.Drop != "IDROP_NEVER" && 2*dlvl >= b.MinMLvl {
 			ril = append(ril, i)
 		}
@@ -741,9 +712,6 @@ func (g *Generator) rndAllItems(dlvl int) int {
 func (g *Generator) rndTypeItems(itype int, imisc string, dlvl int) int {
 	var ril []int
 	for i, b := range g.D.Items {
-		if b.Hellfire && !g.D.Hellfire {
-			continue
-		}
 		if b.Drop != "IDROP_NEVER" && dlvl<<1 >= b.MinMLvl && b.Type == itype && (imisc == "" || b.MiscID == imisc) {
 			ril = append(ril, i)
 		}
@@ -808,7 +776,7 @@ func (g *Generator) FloorItem(dlvl int, onlygood, hell bool) *Item {
 func (g *Generator) LevelMonsterTypes(dlvl int) []int {
 	var list []int
 	for i, m := range g.D.Monsters {
-		if i == D1MonsterCount-1 || m.Hellfire && !g.D.Hellfire { // the Arch-Litch is placed by his quest only
+		if i == D1MonsterCount-1 {
 			continue
 		}
 		minl, maxl := 15*m.MinDLvl/30+1, 15*m.MaxDLvl/30+1
@@ -845,7 +813,7 @@ const shrineThaumaturgic = 8
 // Single-player only, so shrineAvail==2 (multiplayer-only) shrines never appear.
 func (g *Generator) RandomShrine(dlvl int) int {
 	for {
-		rv := g.random(g.D.numShrines())
+		rv := g.random(len(ShrineNames))
 		if rv == shrineThaumaturgic || shrineAvail[rv] == 2 || dlvl > shrineMax[rv] {
 			continue
 		}

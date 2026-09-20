@@ -43,3 +43,24 @@ func TestPannedScalesEachChannel(t *testing.T) {
 		t.Fatal("unpanned samples were copied")
 	}
 }
+
+// music.rec holds the five area themes d1AreaMusic asks for, town wired up to assets/music/town.ogg. A theme with
+// no file assigned stays unregistered, so the current track keeps playing instead.
+func TestAreaMusicRegistered(t *testing.T) {
+	ap := NewAudioPlayer(os.DirFS("../files").(fs.ReadDirFS), SampleRate44100)
+	ap.RegisterMusicEvents("assets/data/music.rec")
+	if !slicesContains(ap.MusicTracks(), "town") {
+		t.Fatalf("no town track, got %v", ap.MusicTracks())
+	}
+	if !ap.availableSounds["town"].IsLooping {
+		t.Fatal("town music does not loop")
+	}
+	for _, theme := range []string{"cathedral", "catacombs", "caves", "hell"} {
+		if _, ok := ap.availableSounds[theme]; ok {
+			continue // someone assigned it a track, fine
+		}
+		if slicesContains(ap.MusicTracks(), theme) {
+			t.Fatalf("%s is listed as a track but has no sound", theme)
+		}
+	}
+}

@@ -30,9 +30,7 @@ func TestD1SfxHaveSoundEvents(t *testing.T) {
 		ids = append(ids, id)
 	}
 	for _, kind := range []int{d1.ObjBARREL, d1.ObjBARRELEX} {
-		for _, dlvl := range []int{1, 17, 21} {
-			ids = append(ids, d1BarrelSfx(kind, dlvl))
-		}
+		ids = append(ids, d1BarrelSfx(kind))
 	}
 	for curs := 0; curs < 200; curs++ {
 		drop, inv := d1.ItemSnds(curs)
@@ -41,11 +39,26 @@ func TestD1SfxHaveSoundEvents(t *testing.T) {
 	for _, v := range []string{"WARR", "ROGUE", "MAGE", "MONK"} {
 		ids = append(ids, "PS_"+v+"69", "PS_"+v+"71")
 	}
-	ids = append(ids, "PS_DEAD", "PS_SWING", "PS_BFIRE", "PS_WALK1", "IS_ISWORD", "IS_TRAP", "IS_DOOROPEN", "IS_CROPEN",
+	ids = append(ids, "PS_DEAD", "PS_SWING", "PS_BFIRE", "PS_WALK1", "IS_ISWORD", "IS_TRAP", "IS_DOOROPEN",
 		"IS_RBOOK", "IS_QUESTDN", "IS_SARC", "IS_CAST8", "IS_CHEST", "IS_ISCROL", "IS_LEVER", "LS_FOUNTAIN", "LS_PUDDLE", "LS_BLODSTAR")
 	for _, id := range ids {
 		if cue := d1SfxCue(id); cue != "" && !strings.Contains(string(b), "internal_name: "+cue+"\n") {
 			t.Errorf("sounds.rec has no %s", cue)
+		}
+	}
+}
+
+// Every speech id D1 has needs a voices.rec record, or it can't be remapped with ./remap_voices.sh.
+func TestD1SpeechHaveVoiceEvents(t *testing.T) {
+	f, err := files.Open("assets/data/voices.rec")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	b, _ := io.ReadAll(f)
+	for id := range d1.SfxFiles {
+		if !strings.Contains(string(b), "internal_name: "+id+"\n") {
+			t.Errorf("voices.rec has no %s", id)
 		}
 	}
 }

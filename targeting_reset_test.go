@@ -19,7 +19,7 @@ func TestPlayerAttackEndsTargeting(t *testing.T) {
 	theGame.GetAudio().SetDisablePlayback(true)
 	ui := &cancelCountUI{DummyUI: NewDummyUI()}
 	theGame.SetAndInitUserInterface(ui)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 	player := theGame.GetWorldState().GetPlayer()
 
 	ui.cancels = 0

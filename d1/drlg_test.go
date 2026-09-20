@@ -35,11 +35,7 @@ func TestDrlgFixtures(t *testing.T) {
 	if _, err := os.Stat(fixtureDir); err != nil {
 		t.Skip("DevilutionX fixtures not in reference/")
 	}
-	d1, err := LoadD1(os.DirFS("../files"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	hf, err := Load(os.DirFS("../files"))
+	d, err := Load(os.DirFS("../files"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,11 +49,7 @@ func TestDrlgFixtures(t *testing.T) {
 		return b
 	}
 	defer func() { readDunHook = nil }()
-	for i, f := range append(drlgFixtures, drlgHellfireFixtures...) {
-		d := d1
-		if i >= len(drlgFixtures) {
-			d = hf
-		}
+	for _, f := range append(drlgFixtures, drlgHellfireFixtures...) {
 		if f.file == "diablo/7-1607627156.dun" {
 			continue // DevilutionX opens the Halls of the Blind from Blind1.DUN; D1 1.09 starts from Blind2.DUN
 		}

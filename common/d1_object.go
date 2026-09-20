@@ -57,13 +57,7 @@ var d1ObjectLights = map[int]int{d1.ObjSKFIRE: 5, d1.ObjCANDLE2: 5, d1.ObjBOOKCA
 
 // d1StoryBookNames ports StoryBookName, indexed by a story book's Var3.
 var d1StoryBookNames = [...]string{"The Great Conflict", "The Wages of Sin are War", "The Tale of the Horadrim",
-	"The Dark Exile", "The Sin War", "The Binding of the Three", "The Realms Beyond", "Tale of the Three", "The Black King",
-	"Journal: The Ensorcellment", "Journal: The Meeting", "Journal: The Tirade", "Journal: His Power Grows",
-	"Journal: NA-KRUL", "Journal: The End", "A Spellbook"} // Hellfire's Crypt journals and Na-Krul's books
-
-// d1NakrulBookText is the first of Na-Krul's three spell books' texts (Var8 6-8) by the reader's class.
-var d1NakrulBookText = [d1.NumClasses]string{d1.Warrior: "TEXT_BOOKA", d1.Rogue: "TEXT_RBOOKA", d1.Sorcerer: "TEXT_MBOOKA",
-	d1.Monk: "TEXT_OBOOKA", d1.Bard: "TEXT_BBOOKA", d1.Barbarian: "TEXT_BOOKA"}
+	"The Dark Exile", "The Sin War", "The Binding of the Three", "The Realms Beyond", "Tale of the Three", "The Black King"}
 
 // d1Containers are the objects that are looted: opening or breaking them may give nothing.
 var d1Containers = map[int]bool{d1.ObjCHEST1: true, d1.ObjCHEST2: true, d1.ObjCHEST3: true,
@@ -277,18 +271,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 	if obj.Kind == d1.ObjSTORYBOOK { // OperateStoryBook: the narrator reads it, as often as the hero likes
 		obj.Active = false
 		f.PlayD1Sfx("IS_ISCROL", o.pos)
-		if !f.d1CryptJournal(obj) {
-			return
-		}
-		switch id := fmt.Sprintf("TEXT_BOOK%d%d", obj.Var1+1, obj.Var2+1); {
-		case obj.Var8 >= 6: // Na-Krul's books: A, B or C
-			id = d1NakrulBookText[player.hero.Class]
-			f.say(o.Name(), id[:len(id)-1]+string(rune('A'+obj.Var8-6)))
-		case obj.Var2 > 300: // the Crypt's journals, TEXT_BOOK4 (317) to TEXT_BOOK8
-			f.say(o.Name(), fmt.Sprintf("TEXT_BOOK%d", obj.Var2-313))
-		default:
-			f.say(o.Name(), id)
-		}
+		f.say(o.Name(), fmt.Sprintf("TEXT_BOOK%d%d", obj.Var1+1, obj.Var2+1))
 		return
 	}
 	if !obj.Active {
@@ -382,7 +365,6 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		msg("The Staff of Lazarus falls from its stand.")
 	case d1.ObjLEVER, d1.ObjSWITCHSKL:
 		msg("You pull the lever. Something rumbles in the distance.")
-		f.d1NakrulLever(f.State.GetMap())
 		UpdateD1Quests(f.State, f.State.GetMap())
 	case d1.ObjTEARFTN:
 		from := d1Rng.Intn(4)
@@ -407,16 +389,9 @@ var d1ObjectSfx = map[int]string{
 	d1.ObjLEVER: "IS_LEVER", d1.ObjSWITCHSKL: "IS_LEVER", d1.ObjMURKYFTN: "LS_FOUNTAIN", d1.ObjTEARFTN: "LS_FOUNTAIN",
 }
 
-// d1BarrelSfx is BreakBarrel's sound: a barrel breaking or blowing up, or Hellfire's pods (the Hive) and urns
-// (the Crypt) popping.
-func d1BarrelSfx(kind, dlvl int) string {
-	ex := kind == d1.ObjBARRELEX
-	switch {
-	case dlvl >= 21:
-		return map[bool]string{false: "IS_POPPOP2", true: "IS_POPPOP3"}[ex]
-	case dlvl >= 17:
-		return map[bool]string{false: "IS_POPPOP5", true: "IS_POPPOP8"}[ex]
-	case ex:
+// d1BarrelSfx is BreakBarrel's sound: a barrel breaking or blowing up.
+func d1BarrelSfx(kind int) string {
+	if kind == d1.ObjBARRELEX {
 		return "IS_BARLFIRE"
 	}
 	return "IS_BARREL"
@@ -524,7 +499,7 @@ func (a *d1BlastAction) GetAnimations() []Animation     { return a.animations }
 func (f *Factory) breakD1Barrel(o *D1Object, player *Actor) {
 	obj, gen, m := o.O, f.Generator, f.State.GetMap()
 	obj.Active = false // the debris stays, walkable
-	f.PlayD1Sfx(d1BarrelSfx(obj.Kind, d1DungeonLevel(f.State)), o.pos)
+	f.PlayD1Sfx(d1BarrelSfx(obj.Kind), o.pos)
 	if obj.Kind == d1.ObjBARREL {
 		dlvl := d1DungeonLevel(f.State)
 		ilvl, hell := f.State.D1ItemLevel(dlvl), d1.LevelType(dlvl) == d1.DTypeHell

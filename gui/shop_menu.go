@@ -77,8 +77,15 @@ func (i *ShopMenu) SetHeader(textLeft, textRight string) {
 }
 
 func (i *ShopMenu) SetItems(items []ShopMenuItem, alignInfo []Alignment) {
+	if len(items) == 0 {
+		i.items = nil
+		i.columnCount = 0
+		i.alignInfo = alignInfo
+		i.Layout()
+		return
+	}
 	columnCount := len(items[0].TextColumns)
-	if len(items) == 0 || columnCount != len(alignInfo) {
+	if columnCount != len(alignInfo) {
 		return
 	}
 	i.items = items

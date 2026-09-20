@@ -18,9 +18,6 @@ func (u *UIController) openPauseMenu() {
 			util.MenuItem{MainText: "Save game", Action: func() { u.context.OpenSaveMenu(func() {}) }},
 			util.MenuItem{MainText: "Load game", Action: func() { u.context.OpenLoadMenu(func() {}) }})
 	}
-	if !u.context.IsHellfire() {
-		items = append(items, util.MenuItem{MainText: "Enable Hellfire content", Action: u.context.EnableHellfire})
-	}
 	quit := "Quit game"
 	if u.context.QuitSaves != nil && u.context.QuitSaves() {
 		quit = "Save & Quit"
@@ -95,28 +92,16 @@ func (u *UIController) openAudioMenu() {
 			u.reopen(u.openAudioMenu)
 		}}
 	}
-	diabloAudioLabel := func() string {
-		state := "Off"
-		if u.configuration.DiabloAudioEnabled {
-			state = "On"
-		}
-		return fmt.Sprintf("Diablo Audio (restart to apply): %s", state)
-	}
 	u.OpenMenu([]util.MenuItem{
 		slider("Sound Effects", ap.GetSoundVolume, ap.SetSoundVolume),
 		slider("Music", ap.GetMusicVolume, ap.SetMusicVolume),
 		slider("Voice", ap.GetVoiceVolume, ap.SetVoiceVolume),
-		{MainText: diabloAudioLabel(), Action: func() {
-			u.configuration.DiabloAudioEnabled = !u.configuration.DiabloAudioEnabled
-			u.configuration.SaveToRecFile(common.ConfigFile)
-			u.reopen(u.openAudioMenu)
-		}},
 		{MainText: "Music Player", Action: u.openMusicPlayer},
 		{MainText: "Back", Action: u.PopWidget},
 	})
 }
 
-// openMusicPlayer lists the tracks in assets/ambience and assets/diablo_music; selecting one plays it.
+// openMusicPlayer lists the tracks in assets/ambience, assets/music and music.rec; selecting one plays it.
 func (u *UIController) openMusicPlayer() {
 	ap := u.context.AudioPlayer
 	var items []util.MenuItem

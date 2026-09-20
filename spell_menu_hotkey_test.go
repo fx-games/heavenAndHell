@@ -12,7 +12,7 @@ import (
 func TestSpellMenuHotkeys(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 	player := theGame.GetWorldState().GetPlayer()
 	player.Hero().SpellLevels[d1.SplFirebolt] = 1
 	player.Hero().SpellLevels[d1.SplHeal] = 1
@@ -38,12 +38,12 @@ func TestSpellMenuHotkeys(t *testing.T) {
 			}
 		}
 	}
-	check("1) Firebolt", "2) Item Repair", "3) Healing", "4) Infravision (Staff, 5 charges)")
+	check("1) Firebolt", "2) Item Repair", "3) Healing", "4) Vision (Staff, 5 charges)")
 	common.MoveSkill(player, 3, 0) // drag the staff to the front
-	check("1) Infravision (Staff, 5 charges)", "2) Firebolt", "3) Item Repair", "4) Healing")
+	check("1) Vision (Staff, 5 charges)", "2) Firebolt", "3) Item Repair", "4) Healing")
 	player.Hero().SpellLevels[d1.SplLightning] = 1 // a newly learned spell goes last, the others keep their keys
 	theGame.GetFactory().RefreshD1Spells(player)
-	check("1) Infravision (Staff, 5 charges)", "2) Firebolt", "3) Item Repair", "4) Healing", "5) Lightning")
+	check("1) Vision (Staff, 5 charges)", "2) Firebolt", "3) Item Repair", "4) Healing", "5) Lightning")
 
 	color := func(i int) any { return common.SpellMenuItems(theGame.GetWorldState(), theGame.GetActions())[i].MainTextColor }
 	if color(1) != defs.White || color(0) == defs.Red {

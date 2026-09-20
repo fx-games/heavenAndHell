@@ -1,0 +1,2423 @@
+%rec: default
+
+# D1's speech, one record per _sfx_id: internal_name is the cue the game plays, text: what the line said in
+# Diablo (reference/d1_voice_transcripts.tsv). No sound: means silent — assign one with ./remap_voices.sh.
+
+internal_name: TSFX_WITCH1
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH2
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH3
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH4
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH5
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH6
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH7
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH8
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH9
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH10
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH11
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH12
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH13
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH14
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH15
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH16
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH17
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH18
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH19
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH20
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH21
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH22
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH23
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH24
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH25
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH26
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH27
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH28
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH29
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH30
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH31
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH32
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH33
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH34
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH35
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH36
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH37
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH38
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH39
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH40
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH41
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH42
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH43
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH44
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH45
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH46
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH47
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH48
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH49
+name: Adria: (no transcript)
+
+internal_name: TSFX_WITCH50
+name: Adria: (no transcript)
+
+internal_name: USFX_LAZ1
+name: Arch-Bishop Lazarus: Abandon your foolish quest. All that awaits you is the wrath...
+text: Abandon your foolish quest. All that awaits you is the wrath of my master. You are too late to save the child. Now you will join him in hell.
+
+internal_name: USFX_LAZ2
+name: Arch-Bishop Lazarus: You are too late to save the child. Now you will join him in...
+text: You are too late to save the child. Now you will join him in hell.
+
+internal_name: TSFX_STORY0
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY1
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY2
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY3
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY4
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY5
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY6
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY7
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY8
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY9
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY10
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY11
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY12
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY13
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY14
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY15
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY16
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY17
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY18
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY19
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY20
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY21
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY22
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY23
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY24
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY25
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY26
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY27
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY28
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY29
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY30
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY31
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY32
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY33
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY34
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY35
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY36
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY37
+name: Cain: (no transcript)
+
+internal_name: TSFX_STORY38
+name: Cain: (no transcript)
+
+internal_name: TSFX_COW1
+name: Cow: (no transcript)
+
+internal_name: TSFX_COW2
+name: Cow: (no transcript)
+
+internal_name: USFX_DIABLOD
+name: Diablo: *Dramatic music*
+text: *Dramatic music*
+
+internal_name: PS_DIABLVLINT
+name: Diablo: I'm your man, I shall pass over to you.
+text: I'm your man, I shall pass over to you.
+
+internal_name: TSFX_DRUNK1
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK2
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK3
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK4
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK5
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK6
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK7
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK8
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK9
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK10
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK11
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK12
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK13
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK14
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK15
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK16
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK17
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK18
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK19
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK20
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK21
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK22
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK23
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK24
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK25
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK26
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK27
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK28
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK29
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK30
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK31
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK32
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK33
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK34
+name: Farnham: (no transcript)
+
+internal_name: TSFX_DRUNK35
+name: Farnham: (no transcript)
+
+internal_name: USFX_GARBUD1
+name: Gharbad the Weak: Please, no hurt, no kill. Keep alive, and next time, good bri...
+text: Please, no hurt, no kill. Keep alive, and next time, good bring to you.
+
+internal_name: USFX_GARBUD2
+name: Gharbad the Weak: Something for you I am making. Again, not kill Garbod. Live a...
+text: Something for you I am making. Again, not kill Garbod. Live and give good. You take this as proof I keep word.
+
+internal_name: USFX_GARBUD3
+name: Gharbad the Weak: Nothing yet. Almost done. Very powerful. Very strong. Live. L...
+text: Nothing yet. Almost done. Very powerful. Very strong. Live. Live. No pain. And promise I keep.
+
+internal_name: USFX_GARBUD4
+name: Gharbad the Weak: This too good for you. Very powerful. You want, you take.
+text: This too good for you. Very powerful. You want, you take.
+
+internal_name: TSFX_BMAID1
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID2
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID3
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID4
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID5
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID6
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID7
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID8
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID9
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID10
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID11
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID12
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID13
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID14
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID15
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID16
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID17
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID18
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID19
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID20
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID21
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID22
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID23
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID24
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID25
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID26
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID27
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID28
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID29
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID30
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID31
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID32
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID33
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID34
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID35
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID36
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID37
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID38
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID39
+name: Gillian: (no transcript)
+
+internal_name: TSFX_BMAID40
+name: Gillian: (no transcript)
+
+internal_name: TSFX_SMITH1
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH2
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH3
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH4
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH5
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH6
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH7
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH8
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH9
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH10
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH11
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH12
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH13
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH14
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH15
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH16
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH17
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH18
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH19
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH20
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH21
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH22
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH23
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH24
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH25
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH26
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH27
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH28
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH29
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH30
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH31
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH32
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH33
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH34
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH35
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH36
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH37
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH38
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH39
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH40
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH41
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH42
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH43
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH44
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH45
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH46
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH47
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH48
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH49
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH50
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH51
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH52
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH53
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH54
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH55
+name: Griswold: (no transcript)
+
+internal_name: TSFX_SMITH56
+name: Griswold: (no transcript)
+
+internal_name: PS_MONK1
+name: Hero: Monk: Beyond the Hall of Heroes lies the Chamber of Bone. Eternal d...
+text: Beyond the Hall of Heroes lies the Chamber of Bone. Eternal death awaits any who would seek to steal the treasure secured within this room. So speaks the Lord of Terror, and so it is written.
+
+internal_name: PS_MONK8
+name: Hero: Monk: Your death will be avenged.
+text: Your death will be avenged.
+
+internal_name: PS_MONK9
+name: Hero: Monk: Rest in peace, my friend.
+text: Rest in peace, my friend.
+
+internal_name: PS_MONK10
+name: Hero: Monk: And so, locked beyond the gateway of blood and past the hall...
+text: And so, locked beyond the gateway of blood and past the hall of fire, valor awaits for the hero of light to awaken.
+
+internal_name: PS_MONK11
+name: Hero: Monk: I can see what you see not. Vision milky, then eyes rot. When...
+text: I can see what you see not. Vision milky, then eyes rot. When you turn, they will be gone, whispering their hidden song. Then you see what cannot be. Shadows move where light should be. Out of darkness, out of mind, cast down into the halls of the blind.
+
+internal_name: PS_MONK12
+name: Hero: Monk: The armories of hell are home to the warlord of blood. In his...
+text: The armories of hell are home to the warlord of blood. In his wake lay the mutilated bodies of thousands. Angels and men alike have been cut down to fulfill his endless sacrifices to the dark ones, who scream for one thing, blood.
+
+internal_name: PS_MONK52
+name: Hero: Monk: Yes, that is a cow, all right.
+text: Yes, that is a cow, all right.
+
+internal_name: PS_MONK54
+name: Hero: Monk: In Spiritus Sanctum.
+text: In Spiritus Sanctum.
+
+internal_name: PS_MONK55
+name: Hero: Monk: Predictum Otium.
+text: Predictum Otium.
+
+internal_name: PS_MONK56
+name: Hero: Monk: Ephesio obitus ut inimicus.
+text: Ephesio obitus ut inimicus.
+
+internal_name: PS_MONK61
+name: Hero: Monk: I am not impressed.
+text: I am not impressed.
+
+internal_name: PS_MONK62
+name: Hero: Monk: I am sorry. Did I break your concentration?
+text: I am sorry. Did I break your concentration?
+
+internal_name: PS_MONK80
+name: Hero: Monk: The spirits of the dead are now avenged.
+text: The spirits of the dead are now avenged.
+
+internal_name: PS_MONK82
+name: Hero: Monk: Rest well, Loric. I'll find your son.
+text: Rest well, Loric. I'll find your son.
+
+internal_name: PS_MONK83
+name: Hero: Monk: Your madness ends here, betrayer.
+text: Your madness ends here, betrayer.
+
+internal_name: PS_MONK87
+name: Hero: Monk: This must be what Griswold wanted.
+text: This must be what Griswold wanted.
+
+internal_name: PS_MONK88
+name: Hero: Monk: I need to get this to locked on in.
+text: I need to get this to locked on in.
+
+internal_name: PS_MONK89
+name: Hero: Monk: I need to get this to Griswold.
+text: I need to get this to Griswold.
+
+internal_name: PS_MONK91
+name: Hero: Monk: May the spirit of Arcane protect me.
+text: May the spirit of Arcane protect me.
+
+internal_name: PS_MONK92
+name: Hero: Monk: This is a place of great power.
+text: This is a place of great power.
+
+internal_name: PS_MONK94
+name: Hero: Monk: Your reign of pain has ended.
+text: Your reign of pain has ended.
+
+internal_name: PS_MONK95
+name: Hero: Monk: Now that is a big mushroom.
+text: Now that is a big mushroom.
+
+internal_name: PS_MONK96
+name: Hero: Monk: The smell of death surrounds me.
+text: The smell of death surrounds me.
+
+internal_name: PS_MONK97
+name: Hero: Monk: The sanctity of this place has been fouled.
+text: The sanctity of this place has been fouled.
+
+internal_name: PS_MONK98
+name: Hero: Monk: It is hot down here.
+text: It is hot down here.
+
+internal_name: PS_MONK99
+name: Hero: Monk: I must be getting close.
+text: I must be getting close.
+
+internal_name: PS_ROGUE1
+name: Hero: Rogue: Beyond the Hall of Heroes lies the Chamber of Bone. Eternal d...
+text: Beyond the Hall of Heroes lies the Chamber of Bone. Eternal death awaits any who would seek to steal the treasures secured within this room. So speaks the Lord of Terror, and so it is written.
+
+internal_name: PS_ROGUE2
+name: Hero: Rogue: Let this tome serve as your warning. This is a forbidden plac...
+text: Let this tome serve as your warning. This is a forbidden place. Return from whence you came and your life will be spared. Horazon, master of the disciplines that summon and bind creatures to this plane, promises death to those who pass beyond the five pillars. You have been admonished.
+
+internal_name: PS_ROGUE3
+name: Hero: Rogue: Then by binding the spirit to the crafted rock, it is given l...
+text: Then by binding the spirit to the crafted rock, it is given life. Sounds like a spell of some kind.
+
+internal_name: PS_ROGUE4
+name: Hero: Rogue: The Creature of Flame by Horazon. Should be interesting reading.
+text: The Creature of Flame by Horazon. Should be interesting reading.
+
+internal_name: PS_ROGUE5
+name: Hero: Rogue: Morta Vespa, Gaia Inumino, Evegin Jatan Luagratan.
+text: Morta Vespa, Gaia Inumino, Evegin Jatan Luagratan.
+
+internal_name: PS_ROGUE6
+name: Hero: Rogue: The lieutenant of Belial is known as Grimspike. Beware this d...
+text: The lieutenant of Belial is known as Grimspike. Beware this demon, for his strength appears immeasurable. Reading the scroll, and therefore speaking his name, near an arcane circle of binding will surely summon him there. Hmm, near a circle of binding, eh?
+
+internal_name: PS_ROGUE7
+name: Hero: Rogue: It seems that I may have brought something into this plane th...
+text: It seems that I may have brought something into this plane that even I cannot control. The creature that fell into my astral trap is a very deadly demon. I've been able to bind it at the bottom of a pit, but it kills everything that I've sent there in attempts to defeat it. While it cannot escape, it does block the tunnels that lead to my protected haven. I am tempted to use the switch to open the tunnels to see if it will just leave, sir, demons I have trapped before. If I could just lure it somewhere else.
+
+internal_name: PS_ROGUE8
+name: Hero: Rogue: Your death will be avenged.
+text: Your death will be avenged.
+
+internal_name: PS_ROGUE9
+name: Hero: Rogue: Rest in peace, my friend.
+text: Rest in peace, my friend.
+
+internal_name: PS_ROGUE10
+name: Hero: Rogue: And so, locked beyond the gateway of blood and past the hall...
+text: And so, locked beyond the gateway of blood and past the hall of fire, valor awaits for the hero of light to awaken.
+
+internal_name: PS_ROGUE11
+name: Hero: Rogue: I can see what you see not. Vision milky, then eyes rot. When...
+text: I can see what you see not. Vision milky, then eyes rot. When you turn, they will be gone, whispering their hidden song. Then you see what cannot be. Shadows move where light should be. Out of darkness, out of mind, cast down into the halls of the blind.
+
+internal_name: PS_ROGUE12
+name: Hero: Rogue: The armories of hell are home to the warlord of blood. In his...
+text: The armories of hell are home to the warlord of blood. In his wake lay the mutilated bodies of thousands. Angels and man alike have been cut down to fulfill his endless sacrifices to the dark ones, who scream for one thing, blood.
+
+internal_name: PS_ROGUE13
+name: Hero: Rogue: I can't use this yet.
+text: I can't use this yet.
+
+internal_name: PS_ROGUE14
+name: Hero: Rogue: I can't carry anymore.
+text: I can't carry anymore.
+
+internal_name: PS_ROGUE15
+name: Hero: Rogue: I have no room.
+text: I have no room.
+
+internal_name: PS_ROGUE16
+name: Hero: Rogue: Now where would I put this?
+text: Now where would I put this?
+
+internal_name: PS_ROGUE17
+name: Hero: Rogue: No way.
+text: No way.
+
+internal_name: PS_ROGUE18
+name: Hero: Rogue: Not a chance.
+text: Not a chance.
+
+internal_name: PS_ROGUE19
+name: Hero: Rogue: I would never use this.
+text: I would never use this.
+
+internal_name: PS_ROGUE20
+name: Hero: Rogue: I'd have to equip that.
+text: I'd have to equip that.
+
+internal_name: PS_ROGUE21
+name: Hero: Rogue: I can't move this.
+text: I can't move this.
+
+internal_name: PS_ROGUE22
+name: Hero: Rogue: I can't move this, yet.
+text: I can't move this, yet.
+
+internal_name: PS_ROGUE23
+name: Hero: Rogue: I can't open this.
+text: I can't open this.
+
+internal_name: PS_ROGUE24
+name: Hero: Rogue: I can't open this, yet.
+text: I can't open this, yet.
+
+internal_name: PS_ROGUE25
+name: Hero: Rogue: I can't lift this.
+text: I can't lift this.
+
+internal_name: PS_ROGUE26
+name: Hero: Rogue: I can't lift this, yet.
+text: I can't lift this, yet.
+
+internal_name: PS_ROGUE27
+name: Hero: Rogue: I can't cast that here.
+text: I can't cast that here.
+
+internal_name: PS_ROGUE28
+name: Hero: Rogue: I can't cast that. Yet.
+text: I can't cast that. Yet.
+
+internal_name: PS_ROGUE29
+name: Hero: Rogue: That didn't do anything.
+text: That didn't do anything.
+
+internal_name: PS_ROGUE30
+name: Hero: Rogue: I can already do that.
+text: I can already do that.
+
+internal_name: PS_ROGUE31
+name: Hero: Rogue: I don't need that.
+text: I don't need that.
+
+internal_name: PS_ROGUE32
+name: Hero: Rogue: I don't need to do that.
+text: I don't need to do that.
+
+internal_name: PS_ROGUE33
+name: Hero: Rogue: I don't want that.
+text: I don't want that.
+
+internal_name: PS_ROGUE34
+name: Hero: Rogue: I don't have a spell ready.
+text: I don't have a spell ready.
+
+internal_name: PS_ROGUE35
+name: Hero: Rogue: Not enough manna.
+text: Not enough manna.
+
+internal_name: PS_ROGUE36
+name: Hero: Rogue: That would kill me.
+text: That would kill me.
+
+internal_name: PS_ROGUE37
+name: Hero: Rogue: I can't do that.
+text: I can't do that.
+
+internal_name: PS_ROGUE38
+name: Hero: Rogue: No.
+text: No.
+
+internal_name: PS_ROGUE39
+name: Hero: Rogue: Yes!
+text: Yes!
+
+internal_name: PS_ROGUE40
+name: Hero: Rogue: That won't work.
+text: That won't work.
+
+internal_name: PS_ROGUE41
+name: Hero: Rogue: That won't work here.
+text: That won't work here.
+
+internal_name: PS_ROGUE42
+name: Hero: Rogue: That won't work yet.
+text: That won't work yet.
+
+internal_name: PS_ROGUE43
+name: Hero: Rogue: I can't get there from here.
+text: I can't get there from here.
+
+internal_name: PS_ROGUE44
+name: Hero: Rogue: It's too heavy.
+text: It's too heavy.
+
+internal_name: PS_ROGUE45
+name: Hero: Rogue: That's too big.
+text: That's too big.
+
+internal_name: PS_ROGUE46
+name: Hero: Rogue: Ah, just what I was looking for.
+text: Ah, just what I was looking for.
+
+internal_name: PS_ROGUE47
+name: Hero: Rogue: I've got a bad feeling about this.
+text: I've got a bad feeling about this.
+
+internal_name: PS_ROGUE48
+name: Hero: Rogue: Got milk?
+text: Got milk?
+
+internal_name: PS_ROGUE49
+name: Hero: Rogue: I'm not thirsty.
+text: I'm not thirsty.
+
+internal_name: PS_ROGUE50
+name: Hero: Rogue: Hey, I'm no milkmaid.
+text: Hey, I'm no milkmaid.
+
+internal_name: PS_ROGUE51
+name: Hero: Rogue: Hey, I could blow up the whole village.
+text: Hey, I could blow up the whole village.
+
+internal_name: PS_ROGUE52
+name: Hero: Rogue: Yep, that's a cow, all right.
+text: Yep, that's a cow, all right.
+
+internal_name: PS_ROGUE53
+name: Hero: Rogue: Too... heavy.
+text: Too... heavy.
+
+internal_name: PS_ROGUE54
+name: Hero: Rogue: In spiritu sanctum.
+text: In spiritu sanctum.
+
+internal_name: PS_ROGUE55
+name: Hero: Rogue: Predictum Otium.
+text: Predictum Otium.
+
+internal_name: PS_ROGUE56
+name: Hero: Rogue: Ephesio orbitus ut inimicus.
+text: Ephesio orbitus ut inimicus.
+
+internal_name: PS_ROGUE57
+name: Hero: Rogue: The enchantment is gone.
+text: The enchantment is gone.
+
+internal_name: PS_ROGUE58
+name: Hero: Rogue: All too easy.
+text: All too easy.
+
+internal_name: PS_ROGUE59
+name: Hero: Rogue: Back to the grave.
+text: Back to the grave.
+
+internal_name: PS_ROGUE60
+name: Hero: Rogue: Time to die.
+text: Time to die.
+
+internal_name: PS_ROGUE61
+name: Hero: Rogue: I'm not impressed.
+text: I'm not impressed.
+
+internal_name: PS_ROGUE62
+name: Hero: Rogue: I'm sorry. Did I break your concentration?
+text: I'm sorry. Did I break your concentration?
+
+internal_name: PS_ROGUE63
+name: Hero: Rogue: Vengeance is mine.
+text: Vengeance is mine.
+
+internal_name: PS_ROGUE64
+name: Hero: Rogue: Die.
+text: Die.
+
+internal_name: PS_ROGUE65
+name: Hero: Rogue: Yeah.
+text: Yeah.
+
+internal_name: PS_ROGUE66
+name: Hero: Rogue: Ah.
+text: Ah.
+
+internal_name: PS_ROGUE67
+name: Hero: Rogue: Phew.
+text: Phew.
+
+internal_name: PS_ROGUE68
+name: Hero: Rogue: Ah!
+text: Ah!
+
+internal_name: PS_ROGUE69
+name: Hero: Rogue: Ah!
+text: Ah!
+
+internal_name: PS_ROGUE69B
+name: Hero: Rogue: Oh!
+text: Oh!
+
+internal_name: PS_ROGUE70
+name: Hero: Rogue: Ugh!
+text: Ugh!
+
+internal_name: PS_ROGUE71
+name: Hero: Rogue: AHHHHHHHHHHHHHHHHHHHHH
+text: AHHHHHHHHHHHHHHHHHHHHH
+
+internal_name: PS_ROGUE72
+name: Hero: Rogue: Ah! Ah!
+text: Ah! Ah!
+
+internal_name: PS_ROGUE73
+name: Hero: Rogue: Oh.
+text: Oh.
+
+internal_name: PS_ROGUE74
+name: Hero: Rogue: Whoa.
+text: Whoa.
+
+internal_name: PS_ROGUE75
+name: Hero: Rogue: Thank the light.
+text: Thank the light.
+
+internal_name: PS_ROGUE76
+name: Hero: Rogue: What was that?
+text: What was that?
+
+internal_name: PS_ROGUE77
+name: Hero: Rogue: Hmm?
+text: Hmm?
+
+internal_name: PS_ROGUE78
+name: Hero: Rogue: Hmm.
+text: Hmm.
+
+internal_name: PS_ROGUE79
+name: Hero: Rogue: Aha.
+text: Aha.
+
+internal_name: PS_ROGUE80
+name: Hero: Rogue: The spirits of the dead are now avenged.
+text: The spirits of the dead are now avenged.
+
+internal_name: PS_ROGUE81
+name: Hero: Rogue: The town is safe from these foul spawn.
+text: The town is safe from these foul spawn.
+
+internal_name: PS_ROGUE82
+name: Hero: Rogue: Rest well, Leoric. I'll find your son.
+text: Rest well, Leoric. I'll find your son.
+
+internal_name: PS_ROGUE83
+name: Hero: Rogue: Your madness ends here, betrayer.
+text: Your madness ends here, betrayer.
+
+internal_name: PS_ROGUE84
+name: Hero: Rogue: You'll lure no more men to their deaths.
+text: You'll lure no more men to their deaths.
+
+internal_name: PS_ROGUE85
+name: Hero: Rogue: Return to heaven, warrior of light.
+text: Return to heaven, warrior of light.
+
+internal_name: PS_ROGUE86
+name: Hero: Rogue: I can see why they fear this weapon.
+text: I can see why they fear this weapon.
+
+internal_name: PS_ROGUE87
+name: Hero: Rogue: This must be what Griswold wanted.
+text: This must be what Griswold wanted.
+
+internal_name: PS_ROGUE88
+name: Hero: Rogue: I need to get this to Lakhdanen.
+text: I need to get this to Lakhdanen.
+
+internal_name: PS_ROGUE89
+name: Hero: Rogue: I need to get this to Griswold.
+text: I need to get this to Griswold.
+
+internal_name: PS_ROGUE90
+name: Hero: Rogue: I've never been here before.
+text: I've never been here before.
+
+internal_name: PS_ROGUE91
+name: Hero: Rogue: May the spirit of Arcane protect me.
+text: May the spirit of Arcane protect me.
+
+internal_name: PS_ROGUE92
+name: Hero: Rogue: This is a place of great power.
+text: This is a place of great power.
+
+internal_name: PS_ROGUE93
+name: Hero: Rogue: This blade must be destroyed.
+text: This blade must be destroyed.
+
+internal_name: PS_ROGUE94
+name: Hero: Rogue: Your reign of pain has ended.
+text: Your reign of pain has ended.
+
+internal_name: PS_ROGUE95
+name: Hero: Rogue: Now that is a big mushroom.
+text: Now that is a big mushroom.
+
+internal_name: PS_ROGUE96
+name: Hero: Rogue: The smell of death surrounds me.
+text: The smell of death surrounds me.
+
+internal_name: PS_ROGUE97
+name: Hero: Rogue: The sanctity of this place has been fouled.
+text: The sanctity of this place has been fouled.
+
+internal_name: PS_ROGUE98
+name: Hero: Rogue: It's hot down here.
+text: It's hot down here.
+
+internal_name: PS_ROGUE99
+name: Hero: Rogue: I must be getting close.
+text: I must be getting close.
+
+internal_name: PS_ROGUE100
+name: Hero: Rogue: Maybe it's locked from the inside.
+text: Maybe it's locked from the inside.
+
+internal_name: PS_ROGUE101
+name: Hero: Rogue: Looks like it's rusted shut.
+text: Looks like it's rusted shut.
+
+internal_name: PS_ROGUE102
+name: Hero: Rogue: Maybe there's another way.
+text: Maybe there's another way.
+
+internal_name: PS_MAGE1
+name: Hero: Sorcerer: Beyond the Hall of Heroes lies the Chamber of Bone. Eternal d...
+text: Beyond the Hall of Heroes lies the Chamber of Bone. Eternal death awaits any who would seek to steal the treasure secured within this room. So speaks the Lord of Terror. And so it is written.
+
+internal_name: PS_MAGE2
+name: Hero: Sorcerer: Let this tome serve as your warning. This is a forbidden plac...
+text: Let this tome serve as your warning. This is a forbidden place. Return from whence you came, and your life will be spared. Horazon, master of the disciplines that summon and bind creatures to this plane, promises death to those who pass beyond the Five Pillars. You have been admonished.
+
+internal_name: PS_MAGE3
+name: Hero: Sorcerer: Then, by binding the spirit to the crafted rock, it is given...
+text: Then, by binding the spirit to the crafted rock, it is given life. This sounds like a spell of some kind.
+
+internal_name: PS_MAGE4
+name: Hero: Sorcerer: The Creature of Flame by Horazon. Hmm. Should be interesting...
+text: The Creature of Flame by Horazon. Hmm. Should be interesting reading.
+
+internal_name: PS_MAGE5
+name: Hero: Sorcerer: Morta, Vespa, Gaia, Innúmino, Evigin, Jatan, Lua, Gretan.
+text: Morta, Vespa, Gaia, Innúmino, Evigin, Jatan, Lua, Gretan.
+
+internal_name: PS_MAGE6
+name: Hero: Sorcerer: The lieutenant of Belial is known as Grimspike. Beware this d...
+text: The lieutenant of Belial is known as Grimspike. Beware this demon, for his strength appears immeasurable. Reading this scroll, and therefore speaking his name, near an arcane circle of binding will surely summon him there. Hmm. Near a circle of binding, eh?
+
+internal_name: PS_MAGE7
+name: Hero: Sorcerer: This looks like some sort of journal. It seems that I may hav...
+text: This looks like some sort of journal. It seems that I may have brought something into this plane that even I cannot control. The creature that fell into my astral trap is a very deadly demon. I have been able to bind it at the bottom of a pit, but it kills everything that I have sent there in attempts to defeat it. While it cannot escape, it does block the tunnels that lead to my protected haven. I don't know if it will just leave, but I fear it is smarter than most of the lesser demons I have trapped before. If I could just lure it somewhere else.
+
+internal_name: PS_MAGE8
+name: Hero: Sorcerer: Your death will be avenged!
+text: Your death will be avenged!
+
+internal_name: PS_MAGE9
+name: Hero: Sorcerer: Rest in peace, my friend.
+text: Rest in peace, my friend.
+
+internal_name: PS_MAGE10
+name: Hero: Sorcerer: And so, locked beyond the gateway of blood and past the Hall...
+text: And so, locked beyond the gateway of blood and past the Hall of Fire, valor awaits for the Hero of Light to awaken.
+
+internal_name: PS_MAGE11
+name: Hero: Sorcerer: I can see what you see not. Vision milky, then eyes rot. When...
+text: I can see what you see not. Vision milky, then eyes rot. When you turn, they will be gone, whispering their hidden song. Then you see what cannot be. Shadows move where light should be. Out of darkness, out of mind. Cast down into the halls of the blind.
+
+internal_name: PS_MAGE12
+name: Hero: Sorcerer: The armories of hell are home to the Warlord of Blood. In his...
+text: The armories of hell are home to the Warlord of Blood. In his wake lay the mutilated bodies of thousands. Angels and men alike have been cut down to fulfill his endless sacrifices to the Dark Ones, who scream for one thing. Blood.
+
+internal_name: PS_MAGE13
+name: Hero: Sorcerer: I cannot use this yet.
+text: I cannot use this yet.
+
+internal_name: PS_MAGE14
+name: Hero: Sorcerer: I cannot carry any more.
+text: I cannot carry any more.
+
+internal_name: PS_MAGE15
+name: Hero: Sorcerer: I have no room.
+text: I have no room.
+
+internal_name: PS_MAGE16
+name: Hero: Sorcerer: Where would I put this?
+text: Where would I put this?
+
+internal_name: PS_MAGE17
+name: Hero: Sorcerer: No way.
+text: No way.
+
+internal_name: PS_MAGE18
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE19
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE20
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE21
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE22
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE23
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE24
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE25
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE26
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE27
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE28
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE29
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE30
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE31
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE32
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE33
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE34
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE35
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE36
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE37
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE38
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE39
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE40
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE41
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE42
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE43
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE44
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE45
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE46
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE47
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE48
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE49
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE50
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE51
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE52
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE53
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE54
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE55
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE56
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE57
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE58
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE59
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE60
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE61
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE62
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE63
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE64
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE65
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE66
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE67
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE68
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE69
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE69B
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE70
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE71
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE72
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE73
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE74
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE75
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE76
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE77
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE78
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE79
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE80
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE81
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE82
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE83
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE84
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE85
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE86
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE87
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE88
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE89
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE90
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE91
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE92
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE93
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE94
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE95
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE96
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE97
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE98
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE99
+name: Hero: Sorcerer: (no transcript)
+
+internal_name: PS_MAGE100
+name: Hero: Sorcerer: Maybe it is locked from the inside.
+text: Maybe it is locked from the inside.
+
+internal_name: PS_MAGE101
+name: Hero: Sorcerer: Looks like it is rusted shut.
+text: Looks like it is rusted shut.
+
+internal_name: PS_MAGE102
+name: Hero: Sorcerer: Maybe there is another way.
+text: Maybe there is another way.
+
+internal_name: PS_WARR14B
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR14C
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR15B
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR15C
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR16B
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR16C
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR69B
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR95B
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR95C
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR95D
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR95E
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR95F
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR96B
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR97
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR98
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR100
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR101
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR102
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR1
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR2
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR3
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR4
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR5
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR6
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR7
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR8
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR9
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR10
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR11
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR12
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR13
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR14
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR15
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR16
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR17
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR18
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR19
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR20
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR21
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR22
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR23
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR24
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR25
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR26
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR27
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR28
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR29
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR30
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR31
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR32
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR33
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR34
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR35
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR36
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR37
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR38
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR39
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR40
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR41
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR42
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR43
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR44
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR45
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR46
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR47
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR48
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR49
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR50
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR51
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR52
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR53
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR54
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR55
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR56
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR57
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR58
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR59
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR60
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR61
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR62
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR63
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR64
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR65
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR66
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR67
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR68
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR69
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR70
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR71
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR72
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR73
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR74
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR75
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR76
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR77
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR78
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR79
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR80
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR81
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR82
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR83
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR84
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR85
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR86
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR87
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR88
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR89
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR90
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR91
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR92
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR93
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR94
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR95
+name: Hero: Warrior: (no transcript)
+
+internal_name: PS_WARR99
+name: Hero: Warrior: (no transcript)
+
+internal_name: USFX_IZUAL1
+name: Izual: How much suffering, mortal, does it take before you lose your...
+text: How much suffering, mortal, does it take before you lose your grace? Let me show you.
+
+internal_name: USFX_LACH1
+name: Lachdanan: Please, don't kill me, just hear me out. I was once captain o...
+text: Please, don't kill me, just hear me out. I was once captain of King Leoric's knights, upholding the laws of this land with justice and honor. Then his dark curse fell upon us for the role we played in his tragic death. As my fellow knights succumbed to their twisted fate, I fled from the king's burial chamber, searching for some way to free myself from the curse. I failed. I heard of a golden elixir that could lift the curse and allow my soul to rest, but I have been unable to find it. My strength now wanes, and with it, the last of my humanity as well. Please, aid me and find the elixir. I will repay your efforts. I swear upon my honor.
+
+internal_name: USFX_LACH2
+name: Lachdanan: You have not found the golden elixir. I fear that I am doomed...
+text: You have not found the golden elixir. I fear that I am doomed for eternity. Please, keep trying.
+
+internal_name: USFX_LACH3
+name: Lachdanan: You have saved my soul from damnation, and for that, I am in...
+text: You have saved my soul from damnation, and for that, I am in your debt. If there is ever a way that I can repay you from beyond the grave, I will find it. But for now, take my helm. On the journey I'm about to take, I will have little use for it. May it protect you against the dark powers below. Go with the light, my friend. you
+
+internal_name: PS_NAR1
+name: Narrator: Take heed and bear witness to the truths that lie herein, for...
+text: Take heed and bear witness to the truths that lie herein, for they are the last legacy of the Haradrim. There is a war that rages on even now, beyond the fields that we know, between the utopian kingdoms of the high heavens and the chaotic pits of the burning hells. This war is known as the Great Conflict, and it has raged and burned longer than any of the stars in the sky. Neither side ever gains sway for long, as the forces of light and darkness constantly vie for control over all creation.
+
+internal_name: PS_NAR2
+name: Narrator: Take heed and bear witness to the truths that lie herein, for...
+text: Take heed and bear witness to the truths that lie herein, for they are the last legacy of the Herodrim. When the eternal conflict between the high heavens and the burning hells falls upon mortal soil, it is called the sin war. Angels and demons walk amongst humanity in disguise, fighting in secret away from the prying eyes of mortals. And help to dictate the course of the sin war.
+
+internal_name: PS_NAR3
+name: Narrator: Take heed and bear witness to the truths that lie herein, for...
+text: Take heed and bear witness to the truths that lie herein, for they are the last legacy of the Haradrim. Nearly 300 years ago, it came to be known that the three prime evils of the burning hells had mysteriously come to our world. The three brothers ravaged the lands of the East for decades, while humanity was left trembling in their wake. Our order, the Haradrim, was founded by a group of secretive magi, to hunt down and capture the three evils once and for all. The original Haradrim captured two of the three within powerful artifacts known as soul stones and buried them deep beneath the desolate eastern sands. The third evil escaped capture and fled to the West with many of the Haradrim in pursuit. The third evil, known as Diablo, the Lord of Terror, was eventually captured. His essence set in a soul stone and buried within this labyrinth. Be warned that the soul stone must be kept from discovery by those not of the faith. If Diablo were to be released, he would seek a body that is easily controlled as he would be very weak, perhaps that of an old man or a child.
+
+internal_name: PS_NAR4
+name: Narrator: So it came to be that there was a great revolution within the...
+text: So it came to be that there was a great revolution within the burning hells known as the Dark Exile. The lesser evils overthrew the three primevils and banished their spirit forms to the mortal realm. The demons Belial, the lord of lies, and Osmodan, the lord of sin, fought to claim rulership of hell during the absence of the three brothers. The factions of Belial and Osmodan, while the forces of the high heavens continually battered upon the very gates of hell.
+
+internal_name: PS_NAR5
+name: Narrator: Many demons traveled to the mortal realm in search of the thr...
+text: Many demons traveled to the mortal realm in search of the three brothers. These demons were followed to the mortal plane by angels who hunted them throughout the vast cities of the east. The angels allied themselves with a secretive order of mortal magi, named the Haradrim, who quickly became adept at hunting demons. They also made many dark enemies in the underworlds.
+
+internal_name: PS_NAR6
+name: Narrator: So it came to be that the three primevils were banished in sp...
+text: So it came to be that the three primevils were banished in spirit form to the mortal realm, and after sowing chaos across the east for decades, they were hunted down by the cursed order of the mortal Haradrim. The Haradrim used artifacts called soulstones to contain the essence of Mephisto, the lord of hatred, and his brother Baal, the lord of destruction. Eventually, the Haradrim captured Diablo within a soulstone as well and buried him under an ancient forgotten cathedral. There, the lord of terror sleeps and awaits the time of his rebirth. Know ye that he will seek a body of youth and power to possess, one that is innocent and easily controlled. And once more, fanned the flames of the sin war.
+
+internal_name: PS_NAR7
+name: Narrator: All praises to Diablo, lord of terror and survivor of the dar...
+text: All praises to Diablo, lord of terror and survivor of the dark exile. When he awakened from his long slumber, my lord and master spoke to me of secrets that few mortals know. He told me the kingdoms of the high heavens and the pits of the burning hells engage in an eternal war. He revealed the powers that have brought this discord to the realms of man. My lord has named the battle for this world and all who exist here, the sin war.
+
+internal_name: PS_NAR8
+name: Narrator: Glory and approbation to Diablo, lord of terror and leader of...
+text: Glory and approbation to Diablo, lord of terror and leader of the three. My lord spoke to me of his two brothers, Mephisto and Baal, who were banished to this world long ago. My lord wishes to bide his time and harness his awesome power so that he may free his captive brothers from their tombs beneath the sands of the east. Once my lord releases his brothers, the sin war will once again know the fury of the three.
+
+internal_name: PS_NAR9
+name: Narrator: Hail and sacrifice to Diablo, lord of terror and destroyer of...
+text: Hail and sacrifice to Diablo, lord of terror and destroyer of souls. When I awoke my master from his sleep, he attempted to possess a mortal's form. Diablo attempted to claim the body of King Leoric, but my master was too weak from his imprisonment. My lord required a simple and innocent anchor to this world, and so found the boy Albrecht to be perfect for the task. While the good King Leoric was left maddened by Diablo's unsuccessful possession, I kidnapped his son Albrecht and brought him before my master. I now await Diablo's call and pray that I will be rewarded when he at last emerges as the lord of this world.
+
+internal_name: TSFX_TAVERN0
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN1
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN2
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN3
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN4
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN5
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN6
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN7
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN8
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN9
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN10
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN11
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN12
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN13
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN14
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN15
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN16
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN17
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN18
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN19
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN20
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN21
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN22
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN23
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN24
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN25
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN26
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN27
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN28
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN29
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN30
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN31
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN32
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN33
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN34
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN35
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN36
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN37
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN38
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN39
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN40
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN41
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN42
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN43
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN44
+name: Ogden: (no transcript)
+
+internal_name: TSFX_TAVERN45
+name: Ogden: (no transcript)
+
+internal_name: TSFX_HEALER1
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER2
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER3
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER4
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER5
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER6
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER7
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER8
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER9
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER10
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER11
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER12
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER13
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER14
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER15
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER16
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER17
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER18
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER19
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER20
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER21
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER22
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER23
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER24
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER25
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER26
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER27
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER28
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER29
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER30
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER31
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER32
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER33
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER34
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER35
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER36
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER37
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER38
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER39
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER40
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER41
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER42
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER43
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER44
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER45
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER46
+name: Pepin: (no transcript)
+
+internal_name: TSFX_HEALER47
+name: Pepin: (no transcript)
+
+internal_name: IS_QUESTDN
+name: Quest Done: you
+text: you
+
+internal_name: IS_SARC
+name: Sarcophagus: *Burr*
+text: *Burr*
+
+internal_name: USFX_SKING1
+name: Skeleton King: The warmth of life has entered my tomb. Prepare yourself, mor...
+text: The warmth of life has entered my tomb. Prepare yourself, mortal, to serve my master for eternity.
+
+internal_name: USFX_SNOT1
+name: Snotspill: Hey! You that one that kill all! You get me magic banner, or...
+text: Hey! You that one that kill all! You get me magic banner, or we attack! You now live with life! You kill big ugly and give back magic! Go past corner and door, find ugly! You give, you go!
+
+internal_name: USFX_SNOT2
+name: Snotspill: You kill uglies! Get banger! You bring to me or else!
+text: You kill uglies! Get banger! You bring to me or else!
+
+internal_name: USFX_SNOT3
+name: Snotspill: You give? Yes, good! Go now! Which turn? We kill all with big...
+text: You give? Yes, good! Go now! Which turn? We kill all with big magic!
+
+internal_name: USFX_CLEAVER
+name: The Butcher: Ah, fresh meat.
+text: Ah, fresh meat.
+
+internal_name: TSFX_PRIEST0
+name: Tremain the Priest: (no transcript)
+
+internal_name: TSFX_PRIEST1
+name: Tremain the Priest: (no transcript)
+
+internal_name: TSFX_PRIEST2
+name: Tremain the Priest: (no transcript)
+
+internal_name: TSFX_PRIEST3
+name: Tremain the Priest: (no transcript)
+
+internal_name: TSFX_PRIEST4
+name: Tremain the Priest: (no transcript)
+
+internal_name: TSFX_PRIEST5
+name: Tremain the Priest: (no transcript)
+
+internal_name: TSFX_PRIEST6
+name: Tremain the Priest: (no transcript)
+
+internal_name: TSFX_PRIEST7
+name: Tremain the Priest: (no transcript)
+
+internal_name: USFX_WLOCK1
+name: Warlock: Mortal, free me from my imprisonment and your reward will be...
+text: Mortal, free me from my imprisonment and your reward will be more than you can imagine. Read the book and I will be released.
+
+internal_name: USFX_WARLRD1
+name: Warlord of Blood: My blade sings for your blood, mortal. And by my dark masters...
+text: My blade sings for your blood, mortal. And by my dark masters it shall not be denied.
+
+internal_name: TSFX_PEGBOY1
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY2
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY3
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY4
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY5
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY6
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY7
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY8
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY9
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY10
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY11
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY12
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY13
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY14
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY15
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY16
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY17
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY18
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY19
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY20
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY21
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY22
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY23
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY24
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY25
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY26
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY27
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY28
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY29
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY30
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY31
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY32
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY33
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY34
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY35
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY36
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY37
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY38
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY39
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY40
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY41
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY42
+name: Wirt: (no transcript)
+
+internal_name: TSFX_PEGBOY43
+name: Wirt: (no transcript)
+
+internal_name: TSFX_DEADGUY
+name: Wounded Townsman: (no transcript)
+
+internal_name: TSFX_WOUND
+name: Wounded Townsman: (no transcript)
+
+internal_name: USFX_ZHAR1
+name: Zhar the Mad: What? Why are you here? All these interruptions are enough to...
+text: What? Why are you here? All these interruptions are enough to make one insane. Here, take this and leave me to my work. Trouble me no more.
+
+internal_name: USFX_ZHAR2
+name: Zhar the Mad: Your curiosity will be the death of you.
+text: Your curiosity will be the death of you.

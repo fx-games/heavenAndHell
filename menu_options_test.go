@@ -35,7 +35,7 @@ func TestStartMenuQuitsAndBackToMainMenuSavesFirst(t *testing.T) {
 	theGame.GetAudio().SetDisablePlayback(true)
 	ui := &recordingUI{DummyUI: NewDummyUI()}
 	theGame.SetAndInitUserInterface(ui)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 
 	if !theGame.QuitSaves() {
 		t.Fatal("a running game quits without saving, so the pause menu would not say Save & Quit")

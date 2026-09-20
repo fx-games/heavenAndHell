@@ -8,10 +8,12 @@ import (
 	"rpg/util"
 )
 
-// Hellfire's runes (AddRuneOf*, MI_Rune): used on a cell in line of sight, a rune lies on the nearest free cell
-// until a monster or the hero steps on it, then goes off there.
+// The placeable traps (Hellfire's runes: AddRuneOf*, MI_Rune): used on a cell in line of sight, a trap lies on
+// the nearest free cell until a monster or the hero steps on it, then goes off there. The Go and data
+// identifiers keep D1's own SPL_RUNE*/IMISC_RUNE* enum names, as every other ported table does; everything the
+// player reads says trap.
 var d1RuneSpells = map[string]struct {
-	spell int // SPL_RUNE*: what the rune goes off as, for the damage and resistance
+	spell int // SPL_RUNE*: what the trap goes off as, for the damage and resistance
 	name  string
 }{
 	"IMISC_RUNEF":    {d1.SplRuneFire, "a fire explosion"},                // MIS_HIVEEXP
@@ -21,7 +23,7 @@ var d1RuneSpells = map[string]struct {
 	"IMISC_RUNES":    {d1.SplRuneStone, "a flash of petrification"},       // MIS_STONE
 }
 
-// d1RuneAction makes a rune item placeable.
+// d1RuneAction makes a trap item placeable.
 func (f *Factory) d1RuneAction(item *Item, it *d1.Item) {
 	rune, ok := d1RuneSpells[it.MiscID]
 	if !ok {
@@ -49,7 +51,7 @@ func (f *Factory) d1RuneAction(item *Item, it *d1.Item) {
 	item.SetCharges(1) // single use, like scrolls/potions/books; the Activate closure above removes it from the pack itself
 }
 
-// spawnD1Rune lays a rune: every turn it checks its cell and goes off under the first monster or hero on it.
+// spawnD1Rune lays a trap: every turn it checks its cell and goes off under the first monster or hero on it.
 func (f *Factory) spawnD1Rune(caster *Actor, misc string, p geometry.Point) {
 	m := f.State.GetMap()
 	rune := NewFire(0)
@@ -77,9 +79,9 @@ func (f *Factory) spawnD1Rune(caster *Actor, misc string, p geometry.Point) {
 	m.AddObject(rune, p)
 }
 
-// d1RuneGoesOff ports the missile each rune turns into, at the rune's cell. MI_Rune adds it as TARGET_BOTH: the
+// d1RuneGoesOff ports the missile each trap turns into, at the trap's cell. MI_Rune adds it as TARGET_BOTH: the
 // fire blast and the lightning wall hurt the hero as well; Nova and Immolation go out TARGET_MONSTERS again from a
-// hero's rune (MI_Nova, mi_fire_nova), and Stone Curse only takes monsters.
+// hero's trap (MI_Nova, mi_fire_nova), and Stone Curse only takes monsters.
 func d1RuneGoesOff(c *spellCtx, misc string, victim geometry.Point) {
 	o, clvl := c.origin(), c.h.Level
 	switch misc {

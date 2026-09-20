@@ -47,7 +47,7 @@ type Player struct {
 	loopVolume      float64
 	sfxVolume       float64
 	voiceVolume     float64
-	musicTracks     []string // cues registered by RegisterMusic, in file order
+	musicTracks     []string // cues registered by RegisterMusic / RegisterMusicEvents, in registration order
 	currentMusic    string
 	masterVolume    float64
 	files           fs.ReadDirFS
@@ -514,9 +514,30 @@ func (ap *Player) PlayMusic(cue string) bool {
 
 // RegisterSoundEvents registers every event in a sounds rec file (assets/data/sounds.rec, edited with
 // ./remap_sounds.sh) as a randomized cue named after its internal_name, one "sound:" field per file relative to
-// assets/. All files are kept (missing ones are skipped when a sample is picked at play time, see Sound.Next), except
-// those rejected by keep; an event left without files isn't registered, so HasCue fallbacks still work.
-func (ap *Player) RegisterSoundEvents(recFile string, keep func(filename string) bool) {
+// assets/. Missing files are skipped when a sample is picked at play time (see Sound.Next); an event left without
+// files isn't registered at all, so HasCue fallbacks still work.
+func (ap *Player) RegisterSoundEvents(recFile string) {
+	ap.registerEvents(recFile, func(s *Sound) { s.IsRandomized = true })
+}
+
+// RegisterVoiceEvents is RegisterSoundEvents for assets/data/voices.rec (./remap_voices.sh): D1's speech ids
+// (_sfx_id, e.g. TSFX_BMAID1 or PS_WARR8), played at the voice volume.
+func (ap *Player) RegisterVoiceEvents(recFile string) {
+	ap.registerEvents(recFile, func(s *Sound) { s.IsRandomized, s.IsVoice = true, true })
+}
+
+// RegisterMusicEvents is RegisterSoundEvents for assets/data/music.rec (./remap_music.sh): the area themes
+// (town, cathedral, catacombs, caves, hell), looped and listed in the Music Player.
+func (ap *Player) RegisterMusicEvents(recFile string) {
+	ap.registerEvents(recFile, func(s *Sound) {
+		s.IsLooping = true
+		if !slicesContains(ap.musicTracks, s.Cue) {
+			ap.musicTracks = append(ap.musicTracks, s.Cue)
+		}
+	})
+}
+
+func (ap *Player) registerEvents(recFile string, setup func(s *Sound)) {
 	f, err := ap.files.Open(recFile)
 	if err != nil {
 		println("ERR: Sound events not found: " + recFile)
@@ -531,13 +552,14 @@ func (ap *Player) RegisterSoundEvents(recFile string, keep func(filename string)
 			case "internal_name":
 				cue = field.Value
 			case "sound":
-				if keep(field.Value) {
-					filenames = append(filenames, path.Join("assets", field.Value))
-				}
+				filenames = append(filenames, path.Join("assets", field.Value))
 			}
 		}
-		if len(filenames) > 0 {
-			ap.availableSounds[cue] = &Sound{Cue: cue, Filenames: filenames, Samples: make([][]byte, len(filenames)), IsRandomized: true}
+		if len(filenames) == 0 { // an event nobody has assigned a file to yet is simply silent
+			continue
 		}
+		s := &Sound{Cue: cue, Filenames: filenames, Samples: make([][]byte, len(filenames))}
+		setup(s)
+		ap.availableSounds[cue] = s
 	}
 }

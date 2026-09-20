@@ -103,9 +103,6 @@ func (g *MapGenerator) setD1Tiles(m *gridmap.GridMap[*Actor, *Item, Object], lvl
 		return lvl.CellSolid(p.X, p.Y) && !door(p)
 	}
 	tileMap := defs.D1Tilemap(g.randomSource, isWall, d1TypeDlvl[lvl.Type])
-	// ponytail: the Nest and the Crypt draw with the Caves' and the Cathedral's icons and only keep the megatiles the
-	// Cathedral shares with the Crypt as see-through; give them their own tilemaps when they get icons.
-	hellfire := lvl.Dlvl > 16
 	for x := max(x1, 0); x <= min(x2, d1.LevelSize-1); x++ {
 		for y := max(y1, 0); y <= min(y2, d1.LevelSize-1); y++ {
 			mapPos := geometry.Point{X: x, Y: y}
@@ -113,16 +110,15 @@ func (g *MapGenerator) setD1Tiles(m *gridmap.GridMap[*Actor, *Item, Object], lvl
 				continue
 			}
 			seeThroughTile, seeThrough := d1CathedralSeeThrough[lvl.CellMega(x, y)]
-			seeThrough = seeThrough && (!hellfire || lvl.CellMega(x, y) <= 42)
 			switch {
 			case door(mapPos):
 				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: tileMap.FloorTile, DefinedDescription: "a floor", IsWalkable: true, IsTransparent: true})
 				if !m.IsObjectAt(mapPos) {
 					m.AddObject(NewDoor(tileMap.OpenDoor, tileMap.ClosedDoor), mapPos)
 				}
-			case lvl.Type == d1.DTypeCaves && !hellfire && d1IsLavaMega(lvl.CellMega(x, y)) && lvl.CellSolid(x, y) && !lvl.CellBlocks(x, y):
+			case lvl.Type == d1.DTypeCaves && d1IsLavaMega(lvl.CellMega(x, y)) && lvl.CellSolid(x, y) && !lvl.CellBlocks(x, y):
 				m.SetTile(mapPos, g.d1LavaTile(m))
-			case lvl.Type == d1.DTypeCaves && !hellfire && d1IsFenceMega(lvl.CellMega(x, y)) && lvl.CellSolid(x, y) && !lvl.CellBlocks(x, y):
+			case lvl.Type == d1.DTypeCaves && d1IsFenceMega(lvl.CellMega(x, y)) && lvl.CellSolid(x, y) && !lvl.CellBlocks(x, y):
 				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: defs.IconWoodenFence, DefinedDescription: "a wooden fence", IsTransparent: true})
 			case lvl.Type == d1.DTypeCathedral && seeThrough && lvl.CellSolid(x, y) && !lvl.CellBlocks(x, y):
 				m.SetTile(mapPos, seeThroughTile)

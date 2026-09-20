@@ -25,8 +25,6 @@ func tiles(read reader, _ []byte) ([]section, error) {
 		{"catacombs", `Levels\L2Data\L2`, `Levels\L2Data\L2_1.PAL`, 10},
 		{"caves", `Levels\L3Data\L3`, `Levels\L3Data\L3_1.PAL`, 10},
 		{"hell", `Levels\L4Data\L4`, `Levels\L4Data\L4_1.PAL`, 16},
-		{"crypt", `NLevels\L5Data\L5`, `NLevels\L5Data\L5Base.PAL`, 10},
-		{"nest", `NLevels\L6Data\L6`, `NLevels\L6Data\L6Base1.PAL`, 10},
 	} {
 		s, err := megatiles(read, l.name, l.path, l.pal, l.blocks)
 		if err != nil {

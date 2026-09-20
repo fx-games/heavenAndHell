@@ -208,6 +208,10 @@ internal_name: effect.hit
 icon: 43
 name: Effect Hit
 
+internal_name: effect.arrow
+icon: 41
+name: Effect Arrow (every arrow shot without a weapon item, e.g. the Fire Clan's bows)
+
 internal_name: prop.l1light
 reference_image: reference/d1_sprites/tiles/objects/l1braz.frame01.png
 name: Cathedral Candelabra (wall light)

@@ -551,7 +551,7 @@ func TrapDamage64(rng *rand.Rand, s Sheet, mind, maxd int, shift bool) int {
 	if shift {
 		dam, getHit = rnd(rng, maxd-mind+1)+mind, s.GetHit
 	} else {
-		dam, getHit = rng.Intn((maxd-mind+1)<<6)+mind<<6, s.GetHit<<6
+		dam, getHit = rnd(rng, (maxd-mind+1)<<6)+mind<<6, s.GetHit<<6
 	}
 	if s.Flags&ISplAbsHalfTrap != 0 {
 		dam >>= 1
@@ -569,7 +569,7 @@ func (h *Hero) BlockChance(s Sheet, monLevel int) int {
 
 // MonsterDamage ports the monster damage roll against the hero, in 1/64 (minimum 1 HP).
 func MonsterDamage(rng *rand.Rand, s Sheet, minDam, maxDam int) int {
-	dam := rng.Intn((maxDam-minDam+1)<<6) + minDam<<6 + s.GetHit<<6
+	dam := rnd(rng, (maxDam-minDam+1)<<6) + minDam<<6 + s.GetHit<<6
 	return max(dam, 64)
 }
 

@@ -42,6 +42,7 @@ type IconOverlay struct {
 	selectedIndex    int
 	scale            float64
 
+	bottomLeft     bool // anchored to the screen's bottom-left corner instead of the bottom-right
 	showEmptySlots bool
 	showShortCuts  bool
 	showCounter    bool
@@ -93,6 +94,12 @@ func (o *IconOverlay) Refresh() {
 	}
 }
 
+// SetBottomLeft anchors the overlay to the screen's bottom-left corner; the offset's X is then the left margin.
+func (o *IconOverlay) SetBottomLeft(v bool) {
+	o.bottomLeft = v
+	o.Layout()
+}
+
 // SetRows sets how many rows of eight icons the overlay has (4 by default).
 func (o *IconOverlay) SetRows(rows int) {
 	o.rows = rows
@@ -122,6 +129,9 @@ func (o *IconOverlay) Layout() {
 	// position contains the distance in x & axis from the bottom right corner of the screen
 	bottomRight := geometry.Point{X: screenSize.X - offsetFromBottomRightCorner.X, Y: screenSize.Y - offsetFromBottomRightCorner.Y}
 	topLeft := geometry.Point{X: bottomRight.X - width, Y: bottomRight.Y - height}
+	if o.bottomLeft {
+		topLeft.X = offsetFromBottomRightCorner.X
+	}
 
 	o.offsetFromBottomRightCorner = offsetFromBottomRightCorner
 	o.tileSize = tileSize
@@ -175,8 +185,12 @@ func (o *IconOverlay) OnMouseClicked(button ebiten.MouseButton, x int, y int) bo
 		return false
 	}
 	o.selectedIndex = o.getItemIndexFromScreenPosition(point)
+	item, isValid := o.getSelectedItem(o.selectedIndex)
+	if !isValid && !o.showEmptySlots {
+		return false // a slot that isn't drawn doesn't swallow the click
+	}
 	if o.draggable {
-		if item, isValid := o.getSelectedItem(o.selectedIndex); isValid {
+		if isValid {
 			o.uiController.beginIconDrag(o, o.selectedIndex, item)
 		}
 		return true
@@ -208,7 +222,7 @@ func (o *IconOverlay) OnMouseMoved(x int, y int) (bool, Tooltip) {
 	o.selectedIndex = o.getItemIndexFromScreenPosition(point)
 	item, isValid := o.getSelectedItem(o.selectedIndex)
 	if !isValid {
-		return true, NoTooltip{}
+		return o.showEmptySlots, NoTooltip{}
 	}
 	infoLabelText := item.Name()
 

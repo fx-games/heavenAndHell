@@ -196,6 +196,9 @@ func FlashDamage64(rng *rand.Rand, clvl, slvl int) (low, high int) {
 
 const FlashTicks = 19
 
+// FlashRadius is how far the burst of light reaches: every cell within one square of the caster.
+const FlashRadius = 1
+
 // BoomTries: an Apocalypse blast (MI_Boom) rolls to hit every tick of its 15-frame animation until one lands.
 const BoomTries = 15
 

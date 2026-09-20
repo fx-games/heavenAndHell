@@ -117,19 +117,13 @@ func (g *GameInstance) onD1MapChanged(oldMapName, newMapName string) {
 	}
 }
 
-// d1AreaMusic names an area's music track, one per area like D1's themes: assets/diablo_music/<name>.ogg
-// (dtowne/dlvla-d converted and renamed, see AGENTS.md) if present, else no track is registered under that name
-// and the current music just keeps playing. Hellfire's two areas come from hfmusic.mpq as nest/crypt.
+// d1AreaMusic names an area's music track, one per area like D1's themes. The tracks come from
+// assets/data/music.rec (./remap_music.sh); a theme with no file assigned isn't registered under that name and the
+// current music just keeps playing.
 func d1AreaMusic(mapName string) string {
 	if defs.IsTownLevel(mapName) {
 		return "town"
 	}
 	dlvl := max(common.LevelFromName(mapName), 1)
-	switch {
-	case dlvl >= 21: // the Crypt
-		return "crypt"
-	case dlvl >= 17: // the Festering Nest
-		return "nest"
-	}
 	return [4]string{"cathedral", "catacombs", "caves", "hell"}[min((dlvl-1)/4, 3)]
 }

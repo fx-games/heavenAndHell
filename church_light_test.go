@@ -12,7 +12,7 @@ import (
 func TestChurchGlowsRedInTown(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 	state := theGame.GetWorldState()
 	town := state.GetMap()
 
@@ -36,7 +36,7 @@ func TestChurchGlowsRedInTown(t *testing.T) {
 func TestTownBrightensAfterFirstDescent(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 	state := theGame.GetWorldState()
 
 	at := state.GetPlayer().MapPosition()
@@ -55,7 +55,7 @@ func TestTownBrightensAfterFirstDescent(t *testing.T) {
 func TestTownPortalGlowsBlue(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 	state := theGame.GetWorldState()
 	town := state.GetMap()
 

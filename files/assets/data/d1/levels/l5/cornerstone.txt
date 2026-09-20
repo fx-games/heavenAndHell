@@ -1,7 +1,0 @@
-# cornerstone  5x5 megatiles
-[tiles] 5 5
-  4   2   2   2   6
-  1 111 172   0   1
-  1 172   0   0  25
-  1   0   0   0   1
-  7   2   2   2   3

@@ -127,12 +127,6 @@ const (
 	MtADVOCATE = 108
 	MtRBLACK   = 96
 	MtCOUNSLR  = 105
-	// Hellfire's
-	MtHORKSPWN = 117
-	MtHORKDMN  = 123
-	MtDEFILER  = 124
-	MtARCHLICH = 133
-	MtNAKRUL   = 137
 )
 
 // D1's own Nightmare bonuses (InitMonster, Monster::level/exp/toHit and the gold roll in devilutionX). This game

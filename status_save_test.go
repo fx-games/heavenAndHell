@@ -18,7 +18,7 @@ func TestStatusEffectsSurviveSaveLoad(t *testing.T) {
 	theGame.GetAudio().SetDisablePlayback(true)
 	ui := &slotUI{DummyUI: NewDummyUI(), choose: 1}
 	theGame.SetAndInitUserInterface(ui)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "Aidan")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "Aidan")
 	state := theGame.GetWorldState()
 	state.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(1), TargetLocation: "ladder_up"})
 

@@ -23,16 +23,14 @@ func playthrough() {
 	}
 	game.SaveDir = filepath.Join(os.TempDir(), "heavenAndHell_playthrough_saves")
 	os.RemoveAll(game.SaveDir)
-	common.D1CornerstoneFile = filepath.Join(os.TempDir(), "heavenAndHell_playthrough_cornerstone.json")
-	os.Remove(common.D1CornerstoneFile)
 	defer os.RemoveAll(game.SaveDir)
 	theGame, _ := createGameAndUIContext() // one instance: ebiten allows a single audio context per process
 	theGame.GetAudio().SetDisablePlayback(true)
 	missiles := &missileCounter{}                                             // registered per check: a new game or a load makes a new broker
 	wallTraps, chestTraps := 0, 0                                             // traps that fired while objects were operated
-	for run := 1; run <= len(theGame.GetGameData().ClassDefinitions); run++ { // every class, D1's three and Hellfire's
+	for run := 1; run <= len(theGame.GetGameData().ClassDefinitions); run++ { // every class
 		os.RemoveAll(game.SaveDir) // every run starts in slot 1: a new game never writes over a slot that is taken
-		theGame.NewGame(theGame.GetGameData().ClassDefinitions[run-1], false, true, "")
+		theGame.NewGame(theGame.GetGameData().ClassDefinitions[run-1], false, "")
 		state := theGame.GetWorldState()
 		player := state.GetPlayer()
 		if player.Hero() == nil {
@@ -46,11 +44,8 @@ func playthrough() {
 		player.Hero().MaxHPBase += 1000 << 6
 		common.SyncHero(player)
 		player.GetStats().GetResource(stats.Health).SetToMax()
-		for dlvl := 1; dlvl <= 24; dlvl++ { // and on through Hellfire's Nest (17-20) and Crypt (21-24)
+		for dlvl := 1; dlvl <= 16; dlvl++ {
 			name, entry := defs.LevelNameFromDepth(dlvl), "ladder_up"
-			if dlvl == 17 || dlvl == 21 { // entered from town
-				entry = "warp"
-			}
 			state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: entry})
 			m := state.GetMap()
 			if m.GetName() != name {
@@ -108,9 +103,8 @@ func playthrough() {
 				q    int
 			}
 			if b, ok := map[int]boss{2: {"The Butcher", d1.QButcher}, 8: {"Zhar the Mad", d1.QZhar},
-				13: {"Warlord of Blood", d1.QWarlord}, 16: {"The Dark Lord", d1.QDiablo},
-				19: {"Hork Demon", -1}, 20: {"The Defiler", -1}, 24: {"Na-Krul", -1}}[dlvl]; ok { // Hellfire's: no quest check
-				active := b.q < 0 || state.D1Quests()[b.q].Active != d1.QuestNotAvail
+				13: {"Warlord of Blood", d1.QWarlord}, 16: {"The Dark Lord", d1.QDiablo}}[dlvl]; ok {
+				active := state.D1Quests()[b.q].Active != d1.QuestNotAvail
 				if active && actorNamed(m, b.name) == nil {
 					fail("run %d dlvl %d: %s is missing", run, dlvl, b.name)
 				}
@@ -134,14 +128,9 @@ func playthrough() {
 				checkDoppelganger(theGame, fail)
 			case 5:
 				checkRune(theGame, fail)
-			case 21:
-				checkCornerstone(theGame, fail)
-			case 24:
-				checkNakrulBooks(state, player, fail)
 			}
 			kills, damageTaken, exp := fight(theGame.GetActionBroker(), state, player)
-			// past 16 the boosted hero (2·dlvl) outlevels the monsters by 10 and D1 gives no experience
-			if kills == 0 || exp == 0 && dlvl <= 16 {
+			if kills == 0 || exp == 0 {
 				fail("run %d dlvl %d: fight didn't work (kills=%d exp=%d)", run, dlvl, kills, exp)
 			}
 			// a blocking Monk can walk a level untouched, so the hero has to bleed somewhere in the run, not here
@@ -230,9 +219,8 @@ func playthrough() {
 			}
 		}
 	}
-	// milestone 3: the D1 town after a trip down to level 24
+	// milestone 3: the D1 town after a trip down to level 16
 	theGame.GetWorldState().MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"})
-	checkHellfireQuests(theGame, fail)
 	checkTown(theGame.GetWorldState(), fail)
 	if wallTraps == 0 || chestTraps == 0 { // Catacombs and Caves chests are trapped 1 in 10, trap walls 10-25%
 		fail("traps: %d wall traps and %d chest traps fired in 3 runs", wallTraps, chestTraps)
@@ -248,7 +236,7 @@ func playthrough() {
 
 	// milestone 2: a permadeath save is gone once the death menu is built
 	os.RemoveAll(game.SaveDir)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], true, true, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], true, "")
 	if !game.HasSave() {
 		fail("permadeath: new game wrote no save")
 	}
@@ -443,81 +431,6 @@ func saveCheckOf(state *common.State) saveCheck {
 	return c
 }
 
-// checkHellfireQuests walks Farmer's Orchard and Grave Matters through in town: the Nest and the Crypt start shut,
-// Lester hands out the Rune Bomb, which opens the Nest, and pays with the Auric Amulet before he leaves; the
-// Cathedral Map opens the Crypt. Cowquest swaps Lester for the Complete Nut.
-func checkHellfireQuests(theGame *game.GameInstance, fail func(string, ...any)) {
-	state, f := theGame.GetWorldState(), theGame.GetFactory()
-	state.MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"})
-	m, player := state.GetMap(), state.GetPlayer()
-	towner := func(vt common.VendorType) *common.Actor {
-		for _, a := range m.Actors() {
-			if a.GetVendorType() == vt {
-				return a
-			}
-		}
-		return nil
-	}
-	for _, gate := range []string{"to_nest", "to_crypt"} {
-		if _, open := m.GetTransitionAt(m.GetNamedLocation(gate)); open {
-			fail("hellfire: %s is open before its quest", gate)
-		}
-	}
-	lester := towner(common.VendorTypeFarmer)
-	if lester == nil || towner(common.VendorTypeCowFarm) != nil || towner(common.VendorTypeGirl) != nil {
-		fail("hellfire: town has lester=%v nut=%v celia=%v", lester != nil, towner(common.VendorTypeCowFarm) != nil, towner(common.VendorTypeGirl) != nil)
-	}
-	talk := func(a *common.Actor) {
-		theGame.GetActionBroker().Execute(common.NewTalkToAction(common.AbstractCause("playthrough"), a))
-	}
-	take := func(name string) *common.Item {
-		for _, it := range m.Items() {
-			if it.Name() == name {
-				m.RemoveItem(it)
-				player.GetInventory().Add(it)
-				return it
-			}
-		}
-		fail("hellfire: no %s on the ground", name)
-		return nil
-	}
-	use := func(it *common.Item, gate string) {
-		near := m.GetFreeCardinalNeighbors(m.GetNamedLocation(gate))
-		if len(near) == 0 {
-			fail("hellfire: nowhere to stand by %s", gate)
-		}
-		m.MoveActor(player, near[0])
-		it.GetUntargetedAction().Invoke(player, common.EffectSource("playthrough"))
-		if t, open := m.GetTransitionAt(m.GetNamedLocation(gate)); !open || player.GetInventory().Has(it) {
-			fail("hellfire: using %s by %s left it %+v (item kept: %v)", it.Name(), gate, t, player.GetInventory().Has(it))
-		}
-	}
-	talk(lester)
-	if state.QuestActive(d1.QFarmer) != d1.QuestActive {
-		fail("hellfire: Lester didn't start Farmer's Orchard")
-	}
-	use(take("Rune Bomb"), "to_nest")
-	talk(lester)
-	take("Auric Amulet")
-	common.UpdateD1Quests(state, m)
-	if towner(common.VendorTypeFarmer) != nil {
-		fail("hellfire: Lester stays after his reward")
-	}
-	mapItem := f.NewD1Item(f.D1().PlainItem(d1.IdiMapOfDoom))
-	player.GetInventory().Add(mapItem)
-	use(mapItem, "to_crypt")
-	if state.QuestActive(d1.QGrave) != d1.QuestDone {
-		fail("hellfire: Grave Matters isn't done")
-	}
-	state.GetFlags().SetTrue(common.FlagCowQuest)
-	state.ApplyHellfireOptions()
-	if towner(common.VendorTypeCowFarm) == nil || state.D1Quests()[d1.QJersey].Active == d1.QuestNotAvail {
-		fail("hellfire: Cowquest brings no Complete Nut")
-	}
-	state.GetFlags().SetFalse(common.FlagCowQuest)
-	state.ApplyHellfireOptions()
-}
-
 // checkDoppelganger swings a Doppelganger's weapon at an ordinary monster: one blow in ten splits off a copy.
 func checkDoppelganger(theGame *game.GameInstance, fail func(string, ...any)) {
 	state, broker := theGame.GetWorldState(), theGame.GetActionBroker()
@@ -588,79 +501,6 @@ func checkRune(theGame *game.GameInstance, fail func(string, ...any)) {
 			fail("rune: the hero stands on the Rune of Fire and it doesn't go off")
 		}
 		return
-	}
-}
-
-// checkCornerstone drops an item beside the Cornerstone of the World: it lands on it, finishes the quest and is
-// there again when the level is built anew.
-func checkCornerstone(theGame *game.GameInstance, fail func(string, ...any)) {
-	state, f := theGame.GetWorldState(), theGame.GetFactory()
-	m, player := state.GetMap(), state.GetPlayer()
-	lvl := state.D1Level(m)
-	if lvl == nil || lvl.Cornerstone == ([2]int{}) {
-		fail("hellfire: level 21 has no Cornerstone of the World")
-		return
-	}
-	stone := geometry.Point{X: lvl.Cornerstone[0] - d1.CellOrigin, Y: lvl.Cornerstone[1] - d1.CellOrigin}
-	var at geometry.Point
-	found := false
-	for _, p := range m.GetFreeCardinalNeighbors(stone) {
-		at, found = p, true
-	}
-	if !found {
-		fail("hellfire: nowhere to stand by the Cornerstone at %v", stone)
-		return
-	}
-	if m.IsItemAt(stone) { // an earlier run's game left its potion on it
-		if m.ItemAt(stone).Name() != "Potion of Healing" {
-			fail("hellfire: the Cornerstone holds %s from nowhere", m.ItemAt(stone).Name())
-		}
-		m.MoveActor(player, stone)
-		theGame.GetActionBroker().Execute(common.NewPickUpAction(common.AbstractCause("playthrough"), player))
-	}
-	m.MoveActor(player, at)
-	it := f.NewD1Item(f.D1().PlainItem(d1.IdxHeal))
-	player.GetInventory().Add(it)
-	theGame.GetActionBroker().Execute(common.NewDropAction(common.AbstractCause("playthrough"), player, it))
-	if !m.IsItemAt(stone) || m.ItemAt(stone) != it || state.QuestActive(d1.QCornstn) != d1.QuestDone {
-		fail("hellfire: the Cornerstone at %v didn't take the %s (quest %d)", stone, it.Name(), state.QuestActive(d1.QCornstn))
-	}
-	m.RemoveItem(it)
-	common.UpdateD1Quests(state, m)
-	if !m.IsItemAt(stone) || m.ItemAt(stone).Name() != it.Name() {
-		fail("hellfire: the Cornerstone forgot its item")
-	}
-}
-
-// checkNakrulBooks reads Na-Krul's three books in their order: his door opens and he loses half his life.
-func checkNakrulBooks(state *common.State, player *common.Actor, fail func(string, ...any)) {
-	m := state.GetMap()
-	var nakrul *common.Actor
-	for _, a := range m.Actors() {
-		if a.D1Monster() != nil && a.D1Monster().Data.ID == "MT_NKR" {
-			nakrul = a
-		}
-	}
-	books := map[int]*common.D1Object{}
-	for _, obj := range m.Objects() {
-		if o, ok := obj.(*common.D1Object); ok && o.O.Kind == d1.ObjSTORYBOOK && o.O.Var8 >= 6 {
-			books[o.O.Var8] = o
-		}
-	}
-	if nakrul == nil || len(books) != 3 {
-		fail("hellfire: level 24 has Na-Krul %v and %d of his books", nakrul != nil, len(books))
-		return
-	}
-	life := nakrul.GetStats().GetAttribute(stats.MaxHealth)
-	for v := 6; v <= 8; v++ {
-		books[v].ActorBumpedInto(player, nil)
-	}
-	if state.QuestActive(d1.QNakrul) != d1.QuestDone || nakrul.GetStats().GetAttribute(stats.MaxHealth) != life/2 {
-		fail("hellfire: Na-Krul's books: quest %d, life %d of %d", state.QuestActive(d1.QNakrul), nakrul.GetStats().GetAttribute(stats.MaxHealth), life)
-	}
-	lvl := state.D1Level(m)
-	if door := (geometry.Point{X: lvl.Uber[0] - d1.CellOrigin, Y: lvl.Uber[1] - d1.CellOrigin}); !m.IsWalkable(door) {
-		fail("hellfire: Na-Krul's door at %v is still shut", door)
 	}
 }
 
@@ -1078,7 +918,7 @@ func actorNamed(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], 
 // questPath walks decision 15's critical path with a fresh hero: Leoric's tomb, the staff, Cain, the red portal,
 // Lazarus, a save and load, the stairs to 16, the levers and Diablo. Bosses are struck down directly.
 func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 	state := theGame.GetWorldState()
 
 	// D1 has no natural regeneration: waiting doesn't heal a hurt hero
@@ -1343,7 +1183,7 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 // questLines walks every other quest line of D1 with a fresh warrior, all quests made available (InitQuests leaves
 // out one of each group per seed): who starts it, the set pieces that open, the items handed in and the rewards.
 func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 	state, broker := theGame.GetWorldState(), theGame.GetActionBroker()
 	for q := range state.D1Quests() {
 		state.D1Quests()[q].Active, state.D1Quests()[q].Var2 = d1.QuestInit, 0

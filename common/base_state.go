@@ -49,7 +49,6 @@ type State struct {
 	townMaps       map[string]*gridmap.GridMap[*Actor, *Item, Object]
 	dungeonMaps    map[string]*gridmap.GridMap[*Actor, *Item, Object]
 	d1Portal       *D1Portal
-	awayTowners    map[VendorType]awayTowner // Hellfire's towners InitTowners wouldn't create now
 	player         *Actor
 	camera         Camera
 	msg            func(string)

@@ -12,7 +12,7 @@ import (
 func TestBelt(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 	player := theGame.GetWorldState().GetPlayer()
 	inv := player.GetInventory()
 	health := player.GetStats().GetResource(stats.Health)

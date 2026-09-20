@@ -171,9 +171,33 @@ func (d *Broker) startAnimations(animations []Animation) {
 		case *MovementAnimation:
 			d.queueMovementAnimation(typedAnimation)
 		default:
+			d.holdUntilPlayerArrives(animation)
 			d.runningAnimations = append(d.runningAnimations, animation)
 		}
 	}
+}
+
+// holdUntilPlayerArrives keeps what the world does in reply to the hero's step from playing while he is still
+// walking into the cell: an arrow loosed at where he is going must not land there before he does.
+func (d *Broker) holdUntilPlayerArrives(animation Animation) {
+	gated, ok := animation.(interface{ StartWhenTrue(func() bool) })
+	if !ok {
+		return
+	}
+	for actor, move := range d.movementAnimations {
+		if move.IsForThePlayer() && !move.IsDone() && actor != animationActor(animation) {
+			gated.StartWhenTrue(move.IsDone)
+			return
+		}
+	}
+}
+
+// animationActor is whose animation this is, or nil.
+func animationActor(animation Animation) *Actor {
+	if a, ok := animation.(interface{ GetActor() *Actor }); ok {
+		return a.GetActor()
+	}
+	return nil
 }
 
 func (d *Broker) CancelAllAnimations() {

@@ -63,9 +63,6 @@ func (d *MoveAction) Execute(context ActionContext) []Action {
 	if d.isNotAnimated() {
 		actor.SetDrawPosition(d.targetPos.ToPointF())
 	}
-	if d.isPlayer && actor.hero != nil && !state.factory.Generator.D.Hellfire { // PM_DoWalk; Hellfire dropped the steps
-		playD1SfxAt(context, "PS_WALK1", d.targetPos)
-	}
 	//println(fmt.Sprintf("Actor %s moved to %s", actor.Action(), d.targetPos))
 	return nil
 }

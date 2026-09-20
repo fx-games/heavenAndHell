@@ -38,25 +38,12 @@ func LevelType(dlvl int) int {
 		return DTypeCatacombs
 	case dlvl <= 12:
 		return DTypeCaves
-	case dlvl <= 16:
-		return DTypeHell
-	case dlvl <= 20:
-		return DTypeCaves // Hellfire's Nest
 	}
-	return DTypeCathedral // Hellfire's Crypt
+	return DTypeHell
 }
 
-// tileset is the level type whose til/sol a level draws with: Hellfire's Nest and Crypt keep D1's level types
-// for everything else.
-func (g *gen) tileset() int {
-	switch {
-	case g.setlevel || g.currlevel < 17:
-		return g.ltype
-	case isCrypt(g.currlevel):
-		return 5
-	}
-	return 6
-}
+// tileset is the level type whose til/sol a level draws with.
+func (g *gen) tileset() int { return g.ltype }
 
 type point struct{ x, y int }
 

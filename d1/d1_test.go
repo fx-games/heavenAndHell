@@ -13,43 +13,16 @@ func TestLoadAndGenerate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(d.Prefixes) != 86 || len(d.Suffixes) != 98 || len(d.UniqueItems) != 111 || len(d.UniqueMonsters) != 100 {
+	if len(d.Prefixes) != 86 || len(d.Suffixes) != 98 || len(d.UniqueItems) != 111 || len(d.UniqueMonsters) != 97 {
 		t.Fatalf("sizes: pre=%d suf=%d uitems=%d umon=%d", len(d.Prefixes), len(d.Suffixes), len(d.UniqueItems), len(d.UniqueMonsters))
 	}
-	// with Hellfire off the tables must roll exactly like D1 1.09's, which is what TestGoldenLevels pins
-	d1only, err := LoadD1(os.DirFS("../files"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	hfPre, hfSuf, hfItems := 0, 0, 0
-	for _, a := range d1only.Prefixes {
-		if a.Hellfire {
-			hfPre++
-		}
-	}
-	for _, a := range d1only.Suffixes {
-		if a.Hellfire {
-			hfSuf++
-		}
-	}
-	for _, b := range d1only.Items {
-		if b.Hellfire {
-			hfItems++
-		}
-	}
-	hfUniq := 0
-	for _, u := range d1only.UniqueItems {
-		if u.Hellfire {
-			hfUniq++
-		}
-	}
-	if hfPre != 3 || hfSuf != 3 || hfUniq != 21 || hfItems != 12 || len(d.Items) != 166 {
-		t.Fatalf("hellfire rows: pre=%d suf=%d uniques=%d items=%d, hellfire table %d", hfPre, hfSuf, hfUniq, hfItems, len(d.Items))
+	if len(d.Items) != 166 {
+		t.Fatalf("hellfire table %d", len(d.Items))
 	}
 	// Hellfire's AllItemsList order (1.09's itemdat.cpp under HELLFIRE)
-	for idx, name := range map[int]string{5: "Short Staff of Mana", 22: "Cathedral Map", 32: "Bovine Plate", 83: "Blacksmith Oil",
+	for idx, name := range map[int]string{5: "Short Staff of Mana", 22: "Map of the Stars", 32: "Bovine Plate", 83: "Blacksmith Oil",
 		86: "Oil", 87: "Elixir of Strength", 91: "Scroll of Healing", 92: "Scroll of Vision", 114: "Book of ", 118: "Dagger",
-		160: "Amulet", 161: "Rune of Fire", 165: "Rune of Stone"} {
+		160: "Amulet", 161: "Fire Trap", 165: "Stone Trap"} {
 		if d.Items[idx].Name != name {
 			t.Errorf("hellfire item %d is %q, want %q", idx, d.Items[idx].Name, name)
 		}
@@ -151,37 +124,30 @@ func TestHero(t *testing.T) {
 }
 
 func TestStores(t *testing.T) {
-	d1only, err := LoadD1(os.DirFS("../files"))
+	d, err := Load(os.DirFS("../files"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	hf, err := Load(os.DirFS("../files"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, d := range []*Data{d1only, hf} {
+	{
 		g := NewGenerator(d, 3)
 		lim := g.limits()
 		for lvl := 6; lvl <= 16; lvl += 5 {
 			smith := g.SmithStock(lvl)
 			for _, it := range smith {
-				if it.Type == ITypeMisc || it.Type == ITypeStaff && (!d.Hellfire || it.Spell != 0) || it.Type == ITypeRing || it.Magical != 0 || !it.Identified {
-					t.Fatalf("hellfire %v: smith sells %+v", d.Hellfire, it)
+				if it.Type == ITypeMisc || it.Type == ITypeStaff && it.Spell != 0 || it.Type == ITypeRing || it.Magical != 0 || !it.Identified {
+					t.Fatalf("smith sells %+v", it)
 				}
 			}
 			if len(smith) > lim.smithItems-1 {
-				t.Fatalf("hellfire %v: smith has %d items", d.Hellfire, len(smith))
+				t.Fatalf("smith has %d items", len(smith))
 			}
 			witch := g.WitchStock(lvl, [NumSpells]int{})
 			if witch[0].MiscID != "IMISC_MANA" || witch[1].MiscID != "IMISC_FULLMANA" || witch[2].Spell != 7 || len(witch) < 10 || len(witch) >= lim.witchItems {
-				t.Fatalf("hellfire %v: witch stock starts wrong: %s %s %s (%d items)", d.Hellfire, witch[0].Name, witch[1].Name, witch[2].Name, len(witch))
+				t.Fatalf("witch stock starts wrong: %s %s %s (%d items)", witch[0].Name, witch[1].Name, witch[2].Name, len(witch))
 			}
 			for _, it := range witch {
-				if d.Hellfire && IsOil(it.MiscID) {
-					t.Fatalf("hellfire witch sells %s", it.Name)
-				}
-				if !d.Hellfire && d.Items[it.BaseIdx].Hellfire {
-					t.Fatalf("D1 witch sells Hellfire's %s", it.Name)
+				if IsOil(it.MiscID) {
+					t.Fatalf("witch sells %s", it.Name)
 				}
 			}
 			book := &Item{MiscID: "IMISC_BOOK", Spell: SplFirebolt}
@@ -197,27 +163,24 @@ func TestStores(t *testing.T) {
 				t.Fatalf("healer stock starts wrong: %s %s", healer[0].Name, healer[1].Name)
 			}
 			for _, it := range healer[2:] {
-				if it.MiscID == "IMISC_HEAL" || it.MiscID == "IMISC_MANA" || d.Hellfire && it.MiscID == "IMISC_ELIXSTR" {
-					t.Fatalf("hellfire %v: healer random stock has %s", d.Hellfire, it.Name)
+				if it.MiscID == "IMISC_HEAL" || it.MiscID == "IMISC_MANA" || it.MiscID == "IMISC_ELIXSTR" {
+					t.Fatalf("healer random stock has %s", it.Name)
 				}
 			}
 			rogue := &Shopper{Class: Rogue, Str: 20, Mag: 15, Dex: 30}
 			boy := g.BoyItem(lvl, rogue)
-			if boy.Magical == 0 || boy.IValue > lim.boyMaxVal || (d.WirtPrice(boy) < BuyPrice(boy)) != d.Hellfire {
-				t.Fatalf("hellfire %v: wirt item %+v at %d", d.Hellfire, boy, d.WirtPrice(boy))
+			if boy.Magical == 0 || boy.IValue > lim.boyMaxVal || d.WirtPrice(boy) >= BuyPrice(boy) {
+				t.Fatalf("wirt item %+v at %d", boy, d.WirtPrice(boy))
 			}
 		}
 
 		p := &Premium{}
 		g.RefillPremium(p, 1, nil)
-		shift := 2
-		if d.Hellfire {
-			shift = 3
-		}
+		shift := 3
 		moved := p.Items[shift+1]
 		g.RefillPremium(p, 2, nil)
 		if p.Level != 2 || p.Items[1] != moved || p.Items[lim.premiumItems-1] == nil || lim.premiumItems < premiumSlots && p.Items[lim.premiumItems] != nil {
-			t.Fatalf("hellfire %v: premium rotation: level %d", d.Hellfire, p.Level)
+			t.Fatalf("premium rotation: level %d", p.Level)
 		}
 		p.Items[4] = nil
 		g.RefillPremium(p, 2, nil)
@@ -230,8 +193,8 @@ func TestStores(t *testing.T) {
 			t.Fatal("sell filters")
 		}
 		oil := &Item{Type: ITypeMisc, MiscID: "IMISC_OILOF", Class: "ICLASS_MISC"}
-		if d.Hellfire && (!d.SmithBuys(oil) || d.WitchBuys(oil)) {
-			t.Fatal("hellfire oil sell filters")
+		if !d.SmithBuys(oil) || d.WitchBuys(oil) {
+			t.Fatal("oil sell filters")
 		}
 	}
 
@@ -424,31 +387,14 @@ func TestHellfireClasses(t *testing.T) {
 	}
 }
 
-// TestHellfireItems covers the expansion's item work: the toggle keeps D1's drop tables intact, a plain Oil
-// settles into one of the ten, and each oil edits only what it is allowed to.
+// TestHellfireItems covers the expansion's item work: a plain Oil settles into one of the ten, and each oil
+// edits only what it is allowed to.
 func TestHellfireItems(t *testing.T) {
 	d, err := Load(os.DirFS("../files"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Hellfire's droppable items reach the floor only with the toggle on
-	seen := map[string]bool{}
-	for _, on := range []bool{false, true} {
-		d.Hellfire = on
-		g := NewGenerator(d, 1)
-		g.R.SetSeed(12345)
-		for n := 0; n < 20000; n++ {
-			if it := g.FloorItem(8, n%5 == 0, false); it != nil && d.Items[it.BaseIdx].Hellfire {
-				seen[map[bool]string{false: "off", true: "on"}[on]] = true
-			}
-		}
-	}
-	if seen["off"] || !seen["on"] {
-		t.Errorf("hellfire items dropped with the toggle off=%v, on=%v", seen["off"], seen["on"])
-	}
-
 	// a plain "Oil" must never stay plain
-	d.Hellfire = true
 	g := NewGenerator(d, 1)
 	g.R.SetSeed(99)
 	oilIdx := -1
@@ -553,5 +499,21 @@ func TestDamagingSpellsShowARange(t *testing.T) {
 		if _, hi, ok := SpellDamageRange(spell, 50, 10, 3); !ok || hi <= 0 {
 			t.Errorf("spell %d has no damage range", spell)
 		}
+	}
+}
+
+// TestDamageRollsTolerateInvertedRange guards the trapped-chest crash: MI_LArrow rolls mind and maxd
+// independently, so mind can exceed maxd; D1's GenerateRnd returns 0 there instead of panicking.
+func TestDamageRollsTolerateInvertedRange(t *testing.T) {
+	rng := rand.New(rand.NewSource(1))
+	var s Sheet
+	if got := MonsterDamage(rng, s, 15, 14); got != 15<<6 {
+		t.Fatalf("MonsterDamage(15,14) = %d, want %d", got, 15<<6)
+	}
+	if got := TrapDamage64(rng, s, 15, 14, false); got != 15<<6 {
+		t.Fatalf("TrapDamage64(15,14) = %d, want %d", got, 15<<6)
+	}
+	if got := MissileDamage64(rng, s, 15, 14, true); got != 64 {
+		t.Fatalf("MissileDamage64(15,14,shift) = %d, want 64", got)
 	}
 }

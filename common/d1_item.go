@@ -176,7 +176,6 @@ func (g *Factory) NewD1Item(it *d1.Item) *Item {
 			if d1.IsOil(it.MiscID) { // Hellfire's oils: pick an item out of the pack and pour it on
 				g.d1OilAction(item, it.MiscID, it.Name)
 			}
-			g.d1HellfireItemAction(item, it)
 			g.d1RuneAction(item, it)
 		}
 	}
@@ -245,6 +244,17 @@ func (i *Item) d1TooltipLines(cmp map[string]int) []string {
 	}
 	if it.Spell > 0 && it.Spell < len(d1.SpellDescriptions) {
 		lines = append(lines, d1.SpellDescriptions[it.Spell])
+		// what the spell does for this hero, right under what it is (a staff's own melee damage follows below)
+		if player := i.getPlayer(); player != nil && player.hero != nil {
+			h, sh := player.hero, player.HeroSheet()
+			if it.Spell == d1.SplHeal {
+				lo, hi := d1.HealRange64(h.Class, h.Level, h.SpellLevel(sh, it.Spell))
+				add("Spell heals %d-%d life", lo>>6, hi>>6)
+			}
+			if t := d1.SpellDamageText(it.Spell, sh.Mag, h.Level, h.SpellLevel(sh, it.Spell)); t != "" {
+				add("Spell: %s", t)
+			}
+		}
 	}
 	switch it.MiscID {
 	case "IMISC_OILACC":
@@ -325,13 +335,6 @@ func (i *Item) d1TooltipLines(cmp map[string]int) []string {
 		h, sh := player.hero, player.HeroSheet()
 		life := func() { lo, hi := h.PotionHealRange(sh.MaxHP); add("Restores %d-%d life", lo>>6, hi>>6) }
 		mana := func() { lo, hi := h.PotionManaRange(sh.MaxMana); add("Restores %d-%d mana", lo>>6, hi>>6) }
-		if it.Spell == d1.SplHeal {
-			lo, hi := d1.HealRange64(h.Class, h.Level, h.SpellLevel(sh, it.Spell))
-			add("Heals %d-%d life", lo>>6, hi>>6)
-		}
-		if t := d1.SpellDamageText(it.Spell, sh.Mag, h.Level, h.SpellLevel(sh, it.Spell)); t != "" {
-			add("%s", t)
-		}
 		switch it.MiscID {
 		case "IMISC_HEAL":
 			life()

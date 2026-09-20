@@ -58,8 +58,6 @@ type Configuration struct {
 
 	SoundVolume, MusicVolume, VoiceVolume float64 // 0..1, set in the audio menu
 
-	DiabloAudioEnabled bool // gates assets/diablo_sfx and assets/diablo_music; takes effect on next launch
-
 	AutoExploreOpenContainers bool // auto explore also bumps chests/barrels/sarcophagi it finds
 
 	Fullscreen bool // set in the video menu or with F11
@@ -164,7 +162,6 @@ func (c Configuration) ToRecord() recfile.Record {
 		{Name: "SoundVolume", Value: recfile.FloatStr(c.SoundVolume)},
 		{Name: "MusicVolume", Value: recfile.FloatStr(c.MusicVolume)},
 		{Name: "VoiceVolume", Value: recfile.FloatStr(c.VoiceVolume)},
-		{Name: "DiabloAudioEnabled", Value: recfile.BoolStr(c.DiabloAudioEnabled)},
 		{Name: "AutoExploreOpenContainers", Value: recfile.BoolStr(c.AutoExploreOpenContainers)},
 		{Name: "Fullscreen", Value: recfile.BoolStr(c.Fullscreen)},
 	}
@@ -218,7 +215,6 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		SoundVolume:               configMap.GetFloatOrDefault("SoundVolume", 1),
 		MusicVolume:               configMap.GetFloatOrDefault("MusicVolume", 1),
 		VoiceVolume:               configMap.GetFloatOrDefault("VoiceVolume", 1),
-		DiabloAudioEnabled:        configMap.GetBoolOrTrue("DiabloAudioEnabled"),
 		AutoExploreOpenContainers: configMap.GetBoolOrFalse("AutoExploreOpenContainers"),
 		Fullscreen:                configMap.GetBoolOrFalse("Fullscreen"),
 		MiniMapColors:             parseMiniMapColors(configMap.GetStringOrDefault("MiniMapColor", "")),

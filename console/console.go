@@ -194,7 +194,10 @@ func (c *Console) visibleActorsText() string {
 
 // common.UserInterface
 
-func (c *Console) ToggleMapInfo() {}
+func (c *Console) ToggleMapInfo()                   {}
+func (c *Console) FlashScreen(color.Color, float64) {}
+func (c *Console) ToggleFogOfWar()                  {}
+func (c *Console) CycleRenderingMode()              {}
 
 func (c *Console) GetVisibleMap() geometry.Rect {
 	r := c.ui.VisibleMap()
@@ -266,21 +269,18 @@ func (c *Console) OnMapChanged() {
 	c.ui.CenterMapOnPlayer()
 }
 
-// OpenNewGameScreen asks for content, class, look, name and permadeath one after the other. Content comes first
-// because it decides which classes there are.
-func (c *Console) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath, hellfire bool, name string), back func()) {
-	c.ui.OpenChoiceDialogue("New game", "Hellfire adds its classes, items, monsters, quests and levels.", []string{"Diablo only", "Hellfire"}, func(content int, _ string) {
-		c.openClassMenu(content == 1, start, back)
-	})
+// OpenNewGameScreen asks for class, look, name and permadeath one after the other.
+func (c *Console) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string), back func()) {
+	c.openClassMenu(start, back)
 }
 
-func (c *Console) openClassMenu(hellfire bool, start func(class defs.LoadoutDefinition, permadeath, hellfire bool, name string), back func()) {
+func (c *Console) openClassMenu(start func(class defs.LoadoutDefinition, permadeath bool, name string), back func()) {
 	var items []textui.MenuItem
-	for _, class := range common.PlayableClasses(hellfire, c.context.Definitions.ClassDefinitions) {
+	for _, class := range c.context.Definitions.ClassDefinitions {
 		items = append(items, textui.MenuItem{Name: class.Name, CloseMenus: true, Action: func() {
 			c.ui.OpenChoiceDialogue("New game", "Choose a look for your "+class.Name, []string{"Male", "Female", "Back"}, func(index int, _ string) {
 				if index == 2 {
-					c.openClassMenu(hellfire, start, back)
+					c.openClassMenu(start, back)
 					return
 				}
 				if index == 1 {
@@ -288,7 +288,7 @@ func (c *Console) openClassMenu(hellfire bool, start func(class defs.LoadoutDefi
 				}
 				c.ui.AskForString("Name", common.RandomHeroName(index == 1), func(name string) {
 					c.ui.OpenChoiceDialogue("New game", "Permadeath deletes the save when you die.", []string{"Normal", "Permadeath"}, func(mode int, _ string) {
-						start(class, mode == 1, hellfire, name)
+						start(class, mode == 1, name)
 					})
 				})
 			})

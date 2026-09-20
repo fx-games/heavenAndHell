@@ -3,6 +3,7 @@ package common
 import (
 	"math"
 	"math/rand"
+	"rpg/defs"
 	"rpg/geometry"
 	"rpg/stats"
 )
@@ -209,7 +210,7 @@ func defaultModifierPattern(attribute int) int {
 }
 
 func (d *RangedAttackAction) GetAnimations() []Animation {
-	projectileIcon := int32(41)
+	projectileIcon := defs.IconEffectArrow
 	if weapon := d.attacker.GetEquipment().GetWeapon(RangedAttack); weapon != nil && weapon.GetWeaponStats().ProjectileIcon > -1 {
 		projectileIcon = weapon.GetWeaponStats().ProjectileIcon // D1 monsters shoot without a weapon item
 	}

@@ -3,7 +3,6 @@ package gui
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"image/color"
 	"rpg/common"
 	"rpg/geometry"
 	"rpg/util"
@@ -163,7 +162,7 @@ func (u *UIController) handleKeyboardInput() {
 		}
 	}
 	for i := range common.BeltSize {
-		if inpututil.IsKeyJustPressed(ebiten.Key1 + ebiten.Key(i)) {
+		if isBeingPressedRepeatedly(ebiten.Key1 + ebiten.Key(i)) {
 			u.UseBeltSlot(i)
 			return
 		}
@@ -186,7 +185,7 @@ func (u *UIController) handleKeyboardInput() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		act.QuickRangedAttack()
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+	if isBeingPressedRepeatedly(ebiten.KeySpace) {
 		act.CastLastSpellAtNearest()
 	}
 
@@ -219,15 +218,13 @@ func (u *UIController) handleKeyboardInput() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyC) {
 		u.ToggleFullStats()
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
-		u.context.DebugActions().KillLevel()
+	// F5 / F9 quick save and quick load; the debug views they used to share the function keys with moved
+	// into the debug menu (F10).
+	if inpututil.IsKeyJustPressed(ebiten.KeyF5) && u.context.QuickSave != nil {
+		u.context.QuickSave()
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyF8) {
-		u.renderingMode = (u.renderingMode + 1) % 3
-		u.configuration.FlipActorsHorizontally = u.renderingMode == GraphicRendering
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyF9) {
-		u.disableFogOfWar = !u.disableFogOfWar
+	if inpututil.IsKeyJustPressed(ebiten.KeyF9) && u.context.QuickLoad != nil {
+		u.context.QuickLoad()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyF10) {
 		u.context.DebugActions().OpenDebugMenu()
@@ -235,10 +232,6 @@ func (u *UIController) handleKeyboardInput() {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF11) {
 		u.toggleFullscreen()
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyF12) {
-		u.FlashScreen(color.White, 0.1)
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyT) {
@@ -255,13 +248,6 @@ func (u *UIController) handleKeyboardInput() {
 
 	if isBeingPressedRepeatedly(ebiten.KeyTab) {
 		act.AutoAttack()
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyJ) {
-		u.context.DebugActions().GoOneLevelUp()
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyK) {
-		u.context.DebugActions().GoOneLevelDown()
 	}
 
 	for key, direction := range map[ebiten.Key]geometry.Point{

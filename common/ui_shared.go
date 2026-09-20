@@ -353,14 +353,6 @@ func AutoExploreSettings(cfg *Configuration, reopen func()) []util.MenuItem {
 	}
 }
 
-// PlayableClasses drops Hellfire's Monk, Bard and Barbarian (classes.rec's last three) when Hellfire is off.
-func PlayableClasses(hellfire bool, classes []defs.LoadoutDefinition) []defs.LoadoutDefinition {
-	if hellfire {
-		return classes
-	}
-	return classes[:d1.Monk]
-}
-
 // RandomHeroName picks a name for a new hero, or "" when the name lists are missing.
 // Name lists: michael-aloys/little-namegenerator (CC BY 4.0, Jonas Förster & Michael A. Hedderich).
 func RandomHeroName(female bool) string {

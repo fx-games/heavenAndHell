@@ -40,4 +40,5 @@ var (
 	IconEffectFireSmall          = tilesIcons["effect.fire_small"]
 	IconEffectFireBig            = tilesIcons["effect.fire_big"]
 	IconEffectHit                = tilesIcons["effect.hit"]
+	IconEffectArrow              = tilesIcons["effect.arrow"]
 )

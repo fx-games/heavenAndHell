@@ -17,7 +17,7 @@ import (
 func TestAttackedMonsterFightsOrFlees(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[1], false, true, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[1], false, "")
 	state := theGame.GetWorldState()
 	player := state.GetPlayer()
 	hp := player.GetStats().GetResource("health")

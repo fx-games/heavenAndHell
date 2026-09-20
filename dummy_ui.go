@@ -2,6 +2,7 @@ package main
 
 import (
 	"image"
+	"image/color"
 	"rpg/common"
 	"rpg/defs"
 	"rpg/geometry"
@@ -27,7 +28,10 @@ func (d DummyUI) SetDebugActions(actions func() common.DebugActions) {
 
 }
 
-func (d DummyUI) ToggleMapInfo() {}
+func (d DummyUI) ToggleMapInfo()                   {}
+func (d DummyUI) FlashScreen(color.Color, float64) {}
+func (d DummyUI) ToggleFogOfWar()                  {}
+func (d DummyUI) CycleRenderingMode()              {}
 
 func (d DummyUI) GetVisibleMap() geometry.Rect {
 	//TODO implement me
@@ -125,7 +129,7 @@ func (d DummyUI) OnMapChanged() {
 
 }
 
-func (d DummyUI) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath, hellfire bool, name string), back func()) {
+func (d DummyUI) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string), back func()) {
 	//TODO implement me
 
 }

@@ -120,7 +120,7 @@ func D1Tilemap(randomSource *rand.Rand, isWall func(geometry.Point) bool, dlvl i
 
 // D1LevelName is the level's name shown on arrival.
 func D1LevelName(dlvl int) string {
-	return fmt.Sprintf("Level %d\n%s", dlvl, [6]string{"Cathedral", "Catacombs", "Caves", "Hell", "Nest", "Crypt"}[min((dlvl-1)/4, 5)])
+	return fmt.Sprintf("Level %d\n%s", dlvl, [4]string{"Cathedral", "Catacombs", "Caves", "Hell"}[min((dlvl-1)/4, 3)])
 }
 
 func LevelNameFromDepth(level int) string {

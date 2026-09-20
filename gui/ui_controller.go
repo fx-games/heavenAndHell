@@ -158,6 +158,17 @@ func (u *UIController) IsPlayerForcingAggression() bool {
 	return u.shiftIsBeingPressedThisTick
 }
 
+// ToggleFogOfWar shows the whole map, monsters included.
+func (u *UIController) ToggleFogOfWar() {
+	u.disableFogOfWar = !u.disableFogOfWar
+}
+
+// CycleRenderingMode steps through the tile/graphic renderings of the world.
+func (u *UIController) CycleRenderingMode() {
+	u.renderingMode = (u.renderingMode + 1) % 3
+	u.configuration.FlipActorsHorizontally = u.renderingMode == GraphicRendering
+}
+
 func (u *UIController) ToggleMapInfo() {
 	u.showMapInfo = !u.showMapInfo
 	u.updateMapTileHoverInfo(u.mousePosOnMap)
@@ -615,18 +626,21 @@ func (u *UIController) ParseColorCodedText(colorCodedText string) []util.Colored
 
 func (u *UIController) OpenStash(playerInv *common.Inventory, stashInTown *common.Inventory, drop func(item *common.Item)) {
 	player := u.context.GameState().GetPlayer()
+	// shift moves the whole stack, a plain click one item at a time
+	moved := func(stack common.InventoryStack) []*common.Item {
+		if u.shiftIsBeingPressedThisTick {
+			return stack
+		}
+		return stack[:1]
+	}
 	toStashHandler := func(uiItem UIElement) {
 		playerEquip := player.GetEquipment()
-		itemStack := uiItem.(common.InventoryStack)
-		firstItem := itemStack[0]
-		if playerEquip.IsEquipped(firstItem) { // unequip first..
-			u.context.PlayerAction().UnequipItem(firstItem)
-		}
-		playerInv.Remove(firstItem)
-		if u.shiftIsBeingPressedThisTick {
-			drop(firstItem)
-		} else {
-			stashInTown.Add(firstItem)
+		for _, item := range moved(uiItem.(common.InventoryStack)) {
+			if playerEquip.IsEquipped(item) { // unequip first..
+				u.context.PlayerAction().UnequipItem(item)
+			}
+			playerInv.Remove(item)
+			stashInTown.Add(item)
 		}
 	}
 
@@ -638,15 +652,9 @@ func (u *UIController) OpenStash(playerInv *common.Inventory, stashInTown *commo
 			return sortStacksForUI(stashInTown.StackedItems())
 		},
 		OnSelection: func(uiItem UIElement) {
-			itemStack := uiItem.(common.InventoryStack)
-			firstItem := itemStack[0]
-			stashInTown.Remove(firstItem)
-
-			if u.shiftIsBeingPressedThisTick { // drop
-				firstItem.DroppedByPlayer()
-				u.context.PlayerAction().DropItem(firstItem)
-			} else { // move
-				playerInv.Add(firstItem)
+			for _, item := range moved(uiItem.(common.InventoryStack)) {
+				stashInTown.Remove(item)
+				playerInv.Add(item)
 			}
 		},
 	}
@@ -711,7 +719,10 @@ func (u *UIController) setupUI() {
 
 	u.miniMap = u.addMiniMap(geometry.Point{X: u.uiBarWidth, Y: topYForMap}, maxHeightForMap, paddingLeftAndRight)
 
-	u.timer = u.addTimerOverlay(geometry.Point{X: paddingLeftAndRight, Y: 360})
+	// the status effects sit in one row in the bottom-left corner, clear of the minimap on the right
+	u.timer = u.addTimerOverlay(geometry.Point{X: paddingLeftAndRight, Y: paddingLeftAndRight})
+	u.timer.SetRows(1)
+	u.timer.SetBottomLeft(true)
 
 	u.OnScreenSizeChanged()
 }
@@ -846,6 +857,10 @@ func (u *UIController) BeginPlayerSellingTo(vendor *common.Actor) {
 				u.BeginPlayerSellingTo(vendor)
 			},
 		})
+	}
+	if len(sellItems) == 0 {
+		msg("This vendor has no interest in anything you carry")
+		return
 	}
 	sort.Slice(sellItems, func(a, b int) bool { return sellItems[a].ShortCut < sellItems[b].ShortCut })
 	goldAmount := player.GetStats().GetAttribute(stats.Gold)
@@ -1352,6 +1367,9 @@ func (u *UIController) BeginThrowTargeting(targetRules common.TargetRules, onSel
 	if !state.GetPlayer().IsAlive() {
 		return
 	}
+	if u.nothingToTarget(targetRules) {
+		return
+	}
 	act := u.context.PlayerAction()
 	act.CancelAutoMove()
 	msg := u.msg
@@ -1374,7 +1392,20 @@ func (u *UIController) BeginThrowTargeting(targetRules common.TargetRules, onSel
 	})
 }
 func (u *UIController) BeginTargeting(targetRules common.TargetRules, onHit *common.HitEffect) {
+	if u.nothingToTarget(targetRules) {
+		return
+	}
 	u.targeter = NewTargeter(u, targetRules, onHit)
+}
+
+// nothingToTarget is true when neither the preselected cell nor any cyclable target would be a valid choice:
+// entering targeting mode then only costs the player a cancel.
+func (u *UIController) nothingToTarget(rules common.TargetRules) bool {
+	if len(rules.Targets()) > 0 || rules.OnTargetChanged(rules.GetPreSelectedTarget()).IsValid {
+		return false
+	}
+	u.msg("There is nothing to target.")
+	return true
 }
 
 func (u *UIController) ShowGameOverMenu() {
@@ -1511,18 +1542,13 @@ func helpColumns(autoPickup bool) [2][]helpSection {
 				{"Enter or f", "Fire"},
 			}},
 			{"DEBUG", [][2]string{
-				{"F8", "Rendering mode"},
-				{"F9", "Fog of war"},
 				{"F10", "Debug menu"},
-				{"F12", "Flash screen"},
-				{"p", "Kill the level"},
 			}},
 		},
 		{
 			{"EXPLORE", [][2]string{
 				{"g", pickup},
 				{"o", "Auto-explore"},
-				{"j / k", "Stairs up / down"},
 				{"z", "Rest until healed"},
 				{".", "Wait a turn"},
 			}},
@@ -1536,6 +1562,7 @@ func helpColumns(autoPickup bool) [2][]helpSection {
 			}},
 			{"SYSTEM", [][2]string{
 				{"F1", "This help"},
+				{"F5 / F9", "Quick save / load"},
 				{"Esc", "Cancel or pause"},
 				{"F11", "Fullscreen"},
 			}},

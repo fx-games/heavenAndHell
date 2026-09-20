@@ -3,11 +3,8 @@ package d1
 import "fmt"
 
 var (
-	// 5 is Hellfire's Crypt and 6 its Nest; both live in HELLFIRE.MPQ under NLevels, not DIABDAT.
-	tilFiles = [7]string{"", `Levels\L1Data\L1.TIL`, `Levels\L2Data\L2.TIL`, `Levels\L3Data\L3.TIL`, `Levels\L4Data\L4.TIL`,
-		`NLevels\L5Data\L5.TIL`, `NLevels\L6Data\L6.TIL`}
-	solFiles = [7]string{"", `Levels\L1Data\L1.SOL`, `Levels\L2Data\L2.SOL`, `Levels\L3Data\L3.SOL`, `Levels\L4Data\L4.SOL`,
-		`NLevels\L5Data\L5.SOL`, `NLevels\L6Data\L6.SOL`}
+	tilFiles = [5]string{"", `Levels\L1Data\L1.TIL`, `Levels\L2Data\L2.TIL`, `Levels\L3Data\L3.TIL`, `Levels\L4Data\L4.TIL`}
+	solFiles = [5]string{"", `Levels\L1Data\L1.SOL`, `Levels\L2Data\L2.SOL`, `Levels\L3Data\L3.SOL`, `Levels\L4Data\L4.SOL`}
 )
 
 // Trigger messages (_tmsg).
@@ -166,6 +163,8 @@ func (gnr *Generator) CreateLevel(q *Quests, seeds [NumLevels]int32, dlvl, setLe
 		g.initMonsters(SLNone)
 		g.rng.Seed()
 		g.initObjects(seeds)
+		g.hangTorchesOnWalls()
+		g.moveMonstersOffObjects()
 		g.initItems()
 		g.createThemeRooms()
 		g.resyncQuests()
@@ -182,7 +181,7 @@ func (q *Quests) setLevelType(sl int) int {
 	return DTypeCathedral
 }
 
-// createDungeon ports CreateDungeon for dungeon levels 1-24.
+// createDungeon ports CreateDungeon for dungeon levels 1-16.
 func (g *gen) createDungeon(seed int32, entry Entry) {
 	g.flags = [112][112]byte{}
 	g.initTrans()
@@ -438,17 +437,6 @@ func (g *gen) output(setLevel int) *Level {
 	}
 	for i, q := range g.l4.quads {
 		l.DiabloQuads[i] = [2]int{q.x, q.y}
-	}
-	if isCrypt(g.currlevel) && !g.setlevel { // CreateL5Dungeon's scan
-		ux, uy := g.uberRoom()
-		l.Uber = [2]int{ux, uy}
-		for j := 16; j < 96; j++ {
-			for i := 16; i < 96; i++ {
-				if g.piece[i][j]+1 == 317 {
-					l.Cornerstone = [2]int{i, j}
-				}
-			}
-		}
 	}
 	l.Monsters = g.monsters
 	for _, oi := range g.objectactive[:g.nobjects] {

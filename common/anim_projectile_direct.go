@@ -9,6 +9,7 @@ import (
 )
 
 type ProjectileDirectionAnimation struct {
+	BaseAnimation
 	firstTile  int32
 	frameCount int
 
@@ -111,7 +112,7 @@ func (m *ProjectileDirectionAnimation) IsDone() bool {
 	return m.ticksAlive >= m.ticksNeeded
 }
 func (m *ProjectileDirectionAnimation) Tick() {
-	if m.IsDone() {
+	if !m.shouldRunNow() || m.IsDone() {
 		return
 	}
 	m.ticksAlive++
@@ -122,7 +123,7 @@ func (m *ProjectileDirectionAnimation) Tick() {
 	}
 }
 func (m *ProjectileDirectionAnimation) Draw(renderer TileRenderer) {
-	if m.IsDone() {
+	if !m.shouldRunNow() || m.IsDone() {
 		return
 	}
 	icon := m.firstTile

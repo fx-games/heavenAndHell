@@ -67,9 +67,7 @@ type GameInstance struct {
 
 	// data definitions
 	dataDefinitions  defs.DataContainer
-	d1Data           *d1.Data // with Hellfire
-	d1Classic        *d1.Data // plain D1 1.09
-	hellfire         bool     // which of the two this game runs on
+	d1Data           *d1.Data
 	levelSeed        int64
 	levelSnapshots   map[string]*common.LevelSnapshot
 	autosave         bool // on once a game was started or loaded through the menus
@@ -195,10 +193,6 @@ func NewGameInstance(startInfo common.StartInfo, uiController common.UserInterfa
 		panic(err)
 	}
 	g.d1Data = d1Data
-	if g.d1Classic, err = d1.LoadD1(files.GetFileSystem()); err != nil {
-		panic(err)
-	}
-	g.hellfire = false // the game behind the start menu, which is the first game when there is no save yet: plain D1
 	g.ResetGame(g.dataDefinitions.ClassDefinitions[0])
 	return g
 }
@@ -318,7 +312,6 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 
 	// set references
 	g.state.SetMapGenerator(mapGen)
-	g.state.ApplyHellfireOptions()                    // D1 only: no Hellfire quests or towners
 	common.UpdateD1Quests(&g.state, g.state.GetMap()) // the town was built before there were quests
 
 	townSpawn := g.state.GetMap().GetNamedLocation("spawn")
@@ -326,25 +319,19 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 
 	//g.spawnActorOnMap(g.state.GetPlayer(), townSpawn, playerStartDefinition)
 
-	// load audio: sound events (assets/data/sounds.rec, ./remap_sounds.sh) pick their files from sfx/ang_sfx and the
-	// optional diablo_sfx (only present if the player dropped their own converted Diablo assets in, see AGENTS.md).
+	// load audio: every cue comes from a rec file the player can rewire without a rebuild — sound events
+	// (assets/data/sounds.rec, ./remap_sounds.sh), speech (voices.rec, ./remap_voices.sh) and the area themes
+	// (music.rec, ./remap_music.sh). Events with no file assigned stay silent.
 	if g.configuration.AudioEnabled {
-		diablo := g.configuration.DiabloAudioEnabled
-		g.audioPlayer.RegisterSoundEvents(path.Join("assets", "data", "sounds.rec"), func(f string) bool {
-			return diablo || !strings.HasPrefix(f, "diablo_")
-		})
+		g.audioPlayer.RegisterSoundEvents(path.Join("assets", "data", "sounds.rec"))
+		g.audioPlayer.RegisterVoiceEvents(path.Join("assets", "data", "voices.rec"))
 		preload := []string{"enter_dungeon", "level_up", "missile_hit_human", "heavy_hit_human", "skeleton_hit"}
 		g.audioPlayer.PreLoadCuesIntoMemory(preload)
 		g.audioPlayer.RegisterMusic(path.Join("assets", "ambience"))
-		if g.configuration.DiabloAudioEnabled {
-			g.audioPlayer.RegisterMusic(path.Join("assets", "diablo_music")) // dtowne/dlvla-d renamed to town/cathedral/catacombs/caves/hell
-		}
+		g.audioPlayer.RegisterMusic(path.Join("assets", "music")) // our own tracks
+		g.audioPlayer.RegisterMusicEvents(path.Join("assets", "data", "music.rec"))
 		g.audioPlayer.RegisterVoices(path.Join("assets", "voice"))
-		if diablo {
-			for id, file := range d1.SfxFiles { // D1's speech and quest sounds, played by their _sfx_id
-				g.audioPlayer.RegisterVoice(id, path.Join("assets", "diablo_sfx", file))
-			}
-		}
+		g.audioPlayer.PlayMusic(d1AreaMusic(g.state.GetMap().GetName())) // tracks register after the first map change
 	}
 
 	g.state.GetFlags().SetTrue("game_started")
@@ -485,12 +472,7 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	return player
 }
 
-func (g *GameInstance) gameData() *d1.Data {
-	if g.hellfire {
-		return g.d1Data
-	}
-	return g.d1Classic
-}
+func (g *GameInstance) gameData() *d1.Data { return g.d1Data }
 
 func (g *GameInstance) GetFactory() *common.Factory { return g.factory }
 
@@ -498,22 +480,11 @@ func (g *GameInstance) GetWorldState() *common.State {
 	return &g.state
 }
 
-// toggleHellfireOption flips one of Hellfire's command.txt switches and rebuilds the quests from the seed.
-func (g *GameInstance) toggleHellfireOption(flag string) {
-	f := g.state.GetFlags()
-	f.Set(flag, !f.IsSet(flag))
-	g.state.ApplyHellfireOptions()
-	g.PlayerMessage(fmt.Sprintf("%s: %v", flag, f.IsSet(flag)))
-}
-
 // d1DebugItems: go to a level, god mode, complete a quest (decision 16).
 func (g *GameInstance) d1DebugItems() []util.MenuItem {
 	var levels, quests []util.MenuItem
-	for dlvl := 1; dlvl <= 24; dlvl++ {
+	for dlvl := 1; dlvl <= 16; dlvl++ {
 		name, at := defs.LevelNameFromDepth(dlvl), "ladder_up"
-		if dlvl == 17 || dlvl == 21 { // entered from town only
-			at = "warp"
-		}
 		levels = append(levels, util.MenuItem{MainText: fmt.Sprintf("Level %d", dlvl), Action: func() {
 			g.state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: at})
 		}})
@@ -537,8 +508,6 @@ func (g *GameInstance) d1DebugItems() []util.MenuItem {
 	return []util.MenuItem{
 		{MainText: "Go to level", Action: func() { g.uiController.OpenMenu(levels) }},
 		{MainText: "Toggle god mode", Action: func() { g.godMode = !g.godMode }},
-		{MainText: "Toggle Hellfire Cowquest", Action: func() { g.toggleHellfireOption(common.FlagCowQuest) }},
-		{MainText: "Toggle Hellfire Theoquest", Action: func() { g.toggleHellfireOption(common.FlagTheoQuest) }},
 		{MainText: "Complete quest", Action: func() { g.uiController.OpenMenu(quests) }},
 		{MainText: "Spawn random unique", Action: func() {
 			player := g.state.GetPlayer()
@@ -574,6 +543,26 @@ func (g *GameInstance) showDebugMenu() {
 		{
 			MainText: "Toggle Map Info",
 			Action:   g.uiController.ToggleMapInfo,
+		},
+		{
+			MainText: "Toggle Fog of War",
+			Action:   g.uiController.ToggleFogOfWar,
+		},
+		{
+			MainText: "Cycle Rendering Mode",
+			Action:   g.uiController.CycleRenderingMode,
+		},
+		{
+			MainText: "Kill everything on this level",
+			Action:   g.killLevel,
+		},
+		{
+			MainText: "Go one level up",
+			Action:   g.actions.goOneLevelUp,
+		},
+		{
+			MainText: "Go one level down",
+			Action:   g.actions.goOneLevelDown,
 		},
 		{
 			MainText: "Enchant Stash to +10",

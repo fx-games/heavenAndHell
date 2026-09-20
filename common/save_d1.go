@@ -176,10 +176,14 @@ func (s *LevelSnapshot) apply(f *Factory, m *gridmap.GridMap[*Actor, *Item, Obje
 		}
 		for i, a := range restore {
 			p := geometry.Point{X: at[i].X, Y: at[i].Y}
-			if !canPlaceD1Monster(m, p) {
-				if near := freeCellsNear(m, p, 1, m.CanPlaceActorHere); len(near) > 0 {
-					p = near[0]
+			// the cell may have been taken since the level was saved; a monster that finds nowhere at all is
+			// dropped rather than left half on the map (gridmap.AddActor)
+			if !canPlaceD1Monster(m, p) || m.IsActorAt(p) {
+				near := freeCellsNear(m, p, 1, m.CanPlaceActorHere)
+				if len(near) == 0 {
+					continue
 				}
+				p = near[0]
 			}
 			SetResource(a.GetStats().GetResource(stats.Health), at[i].HP)
 			if at[i].State != nil {

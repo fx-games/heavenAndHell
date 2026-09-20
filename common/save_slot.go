@@ -15,7 +15,6 @@ type SaveSlot struct {
 	Level      int
 	Deepest    int // the deepest dungeon level reached
 	Permadeath bool
-	Hellfire   bool
 	SavedAt    time.Time
 	ThumbPath  string // the screenshot saved beside the game, empty when there is none
 }
@@ -31,12 +30,8 @@ func (s SaveSlot) Where() string {
 		return fmt.Sprintf("Catacombs %d", s.Deepest)
 	case s.Deepest <= 12:
 		return fmt.Sprintf("Caves %d", s.Deepest)
-	case s.Deepest <= 16:
-		return fmt.Sprintf("Hell %d", s.Deepest)
-	case s.Deepest <= 20:
-		return fmt.Sprintf("Nest %d", s.Deepest)
 	}
-	return fmt.Sprintf("Crypt %d", s.Deepest)
+	return fmt.Sprintf("Hell %d", s.Deepest)
 }
 
 // Rows are the slot's metadata as label/value pairs, so both UIs list the same facts in the same order.
@@ -53,9 +48,6 @@ func (s SaveSlot) Rows() [][2]string {
 	if s.Permadeath {
 		rows = append(rows, [2]string{"Mode", "Permadeath"})
 	}
-	if s.Hellfire {
-		rows = append(rows, [2]string{"Content", "Hellfire"})
-	}
 	return rows
 }
 
@@ -64,10 +56,6 @@ func (s SaveSlot) Summary() string {
 	if !s.Used {
 		return fmt.Sprintf("%d. empty", s.Slot)
 	}
-	hf := ""
-	if s.Hellfire {
-		hf = ", Hellfire"
-	}
-	return fmt.Sprintf("%d. %s the %s, level %d, %s%s, %s", s.Slot, s.Name, s.Class, s.Level, s.Where(), hf,
+	return fmt.Sprintf("%d. %s the %s, level %d, %s, %s", s.Slot, s.Name, s.Class, s.Level, s.Where(),
 		s.SavedAt.Local().Format("2006-01-02 15:04"))
 }

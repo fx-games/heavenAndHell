@@ -14,7 +14,6 @@ import (
 	"rpg/gridmap"
 	"rpg/stats"
 	"rpg/util"
-	"strings"
 	"time"
 )
 
@@ -62,7 +61,6 @@ type saveGame struct {
 	Golem          *common.SavedGolem // the golem follows the hero (onD1MapChanged)
 	ManaShield     bool               // only in saves from before Status was kept
 	Status         map[string]int     // the hero's status effects and their turns left
-	D1Only         bool               // played without Hellfire; false for saves from before the toggle
 	SavedAt        time.Time          // when this slot was last written; zero in saves from before slots
 }
 
@@ -90,7 +88,7 @@ func readSaveSlot(slot int) common.SaveSlot {
 		return info
 	}
 	info.Used, info.Name, info.Level = true, sg.Name, sg.Hero.Level
-	info.Deepest, info.Permadeath, info.Hellfire, info.SavedAt = sg.Deepest, sg.Permadeath, !sg.D1Only, sg.SavedAt
+	info.Deepest, info.Permadeath, info.SavedAt = sg.Deepest, sg.Permadeath, sg.SavedAt
 	if sg.Hero.Class >= 0 && sg.Hero.Class < len(d1.ClassNames) {
 		info.Class = d1.ClassNames[sg.Hero.Class]
 	}
@@ -185,7 +183,7 @@ func (g *GameInstance) writeSlot(slot int) {
 		UniqueDropped: g.factory.D1().UniqueDropped, Flags: g.state.GetFlags().AllEntries(),
 		Map: g.state.GetMap().GetName(), X: pos.X, Y: pos.Y, Levels: map[string]*common.LevelSnapshot{},
 		Deepest: g.state.GetLastDungeonLevel(), Premium: g.premium, Boy: g.boyItem, BoyLevel: g.boyLevel, Portal: g.state.D1Portal(),
-		Status: maps.Clone(player.GetStatusEffects().AllEntries()), D1Only: !g.hellfire, SavedAt: time.Now(),
+		Status: maps.Clone(player.GetStatusEffects().AllEntries()), SavedAt: time.Now(),
 	}
 	if golem := common.D1Golem(g.state.GetMap()); golem != nil {
 		saved := common.SaveD1Golem(golem)
@@ -275,10 +273,7 @@ func (g *GameInstance) LoadGame() error { return g.LoadSlot(LatestSaveSlot()) }
 
 // LoadSlot restores a save slot: the world is rebuilt from the seed, then hero, items and level snapshots are
 // applied. Autosaving continues into the slot that was loaded.
-func (g *GameInstance) LoadSlot(slot int) error { return g.loadSlot(slot, false) }
-
-// loadSlot is LoadSlot; upgrade switches a D1 save to Hellfire content on the way in.
-func (g *GameInstance) loadSlot(slot int, upgrade bool) error {
+func (g *GameInstance) LoadSlot(slot int) error {
 	data, err := os.ReadFile(slotPath(slot))
 	if err != nil {
 		return err
@@ -292,10 +287,6 @@ func (g *GameInstance) loadSlot(slot int, upgrade bool) error {
 	if sg.Female {
 		class.Icon = defs.FemaleIconByClass[class.InternalName]
 	}
-	g.hellfire = !sg.D1Only || upgrade // a D1 save can become Hellfire, never back
-	if sg.D1Only && g.hellfire {       // Hellfire rolls levels 1-16 differently: the snapshots and the portal wouldn't fit
-		sg.Levels, sg.Portal = nil, nil
-	}
 	g.resetGame(class, sg.Seed)
 	g.permadeath = sg.Permadeath
 
@@ -304,11 +295,10 @@ func (g *GameInstance) loadSlot(slot int, upgrade bool) error {
 		player.SetName(sg.Name)
 	}
 	*player.Hero() = sg.Hero
-	copy(g.factory.D1().UniqueDropped, sg.UniqueDropped) // Hellfire's uniques come after D1's
+	copy(g.factory.D1().UniqueDropped, sg.UniqueDropped)
 	for k, v := range sg.Flags {
 		g.state.GetFlags().SetToValue(k, v)
 	}
-	g.state.ApplyHellfireOptions()
 	inv, eq := player.GetInventory(), player.GetEquipment()
 	for _, it := range append([]*common.Item(nil), eq.AllItems()...) {
 		eq.UnEquip(it)
@@ -372,18 +362,17 @@ func (g *GameInstance) loadSlot(slot int, upgrade bool) error {
 
 // NewGame asks which slot the new hero goes into, free ones included: the player always picks. A taken slot is
 // confirmed first, so a new hero never silently writes over an old one.
-func (g *GameInstance) NewGame(class defs.LoadoutDefinition, permadeath, hellfire bool, name string) {
+func (g *GameInstance) NewGame(class defs.LoadoutDefinition, permadeath bool, name string) {
 	back := func() { g.uiController.OpenUncancelableMenu(g.StartMenuItems(false)) }
 	g.uiController.OpenSaveSlots("New game - pick a save slot", ListSaveSlots(),
 		// ownSlot 0: a new hero is nobody's running game, so replacing even the slot that is open right now asks
 		func(slot int) {
-			g.confirmOverwrite(slot, 0, func() { g.startNewGame(class, permadeath, hellfire, name, slot) })
+			g.confirmOverwrite(slot, 0, func() { g.startNewGame(class, permadeath, name, slot) })
 		}, back)
 }
 
-func (g *GameInstance) startNewGame(class defs.LoadoutDefinition, permadeath, hellfire bool, name string, slot int) {
+func (g *GameInstance) startNewGame(class defs.LoadoutDefinition, permadeath bool, name string, slot int) {
 	g.autosave = false
-	g.hellfire = hellfire
 	g.resetGame(class, g.randomSource.Int63())
 	if name != "" {
 		g.state.GetPlayer().SetName(name)
@@ -436,34 +425,6 @@ func (g *GameInstance) OpenLoadMenu(back func()) {
 // are hidden: reloading would undo the one rule permadeath has.
 func (g *GameInstance) IsPermadeath() bool { return g.permadeath }
 
-// IsHellfire reports whether the running game has Hellfire's content.
-func (g *GameInstance) IsHellfire() bool { return g.hellfire }
-
-// EnableHellfire switches the running D1 game's slot to Hellfire for good: it saves, then loads the slot back
-// upgraded, which rebuilds the dungeon (loadSlot). Only in town, so it can't be used to reroll an unwanted level.
-func (g *GameInstance) EnableHellfire() {
-	if !defs.IsTownLevel(g.state.GetMap().GetName()) {
-		g.PlayerMessage("Hellfire content can only be switched on in town.")
-		return
-	}
-	g.uiController.Confirm(strings.Join([]string{
-		"Switch this save to Hellfire content?",
-		"Hellfire's items, monsters, quests and townspeople appear.",
-		"Every dungeon level is rebuilt: new layouts, all monsters",
-		"back, items left lying in the dungeon are lost.",
-		"An open town portal closes.",
-		"Hero, inventory, stash, gold and quests are kept.",
-		"There is no way back for this save.",
-	}, "\n"), func() {
-		g.SaveGame()
-		if err := g.loadSlot(g.slot, true); err != nil {
-			g.PlayerMessage(fmt.Sprintf("Could not switch to Hellfire: %v", err))
-			return
-		}
-		g.SaveGame() // the slot is Hellfire from now on, even if the game is quit right away
-	})
-}
-
 // StartMenuItems builds the start menu, or the death menu when afterDeath is set (which ends autosaving,
 // and deletes the save in permadeath games).
 func (g *GameInstance) StartMenuItems(afterDeath bool) []util.MenuItem {
@@ -507,4 +468,26 @@ func (g *GameInstance) ShowStartMenu() {
 		return
 	}
 	g.uiController.OpenUncancelableMenu(g.StartMenuItems(false))
+}
+
+// QuickSave writes the running game into its own slot (F5). Permadeath games and the menu's throwaway game
+// have no slot to write, and say so.
+func (g *GameInstance) QuickSave() {
+	if g.permadeath || g.slot <= 0 {
+		g.PlayerMessage("There is nothing to quick save.")
+		return
+	}
+	g.writeSlot(g.slot)
+	g.PlayerMessage(fmt.Sprintf("Quick saved to slot %d.", g.slot))
+}
+
+// QuickLoad reloads the running game's own slot (F9), throwing away everything since the last save.
+func (g *GameInstance) QuickLoad() {
+	if g.permadeath || g.slot <= 0 {
+		g.PlayerMessage("There is nothing to quick load.")
+		return
+	}
+	if err := g.LoadSlot(g.slot); err != nil {
+		g.PlayerMessage("Quick load failed: " + err.Error())
+	}
 }
