@@ -1,6 +1,12 @@
 package d1
 
-import "math/rand"
+import (
+	"fmt"
+	"io/fs"
+	"math/rand"
+	"strconv"
+	"strings"
+)
 
 // Player classes (PC_): D1's three, then Hellfire's Monk, Bard and Barbarian.
 const (
@@ -13,7 +19,8 @@ const (
 	NumClasses
 )
 
-var ClassNames = [NumClasses]string{"Warrior", "Rogue", "Sorcerer", "Monk", "Bard", "Barbarian"}
+// ClassNames are the class names, in PC_ order; filled by Load from mods/d1/data/hero.rec.
+var ClassNames [NumClasses]string
 
 // Class flags (PlayerClassFlag), straight off each class' attributes.tsv.
 const (
@@ -50,57 +57,94 @@ type classAttributes struct {
 	Flags                               uint32
 }
 
-var classAttr = [NumClasses]classAttributes{
-	Warrior: {Str: 30, Mag: 10, Dex: 20, Vit: 25, MaxStr: 250, MaxMag: 50, MaxDex: 60, MaxVit: 100, ToBlk: 30,
-		AdjLife: fp(18), AdjMana: fp(-1), LvlLife: fp(2), LvlMana: fp(1), ChrLife: fp(2), ChrMana: fp(1),
-		ItmLife: fp(2), ItmMana: fp(1), PotionLife: fp(2), PotionMana: fp(1), SpellLife: fp(2), ManaCost: fp(1),
-		MagicToHit: 50, MeleeToHit: 70, RangedToHit: 60,
-		AttackFrames: map[int]int{0: 16, ITypeAxe: 20}, SpellFrames: 20, HitFrames: 6,
-		Flags: ClassCriticalStrike},
-	Rogue: {Str: 20, Mag: 15, Dex: 30, Vit: 20, MaxStr: 55, MaxMag: 70, MaxDex: 250, MaxVit: 80, ToBlk: 20,
-		AdjLife: fp(23), AdjMana: fp(5.5), LvlLife: fp(2), LvlMana: fp(2), ChrLife: fp(1), ChrMana: fp(1),
-		ItmLife: fp(1.5), ItmMana: fp(1.5), PotionLife: fp(1.5), PotionMana: fp(1.5), SpellLife: fp(1.5), ManaCost: fp(0.75),
-		MagicToHit: 50, MeleeToHit: 50, RangedToHit: 70,
-		AttackFrames: map[int]int{0: 18, ITypeAxe: 22, ITypeBow: 12, ITypeStaff: 16}, SpellFrames: 16, HitFrames: 7,
-		Flags: ClassTrapSense},
-	Sorcerer: {Str: 15, Mag: 35, Dex: 15, Vit: 20, MaxStr: 45, MaxMag: 250, MaxDex: 85, MaxVit: 80, ToBlk: 10,
-		AdjLife: fp(9), AdjMana: fp(-2), LvlLife: fp(1), LvlMana: fp(2), ChrLife: fp(1), ChrMana: fp(2),
-		ItmLife: fp(1), ItmMana: fp(2), PotionLife: fp(1), PotionMana: fp(2), SpellLife: fp(1), ManaCost: fp(1),
-		MagicToHit: 70, MeleeToHit: 50, RangedToHit: 50,
-		AttackFrames: map[int]int{0: 20, ITypeSword: 16, ITypeAxe: 24, ITypeMace: 16, ITypeStaff: 16}, SpellFrames: 12, HitFrames: 8},
-	Monk: {Str: 25, Mag: 15, Dex: 25, Vit: 20, MaxStr: 150, MaxMag: 80, MaxDex: 150, MaxVit: 80, ToBlk: 25,
-		AdjLife: fp(23), AdjMana: fp(5.5), LvlLife: fp(2), LvlMana: fp(2), ChrLife: fp(1), ChrMana: fp(1),
-		ItmLife: fp(1.5), ItmMana: fp(1.5), PotionLife: fp(1.5), PotionMana: fp(1.5), SpellLife: fp(2), ManaCost: fp(0.75),
-		MagicToHit: 50, MeleeToHit: 50, RangedToHit: 50,
-		AttackFrames: map[int]int{0: 12, ITypeSword: 16, ITypeAxe: 23, ITypeBow: 20, ITypeMace: 16, ITypeStaff: 13},
-		SpellFrames:  18, HitFrames: 6},
-	Bard: {Str: 20, Mag: 20, Dex: 25, Vit: 20, MaxStr: 120, MaxMag: 120, MaxDex: 120, MaxVit: 100, ToBlk: 25,
-		AdjLife: fp(23), AdjMana: fp(3), LvlLife: fp(2), LvlMana: fp(2), ChrLife: fp(1), ChrMana: fp(1.5),
-		ItmLife: fp(1.5), ItmMana: fp(1.75), PotionLife: fp(1.5), PotionMana: fp(1.5), SpellLife: fp(1.5), ManaCost: fp(0.75),
-		MagicToHit: 60, MeleeToHit: 50, RangedToHit: 60,
-		AttackFrames: map[int]int{0: 18, ITypeAxe: 22, ITypeBow: 12, ITypeStaff: 16}, SpellFrames: 16, HitFrames: 7,
-		Flags: ClassDualWield},
-	Barbarian: {Str: 40, Mag: 0, Dex: 20, Vit: 25, MaxStr: 255, MaxMag: 0, MaxDex: 55, MaxVit: 150, ToBlk: 30,
-		AdjLife: fp(18), AdjMana: 0, LvlLife: fp(2), LvlMana: 0, ChrLife: fp(2), ChrMana: fp(1),
-		ItmLife: fp(2.5), ItmMana: fp(1), PotionLife: fp(2), PotionMana: fp(1), SpellLife: fp(2), ManaCost: fp(1),
-		MagicToHit: 50, MeleeToHit: 50, RangedToHit: 50,
-		AttackFrames: map[int]int{0: 16, ITypeAxe: 20}, SpellFrames: 20, HitFrames: 6,
-		Flags: ClassCriticalStrike | ClassIronSkin | ClassNaturalResistance},
-}
+// classAttr is filled by Load from the class section of mods/d1/data/hero.rec.
+var classAttr [NumClasses]classAttributes
 
-// MaxStats is the attribute cap per class and ATTRIB_ (CharacterAttribute).
-var MaxStats = func() (m [NumClasses][4]int) {
-	for c, a := range classAttr {
-		m[c] = [4]int{a.MaxStr, a.MaxMag, a.MaxDex, a.MaxVit}
+// MaxStats is the attribute cap per class and ATTRIB_ (CharacterAttribute), derived from classAttr by Load.
+var MaxStats [NumClasses][4]int
+
+// ExpLvls is the experience total each character level needs; filled by Load.
+var ExpLvls [51]int
+
+// itypeByName and classFlagByName name the columns of hero.rec that are enums rather than numbers, so the file
+// reads as words instead of as the bit patterns and ITYPE_ numbers they compile to.
+var itypeByName = map[string]int{"default": 0, "sword": ITypeSword, "axe": ITypeAxe, "bow": ITypeBow,
+	"mace": ITypeMace, "staff": ITypeStaff}
+
+var classFlagByName = map[string]uint32{"critical_strike": ClassCriticalStrike, "trap_sense": ClassTrapSense,
+	"iron_skin": ClassIronSkin, "natural_resistance": ClassNaturalResistance, "dual_wield": ClassDualWield}
+
+func loadHeroTables(fsys fs.FS) error {
+	recs, err := readRecMulti(fsys, "hero.rec")
+	if err != nil {
+		return err
 	}
-	return
-}()
-
-var ExpLvls = [51]int{0, 2000, 4620, 8040, 12489, 18258, 25712, 35309, 47622, 63364, 83419, 108879, 141086,
-	181683, 231075, 313656, 424067, 571190, 766569, 1025154, 1366227, 1814568, 2401895, 3168651, 4166200,
-	5459523, 7130496, 9281874, 12042092, 15571031, 20066900, 25774405, 32994399, 42095202, 53525811,
-	67831218, 85670061, 107834823, 135274799, 169122009, 210720231, 261657253, 323800420, 399335440,
-	490808349, 601170414, 733825617, 892680222, 1082908612, 1310707109, 1583495809}
+	classes := recs["class"]
+	if len(classes) != NumClasses {
+		return fmt.Errorf("hero.rec: %d classes, want %d", len(classes), NumClasses)
+	}
+	for i, r := range classes {
+		m := r.ToMap("")
+		// fp6 reads one of the 1/64 fixed-point columns, which the file carries as a plain decimal.
+		fp6 := func(key string) int { return fp(m.GetFloatOrDefault(key, 0)) }
+		a := classAttributes{
+			Str: m.GetIntOrDefault("str", 0), Mag: m.GetIntOrDefault("mag", 0),
+			Dex: m.GetIntOrDefault("dex", 0), Vit: m.GetIntOrDefault("vit", 0),
+			MaxStr: m.GetIntOrDefault("max_str", 0), MaxMag: m.GetIntOrDefault("max_mag", 0),
+			MaxDex: m.GetIntOrDefault("max_dex", 0), MaxVit: m.GetIntOrDefault("max_vit", 0),
+			ToBlk:   m.GetIntOrDefault("to_blk", 0),
+			AdjLife: fp6("adj_life"), AdjMana: fp6("adj_mana"),
+			LvlLife: fp6("lvl_life"), LvlMana: fp6("lvl_mana"),
+			ChrLife: fp6("chr_life"), ChrMana: fp6("chr_mana"),
+			ItmLife: fp6("itm_life"), ItmMana: fp6("itm_mana"),
+			PotionLife: fp6("potion_life"), PotionMana: fp6("potion_mana"),
+			SpellLife: fp6("spell_life"), ManaCost: fp6("mana_cost"),
+			MagicToHit: m.GetIntOrDefault("magic_to_hit", 0), MeleeToHit: m.GetIntOrDefault("melee_to_hit", 0),
+			RangedToHit:  m.GetIntOrDefault("ranged_to_hit", 0),
+			AttackFrames: map[int]int{},
+			SpellFrames:  m.GetIntOrDefault("spell_frames", 0), HitFrames: m.GetIntOrDefault("hit_frames", 0),
+		}
+		for _, f := range strings.Fields(m.GetStringOrDefault("attack_frames", "")) {
+			name, frames, ok := strings.Cut(f, "=")
+			itype, known := itypeByName[name]
+			if !ok || !known {
+				return fmt.Errorf("hero.rec: %s: bad attack_frames %q", ClassNames[i], f)
+			}
+			n, convErr := strconv.Atoi(frames)
+			if convErr != nil {
+				return fmt.Errorf("hero.rec: %s: attack_frames %q: %w", ClassNames[i], f, convErr)
+			}
+			a.AttackFrames[itype] = n
+		}
+		for _, f := range strings.Fields(m.GetStringOrDefault("flags", "")) {
+			bit, ok := classFlagByName[f]
+			if !ok {
+				return fmt.Errorf("hero.rec: unknown class flag %q", f)
+			}
+			a.Flags |= bit
+		}
+		ClassNames[i] = m.GetStringOrDefault("name", "")
+		classAttr[i] = a
+		MaxStats[i] = [4]int{a.MaxStr, a.MaxMag, a.MaxDex, a.MaxVit}
+	}
+	var exp []int
+	for _, r := range recs["experience"] {
+		for _, line := range fieldsNamed(r, "exp") {
+			for _, f := range strings.Fields(line) {
+				n, convErr := strconv.Atoi(f)
+				if convErr != nil {
+					return fmt.Errorf("hero.rec: exp %q: %w", f, convErr)
+				}
+				exp = append(exp, n)
+			}
+		}
+	}
+	if len(exp) != len(ExpLvls) {
+		return fmt.Errorf("hero.rec: %d experience levels, want %d", len(exp), len(ExpLvls))
+	}
+	copy(ExpLvls[:], exp)
+	return nil
+}
 
 // HitRecoveryTicks ports PM_DoGotHit: the hit animation, one to three frames shorter with the recovery affixes.
 func HitRecoveryTicks(class int, flags uint32) int {

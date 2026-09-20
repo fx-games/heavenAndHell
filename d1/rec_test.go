@@ -33,6 +33,43 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		}
 	}
 
+	if ClassNames != [NumClasses]string{"Warrior", "Rogue", "Sorcerer", "Monk", "Bard", "Barbarian"} {
+		t.Errorf("ClassNames = %v", ClassNames)
+	}
+	// The 1/64 fixed-point columns are the ones a .rec round trip could quietly round off, so check the
+	// fractional ones and a whole one against what fp() produced from the literal.
+	for _, c := range []struct {
+		class int
+		got   func(classAttributes) int
+		want  int
+		what  string
+	}{
+		{Warrior, func(a classAttributes) int { return a.AdjLife }, fp(18), "warrior adj_life"},
+		{Warrior, func(a classAttributes) int { return a.AdjMana }, fp(-1), "warrior adj_mana"},
+		{Rogue, func(a classAttributes) int { return a.AdjMana }, fp(5.5), "rogue adj_mana"},
+		{Rogue, func(a classAttributes) int { return a.ManaCost }, fp(0.75), "rogue mana_cost"},
+		{Bard, func(a classAttributes) int { return a.ItmMana }, fp(1.75), "bard itm_mana"},
+		{Bard, func(a classAttributes) int { return a.ChrMana }, fp(1.5), "bard chr_mana"},
+		{Barbarian, func(a classAttributes) int { return a.ItmLife }, fp(2.5), "barbarian itm_life"},
+	} {
+		if got := c.got(classAttr[c.class]); got != c.want {
+			t.Errorf("%s = %d, want %d", c.what, got, c.want)
+		}
+	}
+	if got := classAttr[Sorcerer].AttackFrames; got[0] != 20 || got[ITypeAxe] != 24 || got[ITypeStaff] != 16 || len(got) != 5 {
+		t.Errorf("sorcerer AttackFrames = %v", got)
+	}
+	if !HasClassFlag(Barbarian, ClassIronSkin) || !HasClassFlag(Barbarian, ClassNaturalResistance) ||
+		!HasClassFlag(Rogue, ClassTrapSense) || HasClassFlag(Sorcerer, ClassCriticalStrike) {
+		t.Error("class flags did not survive hero.rec")
+	}
+	if MaxStats[Warrior] != [4]int{250, 50, 60, 100} || MaxStats[Barbarian] != [4]int{255, 0, 55, 150} {
+		t.Errorf("MaxStats = %v", MaxStats)
+	}
+	if ExpLvls[0] != 0 || ExpLvls[1] != 2000 || ExpLvls[50] != 1583495809 {
+		t.Errorf("ExpLvls ends = %d/%d/%d", ExpLvls[0], ExpLvls[1], ExpLvls[50])
+	}
+
 	if len(ShrineNames) != 34 || len(ShrineMessages) != 34 || len(shrineMax) != 34 || len(shrineAvail) != 34 {
 		t.Fatalf("shrine tables = %d/%d/%d/%d, want 34 each",
 			len(ShrineNames), len(ShrineMessages), len(shrineMax), len(shrineAvail))
