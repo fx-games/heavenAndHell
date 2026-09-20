@@ -33,6 +33,19 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		}
 	}
 
+	if len(SfxFiles) != 746 {
+		t.Errorf("SfxFiles = %d entries, want 746", len(SfxFiles))
+	}
+	for id, want := range map[string]string{
+		"IS_SARC":      "items/sarc.ogg",
+		"PS_MONK1":     "monk/monk01.ogg",
+		"USFX_DIABLOD": "monsters/diablod.ogg",
+	} {
+		if SfxFiles[id] != want {
+			t.Errorf("SfxFiles[%s] = %q, want %q", id, SfxFiles[id], want)
+		}
+	}
+
 	if len(itemCAnimTbl) != 229 || len(itemDropSnds) != 43 || len(itemInvSnds) != 43 {
 		t.Fatalf("item sound tables = %d/%d/%d, want 229/43/43", len(itemCAnimTbl), len(itemDropSnds), len(itemInvSnds))
 	}

@@ -531,5 +531,8 @@ func loadRecTables(fsys fs.FS) error {
 	if itemCAnimTbl, itemDropSnds, itemInvSnds, err = loadItemSounds(fsys); err != nil {
 		return err
 	}
+	if SfxFiles, err = loadSfxFiles(fsys); err != nil {
+		return err
+	}
 	return nil
 }

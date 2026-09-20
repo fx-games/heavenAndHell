@@ -56,6 +56,13 @@ func TestD1SpeechHaveVoiceEvents(t *testing.T) {
 	}
 	defer f.Close()
 	b, _ := io.ReadAll(f)
+	// SfxFiles is a table now, not a literal: without Load this ranges over an empty map and proves nothing.
+	if _, err := d1.Load(files.GetFileSystem()); err != nil {
+		t.Fatal(err)
+	}
+	if len(d1.SfxFiles) == 0 {
+		t.Fatal("d1.SfxFiles is empty")
+	}
 	for id := range d1.SfxFiles {
 		if !strings.Contains(string(b), "internal_name: "+id+"\n") {
 			t.Errorf("voices.rec has no %s", id)
