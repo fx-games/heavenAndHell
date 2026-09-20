@@ -10,18 +10,20 @@ import (
 
 const newGameIconSize = 32 // 8px tiles at scale 4
 
-// NewGameScreen picks class (rows) and gender (columns), permadeath and a name on one screen.
-// Rows 0..len(classes)-1 are the icon grid, then the permadeath checkbox, the name field, the start and back buttons.
+// NewGameScreen picks class (rows) and gender (columns), permadeath, Hellfire content and a name on one screen.
+// Rows 0..len(classes)-1 are the icon grid, then the permadeath and Hellfire checkboxes, the name field, the start
+// and back buttons. Hellfire's three classes are only listed with Hellfire on.
 type NewGameScreen struct {
 	u           *UIController
 	classes     []defs.LoadoutDefinition
-	start       func(class defs.LoadoutDefinition, permadeath bool, name string)
+	start       func(class defs.LoadoutDefinition, permadeath, hellfire bool, name string)
 	back        func()
 	name        *TextInput
 	rolledName  string // last random name we put into the field; anything else was typed by the player
 	class, col  int
 	focus       int
 	permadeath  bool
+	hellfire    bool
 	shouldClose bool
 	topLeft     geometry.Point
 	size        geometry.Point
@@ -29,8 +31,8 @@ type NewGameScreen struct {
 	lineH       int
 }
 
-func (u *UIController) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string), back func()) {
-	s := &NewGameScreen{u: u, classes: common.PlayableClasses(u.configuration, u.context.Definitions.ClassDefinitions), start: start, back: back}
+func (u *UIController) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath, hellfire bool, name string), back func()) {
+	s := &NewGameScreen{u: u, classes: common.PlayableClasses(false, u.context.Definitions.ClassDefinitions), start: start, back: back}
 	s.name = NewTextInput(u, geometry.Point{}, 16, 0, 1, func(EndAction, string) {})
 	s.rollName() // never start nameless: an empty field would leave the hero called "Player"
 	s.Layout()
@@ -38,9 +40,10 @@ func (u *UIController) OpenNewGameScreen(start func(class defs.LoadoutDefinition
 }
 
 func (s *NewGameScreen) permadeathRow() int { return len(s.classes) }
-func (s *NewGameScreen) nameRow() int       { return len(s.classes) + 1 }
-func (s *NewGameScreen) startRow() int      { return len(s.classes) + 2 }
-func (s *NewGameScreen) backRow() int       { return len(s.classes) + 3 }
+func (s *NewGameScreen) hellfireRow() int   { return len(s.classes) + 1 }
+func (s *NewGameScreen) nameRow() int       { return len(s.classes) + 2 }
+func (s *NewGameScreen) startRow() int      { return len(s.classes) + 3 }
+func (s *NewGameScreen) backRow() int       { return len(s.classes) + 4 }
 
 func (s *NewGameScreen) Layout() {
 	r := s.u.GetRenderer()
@@ -50,7 +53,7 @@ func (s *NewGameScreen) Layout() {
 		lw, _ := r.MeasureString(c.Name)
 		s.labelW = max(s.labelW, int(lw)+16)
 	}
-	s.size = geometry.Point{X: max(int(w), s.labelW+2*newGameIconSize+8), Y: len(s.classes)*(newGameIconSize+8) + 4*s.lineH}
+	s.size = geometry.Point{X: max(int(w), s.labelW+2*newGameIconSize+8), Y: len(s.classes)*(newGameIconSize+8) + 5*s.lineH}
 	screen := s.u.GetScreenSize()
 	s.topLeft = screen.Sub(s.size).Div(2)
 }
@@ -105,15 +108,17 @@ func (s *NewGameScreen) Draw() {
 			}
 		}
 	}
-	check := "[ ] Permadeath"
-	if s.permadeath {
-		check = "[x] Permadeath"
+	checkbox := func(on bool, label string) string {
+		if on {
+			return "[x] " + label
+		}
+		return "[ ] " + label
 	}
 	nameText := "Name: " + s.name.currentText
 	if s.focus == s.nameRow() {
 		nameText += "_"
 	}
-	for i, text := range []string{check, nameText, "Start game", "Back"} {
+	for i, text := range []string{checkbox(s.permadeath, "Permadeath"), checkbox(s.hellfire, "Hellfire content"), nameText, "Start game", "Back"} {
 		row := s.permadeathRow() + i
 		y := s.rowRect(row, 0).Min.Y + (s.lineH+int(h))/2
 		r.DrawTTFOnScreen(float64(s.topLeft.X), float64(y), text, colorOf(row == s.focus))
@@ -151,6 +156,12 @@ func (s *NewGameScreen) activate(row int) {
 	case s.permadeathRow():
 		s.permadeath = !s.permadeath
 		return
+	case s.hellfireRow():
+		s.hellfire = !s.hellfire // relisting the classes moves the rows below the grid: keep focus on this one
+		s.classes = common.PlayableClasses(s.hellfire, s.u.context.Definitions.ClassDefinitions)
+		s.class, s.focus = min(s.class, len(s.classes)-1), s.hellfireRow()
+		s.Layout()
+		return
 	case s.backRow():
 		s.shouldClose = true
 		s.back()
@@ -159,7 +170,7 @@ func (s *NewGameScreen) activate(row int) {
 	class := s.classes[s.class]
 	class.Icon = s.icon(s.class, s.col)
 	s.shouldClose = true
-	s.start(class, s.permadeath, s.name.currentText)
+	s.start(class, s.permadeath, s.hellfire, s.name.currentText)
 }
 
 func (s *NewGameScreen) OnKeyPressed(key ebiten.Key, shiftPressed bool) {
@@ -177,7 +188,7 @@ func (s *NewGameScreen) OnKeyPressed(key ebiten.Key, shiftPressed bool) {
 	case ebiten.KeyD:
 		s.OnCommand(PlayerCommandRight)
 	case ebiten.KeySpace:
-		if s.focus == s.permadeathRow() {
+		if s.focus == s.permadeathRow() || s.focus == s.hellfireRow() {
 			s.activate(s.focus)
 		}
 	}

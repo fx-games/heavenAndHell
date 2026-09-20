@@ -8,7 +8,10 @@ import (
 
 func (u *UIController) Update() error {
 
-	if u.shouldQuitGame {
+	if u.shouldQuitGame || ebiten.IsWindowBeingClosed() {
+		if u.OnQuit != nil {
+			u.OnQuit()
+		}
 		return ebiten.Termination
 	}
 

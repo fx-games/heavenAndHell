@@ -129,8 +129,6 @@ func (g *Factory) newD1Monster(mt int, um *d1.UniqueMonsterData) *Actor {
 	st.GetResource(stats.Health).SetToMax()
 	st.SetAttribute(stats.Level, m.Level)
 	st.SetAttribute(stats.Experience, m.Exp)
-	st.SetAttributeAsFloat(stats.MoveSpeedFactor, d1.SpeedTier(d1.RefWalkTicks, m.Frames[1]))
-	st.SetAttributeAsFloat(stats.AttackSpeedFactor, d1.SpeedTier(d1.RefAttackTicks, m.Frames[2]))
 	a.d1Monster.Dormant = m.AI == "AI_GARG"
 	if m.Flags&d1.MFlagHidden != 0 {
 		a.AddStatusEffect(StatusInvisible, -1)
@@ -245,7 +243,7 @@ func (a *Actor) D1MonsterSections() []D1SheetSection {
 		case mon.MagicRes&r.immn != 0:
 			resists = append(resists, [2]string{r.element, "immune"})
 		case mon.MagicRes&r.resist != 0:
-			resists = append(resists, [2]string{r.element, "resistant"})
+			resists = append(resists, [2]string{r.element, "75%"}) // every damage path quarters a resisted hit (dam >>= 2)
 		}
 	}
 	if len(resists) > 0 {

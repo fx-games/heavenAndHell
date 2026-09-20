@@ -22,6 +22,7 @@ type TargetRulesProvider struct {
 type TargetRules interface {
 	OnTargetChanged(target geometry.Point) TargetInfo
 	GetPreSelectedTarget() geometry.Point
+	Targets() []geometry.Point // what Tab cycles through, nearest first
 	GetAttacker() *Actor
 }
 type TargetInfo struct {

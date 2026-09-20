@@ -213,7 +213,7 @@ func (i *BasicMenu) confirmSelection() {
 		action()
 	}
 	if i.closeOnSelect {
-		i.close()
+		i.uiController.closeIfFinal(i)
 	}
 }
 

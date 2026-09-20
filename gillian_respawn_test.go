@@ -28,7 +28,7 @@ func TestGillianDonationRespawnsMonsters(t *testing.T) {
 	theGame.GetAudio().SetDisablePlayback(true)
 	ui := &menuUI{DummyUI: NewDummyUI()}
 	theGame.SetAndInitUserInterface(ui)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
 	state := theGame.GetWorldState()
 
 	gillian := func() *common.Actor {

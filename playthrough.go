@@ -32,7 +32,7 @@ func playthrough() {
 	wallTraps, chestTraps := 0, 0                                             // traps that fired while objects were operated
 	for run := 1; run <= len(theGame.GetGameData().ClassDefinitions); run++ { // every class, D1's three and Hellfire's
 		os.RemoveAll(game.SaveDir) // every run starts in slot 1: a new game never writes over a slot that is taken
-		theGame.NewGame(theGame.GetGameData().ClassDefinitions[run-1], false, "")
+		theGame.NewGame(theGame.GetGameData().ClassDefinitions[run-1], false, true, "")
 		state := theGame.GetWorldState()
 		player := state.GetPlayer()
 		if player.Hero() == nil {
@@ -248,7 +248,7 @@ func playthrough() {
 
 	// milestone 2: a permadeath save is gone once the death menu is built
 	os.RemoveAll(game.SaveDir)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], true, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], true, true, "")
 	if !game.HasSave() {
 		fail("permadeath: new game wrote no save")
 	}
@@ -1078,7 +1078,7 @@ func actorNamed(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], 
 // questPath walks decision 15's critical path with a fresh hero: Leoric's tomb, the staff, Cain, the red portal,
 // Lazarus, a save and load, the stairs to 16, the levers and Diablo. Bosses are struck down directly.
 func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
 	state := theGame.GetWorldState()
 
 	// D1 has no natural regeneration: waiting doesn't heal a hurt hero
@@ -1343,7 +1343,7 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 // questLines walks every other quest line of D1 with a fresh warrior, all quests made available (InitQuests leaves
 // out one of each group per seed): who starts it, the set pieces that open, the items handed in and the rewards.
 func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
 	state, broker := theGame.GetWorldState(), theGame.GetActionBroker()
 	for q := range state.D1Quests() {
 		state.D1Quests()[q].Active, state.D1Quests()[q].Var2 = d1.QuestInit, 0

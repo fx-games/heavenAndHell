@@ -105,6 +105,7 @@ type Item struct {
 	droppedByPlayer bool
 	isHidden        bool
 	shouldBeDrawn   bool
+	shownWith       *Actor // loot of a monster that is still drawn standing: hidden until it falls
 	baseCost        int
 	isPremiumStock  bool // Griswold's rotating premium stock, shown in its own "Buy premium items" menu
 
@@ -135,7 +136,10 @@ func (i *Item) SetDrawnToScreen(shouldBeDrawn bool) {
 }
 
 func (i *Item) IsDrawn() bool {
-	return i.shouldBeDrawn
+	if i.shownWith != nil && !i.shownWith.VisualsPending() {
+		i.shownWith = nil
+	}
+	return i.shouldBeDrawn && i.shownWith == nil
 }
 func (i *Item) IsModifyingLight() bool {
 	for _, modifier := range i.equippedModifiers {

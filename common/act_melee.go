@@ -31,11 +31,7 @@ func (d *MeleeAttackAction) Execute(context ActionContext) []Action {
 	if dam, extra, handled := resolveD1Attack(context, d.attacker, d.defender, false); handled {
 		d.defender.SetLookDirFromPoI(d.attacker.MapPosition())
 		d.attacker.SetLookDirFromPoI(d.defender.MapPosition())
-		if d.attacker == context.GameState.GetPlayer() {
-			context.AudioPlayer.PlayCue("melee_attack")
-		} else if cue := d.attacker.D1MonsterSoundCue("attack"); cue != "" && context.AudioPlayer.HasCue(cue) {
-			context.AudioPlayer.PlayCue(cue)
-		}
+		d.playSound(context)
 		d.totalDamageDealt = dam
 		if dam <= 0 {
 			return extra
@@ -67,13 +63,21 @@ func (d *MeleeAttackAction) Execute(context ActionContext) []Action {
 	d.defender.SetLookDirFromPoI(d.attacker.MapPosition())
 	d.attacker.SetLookDirFromPoI(d.defender.MapPosition())
 
-	if d.attacker == context.GameState.GetPlayer() {
-		context.AudioPlayer.PlayCue("melee_attack")
-	} else if cue := d.attacker.D1MonsterSoundCue("attack"); cue != "" && context.AudioPlayer.HasCue(cue) {
-		context.AudioPlayer.PlayCue(cue)
-	}
+	d.playSound(context)
 
 	return actions
+}
+
+// playSound: the hero's swing (PS_SWING, PM_DoAttack) or the monster's attack sound (M_DoAttack), where they stand.
+func (d *MeleeAttackAction) playSound(context ActionContext) {
+	p := d.attacker.MapPosition()
+	if d.attacker == context.GameState.GetPlayer() {
+		if !playD1SfxAt(context, "PS_SWING", p) {
+			context.AudioPlayer.PlayCue("melee_attack")
+		}
+	} else {
+		playCueAt(context, d.attacker.D1MonsterSoundCue("attack"), p)
+	}
 }
 
 func RollMeleeDamage(attacker, defender *Actor, damageFactor float64) int {
@@ -157,7 +161,7 @@ func (d *MeleeAttackAction) GetAttacker() *Actor {
 }
 
 func (d *MeleeAttackAction) GetDelayInAut() int {
-	return 100 / d.attacker.GetAttackSpeed(MeleeAttack)
+	return d.attacker.AttackCost(MeleeAttack)
 }
 
 func (d *MeleeAttackAction) GetDefender() *Actor {

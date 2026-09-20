@@ -23,9 +23,7 @@ MusicVolume: 0.1
 VoiceVolume: 0.2
 DiabloAudioEnabled: true
 AutoExploreOpenContainers: true
-WeaponBreakWarning: true
 Fullscreen: false
-Hellfire: true
 MiniMapColor: floor=4d3c66
 MiniMapColor: floorUnlit=231e33
 MiniMapColor: hostileActor=ff0000

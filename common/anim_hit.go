@@ -56,7 +56,7 @@ func (m *HitAnimation) GetActor() *Actor {
 }
 
 func (m *HitAnimation) Cancel() {
-
+	m.ticksAlive = m.ticksNeeded
 }
 
 func (m *HitAnimation) SetOnFinished(onFinished func()) {

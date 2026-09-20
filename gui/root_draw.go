@@ -10,6 +10,8 @@ import (
 	"rpg/renderer"
 	"rpg/stats"
 	"rpg/util"
+	"slices"
+	"unsafe"
 )
 
 func (u *UIController) Draw(screen *ebiten.Image) {
@@ -88,6 +90,19 @@ func Fragment(dstPos vec4, srcPos vec2, color vec4) vec4 {
 
 var uniqueSweepShader = mustCompileShader(uniqueSweepShaderSrc)
 
+// stoneShader draws a Stone Cursed actor's lit sprite in grayscale.
+var stoneShader = mustCompileShader(`//kage:unit pixels
+
+package main
+
+var Tint vec4
+
+func Fragment(dstPos vec4, srcPos vec2, color vec4) vec4 {
+	lit := imageSrc0UnsafeAt(srcPos) * Tint
+	return vec4(vec3(dot(lit.rgb, vec3(0.299, 0.587, 0.114))), lit.a)
+}
+`)
+
 func mustCompileShader(src string) *ebiten.Shader {
 	shader, err := ebiten.NewShader([]byte(src))
 	if err != nil {
@@ -103,9 +118,9 @@ const uniqueSweepFraction = 0.35
 // sprite every uniqueSweepIntervalTicks ticks, then is gone until the next pass. It replaces the normal tinted
 // sprite draw for unique actors (not an overlay on top of one) so there's no second, unlit copy of the sprite
 // sitting on top and hiding the lighting/hurt tint.
-func (u *UIController) drawUniqueSpecularSheen(screenX, screenY float64, atlas renderer.TextureAtlas, icon int32, scale geometry.PointF, tint color.Color, flippedX bool) {
+func (u *UIController) drawUniqueSpecularSheen(actor *common.Actor, screenX, screenY float64, atlas renderer.TextureAtlas, icon int32, scale geometry.PointF, tint color.Color, flippedX bool) {
 	u.tileRenderer.DrawScaledTileWithShader(screenX, screenY, atlas, icon, scale, tint, flippedX, uniqueSweepShader, map[string]interface{}{
-		"Time":          float32(u.worldTicks),
+		"Time":          float32(u.worldTicks + actorPhase(actor)%uniqueSweepIntervalTicks),
 		"IntervalTicks": float32(uniqueSweepIntervalTicks),
 		"SweepFraction": float32(uniqueSweepFraction),
 	})
@@ -119,7 +134,7 @@ func (u *UIController) drawActors() {
 	enemyColor := defs.White
 	actorAtlas := u.GetCurrentAtlas()
 
-	for _, actor := range state.GetMap().Actors() {
+	for _, actor := range slices.Concat(state.GetMap().Actors(), state.Dying()) {
 		if !visibleMapOnScreen.Contains(actor.MapPosition()) || !player.CanPerceive(actor.MapPosition()) {
 			continue
 		}
@@ -137,18 +152,21 @@ func (u *UIController) drawActors() {
 			drawColor = actorColor
 		}
 
-		if actor.IsHurt() {
+		if actor.IsHurt() && !actor.VisualsPending() {
 			percentage := actor.GetHurtTicksAsPercentage() // goes from 1.0 to 0.0
 			drawColor = util.LerpColor(defs.Red, actorColor, percentage)
 		}
-		if u.configuration.ActorBobbingEnabled {
+		if actor.HasStatusEffect(common.StatusStone) { // petrified: frozen and colorless
+			screenPos := u.mapRenderer.MapFloatToScreen(actor.DrawPosition())
+			u.tileRenderer.DrawScaledTileWithShader(float64(screenPos.X), float64(screenPos.Y), actorAtlas, u.getActorIcon(actor, 0), geometry.PointF{X: 1, Y: 1}, drawColor, actor.FlipX() && u.configuration.FlipActorsHorizontally, stoneShader, nil)
+		} else if u.configuration.ActorBobbingEnabled {
 			u.drawActorWithBobbingAnimation(actor, actorAtlas, drawColor, actor.IsUnique())
 		} else {
 			screenPos := u.mapRenderer.MapFloatToScreen(actor.DrawPosition())
 			flippedX := actor.FlipX() && u.configuration.FlipActorsHorizontally
 			icon := u.getActorIcon(actor, u.worldTicks)
 			if actor.IsUnique() {
-				u.drawUniqueSpecularSheen(float64(screenPos.X), float64(screenPos.Y), actorAtlas, icon, geometry.PointF{X: 1, Y: 1}, drawColor, flippedX)
+				u.drawUniqueSpecularSheen(actor, float64(screenPos.X), float64(screenPos.Y), actorAtlas, icon, geometry.PointF{X: 1, Y: 1}, drawColor, flippedX)
 			} else {
 				u.tileRenderer.DrawDefaultScaleTileWithFlip(float64(screenPos.X), float64(screenPos.Y), actorAtlas, icon, drawColor, flippedX)
 			}
@@ -159,7 +177,7 @@ func (u *UIController) drawActors() {
 		if !actor.IsVisible() || !visibleMapOnScreen.Contains(actor.MapPosition()) || !player.CanPerceive(actor.MapPosition()) {
 			continue
 		}
-		if !actor.GetStats().GetResource(stats.Health).IsAtMax() {
+		if atMax := actor.GetStats().GetResource(stats.Health).IsAtMax(); !atMax && !actor.VisualsPending() || actor.VisualsPending() && actor.ShownHealth() < actor.GetStats().GetAttribute(stats.MaxHealth) {
 			u.drawHealthBar(actor)
 		}
 	}
@@ -167,13 +185,12 @@ func (u *UIController) drawActors() {
 
 func (u *UIController) drawActorWithBobbingAnimation(actor *common.Actor, atlas renderer.TextureAtlas, drawColor color.Color, isUnique bool) {
 	screenPos := u.mapRenderer.MapFloatToScreen(actor.DrawPosition())
-	actorTickOffset := actor.MapPosition().X + actor.MapPosition().Y + len(actor.Name())
 	tileSize := u.mapRenderer.GetScaledTileSize()
-	ticksForAnimation := u.worldTicks + uint64(actorTickOffset)
+	ticksForAnimation := u.worldTicks + actorPhase(actor)%3600
 	percentage := util.GetPercentageFromTick(ticksForAnimation, 1) // -> [0.0..1.0)  but we want [0.0..1.0..0.0]
 	percentage *= 2
 	if percentage > 1 {
-		percentage = 1 - percentage
+		percentage = 2 - percentage
 	}
 	//u.tileRenderer.DrawDefaultScaleTile(float64(screenPos.X), float64(screenPos.Y), u.worldTexture, actor.Icon(u.worldTicks), color.White)
 	scaleUp := geometry.PointF{X: 1, Y: 1}
@@ -186,10 +203,16 @@ func (u *UIController) drawActorWithBobbingAnimation(actor *common.Actor, atlas 
 
 	flippedX := actor.FlipX() && u.configuration.FlipActorsHorizontally
 	if isUnique {
-		u.drawUniqueSpecularSheen(float64(screenPos.X)+xOffset, float64(screenPos.Y)+yOffset, atlas, icon, currentScale, drawColor, flippedX)
+		u.drawUniqueSpecularSheen(actor, float64(screenPos.X)+xOffset, float64(screenPos.Y)+yOffset, atlas, icon, currentScale, drawColor, flippedX)
 	} else {
 		u.tileRenderer.DrawScaledTileWithFlip(float64(screenPos.X)+xOffset, float64(screenPos.Y)+yOffset, atlas, icon, currentScale, drawColor, flippedX)
 	}
+}
+
+// actorPhase is a stable pseudo-random tick offset per actor, so bobbing and sheen don't pulse in lockstep.
+// Hashes the pointer: heap objects don't move in Go, so it's constant for the actor's lifetime.
+func actorPhase(actor *common.Actor) uint64 {
+	return uint64(uintptr(unsafe.Pointer(actor))) * 0x9E3779B97F4A7C15 >> 32
 }
 
 func (u *UIController) getActorIcon(actor *common.Actor, ticksForAnimation uint64) int32 {

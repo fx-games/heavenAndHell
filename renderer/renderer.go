@@ -339,6 +339,15 @@ func (g *TileRenderer) DrawTTFOnScreen(screenX, screenY float64, textToDraw stri
 	text.Draw(g.currentRenderTarget, textToDraw, g.ttfFont, int(screenX), int(screenY), textColor)
 }
 
+// DrawTTFOnScreenScaled is DrawTTFOnScreen with the text drawn scale times its size.
+func (g *TileRenderer) DrawTTFOnScreenScaled(screenX, screenY float64, textToDraw string, textColor color.Color, scale float64) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(scale, scale)
+	op.GeoM.Translate(screenX*g.deviceScale, screenY*g.deviceScale)
+	op.ColorScale.ScaleWithColor(textColor)
+	text.DrawWithOptions(g.currentRenderTarget, textToDraw, g.ttfFont, op)
+}
+
 func (g *TileRenderer) DrawTTFOnScreenWithColorCodes(screenX, screenY float64, textToDraw []util.ColoredTextPart) {
 	drawOptions := &ebiten.DrawImageOptions{}
 	screenXF := screenX * g.deviceScale

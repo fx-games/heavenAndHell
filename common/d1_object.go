@@ -258,6 +258,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 	msg := f.Msg
 	switch obj.Kind { // fountains that can be used again and again
 	case d1.ObjBLOODFTN, d1.ObjPURIFYINGFTN:
+		f.PlayD1Sfx("LS_FOUNTAIN", o.pos)
 		res := st.GetResource(stats.Health)
 		if obj.Kind == d1.ObjPURIFYINGFTN {
 			res = st.GetResource(stats.Mana)
@@ -275,6 +276,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 	}
 	if obj.Kind == d1.ObjSTORYBOOK { // OperateStoryBook: the narrator reads it, as often as the hero likes
 		obj.Active = false
+		f.PlayD1Sfx("IS_ISCROL", o.pos)
 		if !f.d1CryptJournal(obj) {
 			return
 		}
@@ -293,6 +295,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		return
 	}
 	obj.Active = false
+	f.PlayD1Sfx(d1ObjectSfx[obj.Kind], o.pos)
 	if d1TrapTargets[obj.Kind] { // Obj_Trap notices the used object on the next tick
 		defer f.springD1WallTraps(f.State.GetMap(), obj.X, obj.Y)
 	}
@@ -393,6 +396,32 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 	}
 }
 
+// d1ObjectSfx is the sound an object makes as it is used (OperateChest's IS_CHEST, OperateShrine's sType, ...).
+// Fountains, story books, barrels and crucified skeletons play theirs where they are handled.
+var d1ObjectSfx = map[int]string{
+	d1.ObjCHEST1: "IS_CHEST", d1.ObjCHEST2: "IS_CHEST", d1.ObjCHEST3: "IS_CHEST",
+	d1.ObjTCHEST1: "IS_CHEST", d1.ObjTCHEST2: "IS_CHEST", d1.ObjTCHEST3: "IS_CHEST",
+	d1.ObjSARC: "IS_SARC", d1.ObjSHRINEL: "IS_MAGIC", d1.ObjSHRINER: "IS_MAGIC",
+	d1.ObjGOATSHRINE: "LS_GSHRINE", d1.ObjCAULDRON: "LS_CALDRON",
+	d1.ObjSKELBOOK: "IS_ISCROL", d1.ObjBOOKSTAND: "IS_ISCROL", d1.ObjBOOKCASEL: "IS_ISCROL", d1.ObjBOOKCASER: "IS_ISCROL",
+	d1.ObjLEVER: "IS_LEVER", d1.ObjSWITCHSKL: "IS_LEVER", d1.ObjMURKYFTN: "LS_FOUNTAIN", d1.ObjTEARFTN: "LS_FOUNTAIN",
+}
+
+// d1BarrelSfx is BreakBarrel's sound: a barrel breaking or blowing up, or Hellfire's pods (the Hive) and urns
+// (the Crypt) popping.
+func d1BarrelSfx(kind, dlvl int) string {
+	ex := kind == d1.ObjBARRELEX
+	switch {
+	case dlvl >= 21:
+		return map[bool]string{false: "IS_POPPOP2", true: "IS_POPPOP3"}[ex]
+	case dlvl >= 17:
+		return map[bool]string{false: "IS_POPPOP5", true: "IS_POPPOP8"}[ex]
+	case ex:
+		return "IS_BARLFIRE"
+	}
+	return "IS_BARREL"
+}
+
 // SpawnD1Skeleton ports M_SpawnSkel for the Skeleton King: one of the level's skeletons rises next to pos.
 func (f *Factory) SpawnD1Skeleton(pos geometry.Point) {
 	mt := f.Generator.D.MonsterByID("MT_WSKELAX")
@@ -474,6 +503,7 @@ func (f *Factory) hitD1Object(m *gridmap.GridMap[*Actor, *Item, Object], p geome
 // breakD1Crux ports BreakCrux: once every crucified skeleton of its group is down, its part of the map opens.
 func (f *Factory) breakD1Crux(o *D1Object) {
 	o.O.Active = false
+	f.PlayD1Sfx("IS_LEVER", o.pos)
 	if m := f.State.GetMap(); d1ObjectGroupUsed(m, isD1Crux, o.O.Var8) {
 		f.Msg("Something rumbles in the distance.")
 		f.State.mapGen.changeD1Map(m, o.O.Var1, o.O.Var2, o.O.Var3, o.O.Var4)
@@ -494,6 +524,7 @@ func (a *d1BlastAction) GetAnimations() []Animation     { return a.animations }
 func (f *Factory) breakD1Barrel(o *D1Object, player *Actor) {
 	obj, gen, m := o.O, f.Generator, f.State.GetMap()
 	obj.Active = false // the debris stays, walkable
+	f.PlayD1Sfx(d1BarrelSfx(obj.Kind, d1DungeonLevel(f.State)), o.pos)
 	if obj.Kind == d1.ObjBARREL {
 		dlvl := d1DungeonLevel(f.State)
 		ilvl, hell := f.State.D1ItemLevel(dlvl), d1.LevelType(dlvl) == d1.DTypeHell
@@ -527,7 +558,11 @@ func (f *Factory) breakD1Barrel(o *D1Object, player *Actor) {
 				switch {
 				case a.hero != nil && d1Rng.Intn(100) < 40: // PlayerMHit with a fire missile from no monster
 					dam64 := 8<<6 + d1Rng.Intn(8<<6+1)
-					dam64 -= dam64 * a.HeroSheet().FR / 100
+					if fr := a.HeroSheet().FR; fr > 0 { // PlayerMHit: a resisted hit doesn't flinch
+						dam64 -= dam64 * fr / 100
+					} else {
+						D1StartPlrHit(f, a, dam64, dam64>>6, false)
+					}
 					dam = dam64 >> 6
 				case a.d1Monster != nil: // MonsterTrapHit
 					mon := a.d1Monster
@@ -790,6 +825,9 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 			if d := it.d1; d1Rng.Intn(3) == 0 && d.Durability != d1.DurIndestructible && d.Durability != 0 {
 				d.Durability /= 2
 				broke = true
+				if d.Durability == 0 {
+					d1Broke(f.Msg, player, d)
+				}
 				break
 			}
 		}

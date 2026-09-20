@@ -286,7 +286,7 @@ func (i *Item) d1TooltipLines(cmp map[string]int) []string {
 	if it.MaxDur > 0 && it.MaxDur < 255 {
 		add("Durability: %d/%d", it.Durability, it.MaxDur)
 		if it.Durability == 0 {
-			add("[:red]Broken: using it now destroys it[:white]")
+			add("[:red]Broken: no effect until repaired[:white]")
 		}
 	}
 	if it.MaxCharges > 0 {
@@ -328,6 +328,9 @@ func (i *Item) d1TooltipLines(cmp map[string]int) []string {
 		if it.Spell == d1.SplHeal {
 			lo, hi := d1.HealRange64(h.Class, h.Level, h.SpellLevel(sh, it.Spell))
 			add("Heals %d-%d life", lo>>6, hi>>6)
+		}
+		if t := d1.SpellDamageText(it.Spell, sh.Mag, h.Level, h.SpellLevel(sh, it.Spell)); t != "" {
+			add("%s", t)
 		}
 		switch it.MiscID {
 		case "IMISC_HEAL":

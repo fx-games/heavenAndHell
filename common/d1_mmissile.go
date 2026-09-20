@@ -102,7 +102,7 @@ func (c *missileCtx) hitAs(mis D1Missile, p, from geometry.Point, mind, maxd int
 	var chance int
 	if c.mon != nil {
 		monLevel = c.mon.Level
-		chance = h.MonsterSpellHitChance(c.mon.Level, dist, dlvl)
+		chance = h.MonsterSpellHitChance(c.mon.Level, dlvl)
 	} else {
 		chance = d1.TrapHitChance(s, mis != MisArrow && mis != MisFarrow, dist, dlvl) // missiledata's mType
 	}
@@ -111,7 +111,7 @@ func (c *missileCtx) hitAs(mis D1Missile, p, from geometry.Point, mind, maxd int
 	if !shift && mis != MisAcidPud {
 		block = h.BlockChance(s, monLevel)
 	}
-	total, blocked := 0, false
+	total, blocked, flinch := 0, false, 0
 	for i := 0; i < ticks; i++ {
 		if d1Rng.Intn(100) >= chance {
 			continue
@@ -120,16 +120,22 @@ func (c *missileCtx) hitAs(mis D1Missile, p, from geometry.Point, mind, maxd int
 		if c.mon == nil {
 			dam = d1.TrapDamage64(d1Rng, s, mind, maxd, shift)
 		}
-		if resper > 0 {
+		if resper > 0 { // a resisted hit doesn't flinch
 			dam -= resper * dam / 100
 		} else if d1Rng.Intn(100) < block {
 			blocked = true
 			continue
+		} else {
+			flinch = max(flinch, dam)
 		}
 		total += dam
 	}
+	if blocked {
+		d1BlockWear(c.ctx.Msg, pl)
+	}
 	if blocked && total == 0 {
 		c.block = true
+		playD1SfxAt(c.ctx, "IS_ISWORD", p) // StartPlrBlock
 		if c.caster != nil {
 			c.ctx.Msg(fmt.Sprintf("You block the attack of %s.", c.caster.Name()))
 		}
@@ -139,6 +145,9 @@ func (c *missileCtx) hitAs(mis D1Missile, p, from geometry.Point, mind, maxd int
 	}
 	c.taken += total
 	c.dealt += d1ManaShield(pl, total>>6)
+	if flinch > 0 {
+		D1StartPlrHit(c.ctx.GameState.factory, pl, flinch, c.dealt, false)
+	}
 	c.c.animations = append(c.c.animations, NewHitAnimation(p, 0.3, defs.IconEffectHit, 2))
 	return true
 }
@@ -173,28 +182,64 @@ func missileIcon(mis D1Missile) int32 {
 	return defs.IconEffectHit
 }
 
+// d1MissileSfx is misdat's launch and impact sounds (mlSFX, miSFX) of the monster and trap missiles, as d1.SpellSfx.
+var d1MissileSfx = map[D1Missile][2]string{
+	MisFirebolt: {"LS_FBOLT1", "LS_FIRIMP2"}, MisFireball: {"LS_FBOLT1", "LS_FIRIMP2"},
+	MisLightCtrl: {"LS_LNING1"}, // the MIS_LIGHTNINGs it lays; LIGHTCTRL2's thin ones are silent
+	MisFlash:     {"LS_NOVA"}, MisFlamec: {"LS_SPOUTSTR"}, MisCbolt: {"LS_CBOLT"}, MisAcid: {"LS_ACID"}, MisAcidPud: {"LS_PUDDLE"},
+	MisNova: {"LS_NOVA"}, MisFireWall: {"LS_WALLLOOP"}, MisFlashTrap: {"LS_NOVA"},
+}
+
+// missileSecPerTile is the flight speed from the missile's AddMissile velocity.
+func missileSecPerTile(mis D1Missile) float64 {
+	v := 16 // fireball, magma ball, flare, acid, fire wall
+	switch mis {
+	case MisFirebolt:
+		v = 26
+	case MisCbolt:
+		v = 8
+	case MisLightCtrl, MisLightCtrl2, MisArrow, MisFarrow:
+		v = 32
+	}
+	return d1.MissileSecondsPerTile(v)
+}
+
 // bolt flies towards the target until it hits the player or something solid (MI_Firebolt, CheckMissileCol).
 func (c *missileCtx) bolt(mis D1Missile, to geometry.Point, mind, maxd int) (geometry.Point, bool) {
+	return c.fly(mis, c.c.ray(c.origin(), to, 20), mind, maxd, false)
+}
+
+// fly moves a missile through cells until it hits; a wandering one is drawn through every cell, not straight.
+func (c *missileCtx) fly(mis D1Missile, cells []geometry.Point, mind, maxd int, wander bool) (geometry.Point, bool) {
 	from, hit := c.origin(), false
-	last := from
-	for _, p := range c.c.ray(from, to, 20) {
+	last, path := from, []geometry.Point{from}
+	for _, p := range cells {
 		if o := d1ObjectAt(c.c.m, p); o != nil && !o.IsWalkable(nil) { // monster missiles fly through other monsters
 			c.ctx.GameState.factory.hitD1Object(c.c.m, p, c.attacker())
 			break
 		}
 		last = p
+		path = append(path, p)
 		if hit = c.hit(mis, p, from, mind, maxd, false, 1); hit {
 			break
 		}
 	}
-	if last != from {
-		c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(c.caster, from, last, 0.03, missileIcon(mis), 2))
+	if impact := d1MissileSfx[mis][1]; last != from {
+		b := NewProjectileDirectionAnimation(c.caster, from, last, missileSecPerTile(mis), missileIcon(mis), 2)
+		if wander {
+			b = NewProjectilePathAnimation(c.caster, path, missileSecPerTile(mis), missileIcon(mis), 2)
+		}
+		b.SetOnFinish(func() { playD1SfxAt(c.ctx, impact, last) })
+		c.c.animations = append(c.c.animations, b)
+	} else {
+		playD1SfxAt(c.ctx, impact, last)
 	}
 	return last, hit
 }
 
 func (c *missileCtx) fire(mis D1Missile, target geometry.Point, dam int) {
 	o := c.origin()
+	playD1SfxAt(c.ctx, d1MissileSfx[mis][0], o)
 	switch mis {
 	case MisFirebolt, MisMagmaball, MisFlare:
 		d := c.monsterDamage()
@@ -209,8 +254,8 @@ func (c *missileCtx) fire(mis D1Missile, target geometry.Point, dam int) {
 			c.hazard(MisAcidPud, end, (d1Rng.Intn(15)+40*(c.mon.Int+1))/d1.RefWalkTicks, d)
 		}
 	case MisCbolt:
-		for i := 0; i < 3; i++ { // ponytail: charged bolts fly straight instead of D1's wobbling paths
-			c.bolt(mis, target, 15, 15)
+		for i := 0; i < 3; i++ { // M_DoRAttack: three sparks, each wandering like the hero's (MI_Cbolt)
+			c.fly(mis, c.c.chargedBoltCells(o, target, d1Rng.Intn(15)+1), 15, 15, true)
 		}
 	case MisFireball:
 		end, _ := c.bolt(mis, target, dam, dam)
@@ -225,7 +270,7 @@ func (c *missileCtx) fire(mis D1Missile, target geometry.Point, dam int) {
 			}
 		}
 		if len(cells) > 0 {
-			c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(c.caster, o, cells[len(cells)-1], 0.01, missileIcon(mis), 2))
+			c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(c.caster, o, cells[len(cells)-1], missileSecPerTile(mis), missileIcon(mis), 2))
 		}
 	case MisLightning:
 		c.hit(mis, target, target, dam, dam, true, 8)
@@ -256,8 +301,9 @@ func (c *missileCtx) hazard(mis D1Missile, p geometry.Point, turns, dam64 int) {
 	caster, mon := c.caster, c.mon
 	hz := NewFire(0)
 	hz.turnsUntilRemoval = turns
-	if mis == MisAcidPud {
+	if mis == MisAcidPud { // the other hazards' fire() already played their launch
 		hz.icon = defs.IconEffectHit
+		playD1SfxAt(c.ctx, d1MissileSfx[mis][0], p)
 	}
 	burn := func() {
 		if f.State.GetMap() != m || c.player.MapPosition() != p {

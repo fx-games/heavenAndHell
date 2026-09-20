@@ -31,6 +31,9 @@ func (d *DieAction) Execute(context ActionContext) []Action {
 		state.factory.PlayD1HeroSound(71)
 		ui.ShowGameOverMenu()
 	} else {
+		if actor.VisualsPending() {
+			state.dying = append(state.dying, actor)
+		}
 		gameMap.RemoveActor(actor)
 		if actor.HasCorpse() {
 			corpsePos := d.getCorpsePos(gameMap, actor.MapPosition())

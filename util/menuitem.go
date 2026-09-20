@@ -13,6 +13,7 @@ type MenuItem struct {
 	UseColorCodes bool
 	Action        func()
 	CharIcon      int32
+	Hotkey        rune // picks the item when its key is pressed, in menus that listen for keys
 	TooltipText   []LabelText
 	ActionLeft    func() string
 	ActionRight   func() string

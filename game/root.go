@@ -198,7 +198,7 @@ func NewGameInstance(startInfo common.StartInfo, uiController common.UserInterfa
 	if g.d1Classic, err = d1.LoadD1(files.GetFileSystem()); err != nil {
 		panic(err)
 	}
-	g.hellfire = cfg.Hellfire
+	g.hellfire = false // the game behind the start menu, which is the first game when there is no save yet: plain D1
 	g.ResetGame(g.dataDefinitions.ClassDefinitions[0])
 	return g
 }
@@ -476,8 +476,12 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 		common.SyncHero(player)
 		g.factory.RefreshD1Spells(player)
 		g.sendEquipmentToWindowClient()
+		g.uiController.RefreshIconBars() // equipping takes no turn and leaves the pack as it is
 	})
-	player.GetInventory().SetOnChangeHandler(g.sendInventoryToWindowClient)
+	player.GetInventory().SetOnChangeHandler(func() {
+		g.sendInventoryToWindowClient()
+		g.uiController.RefreshIconBars() // buying, selling and the stash change the pack without taking a turn
+	})
 	return player
 }
 
@@ -666,9 +670,9 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 	if actor.D1Monster() != nil {
 		return g.getD1MonsterAction(actor)
 	}
-	autCostMove := 100 / actor.GetMoveSpeed()
-	autCostMeleeAttack := 100 / actor.GetAttackSpeed(common.MeleeAttack)
-	autCostRangedAttack := 100 / actor.GetAttackSpeed(common.RangedAttack)
+	autCostMove := actor.MoveCost()
+	autCostMeleeAttack := actor.AttackCost(common.MeleeAttack)
+	autCostRangedAttack := actor.AttackCost(common.RangedAttack)
 	minCostAttack := min(autCostMeleeAttack, autCostRangedAttack)
 
 	minCost := min(autCostMove, minCostAttack)

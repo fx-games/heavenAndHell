@@ -86,6 +86,9 @@ func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 		OpenSaveMenu:   theGame.OpenSaveMenu,
 		OpenLoadMenu:   theGame.OpenLoadMenu,
 		IsPermadeath:   theGame.IsPermadeath,
+		QuitSaves:      theGame.QuitSaves,
+		IsHellfire:     theGame.IsHellfire,
+		EnableHellfire: theGame.EnableHellfire,
 		Animator: func() common.Animator {
 			return theGame.GetActionBroker()
 		},
@@ -291,12 +294,12 @@ func runGameWithEbiten(theGame *game.GameInstance, context common.UIContext) {
 	ebiten.SetScreenClearedEveryFrame(true)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetWindowSizeLimits(640, 480, -1, -1)
-	ebiten.SetWindowClosingHandled(false)
+	ebiten.SetWindowClosingHandled(true)
+	uiController.OnQuit = theGame.SaveGame // decision 11: autosave on quit
 
 	err := ebiten.RunGameWithOptions(uiController, &ebiten.RunGameOptions{
 		GraphicsLibrary: ebiten.GraphicsLibraryOpenGL,
 	})
-	theGame.SaveGame() // decision 11: autosave on quit
 	if err != nil && !errors.Is(err, ebiten.Termination) {
 		log.Fatal(err)
 	}

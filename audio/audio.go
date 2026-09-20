@@ -9,6 +9,7 @@ import (
 	"path"
 	"slices"
 	"strings"
+	"time"
 
 	"rpg/recfile"
 
@@ -115,7 +116,7 @@ func (ap *Player) updateVolume() {
 	for cue, activeSounds := range ap.activeSounds {
 		sound := ap.availableSounds[cue]
 		for _, activeSound := range activeSounds {
-			activeSound.player.SetVolume(ap.volumeFor(sound))
+			activeSound.player.SetVolume(ap.volumeFor(sound) * activeSound.gain)
 		}
 	}
 }
@@ -128,6 +129,7 @@ type Sound struct {
 	IsVoice      bool
 	IsRandomized bool
 	currentIndex int
+	lastStart    time.Time // PlayCueAt's 80 ms guard
 }
 
 func (s *Sound) Unload() {
@@ -184,6 +186,7 @@ func (s *Sound) OpenStream(ap *Player) *audio.Player {
 type ActiveSound struct {
 	player   *audio.Player
 	callback func()
+	gain     float64 // on top of the category volume: PlayCueAt's distance
 }
 
 type NullHandle struct{}
@@ -326,11 +329,10 @@ func (ap *Player) startPlaying(sound *Sound, volume float64, callback func()) *a
 	ap.addActiveSound(sound, player, callback)
 	return player
 }
-func (ap *Player) addActiveSound(sound *Sound, player *audio.Player, callback func()) {
-	if _, ok := ap.activeSounds[sound.Cue]; !ok {
-		ap.activeSounds[sound.Cue] = make([]*ActiveSound, 0)
-	}
-	ap.activeSounds[sound.Cue] = append(ap.activeSounds[sound.Cue], &ActiveSound{player: player, callback: callback})
+func (ap *Player) addActiveSound(sound *Sound, player *audio.Player, callback func()) *ActiveSound {
+	active := &ActiveSound{player: player, callback: callback, gain: 1}
+	ap.activeSounds[sound.Cue] = append(ap.activeSounds[sound.Cue], active)
+	return active
 }
 func (ap *Player) PlayCue(cue string) Handle {
 	if ap.disablePlayback {

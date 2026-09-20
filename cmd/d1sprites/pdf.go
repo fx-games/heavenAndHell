@@ -15,6 +15,7 @@ type card struct {
 	img    *image.NRGBA // nil draws a "no graphics" placeholder
 	png    *image.NRGBA
 	file   string
+	keys   []string // the icons/*.rec entries whose reference_image this sprite is (the first card wins)
 	lines  []string
 	unique bool
 }

@@ -10,7 +10,7 @@ import (
 func TestCharacterSheetPlusRespectsMaximum(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
 	player := theGame.GetWorldState().GetPlayer()
 
 	for _, at := range player.D1SheetAttributes() {
@@ -42,7 +42,7 @@ func TestCharacterSheetPlusRespectsMaximum(t *testing.T) {
 func TestCharacterSheetExposesHiddenRules(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "") // the warrior starts with a sword
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "") // the warrior starts with a sword
 	state := theGame.GetWorldState()
 	player := state.GetPlayer()
 

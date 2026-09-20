@@ -19,9 +19,8 @@ type CharacterSheet struct {
 	topLeft     geometry.Point
 	size        geometry.Point
 	lineH       int
-	labelW      int
-	valueW      int
-	colW        int
+	labelW      [2]int // per column: the long trait values on the right must not widen the left
+	colW        [2]int
 	plusRects   []geometry.Rect // one per attribute row, empty where the row has no "+"
 	focus       int             // which attribute the keyboard is on
 }
@@ -31,22 +30,6 @@ const (
 	sheetColGap   = 20
 	sheetPlusSize = 18
 )
-
-// sheetHeaderColors give each section its own hue, so the eye finds a block without reading the titles.
-var sheetHeaderColors = map[string]color.Color{
-	"Character":   defs.Brown,
-	"Condition":   defs.InvColorAmulet,
-	"Attributes":  defs.Brown,
-	"Combat":      defs.InvColorMeleeWeapon,
-	"Resistances": defs.InvColorUnique,
-	"Traits":      defs.InvColorPotion,
-	"World":       defs.Red,
-	"Creature":    defs.Brown,
-	"Behavior":    defs.InvColorPotion,
-	"Equipment":   defs.InvColorMeleeWeapon,
-	"Afflictions": defs.Red,
-	"Matchup":     defs.InvColorUnique,
-}
 
 // sheetValueColors colour the values that mean something on sight; everything else stays the default gold.
 var sheetValueColors = map[string]color.Color{
@@ -68,7 +51,7 @@ func sheetColor(m map[string]color.Color, key string, fallback color.Color) colo
 
 // OpenCharacterSheet puts the character sheet up, or takes it down if it is already up.
 func (u *UIController) OpenCharacterSheet() {
-	if _, open := u.modal.(*CharacterSheet); open {
+	if _, open := u.GetTopModal().(*CharacterSheet); open {
 		u.PopWidget()
 		return
 	}
@@ -86,7 +69,10 @@ func (s *CharacterSheet) columns() (left, right []common.D1SheetSection) {
 	}
 	for _, sec := range sections {
 		switch sec.Title {
-		case "Character", "Condition":
+		case "Condition": // Life and Mana read fine without a heading; a blank title leaves just a gap
+			sec.Title = ""
+			left = append(left, sec)
+		case "Character":
 			left = append(left, sec)
 		default:
 			right = append(right, sec)
@@ -103,37 +89,60 @@ func (s *CharacterSheet) Layout() {
 	r := s.u.GetRenderer()
 	_, h := r.MeasureString("M")
 	s.lineH = int(h) + 3
-	s.labelW, s.valueW = 0, 0
-	widest := func(dst *int, text string, gutter int) {
-		w, _ := r.MeasureString(text)
-		*dst = max(*dst, int(w)+gutter)
-	}
+	width := func(text string) int { w, _ := r.MeasureString(text); return int(w) }
 	left, right := s.columns()
-	// a section costs its rows plus a title line and a half-line gap; the attributes hang under the left column
-	sideLines := func(sections []common.D1SheetSection) int {
-		lines := 0
+	attrs := s.attributes()
+	s.labelW, s.colW = [2]int{}, [2]int{}
+	var valueW, height [2]int
+	// the attributes hang under the left column, headed only by a gap unless points are waiting
+	height[0] = len(attrs)*s.lineH + s.titleH(s.pointsTitle())
+	s.colW[0] = width("99 point(s) to spend")
+	for _, at := range attrs {
+		s.labelW[0] = max(s.labelW[0], width(at.Label)+10)
+		valueW[0] = max(valueW[0], width(s.attrValue(at))+sheetPlusSize+6) // the "+" sits at the right edge
+	}
+	for i, sections := range [2][]common.D1SheetSection{left, right} {
+		height[i] += drawSectionBlock(nil, sections, 0, 0, 0, s.lineH)
 		for _, sec := range sections {
-			lines += len(sec.Rows) + len(sec.Notes) + 2
+			if len(sec.Rows) == 0 && len(sec.Notes) == 0 {
+				continue
+			}
+			s.colW[i] = max(s.colW[i], width(sec.Title))
 			for _, row := range sec.Rows {
-				widest(&s.labelW, row[0], 10)
-				widest(&s.valueW, row[1], sheetPlusSize+6) // the "+" sits at the right edge of the value column
+				s.labelW[i] = max(s.labelW[i], width(row[0])+10)
+				valueW[i] = max(valueW[i], width(row[1]))
+			}
+			for _, note := range sec.Notes {
+				s.colW[i] = max(s.colW[i], width(note))
 			}
 		}
-		return lines
+		s.colW[i] = max(s.colW[i], s.labelW[i]+valueW[i])
 	}
-	attrs := s.attributes()
-	for _, at := range attrs {
-		widest(&s.labelW, at.Label, 10)
-		widest(&s.valueW, s.attrValue(at), sheetPlusSize+6)
-	}
-	lines := max(sideLines(left)+len(attrs)+2, sideLines(right))
-	s.colW = s.labelW + s.valueW
-	s.size = geometry.Point{X: 2*s.colW + sheetColGap, Y: (lines + 1) * s.lineH}
-	screen := s.u.GetScreenSize()
-	s.topLeft = screen.Sub(s.size).Div(2)
+	s.size = geometry.Point{X: s.colW[0] + sheetColGap + s.colW[1], Y: max(height[0], height[1]) + s.lineH/2}
+	// centre over the map, not the screen: the sidebar stays uncovered so the inventory can be used alongside
+	area := s.u.GetScreenSize().Sub(geometry.Point{X: s.u.uiBarWidth})
+	s.topLeft = area.Sub(s.size).Div(2)
+	s.topLeft.X = max(s.topLeft.X, sheetPad)
+	s.topLeft.X, s.topLeft.Y = max(s.topLeft.X, sheetPad), max(s.topLeft.Y, sheetPad)
 	if s.focus >= len(attrs) {
 		s.focus = 0
 	}
+}
+
+// titleH is a heading's line, or the half-line gap drawSectionBlock leaves for an untitled section.
+func (s *CharacterSheet) titleH(title string) int {
+	if title == "" {
+		return s.lineH / 2
+	}
+	return s.lineH
+}
+
+// pointsTitle heads the attributes only while there are stat points to spend.
+func (s *CharacterSheet) pointsTitle() string {
+	if h := s.u.context.GameState().GetPlayer().Hero(); h != nil && h.StatPts > 0 {
+		return fmt.Sprintf("%d point(s) to spend", h.StatPts)
+	}
+	return ""
 }
 
 func (s *CharacterSheet) attrValue(at common.D1SheetAttribute) string {
@@ -150,31 +159,22 @@ func (s *CharacterSheet) Draw() {
 	r.DrawDefaultBorder(s.topLeft.Sub(pad.Div(2)), s.size.Add(pad))
 
 	left, right := s.columns()
-	y := s.drawSections(left, s.topLeft.X, s.topLeft.Y)
-	s.drawSections(right, s.topLeft.X+s.colW+sheetColGap, s.topLeft.Y)
+	y := s.drawSections(left, s.topLeft.X, s.topLeft.Y, 0)
+	s.drawSections(right, s.topLeft.X+s.colW[0]+sheetColGap, s.topLeft.Y, 1)
 	s.drawAttributes(s.topLeft.X, y)
 }
 
 // drawSections draws one column and returns the y it stopped at.
-func (s *CharacterSheet) drawSections(sections []common.D1SheetSection, x, y int) int {
-	return drawSectionBlock(s.u.GetRenderer(), sections, x, y, s.labelW, s.lineH)
+func (s *CharacterSheet) drawSections(sections []common.D1SheetSection, x, y, col int) int {
+	return drawSectionBlock(s.u.GetRenderer(), sections, x, y, s.labelW[col], s.lineH)
 }
 
 func (s *CharacterSheet) drawAttributes(x, y int) {
 	r := s.u.GetRenderer()
 	attrs := s.attributes()
-	points := 0
-	if h := s.u.context.GameState().GetPlayer().Hero(); h != nil {
-		points = h.StatPts
-	}
-	title := "Attributes"
-	titleColor := sheetHeaderColors["Attributes"]
-	if points > 0 {
-		title = fmt.Sprintf("Attributes - %d point(s) to spend", points)
-		titleColor = defs.PositiveHighlightColor
-	}
-	y += s.lineH
-	r.DrawTTFOnScreen(float64(x), float64(y), title, titleColor)
+	title := s.pointsTitle()
+	y += s.titleH(title)
+	r.DrawTTFOnScreen(float64(x), float64(y), title, defs.PositiveHighlightColor)
 	s.plusRects = make([]geometry.Rect, len(attrs))
 	for i, at := range attrs {
 		y += s.lineH
@@ -183,11 +183,11 @@ func (s *CharacterSheet) drawAttributes(x, y int) {
 			valueColor = defs.DarkGray // capped for this class: no point ever goes in here again
 		}
 		r.DrawTTFOnScreen(float64(x), float64(y), at.Label, defs.DarkTextColor)
-		r.DrawTTFOnScreen(float64(x+s.labelW), float64(y), s.attrValue(at), valueColor)
+		r.DrawTTFOnScreen(float64(x+s.labelW[0]), float64(y), s.attrValue(at), valueColor)
 		if !at.CanRaise {
 			continue
 		}
-		plus := geometry.NewRect(x+s.colW-sheetPlusSize, y-s.lineH+6, x+s.colW, y+6)
+		plus := geometry.NewRect(x+s.colW[0]-sheetPlusSize, y-s.lineH+6, x+s.colW[0], y+6)
 		s.plusRects[i] = plus
 		fill := color.RGBA{R: 40, G: 30, B: 12, A: 255}
 		if i == s.focus {
@@ -225,6 +225,9 @@ func (s *CharacterSheet) OnCommand(command CommandType) bool {
 }
 
 func (s *CharacterSheet) OnMouseClicked(button ebiten.MouseButton, x int, y int) bool {
+	if s.overSidebar(x) { // let the inventory take it: equipping with the sheet open shows the new numbers live
+		return false
+	}
 	p := geometry.Point{X: x, Y: y}
 	for i, rect := range s.plusRects {
 		if rect.Size().X > 0 && rect.Contains(p) {
@@ -247,6 +250,10 @@ func (s *CharacterSheet) OnMouseMoved(x int, y int) (bool, Tooltip) {
 		}
 	}
 	return true, NoTooltip{}
+}
+
+func (s *CharacterSheet) overSidebar(x int) bool {
+	return x >= s.u.GetScreenSize().X-s.u.uiBarWidth
 }
 
 func (s *CharacterSheet) OnMouseWheel(x int, y int, dy float64) bool { return true }

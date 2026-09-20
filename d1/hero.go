@@ -132,8 +132,9 @@ type Hero struct {
 	ManaBase, MaxManaBase              int
 	BaseToBlk                          int
 	SpellLevels                        [NumSpells]int
-	Rage                               int // the Barbarian's Rage: turns of fury left, or minus the turns of hangover left
-	Reflections                        int // Hellfire's Reflect (wReflections): melee blows left to turn back, until the next level
+	Rage                               int      // the Barbarian's Rage: turns of fury left, or minus the turns of hangover left
+	SkillOrder                         []string // skill bar order the player dragged (skill names); not D1's
+	Reflections                        int      // Hellfire's Reflect (wReflections): melee blows left to turn back, until the next level
 }
 
 // NewHero ports CreatePlayer, with calculateBaseLife/Mana in place of D1's per-class multipliers.
@@ -340,7 +341,7 @@ func (h *Hero) Sheet(equipped []*Item) Sheet {
 		s.MaxHP, s.MaxMana = s.MaxHP-p, s.MaxMana+p
 	}
 
-	// SetPlrAnims: attack length by class and weapon, then PM_DoAttack's frame skips. Only the Sorcerer's bare
+	// SetPlrAnims: attack length by class and weapon. Only the Sorcerer's bare
 	// hands are slower than the same hands behind a shield.
 	s.AttackFrames = a.AttackFrames[0]
 	if n, ok := a.AttackFrames[s.WeaponType]; ok {
@@ -348,12 +349,18 @@ func (h *Hero) Sheet(equipped []*Item) Sheet {
 	} else if h.Class == Sorcerer && hasShieldOnly && s.WeaponType == ITypeMisc {
 		s.AttackFrames = 16
 	}
+	return s
+}
+
+// MeleeFrames is AttackFrames after PM_DoAttack's frame skips. PM_DoRangeAttack has none, so bows don't speed up.
+func (s Sheet) MeleeFrames() int {
+	n := s.AttackFrames
 	for flag, skip := range map[uint32]int{ISplQuickAttack: 1, ISplFastAttack: 2, ISplFasterAttack: 3, ISplFastestAttack: 4} {
 		if s.Flags&flag != 0 {
-			s.AttackFrames -= skip
+			n -= skip
 		}
 	}
-	return s
+	return n
 }
 
 // Holds reports an ITYPE in either hand, like devilutionX's Player::isHoldingItem.
@@ -513,9 +520,10 @@ func (h *Hero) MonsterArrowHitChance(s Sheet, monHit, monLevel, dist, dlvl int) 
 	return dlvlHitFloor(max(monHit+30+(monLevel-h.Level)<<1-tac-dist<<1, 10), dlvl)
 }
 
-// MonsterSpellHitChance ports PlayerMHit for magic missiles; dist in cells.
-func (h *Hero) MonsterSpellHitChance(monLevel, dist, dlvl int) int {
-	return dlvlHitFloor(max(40+(monLevel-h.Level)<<1-dist<<1, 10), dlvl)
+// MonsterSpellHitChance ports PlayerMHit for magic missiles. Their distance term is always 0: only MI_Arrow and
+// MI_LArrow ever advance _midist.
+func (h *Hero) MonsterSpellHitChance(monLevel, dlvl int) int {
+	return dlvlHitFloor(max(40+(monLevel-h.Level)<<1, 10), dlvl)
 }
 
 // MissileDamage64 ports PlayerMHit's damage roll in 1/64. With shift (lingering missiles hitting every tick)
@@ -667,33 +675,5 @@ func (h *Hero) PotionManaRange(maxMana int) (int, int) {
 	return potionAmount(maxMana, 0, f), potionAmount(maxMana, max(maxMana>>8, 1)-1, f)
 }
 
-// SpeedTiers is the calibration knob from decision 13: D1 animation lengths snap to these speed factors.
-var SpeedTiers = []float64{0.5, 1, 1.5, 2}
-
-// Reference animation lengths in D1 ticks for one turn: a walk step and a warrior's sword swing.
-const (
-	RefWalkTicks   = 8
-	RefAttackTicks = 16
-)
-
-// SpeedTier maps an animation length to the nearest speed tier (ref/ticks).
-func SpeedTier(refTicks, ticks int) float64 {
-	if ticks <= 0 {
-		return 1
-	}
-	r := float64(refTicks) / float64(ticks)
-	best := SpeedTiers[0]
-	for _, t := range SpeedTiers {
-		if abs(t-r) < abs(best-r) {
-			best = t
-		}
-	}
-	return best
-}
-
-func abs(f float64) float64 {
-	if f < 0 {
-		return -f
-	}
-	return f
-}
+// RefWalkTicks is D1's walk step in ticks, one 10-AUT turn: the D1 clock (decision 13).
+const RefWalkTicks = 8

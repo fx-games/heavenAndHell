@@ -15,17 +15,29 @@ func (u *UIController) openPauseMenu() {
 	items := []util.MenuItem{{MainText: "Resume"}}
 	if !u.context.IsPermadeath() {
 		items = append(items,
-			util.MenuItem{MainText: "Save game", Action: func() { u.context.OpenSaveMenu(u.openPauseMenu) }},
-			util.MenuItem{MainText: "Load game", Action: func() { u.context.OpenLoadMenu(u.openPauseMenu) }})
+			util.MenuItem{MainText: "Save game", Action: func() { u.context.OpenSaveMenu(func() {}) }},
+			util.MenuItem{MainText: "Load game", Action: func() { u.context.OpenLoadMenu(func() {}) }})
+	}
+	if !u.context.IsHellfire() {
+		items = append(items, util.MenuItem{MainText: "Enable Hellfire content", Action: u.context.EnableHellfire})
+	}
+	quit := "Quit game"
+	if u.context.QuitSaves != nil && u.context.QuitSaves() {
+		quit = "Save & Quit"
 	}
 	u.OpenMenu(append(items, []util.MenuItem{
 		{MainText: "Video", Action: u.openVideoMenu},
 		{MainText: "Audio", Action: u.openAudioMenu},
 		{MainText: "Auto explore", Action: u.openAutoExploreMenu},
-		{MainText: "Gameplay", Action: u.openGameplayMenu},
 		{MainText: "Back to main menu", Action: u.context.BackToMainMenu},
-		{MainText: "Quit game", Action: u.QuitGame},
+		{MainText: quit, Action: u.QuitGame},
 	}...))
+}
+
+// reopen rebuilds the menu on top in place, so its labels show the new state without stacking a second copy.
+func (u *UIController) reopen(open func()) {
+	u.PopWidget()
+	open()
 }
 
 func (u *UIController) toggleFullscreen() {
@@ -49,20 +61,15 @@ func (u *UIController) openVideoMenu() {
 	u.OpenMenu([]util.MenuItem{
 		{MainText: "Fullscreen: " + state, Action: func() {
 			u.toggleFullscreen()
-			u.openVideoMenu()
+			u.reopen(u.openVideoMenu)
 		}},
-		{MainText: "Back", Action: u.openPauseMenu},
+		{MainText: "Back", Action: u.PopWidget},
 	})
 }
 
 // openAutoExploreMenu toggles auto-explore behavior, saved to config.rec.
 func (u *UIController) openAutoExploreMenu() {
-	u.OpenMenu(append(common.AutoExploreSettings(u.configuration, u.openAutoExploreMenu), util.MenuItem{MainText: "Back", Action: u.openPauseMenu}))
-}
-
-// openGameplayMenu holds miscellaneous gameplay toggles, saved to config.rec.
-func (u *UIController) openGameplayMenu() {
-	u.OpenMenu(append(common.GameplaySettings(u.configuration, u.openGameplayMenu), util.MenuItem{MainText: "Back", Action: u.openPauseMenu}))
+	u.OpenMenu(append(common.AutoExploreSettings(u.configuration, func() { u.reopen(u.openAutoExploreMenu) }), util.MenuItem{MainText: "Back", Action: u.PopWidget}))
 }
 
 // openAudioMenu: volume sliders (left/right change them by 10%, Enter steps up and wraps), saved to config.rec,
@@ -85,7 +92,7 @@ func (u *UIController) openAudioMenu() {
 			} else {
 				step(0.1)()
 			}
-			u.openAudioMenu()
+			u.reopen(u.openAudioMenu)
 		}}
 	}
 	diabloAudioLabel := func() string {
@@ -102,10 +109,10 @@ func (u *UIController) openAudioMenu() {
 		{MainText: diabloAudioLabel(), Action: func() {
 			u.configuration.DiabloAudioEnabled = !u.configuration.DiabloAudioEnabled
 			u.configuration.SaveToRecFile(common.ConfigFile)
-			u.openAudioMenu()
+			u.reopen(u.openAudioMenu)
 		}},
 		{MainText: "Music Player", Action: u.openMusicPlayer},
-		{MainText: "Back", Action: u.openPauseMenu},
+		{MainText: "Back", Action: u.PopWidget},
 	})
 }
 
@@ -120,13 +127,13 @@ func (u *UIController) openMusicPlayer() {
 		}
 		items = append(items, util.MenuItem{MainText: title, Action: func() {
 			ap.PlayMusic(track)
-			u.openMusicPlayer()
+			u.reopen(u.openMusicPlayer)
 		}})
 	}
 	if len(items) == 0 {
-		items = append(items, util.MenuItem{MainText: "No tracks yet: add .ogg files to assets/ambience", Action: u.openMusicPlayer})
+		items = append(items, util.MenuItem{MainText: "No tracks yet: add .ogg files to assets/ambience", Action: func() { u.reopen(u.openMusicPlayer) }})
 	}
-	u.OpenMenu(append(items, util.MenuItem{MainText: "Back", Action: u.openAudioMenu}))
+	u.OpenMenu(append(items, util.MenuItem{MainText: "Back", Action: u.PopWidget}))
 }
 
 func (u *UIController) saveVolumes() {

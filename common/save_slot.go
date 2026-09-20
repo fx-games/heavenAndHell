@@ -15,6 +15,7 @@ type SaveSlot struct {
 	Level      int
 	Deepest    int // the deepest dungeon level reached
 	Permadeath bool
+	Hellfire   bool
 	SavedAt    time.Time
 	ThumbPath  string // the screenshot saved beside the game, empty when there is none
 }
@@ -52,6 +53,9 @@ func (s SaveSlot) Rows() [][2]string {
 	if s.Permadeath {
 		rows = append(rows, [2]string{"Mode", "Permadeath"})
 	}
+	if s.Hellfire {
+		rows = append(rows, [2]string{"Content", "Hellfire"})
+	}
 	return rows
 }
 
@@ -60,6 +64,10 @@ func (s SaveSlot) Summary() string {
 	if !s.Used {
 		return fmt.Sprintf("%d. empty", s.Slot)
 	}
-	return fmt.Sprintf("%d. %s the %s, level %d, %s, %s", s.Slot, s.Name, s.Class, s.Level, s.Where(),
+	hf := ""
+	if s.Hellfire {
+		hf = ", Hellfire"
+	}
+	return fmt.Sprintf("%d. %s the %s, level %d, %s%s, %s", s.Slot, s.Name, s.Class, s.Level, s.Where(), hf,
 		s.SavedAt.Local().Format("2006-01-02 15:04"))
 }

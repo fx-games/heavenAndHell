@@ -792,7 +792,7 @@ func d1QuestKill(ctx ActionContext, mon *D1Monster) {
 		}
 		if clean && state.QuestActive(d1.QPWater) != d1.QuestDone {
 			f.completeD1Quest(d1.QPWater)
-			f.playD1Sound("IS_QUESTDN")
+			f.PlayD1Sfx("IS_QUESTDN", state.GetPlayer().MapPosition())
 			state.mapGen.cleanD1Water(state.GetMap())
 		}
 	}
@@ -878,6 +878,7 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 			f.Msg("I can't open this yet.")
 		} else if obj.Active {
 			obj.Active = false
+			f.PlayD1Sfx("IS_CHEST", o.pos)
 			f.dropD1Item(gen.PlainItem(d1.IdiMushroom), o.pos)
 			s.SetQuestVar(q, 1, d1.QSMushSpawned)
 		}
@@ -887,6 +888,7 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 			f.Msg("I can't open this yet.")
 		} else if obj.Active {
 			obj.Active = false
+			f.PlayD1Sfx("IS_CHEST", o.pos)
 			f.dropD1Item(gen.PlainItem(d1.IdiBanner), o.pos)
 		}
 	case d1.ObjBLINDBOOK, d1.ObjBLOODBOOK, d1.ObjSTEELTOME: // OperateBookLever
@@ -912,6 +914,7 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 		q := d1.QBlood
 		if stones := s.QuestVar(q, 2); stones < 3 && d1TakeItem(player, d1.IdiBldStone) {
 			s.SetQuestVar(q, 2, stones+1)
+			f.PlayD1Sfx(map[bool]string{false: "LS_PUDDLE", true: "LS_BLODSTAR"}[stones+1 == 3], o.pos)
 			UpdateD1Quests(s, m)
 			if stones+1 == 3 {
 				obj.Active = false
@@ -936,7 +939,7 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 			h.SpellLevels[d1.SplGuardian] = min(h.SpellLevels[d1.SplGuardian]+1, 15)
 			f.RefreshD1Spells(player)
 			f.completeD1Quest(d1.QSchamb)
-			f.playD1Sound("IS_QUESTDN")
+			f.PlayD1Sfx("IS_QUESTDN", o.pos)
 			f.Msg("Arcane knowledge gained!")
 			f.ActionBroker.Execute(NewSpellAction(player, d1.SplGuardian, h.SpellLevels[d1.SplGuardian], o.pos.Add(geometry.Point{X: -2, Y: -4})))
 		}

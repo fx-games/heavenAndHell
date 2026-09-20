@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"rpg/audio"
 	"rpg/common"
+	"rpg/d1"
 	"rpg/defs"
 	"rpg/geometry"
 	"rpg/gridmap"
@@ -24,12 +25,13 @@ type Actions struct {
 	audio        *audio.Player
 	definitions  defs.DataContainer
 
-	getTimeKeeper  func() *common.TimeKeeper
-	logError       func(message string)
-	autoExplore    bool
-	playerPath     []geometry.Point
-	isResting      bool
-	queueAfterTurn func(call func())
+	getTimeKeeper   func() *common.TimeKeeper
+	logError        func(message string)
+	autoExplore     bool
+	playerPath      []geometry.Point
+	isResting       bool
+	queueAfterTurn  func(call func())
+	lastSpellTarget *common.Actor // recast prefers it while it stays a valid target
 }
 
 func (a *Actions) BeginActionTargeting(element *common.TargetedAction) {
@@ -61,6 +63,9 @@ func (a *Actions) beginActionTargeting(action *common.TargetedAction, chargedIte
 	act.CancelAutoMove()
 
 	rangedAttackRules := action.GetTargetingRules(state.GetPlayer(), state.GetMap())
+	if rangedAttackRules.GetPreSelectedTarget() == a.player.MapPosition() && a.hostileInSight() {
+		a.logError("No clear path to any target")
+	}
 	onHit := &common.HitEffect{
 		Activate: func(attacker *common.Actor, target geometry.Point, hitPositions []geometry.Point) {
 			if chargedItem != nil {
@@ -70,6 +75,7 @@ func (a *Actions) beginActionTargeting(action *common.TargetedAction, chargedIte
 				}
 			}
 			act.CancelAutoMove()
+			a.rememberSpellTarget(target)
 			action.OnSelected(attacker, target, hitPositions)
 		},
 		Description: action.GetDescription(),
@@ -124,10 +130,12 @@ func (a *Actions) EquipItem(item *common.Item) {
 		return
 	}
 	a.actionBroker.Execute(common.NewEquipItemAction(common.AbstractCause("equip"), a.player, item))
+	a.actionBroker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("equip"), 10)) // not D1's (instant): a belt swap isn't free
 }
 
 func (a *Actions) UnequipItem(item *common.Item) {
 	a.actionBroker.Execute(common.NewUnequipItemAction(common.AbstractCause("unequip"), a.player, item))
+	a.actionBroker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("unequip"), 10))
 }
 
 func (a *Actions) ActivateItemActionForPlayer(itemWithAction *common.Item) {
@@ -141,14 +149,24 @@ func (a *Actions) ActivateItemActionForPlayer(itemWithAction *common.Item) {
 		msg(fmt.Sprintf("%s is out of charges", itemWithAction.Name()))
 		return
 	}
+	if d := itemWithAction.D1(); d != nil && d.Type == d1.ITypeStaff {
+		user.SetLastCastItem(itemWithAction)
+	}
 
+	isStaff := itemWithAction.D1() != nil && itemWithAction.D1().Type == d1.ITypeStaff // staves cast, not UseInvItem
 	if itemWithAction.HasTargetedAction() {
+		if !isStaff {
+			a.state.Factory().PlayD1ItemUseSound(itemWithAction, user)
+		}
 		a.beginActionTargeting(itemWithAction.GetTargetedAction(), itemWithAction)
 	} else if itemWithAction.HasUntargetedAction() {
 
 		untargetedAction := itemWithAction.GetUntargetedAction()
 		if !untargetedAction.CanActivate(user) {
 			return // e.g. a book that needs more magic than the reader has: not consumed
+		}
+		if !isStaff {
+			a.state.Factory().PlayD1ItemUseSound(itemWithAction, user)
 		}
 
 		itemWithAction.UseCharge()
@@ -239,13 +257,7 @@ func (a *Actions) ManualMovePlayer(direction geometry.Point) {
 		return
 	}
 
-	attackType, isAttack := common.AttackTypeOf(playerAction)
-	if isAttack {
-		a.executeAttack(playerAction, attackType)
-		return
-	}
-	a.actionBroker.Execute(playerAction)
-	a.actionBroker.Execute(common.NewEndPlayerTurnAction(playerAction.Cause(), playerAction.GetDelayInAut()))
+	a.executeAttack(playerAction)
 }
 
 func (a *Actions) getActionContext() common.ActionContext {
@@ -556,20 +568,69 @@ func (a *Actions) QuickRangedAttack() {
 	return
 }
 
-// CastLastSpellAtNearest recasts the last spell picked from the spell menu or skill bar at the nearest hostile actor.
+// hostileInSight: a visible enemy the player could aim at, path or no path.
+func (a *Actions) hostileInSight() bool {
+	return a.state.GetMap().GetNearestActor(a.player.MapPosition(), func(e *common.Actor) bool {
+		return e.IsVisible() && e.IsHostileTo(a.player) && a.player.CanSee(e.MapPosition()) && !e.IsVendor()
+	}) != nil
+}
+
+func (a *Actions) rememberSpellTarget(target geometry.Point) {
+	a.lastSpellTarget = nil
+	if m := a.state.GetMap(); m.Contains(target) && m.IsActorAt(target) {
+		a.lastSpellTarget = m.GetActor(target)
+	}
+}
+
+// CastLastSpellAtNearest recasts the last spell picked from the spell menu or skill bar, or cast from a staff, at its last target if still valid, else the nearest hostile actor.
 func (a *Actions) CastLastSpellAtNearest() {
 	state := a.state
 	player := state.GetPlayer()
 	if !player.IsAlive() {
 		return
 	}
-	targeted, untargeted := player.LastCastSpell()
+	targeted, untargeted, item := player.LastCastSpell()
+	var source common.EffectSource
+	if item != nil {
+		if !player.GetInventory().Has(item) && !player.GetEquipment().IsEquipped(item) {
+			a.logError("No spell to recast")
+			return
+		}
+		if !item.HasChargesLeft() {
+			a.logError(fmt.Sprintf("%s is out of charges", item.Name()))
+			return
+		}
+		targeted, untargeted = item.GetTargetedAction(), item.GetUntargetedAction()
+		source = common.EffectSource(item.GetInternalName())
+	}
+	var target geometry.Point
+	if targeted != nil {
+		rules := targeted.GetTargetingRules(player, state.GetMap())
+		target = rules.GetPreSelectedTarget()
+		if t := a.lastSpellTarget; t != nil && t.IsAlive() && slices.Contains(rules.Targets(), t.MapPosition()) {
+			target = t.MapPosition()
+		}
+		if target == player.MapPosition() {
+			if a.hostileInSight() {
+				a.logError("No clear path to any target")
+			} else {
+				a.logError("No target in sight")
+			}
+			return
+		}
+	}
+	if item != nil {
+		item.UseCharge() // staves never self-destruct, so no removal like ActivateItemActionForPlayer
+	}
 	switch {
 	case targeted != nil:
-		target := targeted.GetTargetingRules(player, state.GetMap()).GetPreSelectedTarget()
+		a.rememberSpellTarget(target)
 		targeted.OnSelected(player, target, targeted.GetHitPositions(player.MapPosition(), target))
 	case untargeted != nil:
-		a.activateUntargetedAction(player, untargeted, common.EffectSource(untargeted.GetInternalName()))
+		if source == "" {
+			source = common.EffectSource(untargeted.GetInternalName())
+		}
+		a.activateUntargetedAction(player, untargeted, source)
 	default:
 		a.logError("No spell to recast")
 	}
@@ -738,23 +799,15 @@ func (a *Actions) playerMoveOneStep(player *common.Actor, targetPos geometry.Poi
 	a.actionBroker.Execute(common.NewEndPlayerTurnAction(moveAction.Cause(), moveAction.GetDelayInAut()))
 }
 
-// executeAttack runs action and ends the turn, unless it would destroy an already-broken equipped weapon, in
-// which case the player is asked to confirm first (Gameplay menu > Warning: Weapon breaking).
-func (a *Actions) executeAttack(action common.Action, attackType common.AttackType) {
-	proceed := func() {
-		a.actionBroker.Execute(action)
-		a.actionBroker.Execute(common.NewEndPlayerTurnAction(action.Cause(), action.GetDelayInAut()))
-	}
-	if brokenWeapon := common.WeaponAboutToBreak(a.player, attackType); brokenWeapon != nil && a.config.WeaponBreakWarning {
-		a.ui().Confirm(fmt.Sprintf("Your %s will break. Attack anyway?", brokenWeapon.Name()), proceed)
-		return
-	}
-	proceed()
+// executeAttack runs action and ends the turn.
+func (a *Actions) executeAttack(action common.Action) {
+	a.actionBroker.Execute(action)
+	a.actionBroker.Execute(common.NewEndPlayerTurnAction(action.Cause(), action.GetDelayInAut()))
 }
 
 func (a *Actions) playerMeleeAttack(player *common.Actor, defender *common.Actor) {
 	meleeAction := common.NewMeleeAttackAction(common.NewActorCause("Melee attack", player), player, defender)
-	a.executeAttack(meleeAction, common.MeleeAttack)
+	a.executeAttack(meleeAction)
 }
 
 // RangedAttackAt fires the player's equipped ranged weapon at mapPos, if there is a clear shot at something worth
@@ -801,7 +854,7 @@ func (a *Actions) playerRangedAttack(player *common.Actor, targetPos geometry.Po
 	}
 
 	*/
-	a.executeAttack(rangedAttackAction, common.RangedAttack)
+	a.executeAttack(rangedAttackAction)
 }
 
 func (a *Actions) RestUntilHealed() {

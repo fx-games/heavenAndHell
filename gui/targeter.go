@@ -1,10 +1,13 @@
 package gui
 
 import (
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"rpg/common"
 	"rpg/defs"
 	"rpg/geometry"
 	"rpg/renderer"
+	"slices"
 )
 
 type Targeter struct {
@@ -13,6 +16,8 @@ type Targeter struct {
 	isDone       bool
 	uiController *UIController
 	targetInfo   common.TargetInfo
+	confirmKey   ebiten.Key // the key that started targeting (e.g. a spell menu hotkey) confirms it too
+	hasConfirm   bool
 }
 
 func (t *Targeter) IsDone() bool {
@@ -97,6 +102,19 @@ func (t *Targeter) Draw(renderer *renderer.MapRenderer) {
 	}
 }
 
+// Cycle moves the cursor to the next (step 1) or previous (step -1) valid target, wrapping around.
+func (t *Targeter) Cycle(step int) {
+	ts := t.rules.Targets()
+	if len(ts) == 0 {
+		return
+	}
+	i := slices.Index(ts, t.targetInfo.AdjustedTarget)
+	if i < 0 && step < 0 {
+		i = 0 // off every target: Tab lands on the nearest, Shift+Tab on the farthest
+	}
+	t.updateTarget(ts[((i+step)%len(ts)+len(ts))%len(ts)])
+}
+
 func (t *Targeter) updateTarget(pos geometry.Point) {
 	t.targetInfo = t.rules.OnTargetChanged(pos)
 }
@@ -122,5 +140,10 @@ func NewTargeter(uiController *UIController, rules common.TargetRules, onTargetS
 		targetInfo:   rules.OnTargetChanged(rules.GetPreSelectedTarget()),
 	}
 	t.updateTarget(rules.GetPreSelectedTarget())
+	for _, key := range inpututil.AppendJustPressedKeys(nil) {
+		if key != ebiten.KeyShift && key != ebiten.KeyControl && key != ebiten.KeyAlt {
+			t.confirmKey, t.hasConfirm = key, true
+		}
+	}
 	return t
 }

@@ -30,3 +30,16 @@ func TestRandomCueSkipsMissingFiles(t *testing.T) {
 		t.Fatalf("expected both loaded samples to be picked, got %d distinct", len(seen))
 	}
 }
+
+func TestPannedScalesEachChannel(t *testing.T) {
+	// one frame: left 1000, right -1000
+	b := []byte{0xe8, 0x03, 0x18, 0xfc}
+	out := panned(b, 0.5, 1)
+	l, r := int16(uint16(out[0])|uint16(out[1])<<8), int16(uint16(out[2])|uint16(out[3])<<8)
+	if l != 500 || r != -1000 {
+		t.Fatalf("got %d, %d", l, r)
+	}
+	if &panned(b, 1, 1)[0] != &b[0] {
+		t.Fatal("unpanned samples were copied")
+	}
+}

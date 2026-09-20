@@ -184,7 +184,7 @@ func (g *MapGenerator) changeD1Map(m *gridmap.GridMap[*Actor, *Item, Object], x1
 	})
 	waiting := g.walledIn[m.GetName()][:0]
 	for _, a := range g.walledIn[m.GetName()] {
-		if p := a.MapPosition(); m.CanPlaceActorHere(p) {
+		if p := a.MapPosition(); canPlaceD1Monster(m, p) {
 			m.AddActor(a, p)
 			if g.factory.State.GetMap() == m { // a level being built gets its actors timed on arrival
 				g.factory.State.OnActorSpawned(a)

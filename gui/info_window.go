@@ -40,16 +40,6 @@ func (u *UIController) OpenInfoWindow(title string, sections []common.D1SheetSec
 	u.PushWidget(w)
 }
 
-// sectionLines is how many text lines a block of sections takes: a title line and a half-line gap per section,
-// plus its rows and notes.
-func sectionLines(sections []common.D1SheetSection) int {
-	lines := 0
-	for _, sec := range sections {
-		lines += len(sec.Rows) + len(sec.Notes) + 2
-	}
-	return lines
-}
-
 func (w *InfoWindow) Layout() {
 	r := w.u.GetRenderer()
 	screen := w.u.GetScreenSize()
@@ -88,22 +78,23 @@ func (w *InfoWindow) Layout() {
 	}
 	w.colW = max(w.colW, w.labelW+valueW)
 
-	// one column unless it would run off the screen, then split the sections in half by line count
+	// one column unless it would run off the screen, then split the sections in half by height.
+	// Heights come from drawSectionBlock itself, so the window always fits exactly what gets drawn.
+	height := func(secs []common.D1SheetSection) int { return drawSectionBlock(nil, secs, 0, 0, 0, w.lineH) }
 	w.cols = [][]common.D1SheetSection{sections}
-	lines := sectionLines(sections)
-	if (lines+2)*w.lineH > screen.Y*17/20 {
-		half, count := lines/2, 0
-		for i, sec := range sections {
-			count += len(sec.Rows) + len(sec.Notes) + 2
-			if count >= half && i < len(sections)-1 {
+	blockH := height(sections)
+	if w.lineH+blockH > screen.Y*17/20 {
+		for i := range sections[:len(sections)-1] {
+			if height(sections[:i+1])*2 >= blockH {
 				w.cols = [][]common.D1SheetSection{sections[:i+1], sections[i+1:]}
+				blockH = max(height(w.cols[0]), height(w.cols[1]))
 				break
 			}
 		}
-		lines = max(sectionLines(w.cols[0]), sectionLines(w.cols[1]))
 	}
 
-	w.size = geometry.Point{X: len(w.cols)*w.colW + (len(w.cols)-1)*infoColGap, Y: (lines + 2) * w.lineH}
+	// the title line sits above the blocks
+	w.size = geometry.Point{X: len(w.cols)*w.colW + (len(w.cols)-1)*infoColGap, Y: w.lineH + blockH}
 	w.topLeft = screen.Sub(w.size).Div(2)
 }
 
@@ -122,13 +113,24 @@ func (w *InfoWindow) Draw() {
 
 // drawSectionBlock draws titled sections as a column of label/value rows with full-width notes underneath, and
 // returns the y it stopped at. The character sheet and the info window share it, so both read the same.
+// A nil renderer only measures: layout sizes windows with it so size and drawing cannot drift apart.
 func drawSectionBlock(r *renderer.TileRenderer, sections []common.D1SheetSection, x, y, labelW, lineH int) int {
 	for _, sec := range sections {
 		if len(sec.Rows) == 0 && len(sec.Notes) == 0 {
 			continue
 		}
-		y += lineH
-		r.DrawTTFOnScreen(float64(x), float64(y), sec.Title, sheetColor(sheetHeaderColors, sec.Title, defs.HeaderTextColor))
+		if sec.Title == "" {
+			y += lineH / 2
+		} else {
+			y += lineH
+			if r != nil {
+				r.DrawTTFOnScreen(float64(x), float64(y), sec.Title, defs.White)
+			}
+		}
+		if r == nil {
+			y += (len(sec.Rows)+len(sec.Notes))*lineH + lineH/3
+			continue
+		}
 		for _, row := range sec.Rows {
 			y += lineH
 			r.DrawTTFOnScreen(float64(x), float64(y), row[0], defs.DarkTextColor)

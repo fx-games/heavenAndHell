@@ -71,6 +71,9 @@ func (b *d1Brain) charge(hit, knockback bool) (d1Act, bool) {
 				b.g.actionBroker.Execute(common.NewMoveAction(common.AbstractCause("Knockback"), target, push, target == b.g.state.GetPlayer()))
 			}
 		}
+		if knockback {
+			common.D1StartPlrHit(b.g.state.Factory(), target, 0, 0, true) // the charge's forced flinch
+		}
 	}}, true
 }
 

@@ -138,12 +138,12 @@ func (c *Console) openSystemMenu() {
 			util.MenuItem{MainText: "Save game", Action: func() { c.context.OpenSaveMenu(c.openSystemMenu) }},
 			util.MenuItem{MainText: "Load game", Action: func() { c.context.OpenLoadMenu(c.openSystemMenu) }})
 	}
+	if !c.context.IsHellfire() {
+		items = append(items, util.MenuItem{MainText: "Enable Hellfire content", Action: c.context.EnableHellfire})
+	}
 	c.OpenMenu(append(items, []util.MenuItem{
 		{MainText: "Auto explore", Action: func() {
 			c.OpenMenu(append(common.AutoExploreSettings(c.config, c.openSystemMenu), util.MenuItem{MainText: "Back", Action: c.openSystemMenu}))
-		}},
-		{MainText: "Gameplay", Action: func() {
-			c.OpenMenu(append(common.GameplaySettings(c.config, c.openSystemMenu), util.MenuItem{MainText: "Back", Action: c.openSystemMenu}))
 		}},
 		{MainText: "Key bindings", Action: c.showHelp},
 		{MainText: "Back to main menu", Action: c.context.BackToMainMenu},

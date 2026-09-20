@@ -1,158 +1,197 @@
 %rec: default
 
 internal_name: item.misc
+reference_image: reference/d1_sprites/items/item.magic_rock.curs76.png
 name: Misc Item (fallback)
 icon: 137
 
 internal_name: item.bow
+reference_image: reference/d1_sprites/items/item.short_bow.curs118.png
 name: Bow
 icon: 621
 
 internal_name: item.shield
+reference_image: reference/d1_sprites/items/item.buckler.curs83.png
 name: Shield
 icon: 205
 
 internal_name: item.larmor
+reference_image: reference/d1_sprites/items/item.cape.curs150.png
 name: Light Armor (rags, capes, leather)
 icon: 227
 
 internal_name: item.marmor
+reference_image: reference/d1_sprites/items/item.arkaine_s_valor.curs157.png
 name: Medium Armor (mail)
 icon: 230
 
 internal_name: item.harmor
+reference_image: reference/d1_sprites/items/item.breast_plate.curs153.png
 name: Heavy Armor (plate)
 icon: 199
 
 internal_name: item.staff
+reference_image: reference/d1_sprites/items/item.short_staff_of_charged_bolt.curs109.png
 name: Staff
 icon: 141
 
 internal_name: item.gold_small
+reference_image: reference/d1_sprites/items/item.gold.curs168.png
 name: Gold (small pile)
 icon: 271
 
 internal_name: item.gold_medium
+reference_image: reference/d1_sprites/items/item.gold.curs168.png
 name: Gold (medium pile)
 icon: 272
 
 internal_name: item.gold_large
+reference_image: reference/d1_sprites/items/item.gold.curs168.png
 name: Gold (large pile)
 icon: 273
 
 internal_name: item.ring
+reference_image: reference/d1_sprites/items/item.empyrean_band.curs18.png
 name: Ring
 icon: 129
 
 internal_name: item.amulet
+reference_image: reference/d1_sprites/items/item.optic_amulet.curs44.png
 name: Amulet
 icon: 132
 
 internal_name: item.heal
+reference_image: reference/d1_sprites/items/item.potion_of_healing.curs32.png
 name: Potion of Healing
 icon: 331
 
 internal_name: item.fullheal
+reference_image: reference/d1_sprites/items/item.potion_of_full_healing.curs35.png
 name: Potion of Full Healing
 icon: 332
 
 internal_name: item.mana
+reference_image: reference/d1_sprites/items/item.potion_of_mana.curs39.png
 name: Potion of Mana
 icon: 329
 
 internal_name: item.fullmana
+reference_image: reference/d1_sprites/items/item.potion_of_full_mana.curs0.png
 name: Potion of Full Mana
 icon: 327
 
 internal_name: item.rejuv
+reference_image: reference/d1_sprites/items/item.potion_of_rejuvenation.curs37.png
 name: Potion of Rejuvenation
 icon: 325
 
 internal_name: item.fullrejuv
+reference_image: reference/d1_sprites/items/item.potion_of_full_rejuvenation.curs33.png
 name: Potion of Full Rejuvenation
 icon: 335
 
 internal_name: item.elixstr
+reference_image: reference/d1_sprites/items/item.elixir_of_strength.curs38.png
 name: Elixir of Strength
 icon: 333
 
 internal_name: item.elixmag
+reference_image: reference/d1_sprites/items/item.elixir_of_magic.curs34.png
 name: Elixir of Magic
 icon: 333
 
 internal_name: item.elixdex
+reference_image: reference/d1_sprites/items/item.elixir_of_dexterity.curs36.png
 name: Elixir of Dexterity
 icon: 333
 
 internal_name: item.elixvit
+reference_image: reference/d1_sprites/items/item.elixir_of_vitality.curs31.png
 name: Elixir of Vitality
 icon: 333
 
 internal_name: item.specelix
+reference_image: reference/d1_sprites/items/item.spectral_elixir.curs15.png
 name: Spectral Elixir
 icon: 326
 
 internal_name: item.scroll
+reference_image: reference/d1_sprites/items/item.scroll_of_identify.curs1.png
 name: Scroll
-icon: 139
+icon: 830
 
 internal_name: item.scrollt
+reference_image: reference/d1_sprites/items/item.scroll_of_resurrect.curs1.png
 name: Scroll (targeted spell)
-icon: 139
+icon: 831
 
 internal_name: item.book
+reference_image: reference/d1_sprites/items/item.book_of.curs88.png
 name: Spell Book
 icon: 323
 
 internal_name: item.ear
+reference_image: reference/d1_sprites/items/item.heart.curs19.png
 name: Ear / Heart
 icon: 139
 
 internal_name: item.mapofdoom
+reference_image: reference/d1_sprites/items/item.map_of_the_stars.curs96.png
 name: Map of the Stars (quest)
 icon: 139
 
 internal_name: item.tavern_sign
+reference_image: reference/d1_sprites/items/item.tavern_sign.curs126.png
 name: Tavern Sign (quest)
 icon: 673
 
 internal_name: item.magic_rock
+reference_image: reference/d1_sprites/items/item.magic_rock.curs76.png
 name: Magic Rock (quest)
 icon: 776
 
 internal_name: item.anvil_of_fury
+reference_image: reference/d1_sprites/items/item.anvil_of_fury.curs140.png
 name: Anvil of Fury (quest)
 icon: 137
 
 internal_name: item.black_mushroom
+reference_image: reference/d1_sprites/items/item.black_mushroom.curs89.png
 name: Black Mushroom (quest)
 icon: 279
 
 internal_name: item.brain
+reference_image: reference/d1_sprites/items/item.brain.curs40.png
 name: Brain (quest)
 icon: 137
 
 internal_name: item.fungal_tome
+reference_image: reference/d1_sprites/items/item.fungal_tome.curs97.png
 name: Fungal Tome (quest)
 icon: 754
 
 internal_name: item.blood_stone
+reference_image: reference/d1_sprites/items/item.blood_stone.curs25.png
 name: Blood Stone (quest)
 icon: 775
 
 internal_name: item.golden_elixir
+reference_image: reference/d1_sprites/items/item.golden_elixir.curs17.png
 name: Golden Elixir (quest)
 icon: 334
 
 internal_name: item.staff_of_lazarus
+reference_image: reference/d1_sprites/items/item.staff_of_lazarus.curs155.png
 name: Staff of Lazarus (quest)
 icon: 643
 
 internal_name: item.oilof
+reference_image: reference/d1_sprites/items/item.oil.curs30.png
 name: Oil (unidentified)
 icon: 333
 
 internal_name: item.oilacc
+reference_image: reference/d1_sprites/items/item.oil_of_accuracy.curs30.png
 name: Oil of Accuracy
 icon: 333
 
@@ -161,6 +200,7 @@ name: Oil of Mastery
 icon: 333
 
 internal_name: item.oilsharp
+reference_image: reference/d1_sprites/items/item.oil_of_sharpness.curs30.png
 name: Oil of Sharpness
 icon: 333
 
@@ -173,6 +213,7 @@ name: Oil of Skill
 icon: 333
 
 internal_name: item.oilbsmth
+reference_image: reference/d1_sprites/items/item.blacksmith_oil.curs30.png
 name: Blacksmith Oil
 icon: 333
 
@@ -193,346 +234,432 @@ name: Oil of Imperviousness
 icon: 333
 
 internal_name: item.runef
+reference_image: reference/d1_sprites/items/item.rune_of_fire.curs193.png
 name: Rune of Fire
 icon: 771
 
 internal_name: item.runel
+reference_image: reference/d1_sprites/items/item.rune_of_lightning.curs195.png
 name: Rune of Lightning
 icon: 772
 
 internal_name: item.gr_runef
+reference_image: reference/d1_sprites/items/item.greater_rune_of_fire.curs194.png
 name: Greater Rune of Fire
 icon: 771
 
 internal_name: item.gr_runel
+reference_image: reference/d1_sprites/items/item.greater_rune_of_lightning.curs196.png
 name: Greater Rune of Lightning
 icon: 772
 
 internal_name: item.runes
+reference_image: reference/d1_sprites/items/item.rune_of_stone.curs197.png
 name: Rune of Stone
 icon: 773
 
 internal_name: item.auric
+reference_image: reference/d1_sprites/items/item.auric_amulet.curs180.png
 name: Auric Amulet
 icon: 134
 
 internal_name: item.note
+reference_image: reference/d1_sprites/items/item.reconstructed_note.curs192.png
 name: Reconstructed Note
 icon: 111
 
 internal_name: item.arenapot
+reference_image: reference/d1_sprites/items/item.arena_potion.curs16.png
 name: Arena Potion
 icon: 332
 
 internal_name: item.rune_bomb
+reference_image: reference/d1_sprites/items/item.rune_bomb.curs187.png
 name: Rune Bomb
 icon: 770
 
 internal_name: item.theodore
+reference_image: reference/d1_sprites/items/item.theodore.curs188.png
 name: Theodore
 icon: 83
 
 internal_name: item.torn_note_1
+reference_image: reference/d1_sprites/items/item.torn_note_1.curs189.png
 name: Torn Note 1
 icon: 139
 
 internal_name: item.torn_note_2
+reference_image: reference/d1_sprites/items/item.torn_note_2.curs190.png
 name: Torn Note 2
 icon: 139
 
 internal_name: item.torn_note_3
+reference_image: reference/d1_sprites/items/item.torn_note_3.curs191.png
 name: Torn Note 3
 icon: 139
 
 internal_name: item.brown_suit
+reference_image: reference/d1_sprites/items/item.brown_suit.curs199.png
 name: Brown Suit
 icon: 608
 
 internal_name: item.grey_suit
+reference_image: reference/d1_sprites/items/item.grey_suit.curs198.png
 name: Grey Suit
 icon: 609
 
 internal_name: item.arkaine_s_valor
+reference_image: reference/d1_sprites/items/item.arkaine_s_valor.curs157.png
 icon: 200
 name: Medium Armor: Arkaine's Valor
 
 internal_name: item.axe
+reference_image: reference/d1_sprites/items/item.cleaver.curs106.png
 icon: 697
 name: Axe: Axe
 
 internal_name: item.axe.magic
+reference_image: reference/d1_sprites/items/item.axe.curs144.png
 icon: 172
 name: Axe: Axe (magic)
 
 internal_name: item.bastard_sword
+reference_image: reference/d1_sprites/items/item.bastard_sword.curs57.png
 icon: 646
 name: Sword: Bastard Sword
 
 internal_name: item.bastard_sword.magic
+reference_image: reference/d1_sprites/items/item.bastard_sword.curs57.png
 icon: 146
 name: Sword: Bastard Sword (magic)
 
 internal_name: item.bastard_sword.unique
+reference_image: reference/d1_sprites/items/item.doombringer.unique.png
 icon: 147
 name: Sword: Bastard Sword (unique)
 
 internal_name: item.battle_axe
+reference_image: reference/d1_sprites/items/item.battle_axe.curs101.png
 icon: 697
 name: Axe: Battle Axe
 
 internal_name: item.battle_axe.magic
+reference_image: reference/d1_sprites/items/item.battle_axe.curs101.png
 icon: 172
 name: Axe: Battle Axe (magic)
 
 internal_name: item.battle_axe.unique
+reference_image: reference/d1_sprites/items/item.the_celestial_axe.unique.png
 icon: 173
 name: Axe: Battle Axe (unique)
 
 internal_name: item.blade
+reference_image: reference/d1_sprites/items/item.blade.curs56.png
 icon: 646
 name: Sword: Blade
 
 internal_name: item.blade.magic
+reference_image: reference/d1_sprites/items/item.blade.curs56.png
 icon: 146
 name: Sword: Blade (magic)
 
 internal_name: item.bovine_plate
+reference_image: reference/d1_sprites/items/item.bovine_plate.curs226.png
 icon: 199
 name: Heavy Armor: Bovine Plate
 
 internal_name: item.breast_plate
+reference_image: reference/d1_sprites/items/item.breast_plate.curs153.png
 icon: 199
 name: Heavy Armor: Breast Plate
 
 internal_name: item.breast_plate.magic
+reference_image: reference/d1_sprites/items/item.breast_plate.curs153.png
 icon: 200
 name: Heavy Armor: Breast Plate (magic)
 
 internal_name: item.breast_plate.unique
+reference_image: reference/d1_sprites/items/item.scavenger_carapace.unique.png
 icon: 201
 name: Heavy Armor: Breast Plate (unique)
 
 internal_name: item.broad_axe
+reference_image: reference/d1_sprites/items/item.broad_axe.curs141.png
 icon: 697
 name: Axe: Broad Axe
 
 internal_name: item.broad_axe.magic
+reference_image: reference/d1_sprites/items/item.broad_axe.curs141.png
 icon: 172
 name: Axe: Broad Axe (magic)
 
 internal_name: item.broad_axe.unique
+reference_image: reference/d1_sprites/items/item.bloodslayer.unique.png
 icon: 173
 name: Axe: Broad Axe (unique)
 
 internal_name: item.broad_sword
+reference_image: reference/d1_sprites/items/item.broad_sword.curs61.png
 icon: 649
 name: Sword: Broad Sword
 
 internal_name: item.broad_sword.magic
+reference_image: reference/d1_sprites/items/item.broad_sword.curs61.png
 icon: 146
 name: Sword: Broad Sword (magic)
 
 internal_name: item.broad_sword.unique
+reference_image: reference/d1_sprites/items/item.gibbous_moon.unique.png
 icon: 147
 name: Sword: Broad Sword (unique)
 
 internal_name: item.buckler
+reference_image: reference/d1_sprites/items/item.buckler.curs83.png
 icon: 203
 name: Shield: Buckler
 
 internal_name: item.buckler.magic
+reference_image: reference/d1_sprites/items/item.buckler.curs83.png
 icon: 204
 name: Shield: Buckler (magic)
 
 internal_name: item.buckler.unique
+reference_image: reference/d1_sprites/items/item.the_deflector.unique.png
 icon: 204
 name: Shield: Buckler (unique)
 
 internal_name: item.cap
+reference_image: reference/d1_sprites/items/item.cap.curs91.png
 icon: 211
 name: Helm: Cap
 
 internal_name: item.cap.magic
+reference_image: reference/d1_sprites/items/item.cap.curs91.png
 icon: 212
 name: Helm: Cap (magic)
 
 internal_name: item.cape
+reference_image: reference/d1_sprites/items/item.cape.curs150.png
 icon: 415
 name: Light Armor: Cape
 
 internal_name: item.cape.magic
+reference_image: reference/d1_sprites/items/item.cape.curs150.png
 icon: 417
 name: Light Armor: Cape (magic)
 
 internal_name: item.cape.unique
+reference_image: reference/d1_sprites/items/item.nightscape.unique.png
 icon: 418
 name: Light Armor: Cape (unique)
 
 internal_name: item.chain_mail
+reference_image: reference/d1_sprites/items/item.chain_mail.curs111.png
 icon: 230
 name: Medium Armor: Chain Mail
 
 internal_name: item.chain_mail.magic
+reference_image: reference/d1_sprites/items/item.chain_mail.curs111.png
 icon: 196
 name: Medium Armor: Chain Mail (magic)
 
 internal_name: item.chain_mail.unique
+reference_image: reference/d1_sprites/items/item.sparking_mail.unique.png
 icon: 197
 name: Medium Armor: Chain Mail (unique)
 
 internal_name: item.claymore
+reference_image: reference/d1_sprites/items/item.claymore.curs65.png
 icon: 650
 name: Sword: Claymore
 
 internal_name: item.claymore.magic
+reference_image: reference/d1_sprites/items/item.claymore.curs65.png
 icon: 629
 name: Sword: Claymore (magic)
 
 internal_name: item.claymore.unique
+reference_image: reference/d1_sprites/items/item.the_bonesaw.unique.png
 icon: 651
 name: Sword: Claymore (unique)
 
 internal_name: item.cleaver
+reference_image: reference/d1_sprites/items/item.cleaver.curs106.png
 icon: 697
 name: Axe: Cleaver
 
 internal_name: item.cloak
+reference_image: reference/d1_sprites/items/item.cloak.curs149.png
 icon: 415
 name: Light Armor: Cloak
 
 internal_name: item.cloak.magic
+reference_image: reference/d1_sprites/items/item.cloak.curs149.png
 icon: 417
 name: Light Armor: Cloak (magic)
 
 internal_name: item.cloak.unique
+reference_image: reference/d1_sprites/items/item.the_rainbow_cloak.unique.png
 icon: 418
 name: Light Armor: Cloak (unique)
 
 internal_name: item.club
+reference_image: reference/d1_sprites/items/item.club.curs66.png
 icon: 659
 name: Mace: Club
 
 internal_name: item.club.magic
+reference_image: reference/d1_sprites/items/item.club.curs66.png
 icon: 169
 name: Mace: Club (magic)
 
 internal_name: item.club.unique
+reference_image: reference/d1_sprites/items/item.gnarled_root.unique.png
 icon: 170
 name: Mace: Club (unique)
 
 internal_name: item.composite_bow
+reference_image: reference/d1_sprites/items/item.composite_bow.curs133.png
 icon: 621
 name: Bow: Composite Bow
 
 internal_name: item.composite_bow.magic
+reference_image: reference/d1_sprites/items/item.composite_bow.curs133.png
 icon: 150
 name: Bow: Composite Bow (magic)
 
 internal_name: item.composite_bow.unique
+reference_image: reference/d1_sprites/items/item.deadly_hunter.unique.png
 icon: 151
 name: Bow: Composite Bow (unique)
 
 internal_name: item.composite_staff
+reference_image: reference/d1_sprites/items/item.composite_staff.curs166.png
 icon: 141
 name: Staff: Composite Staff
 
 internal_name: item.composite_staff.magic
+reference_image: reference/d1_sprites/items/item.composite_staff.curs166.png
 icon: 143
 name: Staff: Composite Staff (magic)
 
 internal_name: item.composite_staff.unique
+reference_image: reference/d1_sprites/items/item.thundercall.unique.png
 icon: 140
 name: Staff: Composite Staff (unique)
 
 internal_name: item.crown
+reference_image: reference/d1_sprites/items/item.crown.curs95.png
 icon: 596
 name: Helm: Crown
 
 internal_name: item.crown.magic
+reference_image: reference/d1_sprites/items/item.crown.curs95.png
 icon: 597
 name: Helm: Crown (magic)
 
 internal_name: item.crown.unique
+reference_image: reference/d1_sprites/items/item.royal_circlet.unique.png
 icon: 598
 name: Helm: Crown (unique)
 
 internal_name: item.dagger
+reference_image: reference/d1_sprites/items/item.dagger.curs51.png
 icon: 233
 name: Sword: Dagger
 
 internal_name: item.dagger.magic
+reference_image: reference/d1_sprites/items/item.dagger.curs51.png
 icon: 146
 name: Sword: Dagger (magic)
 
 internal_name: item.dagger.unique
+reference_image: reference/d1_sprites/items/item.gonnagal_s_dirk.unique.png
 icon: 147
 name: Sword: Dagger (unique)
 
 internal_name: item.falchion
+reference_image: reference/d1_sprites/items/item.falchion.curs62.png
 icon: 600
 name: Sword: Falchion
 
 internal_name: item.falchion.magic
+reference_image: reference/d1_sprites/items/item.falchion.curs62.png
 icon: 146
 name: Sword: Falchion (magic)
 
 internal_name: item.falchion.unique
+reference_image: reference/d1_sprites/items/item.gryphons_claw.unique.png
 icon: 147
 name: Sword: Falchion (unique)
 
 internal_name: item.field_plate
+reference_image: reference/d1_sprites/items/item.field_plate.curs103.png
 icon: 199
 name: Heavy Armor: Field Plate
 
 internal_name: item.field_plate.magic
+reference_image: reference/d1_sprites/items/item.field_plate.curs103.png
 icon: 200
 name: Heavy Armor: Field Plate (magic)
 
 internal_name: item.flail
+reference_image: reference/d1_sprites/items/item.flail.curs131.png
 icon: 659
 name: Mace: Flail
 
 internal_name: item.flail.magic
+reference_image: reference/d1_sprites/items/item.flail.curs131.png
 icon: 169
 name: Mace: Flail (magic)
 
 internal_name: item.flail.unique
+reference_image: reference/d1_sprites/items/item.the_celestial_star.unique.png
 icon: 170
 name: Mace: Flail (unique)
 
 internal_name: item.full_helm
+reference_image: reference/d1_sprites/items/item.full_helm.curs75.png
 icon: 211
 name: Helm: Full Helm
 
 internal_name: item.full_helm.magic
+reference_image: reference/d1_sprites/items/item.full_helm.curs75.png
 icon: 212
 name: Helm: Full Helm (magic)
 
 internal_name: item.full_plate_mail
+reference_image: reference/d1_sprites/items/item.full_plate_mail.curs151.png
 icon: 199
 name: Heavy Armor: Full Plate Mail
 
 internal_name: item.full_plate_mail.magic
+reference_image: reference/d1_sprites/items/item.full_plate_mail.curs151.png
 icon: 200
 name: Heavy Armor: Full Plate Mail (magic)
 
 internal_name: item.full_plate_mail.unique
+reference_image: reference/d1_sprites/items/item.demonspike_coat.unique.png
 icon: 201
 name: Heavy Armor: Full Plate Mail (unique)
 
 internal_name: item.gothic_plate
+reference_image: reference/d1_sprites/items/item.gothic_plate.curs152.png
 icon: 199
 name: Heavy Armor: Gothic Plate
 
 internal_name: item.gothic_plate.magic
+reference_image: reference/d1_sprites/items/item.gothic_plate.curs152.png
 icon: 200
 name: Heavy Armor: Gothic Plate (magic)
 
 internal_name: item.gothic_shield
+reference_image: reference/d1_sprites/items/item.gothic_shield.curs148.png
 icon: 691
 name: Shield: Gothic Shield
 
 internal_name: item.gothic_shield.magic
+reference_image: reference/d1_sprites/items/item.gothic_shield.curs148.png
 icon: 690
 name: Shield: Gothic Shield (magic)
 
@@ -541,422 +668,527 @@ icon: 689
 name: Shield: Gothic Shield (unique)
 
 internal_name: item.great_axe
+reference_image: reference/d1_sprites/items/item.great_axe.curs143.png
 icon: 697
 name: Axe: Great Axe
 
 internal_name: item.great_axe.magic
+reference_image: reference/d1_sprites/items/item.great_axe.curs143.png
 icon: 172
 name: Axe: Great Axe (magic)
 
 internal_name: item.great_axe.unique
+reference_image: reference/d1_sprites/items/item.messerschmidt_s_reaver.unique.png
 icon: 173
 name: Axe: Great Axe (unique)
 
 internal_name: item.great_helm
+reference_image: reference/d1_sprites/items/item.great_helm.curs98.png
 icon: 211
 name: Helm: Great Helm
 
 internal_name: item.great_helm.magic
+reference_image: reference/d1_sprites/items/item.great_helm.curs98.png
 icon: 212
 name: Helm: Great Helm (magic)
 
 internal_name: item.great_helm.unique
+reference_image: reference/d1_sprites/items/item.gotterdamerung.unique.png
 icon: 213
 name: Helm: Great Helm (unique)
 
 internal_name: item.great_sword
+reference_image: reference/d1_sprites/items/item.great_sword.curs134.png
 icon: 646
 name: Sword: Great Sword
 
 internal_name: item.great_sword.magic
+reference_image: reference/d1_sprites/items/item.great_sword.curs134.png
 icon: 146
 name: Sword: Great Sword (magic)
 
 internal_name: item.great_sword.unique
+reference_image: reference/d1_sprites/items/item.the_grandfather.unique.png
 icon: 147
 name: Sword: Great Sword (unique)
 
 internal_name: item.griswold_s_edge
+reference_image: reference/d1_sprites/items/item.griswold_s_edge.curs61.png
 icon: 645
 name: Sword: Griswold's Edge
 
 internal_name: item.hard_leather_armor
+reference_image: reference/d1_sprites/items/item.hard_leather_armor.curs127.png
 icon: 227
 name: Light Armor: Hard Leather Armor
 
 internal_name: item.hard_leather_armor.magic
+reference_image: reference/d1_sprites/items/item.hard_leather_armor.curs127.png
 icon: 228
 name: Light Armor: Hard Leather Armor (magic)
 
 internal_name: item.harlequin_crest
+reference_image: reference/d1_sprites/items/item.harlequin_crest.curs93.png
 icon: 211
 name: Helm: Harlequin Crest
 
 internal_name: item.helm
+reference_image: reference/d1_sprites/items/item.the_undead_crown.curs78.png
 icon: 211
 name: Helm: Helm
 
 internal_name: item.helm.magic
+reference_image: reference/d1_sprites/items/item.helm.curs82.png
 icon: 212
 name: Helm: Helm (magic)
 
 internal_name: item.helm.unique
+reference_image: reference/d1_sprites/items/item.helm_of_sprits.unique.png
 icon: 213
 name: Helm: Helm (unique)
 
 internal_name: item.hunter_s_bow
+reference_image: reference/d1_sprites/items/item.hunter_s_bow.curs102.png
 icon: 621
 name: Bow: Hunter's Bow
 
 internal_name: item.hunter_s_bow.magic
+reference_image: reference/d1_sprites/items/item.hunter_s_bow.curs102.png
 icon: 150
 name: Bow: Hunter's Bow (magic)
 
 internal_name: item.hunter_s_bow.unique
+reference_image: reference/d1_sprites/items/item.flamedart.unique.png
 icon: 151
 name: Bow: Hunter's Bow (unique)
 
 internal_name: item.kite_shield
+reference_image: reference/d1_sprites/items/item.kite_shield.curs113.png
 icon: 205
 name: Shield: Kite Shield
 
 internal_name: item.kite_shield.magic
+reference_image: reference/d1_sprites/items/item.kite_shield.curs113.png
 icon: 206
 name: Shield: Kite Shield (magic)
 
 internal_name: item.kite_shield.unique
+reference_image: reference/d1_sprites/items/item.dragon_s_breach.unique.png
 icon: 410
 name: Shield: Kite Shield (unique)
 
 internal_name: item.large_axe
+reference_image: reference/d1_sprites/items/item.large_axe.curs142.png
 icon: 697
 name: Axe: Large Axe
 
 internal_name: item.large_axe.magic
+reference_image: reference/d1_sprites/items/item.large_axe.curs142.png
 icon: 172
 name: Axe: Large Axe (magic)
 
 internal_name: item.large_axe.unique
+reference_image: reference/d1_sprites/items/item.the_mangler.unique.png
 icon: 173
 name: Axe: Large Axe (unique)
 
 internal_name: item.large_shield
+reference_image: reference/d1_sprites/items/item.large_shield.curs147.png
 icon: 205
 name: Shield: Large Shield
 
 internal_name: item.large_shield.magic
+reference_image: reference/d1_sprites/items/item.large_shield.curs147.png
 icon: 206
 name: Shield: Large Shield (magic)
 
 internal_name: item.large_shield.unique
+reference_image: reference/d1_sprites/items/item.holy_defender.unique.png
 icon: 410
 name: Shield: Large Shield (unique)
 
 internal_name: item.leather_armor
+reference_image: reference/d1_sprites/items/item.leather_armor.curs135.png
 icon: 227
 name: Light Armor: Leather Armor
 
 internal_name: item.leather_armor.magic
+reference_image: reference/d1_sprites/items/item.leather_armor.curs135.png
 icon: 228
 name: Light Armor: Leather Armor (magic)
 
 internal_name: item.leather_armor.unique
+reference_image: reference/d1_sprites/items/item.leather_of_aut.unique.png
 icon: 229
 name: Light Armor: Leather Armor (unique)
 
 internal_name: item.lightforge
+reference_image: reference/d1_sprites/items/item.lightforge.curs59.png
 icon: 498
 name: Mace: Lightforge
 
 internal_name: item.long_battle_bow
+reference_image: reference/d1_sprites/items/item.long_battle_bow.curs119.png
 icon: 621
 name: Bow: Long Battle Bow
 
 internal_name: item.long_battle_bow.magic
+reference_image: reference/d1_sprites/items/item.long_battle_bow.curs119.png
 icon: 150
 name: Bow: Long Battle Bow (magic)
 
 internal_name: item.long_battle_bow.unique
+reference_image: reference/d1_sprites/items/item.eaglehorn.unique.png
 icon: 151
 name: Bow: Long Battle Bow (unique)
 
 internal_name: item.long_bow
+reference_image: reference/d1_sprites/items/item.long_bow.curs102.png
 icon: 621
 name: Bow: Long Bow
 
 internal_name: item.long_bow.magic
+reference_image: reference/d1_sprites/items/item.long_bow.curs102.png
 icon: 150
 name: Bow: Long Bow (magic)
 
 internal_name: item.long_bow.unique
+reference_image: reference/d1_sprites/items/item.the_celestial_bow.unique.png
 icon: 151
 name: Bow: Long Bow (unique)
 
 internal_name: item.long_staff
+reference_image: reference/d1_sprites/items/item.long_staff.curs123.png
 icon: 141
 name: Staff: Long Staff
 
 internal_name: item.long_staff.magic
+reference_image: reference/d1_sprites/items/item.long_staff.curs123.png
 icon: 143
 name: Staff: Long Staff (magic)
 
 internal_name: item.long_staff.unique
+reference_image: reference/d1_sprites/items/item.staff_of_shadows.unique.png
 icon: 140
 name: Staff: Long Staff (unique)
 
 internal_name: item.long_sword
+reference_image: reference/d1_sprites/items/item.long_sword.curs60.png
 icon: 646
 name: Sword: Long Sword
 
 internal_name: item.long_sword.magic
+reference_image: reference/d1_sprites/items/item.long_sword.curs60.png
 icon: 146
 name: Sword: Long Sword (magic)
 
 internal_name: item.long_sword.unique
+reference_image: reference/d1_sprites/items/item.ice_shank.unique.png
 icon: 147
 name: Sword: Long Sword (unique)
 
 internal_name: item.long_war_bow
+reference_image: reference/d1_sprites/items/item.long_war_bow.curs119.png
 icon: 621
 name: Bow: Long War Bow
 
 internal_name: item.long_war_bow.magic
+reference_image: reference/d1_sprites/items/item.long_war_bow.curs119.png
 icon: 150
 name: Bow: Long War Bow (magic)
 
 internal_name: item.long_war_bow.unique
+reference_image: reference/d1_sprites/items/item.windforce.unique.png
 icon: 151
 name: Bow: Long War Bow (unique)
 
 internal_name: item.mace
+reference_image: reference/d1_sprites/items/item.club.curs66.png
 icon: 659
 name: Mace: Mace
 
 internal_name: item.mace.magic
+reference_image: reference/d1_sprites/items/item.mace.curs59.png
 icon: 169
 name: Mace: Mace (magic)
 
 internal_name: item.mace.unique
+reference_image: reference/d1_sprites/items/item.lightforge.unique.png
 icon: 170
 name: Mace: Mace (unique)
 
 internal_name: item.maul
+reference_image: reference/d1_sprites/items/item.maul.curs122.png
 icon: 659
 name: Mace: Maul
 
 internal_name: item.maul.magic
+reference_image: reference/d1_sprites/items/item.maul.curs122.png
 icon: 169
 name: Mace: Maul (magic)
 
 internal_name: item.maul.unique
+reference_image: reference/d1_sprites/items/item.hammer_of_jholm.unique.png
 icon: 170
 name: Mace: Maul (unique)
 
 internal_name: item.morning_star
+reference_image: reference/d1_sprites/items/item.morning_star.curs63.png
 icon: 659
 name: Mace: Morning Star
 
 internal_name: item.morning_star.magic
+reference_image: reference/d1_sprites/items/item.morning_star.curs63.png
 icon: 169
 name: Mace: Morning Star (magic)
 
 internal_name: item.morning_star.unique
+reference_image: reference/d1_sprites/items/item.baranar_s_star.unique.png
 icon: 170
 name: Mace: Morning Star (unique)
 
 internal_name: item.plate_mail
+reference_image: reference/d1_sprites/items/item.plate_mail.curs103.png
 icon: 199
 name: Heavy Armor: Plate Mail
 
 internal_name: item.plate_mail.magic
+reference_image: reference/d1_sprites/items/item.plate_mail.curs103.png
 icon: 200
 name: Heavy Armor: Plate Mail (magic)
 
 internal_name: item.plate_mail.unique
+reference_image: reference/d1_sprites/items/item.naj_s_light_plate.unique.png
 icon: 201
 name: Heavy Armor: Plate Mail (unique)
 
 internal_name: item.quarter_staff
+reference_image: reference/d1_sprites/items/item.quarter_staff.curs109.png
 icon: 141
 name: Staff: Quarter Staff
 
 internal_name: item.quarter_staff.magic
+reference_image: reference/d1_sprites/items/item.quarter_staff.curs109.png
 icon: 143
 name: Staff: Quarter Staff (magic)
 
 internal_name: item.quarter_staff.unique
+reference_image: reference/d1_sprites/items/item.mindcry.unique.png
 icon: 140
 name: Staff: Quarter Staff (unique)
 
 internal_name: item.quilted_armor
+reference_image: reference/d1_sprites/items/item.quilted_armor.curs129.png
 icon: 227
 name: Light Armor: Quilted Armor
 
 internal_name: item.quilted_armor.magic
+reference_image: reference/d1_sprites/items/item.quilted_armor.curs129.png
 icon: 198
 name: Light Armor: Quilted Armor (magic)
 
 internal_name: item.rags
+reference_image: reference/d1_sprites/items/item.rags.curs128.png
 icon: 227
 name: Light Armor: Rags
 
 internal_name: item.rags.magic
+reference_image: reference/d1_sprites/items/item.rags.curs128.png
 icon: 198
 name: Light Armor: Rags (magic)
 
 internal_name: item.rags.unique
+reference_image: reference/d1_sprites/items/item.torn_flesh_of_souls.unique.png
 icon: 201
 name: Light Armor: Rags (unique)
 
 internal_name: item.ring_mail
+reference_image: reference/d1_sprites/items/item.ring_mail.curs154.png
 icon: 230
 name: Medium Armor: Ring Mail
 
 internal_name: item.ring_mail.magic
+reference_image: reference/d1_sprites/items/item.ring_mail.curs154.png
 icon: 198
 name: Medium Armor: Ring Mail (magic)
 
 internal_name: item.robe
+reference_image: reference/d1_sprites/items/item.robe.curs137.png
 icon: 638
 name: Light Armor: Robe
 
 internal_name: item.robe.magic
+reference_image: reference/d1_sprites/items/item.robe.curs137.png
 icon: 637
 name: Light Armor: Robe (magic)
 
 internal_name: item.robe.unique
+reference_image: reference/d1_sprites/items/item.wisdom_s_wrap.unique.png
 icon: 610
 name: Light Armor: Robe (unique)
 
 internal_name: item.sabre
+reference_image: reference/d1_sprites/items/item.sabre.curs67.png
 icon: 646
 name: Sword: Sabre
 
 internal_name: item.sabre.magic
+reference_image: reference/d1_sprites/items/item.sabre.curs67.png
 icon: 146
 name: Sword: Sabre (magic)
 
 internal_name: item.sabre.unique
+reference_image: reference/d1_sprites/items/item.the_defender.unique.png
 icon: 147
 name: Sword: Sabre (unique)
 
 internal_name: item.scale_mail
+reference_image: reference/d1_sprites/items/item.scale_mail.curs114.png
 icon: 230
 name: Medium Armor: Scale Mail
 
 internal_name: item.scale_mail.magic
+reference_image: reference/d1_sprites/items/item.scale_mail.curs114.png
 icon: 198
 name: Medium Armor: Scale Mail (magic)
 
 internal_name: item.scimitar
+reference_image: reference/d1_sprites/items/item.scimitar.curs72.png
 icon: 646
 name: Sword: Scimitar
 
 internal_name: item.scimitar.magic
+reference_image: reference/d1_sprites/items/item.scimitar.curs72.png
 icon: 146
 name: Sword: Scimitar (magic)
 
 internal_name: item.scimitar.unique
+reference_image: reference/d1_sprites/items/item.the_falcon_s_talon.unique.png
 icon: 147
 name: Sword: Scimitar (unique)
 
 internal_name: item.short_battle_bow
+reference_image: reference/d1_sprites/items/item.short_battle_bow.curs167.png
 icon: 621
 name: Bow: Short Battle Bow
 
 internal_name: item.short_battle_bow.magic
+reference_image: reference/d1_sprites/items/item.short_battle_bow.curs167.png
 icon: 150
 name: Bow: Short Battle Bow (magic)
 
 internal_name: item.short_bow
+reference_image: reference/d1_sprites/items/item.short_bow.curs118.png
 icon: 621
 name: Bow: Short Bow
 
 internal_name: item.short_bow.magic
+reference_image: reference/d1_sprites/items/item.short_bow.curs118.png
 icon: 150
 name: Bow: Short Bow (magic)
 
 internal_name: item.short_bow.unique
+reference_image: reference/d1_sprites/items/item.the_rift_bow.unique.png
 icon: 151
 name: Bow: Short Bow (unique)
 
 internal_name: item.short_staff
+reference_image: reference/d1_sprites/items/item.short_staff.curs109.png
 icon: 141
 name: Staff: Short Staff
 
 internal_name: item.short_staff.magic
+reference_image: reference/d1_sprites/items/item.short_staff.curs109.png
 icon: 143
 name: Staff: Short Staff (magic)
 
 internal_name: item.short_staff.unique
+reference_image: reference/d1_sprites/items/item.gleamsong.unique.png
 icon: 140
 name: Staff: Short Staff (unique)
 
 internal_name: item.short_staff_of_charged_bolt
+reference_image: reference/d1_sprites/items/item.short_staff_of_charged_bolt.curs109.png
 icon: 141
 name: Staff: Short Staff of Charged Bolt
 
 internal_name: item.short_staff_of_charged_bolt.magic
+reference_image: reference/d1_sprites/items/item.short_staff_of_charged_bolt.curs109.png
 icon: 143
 name: Staff: Short Staff of Charged Bolt (magic)
 
 internal_name: item.short_sword
+reference_image: reference/d1_sprites/items/item.short_sword.curs64.png
 icon: 652
 name: Sword: Short Sword
 
 internal_name: item.short_sword.magic
+reference_image: reference/d1_sprites/items/item.short_sword.curs64.png
 icon: 146
 name: Sword: Short Sword (magic)
 
 internal_name: item.short_war_bow
+reference_image: reference/d1_sprites/items/item.short_war_bow.curs165.png
 icon: 621
 name: Bow: Short War Bow
 
 internal_name: item.short_war_bow.magic
+reference_image: reference/d1_sprites/items/item.short_war_bow.curs165.png
 icon: 150
 name: Bow: Short War Bow (magic)
 
 internal_name: item.skull_cap
+reference_image: reference/d1_sprites/items/item.skull_cap.curs90.png
 icon: 211
 name: Helm: Skull Cap
 
 internal_name: item.skull_cap.magic
+reference_image: reference/d1_sprites/items/item.skull_cap.curs90.png
 icon: 212
 name: Helm: Skull Cap (magic)
 
 internal_name: item.skull_cap.unique
+reference_image: reference/d1_sprites/items/item.thinking_cap.unique.png
 icon: 213
 name: Helm: Skull Cap (unique)
 
 internal_name: item.small_axe
+reference_image: reference/d1_sprites/items/item.small_axe.curs112.png
 icon: 697
 name: Axe: Small Axe
 
 internal_name: item.small_axe.magic
+reference_image: reference/d1_sprites/items/item.small_axe.curs112.png
 icon: 172
 name: Axe: Small Axe (magic)
 
 internal_name: item.small_axe.unique
+reference_image: reference/d1_sprites/items/item.aguinara_s_hatchet.unique.png
 icon: 173
 name: Axe: Small Axe (unique)
 
 internal_name: item.small_shield
+reference_image: reference/d1_sprites/items/item.small_shield.curs105.png
 icon: 205
 name: Shield: Small Shield
 
 internal_name: item.small_shield.magic
+reference_image: reference/d1_sprites/items/item.small_shield.curs105.png
 icon: 206
 name: Shield: Small Shield (magic)
 
 internal_name: item.small_shield.unique
+reference_image: reference/d1_sprites/items/item.blackoak_shield.unique.png
 icon: 410
 name: Shield: Small Shield (unique)
 
 internal_name: item.spiked_club
+reference_image: reference/d1_sprites/items/item.spiked_club.curs70.png
 icon: 659
 name: Mace: Spiked Club
 
 internal_name: item.spiked_club.magic
+reference_image: reference/d1_sprites/items/item.spiked_club.curs70.png
 icon: 169
 name: Mace: Spiked Club (magic)
 
@@ -965,86 +1197,107 @@ icon: 170
 name: Mace: Spiked Club (unique)
 
 internal_name: item.splint_mail
+reference_image: reference/d1_sprites/items/item.splint_mail.curs136.png
 icon: 230
 name: Medium Armor: Splint Mail
 
 internal_name: item.splint_mail.magic
+reference_image: reference/d1_sprites/items/item.splint_mail.curs136.png
 icon: 198
 name: Medium Armor: Splint Mail (magic)
 
 internal_name: item.studded_leather_armor
+reference_image: reference/d1_sprites/items/item.studded_leather_armor.curs107.png
 icon: 227
 name: Light Armor: Studded Leather Armor
 
 internal_name: item.studded_leather_armor.magic
+reference_image: reference/d1_sprites/items/item.studded_leather_armor.curs107.png
 icon: 228
 name: Light Armor: Studded Leather Armor (magic)
 
 internal_name: item.studded_leather_armor.unique
+reference_image: reference/d1_sprites/items/item.the_gladiator_s_bane.unique.png
 icon: 229
 name: Light Armor: Studded Leather Armor (unique)
 
 internal_name: item.sword
+reference_image: reference/d1_sprites/items/item.short_sword.curs64.png
 icon: 646
 name: Sword: Sword
 
 internal_name: item.sword.magic
+reference_image: reference/d1_sprites/items/item.sword.curs64.png
 icon: 146
 name: Sword: Sword (magic)
 
 internal_name: item.the_undead_crown
+reference_image: reference/d1_sprites/items/item.the_undead_crown.curs78.png
 icon: 598
 name: Helm: The Undead Crown
 
 internal_name: item.tower_shield
+reference_image: reference/d1_sprites/items/item.tower_shield.curs132.png
 icon: 205
 name: Shield: Tower Shield
 
 internal_name: item.tower_shield.magic
+reference_image: reference/d1_sprites/items/item.tower_shield.curs132.png
 icon: 206
 name: Shield: Tower Shield (magic)
 
 internal_name: item.tower_shield.unique
+reference_image: reference/d1_sprites/items/item.stormshield.unique.png
 icon: 410
 name: Shield: Tower Shield (unique)
 
 internal_name: item.two_handed_sword
+reference_image: reference/d1_sprites/items/item.two_handed_sword.curs110.png
 icon: 650
 name: Sword: Two-Handed Sword
 
 internal_name: item.two_handed_sword.magic
+reference_image: reference/d1_sprites/items/item.two_handed_sword.curs110.png
 icon: 629
 name: Sword: Two-Handed Sword (magic)
 
 internal_name: item.two_handed_sword.unique
+reference_image: reference/d1_sprites/items/item.the_grizzly.unique.png
 icon: 627
 name: Sword: Two-Handed Sword (unique)
 
 internal_name: item.veil_of_steel
+reference_image: reference/d1_sprites/items/item.veil_of_steel.curs85.png
 icon: 596
 name: Helm: Veil of Steel
 
 internal_name: item.war_hammer
+reference_image: reference/d1_sprites/items/item.war_hammer.curs121.png
 icon: 659
 name: Mace: War Hammer
 
 internal_name: item.war_hammer.magic
+reference_image: reference/d1_sprites/items/item.war_hammer.curs121.png
 icon: 169
 name: Mace: War Hammer (magic)
 
 internal_name: item.war_hammer.unique
+reference_image: reference/d1_sprites/items/item.schaefer_s_hammer.unique.png
 icon: 170
 name: Mace: War Hammer (unique)
 
 internal_name: item.war_staff
+reference_image: reference/d1_sprites/items/item.war_staff.curs124.png
 icon: 141
 name: Staff: War Staff
 
 internal_name: item.war_staff.magic
+reference_image: reference/d1_sprites/items/item.war_staff.curs124.png
 icon: 143
 name: Staff: War Staff (magic)
 
 internal_name: item.war_staff.unique
+reference_image: reference/d1_sprites/items/item.storm_spire.unique.png
 icon: 140
 name: Staff: War Staff (unique)
 

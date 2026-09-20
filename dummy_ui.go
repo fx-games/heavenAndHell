@@ -125,7 +125,7 @@ func (d DummyUI) OnMapChanged() {
 
 }
 
-func (d DummyUI) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string), back func()) {
+func (d DummyUI) OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath, hellfire bool, name string), back func()) {
 	//TODO implement me
 
 }
@@ -164,6 +164,8 @@ func (d DummyUI) UpdateMiniMap() {
 	//TODO implement me
 
 }
+
+func (d DummyUI) RefreshIconBars() {}
 
 func (d DummyUI) OnPlayerTurnTaken() {
 	//TODO implement me

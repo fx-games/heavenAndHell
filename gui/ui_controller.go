@@ -15,6 +15,7 @@ import (
 	"rpg/renderer"
 	"rpg/stats"
 	"rpg/util"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -77,7 +78,7 @@ type UIConfig struct {
 }
 
 type UIController struct {
-	modal        UIWidget
+	modals       []UIWidget // the top one gets the input; closing it goes back to the one below
 	overlays     []UIWidget
 	tileRenderer *renderer.TileRenderer
 	mapRenderer  *renderer.MapRenderer
@@ -98,9 +99,14 @@ type UIController struct {
 	statsLabel *BasicLabel
 	inventory  *IconOverlay
 	skills     *IconOverlay
+	belt       *IconOverlay // the quick slots, on keys 1 to common.BeltSize
 	timer      *IconOverlay
-	miniMap    *MinimapOverlay
-	message    PrintMessage
+
+	dragFrom  *IconOverlay // the overlay an icon is being dragged from while the button is held; nil otherwise
+	dragIndex int
+	dragged   UIElement
+	miniMap   *MinimapOverlay
+	message   PrintMessage
 
 	configuration *common.Configuration
 
@@ -111,6 +117,7 @@ type UIController struct {
 	worldTicks       uint64
 	thumbnail        *ebiten.Image // the last unobstructed frame, scaled down, for a save slot's screenshot
 	shouldQuitGame   bool
+	OnQuit           func() // runs inside the loop before it ends; GPU reads (the save's thumbnail) fail after RunGame returns
 	mousePosInPixels geometry.Point
 
 	targeter                   *Targeter
@@ -254,19 +261,25 @@ func (u *UIController) disableScrolling() {
 }
 
 func (u *UIController) GetTopModal() UIWidget {
-	return u.modal
+	if len(u.modals) == 0 {
+		return nil
+	}
+	return u.modals[len(u.modals)-1]
 }
 
 func (u *UIController) IsUIModalVisible() bool {
-	return u.modal != nil
+	return len(u.modals) > 0
 }
 func (u *UIController) PushWidget(widget UIWidget) {
-	u.modal = widget
+	u.modals = append(u.modals, widget)
 	u.HideTooltip() // a tooltip belongs to the widget it was hovered in
 }
 
+// PopWidget closes the top window, going back to the one below it.
 func (u *UIController) PopWidget() {
-	u.modal = nil
+	if len(u.modals) > 0 {
+		u.modals = u.modals[:len(u.modals)-1]
+	}
 	u.HideTooltip()
 	u.UpdateStatsLabel() // restore the compact stat bar (e.g. the unspent-points reminder) over whatever a menu showed
 }
@@ -333,6 +346,7 @@ func (u *UIController) OnMouseWheel(x int, y int, dy float64) bool {
 func (u *UIController) drawUI() {
 
 	defer u.drawTooltip()
+	defer u.drawDraggedIcon()
 	for _, overlay := range u.overlays {
 		if overlay == u.elevatedOverlay {
 			continue
@@ -343,7 +357,11 @@ func (u *UIController) drawUI() {
 		return
 	}
 	renderer := u.GetRenderer()
-	renderer.DrawColoredRect(geometry.Point{X: 0, Y: 0}, u.screenSize, color.RGBA{A: 140})
+	dimmed := u.screenSize
+	if _, sheet := u.GetTopModal().(*CharacterSheet); sheet {
+		dimmed.X -= u.uiBarWidth // the sidebar stays live under the character sheet
+	}
+	renderer.DrawColoredRect(geometry.Point{X: 0, Y: 0}, dimmed, color.RGBA{A: 140})
 
 	if u.elevatedOverlay != nil {
 		u.elevatedOverlay.Draw()
@@ -353,11 +371,19 @@ func (u *UIController) drawUI() {
 		return
 	}
 
-	if u.GetTopModal().ShouldClose() {
-		u.PopWidget()
-	} else {
-		u.GetTopModal().Draw()
+	if top := u.dropClosedWidgets(); top != nil {
+		top.Draw()
 	}
+}
+
+// dropClosedWidgets removes every widget that asked to close, not just the top one: a widget can close while under
+// another (a save slot screen under the confirmation it opened). It returns the new top, if any.
+func (u *UIController) dropClosedWidgets() UIWidget {
+	u.modals = slices.DeleteFunc(u.modals, func(w UIWidget) bool { return w.ShouldClose() })
+	if len(u.modals) == 0 {
+		u.UpdateStatsLabel()
+	}
+	return u.GetTopModal()
 }
 
 func (u *UIController) drawTooltip() {
@@ -366,13 +392,13 @@ func (u *UIController) drawTooltip() {
 	}
 }
 
-// Confirm opens a Yes/No menu asking message; onConfirm runs only if the player picks Yes.
+// Confirm opens a Yes/No menu asking message, one line per "\n"; onConfirm runs only if the player picks Yes.
 func (u *UIController) Confirm(message string, onConfirm func()) {
-	u.OpenMenu([]util.MenuItem{
-		{MainText: message},
-		{MainText: "Yes", Action: onConfirm},
-		{MainText: "No"},
-	})
+	var items []util.MenuItem
+	for _, line := range strings.Split(message, "\n") {
+		items = append(items, util.MenuItem{MainText: line})
+	}
+	u.OpenMenu(append(items, util.MenuItem{MainText: "Yes", Action: onConfirm}, util.MenuItem{MainText: "No", Action: u.PopWidget})) // "No" goes back to what asked
 }
 
 func (u *UIController) OpenMenu(menuItems []util.MenuItem) {
@@ -396,6 +422,7 @@ func (u *UIController) OpenUncancelableMenu(menuItems []util.MenuItem) {
 		u.mousePosInPixels.X,
 		u.mousePosInPixels.Y,
 	)
+	u.PopAll() // nothing to go back to from the start or death menu
 	u.PushWidget(menu)
 }
 func (u *UIController) GetRenderer() *renderer.TileRenderer {
@@ -512,8 +539,9 @@ func (u *UIController) HideTooltip() {
 }
 
 func (u *UIController) PopAll() {
-	u.modal = nil
+	u.modals = nil
 	u.HideTooltip()
+	u.UpdateStatsLabel() // a menu choice (Pepin's heal) may have changed what the stat bar shows
 }
 
 func (u *UIController) SetTileMapAnimations(mapping map[int32]TilemapAnimInfo) {
@@ -646,7 +674,7 @@ func (u *UIController) OpenStash(playerInv *common.Inventory, stashInTown *commo
 
 func (u *UIController) setupUI() {
 	u.overlays = []UIWidget{}
-	u.modal = nil
+	u.modals = nil
 
 	paddingLeftAndRight := 6
 	u.inventory = u.addInventoryOverlay(geometry.Point{X: paddingLeftAndRight, Y: 10})
@@ -669,11 +697,16 @@ func (u *UIController) setupUI() {
 	}))
 	statsBounds := u.statsLabel.GetBounds()
 
-	u.skills = u.addSkillsOverlay(geometry.Point{X: paddingLeftAndRight, Y: 180})
+	// the skills' hover label sits above the row; leave it room below the belt
+	labelSize := SizeNeededForText(u.GetRenderer().MeasureString, util.ToLabelText([]string{"Ag"}), 0)
+	labelHeight := labelSize.YOffsetForFirstLine + labelSize.SizeInPixels.Y
+	u.skills = u.addSkillsOverlay(geometry.Point{X: paddingLeftAndRight, Y: 180 - labelHeight})
 	skillBounds := u.skills.GetBounds()
+	u.belt = u.addBeltOverlay(geometry.Point{X: paddingLeftAndRight, Y: u.GetScreenSize().Y - skillBounds.Min.Y + labelHeight + paddingLeftAndRight})
+	beltBounds := u.belt.GetBounds()
 
 	topYForMap := statsBounds.Max.Y + paddingLeftAndRight*2
-	bottomYForMap := skillBounds.Min.Y - paddingLeftAndRight
+	bottomYForMap := beltBounds.Min.Y - paddingLeftAndRight
 	maxHeightForMap := bottomYForMap - topYForMap
 
 	u.miniMap = u.addMiniMap(geometry.Point{X: u.uiBarWidth, Y: topYForMap}, maxHeightForMap, paddingLeftAndRight)
@@ -698,6 +731,7 @@ func (u *UIController) addInventoryOverlay(pixelEdgeFromBottomRight geometry.Poi
 			return sortStacksForUI(state.GetPlayer().GetInventory().StackedItems())
 		},
 		OnSelection: u.onItemInInventoryClicked,
+		Draggable:   true, // onto the belt
 		OnRightClick: func(uiItem UIElement) {
 			if !state.GetPlayer().IsAlive() {
 				return
@@ -723,6 +757,8 @@ func firstItemFromUIStack(uiItem any) *common.Item {
 		firstItem = textStack.InventoryStack[0]
 	} else if itemStack, isItemStack := uiItem.(common.InventoryStack); isItemStack {
 		firstItem = itemStack[0]
+	} else if liveStack, isLiveStack := uiItem.(*common.InventoryStack); isLiveStack && len(*liveStack) > 0 {
+		firstItem = (*liveStack)[0]
 	}
 
 	return firstItem
@@ -763,7 +799,7 @@ func (u *UIController) ToggleFullStats() { u.OpenCharacterSheet() }
 // ShowFullStats relays out the character sheet if it is open. Equipping and dropping gear call it because the
 // numbers changed; the window itself is opened with 'c' or by the level-up prompt.
 func (u *UIController) ShowFullStats() {
-	if sheet, open := u.modal.(*CharacterSheet); open {
+	if sheet, open := u.GetTopModal().(*CharacterSheet); open {
 		sheet.Layout()
 	}
 }
@@ -806,6 +842,7 @@ func (u *UIController) BeginPlayerSellingTo(vendor *common.Actor) {
 			},
 			Action: func() {
 				msg(common.SellItem(player, typedItem))
+				u.PopWidget()
 				u.BeginPlayerSellingTo(vendor)
 			},
 		})
@@ -823,7 +860,7 @@ func (u *UIController) openLevelUpMenu() {
 	if !u.context.GameState().GetPlayer().CanLevelUp() {
 		return
 	}
-	if _, open := u.modal.(*CharacterSheet); !open {
+	if _, open := u.GetTopModal().(*CharacterSheet); !open {
 		u.OpenCharacterSheet()
 	}
 }
@@ -836,32 +873,141 @@ func (u *UIController) addMiniMap(offset geometry.Point, maxHeight int, horizont
 func (u *UIController) addSkillsOverlay(pixelEdgeFromBottomRight geometry.Point) *IconOverlay {
 	tileSize := u.worldTexture.GetTileSize()
 	state := u.context.GameState()
-	getList := func() []UIElement {
-		player := state.GetPlayer()
-		items := make([]UIElement, 0)
-		for _, item := range u.GetActiveSkillsForUI(player) {
-			items = append(items, item)
-		}
-		return items
-	}
-	isEquipped := func(item UIElement) bool {
-		return false // TODO:
-	}
-
 	dataSource := IconDataSource{
-		IsHighlighted: isEquipped,
-		GetElements:   getList,
-		OnSelection: func(element UIElement) {
-			switch typedElement := element.(type) {
-			case *common.UntargetedAction:
-				u.context.PlayerAction().ActivateUntargetedAction(typedElement, common.EffectSource(typedElement.GetInternalName()))
-			case *common.TargetedAction:
-				u.context.PlayerAction().BeginActionTargeting(typedElement)
+		IsHighlighted: func(UIElement) bool { return false },
+		GetElements: func() []UIElement {
+			var items []UIElement
+			for _, entry := range common.SkillBar(state.GetPlayer()) {
+				items = append(items, entry.(UIElement))
+			}
+			return items
+		},
+		OnSelection: func(element UIElement) { element.(common.QuickSlotEntry).Use(u.context.PlayerAction()) },
+		Draggable:   true,
+		OnDrop: func(_ UIElement, from *IconOverlay, fromIndex, to int) {
+			if from == u.skills {
+				common.MoveSkill(state.GetPlayer(), fromIndex, to)
 			}
 		},
 	}
 
 	return u.OpenSkillsOverlay(pixelEdgeFromBottomRight, tileSize, dataSource)
+}
+
+// addBeltOverlay is D1's belt: eight quick slots, filled by dragging skills and inventory stacks onto them.
+func (u *UIController) addBeltOverlay(pixelEdgeFromBottomRight geometry.Point) *IconOverlay {
+	state := u.context.GameState()
+	dataSource := IconDataSource{
+		IsHighlighted: func(UIElement) bool { return false },
+		GetElements: func() []UIElement {
+			items := make([]UIElement, common.BeltSize)
+			for i := range items {
+				if e := common.BeltEntry(state.GetPlayer(), i); e != nil {
+					items[i] = e.(UIElement)
+				}
+			}
+			return items
+		},
+		OnSelection: func(element UIElement) { element.(common.QuickSlotEntry).Use(u.context.PlayerAction()) },
+		HotkeyHint: func(i int) rune {
+			if i >= common.BeltSize {
+				return 0
+			}
+			return rune('1' + i)
+		},
+		Draggable: true,
+		OnDrop: func(dragged UIElement, from *IconOverlay, fromIndex, to int) {
+			player := state.GetPlayer()
+			if to < 0 || to >= common.BeltSize {
+				return
+			}
+			if from == u.belt {
+				common.SwapBeltEntries(player, fromIndex, to)
+			} else if entry := u.quickSlotEntryFor(dragged); entry != nil {
+				common.SetBeltEntry(player, to, entry)
+			}
+		},
+		OnDropOutside: func(fromIndex int) { common.SetBeltEntry(state.GetPlayer(), fromIndex, nil) },
+	}
+	belt := NewIconOverlay(u, pixelEdgeFromBottomRight, u.worldTexture.GetTileSize(), dataSource)
+	belt.SetRows(1)
+	belt.SetShowEmptySlots(true)
+	belt.SetShowCounter(true)
+	u.PushOverlay(belt)
+	return belt
+}
+
+// quickSlotEntryFor is what the belt holds for an icon dragged onto it: an inventory icon (a stack snapshot) or a
+// staff on the skill bar becomes the pack's live stack, a skill stays itself.
+func (u *UIController) quickSlotEntryFor(dragged UIElement) common.QuickSlotEntry {
+	if item := firstItemFromUIStack(dragged); item != nil {
+		if stack := u.context.GameState().GetPlayer().GetInventory().StackOf(item); stack != nil {
+			return stack
+		}
+		return nil
+	}
+	entry, _ := dragged.(common.QuickSlotEntry)
+	return entry
+}
+
+// UseBeltSlot fires belt slot i (0-based), as its number key does; an empty slot does nothing.
+func (u *UIController) UseBeltSlot(i int) {
+	if e := common.BeltEntry(u.context.GameState().GetPlayer(), i); e != nil {
+		u.CancelTargeting() // a new slot replaces the spell being aimed
+		e.Use(u.context.PlayerAction())
+	}
+	u.RefreshIconBars()
+}
+
+// RefreshIconBars rebuilds the sidebar's icon overlays, and any icon window open over them (the stash).
+// ponytail: refreshed on turns, pack and gear changes, clicks and drags; anything else (debug menu) shows a turn late.
+func (u *UIController) RefreshIconBars() {
+	for _, o := range []*IconOverlay{u.inventory, u.skills, u.belt, u.timer} {
+		if o != nil {
+			o.Refresh()
+		}
+	}
+	for _, m := range u.modals {
+		if o, isIcons := m.(*IconOverlay); isIcons {
+			o.Refresh()
+		}
+	}
+}
+
+func (u *UIController) beginIconDrag(from *IconOverlay, index int, dragged UIElement) {
+	u.dragFrom, u.dragIndex, u.dragged = from, index, dragged
+}
+
+// endIconDrag drops the dragged icon on the icon overlay under the mouse, if any.
+func (u *UIController) endIconDrag(x, y int) {
+	from := u.dragFrom
+	if from == nil {
+		return
+	}
+	dragged := u.dragged
+	u.dragFrom, u.dragged = nil, nil
+	point := geometry.Point{X: x, Y: y}
+	from.onIconReleased(u.dragIndex, dragged, u.iconOverlayAt(point), point)
+	u.RefreshIconBars()
+}
+
+func (u *UIController) iconOverlayAt(point geometry.Point) *IconOverlay {
+	for _, w := range append(slices.Clone(u.modals), u.overlays...) {
+		if o, isIcons := w.(*IconOverlay); isIcons && o.bounds.Contains(point) {
+			return o
+		}
+	}
+	return nil
+}
+
+// drawDraggedIcon draws the icon being dragged under the mouse, once it has left its own slot.
+func (u *UIController) drawDraggedIcon() {
+	from := u.dragFrom
+	if from == nil || (from.bounds.Contains(u.mousePosInPixels) && from.getItemIndexFromScreenPosition(u.mousePosInPixels) == u.dragIndex) {
+		return
+	}
+	mouse := u.mousePosInPixels.Sub(from.tileSizeInPixels.Div(2))
+	u.GetRenderer().DrawOnScreenWithScale(mouse.X, mouse.Y, u.dragged.InventoryIcon(), from.scale)
 }
 
 // openSpellMenu lists the memorized D1 spells; picking one casts it (targeted spells start targeting first).
@@ -871,18 +1017,13 @@ func (u *UIController) openSpellMenu() {
 		u.ShowLogMessage("You don't know any spells and carry no scrolls or staves.")
 		return
 	}
-	u.OpenMenu(items)
-}
-
-func (u *UIController) GetActiveSkillsForUI(player *common.Actor) []UIElement {
-	var activeSkills []UIElement
-	for _, skill := range player.GetTargetedSkills() {
-		activeSkills = append(activeSkills, skill)
-	}
-	for _, skill := range player.GetUntargetedSkills() {
-		activeSkills = append(activeSkills, skill)
-	}
-	return activeSkills
+	u.OpenInventoryListModal(u.worldTexture.GetTileSize(), ListDataSource{GetElements: func() []IconListElement {
+		elements := make([]IconListElement, len(items))
+		for i, item := range items {
+			elements[i] = menuListElement{item, u}
+		}
+		return elements
+	}})
 }
 
 func (u *UIController) addTimerOverlay(pixelEdgeFromBottomRight geometry.Point) *IconOverlay {
@@ -1084,7 +1225,7 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 
 	// corpses lie under objects and items (loot dropped on a corpse stays visible)
 	var corpse *renderer.CellDrawInfo
-	if currentMap.IsDownedActorAt(mapPos) && state.GetPlayer().GetFOV().Visible(mapPos) {
+	if currentMap.IsDownedActorAt(mapPos) && state.GetPlayer().GetFOV().Visible(mapPos) && !currentMap.DownedActorAt(mapPos).VisualsPending() {
 		corpse = &renderer.CellDrawInfo{
 			Atlas: u.GetCurrentAtlas(),
 			Icon:  currentMap.DownedActorAt(mapPos).Icon(u.worldTicks),
@@ -1261,6 +1402,7 @@ func (u *UIController) OpenPlayerStashInTown() {
 }
 
 func (u *UIController) OnPlayerTurnTaken() {
+	u.RefreshIconBars()
 	u.UpdateMiniMap()
 	u.UpdateStatsLabel()
 	player := u.context.GameState().GetPlayer()
@@ -1361,6 +1503,12 @@ func helpColumns(autoPickup bool) [2][]helpSection {
 				{"t", "Throw an item"},
 				{"e", "Cast a spell"},
 				{"space", "Recast at nearest"},
+				{"1 - 8", "Use a belt slot"},
+			}},
+			{"WHILE AIMING", [][2]string{
+				{"tab / shift+tab", "Next / prev target"},
+				{"w a s d", "Move the cursor"},
+				{"Enter or f", "Fire"},
 			}},
 			{"DEBUG", [][2]string{
 				{"F8", "Rendering mode"},
@@ -1509,6 +1657,14 @@ func (u *UIController) OpenItemList(items []*common.TextualStack) {
 	}})
 }
 
+// closeIfFinal ends a chain of menus after a choice that opened nothing on top of the menu. Only a choice that
+// opens another window keeps the menu, so closing that window goes back to it.
+func (u *UIController) closeIfFinal(menu UIWidget) {
+	if u.GetTopModal() == menu {
+		u.PopAll()
+	}
+}
+
 // OpenServiceMenu lists items for a paid service (repair, identify, recharge) in the buy/sell menus' layout: name
 // left, price right-aligned and red when unaffordable.
 func (u *UIController) OpenServiceMenu(items []*common.Item, price func(*common.Item) int, pick func(*common.Item)) {
@@ -1538,7 +1694,7 @@ func (u *UIController) OpenServiceMenu(items []*common.Item, price func(*common.
 				{Text: fmt.Sprintf("%d", cost), TextWithColorCodes: u.ParseColorCodedText(fmt.Sprintf("[:%s]%d", priceColor, cost)), UseColorCodes: true},
 			},
 			Action: func() {
-				u.PopAll()
+				u.PopWidget() // pick reopens the list if anything is left, else it's back to the menu below
 				pick(item)
 			},
 		})
@@ -1685,6 +1841,7 @@ func (u *UIController) openShopMenuWithHandler(inventory *common.Inventory, filt
 
 func (u *UIController) tryToBuy(item *common.Item, seller *common.Actor, filter func(*common.Item) bool) {
 	u.msg(common.BuyItem(u.context.GameState().GetPlayer(), seller, item))
+	u.PopWidget() // the list is rebuilt with the new gold and stock
 	u.OpenShopMenuFiltered(seller, filter)
 }
 
@@ -1742,7 +1899,7 @@ func (u *UIController) updateMapTileHoverInfo(mapPos geometry.Point) {
 }
 
 func (u *UIController) drawHealthBar(actor *common.Actor) {
-	health := actor.GetStats().GetResource(stats.Health).Value()
+	health := actor.ShownHealth()
 	maxHealth := actor.GetStats().GetAttribute(stats.MaxHealth)
 	healthPercent := float64(health) / float64(maxHealth)
 

@@ -21,6 +21,7 @@ const (
 )
 
 type Actor struct {
+	belt         [BeltSize]QuickSlotEntry // the player's quick slots; see BeltEntry
 	mapPosition  geometry.Point
 	drawPosition geometry.PointF
 	icon         int32
@@ -56,10 +57,14 @@ type Actor struct {
 	untargetedSkills   []*UntargetedAction
 	lastCastTargeted   *TargetedAction
 	lastCastUntargeted *UntargetedAction
+	lastCastItem       *Item
 	damageDice         util.Dice
 	color              color.RGBA
 	d1Monster          *D1Monster
 	hero               *d1.Hero
+	visualGate         func() bool   // see VisualsPending
+	shownHealth        int           // health drawn while VisualsPending
+	moveHold           *HitAnimation // a projectile hit still to be shown where a stands; its next move waits for it
 }
 
 type AttackType int
@@ -70,7 +75,7 @@ const (
 )
 
 func (a *Actor) Tick() {
-	if a.IsHurt() {
+	if a.IsHurt() && !a.VisualsPending() {
 		a.hurtTicks--
 	}
 }
@@ -168,8 +173,27 @@ func (a *Actor) SetDrawPosition(pos geometry.PointF) {
 	a.drawPosition = pos
 }
 
+// VisualsPending: a projectile already hurt or killed a, but hasn't reached it on screen yet.
+func (a *Actor) VisualsPending() bool {
+	if a == nil {
+		return false
+	}
+	if a.visualGate != nil && a.visualGate() {
+		a.visualGate = nil
+	}
+	return a.visualGate != nil
+}
+
+// ShownHealth is the health to draw: what it was before hits whose projectile is still in the air.
+func (a *Actor) ShownHealth() int {
+	if a.VisualsPending() {
+		return a.shownHealth
+	}
+	return a.GetStats().GetResource(stats.Health).Value()
+}
+
 func (a *Actor) Icon(tick uint64) int32 {
-	if !a.IsAlive() {
+	if !a.IsAlive() && !a.VisualsPending() {
 		return a.corpseIcon
 	}
 	return a.icon
@@ -520,17 +544,26 @@ func (a *Actor) GetUntargetedSkills() []*UntargetedAction {
 func (a *Actor) SetLastCastTargeted(skill *TargetedAction) {
 	a.lastCastTargeted = skill
 	a.lastCastUntargeted = nil
+	a.lastCastItem = nil
 }
 
 // SetLastCastUntargeted remembers an untargeted spell as the one to recast with CastLastSpellAtNearest.
 func (a *Actor) SetLastCastUntargeted(skill *UntargetedAction) {
 	a.lastCastUntargeted = skill
 	a.lastCastTargeted = nil
+	a.lastCastItem = nil
 }
 
-// LastCastSpell returns the last spell cast via the spell menu or skill bar, if any.
-func (a *Actor) LastCastSpell() (*TargetedAction, *UntargetedAction) {
-	return a.lastCastTargeted, a.lastCastUntargeted
+// SetLastCastItem remembers a staff as the one to recast with CastLastSpellAtNearest.
+func (a *Actor) SetLastCastItem(item *Item) {
+	a.lastCastItem = item
+	a.lastCastTargeted = nil
+	a.lastCastUntargeted = nil
+}
+
+// LastCastSpell returns the last spell cast via the spell menu or skill bar, or the staff it was cast from, if any.
+func (a *Actor) LastCastSpell() (*TargetedAction, *UntargetedAction, *Item) {
+	return a.lastCastTargeted, a.lastCastUntargeted, a.lastCastItem
 }
 
 func (a *Actor) VisionRange() int {

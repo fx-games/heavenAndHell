@@ -7,6 +7,7 @@ type Broker struct {
 	movementAnimations map[*Actor]*MovementAnimation
 	queuedActions      [][]Action
 	context            ActionContext
+	ticks              uint64
 }
 
 // NewBroker creates a new broker
@@ -24,6 +25,7 @@ func NewBroker(context ActionContext) *Broker {
 	return b
 }
 func (d *Broker) Tick() {
+	d.ticks++
 	if len(d.movementAnimations) > 0 {
 		for actor, animation := range d.movementAnimations {
 			if animation.IsDone() {
@@ -60,6 +62,8 @@ func (d *Broker) Execute(action Action) {
 		return
 	}
 
+	d.endTargetingOnPlayerAttack(action)
+
 	var chainedActions []Action
 	d.callBeforeHooks(action)
 
@@ -67,6 +71,7 @@ func (d *Broker) Execute(action Action) {
 	animation := action.GetAnimations()
 	if animation != nil {
 		d.startAnimations(animation)
+		d.syncToProjectiles(animation, chainedActions)
 	}
 
 	for _, chainedAction := range chainedActions {
@@ -227,4 +232,22 @@ func (d *Broker) GetAnimation(filter func(anim Animation) bool) (Animation, bool
 		}
 	}
 	return nil, false
+}
+
+// endTargetingOnPlayerAttack drops the UI back to normal mode whenever the player attacks or casts, however it
+// was started (bump, hotkey, quick cast, auto attack, the targeter itself).
+func (d *Broker) endTargetingOnPlayerAttack(action Action) {
+	switch action.(type) {
+	case *MeleeAttackAction, *RangedAttackAction, *ThrowAction, *SpellAction:
+	default:
+		return
+	}
+	if d.context.GameState == nil || d.context.UserInterface == nil || action.Cause() == nil {
+		return
+	}
+	if player := d.context.GameState.GetPlayer(); player != nil && action.Cause().GetActor() == player {
+		if ui := d.context.UserInterface(); ui != nil {
+			ui.CancelTargeting()
+		}
+	}
 }

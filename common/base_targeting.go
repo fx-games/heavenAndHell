@@ -6,15 +6,16 @@ import (
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/util"
+	"slices"
 )
 
 type RangedTargetingRules struct {
-	isOnMap             func(geometry.Point) bool
-	getActorAt          func(geometry.Point) *Actor
-	nearestHostileActor func() geometry.Point
-	attacker            *Actor
-	aoe                 *AoEResolver
-	infoForTarget       func(geometry.Point) string
+	isOnMap       func(geometry.Point) bool
+	getActorAt    func(geometry.Point) *Actor
+	targets       func() []geometry.Point // valid targets, nearest first
+	attacker      *Actor
+	aoe           *AoEResolver
+	infoForTarget func(geometry.Point) string
 }
 
 func (r RangedTargetingRules) OnTargetChanged(targetPos geometry.Point) TargetInfo {
@@ -61,7 +62,26 @@ func (r RangedTargetingRules) IsVisiblePositionOnMap(target geometry.Point) bool
 }
 
 func (r RangedTargetingRules) GetPreSelectedTarget() geometry.Point {
-	return r.nearestHostileActor()
+	if ts := r.targets(); len(ts) > 0 {
+		return ts[0]
+	}
+	return r.GetOrigin()
+}
+
+func (r RangedTargetingRules) Targets() []geometry.Point { return r.targets() }
+
+// targetsByDistance lists where m's actors that pass filter stand, nearest to from first (ties in map order).
+func targetsByDistance(m *gridmap.GridMap[*Actor, *Item, Object], from geometry.Point, filter func(*Actor) bool) []geometry.Point {
+	var ps []geometry.Point
+	for _, a := range m.Actors() {
+		if filter(a) {
+			ps = append(ps, a.MapPosition())
+		}
+	}
+	slices.SortStableFunc(ps, func(a, b geometry.Point) int {
+		return geometry.DistanceSquared(from, a) - geometry.DistanceSquared(from, b)
+	})
+	return ps
 }
 
 func NewRangedAttackTargetingRules(args util.Arguments) *TargetRulesProvider {
@@ -76,17 +96,10 @@ func NewRangedAttackTargetingRules(args util.Arguments) *TargetRulesProvider {
 				isOnMap: func(target geometry.Point) bool {
 					return currentMap.Contains(target)
 				},
-				nearestHostileActor: func() geometry.Point {
-					nearestActor := currentMap.GetNearestActor(attacker.MapPosition(), func(actor *Actor) bool {
-						if !actor.IsVisible() || !actor.IsHostileTo(attacker) || !attacker.CanSee(actor.MapPosition()) || actor.IsVendor() {
-							return false
-						}
-						return true
+				targets: func() []geometry.Point {
+					return targetsByDistance(currentMap, attacker.MapPosition(), func(actor *Actor) bool {
+						return actor.IsVisible() && actor.IsHostileTo(attacker) && attacker.CanSee(actor.MapPosition()) && !actor.IsVendor()
 					})
-					if nearestActor == nil {
-						return attacker.MapPosition()
-					}
-					return nearestActor.MapPosition()
 				},
 				aoe: hitPositions,
 				infoForTarget: func(point geometry.Point) string {

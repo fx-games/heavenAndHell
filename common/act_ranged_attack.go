@@ -35,8 +35,14 @@ func NewRangedAttackAction(source Cause, attacker *Actor, targetPos geometry.Poi
 }
 
 func (d *RangedAttackAction) Execute(context ActionContext) []Action {
-	audio := context.AudioPlayer
-	audio.PlayCue("bow_fire")
+	// the hero's bow twangs (PS_BFIRE, PM_DoRangeAttack); a D1 monster's shot sounds as its mode starts (M_DoRAttack)
+	if d.attacker == context.GameState.GetPlayer() {
+		if !playD1SfxAt(context, "PS_BFIRE", d.attacker.MapPosition()) {
+			context.AudioPlayer.PlayCue("bow_fire")
+		}
+	} else if d.attacker.d1Monster == nil {
+		context.AudioPlayer.PlayCue("bow_fire")
+	}
 
 	currentMap := context.GameState.GetMap()
 	var actions []Action
@@ -228,7 +234,7 @@ func (d *RangedAttackAction) GetAttacker() *Actor {
 }
 
 func (d *RangedAttackAction) GetDelayInAut() int {
-	return 100 / d.attacker.GetAttackSpeed(RangedAttack)
+	return d.attacker.AttackCost(RangedAttack)
 }
 
 func (d *RangedAttackAction) GetDefender() interface{} {

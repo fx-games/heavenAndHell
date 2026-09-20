@@ -12,7 +12,7 @@ import (
 func TestSpawnedSkeletonIsVisibleEnemy(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[1], false, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[1], false, true, "")
 	state := theGame.GetWorldState()
 	player := state.GetPlayer()
 	spawns := 0

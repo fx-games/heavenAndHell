@@ -8,6 +8,7 @@ import (
 	"rpg/gridmap"
 	"rpg/stats"
 	"rpg/util"
+	"slices"
 )
 
 // D1 spell status effects (decision 6: Mana Shield, Infravision and Stone Curse are status effects).
@@ -46,22 +47,25 @@ func (a *SpellAction) Execute(ctx ActionContext) []Action {
 	f := ctx.GameState.factory
 	c := &spellCtx{f: f, caster: a.caster, h: a.caster.hero, s: a.caster.HeroSheet(), spell: a.spell, slvl: a.slvl,
 		m: ctx.GameState.GetMap(), cause: a.cause, dealt: map[*Actor]int{}, ctx: ctx}
+	from := c.origin() // Teleport moves the caster
 	a.castSucceeded = c.cast(a.target)
 	if a.castSucceeded {
+		sfx := d1.SpellSfx[a.spell]
+		playD1SfxAt(ctx, sfx[0], from)
+		playD1SfxAt(ctx, sfx[1], from)
 		ctx.Msg(fmt.Sprintf("You cast %s.", f.Generator.D.Spells[a.spell].Name))
 	}
 	a.animations = c.animations
 	return c.finish()
 }
 
-// D1CastAut: casting takes the class's spell animation, rounded to a speed tier (decision 13).
+// D1CastAut: casting takes the class's spell animation (decision 13).
 func D1CastAut(caster *Actor) int {
 	class := 0
 	if caster.hero != nil {
 		class = caster.hero.Class
 	}
-	speed := float64(caster.GetBaseSpeed()) * d1.SpeedTier(d1.RefAttackTicks, d1.SpellFrames[class])
-	return 100 / max(int(speed), 1)
+	return d1TicksToAUT(d1.SpellFrames[class])
 }
 
 type spellCtx struct {
@@ -78,6 +82,7 @@ type spellCtx struct {
 	animations  []Animation
 	from        *geometry.Point // where the spell comes from when not the caster: a rune
 	heroDealt   int             // whole points the hero's own TARGET_BOTH missiles dealt to him
+	lastBolt    *ProjectileDirectionAnimation
 }
 
 func (c *spellCtx) origin() geometry.Point {
@@ -102,23 +107,74 @@ func (c *spellCtx) hitCell(p geometry.Point) *Actor {
 
 func (c *spellCtx) open(p geometry.Point) bool { return c.m.Contains(p) && c.m.IsTransparent(p) }
 
-// ray lists the cells from `from` (excluded) through `to` and on, up to maxLen cells or the first wall.
-func (c *spellCtx) ray(from, to geometry.Point, maxLen int) []geometry.Point {
-	d := to.Sub(from)
-	n := max(geometry.Abs(d.X), geometry.Abs(d.Y))
-	if n == 0 {
-		return nil
-	}
-	k := (maxLen + n - 1) / n
-	far := from.Add(geometry.Point{X: d.X * k, Y: d.Y * k})
+// chargedBoltCells lists the cells a charged bolt from o wanders through (d1.ChargedBoltFlight) up to the first wall.
+func (c *spellCtx) chargedBoltCells(o, target geometry.Point, rnd int) []geometry.Point {
 	var cells []geometry.Point
-	for _, p := range geometry.LineOfSight(from, far, func(p geometry.Point) bool { return p == from || c.open(p) })[1:] {
-		if !c.open(p) || len(cells) == maxLen {
+	p := o
+	for _, t := range d1.ChargedBoltFlight(D1DirTo(o, target), rnd) {
+		next := o.Add(geometry.Point{X: t[0], Y: t[1]})
+		if next == p {
+			continue
+		}
+		if !c.open(next) {
 			break
 		}
+		p = next
 		cells = append(cells, p)
 	}
 	return cells
+}
+
+// ray lists the cells from `from` (excluded) through `to` and on, up to maxLen cells or the first wall.
+func (c *spellCtx) ray(from, to geometry.Point, maxLen int) []geometry.Point {
+	cells, _, _ := c.rayToWall(from, to, maxLen)
+	return cells
+}
+
+// rayToWall is ray, plus the wall cell that stopped it, if one did.
+func (c *spellCtx) rayToWall(from, to geometry.Point, maxLen int) (cells []geometry.Point, wall geometry.Point, hitWall bool) {
+	d := to.Sub(from)
+	n := max(geometry.Abs(d.X), geometry.Abs(d.Y))
+	if n == 0 {
+		return nil, wall, false
+	}
+	k := (maxLen + n - 1) / n
+	far := from.Add(geometry.Point{X: d.X * k, Y: d.Y * k})
+	for _, p := range geometry.LineOfSight(from, far, func(p geometry.Point) bool { return p == from || c.open(p) })[1:] {
+		if len(cells) == maxLen {
+			break
+		}
+		if !c.open(p) {
+			return cells, p, c.m.Contains(p)
+		}
+		cells = append(cells, p)
+	}
+	return cells, wall, false
+}
+
+// flight ports a travelling missile's path (GetMissilePos) from `from` towards `to` at velocity v: the cells it
+// passes, starting with its own, each with the ticks it spends there. It ends at a wall, after a solid object
+// (CheckMissileCol stops it there), or after 20 cells. Missiles that hit every tick they spend on a monster
+// (MI_Lightball, MI_Firemove) hit it that many times.
+func (c *spellCtx) flight(from, to geometry.Point, v int) (cells []geometry.Point, ticks []int) {
+	d := to.Sub(from)
+	for _, t := range d1.MissileFlight(d.X, d.Y, v, 255) {
+		p := from.Add(geometry.Point{X: t[0], Y: t[1]})
+		if n := len(cells); n > 0 && cells[n-1] == p {
+			ticks[n-1]++
+			continue
+		}
+		if n := len(cells); n == 20 || !c.open(p) || n > 0 && isSolidObjectAt(c.m, cells[n-1]) {
+			break
+		}
+		cells, ticks = append(cells, p), append(ticks, 1)
+	}
+	return cells, ticks
+}
+
+func isSolidObjectAt(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point) bool {
+	o := d1ObjectAt(m, p)
+	return o != nil && !o.IsWalkable(nil)
 }
 
 // lineClear ports LineClear/CheckBlock: no wall between the two cells.
@@ -174,8 +230,7 @@ func (c *spellCtx) strike(a *Actor, dam64, ticks int) bool {
 	if c.spell == d1.SplBoneSpirit {
 		dam64 = (a.GetStats().GetResource(stats.Health).Value() - c.dealt[a]) << 6 / 3
 	}
-	dist := geometry.DistanceChebyshev(c.origin(), a.MapPosition())
-	chance := c.h.SpellHitChance(c.s, mon.Level, dist)
+	chance := c.h.SpellHitChance(c.s, mon.Level)
 	total := 0
 	for i := 0; i < ticks; i++ {
 		if a.HasStatusEffect(StatusStone) || d1Rng.Intn(100) < chance {
@@ -231,55 +286,101 @@ func (c *spellCtx) hurtHero(p geometry.Point, mind, maxd int, shift bool, ticks 
 
 // fireball ports MI_Fireball: a bolt that bursts on the 3×3 around where it hits, dam whole points.
 func (c *spellCtx) fireball(from, to geometry.Point, dam int) {
-	impact := c.bolt(from, to, func(a *Actor) bool { return c.strike(a, dam<<6, 1) })
+	impact, _ := c.bolt(from, to, func(a *Actor) bool { return c.strike(a, dam<<6, 1) })
+	c.burst(impact, from, dam<<6, 1)
+}
+
+// burst hits the 3×3 around center with `ticks` rolls of dam64, every cell not blocked from `from` (CheckBlock).
+func (c *spellCtx) burst(center, from geometry.Point, dam64, ticks int) {
 	for dy := -1; dy <= 1; dy++ {
 		for dx := -1; dx <= 1; dx++ {
-			p := impact.Add(geometry.Point{X: dx, Y: dy})
+			p := center.Add(geometry.Point{X: dx, Y: dy})
 			if a := c.hitCell(p); a != nil && c.lineClear(from, p) {
-				c.strike(a, dam<<6, 1)
+				c.strike(a, dam64, ticks)
 			}
 		}
 	}
-	c.animations = append(c.animations, NewHitAnimation(impact, 0.4, defs.IconEffectFireBig, 2))
+	c.animations = append(c.animations, NewHitAnimation(center, 0.4, defs.IconEffectFireBig, 2))
+}
+
+// nova ports MI_Nova: a lightning ball down every Nova ray, hitting every tick it spends on a monster
+// (MI_Lightball), dam whole points a hit.
+func (c *spellCtx) nova(o geometry.Point, dam int) {
+	for _, r := range d1.NovaRays {
+		cells, ticks := c.flight(o, o.Add(geometry.Point{X: r[0], Y: r[1]}), 16)
+		for i, p := range cells {
+			if a := c.hitCell(p); a != nil {
+				c.strike(a, dam<<6, ticks[i])
+			}
+		}
+	}
+	c.animations = append(c.animations, NewHitAnimation(o, 0.5, defs.IconEffectLightning, 2))
+}
+
+// boom ports MI_Boom: a blast that rolls to hit every tick until one lands, then hits once.
+func (c *spellCtx) boom(a *Actor, dam64 int) {
+	for i := 0; i < d1.BoomTries && !c.strike(a, dam64, 1); i++ {
+	}
+}
+
+func (c *spellCtx) secPerTile() float64 {
+	return d1.MissileSecondsPerTile(d1.SpellMissileVel(c.spell, c.slvl))
 }
 
 func (c *spellCtx) icon() int32 { return d1SpellIcons[c.f.Generator.D.Spells[c.spell].Type] }
 
 // bolt flies from `from` towards `to` until it hits a monster or a wall; a miss flies on (CheckMissileCol).
-// It returns the last cell it reached. Barrels in its way break.
-func (c *spellCtx) bolt(from, to geometry.Point, hit func(a *Actor) bool) geometry.Point {
+// It returns where it stopped: the monster's, solid object's or wall's cell (a wall stops a missile on it), else
+// the last cell it reached, and whether something stopped it. Barrels in its way break.
+func (c *spellCtx) bolt(from, to geometry.Point, hit func(a *Actor) bool) (impact geometry.Point, stopped bool) {
 	last := from
-	for _, p := range c.ray(from, to, 20) {
+	cells, wall, hitWall := c.rayToWall(from, to, 20)
+	impact, stopped = wall, hitWall
+	for _, p := range cells {
 		last = p
 		if o := d1ObjectAt(c.m, p); o != nil && !o.IsWalkable(nil) {
 			c.f.hitD1Object(c.m, p, c.caster)
+			impact, stopped = p, true
 			break
 		}
 		if a := c.monsterAt(p); a != nil && hit(a) {
+			impact, stopped = p, true
 			break
 		}
 	}
-	if last != from {
-		c.animations = append(c.animations, NewProjectileDirectionAnimation(c.caster, from, last, 0.03, c.icon(), 2))
+	if !stopped {
+		impact = last
 	}
-	return last
+	if b := c.lastBolt; b != nil && b.End() == from { // Elemental's homing leg flies on from where the first one stopped
+		b.Extend(last)
+	} else if sfx := d1.SpellSfx[c.spell][2]; last != from {
+		c.lastBolt = NewProjectileDirectionAnimation(c.caster, from, last, c.secPerTile(), c.icon(), 2)
+		c.lastBolt.SetOnFinish(func() { playD1SfxAt(c.ctx, sfx, last) })
+		c.animations = append(c.animations, c.lastBolt)
+	} else {
+		playD1SfxAt(c.ctx, sfx, last)
+	}
+	return impact, stopped
 }
 
-// beam hits every monster on the line up to the first wall (lightning).
-func (c *spellCtx) beam(to geometry.Point, dam func() int) {
+// beam ports MI_Lightctrl: it lays a bolt on every cell up to the first wall, each rolling its damage once and
+// hitting the monster there every tick it burns (MI_Lightning).
+func (c *spellCtx) beam(to geometry.Point) {
 	cells := c.ray(c.origin(), to, 20)
 	for _, p := range cells {
+		dam := d1.LightningDamage(d1Rng, c.h.Level)
 		if a := c.hitCell(p); a != nil {
-			c.strike(a, dam()<<6, 1)
+			c.strike(a, dam<<6, d1.LightningTicks(c.slvl))
 		}
 	}
 	if len(cells) > 0 {
-		c.animations = append(c.animations, NewProjectileDirectionAnimation(c.caster, c.origin(), cells[len(cells)-1], 0.01, c.icon(), 2))
+		c.animations = append(c.animations, NewProjectileDirectionAnimation(c.caster, c.origin(), cells[len(cells)-1], c.secPerTile(), c.icon(), 2))
 	}
 }
 
 // home ports the second half of Elemental and Bone Spirit: from where they arrived, find the closest monster.
-func (c *spellCtx) home(from geometry.Point, dam64 int) {
+// It returns bolt's result; with no monster to fly at, the missile flies off (stopped is false).
+func (c *spellCtx) home(from geometry.Point, dam64 int) (impact geometry.Point, stopped bool) {
 	var best *Actor
 	for _, a := range c.m.Actors() {
 		if c.monsterAt(a.MapPosition()) == a && geometry.DistanceChebyshev(from, a.MapPosition()) < 19 && c.lineClear(from, a.MapPosition()) &&
@@ -288,8 +389,9 @@ func (c *spellCtx) home(from geometry.Point, dam64 int) {
 		}
 	}
 	if best != nil && best.MapPosition() != from {
-		c.bolt(from, best.MapPosition(), func(a *Actor) bool { return c.strike(a, dam64, 1) })
+		return c.bolt(from, best.MapPosition(), func(a *Actor) bool { return c.strike(a, dam64, 1) })
 	}
+	return from, false
 }
 
 func (c *spellCtx) payHP(hp int) {
@@ -327,12 +429,12 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 	case d1.SplHeal:
 		st.GetResource(stats.Health).Increase(float64(d1.HealAmount64(d1Rng, h.Class, clvl, slvl) >> 6))
 	case d1.SplLightning:
-		c.beam(target, func() int { return d1.LightningDamage(d1Rng, clvl) })
+		c.beam(target)
 	case d1.SplChain:
-		c.beam(target, func() int { return d1.LightningDamage(d1Rng, clvl) })
+		c.beam(target)
 		for _, a := range append([]*Actor(nil), c.m.Actors()...) {
 			if c.monsterAt(a.MapPosition()) == a && geometry.DistanceChebyshev(o, a.MapPosition()) < min(slvl+3, 19) {
-				c.beam(a.MapPosition(), func() int { return d1.LightningDamage(d1Rng, clvl) })
+				c.beam(a.MapPosition())
 			}
 		}
 	case d1.SplFlash:
@@ -374,20 +476,21 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		if !ok {
 			return false
 		}
-		spawn := func(p geometry.Point) { f.spawnD1FireWall(c.caster, p, slvl) }
+		spawn := func(p geometry.Point, layers int) { f.spawnD1FireWall(c.caster, p, d1.SplFireWall, slvl, layers) }
 		if c.spell == d1.SplLightWall {
-			spawn = func(p geometry.Point) { f.spawnD1LightningWall(c.caster, p, slvl, clvl) }
+			spawn = func(p geometry.Point, layers int) { f.spawnD1LightningWall(c.caster, p, slvl, clvl, layers) }
 		}
+		// the controller lays both arms from the start cell for 6 ticks: 11 cells, two walls on the start cell
 		dir := D1DirTo(o, target)
-		spawn(start)
+		spawn(start, 2)
 		for _, side := range []int{dir + 2, dir + 6} {
 			p := start
-			for i := 1; i < 7; i++ {
+			for i := 1; i < 6; i++ {
 				p = p.Add(D1Dirs[side%8])
 				if !c.m.Contains(p) || !c.m.IsTileWalkable(p) {
 					break
 				}
-				spawn(p)
+				spawn(p, 1)
 			}
 		}
 	case d1.SplMana: // missiles_rech_mana
@@ -439,8 +542,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 			if lvl != nil && lvl.CellMissile(p.X, p.Y) {
 				break
 			}
-			f.spawnD1Wall(c.caster, p, d1.SplRingOfFire, d1.FireWallTurns(slvl), true, defs.IconEffectFireSmall,
-				func() int { return d1.FireWallDamage64(d1Rng, clvl) })
+			f.spawnD1FireWall(c.caster, p, d1.SplRingOfFire, slvl, 1)
 		}
 	case d1.SplTown:
 		return f.openD1Portal(c.caster)
@@ -488,24 +590,17 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		}
 		for _, p := range starts {
 			dam := d1.WaveDamage(d1Rng, clvl)
-			cells := append([]geometry.Point{p}, c.ray(p, p.Add(D1Dirs[dir]), 20)...)
-			for _, q := range cells {
+			cells, ticks := c.flight(p, p.Add(D1Dirs[dir]), 16)
+			for i, q := range cells {
 				if a := c.hitCell(q); a != nil {
-					c.strike(a, dam<<6, 1)
+					c.strike(a, dam<<6, ticks[i])
 				}
 			}
-			c.animations = append(c.animations, NewProjectileDirectionAnimation(c.caster, p, cells[len(cells)-1], 0.03, defs.IconEffectFireSmall, 2))
+			c.animations = append(c.animations, NewProjectileDirectionAnimation(c.caster, p, cells[len(cells)-1], c.secPerTile(), defs.IconEffectFireSmall, 2))
 		}
 	case d1.SplNova:
 		dam := d1.NovaDamage(d1Rng, clvl, slvl)
-		for _, r := range d1.NovaRays {
-			for _, p := range c.ray(o, o.Add(geometry.Point{X: r[0], Y: r[1]}), 20) {
-				if a := c.hitCell(p); a != nil {
-					c.strike(a, dam<<6, 1)
-				}
-			}
-		}
-		c.animations = append(c.animations, NewHitAnimation(o, 0.5, defs.IconEffectLightning, 2))
+		c.nova(o, dam)
 	case d1.SplInferno:
 		for n, p := range c.ray(o, target, 3) {
 			dam := d1.InfernoDamage64(d1Rng, clvl)
@@ -523,10 +618,14 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		}
 		f.d1MovePlayer(c.caster, p, "Teleport")
 	case d1.SplApocalypse:
+		// MI_Apoca: a blast on every monster in the box; 1.09 adds a second one when the caster has line to it
 		dam := d1.ApocalypseDamage(d1Rng, clvl)
 		for _, a := range append([]*Actor(nil), c.m.Actors()...) {
 			if d := a.MapPosition().Sub(o); c.monsterAt(a.MapPosition()) == a && d.X >= -8 && d.X < 8 && d.Y >= -8 && d.Y < 8 {
-				c.strike(a, dam<<6, 1)
+				c.boom(a, dam<<6)
+				if c.lineClear(o, a.MapPosition()) {
+					c.boom(a, dam<<6)
+				}
 			}
 		}
 	case d1.SplElemental, d1.SplBoneSpirit:
@@ -534,35 +633,27 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		if c.spell == d1.SplBoneSpirit {
 			c.payHP(6)
 		}
-		hit := false
-		arrived := c.bolt(o, target, func(a *Actor) bool {
-			hit = c.strike(a, dam<<6, 1)
-			return hit
-		})
-		if !hit && geometry.DistanceChebyshev(o, arrived) >= geometry.DistanceChebyshev(o, target) {
-			c.home(arrived, dam<<6)
+		arrived, stopped := c.bolt(o, target, func(a *Actor) bool { return c.strike(a, dam<<6, 1) })
+		if !stopped && geometry.DistanceChebyshev(o, arrived) >= geometry.DistanceChebyshev(o, target) {
+			arrived, stopped = c.home(arrived, dam<<6)
+		}
+		if stopped && c.spell == d1.SplElemental { // MI_Element's explosion: dam read as 1/64 a tick
+			c.burst(arrived, o, dam, d1.ElementalBurstTicks)
 		}
 	case d1.SplChargedBolt:
-		bpath := [16]int{-1, 0, 1, -1, 0, 1, -1, -1, 0, 0, 1, 1, 0, 1, -1, 0}
 		for n := d1.ChargedBolts(slvl); n > 0; n-- {
-			dam, dir, r := d1.ChargedBoltDamage(d1Rng, s.Mag), D1DirTo(o, target), d1Rng.Intn(15)+1
-			p, md := o, dir
-			for step := 0; step < 24; step++ {
-				if step%4 == 0 {
-					md = ((dir+bpath[r])%8 + 8) % 8
-					r = (r + 1) & 15
-				}
-				next := p.Add(D1Dirs[md])
-				if !c.open(next) {
-					break
-				}
+			r := d1Rng.Intn(15) + 1
+			dam := d1.ChargedBoltDamage(d1Rng, s.Mag)
+			p, path := o, []geometry.Point{o}
+			for _, next := range c.chargedBoltCells(o, target, r) {
 				p = next
+				path = append(path, p)
 				if a := c.hitCell(p); a != nil && c.strike(a, dam<<6, 1) {
 					break
 				}
 			}
 			if p != o {
-				c.animations = append(c.animations, NewProjectileDirectionAnimation(c.caster, o, p, 0.03, defs.IconEffectLightning, 2))
+				c.animations = append(c.animations, NewProjectilePathAnimation(c.caster, path, c.secPerTile(), defs.IconEffectLightning, 2))
 			}
 		}
 	case d1.SplTelekinesis:
@@ -573,26 +664,35 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 	return true
 }
 
-// spawnD1FireWall places one cell of the Fire Wall spell (MI_Firewall); Hellfire's burns the hero too.
-func (f *Factory) spawnD1FireWall(caster *Actor, p geometry.Point, slvl int) {
+// spawnD1FireWall places one cell of a fire wall (AddFirewall, MI_Firewall), for Fire Wall or Ring of Fire.
+// Hellfire's burns the hero too, dlvl·16 ticks longer, and for a flat 8·clvl/64 a tick (AddFirewall's bug).
+func (f *Factory) spawnD1FireWall(caster *Actor, p geometry.Point, spell, slvl, layers int) {
 	clvl := caster.hero.Level
-	f.spawnD1Wall(caster, p, d1.SplFireWall, d1.FireWallTurns(slvl), f.Generator.D.Hellfire, defs.IconEffectFireSmall,
-		func() int { return d1.FireWallDamage64(d1Rng, clvl) })
+	turns, dam64 := d1.FireWallTurns(slvl, 0), func() int { return d1.FireWallDamage64(d1Rng, clvl) }
+	if f.Generator.D.Hellfire {
+		turns, dam64 = d1.FireWallTurns(slvl, d1DungeonLevel(f.State)), func() int { return d1.HellfireFireWallDamage64(clvl) }
+	}
+	f.spawnD1Wall(caster, p, spell, turns, f.Generator.D.Hellfire, layers, defs.IconEffectFireSmall, dam64)
 }
 
 // spawnD1LightningWall places one cell of a lightning wall (MIS_LIGHTWALL): 255·(slvl+1) ticks of 16·(2d10 + clvl
 // + 2)/64 a tick, rolled once when it is laid, on monsters and the hero alike.
-func (f *Factory) spawnD1LightningWall(caster *Actor, p geometry.Point, slvl, clvl int) {
-	dam := 16 * (d1Rng.Intn(10) + d1Rng.Intn(10) + clvl + 2)
-	f.spawnD1Wall(caster, p, d1.SplLightWall, 255*(slvl+1)/d1.RefWalkTicks, true, defs.IconEffectLightning, func() int { return dam })
+func (f *Factory) spawnD1LightningWall(caster *Actor, p geometry.Point, slvl, clvl, layers int) {
+	dam := 16 * (d1Rng.Intn(10) + d1Rng.Intn(10) + clvl + 2) // one roll a controller tick, shared by what it lays
+	f.spawnD1Wall(caster, p, d1.SplLightWall, 255*(slvl+1)/d1.RefWalkTicks, true, layers, defs.IconEffectLightning, func() int { return dam })
 }
 
-// spawnD1Wall places one wall cell: each turn it hits the monster standing in it, and with both the hero too, for
-// dam64() 1/64 a tick over a turn's 8 ticks.
-func (f *Factory) spawnD1Wall(caster *Actor, p geometry.Point, spell, turns int, both bool, icon int32, dam64 func() int) {
+// spawnD1Wall places one wall cell of `layers` walls stacked (a fire wall's start cell holds two), each rolling
+// dam64() once as it is laid: each turn every layer hits the monster standing in it, and with both the hero too,
+// for its 1/64 a tick over a turn's 8 ticks.
+func (f *Factory) spawnD1Wall(caster *Actor, p geometry.Point, spell, turns int, both bool, layers int, icon int32, dam64 func() int) {
 	m := f.State.GetMap()
 	if m.IsObjectAt(p) || turns <= 0 {
 		return
+	}
+	dams := make([]int, layers)
+	for i := range dams {
+		dams[i] = dam64()
 	}
 	wall := NewFire(0)
 	wall.icon, wall.turnsUntilRemoval = icon, turns
@@ -610,11 +710,12 @@ func (f *Factory) spawnD1Wall(caster *Actor, p geometry.Point, spell, turns int,
 		f.ActionBroker.Execute(&spellTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
 			caster: caster, spell: spell, run: func(c *spellCtx) {
 				c.from = &p
-				d := dam64()
-				if v := c.monsterAt(p); v != nil {
-					c.strike(v, d, d1.RefWalkTicks)
-				} else if both {
-					c.hurtHero(p, d, d, true, d1.RefWalkTicks)
+				for _, d := range dams {
+					if v := c.monsterAt(p); v != nil {
+						c.strike(v, d, d1.RefWalkTicks)
+					} else if both {
+						c.hurtHero(p, d, d, true, d1.RefWalkTicks)
+					}
 				}
 			}})
 	})
@@ -648,6 +749,7 @@ func (f *Factory) spawnD1Guardian(caster *Actor, p geometry.Point, turns int) {
 				}
 				if best != nil {
 					dam := d1.FireboltDamage(d1Rng, c.s.Mag, c.h.SpellLevel(c.s, d1.SplFirebolt))
+					playD1SfxAt(c.ctx, d1.SpellSfx[d1.SplFirebolt][1], p)
 					c.bolt(p, best.MapPosition(), func(a *Actor) bool { return c.strike(a, dam<<6, 1) })
 				}
 			}})
@@ -881,6 +983,7 @@ func PlaceD1Portal(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 	m.AddNamedLocation(d1PortalLocation, pos)
 	m.AddObject(&d1PortalObject{pos: pos, target: target}, pos)
 	m.AddTransitionAt(pos, target)
+	delete(s.glowCache, m) // the portal is a light source
 }
 
 // CloseD1Portal removes both ends of the town portal from the maps that are loaded.
@@ -897,6 +1000,7 @@ func (s *State) CloseD1Portal() {
 			if po, ok := obj.(*d1PortalObject); ok {
 				m.RemoveObject(po)
 				m.RemoveTransitionAt(po.pos)
+				delete(s.glowCache, m)
 			}
 		}
 	}
@@ -913,8 +1017,10 @@ func (f *Factory) D1SpellSkills(player *Actor) ([]*TargetedAction, []*Untargeted
 	var targeted []*TargetedAction
 	var untargeted []*UntargetedAction
 	if t, u := f.d1ClassSkill(player); t != nil {
+		t.SetInternalName(d1ClassSkillID)
 		targeted = append(targeted, t)
 	} else {
+		u.SetInternalName(d1ClassSkillID)
 		untargeted = append(untargeted, u)
 	}
 	for spell := range h.SpellLevels {
@@ -924,27 +1030,33 @@ func (f *Factory) D1SpellSkills(player *Actor) ([]*TargetedAction, []*Untargeted
 		sd := f.Generator.D.Spells[spell]
 		sp := spell
 		// only the name on the skill bar - the sidebar is too narrow for more; level and mana go in the tooltip
-		desc := d1SpellTooltip(sp, d1.SpellDescriptions[sp], h.SpellLevel(s, spell), f.Generator.D.ManaCost(h, s, spell)>>6)
+		slvl := h.SpellLevel(s, spell)
+		desc := d1SpellTooltip(d1.SpellDescriptions[sp], d1.SpellDamageText(sp, s.Mag, h.Level, slvl), slvl, f.Generator.D.ManaCost(h, s, spell)>>6)
 		if d1.SpellTargeted[spell] {
 			action := NewTargetedAction(sd.Name, OneTargetTile(f.State.GetMap, util.Arguments{}),
 				&HitEffect{Activate: func(caster *Actor, target geometry.Point, _ []geometry.Point) { f.CastD1FromMemory(caster, sp, target) },
 					Description: desc},
 				d1SpellTargeting(f, sp))
 			action.SetIcon(defs.Icon(defs.IconID("spell", sd.ID)))
+			action.SetInternalName(sd.ID)
 			targeted = append(targeted, action)
 		} else {
 			action := NewUntargetedAction(sd.Name, defs.Icon(defs.IconID("spell", sd.ID)))
 			action.SetEffect(&UntargetedEffect{Effect: func(caster *Actor, _ EffectSource) { f.CastD1FromMemory(caster, sp, caster.MapPosition()) },
 				Description: desc})
+			action.SetInternalName(sd.ID)
 			untargeted = append(untargeted, action)
 		}
 	}
 	return targeted, untargeted
 }
 
-// d1SpellTooltip is a memorized spell's popup: what it does, then its spell level and what a cast costs.
-func d1SpellTooltip(spell int, text string, slvl, mana int) []util.LabelText {
+// d1SpellTooltip is a memorized spell's popup: what it does, its damage, then its spell level and what a cast costs.
+func d1SpellTooltip(text, damage string, slvl, mana int) []util.LabelText {
 	lines := []util.LabelText{util.LabelTextFromStringWithColor(text, defs.OffWhite), util.LabelTextFromString("")}
+	if damage != "" {
+		lines = append(lines, util.LabelTextFromStringWithColor(damage, defs.LightGray))
+	}
 	lines = append(lines, util.LabelTextFromStringWithColor(fmt.Sprintf("Spell level %d", slvl), defs.LightGray))
 	cost := fmt.Sprintf("Mana cost: %d", mana)
 	if mana == 0 {
@@ -953,11 +1065,26 @@ func d1SpellTooltip(spell int, text string, slvl, mana int) []util.LabelText {
 	return append(lines, util.LabelTextFromStringWithColor(cost, defs.LightGray))
 }
 
-// RefreshD1Spells updates the player's spell skills after learning or changing gear.
+// d1ClassSkillID is the class skill's internal name: a hero has exactly one.
+const d1ClassSkillID = "CLASS_SKILL"
+
+// RefreshD1Spells updates the player's spell skills after learning or changing gear. A skill the player already
+// had keeps its pointer (updated in place), so the belt and anything else holding it stays current.
 func (f *Factory) RefreshD1Spells(player *Actor) {
 	t, u := f.D1SpellSkills(player)
-	player.SetTargetedSkills(t)
-	player.SetUntargetedSkills(u)
+	player.SetTargetedSkills(keepIdentity(player.GetTargetedSkills(), t, (*TargetedAction).GetInternalName))
+	player.SetUntargetedSkills(keepIdentity(player.GetUntargetedSkills(), u, (*UntargetedAction).GetInternalName))
+}
+
+// keepIdentity swaps each fresh entry for the old one with the same name, overwritten with the fresh contents.
+func keepIdentity[T any](old, fresh []*T, name func(*T) string) []*T {
+	for i, n := range fresh {
+		if at := slices.IndexFunc(old, func(o *T) bool { return name(o) == name(n) }); at >= 0 {
+			*old[at] = *n
+			fresh[i] = old[at]
+		}
+	}
+	return fresh
 }
 
 func d1SpellTargeting(f *Factory, spell int) *TargetRulesProvider {
@@ -966,13 +1093,11 @@ func d1SpellTargeting(f *Factory, spell int) *TargetRulesProvider {
 			return &RangedTargetingRules{
 				attacker: attacker,
 				isOnMap:  m.Contains,
-				nearestHostileActor: func() geometry.Point {
-					if a := m.GetNearestActor(attacker.MapPosition(), func(a *Actor) bool {
-						return a.IsVisible() && a.IsHostileTo(attacker) && attacker.CanSee(a.MapPosition()) && !a.IsVendor()
-					}); a != nil {
-						return a.MapPosition()
-					}
-					return attacker.MapPosition()
+				targets: func() []geometry.Point {
+					return targetsByDistance(m, attacker.MapPosition(), func(a *Actor) bool {
+						return a.IsVisible() && a.IsHostileTo(attacker) && attacker.CanSee(a.MapPosition()) && !a.IsVendor() &&
+							d1BoltReaches(m, attacker.MapPosition(), a.MapPosition())
+					})
 				},
 				aoe: aoe,
 				infoForTarget: func(p geometry.Point) string {
@@ -980,11 +1105,25 @@ func d1SpellTargeting(f *Factory, spell int) *TargetRulesProvider {
 					if !ok || a.d1Monster == nil || attacker.hero == nil {
 						return ""
 					}
-					return fmt.Sprintf("%d%%", attacker.hero.SpellHitChance(attacker.HeroSheet(), a.d1Monster.Level, geometry.DistanceChebyshev(attacker.MapPosition(), p)))
+					return fmt.Sprintf("%d%%", attacker.hero.SpellHitChance(attacker.HeroSheet(), a.d1Monster.Level))
 				},
 			}
 		},
 	}
+}
+
+// d1BoltReaches: a bolt from `from` flies into `to` without a wall or solid object (a bookcase) stopping it first.
+// ponytail: applied to every targeted spell's auto-aim, even ones that don't fly (Teleport); split per spell if that bites.
+func d1BoltReaches(m *gridmap.GridMap[*Actor, *Item, Object], from, to geometry.Point) bool {
+	for _, p := range (&spellCtx{m: m}).ray(from, to, 20) {
+		if p == to {
+			return true
+		}
+		if o := d1ObjectAt(m, p); o != nil && !o.IsWalkable(nil) {
+			return false
+		}
+	}
+	return false
 }
 
 // CastD1FromMemory casts a memorized spell: D1 checks the spell level and mana, and takes the mana only if it worked.
@@ -1097,15 +1236,12 @@ func (f *Factory) readD1Book(user *Actor, it *d1.Item) {
 	f.Msg(fmt.Sprintf("You learn %s (level %d).", sd.Name, h.SpellLevels[it.Spell]))
 }
 
-// d1ManaShield ports MI_Manashield for a hit of dam whole points: mana pays first (a third less from spell level 1).
+// d1ManaShield ports MI_Manashield for a hit of dam whole points: mana pays first, for less (d1.ManaShieldCost).
 func d1ManaShield(def *Actor, dam int) int {
 	if !def.HasStatusEffect(StatusManaShield) || dam <= 0 {
 		return dam
 	}
-	h := def.hero
-	if h.SpellLevel(def.HeroSheet(), d1.SplManaShield) > 0 {
-		dam -= dam / 3
-	}
+	dam = d1.ManaShieldCost(dam, def.hero.SpellLevel(def.HeroSheet(), d1.SplManaShield))
 	mana := def.GetStats().GetResource(stats.Mana)
 	if mana.Value() >= dam {
 		mana.Decrease(dam)
@@ -1119,3 +1255,20 @@ func d1ManaShield(def *Actor, dam int) int {
 
 // D1SpellName is a spell's name for menus.
 func (s *State) D1SpellName(spell int) string { return s.factory.Generator.D.Spells[spell].Name }
+
+// D1LacksMana: the player's memorized spell of that name costs more mana than he has (CastD1FromMemory's check).
+func (s *State) D1LacksMana(player *Actor, name string) bool {
+	h := player.hero
+	if h == nil {
+		return false
+	}
+	sheet := player.HeroSheet()
+	for spell := range h.SpellLevels {
+		if h.SpellLevel(sheet, spell) <= 0 || s.D1SpellName(spell) != name {
+			continue
+		}
+		cost := s.factory.Generator.D.ManaCost(h, sheet, spell)
+		return player.GetStats().GetResource(stats.Mana).Value() < cost>>6 || sheet.Flags&d1.ISplNoMana != 0 && cost > 0
+	}
+	return false
+}

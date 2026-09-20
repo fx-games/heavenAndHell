@@ -13,6 +13,7 @@ import (
 	"rpg/renderer"
 	"rpg/stats"
 	"rpg/util"
+	"slices"
 )
 
 type PlayerActions interface {
@@ -65,6 +66,8 @@ type State struct {
 	timekeeper          *TimeKeeper
 	actions             *Broker
 	animator            Animator
+	dropsFrom           *Actor   // the monster dying right now: its loot shows when it falls
+	dying               []*Actor // dead, but still drawn standing until the killing projectile reaches them
 
 	config Configuration
 
@@ -121,6 +124,12 @@ func (s *State) D1Quests() *d1.Quests {
 }
 func (s *State) GetVisibility() *Visibility {
 	return s.visibility
+}
+
+// Dying are the dead actors to draw as still standing: their killing blow is still in the air.
+func (s *State) Dying() []*Actor {
+	s.dying = slices.DeleteFunc(s.dying, func(a *Actor) bool { return !a.VisualsPending() })
+	return s.dying
 }
 
 func (s *State) PlayerTookTurn(autUsed int) {
@@ -295,14 +304,31 @@ func (s *State) LitByVision(mapPos geometry.Point) bool {
 // ApplyLighting shades what is drawn at mapPos: distance from the player, lit and unlit dungeon rooms, torches,
 // and on top of all of it the church's red light, which has to show in the town's daylight too.
 func (s *State) ApplyLighting(mapPos geometry.Point, drawColor color.RGBA, worldTick uint64) color.RGBA {
-	return s.applyRedLight(mapPos, s.applyLighting(mapPos, drawColor, worldTick), worldTick)
+	return s.applyPortalLight(mapPos, s.applyRedLight(mapPos, s.applyLighting(mapPos, drawColor, worldTick), worldTick), worldTick)
+}
+
+// applyPortalLight bathes the cells right around an open town portal in a cold, shimmering light blue, lifted out
+// of the dark like the church's red light.
+func (s *State) applyPortalLight(mapPos geometry.Point, drawColor color.RGBA, worldTick uint64) color.RGBA {
+	glow := s.d1GlowAt(mapPos)
+	if glow.kind != glowPortal || glow.v <= 0 || !s.GetMap().IsExplored(mapPos) {
+		return drawColor
+	}
+	pulse := 0.8 + 0.2*math.Sin(float64(worldTick)/12.0)
+	lit := color.RGBA{
+		R: uint8(min(float64(drawColor.R)*0.45+80*glow.v, 255)),
+		G: uint8(min(float64(drawColor.G)*0.8+170*glow.v, 255)),
+		B: uint8(min(float64(drawColor.B)+235*glow.v, 255)),
+		A: drawColor.A,
+	}
+	return lerpRGBA(drawColor, lit, min(glow.v*1.8, 1.0)*pulse)
 }
 
 // applyRedLight tints a cell inside the demon-possessed church (and the ground the light falls on outside its
 // door) red, pulsing slowly, and lifts it out of the dark so the glow reads as a light source and not as shadow.
 func (s *State) applyRedLight(mapPos geometry.Point, drawColor color.RGBA, worldTick uint64) color.RGBA {
 	glow := s.d1GlowAt(mapPos)
-	if !glow.red || glow.v <= 0 || !s.GetMap().IsExplored(mapPos) {
+	if glow.kind != glowRed || glow.v <= 0 || !s.GetMap().IsExplored(mapPos) {
 		return drawColor
 	}
 	pulse := 0.85 + 0.15*math.Sin(float64(worldTick)/45.0)
@@ -363,7 +389,7 @@ func (s *State) applyLighting(mapPos geometry.Point, drawColor color.RGBA, world
 	} else {
 		percentageLightness := float64(distanceToPlayer) / float64(maxDistance)
 		percentageLightness = 1.0 - util.EaseInExpo(percentageLightness)
-		if glow := s.d1GlowAt(mapPos); glow.v > 0 && !glow.red { // wall torches and braziers, each flickering out of step
+		if glow := s.d1GlowAt(mapPos); glow.v > 0 && glow.kind == glowTorch { // wall torches and braziers, each flickering out of step
 			frame := util.GetLoopingFrameFromTick(worldTick+uint64(mapPos.X*7+mapPos.Y*13), d1HeroTorch.FlickerFrameDelay, len(d1HeroTorch.FlickerPattern))
 			if g := glow.v * d1HeroTorch.FlickerPattern[frame]; g > percentageLightness {
 				percentageLightness = g
@@ -558,6 +584,12 @@ func (s *State) AddItemToMapWithDistribution(item *Item, pos geometry.Point) {
 	currentMap := s.GetMap()
 	dropPos := getDropPos(currentMap, pos)
 	currentMap.AddItem(item, dropPos)
+	if s.dropsFrom.VisualsPending() {
+		item.shownWith = s.dropsFrom
+	}
+	if drop, _ := d1ItemSfx(item); s.factory != nil { // ProcessItems: the item lands after its flip
+		whenVisible(s.actions, s.dropsFrom, func() { s.factory.PlayD1Sfx(drop, dropPos) })
+	}
 }
 
 func (s *State) SetTimeKeeper(keeper *TimeKeeper) {
@@ -670,12 +702,23 @@ type QuestFlags struct {
 	RewardedFlag string
 }
 
-// d1Glow is a light source's reach on one cell: how much of it lands there (0..1) and whether it is the church's
-// red light rather than ordinary torch light.
+// d1Glow is a light source's reach on one cell: how much of it lands there (0..1) and which kind of light it is.
 type d1Glow struct {
-	v   float64
-	red bool
+	v    float64
+	kind glowKind
 }
+
+type glowKind uint8
+
+const (
+	glowTorch  glowKind = iota // wall torches and braziers
+	glowRed                    // the church's red light
+	glowPortal                 // an open town portal
+)
+
+// d1PortalLightRadius keeps the portal's light to the tiles right around it: full strength on the portal, falling
+// off over the next two.
+const d1PortalLightRadius = 3
 
 // d1ChurchLightRadius is how far the red light inside the demon-possessed church reaches. Its source sits inside
 // the nave, so the light bathes the church and spills back out of the doorway; the line-of-sight check below
@@ -702,7 +745,7 @@ func (s *State) d1GlowAt(p geometry.Point) d1Glow {
 		for y := 0; y < m.MapSize().Y; y++ {
 			for x := 0; x < m.MapSize().X; x++ {
 				src := geometry.Point{X: x, Y: y}
-				r, red := 0, false
+				r, kind := 0, glowTorch
 				if icon, has := m.GetDecal(src); has && icon == defs.IconWallTorch {
 					r = d1LightRadius(icon)
 				}
@@ -711,10 +754,12 @@ func (s *State) d1GlowAt(p geometry.Point) d1Glow {
 						r = d1LightRadius(wl.icon)
 					} else if o, ok := m.ObjectAt(src).(*D1Object); ok {
 						r = d1ObjectLights[o.O.Kind]
+					} else if _, ok := m.ObjectAt(src).(*d1PortalObject); ok {
+						r, kind = d1PortalLightRadius, glowPortal
 					}
 				}
 				if src == church {
-					r, red = d1ChurchLightRadius, true
+					r, kind = d1ChurchLightRadius, glowRed
 				}
 				for dy := -r; dy <= r && r > 0; dy++ {
 					for dx := -r; dx <= r; dx++ {
@@ -726,7 +771,7 @@ func (s *State) d1GlowAt(p geometry.Point) d1Glow {
 						los := geometry.LineOfSight(src, q, func(c geometry.Point) bool { return c == src || m.IsTransparent(c) })
 						if len(los) > 0 && los[len(los)-1] == q {
 							if v := 1 - d/float64(r); v > glow[q].v {
-								glow[q] = d1Glow{v: v, red: red}
+								glow[q] = d1Glow{v: v, kind: kind}
 							}
 						}
 					}

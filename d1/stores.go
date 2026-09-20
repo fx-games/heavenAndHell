@@ -134,7 +134,7 @@ func (g *Generator) storeIdx(lvl int, ok func(ItemData) bool, double bool) int {
 	var l []int
 	for i := 1; i < len(g.D.Items); i++ {
 		b := g.D.Items[i]
-		if b.Drop != "IDROP_NEVER" && ok(b) && lvl >= b.MinMLvl {
+		if b.Drop != "IDROP_NEVER" && ok(b) && lvl >= b.MinMLvl && (g.D.Hellfire || !b.Hellfire) {
 			l = append(l, i)
 			if double && b.Drop == "IDROP_DOUBLE" {
 				l = append(l, i)

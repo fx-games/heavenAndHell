@@ -118,8 +118,25 @@ func (g *GameInstance) d1MonsterAction(a *common.Actor) (int, func()) {
 
 func (b *d1Brain) commit(act d1Act) (int, func()) {
 	return act.cost, func() {
+		b.modeSound(act.mode)
 		act.run()
 		b.mon.LastMode, b.mon.StandTicks = act.mode, 0
+	}
+}
+
+// modeSound is the PlayEffect a mode starts with that isn't a melee swing's (MeleeAttackAction plays those):
+// M_DoRAttack's attack sound, M_DoRSpAttack's and M_DoSpStand's special one, and a charge's (MAI_Rhino).
+func (b *d1Brain) modeSound(mode int) {
+	f := b.g.factory
+	switch mode {
+	case common.D1ModeRAttack:
+		f.PlayD1MonsterSound(b.a, "attack")
+	case common.D1ModeRSpAttack, common.D1ModeSpStand:
+		f.PlayD1MonsterSound(b.a, "special")
+	case common.D1ModeCharge:
+		if !f.PlayD1MonsterSound(b.a, "special") {
+			f.PlayD1MonsterSound(b.a, "attack")
+		}
 	}
 }
 
@@ -307,8 +324,8 @@ func (b *d1Brain) stoodLong() bool { return b.mon.StandTicks > 20 }
 func (b *d1Brain) justWalked() bool {
 	return b.mon.LastMode == common.D1ModeWalk && b.mon.StandTicks == 0
 }
-func (b *d1Brain) walkCost() int   { return 100 / b.a.GetMoveSpeed() }
-func (b *d1Brain) attackCost() int { return 100 / b.a.GetAttackSpeed(common.MeleeAttack) }
+func (b *d1Brain) walkCost() int   { return b.a.MoveCost() }
+func (b *d1Brain) attackCost() int { return b.a.AttackCost(common.MeleeAttack) }
 func (b *d1Brain) dirTo(p geometry.Point) int {
 	return common.D1DirTo(b.pos, p)
 }
@@ -368,7 +385,7 @@ func (b *d1Brain) golem() (int, func()) {
 
 func (b *d1Brain) shoot() (d1Act, bool) {
 	target := b.enemy
-	return d1Act{cost: 100 / b.a.GetAttackSpeed(common.RangedAttack), mode: common.D1ModeRAttack, run: func() {
+	return d1Act{cost: b.a.AttackCost(common.RangedAttack), mode: common.D1ModeRAttack, run: func() {
 		b.g.actionBroker.Execute(common.NewRangedAttackAction(common.NewActorCause("Ranged attack", b.a), b.a, target))
 	}}, true
 }

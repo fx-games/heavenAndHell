@@ -37,7 +37,6 @@ func SyncHero(a *Actor) {
 	st.SetAttribute(stats.MaxMana, s.MaxMana>>6)
 	st.GetResource(stats.Health).Increase(0) // clamp to the new maximum
 	st.GetResource(stats.Mana).Increase(0)
-	st.SetAttributeAsFloat(stats.AttackSpeedFactor, d1.SpeedTier(d1.RefAttackTicks, s.AttackFrames))
 }
 
 // D1SheetAttribute is one of the four attributes on the character sheet: the base value stat points buy, the
@@ -313,29 +312,21 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 		blast := 0
 		if !ranged { // PM_DoAttack: fire and lightning weapons explode on the swing's target, hit or miss (MI_Weapexp)
 			if s.Flags&d1.ISplFireDam != 0 {
-				blast += d1ElementalHit(def, d1.ResistKindFire, h.SpellHitChance(s, mon.Level, 0), func() int { return s.FMinDam + d1Rng.Intn(max(s.FMaxDam-s.FMinDam+1, 1)) })
+				blast += d1ElementalHit(def, d1.ResistKindFire, h.SpellHitChance(s, mon.Level), func() int { return s.FMinDam + d1Rng.Intn(max(s.FMaxDam-s.FMinDam+1, 1)) })
 			}
 			if s.Flags&d1.ISplLightDam != 0 {
-				blast += d1ElementalHit(def, d1.ResistKindLightning, h.SpellHitChance(s, mon.Level, 0), func() int { return s.LMinDam + d1Rng.Intn(max(s.LMaxDam-s.LMinDam+1, 1)) })
+				blast += d1ElementalHit(def, d1.ResistKindLightning, h.SpellHitChance(s, mon.Level), func() int { return s.LMinDam + d1Rng.Intn(max(s.LMaxDam-s.LMinDam+1, 1)) })
 			}
 		}
 		if d1Rng.Intn(100) >= chance {
 			logMissed(ctx, att, def)
 			return blast, nil, true
 		}
-		attackType := MeleeAttack
+		durrnd := 30
 		if ranged {
-			attackType = RangedAttack
+			durrnd = 40
 		}
-		if brokenWeapon := WeaponAboutToBreak(att, attackType); brokenWeapon != nil {
-			destroyBrokenWeapon(ctx, att, brokenWeapon)
-		} else {
-			durrnd := 30
-			if ranged {
-				durrnd = 40
-			}
-			d1Broke(ctx, att, d1.WeaponDur(d1Rng, att.equippedD1(), durrnd))
-		}
+		d1Broke(ctx.Msg, att, d1.WeaponDur(d1Rng, att.equippedD1(), durrnd))
 		if ranged {
 			dam = h.ArrowDamage(d1Rng, s)
 		} else {
@@ -396,14 +387,23 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 		}
 		if d1Rng.Intn(100) < h.BlockChance(s, mon.Level) {
 			ctx.Msg(fmt.Sprintf("You block the attack of %s.", att.Name()))
-			d1Broke(ctx, def, d1.ShieldDur(def.equippedD1()))
+			playD1SfxAt(ctx, "IS_ISWORD", def.MapPosition()) // StartPlrBlock
+			d1BlockWear(ctx.Msg, def)
 			reflect(d1.MonsterDamage(d1Rng, s, minDam, maxDam))
 			return 0, extra, true
 		}
-		d1Broke(ctx, def, d1.ArmorDur(d1Rng, def.equippedD1()))
 		dam64 := d1.MonsterDamage(d1Rng, s, minDam, maxDam)
 		dam64 -= reflect(dam64)
 		dam = d1ManaShield(def, max(dam64, 0)>>6)
+		D1StartPlrHit(state.factory, def, dam64, dam, false)
+		if !ranged && mon.Data.Flags&d1.MFlagKnockback != 0 && def.GetStats().GetResource(stats.Health).Value() > dam {
+			D1StartPlrHit(state.factory, def, 0, dam, true)
+			m := state.GetMap()
+			push := def.MapPosition().Add(D1Dirs[mon.Dir])
+			if _, isTransition := m.GetTransitionAt(push); m.IsCurrentlyPassable(push) && !isTransition {
+				extra = append(extra, NewMoveAction(AbstractCause("Knockback"), def, push, true))
+			}
+		}
 		if !ranged && s.Flags&d1.ISplThorns != 0 {
 			extra = append(extra, NewChangeResourceAction(NewActorCause("Thorns", def), att, stats.Health, -float64(d1Rng.Intn(3)+1)))
 		}
@@ -571,23 +571,76 @@ func d1Alert(victim, attacker *Actor) {
 	}
 }
 
-// d1HitRecovery ports StartPlrHit and M_StartHit for any damage taken: a hard hit makes the victim flinch and lose
-// time. A new hit restarts the recovery instead of adding to it. Ticks convert at a warrior's swing (RefAttackTicks
-// ticks = one 10 AUT turn).
-func d1HitRecovery(ctx ActionContext, victim *Actor, dam int) {
-	switch {
-	case victim.hero != nil && dam >= victim.hero.Level:
-		if victim.hitRecovery == 0 {
-			ctx.Msg("You are staggered!")
-			ctx.GameState.factory.PlayD1HeroSound(69)
-		}
-		victim.hitRecovery = max(victim.hitRecovery, d1TicksToAUT(d1.HitRecoveryTicks(victim.hero.Class, victim.HeroSheet().Flags)))
-	case victim.d1Monster != nil:
+// d1HitRecovery ports M_StartHit for any damage a monster takes. The hero flinches only where D1 calls
+// StartPlrHit (D1StartPlrHit).
+func d1HitRecovery(victim *Actor, dam int) {
+	if victim.d1Monster != nil {
 		d1MonsterGotHit(victim, dam)
 	}
 }
 
-func d1TicksToAUT(ticks int) int { return (ticks*10 + d1.RefAttackTicks/2) / d1.RefAttackTicks }
+// D1StartPlrHit ports StartPlrHit and PM_DoGotHit: a blow of dam64 (in 64ths, before mana shield) of at least clvl
+// (a Barbarian 1.25×) makes the hero flinch and lose time, and his armor wears 3 in 4 times. force is a charge's
+// or knockback's flinch, which a hero already flinching doesn't get again. No flinch when dealt kills him. A new
+// hit restarts the recovery instead of adding to it.
+func D1StartPlrHit(f *Factory, a *Actor, dam64, dealt int, force bool) {
+	h := a.hero
+	if h == nil || a.GetStats().GetResource(stats.Health).Value() <= dealt ||
+		force && a.hitRecovery > 0 || !force && dam64>>6 < h.Level+d1BarbarianBonus(h) {
+		return
+	}
+	if a.hitRecovery == 0 {
+		f.Msg("You are staggered!")
+		f.PlayD1HeroSound(69)
+	}
+	a.hitRecovery = max(a.hitRecovery, d1TicksToAUT(d1.HitRecoveryTicks(h.Class, a.HeroSheet().Flags)))
+	if d1Rng.Intn(4) != 0 {
+		d1Broke(f.Msg, a, d1.ArmorDur(d1Rng, a.equippedD1()))
+	}
+}
+
+// d1BarbarianBonus is what a Barbarian's StartPlrHit adds to the flinch threshold.
+func d1BarbarianBonus(h *d1.Hero) int {
+	if h.Class == d1.Barbarian {
+		return h.Level / 4
+	}
+	return 0
+}
+
+// d1BlockWear ports PM_DoBlock: a block wears the shield 1 in 10 times.
+func d1BlockWear(msg func(string), a *Actor) {
+	if d1Rng.Intn(10) == 0 {
+		d1Broke(msg, a, d1.ShieldDur(a.equippedD1()))
+	}
+}
+
+// d1TicksToAUT converts D1 ticks at a walk step (RefWalkTicks ticks = one 10-AUT turn).
+func d1TicksToAUT(ticks int) int { return (ticks*10 + d1.RefWalkTicks/2) / d1.RefWalkTicks }
+
+// MoveCost is a step's AUT: a D1 monster's walk animation, anything else its speed factors (a D1 hero's step is
+// RefWalkTicks).
+func (a *Actor) MoveCost() int {
+	if a.d1Monster != nil {
+		d := a.d1Monster.Data
+		return d1TicksToAUT(d.Frames[1] * (d.Rate[1] + 1))
+	}
+	return 100 / a.GetMoveSpeed()
+}
+
+// AttackCost is an attack's AUT. D1 heroes and monsters take their attack animation's ticks (decision 13),
+// anything else its speed factors.
+func (a *Actor) AttackCost(t AttackType) int {
+	switch {
+	case a.hero != nil && t == MeleeAttack:
+		return d1TicksToAUT(a.HeroSheet().MeleeFrames())
+	case a.hero != nil:
+		return d1TicksToAUT(a.HeroSheet().AttackFrames)
+	case a.d1Monster != nil:
+		d := a.d1Monster.Data
+		return d1TicksToAUT(d.Frames[2] * (d.Rate[2] + 1))
+	}
+	return 100 / a.GetAttackSpeed(t)
+}
 
 // D1MonsterRecoveryAUT is the time a hard hit costs a monster: its hit animation minus the part of its attack
 // animation after the hit frame, because our monsters' blows land when their action ends and D1's at mAFNum.
@@ -649,12 +702,12 @@ func d1OnKill(ctx ActionContext, killer, victim *Actor) []Action {
 			state.factory.RefreshD1Spells(killer)
 		}
 	}
-	if cue := victim.D1MonsterSoundCue("death"); cue != "" && ctx.AudioPlayer.HasCue(cue) {
-		ctx.AudioPlayer.PlayCue(cue)
-	}
+	whenVisible(ctx.ActionBroker, victim, func() { playCueAt(ctx, victim.D1MonsterSoundCue("death"), victim.MapPosition()) })
 	d1QuestKill(ctx, mon)
 	d1FallenFear(state, victim.MapPosition())
 	state.factory.d1AcidDeath(ctx, victim)
+	state.dropsFrom = victim
+	defer func() { state.dropsFrom = nil }()
 	dlvl := d1DungeonLevel(state)
 	if state.factory.d1HellfireLoot(mon, victim.MapPosition(), state.D1ItemLevel(dlvl)) {
 	} else if it := state.factory.d1QuestDrop(mon); it != nil {
@@ -697,10 +750,10 @@ func d1DecayWeapons(ctx ActionContext, att *Actor) {
 		}
 		it.d1.PLDam -= 5
 		if it.d1.PLDam <= -100 {
-			d1Broke(ctx, att, it.d1)
 			att.GetEquipment().UnEquip(it)
 			att.GetInventory().Remove(it)
 			ctx.Msg(fmt.Sprintf("Your %s crumbles away.", it.Name()))
+			SyncHero(att)
 			continue
 		}
 		it.RefreshD1()

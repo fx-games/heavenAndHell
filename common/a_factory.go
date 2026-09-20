@@ -38,15 +38,26 @@ func (g *Factory) playD1Sound(id string) {
 	g.speechCue = id
 }
 
-// d1HeroVoice is the voice set each class speaks with. The Monk has his own (hfmonk.mpq / hfvoice.mpq); the Bard
-// and the Barbarian borrow the Rogue's and the Warrior's, which is what Hellfire itself does — EFFECTS.H defines
-// PS_BARD1 as PS_ROGUE1 and so on. A missing file is simply not registered, so without the expansion's archives
-// the Monk falls silent rather than breaking.
-var d1HeroVoice = [d1.NumClasses]string{d1.Warrior: "WARR", d1.Rogue: "ROGUE", d1.Sorcerer: "MAGE", d1.Monk: "MONK", d1.Bard: "ROGUE", d1.Barbarian: "WARR"}
+// d1HeroVoice is the voice set the hero speaks with. D1 and Hellfire have one woman's set (the Rogue's) and three
+// men's (Warrior, Sorcerer, Monk; the Monk's is in hfmonk.mpq / hfvoice.mpq and falls silent without it), all with
+// the same line numbers. So every heroine speaks with the Rogue's, and a man with his class's own, the Warrior's
+// for the Rogue, the Bard and the Barbarian.
+func (g *Factory) d1HeroVoice() string {
+	if sel := g.State.SelectedClass; sel.Icon == defs.FemaleIconByClass[sel.InternalName] {
+		return "ROGUE"
+	}
+	switch g.State.GetPlayer().Hero().Class {
+	case d1.Sorcerer:
+		return "MAGE"
+	case d1.Monk:
+		return "MONK"
+	}
+	return "WARR"
+}
 
-// PlayD1HeroSound plays the hero's class version of a hero line: n 8 is PS_WARR8, PS_ROGUE8 or PS_MAGE8.
+// PlayD1HeroSound plays the hero's voice version of a hero line: n 8 is PS_WARR8, PS_ROGUE8 or PS_MAGE8.
 func (g *Factory) PlayD1HeroSound(n int) {
-	id := fmt.Sprintf("PS_%s%d", d1HeroVoice[g.State.GetPlayer().Hero().Class], n)
+	id := fmt.Sprintf("PS_%s%d", g.d1HeroVoice(), n)
 	if id == "PS_WARR96" { // the warrior's catacombs line is PS_WARR96B
 		id += "B"
 	}

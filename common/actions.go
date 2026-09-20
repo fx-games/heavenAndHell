@@ -76,7 +76,7 @@ type UserInterface interface {
 
 	// Specialized
 	OnMapChanged()
-	OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath bool, name string), back func())
+	OpenNewGameScreen(start func(class defs.LoadoutDefinition, permadeath, hellfire bool, name string), back func())
 	// OpenSaveSlots shows the save slots with their screenshots and metadata; pick gets the chosen slot, back
 	// closes the screen without touching anything.
 	OpenSaveSlots(title string, slots []SaveSlot, pick func(slot int), back func())
@@ -98,6 +98,8 @@ type UserInterface interface {
 	UpdateMiniMap()
 	OpenPlayerStashInTown()
 	OnPlayerTurnTaken()
+	// RefreshIconBars rebuilds the sidebar's inventory, skill and belt icons after a change outside a turn.
+	RefreshIconBars()
 	SetPlayerMessage(message func(message string))
 	SetDebugActions(actions func() DebugActions)
 	FadeToBlack()

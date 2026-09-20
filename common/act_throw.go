@@ -100,7 +100,7 @@ func (d *ThrowAction) GetAttacker() *Actor {
 }
 
 func (d *ThrowAction) GetDelayInAut() int {
-	return 100 / d.attacker.GetAttackSpeed(RangedAttack)
+	return d.attacker.AttackCost(RangedAttack)
 }
 
 func (d *ThrowAction) GetDefender() interface{} {

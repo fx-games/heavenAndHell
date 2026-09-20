@@ -148,10 +148,6 @@ func TestHero(t *testing.T) {
 	if !w.SpendStatPoint(AttrVit) || w.MaxHPBase != 70<<6+129+128 || w.BaseVit != 26 {
 		t.Fatalf("vit point: %+v", w)
 	}
-
-	if SpeedTier(RefWalkTicks, 24) != 0.5 || SpeedTier(RefWalkTicks, 8) != 1 || SpeedTier(RefAttackTicks, 12) != 1.5 {
-		t.Fatal("speed tiers")
-	}
 }
 
 func TestStores(t *testing.T) {
@@ -183,6 +179,9 @@ func TestStores(t *testing.T) {
 			for _, it := range witch {
 				if d.Hellfire && IsOil(it.MiscID) {
 					t.Fatalf("hellfire witch sells %s", it.Name)
+				}
+				if !d.Hellfire && d.Items[it.BaseIdx].Hellfire {
+					t.Fatalf("D1 witch sells Hellfire's %s", it.Name)
 				}
 			}
 			book := &Item{MiscID: "IMISC_BOOK", Spell: SplFirebolt}
@@ -272,8 +271,8 @@ func TestSpells(t *testing.T) {
 	if g := GolemStats(1, 1, 0); g.HP != 10 || g.Hit != 47 || g.MinDam != 10 || g.MaxDam != 18 {
 		t.Errorf("golem %+v", g)
 	}
-	if StoneTurns(1) != 14 || FireWallTurns(0) != 20 {
-		t.Errorf("stone %d turns, fire wall %d turns", StoneTurns(1), FireWallTurns(0))
+	if StoneTurns(1) != 14 || FireWallTurns(0, 0) != 20 {
+		t.Errorf("stone %d turns, fire wall %d turns", StoneTurns(1), FireWallTurns(0, 0))
 	}
 }
 
@@ -492,5 +491,67 @@ func TestHellfireItems(t *testing.T) {
 	}
 	if q := (&Item{Class: "ICLASS_QUEST"}); ApplyOil("IMISC_OILBSMTH", q, rng.Intn) {
 		t.Error("a quest item took an oil")
+	}
+}
+
+// MI_Cbolt: a spark heading +x (dir 7, bpath 0) covers 3 tiles in the 17 ticks before its first turn.
+func TestChargedBoltFlight(t *testing.T) {
+	f := ChargedBoltFlight(7, 1)
+	for i, p := range f[:17] {
+		if p[1] != 0 {
+			t.Fatalf("tick %d: %v left the x axis", i, p)
+		}
+	}
+	if f[16] != [2]int{3, 0} || len(f) != 256 {
+		t.Fatalf("after 17 ticks at %v, %d ticks", f[16], len(f))
+	}
+}
+
+// GetMissilePos at velocity 16: 2-3 ticks a tile along an axis, 4 on a diagonal (a Nova ball or a Flame Wave
+// hits a monster that often).
+func TestMissileFlightTicksPerTile(t *testing.T) {
+	for _, c := range []struct{ dx, dy, lo, hi int }{{1, 0, 2, 3}, {1, 1, 4, 4}} {
+		count := map[[2]int]int{}
+		for _, p := range MissileFlight(c.dx, c.dy, 16, 60) {
+			count[p]++
+		}
+		for p, n := range count {
+			if p != [2]int{} && (p[0] < 10 && p[1] < 10) && (n < c.lo || n > c.hi) {
+				t.Errorf("(%d,%d): %d ticks on %v", c.dx, c.dy, n, p)
+			}
+		}
+	}
+}
+
+// MI_Manashield: spell level 1 pays 4/9 of the damage, level 7 and up 40/63.
+func TestManaShieldCost(t *testing.T) {
+	if got := ManaShieldCost(630, 0); got != 630 {
+		t.Errorf("slvl 0: %d", got)
+	}
+	if got := ManaShieldCost(630, 1); got != 280 {
+		t.Errorf("slvl 1: %d", got)
+	}
+	if got := ManaShieldCost(630, 9); got != 400 {
+		t.Errorf("slvl 9: %d", got)
+	}
+}
+
+func TestTypedSpellsNameTheirDamageType(t *testing.T) {
+	for spell, kind := range SpellResist {
+		if kind == ResistNone {
+			continue
+		}
+		want := [...]string{"", "fire", "lightning", "magic"}[kind]
+		if text := SpellDamageText(spell, 50, 10, 3); !strings.Contains(strings.ToLower(text), want) {
+			t.Errorf("spell %d says %q, want it to name %s", spell, text, want)
+		}
+	}
+}
+
+func TestDamagingSpellsShowARange(t *testing.T) {
+	for _, spell := range []int{SplInferno, SplFlash, SplFireWall, SplLightWall, SplRingOfFire, SplGuardian} {
+		if _, hi, ok := SpellDamageRange(spell, 50, 10, 3); !ok || hi <= 0 {
+			t.Errorf("spell %d has no damage range", spell)
+		}
 	}
 }

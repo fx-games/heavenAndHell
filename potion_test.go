@@ -11,7 +11,7 @@ import (
 func TestFullResourceRefusesPotion(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
 	player := theGame.GetWorldState().GetPlayer()
 	st := player.GetStats()
 	st.GetResource(stats.Health).SetToMax()

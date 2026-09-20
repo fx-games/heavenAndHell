@@ -62,11 +62,7 @@ type Configuration struct {
 
 	AutoExploreOpenContainers bool // auto explore also bumps chests/barrels/sarcophagi it finds
 
-	WeaponBreakWarning bool // ask for confirmation before an attack that would destroy a zero-durability weapon
-
 	Fullscreen bool // set in the video menu or with F11
-
-	Hellfire bool // new games get Hellfire's classes, items, monsters, quests and levels; Continue upgrades a D1 save
 
 	// MiniMapColors overrides minimap pixel colors by name, from repeated
 	// "MiniMapColor: name=rrggbb" lines. Unknown names are kept and written back, but never drawn.
@@ -170,9 +166,7 @@ func (c Configuration) ToRecord() recfile.Record {
 		{Name: "VoiceVolume", Value: recfile.FloatStr(c.VoiceVolume)},
 		{Name: "DiabloAudioEnabled", Value: recfile.BoolStr(c.DiabloAudioEnabled)},
 		{Name: "AutoExploreOpenContainers", Value: recfile.BoolStr(c.AutoExploreOpenContainers)},
-		{Name: "WeaponBreakWarning", Value: recfile.BoolStr(c.WeaponBreakWarning)},
 		{Name: "Fullscreen", Value: recfile.BoolStr(c.Fullscreen)},
-		{Name: "Hellfire", Value: recfile.BoolStr(c.Hellfire)},
 	}
 	// written back on every save, so a menu toggle cannot drop the user's palette
 	for _, name := range slices.Sorted(maps.Keys(c.MiniMapColors)) {
@@ -226,9 +220,7 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		VoiceVolume:               configMap.GetFloatOrDefault("VoiceVolume", 1),
 		DiabloAudioEnabled:        configMap.GetBoolOrTrue("DiabloAudioEnabled"),
 		AutoExploreOpenContainers: configMap.GetBoolOrFalse("AutoExploreOpenContainers"),
-		WeaponBreakWarning:        configMap.GetBoolOrTrue("WeaponBreakWarning"),
 		Fullscreen:                configMap.GetBoolOrFalse("Fullscreen"),
-		Hellfire:                  configMap.GetBoolOrTrue("Hellfire"),
 		MiniMapColors:             parseMiniMapColors(configMap.GetStringOrDefault("MiniMapColor", "")),
 		WindowSize: geometry.Point{ //1280, Y: 800
 			X: configMap.GetIntOrDefault("WindowWidth", 1280),

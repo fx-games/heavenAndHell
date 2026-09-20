@@ -12,7 +12,7 @@ import (
 func TestChurchGlowsRedInTown(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
 	state := theGame.GetWorldState()
 	town := state.GetMap()
 
@@ -36,7 +36,7 @@ func TestChurchGlowsRedInTown(t *testing.T) {
 func TestTownBrightensAfterFirstDescent(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
 	state := theGame.GetWorldState()
 
 	at := state.GetPlayer().MapPosition()
@@ -48,5 +48,38 @@ func TestTownBrightensAfterFirstDescent(t *testing.T) {
 	bright := state.ApplyLighting(at, white, 0)
 	if bright.R <= gloomy.R || bright.G <= gloomy.G {
 		t.Fatalf("first visit draws as %v, the return visit as %v: town does not brighten", gloomy, bright)
+	}
+}
+
+// An open town portal lights the tiles right next to it light blue, and the light is gone once it closes.
+func TestTownPortalGlowsBlue(t *testing.T) {
+	theGame, _ := createGameAndUIContext()
+	theGame.GetAudio().SetDisablePlayback(true)
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "")
+	state := theGame.GetWorldState()
+	town := state.GetMap()
+
+	pos := town.GetNamedLocation("portal")
+	next := geometry.Point{X: pos.X + 1, Y: pos.Y}
+	far := geometry.Point{X: pos.X + 4, Y: pos.Y}
+	for _, p := range []geometry.Point{pos, next, far} {
+		town.SetExplored(p)
+	}
+	white := color.RGBA{R: 200, G: 200, B: 200, A: 255}
+	before := state.ApplyLighting(next, white, 0)
+	farBefore := state.ApplyLighting(far, white, 0)
+
+	state.SetD1Portal(&common.D1Portal{Map: "level_1", X: 10, Y: 10})
+	common.PlaceD1Portal(state, town)
+	if lit := state.ApplyLighting(next, white, 0); lit.B <= before.B || lit.B <= lit.R {
+		t.Fatalf("next to the portal: %v before, %v with it open: no blue light", before, lit)
+	}
+	if got := state.ApplyLighting(far, white, 0); got != farBefore {
+		t.Fatalf("4 tiles from the portal the light changed from %v to %v: it reaches too far", farBefore, got)
+	}
+
+	state.CloseD1Portal()
+	if got := state.ApplyLighting(next, white, 0); got != before {
+		t.Fatalf("after closing the portal the cell next to it draws %v, was %v", got, before)
 	}
 }

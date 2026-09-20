@@ -33,6 +33,7 @@ func (d *PickUpAction) Execute(context ActionContext) []Action {
 	gameMap.RemoveItem(item)
 	state.factory.d1CornerstoneTaken(actorPos)
 
+	playD1ItemInvSfx(context, item, actor)
 	if item.IsGold() {
 		actor.GetStats().IncrementBy(stats.Gold, item.d1.Value)
 		context.Msg(fmt.Sprintf("You pick up %d gold", item.d1.Value))

@@ -4,6 +4,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"image/color"
+	"rpg/common"
 	"rpg/geometry"
 	"rpg/util"
 )
@@ -100,10 +101,14 @@ func (u *UIController) handleKeyboardInput() {
 			u.OnCommand(PlayerCommandRight)
 			return
 		}
+		if _, sheet := u.GetTopModal().(*CharacterSheet); sheet && inpututil.IsKeyJustPressed(ebiten.KeyC) {
+			u.PopWidget() // 'c' toggles it shut, same key that opened it
+			return
+		}
 		switch u.GetTopModal().(type) {
 		case Keylistener: // letters are hotkeys or typed text there
-		case *BasicLabel:
-			if inpututil.IsKeyJustPressed(ebiten.KeyE) {
+		case *BasicLabel, *InfoWindow: // pop-ups: e and space close them like esc, enter and any click
+			if inpututil.IsKeyJustPressed(ebiten.KeyE) || inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 				u.Cancel()
 				return
 			}
@@ -135,6 +140,34 @@ func (u *UIController) handleKeyboardInput() {
 		return
 	}
 
+	if t := u.targeter; t != nil && t.hasConfirm && inpututil.IsKeyJustPressed(t.confirmKey) {
+		t.Activate()
+		u.CancelTargeting()
+		return
+	}
+	if t := u.targeter; t != nil { // aiming: Tab cycles targets, WASD nudges the cursor, Enter fires
+		if inpututil.IsKeyJustPressed(ebiten.KeyTab) {
+			t.Cycle(map[bool]int{false: 1, true: -1}[u.shiftIsBeingPressedThisTick])
+			return
+		}
+		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+			t.Activate()
+			u.CancelTargeting()
+			return
+		}
+		for key, command := range map[ebiten.Key]CommandType{ebiten.KeyW: PlayerCommandUp, ebiten.KeyS: PlayerCommandDown, ebiten.KeyA: PlayerCommandLeft, ebiten.KeyD: PlayerCommandRight} {
+			if isBeingPressedRepeatedly(key) {
+				t.OnCommand(command)
+				return
+			}
+		}
+	}
+	for i := range common.BeltSize {
+		if inpututil.IsKeyJustPressed(ebiten.Key1 + ebiten.Key(i)) {
+			u.UseBeltSlot(i)
+			return
+		}
+	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyG) {
 		act.PickUpItem()
 	}
@@ -296,6 +329,9 @@ func (u *UIController) handleMouseInput() {
 		}
 
 	}
+	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
+		u.endIconDrag(mousePosInPixelsX, mousePosInPixelsY)
+	}
 	noButton := ebiten.MouseButton(-1)
 	mouseButton := noButton
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
@@ -313,9 +349,9 @@ func (u *UIController) handleMouseInput() {
 		if !state.GetMap().Contains(u.mousePosOnMap) || !visibleMap.Contains(u.mousePosOnMap) {
 			return
 		}
-		if u.targeter != nil {
-			u.targeter.OnMouseClicked(u.mousePosOnMap)
-			if u.targeter.IsDone() {
+		if t := u.targeter; t != nil { // the hit effect may clear or replace u.targeter itself
+			t.OnMouseClicked(u.mousePosOnMap)
+			if t.IsDone() && u.targeter == t {
 				u.CancelTargeting()
 			}
 			return

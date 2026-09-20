@@ -13,7 +13,7 @@ import (
 func TestActorInfoSections(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "Aidan")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "Aidan")
 	state := theGame.GetWorldState()
 	player := state.GetPlayer()
 

@@ -15,9 +15,11 @@ type slotUI struct {
 	choose    int
 	confirmed string
 	refuse    bool // answer "no" to the overwrite question
+	asked     int  // how often the slot screen was opened
 }
 
 func (s *slotUI) OpenSaveSlots(title string, slots []common.SaveSlot, pick func(slot int), back func()) {
+	s.asked++
 	pick(s.choose)
 }
 
@@ -28,17 +30,20 @@ func (s *slotUI) Confirm(message string, onConfirm func()) {
 	}
 }
 
-// A new game takes the first free slot and writes the metadata the load screen shows; saving into another slot
+// A new game asks for its slot even with free ones left, and writes the metadata the load screen shows; saving into another slot
 // leaves the first one alone; and writing over a slot that holds somebody else's hero asks first, and writes
 // nothing when the answer is no.
 func TestSaveSlots(t *testing.T) {
 	game.SaveDir = filepath.Join(t.TempDir(), "saves")
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	ui := &slotUI{DummyUI: NewDummyUI()}
+	ui := &slotUI{DummyUI: NewDummyUI(), choose: 1}
 	theGame.SetAndInitUserInterface(ui)
 
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "Aidan")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "Aidan")
+	if ui.asked != 1 {
+		t.Fatalf("a new game with every slot free picked one itself instead of asking (asked %d times)", ui.asked)
+	}
 	slots := game.ListSaveSlots()
 	if len(slots) != game.MaxSaveSlots {
 		t.Fatalf("got %d slots, want %d", len(slots), game.MaxSaveSlots)
@@ -82,7 +87,7 @@ func TestSaveSlots(t *testing.T) {
 		t.Fatalf("slot %d is still free after filling all of them", free)
 	}
 	ui.choose, ui.confirmed, ui.refuse = 5, "", true // slot 5 is the one this game autosaves into
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "Warriv")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "Warriv")
 	if ui.confirmed == "" {
 		t.Fatal("a new game replaced an existing save without asking")
 	}
@@ -102,7 +107,7 @@ func TestLegacySaveMigratesToSlotOne(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
 	theGame.SetAndInitUserInterface(&slotUI{DummyUI: NewDummyUI(), choose: 1})
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "Moreina")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, true, "Moreina")
 
 	// put the save back where the old single-slot game kept it: in the working directory, next to "saves"
 	saved, err := os.ReadFile(filepath.Join(game.SaveDir, "slot1.json"))

@@ -209,198 +209,247 @@ icon: 43
 name: Effect Hit
 
 internal_name: prop.l1light
+reference_image: reference/d1_sprites/tiles/objects/l1braz.frame01.png
 name: Cathedral Candelabra (wall light)
 icon: 109
 
 internal_name: prop.chest1
+reference_image: reference/d1_sprites/tiles/objects/chest1.frame01.png
 name: Small Chest
 icon: 128
 
 internal_name: prop.chest1.used
+reference_image: reference/d1_sprites/tiles/objects/chest1.frame02.png
 name: Small Chest (opened)
 icon: 127
 
 internal_name: prop.chest2
+reference_image: reference/d1_sprites/tiles/objects/chest2.frame01.png
 name: Chest
 icon: 128
 
 internal_name: prop.chest2.used
+reference_image: reference/d1_sprites/tiles/objects/chest2.frame02.png
 name: Chest (opened)
 icon: 127
 
 internal_name: prop.chest3
+reference_image: reference/d1_sprites/tiles/objects/chest3.frame01.png
 name: Large Chest
 icon: 128
 
 internal_name: prop.chest3.used
+reference_image: reference/d1_sprites/tiles/objects/chest3.frame02.png
 name: Large Chest (opened)
 icon: 127
 
 internal_name: prop.sarc
+reference_image: reference/d1_sprites/tiles/objects/sarc.frame01.png
 name: Sarcophagus
 icon: 264
 
 internal_name: prop.sarc.used
+reference_image: reference/d1_sprites/tiles/objects/sarc.frame02.png
 name: Sarcophagus (opened)
 icon: 265
 
 internal_name: prop.barrel
+reference_image: reference/d1_sprites/tiles/objects/barrel.frame01.png
 name: Barrel
 icon: 125
 
 internal_name: prop.barrelex
+reference_image: reference/d1_sprites/tiles/objects/barrelex.frame01.png
 name: Explosive Barrel
 icon: 320
 
 internal_name: prop.shrine
+reference_image: reference/d1_sprites/tiles/objects/lshrineg.frame01.png
 name: Shrine
 icon: 75
 
 internal_name: prop.shrine.used
+reference_image: reference/d1_sprites/tiles/objects/lshrineg.frame02.png
 name: Shrine (used)
 icon: 75
 
 internal_name: prop.book2
+reference_image: reference/d1_sprites/tiles/objects/book2.frame01.png
 name: Book on Skull Lectern (Ancient/Mythical Book, Skeleton Tome, Library Book)
 icon: 321
 
 internal_name: prop.book2.used
+reference_image: reference/d1_sprites/tiles/objects/book2.frame02.png
 name: Book on Skull Lectern (read)
 icon: 322
 
 internal_name: prop.bookcase
+reference_image: reference/d1_sprites/tiles/objects/bcase.frame01.png
 name: Bookcase
 icon: 321
 
 internal_name: prop.bookcase.used
+reference_image: reference/d1_sprites/tiles/objects/bcase.frame01.png
 name: Bookcase (searched, or plain Bookshelf)
 icon: 322
 
 internal_name: prop.bloodftn
+reference_image: reference/d1_sprites/tiles/objects/bloodfnt.frame01.png
 name: Blood Fountain
 icon: 293
 
 internal_name: prop.decap
+reference_image: reference/d1_sprites/tiles/objects/decap.frame01.png
 name: Decapitated Body
 icon: 836
 
 internal_name: prop.decap.used
+reference_image: reference/d1_sprites/tiles/objects/decap.frame02.png
 name: Decapitated Body (searched)
 icon: 836
 
 internal_name: prop.purifyingftn
+reference_image: reference/d1_sprites/tiles/objects/pfountn.frame01.png
 name: Purifying Spring
 icon: 292
 
 internal_name: prop.armorstand
+reference_image: reference/d1_sprites/tiles/objects/armstand.frame01.png
 name: Armor Stand (incl. Warlord's)
 icon: 348
 
 internal_name: prop.armorstand.used
+reference_image: reference/d1_sprites/tiles/objects/armstand.frame01.png
 name: Armor Stand (empty)
 icon: 349
 
 internal_name: prop.goatshrine
+reference_image: reference/d1_sprites/tiles/objects/goatshrn.frame01.png
 name: Goat Shrine
 icon: 75
 
 internal_name: prop.goatshrine.used
+reference_image: reference/d1_sprites/tiles/objects/goatshrn.frame01.png
 name: Goat Shrine (used)
 icon: 75
 
 internal_name: prop.cauldron
+reference_image: reference/d1_sprites/tiles/objects/cauldren.frame01.png
 name: Cauldron
 icon: 75
 
 internal_name: prop.cauldron.used
+reference_image: reference/d1_sprites/tiles/objects/cauldren.frame02.png
 name: Cauldron (used)
 icon: 75
 
 internal_name: prop.murkyftn
+reference_image: reference/d1_sprites/tiles/objects/mfountn.frame01.png
 name: Murky Pool
 icon: 292
 
 internal_name: prop.murkyftn.used
+reference_image: reference/d1_sprites/tiles/objects/mfountn.frame01.png
 name: Murky Pool (used)
 icon: 292
 
 internal_name: prop.tearftn
+reference_image: reference/d1_sprites/tiles/objects/tfountn.frame01.png
 name: Fountain of Tears
 icon: 292
 
 internal_name: prop.tearftn.used
+reference_image: reference/d1_sprites/tiles/objects/tfountn.frame01.png
 name: Fountain of Tears (used)
 icon: 292
 
 internal_name: prop.weaponrack
+reference_image: reference/d1_sprites/tiles/objects/weapstnd.frame01.png
 name: Weapon Rack (incl. Warlord's, Weapon Stand)
 icon: 376
 
 internal_name: prop.weaponrack.used
+reference_image: reference/d1_sprites/tiles/objects/weapstnd.frame01.png
 name: Weapon Rack (empty)
 icon: 377
 
 internal_name: prop.lever
+reference_image: reference/d1_sprites/tiles/objects/lever.frame01.png
 name: Lever (incl. Flame Trap Lever)
 icon: 266
 
 internal_name: prop.lever.used
+reference_image: reference/d1_sprites/tiles/objects/lever.frame02.png
 name: Lever (pulled)
 icon: 267
 
 internal_name: prop.lazstand
+reference_image: reference/d1_sprites/tiles/objects/lzstand.frame01.png
 name: Staff of Lazarus Stand (with staff)
 icon: 347
 
 internal_name: prop.lazstand.used
+reference_image: reference/d1_sprites/tiles/objects/lzstand.frame02.png
 name: Staff of Lazarus Stand (empty)
 icon: 349
 
 internal_name: prop.switchskl
+reference_image: reference/d1_sprites/tiles/objects/switch4.frame01.png
 name: Skull Lever
 icon: 266
 
 internal_name: prop.switchskl.used
+reference_image: reference/d1_sprites/tiles/objects/switch4.frame02.png
 name: Skull Lever (pulled)
 icon: 267
 
 internal_name: prop.mushpatch
+reference_image: reference/d1_sprites/tiles/objects/mushptch.frame01.png
 name: Mushroom Patch (Black Mushroom quest)
 icon: 34
 
 internal_name: prop.mushpatch.used
+reference_image: reference/d1_sprites/tiles/objects/mushptch.frame02.png
 name: Mushroom Patch (searched)
 icon: 46
 
 internal_name: prop.book1
+reference_image: reference/d1_sprites/tiles/objects/book1.frame01.png
 name: Book on Stone Lectern (Blind, Blood, Steel Tome, Book Lever)
 icon: 321
 
 internal_name: prop.book1.used
+reference_image: reference/d1_sprites/tiles/objects/book1.frame02.png
 name: Book on Stone Lectern (read)
 icon: 322
 
 internal_name: prop.pedistal
+reference_image: reference/d1_sprites/tiles/objects/pedistl.frame01.png
 name: Pedestal of Blood (Valor quest)
 icon: 39
 
 internal_name: prop.pedistal.used
+reference_image: reference/d1_sprites/tiles/objects/pedistl.frame02.png
 name: Pedestal of Blood (stones placed)
 icon: 40
 
 internal_name: prop.storybook
+reference_image: reference/d1_sprites/tiles/objects/bkslbrnt.frame01.png
 name: Story Book (levels 4, 8, 12)
 icon: 321
 
 internal_name: prop.storybook.used
+reference_image: reference/d1_sprites/tiles/objects/bkslbrnt.frame02.png
 name: Story Book (read)
 icon: 322
 
 internal_name: prop.slainhero
+reference_image: reference/d1_sprites/tiles/objects/decap.frame01.png
 name: Slain Hero (level 9)
 icon: 135
 
 internal_name: prop.slainhero.used
+reference_image: reference/d1_sprites/tiles/objects/decap.frame02.png
 name: Slain Hero (searched)
 icon: 135
 
@@ -417,6 +466,7 @@ name: Town Portal (frame 2)
 icon: 294
 
 internal_name: prop.skfire
+reference_image: reference/d1_sprites/tiles/objects/skulfire.frame01.png
 name: Skull Fire
 icon: 32
 
@@ -425,6 +475,7 @@ name: Candle
 icon: 110
 
 internal_name: prop.candle2
+reference_image: reference/d1_sprites/tiles/objects/candle2.frame01.png
 name: Candle (lit)
 icon: 110
 
@@ -433,10 +484,12 @@ name: Candle
 icon: 110
 
 internal_name: prop.banner
+reference_image: reference/d1_sprites/tiles/objects/banner.frame01.png
 name: Banner
-icon: 61
+icon: 832
 
 internal_name: prop.skpile
+reference_image: reference/d1_sprites/tiles/objects/skulpile.frame01.png
 name: Skull Pile
 icon: 250
 
@@ -461,90 +514,112 @@ name: Skull on a Stick 5
 icon: 251
 
 internal_name: prop.crux
+reference_image: reference/d1_sprites/tiles/objects/cruxsk1.frame01.png
 name: Crucified Skeleton
 icon: 240
 
 internal_name: prop.crux.used
+reference_image: reference/d1_sprites/tiles/objects/cruxsk1.frame02.png
 name: Crucified Skeleton (broken)
 icon: 250
 
 internal_name: prop.stand
+reference_image: reference/d1_sprites/tiles/objects/rockstan.frame01.png
 name: Magic Rock Stand
 icon: 347
 
 internal_name: prop.angel
+reference_image: reference/d1_sprites/tiles/objects/angel.frame01.png
 name: Angel Statue
 icon: 106
 
 internal_name: prop.bcross
+reference_image: reference/d1_sprites/tiles/objects/burncros.frame01.png
 name: Burning Cross
-icon: 241
+icon: 827
 
 internal_name: prop.nudew2r
+reference_image: reference/d1_sprites/tiles/objects/nude2.frame01.png
 name: Tortured Body (woman)
 icon: 838
 
 internal_name: prop.tnudem1
+reference_image: reference/d1_sprites/tiles/objects/tnudem.frame01.png
 name: Tortured Body (man 1)
 icon: 837
 
 internal_name: prop.tnudem2
+reference_image: reference/d1_sprites/tiles/objects/tnudem.frame01.png
 name: Tortured Body (man 2)
 icon: 837
 
 internal_name: prop.tnudem3
+reference_image: reference/d1_sprites/tiles/objects/tnudem.frame01.png
 name: Tortured Body (man 3)
 icon: 837
 
 internal_name: prop.tnudem4
+reference_image: reference/d1_sprites/tiles/objects/tnudem.frame01.png
 name: Tortured Body (man 4)
 icon: 837
 
 internal_name: prop.tnudew1
+reference_image: reference/d1_sprites/tiles/objects/tnudew.frame01.png
 name: Tortured Body (woman 1)
 icon: 838
 
 internal_name: prop.tnudew2
+reference_image: reference/d1_sprites/tiles/objects/tnudew.frame01.png
 name: Tortured Body (woman 2)
 icon: 838
 
 internal_name: prop.tnudew3
+reference_image: reference/d1_sprites/tiles/objects/tnudew.frame01.png
 name: Tortured Body (woman 3)
 icon: 838
 
 internal_name: prop.torture1
+reference_image: reference/d1_sprites/tiles/objects/tsoul.frame01.png
 name: Hooked Body 1
 icon: 835
 
 internal_name: prop.torture2
+reference_image: reference/d1_sprites/tiles/objects/tsoul.frame01.png
 name: Hooked Body 2
 icon: 835
 
 internal_name: prop.torture3
+reference_image: reference/d1_sprites/tiles/objects/tsoul.frame01.png
 name: Hooked Body 3
 icon: 835
 
 internal_name: prop.torture4
+reference_image: reference/d1_sprites/tiles/objects/tsoul.frame01.png
 name: Hooked Body 4
 icon: 835
 
 internal_name: prop.torture5
+reference_image: reference/d1_sprites/tiles/objects/tsoul.frame01.png
 name: Hooked Body 5
 icon: 835
 
 internal_name: prop.flamehole
+reference_image: reference/d1_sprites/tiles/objects/flame1.frame01.png
 name: Flame Hole
 icon: 32
 
 internal_name: prop.water
+reference_image: reference/d1_sprites/tiles/objects/miniwatr.frame01.png
 name: Water
 icon: 28
 
 internal_name: prop.altboy
+reference_image: reference/d1_sprites/tiles/objects/altboy.frame01.png
 name: Altar (Lazarus' lair)
 icon: 347
 
 internal_name: prop.mcircle
+reference_image: reference/d1_sprites/tiles/objects/mcirl.frame01.png
 name: Magic Circle
 icon: 215
 

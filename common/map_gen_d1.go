@@ -167,7 +167,7 @@ func (g *MapGenerator) placeD1Monsters(m *gridmap.GridMap[*Actor, *Item, Object]
 		a.d1Monster.SpawnIndex = i
 		p := toCell(mon.X, mon.Y)
 		a.SetDrawPosition(p.ToPointF())
-		if !m.CanPlaceActorHere(p) {
+		if !canPlaceD1Monster(m, p) {
 			// walled in, like Lazarus and his helpers until their rooms open (changeD1Map places them then), or
 			// inside what our simplified terrain treats as solid (see d1IsLavaMega etc.)
 			a.SetMapPosition(p)
@@ -176,6 +176,21 @@ func (g *MapGenerator) placeD1Monsters(m *gridmap.GridMap[*Actor, *Item, Object]
 		}
 		m.AddActor(a, p)
 	}
+}
+
+// canPlaceD1Monster is CanPlaceActorHere minus D1's objects. D1 runs InitMonsters before InitObjects, and set pieces
+// like the Poisoned Water candles (addCandles) go down without checking dMonster, so a monster can own the cell of
+// a solid object. Anything placing monsters after objects exist (respawn, walled-in release, save restore) must
+// allow the same.
+func canPlaceD1Monster(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point) bool {
+	if m.CanPlaceActorHere(p) {
+		return true
+	}
+	if !m.Contains(p) || !m.IsObjectAt(p) {
+		return false
+	}
+	_, isD1 := m.ObjectAt(p).(*D1Object)
+	return isD1 && m.GetCell(p).TileType.IsWalkable && !m.IsActorAt(p) && !m.IsObviousHazardAt(p)
 }
 
 // placeD1Objects ports the object side of InitObjects/CreateThemeRooms: everything D1's generator placed. Doors

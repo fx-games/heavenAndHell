@@ -175,7 +175,7 @@ func NewIconList(uiController *UIController, tileSize geometry.Point, dataSource
 }
 
 func keyToInventoryRune(key ebiten.Key, shiftPressed bool) rune {
-	asString := key.String()
+	asString := strings.TrimPrefix(key.String(), "Digit")
 	if len(asString) != 1 {
 		return 0
 	}
@@ -186,4 +186,28 @@ func keyToInventoryRune(key ebiten.Key, shiftPressed bool) rune {
 	}
 	asRune := rune(asString[0])
 	return asRune
+}
+
+// menuListElement shows a util.MenuItem in an IconList: its CharIcon, then its text in its color.
+type menuListElement struct {
+	util.MenuItem
+	u *UIController
+}
+
+func (e menuListElement) Name() string { return e.MainText }
+func (e menuListElement) GetTooltipLines(func(string) []util.ColoredTextPart) []util.LabelText {
+	return e.TooltipText
+}
+func (e menuListElement) InventoryIcon() int32 { return e.CharIcon }
+func (e menuListElement) TintColor() color.RGBA {
+	if e.MainTextColor == nil {
+		return defs.DarkTextColor
+	}
+	return color.RGBAModel.Convert(e.MainTextColor).(color.RGBA)
+}
+func (e menuListElement) Shortcut() rune { return e.Hotkey }
+func (e menuListElement) OnSelected() {
+	menu := e.u.GetTopModal()
+	e.Action()
+	e.u.closeIfFinal(menu)
 }

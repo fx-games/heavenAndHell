@@ -37,8 +37,7 @@ func (i *BasicLabel) OnCommand(command CommandType) bool {
 }
 
 func (i *BasicLabel) OnMouseClicked(button ebiten.MouseButton, x int, y int) bool {
-	mousePos := geometry.Point{X: x, Y: y}
-	if i.canBeClosed && (!i.bounds.Contains(mousePos) || button == ebiten.MouseButtonRight) {
+	if i.canBeClosed {
 		i.shouldClose = true
 		return true
 	}

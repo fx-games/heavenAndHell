@@ -3,7 +3,6 @@ package gui
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
-	"rpg/common"
 	"rpg/defs"
 	"rpg/geometry"
 	"rpg/util"
@@ -14,13 +13,24 @@ type IconDataSource struct {
 	IsHighlighted func(UIElement) bool
 	GetElements   func() []UIElement
 	OnSelection   func(UIElement)
-	OnRightClick  func(UIElement) // optional
+	OnRightClick  func(UIElement)      // optional
+	HotkeyHint    func(index int) rune // optional: a key drawn in the icon's top-left corner, 0 for none
+
+	// Draggable icons are picked up on press (the UIController holds the drag) and a click acts on release.
+	Draggable bool
+	// OnDrop takes an icon dropped on slot to, dragged from fromIndex of the overlay from (maybe this one). Optional.
+	OnDrop func(dragged UIElement, from *IconOverlay, fromIndex, to int)
+	// OnDropOutside runs when an icon dragged from here is released anywhere but on this overlay. Optional.
+	OnDropOutside func(fromIndex int)
 }
 
 type IconOverlay struct {
 	infoLabel *BasicLabel
 
 	getElements  func() []UIElement
+	elements     []UIElement // what getElements returned at the last Refresh; nil entries are empty slots
+	highlighted  []bool
+	rows         int
 	dimensions   geometry.Point
 	margin       geometry.Point
 	uiController *UIController
@@ -38,6 +48,10 @@ type IconOverlay struct {
 
 	onSelection                 func(UIElement)
 	onRightClick                func(UIElement)
+	hotkeyHint                  func(index int) rune
+	draggable                   bool
+	onDrop                      func(dragged UIElement, from *IconOverlay, fromIndex, to int)
+	onDropOutside               func(fromIndex int)
 	isActive                    bool
 	offsetFromBottomRightCorner geometry.Point
 	tileSize                    geometry.Point
@@ -55,13 +69,34 @@ func NewIconOverlay(uiController *UIController, offsetFromBottomRightCorner, til
 		getElements:                 dataSource.GetElements,
 		onSelection:                 dataSource.OnSelection,
 		onRightClick:                dataSource.OnRightClick,
+		hotkeyHint:                  dataSource.HotkeyHint,
+		draggable:                   dataSource.Draggable,
+		onDrop:                      dataSource.OnDrop,
+		onDropOutside:               dataSource.OnDropOutside,
+		rows:                        4,
 		selectedIndex:               -1,
 		offsetFromBottomRightCorner: offsetFromBottomRightCorner,
 		tileSize:                    tileSize,
 	}
 	i.infoLabel = NewCustomLabel(uiController, i.layoutLabel)
 	i.Layout()
+	i.Refresh()
 	return i
+}
+
+// Refresh re-reads the icons from the data source; drawing and the mouse only ever look at what it read.
+func (o *IconOverlay) Refresh() {
+	o.elements = o.getElements()
+	o.highlighted = make([]bool, len(o.elements))
+	for i, e := range o.elements {
+		o.highlighted[i] = e != nil && o.isHighlighted(e)
+	}
+}
+
+// SetRows sets how many rows of eight icons the overlay has (4 by default).
+func (o *IconOverlay) SetRows(rows int) {
+	o.rows = rows
+	o.Layout()
 }
 
 func (o *IconOverlay) SetInfoLabelHandler(handler func(UIElement) string) {
@@ -79,7 +114,7 @@ func (o *IconOverlay) Layout() {
 		X: int(float64(tileSize.X) * totalScale),
 		Y: int(float64(tileSize.Y) * totalScale),
 	}
-	dimensions := geometry.Point{X: 8, Y: 4}
+	dimensions := geometry.Point{X: 8, Y: o.rows}
 	margin := geometry.Point{X: 1, Y: 1}
 
 	width := dimensions.X*tileSizeInPixels.X + (dimensions.X-1)*margin.X
@@ -120,6 +155,7 @@ func (o *IconOverlay) OnMouseClicked(button ebiten.MouseButton, x int, y int) bo
 		}
 		if item, isValid := o.getSelectedItem(o.getItemIndexFromScreenPosition(point)); isValid {
 			o.onRightClick(item)
+			o.uiController.RefreshIconBars()
 		}
 		return true
 	}
@@ -139,8 +175,27 @@ func (o *IconOverlay) OnMouseClicked(button ebiten.MouseButton, x int, y int) bo
 		return false
 	}
 	o.selectedIndex = o.getItemIndexFromScreenPosition(point)
+	if o.draggable {
+		if item, isValid := o.getSelectedItem(o.selectedIndex); isValid {
+			o.uiController.beginIconDrag(o, o.selectedIndex, item)
+		}
+		return true
+	}
 	o.onItemSelected(o.selectedIndex)
 	return true
+}
+
+// onIconReleased ends a drag begun on this overlay's icon from: released on it, it acts; on another slot here or
+// on another overlay, it is dropped there; anywhere else, it is dropped outside.
+func (o *IconOverlay) onIconReleased(from int, dragged UIElement, target *IconOverlay, point geometry.Point) {
+	switch {
+	case target == o && o.getItemIndexFromScreenPosition(point) == from:
+		o.onItemSelected(from)
+	case target != nil && target.onDrop != nil:
+		target.onDrop(dragged, o, from, target.getItemIndexFromScreenPosition(point))
+	case target != o && o.onDropOutside != nil:
+		o.onDropOutside(from)
+	}
 }
 
 func (o *IconOverlay) OnMouseMoved(x int, y int) (bool, Tooltip) {
@@ -185,10 +240,10 @@ func (o *IconOverlay) Draw() {
 	blackTransparent := color.RGBA{R: 0, G: 0, B: 0, A: 128}
 
 	renderer := o.uiController.GetRenderer()
-	items := o.getElements()
+	items := o.elements
 	for i := 0; i < o.dimensions.X*o.dimensions.Y; i++ {
 		itemPosition := o.positionForItem(i)
-		if i >= len(items) { // an empty slot
+		if i >= len(items) || items[i] == nil { // an empty slot
 			if !o.showEmptySlots {
 				continue
 			}
@@ -197,14 +252,12 @@ func (o *IconOverlay) Draw() {
 			if i == o.selectedIndex {
 				renderer.DrawOnScreenWithScale(itemPosition.X, itemPosition.Y, defs.IconTargeting, o.scale)
 			}
+			o.drawHotkeyHint(i, itemPosition)
 			continue
 		}
 		item := items[i]
-		var gameItem *common.Item // the overlay holds inventory stacks, not bare items
-		if stack, ok := item.(common.InventoryStack); ok && len(stack) > 0 {
-			gameItem = stack[0]
-		}
-		if o.isHighlighted(item) {
+		gameItem := firstItemFromUIStack(item) // nil for a skill
+		if o.highlighted[i] {
 			renderer.DrawColoredBorder(itemPosition, o.tileSizeInPixels, defs.DarkGreen, defs.DarkYellow)
 		} else {
 			renderer.DrawDefaultBorder(itemPosition, o.tileSizeInPixels)
@@ -227,6 +280,7 @@ func (o *IconOverlay) Draw() {
 		if i == o.selectedIndex {
 			renderer.DrawOnScreenWithScale(itemPosition.X, itemPosition.Y, defs.IconTargeting, o.scale)
 		}
+		o.drawHotkeyHint(i, itemPosition)
 		if o.showShortCuts {
 			renderer.DrawCharOnScreen(itemPosition.X, itemPosition.Y, util.GetShortCutForIndex(i), 1, color.White)
 		} else if o.showCounter {
@@ -257,6 +311,20 @@ func (o *IconOverlay) Draw() {
 	o.infoLabel.Draw()
 }
 
+// drawHotkeyHint draws slot i's key in its top-left corner, empty slots included (the belt's keys are fixed).
+func (o *IconOverlay) drawHotkeyHint(i int, itemPosition geometry.Point) {
+	if o.hotkeyHint == nil || o.hotkeyHint(i) == 0 {
+		return
+	}
+	renderer := o.uiController.GetRenderer()
+	hint := string(o.hotkeyHint(i))
+	const hintScale = 0.5
+	w, h := renderer.MeasureString(hint)
+	w, h = w*hintScale, h*hintScale
+	renderer.DrawColoredRect(itemPosition, geometry.Point{X: int(w) + 2, Y: int(h) + 1}, color.RGBA{A: 128})
+	renderer.DrawTTFOnScreenScaled(float64(itemPosition.X+1), float64(itemPosition.Y)+h, hint, color.White, hintScale)
+}
+
 func (o *IconOverlay) positionForItem(i int) geometry.Point {
 	itemPosition := geometry.Point{
 		X: o.topLeft.X + o.margin.X + (i%o.dimensions.X)*(o.tileSizeInPixels.X+o.margin.X),
@@ -279,15 +347,14 @@ func (o *IconOverlay) onItemSelected(index int) {
 		return
 	}
 	o.onSelection(item)
+	o.uiController.RefreshIconBars()
 }
 
 func (o *IconOverlay) getSelectedItem(index int) (UIElement, bool) {
-	items := o.getElements()
-	if index >= len(items) || index < 0 {
+	if index >= len(o.elements) || index < 0 || o.elements[index] == nil {
 		return nil, false
 	}
-	item := items[index]
-	return item, true
+	return o.elements[index], true
 }
 
 func (o *IconOverlay) IsActive() bool {
@@ -305,7 +372,7 @@ func (o *IconOverlay) Deactivate() {
 }
 
 func (o *IconOverlay) HasItems() bool {
-	return len(o.getElements()) > 0
+	return len(o.elements) > 0
 }
 
 func (o *IconOverlay) SetShowEmptySlots(value bool) {

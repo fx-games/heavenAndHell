@@ -20,8 +20,8 @@ var hellfireMusic = map[string]string{
 // (the "%c%i" monster patterns, expanded) and EFFECTS.H. None of them are in DIABDAT.MPQ.
 //
 // The Monk's own voice set ("Sfx\Monk\Monk*.wav") is in hfmonk.mpq and hfvoice.mpq rather than hellfire.mpq, so
-// it is listed here too and simply skipped when neither archive is around — the Monk then keeps speaking with the
-// Sorcerer's lines (d1HeroVoice in common/a_factory.go), as Hellfire itself does for the Bard and the Barbarian.
+// it is listed here too and simply skipped when neither archive is around — the Monk then falls silent
+// (d1HeroVoice in common/a_factory.go).
 func hellfireSfx() []string {
 	var out []string
 	// the new monsters: <name><a|h|d|s><take>.WAV, attack / hit / death / special

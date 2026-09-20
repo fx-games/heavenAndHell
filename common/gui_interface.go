@@ -24,6 +24,10 @@ type UIContext struct {
 	OpenSaveMenu func(back func())
 	OpenLoadMenu func(back func())
 	IsPermadeath func() bool
+	QuitSaves    func() bool // quitting now also saves: the pause menu says "Save & Quit"
+	// IsHellfire and EnableHellfire: a D1 save can switch to Hellfire content once, mid-game, never back.
+	IsHellfire     func() bool
+	EnableHellfire func()
 }
 
 func SortStacksForTextUITyped(stacks []InventoryStack, getLetterForStack func(stack InventoryStack) rune, selected func(invItemKey rune)) []*TextualStack {

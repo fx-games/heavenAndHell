@@ -37,6 +37,10 @@ func (m *MovementAnimation) Tick() {
 	}
 
 	if m.ticksAlive == 0 {
+		if h := m.actor.moveHold; h != nil && !h.IsDone() {
+			return // stay on the tile until the projectile's hit there has played
+		}
+		m.actor.moveHold = nil
 		m.actor.SetMovingAnimation(true)
 	}
 

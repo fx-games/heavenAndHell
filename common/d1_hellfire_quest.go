@@ -252,7 +252,7 @@ func (g *Factory) d1HellfireItemAction(item *Item, it *d1.Item) {
 			if it.BaseIdx == d1.IdiRuneBomb { // AddOpenNest: four big explosions on the hive's mound
 				g.Msg("The rune bomb blows the hive open!")
 			} else {
-				g.playD1Sound("IS_SARC")
+				g.PlayD1Sfx("IS_SARC", user.MapPosition())
 				g.Msg("The crypt beneath the graveyard opens.")
 			}
 			updateD1Town(g.State, m)
@@ -441,8 +441,8 @@ func (f *Factory) d1OpenNakrulRoom(m *gridmap.GridMap[*Actor, *Item, Object]) {
 	if lvl == nil || !lvl.OpenNakrulRoom() {
 		return
 	}
-	f.playD1Sound("IS_CROPEN")
 	p := toCell(lvl.Uber[0], lvl.Uber[1])
+	f.PlayD1Sfx("IS_CROPEN", p)
 	gen.setD1Tiles(m, lvl, p.X-1, p.Y-3, p.X+1, p.Y+2, func(geometry.Point) bool { return false })
 }
 

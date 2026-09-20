@@ -10,7 +10,7 @@ import (
 )
 
 type Inventory struct {
-	items         []*Item
+	stacks        []*InventoryStack // live: Add and Remove mutate these in place, so a held *InventoryStack stays current
 	maxItemStacks int
 	letterToItem  map[rune]*Item
 	itemToLetter  map[*Item]rune
@@ -19,7 +19,6 @@ type Inventory struct {
 
 func NewInventory(maxItemStacks int) *Inventory {
 	return &Inventory{
-		items:         make([]*Item, 0),
 		maxItemStacks: maxItemStacks,
 		itemToLetter:  make(map[*Item]rune),
 		letterToItem:  make(map[rune]*Item),
@@ -27,7 +26,27 @@ func NewInventory(maxItemStacks int) *Inventory {
 }
 
 func (i *Inventory) Items() []*Item {
-	return i.items
+	var items []*Item
+	for _, stack := range i.stacks {
+		items = append(items, *stack...)
+	}
+	return items
+}
+
+// Stacks are the inventory's live stacks: a stack keeps its pointer while items join and leave it, and is dropped
+// from the inventory (left empty) once its last item goes.
+func (i *Inventory) Stacks() []*InventoryStack {
+	return i.stacks
+}
+
+// StackOf is the live stack holding item, nil if it isn't carried.
+func (i *Inventory) StackOf(item *Item) *InventoryStack {
+	for _, stack := range i.stacks {
+		if slices.Contains(*stack, item) {
+			return stack
+		}
+	}
+	return nil
 }
 
 type InventoryStack []*Item
@@ -75,22 +94,10 @@ func (i *Inventory) StackedItems() []InventoryStack {
 	return i.StackedItemsWithFilter(func(item *Item) bool { return true })
 }
 func (i *Inventory) StackedItemsWithFilter(filter func(*Item) bool) []InventoryStack {
-	stacks := make([]InventoryStack, 0)
-	for _, item := range i.items {
-		if !filter(item) {
-			continue
-		}
-		found := false
-		for stackIndex, stack := range stacks {
-			if stack[0].CanStackWith(item) {
-				stack = append(stack, item)
-				stacks[stackIndex] = stack
-				found = true
-				break
-			}
-		}
-		if !found {
-			stacks = append(stacks, []*Item{item})
+	stacks := make([]InventoryStack, 0, len(i.stacks))
+	for _, stack := range i.stacks {
+		if filtered := slices.DeleteFunc(slices.Clone(*stack), func(item *Item) bool { return !filter(item) }); len(filtered) > 0 {
+			stacks = append(stacks, filtered)
 		}
 	}
 	return stacks
@@ -98,9 +105,12 @@ func (i *Inventory) StackedItemsWithFilter(filter func(*Item) bool) []InventoryS
 
 func (i *Inventory) Remove(item *Item) {
 	defer i.changed()
-	for idx, invItem := range i.items {
-		if invItem == item {
-			i.items = append(i.items[:idx], i.items[idx+1:]...)
+	for idx, stack := range i.stacks {
+		if at := slices.Index(*stack, item); at >= 0 {
+			*stack = slices.Delete(*stack, at, at+1)
+			if len(*stack) == 0 {
+				i.stacks = slices.Delete(i.stacks, idx, idx+1)
+			}
 			i.updateLetterMapping()
 			return
 		}
@@ -108,26 +118,30 @@ func (i *Inventory) Remove(item *Item) {
 }
 
 func (i *Inventory) Has(item *Item) bool {
-	for _, invItem := range i.items {
-		if invItem == item {
-			return true
-		}
-	}
-	return false
+	return i.StackOf(item) != nil
 }
 
+// Add puts item on the stack it stacks with, or starts a new one.
+// ponytail: stacks only form here, so an item whose name changes while carried (identify) keeps its old stack.
 func (i *Inventory) Add(item *Item) {
 	defer i.changed()
-	i.items = append(i.items, item)
+	for _, stack := range i.stacks {
+		if (*stack)[0].CanStackWith(item) {
+			*stack = append(*stack, item)
+			i.updateLetterMapping()
+			return
+		}
+	}
+	i.stacks = append(i.stacks, &InventoryStack{item})
 	i.updateLetterMapping()
 }
 
 func (i *Inventory) IsEmpty() bool {
-	return len(i.items) == 0
+	return len(i.stacks) == 0
 }
 
 func (i *Inventory) CanStack(item *Item) bool {
-	for _, invItem := range i.items {
+	for _, invItem := range i.Items() {
 		if invItem.CanStackWith(item) {
 			return true
 		}
@@ -136,7 +150,7 @@ func (i *Inventory) CanStack(item *Item) bool {
 }
 
 func (i *Inventory) IsFull() bool {
-	return len(i.StackedItems()) == i.maxItemStacks
+	return len(i.stacks) == i.maxItemStacks
 }
 
 func (i *Inventory) updateLetterMapping() {
@@ -190,7 +204,7 @@ func (i *Inventory) AsColorCodedStrings() []string {
 }
 
 func (i *Inventory) HasLightSource() bool {
-	for _, item := range i.items {
+	for _, item := range i.Items() {
 		if item.IsLightSource() {
 			return true
 		}
@@ -204,14 +218,14 @@ func (i *Inventory) IsValidLetter(r rune) bool {
 
 func (i *Inventory) Clone() *Inventory {
 	clonedInv := NewInventory(i.maxItemStacks)
-	for _, item := range i.items {
+	for _, item := range i.Items() {
 		clonedInv.Add(item.Clone())
 	}
 	return clonedInv
 }
 
 func (i *Inventory) HasEnchantableArmor() bool {
-	for _, item := range i.items {
+	for _, item := range i.Items() {
 		if item.IsArmor() && item.GetArmorStats().CanBeFurtherEnchanted() {
 			return true
 		}
@@ -220,7 +234,7 @@ func (i *Inventory) HasEnchantableArmor() bool {
 }
 
 func (i *Inventory) HasEnchantableWeapon() bool {
-	for _, item := range i.items {
+	for _, item := range i.Items() {
 		if item.IsWeapon() && item.GetWeaponStats().CanBeFurtherEnchanted() {
 			return true
 		}
@@ -239,13 +253,13 @@ func (i *Inventory) changed() {
 }
 
 func (i *Inventory) RepairAll() {
-	for _, item := range i.items {
+	for _, item := range i.Items() {
 		item.Repair()
 	}
 }
 
 func (i *Inventory) HasFood() bool {
-	for _, item := range i.items {
+	for _, item := range i.Items() {
 		if item.IsFood() {
 			return true
 		}
@@ -254,7 +268,7 @@ func (i *Inventory) HasFood() bool {
 }
 
 func (i *Inventory) UseFood() {
-	for _, item := range i.items {
+	for _, item := range i.Items() {
 		if item.IsFood() {
 			i.Remove(item)
 			return

@@ -13,7 +13,7 @@ import (
 func TestInfravisionMonstersCanBeInspected(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
-	theGame.NewGame(theGame.GetGameData().ClassDefinitions[1], false, "")
+	theGame.NewGame(theGame.GetGameData().ClassDefinitions[1], false, true, "")
 	state := theGame.GetWorldState()
 	state.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(1), TargetLocation: "ladder_up"})
 	player := state.GetPlayer()
@@ -36,7 +36,7 @@ func TestInfravisionMonstersCanBeInspected(t *testing.T) {
 	if !player.CanPerceive(pos) {
 		t.Fatalf("infravision draws %s at %v but the player cannot inspect it", hidden.Name(), pos)
 	}
-	if far := pos.Add(geometry.Point{X: 20, Y: 20}); player.CanPerceive(far) {
-		t.Fatalf("infravision reaches %v, 20+ tiles away", far)
+	if far := player.MapPosition().Add(geometry.Point{X: 16, Y: 16}); !player.CanSee(far) && player.CanPerceive(far) {
+		t.Fatalf("infravision reaches %v, 16 tiles from the player", far)
 	}
 }

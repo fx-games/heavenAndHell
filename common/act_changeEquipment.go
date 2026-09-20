@@ -71,6 +71,7 @@ func (d *ChangeEquipmentAction) Execute(context ActionContext) []Action {
 	}
 
 	context.Msg(message)
+	playD1ItemInvSfx(context, item, actor)
 
 	return nil
 }

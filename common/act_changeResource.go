@@ -30,14 +30,22 @@ func NewChangeResourceAction(cause Cause, actor *Actor, resourceName stats.Name,
 func (d *ChangeResourceAction) Execute(context ActionContext) []Action {
 	receiver := d.actor
 	d.changedByAmount = float64(d.amount) * d.changeFactor
+	if d.resourceName == stats.Health && d.changedByAmount < 0 && d.shouldStartAnimation != nil && !receiver.VisualsPending() {
+		receiver.shownHealth = receiver.GetStats().GetResource(stats.Health).Value()
+	}
 
 	receiver.GetStats().IncrementResourceBy(d.resourceName, d.changedByAmount)
 
-	if d.changedByAmount < 0 { // this needs to be synched to the animation
-
+	if d.changedByAmount < 0 {
+		if d.shouldStartAnimation != nil {
+			receiver.visualGate = d.shouldStartAnimation // tint and death wait for the projectile too
+		}
 		receiver.SetHurt()
 		if d.resourceName == stats.Health && receiver.IsAlive() {
-			d1HitRecovery(context, receiver, int(-d.changedByAmount))
+			d1HitRecovery(receiver, int(-d.changedByAmount))
+		}
+		if d.resourceName == stats.Health && receiver.hero != nil && receiver == context.GameState.GetPlayer() {
+			whenVisible(context.ActionBroker, receiver, func() { d1HeroPainSound(context, receiver) })
 		}
 	}
 
@@ -78,10 +86,13 @@ func (d *ChangeResourceAction) prepareAnimations(context ActionContext) []Animat
 					freeNeighbor = d.actor.MapPosition()
 				}
 				context.GameState.AddBloodDecalAt(freeNeighbor)
-				if rand.Intn(10) <= 8 && d.actor != context.GameState.GetPlayer() {
+				if rand.Intn(10) <= 8 && d.actor != context.GameState.GetPlayer() && (d.actor.IsAlive() || d.actor.d1Monster == nil) {
 					d.playHitSound(context)
 				}
 			})
+			if d.shouldStartAnimation != nil {
+				d.actor.moveHold = hitAnimation
+			}
 			animations = append(animations, hitAnimation)
 		}
 	}
@@ -90,8 +101,7 @@ func (d *ChangeResourceAction) prepareAnimations(context ActionContext) []Animat
 
 func (d *ChangeResourceAction) playHitSound(context ActionContext) {
 	hitActor := d.actor
-	if cue := hitActor.D1MonsterSoundCue("hit"); cue != "" && context.AudioPlayer.HasCue(cue) {
-		context.AudioPlayer.PlayCue(cue)
+	if playCueAt(context, hitActor.D1MonsterSoundCue("hit"), hitActor.MapPosition()) {
 		return
 	}
 	hitCue := "human_hit"

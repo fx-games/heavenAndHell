@@ -40,18 +40,22 @@ func main() {
 		log.Fatal(err)
 	}
 	for _, doc := range []struct {
-		name, title string
-		build       func(reader, []byte) ([]section, error)
+		name, title, rec string
+		build            func(reader, []byte) ([]section, error)
 	}{
-		{"monsters", "D1 + Hellfire monsters and uniques (front and side views)", monsters},
-		{"items", "D1 + Hellfire items and unique items", items},
-		{"skills", "D1 + Hellfire spell and skill icons", spells},
-		{"tiles", "D1 + Hellfire objects and dungeon megatiles", tiles},
+		{"monsters", "D1 + Hellfire monsters and uniques (front and side views)", "actors", monsters},
+		{"items", "D1 + Hellfire items and unique items", "items", items},
+		{"skills", "D1 + Hellfire spell and skill icons", "skills", spells},
+		{"tiles", "D1 + Hellfire objects and dungeon megatiles", "tiles", tiles},
 	} {
 		pdf := filepath.Join(*out, "d1_"+doc.name+".pdf")
 		sections, err := doc.build(read, pal)
+		dir := filepath.Join(*out, "d1_sprites", doc.name)
 		if err == nil {
-			err = savePNGs(filepath.Join(*out, "d1_sprites", doc.name), sections)
+			err = savePNGs(dir, sections)
+		}
+		if err == nil {
+			err = setReferenceImages(doc.rec, dir, sections)
 		}
 		if err == nil {
 			err = writePDF(pdf, doc.title, sections)
@@ -166,7 +170,7 @@ func monsters(read reader, pal []byte) ([]section, error) {
 			order = append(order, fam)
 		}
 		c := sprite(m, nil)
-		c.file = defs.IconID("monster", id) + ".png"
+		c.file, c.keys = defs.IconID("monster", id)+".png", []string{defs.IconID("monster", id)}
 		c.lines = []string{icons.name(defs.IconID("monster", id), r.s("mName")), id, "TRN: " + trn, "icon: " + icons.icon(defs.IconID("monster", id))}
 		withPoster(c, fam)
 		cards[fam] = append(cards[fam], *c)
@@ -181,7 +185,7 @@ func monsters(read reader, pal []byte) ([]section, error) {
 			return nil, fmt.Errorf("%s: %v", name, err)
 		}
 		c := sprite(types[id], t)
-		c.unique, c.file = true, defs.IconID("unique", name)+".png"
+		c.unique, c.file, c.keys = true, defs.IconID("unique", name)+".png", []string{defs.IconID("unique", name)}
 		c.lines = []string{name, "unique " + id, "TRN: " + r.s("mTrnName") + " on top", "icon: " + icons.icon(defs.IconID("unique", name))}
 		withPoster(c, familyOf[id])
 		cards[familyOf[id]] = append(cards[familyOf[id]], *c)
@@ -271,6 +275,10 @@ func items(read reader, pal []byte) ([]section, error) {
 			return nil, fmt.Errorf("%s: %v", r.s("iName"), err)
 		}
 		c.file = fmt.Sprintf("%s.curs%d.png", defs.IconID("item", r.s("iName")), r.i("iCurs"))
+		c.keys = []string{key, key + ".magic", defs.IconID("item", typ)} // the type's fallback icon last
+		if typ == "ITYPE_GOLD" {
+			c.keys = []string{"item.gold_small", "item.gold_medium", "item.gold_large"}
+		}
 		c.lines = []string{r.s("iName"), fmt.Sprintf("curs %d  %s", r.i("iCurs"), r.s("iMiscId")), key, "icon: " + icons.icon(key)}
 		cards[r.i("itype")] = append(cards[r.i("itype")], *c)
 	}
@@ -293,7 +301,7 @@ func items(read reader, pal []byte) ([]section, error) {
 		if err != nil {
 			return nil, fmt.Errorf("%s: %v", r.s("UIName"), err)
 		}
-		c.unique, c.file = true, defs.IconID("item", r.s("UIName"))+".unique.png"
+		c.unique, c.file, c.keys = true, defs.IconID("item", r.s("UIName"))+".unique.png", []string{key}
 		c.lines = []string{r.s("UIName"), fmt.Sprintf("curs %d  unique %s", curs, base.s("iName")), key, "icon: " + icons.icon(key)}
 		cards[base.i("itype")] = append(cards[base.i("itype")], *c)
 	}
@@ -337,7 +345,7 @@ func spells(read reader, pal []byte) ([]section, error) {
 			return nil, err
 		}
 		id := r.s("sName")
-		c.file = defs.IconID("spell", id) + ".png"
+		c.file, c.keys = defs.IconID("spell", id)+".png", []string{defs.IconID("spell", id)}
 		c.lines = []string{r.s("sNameText"), id, fmt.Sprintf("frame %d", frame), "icon: " + icons.icon(defs.IconID("spell", id))}
 		used.cards = append(used.cards, *c)
 	}
@@ -435,6 +443,37 @@ func (m icons) name(key, fallback string) string {
 		return e[1]
 	}
 	return fallback
+}
+
+// setReferenceImages points each entry of icons/<name>.rec at its sprite under dir (reference_image, which the
+// remapper shows beside the atlas): the first card listing the entry's internal_name among its keys.
+func setReferenceImages(name, dir string, sections []section) error {
+	refs := map[string]string{}
+	for _, s := range sections {
+		for _, c := range s.cards {
+			for _, k := range c.keys {
+				if _, ok := refs[k]; !ok && c.img != nil {
+					refs[k] = filepath.ToSlash(filepath.Join(dir, c.file))
+				}
+			}
+		}
+	}
+	path := "files/assets/data/icons/" + name + ".rec"
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	var out []string
+	for _, l := range strings.Split(string(b), "\n") {
+		if strings.HasPrefix(l, "reference_image: ") {
+			continue
+		}
+		out = append(out, l)
+		if key, ok := strings.CutPrefix(l, "internal_name: "); ok && refs[key] != "" {
+			out = append(out, "reference_image: "+refs[key])
+		}
+	}
+	return os.WriteFile(path, []byte(strings.Join(out, "\n")), 0o644)
 }
 
 func baseName(path string) string {

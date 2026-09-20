@@ -59,8 +59,14 @@ func objects(read reader) ([]section, error) {
 			placeholders.notes = append(placeholders.notes, note)
 			continue
 		}
+		// ponytail: frame 1 is the fresh prop, frame 2 (else 1) the used one; D1's per-object used frames if it matters
+		addKeys := func(cs []card) {
+			cs[0].keys = append(cs[0].keys, key)
+			cs[min(1, len(cs)-1)].keys = append(cs[min(1, len(cs)-1)].keys, key+".used")
+		}
 		if i, ok := byFile[file]; ok {
 			sections[i].notes = append(sections[i].notes, note)
+			addKeys(sections[i].cards)
 			continue
 		}
 		lvl := max(r.i("olvltype"), 1)
@@ -88,6 +94,7 @@ func objects(read reader) ([]section, error) {
 			s.cards = append(s.cards, card{img: crop(render(decodeCel(f), r.i("oAnimWidth"), pals[lvl])),
 				file: fmt.Sprintf("objects/%s.frame%02d.png", strings.ToLower(file), n+1), lines: []string{fmt.Sprintf("frame %d", n+1)}})
 		}
+		addKeys(s.cards)
 		byFile[file] = len(sections)
 		sections = append(sections, s)
 	}

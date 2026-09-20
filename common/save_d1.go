@@ -1,6 +1,7 @@
 package common
 
 import (
+	"maps"
 	"rpg/d1"
 	"rpg/geometry"
 	"rpg/gridmap"
@@ -12,6 +13,7 @@ type SavedMonster struct {
 	HP, X, Y int
 	Type     int             // only for monsters that objects spawned (not part of the generated level) and corpses
 	State    *D1MonsterState // nil in saves from before AI state was kept
+	Status   map[string]int  `json:",omitempty"` // status effects (Stone Curse, ...) and their turns left
 }
 
 type SavedItem struct {
@@ -44,7 +46,7 @@ func SnapshotLevel(state *State, m *gridmap.GridMap[*Actor, *Item, Object]) *Lev
 			p := a.MapPosition()
 			// at least 1 HP: regeneration leaves monsters alive below 1
 			state := mon.D1MonsterState
-			saved := SavedMonster{HP: max(a.GetStats().GetResource(stats.Health).Value(), 1), X: p.X, Y: p.Y, Type: mon.Type, State: &state}
+			saved := SavedMonster{HP: max(a.GetStats().GetResource(stats.Health).Value(), 1), X: p.X, Y: p.Y, Type: mon.Type, State: &state, Status: maps.Clone(a.statusEffects.AllEntries())}
 			if mon.SpawnIndex < 0 {
 				s.Spawned = append(s.Spawned, saved)
 			} else {
@@ -174,7 +176,7 @@ func (s *LevelSnapshot) apply(f *Factory, m *gridmap.GridMap[*Actor, *Item, Obje
 		}
 		for i, a := range restore {
 			p := geometry.Point{X: at[i].X, Y: at[i].Y}
-			if !m.CanPlaceActorHere(p) {
+			if !canPlaceD1Monster(m, p) {
 				if near := freeCellsNear(m, p, 1, m.CanPlaceActorHere); len(near) > 0 {
 					p = near[0]
 				}
@@ -183,6 +185,7 @@ func (s *LevelSnapshot) apply(f *Factory, m *gridmap.GridMap[*Actor, *Item, Obje
 			if at[i].State != nil {
 				a.d1Monster.D1MonsterState = *at[i].State
 			}
+			maps.Copy(a.statusEffects.AllEntries(), at[i].Status)
 			a.SetDrawPosition(p.ToPointF())
 			m.AddActor(a, p)
 		}

@@ -134,8 +134,11 @@ func (s *SaveSlotScreen) choose(i int) {
 	if i < 0 || i >= len(s.slots) {
 		return
 	}
-	s.shouldClose = true // the pick may open a confirmation on top, so this screen gets out of the way first
 	s.pick(s.slots[i].Slot)
+	if top, reopened := s.u.GetTopModal().(*SaveSlotScreen); reopened && top != s {
+		s.shouldClose = true // the pick put a fresh slot screen up: don't leave this one under it
+	}
+	s.u.closeIfFinal(s) // stays under an overwrite confirmation, so "No" comes back here
 }
 
 func (s *SaveSlotScreen) OnCommand(command CommandType) bool {

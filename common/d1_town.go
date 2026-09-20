@@ -66,7 +66,8 @@ func PayGold(ctx ActionContext, player *Actor, cost int) bool {
 
 // d1ServiceOption lists the player's items a service applies to, with prices, and performs it on selection. Like the
 // sell menu, the list reopens after each purchase until nothing is left for the service.
-// showAfter, when set, opens the item's description once the service menu is back up, so the window lands on top of it.
+// showAfter, when set, opens the item's description on top of the reopened list (or the NPC's menu, once nothing is
+// left for the service), so closing it goes back there.
 func d1ServiceOption(ctx ActionContext, label string, applies func(*d1.Item) bool, cost func(*d1.Item) int, perform func(*d1.Item), showAfter ...bool) util.MenuItem {
 	var open func(reopen bool)
 	open = func(reopen bool) {
@@ -127,7 +128,7 @@ func d1VendorOptions(ctx ActionContext, vendor *Actor) []util.MenuItem {
 		heal := func() {
 			player := ctx.GameState.GetPlayer()
 			if hp := player.GetStats().GetResource(stats.Health); !hp.IsAtMax() {
-				ctx.GameState.factory.playD1Sound("IS_CAST8")
+				playD1SfxAt(ctx, "IS_CAST8", player.MapPosition())
 			}
 			player.HealCompletely()
 			ctx.Msg("Pepin tends to your wounds.")
@@ -188,35 +189,28 @@ func (a *Actor) equippedD1() []*d1.Item {
 	return items
 }
 
-// d1Broke reports an item that just broke and recalculates the sheet.
-func d1Broke(ctx ActionContext, owner *Actor, broke *d1.Item) {
+// d1Broke handles an item whose durability just ran out. Like D1's WeaponDur/ArmorDur/ShieldDur it is destroyed,
+// except uniques: they stay, doing nothing (see Hero.Sheet) until Griswold repairs them.
+func d1Broke(msg func(string), owner *Actor, broke *d1.Item) {
 	if broke == nil {
 		return
 	}
-	name := broke.Name
-	if broke.Identified {
-		name = broke.IName
+	if broke.Magical == 2 {
+		name := broke.Name
+		if broke.Identified {
+			name = broke.IName
+		}
+		msg(fmt.Sprintf("Your %s broke! Griswold can repair it.", name))
+		SyncHero(owner)
+		return
 	}
-	ctx.Msg(fmt.Sprintf("Your %s broke! Griswold can repair it.", name))
-	SyncHero(owner)
-}
-
-// WeaponAboutToBreak returns the equipped weapon for attackType if it is already at zero durability, i.e.
-// swinging it now destroys it. Used to warn the player before such an attack.
-func WeaponAboutToBreak(actor *Actor, attackType AttackType) *Item {
-	weapon := actor.GetEquipment().GetWeapon(attackType)
-	if weapon == nil || weapon.d1 == nil || weapon.d1.MaxDur == 0 || weapon.d1.Durability != 0 {
-		return nil
+	for _, it := range owner.GetEquipment().AllItems() {
+		if it.d1 == broke {
+			owner.GetEquipment().UnEquip(it)
+			owner.GetInventory().Remove(it)
+			msg(fmt.Sprintf("Your %s was destroyed.", it.Name()))
+		}
 	}
-	return weapon
-}
-
-// destroyBrokenWeapon removes a weapon that was used at zero durability from the owner entirely.
-func destroyBrokenWeapon(ctx ActionContext, owner *Actor, weapon *Item) {
-	name := weapon.Name()
-	owner.GetEquipment().UnEquip(weapon)
-	owner.GetInventory().Remove(weapon)
-	ctx.Msg(fmt.Sprintf("Your %s falls apart!", name))
 	SyncHero(owner)
 }
 

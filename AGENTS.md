@@ -77,7 +77,8 @@ remap it same as any other. Tinting is reserved for D1 monster variants, water t
 object whose `prop.<name>.used` icon is the same tile as its fresh `prop.<name>` icon is drawn grayed out
 (`common.D1UsedTint`); remap `.used` to a different tile to drop the tint. Anything else that needs to look
 different (uniques, magic/unique items) gets its own icon record. Remapper: `remapper` on `$PATH`, source
-`~/Projects/remapper`.
+`~/Projects/remapper`. It shows an entry's `reference_image:` (a D1 sprite under the gitignored `reference/`) beside
+the atlas; `go run -tags development ./cmd/d1sprites` writes those fields into all four rec files.
 
 ## Audio (`files/assets/`)
 
@@ -88,6 +89,10 @@ Sound effects are **events**, not folders: `files/assets/data/sounds.rec` has on
 `DiabloAudioEnabled` is off), so a fresh clone without the Diablo folders still runs. Assign files visually with
 `./remap_sounds.sh` (`sfxmapper`, source `~/Projects/remapper/sfxmapper`, install with
 `go build -o ~/bin/sfxmapper ./sfxmapper`). A new sound event = one `PlayCue("<name>")` call + one record here.
+D1's sound effects are events named `sfx.<_sfx_id>` (`sfx.IS_CAST2`, `sfx.PS_SWING`; RndSFX's variants are the
+event's extra files), played through `playD1SfxAt` / `Factory.PlayD1Sfx` with D1's distance fade and pan
+(`common/d1_sound.go`); monster sounds are `monster.<id>.attack|hit|death|special`. A new D1 sound = one call + one
+record; `TestD1SfxHaveSoundEvents` fails when the record is missing.
 
 - `sfx/`, `ang_sfx/` — this game's own and the Angband-sourced effects, referenced from `sounds.rec`.
 - `ambience/` — background music tracks and ambient loops, shown in the pause menu's Music Player

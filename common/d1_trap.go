@@ -29,6 +29,7 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 	player := ctx.GameState.GetPlayer()
 	c := &missileCtx{ctx: ctx, from: a.from, player: player, c: &spellCtx{m: ctx.GameState.GetMap()}}
 	cl := d1DungeonLevel(ctx.GameState)
+	playD1SfxAt(ctx, d1MissileSfx[a.mis][0], a.from)
 	switch a.mis {
 	case MisArrow: // MI_Arrow: currlevel..2·currlevel
 		c.bolt(a.mis, a.target, cl, 2*cl)
@@ -44,7 +45,7 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 		// ponytail: the burst hits once; D1's MAGBLOS animation may roll again on later frames
 		mind, maxd = d1Rng.Intn(10)+1+cl, d1Rng.Intn(10)+1+2*cl
 		c.hit(a.mis, end, a.from, mind, maxd, false, 1)
-		c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(nil, a.from, end, 0.03, defs.IconEffectFireSmall, 2),
+		c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(nil, a.from, end, missileSecPerTile(a.mis), defs.IconEffectFireSmall, 2),
 			NewHitAnimation(end, 0.4, defs.IconEffectFireBig, 2))
 	case MisFirebolt: // MI_Firebolt without a source: currlevel + rnd(2·currlevel)
 		d := cl + d1Rng.Intn(2*cl)
@@ -58,7 +59,7 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 			}
 		}
 		if len(cells) > 0 {
-			c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(nil, a.from, cells[len(cells)-1], 0.01, defs.IconEffectLightning, 2))
+			c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(nil, a.from, cells[len(cells)-1], missileSecPerTile(a.mis), defs.IconEffectLightning, 2))
 		}
 	case MisFireRing: // mi_fire_ring: fire walls on the ring three cells out that the chest sees, until one lands on
 		// a piece that stops missiles; each burns (10 + currlevel)·16 ticks at currlevel·8/64 a tick
@@ -82,7 +83,7 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 		if p := player.MapPosition(); c.c.lineClear(a.from, p) {
 			c.hit(a.mis, p, a.from, 8*lvl, 8*lvl, true, 2)
 		}
-		c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(nil, a.from, player.MapPosition(), 0.03, defs.IconEffectFireBig, 2))
+		c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(nil, a.from, player.MapPosition(), missileSecPerTile(a.mis), defs.IconEffectFireBig, 2))
 	case MisFlashTrap: // AddFlash for the players: monster[0]'s level (the golem slot) ·2, on the six cells below
 		dam := 2 * ctx.GameState.factory.Generator.D.Monsters[d1.MtGOLEM].Level
 		for _, d := range []geometry.Point{{X: -1}, {}, {X: 1}, {X: -1, Y: 1}, {Y: 1}, {X: 1, Y: 1}} {
@@ -144,6 +145,7 @@ func (f *Factory) springD1WallTraps(m *gridmap.GridMap[*Actor, *Item, Object], p
 		}
 		mis := map[int]D1Missile{0: MisArrow, 1: MisFirebolt, 2: MisLightCtrl}[t.Var3]
 		f.Msg("A trap fires from the wall!")
+		f.PlayD1Sfx("IS_TRAP", toCell(t.X, t.Y)) // Obj_Trap
 		f.ActionBroker.QueueForExecution(NewTrapMissileAction(toCell(t.X, t.Y), mis, to))
 		target.TrapFlag = false
 	}

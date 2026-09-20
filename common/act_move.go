@@ -38,8 +38,7 @@ func (d *MoveAction) SetAnimationDelay(delay float64) {
 }
 
 func (d *MoveAction) GetDelayInAut() int {
-	autUsed := 100 / d.actor.GetMoveSpeed()
-	return autUsed
+	return d.actor.MoveCost()
 }
 
 // PROBLEM: Since all enemy actions are triggered in one tick,
@@ -63,6 +62,9 @@ func (d *MoveAction) Execute(context ActionContext) []Action {
 	}
 	if d.isNotAnimated() {
 		actor.SetDrawPosition(d.targetPos.ToPointF())
+	}
+	if d.isPlayer && actor.hero != nil && !state.factory.Generator.D.Hellfire { // PM_DoWalk; Hellfire dropped the steps
+		playD1SfxAt(context, "PS_WALK1", d.targetPos)
 	}
 	//println(fmt.Sprintf("Actor %s moved to %s", actor.Action(), d.targetPos))
 	return nil
@@ -143,18 +145,6 @@ func PlayerMoveToAttack(actor *Actor, relativeDirection geometry.Point, forceAtt
 
 	state.GetMap().SetExplored(targetPos)
 	return nil
-}
-
-// AttackTypeOf reports which attack type action performs, if any (used to gate the weapon-break confirmation
-// on the bump-to-attack path, which returns a plain Action).
-func AttackTypeOf(action Action) (attackType AttackType, isAttack bool) {
-	switch action.(type) {
-	case *MeleeAttackAction:
-		return MeleeAttack, true
-	case *RangedAttackAction:
-		return RangedAttack, true
-	}
-	return 0, false
 }
 
 func AnimateNow() func() bool {
