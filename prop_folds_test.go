@@ -25,7 +25,7 @@ func TestPropFolds(t *testing.T) {
 		}
 		reached[id], reached[id+".used"] = true, true
 	}
-	f, err := os.Open("files/assets/data/icons/tiles.rec")
+	f, err := os.Open("files/mods/d1/data/icons/tiles.rec")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Icons live in four independently remappable rec files under files/assets/data/icons/ (8x8 tiles in
+// Icons live in four independently remappable rec files under files/mods/<mod>/data/icons/ (8x8 tiles in
 // the sprite sheet named by common.Configuration.SpriteSheet), one ID convention throughout: "kind.snake_case_name", e.g. "class.warrior_male",
 // "monster.nzombie", "unique.gharbad_the_weak", "npc.wirt", "corpse.default" (actors.rec); "item.falchion",
 // "item.falchion.magic"/".unique" (per weapon/armor family), "item.heal" (potions/scrolls, keyed by IMISC_*) etc.

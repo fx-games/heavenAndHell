@@ -1,6 +1,6 @@
 package defs
 
-// tilesIcons is the name->icon lookup for files/assets/data/icons/tiles.rec, edited at runtime with ./remap_tiles.sh.
+// tilesIcons is the name->icon lookup for files/mods/<mod>/data/icons/tiles.rec, edited at runtime with ./remap_tiles.sh.
 var tilesIcons map[string]int32
 
 var (

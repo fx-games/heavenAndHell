@@ -11,7 +11,7 @@ Design decisions and deferred scope for the D1 rebuild: `D1_PLAN.md`.
 | `reference/devilutionX` | [diasurgical/devilutionX](https://github.com/diasurgical/devilutionX): modern, maintained port | Bug-fixed logic in `Source/` (`levels/`, `monsters/`, `items/`, `quests/`...), data tables as TSV in `assets/txtdata/`, and **test fixtures** in `test/` (see below). It fixes vanilla bugs and adds QoL; when it disagrees with 1.09, 1.09 wins unless `D1_PLAN.md` says otherwise. |
 | `reference/DIABDAT.MPQ` | Diablo's own data archive (bring your own copy, ~500 MB) | Level data the sources don't contain: set pieces (`Levels\L1Data\SklKng1.DUN`...), `.TIL`/`.SOL` tile tables. Read with `d1.DiabDat()` / `mustReadMPQ` (`d1/mpq.go`, looks in `.`, `reference/`, `../reference/`). |
 | `reference/diablo-hellfire` | [pvpgn/diablo-hellfire](https://github.com/pvpgn/diablo-hellfire): Synergistic Software's own Hellfire source (VC++ 6, `src/*.CPP`, uppercase filenames) | **Ground truth for Hellfire**, the way `devilution-109` is for D1. `ITEMDAT.CPP`, `MONSTDAT.CPP`, `SPELLDAT.CPP`, `MISDAT.CPP` and `OBJDAT.CPP` hold the real tables with the original comments; `PLAYER.CPP` the class tables. Hellfire's own levels (the Nest and the Crypt), its quests, towners and the monsters that only spawn there are **cut** from this game (`D1_PLAN.md`); its items, affixes, spells, classes and store behaviour are in and always on. |
-| `reference/HELLFIRE.MPQ`, `HFVOICE.MPQ`, `HFMONK.MPQ`, `HFMUSIC.MPQ` | Hellfire's four archives, straight off the expansion's disc (`hdiutil attach Hellfire.iso`, they sit in the root). `hfvoice` holds the expansion's speech at full quality and `hfmonk` the Monk's lines (neither is in `hellfire.mpq`), `hfmusic` the expansion's tracks | Hellfire's item/spell sprites for `cmd/d1sprites`. Its audio is **not** used at all (no `diablo_sfx/`, see Audio), and neither are its items or classes: those are numbers in the tables above, and this game draws them from its own tileset through `files/assets/data/icons/*.rec`. Opens with the same `OpenMPQ` as DIABDAT (`cmd/internal/mpq`). |
+| `reference/HELLFIRE.MPQ`, `HFVOICE.MPQ`, `HFMONK.MPQ`, `HFMUSIC.MPQ` | Hellfire's four archives, straight off the expansion's disc (`hdiutil attach Hellfire.iso`, they sit in the root). `hfvoice` holds the expansion's speech at full quality and `hfmonk` the Monk's lines (neither is in `hellfire.mpq`), `hfmusic` the expansion's tracks | Hellfire's item/spell sprites for `cmd/d1sprites`. Its audio is **not** used at all (no `diablo_sfx/`, see Audio), and neither are its items or classes: those are numbers in the tables above, and this game draws them from its own tileset through `files/mods/<mod>/data/icons/*.rec`. Opens with the same `OpenMPQ` as DIABDAT (`cmd/internal/mpq`). |
 
 ### How to port with them
 
@@ -39,9 +39,9 @@ git clone --depth 1 https://github.com/diasurgical/devilutionX reference/devilut
 git clone --depth 1 https://github.com/pvpgn/diablo-hellfire reference/diablo-hellfire
 ```
 
-## Icons (tileset `files/assets/classic_roguelike.png`, 8×8)
+## Icons (tileset `files/mods/<mod>/classic_roguelike.png`, 8×8)
 
-Four independent rec files under `files/assets/data/icons/`, each read fresh on every game start (no rebuild
+Four independent rec files under `files/mods/<mod>/data/icons/`, each read fresh on every game start (no rebuild
 needed to see a remap take effect — just restart the game). One ID convention throughout: `kind.snake_case_name`
 — `class.warrior_male`, `monster.nzombie`, `unique.gharbad_the_weak`, `npc.wirt`, `corpse.default` (actors.rec);
 `item.falchion` (+ `.magic`/`.unique` per weapon/armor family), `item.heal` (potions/scrolls, by IMISC_*) (items.rec);

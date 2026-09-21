@@ -1,6 +1,6 @@
 package defs
 
-// actorsIcons is the name->icon lookup for files/assets/data/icons/actors.rec, edited at runtime with ./remap_actors.sh.
+// actorsIcons is the name->icon lookup for files/mods/<mod>/data/icons/actors.rec, edited at runtime with ./remap_actors.sh.
 var actorsIcons map[string]int32
 
 // The playable classes are a mod's content, not the engine's, so their icons are NOT in this fixed list: they

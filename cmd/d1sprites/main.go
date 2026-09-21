@@ -405,7 +405,7 @@ func table(name string) []row {
 type icons map[string][2]string
 
 func loadIcons(name string) icons {
-	b, err := os.ReadFile("files/assets/data/icons/" + name + ".rec")
+	b, err := os.ReadFile("files/mods/d1/data/icons/" + name + ".rec")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -458,7 +458,7 @@ func setReferenceImages(name, dir string, sections []section) error {
 			}
 		}
 	}
-	path := "files/assets/data/icons/" + name + ".rec"
+	path := "files/mods/d1/data/icons/" + name + ".rec"
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return err
