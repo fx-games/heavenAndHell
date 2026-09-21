@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"github.com/flopp/go-findfont"
+	"log"
 	"math"
 	"math/rand"
 	"os"
@@ -436,6 +437,14 @@ func (g *GameInstance) updateStatsDisplay() {
 }
 
 func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition) *common.Actor {
+	// The hero's per-class numbers - starting attributes, their caps, the life and mana curves, to-hit and the
+	// animation lengths - are content, and they live in the mod's hero.rec. Building a hero without them would
+	// give a character sheet of zeroes that looks like a game until you played it, which is exactly the class of
+	// bug this split keeps producing. Stop here instead, naming the file.
+	if !d1.HeroTablesLoaded() {
+		log.Fatalf("mod %q has no hero: expected files/mods/%s/data/hero.rec with this game's per-class numbers",
+			files.ActiveMod(), files.ActiveMod())
+	}
 	player := common.NewActor(playerStartDefinition.Icon)
 	player.SetAsciiIcon('@')
 	player.SetCP437Icon(int32(util.UnicodeToCP437Byte('☺')))

@@ -115,6 +115,64 @@ interface to the union of both families is the failure mode to resist.
 every level it builds fails the walkability check. Unfinished code, not a
 generator.
 
+## Terrain: GenerateMap dispatches, it does not assume
+
+`common.GenerateMap` used to call `generateD1Map` unconditionally. It now
+type-switches on the `dungeon.Config` the level's own generator parsed, so each
+family takes back the type it produced. No generator name and no mod name is
+tested anywhere in that path. D1's side stays in `map_gen_d1.go`, dungen's in
+`map_gen_dungen.go`, and they share only the gridmap they write into.
+
+Three knobs belong to a LEVEL rather than to any generator, and so live on
+`dungeon.Level` rather than in a family's Config: `name` (what it is called on
+arrival), `tiles` (one of the engine's named tile sets) and `transition` (extra
+ways off it). How deep a game goes is written down in exactly one place too -
+the deepest `dlvl` in the mod's levels.rec - and the engine gives that level no
+ladder down rather than carrying a constant.
+
+## A mod may not have a Diablo feature
+
+`d1.Load` used to refuse anything that was not Diablo. The `xl_*` tables, the
+megatile/set-piece data under `levels/`, and six rec tables (`oils`,
+`item_sounds`, `sfx`, `objects`, `spells`, `properties`, plus `monsters`' AI
+glossary) each describe a Diablo FEATURE. A mod that has none of them ships no
+file and gets the feature empty - no affix table means items roll plain, no
+spell table means no spell book. Diablo ships all of them, so nothing about D1
+changes; the size assertions and Hellfire's item reordering only run on a table
+that IS Diablo's.
+
+Absent is not the same as zero. The line is: a table whose absence means "this
+game does not have that" may be missing; a table whose absence would leave a
+zeroed version of something the game DOES have may not. `hero.rec` is on the
+wrong side of that line and is the boundary this phase stopped at.
+
+## Open: H&H has no hero
+
+Everything below the hero works for H&H: its 43 monsters, 113 items, 4 vendors
+and 12 levels load, generate, and populate. The hero does not.
+
+`hero.rec` holds the unified hero model's per-class numbers - starting
+attributes and their caps, the 1/64 life and mana curves, to-hit, animation
+frame counts - and only `mods/d1` has one. Two things stand in the way, and
+they are different sizes:
+
+- The numbers. H&H's branch used the `stats` package (strength/dexterity/
+  intelligence, health/mana resources), which is what its classes.rec still
+  carries; it never had D1's Str/Mag/Dex/Vit or its growth curves. They do not
+  translate row for row, so writing them is a design decision about how H&H's
+  Warrior, Archer and Mage actually play, not a port.
+- The shape. `hero.rec` must declare exactly `NumClasses` (6) classes and is
+  indexed by D1's PC_ order, which `d1ClassIndex` maps names onto. A mod with
+  three classes cannot satisfy that without also declaring Hellfire's monk,
+  bard and barbarian. The class ROSTER is content (`defs.ClassIcons` resolves a
+  class' sprites by the name its classes.rec gave it, and classes.rec itself is
+  now per-mod), but the hero TABLE is not yet.
+
+So the hero model held up as a model - H&H's three classes are D1's three core
+archetypes and "play the same" - while its table is still one game's shape.
+`createPlayer` stops with the file's name rather than building a hero out of
+zeroes.
+
 ## One content schema
 
 The H&H `.rec` schema is the unified content model, for the same reason the H&H
@@ -168,5 +226,47 @@ another size lost most of its cells. The stride now travels with the bitmap.
 6. per-mod level configs
 7. delete hardcoded paths, both mods boot
 
+8. H&H playable — partly. Done: terrain dispatch and the DungeonMap -> gridmap
+   conversion; population from H&H's own tables; classes as content. Not done,
+   in the order they block each other:
+   a. `hero.rec` for H&H, and `NumClasses` stopping being six (above). Nothing
+      below this can be reached in a running game until it is.
+   b. The town. `mods/heavenandhell/maps.ldtk` still holds it, intact, with
+      Kirioth, Shekel, Abel and Sister Mary, its signs, doors, spawn and the
+      three dungeon entrances; `NewGridMapFromLDTK` is already mod-agnostic and
+      will build it. What is missing is one data edit: H&H's `Location` entity
+      definition has no `TargetMap`/`TargetLocation` fields, so its entrances
+      are named spots that lead nowhere. D1's Town wires its entrances exactly
+      that way (`to_cathedral` -> `!gen_dungeon_level_1`/`ladder_up`), and
+      main's `setupTownTransitions` hardcoded the same three in Go -
+      `to_cathedral` -> level 1 `ladder_up`, `to_catacombs` -> level 4
+      `to_town`, `to_caves` -> level 6 `to_town`. Add the two fields to the
+      entity def and fill them; no engine change. The other half is the
+      ladder_up on dungeon level 1, which currently targets `Town`/`to_dungeon`
+      because the engine cannot name `to_cathedral`: that wants one more
+      level knob, not a special case.
+   c. Dialogue for those four, as data. The text is `git show
+      main:files/assets/dialogue/*.txt` and the NPC list `git show
+      main:common/def_dialogue.go`; the schema to express it in is the existing
+      `TriggeredDialogue{NeededFlag, DialogueFile, OnShow}` on `on_talk`.
+   d. Vendors. `mods/heavenandhell/data/stores.rec` loads (4 vendors, reaching
+      only H&H's items - `defs.TestEachModStocksItsOwnItems` covers that), and
+      the town NPCs carry their vendor type from their `InternalName`. What is
+      untested is whether trading with them works once the town is reachable.
+   e. Quests: Meat Jack, Lucifer, the poisoned water, the skeleton king, into
+      `mods/heavenandhell/data/quests.rec` on the same trigger schema as D1's.
+      `d.QuestDefs` is 0 for H&H today, which `QuestActive` now tolerates.
+
 Gameplay changes (shrines, monster abilities, shop seeding, durability, skill trees)
 land after the boundary exists, not before.
+
+Two things main had that H&H's mod does NOT reproduce, on purpose, and both
+should be decided rather than forgotten:
+- The Dungeon-of-Doom tile sets for levels 9 and 10. Their icons
+  (`tile.dungeon_of_doom_*`) did not survive the content extraction and are in
+  neither mod's tiles.rec, so those levels declare `tiles: caves`. Re-adding
+  them means adding six names back to the engine's fixed Icon* list, which D1
+  would then owe as well.
+- The Warrior's six Scrolls of Earthquake. main's classes.rec started the
+  Warrior with six copies of the same scroll; that is a debug loadout, and it
+  is left out.
