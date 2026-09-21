@@ -63,11 +63,11 @@ func TestLoadGameReadsTheSlotTheGameSavedInto(t *testing.T) {
 	}
 	// another slot holding a save that is just as new: picking "the latest slot in the directory" reads this
 	// one, because slot 1 comes first, and the running game silently changes hands
-	saved, err := os.ReadFile(filepath.Join(game.SaveDir, "slot2.json"))
+	saved, err := os.ReadFile(filepath.Join(game.SaveDir, "d1", "slot2.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(game.SaveDir, "slot1.json"), saved, 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(game.SaveDir, "d1", "slot1.json"), saved, 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := theGame.LoadGame(); err != nil {

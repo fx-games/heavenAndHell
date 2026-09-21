@@ -110,7 +110,7 @@ func TestLegacySaveMigratesToSlotOne(t *testing.T) {
 	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "Moreina")
 
 	// put the save back where the old single-slot game kept it: in the working directory, next to "saves"
-	saved, err := os.ReadFile(filepath.Join(game.SaveDir, "slot1.json"))
+	saved, err := os.ReadFile(filepath.Join(game.SaveDir, "d1", "slot1.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
