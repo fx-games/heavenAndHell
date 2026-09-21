@@ -2,7 +2,6 @@ package defs
 
 import (
 	"slices"
-	"strings"
 	"testing"
 
 	"rpg/files"
@@ -92,33 +91,29 @@ func TestD1ModSuppliesEveryIcon(t *testing.T) {
 	}
 }
 
-// The H&H mod does not yet, and this is the exact list, so finishing it is a shrinking list rather than a
-// guess and so a name quietly appearing or vanishing shows up here. What is left is dungeon furniture and a
-// missile the engine names because D1 draws them: the engine's fixed Icon* list still shaped like one game's
-// content. The six class sprites that used to head this list are gone because classes became content --
-// ClassIcons resolves them from the class a mod declares, so no mod owes the engine Hellfire's monk.
-func TestHeavenAndHellModIconGapIsExactlyThis(t *testing.T) {
-	want := []string{
-		"tile.wooden_fence", "tile.arch", "tile.grate", "tile.pillar", "tile.lamp", "tile.lava",
-		"tile.wall_torch", "tile.brazier", "effect.arrow",
-	}
+// Every icon the engine requires of a mod, H&H supplies from its own sheet.
+func TestHeavenAndHellModSuppliesEveryIcon(t *testing.T) {
 	files.SelectMod("heavenandhell")
 	err := LoadIcons()
-	if err == nil {
-		t.Fatal("the mod now supplies every icon: delete this test and its list")
-	}
-	got := err.Error()
-	for _, name := range want {
-		if !strings.Contains(got, name) {
-			t.Errorf("%q is supplied now; remove it from the list", name)
-		}
-	}
-	if n := strings.Count(got, ", ") + 1; n != len(want) {
-		t.Errorf("%d icons missing, the list expects %d: %v", n, len(want), err)
-	}
 	files.SelectMod("d1") // leave the icon vars pointing at a complete mod
+	if err != nil {
+		t.Error(err)
+	}
 	if err := LoadIcons(); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// LoadIcons no longer demands D1's dungeon furniture of every mod, so D1 has to be held to it here.
+func TestD1DefinesItsFurniture(t *testing.T) {
+	files.SelectMod("d1")
+	if err := LoadIcons(); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range D1FurnitureIcons {
+		if _, ok := tilesIcons[name]; !ok {
+			t.Errorf("d1 defines no %s", name)
+		}
 	}
 }
 

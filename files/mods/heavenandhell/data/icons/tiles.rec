@@ -83,3 +83,6 @@ icon: 32
 
 internal_name: effect.hit
 icon: 43
+
+internal_name: effect.arrow
+icon: 41

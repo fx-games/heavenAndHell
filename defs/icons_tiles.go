@@ -45,6 +45,13 @@ var (
 
 func tileIcon(name string) int32 { return namedIcon(tilesIcons, name) }
 
+// D1FurnitureIcons are drawn only by D1's own level builders, so a mod whose levels never use them owes the
+// engine nothing for them. TestD1DefinesItsFurniture keeps D1 honest instead of LoadIcons.
+var D1FurnitureIcons = []string{"tile.wooden_fence", "tile.arch", "tile.grate", "tile.pillar", "tile.lamp",
+	"tile.lava", "tile.wall_torch", "tile.brazier"}
+
+func furnitureIcon(name string) int32 { return tilesIcons[name] }
+
 func loadTilesIcons() {
 	tilesIcons = loadIconRec("tiles")
 	IconWhite = tileIcon("tile.white")
@@ -53,14 +60,14 @@ func loadTilesIcons() {
 	IconDirt = tileIcon("tile.dirt")
 	IconMountain = tileIcon("tile.mountain")
 	IconWater = tileIcon("tile.water")
-	IconWoodenFence = tileIcon("tile.wooden_fence") // first guess
-	IconArch = tileIcon("tile.arch")
-	IconGrate = tileIcon("tile.grate")
-	IconPillar = tileIcon("tile.pillar") // first guess
-	IconLamp = tileIcon("tile.lamp")     // first guess
-	IconLava = tileIcon("tile.lava")
-	IconWallTorch = tileIcon("tile.wall_torch") // first guess
-	IconBrazier = tileIcon("tile.brazier")      // a small flame (131 is a ring icon)
+	IconWoodenFence = furnitureIcon("tile.wooden_fence") // first guess
+	IconArch = furnitureIcon("tile.arch")
+	IconGrate = furnitureIcon("tile.grate")
+	IconPillar = furnitureIcon("tile.pillar") // first guess
+	IconLamp = furnitureIcon("tile.lamp")     // first guess
+	IconLava = furnitureIcon("tile.lava")
+	IconWallTorch = furnitureIcon("tile.wall_torch") // first guess
+	IconBrazier = furnitureIcon("tile.brazier")      // a small flame (131 is a ring icon)
 	IconCathedralFloor = tileIcon("tile.cathedral_floor")
 	IconCatacombsFloor = tileIcon("tile.catacombs_floor")
 	IconCatacombsWall = tileIcon("tile.catacombs_wall")
