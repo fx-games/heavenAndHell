@@ -55,7 +55,6 @@ targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_SCURIMP
 hit_zone: target_only
-effect: apply_status(stone|12)
 
 id: SPL_INFRA
 cast_sfx: IS_CAST8
@@ -132,7 +131,6 @@ targeted: true
 cast_sfx: IS_CAST6
 launch_sfx: LS_ELEMENTL
 hit_zone: target_only
-effect: blink
 
 id: SPL_APOCA
 resist: none

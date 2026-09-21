@@ -329,6 +329,7 @@ func (a *Actions) nextStepOnPlayerPath() {
 		a.playerPath = a.playerPath[1:]
 		autoMoveAction := common.NewMoveAction(common.AbstractCause("Player Movement"), state.GetPlayer(), nextStep, true)
 		autoMoveAction.SetAnimationDelay(0.08)
+		autoMoveAction.Step = true
 		a.actionBroker.QueueForExecution(autoMoveAction)
 		a.actionBroker.QueueForExecution(common.NewEndPlayerTurnAction(autoMoveAction.Cause(), autoMoveAction.GetDelayInAut()))
 	} else if a.autoExplore {
@@ -796,6 +797,7 @@ func (a *Actions) AutoAttack() {
 
 func (a *Actions) playerMoveOneStep(player *common.Actor, targetPos geometry.Point) {
 	moveAction := common.NewMoveAction(common.NewActorCause("Move", player), player, targetPos, true)
+	moveAction.Step = true
 	a.actionBroker.Execute(moveAction)
 	a.actionBroker.Execute(common.NewEndPlayerTurnAction(moveAction.Cause(), moveAction.GetDelayInAut()))
 }

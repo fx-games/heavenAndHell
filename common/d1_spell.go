@@ -413,6 +413,26 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		f.spawnD1Guardian(c.caster, p, d1.GuardianTurns(clvl, slvl))
 	case d1.SplGolem:
 		return f.summonD1Golem(c, target)
+	case d1.SplStone: // AddStone: the first monster of six CrawlTable rings, never Diablo; no mana without one
+		p, ok := c.freeNear(target, func(p geometry.Point) bool {
+			a := c.monsterAt(p)
+			return a != nil && a.d1Monster.AI != "AI_DIABLO"
+		})
+		if !ok {
+			return false
+		}
+		turns := min(slvl+6, 15) << 4 / d1.RefWalkTicks
+		f.ActionBroker.Execute(NewApplyStatusAction(c.cause, c.monsterAt(p), StatusStone, turns))
+	case d1.SplTeleport: // AddTeleport: the first cell of six CrawlTable rings with no wall, monster, object or player
+		p, ok := c.freeNear(target, func(p geometry.Point) bool {
+			return c.m.IsWalkable(p) && !c.m.IsActorAt(p) && !c.m.IsObjectAt(p)
+		})
+		if !ok {
+			return false
+		}
+		move := NewMoveAction(c.cause, c.caster, p, c.caster == f.State.GetPlayer())
+		move.DisableAnimation()
+		f.ActionBroker.Execute(move)
 	case d1.SplTelekinesis:
 		return f.d1Telekinesis(c, target)
 	default:

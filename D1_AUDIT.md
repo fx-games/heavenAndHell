@@ -72,7 +72,7 @@ own Firebolt level, Phasing / the Holy shrine (`AddRndTeleport`), the mana shiel
   23 `vCrawlTable` rays, from its 6th point inwards, each point in four mirrored quadrants, on a clear line
   (`Sentfire`). So it reaches 6 cells and prefers far targets in a fixed order. Ours shoots the closest monster
   within 15 cells.
-- **open — Stone Curse.** `AddStone` petrifies the first monster in the six CrawlTable rings around the target
+- **fixed — Stone Curse.** `AddStone` petrifies the first monster in the six CrawlTable rings around the target
   cell (never Diablo, never one fading or charging), for `min(slvl + 6, 15) · 16` ticks. Ours only curses a
   monster on the target cell, for a flat 12 turns (`apply_status(stone|12)`), and Diablo can be cursed.
 - **fixed — Apocalypse's box.** `AddApoca`/`MI_Apoca` cover x−8 … x+7 and y−8 … y+7 (the upper bound is
@@ -88,7 +88,7 @@ own Firebolt level, Phasing / the Holy shrine (`AddRndTeleport`), the mana shiel
 - **open — Bone Spirit's homing.** `MI_Bonespirit` flies to the target cell; if it gets there without hitting,
   it turns towards the closest monster within 19 cells in line (`FindClosest`, CrawlTable order), or on in the
   hero's direction if there is none. Ours stops at the target cell.
-- **open — Teleport's landing.** `AddTeleport` lands on the first free cell (not solid, no monster, object or
+- **fixed — Teleport's landing.** `AddTeleport` lands on the first free cell (not solid, no monster, object or
   player) of the six CrawlTable rings around the target, and fails (no mana spent) when there is none. Ours
   moves onto the target cell or not at all.
 - **open — Town Portal's spot.** `AddTown` opens the portal at the target cell, or the first cell of the six
