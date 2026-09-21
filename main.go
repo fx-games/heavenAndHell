@@ -65,6 +65,7 @@ func main() {
 func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 	userConfig := common.NewConfigurationFromRecFile(common.ConfigFile)
 	files.SelectMod(userConfig.Mod) // before anything reads content: assets/ resolves to the mod first from here on
+	defs.LoadIcons()                // and before any Icon* is read: the numbers come from the mod's icon rec files
 	startInfos := common.StartInfo{
 		Title:       "RPG",
 		ScreenSize:  userConfig.WindowSize,

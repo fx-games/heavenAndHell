@@ -18,6 +18,17 @@ import (
 // ./remap_items.sh, ./remap_tiles.sh, ./remap_skills.sh — each rec file is read fresh on every game start, no
 // rebuild needed. The H&H constants (IconGrass, ...) are package vars, not consts, for the same
 // reason: their value comes from the rec file, not from the Go source.
+//
+// The sprite sheet they index is the active mod's: a mod that ships its own assets/data/icons and its own sheet
+// gets both. That is why LoadIcons is explicit rather than a package initializer -- the vars must be filled
+// AFTER files.SelectMod, or every Icon* silently carries the engine's number instead of the mod's.
+func LoadIcons() {
+	loadActorsIcons()
+	loadItemsIcons()
+	loadSkillsIcons()
+	loadTilesIcons()
+}
+
 func loadIconRec(name string) map[string]int32 {
 	f, err := files.Open(path.Join("assets", "data", "icons", name+".rec"))
 	if err != nil {
