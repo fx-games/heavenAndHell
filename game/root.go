@@ -841,7 +841,9 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 	g.onD1MapChanged(oldMapName, newMapName)
 
 	g.actions.updateFoV()
-	g.SaveGame()
+	if g.configuration.AutosavesOnLevelChange() {
+		g.SaveGame()
+	}
 	g.uiController.OnMapChanged()
 
 	if g.onMapChange != nil {

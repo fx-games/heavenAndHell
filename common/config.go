@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"maps"
 	"os"
+	"rpg/files"
 	"rpg/geometry"
 	"rpg/recfile"
 	"slices"
@@ -60,6 +61,8 @@ type Configuration struct {
 	SoundVolume, MusicVolume, VoiceVolume float64 // 0..1, set in the audio menu
 
 	AutoExploreOpenContainers bool // auto explore also bumps chests/barrels/sarcophagi it finds
+
+	AutosaveOnLevelChange bool // the player's choice; a mod's data/mod.rec may fix it (AutosavesOnLevelChange)
 
 	Fullscreen bool // set in the video menu or with F11
 
@@ -171,6 +174,7 @@ func (c Configuration) ToRecord() recfile.Record {
 		{Name: "MusicVolume", Value: recfile.FloatStr(c.MusicVolume)},
 		{Name: "VoiceVolume", Value: recfile.FloatStr(c.VoiceVolume)},
 		{Name: "AutoExploreOpenContainers", Value: recfile.BoolStr(c.AutoExploreOpenContainers)},
+		{Name: "AutosaveOnLevelChange", Value: recfile.BoolStr(c.AutosaveOnLevelChange)},
 		{Name: "Fullscreen", Value: recfile.BoolStr(c.Fullscreen)},
 		{Name: "Mod", Value: c.Mod},
 		{Name: "SpriteSheet", Value: c.SpriteSheet},
@@ -212,6 +216,7 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		DefaultFont:               configMap.GetStringOrDefault("DefaultFont", "assets/fonts/Ac437_EagleSpCGA_Alt3.ttf"),
 		DefaultFontSize:           configMap.GetFloatOrDefault("DefaultFontSize", 16.0),
 		AutoPickup:                configMap.GetBoolOrTrue("AutoPickup"),
+		AutosaveOnLevelChange:     configMap.GetBoolOrTrue("AutosaveOnLevelChange"),
 		KeepPlayerCentered:        configMap.GetBoolOrTrue("KeepPlayerCentered"),
 		DrawTilesBehindActors:     configMap.GetBoolOrFalse("DrawTilesBehindActors"),
 		DrawTilesBehindItems:      configMap.GetBoolOrFalse("DrawTilesBehindItems"),
@@ -286,4 +291,32 @@ func setConfigFields(recFilename string, fields [][2]string) error {
 		}
 	}
 	return os.WriteFile(recFilename, []byte(strings.Join(lines, "\n")+"\n"), 0o644)
+}
+
+// ModSetting is a setting the active mod fixes in its data/mod.rec, and whether it does. The player can't change
+// such a setting: the mod's value wins over config.rec.
+func ModSetting(name string) (value string, fixed bool) {
+	f, err := files.Open("assets/data/mod.rec")
+	if err != nil {
+		return "", false
+	}
+	defer f.Close()
+	recs := recfile.Read(f)
+	if len(recs) == 0 {
+		return "", false
+	}
+	for _, field := range recs[0] {
+		if field.Name == name {
+			return field.Value, true
+		}
+	}
+	return "", false
+}
+
+// AutosavesOnLevelChange: whether a level change saves the game - the mod's word if it has one, else the player's.
+func (c *Configuration) AutosavesOnLevelChange() bool {
+	if v, fixed := ModSetting("AutosaveOnLevelChange"); fixed {
+		return v == "true"
+	}
+	return c.AutosaveOnLevelChange
 }

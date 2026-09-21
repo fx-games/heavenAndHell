@@ -20,3 +20,14 @@ func TestSaveModWritesIntoFirstRecord(t *testing.T) {
 		t.Fatalf("Mod = %q after replace", got)
 	}
 }
+
+// A mod's data/mod.rec fixes a setting over config.rec: D1 (1.09) never autosaves on a level change.
+func TestModFixesAutosave(t *testing.T) {
+	cfg := Configuration{AutosaveOnLevelChange: true}
+	if cfg.AutosavesOnLevelChange() {
+		t.Fatal("d1's mod.rec should turn the level-change autosave off")
+	}
+	if _, fixed := ModSetting("AutosaveOnLevelChange"); !fixed {
+		t.Fatal("the setting should be locked for the player")
+	}
+}

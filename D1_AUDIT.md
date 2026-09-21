@@ -132,7 +132,7 @@ Poisoned Water), Cain (Lazarus, Diablo), the dead guy, the quest objects (books,
   cells from its leader (`DirOK`); a leader with `mUnqAttr & 2` only moves when its whole pack is around it;
   leader and minions share `_msquelch`/`_lastx` (whoever is more alert tells the other, and wakes a gargoyle);
   a minion that strays gets back in line or drops out (`M_UpdateLeader`). Ours sets `Leader` and never reads it.
-- **open — New Game Plus.** Once Diablo is dead we keep the game running with "Nightmare" monsters and loot
+- **by design — New Game Plus.** (kept: it comes after the official content) Once Diablo is dead we keep the game running with "Nightmare" monsters and loot
   (`D1NewGamePlus`, `scaleD1NewGamePlus`, `D1ItemLevel`), using devilutionX's AC/to-hit bonuses and an HP bonus in
   the wrong units, and the end text talks of Gillian's donation. 1.09 plays the ending and goes back to the
   main menu; Nightmare only exists as a difficulty picked for a multiplayer game.
@@ -149,9 +149,8 @@ Poisoned Water), Cain (Lazarus, Diablo), the dead guy, the quest objects (books,
 
 ## Hero death and saving
 
-- **open — saving.** 1.09 single player saves only on "Save Game" and on quitting; dying leaves Load Game / New
-  Game. We also autosave on every level change, so a death loses at most the current level. (Dropping half the
-  gold and the equipment at death only matters in multiplayer: a single player game can't go on after it.)
+- **fixed — saving.** 1.09 single player saves only on "Save Game" and on quitting. The level-change autosave is
+  now `AutosaveOnLevelChange` in config.rec (pause menu), and D1's `data/mod.rec` fixes it off, locked for the player.
 
 ## Town
 

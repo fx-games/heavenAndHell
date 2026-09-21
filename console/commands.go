@@ -136,7 +136,8 @@ func (c *Console) openSystemMenu() {
 	if !c.context.IsPermadeath() { // permadeath has one life and one autosave: nothing to pick
 		items = append(items,
 			util.MenuItem{MainText: "Save game", Action: func() { c.context.OpenSaveMenu(c.openSystemMenu) }},
-			util.MenuItem{MainText: "Load game", Action: func() { c.context.OpenLoadMenu(c.openSystemMenu) }})
+			util.MenuItem{MainText: "Load game", Action: func() { c.context.OpenLoadMenu(c.openSystemMenu) }},
+			common.AutosaveToggle(c.config, c.openSystemMenu))
 	}
 	c.OpenMenu(append(items, []util.MenuItem{
 		{MainText: "Auto explore", Action: func() {

@@ -353,6 +353,15 @@ func AutoExploreSettings(cfg *Configuration, reopen func()) []util.MenuItem {
 	}
 }
 
+// AutosaveToggle is configToggle for AutosaveOnLevelChange, shown but locked when the mod fixes it.
+func AutosaveToggle(cfg *Configuration, reopen func()) util.MenuItem {
+	if _, fixed := ModSetting("AutosaveOnLevelChange"); fixed {
+		state := map[bool]string{true: "On", false: "Off"}[cfg.AutosavesOnLevelChange()]
+		return util.MenuItem{MainText: fmt.Sprintf("Autosave on level change: %s (set by the mod)", state), Action: reopen}
+	}
+	return configToggle(cfg, "Autosave on level change", &cfg.AutosaveOnLevelChange, reopen)
+}
+
 // RandomHeroName picks a name for a new hero, or "" when the name lists are missing.
 // Name lists: michael-aloys/little-namegenerator (CC BY 4.0, Jonas Förster & Michael A. Hedderich).
 func RandomHeroName(female bool) string {

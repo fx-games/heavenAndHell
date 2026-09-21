@@ -16,7 +16,8 @@ func (u *UIController) openPauseMenu() {
 	if !u.context.IsPermadeath() {
 		items = append(items,
 			util.MenuItem{MainText: "Save game", Action: func() { u.context.OpenSaveMenu(func() {}) }},
-			util.MenuItem{MainText: "Load game", Action: func() { u.context.OpenLoadMenu(func() {}) }})
+			util.MenuItem{MainText: "Load game", Action: func() { u.context.OpenLoadMenu(func() {}) }},
+			common.AutosaveToggle(u.configuration, func() { u.reopen(u.openPauseMenu) }))
 	}
 	quit := "Quit game"
 	if u.context.QuitSaves != nil && u.context.QuitSaves() {
