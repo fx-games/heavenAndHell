@@ -23,6 +23,7 @@ import (
 )
 
 type GameInstance struct {
+	switchMod func() // SetModSwitcher
 	// base infos / config
 	title                       string
 	deviceIndependentScreenSize geometry.Point

@@ -509,8 +509,11 @@ func (g *GameInstance) StartMenuItems(afterDeath bool) []util.MenuItem {
 	return append(items, util.MenuItem{MainText: "Quit", Action: g.uiController.QuitGame})
 }
 
-// openModPicker switches mods by restarting: every icon, sprite, sound and definition was read for the mod
-// running now, so the new one starts from scratch in a fresh process. The choice is stored in the config file.
+// openModPicker switches mods in place: the choice goes into the config file, this game's sounds stop, and the UI
+// builds a fresh game on the new mod (SetModSwitcher) -- every icon, sprite, sound and definition is read anew.
+// SetModSwitcher is how the UI replaces this game with one on the mod just saved to the config file.
+func (g *GameInstance) SetModSwitcher(switchMod func()) { g.switchMod = switchMod }
+
 func (g *GameInstance) openModPicker(mods []string, back func()) {
 	var items []util.MenuItem
 	for _, mod := range mods {
@@ -522,7 +525,8 @@ func (g *GameInstance) openModPicker(mods []string, back func()) {
 				g.PlayerMessage(fmt.Sprintf("Could not switch mods: %v", err))
 				return
 			}
-			restart()
+			g.audioPlayer.StopAll()
+			g.switchMod()
 		}})
 	}
 	g.uiController.OpenUncancelableMenu(append(items, util.MenuItem{MainText: "Back", Action: back}))

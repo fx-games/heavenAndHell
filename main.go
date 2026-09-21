@@ -272,20 +272,58 @@ func maptest() {
 }
 
 func runGameWithConsole(theGame *game.GameInstance, context common.UIContext) {
-	theGame.SetConsoleMode(true)
-	con := console.NewConsole(context)
-	theGame.SetAndInitUserInterface(con)
-
-	if err := con.Run(theGame.ShowStartMenu); err != nil {
-		log.Fatal(err)
+	for {
+		theGame.SetConsoleMode(true)
+		con := console.NewConsole(context)
+		theGame.SetAndInitUserInterface(con)
+		switched := false
+		theGame.SetModSwitcher(func() { switched = true; con.QuitGame() })
+		if err := con.Run(theGame.ShowStartMenu); err != nil {
+			log.Fatal(err)
+		}
+		if !switched {
+			theGame.SaveGame() // decision 11: autosave on quit
+			return
+		}
+		theGame, context = createGameAndUIContext() // the mod picker saved the new mod to the config
 	}
-	theGame.SaveGame() // decision 11: autosave on quit
-
 }
 
-// runGameWithEbiten will start the infinitely running game loop
-// game will receive the update and draw calls
+// modHost is the one ebiten.Game for the whole run; picking a mod swaps the controller it forwards to.
+type modHost struct{ *gui.UIController }
+
 func runGameWithEbiten(theGame *game.GameInstance, context common.UIContext) {
+	host := &modHost{}
+	var mount func(*game.GameInstance, common.UIContext)
+	mount = func(g *game.GameInstance, ctx common.UIContext) {
+		host.UIController = newEbitenUI(g, ctx)
+		g.SetModSwitcher(func() { mount(createGameAndUIContext()) })
+		g.ShowStartMenu()
+	}
+	mount(theGame, context)
+	uiController := host.UIController
+	screenSize := uiController.GetDeviceIndependentScreenSize()
+
+	ebiten.SetWindowTitle("Lux Aeterna")
+	ebiten.SetWindowSize(screenSize.X, screenSize.Y)
+	if context.StartInfos.UserConfiguration.Fullscreen {
+		uiController.SetFullscreen(true)
+	}
+	ebiten.SetScreenClearedEveryFrame(true)
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	ebiten.SetWindowSizeLimits(640, 480, -1, -1)
+	ebiten.SetWindowClosingHandled(true)
+
+	err := ebiten.RunGameWithOptions(host, &ebiten.RunGameOptions{
+		GraphicsLibrary: ebiten.GraphicsLibraryOpenGL,
+	})
+	if err != nil && !errors.Is(err, ebiten.Termination) {
+		log.Fatal(err)
+	}
+}
+
+// newEbitenUI builds the tile UI for one game: renderer, atlases and controller all read the active mod.
+func newEbitenUI(theGame *game.GameInstance, context common.UIContext) *gui.UIController {
 	startInfos := context.StartInfos
 	tileRenderer := renderer.NewTileRenderer(startInfos.TileScale)
 	tileRenderer.SetColorFromName(defs.ColorFromName)
@@ -303,25 +341,6 @@ func runGameWithEbiten(theGame *game.GameInstance, context common.UIContext) {
 	uiController.SetTTFFont(files.MustOpen(startInfos.FontInfos.TTFFile), startInfos.FontInfos.TTFSize)
 	uiController.SetAsciiAtlas(renderer.NewTextureAtlas(path.Join("assets", "Bm437_IBM_CGA.png"), 8, 8))
 	theGame.SetAndInitUserInterface(uiController)
-	theGame.ShowStartMenu()
-
-	screenSize := uiController.GetDeviceIndependentScreenSize()
-
-	ebiten.SetWindowTitle("Lux Aeterna")
-	ebiten.SetWindowSize(screenSize.X, screenSize.Y)
-	if startInfos.UserConfiguration.Fullscreen {
-		uiController.SetFullscreen(true)
-	}
-	ebiten.SetScreenClearedEveryFrame(true)
-	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
-	ebiten.SetWindowSizeLimits(640, 480, -1, -1)
-	ebiten.SetWindowClosingHandled(true)
 	uiController.OnQuit = theGame.SaveGame // decision 11: autosave on quit
-
-	err := ebiten.RunGameWithOptions(uiController, &ebiten.RunGameOptions{
-		GraphicsLibrary: ebiten.GraphicsLibraryOpenGL,
-	})
-	if err != nil && !errors.Is(err, ebiten.Termination) {
-		log.Fatal(err)
-	}
+	return uiController
 }

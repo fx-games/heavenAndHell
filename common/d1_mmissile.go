@@ -186,7 +186,7 @@ func missileIcon(mis D1Missile) int32 {
 var d1MissileSfx = map[D1Missile][2]string{
 	MisFirebolt: {"LS_FBOLT1", "LS_FIRIMP2"}, MisFireball: {"LS_FBOLT1", "LS_FIRIMP2"},
 	MisLightCtrl: {"LS_LNING1"}, MisLightning: {"LS_LNING1", "LS_ELECIMP1"}, // the MIS_LIGHTNINGs it lays; LIGHTCTRL2's thin ones are silent
-	MisFlash:     {"LS_NOVA"}, MisFlamec: {"LS_SPOUTSTR"}, MisCbolt: {"LS_CBOLT"}, MisAcid: {"LS_ACID"}, MisAcidPud: {"LS_PUDDLE"},
+	MisFlash: {"LS_NOVA"}, MisFlamec: {"LS_SPOUTSTR"}, MisCbolt: {"LS_CBOLT"}, MisAcid: {"LS_ACID"}, MisAcidPud: {"LS_PUDDLE"},
 	MisNova: {"LS_NOVA"}, MisFireWall: {"LS_WALLLOOP"}, MisFlashTrap: {"LS_NOVA"},
 }
 
