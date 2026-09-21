@@ -12,6 +12,7 @@ import (
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/stats"
+	"strconv"
 	"strings"
 )
 
@@ -26,6 +27,18 @@ func playthrough() {
 	defer os.RemoveAll(game.SaveDir)
 	theGame, _ := createGameAndUIContext() // one instance: ebiten allows a single audio context per process
 	theGame.GetAudio().SetDisablePlayback(true)
+	// A smoke test that plays a different dungeon every launch reports a different result every launch: this
+	// used to pass about five runs in six, which is indistinguishable from "the change you just made is fine".
+	// Both time-seeded sources get pinned, and the seed is printed so a failure can be replayed verbatim.
+	seed := int64(1)
+	if len(os.Args) > 2 {
+		if parsed, err := strconv.ParseInt(os.Args[2], 10, 64); err == nil {
+			seed = parsed
+		}
+	}
+	fmt.Printf("playthrough seed: %d (replay with: playthrough %d)\n", seed, seed)
+	theGame.SeedRandom(seed)
+	common.SeedD1Rng(seed)
 	missiles := &missileCounter{}                                             // registered per check: a new game or a load makes a new broker
 	wallTraps, chestTraps := 0, 0                                             // traps that fired while objects were operated
 	for run := 1; run <= len(theGame.GetGameData().ClassDefinitions); run++ { // every class

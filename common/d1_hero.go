@@ -11,6 +11,10 @@ import (
 
 var d1Rng = rand.New(rand.NewSource(time.Now().UnixNano()))
 
+// SeedD1Rng makes the D1 rolls that do not hang off the world seed (flinch, armor wear, drops) reproducible.
+// Only reproducible runs use it - the game itself wants a fresh sequence every launch.
+func SeedD1Rng(seed int64) { d1Rng = rand.New(rand.NewSource(seed)) }
+
 func (a *Actor) Hero() *d1.Hero     { return a.hero }
 func (a *Actor) SetHero(h *d1.Hero) { a.hero = h }
 

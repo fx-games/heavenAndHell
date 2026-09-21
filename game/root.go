@@ -170,6 +170,10 @@ func (g *GameInstance) GetAudio() *audio.Player {
 	return g.audioPlayer
 }
 
+// SeedRandom replaces the instance's random source, so a run that starts new games picks the same world seeds
+// every time. Only reproducible runs use it.
+func (g *GameInstance) SeedRandom(seed int64) { g.randomSource = rand.New(rand.NewSource(seed)) }
+
 func NewGameInstance(startInfo common.StartInfo, uiController common.UserInterface) *GameInstance {
 	g := &GameInstance{
 		startInfo:    startInfo,
