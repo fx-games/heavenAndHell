@@ -40,7 +40,7 @@ func (o *D1Object) name() string {
 	if o.O.Kind == d1.ObjSTORYBOOK && o.O.Var3 >= 0 && o.O.Var3 < len(d1.StoryBookNames) {
 		return d1.StoryBookNames[o.O.Var3]
 	}
-	if o.O.Kind == d1.ObjBOOK2L && o.f.State.GetMap().GetName() == D1LazarusLevel {
+	if o.O.Kind == d1.ObjBOOK2L && o.f.State.onSetLevelOf(o.f.State.GetMap(), d1.QBetrayer) {
 		return "Book of Vileness"
 	}
 	return d1ObjectDisplay(o.O.Kind).Name

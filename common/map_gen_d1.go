@@ -30,7 +30,7 @@ func toCell(px, py int) geometry.Point {
 
 // generateD1Map builds dungeon level dlvl (1-24), or a quest set level entered from it, with D1's own generators.
 func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMap[*Actor, *Item, Object] {
-	setLevel := d1SetLevelOf(targetMap)
+	setLevel := g.factory.State.setLevelOf(targetMap)
 	sl := d1.SLNone
 	if setLevel != nil {
 		sl = setLevel.SL
@@ -111,7 +111,7 @@ func (g *MapGenerator) wireD1Triggers(m *gridmap.GridMap[*Actor, *Item, Object],
 		}
 	}
 
-	for _, sl := range D1SetLevels {
+	for _, sl := range g.factory.State.SetLevels() {
 		q := g.d1Quests[sl.Quest]
 		if q.Level != dlvl || q.Active == d1.QuestNotAvail {
 			continue

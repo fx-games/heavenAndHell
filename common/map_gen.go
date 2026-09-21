@@ -144,7 +144,7 @@ var (
 // (L3pfoul.pal, then L3pwater.pal once the quest is done) turns them into foul water and then clean water, tinted
 // by State.GetWaterColor.
 func (g *MapGenerator) d1LavaTile(m *gridmap.GridMap[*Actor, *Item, Object]) gridmap.Tile {
-	if sl := d1SetLevelOf(m.GetName()); sl == nil || sl.SL != d1.SLPoisonWater {
+	if !g.factory.State.onSetLevelOf(m, d1.QPWater) {
 		return d1Lava
 	}
 	if g.factory.State.QuestActive(d1.QPWater) == d1.QuestDone {

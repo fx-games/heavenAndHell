@@ -52,15 +52,7 @@ type Quest struct {
 
 type Quests [NumQuests]Quest
 
-// QuestNames are questlist's _qlstr.
-var QuestNames = [NumQuests]string{"The Magic Rock", "Black Mushroom", "Gharbad The Weak", "Zhar the Mad", "Lachdanan",
-	"Diablo", "The Butcher", "Ogden's Sign", "Halls of the Blind", "Valor", "Anvil of Fury", "Warlord of Blood",
-	"The Curse of King Leoric", "Poisoned Water Supply", "The Chamber of Bone", "Archbishop Lazarus"}
-
-// QuestMsgs are questlist's _qdmsg: the text the quest log shows.
-var QuestMsgs = [NumQuests]string{"TEXT_INFRA5", "TEXT_MUSH8", "TEXT_GARBUD1", "TEXT_ZHAR1", "TEXT_VEIL9", "TEXT_VILE3",
-	"TEXT_BUTCH9", "TEXT_BANNER2", "TEXT_BLINDING", "TEXT_BLOODY", "TEXT_ANVIL5", "TEXT_BLOODWAR", "TEXT_KING2",
-	"TEXT_POISON3", "TEXT_BONER", "TEXT_VILE1"}
+// questlist's _qlstr and _qdmsg -- a quest's name and log text -- are the mod's, in assets/data/quests.rec.
 
 // Black Mushroom's steps (quest_mush_state, Var1).
 const (

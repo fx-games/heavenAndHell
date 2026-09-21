@@ -437,7 +437,7 @@ func (s *State) mixLightSourceColor(drawColor, noLightSource color.RGBA, worldTi
 // for this game and isn't done yet, blue otherwise.
 func (s *State) GetWaterColor() color.RGBA {
 	name, q := s.GetMap().GetName(), s.QuestActive(d1.QPWater)
-	sl := d1SetLevelOf(name)
+	sl := s.setLevelOf(name)
 	if (defs.IsTownLevel(name) || sl != nil && sl.SL == d1.SLPoisonWater) && q != d1.QuestNotAvail && q != d1.QuestDone {
 		return color.RGBA{R: 199, G: 251, B: 161, A: 255}
 	}
