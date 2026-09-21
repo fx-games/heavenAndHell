@@ -1,6 +1,7 @@
 package defs
 
 import (
+	"strings"
 	"testing"
 
 	"rpg/files"
@@ -79,6 +80,45 @@ func TestEachModLoadsItsOwnItems(t *testing.T) {
 				t.Errorf("%s mod served the other mod's item %q", tc.mod, tc.absent)
 			}
 		})
+	}
+}
+
+// The D1 mod supplies every icon the engine names; that is the state a finished mod is in.
+func TestD1ModSuppliesEveryIcon(t *testing.T) {
+	files.SelectMod("d1")
+	if err := LoadIcons(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// The H&H mod does not yet, and this is the exact list, so finishing it is a shrinking list rather than a
+// guess and so a name quietly appearing or vanishing shows up here. Six are classes H&H does not have (monk,
+// bard and barbarian are Hellfire's) and the rest are dungeon furniture and a missile the engine names because
+// D1 draws them -- both are the engine's fixed Icon* list still being shaped like one game's content.
+func TestHeavenAndHellModIconGapIsExactlyThis(t *testing.T) {
+	want := []string{
+		"class.monk_male", "class.monk_female", "class.bard_male", "class.bard_female",
+		"class.barbarian_male", "class.barbarian_female",
+		"tile.wooden_fence", "tile.arch", "tile.grate", "tile.pillar", "tile.lamp", "tile.lava",
+		"tile.wall_torch", "tile.brazier", "effect.arrow",
+	}
+	files.SelectMod("heavenandhell")
+	err := LoadIcons()
+	if err == nil {
+		t.Fatal("the mod now supplies every icon: delete this test and its list")
+	}
+	got := err.Error()
+	for _, name := range want {
+		if !strings.Contains(got, name) {
+			t.Errorf("%q is supplied now; remove it from the list", name)
+		}
+	}
+	if n := strings.Count(got, ", ") + 1; n != len(want) {
+		t.Errorf("%d icons missing, the list expects %d: %v", n, len(want), err)
+	}
+	files.SelectMod("d1") // leave the icon vars pointing at a complete mod
+	if err := LoadIcons(); err != nil {
+		t.Fatal(err)
 	}
 }
 

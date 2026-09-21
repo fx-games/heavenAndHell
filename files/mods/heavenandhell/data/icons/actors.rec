@@ -130,3 +130,27 @@ icon: 342
 
 internal_name: monster.adventurer_archer
 icon: 370
+
+
+# Class and corpse icons, from the game's own other_icons.rec.
+
+internal_name: class.rogue_male
+icon: 19
+
+internal_name: class.rogue_female
+icon: 47
+
+internal_name: class.warrior_male
+icon: 20
+
+internal_name: class.warrior_female
+icon: 48
+
+internal_name: class.sorcerer_male
+icon: 21
+
+internal_name: class.sorcerer_female
+icon: 49
+
+internal_name: corpse.default
+icon: 135
