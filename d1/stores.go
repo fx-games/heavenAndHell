@@ -98,6 +98,7 @@ func loadStoreTables(fsys fs.FS, d *Data) error {
 		}
 		d.Vendors[v.InternalName] = v
 	}
+	d.VendorList = vendors
 	return nil
 }
 
@@ -312,6 +313,30 @@ func (g *Generator) BoyItem(clvl int, who *Shopper) *Item {
 			return it
 		}
 	}
+}
+
+// VendorsOf is every record the town NPC npc runs, in file order.
+func (d *Data) VendorsOf(npc string) []Vendor {
+	var out []Vendor
+	for _, v := range d.VendorList {
+		if v.NPC == npc {
+			out = append(out, v)
+		}
+	}
+	return out
+}
+
+// ListStock is a vendor that names its wares: every always item, then sometimes items to fill the rolled count,
+// at least one when it has any -- main's getVendorInventoryFromDefinition.
+func (g *Generator) ListStock(v Vendor, lvl int) []*Item {
+	count := max(len(v.Always), g.rollCount(v.ItemCount))
+	out := g.always(v)
+	if len(v.Sometimes) > 0 {
+		for n := max(1, count-len(v.Always)); n > 0; n-- {
+			out = append(out, g.storeItem(g.D.idx(v.Sometimes[g.random(len(v.Sometimes))]), lvl))
+		}
+	}
+	return out
 }
 
 // BuyPrice is what a store charges (the identified value).

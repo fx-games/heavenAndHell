@@ -245,6 +245,7 @@ type Data struct {
 	Items          []ItemData
 	ItemIdx        map[string]int    // item internal_name -> index into Items
 	Vendors        map[string]Vendor // store internal_name -> its record (assets/data/stores.rec)
+	VendorList     []Vendor          // the same records in file order, which is the order an NPC's menu and stock take
 	Prefixes       []Affix
 	Suffixes       []Affix
 	UniqueItems    []UniqueItemData

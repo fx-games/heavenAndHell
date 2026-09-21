@@ -6,12 +6,13 @@ import (
 	"rpg/defs"
 	"rpg/geometry"
 	"rpg/gridmap"
+	"slices"
 )
 
 type gameMap = gridmap.GridMap[*common.Actor, *common.Item, common.Object]
 
-// restockD1Town ports SetupTownStores: every visit to town brings new smith, witch and healer stock;
-// Griswold's premium items and Wirt's item stay until bought or outleveled.
+// restockD1Town ports SetupTownStores for every mod: each town NPC's stock is its vendor records' stock rolls, in
+// stores.rec order. Premium items and Wirt's item stay until bought or outleveled; everything else is new each visit.
 func (g *GameInstance) restockD1Town(m *gameMap) {
 	gen := g.factory.D1()
 	player := g.state.GetPlayer()
@@ -20,28 +21,40 @@ func (g *GameInstance) restockD1Town(m *gameMap) {
 	clvl := player.Hero().Level
 	g.forgetBoughtD1Stock(m)
 	for _, a := range m.Actors() {
-		inv := a.GetInventory()
-		switch a.GetVendorType() {
-		case common.VendorTypeWeapons:
-			gen.RefillPremium(&g.premium, clvl, who)
-			g.stock(inv, append(gen.SmithStock(lvl), g.premium.Items[:]...), d1.BuyPrice)
-			for _, item := range inv.Items() {
-				for _, premiumItem := range g.premium.Items {
-					if premiumItem != nil && item.D1() == premiumItem {
-						item.SetPremiumStock(true)
-					}
+		var stock, premium []*d1.Item
+		price := d1.BuyPrice
+		for _, v := range gen.D.VendorsOf(a.GetInternalName()) {
+			switch v.Stock {
+			case "premium":
+				gen.RefillPremium(&g.premium, clvl, who)
+				premium = g.premium.Items[:]
+			case "smith":
+				stock = append(stock, gen.SmithStock(lvl)...)
+			case "witch":
+				stock = append(stock, gen.WitchStock(lvl, player.Hero().SpellLevels)...)
+			case "healer":
+				stock = append(stock, gen.HealerStock(lvl, who)...)
+			case "list":
+				stock = append(stock, gen.ListStock(v, lvl)...)
+			case "boy":
+				if g.boyItem == nil || g.boyLevel < clvl>>1 {
+					g.boyItem, g.boyLevel = gen.BoyItem(clvl, who), clvl>>1
+					g.state.GetFlags().SetFalse(common.FlagWirtItemSeen) // a new item costs a new look fee
 				}
+				stock, price = append(stock, g.boyItem), gen.D.WirtPrice
+			default:
+				continue
 			}
-		case common.VendorTypeWands:
-			g.stock(inv, gen.WitchStock(lvl, player.Hero().SpellLevels), d1.BuyPrice)
-		case common.VendorTypeGeneral:
-			g.stock(inv, gen.HealerStock(lvl, who), d1.BuyPrice)
-		case common.VendorTypeWirt:
-			if g.boyItem == nil || g.boyLevel < clvl>>1 {
-				g.boyItem, g.boyLevel = gen.BoyItem(clvl, who), clvl>>1
-				g.state.GetFlags().SetFalse(common.FlagWirtItemSeen) // a new item costs a new look fee
+		}
+		if stock == nil && premium == nil {
+			continue
+		}
+		inv := a.GetInventory()
+		g.stock(inv, append(stock, premium...), price)
+		for _, item := range inv.Items() {
+			if slices.Contains(premium, item.D1()) {
+				item.SetPremiumStock(true)
 			}
-			g.stock(inv, []*d1.Item{g.boyItem}, gen.D.WirtPrice)
 		}
 	}
 	g.storesShown = true
@@ -55,16 +68,18 @@ func (g *GameInstance) forgetBoughtD1Stock(town *gameMap) {
 	}
 	for _, a := range town.Actors() {
 		inv := a.GetInventory()
-		switch a.GetVendorType() {
-		case common.VendorTypeWeapons:
-			for i, it := range g.premium.Items {
-				if it != nil && !hasD1Item(inv, it) {
-					g.premium.Items[i] = nil
+		for _, v := range g.factory.D1().D.VendorsOf(a.GetInternalName()) {
+			switch v.Stock {
+			case "premium":
+				for i, it := range g.premium.Items {
+					if it != nil && !hasD1Item(inv, it) {
+						g.premium.Items[i] = nil
+					}
 				}
-			}
-		case common.VendorTypeWirt:
-			if g.boyItem != nil && !hasD1Item(inv, g.boyItem) {
-				g.boyItem = nil
+			case "boy":
+				if g.boyItem != nil && !hasD1Item(inv, g.boyItem) {
+					g.boyItem = nil
+				}
 			}
 		}
 	}

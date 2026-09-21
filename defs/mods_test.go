@@ -156,7 +156,7 @@ func TestEachModStocksItsOwnItems(t *testing.T) {
 		want      string // an item only this mod has, which some vendor of it can stock
 		absent    string // the other mod's item, which none of its vendors may reach
 	}{
-		{"d1", 5, "witch", "Potion of Full Mana", "Potion of Berserker Rage"},
+		{"d1", 7, "witch", "Potion of Full Mana", "Potion of Berserker Rage"},
 		{"heavenandhell", 4, "store_general", "a torch", "Potion of Full Mana"},
 	} {
 		t.Run(tc.mod, func(t *testing.T) {

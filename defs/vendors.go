@@ -8,6 +8,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/vm"
+
 	"rpg/recfile"
 	"rpg/stats"
 )
@@ -33,7 +36,16 @@ var ItemTypeNames = []string{"misc", "sword", "axe", "bow", "mace", "shield", "l
 // items, how dear, how many tries before it settles, the fixed slots of a rotating premium stock, and the item
 // types it keeps away from a class. HOW it rolls stays in the engine.
 type Vendor struct {
-	InternalName   string
+	InternalName string
+
+	// Who runs it and what they do, all named from the engine's vocabulary. Several records may name the same
+	// npc: its menu is their services in file order, its stock their stock rolls in file order.
+	NPC      string   // the town NPC's internal_name
+	Stock    string   // the stock strategy: one of VendorStocks, or "" for a vendor that sells nothing
+	Buys     string   // what it buys from the hero: one of VendorBuyRules, or "" for nothing
+	Services []string // menu entries: VendorServices names, some with an argument, e.g. "identify(100)"
+	When     string   // an expr-lang condition over quests (as in quests.rec) for the record to count at all
+
 	Purse          int
 	ItemCount      stats.Interval // how many items the vendor stocks, the always list included
 	TurnoverItems  int
@@ -58,7 +70,20 @@ type Vendor struct {
 	FeaturedCount  stats.Interval
 	Shuns          map[string][]string // class name -> item types it keeps away from that class
 	ShunTries      int                 // how long it keeps shunning before it gives up
+
+	program *vm.Program
 }
+
+// Cond is the compiled When, nil when the record has none.
+func (v Vendor) Cond() *vm.Program { return v.program }
+
+// The engine's vendor vocabulary. The algorithms behind each name live in the engine; a mod picks by name.
+var (
+	VendorStocks   = []string{"smith", "premium", "witch", "healer", "boy", "list"}
+	VendorBuyRules = []string{"smith", "witch", "any"}
+	VendorServices = []string{"buy", "buy_basic", "buy_premium", "sell", "repair", "recharge", "identify", "heal_on_visit",
+		"donate", "peek", "stash", "transfer"}
+)
 
 // Accepts reports whether a vendor's criteria let it stock this base item. Depth and drop rate are the
 // caller's, since they depend on the level being stocked for.
@@ -108,6 +133,16 @@ func vendorFromRecord(rec recfile.Record) (Vendor, error) {
 		switch f.Name {
 		case "internal_name":
 			v.InternalName = f.Value
+		case "npc":
+			v.NPC = f.Value
+		case "stock":
+			v.Stock = f.Value
+		case "buys":
+			v.Buys = f.Value
+		case "service":
+			v.Services = append(v.Services, f.Value)
+		case "when":
+			v.When = f.Value
 		case "purse":
 			v.Purse = f.AsInt()
 		case "item_count":
@@ -173,6 +208,25 @@ func vendorFromRecord(rec recfile.Record) (Vendor, error) {
 		if !slices.Contains(ItemTypeNames, t) {
 			return v, fmt.Errorf("unknown item type %q", t)
 		}
+	}
+	if v.Stock != "" && !slices.Contains(VendorStocks, v.Stock) {
+		return v, fmt.Errorf("unknown stock %q (have %v)", v.Stock, VendorStocks)
+	}
+	if v.Buys != "" && !slices.Contains(VendorBuyRules, v.Buys) {
+		return v, fmt.Errorf("unknown buys %q (have %v)", v.Buys, VendorBuyRules)
+	}
+	for _, sv := range v.Services {
+		name, _, _ := strings.Cut(sv, "(")
+		if !slices.Contains(VendorServices, name) {
+			return v, fmt.Errorf("unknown service %q (have %v)", sv, VendorServices)
+		}
+	}
+	if v.When != "" {
+		p, err := expr.Compile(v.When, expr.Env(QuestEnv{}), expr.AsBool())
+		if err != nil {
+			return v, fmt.Errorf("when: %w", err)
+		}
+		v.program = p
 	}
 	for _, types := range v.Shuns {
 		for _, t := range types {

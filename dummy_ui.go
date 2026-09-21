@@ -186,3 +186,5 @@ func NewDummyUI() *DummyUI {
 }
 
 func (d DummyUI) OpenPlayerStashInTown() {}
+
+func (d DummyUI) OpenTransferEnchantmentMenu() {}

@@ -1,7 +1,14 @@
 # Heaven&Hell's four town shops, ported from the branch that had its own defs.VendorDefinition loader.
 # These vendors use the record's list half: they name their stock instead of filtering the item table.
+# Who runs each and its menu are main's getVendorOptions: Mary buys and sells, Abel keeps your stash, Shekel
+# repairs, and Kirioth heals every visitor ("during the siege of the undead only") and transfers enchantments.
 
 internal_name: store_general
+npc: mary
+stock: list
+buys: any
+service: buy
+service: sell
 purse: 10000
 item_count: 12
 turnover_items: 2
@@ -17,6 +24,10 @@ sometimes: mana_potion
 sometimes: stoneskin_potion
 
 internal_name: store_armor
+npc: abel
+stock: list
+service: buy
+service: stash
 purse: 10000
 item_count: 6-18
 turnover_items: 2
@@ -38,6 +49,10 @@ sometimes: leather_buckler
 sometimes: small_leather_shield
 
 internal_name: store_weapons
+npc: shekel
+stock: list
+service: buy
+service: repair
 purse: 10000
 item_count: 6-18
 turnover_items: 2
@@ -66,6 +81,11 @@ sometimes: long_bow
 sometimes: light_crossbow
 
 internal_name: store_alchemy
+npc: kirioth
+stock: list
+service: heal_on_visit
+service: buy
+service: transfer
 purse: 10000
 item_count: 12
 turnover_items: 2

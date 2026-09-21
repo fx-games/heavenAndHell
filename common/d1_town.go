@@ -2,6 +2,9 @@ package common
 
 import (
 	"fmt"
+
+	"github.com/expr-lang/expr"
+
 	"rpg/d1"
 	"rpg/defs"
 	"rpg/stats"
@@ -19,19 +22,21 @@ const (
 	VendorTypeBarmaid VendorType = "gillian" // only talk (S_StartBarmaid)
 )
 
-// WirtLookCost is what Wirt charges to show his item.
-const WirtLookCost = 50
-
-// D1VendorBuys ports SmithSellOk/WitchSellOk for the vendor's type.
+// D1VendorBuys is whether vendor takes item off the hero: its vendor records' buys rule (SmithSellOk,
+// WitchSellOk, or anything).
 func D1VendorBuys(vendor *Actor, item *Item) bool {
 	if item.d1 == nil || item.d1Data == nil {
 		return false
 	}
-	switch vendor.GetVendorType() {
-	case VendorTypeWeapons:
-		return item.d1Data.SmithBuys(item.d1)
-	case VendorTypeWands:
-		return item.d1Data.WitchBuys(item.d1)
+	for _, v := range item.d1Data.VendorsOf(vendor.GetInternalName()) {
+		switch v.Buys {
+		case "smith":
+			return item.d1Data.SmithBuys(item.d1)
+		case "witch":
+			return item.d1Data.WitchBuys(item.d1)
+		case "any":
+			return true
+		}
 	}
 	return false
 }
@@ -102,77 +107,99 @@ func d1ServiceOption(ctx ActionContext, label string, applies func(*d1.Item) boo
 	return util.MenuItem{MainText: label, Action: func() { open(false) }}
 }
 
-// d1VendorOptions ports each NPC's S_Start* menu (stores.cpp) with its exact D1 labels and structure: Griswold
-// splits his stock into basic and premium buy lists (S_StartSmith), Adria has one buy list plus recharging
-// (S_StartWitch), Pepin's free heal is its own choice rather than a side effect of talking (S_StartHealer, base
-// game), Cain only identifies (S_StartStory), and Wirt only offers his one item for a look fee (S_StartBoy).
+// d1VendorOptions is the town NPC's menu: the services of each of its vendor records whose condition holds, in
+// stores.rec order. Every service is implemented here once; a mod only picks which ones an NPC offers. D1's
+// labels are kept (S_StartSmith, S_StartWitch, S_StartHealer, S_StartStory, S_StartBoy).
 func d1VendorOptions(ctx ActionContext, vendor *Actor) []util.MenuItem {
+	var items []util.MenuItem
+	f := ctx.GameState.factory
+	for _, v := range f.D1().D.VendorsOf(vendor.GetInternalName()) {
+		if p := v.Cond(); p != nil {
+			if out, err := expr.Run(p, ctx.GameState.questEnv()); err != nil || out != true {
+				continue
+			}
+		}
+		for _, sv := range v.Services {
+			if item, ok := vendorService(ctx, vendor, sv); ok {
+				items = append(items, item)
+			}
+		}
+	}
+	return items
+}
+
+// vendorService builds one named service; false when it has nothing to offer right now.
+func vendorService(ctx ActionContext, vendor *Actor, service string) (util.MenuItem, bool) {
 	gui := ctx.UserInterface()
 	data := ctx.GameState.factory.D1().D
-	sell := util.MenuItem{MainText: "Sell items", Action: func() { gui.BeginPlayerSellingTo(vendor) }}
-	switch vendor.GetVendorType() {
-	case VendorTypeWeapons:
-		basic := util.MenuItem{MainText: "Buy basic items", Action: func() {
+	name, arg := service, 0
+	if util.LooksLikeAFunction(service) {
+		n, args := util.GetNameAndArgs(service)
+		name, arg = n, args.GetInt(0)
+	}
+	switch name {
+	case "buy":
+		return util.MenuItem{MainText: "Buy items", Action: func() { gui.OpenShopMenu(vendor) }}, true
+	case "buy_basic":
+		return util.MenuItem{MainText: "Buy basic items", Action: func() {
 			gui.OpenShopMenuFiltered(vendor, func(item *Item) bool { return !item.IsPremiumStock() })
-		}}
-		premium := util.MenuItem{MainText: "Buy premium items", Action: func() {
+		}}, true
+	case "buy_premium":
+		return util.MenuItem{MainText: "Buy premium items", Action: func() {
 			gui.OpenShopMenuFiltered(vendor, func(item *Item) bool { return item.IsPremiumStock() })
-		}}
-		return []util.MenuItem{basic, premium, sell, d1ServiceOption(ctx, "Repair items", d1.CanRepair, d1.RepairCost,
-			func(it *d1.Item) { it.Durability = it.MaxDur })}
-	case VendorTypeWands:
-		buy := util.MenuItem{MainText: "Buy items", Action: func() { gui.OpenShopMenu(vendor) }}
-		return []util.MenuItem{buy, sell, d1ServiceOption(ctx, "Recharge staves", data.CanRecharge, data.RechargeCost,
-			func(it *d1.Item) { it.Charges = it.MaxCharges })}
-	case VendorTypeGeneral:
-		heal := func() {
-			player := ctx.GameState.GetPlayer()
-			if hp := player.GetStats().GetResource(stats.Health); !hp.IsAtMax() {
-				playD1SfxAt(ctx, "IS_CAST8", player.MapPosition())
-			}
-			player.HealCompletely()
-			ctx.Msg("Pepin tends to your wounds.")
+		}}, true
+	case "sell":
+		return util.MenuItem{MainText: "Sell items", Action: func() { gui.BeginPlayerSellingTo(vendor) }}, true
+	case "repair":
+		return d1ServiceOption(ctx, "Repair items", d1.CanRepair, d1.RepairCost, func(it *d1.Item) { it.Durability = it.MaxDur }), true
+	case "recharge":
+		return d1ServiceOption(ctx, "Recharge staves", data.CanRecharge, data.RechargeCost,
+			func(it *d1.Item) { it.Charges = it.MaxCharges }), true
+	case "identify": // a flat fee, whatever the item (D1's AddStoreHoldId)
+		return d1ServiceOption(ctx, "Identify an item", func(it *d1.Item) bool { return it.Magical != 0 && !it.Identified },
+			func(*d1.Item) int { return arg }, func(it *d1.Item) { it.Identified = true }, true), true
+	case "heal_on_visit": // not a menu entry: coming in is enough (Hellfire's S_StartHealer)
+		player := ctx.GameState.GetPlayer()
+		if hp := player.GetStats().GetResource(stats.Health); !hp.IsAtMax() {
+			playD1SfxAt(ctx, "IS_CAST8", player.MapPosition())
 		}
-		heal() // S_StartHealer: Hellfire's Pepin heals as you come in
-		return []util.MenuItem{{MainText: "Buy items", Action: func() { gui.OpenShopMenu(vendor) }}}
-	case VendorTypeCain:
-		// D1 charges a flat 100 gold to identify (AddStoreHoldId in stores.cpp), regardless of item value
-		return []util.MenuItem{d1ServiceOption(ctx, "Identify an item", func(it *d1.Item) bool { return it.Magical != 0 && !it.Identified },
-			func(*d1.Item) int { return 100 }, func(it *d1.Item) { it.Identified = true }, true)}
-	case VendorTypeBarmaid: // once Diablo is dead she collects for the town, and the dungeon fills back up
-		if ctx.GameState.QuestActive(d1.QDiablo) != d1.QuestDone {
-			return nil
-		}
+		player.HealCompletely()
+		ctx.Msg(fmt.Sprintf("%s tends to your wounds.", vendor.Name()))
+	case "donate": // arg gold per explored level refills the dungeon
 		levels := ctx.GameState.ExploredD1DungeonLevels()
 		if levels == 0 {
-			return nil
+			break
 		}
-		cost := D1GillianDonationPerLevel * levels
-		return []util.MenuItem{{MainText: fmt.Sprintf("Give her %d gold.", cost), Action: func() {
+		cost := arg * levels
+		return util.MenuItem{MainText: fmt.Sprintf("Give her %d gold.", cost), Action: func() {
 			if !PayGold(ctx, ctx.GameState.GetPlayer(), cost) {
 				return
 			}
 			n := ctx.GameState.RespawnD1Monsters()
 			gui.OpenTextWindow(util.ToLabelText([]string{vendor.Name(), "", "I am very grateful. This will go to a good cause."}))
 			ctx.Msg(fmt.Sprintf("Something stirs on %d dungeon levels.", n))
-		}}}
-	case VendorTypeWirt: // the look fee is paid once per item: looking again is free until Wirt has a new one
+		}}, true
+	case "peek": // a look fee of arg, paid once per item: looking again is free until the stock changes
 		if vendor.GetInventory().IsEmpty() {
-			return nil
+			break
 		}
 		flags := ctx.GameState.GetFlags()
-		label := fmt.Sprintf("I have something for sale, but it will cost %d gold just to take a look", WirtLookCost)
+		label := fmt.Sprintf("I have something for sale, but it will cost %d gold just to take a look", arg)
 		if flags.IsSet(FlagWirtItemSeen) {
 			label = "What have you got?"
 		}
-		return []util.MenuItem{{MainText: label, Action: func() {
-			if flags.IsSet(FlagWirtItemSeen) || PayGold(ctx, ctx.GameState.GetPlayer(), WirtLookCost) {
+		return util.MenuItem{MainText: label, Action: func() {
+			if flags.IsSet(FlagWirtItemSeen) || PayGold(ctx, ctx.GameState.GetPlayer(), arg) {
 				flags.SetTrue(FlagWirtItemSeen)
 				gui.OpenShopMenu(vendor)
 			}
-		}}}
+		}}, true
+	case "stash":
+		return util.MenuItem{MainText: "Open your stash", Action: gui.OpenPlayerStashInTown}, true
+	case "transfer":
+		return util.MenuItem{MainText: "Transfer an enchantment", Action: gui.OpenTransferEnchantmentMenu}, true
 	}
-	return nil
+	return util.MenuItem{}, false
 }
 
 func (a *Actor) equippedD1() []*d1.Item {
@@ -212,9 +239,6 @@ func d1Broke(msg func(string), owner *Actor, broke *d1.Item) {
 
 // FlagWirtItemSeen is set once the look fee for Wirt's current item is paid; a new item clears it (saved with the flags).
 const FlagWirtItemSeen = "wirt_item_seen"
-
-// D1GillianDonationPerLevel is what Gillian collects per explored dungeon level.
-const D1GillianDonationPerLevel = 200
 
 // exploredD1DungeonNames are the dungeon levels the player has been to: the ones still loaded plus the ones a
 // save only kept a snapshot of.

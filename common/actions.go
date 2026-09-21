@@ -106,6 +106,7 @@ type UserInterface interface {
 	OpenServiceMenu(items []*Item, price func(*Item) int, pick func(*Item)) // a paid service laid out like the shop menus
 	UpdateMiniMap()
 	OpenPlayerStashInTown()
+	OpenTransferEnchantmentMenu()
 	OnPlayerTurnTaken()
 	// RefreshIconBars rebuilds the sidebar's inventory, skill and belt icons after a change outside a turn.
 	RefreshIconBars()

@@ -429,6 +429,9 @@ func (c *Console) OpenServiceMenu(items []*common.Item, price func(*common.Item)
 
 func (c *Console) UpdateMiniMap() {}
 
+// ponytail: the console has no enchantment-transfer screen; the graphical UI's is gui/transfer_enchantment.go.
+func (c *Console) OpenTransferEnchantmentMenu() {}
+
 // OpenPlayerStashInTown shows the pack and the stash side by side; picking an item moves it across.
 func (c *Console) OpenPlayerStashInTown() {
 	state := c.context.GameState()
