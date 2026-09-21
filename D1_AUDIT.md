@@ -17,15 +17,15 @@ dumps identical to 1.09's), stores (b224ec8), traps' burst and nova (7fcd007), e
 
 ## Combat
 
-- **open — CheckMonsterHit is not ported** (`monster.cpp` 6658, called from `PlrHitMonst`, `MonsterMHit`,
+- **fixed — CheckMonsterHit is not ported** (`monster.cpp` 6658, called from `PlrHitMonst`, `MonsterMHit`,
   `M_TryM2MHit`). 1.09: a blow at a dormant gargoyle (`MFLAG_ALLOW_SPECIAL`) wakes it and does no damage; a
   counselor/magistrate/cabalist/advocate that isn't `MGOAL_NORMAL` (fading, retreating, circling) cannot be hit.
   Ours: both take the blow normally. `common/d1_hero.go` resolveD1Attack.
-- **open — untouchable monsters.** `PlrHitMonst` returns FALSE for an Illusion Weaver in `MGOAL_RETREAT` and any
+- **fixed — untouchable monsters.** `PlrHitMonst` returns FALSE for an Illusion Weaver in `MGOAL_RETREAT` and any
   monster in `MM_CHARGE`. Ours hits them.
-- **open — Black Death's max-HP drain** (`M_TryH2HHit`): every landed hit by `MT_YZOMBIE` takes 1 from the
+- **fixed — Black Death's max-HP drain** (`M_TryH2HHit`): every landed hit by `MT_YZOMBIE` takes 1 from the
   hero's max HP and base max HP, permanently, while both are above 1. Not implemented at all.
-- **open — life steal stacks.** `PlrHitMonst` takes 3% *or* 5% (the 5% flag overrides the 3%), plus the random
+- **fixed — life steal stacks.** `PlrHitMonst` takes 3% *or* 5% (the 5% flag overrides the 3%), plus the random
   steal. `d1.Hero.HitLeech` adds 3% and 5% together when an item has both.
 
 ## Traps
@@ -40,7 +40,7 @@ dumps identical to 1.09's), stores (b224ec8), traps' burst and nova (7fcd007), e
   our monsters have no table index to reproduce the bug with.
 - **open — darkness.** `MAI_Sneak` idles where `dLight == lightmax`. We have no light map: a cell counts as dark
   outside the hero's light radius and any lit room.
-- **open — combat: experience at the cap.** `AddPlrExperience` sets level 50 outright once experience reaches
+- **fixed — combat: experience at the cap.** `AddPlrExperience` sets level 50 outright once experience reaches
   `ExpLvlsTbl[49]`, without `NextPlrLevel` (no stat points, life or mana for those levels), and gives a dead
   hero nothing. `d1.Hero.AddExperience` levels up normally.
 
@@ -62,7 +62,7 @@ Matched: the damage of Firebolt, Holy Bolt, Charged Bolt, Fireball, Elemental, N
 Wall, Healing and Infravision (`d1/spells.go` against the `Add*` functions), the Guardian's firebolts at the hero's
 own Firebolt level, Phasing / the Holy shrine (`AddRndTeleport`), the mana shield having no timer.
 
-- **open — Mana Shield's reduction.** 1.09's `MI_Manashield` takes a third off the life lost once the spell
+- **fixed — Mana Shield's reduction.** 1.09's `MI_Manashield` takes a third off the life lost once the spell
   level is above 0 (`diff += diff / -3`). Hellfire instead divides by `3·min(slvl, 7)`. `d1.ManaShieldCost`
   applies both, one after the other, so it matches neither game.
 - **open — Chain Lightning.** `MI_Chain` sends one lightning bolt (`MIS_LIGHTCTRL`) at the target, and one more at
