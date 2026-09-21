@@ -780,7 +780,7 @@ func (g *Generator) LevelMonsterTypes(dlvl int) []int {
 			continue
 		}
 		minl, maxl := 15*m.MinDLvl/30+1, 15*m.MaxDLvl/30+1
-		if dlvl >= minl && dlvl <= maxl && m.Available {
+		if dlvl >= minl && dlvl <= maxl && m.Available() {
 			list = append(list, i)
 		}
 	}
@@ -823,7 +823,7 @@ func (g *Generator) RandomShrine(dlvl int) int {
 
 // MonsterHP ports InitMonster's HP roll, halved for single player like D1.
 func (g *Generator) MonsterHP(m *MonsterData) int {
-	hp := g.random(m.MaxHP-m.MinHP+1) + m.MinHP
+	hp := g.random(m.MaxHP()-m.MinHP()+1) + m.MinHP()
 	if m.ID == "MT_DIABLO" {
 		hp = 1666
 	}

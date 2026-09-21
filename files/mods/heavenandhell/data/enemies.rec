@@ -1,0 +1,799 @@
+# Heaven&Hell's monsters in the unified enemies.rec schema every mod uses (see defs.Monster),
+# ported from the game's own enemies/enemies.rec and enemies/unique_enemies.rec. The uniques are
+# the records tagged "unique"; that tag is what told them apart on the old branch too.
+#
+# Converged from the old H&H field names: resource_health -> health, damage_dice -> damage,
+# max_level -> max_dlvl, and the numeric icon -> an icon ID this mod defines in icons/actors.rec.
+
+name: rat
+internal_name: rat
+icon: monster.rat
+ascii: r
+cp437: r
+unicode: r
+color: 120 120 120
+dlvl: 1
+base_speed: 10
+damage: 1d3
+health: 1d8
+stats_armor_class: 0
+stats_experience: 5
+stats_dexterity: 5
+stats_intelligence: 5
+untargeted_skill: replicate_with
+group_spawn: rat(0-1)
+aggro_range: 4
+death_string: %s squeaks in agony and dies.
+death_string: %s meets the Death of Rats.
+available: 1
+
+name: a skeleton
+internal_name: skeleton
+icon: monster.skeleton
+ascii: u
+color: 200 200 200
+dlvl: 1
+base_speed: 9
+damage: 1d3+1
+health: 1d8
+stats_armor_class: 0
+stats_experience: 10
+stats_dexterity: 6
+stats_intelligence: 5
+death_string: %s crumbles to dust.
+death_string: %s falls apart.
+available: 1
+
+name: a skeleton archer
+internal_name: skeleton_archer
+icon: monster.skeleton_archer
+ascii: u
+color: 191 169 147
+dlvl: 2
+base_speed: 9
+damage: 1d4
+health: 2d8+2
+stats_armor_class: 0
+stats_experience: 12
+stats_strength: 8
+stats_dexterity: 9
+stats_intelligence: 5
+equipment: short_bow
+death_string: %s crumbles to dust.
+death_string: %s falls apart.
+available: 1
+
+name: a skeleton warrior
+internal_name: skeleton_warrior
+icon: monster.skeleton_warrior
+dlvl: 2
+ascii: u
+color: 247 246 245
+base_speed: 9
+damage: 1d6+1
+health: 2d8+2
+stats_armor_class: 1
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+stats_intelligence: 5
+equipment: dagger
+death_string: %s crumbles to dust.
+death_string: %s falls apart.
+available: 1
+
+name: a skeleton captain
+internal_name: skeleton_captain
+icon: monster.skeleton_captain
+ascii: u
+color: 189 136 136
+dlvl: 3
+base_speed: 9
+damage: 1d8+1
+health: 3d8+3
+stats_armor_class: 2
+stats_experience: 20
+stats_strength: 12
+stats_dexterity: 6
+stats_intelligence: 5
+equipment: dagger
+equipment: hard_leather_cap
+death_string: %s crumbles to dust.
+death_string: %s falls apart.
+available: 1
+
+name: a bat
+internal_name: bat
+icon: monster.bat
+ascii: b
+color: 147 143 201
+dlvl: 1
+base_speed: 12
+damage: 1d3
+health: 1d8
+stats_armor_class: 0
+stats_experience: 15
+stats_strength: 9
+stats_dexterity: 9
+stats_intelligence: 5
+tags: flying
+aggro_range: 2
+death_string: %s crumbles to dust.
+death_string: %s falls apart.
+available: 1
+
+name: a cave bear
+internal_name: caveling_bear
+icon: monster.caveling_bear
+dlvl: 5
+base_speed: 10
+damage: 2d6
+health: 5d8
+stats_armor_class: 1
+stats_experience: 8
+stats_strength: 14
+stats_dexterity: 6
+stats_intelligence: 5
+death_string: %s dies a bloody death.
+death_string: %s bites the dust.
+available: 1
+
+name: a caveling
+internal_name: caveling
+icon: monster.caveling
+dlvl: 5
+base_speed: 10
+damage: 1d6
+health: 5d8
+stats_armor_class: 0
+stats_experience: 8
+stats_strength: 9
+stats_dexterity: 6
+stats_intelligence: 5
+death_string: %s dies a bloody death.
+death_string: %s bites the dust.
+available: 1
+
+name: an imp
+internal_name: fallen
+icon: monster.fallen
+ascii: i
+color: 219 42 68
+dlvl: 1
+base_speed: 8
+damage: 1d5
+health: 1d8
+stats_armor_class: 0
+stats_experience: 8
+stats_strength: 9
+stats_dexterity: 6
+stats_intelligence: 5
+death_string: %s stops existing.
+death_string: %s bursts into pieces.
+available: 1
+
+name: a fiend
+internal_name: fiend
+icon: monster.fiend
+ascii: f
+color: 219 42 68
+dlvl: 7
+base_speed: 10
+damage: 3d4
+health: 7d8
+stats_armor_class: 1
+stats_experience: 20
+stats_strength: 12
+stats_dexterity: 12
+stats_intelligence: 5
+death_string: %s bursts into flames.
+death_string: %s violently explodes.
+available: 1
+
+name: a horned fiend
+internal_name: fiend_horned
+icon: monster.fiend_horned
+ascii: f
+color: 214 188 192
+dlvl: 7
+base_speed: 10
+damage: 5d4
+health: 7d8
+stats_armor_class: 1
+stats_experience: 20
+stats_strength: 12
+stats_dexterity: 12
+stats_intelligence: 5
+death_string: %s bursts into flames.
+death_string: %s violently explodes.
+available: 1
+
+name: a horned fiend with knife
+internal_name: fiend_armed
+icon: monster.fiend_armed
+ascii: f
+color: 214 188 192
+dlvl: 7
+base_speed: 10
+damage: 2d6+1
+health: 7d8
+stats_armor_class: 1
+stats_experience: 20
+stats_strength: 12
+stats_dexterity: 12
+stats_intelligence: 5
+equipment: dagger
+death_string: %s bursts into flames.
+death_string: %s violently explodes.
+available: 1
+
+name: a horned fiend with whip
+internal_name: fiend_whip
+icon: monster.fiend_whip
+ascii: f
+color: 214 188 192
+dlvl: 7
+base_speed: 10
+damage: 3d6
+health: 7d8
+stats_armor_class: 1
+stats_experience: 20
+stats_strength: 12
+stats_dexterity: 12
+stats_intelligence: 5
+equipment: dagger
+death_string: %s bursts into flames.
+death_string: %s violently explodes.
+available: 1
+
+name: a horned fiend with glaive
+internal_name: fiend_glaive
+icon: monster.fiend_glaive
+ascii: f
+color: 214 188 192
+dlvl: 7
+base_speed: 10
+damage: 3d6+1
+health: 7d8
+stats_armor_class: 2
+stats_experience: 20
+stats_strength: 12
+stats_dexterity: 12
+stats_intelligence: 5
+equipment: dagger
+death_string: %s bursts into flames.
+death_string: %s violently explodes.
+available: 1
+
+name: a big horned fiend
+internal_name: fiend_big
+icon: monster.fiend_big
+ascii: f
+color: 240 2 39
+dlvl: 7
+base_speed: 10
+damage: 3d6+1
+health: 7d8
+stats_armor_class: 2
+stats_experience: 20
+stats_strength: 12
+stats_dexterity: 12
+stats_intelligence: 5
+death_string: %s bursts into flames.
+death_string: %s violently explodes.
+available: 1
+
+name: a fallen warrior
+internal_name: fallen_warrior
+icon: monster.fallen_warrior
+ascii: i
+color: 189 47 69
+dlvl: 2
+base_speed: 8
+damage: 1d5
+health: 2d8
+stats_armor_class: 0
+stats_experience: 12
+stats_strength: 9
+stats_dexterity: 6
+stats_intelligence: 5
+equipment: dagger
+death_string: %s stops existing.
+death_string: %s bursts into pieces.
+available: 1
+
+name: a fallen archer
+internal_name: fallen_archer
+icon: monster.fallen_archer
+ascii: i
+color: 189 111 47
+dlvl: 4
+base_speed: 8
+damage: 1d5
+health: 4d8
+stats_armor_class: 0
+stats_experience: 12
+stats_strength: 9
+stats_dexterity: 8
+stats_intelligence: 5
+equipment: short_bow
+death_string: %s stops existing.
+death_string: %s bursts into pieces.
+available: 1
+
+name: a fallen shaman
+internal_name: fallen_shaman
+icon: monster.fallen_shaman
+ascii: i
+color: 38 98 189
+dlvl: 5
+base_speed: 8
+damage: 1d4
+health: 5d8
+stats_armor_class: 0
+stats_experience: 12
+stats_strength: 9
+stats_dexterity: 8
+stats_intelligence: 8
+targeted_skill: fire_bresen
+death_string: %s stops existing.
+death_string: %s bursts into pieces.
+available: 1
+
+name: a caveling with weapon
+internal_name: caveling_armed
+icon: monster.caveling_armed
+dlvl: 5
+base_speed: 10
+damage: 2d6
+health: 5d8
+stats_armor_class: 0
+stats_experience: 8
+stats_strength: 9
+stats_dexterity: 6
+stats_intelligence: 5
+equipment: dagger
+death_string: %s dies a bloody death.
+death_string: %s bites the dust.
+available: 1
+
+name: a caveling with axes
+internal_name: caveling_axe
+icon: monster.caveling_axe
+dlvl: 5
+base_speed: 10
+damage: 2d6+1
+health: 5d8
+stats_armor_class: 0
+stats_experience: 8
+stats_strength: 9
+stats_dexterity: 6
+stats_intelligence: 5
+equipment: dagger
+death_string: %s dies a bloody death.
+death_string: %s bites the dust.
+available: 1
+
+name: a caveling with a big axe
+internal_name: caveling_big_axe
+icon: monster.caveling_big_axe
+dlvl: 5
+base_speed: 10
+damage: 2d6+4
+health: 5d8
+stats_armor_class: 1
+stats_experience: 8
+stats_strength: 9
+stats_dexterity: 6
+stats_intelligence: 5
+equipment: dagger
+death_string: %s dies a bloody death.
+death_string: %s bites the dust.
+available: 1
+
+name: a possessed thief
+internal_name: thief_possessed
+icon: monster.thief_possessed
+dlvl: 6
+base_speed: 10
+damage: 1d6
+health: 6d8
+stats_armor_class: 0
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+stats_intelligence: 5
+equipment: dagger
+targeted_skill: steal_item_vanish
+death_string: %s dies.
+death_string: %s has stolen his last piece of gold.
+available: 1
+
+name: a skeleton sorcerer
+internal_name: skeleton_sorcerer
+icon: monster.skeleton_sorcerer
+dlvl: 4
+base_speed: 9
+damage: 1d4+1
+health: 4d8
+stats_armor_class: 0
+stats_experience: 15
+stats_strength: 6
+stats_dexterity: 6
+stats_intelligence: 6
+targeted_skill: mind_push
+death_string: %s crumbles to dust.
+death_string: %s falls apart.
+available: 1
+
+name: a kestrel
+internal_name: rogue_kestrel
+icon: monster.rogue_kestrel
+dlvl: 9
+base_speed: 10
+damage: 1d4
+health: 9d8
+stats_armor_class: 0
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+stats_intelligence: 5
+death_string: %s dies.
+available: 1
+
+name: a bat
+internal_name: rogue_bat
+icon: monster.rogue_bat
+dlvl: 9
+base_speed: 10
+damage: 1d2
+health: 9d8
+stats_armor_class: 0
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+stats_intelligence: 5
+death_string: %s dies.
+available: 1
+
+name: an emu
+internal_name: rogue_emu
+icon: monster.rogue_emu
+dlvl: 9
+base_speed: 10
+damage: 1d6
+health: 9d8
+stats_armor_class: 0
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+stats_intelligence: 5
+death_string: %s dies.
+available: 1
+
+name: a jackal
+internal_name: rogue_jackal
+icon: monster.rogue_jackal
+dlvl: 9
+base_speed: 10
+damage: 1d6+2
+health: 9d8
+stats_armor_class: 0
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+stats_intelligence: 5
+death_string: %s dies.
+available: 1
+
+name: an orc
+internal_name: rogue_orc
+icon: monster.rogue_orc
+dlvl: 9
+base_speed: 10
+damage: 2d6
+health: 9d8
+stats_armor_class: 1
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+stats_intelligence: 5
+death_string: %s dies.
+available: 1
+
+name: a snake
+internal_name: rogue_snake
+icon: monster.rogue_snake
+dlvl: 9
+base_speed: 10
+damage: 1d8
+health: 9d8
+stats_armor_class: 0
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+stats_intelligence: 5
+death_string: %s dies.
+available: 1
+
+name: a thief
+internal_name: thief_goblin
+icon: monster.thief_goblin
+dlvl: 11
+base_speed: 10
+damage: 1d6+2
+health: 11d8
+stats_armor_class: 0
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+stats_intelligence: 5
+death_string: %s dies.
+available: 1
+
+name: a goatman
+internal_name: goatman
+icon: monster.goatman
+dlvl: 11
+base_speed: 10
+damage: 2d6+3
+health: 11d8
+stats_armor_class: 1
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+stats_intelligence: 5
+death_string: %s dies.
+available: 1
+
+name: a goatman archer
+internal_name: goatman_archer
+icon: monster.goatman_archer
+dlvl: 11
+base_speed: 10
+damage: 1d6
+health: 11d8
+stats_armor_class: 0
+stats_experience: 12
+stats_strength: 10
+stats_dexterity: 6
+stats_intelligence: 5
+death_string: %s dies.
+available: 1
+
+name: Lucifer
+internal_name: lucifer
+icon: monster.lucifer
+dlvl: 8
+base_speed: 14
+damage: 6d6+6
+health: 10d4+120
+stats_armor_class: 16
+stats_experience: 1200
+stats_strength: 18
+stats_dexterity: 18
+stats_intelligence: 18
+tags: unique | no_corpse
+speech_on_sight: I am the morning star!
+speech_on_sight: I am the fallen one!
+speech_on_sight: I am the lightbringer!
+speech_on_sight: I am the prince of darkness!
+speech_on_sight: I am just a scapegoat!
+speech_on_sight: I am the antichrist!
+speech_on_sight: I am the challenger!
+speech_on_sight: I am the prosecutor!
+speech_on_sight: I am the accuser!
+speech_on_sight: I am the tempter!
+speech_on_sight: I am the deceiver!
+speech_on_sight: I am the rebel!
+speech_on_sight: I am the adversary!
+speech_on_sight: I am the enemy!
+speech_on_sight: I am the opposer!
+speech_on_sight: I am the destroyer!
+speech_on_sight: I am the lord of the flies!
+speech_on_sight: I am the lord of the underworld!
+speech_on_sight: I am the lord of the night!
+speech_on_sight: I am the lord of hell!
+death_string: %s vanishes in a puff of smoke.
+death_string: %s disappears in a flash of light.
+death_string: %s is gone.
+death_string: %s disappears.
+death_string: %s has left.
+available: 1
+
+name: King Zedek
+internal_name: king_zedek
+icon: monster.king_zedek
+dlvl: 4
+base_speed: 9
+damage: 3d8
+health: 6d4+60
+stats_armor_class: 12
+stats_experience: 200
+stats_strength: 14
+stats_dexterity: 9
+stats_intelligence: 10
+tags: unique | no_corpse
+speech_on_sight: We've all sworn the eternal vow!
+speech_on_sight: Your time to die is now!
+speech_on_sight: Still brave, beyond the grave!
+speech_on_sight: Victory! Victory! Eternal glory!
+death_string: %s crumbles to legendary dust.
+death_string: %s falls apart into royal pieces.
+death_string: %s is gone from the throne.
+death_string: %s dies again.
+available: 1
+
+name: Meat Jack
+internal_name: meat_jack
+icon: monster.meat_jack
+dlvl: 2
+base_speed: 13
+damage: 2d6
+health: 5d4+60
+stats_armor_class: 5
+stats_experience: 200
+stats_strength: 18
+stats_dexterity: 4
+stats_intelligence: 4
+tags: unique | no_corpse
+speech_on_sight: Meet Meat Jack!
+speech_on_sight: Meat, meet Jack!
+speech_on_sight: Meat Jack meets meat!
+speech_on_sight: Jack, meet meat!
+speech_on_sight: Meat Jack, meet meat!
+speech_on_sight: I am Meat Jack!
+speech_on_sight: My name is.. Ji.. Jack!
+death_string: %s explodes into a pile of meat.
+death_string: %s blows up into a heap of blood and guts.
+death_string: %s was butchered.
+death_string: %s died an agonizing death.
+death_string: %s was slaughtered.
+death_string: %s was minced.
+death_string: %s was chopped.
+death_string: %s was diced.
+death_string: %s was sliced.
+death_string: %s was cut to pieces.
+available: 1
+
+name: The Rogue
+internal_name: rogue
+icon: monster.rogue
+dlvl: 10
+base_speed: 10
+damage: 2d8+2
+health: 7d8
+stats_armor_class: 11
+stats_experience: 200
+stats_strength: 12
+stats_dexterity: 12
+stats_intelligence: 12
+tags: unique | no_corpse
+speech_on_sight: qf
+speech_on_sight: za
+speech_on_sight: rb
+speech_on_sight: f
+death_string: %s ascends forever.
+death_string: %s descends forever.
+death_string: %s quaffed his last potion.
+death_string: %s dies again.
+available: 1
+
+name: a rogue dog
+internal_name: rogue_dog
+icon: monster.rogue_dog
+dlvl: 10
+base_speed: 10
+damage: 1d6+2
+health: 3d8
+stats_armor_class: 4
+stats_experience: 200
+stats_strength: 10
+stats_dexterity: 9
+stats_intelligence: 9
+tags: unique | no_corpse
+speech_on_sight: f
+death_string: %s goes to dog heaven.
+available: 1
+
+name: the true Shekel
+internal_name: evil_shekel
+icon: monster.evil_shekel
+dlvl: 13
+base_speed: 11
+damage: 1d6+2
+health: 12d8
+stats_armor_class: 5
+stats_experience: 200
+stats_strength: 14
+stats_dexterity: 12
+stats_intelligence: 16
+tags: unique | no_corpse
+speech_on_sight: Your time has come!
+death_string: %s dies.
+available: 1
+
+name: the true Kirioth
+internal_name: evil_kirioth
+icon: monster.evil_kirioth
+dlvl: 12
+base_speed: 10
+damage: 1d6
+health: 12d8
+stats_armor_class: 5
+stats_experience: 200
+stats_strength: 10
+stats_dexterity: 10
+stats_intelligence: 18
+tags: unique | no_corpse
+speech_on_sight: Your time has come!
+death_string: %s dies.
+available: 1
+
+name: a red knight
+internal_name: adventurer_knight
+icon: monster.adventurer_knight
+dlvl: 9
+base_speed: 8
+damage: 2d6
+health: 9d8
+stats_armor_class: 8
+stats_experience: 200
+stats_strength: 9
+stats_dexterity: 10
+stats_intelligence: 9
+tags: unique | no_corpse
+speech_on_sight: Your time has come!
+death_string: %s dies.
+available: 1
+
+name: a false prophet
+internal_name: adventurer_priest
+icon: monster.adventurer_priest
+dlvl: 9
+base_speed: 10
+damage: 1d6+1
+health: 9d8
+stats_armor_class: 6
+stats_experience: 200
+stats_strength: 10
+stats_dexterity: 10
+stats_intelligence: 9
+tags: unique | no_corpse
+speech_on_sight: Your time has come!
+death_string: %s dies.
+available: 1
+
+name: a barbarian
+internal_name: adventurer_barbarian
+icon: monster.adventurer_barbarian
+dlvl: 9
+base_speed: 12
+damage: 2d6+2
+health: 9d8
+stats_armor_class: 4
+stats_experience: 200
+stats_strength: 9
+stats_dexterity: 12
+stats_intelligence: 9
+tags: unique | no_corpse
+speech_on_sight: Your time has come!
+death_string: %s dies.
+available: 1
+
+name: an archer in tights
+internal_name: adventurer_archer
+icon: monster.adventurer_archer
+dlvl: 9
+base_speed: 12
+damage: 1d5
+health: 9d8
+stats_armor_class: 6
+stats_experience: 200
+stats_strength: 10
+stats_dexterity: 16
+stats_intelligence: 9
+tags: unique | no_corpse
+speech_on_sight: Your time has come!
+death_string: %s dies.
+available: 1

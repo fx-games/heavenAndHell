@@ -9,6 +9,8 @@ import (
 	"path"
 	"strconv"
 	"strings"
+
+	"rpg/defs"
 )
 
 type row map[string]string
@@ -71,22 +73,9 @@ func readTable(fsys fs.FS, name string) ([]row, error) {
 	return rows, nil
 }
 
-type MonsterData struct {
-	ID                                    string // MT_ name
-	Family                                string // graphics folder, e.g. "Zombie"; variants share it
-	ImgSize                               int    // mType: graphics budget per level
-	Frames, Rate                          [6]int // stand, walk, attack, hit, death, special
-	Name                                  string
-	MinDLvl, MaxDLvl, Level, MinHP, MaxHP int
-	AI                                    string
-	Flags, Int                            int
-	Hit, AFNum, MinDam, MaxDam            int
-	Hit2, AFNum2, MinDam2, MaxDam2        int
-	AC                                    int
-	Class                                 string // MC_UNDEAD, MC_DEMON, MC_ANIMAL
-	MagicRes, MagicRes2, Treasure, Exp    int
-	Available                             bool // MonstAvailTbl != 0
-}
+// MonsterData is the unified monster record (defs.Monster), not a D1-shaped one. Diablo is a mod like any
+// other: its monsters come out of mods/d1/data/enemies.rec through the same defs.ReadMonsters every mod uses.
+type MonsterData = defs.Monster
 
 // Monster flag bits (_mFlags).
 const (
@@ -247,17 +236,6 @@ var (
 // D1MonsterCount is how many entries D1 1.09's table has; everything past it is Hellfire's, appended.
 const D1MonsterCount = 112
 
-// monstdat.cpp MonstAvailTbl: 0 = never spawns at random. A parallel column of xl_monst rather than a table of
-// its own, so it stays here until that TSV can carry it.
-var monstAvail = [112]byte{
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 0, 2, 2, 2, 2, 1, 1,
-	1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0,
-	2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2,
-	0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0,
-	0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0,
-}
-
 type Data struct {
 	Monsters       []MonsterData
 	UniqueMonsters []UniqueMonsterData
@@ -356,24 +334,17 @@ func Load(fsys fs.FS) (*Data, error) {
 
 func load(fsys fs.FS) (*Data, error) {
 	d := &Data{}
+	var err error
 	tables := map[string][]row{}
-	for _, n := range []string{"xl_monst", "xl_umon", "xl_item", "xl_ipre", "xl_isuf", "xl_uitem", "xl_spell", "xl_obj"} {
+	for _, n := range []string{"xl_umon", "xl_item", "xl_ipre", "xl_isuf", "xl_uitem", "xl_spell", "xl_obj"} {
 		rows, err := readTable(fsys, n+".txt")
 		if err != nil {
 			return nil, err
 		}
 		tables[n] = rows
 	}
-	for n, r := range tables["xl_monst"] {
-		d.Monsters = append(d.Monsters, MonsterData{
-			ID: r.s(""), Family: family(r.s("GraphicType")), ImgSize: r.i("mType"), Frames: r.arr("Frames"), Rate: r.arr("Rate"), Name: r.s("mName"),
-			MinDLvl: r.i("mMinDLvl"), MaxDLvl: r.i("mMaxDLvl"), Level: r.i("mLevel"), MinHP: r.i("mMinHP"), MaxHP: r.i("mMaxHP"),
-			AI: r.s("mAi"), Flags: r.i("mFlags"), Int: r.i("mInt"),
-			Hit: r.i("mHit"), AFNum: r.i("mAFNum"), MinDam: r.i("mMinDamage"), MaxDam: r.i("mMaxDamage"),
-			Hit2: r.i("mHit2"), AFNum2: r.i("mAFNum2"), MinDam2: r.i("mMinDamage2"), MaxDam2: r.i("mMaxDamage2"),
-			AC: r.i("mArmorClass"), Class: r.s("mMonstClass"), MagicRes: r.i("mMagicRes"), MagicRes2: r.i("mMagicRes2"),
-			Treasure: r.i("mTreasure"), Exp: r.i("mExp"), Available: n < len(monstAvail) && monstAvail[n] != 0,
-		})
+	if d.Monsters, err = defs.ReadMonsters(fsys); err != nil {
+		return nil, err
 	}
 	for _, r := range tables["xl_umon"] {
 		if r.s("mtype") == "-1" {
@@ -449,7 +420,7 @@ func load(fsys fs.FS) (*Data, error) {
 			Break: r.i("oBreak"), SelFlag: r.i("oSelFlag"), Trap: r.i("oTrapFlag") != 0,
 		})
 	}
-	if len(d.Monsters) != len(monstAvail) || len(d.Items) < D1ItemCount || len(d.Spells) != NumSpells {
+	if len(d.Monsters) != D1MonsterCount || len(d.Items) < D1ItemCount || len(d.Spells) != NumSpells {
 		return nil, fmt.Errorf("d1 tables: unexpected sizes monsters=%d items=%d spells=%d", len(d.Monsters), len(d.Items), len(d.Spells))
 	}
 	d.Texts, d.TextSfx, d.Gossip = loadTexts(fsys)

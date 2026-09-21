@@ -164,7 +164,7 @@ func (g *gen) getLevelMTypes(setLevel int) {
 	var typelist []int
 	for i := 0; i < numMTypes; i++ {
 		m := &g.data.Monsters[i]
-		if minl, maxl := 15*m.MinDLvl/30+1, 15*m.MaxDLvl/30+1; g.currlevel >= minl && g.currlevel <= maxl && m.Available {
+		if minl, maxl := 15*m.MinDLvl/30+1, 15*m.MaxDLvl/30+1; g.currlevel >= minl && g.currlevel <= maxl && m.Available() {
 			typelist = append(typelist, i)
 		}
 	}
@@ -195,11 +195,11 @@ func (g *gen) initMonster(slot, dir, mt, x, y int) *Monster {
 	if g.mtypes[mt].mtype == MtDIABLO {
 		hp = (g.rnd(1) + 3333) << 6 // Hellfire's Diablo
 	} else {
-		hp = (d.MinHP + g.rnd(d.MaxHP-d.MinHP+1)) << 6
+		hp = (d.MinHP() + g.rnd(d.MaxHP()-d.MinHP()+1)) << 6
 	}
 	hp = max(hp>>1, 64)
 	m := &Monster{Type: g.mtypes[mt].mtype, Unique: -1, X: x, Y: y, Dir: dir, HP: hp, AI: d.AI, Int: d.Int, Level: d.Level,
-		Leader: -1, MinDam: d.MinDam, MaxDam: d.MaxDam, MagicRes: d.MagicRes}
+		Leader: -1, MinDam: d.MinDam(), MaxDam: d.MaxDam(), MagicRes: d.MagicRes}
 	m.Seed = g.rng.Seed()
 	m.AISeed = g.rng.Seed()
 	for len(g.monsters) <= slot {

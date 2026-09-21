@@ -122,8 +122,8 @@ func (g *Factory) newD1Monster(mt int, um *d1.UniqueMonsterData) *Actor {
 	if um != nil {
 		a.SetUnique()
 	}
-	a.d1Monster = &D1Monster{Type: mt, Data: m, Unique: um, Level: m.Level, Exp: m.Exp, Int: m.Int, Hit: m.Hit, MinDam: m.MinDam,
-		MaxDam: m.MaxDam, Hit2: m.Hit2, MinDam2: m.MinDam2, MaxDam2: m.MaxDam2, AC: m.AC, MagicRes: m.MagicRes, AI: m.AI, D1MonsterState: D1MonsterState{Goal: 1}}
+	a.d1Monster = &D1Monster{Type: mt, Data: m, Unique: um, Level: m.Level, Exp: m.Exp, Int: m.Int, Hit: m.Hit, MinDam: m.MinDam(),
+		MaxDam: m.MaxDam(), Hit2: m.Hit2, MinDam2: m.MinDam2(), MaxDam2: m.MaxDam2(), AC: m.AC, MagicRes: m.MagicRes, AI: m.AI, D1MonsterState: D1MonsterState{Goal: 1}}
 	st := a.GetStats()
 	st.SetAttribute(stats.MaxHealth, g.Generator.MonsterHP(m))
 	st.GetResource(stats.Health).SetToMax()

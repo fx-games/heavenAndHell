@@ -18,9 +18,10 @@ func TestLoadIconsNamesEveryMissingIcon(t *testing.T) {
 		"mods/skimpy/data/icons/skills.rec": {},
 		"mods/skimpy/data/icons/tiles.rec":  {},
 	}
+	real := files.GetFileSystem()
 	files.SetFileSystem(mod)
 	files.SelectMod("skimpy")
-	defer files.SetFileSystem(mod)
+	defer files.SetFileSystem(real) // the real tree back, or every later test in this package reads the fake one
 
 	err := LoadIcons()
 	if err == nil {
