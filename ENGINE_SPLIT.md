@@ -61,6 +61,13 @@ Mod (rec/tsv):
   test suites); treat init-time content binding as a defect on sight.
 - Dungeon generation output must stay byte-identical: `d1/testdata/levels.golden`
   is the referee. A golden diff is a bug, never a regeneration.
+  Its scope is wide: `hashLevel` hashes tiles, flags, AND every monster, object
+  and item as a full struct dump, over 6 game seeds x 20 levels. So migrating D1
+  content to the unified schema is checkable, not faith-based - identical structs
+  out means identical content in.
+  The ONE exception: deliberate simplification of the generators is allowed to
+  change output, in its own labelled commit, one simplification at a time, with
+  the before/after summarised. Refactors never change it.
 
 ## One content schema
 
