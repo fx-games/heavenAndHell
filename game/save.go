@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/png"
-	"log"
 	"maps"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"rpg/common"
 	"rpg/d1"
@@ -528,19 +526,6 @@ func (g *GameInstance) openModPicker(mods []string, back func()) {
 		}})
 	}
 	g.uiController.OpenUncancelableMenu(append(items, util.MenuItem{MainText: "Back", Action: back}))
-}
-
-func restart() {
-	exe, err := os.Executable()
-	if err == nil {
-		cmd := exec.Command(exe, os.Args[1:]...)
-		cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-		err = cmd.Start()
-	}
-	if err != nil {
-		log.Printf("could not restart, start the game again to play the new mod: %v", err)
-	}
-	os.Exit(0)
 }
 
 // BackToMainMenu leaves a running game for the start menu. It saves first, so that picking Continue puts the
