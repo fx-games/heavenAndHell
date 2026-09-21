@@ -250,8 +250,11 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 	}
 	switch obj.Kind {
 	case d1.ObjCHEST1, d1.ObjCHEST2, d1.ObjCHEST3, d1.ObjTCHEST1, d1.ObjTCHEST2, d1.ObjTCHEST3:
+		setLevel := f.State.setLevelOf(f.State.GetMap().GetName()) != nil
 		for j := 0; j < obj.Var1; j++ {
-			if obj.Var2 != 0 {
+			if setLevel { // OperateChest: a quest level's chest only holds good items
+				drop(gen.FloorItem(ilvl, true, hell))
+			} else if obj.Var2 != 0 {
 				drop(gen.FloorItem(ilvl, false, hell))
 			} else {
 				drop(gen.UsefulItem(ilvl))

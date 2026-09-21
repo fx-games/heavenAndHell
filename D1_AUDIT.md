@@ -81,7 +81,7 @@ own Firebolt level, Phasing / the Holy shrine (`AddRndTeleport`), the mana shiel
   direction, `1 + 2·(slvl/2 + 2)` cells wide (each side stops at the first cell missiles can't cross), and the
   flames roll forward. Ours is a cone that widens to 3 cells either side over 8 (`hit_zone: cone_aoe(8|3)`).
 
-- **open — Inferno's burn length.** `AddFlame` gives the flame n cells out (n = 0, 1, 2) `20 + 5n` ticks, and rolls
+- **fixed — Inferno's burn length.** `AddFlame` gives the flame n cells out (n = 0, 1, 2) `20 + 5n` ticks, and rolls
   each flame's damage on its own. Ours burns all three cells for 20 ticks (`InfernoTicks(0)`).
 - **open — bolt reach.** 1.09's Firebolt, Lightning, Blood Star and Bone Spirit fly 256 ticks, i.e. until a wall
   stops them. Ours stop after 20 cells (`bolt_aoe(20)`, `ray_aoe(20)`).
@@ -111,9 +111,9 @@ Matched: sarcophagi, barrels and exploding barrels (`BreakBarrel`), skeleton boo
 bodies, armor stands, weapon racks, slain heroes, the four fountains, goat shrines and cauldrons
 (`FindValidShrine`), crucified skeletons, levers, the Staff of Lazarus stand, story books.
 
-- **open — chests on quest levels.** `OperateChest` on a set level always drops `CreateRndItem(..., onlygood =
+- **fixed — chests on quest levels.** `OperateChest` on a set level always drops `CreateRndItem(..., onlygood =
   TRUE)`, ignoring `_oVar2`. Ours rolls as on an ordinary level.
-- **open — doors can't be closed.** 1.09 closes an open door when it is clicked again, unless a monster, item or
+- **fixed — doors can't be closed.** 1.09 closes an open door when it is clicked again, unless a monster, item or
   corpse is in the doorway (`OperateL*Door`). Ours never closes one.
 
 ## Quests (`quests.cpp`, `TalkToTowner`, `CheckQuestItem`, `CheckQuestKill`)
@@ -121,10 +121,10 @@ bodies, armor stands, weapon racks, slain heroes, the four fountains, goat shrin
 Matched: the kill and pick-up triggers, Griswold (Magic Rock, Anvil), Adria and Pepin (Black Mushroom,
 Poisoned Water), Cain (Lazarus, Diablo), the dead guy, the quest objects (books, pedestal, tomes).
 
-- **open — Ogden's Sign needs Leoric.** Ogden's banner lines in 1.09 only ask for level 3 visited; our triggers
+- **fixed — Ogden's Sign needs Leoric.** Ogden's banner lines in 1.09 only ask for level 3 visited; our triggers
   also require `avail("leoric")`. Leoric and Poisoned Water exclude each other, so in a Poisoned Water game the
   banner quest can never start or be handed in.
-- **open — Ogden's greeting.** Talking to Ogden before ever entering level 1 plays `TEXT_INTRO`. Ours never does.
+- **fixed — Ogden's greeting.** Talking to Ogden before ever entering level 1 plays `TEXT_INTRO`. Ours never does.
 
 ## Monsters
 
@@ -141,10 +141,10 @@ Poisoned Water), Cain (Lazarus, Diablo), the dead guy, the quest objects (books,
 
 ## Items
 
-- **open — bow wear.** 1.09 wears the bow on every shot (`PM_DoRangeAttack`: `WeaponDur(pnum, 40)`); ours only on
+- **fixed — bow wear.** 1.09 wears the bow on every shot (`PM_DoRangeAttack`: `WeaponDur(pnum, 40)`); ours only on
   a hit. Melee (1 in 30 on a hit), armour (3 in 4 per hit recovery, chest 2 in 3) and shields (1 in 10 per
   block) match.
-- **open — repair of worthless magic items.** `AddStoreHoldRepair` leaves out an identified magic item whose
+- **fixed — repair of worthless magic items.** `AddStoreHoldRepair` leaves out an identified magic item whose
   repair would cost 0; ours charges 1.
 
 ## Hero death and saving

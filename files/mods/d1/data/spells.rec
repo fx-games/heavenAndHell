@@ -25,7 +25,7 @@ targeted: true
 cast_sfx: IS_CAST4
 launch_sfx: LS_LNING1
 hit_zone: ray_aoe(20)
-effect: spell_damage(lightning|lightning)
+effect: spell_damage(lightning|lightning|per_cell)
 
 id: SPL_FLASH
 resist: magic
@@ -120,7 +120,7 @@ targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_SPOUTSTR
 hit_zone: ray_aoe(3)
-effect: spell_damage(inferno|fire)
+effect: spell_damage(inferno|fire|per_cell)
 
 id: SPL_GOLEM
 targeted: true

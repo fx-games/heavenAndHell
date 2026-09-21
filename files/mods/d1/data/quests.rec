@@ -341,6 +341,13 @@ do: sound(PS_DIABLVLINT)
 # first one that fires is the whole visit, as the function's return was; "pass" lets Pepin say two things.
 # Quest steps (v1) for the mushroom: 2 tome given, 4 mushroom picked, 5 mushroom given, 7 brain given.
 
+# Until the hero first leaves town (_pLvlVisited[0]; the first way out always leads to level 1) Ogden greets them.
+event: on_approach
+subject: ogden
+when: not flag("d1:dungmsg:1") and not flag("d1:intro")
+do: set_flag(d1:intro)
+do: say(TEXT_INTRO)
+
 event: on_approach
 subject: ogden
 when: deepest >= 2 and avail("leoric") and v2("leoric") == 0
@@ -358,14 +365,14 @@ do: say(TEXT_KING4)
 # 1.09 asks about Ogden's Sign only inside Leoric's check.
 event: on_approach
 subject: ogden
-when: deepest >= 3 and avail("leoric") and avail("banner") and not done("banner") and v2("banner") == 0
+when: deepest >= 3 and avail("banner") and not done("banner") and v2("banner") == 0
 do: set_quest_var(banner, 2, 1)
 do: start_town_quest(banner)
 do: say(TEXT_BANNER2)
 
 event: on_approach
 subject: ogden
-when: deepest >= 3 and avail("leoric") and avail("banner") and v2("banner") == 1 and has("tavern_sign")
+when: deepest >= 3 and avail("banner") and v2("banner") == 1 and has("tavern_sign")
 do: take_item(tavern_sign)
 do: complete_quest(banner)
 do: set_quest_var(banner, 1, 3)

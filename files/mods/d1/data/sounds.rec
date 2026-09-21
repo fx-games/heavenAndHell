@@ -2305,6 +2305,11 @@ sound: ang_sfx/plm_door_dungeon.ogg
 sound: ang_sfx/plm_door_squeaky.ogg
 sound: ang_sfx/plm_door_bolt.ogg
 
+internal_name: sfx.IS_DOORCLOS
+name: Object - Door Close
+sound: ang_sfx/close_door/plm_door_shut.ogg
+sound: ang_sfx/close_door/plm_door_slam.ogg
+
 internal_name: sfx.IS_BARLFIRE
 name: Object - Exploding Barrel
 sound: ang_sfx/plm_break_wood.ogg

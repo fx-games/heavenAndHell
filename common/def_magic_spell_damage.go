@@ -19,12 +19,14 @@ import (
 //
 // The caster's spell level is appended as a fourth argument where the action is built, because a roll grows with
 // it. <roll> names an entry of GetAllDamageRolls, <resist> is none/fire/lightning/magic, and <mode> is empty,
-// undead_only or drain_third.
+// undead_only, drain_third or per_cell. per_cell rolls afresh for every cell and tells the roll which cell it is,
+// for spells that lay one missile per cell (Lightning, Inferno) rather than one blast.
 
 // RollContext is everything a damage roll may read: the caster's magic, character level and this spell's level.
 type RollContext struct {
 	Rng             *rand.Rand
 	Mag, Clvl, Slvl int
+	Cell            int // per_cell: the cell's place along the hit zone, from 0
 }
 
 // SpellRoll is one roll's outcome: damage in 1/64 points, and how many times it is rolled against the victim.
@@ -54,7 +56,7 @@ func GetAllDamageRolls() map[string]func(RollContext) SpellRoll {
 			return whole(d1.LightningDamage(c.Rng, c.Clvl), d1.LightningTicks(c.Slvl))
 		},
 		"inferno": func(c RollContext) SpellRoll {
-			return SpellRoll{Damage64: d1.InfernoDamage64(c.Rng, c.Clvl), Ticks: d1.InfernoTicks(0)}
+			return SpellRoll{Damage64: d1.InfernoDamage64(c.Rng, c.Clvl), Ticks: d1.InfernoTicks(c.Cell)}
 		},
 		"flash": func(c RollContext) SpellRoll {
 			low, _ := d1.FlashDamage64(c.Rng, c.Clvl, c.Slvl)
@@ -72,6 +74,14 @@ var damageIconByResist = map[int]int32{
 	d1.ResistNone: defs.IconEffectHit, d1.ResistKindMagic: defs.IconEffectHit,
 }
 
+// spellDamageModeAndLevel reads spell_damage's optional mode and the spell level the cast appends after it.
+func spellDamageModeAndLevel(args util.Arguments) (mode string, slvl int) {
+	if len(args) > 3 {
+		mode = args.Get(2)
+	}
+	return mode, args.GetInt(len(args) - 1)
+}
+
 func (g *Factory) spellDamage(args util.Arguments) *HitEffect {
 	rollName := args.Get(0)
 	if _, known := GetAllDamageRolls()[rollName]; !known {
@@ -79,8 +89,7 @@ func (g *Factory) spellDamage(args util.Arguments) *HitEffect {
 		return nil
 	}
 	resist := resistKindByName[args.Get(1)]
-	mode := args.Get(2)
-	slvl := args.GetInt(3)
+	mode, slvl := spellDamageModeAndLevel(args)
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			g.ActionBroker.Execute(NewSpellDamageAction(attacker, rollName, resist, mode, slvl, target, hitPositions))
@@ -126,9 +135,15 @@ func (a *SpellDamageAction) Execute(ctx ActionContext) []Action {
 	if c.h == nil {
 		return nil
 	}
-	roll := GetAllDamageRolls()[a.roll](RollContext{Rng: d1Rng, Mag: c.s.Mag, Clvl: c.h.Level, Slvl: a.slvl})
+	rollAt := func(cell int) SpellRoll {
+		return GetAllDamageRolls()[a.roll](RollContext{Rng: d1Rng, Mag: c.s.Mag, Clvl: c.h.Level, Slvl: a.slvl, Cell: cell})
+	}
+	roll := rollAt(0)
 	icon := damageIconByResist[a.resist]
-	for _, p := range a.hitPositions {
+	for i, p := range a.hitPositions {
+		if a.mode == "per_cell" && i > 0 {
+			roll = rollAt(i)
+		}
 		if victim := c.hitCell(p); victim != nil && c.strike(victim, roll.Damage64, roll.Ticks) {
 			a.landed = true
 		}

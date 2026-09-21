@@ -410,7 +410,11 @@ func (d *Data) HellfireWitchBuys(it *Item) bool {
 
 // CanRepair ports SmithRepairOk.
 func CanRepair(it *Item) bool {
-	return it.MaxDur > 0 && it.Durability != it.MaxDur && it.Type != ITypeMisc && it.Type != ITypeGold
+	if it.MaxDur <= 0 || it.Durability == it.MaxDur || it.Type == ITypeMisc || it.Type == ITypeGold {
+		return false
+	}
+	// AddStoreHoldRepair leaves out an identified magic item whose repair would cost nothing
+	return !(it.Magical != 0 && it.Identified && repairValue(it) == 0)
 }
 
 // RepairItem ports the Warrior's Item Repair (RepairItem): each round of repair costs maximum durability, and an
@@ -465,15 +469,19 @@ func DisarmChance(dex, dlvl int) int { return 2*dex - 5*dlvl }
 
 // RepairCost ports AddStoreHoldRepair.
 func RepairCost(it *Item) int {
+	v := max(repairValue(it), 1)
+	if v > 1 {
+		v >>= 1
+	}
+	return v
+}
+
+func repairValue(it *Item) int {
 	value := it.Value
 	if it.Magical != 0 && it.Identified {
 		value = 30 * it.IValue / 100
 	}
-	v := 100 * (it.MaxDur - it.Durability) / it.MaxDur * value / 100
-	if v > 1 {
-		v >>= 1
-	}
-	return max(v, 1)
+	return 100 * (it.MaxDur - it.Durability) / it.MaxDur * value / 100
 }
 
 // CanRecharge ports WitchRechargeOk; with recharge_uniques on the witch's record, uniques with charges too (Hellfire).

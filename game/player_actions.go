@@ -811,6 +811,18 @@ func (a *Actions) playerMeleeAttack(player *common.Actor, defender *common.Actor
 	a.executeAttack(meleeAction)
 }
 
+// CloseDoorAt shuts the open door at mapPos when the player clicks it from next to it, as D1 does.
+func (a *Actions) CloseDoorAt(mapPos geometry.Point) bool {
+	player := a.state.GetPlayer()
+	if !player.IsAlive() || !common.CanCloseDoorAt(a.state.GetMap(), player, mapPos) {
+		return false
+	}
+	closeDoor := common.NewCloseDoorAction(common.AbstractCause("Close door"), player, mapPos)
+	a.actionBroker.QueueForExecution(closeDoor)
+	a.actionBroker.QueueForExecution(common.NewEndPlayerTurnAction(closeDoor.Cause(), closeDoor.GetDelayInAut()))
+	return true
+}
+
 // RangedAttackAt fires the player's equipped ranged weapon at mapPos, if there is a clear shot at something worth
 // shooting: a hostile actor, or an intact barrel. What a left-click on a distant enemy or barrel does; false (do
 // nothing) for anything else, so the caller falls back to its normal click handling (move/auto-explore).

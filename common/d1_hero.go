@@ -291,15 +291,16 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 				blast += d1ElementalHit(def, d1.ResistKindLightning, h.SpellHitChance(s, mon.Level), func() int { return s.LMinDam + d1Rng.Intn(max(s.LMaxDam-s.LMinDam+1, 1)) })
 			}
 		}
+		if ranged { // PM_DoRangeAttack wears the bow on every shot, a melee blow only when it lands
+			d1Broke(ctx.Msg, att, d1.WeaponDur(d1Rng, att.equippedD1(), 40))
+		}
 		if d1Rng.Intn(100) >= chance {
 			logMissed(ctx, att, def)
 			return blast, nil, true
 		}
-		durrnd := 30
-		if ranged {
-			durrnd = 40
+		if !ranged {
+			d1Broke(ctx.Msg, att, d1.WeaponDur(d1Rng, att.equippedD1(), 30))
 		}
-		d1Broke(ctx.Msg, att, d1.WeaponDur(d1Rng, att.equippedD1(), durrnd))
 		if ranged {
 			dam = h.ArrowDamage(d1Rng, s)
 		} else {
