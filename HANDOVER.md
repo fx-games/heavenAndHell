@@ -6,10 +6,12 @@ every decision and why).
 
 ## Where the work is
 
-- **Branch: `engine-split`.** All work lives here. 87 commits ahead of `d1-rebuild`.
+- **Branch: `engine-split`.** All work lives here. Nothing is merged to `d1-rebuild` or `main`.
 - `d1-rebuild` and `main` are **untouched**. Do not merge to them without asking.
 - `main` is an old version of the Heaven&Hell game. It is the SOURCE you read old
   content and code from (`git show main:<path>`), never a base to work on.
+- The last session worked in worktree branch `worktree-agent-a223e92bbd2677d04`. If
+  `engine-split` is behind it, fast-forward first: `git merge --ff-only worktree-agent-a223e92bbd2677d04`.
 
 ## The goal
 
@@ -56,6 +58,8 @@ Three gates, all non-negotiable:
 | 8 | Quest triggers declarative: named event + expr condition + named outcome |
 | 9 | `dungen/` restored as engine strategies behind a deliberately narrow seam |
 | 10 | H&H's 12 levels generate, walk, and populate from its own tables |
+| 11 | H&H playable except trading: hero table, town doors, quests + dialogue, own sheet/icons (see ENGINE_SPLIT.md phase 8) |
+| 12 | Every mod owns its content: D1's sheet, icons and town map moved into `mods/d1`; all dialogue is `texts.rec` |
 
 Also fixed along the way (all were real, pre-existing bugs):
 - Shop menus crashed on any empty list (`items[0]` before the empty check).
@@ -66,24 +70,37 @@ Also fixed along the way (all were real, pre-existing bugs):
 - `LoadGame` asked the directory for its newest slot, not the running game's.
 - The explored bitmap used a hardcoded `d1.LevelSize` stride, so any
   differently-sized level lost most of its cells on load.
+- D1's quest availability table leaked into other mods by quest index.
+- Every H&H monster was level 0: ~40% of kills panicked rolling a drop.
+- H&H uniques spawned at random and never in their rooms.
+- `build_release.sh` never copied `files/mods`: a non-embedded release had no game.
 
-## In flight
+## The user's rules for mods (stated in the last session, binding)
 
-**An agent is running** (finishing H&H playability). It covers: class count
-becoming content (`d1/hero.go` fixes the roster at `[NumClasses]`=6 arrays),
-authoring `mods/heavenandhell/data/hero.rec`, making the town reachable,
-dialogue via `on_talk` triggers, and H&H's quests. Check for its worktree under
-`.claude/worktrees/` before starting anything in those files.
+- Each mod brings its own assets: tilesheet, icons, levels, town map, NPCs,
+  quests, items, skills, spells. Nothing a mod needs lives in engine assets.
+- Every mod uses the same engine subsystems and interfaces. One unified
+  subsystem per concern, **no mod-specific implementations**: if D1 and H&H
+  both need something, it is one engine feature both configure by data.
+- All dialogue text is in rec format.
 
 ## Remaining
 
-1. **Finish H&H playability** if the in-flight agent stopped short. Its report
-   and `ENGINE_SPLIT.md` phase 8 notes carry the specifics.
-2. **The fallback room.** With no mod, the engine should run one hardcoded room,
+1. **Vendors, unified.** H&H's four NPCs open no shop. Design and pointers are in
+   ENGINE_SPLIT.md phase 8 "Not done: d". This is the last gap to H&H playable.
+   `hh_town_test.go` is where to prove it (talk -> buy -> sell).
+2. **H&H leftovers from main**, not ported yet: the notes/evidence items and
+   Lucifer's death text (`git show main:files/assets/dialogue/note_*.txt`,
+   `lucifer_death.txt`), Kirioth's missing `kirioth_after_lucifer` text (main
+   never had the file either), and H&H's own spells/skills (classes.rec names
+   them; the engine gives H&H heroes none yet).
+3. **Remaining engine-side D1 hardcodes** that break the no-mod-specific rule:
+   D1 town quest hand-ins (`d1TownerQuests`), `UpdateD1Quests`, vendor menus.
+4. **The fallback room.** With no mod, the engine should run one hardcoded room,
    one weapon, one enemy. Today a missing mod stops with a clear message
    (`mod "x" not found: expected a directory at files/mods/x`), which is the
-   floor, not the goal.
-3. **The original gameplay requests**, deferred behind the port and never
+   floor, not the goal. Engine `files/assets` no longer holds a sheet or map.
+5. **The original gameplay requests**, deferred behind the port and never
    started. These are the user's own words:
    - Remove shrine effects with permanent negative outcomes. Decided:
      permanent stat/spell-level/HP/mana loss is out; temporary debuffs and gold
@@ -125,6 +142,11 @@ dialogue via `on_talk` triggers, and H&H's quests. Check for its worktree under
   `config.rec` is ignored.
 - **Effect arguments split on `|`, not `,`.** A whole batch of spell mappings
   silently resolved to nil until a test caught it.
+- **Test a mod by playing it.** Every H&H bug last session (crash on class
+  skill icon, town load nil deref, quest index panic, level-0 drops, uniques)
+  was invisible to unit tests and fell out of one test driving a real game:
+  `newHeavenAndHellGame` in `hh_town_test.go`. Walking `Actors()` while killing
+  skips every other actor: clone the slice.
 
 ## Working agreements that produced good results
 
