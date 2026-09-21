@@ -46,6 +46,42 @@ func TestEachModLoadsItsOwnMonsters(t *testing.T) {
 	}
 }
 
+// Same again for items: one ReadItems, and each mod gets its own.
+func TestEachModLoadsItsOwnItems(t *testing.T) {
+	for _, tc := range []struct {
+		mod    string
+		count  int
+		want   string
+		absent string
+	}{
+		{"d1", 168, "The Undead Crown", "Potion of Berserker Rage"},
+		{"heavenandhell", 113, "Potion of Berserker Rage", "The Undead Crown"},
+	} {
+		t.Run(tc.mod, func(t *testing.T) {
+			files.SelectMod(tc.mod)
+			items, err := ReadItems(files.GetFileSystem())
+			if err != nil {
+				t.Fatalf("ReadItems: %v", err)
+			}
+			if len(items) != tc.count {
+				t.Errorf("loaded %d items, want %d", len(items), tc.count)
+			}
+			byName := map[string]Item{}
+			for _, it := range items {
+				byName[it.Name] = it
+			}
+			if it, ok := byName[tc.want]; !ok {
+				t.Errorf("%s is missing its own item %q", tc.mod, tc.want)
+			} else if it.Icon == "" {
+				t.Errorf("%q has no icon ID", tc.want)
+			}
+			if _, ok := byName[tc.absent]; ok {
+				t.Errorf("%s mod served the other mod's item %q", tc.mod, tc.absent)
+			}
+		})
+	}
+}
+
 // D1 stores damage as a min..max range and H&H as dice; both arrive as util.Dice with their own bounds intact.
 // This is the schema convergence, so it gets an assertion rather than a comment.
 func TestBothSchemasSurviveTheSharedDiceField(t *testing.T) {

@@ -159,8 +159,11 @@ func (g *Generator) bookSpell(it *Item, lvl int) {
 	lvl = max(lvl, 1)
 	bs := g.nextSpell(func(s SpellData) bool { return s.BookLvl != -1 && lvl >= s.BookLvl })
 	sp := g.D.Spells[bs]
-	it.Name += sp.Name
-	it.IName += sp.Name
+	// The base item is named "Book of" and the spell completes it. Diablo's own table wrote the separator as a
+	// trailing space inside the name; a .rec field cannot carry one, and a name ending in a space was never
+	// content anyway -- it was the concatenation, which belongs here.
+	it.Name += " " + sp.Name
+	it.IName += " " + sp.Name
 	it.Spell = bs
 	it.MinMag = sp.MinInt
 	it.Value += sp.BookCost

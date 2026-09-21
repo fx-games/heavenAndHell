@@ -139,17 +139,9 @@ func hellfireItemOrder(d1Items []ItemData) []ItemData {
 // Hellfire fills D1's thirteen empty slots 35-47 in place, so every D1 index below it stays where it was.
 const D1ItemCount = 156
 
-type ItemData struct {
-	Drop, Class, Loc             string // IDROP_, ICLASS_, ILOC_
-	Curs, Type                   int    // cursor graphic, ITYPE_ value
-	UniqueBase                   string // UITYPE_ name uniques refer to
-	Name, ShortName              string
-	MinMLvl, Durability          int
-	MinDam, MaxDam, MinAC, MaxAC int
-	MinStr, MinMag, MinDex       int
-	Flags, MiscID, Spell         string
-	Value                        int
-}
+// ItemData is the unified item record (defs.Item). Diablo's items come out of mods/d1/data/items.rec
+// through the same defs.ReadItems every mod uses.
+type ItemData = defs.Item
 
 // ITYPE_ values.
 const (
@@ -336,7 +328,7 @@ func load(fsys fs.FS) (*Data, error) {
 	d := &Data{}
 	var err error
 	tables := map[string][]row{}
-	for _, n := range []string{"xl_umon", "xl_item", "xl_ipre", "xl_isuf", "xl_uitem", "xl_spell", "xl_obj"} {
+	for _, n := range []string{"xl_umon", "xl_ipre", "xl_isuf", "xl_uitem", "xl_spell", "xl_obj"} {
 		rows, err := readTable(fsys, n+".txt")
 		if err != nil {
 			return nil, err
@@ -356,17 +348,8 @@ func load(fsys fs.FS) (*Data, error) {
 			UnqAttr: r.i("mUnqAttr"), UnqVar1: r.i("mUnqVar1"), UnqVar2: r.i("mUnqVar2"), TalkMsg: r.s("mtalkmsg"),
 		})
 	}
-	for _, r := range tables["xl_item"] {
-		if r.s("iLoc") == "ILOC_INVALID" {
-			break
-		}
-		d.Items = append(d.Items, ItemData{
-			Drop: r.s("iRnd"), Class: r.s("iClass"), Loc: r.s("iLoc"), Curs: r.i("iCurs"), Type: r.i("itype"),
-			UniqueBase: r.s("iItemId"), Name: r.s("iName"), ShortName: r.s("iSName"), MinMLvl: r.i("iMinMLvl"),
-			Durability: r.i("iDurability"), MinDam: r.i("iMinDam"), MaxDam: r.i("iMaxDam"), MinAC: r.i("iMinAC"), MaxAC: r.i("iMaxAC"),
-			MinStr: r.i("iMinStr"), MinMag: r.i("iMinMag"), MinDex: r.i("iMinDex"),
-			Flags: r.s("iFlags"), MiscID: r.s("iMiscId"), Spell: r.s("iSpell"), Value: r.i("iValue"),
-		})
+	if d.Items, err = defs.ReadItems(fsys); err != nil {
+		return nil, err
 	}
 	affixes := func(rows []row) (out []Affix) {
 		for _, r := range rows {
