@@ -77,3 +77,14 @@ own Firebolt level, Phasing / the Holy shrine (`AddRndTeleport`), the mana shiel
   monster on the target cell, for a flat 12 turns (`apply_status(stone|12)`), and Diablo can be cursed.
 - **open — Apocalypse's box.** `AddApoca`/`MI_Apoca` cover x−8 … x+7 and y−8 … y+7 (the upper bound is
   exclusive), with no line-of-sight test (Hellfire added one). Our `box_aoe(8)` is −8 … +8.
+- **open — Flame Wave's shape.** `MI_Wave` lays a straight wall of `MIS_FIREMOVE` flames across the cast
+  direction, `1 + 2·(slvl/2 + 2)` cells wide (each side stops at the first cell missiles can't cross), and the
+  flames roll forward. Ours is a cone that widens to 3 cells either side over 8 (`hit_zone: cone_aoe(8|3)`).
+
+## Not yet audited
+
+Lightning's and Inferno's per-cell burn, Blood Star, Bone Spirit, Telekinesis, Teleport, Town Portal, Golem,
+Identify; objects (chests, barrels, sarcophagi, bookcases, racks, decapitated bodies, crucified skeletons,
+levers, books, fountains, cauldron, goat shrines, pedestal); the 16 quests; monster special attacks and unique
+monster traits; monster drops and gold; durability, repair and identification; the hero's death; town
+dialogue.
