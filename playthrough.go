@@ -1,8 +1,15 @@
+// The engine rolls a lot of dice on math/rand's global source (map transitions, melee, drops). Since Go 1.20
+// that source seeds itself from the OS, and rand.Seed is a no-op, so a pinned playthrough seed could not reach
+// it: this directive restores rand.Seed so `playthrough <seed>` really replays. A normal launch never calls
+// Seed and keeps its automatic seeding.
+//go:debug randseednop=0
+
 package main
 
 import (
 	"fmt"
 	"image/color"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"rpg/common"
@@ -39,6 +46,7 @@ func playthrough() {
 	fmt.Printf("playthrough seed: %d (replay with: playthrough %d)\n", seed, seed)
 	theGame.SeedRandom(seed)
 	common.SeedD1Rng(seed)
+	rand.Seed(seed)                                                           // the global source the engine rolls most of its dice on
 	missiles := &missileCounter{}                                             // registered per check: a new game or a load makes a new broker
 	wallTraps, chestTraps := 0, 0                                             // traps that fired while objects were operated
 	for run := 1; run <= len(theGame.GetGameData().ClassDefinitions); run++ { // every class
