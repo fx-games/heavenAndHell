@@ -253,12 +253,23 @@ const ConfigFile = "config.rec"
 
 // SaveVolumes writes the volume settings into the config file in place, keeping its other lines and comments.
 func (c Configuration) SaveVolumes(recFilename string) error {
+	return setConfigFields(recFilename, [][2]string{{"SoundVolume", recfile.FloatStr(c.SoundVolume)}, {"MusicVolume", recfile.FloatStr(c.MusicVolume)}, {"VoiceVolume", recfile.FloatStr(c.VoiceVolume)}})
+}
+
+// SaveMod writes the mod to start with next time into the config file, keeping its other lines.
+func SaveMod(recFilename, mod string) error {
+	return setConfigFields(recFilename, [][2]string{{"Mod", mod}})
+}
+
+// setConfigFields replaces each field's line in place. A missing field goes to the top: only the first record is
+// read, so a line appended after a trailing blank line would be ignored.
+func setConfigFields(recFilename string, fields [][2]string) error {
 	data, err := os.ReadFile(recFilename)
-	if err != nil {
+	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
 	lines := strings.Split(strings.TrimRight(string(data), "\n"), "\n")
-	for _, kv := range [][2]string{{"SoundVolume", recfile.FloatStr(c.SoundVolume)}, {"MusicVolume", recfile.FloatStr(c.MusicVolume)}, {"VoiceVolume", recfile.FloatStr(c.VoiceVolume)}} {
+	for _, kv := range fields {
 		line, found := kv[0]+": "+kv[1], false
 		for i, l := range lines {
 			if strings.HasPrefix(l, kv[0]+":") {
@@ -266,7 +277,7 @@ func (c Configuration) SaveVolumes(recFilename string) error {
 			}
 		}
 		if !found {
-			lines = append(lines, line)
+			lines = append([]string{line}, lines...)
 		}
 	}
 	return os.WriteFile(recFilename, []byte(strings.Join(lines, "\n")+"\n"), 0o644)

@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/png"
+	"log"
 	"maps"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"rpg/common"
 	"rpg/d1"
@@ -502,8 +504,43 @@ func (g *GameInstance) StartMenuItems(afterDeath bool) []util.MenuItem {
 			}
 		}}, util.MenuItem{MainText: "Load game", Action: func() { g.OpenLoadMenu(back) }})
 	}
-	return append(items, util.MenuItem{MainText: "New game", Action: func() { g.uiController.OpenNewGameScreen(g.NewGame, back) }},
-		util.MenuItem{MainText: "Quit", Action: g.uiController.QuitGame})
+	items = append(items, util.MenuItem{MainText: "New game", Action: func() { g.uiController.OpenNewGameScreen(g.NewGame, back) }})
+	if mods := files.Mods(); !afterDeath && len(mods) > 1 {
+		items = append(items, util.MenuItem{MainText: "Mod: " + files.ActiveMod(), Action: func() { g.openModPicker(mods, back) }})
+	}
+	return append(items, util.MenuItem{MainText: "Quit", Action: g.uiController.QuitGame})
+}
+
+// openModPicker switches mods by restarting: every icon, sprite, sound and definition was read for the mod
+// running now, so the new one starts from scratch in a fresh process. The choice is stored in the config file.
+func (g *GameInstance) openModPicker(mods []string, back func()) {
+	var items []util.MenuItem
+	for _, mod := range mods {
+		if mod == files.ActiveMod() {
+			continue
+		}
+		items = append(items, util.MenuItem{MainText: mod, Action: func() {
+			if err := common.SaveMod(common.ConfigFile, mod); err != nil {
+				g.PlayerMessage(fmt.Sprintf("Could not switch mods: %v", err))
+				return
+			}
+			restart()
+		}})
+	}
+	g.uiController.OpenUncancelableMenu(append(items, util.MenuItem{MainText: "Back", Action: back}))
+}
+
+func restart() {
+	exe, err := os.Executable()
+	if err == nil {
+		cmd := exec.Command(exe, os.Args[1:]...)
+		cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+		err = cmd.Start()
+	}
+	if err != nil {
+		log.Printf("could not restart, start the game again to play the new mod: %v", err)
+	}
+	os.Exit(0)
 }
 
 // BackToMainMenu leaves a running game for the start menu. It saves first, so that picking Continue puts the
@@ -513,9 +550,9 @@ func (g *GameInstance) BackToMainMenu() {
 	g.uiController.OpenUncancelableMenu(g.StartMenuItems(false))
 }
 
-// ShowStartMenu opens the start menu when a save exists; without one the default game autosaves right away.
+// ShowStartMenu opens the start menu when a save exists or there is a mod to pick; without one the default game autosaves right away.
 func (g *GameInstance) ShowStartMenu() {
-	if !HasSave() {
+	if !HasSave() && len(files.Mods()) < 2 { // with several mods the menu is where the mod is picked
 		g.slot = FirstFreeSaveSlot()
 		g.autosave = true
 		return

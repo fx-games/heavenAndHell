@@ -92,3 +92,15 @@ func (m modFS) ReadDir(name string) ([]fs.DirEntry, error) {
 	}
 	return m.base.ReadDir(name)
 }
+
+// Mods lists the mod directories under mods/, the choices of the start menu's mod picker.
+func Mods() []string {
+	entries, _ := sourceFileSystem.ReadDir("mods")
+	var names []string
+	for _, e := range entries {
+		if e.IsDir() {
+			names = append(names, e.Name())
+		}
+	}
+	return names
+}
