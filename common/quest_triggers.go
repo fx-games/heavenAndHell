@@ -52,7 +52,8 @@ func (s *State) questEnv() defs.QuestEnv {
 
 // fireQuestTriggers runs the mod's triggers for one named event and subject, in file order: each one whose
 // condition holds runs its outcomes. Conditions were compiled when the mod loaded; this only evaluates them.
-func (f *Factory) fireQuestTriggers(event, subject string) {
+// speaker is who a say() outcome speaks as; empty for events nobody speaks at.
+func (f *Factory) fireQuestTriggers(event, subject, speaker string) {
 	s := f.State
 	env := s.questEnv()
 	for _, t := range s.factory.D1().D.QuestTriggers {
@@ -70,7 +71,7 @@ func (f *Factory) fireQuestTriggers(event, subject string) {
 			}
 		}
 		for _, do := range t.Do {
-			if !f.runQuestOutcome(do) {
+			if !f.runQuestOutcome(do, speaker) {
 				f.Msg(fmt.Sprintf("quest trigger %s/%s: no outcome named %q", event, subject, do.Name()))
 			}
 		}
@@ -80,7 +81,7 @@ func (f *Factory) fireQuestTriggers(event, subject string) {
 
 // runQuestOutcome performs one named outcome; false if the engine has no such outcome. This list is the whole
 // vocabulary a mod's triggers have -- outcomes are engine behaviour, never expressions.
-func (f *Factory) runQuestOutcome(do recfile.StringPredicate) bool {
+func (f *Factory) runQuestOutcome(do recfile.StringPredicate, speaker string) bool {
 	s := f.State
 	quest := func(i int) int { return s.QuestByKey(do.GetString(i)) }
 	switch do.Name() {
@@ -108,6 +109,8 @@ func (f *Factory) runQuestOutcome(do recfile.StringPredicate) bool {
 		f.playD1Sound(do.GetString(0))
 	case "refresh_level":
 		UpdateD1Quests(s, s.GetMap())
+	case "say":
+		f.say(speaker, do.GetString(0))
 	case "end_text":
 		f.d1EndTextWindow()
 	default:
@@ -121,7 +124,7 @@ func (f *Factory) runQuestOutcome(do recfile.StringPredicate) bool {
 func QuestOutcomeExists(name string) bool {
 	switch name {
 	case "complete_quest", "activate_quest", "log_quest", "set_quest_var", "set_flag", "hero_sound", "sound",
-		"refresh_level", "end_text":
+		"say", "refresh_level", "end_text":
 		return true
 	}
 	return false

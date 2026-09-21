@@ -269,14 +269,8 @@ func (f *Factory) d1TownerQuests(npc *Actor) bool {
 				return true
 			}
 		}
-	case VendorTypeDeadGuy:
-		if q := d1.QButcher; active(q) == d1.QuestInit || active(q) == d1.QuestActive && v1(q) == 0 {
-			s.startQuest(q)
-			s.SetQuestVar(q, 1, 1)
-			f.say(name, "TEXT_BUTCH9")
-		} else if active(q) == d1.QuestActive {
-			f.PlayD1HeroSound(8) // his last words are said
-		}
+	case VendorTypeDeadGuy: // the dying townsman says one thing, under one condition: a dialogue record
+		f.fireQuestTriggers(EventTalk, string(VendorTypeDeadGuy), name)
 		return true
 	case VendorTypeWeapons:
 		if visited(4) && avail(d1.QRock) {
@@ -785,9 +779,9 @@ func d1QuestKill(ctx ActionContext, mon *D1Monster) {
 			state.mapGen.cleanD1Water(state.GetMap())
 		}
 	}
-	f.fireQuestTriggers(EventKill, mon.Data.ID)
+	f.fireQuestTriggers(EventKill, mon.Data.ID, "")
 	if mon.Unique != nil {
-		f.fireQuestTriggers(EventKill, mon.Unique.Name)
+		f.fireQuestTriggers(EventKill, mon.Unique.Name, "")
 	}
 }
 
@@ -815,7 +809,7 @@ func (f *Factory) d1QuestItemPickedUp(it *d1.Item) {
 	if it.BaseIdx < 0 || it.BaseIdx >= len(items) {
 		return
 	}
-	f.fireQuestTriggers(EventItemPickup, items[it.BaseIdx].InternalName)
+	f.fireQuestTriggers(EventItemPickup, items[it.BaseIdx].InternalName, "")
 }
 
 // d1QuestDrop ports SpawnItem's Black Mushroom branch: once Adria has the mushroom, the next ordinary monster
@@ -950,5 +944,5 @@ func (f *Factory) d1DungMsgs(m *gridmap.GridMap[*Actor, *Item, Object]) {
 	if f.State.setLevelOf(m.GetName()) != nil || dlvl == 0 {
 		return
 	}
-	f.fireQuestTriggers(EventEnterLevel, fmt.Sprint(dlvl))
+	f.fireQuestTriggers(EventEnterLevel, fmt.Sprint(dlvl), "")
 }

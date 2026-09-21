@@ -198,6 +198,7 @@ gossip: wirt TEXT_VILE12
 # on_kill          a monster's internal name, or a unique monster's name
 # on_item_pickup   an item's internal name
 # on_enter_level   the dungeon depth the hero arrives on
+# on_talk          the NPC's internal name -- a dialogue record: condition, text, what saying it does
 
 %rec: trigger
 
@@ -247,6 +248,21 @@ subject: MT_DIABLO
 when: not done("diablo")
 do: complete_quest(diablo)
 do: end_text()
+
+# The dying townsman on level 2: his last words start the Butcher, and after that he only groans. The groan
+# comes first so that speaking does not immediately satisfy it -- triggers see what earlier ones did.
+event: on_talk
+subject: deadguy
+when: active("butcher") and v1("butcher") != 0
+do: hero_sound(8)
+
+event: on_talk
+subject: deadguy
+when: (avail("butcher") and not done("butcher") and not active("butcher")) or (active("butcher") and v1("butcher") == 0)
+do: activate_quest(butcher)
+do: log_quest(butcher)
+do: set_quest_var(butcher, 1, 1)
+do: say(TEXT_BUTCH9)
 
 event: on_item_pickup
 subject: optic_amulet
