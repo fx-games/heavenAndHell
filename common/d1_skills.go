@@ -13,6 +13,9 @@ import (
 // Recharge and, from Hellfire, the Monk's Vision, the Bard's Identify and the Barbarian's Rage. They cost no
 // mana; like D1's cursor, repair, recharge and identify ask for an item and disarm for an object.
 func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedAction) {
+	if f.Generator.D.Spells[d1ClassSkillSpell[player.hero.Class]].ID == "" {
+		return nil, nil // the mod declares no such skill: a class skill is content, not a D1 birthright
+	}
 	switch player.hero.Class {
 	case d1.Monk:
 		return nil, f.d1CastSkill("Vision", d1.SplSearch)
@@ -103,6 +106,10 @@ func (f *Factory) getRageSelfAction(args util.Arguments) UntargetedEffect {
 		Description: []util.LabelText{util.LabelTextFromString("Work yourself into a rage")},
 	}
 }
+
+// d1ClassSkillSpell is the spell behind each archetype's class skill, in class order.
+var d1ClassSkillSpell = [...]int{d1.Warrior: d1.SplRepair, d1.Rogue: d1.SplDisarm, d1.Sorcerer: d1.SplRecharge,
+	d1.Monk: d1.SplSearch, d1.Bard: d1.SplIdentify, d1.Barbarian: d1.SplRage}
 
 // d1SkillIcon is the skills.rec icon of a spell or class skill.
 func (f *Factory) d1SkillIcon(spell int) int32 {

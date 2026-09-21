@@ -58,6 +58,7 @@ type classAttributes struct {
 	AttackFrames                        map[int]int // attack animation length by weapon ITYPE, key 0 = bare-handed and the default
 	SpellFrames, HitFrames              int
 	Flags                               uint32
+	StartSpells                         map[int]int // spell levels a new hero of this class knows
 }
 
 // classAttr is filled by Load from the class section of assets/data/hero.rec.
@@ -124,8 +125,8 @@ func loadHeroTables(fsys fs.FS) error {
 			SpellLife: fp6("spell_life"), ManaCost: fp6("mana_cost"),
 			MagicToHit: m.GetIntOrDefault("magic_to_hit", 0), MeleeToHit: m.GetIntOrDefault("melee_to_hit", 0),
 			RangedToHit:  m.GetIntOrDefault("ranged_to_hit", 0),
-			AttackFrames: map[int]int{},
-			SpellFrames:  m.GetIntOrDefault("spell_frames", 0), HitFrames: m.GetIntOrDefault("hit_frames", 0),
+			AttackFrames: map[int]int{}, StartSpells: map[int]int{},
+			SpellFrames: m.GetIntOrDefault("spell_frames", 0), HitFrames: m.GetIntOrDefault("hit_frames", 0),
 		}
 		for _, f := range strings.Fields(m.GetStringOrDefault("attack_frames", "")) {
 			name, frames, ok := strings.Cut(f, "=")
@@ -138,6 +139,15 @@ func loadHeroTables(fsys fs.FS) error {
 				return fmt.Errorf("hero.rec: %s: attack_frames %q: %w", ClassNames[i], f, convErr)
 			}
 			a.AttackFrames[itype] = n
+		}
+		for _, f := range strings.Fields(m.GetStringOrDefault("start_spells", "")) {
+			name, lvl, ok := strings.Cut(f, "=")
+			spell, known := spellIDByName[name]
+			n, convErr := strconv.Atoi(lvl)
+			if !ok || !known || convErr != nil {
+				return fmt.Errorf("hero.rec: %s: bad start_spells %q", m.GetStringOrDefault("name", ""), f)
+			}
+			a.StartSpells[spell] = n
 		}
 		for _, f := range strings.Fields(m.GetStringOrDefault("flags", "")) {
 			bit, ok := classFlagByName[f]
@@ -213,8 +223,8 @@ func NewHero(class int) *Hero {
 	hp := a.AdjLife + a.LvlLife*h.Level + a.ChrLife*h.BaseVit
 	mana := a.AdjMana + a.LvlMana*h.Level + a.ChrMana*h.BaseMag
 	h.HPBase, h.MaxHPBase, h.ManaBase, h.MaxManaBase = hp, hp, mana, mana
-	if class == Sorcerer {
-		h.SpellLevels[SplFirebolt] = 2
+	for spell, lvl := range a.StartSpells {
+		h.SpellLevels[spell] = lvl
 	}
 	return h
 }

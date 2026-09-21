@@ -5,6 +5,7 @@
 # decimals (1/64 multipliers) and are written here as the decimals, not the fixed-point ints.
 # attack_frames is the attack animation length by weapon type; default covers bare hands and
 # anything not listed.
+# start_spells is what a new hero of the class knows: SPL_ id = spell level.
 
 name: Warrior
 str: 30
@@ -94,6 +95,7 @@ ranged_to_hit: 50
 attack_frames: default=20 sword=16 axe=24 mace=16 staff=16
 spell_frames: 12
 hit_frames: 8
+start_spells: SPL_FIREBOLT=2
 
 name: Monk
 str: 25

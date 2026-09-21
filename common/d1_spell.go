@@ -782,7 +782,7 @@ func (f *Factory) D1SpellSkills(player *Actor) ([]*TargetedAction, []*Untargeted
 	if t, u := f.d1ClassSkill(player); t != nil {
 		t.SetInternalName(d1ClassSkillID)
 		targeted = append(targeted, t)
-	} else {
+	} else if u != nil {
 		u.SetInternalName(d1ClassSkillID)
 		untargeted = append(untargeted, u)
 	}

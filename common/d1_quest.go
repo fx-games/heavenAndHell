@@ -154,7 +154,12 @@ func (s *State) onSetLevelOf(m *gridmap.GridMap[*Actor, *Item, Object], q int) b
 }
 
 // questMap is the map name of quest q's set level, "" when it has none.
-func (s *State) questMap(q int) string { return s.QuestDefs()[q].SetMap }
+func (s *State) questMap(q int) string {
+	if q >= len(s.QuestDefs()) {
+		return "" // a quest this mod does not have has no level of its own
+	}
+	return s.QuestDefs()[q].SetMap
+}
 
 // d1QuestTopic is what npc says about quest q, if S_TalkEnter lists it: the quest is active and logged. What
 // each townsperson says comes from the quest's gossip lines; which of them is offered is the logic below.
