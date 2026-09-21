@@ -3,6 +3,7 @@ package defs
 import (
 	"fmt"
 	"math/rand"
+	"sort"
 	"rpg/geometry"
 )
 
@@ -103,6 +104,35 @@ func getCatacombsTilemap(randomSource *rand.Rand, isWall func(geometry.Point) bo
 		OpenDoor:        IconOpenDoor,
 		ClosedDoor:      IconClosedDoor,
 	}
+}
+
+// tilemaps are the engine's named tile sets: the look a mod picks for a level with "tiles:" in levels.rec.
+// They are engine code because they are drawing rules (which wall sprite a wall gets, given its neighbours),
+// not content; which level wears which is the mod's choice.
+var tilemaps = map[string]func(*rand.Rand, func(geometry.Point) bool) BasicTileMapping{
+	"cathedral": getCathedralTilemap,
+	"catacombs": getCatacombsTilemap,
+	"caves":     getCavesTilemap,
+	"hell":      getHellTilemap,
+}
+
+// TilemapNames lists every tile set a mod may name, sorted, for the error a typo in levels.rec earns.
+func TilemapNames() []string {
+	out := make([]string, 0, len(tilemaps))
+	for n := range tilemaps {
+		out = append(out, n)
+	}
+	sort.Strings(out)
+	return out
+}
+
+// Tilemap resolves one by name. isWall answers for any position, including off-map ones (walls).
+func Tilemap(name string, randomSource *rand.Rand, isWall func(geometry.Point) bool) (BasicTileMapping, bool) {
+	f, ok := tilemaps[name]
+	if !ok {
+		return BasicTileMapping{}, false
+	}
+	return f(randomSource, isWall), true
 }
 
 // D1Tilemap picks the tiles of dungeon level dlvl's type.

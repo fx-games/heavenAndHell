@@ -310,6 +310,9 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 	})
 
 	mapGen := common.NewMapGenerator(g.randomSource)
+	if err := mapGen.LoadLevels(); err != nil { // which generator builds each level, and how deep the game goes
+		panic(err)
+	}
 	mapGen.SetFactory(g.factory)
 	mapGen.SetSeed(g.levelSeed)
 	mapGen.SetSnapshots(g.levelSnapshots)

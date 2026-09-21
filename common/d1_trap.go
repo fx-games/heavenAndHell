@@ -63,7 +63,7 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 		}
 	case MisFireRing: // mi_fire_ring: fire walls on the ring three cells out that the chest sees, until one lands on
 		// a piece that stops missiles; each burns (10 + currlevel)·16 ticks at currlevel·8/64 a tick
-		if lvl := ctx.GameState.mapGen.levels[c.c.m.GetName()]; lvl != nil {
+		if lvl := ctx.GameState.mapGen.d1Levels[c.c.m.GetName()]; lvl != nil {
 			for _, p := range d1Ring(a.from, 3) {
 				if !c.c.m.Contains(p) || lvl.CellSolid(p.X, p.Y) || c.c.m.IsObjectAt(p) || !c.c.lineClear(a.from, p) {
 					continue
@@ -121,7 +121,7 @@ var d1TrapTargets = map[int]bool{d1.ObjL1LDOOR: true, d1.ObjL1RDOOR: true, d1.Ob
 // springD1WallTraps ports Obj_Trap for the object at piece (px, py), just opened or used: every wall trap aimed at
 // it that hasn't fired shoots its missile at the hero standing next to the object, or at the object itself.
 func (f *Factory) springD1WallTraps(m *gridmap.GridMap[*Actor, *Item, Object], px, py int) {
-	lvl := f.State.mapGen.levels[m.GetName()]
+	lvl := f.State.mapGen.d1Levels[m.GetName()]
 	if lvl == nil || f.State.GetMap() != m {
 		return
 	}
@@ -242,7 +242,7 @@ func d1SprungTraps(lvl *d1.Level) (out []int) {
 func D1BurningCross(s *State, player *Actor, autUsed int) {
 	m := s.GetMap()
 	o := d1ObjectAt(m, player.MapPosition().Add(geometry.Point{Y: 1}))
-	lvl := s.mapGen.levels[m.GetName()]
+	lvl := s.mapGen.d1Levels[m.GetName()]
 	if o == nil || o.O.Kind != d1.ObjBCROSS && o.O.Kind != d1.ObjTBCROSS || lvl == nil || player.hero == nil || !player.IsAlive() {
 		return
 	}

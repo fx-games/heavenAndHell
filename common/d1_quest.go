@@ -622,7 +622,7 @@ func replayD1MapChanges(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 		for _, r := range stages[:min(s.QuestVar(d1.QBlood, 2), 3)] {
 			gen.changeD1Map(m, r[0], r[1], r[2], r[3])
 		}
-		if lvl := gen.levels[m.GetName()]; lvl != nil && s.QuestVar(d1.QBlood, 2) >= 3 { // OperatePedistal: Blood2.DUN's torches light the hall
+		if lvl := gen.d1Levels[m.GetName()]; lvl != nil && s.QuestVar(d1.QBlood, 2) >= 3 { // OperatePedistal: Blood2.DUN's torches light the hall
 			for _, o := range s.factory.D1().D.DunObjects("l2/blood2", 2*sp[0], 2*sp[1]) {
 				d1PlaceObject(s.factory, m, lvl, o, toCell(o.X, o.Y))
 			}
@@ -927,7 +927,7 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 
 // D1Level is the generated D1 level behind a built map, nil for any other.
 func (s *State) D1Level(m *gridmap.GridMap[*Actor, *Item, Object]) *d1.Level {
-	return s.mapGen.levels[m.GetName()]
+	return s.mapGen.d1Levels[m.GetName()]
 }
 
 // D1MonsterGreeting ports ProcessMonsters' first-sight lines: the Butcher's "fresh meat".

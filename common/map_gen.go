@@ -1,15 +1,21 @@
 package common
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
+	"path"
+	"strconv"
+	"strings"
+
 	"rpg/d1"
 	"rpg/defs"
+	"rpg/dungeon"
+	"rpg/files"
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/ldtk"
-	"strconv"
-	"strings"
+	"rpg/recfile"
 )
 
 type MapGenerator struct {
@@ -19,9 +25,33 @@ type MapGenerator struct {
 	snapshots    map[string]*LevelSnapshot
 	d1Seeds      [d1.NumLevels]int32
 	d1Quests     *d1.Quests
-	levels       map[string]*d1.Level // the generated D1 levels by map name, for changeD1Map
+	d1Levels     map[string]*d1.Level // the generated D1 levels by map name, for changeD1Map
 	walledIn     map[string][]*Actor  // monsters D1 placed inside walls that a map change opens later, by map name
+	levels       []dungeon.Level      // the mod's declared level list, indexed by dungeon level; index 0 is the town
 }
+
+// LoadLevels reads the active mod's levels.rec, which says which generator builds each dungeon level and how
+// deep the game goes. Called after mod selection, never at package init: the whole table is content.
+func (g *MapGenerator) LoadLevels() error {
+	f, err := files.Open(path.Join("assets", "data", "levels.rec"))
+	if err != nil {
+		return fmt.Errorf("levels.rec: %w", err)
+	}
+	defer f.Close()
+	levels, err := dungeon.LoadLevels(recfile.Read(f), 0)
+	if err != nil {
+		return err
+	}
+	g.levels = levels
+	return nil
+}
+
+// SetLevels is LoadLevels for a caller that already has the table (tests, and any tool that builds one level).
+func (g *MapGenerator) SetLevels(levels []dungeon.Level) { g.levels = levels }
+
+// Levels is the mod's declared level list. Read-only: whoever wants to know how deep the dungeon goes asks here
+// rather than carrying a constant.
+func (g *MapGenerator) Levels() []dungeon.Level { return g.levels }
 
 func NewMapGenerator(randomSource *rand.Rand) *MapGenerator {
 	return &MapGenerator{
@@ -32,8 +62,32 @@ func (g *MapGenerator) SetFactory(factory *Factory) {
 	g.factory = factory
 }
 
+// GenerateMap builds one dungeon level with whatever generator the mod declared for it in levels.rec.
+//
+// The dispatch is a type switch on the configuration the generator's own Parse produced, which is the seam
+// dungeon.Strategy exists for: the engine stored a Config it cannot read, and here each generation family takes
+// its own type back. It is deliberately NOT a switch on the generator's name or the mod's - the engine never
+// names either - and it is deliberately not a shared "build a level" interface, because D1 hands back a
+// populated d1.Level and dungen a bare layout, and pretending those are one return type is the lie this seam
+// was drawn to avoid.
 func (g *MapGenerator) GenerateMap(targetMap string, dungeonLevel int) *gridmap.GridMap[*Actor, *Item, Object] {
-	return g.generateD1Map(targetMap, dungeonLevel)
+	lvl := g.levelConfig(dungeonLevel)
+	switch lvl.Config.(type) {
+	case nil, d1.LevelParams:
+		// nil covers a set level, which has no entry of its own in levels.rec and is built by the family that
+		// owns the dungeon level it hangs off.
+		return g.generateD1Map(targetMap, dungeonLevel)
+	default:
+		return g.generateDungenMap(targetMap, dungeonLevel, lvl)
+	}
+}
+
+// levelConfig is the mod's entry for a dungeon level, or the zero Level when it declared none.
+func (g *MapGenerator) levelConfig(dungeonLevel int) dungeon.Level {
+	if dungeonLevel < 0 || dungeonLevel >= len(g.levels) {
+		return dungeon.Level{}
+	}
+	return g.levels[dungeonLevel]
 }
 
 func minDist(locations []geometry.Point, pos geometry.Point) float64 {
@@ -167,7 +221,7 @@ func (g *MapGenerator) cleanD1Water(m *gridmap.GridMap[*Actor, *Item, Object]) {
 // changeD1Map ports ObjChangeMap on a built map: megatiles (x1, y1)..(x2, y2) switch to the level's alternate
 // layout and are redrawn, with the doors AddL1Objs/AddL2Objs add. Nothing happens if they already switched.
 func (g *MapGenerator) changeD1Map(m *gridmap.GridMap[*Actor, *Item, Object], x1, y1, x2, y2 int) {
-	lvl := g.levels[m.GetName()]
+	lvl := g.d1Levels[m.GetName()]
 	if lvl == nil || !lvl.ChangeMap(x1, y1, x2, y2) {
 		return
 	}

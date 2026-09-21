@@ -39,10 +39,10 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 	if err != nil {
 		panic(err)
 	}
-	if g.levels == nil {
-		g.levels = map[string]*d1.Level{}
+	if g.d1Levels == nil {
+		g.d1Levels = map[string]*d1.Level{}
 	}
-	g.levels[targetMap] = lvl
+	g.d1Levels[targetMap] = lvl
 
 	m := gridmap.NewEmptyMap[*Actor, *Item, Object](d1.LevelSize, d1.LevelSize)
 	m.SetName(targetMap)
@@ -74,7 +74,7 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 
 // setPiece is the level's quest set piece in megatiles: x, y, w, h (D1's setpc_*).
 func (g *MapGenerator) setPiece(m *gridmap.GridMap[*Actor, *Item, Object]) [4]int {
-	if lvl := g.levels[m.GetName()]; lvl != nil {
+	if lvl := g.d1Levels[m.GetName()]; lvl != nil {
 		return lvl.SetPiece
 	}
 	return [4]int{}

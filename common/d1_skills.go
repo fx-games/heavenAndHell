@@ -218,7 +218,7 @@ func (f *Factory) D1Disarm(player *Actor, target geometry.Point) {
 // disarmD1Object ports TryDisarm's success: the wall traps pointing at the object stop (their _oVar4 set to 1).
 func (g *MapGenerator) disarmD1Object(m interface{ GetName() string }, obj *d1.Object) {
 	obj.TrapFlag = false
-	lvl := g.levels[m.GetName()]
+	lvl := g.d1Levels[m.GetName()]
 	if lvl == nil {
 		return
 	}
