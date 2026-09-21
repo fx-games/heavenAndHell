@@ -126,20 +126,15 @@ func (g *GameInstance) onD1MapChanged(oldMapName, newMapName string) {
 	}
 	player.RemoveStatusEffect(common.StatusManaShield)
 	common.UpdateD1Quests(&g.state, g.state.GetMap())
-	g.audioPlayer.PlayMusic(d1AreaMusic(newMapName)) // without that track the current music plays on
+	g.audioPlayer.PlayMusic(g.d1AreaMusic(newMapName)) // without that track the current music plays on
 	if p := g.state.D1Portal(); p != nil && defs.IsTownLevel(oldMapName) && newMapName == p.Map &&
 		geometry.DistanceChebyshev(player.MapPosition(), geometry.Point{X: p.X, Y: p.Y}) <= 1 {
 		g.state.CloseD1Portal()
 	}
 }
 
-// d1AreaMusic names an area's music track, one per area like D1's themes. The tracks come from
-// assets/data/music.rec (./remap_music.sh); a theme with no file assigned isn't registered under that name and the
-// current music just keeps playing.
-func d1AreaMusic(mapName string) string {
-	if defs.IsTownLevel(mapName) {
-		return "town"
-	}
-	dlvl := max(common.LevelFromName(mapName), 1)
-	return [4]string{"cathedral", "catacombs", "caves", "hell"}[min((dlvl-1)/4, 3)]
+// d1AreaMusic names an area's music track: music_start(leveltype), one theme per level type. The tracks come from
+// the mod's music.rec; a theme with no file assigned isn't registered and the current music just keeps playing.
+func (g *GameInstance) d1AreaMusic(mapName string) string {
+	return [5]string{"town", "cathedral", "catacombs", "caves", "hell"}[min(max(g.state.D1LevelType(mapName), 0), 4)]
 }

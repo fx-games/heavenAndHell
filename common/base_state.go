@@ -122,6 +122,18 @@ func (s *State) SetMapGenerator(mapGen *MapGenerator) {
 func (s *State) D1Quests() *d1.Quests {
 	return s.mapGen.d1Quests
 }
+// D1LevelType is a map's leveltype (d1.DTypeTown ... DTypeHell): a set level's from its quest (_qlvltype), a
+// dungeon level's from the mod's levels.rec.
+func (s *State) D1LevelType(mapName string) int {
+	if defs.IsTownLevel(mapName) {
+		return d1.DTypeTown
+	}
+	if sl := s.setLevelOf(mapName); sl != nil && s.D1Quests() != nil {
+		return s.D1Quests()[sl.Quest].LvlType
+	}
+	return s.factory.Generator.D.LevelType(LevelFromName(mapName))
+}
+
 func (s *State) GetVisibility() *Visibility {
 	return s.visibility
 }

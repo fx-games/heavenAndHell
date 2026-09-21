@@ -341,7 +341,7 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 		g.audioPlayer.RegisterMusic(path.Join("assets", "music")) // our own tracks
 		g.audioPlayer.RegisterMusicEvents(path.Join("assets", "data", "music.rec"))
 		g.audioPlayer.RegisterVoices(path.Join("assets", "voice"))
-		g.audioPlayer.PlayMusic(d1AreaMusic(g.state.GetMap().GetName())) // tracks register after the first map change
+		g.audioPlayer.PlayMusic(g.d1AreaMusic(g.state.GetMap().GetName())) // tracks register after the first map change
 	}
 
 	g.state.GetFlags().SetTrue("game_started")
