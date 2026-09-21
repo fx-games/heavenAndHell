@@ -23,13 +23,14 @@ Common fields, owned by the engine:
 | `exit` | repeatable | `exit: <location> -> <map id>, <arrival location>`, with an optional `open_when: <condition>` in the quest trigger language |
 | `patch` | repeatable | `patch: <name> = <map file>, rect x1 y1 x2 y2`: a region stamped onto the level when a trigger applies it |
 
-Each generator declares the extra fields it reads (D1: decorations, set pieces, `leveltype` for `d1_set`;
+Each generator declares the extra fields it reads (D1: decorations, set pieces, `quest` for `d1_set`;
 `accretion`: templates, rooms, doors; `ldtk`: `template`). Anything else is a load error, as are a missing
 required field, an unknown generator, a duplicate `map`, an exit to a missing level or location, and zero or
 several `start` records. One test loads every mod through this check.
 
-There is no `type:`. D1's leveltype is a parameter of D1's generators (the cathedral algorithm is leveltype 1;
-`d1_set` takes `leveltype:`, 1.09's `_qlvltype`). The engine has no notion of level type.
+There is no `type:`. D1's leveltype belongs to D1's generators (the cathedral algorithm is leveltype 1; `d1_set`
+names its quest, and 1.09's quest table gives the set level and its `_qlvltype`). The engine has no notion of
+level type.
 
 ## Links
 
@@ -74,7 +75,7 @@ golden dumps stay byte-identical); others use `hash(gameSeed, map id)`.
 1. Schema + loader + validation, clean ids in both mods, `Level(id)`, one map store; delete the name/depth helpers.
 2. Explicit exits; generators only place locations; `open_when`.
 3. Quests declarative (`level:`, patches, `place_item`); delete `UpdateD1Quests`.
-4. Music and tiles from the record; `d1_set` with `leveltype`.
+4. Music and tiles from the record; delete `D1LevelType`.
 5. No fallback game; default mod `heavenandhell`.
 
 Every step keeps the game playable and the 120 D1 golden dumps byte-identical.
