@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"rpg/dungeon"
 	"rpg/recfile"
 )
 
@@ -28,11 +29,17 @@ func parseOne(t *testing.T, rec string) (levelConfig, int) {
 	if len(recs) != 1 {
 		t.Fatalf("want one record, got %d", len(recs))
 	}
-	cfg, dlvl, err := parseLevelConfig(recs[0])
-	if err != nil {
+	levels, err := dungeon.LoadLevels(recs, NumLevels)
+	if err != nil && !strings.Contains(err.Error(), "no generator for dungeon level") {
 		t.Fatal(err)
 	}
-	return cfg, dlvl
+	for dlvl, l := range levels {
+		if l.Generator != "" {
+			return levelConfig{strategy: l.Generator, params: l.Config.(LevelParams)}, dlvl
+		}
+	}
+	t.Fatal("no level parsed")
+	return levelConfig{}, 0
 }
 
 // TestModParamsReachTheGenerator is the end-to-end proof that a knob declared in a mod's levels.rec arrives at the
@@ -76,8 +83,8 @@ func TestDefaultParamsAreDiablo(t *testing.T) {
 	}
 	for dlvl := 1; dlvl < NumLevels; dlvl++ {
 		cfg := d.levels.cfg[dlvl]
-		st, ok := strategies[cfg.strategy]
-		if !ok {
+		st := strategyNamed(cfg.strategy)
+		if st.name == "" {
 			t.Fatalf("level %d names unregistered generator %q", dlvl, cfg.strategy)
 		}
 		if st.ltype != d.LevelType(dlvl) {
