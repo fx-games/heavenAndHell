@@ -569,38 +569,27 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 	hp, mana := st.GetResource(stats.Health), st.GetResource(stats.Mana)
 	equipped, pack := d1OwnedItems(player)
 	all := append(append([]*Item(nil), equipped...), pack...)
-	learn := func(spell int) { // Fascinating, Sacred, Ornate: +2 spell levels for 10% of base mana
+	learn := func(spell int) { // Fascinating, Sacred, Ornate: +2 spell levels (D1 took 10% of base mana for it)
 		h.SpellLevels[spell] = min(h.SpellLevels[spell]+2, 15)
-		cut := h.MaxManaBase / 10
-		h.MaxManaBase -= cut
-		h.ManaBase = max(h.ManaBase-cut, 0)
-		SyncHero(player)
-		mana.Decrease(cut >> 6)
+	}
+	// What D1 made a shrine take for good - a stat, a spell level, base mana, experience, an item's durability or
+	// damage - it asks for in gold instead: the gift stays, the loss is gone (the mod's shrine cost).
+	if shrine < len(d1.ShrineCosts) && d1.ShrineCosts[shrine] > 0 {
+		st.DecrementBy(stats.Gold, min(d1.ShrineCosts[shrine]*max(dlvl, 1), st.GetAttribute(stats.Gold)))
 	}
 	switch shrine {
-	case 0: // Mysterious
-		for attr := d1.AttrStr; attr <= d1.AttrVit; attr++ {
-			f.d1ModifyStat(player, attr, -1)
-		}
+	case 0: // Tithing (D1's Mysterious, which took 1 from every stat)
 		f.d1ModifyStat(player, d1Rng.Intn(4), 6)
-	case 1: // Hidden
-		var durable []*Item
+	case 1: // Tempering (D1's Hidden, which took 20 max durability from one item)
 		for _, it := range equipped {
 			if d := it.d1; d.MaxDur != 0 && d.MaxDur != 255 {
 				d.Durability, d.MaxDur = min(d.Durability+10, d.MaxDur+10), d.MaxDur+10
-				durable = append(durable, it)
 			}
 		}
-		if len(durable) > 0 {
-			d := durable[d1Rng.Intn(len(durable))].d1
-			d.Durability, d.MaxDur = max(d.Durability-20, 1), max(d.MaxDur-20, 1)
-		}
-	case 2: // Gloomy
+	case 2: // Bulwark (D1's Gloomy, which took 1 max damage from every weapon)
 		for _, it := range all {
 			if d := it.d1; isD1Armor(d) {
 				d.AC += 2
-			} else if isD1Weapon(d) {
-				d.MaxDam = max(d.MaxDam-1, d.MinDam)
 			}
 		}
 	case 3: // Weird
@@ -621,19 +610,11 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 		for _, it := range all {
 			it.d1.Durability = it.d1.MaxDur
 		}
-	case 7: // Enchanted
-		var known []int
+	case 7: // Arcane (D1's Enchanted, which took 2 levels from one spell)
 		for s, l := range h.SpellLevels {
 			if l > 0 {
-				known = append(known, s)
+				h.SpellLevels[s] = min(l+1, 15)
 			}
-		}
-		if len(known) > 1 {
-			for _, s := range known {
-				h.SpellLevels[s] = min(h.SpellLevels[s]+1, 15)
-			}
-			s := known[d1Rng.Intn(len(known))]
-			h.SpellLevels[s] = max(h.SpellLevels[s]-2, 0)
 		}
 	case 8: // Thaumaturgic
 		for _, obj := range m.Objects() {
@@ -641,7 +622,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 				o.O.Active = true
 			}
 		}
-	case 9: // Fascinating
+	case 9: // Burning (D1's Fascinating)
 		learn(d1.SplFirebolt)
 	case 10: // Cryptic
 		f.ActionBroker.Execute(NewSpellAction(player, d1.SplNova, 2*lt, player.MapPosition()))
@@ -680,7 +661,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 		mana.SetToMax()
 	case 15: // Holy
 		f.d1RandomTeleport(player)
-	case 16: // Sacred
+	case 16: // Crackling (D1's Sacred)
 		learn(d1.SplChargedBolt)
 	case 17: // Spiritual
 		inv := player.GetInventory()
@@ -695,7 +676,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 		f.d1ModifyStat(player, d1.AttrVit, 2)
 	case 22: // Secluded
 		m.SetAllExplored()
-	case 23: // Ornate
+	case 23: // Radiant (D1's Ornate)
 		learn(d1.SplHolyBolt)
 	case 24: // Glimmering
 		for _, it := range all {
@@ -710,13 +691,8 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 			f.d1ModifyStat(player, a[0], a[1])
 		}
 		f.ActionBroker.QueueForExecution(NewTrapMissileAction(pos, MisFireWall, player.MapPosition()))
-	case 27: // Glowing
-		gain, keep := h.Exp/1000, 0
-		if h.Exp > 5000 {
-			gain, keep = 5, int(float64(h.Exp)*0.95)
-		}
-		f.d1ModifyStat(player, d1.AttrMag, gain)
-		h.Exp = keep
+	case 27: // Lucid (D1's Glowing, which took experience)
+		f.d1ModifyStat(player, d1.AttrMag, min(h.Exp/1000, 5))
 	case 28: // Mendicant's
 		gold := st.GetAttribute(stats.Gold) / 2
 		h.AddExperience(h.Level, gold)
