@@ -40,7 +40,7 @@ name: Door - Close
 sound: sfx/close_door/plm_door_shut.ogg
 sound: sfx/close_door/plm_door_slam.ogg
 
-internal_name: heavy_door
+internal_name: enter_dungeon
 name: Town gate
 sound: sfx/heavy_door.ogg
 

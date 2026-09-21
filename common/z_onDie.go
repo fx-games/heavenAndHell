@@ -70,6 +70,7 @@ func (d *OnKillHook) onKill(context ActionContext, killer, victim *Actor) []Acti
 	if victim.hero != nil { // D1 monsters gain nothing from killing the hero
 		return nil
 	}
+	whenVisible(context.ActionBroker, victim, func() { playCueAt(context, victim.MonsterSoundCue("death"), victim.MapPosition()) })
 	msg := context.Msg
 	victimLevel := victim.GetStats().GetAttribute(stats.Level)
 	victimXP := max(1, victim.GetStats().GetAttribute(stats.Experience))

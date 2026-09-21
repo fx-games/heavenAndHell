@@ -76,7 +76,7 @@ func (d *MeleeAttackAction) playSound(context ActionContext) {
 			context.AudioPlayer.PlayCue("melee_attack")
 		}
 	} else {
-		playCueAt(context, d.attacker.D1MonsterSoundCue("attack"), p)
+		playCueAt(context, d.attacker.MonsterSoundCue("attack"), p)
 	}
 }
 

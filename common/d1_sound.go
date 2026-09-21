@@ -35,7 +35,7 @@ func (g *Factory) PlaySoundAt(cue string, p geometry.Point) bool {
 // PlayD1MonsterSound plays a monster's sound of a category (attack, hit, death, special) where it stands
 // (PlayEffect); false when it has none.
 func (g *Factory) PlayD1MonsterSound(a *Actor, category string) bool {
-	return g.PlaySoundAt(a.D1MonsterSoundCue(category), a.MapPosition())
+	return g.PlaySoundAt(a.MonsterSoundCue(category), a.MapPosition())
 }
 
 func playCueFrom(ap *audio.Player, listener *Actor, cue string, p geometry.Point) bool {

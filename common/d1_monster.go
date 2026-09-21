@@ -85,13 +85,17 @@ func D1DirTo(from, to geometry.Point) int {
 
 func (a *Actor) D1Monster() *D1Monster { return a.d1Monster }
 
-// D1MonsterSoundCue builds a monster-specific sound event (e.g. "monster.nzombie.attack", from
-// assets/data/sounds.rec) for category "attack"/"hit"/"death". Empty if this actor isn't a D1 monster.
-func (a *Actor) D1MonsterSoundCue(category string) string {
-	if a.d1Monster == nil || a.d1Monster.Data == nil {
+// MonsterSoundCue builds a monster-specific sound event (e.g. "monster.nzombie.attack", from
+// assets/data/sounds.rec) for category "attack"/"hit"/"death"/"special": a D1 monster by its type, any other
+// monster by its internal name ("monster.skeleton.death"). Empty for the hero.
+func (a *Actor) MonsterSoundCue(category string) string {
+	if a.hero != nil {
 		return ""
 	}
-	return defs.IconID("monster", a.d1Monster.Data.ID) + "." + category
+	if a.d1Monster != nil && a.d1Monster.Data != nil {
+		return defs.IconID("monster", a.d1Monster.Data.ID) + "." + category
+	}
+	return "monster." + a.GetInternalName() + "." + category
 }
 
 // Decision 8: one sheet icon per D1 monster type ("monster.<ID>" in icons/actors.rec, seeded from its graphics

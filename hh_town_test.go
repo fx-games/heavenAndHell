@@ -451,10 +451,17 @@ func TestHeavenAndHellHearsOnlyItsOwnSounds(t *testing.T) {
 	g := newHeavenAndHellGame(t, NewDummyUI())
 	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
 	a := g.GetAudio()
-	if !a.HasCue("level_up") || !a.HasCue("monster.skeleton.hit") {
-		t.Error("H&H's own sounds are not registered")
+	for _, cue := range []string{"level_up", "monster.skeleton.hit", "monster.skeleton.death", "monster.bat.attack", "enter_dungeon"} {
+		if !a.HasCue(cue) {
+			t.Errorf("H&H's own %s is not registered", cue)
+		}
 	}
-	for _, cue := range []string{"monster.nzombie.hit", "enter_dungeon"} {
+	for _, a := range g.GetWorldState().GetMap().Actors() {
+		if a.GetInternalName() == "skeleton" && a.MonsterSoundCue("death") != "monster.skeleton.death" {
+			t.Errorf("an H&H skeleton dies with %q", a.MonsterSoundCue("death"))
+		}
+	}
+	for _, cue := range []string{"monster.nzombie.hit", "sfx.PS_SWING"} {
 		if a.HasCue(cue) {
 			t.Errorf("H&H plays Diablo's %s", cue)
 		}

@@ -723,7 +723,7 @@ func d1OnKill(ctx ActionContext, killer, victim *Actor) []Action {
 	if killer.hero != nil {
 		state.factory.grantExperience(killer, mon.Level, mon.Exp)
 	}
-	whenVisible(ctx.ActionBroker, victim, func() { playCueAt(ctx, victim.D1MonsterSoundCue("death"), victim.MapPosition()) })
+	whenVisible(ctx.ActionBroker, victim, func() { playCueAt(ctx, victim.MonsterSoundCue("death"), victim.MapPosition()) })
 	d1QuestKill(ctx, mon)
 	d1FallenFear(state, victim.MapPosition())
 	state.factory.d1AcidDeath(ctx, victim)

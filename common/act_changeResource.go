@@ -104,7 +104,7 @@ func (d *ChangeResourceAction) prepareAnimations(context ActionContext) []Animat
 
 func (d *ChangeResourceAction) playHitSound(context ActionContext) {
 	hitActor := d.actor
-	if playCueAt(context, hitActor.D1MonsterSoundCue("hit"), hitActor.MapPosition()) {
+	if playCueAt(context, hitActor.MonsterSoundCue("hit"), hitActor.MapPosition()) {
 		return
 	}
 	hitCue := "human_hit"
