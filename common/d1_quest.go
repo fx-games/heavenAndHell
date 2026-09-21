@@ -768,25 +768,12 @@ func randomQuestSpot(m *gridmap.GridMap[*Actor, *Item, Object], keep func(geomet
 	return cells[d1Rng.Intn(len(cells))], true
 }
 
-// d1QuestKill ports CheckQuestKill and M_DiabloDeath's quest, plus Poisoned Water's check of CheckQuests: the
-// set level is clean once its last monster dies.
+// d1QuestKill ports Poisoned Water's check of CheckQuests -- the set level is clean once its last monster dies,
+// which is a whole-map question no condition can ask -- and then hands the death to the mod's on_kill triggers,
+// which carry CheckQuestKill and M_DiabloDeath's quest.
 func d1QuestKill(ctx ActionContext, mon *D1Monster) {
 	state := ctx.GameState
 	f := state.factory
-	q := -1
-	switch {
-	case mon.Data.ID == "MT_SKING":
-		q = d1.QSkelKing
-	case mon.Data.ID == "MT_CLEAVER":
-		q = d1.QButcher
-	case mon.Data.ID == "MT_DIABLO":
-		q = d1.QDiablo
-	case mon.Unique != nil:
-		if uq, ok := map[string]int{"Gharbad the Weak": d1.QGarbud, "Zhar the Mad": d1.QZhar, "Arch-Bishop Lazarus": d1.QBetrayer,
-			"Warlord of Blood": d1.QWarlord}[mon.Unique.Name]; ok {
-			q = uq
-		}
-	}
 	if state.onSetLevelOf(state.GetMap(), d1.QPWater) && state.QuestActive(d1.QPWater) != d1.QuestInit {
 		clean := true
 		for _, a := range state.GetMap().Actors() {
@@ -798,28 +785,21 @@ func d1QuestKill(ctx ActionContext, mon *D1Monster) {
 			state.mapGen.cleanD1Water(state.GetMap())
 		}
 	}
-	if q < 0 || state.QuestActive(q) == d1.QuestDone {
-		return
+	f.fireQuestTriggers(EventKill, mon.Data.ID)
+	if mon.Unique != nil {
+		f.fireQuestTriggers(EventKill, mon.Unique.Name)
 	}
-	f.completeD1Quest(q)
-	if n, ok := map[int]int{d1.QSkelKing: 82, d1.QButcher: 80, d1.QGarbud: 61, d1.QZhar: 62, d1.QBetrayer: 83, d1.QWarlord: 94}[q]; ok {
-		f.PlayD1HeroSound(n)
+}
+
+// d1EndTextWindow is the end_text outcome: Diablo's death screen.
+func (f *Factory) d1EndTextWindow() {
+	if ui := f.UI(); ui != nil {
+		ui.OpenTextWindow(util.ToLabelText(append(d1EndText(), "",
+			"Yet what dwells below has taken his measure. Every level of the dungeon now breeds",
+			"stronger things, and richer spoils. Gillian collects for the town, should you wish",
+			"to see them walk again.")))
 	}
-	switch q {
-	case d1.QBetrayer:
-		state.SetQuestVar(q, 1, 7)
-		state.SetQuestVar(q, 2, 4)
-		state.SetQuestActive(d1.QDiablo, d1.QuestActive)
-		UpdateD1Quests(state, state.GetMap())
-	case d1.QDiablo:
-		if ui := ctx.UserInterface(); ui != nil {
-			ui.OpenTextWindow(util.ToLabelText(append(d1EndText(), "",
-				"Yet what dwells below has taken his measure. Every level of the dungeon now breeds",
-				"stronger things, and richer spoils. Gillian collects for the town, should you wish",
-				"to see them walk again.")))
-		}
-		ctx.Msg("The dungeon stirs: monsters and loot below are stronger now.")
-	}
+	f.Msg("The dungeon stirs: monsters and loot below are stronger now.")
 }
 
 func d1EndText() []string {
@@ -829,32 +809,13 @@ func d1EndText() []string {
 	return strings.Split(string(data), "\n")
 }
 
-// d1QuestItemPickedUp ports CheckQuestItem.
+// d1QuestItemPickedUp ports CheckQuestItem: the mod's on_item_pickup triggers, named by the item picked up.
 func (f *Factory) d1QuestItemPickedUp(it *d1.Item) {
-	s := f.State
-	switch it.BaseIdx {
-	case d1.IdiOptAmulet:
-		f.completeD1Quest(d1.QBlind)
-	case d1.IdiMushroom:
-		if s.QuestActive(d1.QMushroom) == d1.QuestActive && s.QuestVar(d1.QMushroom, 1) == d1.QSMushSpawned {
-			f.PlayD1HeroSound(95)
-			s.SetQuestVar(d1.QMushroom, 1, d1.QSMushPicked)
-		}
-	case d1.IdiAnvil, d1.IdiRock:
-		q := map[int]int{d1.IdiAnvil: d1.QAnvil, d1.IdiRock: d1.QRock}[it.BaseIdx]
-		if s.QuestActive(q) == d1.QuestInit {
-			s.SetQuestActive(q, d1.QuestActive)
-			s.SetQuestVar(q, 1, 1)
-		}
-		if s.QuestLog(q) {
-			f.PlayD1HeroSound(map[int]int{d1.QAnvil: 89, d1.QRock: 87}[q])
-		}
-	case d1.IdiGldnElix:
-		f.PlayD1HeroSound(88)
-	case d1.IdiArmOfVal:
-		f.completeD1Quest(d1.QBlood)
-		f.PlayD1HeroSound(91)
+	items := f.D1().D.Items
+	if it.BaseIdx < 0 || it.BaseIdx >= len(items) {
+		return
 	}
+	f.fireQuestTriggers(EventItemPickup, items[it.BaseIdx].InternalName)
 }
 
 // d1QuestDrop ports SpawnItem's Black Mushroom branch: once Adria has the mushroom, the next ordinary monster
@@ -982,25 +943,12 @@ func (f *Factory) D1MonsterGreeting(a *Actor) {
 	}
 }
 
-// d1DungMsgs ports PlayDungMsgs: the hero's line on first entering 1, 5, 9 and 13, and Diablo's on 16, each once.
+// d1DungMsgs ports PlayDungMsgs: the mod's on_enter_level triggers, named by the depth reached. Set levels and
+// town have none. The "each once" is the triggers' own business -- they set and test a flag.
 func (f *Factory) d1DungMsgs(m *gridmap.GridMap[*Actor, *Item, Object]) {
-	s := f.State
 	dlvl := LevelFromName(m.GetName())
-	if s.setLevelOf(m.GetName()) != nil || dlvl == 0 {
+	if f.State.setLevelOf(m.GetName()) != nil || dlvl == 0 {
 		return
 	}
-	once := func(key string) bool {
-		key = "d1:dungmsg:" + key
-		if s.GetFlags().IsSet(key) {
-			return false
-		}
-		s.GetFlags().SetTrue(key)
-		return true
-	}
-	switch {
-	case (dlvl == 1 || dlvl == 5 || dlvl == 9 || dlvl == 13) && once(fmt.Sprint(dlvl)): // cathedral, catacombs, caves, hell
-		f.PlayD1HeroSound(map[int]int{1: 97, 5: 96, 9: 98, 13: 99}[dlvl])
-	case dlvl == 16 && once("16"): // Diablo's greeting; 1.09 checks _pLvlVisited[15] by mistake and never plays it
-		f.playD1Sound("PS_DIABLVLINT")
-	}
+	f.fireQuestTriggers(EventEnterLevel, fmt.Sprint(dlvl))
 }
