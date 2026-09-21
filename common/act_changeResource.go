@@ -33,7 +33,12 @@ func (d *ChangeResourceAction) Execute(context ActionContext) []Action {
 		receiver.shownHealth = receiver.GetStats().GetResource(stats.Health).Value()
 	}
 
+	hp := receiver.GetStats().GetResource(stats.Health)
+	wasOK := hp.Value()*4 >= hp.GetMax()
 	receiver.GetStats().IncrementResourceBy(d.resourceName, d.changedByAmount)
+	if d.resourceName == stats.Health && wasOK && hp.Value()*4 < hp.GetMax() && receiver.IsAlive() && receiver == context.GameState.GetPlayer() {
+		PlayUICue("low_health") // a quarter of the hero's life left
+	}
 
 	if d.changedByAmount < 0 {
 		if d.shouldStartAnimation != nil {

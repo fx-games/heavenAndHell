@@ -94,7 +94,16 @@ callers fall back.
 | `data/voices.rec` | `./remap_voices.sh` | D1's speech, one record per `_sfx_id` (`TSFX_BMAID1`, `PS_WARR8`, `USFX_GARBUD1`). `text:` is what the original line said, so you know what to record in its place | `RegisterVoiceEvents` (voice volume) |
 | `data/music.rec` | `./remap_music.sh` | the five area themes `town`/`cathedral`/`catacombs`/`caves`/`hell` that `d1AreaMusic` (`game/town_d1.go`) switches between | `RegisterMusicEvents` (looped, listed in the Music Player) |
 
-A new sound event = one `PlayCue("<name>")` call + one record in `sounds.rec`. D1's effects go through
+Every rec above is the mod's own (`files/mods/<mod>/data/`); the scripts take the mod, default `d1`
+(`./remap_sounds.sh heavenandhell`), and the file browser shows only that mod's folder.
+
+The engine's own cues, each silent unless the mod's `sounds.rec` has it: `menu_move`, `menu_select` (both menus;
+D1: `IS_TITLEMOV`/`IS_TITLSLCT`), `store_enter`, `vendor_buy`, `vendor_sell`, `stairs_down`, `stairs_up`,
+`enter_dungeon`, `identify_bad|ego|art`, `status.<effect>` and `status_recover` (the hero's), `low_health`,
+`item_break`, `quaff`, `use_item`, `use_staff`, `disarm`, `item_equip`, `item_unequip`, `player_death`,
+`game_over`, `you_win`, `teleport`, `earthquake`, `melee_attack`, `bow_fire`, `open_door`, `close_door`,
+`level_up`, and `monster.<id>.attack|hit|death|special`. The shared D1 code plays D1's ids as `sfx.<id>`, whatever
+the mod. A new sound event = one `PlayCue("<name>")` call + one record in `sounds.rec`. D1's effects go through
 `playD1SfxAt` / `Factory.PlayD1Sfx` with D1's distance fade and pan (`common/d1_sound.go`), its speech through
 `playD1Sound`; `TestD1SfxHaveSoundEvents` and `TestD1SpeechHaveVoiceEvents` fail when a record is missing.
 

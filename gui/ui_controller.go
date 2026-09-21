@@ -1978,3 +1978,10 @@ func redToGreen(percent float64) color.RGBA {
 	green := uint8(255 * percent)
 	return color.RGBA{R: red, G: green, B: 0, A: 255}
 }
+
+// playUICue plays one of the engine's interface cues (menu_move, menu_select, ...) if the mod's sounds.rec has it.
+func (u *UIController) playUICue(cue string) {
+	if ap := u.context.AudioPlayer; ap != nil && ap.HasCue(cue) {
+		ap.PlayCue(cue)
+	}
+}

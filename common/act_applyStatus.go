@@ -20,6 +20,9 @@ func NewApplyStatusAction(source Cause, actor *Actor, effect StatusEffect, turnC
 }
 func (d *ApplyStatusAction) Execute(context ActionContext) []Action {
 	d.actor.AddStatusEffect(d.effect, d.turnCount)
+	if d.actor == context.GameState.GetPlayer() {
+		PlayUICue("status." + string(d.effect))
+	}
 	return nil
 }
 

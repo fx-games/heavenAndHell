@@ -186,6 +186,7 @@ func NewGameInstance(startInfo common.StartInfo, uiController common.UserInterfa
 	println(fmt.Sprintf("GameInstance created.."))
 	println(fmt.Sprintf("Random source loaded.."))
 	cfg := startInfo.UserConfiguration
+	common.UICues = g.audioPlayer
 	g.audioPlayer.SetSoundVolume(cfg.SoundVolume)
 	g.audioPlayer.SetMusicVolume(cfg.MusicVolume)
 	g.audioPlayer.SetVoiceVolume(cfg.VoiceVolume)
@@ -835,8 +836,13 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 		}
 	}
 
-	if defs.IsTownLevel(oldMapName) {
+	switch old, now := common.LevelFromName(oldMapName), common.LevelFromName(newMapName); {
+	case defs.IsTownLevel(oldMapName):
 		g.GetAudio().PlayCue("enter_dungeon")
+	case defs.IsTownLevel(newMapName) || now < old:
+		common.PlayUICue("stairs_up")
+	default:
+		common.PlayUICue("stairs_down")
 	}
 	g.onD1MapChanged(oldMapName, newMapName)
 

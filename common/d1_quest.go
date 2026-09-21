@@ -667,6 +667,7 @@ func mapClearedBy(m *gridmap.GridMap[*Actor, *Item, Object], mon *D1Monster) boo
 
 // d1EndTextWindow is the end_text outcome: Diablo's death screen.
 func (f *Factory) d1EndTextWindow() {
+	PlayUICue("you_win")
 	if ui := f.UI(); ui != nil {
 		ui.OpenTextWindow(util.ToLabelText(append(d1EndText(), "",
 			"Yet what dwells below has taken his measure. Every level of the dungeon now breeds",

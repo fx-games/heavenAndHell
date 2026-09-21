@@ -262,6 +262,7 @@ func (i *ShopMenu) layoutCentered() {
 }
 
 func (i *ShopMenu) selectionUp() {
+	defer i.uiController.playUICue("menu_move") // IS_TITLEMOV
 	if i.selectedIndex == 0 {
 		i.selectedIndex = len(i.items) - 1
 	} else {
@@ -270,6 +271,7 @@ func (i *ShopMenu) selectionUp() {
 }
 
 func (i *ShopMenu) selectionDown() {
+	defer i.uiController.playUICue("menu_move") // IS_TITLEMOV
 	if i.selectedIndex == len(i.items)-1 {
 		i.selectedIndex = 0
 	} else {
@@ -281,6 +283,7 @@ func (i *ShopMenu) confirmSelection() {
 	if !i.hasValidSelection() {
 		return
 	}
+	i.uiController.playUICue("menu_select") // IS_TITLSLCT
 	action := i.items[i.selectedIndex].Action
 	if action != nil {
 		action()

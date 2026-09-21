@@ -7,6 +7,7 @@ import (
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/stats"
+	"strings"
 	"time"
 )
 
@@ -213,6 +214,11 @@ func UseD1Potion(user *Actor, miscID string) {
 	h := user.hero
 	if h == nil {
 		return
+	}
+	if strings.Contains(miscID, "POT") || strings.Contains(miscID, "ELIX") {
+		PlayUICue("quaff")
+	} else {
+		PlayUICue("use_item")
 	}
 	s := user.HeroSheet()
 	hp, mana := user.GetStats().GetResource(stats.Health), user.GetStats().GetResource(stats.Mana)

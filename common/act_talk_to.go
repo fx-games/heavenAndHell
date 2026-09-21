@@ -80,6 +80,9 @@ func (d *TalkToAction) Execute(context ActionContext) []Action {
 		}
 	}
 	f.playD1Sound(f.D1().D.TextSfx[d1Greeting(f.D1().D.Gossip, npc.GetVendorType())])
+	if npc.GetVendorType() != "" {
+		PlayUICue("store_enter")
+	}
 	talkItem := util.MenuItem{MainText: fmt.Sprintf("Talk to %s", npc.Name()), Action: talk}
 	options := append([]util.MenuItem{talkItem}, d1VendorOptions(context, npc)...)
 	context.UserInterface().OpenMenu(options)

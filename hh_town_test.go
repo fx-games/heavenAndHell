@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"rpg/common"
 	"rpg/d1"
 	"rpg/defs"
@@ -462,9 +464,17 @@ func TestHeavenAndHellHearsOnlyItsOwnSounds(t *testing.T) {
 			t.Errorf("an H&H skeleton dies with %q", a.MonsterSoundCue("death"))
 		}
 	}
-	for _, cue := range []string{"monster.nzombie.hit", "sfx.PS_SWING"} {
-		if a.HasCue(cue) {
-			t.Errorf("H&H plays Diablo's %s", cue)
+	if a.HasCue("monster.nzombie.hit") {
+		t.Error("H&H has Diablo's monsters' sounds")
+	}
+	// the effect ids the shared D1 code plays (sfx.PS_SWING...) are H&H's to fill, with anything but Diablo's files
+	for _, rec := range []string{"sounds.rec", "music.rec"} {
+		data, err := os.ReadFile(filepath.Join("files", "mods", "heavenandhell", "data", rec))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(string(data), "diablo_") {
+			t.Errorf("H&H's %s points at Diablo's audio", rec)
 		}
 	}
 }

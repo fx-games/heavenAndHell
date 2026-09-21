@@ -702,8 +702,9 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 		learn(d1.SplHolyBolt)
 	case 24: // Glimmering
 		for _, it := range all {
-			if it.d1.Magical != 0 {
+			if it.d1.Magical != 0 && !it.d1.Identified {
 				it.d1.Identified = true
+				d1IdentifyCue(it.d1)
 			}
 		}
 	case 26: // Oily

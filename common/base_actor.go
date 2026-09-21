@@ -460,6 +460,9 @@ func (a *Actor) handleStatusEffects() {
 			newValue := value - 1
 			if newValue == 0 {
 				a.statusEffects.SetFalse(flagName)
+				if a.hero != nil {
+					PlayUICue("status_recover")
+				}
 			} else {
 				a.statusEffects.SetToValue(flagName, newValue)
 			}

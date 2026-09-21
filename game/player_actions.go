@@ -129,11 +129,13 @@ func (a *Actions) EquipItem(item *common.Item) {
 		a.state.Factory().PlayD1HeroSound(13)
 		return
 	}
+	common.PlayUICue("item_equip")
 	a.actionBroker.Execute(common.NewEquipItemAction(common.AbstractCause("equip"), a.player, item))
 	a.actionBroker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("equip"), 10)) // not D1's (instant): a belt swap isn't free
 }
 
 func (a *Actions) UnequipItem(item *common.Item) {
+	common.PlayUICue("item_unequip")
 	a.actionBroker.Execute(common.NewUnequipItemAction(common.AbstractCause("unequip"), a.player, item))
 	a.actionBroker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("unequip"), 10))
 }

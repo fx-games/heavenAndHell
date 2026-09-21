@@ -389,6 +389,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 			return false
 		}
 		item.d1.Identified = true
+		d1IdentifyCue(item.d1)
 		item.RefreshD1()
 		SyncHero(c.caster)
 		f.Msg(fmt.Sprintf("It is %s.", item.Name()))

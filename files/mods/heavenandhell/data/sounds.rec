@@ -1,32 +1,52 @@
 %rec: default
-# Heaven & Hell's sounds: main's files/assets/sfx, on the engine's cue names. This game has no music or speech.
+# Heaven & Hell's sound events: its own and Abaddon's effects (sfx/) and the Dubtrain Angband Sound Pack
+# (ang_sfx/), never Diablo's. Remap with ./remap_sounds.sh (sfxmapper) like any mod.
 
 internal_name: melee_attack
 name: Hero - Attack
 sound: sfx/melee_attack/plc_hit_body.ogg
 sound: sfx/melee_attack/plc_hit_hay.ogg
+sound: sfx/melee_attack/melee_attack_1.ogg
+sound: sfx/melee_attack/melee_attack_2.ogg
+sound: sfx/melee_attack/melee_attack_big.ogg
+sound: sfx/melee_attack/melee_attack_critical.ogg
+sound: sfx/player_melee_sfx_1.ogg
+sound: sfx/player_melee_sfx_2.ogg
+sound: sfx/special_attack.ogg
 
 internal_name: bow_fire
 name: Hero - Shoot
 sound: sfx/bow_fire/plc_miss_arrow.ogg
 sound: sfx/bow_fire/plc_miss_arrow2.ogg
+sound: ang_sfx/bow_fire/plc_miss_arrow.ogg
+sound: ang_sfx/bow_fire/plc_miss_arrow2.ogg
+sound: sfx/player_ranged_sfx_1.ogg
+sound: sfx/player_ranged_sfx_2.ogg
+sound: sfx/ranged_attack/ranged_1.ogg
+sound: sfx/ranged_attack/ranged_2.ogg
 
 internal_name: level_up
 name: Hero - Level Up
 sound: sfx/levelup.ogg
+sound: sfx/level_up.ogg
 
 internal_name: human_hit
 name: Hero - Hit
 sound: sfx/human_hit/plc_hit_grunt.ogg
 sound: sfx/human_hit/plc_hit_grunt2.ogg
+sound: sfx/human_hit/player_hit_2.ogg
+sound: sfx/human_hit/player_hit_sfx_1.ogg
 
 internal_name: heavy_hit_human
 name: Hero - Heavy Hit
 sound: sfx/heavy_hit_human.ogg
+sound: ang_sfx/heavy_hit_human.ogg
+sound: sfx/knockback.ogg
 
 internal_name: missile_hit_human
 name: Hero - Missile Hit
 sound: sfx/missile_hit_human.ogg
+sound: ang_sfx/missile_hit_human.ogg
 
 internal_name: open_door
 name: Door - Open
@@ -34,52 +54,1452 @@ sound: sfx/open_door/plm_door_open.ogg
 sound: sfx/open_door/plm_door_opening.ogg
 sound: sfx/open_door/plm_door_rusty.ogg
 sound: sfx/open_door/plm_door_wooden.ogg
+sound: sfx/open_door/open_door_sfx_1.ogg
+sound: sfx/open_door/open_door_sfx_2.ogg
 
 internal_name: close_door
 name: Door - Close
 sound: sfx/close_door/plm_door_shut.ogg
 sound: sfx/close_door/plm_door_slam.ogg
+sound: ang_sfx/plm_cabinet_shut.ogg
+sound: ang_sfx/plm_door_creakshut.ogg
+sound: ang_sfx/plm_door_latch.ogg
 
 internal_name: enter_dungeon
 name: Town gate
 sound: sfx/heavy_door.ogg
+sound: sfx/enter_dungeon.ogg
 
 internal_name: skeleton_hit
 name: Skeleton - Hit
 sound: sfx/skeleton_hit.ogg
+sound: ang_sfx/skeleton_hit.ogg
 
 internal_name: monster.skeleton.hit
 name: Skeleton - Hit
 sound: sfx/skeleton_hit.ogg
+sound: sfx/skeleton/skeleton_1.ogg
+sound: sfx/skeleton/skeleton_2.ogg
+sound: sfx/bone_hit/bone_hit_1.ogg
+sound: sfx/bone_hit/bone_hit_2.ogg
 
 internal_name: monster.skeleton.death
 name: Skeleton - Death
 sound: sfx/skeleton_death.ogg
+sound: sfx/skeleton_death_2.ogg
 
 internal_name: monster.skeleton_archer.hit
 name: Skeleton - Hit
 sound: sfx/skeleton_hit.ogg
+sound: sfx/skeleton/skeleton_1.ogg
+sound: sfx/skeleton/skeleton_2.ogg
+sound: sfx/bone_hit/bone_hit_1.ogg
+sound: sfx/bone_hit/bone_hit_2.ogg
 
 internal_name: monster.skeleton_archer.death
 name: Skeleton - Death
 sound: sfx/skeleton_death.ogg
+sound: sfx/skeleton_death_2.ogg
 
 internal_name: monster.skeleton_warrior.hit
 name: Skeleton - Hit
 sound: sfx/skeleton_hit.ogg
+sound: sfx/skeleton/skeleton_1.ogg
+sound: sfx/skeleton/skeleton_2.ogg
+sound: sfx/bone_hit/bone_hit_1.ogg
+sound: sfx/bone_hit/bone_hit_2.ogg
 
 internal_name: monster.skeleton_warrior.death
 name: Skeleton - Death
 sound: sfx/skeleton_death.ogg
+sound: sfx/skeleton_death_2.ogg
 
 internal_name: monster.skeleton_captain.hit
 name: Skeleton - Hit
 sound: sfx/skeleton_hit.ogg
+sound: sfx/skeleton/skeleton_1.ogg
+sound: sfx/skeleton/skeleton_2.ogg
+sound: sfx/bone_hit/bone_hit_1.ogg
+sound: sfx/bone_hit/bone_hit_2.ogg
 
 internal_name: monster.skeleton_captain.death
 name: Skeleton - Death
 sound: sfx/skeleton_death.ogg
+sound: sfx/skeleton_death_2.ogg
 
 internal_name: monster.bat.attack
 name: Bat - Attack
 sound: sfx/bat_attack.ogg
+sound: sfx/bat/bat_1.ogg
+sound: sfx/bat/bat_2.ogg
+sound: ang_sfx/mco_ceramic_trill.ogg
+
+internal_name: sfx.PS_BFIRE
+name: Hero - Bow Shot
+sound: ang_sfx/mco_spray_long.ogg
+sound: sfx/player_ranged_sfx_1.ogg
+sound: sfx/player_ranged_sfx_2.ogg
+
+internal_name: sfx.PS_ROGUE71
+name: Hero - Death (Rogue voice)
+sound: ang_sfx/pls_man_scream2.ogg
+sound: ang_sfx/pls_man_yell.ogg
+sound: sfx/player_death_sfx.ogg
+
+internal_name: sfx.PS_MAGE71
+name: Hero - Death (Sorcerer voice)
+sound: ang_sfx/pls_man_scream2.ogg
+sound: ang_sfx/pls_man_yell.ogg
+sound: sfx/player_death_sfx.ogg
+
+internal_name: sfx.PS_WARR71
+name: Hero - Death (Warrior voice)
+sound: ang_sfx/pls_man_scream2.ogg
+sound: ang_sfx/pls_man_yell.ogg
+sound: sfx/player_death_sfx.ogg
+
+internal_name: sfx.PS_DEAD
+name: Hero - Death (Warrior)
+sound: ang_sfx/plc_die_laugh.ogg
+sound: sfx/player_death_sfx.ogg
+
+internal_name: sfx.IS_REPAIR
+name: Hero - Item Repair
+sound: sfx/anvil_UI.ogg
+
+internal_name: sfx.PS_ROGUE69
+name: Hero - Hurt (Rogue voice)
+sound: ang_sfx/human_hit/plc_hit_grunt.ogg
+sound: ang_sfx/human_hit/plc_hit_grunt2.ogg
+sound: ang_sfx/pls_man_argoh.ogg
+sound: sfx/human_hit/player_hit_2.ogg
+sound: sfx/human_hit/player_hit_sfx_1.ogg
+sound: sfx/human_hit/plc_hit_grunt.ogg
+sound: sfx/human_hit/plc_hit_grunt2.ogg
+
+internal_name: sfx.PS_MAGE69
+name: Hero - Hurt (Sorcerer voice)
+sound: ang_sfx/human_hit/plc_hit_grunt.ogg
+sound: ang_sfx/human_hit/plc_hit_grunt2.ogg
+sound: ang_sfx/pls_man_argoh.ogg
+sound: sfx/human_hit/player_hit_2.ogg
+sound: sfx/human_hit/player_hit_sfx_1.ogg
+sound: sfx/human_hit/plc_hit_grunt.ogg
+sound: sfx/human_hit/plc_hit_grunt2.ogg
+
+internal_name: sfx.PS_WARR69
+name: Hero - Hurt (Warrior voice)
+sound: ang_sfx/human_hit/plc_hit_grunt.ogg
+sound: ang_sfx/human_hit/plc_hit_grunt2.ogg
+sound: ang_sfx/pls_man_argoh.ogg
+sound: sfx/human_hit/player_hit_2.ogg
+sound: sfx/human_hit/player_hit_sfx_1.ogg
+sound: sfx/human_hit/plc_hit_grunt.ogg
+sound: sfx/human_hit/plc_hit_grunt2.ogg
+
+internal_name: sfx.PS_SWING
+name: Hero - Swing
+sound: ang_sfx/plc_miss_swish.ogg
+sound: sfx/player_melee_sfx_1.ogg
+sound: sfx/player_melee_sfx_2.ogg
+
+internal_name: sfx.IS_FANVL
+name: Item - Drop: Anvil
+sound: ang_sfx/plc_hit_anvil.ogg
+
+internal_name: sfx.IS_FAXE
+name: Item - Drop: Axe
+sound: ang_sfx/plm_metal_clank.ogg
+
+internal_name: sfx.IS_FBLST
+name: Item - Drop: Blood Stone
+sound: ang_sfx/plm_wood_thud.ogg
+
+internal_name: sfx.IS_FBODY
+name: Item - Drop: Body Part
+sound: ang_sfx/plm_bang_metal.ogg
+
+internal_name: sfx.IS_FBOOK
+name: Item - Drop: Book
+sound: ang_sfx/plm_book_pageturn.ogg
+
+internal_name: sfx.IS_FBOW
+name: Item - Drop: Bow
+sound: ang_sfx/plm_wood_thud.ogg
+
+internal_name: sfx.IS_FHARM
+name: Item - Drop: Heavy Armor
+sound: ang_sfx/plm_bang_metal.ogg
+
+internal_name: sfx.IS_FCAP
+name: Item - Drop: Helm
+sound: ang_sfx/plm_drop_boot.ogg
+
+internal_name: sfx.IS_FLARM
+name: Item - Drop: Light Armor
+sound: ang_sfx/plm_drop_boot.ogg
+
+internal_name: sfx.IS_FMUSH
+name: Item - Drop: Mushroom
+sound: ang_sfx/plm_eat_bite.ogg
+
+internal_name: sfx.IS_FPOT
+name: Item - Drop: Potion
+sound: ang_sfx/plm_bottle_clinks.ogg
+
+internal_name: sfx.IS_FRING
+name: Item - Drop: Ring
+sound: ang_sfx/plm_jar_ding.ogg
+
+internal_name: sfx.IS_FROCK
+name: Item - Drop: Rock
+sound: ang_sfx/plm_bang_ceramic.ogg
+
+internal_name: sfx.IS_FSCRL
+name: Item - Drop: Scroll
+sound: ang_sfx/plm_book_pageturn.ogg
+
+internal_name: sfx.IS_FSHLD
+name: Item - Drop: Shield
+sound: ang_sfx/plm_bang_metal.ogg
+
+internal_name: sfx.IS_FSTAF
+name: Item - Drop: Staff
+sound: ang_sfx/plm_wood_thud.ogg
+
+internal_name: sfx.IS_FSWOR
+name: Item - Drop: Sword
+sound: ang_sfx/plc_hit_anvil2.ogg
+
+internal_name: sfx.IS_GOLD
+name: Item - Gold
+sound: ang_sfx/plm_coins_light.ogg
+sound: ang_sfx/plm_coins_shake.ogg
+sound: ang_sfx/plm_coins_pour.ogg
+sound: ang_sfx/plm_coins_dump.ogg
+
+internal_name: sfx.IS_IANVL
+name: Item - Pack: Anvil
+sound: ang_sfx/plm_metal_clank.ogg
+
+internal_name: sfx.IS_IAXE
+name: Item - Pack: Axe
+sound: ang_sfx/plm_metal_sharpen.ogg
+
+internal_name: sfx.IS_IBLST
+name: Item - Pack: Blood Stone
+sound: ang_sfx/plm_click_wood.ogg
+
+internal_name: sfx.IS_IBODY
+name: Item - Pack: Body Part
+sound: ang_sfx/plm_metal_clank.ogg
+
+internal_name: sfx.IS_IBOOK
+name: Item - Pack: Book
+sound: ang_sfx/plm_book_pageturn.ogg
+
+internal_name: sfx.IS_IBOW
+name: Item - Pack: Bow
+sound: ang_sfx/plm_click_wood.ogg
+
+internal_name: sfx.IS_IHARM
+name: Item - Pack: Heavy Armor
+sound: ang_sfx/plm_metal_clank.ogg
+
+internal_name: sfx.IS_ICAP
+name: Item - Pack: Helm
+sound: ang_sfx/plm_drop_boot.ogg
+
+internal_name: sfx.IS_ILARM
+name: Item - Pack: Light Armor
+sound: ang_sfx/plm_drop_boot.ogg
+
+internal_name: sfx.IS_IMUSH
+name: Item - Pack: Mushroom
+sound: ang_sfx/plm_eat_bite.ogg
+
+internal_name: sfx.IS_IPOT
+name: Item - Pack: Potion
+sound: ang_sfx/plm_bottle_clinks.ogg
+sound: ang_sfx/plm_cork_squeak.ogg
+
+internal_name: sfx.IS_IRING
+name: Item - Pack: Ring
+sound: ang_sfx/plm_jar_ding.ogg
+
+internal_name: sfx.IS_IROCK
+name: Item - Pack: Rock
+sound: ang_sfx/plm_click_dry.ogg
+
+internal_name: sfx.IS_ISCROL
+name: Item - Pack: Scroll / Book Opened
+sound: ang_sfx/plm_book_pageturn.ogg
+
+internal_name: sfx.IS_ISHIEL
+name: Item - Pack: Shield
+sound: ang_sfx/plm_metal_clank.ogg
+
+internal_name: sfx.IS_ISTAF
+name: Item - Pack: Staff
+sound: ang_sfx/plm_click_wood.ogg
+
+internal_name: sfx.IS_ISWORD
+name: Item - Pack: Sword / Block
+sound: ang_sfx/plm_metal_sharpen.ogg
+
+internal_name: sfx.IS_ISIGN
+name: Item - Pack: Tavern Sign
+sound: ang_sfx/plm_chain_light.ogg
+
+internal_name: sfx.IS_RBOOK
+name: Item - Read Book
+sound: ang_sfx/plm_book_pageturn.ogg
+
+internal_name: sfx.LS_ACID
+name: Missile - Acid
+sound: ang_sfx/mco_attack_spray.ogg
+
+internal_name: sfx.LS_PUDDLE
+name: Missile - Acid Puddle
+sound: ang_sfx/mco_liquid_squirt.ogg
+sound: sfx/water_splash.ogg
+
+internal_name: sfx.IS_BARREL
+name: Object - Barrel
+sound: ang_sfx/plm_break_wood.ogg
+sound: ang_sfx/plm_break_plates.ogg
+
+internal_name: sfx.LS_CALDRON
+name: Object - Cauldron
+sound: ang_sfx/amb_pulse_low.ogg
+
+internal_name: sfx.IS_CHEST
+name: Object - Chest
+sound: ang_sfx/plm_chest_unlatch.ogg
+sound: ang_sfx/plm_open_case.ogg
+sound: ang_sfx/plm_cabinet_open.ogg
+sound: ang_sfx/plm_lock_case.ogg
+sound: ang_sfx/plm_lock_distant.ogg
+
+internal_name: sfx.IS_CROPEN
+name: Object - Crypt Door Open
+sound: ang_sfx/plm_door_dungeon.ogg
+sound: ang_sfx/plm_door_echolock.ogg
+
+internal_name: sfx.IS_DOOROPEN
+name: Object - Door Open
+sound: ang_sfx/plm_door_creak.ogg
+sound: ang_sfx/plm_door_dungeon.ogg
+sound: ang_sfx/plm_door_squeaky.ogg
+sound: ang_sfx/plm_door_bolt.ogg
+sound: sfx/open_door/open_door_sfx_1.ogg
+sound: sfx/open_door/open_door_sfx_2.ogg
+sound: sfx/open_door/plm_door_open.ogg
+sound: sfx/open_door/plm_door_opening.ogg
+sound: sfx/open_door/plm_door_rusty.ogg
+sound: sfx/open_door/plm_door_wooden.ogg
+
+internal_name: sfx.IS_DOORCLOS
+name: Object - Door Close
+sound: ang_sfx/close_door/plm_door_shut.ogg
+sound: ang_sfx/close_door/plm_door_slam.ogg
+sound: sfx/close_door/close_door_sfx_1.ogg
+sound: sfx/close_door/close_door_sfx_2.ogg
+sound: sfx/close_door/plm_door_shut.ogg
+sound: sfx/close_door/plm_door_slam.ogg
+sound: ang_sfx/plm_cabinet_shut.ogg
+sound: ang_sfx/plm_door_creakshut.ogg
+sound: ang_sfx/plm_door_latch.ogg
+
+internal_name: sfx.IS_BARLFIRE
+name: Object - Exploding Barrel
+sound: ang_sfx/plm_break_wood.ogg
+sound: ang_sfx/plm_break_canister.ogg
+sound: sfx/exploding_barrel.ogg
+
+internal_name: sfx.IS_POPPOP8
+name: Object - Exploding Pod
+sound: ang_sfx/mco_liquid_squirt.ogg
+
+internal_name: sfx.IS_POPPOP3
+name: Object - Exploding Urn
+sound: ang_sfx/mco_squish_snap.ogg
+
+internal_name: sfx.LS_FOUNTAIN
+name: Object - Fountain
+sound: ang_sfx/amb_dungeon_echowet.ogg
+
+internal_name: sfx.LS_GSHRINE
+name: Object - Goat Shrine
+sound: ang_sfx/sum_angel_song.ogg
+
+internal_name: sfx.IS_LEVER
+name: Object - Lever
+sound: ang_sfx/plm_click_switch.ogg
+sound: ang_sfx/plm_click_switch3.ogg
+sound: ang_sfx/plm_click_switch2.ogg
+sound: ang_sfx/plm_door_knob.ogg
+
+internal_name: sfx.IS_POPPOP5
+name: Object - Pod
+sound: ang_sfx/plm_break_canister.ogg
+
+internal_name: sfx.IS_SARC
+name: Object - Sarcophagus
+sound: ang_sfx/plm_close_hatch.ogg
+sound: ang_sfx/plm_bang_dumpster.ogg
+
+internal_name: sfx.IS_MAGIC
+name: Object - Shrine
+sound: ang_sfx/plm_spell1.ogg
+sound: ang_sfx/plm_spell2.ogg
+sound: ang_sfx/plm_spell3.ogg
+
+internal_name: sfx.IS_POPPOP2
+name: Object - Urn
+sound: ang_sfx/mco_squish_hit.ogg
+
+internal_name: sfx.IS_TRAP
+name: Object - Wall Trap
+sound: ang_sfx/plm_click_dry.ogg
+sound: ang_sfx/plm_bang_ceramic.ogg
+sound: sfx/spikes_hit.ogg
+
+internal_name: sfx.IS_QUESTDN
+name: Quest - Done
+sound: ang_sfx/sum_bell_crystal.ogg
+
+internal_name: sfx.LS_APOC
+name: Spell - Apocalypse
+sound: ang_sfx/amb_gong_low.ogg
+
+internal_name: sfx.LS_BLODSTAR
+name: Spell - Blood Star
+sound: ang_sfx/plm_zap_rod.ogg
+
+internal_name: sfx.LS_BONESP
+name: Spell - Bone Spirit
+sound: ang_sfx/sum_ghost_wail.ogg
+
+internal_name: sfx.LS_BSIMPCT
+name: Spell - Bone Spirit Impact
+sound: ang_sfx/mco_thud_crash.ogg
+
+internal_name: sfx.IS_CAST2
+name: Spell - Cast
+sound: ang_sfx/plm_spell1.ogg
+sound: sfx/magic_spell/generic_spell.ogg
+sound: sfx/magic_spell/generic_spell_2.ogg
+
+internal_name: sfx.IS_CAST8
+name: Spell - Cast (Healing)
+sound: ang_sfx/pls_bell_bowl.ogg
+
+internal_name: sfx.IS_CAST4
+name: Spell - Cast (Lightning)
+sound: ang_sfx/plm_spell2.ogg
+sound: sfx/enchant.ogg
+
+internal_name: sfx.IS_CAST6
+name: Spell - Cast (Utility)
+sound: ang_sfx/plm_spell3.ogg
+sound: sfx/magic_spell/generic_spell.ogg
+sound: sfx/magic_spell/generic_spell_2.ogg
+
+internal_name: sfx.LS_CBOLT
+name: Spell - Charged Bolt
+sound: ang_sfx/pls_tone_elec.ogg
+
+internal_name: sfx.LS_ELEMENTL
+name: Spell - Elemental / Teleport
+sound: ang_sfx/amb_gong_strike.ogg
+sound: sfx/teleport.ogg
+
+internal_name: sfx.LS_FIRIMP2
+name: Spell - Fire Impact
+sound: ang_sfx/mco_attack_breath.ogg
+
+internal_name: sfx.LS_WALLLOOP
+name: Spell - Fire Wall
+sound: ang_sfx/amb_pulse_low.ogg
+sound: sfx/lava_sizzle.ogg
+
+internal_name: sfx.LS_FBOLT1
+name: Spell - Firebolt / Fireball
+sound: ang_sfx/plm_spell2.ogg
+sound: sfx/fireball.ogg
+
+internal_name: sfx.LS_FLAMWAVE
+name: Spell - Flame Wave
+sound: ang_sfx/mco_spray_long.ogg
+
+internal_name: sfx.LS_GOLUM
+name: Spell - Golem
+sound: ang_sfx/mco_dino_low.ogg
+
+internal_name: sfx.LS_GUARD
+name: Spell - Guardian
+sound: ang_sfx/sum_bell_hand.ogg
+
+internal_name: sfx.LS_HOLYBOLT
+name: Spell - Holy Bolt
+sound: ang_sfx/pls_bell_glass.ogg
+
+internal_name: sfx.LS_SPOUTSTR
+name: Spell - Inferno
+sound: ang_sfx/mco_spray_long.ogg
+
+internal_name: sfx.LS_INFRAVIS
+name: Spell - Infravision
+sound: ang_sfx/pls_tone_clavelo8.ogg
+
+internal_name: sfx.LS_LNING1
+name: Spell - Lightning
+sound: ang_sfx/pls_tone_elec.ogg
+sound: sfx/chain_lightning.ogg
+
+internal_name: sfx.LS_ELECIMP1
+name: Spell - Lightning Impact
+sound: ang_sfx/pls_tone_elec.ogg
+
+internal_name: sfx.LS_LMAG
+name: Spell - Lightning Wall
+sound: ang_sfx/plm_spell3.ogg
+
+internal_name: sfx.LS_MSHIELD
+name: Spell - Mana Shield / Reflect
+sound: ang_sfx/pls_bell_bowl.ogg
+
+internal_name: sfx.LS_NOVA
+name: Spell - Nova / Flash
+sound: ang_sfx/amb_gong_chinese.ogg
+sound: sfx/ice_spell.ogg
+
+internal_name: sfx.LS_TELEPORT
+name: Spell - Phasing
+sound: ang_sfx/plm_chimes_jangle.ogg
+sound: sfx/teleport.ogg
+
+internal_name: sfx.LS_SCURIMP
+name: Spell - Stone Curse
+sound: ang_sfx/mco_scurry_dry.ogg
+
+internal_name: sfx.LS_ETHEREAL
+name: Spell - Telekinesis / Warp
+sound: ang_sfx/sum_bell_tone.ogg
+sound: sfx/force_push.ogg
+
+internal_name: sfx.LS_SENTINEL
+name: Spell - Town Portal
+sound: ang_sfx/sum_bell_tone.ogg
+
+internal_name: sfx.LS_TRAPDIS
+name: Spell - Trap Disarm
+sound: ang_sfx/plm_click_switch3.ogg
+
+internal_name: menu_move
+name: UI - Menu move
+sound: sfx/wood_UI.ogg
+
+internal_name: menu_select
+name: UI - Menu select
+sound: sfx/lighter_UI.ogg
+
+internal_name: store_enter
+name: Store - Enter
+sound: ang_sfx/sto_bell_desk.ogg
+sound: ang_sfx/sto_bell_ding.ogg
+sound: ang_sfx/sto_bell_dingaling.ogg
+sound: ang_sfx/sto_bell_jingles.ogg
+sound: ang_sfx/sto_bell_ringing.ogg
+sound: ang_sfx/sto_bell_shop.ogg
+sound: ang_sfx/sto_man_hey.ogg
+sound: ang_sfx/sto_man_haha.ogg
+sound: ang_sfx/sto_man_whoohaha.ogg
+sound: ang_sfx/plm_door_entrance.ogg
+
+internal_name: vendor_buy
+name: Store - Buy
+sound: sfx/vendor_buy.ogg
+sound: ang_sfx/sto_bell_register1.ogg
+sound: ang_sfx/sto_coins_countertop.ogg
+
+internal_name: vendor_sell
+name: Store - Sell
+sound: sfx/vendor_sell.ogg
+sound: ang_sfx/sto_bell_register2.ogg
+
+internal_name: stairs_down
+name: Stairs - Down
+sound: ang_sfx/plm_floor_creak.ogg
+sound: sfx/chasm_fall.ogg
+
+internal_name: stairs_up
+name: Stairs - Up
+sound: ang_sfx/plm_floor_creak2.ogg
+
+internal_name: identify_bad
+name: Identify - Cursed
+sound: ang_sfx/id_bad_aww.ogg
+sound: ang_sfx/id_bad_dang.ogg
+sound: ang_sfx/id_bad_hmm.ogg
+sound: ang_sfx/id_bad_hmph.ogg
+sound: ang_sfx/id_bad_ohh.ogg
+sound: ang_sfx/pls_man_oooh.ogg
+
+internal_name: identify_ego
+name: Identify - Magic
+sound: ang_sfx/id_ego_whoa.ogg
+sound: ang_sfx/id_ego_woohoo.ogg
+sound: ang_sfx/id_ego_yeah.ogg
+sound: ang_sfx/id_ego_yeah2.ogg
+sound: ang_sfx/id_ego_yes.ogg
+
+internal_name: identify_art
+name: Identify - Unique
+sound: ang_sfx/id_good_hey.ogg
+sound: ang_sfx/id_good_hey2.ogg
+sound: ang_sfx/id_good_hmm.ogg
+sound: ang_sfx/id_good_huh.ogg
+sound: ang_sfx/id_good_ooh.ogg
+sound: ang_sfx/id_good_ooo.ogg
+sound: ang_sfx/id_good_wow.ogg
+
+internal_name: low_health
+name: Hero - Low life
+sound: ang_sfx/plc_bell_warn.ogg
+
+internal_name: item_break
+name: Item - Breaks
+sound: ang_sfx/plm_break_glass.ogg
+sound: ang_sfx/plm_break_glass2.ogg
+sound: ang_sfx/plm_break_shatter.ogg
+sound: ang_sfx/plm_break_smash.ogg
+sound: ang_sfx/plm_glass_break.ogg
+sound: ang_sfx/plm_glass_breaking.ogg
+sound: ang_sfx/plm_glass_smashing.ogg
+
+internal_name: quaff
+name: Item - Drink
+sound: ang_sfx/plm_cork_pop.ogg
+
+internal_name: use_item
+name: Item - Use
+sound: sfx/use_item.ogg
+
+internal_name: use_staff
+name: Item - Use staff
+sound: ang_sfx/plm_use_staff.ogg
+sound: ang_sfx/plm_aim_wand.ogg
+
+internal_name: disarm
+name: Trap - Disarmed
+sound: ang_sfx/plm_chest_latch.ogg
+
+internal_name: player_death
+name: Hero - Death
+sound: sfx/player_death_sfx.ogg
+sound: ang_sfx/pls_man_sob.ogg
+
+internal_name: game_over
+name: Game over
+sound: sfx/game_over.ogg
+
+internal_name: you_win
+name: Game won
+sound: sfx/you_win.ogg
+
+internal_name: item_equip
+name: Item - Equip
+sound: sfx/item_equip.ogg
+
+internal_name: item_unequip
+name: Item - Unequip
+sound: sfx/item_unequip.ogg
+
+internal_name: teleport
+name: Spell - Teleport
+sound: sfx/teleport.ogg
+
+internal_name: earthquake
+name: Spell - Earthquake
+sound: sfx/earthquake.ogg
+
+internal_name: status_recover
+name: Status - Wears off
+sound: ang_sfx/pls_bell_chime_new.ogg
+sound: ang_sfx/pls_bell_hibell_soft.ogg
+
+internal_name: status.stunned
+name: Status - stunned
+sound: ang_sfx/pls_bell_mute.ogg
+
+internal_name: status.hasted
+name: Status - hasted
+sound: ang_sfx/pls_bell_sustain.ogg
+
+internal_name: status.confused
+name: Status - confused
+sound: ang_sfx/pls_man_ugh.ogg
+sound: ang_sfx/pls_breathe_in.ogg
+
+internal_name: status.immobile
+name: Status - immobile
+sound: ang_sfx/pls_man_gulp_new.ogg
+
+internal_name: status.slow
+name: Status - slow
+sound: ang_sfx/pls_man_sigh.ogg
+
+internal_name: status.vision
+name: Status - vision
+sound: ang_sfx/pls_man_sniff.ogg
+
+internal_name: status.poisoned
+name: Status - poisoned
+sound: ang_sfx/pls_man_spit.ogg
+sound: ang_sfx/pls_tone_guiro.ogg
+
+internal_name: status.mana_shield
+name: Status - mana shield
+sound: ang_sfx/pls_tone_blurk.ogg
+
+internal_name: status.infravision
+name: Status - infravision
+sound: ang_sfx/pls_tone_clave6.ogg
+
+internal_name: status.blinded
+name: Status - blinded
+sound: ang_sfx/pls_tone_conk.ogg
+
+internal_name: status.berserk
+name: Status - berserk
+sound: ang_sfx/pls_tone_goblet.ogg
+
+internal_name: status.damage_over_time
+name: Status - damage over time
+sound: ang_sfx/pls_tone_headstock.ogg
+
+internal_name: status.stone
+name: Status - stone
+sound: ang_sfx/pls_tone_scrape.ogg
+
+internal_name: status.silenced
+name: Status - silenced
+sound: ang_sfx/pls_tone_stick.ogg
+
+internal_name: monster.rat.attack
+name: Rat - Attack
+sound: sfx/rat/rat_1.ogg
+sound: sfx/rat/rat_2.ogg
+sound: ang_sfx/mco_bite_small.ogg
+sound: ang_sfx/mco_mouse_squeaks.ogg
+sound: ang_sfx/mco_bite_chew.ogg
+
+internal_name: monster.rat.hit
+name: Rat - Hurt
+sound: sfx/rat/rat_1.ogg
+sound: sfx/rat/rat_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.rat.death
+name: Rat - Death
+sound: sfx/rat_death.ogg
+
+internal_name: monster.skeleton.attack
+name: Skeleton - Attack
+sound: sfx/skeleton/skeleton_1.ogg
+sound: sfx/skeleton/skeleton_2.ogg
+sound: ang_sfx/mco_card_shuffle.ogg
+
+internal_name: monster.skeleton_archer.attack
+name: Skeleton Archer - Attack
+sound: sfx/skeleton/skeleton_1.ogg
+sound: sfx/skeleton/skeleton_2.ogg
+sound: ang_sfx/mco_card_shuffle.ogg
+sound: sfx/ranged_attack/ranged_1.ogg
+sound: sfx/ranged_attack/ranged_2.ogg
+
+internal_name: monster.skeleton_warrior.attack
+name: Skeleton Warrior - Attack
+sound: sfx/skeleton/skeleton_1.ogg
+sound: sfx/skeleton/skeleton_2.ogg
+sound: ang_sfx/mco_card_shuffle.ogg
+sound: ang_sfx/mco_shake_roll.ogg
+
+internal_name: monster.skeleton_captain.attack
+name: Skeleton Captain - Attack
+sound: sfx/skeleton/skeleton_1.ogg
+sound: sfx/skeleton/skeleton_2.ogg
+sound: ang_sfx/mco_card_shuffle.ogg
+
+internal_name: monster.bat.hit
+name: Bat - Hurt
+sound: sfx/bat/bat_1.ogg
+sound: sfx/bat/bat_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.bat.death
+name: Bat - Death
+sound: sfx/bat_death.ogg
+
+internal_name: monster.caveling_bear.attack
+name: Caveling Bear - Attack
+sound: sfx/bear/bear_1.ogg
+sound: sfx/bear/bear_2.ogg
+sound: ang_sfx/mco_bite_gnash.ogg
+sound: ang_sfx/mco_dino_yawn.ogg
+sound: ang_sfx/mco_bite_hard.ogg
+sound: ang_sfx/mco_bite_chomp.ogg
+
+internal_name: monster.caveling_bear.hit
+name: Caveling Bear - Hurt
+sound: sfx/bear/bear_1.ogg
+sound: sfx/bear/bear_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.caveling_bear.death
+name: Caveling Bear - Death
+sound: sfx/bear_death.ogg
+
+internal_name: monster.caveling.attack
+name: Caveling - Attack
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+
+internal_name: monster.caveling.hit
+name: Caveling - Hurt
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.caveling.death
+name: Caveling - Death
+sound: sfx/humanoid_b_death.ogg
+
+internal_name: monster.fallen.attack
+name: Fallen - Attack
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+
+internal_name: monster.fallen.hit
+name: Fallen - Hurt
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.fallen.death
+name: Fallen - Death
+sound: sfx/imp_death.ogg
+
+internal_name: monster.fiend.attack
+name: Fiend - Attack
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+sound: ang_sfx/mco_creature_groan.ogg
+
+internal_name: monster.fiend.hit
+name: Fiend - Hurt
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.fiend.death
+name: Fiend - Death
+sound: sfx/imp_death.ogg
+
+internal_name: monster.fiend_horned.attack
+name: Fiend Horned - Attack
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+sound: ang_sfx/mco_creature_yelp.ogg
+
+internal_name: monster.fiend_horned.hit
+name: Fiend Horned - Hurt
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.fiend_horned.death
+name: Fiend Horned - Death
+sound: sfx/imp_death.ogg
+
+internal_name: monster.fiend_armed.attack
+name: Fiend Armed - Attack
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+
+internal_name: monster.fiend_armed.hit
+name: Fiend Armed - Hurt
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.fiend_armed.death
+name: Fiend Armed - Death
+sound: sfx/imp_death.ogg
+
+internal_name: monster.fiend_whip.attack
+name: Fiend Whip - Attack
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+sound: ang_sfx/mco_cuica_rubbing.ogg
+
+internal_name: monster.fiend_whip.hit
+name: Fiend Whip - Hurt
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.fiend_whip.death
+name: Fiend Whip - Death
+sound: sfx/imp_death.ogg
+
+internal_name: monster.fiend_glaive.attack
+name: Fiend Glaive - Attack
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+
+internal_name: monster.fiend_glaive.hit
+name: Fiend Glaive - Hurt
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.fiend_glaive.death
+name: Fiend Glaive - Death
+sound: sfx/imp_death.ogg
+
+internal_name: monster.fiend_big.attack
+name: Fiend Big - Attack
+sound: sfx/king/king_1.ogg
+sound: sfx/king/king_2.ogg
+sound: ang_sfx/sum_chime_jangle.ogg
+
+internal_name: monster.fiend_big.hit
+name: Fiend Big - Hurt
+sound: sfx/king/king_1.ogg
+sound: sfx/king/king_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.fiend_big.death
+name: Fiend Big - Death
+sound: sfx/king_death.ogg
+
+internal_name: monster.fiend_big.special
+name: Fiend Big - Special
+sound: sfx/king_spell.ogg
+
+internal_name: monster.fallen_warrior.attack
+name: Fallen Warrior - Attack
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+
+internal_name: monster.fallen_warrior.hit
+name: Fallen Warrior - Hurt
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.fallen_warrior.death
+name: Fallen Warrior - Death
+sound: sfx/imp_death.ogg
+
+internal_name: monster.fallen_archer.attack
+name: Fallen Archer - Attack
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+sound: sfx/ranged_attack/ranged_1.ogg
+sound: sfx/ranged_attack/ranged_2.ogg
+
+internal_name: monster.fallen_archer.hit
+name: Fallen Archer - Hurt
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.fallen_archer.death
+name: Fallen Archer - Death
+sound: sfx/imp_death.ogg
+
+internal_name: monster.fallen_shaman.attack
+name: Fallen Shaman - Attack
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+sound: ang_sfx/mco_click_vibra.ogg
+
+internal_name: monster.fallen_shaman.hit
+name: Fallen Shaman - Hurt
+sound: sfx/imp/imp_1.ogg
+sound: sfx/imp/imp_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.fallen_shaman.death
+name: Fallen Shaman - Death
+sound: sfx/imp_death.ogg
+
+internal_name: monster.caveling_armed.attack
+name: Caveling Armed - Attack
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+
+internal_name: monster.caveling_armed.hit
+name: Caveling Armed - Hurt
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.caveling_armed.death
+name: Caveling Armed - Death
+sound: sfx/humanoid_b_death.ogg
+
+internal_name: monster.caveling_axe.attack
+name: Caveling Axe - Attack
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+sound: ang_sfx/mco_tube_hit.ogg
+
+internal_name: monster.caveling_axe.hit
+name: Caveling Axe - Hurt
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.caveling_axe.death
+name: Caveling Axe - Death
+sound: sfx/humanoid_b_death.ogg
+
+internal_name: monster.caveling_big_axe.attack
+name: Caveling Big Axe - Attack
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+sound: ang_sfx/mco_rubber_thud.ogg
+
+internal_name: monster.caveling_big_axe.hit
+name: Caveling Big Axe - Hurt
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.caveling_big_axe.death
+name: Caveling Big Axe - Death
+sound: sfx/humanoid_b_death.ogg
+
+internal_name: monster.thief_possessed.attack
+name: Thief Possessed - Attack
+sound: sfx/humanoid_hit/humanoid_a_1.ogg
+sound: sfx/humanoid_hit/humanoid_a_2.ogg
+sound: ang_sfx/mco_man_mumble.ogg
+
+internal_name: monster.thief_possessed.hit
+name: Thief Possessed - Hurt
+sound: sfx/humanoid_hit/humanoid_a_1.ogg
+sound: sfx/humanoid_hit/humanoid_a_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.thief_possessed.death
+name: Thief Possessed - Death
+sound: sfx/humanoid_a_death.ogg
+
+internal_name: monster.skeleton_sorcerer.attack
+name: Skeleton Sorcerer - Attack
+sound: sfx/skeleton/skeleton_1.ogg
+sound: sfx/skeleton/skeleton_2.ogg
+sound: ang_sfx/mco_card_shuffle.ogg
+sound: ang_sfx/mco_dub_wobble.ogg
+sound: ang_sfx/sum_ghost_moan.ogg
+sound: ang_sfx/sum_ghost_oooo.ogg
+
+internal_name: monster.skeleton_sorcerer.hit
+name: Skeleton Sorcerer - Hurt
+sound: sfx/skeleton/skeleton_1.ogg
+sound: sfx/skeleton/skeleton_2.ogg
+sound: sfx/skeleton_hit.ogg
+sound: sfx/bone_hit/bone_hit_1.ogg
+sound: sfx/bone_hit/bone_hit_2.ogg
+
+internal_name: monster.skeleton_sorcerer.death
+name: Skeleton Sorcerer - Death
+sound: sfx/skeleton_death.ogg
+sound: sfx/skeleton_death_2.ogg
+
+internal_name: monster.rogue_kestrel.attack
+name: Rogue Kestrel - Attack
+sound: sfx/bird/bird_1.ogg
+sound: sfx/bird/bird_2.ogg
+
+internal_name: monster.rogue_kestrel.hit
+name: Rogue Kestrel - Hurt
+sound: sfx/bird/bird_1.ogg
+sound: sfx/bird/bird_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.rogue_kestrel.death
+name: Rogue Kestrel - Death
+sound: sfx/bird_death.ogg
+
+internal_name: monster.rogue_bat.attack
+name: Rogue Bat - Attack
+sound: sfx/bat/bat_1.ogg
+sound: sfx/bat/bat_2.ogg
+sound: ang_sfx/mco_ceramic_trill.ogg
+
+internal_name: monster.rogue_bat.hit
+name: Rogue Bat - Hurt
+sound: sfx/bat/bat_1.ogg
+sound: sfx/bat/bat_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.rogue_bat.death
+name: Rogue Bat - Death
+sound: sfx/bat_death.ogg
+
+internal_name: monster.rogue_emu.attack
+name: Rogue Emu - Attack
+sound: sfx/bird/bird_1.ogg
+sound: sfx/bird/bird_2.ogg
+
+internal_name: monster.rogue_emu.hit
+name: Rogue Emu - Hurt
+sound: sfx/bird/bird_1.ogg
+sound: sfx/bird/bird_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.rogue_emu.death
+name: Rogue Emu - Death
+sound: sfx/bird_death.ogg
+
+internal_name: monster.rogue_jackal.attack
+name: Rogue Jackal - Attack
+sound: sfx/cerberus/cerberus_1.ogg
+sound: sfx/cerberus/cerberus_2.ogg
+sound: ang_sfx/mco_bite_long.ogg
+sound: ang_sfx/mco_bite_regular.ogg
+sound: ang_sfx/sum_lion_growl.ogg
+sound: ang_sfx/mco_howl_high.ogg
+sound: ang_sfx/mco_howl_distressed.ogg
+sound: ang_sfx/mco_howl_croak.ogg
+
+internal_name: monster.rogue_jackal.hit
+name: Rogue Jackal - Hurt
+sound: sfx/cerberus/cerberus_1.ogg
+sound: sfx/cerberus/cerberus_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.rogue_jackal.death
+name: Rogue Jackal - Death
+sound: sfx/cerberus_death.ogg
+
+internal_name: monster.rogue_orc.attack
+name: Rogue Orc - Attack
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+
+internal_name: monster.rogue_orc.hit
+name: Rogue Orc - Hurt
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.rogue_orc.death
+name: Rogue Orc - Death
+sound: sfx/humanoid_b_death.ogg
+
+internal_name: monster.rogue_snake.attack
+name: Rogue Snake - Attack
+sound: sfx/snake/snake_1.ogg
+sound: sfx/snake/snake_2.ogg
+sound: ang_sfx/mco_bite_soft.ogg
+sound: ang_sfx/mco_frog_trill.ogg
+sound: ang_sfx/mco_bite_dainty.ogg
+
+internal_name: monster.rogue_snake.hit
+name: Rogue Snake - Hurt
+sound: sfx/snake/snake_1.ogg
+sound: sfx/snake/snake_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.rogue_snake.death
+name: Rogue Snake - Death
+sound: sfx/snake_death.ogg
+
+internal_name: monster.thief_goblin.attack
+name: Thief Goblin - Attack
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+
+internal_name: monster.thief_goblin.hit
+name: Thief Goblin - Hurt
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.thief_goblin.death
+name: Thief Goblin - Death
+sound: sfx/humanoid_b_death.ogg
+
+internal_name: monster.goatman.attack
+name: Goatman - Attack
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+sound: ang_sfx/mco_dino_talk.ogg
+sound: ang_sfx/mco_dino_slur.ogg
+
+internal_name: monster.goatman.hit
+name: Goatman - Hurt
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.goatman.death
+name: Goatman - Death
+sound: sfx/humanoid_b_death.ogg
+
+internal_name: monster.goatman_archer.attack
+name: Goatman Archer - Attack
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+sound: sfx/ranged_attack/ranged_1.ogg
+sound: sfx/ranged_attack/ranged_2.ogg
+
+internal_name: monster.goatman_archer.hit
+name: Goatman Archer - Hurt
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.goatman_archer.death
+name: Goatman Archer - Death
+sound: sfx/humanoid_b_death.ogg
+
+internal_name: monster.lucifer.attack
+name: Lucifer - Attack
+sound: sfx/king/king_1.ogg
+sound: sfx/king/king_2.ogg
+sound: ang_sfx/sum_chime_jangle.ogg
+sound: ang_sfx/mco_strange_music.ogg
+sound: ang_sfx/sum_laugh_evil2.ogg
+
+internal_name: monster.lucifer.hit
+name: Lucifer - Hurt
+sound: sfx/king/king_1.ogg
+sound: sfx/king/king_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.lucifer.death
+name: Lucifer - Death
+sound: sfx/king_death.ogg
+
+internal_name: monster.lucifer.special
+name: Lucifer - Special
+sound: sfx/king_spell.ogg
+
+internal_name: monster.king_zedek.attack
+name: King Zedek - Attack
+sound: sfx/king/king_1.ogg
+sound: sfx/king/king_2.ogg
+sound: ang_sfx/sum_chime_jangle.ogg
+sound: ang_sfx/sum_gong_temple.ogg
+
+internal_name: monster.king_zedek.hit
+name: King Zedek - Hurt
+sound: sfx/king/king_1.ogg
+sound: sfx/king/king_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.king_zedek.death
+name: King Zedek - Death
+sound: sfx/king_death.ogg
+sound: ambience/amb_guitar_chord.ogg
+
+internal_name: monster.king_zedek.special
+name: King Zedek - Special
+sound: sfx/king_spell.ogg
+
+internal_name: monster.meat_jack.attack
+name: Meat Jack - Attack
+sound: sfx/black_death/black_death_1.ogg
+sound: sfx/black_death/black_death_2.ogg
+sound: ang_sfx/mco_creature_choking.ogg
+sound: ang_sfx/mco_bite_munch.ogg
+sound: ang_sfx/mco_bite_short.ogg
+
+internal_name: monster.meat_jack.hit
+name: Meat Jack - Hurt
+sound: sfx/black_death/black_death_1.ogg
+sound: sfx/black_death/black_death_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.meat_jack.death
+name: Meat Jack - Death
+sound: sfx/black_death_kick.ogg
+
+internal_name: monster.rogue.attack
+name: Rogue - Attack
+sound: sfx/humanoid_hit/humanoid_a_1.ogg
+sound: sfx/humanoid_hit/humanoid_a_2.ogg
+
+internal_name: monster.rogue.hit
+name: Rogue - Hurt
+sound: sfx/humanoid_hit/humanoid_a_1.ogg
+sound: sfx/humanoid_hit/humanoid_a_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.rogue.death
+name: Rogue - Death
+sound: sfx/humanoid_a_death.ogg
+
+internal_name: monster.rogue_dog.attack
+name: Rogue Dog - Attack
+sound: sfx/cerberus/cerberus_1.ogg
+sound: sfx/cerberus/cerberus_2.ogg
+sound: ang_sfx/mco_bite_long.ogg
+sound: ang_sfx/mco_bite_regular.ogg
+sound: ang_sfx/sum_lion_growl.ogg
+sound: ang_sfx/mco_howl_deep.ogg
+sound: ang_sfx/mco_howl_long.ogg
+sound: ang_sfx/mco_snarl_short.ogg
+
+internal_name: monster.rogue_dog.hit
+name: Rogue Dog - Hurt
+sound: sfx/cerberus/cerberus_1.ogg
+sound: sfx/cerberus/cerberus_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.rogue_dog.death
+name: Rogue Dog - Death
+sound: sfx/cerberus_death.ogg
+
+internal_name: monster.evil_shekel.attack
+name: Evil Shekel - Attack
+sound: sfx/humanoid_hit/humanoid_a_1.ogg
+sound: sfx/humanoid_hit/humanoid_a_2.ogg
+sound: ang_sfx/mco_thoing_deep.ogg
+sound: ang_sfx/mco_strange_thwoink.ogg
+
+internal_name: monster.evil_shekel.hit
+name: Evil Shekel - Hurt
+sound: sfx/humanoid_hit/humanoid_a_1.ogg
+sound: sfx/humanoid_hit/humanoid_a_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.evil_shekel.death
+name: Evil Shekel - Death
+sound: sfx/humanoid_a_death.ogg
+
+internal_name: monster.evil_kirioth.attack
+name: Evil Kirioth - Attack
+sound: sfx/humanoid_hit/humanoid_a_1.ogg
+sound: sfx/humanoid_hit/humanoid_a_2.ogg
+sound: ang_sfx/mco_thoing_backwards.ogg
+sound: ang_sfx/sum_piano_scrape.ogg
+
+internal_name: monster.evil_kirioth.hit
+name: Evil Kirioth - Hurt
+sound: sfx/humanoid_hit/humanoid_a_1.ogg
+sound: sfx/humanoid_hit/humanoid_a_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.evil_kirioth.death
+name: Evil Kirioth - Death
+sound: sfx/humanoid_a_death.ogg
+
+internal_name: monster.adventurer_knight.attack
+name: Adventurer Knight - Attack
+sound: sfx/humanoid_hit/humanoid_a_1.ogg
+sound: sfx/humanoid_hit/humanoid_a_2.ogg
+
+internal_name: monster.adventurer_knight.hit
+name: Adventurer Knight - Hurt
+sound: sfx/humanoid_hit/humanoid_a_1.ogg
+sound: sfx/humanoid_hit/humanoid_a_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.adventurer_knight.death
+name: Adventurer Knight - Death
+sound: sfx/humanoid_a_death.ogg
+
+internal_name: monster.adventurer_priest.attack
+name: Adventurer Priest - Attack
+sound: sfx/humanoid_hit/humanoid_a_1.ogg
+sound: sfx/humanoid_hit/humanoid_a_2.ogg
+
+internal_name: monster.adventurer_priest.hit
+name: Adventurer Priest - Hurt
+sound: sfx/humanoid_hit/humanoid_a_1.ogg
+sound: sfx/humanoid_hit/humanoid_a_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.adventurer_priest.death
+name: Adventurer Priest - Death
+sound: sfx/humanoid_a_death.ogg
+
+internal_name: monster.adventurer_barbarian.attack
+name: Adventurer Barbarian - Attack
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+
+internal_name: monster.adventurer_barbarian.hit
+name: Adventurer Barbarian - Hurt
+sound: sfx/humanoid_hit_2/humanoid_b_1.ogg
+sound: sfx/humanoid_hit_2/humanoid_b_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.adventurer_barbarian.death
+name: Adventurer Barbarian - Death
+sound: sfx/humanoid_b_death.ogg
+
+internal_name: monster.adventurer_archer.attack
+name: Adventurer Archer - Attack
+sound: sfx/humanoid_hit/humanoid_a_1.ogg
+sound: sfx/humanoid_hit/humanoid_a_2.ogg
+sound: sfx/ranged_attack/ranged_1.ogg
+sound: sfx/ranged_attack/ranged_2.ogg
+
+internal_name: monster.adventurer_archer.hit
+name: Adventurer Archer - Hurt
+sound: sfx/humanoid_hit/humanoid_a_1.ogg
+sound: sfx/humanoid_hit/humanoid_a_2.ogg
+sound: sfx/gore_hit/gore_hit_1.ogg
+sound: sfx/gore_hit/gore_hit_2.ogg
+
+internal_name: monster.adventurer_archer.death
+name: Adventurer Archer - Death
+sound: sfx/humanoid_a_death.ogg

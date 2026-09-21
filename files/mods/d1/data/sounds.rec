@@ -2712,3 +2712,11 @@ sound: diablo_sfx/misc/sentinel.ogg
 internal_name: sfx.LS_TRAPDIS
 name: Spell - Trap Disarm
 sound: diablo_sfx/misc/trapdis.ogg
+
+internal_name: menu_move
+name: UI - Menu move (IS_TITLEMOV)
+sound: diablo_sfx/items/titlemov.ogg
+
+internal_name: menu_select
+name: UI - Menu select (IS_TITLSLCT)
+sound: diablo_sfx/items/titlslct.ogg

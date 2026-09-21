@@ -189,6 +189,7 @@ func (i *BasicMenu) SetItems(items []util.MenuItem) {
 }
 
 func (i *BasicMenu) selectionUp() {
+	defer i.uiController.playUICue("menu_move") // IS_TITLEMOV
 	if i.selectedIndex == 0 {
 		i.selectedIndex = len(i.items) - 1
 	} else {
@@ -197,6 +198,7 @@ func (i *BasicMenu) selectionUp() {
 }
 
 func (i *BasicMenu) selectionDown() {
+	defer i.uiController.playUICue("menu_move") // IS_TITLEMOV
 	if i.selectedIndex == len(i.items)-1 {
 		i.selectedIndex = 0
 	} else {
@@ -208,6 +210,7 @@ func (i *BasicMenu) confirmSelection() {
 	if !i.hasValidSelection() {
 		return
 	}
+	i.uiController.playUICue("menu_select") // IS_TITLSLCT
 	action := i.items[i.selectedIndex].Action
 	if action != nil {
 		action()

@@ -161,7 +161,7 @@ func vendorService(ctx ActionContext, vendor *Actor, service string) (util.MenuI
 			func(it *d1.Item) { it.Charges = it.MaxCharges }), true
 	case "identify": // a flat fee, whatever the item (D1's AddStoreHoldId)
 		return d1ServiceOption(ctx, "Identify an item", func(it *d1.Item) bool { return it.Magical != 0 && !it.Identified },
-			func(*d1.Item) int { return arg }, func(it *d1.Item) { it.Identified = true }, true), true
+			func(*d1.Item) int { return arg }, func(it *d1.Item) { it.Identified = true; d1IdentifyCue(it) }, true), true
 	case "heal": // "Receive healing" (S_HealerEnter): full life, with IS_CAST8 when there was any to restore
 		return util.MenuItem{MainText: "Receive healing", Action: func() { healAtVendor(ctx, vendor) }}, true
 	case "heal_on_visit": // not a menu entry: coming in is enough
@@ -219,6 +219,7 @@ func d1Broke(msg func(string), owner *Actor, broke *d1.Item) {
 	if broke == nil {
 		return
 	}
+	PlayUICue("item_break")
 	for _, it := range owner.GetEquipment().AllItems() {
 		if it.d1 == broke {
 			owner.GetEquipment().UnEquip(it)

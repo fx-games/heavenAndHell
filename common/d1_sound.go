@@ -106,3 +106,27 @@ func (g *Factory) PlayD1ItemUseSound(item *Item, user *Actor) {
 	}
 	g.PlayD1Sfx(id, user.MapPosition())
 }
+
+// d1IdentifyCue plays what identifying it turned up: a unique, a curse (it's worth less than it looked), or magic.
+func d1IdentifyCue(it *d1.Item) {
+	switch {
+	case it.Magical == 2:
+		PlayUICue("identify_art")
+	case it.IValue < it.Value: // ponytail: price as the curse test; read the affixes if it misjudges
+		PlayUICue("identify_bad")
+	default:
+		PlayUICue("identify_ego")
+	}
+}
+
+// UICues is the running game's audio player, for the engine's non-positional cues from code that holds no
+// ActionContext (shop transactions). NewGameInstance sets it.
+var UICues *audio.Player
+
+// PlayUICue plays one of the engine's cues (store_enter, vendor_buy, identify_art, ...) if the mod wired it up:
+// each mod's sounds.rec decides what, if anything, it sounds like.
+func PlayUICue(cue string) {
+	if UICues != nil && UICues.HasCue(cue) {
+		UICues.PlayCue(cue)
+	}
+}

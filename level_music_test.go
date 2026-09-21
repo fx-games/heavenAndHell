@@ -20,3 +20,15 @@ func TestD1LevelTypeForMusic(t *testing.T) {
 		}
 	}
 }
+
+// A dungen level's type (and so its music) is its tiles: set.
+func TestHHLevelTypeForMusic(t *testing.T) {
+	g := newModGame(t, "heavenandhell", NewDummyUI())
+	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
+	s := g.GetWorldState()
+	for dlvl, want := range map[int]int{1: d1.DTypeCathedral, 3: d1.DTypeCatacombs, 5: d1.DTypeCaves, 7: d1.DTypeHell, 11: d1.DTypeCathedral} {
+		if got := s.D1LevelType(defs.LevelNameFromDepth(dlvl)); got != want {
+			t.Errorf("level %d: type %d, want %d", dlvl, got, want)
+		}
+	}
+}

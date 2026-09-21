@@ -29,6 +29,8 @@ func (d *DieAction) Execute(context ActionContext) []Action {
 	if actor == state.GetPlayer() {
 		msg(fmt.Sprintf("You die. CoD: %s", d.cause.ToString()))
 		state.factory.PlayD1HeroSound(71)
+		PlayUICue("player_death")
+		PlayUICue("game_over")
 		ui.ShowGameOverMenu()
 	} else {
 		if actor.VisualsPending() {

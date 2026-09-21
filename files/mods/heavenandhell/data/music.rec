@@ -1,21 +1,23 @@
 %rec: default
+# Heaven & Hell's area themes, by level type (music_start(leveltype)): the town's own track and Abaddon's music.
+# The rest of ambience/ (battle_music_3/4 and the ambient loops) is in the pause menu's Music Player.
 
 internal_name: town
 name: Music - Town
 sound: music/town.ogg
 
 internal_name: cathedral
-name: Music - Cathedral (dlvl 1-4)
-sound: ambience/amb_echo.ogg
+name: Music - Cathedral levels
+sound: ambience/calm_music_1.ogg
 
 internal_name: catacombs
-name: Music - Catacombs (dlvl 5-8)
-sound: ambience/amb_creaky.ogg
+name: Music - Catacomb levels
+sound: ambience/calm_music_2.ogg
 
 internal_name: caves
-name: Music - Caves (dlvl 9-12)
-sound: ambience/amb_cave.ogg
+name: Music - Cave levels
+sound: ambience/battle_music_1.ogg
 
 internal_name: hell
-name: Music - Hell (dlvl 13-16)
-sound: ambience/amb_lava.ogg
+name: Music - Hell levels
+sound: ambience/battle_music_2.ogg

@@ -299,6 +299,7 @@ func BuyItem(player, seller *Actor, item *Item) string {
 	seller.GetStats().IncrementBy(stats.Gold, cost)
 	seller.GetInventory().Remove(item)
 	player.GetInventory().Add(item)
+	PlayUICue("vendor_buy")
 	return fmt.Sprintf("You bought [:darkText]%s[:white] for [:darkText]%d[:white] gold", item.Name(), cost)
 }
 
@@ -318,6 +319,7 @@ func SellItem(player *Actor, item *Item) string {
 	price := D1SellPrice(item)
 	player.GetInventory().Remove(item)
 	player.GetStats().IncrementBy(stats.Gold, price)
+	PlayUICue("vendor_sell")
 	return fmt.Sprintf("You sold [:darkText]%s[:white] for [:darkText]%d[:white] gold", item.Name(), price)
 }
 
