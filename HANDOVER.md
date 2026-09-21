@@ -92,6 +92,16 @@ Also fixed along the way (all were real, pre-existing bugs):
 - A monster record without animation frames cost 0 AUT per action and spun the
   turn loop forever; it now acts at its speed.
 
+- Mod picker: with more than one directory under `files/mods/`, the start menu has a "Mod: <name>" entry and is
+  always shown. Picking a mod writes `Mod:` into `config.rec` (`common.SaveMod`) and restarts the process
+  (`game/save.go` `restart`). It restarts because icons, sprites, sounds and definitions are all loaded once per
+  process.
+- Sound audit: D1's registration, area music, call sites and quest lines (now `hero_sound`/`sound` in
+  `quests.rec`) match d1-rebuild. H&H now matches main (the 7drl branch is merged into main):
+  `MonsterSoundCue` falls back to `monster.<internal name>`, the generic kill path plays death sounds, and
+  `heavy_door` is now the engine's `enter_dungeon`. H&H has no music, same as main. `close_door` is defined
+  but never played, same as main.
+
 ## The user's rules for mods (stated in the last session, binding)
 
 - Each mod brings its own assets: tilesheet, icons, levels, town map, NPCs,
