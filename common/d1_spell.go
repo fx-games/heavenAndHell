@@ -424,10 +424,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		if f.UI != nil {
 			f.UI().ShowItemInfo(item)
 		}
-	case d1.SplSearch, d1.SplInfra: // Vision: Infravision merged into it. Everything alive on the level shows
-		// until the level changes, and seeing through walls outlasts that by Infravision's own duration.
-		c.caster.AddStatusEffect(StatusVision, -1) // negative turnCount: never decays on its own, see State.MapTransition
-		c.caster.AddStatusEffect(StatusInfravision, d1.InfravisionTurns(slvl))
 	case d1.SplRage: // AddRage: no raging while already raging, or while too wounded to survive the hangover
 		if h.Rage != 0 || st.GetResource(stats.Health).Value() <= clvl {
 			c.ctx.Msg("You cannot work yourself up again.")

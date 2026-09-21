@@ -58,6 +58,9 @@ effect: apply_status(stone|12)
 id: SPL_INFRA
 cast_sfx: IS_CAST8
 launch_sfx: LS_INFRAVIS
+hit_zone: target_only
+effect: on_self(apply_status_self|vision|-1|)
+effect: on_self(apply_status_self|infravision|198|)
 
 id: SPL_RNDTELEPORT
 cast_sfx: IS_CAST2
@@ -69,7 +72,7 @@ id: SPL_MANASHIELD
 cast_sfx: IS_CAST2
 launch_sfx: LS_MSHIELD
 hit_zone: target_only
-effect: on_self(apply_status_self|mana_shield|-1)
+effect: on_self(apply_status_self|mana_shield|-1|)
 
 id: SPL_FIREBALL
 resist: fire
@@ -239,6 +242,9 @@ effect: spawn_wall(fire)
 
 id: SPL_SEARCH
 cast_sfx: IS_CAST6
+hit_zone: target_only
+effect: on_self(apply_status_self|vision|-1|)
+effect: on_self(apply_status_self|infravision|198|)
 
 id: SPL_RUNEFIRE
 resist: fire
