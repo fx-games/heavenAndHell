@@ -3,6 +3,7 @@ module rpg
 go 1.27.1
 
 require (
+	github.com/expr-lang/expr v1.17.8
 	github.com/flopp/go-findfont v0.1.0
 	github.com/gdamore/tcell/v2 v2.13.10
 	github.com/hajimehoshi/ebiten/v2 v2.10.2
