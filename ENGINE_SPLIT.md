@@ -106,6 +106,23 @@ This becomes load-bearing the moment a SECOND mod ships its own icon names, so
 extracting the H&H content must also make a missing icon name loud: fail the
 load naming every icon the mod did not supply, rather than rendering tile 0.
 
+## Verified behaviour of a missing mod (phase 1 input)
+
+With `Mod: nosuchmod`, the engine today dies with:
+
+    open assets/data/xl_monst.txt: no such file or directory
+
+The overlay falls through to `assets/`, which holds no game content, and the
+first content read fails with a path the player cannot act on. That is the
+current "no mod" state, and it is what the fallback room replaces: one
+hardcoded room, one weapon, one enemy, plus a clear message naming the mod
+that could not be found.
+
+Papercut found alongside it: `config.rec` is THREE blank-line-separated rec
+records, and the config parser only reads the first. A setting appended at the
+end of the file - the obvious thing for a player to do - is silently ignored.
+Worth either merging the records or warning on keys found in later ones.
+
 ## Phases
 
 0. mod overlay filesystem — done
