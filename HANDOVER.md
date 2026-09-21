@@ -45,7 +45,7 @@ Three gates, all non-negotiable:
    output at all (`md5 -q` two runs, and against the run before your change). A
    deliberate gameplay change (the user's list below) changes it: diff the output
    and check every changed line is the intended effect, then say so in the commit.
-   Current baseline, after the shrine change: `afbc3d8254bb4aa6b23d3ed449dc58a1`.
+   Current baseline, after the shrine revert: `06820f034ba7ea3aafe8e01a24b51c4b`.
 3. Both build tags green, no new test failures.
 
 ## Done
@@ -72,7 +72,7 @@ Three gates, all non-negotiable:
 | 17 | D1's town quest talk (TalkToTowner) is `on_approach` triggers in D1's quests.rec |
 | 18 | The fallback room: no mod / missing mod plays the engine's own one room, one weapon, one rat from `files/assets` |
 | 19 | Each mod owns its music and sound exclusively; the engine has no audio. Saves are per mod (`saves/<mod>/`) and refuse another mod's game |
-| 20 | Gameplay: shrines ask gold instead of a permanent loss, and are renamed (objects.rec `cost`) |
+| 20 | Shrine gold costs, later reverted (D1 stays true to the original) |
 
 Also fixed along the way (all were real, pre-existing bugs):
 - Shop menus crashed on any empty list (`items[0]` before the empty check).

@@ -246,8 +246,7 @@ another size lost most of its cells. The stride now travels with the bitmap.
    - `UpdateD1Quests` (set-piece map changes) stays with D1's level family, on
      its side of the generator seam, like its generators.
 
-Gameplay changes (shrines, monster abilities, shop seeding, durability, skill trees)
-land after the boundary exists, not before.
+Gameplay changes to D1 are off the table: the D1 mod follows the original 1:1 (user, 2026-09-21).
 
 Two things main had that H&H's mod does NOT reproduce, on purpose, and both
 should be decided rather than forgotten:
