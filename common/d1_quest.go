@@ -245,7 +245,6 @@ func (f *Factory) dropD1Item(it *d1.Item, pos geometry.Point) {
 	f.State.AddItemToMapWithDistribution(f.NewD1Item(it), pos)
 }
 
-
 // Monster goals (monster_goal) the talking bosses use.
 const (
 	d1GoalNormal    = 1
