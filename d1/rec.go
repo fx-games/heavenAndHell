@@ -1,6 +1,7 @@
 package d1
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 
@@ -33,6 +34,12 @@ var MonsterAIDescriptions map[string]string
 
 func loadMonsterTables(fsys fs.FS) error {
 	recs, err := readRecMulti(fsys, "monsters.rec")
+	// monsters.rec glosses the AI_* brains in plain English for the actor popup. A mod whose monsters are driven
+	// by skills rather than by Diablo's brains names no AI_* at all and ships no file; the glossary stays empty.
+	if errors.Is(err, fs.ErrNotExist) {
+		MonsterAIDescriptions = map[string]string{}
+		return nil
+	}
 	if err != nil {
 		return err
 	}

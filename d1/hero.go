@@ -1,6 +1,7 @@
 package d1
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"math/rand"
@@ -74,8 +75,22 @@ var itypeByName = map[string]int{"default": 0, "sword": ITypeSword, "axe": IType
 var classFlagByName = map[string]uint32{"critical_strike": ClassCriticalStrike, "trap_sense": ClassTrapSense,
 	"iron_skin": ClassIronSkin, "natural_resistance": ClassNaturalResistance, "dual_wield": ClassDualWield}
 
+// heroTablesLoaded records whether the active mod supplied hero.rec. It is NOT optional in the way the xl_*
+// tables are: those describe features a mod may not have, while this one is the hero's own numbers, and a game
+// with no hero numbers has no hero. It is tolerated only so that the rest of a mod - its monsters, items,
+// vendors and levels - can be loaded and worked on, and HeroTablesLoaded exists so nothing quietly builds a
+// hero out of a table of zeroes. Zeroed class tables have silently broken this engine once already.
+var heroTablesLoaded bool
+
+// HeroTablesLoaded reports whether the active mod declared the hero's per-class numbers.
+func HeroTablesLoaded() bool { return heroTablesLoaded }
+
 func loadHeroTables(fsys fs.FS) error {
+	heroTablesLoaded = false
 	recs, err := readRecMulti(fsys, "hero.rec")
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
 	if err != nil {
 		return err
 	}
@@ -144,6 +159,7 @@ func loadHeroTables(fsys fs.FS) error {
 		return fmt.Errorf("hero.rec: %d experience levels, want %d", len(exp), len(ExpLvls))
 	}
 	copy(ExpLvls[:], exp)
+	heroTablesLoaded = true
 	return nil
 }
 

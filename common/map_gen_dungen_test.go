@@ -5,12 +5,14 @@ import (
 	"path"
 	"testing"
 
+	"rpg/d1"
 	"rpg/defs"
 	"rpg/dungeon"
 	"rpg/files"
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/recfile"
+	"rpg/stats"
 )
 
 // withMod points the whole content stack at one mod for the duration of a test and puts it back afterwards,
@@ -25,6 +27,27 @@ func withMod(t *testing.T, name string) {
 			t.Fatalf("restoring %s icons: %v", DefaultMod, err)
 		}
 	})
+}
+
+// modFactory is the smallest Factory that can turn the active mod's records into actors and items: its own
+// tables, its own RNG, and a State for the item factory to hang the player getter off. Nothing here is
+// D1-specific; it is whatever mod withMod selected.
+func modGenerator(t *testing.T, levels []dungeon.Level, seed int64) *MapGenerator {
+	t.Helper()
+	data, err := d1.Load(files.GetFileSystem())
+	if err != nil {
+		t.Fatalf("loading %s content: %v", files.ActiveMod(), err)
+	}
+	rnd := rand.New(rand.NewSource(seed))
+	g := NewMapGenerator(rnd)
+	g.SetLevels(levels)
+	g.SetSeed(seed)
+	s := NewState(nil)
+	s.SetMapGenerator(g)
+	f := &Factory{RandomSource: rnd, State: &s, Generator: d1.NewGenerator(data, int32(seed))}
+	s.SetFactory(f)
+	g.SetFactory(f)
+	return g
 }
 
 func loadModLevels(t *testing.T) []dungeon.Level {
@@ -74,8 +97,7 @@ func TestHeavenAndHellLevelsAreWalkable(t *testing.T) {
 	}
 
 	for dlvl := 1; dlvl < len(levels); dlvl++ {
-		g := NewMapGenerator(rand.New(rand.NewSource(int64(dlvl) * 7919)))
-		g.SetLevels(levels)
+		g := modGenerator(t, levels, int64(dlvl)*7919)
 		name := defs.LevelNameFromDepth(dlvl)
 		m := g.GenerateMap(name, dlvl)
 
@@ -131,6 +153,54 @@ func TestHeavenAndHellLevelsAreWalkable(t *testing.T) {
 	}
 }
 
+// A level with nothing on it is terrain, not a dungeon. This is the population half: the monsters and the floor
+// loot have to be THIS mod's, drawn from its enemies.rec and its items.rec, at a depth its own records allow -
+// which is the whole point of the split, and the thing a "reuse D1's placement" shortcut would have broken.
+func TestHeavenAndHellLevelsArePopulatedFromItsOwnTables(t *testing.T) {
+	withMod(t, "heavenandhell")
+	levels := loadModLevels(t)
+
+	monsters, err := defs.ReadMonsters(files.GetFileSystem())
+	if err != nil {
+		t.Fatal(err)
+	}
+	ownMonster := map[string]defs.Monster{}
+	for _, mon := range monsters {
+		ownMonster[mon.ID] = mon
+	}
+
+	totalActors, totalItems := 0, 0
+	for dlvl := 1; dlvl < len(levels); dlvl++ {
+		g := modGenerator(t, levels, int64(dlvl)*104729)
+		m := g.GenerateMap(defs.LevelNameFromDepth(dlvl), dlvl)
+
+		actors := m.Actors()
+		totalActors += len(actors)
+		totalItems += len(m.Items())
+		for _, a := range actors {
+			mon, ok := ownMonster[a.GetInternalName()]
+			if !ok {
+				t.Errorf("dlvl %d: %q is not one of this mod's monsters", dlvl, a.GetInternalName())
+				continue
+			}
+			// Nothing may turn up deeper than its record allows. Shallower is legal: that is out-of-depth.
+			if mon.MaxDLvl > 0 && dlvl > mon.MaxDLvl {
+				t.Errorf("dlvl %d: %s is capped at dlvl %d", dlvl, mon.ID, mon.MaxDLvl)
+			}
+			if a.GetStats().GetAttribute(stats.MaxHealth) <= 0 {
+				t.Errorf("dlvl %d: %s spawned with no hit points", dlvl, mon.ID)
+			}
+		}
+	}
+	if totalActors == 0 {
+		t.Error("twelve levels and not one monster on any of them")
+	}
+	if totalItems == 0 {
+		t.Error("twelve levels and not one item on any of them")
+	}
+	t.Logf("twelve levels: %d monsters, %d floor items, all from this mod's tables", totalActors, totalItems)
+}
+
 // Same seed, same level: a dungeon that differs run to run cannot be saved, reloaded or reasoned about, and
 // three of this engine's four nondeterminism bugs were exactly this.
 func TestDungenLevelsAreReproducibleFromTheirSeed(t *testing.T) {
@@ -138,8 +208,7 @@ func TestDungenLevelsAreReproducibleFromTheirSeed(t *testing.T) {
 	levels := loadModLevels(t)
 
 	build := func() string {
-		g := NewMapGenerator(rand.New(rand.NewSource(4242)))
-		g.SetLevels(levels)
+		g := modGenerator(t, levels, 4242)
 		m := g.GenerateMap(defs.LevelNameFromDepth(3), 3)
 		out := make([]byte, 0, m.GetWidth()*m.GetHeight())
 		for y := 0; y < m.GetHeight(); y++ {

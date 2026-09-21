@@ -17,8 +17,19 @@ var d1ITypeFallback = []string{"item.misc", "item.sword", "item.axe", "item.bow"
 
 // d1ItemIcon: icons.rec "item.<misc id>" if present (potions, scrolls), else the ".magic"/".unique" variant of the
 // item's own family icon if it.Magical calls for one, else the family icon, else "item.<type>".
-func d1ItemIcon(it *d1.Item) int32 {
-	return defs.Icon(d1ItemIconName(it))
+// The last step of the chain is the base record's own "icon:" field, for a mod that names its items' icons
+// outright instead of leaning on Diablo's ITYPE_/IMISC_ enums. D1's own names all resolve before this, so its
+// items are unaffected.
+func (g *Factory) d1ItemIcon(it *d1.Item) int32 {
+	if icon, ok := defs.IconOK(d1ItemIconName(it)); ok {
+		return icon
+	}
+	if it.BaseIdx >= 0 && it.BaseIdx < len(g.Generator.D.Items) {
+		if icon, ok := defs.IconOK(g.Generator.D.Items[it.BaseIdx].Icon); ok {
+			return icon
+		}
+	}
+	return defs.Icon(d1ItemIconName(it)) // no icon anywhere: fail naming the one that is missing
 }
 
 // d1GoldIconName picks the gold pile icon by thirds of the spawned range: 5*dlvl + rand(10*dlvl), +1/8 in hell,
@@ -86,7 +97,7 @@ func d1SlotName(it *d1.Item, dualWield bool) defs.SlotName {
 
 // NewD1Item wraps a rolled D1 item into a game item; the D1 fields stay the source of truth.
 func (g *Factory) NewD1Item(it *d1.Item) *Item {
-	item := NewItem(g.State.GetPlayer, it.Name, d1ItemIcon(it))
+	item := NewItem(g.State.GetPlayer, it.Name, g.d1ItemIcon(it))
 	item.d1, item.d1Data = it, g.Generator.D
 	item.SetInternalName(it.Name)
 	item.SetBaseCost(it.IValue)

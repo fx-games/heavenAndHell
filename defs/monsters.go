@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"io/fs"
+	"math/rand"
 	"path"
 	"strings"
 
@@ -65,6 +66,19 @@ type Monster struct {
 
 // Available reports whether the monster turns up in random spawns.
 func (m Monster) Available() bool { return m.Avail != 0 }
+
+// CanAppearAt reports whether this monster may be rolled for dungeon level dlvl: at or below its own depth, or
+// above it on an out-of-depth roll, and never past max_dlvl. The record carries all four knobs, so the rule
+// lives with the record rather than with whichever generator happens to be placing monsters.
+func (m Monster) CanAppearAt(randomSource *rand.Rand, dlvl int) bool {
+	if m.MaxDLvl > 0 && dlvl > m.MaxDLvl {
+		return false
+	}
+	if dlvl >= m.MinDLvl {
+		return true
+	}
+	return dlvl >= m.MinLevelForOoD && randomSource.Float64() < m.OutOfDepthChance
+}
 
 // MinHP/MaxHP/MinDam/MaxDam are the bounds the combat code works in, from the dice the record carries.
 func (m Monster) MinHP() int   { return m.Health.Min() }

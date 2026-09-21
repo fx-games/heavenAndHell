@@ -37,8 +37,9 @@ func (g *MapGenerator) generateDungenMap(targetMap string, dlvl int, lvl dungeon
 	m.SetDisplayName(g.dungenLevelName(lvl, dlvl))
 
 	g.addDungenTiles(m, layout, g.dungenTilemap(lvl, dlvl, layout))
-	g.addDungenStairs(m, layout, lvl, dlvl)
+	stairs := g.addDungenStairs(m, layout, lvl, dlvl)
 	g.decorateDungenRooms(m, layout, lvl, dlvl)
+	g.populateDungenLevel(m, layout, dlvl, stairs)
 
 	if snap := g.snapshots[targetMap]; snap != nil {
 		snap.apply(g.factory, m)

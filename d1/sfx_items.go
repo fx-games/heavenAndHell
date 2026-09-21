@@ -1,6 +1,7 @@
 package d1
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"strconv"
@@ -24,6 +25,11 @@ var itemDropSnds, itemInvSnds []string
 
 func loadItemSounds(fsys fs.FS) (canim []int, drop, inv []string, err error) {
 	recs, err := readRecMulti(fsys, "item_sounds.rec")
+	// A mod that does not have this Diablo feature ships no file for it, and an absent feature is not an
+	// error: what the table would have filled stays empty.
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil, nil, nil
+	}
 	if err != nil {
 		return nil, nil, nil, err
 	}

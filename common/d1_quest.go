@@ -22,8 +22,16 @@ import (
 // QuestDefs are the mod's quests, in quest-id order.
 func (s *State) QuestDefs() []defs.Quest { return s.factory.D1().D.QuestDefs }
 
-// QuestFlag is the flag set once quest q is done.
-func (s *State) QuestFlag(q int) string { return "quest:" + s.QuestDefs()[q].Key }
+// QuestFlag is the flag set once quest q is done. A quest id the mod's quests.rec does not reach has no flag:
+// the engine names a few quests by id (the one that opens new game plus, the ones the town hands in), and a mod
+// with a shorter quest list simply does not have them.
+func (s *State) QuestFlag(q int) string {
+	defs := s.QuestDefs()
+	if q < 0 || q >= len(defs) {
+		return ""
+	}
+	return "quest:" + defs[q].Key
+}
 
 // QuestByKey is the id of the quest a record names, or -1.
 func (s *State) QuestByKey(key string) int {
@@ -37,6 +45,9 @@ func (s *State) QuestByKey(key string) int {
 
 // QuestActive is quests[q]._qactive.
 func (s *State) QuestActive(q int) int {
+	if s.QuestFlag(q) == "" {
+		return d1.QuestNotAvail // a quest this mod does not have is never active
+	}
 	switch f := s.GetFlags(); {
 	case f.IsSet(s.QuestFlag(q)):
 		return d1.QuestDone

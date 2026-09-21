@@ -1,6 +1,7 @@
 package d1
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 )
@@ -13,6 +14,11 @@ var SfxFiles map[string]string
 
 func loadSfxFiles(fsys fs.FS) (map[string]string, error) {
 	recs, err := readRec(fsys, "sfx.rec")
+	// A mod that does not have this Diablo feature ships no file for it, and an absent feature is not an
+	// error: what the table would have filled stays empty.
+	if errors.Is(err, fs.ErrNotExist) {
+		return map[string]string{}, nil
+	}
 	if err != nil {
 		return nil, err
 	}

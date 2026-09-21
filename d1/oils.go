@@ -1,6 +1,9 @@
 package d1
 
-import "io/fs"
+import (
+	"errors"
+	"io/fs"
+)
 
 // oil is one of Hellfire's oils; the table lives in assets/data/oils.rec and is loaded by Load.
 type oil struct {
@@ -14,6 +17,11 @@ var oils []oil
 
 func loadOils(fsys fs.FS) ([]oil, error) {
 	recs, err := readRec(fsys, "oils.rec")
+	// A mod that does not have this Diablo feature ships no file for it, and an absent feature is not an
+	// error: what the table would have filled stays empty.
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}

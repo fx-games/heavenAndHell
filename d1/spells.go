@@ -1,6 +1,7 @@
 package d1
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"math"
@@ -145,6 +146,11 @@ var resistKindByName = map[string]int{"none": ResistNone, "fire": ResistKindFire
 
 func loadSpellTables(fsys fs.FS) error {
 	recs, err := readRecMulti(fsys, "spells.rec")
+	// A mod that does not have this Diablo feature ships no file for it, and an absent feature is not an
+	// error: what the table would have filled stays empty.
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
 	if err != nil {
 		return err
 	}
