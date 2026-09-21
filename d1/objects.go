@@ -55,9 +55,6 @@ var (
 	ShrineNames []string
 	// ShrineMessages are the MsgStrings each shrine shows, with a note on what the shrine does.
 	ShrineMessages []string
-	// ShrineCosts is the gold per dungeon level a shrine asks for its gift, in place of D1's permanent losses;
-	// 0 for a shrine that takes nothing. A hero short of it pays what they have.
-	ShrineCosts []int
 	// StoryBookNames are D1's StoryBookName, indexed by a story book's Var3.
 	StoryBookNames []string
 
@@ -112,13 +109,12 @@ func loadObjectTables(fsys fs.FS, d *Data) error {
 			Sfx:       m.GetStringOrDefault("sfx", ""),
 		}
 	}
-	ShrineNames, ShrineMessages, ShrineCosts = nil, nil, nil
+	ShrineNames, ShrineMessages = nil, nil
 	shrineMax, shrineAvail = nil, nil
 	for _, r := range recs["shrine"] {
 		m := r.ToMap("")
 		ShrineNames = append(ShrineNames, m.GetStringOrDefault("name", ""))
 		ShrineMessages = append(ShrineMessages, m.GetStringOrDefault("message", ""))
-		ShrineCosts = append(ShrineCosts, m.GetIntOrDefault("cost", 0))
 		shrineMax = append(shrineMax, m.GetIntOrDefault("max_lvl", 0))
 		shrineAvail = append(shrineAvail, m.GetIntOrDefault("avail", 0))
 	}

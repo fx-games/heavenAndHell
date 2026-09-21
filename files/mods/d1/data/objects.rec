@@ -2,24 +2,19 @@
 # D1's 34 shrines (shrinestrs and their MsgStrings), in shrine order: the index is the shrine's Var1.
 # max_lvl is D1's shrineMax, the deepest dungeon level the shrine may be generated on; avail is shrineAvail,
 # where 2 means multiplayer only and so never appears in this game. The last eight are Hellfire's.
-# cost is the gold per dungeon level a shrine asks for its gift. Where D1 took something for good (a stat, a spell
-# level, base mana, experience, durability, damage), this game asks gold instead and the shrine is renamed.
 
-name: Tithing
-message: Strength is bought, not taken (+6 to one random stat permanently, for 100 gold per dungeon level)
-cost: 100
+name: Mysterious
+message: Some are weakened as one grows strong (-1 all stats, +6 to one random stat permanently)
 max_lvl: 24
 avail: 0
 
-name: Tempering
-message: Steel remembers the forge (+10 max durability on equipped items, for 50 gold per dungeon level)
-cost: 50
+name: Hidden
+message: New strength is forged through destruction (+10 max durability on equipped items, one random item -20)
 max_lvl: 24
 avail: 0
 
-name: Bulwark
-message: Those who defend stand firm (+2 armor on all armor, for 50 gold per dungeon level)
-cost: 50
+name: Gloomy
+message: Those who defend seldom attack (+2 armor on all armor, -1 max damage on all weapons)
 max_lvl: 24
 avail: 1
 
@@ -43,9 +38,8 @@ message: Time cannot diminish the power of steel (repairs all items)
 max_lvl: 24
 avail: 0
 
-name: Arcane
-message: Magic answers those who pay it (+1 level to known spells, for 100 gold per dungeon level)
-cost: 100
+name: Enchanted
+message: Magic is not always what it seems to be (+1 level to known spells, -2 to one random spell)
 max_lvl: 8
 avail: 0
 
@@ -54,9 +48,8 @@ message: What once was opened now is closed (refills all chests on this level)
 max_lvl: 24
 avail: 1
 
-name: Burning
-message: Intensity has its price (+2 Firebolt levels, for 75 gold per dungeon level)
-cost: 75
+name: Fascinating
+message: Intensity comes at the cost of wisdom (+2 Firebolt levels, -10% max mana permanently)
 max_lvl: 24
 avail: 0
 
@@ -90,9 +83,8 @@ message: Wherever you go, there you are (teleports you to a random spot)
 max_lvl: 24
 avail: 0
 
-name: Crackling
-message: Energy has its price (+2 Charged Bolt levels, for 75 gold per dungeon level)
-cost: 75
+name: Sacred
+message: Energy comes at the cost of wisdom (+2 Charged Bolt levels, -10% max mana permanently)
 max_lvl: 24
 avail: 0
 
@@ -126,9 +118,8 @@ message: The way is made clear when viewed from above (reveals the level map)
 max_lvl: 24
 avail: 0
 
-name: Radiant
-message: Salvation has its price (+2 Holy Bolt levels, for 75 gold per dungeon level)
-cost: 75
+name: Ornate
+message: Salvation comes at the cost of wisdom (+2 Holy Bolt levels, -10% max mana permanently)
 max_lvl: 24
 avail: 0
 
@@ -147,9 +138,8 @@ message: That which does not kill you... (+2 to your class' main stat, sets off 
 max_lvl: 24
 avail: 0
 
-name: Lucid
-message: Knowledge is power (+1 Mag per 1000 XP, up to +5, for 50 gold per dungeon level)
-cost: 50
+name: Glowing
+message: Knowledge is power (+1 Mag per 1000 XP, up to +5 for 5% of your XP)
 max_lvl: 24
 avail: 0
 

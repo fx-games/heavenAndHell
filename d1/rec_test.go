@@ -189,8 +189,8 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		name       string
 		max, avail int
 	}{
-		{0, "Tithing", 24, 0},  // D1's Mysterious, asking gold instead of a stat
-		{7, "Arcane", 8, 0},    // D1's Enchanted; the one shrine with a shallower cap
+		{0, "Mysterious", 24, 0},
+		{7, "Enchanted", 8, 0}, // the one shrine with a shallower cap
 		{18, "Spooky", 24, 2},  // multiplayer only
 		{25, "Tainted", 24, 2}, // multiplayer only
 		{32, "Solar", 24, 1},
