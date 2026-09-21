@@ -1,0 +1,85 @@
+%rec: default
+# Heaven & Hell's sounds: main's files/assets/sfx, on the engine's cue names. This game has no music or speech.
+
+internal_name: melee_attack
+name: Hero - Attack
+sound: sfx/melee_attack/plc_hit_body.ogg
+sound: sfx/melee_attack/plc_hit_hay.ogg
+
+internal_name: bow_fire
+name: Hero - Shoot
+sound: sfx/bow_fire/plc_miss_arrow.ogg
+sound: sfx/bow_fire/plc_miss_arrow2.ogg
+
+internal_name: level_up
+name: Hero - Level Up
+sound: sfx/levelup.ogg
+
+internal_name: human_hit
+name: Hero - Hit
+sound: sfx/human_hit/plc_hit_grunt.ogg
+sound: sfx/human_hit/plc_hit_grunt2.ogg
+
+internal_name: heavy_hit_human
+name: Hero - Heavy Hit
+sound: sfx/heavy_hit_human.ogg
+
+internal_name: missile_hit_human
+name: Hero - Missile Hit
+sound: sfx/missile_hit_human.ogg
+
+internal_name: open_door
+name: Door - Open
+sound: sfx/open_door/plm_door_open.ogg
+sound: sfx/open_door/plm_door_opening.ogg
+sound: sfx/open_door/plm_door_rusty.ogg
+sound: sfx/open_door/plm_door_wooden.ogg
+
+internal_name: close_door
+name: Door - Close
+sound: sfx/close_door/plm_door_shut.ogg
+sound: sfx/close_door/plm_door_slam.ogg
+
+internal_name: heavy_door
+name: Town gate
+sound: sfx/heavy_door.ogg
+
+internal_name: skeleton_hit
+name: Skeleton - Hit
+sound: sfx/skeleton_hit.ogg
+
+internal_name: monster.skeleton.hit
+name: Skeleton - Hit
+sound: sfx/skeleton_hit.ogg
+
+internal_name: monster.skeleton.death
+name: Skeleton - Death
+sound: sfx/skeleton_death.ogg
+
+internal_name: monster.skeleton_archer.hit
+name: Skeleton - Hit
+sound: sfx/skeleton_hit.ogg
+
+internal_name: monster.skeleton_archer.death
+name: Skeleton - Death
+sound: sfx/skeleton_death.ogg
+
+internal_name: monster.skeleton_warrior.hit
+name: Skeleton - Hit
+sound: sfx/skeleton_hit.ogg
+
+internal_name: monster.skeleton_warrior.death
+name: Skeleton - Death
+sound: sfx/skeleton_death.ogg
+
+internal_name: monster.skeleton_captain.hit
+name: Skeleton - Hit
+sound: sfx/skeleton_hit.ogg
+
+internal_name: monster.skeleton_captain.death
+name: Skeleton - Death
+sound: sfx/skeleton_death.ogg
+
+internal_name: monster.bat.attack
+name: Bat - Attack
+sound: sfx/bat_attack.ogg

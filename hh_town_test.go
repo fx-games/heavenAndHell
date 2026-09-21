@@ -445,3 +445,18 @@ func TestHeavenAndHellHellTown(t *testing.T) {
 		}
 	}
 }
+
+// A mod owns its music and sound outright: H&H plays main's sounds, and none of Diablo's reach it.
+func TestHeavenAndHellHearsOnlyItsOwnSounds(t *testing.T) {
+	g := newHeavenAndHellGame(t, NewDummyUI())
+	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
+	a := g.GetAudio()
+	if !a.HasCue("level_up") || !a.HasCue("monster.skeleton.hit") {
+		t.Error("H&H's own sounds are not registered")
+	}
+	for _, cue := range []string{"monster.nzombie.hit", "enter_dungeon"} {
+		if a.HasCue(cue) {
+			t.Errorf("H&H plays Diablo's %s", cue)
+		}
+	}
+}

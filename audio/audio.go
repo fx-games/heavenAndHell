@@ -2,6 +2,7 @@ package audio
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -539,8 +540,11 @@ func (ap *Player) RegisterMusicEvents(recFile string) {
 
 func (ap *Player) registerEvents(recFile string, setup func(s *Sound)) {
 	f, err := ap.files.Open(recFile)
+	if errors.Is(err, fs.ErrNotExist) {
+		return // a mod without music, speech or sound has none: nothing is shared between mods
+	}
 	if err != nil {
-		println("ERR: Sound events not found: " + recFile)
+		println("ERR: Sound events not readable: " + recFile + ": " + err.Error())
 		return
 	}
 	defer f.Close()

@@ -4,11 +4,20 @@ import (
 	"io/fs"
 	"os"
 	"testing"
+
+	"rpg/files"
 )
+
+// d1Files is the file tree the game reads, on the D1 mod: sound and music are a mod's, never the engine's.
+func d1Files() fs.ReadDirFS {
+	files.SetFileSystem(os.DirFS("../files").(files.FileSystem))
+	files.SelectMod("d1")
+	return files.GetFileSystem()
+}
 
 // An event with a missing file keeps its other files and plays a random loaded one of them at run time.
 func TestRandomCueSkipsMissingFiles(t *testing.T) {
-	ap := NewAudioPlayer(os.DirFS("../files").(fs.ReadDirFS), SampleRate44100)
+	ap := NewAudioPlayer(d1Files(), SampleRate44100)
 	s := &Sound{
 		Cue:          "test",
 		Filenames:    []string{"assets/sfx/missing.ogg", "assets/sfx/melee_attack/melee_attack_1.ogg", "assets/sfx/melee_attack/melee_attack_2.ogg"},
@@ -44,10 +53,10 @@ func TestPannedScalesEachChannel(t *testing.T) {
 	}
 }
 
-// music.rec holds the five area themes d1AreaMusic asks for, town wired up to assets/music/town.ogg. A theme with
+// music.rec holds the five area themes d1AreaMusic asks for, town wired up to the mod's music/town.ogg. A theme with
 // no file assigned stays unregistered, so the current track keeps playing instead.
 func TestAreaMusicRegistered(t *testing.T) {
-	ap := NewAudioPlayer(os.DirFS("../files").(fs.ReadDirFS), SampleRate44100)
+	ap := NewAudioPlayer(d1Files(), SampleRate44100)
 	ap.RegisterMusicEvents("assets/data/music.rec")
 	if !slicesContains(ap.MusicTracks(), "town") {
 		t.Fatalf("no town track, got %v", ap.MusicTracks())
