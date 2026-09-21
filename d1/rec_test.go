@@ -20,7 +20,8 @@ func TestMain(m *testing.M) {
 // The tables below moved out of Go source into mods/d1/data/*.rec. These are the values the literals had, spot
 // checked at the ends and the awkward middles, so a mangled .rec fails here rather than in the game.
 func TestRecTablesMatchTheOldLiterals(t *testing.T) {
-	if _, err := Load(testFS()); err != nil {
+	d, err := Load(testFS())
+	if err != nil {
 		t.Fatal(err)
 	}
 
@@ -111,10 +112,10 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		t.Error("property better did not survive properties.rec")
 	}
 
-	if boyShuns[Warrior] == nil || len(boyShuns[Rogue]) != 5 ||
-		boyShuns[Warrior][0] != ITypeBow || boyShuns[Warrior][1] != ITypeStaff ||
-		boyShuns[Monk][1] != ITypeMArmor {
-		t.Errorf("boyShuns did not survive stores.rec: %v", boyShuns)
+	shuns := d.Vendors["boy"].Shuns
+	if len(shuns) != NumClasses || len(shuns["Rogue"]) != 5 ||
+		shuns["Warrior"][0] != "bow" || shuns["Warrior"][1] != "staff" || shuns["Monk"][1] != "marmor" {
+		t.Errorf("Wirt's shuns did not survive stores.rec: %v", shuns)
 	}
 
 	if len(SpellResist) != 25 || len(SpellTargeted) != 20 || len(SpellSfx) != 45 {

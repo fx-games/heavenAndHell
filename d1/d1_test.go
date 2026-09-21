@@ -129,7 +129,7 @@ func TestStores(t *testing.T) {
 	}
 	{
 		g := NewGenerator(d, 3)
-		lim := g.limits()
+		smithV, witchV, boyV, premiumV := d.Vendors["smith"], d.Vendors["witch"], d.Vendors["boy"], d.Vendors["premium"]
 		for lvl := 6; lvl <= 16; lvl += 5 {
 			smith := g.SmithStock(lvl)
 			for _, it := range smith {
@@ -137,11 +137,11 @@ func TestStores(t *testing.T) {
 					t.Fatalf("smith sells %+v", it)
 				}
 			}
-			if len(smith) > lim.smithItems-1 {
+			if len(smith) > smithV.ItemCount.Max() {
 				t.Fatalf("smith has %d items", len(smith))
 			}
 			witch := g.WitchStock(lvl, [NumSpells]int{})
-			if witch[0].MiscID != "IMISC_MANA" || witch[1].MiscID != "IMISC_FULLMANA" || witch[2].Spell != 7 || len(witch) < 10 || len(witch) >= lim.witchItems {
+			if witch[0].MiscID != "IMISC_MANA" || witch[1].MiscID != "IMISC_FULLMANA" || witch[2].Spell != 7 || len(witch) < 10 || len(witch) > witchV.ItemCount.Max()+len(witchV.Always) {
 				t.Fatalf("witch stock starts wrong: %s %s %s (%d items)", witch[0].Name, witch[1].Name, witch[2].Name, len(witch))
 			}
 			for _, it := range witch {
@@ -168,7 +168,7 @@ func TestStores(t *testing.T) {
 			}
 			rogue := &Shopper{Class: Rogue, Str: 20, Mag: 15, Dex: 30}
 			boy := g.BoyItem(lvl, rogue)
-			if boy.Magical == 0 || boy.IValue > lim.boyMaxVal || d.WirtPrice(boy) >= BuyPrice(boy) {
+			if boy.Magical == 0 || boy.IValue > boyV.MaxValue || d.WirtPrice(boy) >= BuyPrice(boy) {
 				t.Fatalf("wirt item %+v at %d", boy, d.WirtPrice(boy))
 			}
 		}
@@ -178,7 +178,7 @@ func TestStores(t *testing.T) {
 		shift := 3
 		moved := p.Items[shift+1]
 		g.RefillPremium(p, 2, nil)
-		if p.Level != 2 || p.Items[1] != moved || p.Items[lim.premiumItems-1] == nil || lim.premiumItems < premiumSlots && p.Items[lim.premiumItems] != nil {
+		if p.Level != 2 || p.Items[1] != moved || p.Items[len(premiumV.SlotLevels)-1] == nil {
 			t.Fatalf("premium rotation: level %d", p.Level)
 		}
 		p.Items[4] = nil
