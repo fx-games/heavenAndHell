@@ -64,6 +64,7 @@ func main() {
 
 func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 	userConfig := common.NewConfigurationFromRecFile(common.ConfigFile)
+	files.SelectMod(userConfig.Mod) // before anything reads content: assets/ resolves to the mod first from here on
 	startInfos := common.StartInfo{
 		Title:       "RPG",
 		ScreenSize:  userConfig.WindowSize,
@@ -227,6 +228,7 @@ func maptest() {
 	if len(os.Args) > 3 {
 		seed, _ = strconv.ParseInt(os.Args[3], 10, 64)
 	}
+	files.SelectMod(common.NewConfigurationFromRecFile(common.ConfigFile).Mod)
 	d1Data, err := d1.Load(files.GetFileSystem())
 	if err != nil {
 		log.Fatal(err)

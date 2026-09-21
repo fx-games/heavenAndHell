@@ -30,12 +30,10 @@ func (r row) arr(k string) (out [6]int) {
 	return
 }
 
-// dataPath locates one of this mod's data files. Diablo 1 is a mod like any other: its tables, texts and level
-// data live under files/mods/d1/data, where they shadow assets/data for a game that selects this mod. Package d1
-// reads them from their real home rather than through the overlay, so a caller with a plain fs.FS rooted at
-// files/ (every test does this) gets the same bytes as the running game.
+// dataPath locates one of the active mod's data files. Diablo 1 is a mod like any other: the engine never names
+// it, so every read goes to assets/data and the overlay in package files resolves it to mods/<active>/data.
 func dataPath(elem ...string) string {
-	return path.Join(append([]string{"mods", "d1", "data"}, elem...)...)
+	return path.Join(append([]string{"assets", "data"}, elem...)...)
 }
 
 func readTable(fsys fs.FS, name string) ([]row, error) {

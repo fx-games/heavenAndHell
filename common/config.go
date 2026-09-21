@@ -62,6 +62,9 @@ type Configuration struct {
 
 	Fullscreen bool // set in the video menu or with F11
 
+	// Mod names the game to play: files/mods/<Mod> shadows the engine's own assets/. One mod is one complete game.
+	Mod string
+
 	// MiniMapColors overrides minimap pixel colors by name, from repeated
 	// "MiniMapColor: name=rrggbb" lines. Unknown names are kept and written back, but never drawn.
 	MiniMapColors map[string][4]byte
@@ -164,6 +167,7 @@ func (c Configuration) ToRecord() recfile.Record {
 		{Name: "VoiceVolume", Value: recfile.FloatStr(c.VoiceVolume)},
 		{Name: "AutoExploreOpenContainers", Value: recfile.BoolStr(c.AutoExploreOpenContainers)},
 		{Name: "Fullscreen", Value: recfile.BoolStr(c.Fullscreen)},
+		{Name: "Mod", Value: c.Mod},
 	}
 	// written back on every save, so a menu toggle cannot drop the user's palette
 	for _, name := range slices.Sorted(maps.Keys(c.MiniMapColors)) {
@@ -217,6 +221,7 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		VoiceVolume:               configMap.GetFloatOrDefault("VoiceVolume", 1),
 		AutoExploreOpenContainers: configMap.GetBoolOrFalse("AutoExploreOpenContainers"),
 		Fullscreen:                configMap.GetBoolOrFalse("Fullscreen"),
+		Mod:                       configMap.GetStringOrDefault("Mod", DefaultMod),
 		MiniMapColors:             parseMiniMapColors(configMap.GetStringOrDefault("MiniMapColor", "")),
 		WindowSize: geometry.Point{ //1280, Y: 800
 			X: configMap.GetIntOrDefault("WindowWidth", 1280),
@@ -228,6 +233,9 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 	}
 	return configuration
 }
+
+// DefaultMod is the game played when config.rec does not name one.
+const DefaultMod = "d1"
 
 // ConfigFile is the user configuration next to the game.
 const ConfigFile = "config.rec"

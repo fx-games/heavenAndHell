@@ -1,7 +1,6 @@
 package d1
 
 import (
-	"os"
 	"strings"
 	"testing"
 )
@@ -115,7 +114,7 @@ func TestParseTilSol(t *testing.T) {
 
 // TestLevelDataLoads checks every imported file parses and the tables are the sizes D1's are.
 func TestLevelDataLoads(t *testing.T) {
-	ld, err := loadLevelData(os.DirFS("../files"))
+	ld, err := loadLevelData(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}

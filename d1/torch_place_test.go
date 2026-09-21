@@ -1,14 +1,13 @@
 package d1
 
 import (
-	"os"
 	"testing"
 )
 
 // A wall torch belongs on a wall: D1 hangs some of them off the floor cell in front, which top-down leaves a
 // torch standing in the open (addL2Torches).
 func TestWallTorchesSitOnWalls(t *testing.T) {
-	d, err := Load(os.DirFS("../files"))
+	d, err := Load(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -2,7 +2,6 @@ package d1
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 )
@@ -10,7 +9,7 @@ import (
 // TestCreateLevels builds every level and set level for several games and checks what D1 guarantees: monsters,
 // objects and items on open cells, stairs on every level that has them, no two things in one cell.
 func TestCreateLevels(t *testing.T) {
-	d, err := Load(os.DirFS("../files"))
+	d, err := Load(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,7 +99,7 @@ func TestCreateLevels(t *testing.T) {
 // TestStoryObjects checks what the story books and the slain hero hand out: a narration for each book's level and
 // the class rewards OperateSlainHero rolls for.
 func TestStoryObjects(t *testing.T) {
-	d, err := Load(os.DirFS("../files"))
+	d, err := Load(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}

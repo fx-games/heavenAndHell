@@ -10,7 +10,7 @@ import (
 // a single test run in isolation behaves like the whole package, rather than depending on some earlier test
 // having loaded the data first.
 func TestMain(m *testing.M) {
-	if _, err := Load(os.DirFS("../files")); err != nil {
+	if _, err := Load(testFS()); err != nil {
 		fmt.Println("d1.Load:", err)
 		os.Exit(1)
 	}
@@ -20,7 +20,7 @@ func TestMain(m *testing.M) {
 // The tables below moved out of Go source into mods/d1/data/*.rec. These are the values the literals had, spot
 // checked at the ends and the awkward middles, so a mangled .rec fails here rather than in the game.
 func TestRecTablesMatchTheOldLiterals(t *testing.T) {
-	if _, err := Load(os.DirFS("../files")); err != nil {
+	if _, err := Load(testFS()); err != nil {
 		t.Fatal(err)
 	}
 
