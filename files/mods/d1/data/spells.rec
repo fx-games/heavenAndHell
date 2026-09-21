@@ -74,7 +74,6 @@ id: SPL_MANASHIELD
 cast_sfx: IS_CAST2
 launch_sfx: LS_MSHIELD
 hit_zone: target_only
-effect: on_self(apply_status_self|mana_shield|-1|)
 
 id: SPL_FIREBALL
 resist: fire

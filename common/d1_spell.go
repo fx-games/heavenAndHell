@@ -449,6 +449,8 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 			}
 		}
 		f.ActionBroker.Execute(NewSpellDamageAction(c.caster, "wave", d1.ResistKindFire, "per_cell", slvl, target, cells))
+	case d1.SplManaShield:
+		d1RaiseManaShield(c.caster, slvl)
 	case d1.SplStone: // AddStone: the first monster of six CrawlTable rings, never Diablo; no mana without one
 		p, ok := c.freeNear(target, func(p geometry.Point) bool {
 			a := c.monsterAt(p)
@@ -1089,11 +1091,21 @@ func (f *Factory) readD1Book(user *Actor, it *d1.Item) {
 }
 
 // d1ManaShield ports MI_Manashield for a hit of dam whole points: mana pays first, for less (d1.ManaShieldCost).
+// d1RaiseManaShield ports AddManashield. MI_Manashield takes a third off only when the shield was cast above spell
+// level 0, so the mana_shield status keeps that as its value: -2 with the third, -1 without (neither ticks down).
+func d1RaiseManaShield(a *Actor, slvl int) {
+	a.AddStatusEffect(StatusManaShield, map[bool]int{true: -2, false: -1}[slvl > 0])
+}
+
+func d1ShieldTakesThird(a *Actor) bool { return a.statusEffects.AllEntries()[string(StatusManaShield)] == -2 }
+
 func d1ManaShield(def *Actor, dam int) int {
 	if !def.HasStatusEffect(StatusManaShield) || dam <= 0 {
 		return dam
 	}
-	dam = d1.ManaShieldCost(dam, def.hero.SpellLevel(def.HeroSheet(), d1.SplManaShield))
+	if d1ShieldTakesThird(def) {
+		dam = d1.ManaShieldCost(dam, 1)
+	}
 	mana := def.GetStats().GetResource(stats.Mana)
 	if mana.Value() >= dam {
 		mana.Decrease(dam)

@@ -50,7 +50,7 @@ Compared all 26: Mysterious, Hidden, Gloomy, Weird, Stone, Religious, Enchanted,
 Cryptic, Eldritch, Eerie, Divine, Holy, Sacred, Abandoned, Creepy, Quiet, Secluded, Ornate and Glimmering match
 (Spooky and Tainted are multiplayer only).
 
-- **open — Magical.** 1.09 casts the mana shield at spell level `2 * leveltype` (`AddMissile(..., MIS_MANASHIELD,
+- **fixed — Magical.** 1.09 casts the mana shield at spell level `2 * leveltype` (`AddMissile(..., MIS_MANASHIELD,
   ..., 2 * leveltype)`), so its damage reduction comes from that level. Ours raises the hero's mana shield status,
   which then reduces by the hero's own Mana Shield level (0 when unknown).
 - **by design — Spiritual.** 1.09 fills every empty cell of the 40-cell inventory grid with a gold pile; this

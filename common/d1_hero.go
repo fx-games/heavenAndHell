@@ -171,7 +171,7 @@ func (a *Actor) d1TraitRows() [][2]string {
 	}
 	if a.HasStatusEffect(StatusManaShield) {
 		absorbed := "all damage paid from mana"
-		if h.SpellLevel(s, d1.SplManaShield) > 0 {
+		if d1ShieldTakesThird(a) {
 			absorbed = "a third less damage, paid from mana"
 		}
 		rows = append(rows, [2]string{"Mana shield", absorbed})
@@ -462,7 +462,7 @@ func D1ForecastSection(state *State, player, monster *Actor) (D1SheetSection, bo
 	pool := st.GetResource(stats.Health).Value()
 	if player.HasStatusEffect(StatusManaShield) { // the shield pays for the damage from mana first, a third off with the spell
 		mana := st.GetResource(stats.Mana).Value()
-		if h.SpellLevel(s, d1.SplManaShield) > 0 {
+		if d1ShieldTakesThird(player) {
 			mana = mana * 3 / 2
 		}
 		pool += mana

@@ -613,7 +613,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 			}
 		}
 	case 4, 11: // Magical
-		player.AddStatusEffect(StatusManaShield, -1)
+		d1RaiseManaShield(player, 2*lt) // AddMissile(..., MIS_MANASHIELD, ..., 2 * leveltype)
 	case 5: // Stone
 		for _, it := range all {
 			if it.d1.Type == d1.ITypeStaff {
