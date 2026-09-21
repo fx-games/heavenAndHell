@@ -182,16 +182,12 @@ func (c *spellCtx) lineClear(from, to geometry.Point) bool {
 	return los[len(los)-1] == to
 }
 
-// freeNear ports the CrawlTable searches: the nearest cell (ring by ring, up to radius 5) that is floor, empty
-// and in line from the caster.
+// freeNear ports the CrawlTable searches: the first cell of rings 0-5, in 1.09's order, that is ok.
 func (c *spellCtx) freeNear(target geometry.Point, ok func(geometry.Point) bool) (geometry.Point, bool) {
-	for r := 0; r <= 5; r++ {
-		for dy := -r; dy <= r; dy++ {
-			for dx := -r; dx <= r; dx++ {
-				p := target.Add(geometry.Point{X: dx, Y: dy})
-				if max(geometry.Abs(dx), geometry.Abs(dy)) == r && c.m.Contains(p) && ok(p) {
-					return p, true
-				}
+	for _, ring := range d1.CrawlRings[:6] {
+		for _, o := range ring {
+			if p := target.Add(geometry.Point{X: o[0], Y: o[1]}); c.m.Contains(p) && ok(p) {
+				return p, true
 			}
 		}
 	}
@@ -618,16 +614,17 @@ func (f *Factory) d1Telekinesis(c *spellCtx, target geometry.Point) bool {
 	return false
 }
 
-// summonD1Golem ports AddGolem/SpawnGolum: the old golem goes, a new one appears near the target.
+// summonD1Golem ports AddGolem/SpawnGolum: the old golem dies (M_StartKill, corpse and all), a new one appears
+// near the target. The mana is spent even when MI_Golem then finds no free cell.
 func (f *Factory) summonD1Golem(c *spellCtx, target geometry.Point) bool {
+	for _, a := range c.m.Actors() {
+		if a.d1Monster != nil && a.d1Monster.Golem && a.IsAlive() {
+			c.order, c.dealt[a] = append(c.order, a), a.GetStats().GetResource(stats.Health).Value()
+		}
+	}
 	p, ok := c.freeNear(target, c.emptyFloor)
 	if !ok {
-		return false
-	}
-	for _, a := range append([]*Actor(nil), c.m.Actors()...) {
-		if a.d1Monster != nil && a.d1Monster.Golem {
-			c.m.RemoveActor(a)
-		}
+		return true
 	}
 	gs := d1.GolemStats(c.slvl, c.h.Level, c.s.MaxMana)
 	f.placeD1Golem(c.m, p, SavedGolem{AC: gs.AC, Hit: gs.Hit, MinDam: gs.MinDam, MaxDam: gs.MaxDam, MaxHP: gs.HP, HP: gs.HP})

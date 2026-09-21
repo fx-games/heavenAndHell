@@ -11,7 +11,7 @@ targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_FBOLT1
 impact_sfx: LS_FIRIMP2
-hit_zone: bolt_aoe(20)
+hit_zone: bolt_aoe(112)
 effect: spell_damage(firebolt|fire)
 
 id: SPL_HEAL
@@ -24,7 +24,7 @@ resist: lightning
 targeted: true
 cast_sfx: IS_CAST4
 launch_sfx: LS_LNING1
-hit_zone: ray_aoe(20)
+hit_zone: ray_aoe(112)
 effect: spell_damage(lightning|lightning|per_cell)
 
 id: SPL_FLASH
@@ -82,7 +82,7 @@ targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_FBOLT1
 impact_sfx: LS_FIRIMP2
-hit_zone: bolt_aoe(20|1)
+hit_zone: bolt_aoe(112|1)
 effect: spell_damage(fireball|fire)
 
 id: SPL_GUARDIAN
@@ -138,7 +138,7 @@ id: SPL_APOCA
 resist: none
 cast_sfx: IS_CAST2
 launch_sfx: LS_APOC
-hit_zone: box_aoe(8)
+hit_zone: box_aoe(8|7)
 effect: spell_damage(apocalypse|magic)
 
 id: SPL_REPAIR
@@ -156,7 +156,7 @@ resist: fire
 targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_ELEMENTL
-hit_zone: bolt_aoe(20|1)
+hit_zone: bolt_aoe(112|1)
 effect: spell_damage(elemental|fire)
 
 id: SPL_CBOLT
@@ -173,7 +173,7 @@ targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_HOLYBOLT
 impact_sfx: LS_ELECIMP1
-hit_zone: bolt_aoe(20)
+hit_zone: bolt_aoe(112)
 effect: spell_damage(holy_bolt|magic|undead_only)
 
 id: SPL_RESURRECT
@@ -185,7 +185,7 @@ id: SPL_BLODSTAR
 resist: magic
 targeted: true
 cast_sfx: IS_CAST2
-hit_zone: bolt_aoe(20)
+hit_zone: bolt_aoe(112)
 effect: spell_damage(blood_star|magic)
 health_cost: 5
 
@@ -195,7 +195,7 @@ targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_BONESP
 impact_sfx: LS_BSIMPCT
-hit_zone: bolt_aoe(20)
+hit_zone: bolt_aoe(112)
 effect: spell_damage(bone_spirit|magic|drain_third)
 health_cost: 6
 

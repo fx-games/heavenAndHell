@@ -75,7 +75,7 @@ own Firebolt level, Phasing / the Holy shrine (`AddRndTeleport`), the mana shiel
 - **open — Stone Curse.** `AddStone` petrifies the first monster in the six CrawlTable rings around the target
   cell (never Diablo, never one fading or charging), for `min(slvl + 6, 15) · 16` ticks. Ours only curses a
   monster on the target cell, for a flat 12 turns (`apply_status(stone|12)`), and Diablo can be cursed.
-- **open — Apocalypse's box.** `AddApoca`/`MI_Apoca` cover x−8 … x+7 and y−8 … y+7 (the upper bound is
+- **fixed — Apocalypse's box.** `AddApoca`/`MI_Apoca` cover x−8 … x+7 and y−8 … y+7 (the upper bound is
   exclusive), with no line-of-sight test (Hellfire added one). Our `box_aoe(8)` is −8 … +8.
 - **open — Flame Wave's shape.** `MI_Wave` lays a straight wall of `MIS_FIREMOVE` flames across the cast
   direction, `1 + 2·(slvl/2 + 2)` cells wide (each side stops at the first cell missiles can't cross), and the
@@ -83,7 +83,7 @@ own Firebolt level, Phasing / the Holy shrine (`AddRndTeleport`), the mana shiel
 
 - **fixed — Inferno's burn length.** `AddFlame` gives the flame n cells out (n = 0, 1, 2) `20 + 5n` ticks, and rolls
   each flame's damage on its own. Ours burns all three cells for 20 ticks (`InfernoTicks(0)`).
-- **open — bolt reach.** 1.09's Firebolt, Lightning, Blood Star and Bone Spirit fly 256 ticks, i.e. until a wall
+- **fixed — bolt reach.** 1.09's Firebolt, Lightning, Blood Star and Bone Spirit fly 256 ticks, i.e. until a wall
   stops them. Ours stop after 20 cells (`bolt_aoe(20)`, `ray_aoe(20)`).
 - **open — Bone Spirit's homing.** `MI_Bonespirit` flies to the target cell; if it gets there without hitting,
   it turns towards the closest monster within 19 cells in line (`FindClosest`, CrawlTable order), or on in the
@@ -94,14 +94,13 @@ own Firebolt level, Phasing / the Holy shrine (`AddRndTeleport`), the mana shiel
 - **open — Town Portal's spot.** `AddTown` opens the portal at the target cell, or the first cell of the six
   CrawlTable rings around it free of missiles, solids, missile-blocking pieces, objects, players and triggers.
   Ours opens it next to the hero.
-- **open — Golem's recast.** `AddGolem` kills the old golem (`M_StartKill`: death, corpse) and spends the mana even
+- **fixed — Golem's recast.** `AddGolem` kills the old golem (`M_StartKill`: death, corpse) and spends the mana even
   when `MI_Golem` then finds no free cell. Ours removes the old golem silently, and a cast with nowhere to put
   the new one does nothing and costs nothing.
 - **open — Telekinesis on monsters.** `DoTelekinesis` never pushes a talking monster (`M_Talker`, `mtalkmsg`).
   `M_GetKnockback` moves it back against its own facing and puts it in hit recovery. Ours pushes away from the
   caster (the same thing while it faces the hero), with no hit recovery, and pushes talkers too.
-- **by design — CrawlTable order.** `freeNear` searches square rings; 1.09's CrawlTable rings are rounder and
-  ordered differently, so a crowded target can pick a different free cell.
+- **fixed — CrawlTable order.** `freeNear` walks 1.09's own CrawlTable (`d1.CrawlRings`).
 - Matched: Lightning's per-cell damage and burn (`slvl/2 + 6` ticks), Blood Star (damage, 5 HP, magic),
   Bone Spirit's third (6 HP), the golem's numbers (`SpawnGolum`), Identify.
 

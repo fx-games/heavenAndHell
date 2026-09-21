@@ -60,16 +60,17 @@ func RingAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.A
 	}
 }
 
-// BoxAoE (box_aoe(radius)) is the filled square of side 2*radius+1 centred on the origin. Apocalypse blasts every
+// BoxAoE (box_aoe(radius[|hi])) is the filled square from -radius to +hi (default radius) around the origin. Apocalypse blasts every
 // monster in such a box, and Flash lights up the one square around the caster.
 func BoxAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
 	radius := args.GetIntOrDefault(0, 1)
+	hi := args.GetIntOrDefault(1, radius) // box_aoe(8|7): Apocalypse's -8 .. +7
 	return &AoEResolver{
 		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
 			currentMap := gridMap()
 			var result []geometry.Point
-			for dy := -radius; dy <= radius; dy++ {
-				for dx := -radius; dx <= radius; dx++ {
+			for dy := -radius; dy <= hi; dy++ {
+				for dx := -radius; dx <= hi; dx++ {
 					if p := (geometry.Point{X: origin.X + dx, Y: origin.Y + dy}); currentMap.Contains(p) {
 						result = append(result, p)
 					}
