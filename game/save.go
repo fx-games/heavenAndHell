@@ -10,6 +10,7 @@ import (
 	"rpg/common"
 	"rpg/d1"
 	"rpg/defs"
+	"rpg/files"
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/stats"
@@ -19,8 +20,19 @@ import (
 
 const defaultSaveDir = "saves"
 
-// SaveDir holds the save slots: slot<N>.json with its screenshot next to it as slot<N>.png.
+// SaveDir holds the save slots, one directory per mod: <mod>/slot<N>.json with its screenshot beside it as
+// slot<N>.png. A mod's games are its own: another mod neither lists nor loads them.
 var SaveDir = defaultSaveDir
+
+// saveMod is the mod whose saves are in play: the active one, or "fallback" for the engine's own room.
+func saveMod() string {
+	if m := files.ActiveMod(); m != "" {
+		return m
+	}
+	return "fallback"
+}
+
+func modSaveDir() string { return filepath.Join(SaveDir, saveMod()) }
 
 // LegacySaveFile is the single save slot the game had before slots existed; it is moved into slot 1 on the
 // first listing, so an in-progress game survives the upgrade.
@@ -29,8 +41,10 @@ const LegacySaveFile = "savegame.json"
 // MaxSaveSlots is how many slots the load/save screen offers.
 const MaxSaveSlots = 5
 
-func slotPath(slot int) string      { return filepath.Join(SaveDir, fmt.Sprintf("slot%d.json", slot)) }
-func slotThumbPath(slot int) string { return filepath.Join(SaveDir, fmt.Sprintf("slot%d.png", slot)) }
+func slotPath(slot int) string { return filepath.Join(modSaveDir(), fmt.Sprintf("slot%d.json", slot)) }
+func slotThumbPath(slot int) string {
+	return filepath.Join(modSaveDir(), fmt.Sprintf("slot%d.png", slot))
+}
 
 type savedInvItem struct {
 	Item     d1.Item
@@ -38,6 +52,7 @@ type savedInvItem struct {
 }
 
 type saveGame struct {
+	Mod            string // the mod the game was played on; empty in saves from before mods, which were D1's
 	Class          string
 	Female         bool
 	Name           string
@@ -84,7 +99,7 @@ func readSaveSlot(slot int) common.SaveSlot {
 		return info
 	}
 	var sg saveGame
-	if err := json.Unmarshal(data, &sg); err != nil {
+	if err := json.Unmarshal(data, &sg); err != nil || !sg.forThisMod() {
 		return info
 	}
 	info.Used, info.Name, info.Level = true, sg.Name, sg.Hero.Level
@@ -105,16 +120,41 @@ func migrateLegacySave() {
 	if SaveDir != defaultSaveDir {
 		return
 	}
+	// Slots written before saves were kept per mod lie in SaveDir itself, and every one of them is D1's.
+	for slot := 1; slot <= MaxSaveSlots; slot++ {
+		for _, name := range []string{fmt.Sprintf("slot%d.json", slot), fmt.Sprintf("slot%d.png", slot)} {
+			old, moved := filepath.Join(SaveDir, name), filepath.Join(SaveDir, common.DefaultMod, name)
+			if _, err := os.Stat(old); err != nil {
+				continue
+			}
+			if _, err := os.Stat(moved); err == nil {
+				continue
+			}
+			if os.MkdirAll(filepath.Dir(moved), 0o755) == nil {
+				_ = os.Rename(old, moved)
+			}
+		}
+	}
+	legacy := filepath.Join(SaveDir, common.DefaultMod, "slot1.json")
 	if _, err := os.Stat(LegacySaveFile); err != nil {
 		return
 	}
-	if _, err := os.Stat(slotPath(1)); err == nil {
+	if _, err := os.Stat(legacy); err == nil {
 		return
 	}
-	if err := os.MkdirAll(SaveDir, 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(legacy), 0o755); err != nil {
 		return
 	}
-	_ = os.Rename(LegacySaveFile, slotPath(1))
+	_ = os.Rename(LegacySaveFile, legacy)
+}
+
+// forThisMod is whether the save belongs to the running mod. A save from before mods is D1's.
+func (sg saveGame) forThisMod() bool {
+	mod := sg.Mod
+	if mod == "" {
+		mod = common.DefaultMod
+	}
+	return mod == saveMod()
 }
 
 // HasSave reports whether any slot holds a game.
@@ -180,7 +220,7 @@ func (g *GameInstance) writeSlot(slot int) {
 	st := player.GetStats()
 	pos := player.MapPosition()
 	sg := saveGame{
-		Class: g.state.SelectedClass.InternalName, Female: g.state.SelectedClass.IsFemale(),
+		Mod: saveMod(), Class: g.state.SelectedClass.InternalName, Female: g.state.SelectedClass.IsFemale(),
 		Name: player.Name(), Permadeath: g.permadeath, Seed: g.levelSeed, Hero: *player.Hero(),
 		HP: max(st.GetResource(stats.Health).Value(), 1), Mana: st.GetResource(stats.Mana).Value(), Gold: st.GetAttribute(stats.Gold),
 		UniqueDropped: g.factory.D1().UniqueDropped, Flags: g.state.GetFlags().AllEntries(),
@@ -223,7 +263,7 @@ func (g *GameInstance) writeSlot(slot int) {
 		g.ErrLog(fmt.Sprintf("saving failed: %v", err))
 		return
 	}
-	if err := os.MkdirAll(SaveDir, 0o755); err != nil {
+	if err := os.MkdirAll(modSaveDir(), 0o755); err != nil {
 		g.ErrLog(fmt.Sprintf("saving failed: %v", err))
 		return
 	}
@@ -291,6 +331,9 @@ func (g *GameInstance) LoadSlot(slot int) error {
 	var sg saveGame
 	if err := json.Unmarshal(data, &sg); err != nil {
 		return fmt.Errorf("save file is corrupt: %w", err)
+	}
+	if !sg.forThisMod() {
+		return fmt.Errorf("this game was saved with mod %q; load %q to continue it", sg.Mod, sg.Mod)
 	}
 	g.autosave = false
 	class := g.classByName(sg.Class)
