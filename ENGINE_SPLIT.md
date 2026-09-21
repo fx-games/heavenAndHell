@@ -52,6 +52,15 @@ Mod (rec/tsv):
   never polled. Outcomes are a fixed set the engine implements.
   The existing hook system (`OnKillHook`, `ItemActionHook`) is the event spine;
   no new event bus.
+  Done, partly: `mods/d1/data/quests.rec` holds all sixteen quests' key, name,
+  log text, per-NPC gossip and set-level placement, plus triggers on four named
+  events (`on_kill`, `on_item_pickup`, `on_enter_level`, `on_talk`) and nine
+  named outcomes. What did NOT move, and why: the town hand-ins, the talking
+  bosses' state machines, `UpdateD1Quests`/`replayD1MapChanges` and the quest
+  objects all sequence side effects (take this item, then spawn that reward
+  there, then reopen this room) rather than test a condition. Expressing them
+  would need a scripting language, which is the thing this rule exists to
+  avoid, so their logic stays Go and their text and placement come from data.
 - The H&H effect model is the one true effect system: name + args + hit zone +
   targeting rules, resolvable from a string. D1 spells are re-expressed as
   mappings onto it. Missing pieces get ADDED to the H&H system in its own style,
