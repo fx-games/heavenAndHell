@@ -118,24 +118,13 @@ Also fixed along the way (all were real, pre-existing bugs):
 
 ## Remaining
 
-1. **The rest of the user's gameplay requests** (their words, decisions already made):
-   - Remove monster abilities that permanently reduce player stats (Black
-     Death's max-HP loss). Other drains stay. Make those monsters harder instead.
-     Look for the max-HP drain in `common/d1_hero.go` / `d1_monster.go` hit code.
-   - **Prevent shop save-scumming**: reloading must give the same stock; restock
-     only on reaching a new level. Wirt's item likewise fixed per reload. Today
-     `game/town_d1.go` restockD1Town runs on every town visit and uses the live
-     RNG; the stock must be derived from (seed, deepest level) or saved.
-   - **Remove item destruction**: at 0 durability an item is fully inert (no
-     base stats either) but repairable at max cost. Indestructible = never loses
-     durability. Today `d1Broke` (common/d1_town.go) destroys non-uniques.
-   - **Skill trees**: 2 points per level, D2-style tiers, 8 skills per class,
-     10 ranks each, max 1 point per skill per level-up, respec in town for 1000
-     gold. Skill points are ON TOP of attribute points. Save wipe is acceptable.
-     Re-activate H&H spells/skills from git history. **Ask the user for the skill
-     list per class before building it**: it is 48 skills of game design, and
-     none of it is decided. H&H's named skills (effects/*.rec) and D1's spells are
-     the material.
+The plan (user, 2026-09-21):
+- **D1 mod:** feature parity with the original Diablo, as close to 1:1 as possible, following the source in
+  `reference/`. The earlier gameplay changes (no Black Death max-HP drain, fixed shop stock across reloads, no
+  item destruction, skill trees) are dropped, because they depart from the original.
+- **H&H mod:** show every feature that main and the 7drl branch (merged into main) already had for H&H.
+
+1. Verify the D1 mod against `reference/` system by system and close the gaps.
 2. **H&H leftovers**: main's on-hit item *hooks* (the other half of its
    enchantments; `common/def_itemhooks.go` has them) are not rolled. An affix
    power cannot carry one without a field on `d1.Item`, and `d1.Item` is dumped
