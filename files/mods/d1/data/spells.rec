@@ -96,6 +96,8 @@ resist: lightning
 targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_LNING1
+hit_zone: chain_aoe(6|7)
+effect: spell_damage(lightning|lightning)
 
 id: SPL_WAVE
 resist: fire

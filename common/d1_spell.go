@@ -323,21 +323,6 @@ func (c *spellCtx) bolt(from, to geometry.Point, hit func(a *Actor) bool) (impac
 	return impact, stopped
 }
 
-// beam ports MI_Lightctrl: it lays a bolt on every cell up to the first wall, each rolling its damage once and
-// hitting the monster there every tick it burns (MI_Lightning).
-func (c *spellCtx) beam(to geometry.Point) {
-	cells := c.ray(c.origin(), to, 20)
-	for _, p := range cells {
-		dam := d1.LightningDamage(d1Rng, c.h.Level)
-		if a := c.hitCell(p); a != nil {
-			c.strike(a, dam<<6, d1.LightningTicks(c.slvl))
-		}
-	}
-	if len(cells) > 0 {
-		c.animations = append(c.animations, NewProjectileDirectionAnimation(c.caster, c.origin(), cells[len(cells)-1], c.secPerTile(), c.icon(), 2))
-	}
-}
-
 func (c *spellCtx) payHP(hp int) {
 	c.caster.GetStats().GetResource(stats.Health).Decrease(hp)
 	if !c.caster.IsAlive() {
@@ -396,19 +381,12 @@ func (c *spellCtx) castAllowed(target geometry.Point) bool {
 }
 
 func (c *spellCtx) cast(target geometry.Point) bool {
-	f, h, slvl, o := c.f, c.h, c.slvl, c.origin()
+	f, h, slvl := c.f, c.h, c.slvl
 	clvl := h.Level
 	if !c.castAllowed(target) {
 		return false
 	}
 	switch c.spell {
-	case d1.SplChain:
-		c.beam(target)
-		for _, a := range append([]*Actor(nil), c.m.Actors()...) {
-			if c.monsterAt(a.MapPosition()) == a && geometry.DistanceChebyshev(o, a.MapPosition()) < min(slvl+3, 19) {
-				c.beam(a.MapPosition())
-			}
-		}
 	case d1.SplIdentify:
 		item := f.identifyTarget
 		if item == nil {
