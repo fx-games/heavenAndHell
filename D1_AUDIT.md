@@ -91,7 +91,7 @@ own Firebolt level, Phasing / the Holy shrine (`AddRndTeleport`), the mana shiel
 - **fixed — Teleport's landing.** `AddTeleport` lands on the first free cell (not solid, no monster, object or
   player) of the six CrawlTable rings around the target, and fails (no mana spent) when there is none. Ours
   moves onto the target cell or not at all.
-- **open — Town Portal's spot.** `AddTown` opens the portal at the target cell, or the first cell of the six
+- **fixed — Town Portal's spot.** `AddTown` opens the portal at the target cell, or the first cell of the six
   CrawlTable rings around it free of missiles, solids, missile-blocking pieces, objects, players and triggers.
   Ours opens it next to the hero.
 - **fixed — Golem's recast.** `AddGolem` kills the old golem (`M_StartKill`: death, corpse) and spends the mana even

@@ -369,7 +369,7 @@ func (c *spellCtx) castAllowed(target geometry.Point) bool {
 		c.f.PlayD1HeroSound(27)
 		return false
 	}
-	if d1.SpellTargeted[c.spell] && target == c.origin() && c.spell != d1.SplTeleport && c.spell != d1.SplGolem {
+	if d1.SpellTargeted[c.spell] && target == c.origin() && c.spell != d1.SplTeleport && c.spell != d1.SplGolem && c.spell != d1.SplTown {
 		c.ctx.Msg("You need a target other than yourself.")
 		return false
 	}
@@ -404,7 +404,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 	case d1.SplWarp: // missiles_warp: to the nearest stairs, beside them
 		return f.d1Warp(c)
 	case d1.SplTown:
-		return f.openD1Portal(c.caster)
+		return f.openD1Portal(c, target)
 	case d1.SplGuardian:
 		p, ok := c.freeNear(target, c.emptyFloor)
 		if !ok {
@@ -723,19 +723,30 @@ func (o *d1PortalObject) ActorBumpedInto(*Actor, func() bool) {}
 func (s *State) D1Portal() *D1Portal     { return s.d1Portal }
 func (s *State) SetD1Portal(p *D1Portal) { s.d1Portal = p }
 
-func (f *Factory) openD1Portal(player *Actor) bool {
+func (f *Factory) openD1Portal(c *spellCtx, target geometry.Point) bool {
 	m := f.State.GetMap()
 	if old := f.State.d1Portal; old != nil {
 		f.State.CloseD1Portal()
 	}
-	cells := freeCellsNear(m, player.MapPosition(), 1, func(p geometry.Point) bool {
-		_, isTransition := m.GetTransitionAt(p)
-		return m.CanPlaceActorHere(p) && !m.IsObjectAt(p) && !isTransition
+	// AddTown: the first cell of six CrawlTable rings around the target with no wall, object (missiles are ours),
+	// player, or stairs within a cell (CheckIfTrig); monsters don't matter
+	p, ok := c.freeNear(target, func(p geometry.Point) bool {
+		if !m.IsWalkable(p) || m.IsObjectAt(p) || p == f.State.GetPlayer().MapPosition() {
+			return false
+		}
+		for dy := -1; dy <= 1; dy++ {
+			for dx := -1; dx <= 1; dx++ {
+				if _, trig := m.GetTransitionAt(p.Add(geometry.Point{X: dx, Y: dy})); trig {
+					return false
+				}
+			}
+		}
+		return true
 	})
-	if len(cells) == 0 {
+	if !ok {
 		return false
 	}
-	f.State.d1Portal = &D1Portal{Map: m.GetName(), X: cells[0].X, Y: cells[0].Y}
+	f.State.d1Portal = &D1Portal{Map: m.GetName(), X: p.X, Y: p.Y}
 	PlaceD1Portal(f.State, m)
 	return true
 }

@@ -46,6 +46,7 @@ hit_zone: wall_aoe(11)
 effect: spawn_wall(fire)
 
 id: SPL_TOWN
+targeted: true
 cast_sfx: IS_CAST6
 launch_sfx: LS_SENTINEL
 
