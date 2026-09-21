@@ -146,7 +146,9 @@ static on speech). `go:embed mods` embeds whatever is on disk: build a release f
 
 ## Running
 
-- Game: `go run -tags development .` (assets from `files/`, `config.rec` from the repo root)
+- Game: `go run -tags development .` (assets from `files/`, `config.rec` from the repo root). A mod can fix a setting in
+  its `data/mod.rec` (`common.ModSetting`): the mod's value wins and the menu shows it locked. D1 fixes
+  `AutosaveOnLevelChange: false`, as 1.09 only saves on "Save Game" and on quitting
 - ASCII mode: `go run -tags development . ascii` (needs a real terminal, F1 lists the keys)
 - D1 unit tests: `go test ./d1`
 - Headless smoke test: `go run -tags development . playthrough` (must print `PLAYTHROUGH OK`)
