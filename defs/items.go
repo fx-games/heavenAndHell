@@ -92,9 +92,61 @@ func ReadItems(fsys fs.FS) ([]Item, error) {
 		if err != nil {
 			return nil, fmt.Errorf("items.rec record %d: %w", i+1, err)
 		}
+		fillEquipModel(&it)
 		out = append(out, it)
 	}
 	return out, nil
+}
+
+// fillEquipModel gives a record that describes itself by category, weapon_type and armor_type (H&H's way) the
+// item class, type and location the engine's equipment and hero sheet work with (D1's way). A record that set
+// its own item_type, class or location keeps them.
+func fillEquipModel(it *Item) {
+	if it.Type != 0 || it.Class != "" || it.Loc != "" {
+		return
+	}
+	hand := "ILOC_ONEHAND"
+	if it.Weapon.IsTwoHanded {
+		hand = "ILOC_TWOHAND"
+	}
+	switch it.InventoryCategory {
+	case ItemCategoryWeapon:
+		it.Class, it.Loc = "ICLASS_WEAPON", hand
+		switch it.Weapon.WeaponType {
+		case WeaponTypeAxe:
+			it.Type = 2
+		case WeaponTypeBow, WeaponTypeCrossbow, WeaponTypeSling:
+			it.Type, it.Loc = 3, "ILOC_TWOHAND"
+		case WeaponTypeMace:
+			it.Type = 4
+		case WeaponTypeSpear, WeaponTypeScythe:
+			it.Type = 10
+		default: // sword, dagger, whip
+			it.Type = 1
+		}
+	case ItemCategoryArmor:
+		it.Class = "ICLASS_ARMOR"
+		switch it.Armor.ArmorType {
+		case ArmorTypeHelmet:
+			it.Type, it.Loc = 7, "ILOC_HELM"
+		case ArmorTypeShield, ArmorTypeDefensiveWeapon:
+			it.Type, it.Loc = 5, "ILOC_ONEHAND"
+		case ArmorTypeBoots:
+			it.Type, it.Loc = 6, "ILOC_FEET"
+		case ArmorTypeGloves:
+			it.Type, it.Loc = 6, "ILOC_HANDS"
+		case ArmorTypeCape:
+			it.Type, it.Loc = 6, "ILOC_BACK"
+		default:
+			it.Type, it.Loc = 6, "ILOC_ARMOR"
+		}
+	case ItemCategoryRing:
+		it.Class, it.Type, it.Loc = "ICLASS_MISC", 12, "ILOC_RING"
+	case ItemCategoryAmulet:
+		it.Class, it.Type, it.Loc = "ICLASS_MISC", 13, "ILOC_AMULET"
+	case ItemCategoryLightSource:
+		it.Class, it.Loc = "ICLASS_MISC", "ILOC_LIGHT"
+	}
 }
 
 func itemFromRecord(rec recfile.Record) (Item, error) {

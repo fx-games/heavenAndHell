@@ -91,6 +91,14 @@ func d1SlotName(it *d1.Item, dualWield bool) defs.SlotName {
 		return defs.SlotNameRing
 	case "ILOC_AMULET":
 		return defs.SlotNameAmulet
+	case "ILOC_FEET":
+		return defs.SlotNameArmorFeet
+	case "ILOC_HANDS":
+		return defs.SlotNameArmorHands
+	case "ILOC_BACK":
+		return defs.SlotNameArmorBack
+	case "ILOC_LIGHT":
+		return defs.SlotNameLightSource
 	}
 	return defs.SlotNameNotEquippable
 }
@@ -192,6 +200,9 @@ func (g *Factory) NewD1Item(it *d1.Item) *Item {
 	}
 	if it.Type == d1.ITypeStaff && it.Spell > 0 && it.MaxCharges > 0 {
 		g.d1SpellItemAction(item)
+	}
+	if it.BaseIdx >= 0 && it.BaseIdx < len(g.Generator.D.Items) {
+		g.applyItemRecord(item, g.Generator.D.Items[it.BaseIdx])
 	}
 	item.SetRarity(ItemRarity(it.Magical))
 	item.RefreshD1()
@@ -445,4 +456,46 @@ func (e *Equipment) D1CompareForEquipping(candidate *Item) ([]EquippedComparison
 		}
 	}
 	return result, candidateCmp
+}
+
+// applyItemRecord gives an item what its record declares beyond the D1 fields: its category, the effect it has on
+// use, its light, its ranged and throwing numbers. Only records that name a category (H&H's) carry any of it.
+func (g *Factory) applyItemRecord(item *Item, b d1.ItemData) {
+	if b.InventoryCategory == defs.ItemCategoryInvalid {
+		return
+	}
+	item.SetCategory(b.InventoryCategory)
+	if w := item.weaponComponent; w != nil && b.Weapon.IsValid() {
+		w.Damage, w.AttackSpeedFactor, w.ArmorPenetration = b.Weapon.Damage, max(b.Weapon.Speed, 0.1), b.Weapon.ArmorPenetration
+		if b.Weapon.MaxRange > 0 {
+			w.MaxRange, w.AccuracyAtMinRange, w.AccuracyAtMaxRange = b.Weapon.MaxRange, b.Weapon.AccuracyAtMinRange, b.Weapon.AccuracyAtMaxRange
+		}
+		w.ProjectileIcon = b.Weapon.ProjectileIcon
+	}
+	if b.Throw.IsValid() {
+		if zone := HitZoneFromString(g.State.GetMap, b.Throw.HitZone); zone != nil {
+			item.SetThrowComponent(&ThrowStats{Damage: b.Throw.Damage, HitZone: zone, ChanceToBreak: b.Throw.ChanceToBreak,
+				OnHitEffect: g.NewOnHitEffectFromString(b.Throw.OnHitEffect)})
+		}
+	}
+	if b.InventoryCategory == defs.ItemCategoryLightSource {
+		light := d1HeroTorch
+		if b.Light.IsValid() {
+			light = LightStats{LightColor: util.GetColorFromRGBString(b.Light.LightColor), FlickerPattern: defs.GetFireFlickerPattern(),
+				FlickerFrameDelay: b.Light.FlickerFrameDelay}
+		}
+		item.SetLightComponent(&light)
+	}
+	if b.UntargetedAction != "" {
+		if action := g.NewUntargetedActionFromName(b.UntargetedAction); action != nil {
+			item.SetUntargetedAction(action)
+		}
+	}
+	// ponytail: targeted_action (only summon_monster) has no by-name lookup since untargeted.rec went; add one with it.
+	if b.InventoryCategory.HasAlwaysOneCharge() {
+		item.SetCharges(1)
+		item.SetDestroyAfterUse(true)
+	} else if b.Charges != 0 {
+		item.SetCharges(b.Charges)
+	}
 }

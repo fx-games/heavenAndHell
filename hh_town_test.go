@@ -7,6 +7,7 @@ import (
 	"rpg/files"
 	"rpg/game"
 	"rpg/gridmap"
+	"rpg/stats"
 	"rpg/util"
 	"slices"
 	"strings"
@@ -21,6 +22,13 @@ func TestHeavenAndHellTownIsPlayable(t *testing.T) {
 	for _, class := range g.GetGameData().ClassDefinitions {
 		g.NewGame(class, false, "")
 		s := g.GetWorldState()
+		armed := false
+		for _, it := range s.GetPlayer().GetEquipment().AllItems() {
+			armed = armed || it.IsWeapon()
+		}
+		if !armed || s.GetPlayer().HeroSheet().MaxDam <= 1 {
+			t.Errorf("%s starts unarmed (max damage %d)", class.Name, s.GetPlayer().HeroSheet().MaxDam)
+		}
 		if s.GetMap().GetName() != string(defs.LevelNameTown) {
 			t.Fatalf("%s starts on %q, not in town", class.Name, s.GetMap().GetName())
 		}
@@ -183,4 +191,66 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	}
 	talk("kirioth", "")
 	expect("lucifer", d1.QuestDone)
+}
+
+// H&H's four shops, as main had them: stocked from their own lists, each with its own menu, Mary buying from the
+// hero and Kirioth healing whoever walks in.
+func TestHeavenAndHellShops(t *testing.T) {
+	ui := &talkUI{DummyUI: NewDummyUI()}
+	g := newHeavenAndHellGame(t, ui)
+	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
+	s := g.GetWorldState()
+	player := s.GetPlayer()
+	want := map[string][]string{
+		"mary":    {"Buy items", "Sell items"},
+		"abel":    {"Buy items", "Open your stash"},
+		"shekel":  {"Buy items", "Repair items"},
+		"kirioth": {"Buy items", "Transfer an enchantment"},
+	}
+	for npc, labels := range want {
+		var who *common.Actor
+		for _, a := range s.GetMap().Actors() {
+			if a.GetInternalName() == npc {
+				who = a
+			}
+		}
+		if who == nil {
+			t.Fatalf("no %s in town", npc)
+		}
+		if who.GetInventory().IsEmpty() {
+			t.Errorf("%s has no stock", npc)
+		}
+		if npc == "kirioth" {
+			usable := false
+			for _, it := range who.GetInventory().Items() {
+				usable = usable || it.HasUntargetedAction()
+			}
+			if !usable {
+				t.Errorf("none of Kirioth's potions does anything")
+			}
+		}
+		for _, it := range who.GetInventory().Items() {
+			if it.BuyPrice() <= 0 {
+				t.Errorf("%s sells %s for %d", npc, it.Name(), it.BuyPrice())
+			}
+		}
+		player.GetStats().GetResource(stats.Health).Decrease(1)
+		ui.menus = nil
+		g.GetActionBroker().Execute(common.NewTalkToAction(common.NewActorCause("test", player), who))
+		var got []string
+		for _, item := range ui.menus[0][1:] { // after "Talk to"
+			got = append(got, item.MainText)
+		}
+		if !slices.Equal(got, labels) {
+			t.Errorf("%s offers %q, want %q", npc, got, labels)
+		}
+		healed := player.GetStats().GetResource(stats.Health).IsAtMax()
+		if healed != (npc == "kirioth") {
+			t.Errorf("%s: hero healed=%v", npc, healed)
+		}
+		sword := player.GetEquipment().AllItems()[0]
+		if buys := common.D1VendorBuys(who, sword); buys != (npc == "mary") {
+			t.Errorf("%s buys the hero's %s: %v", npc, sword.Name(), buys)
+		}
+	}
 }

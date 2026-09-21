@@ -1,6 +1,10 @@
 package d1
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
 
 // ISPL_ item special-effect bits.
 const (
@@ -106,6 +110,9 @@ func (g *Generator) itemAttrs(idx, lvl, dlvl int, hell bool) *Item {
 	if it.MiscID == "IMISC_OILOF" { // a plain Oil settles into one of the ten as it drops
 		g.getOilType(it, lvl)
 	}
+	for _, m := range b.Modifiers {
+		g.recordPower(it, m, lvl)
+	}
 	if it.Type == ITypeGold {
 		v := 5*dlvl + g.random(10*dlvl)
 		if hell {
@@ -114,6 +121,32 @@ func (g *Generator) itemAttrs(idx, lvl, dlvl int, hell bool) *Item {
 		it.Value = min(v, 5000)
 	}
 	return it
+}
+
+// recordPower applies an equip_modifier a record names (H&H's "strength", "light_radius(2)") as the item power that
+// means the same, rolled at item level lvl the way an affix is. A modifier with an argument uses it as the value.
+func (g *Generator) recordPower(it *Item, modifier string, lvl int) {
+	name, arg, hasArg := strings.Cut(strings.TrimSuffix(modifier, ")"), "(")
+	lo, hi := 1, max(lvl, 1)
+	if hasArg {
+		if n, err := strconv.Atoi(strings.TrimSpace(arg)); err == nil {
+			lo, hi = n, n
+		}
+	}
+	power := map[string]string{
+		"strength": "IPL_STR", "dexterity": "IPL_DEX", "intelligence": "IPL_MAG", "health": "IPL_LIFE", "mana": "IPL_MANA",
+		"damage": "IPL_DAMMOD", "armor_class": "IPL_ACP", "light_radius": "IPL_LIGHT", "attack_speed": "IPL_FASTATTACK",
+		"steal_health": "IPL_STEALLIFE", "steal_mana": "IPL_STEALMANA",
+	}[name]
+	switch power {
+	case "":
+		return // ponytail: speed and move_speed have no hero-sheet stat yet; add one when movement speed exists
+	case "IPL_ACP":
+		lo, hi = 10*lo, 10*hi // percent
+	case "IPL_FASTATTACK":
+		lo, hi = 1, 1
+	}
+	g.savePower(it, power, lo, hi, 0, 0, 1)
 }
 
 func (g *Generator) spellIdx(id string) int {

@@ -77,7 +77,13 @@ func loadPropertyDefs(fsys fs.FS) (map[string]propertyDef, error) {
 }
 
 // Text formats the property as its tooltip line.
-func (p Property) Text() string { return propertyDefs[p.Key].format(p.Min, p.Max) }
+func (p Property) Text() string {
+	d, ok := propertyDefs[p.Key]
+	if !ok || d.format == nil {
+		return fmt.Sprintf("%s %+d", p.Key, p.Min) // the mod's properties.rec does not describe this power
+	}
+	return d.format(p.Min, p.Max)
+}
 
 // PropertyList lists an item's magical powers (a compact PrintItemPower), in tooltip order.
 func (it *Item) PropertyList() []Property {

@@ -452,21 +452,19 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	player.SetName("Player")
 	g.state.SetPlayer(player)
 
-	hero := d1.NewHero(d1ClassIndex(playerStartDefinition.InternalName))
+	hero := d1.NewHero(g.classIndex(playerStartDefinition))
 	player.SetHero(hero)
 	gen := g.factory.D1()
-	// CreatePlrItems as Hellfire does it, on its item table (24 is the healing potion, 3 the warrior's spare club):
-	// the Sorcerer's Short Staff of Mana (5) comes with healing potions, the Monk takes IDI_SHORTSTAFF (36), the
-	// Bard IDI_BARDSWORD and IDI_BARDDAGGER (37, 38), and the Barbarian item 139 with the warrior's shield.
-	for _, idx := range startingItems(playerStartDefinition, hero.Class, gen.D.ItemIdx) {
+	idxs, pack := startingItems(playerStartDefinition, gen.D.ItemIdx)
+	for i, idx := range idxs {
 		item := g.factory.NewD1Item(gen.PlainItem(idx))
-		if item.IsEquippable() && idx != 3 { // CreatePlrItems: the warrior's club goes into the pack
+		if item.IsEquippable() && !pack[i] {
 			g.giveAndEquipItemToActor(player, item)
 		} else {
 			player.GetInventory().Add(item)
 		}
 	}
-	player.GetStats().SetAttribute(stats.Gold, 100)
+	player.GetStats().SetAttribute(stats.Gold, playerStartDefinition.Gold)
 	common.SyncHero(player)
 	player.GetStats().GetResource(stats.Health).SetToMax()
 	player.GetStats().GetResource(stats.Mana).SetToMax()
@@ -918,44 +916,29 @@ func (g *GameInstance) getDebugActions() common.DebugActions {
 	}
 }
 
-// startingItems is the gear a hero starts with, as indices into the active mod's item table. A class that names
-// its own items in classes.rec gets those; a class that names none falls back to CreatePlrItems' list, which is
-// what Diablo's classes.rec does (24 is the healing potion, 3 the warrior's spare club): the Sorcerer's Short
-// Staff of Mana (5) comes with healing potions, the Monk takes IDI_SHORTSTAFF (36), the Bard IDI_BARDSWORD and
-// IDI_BARDDAGGER (37, 38), and the Barbarian item 139 with the warrior's shield.
-func startingItems(def defs.LoadoutDefinition, class int, byName map[string]int) []int {
-	if len(def.Items) == 0 {
-		return map[int][]int{
-			d1.Warrior: {1, 2, 3, 24, 24}, d1.Rogue: {4, 24, 24}, d1.Sorcerer: {5, 24, 24},
-			d1.Monk: {36, 24, 24}, d1.Bard: {37, 38, 24, 24}, d1.Barbarian: {139, 2, 24, 24},
-		}[class]
-	}
-	var out []int
-	for _, name := range def.Items {
-		idx, ok := byName[name]
+// startingItems is the gear a hero starts with, as indices into the active mod's item table, and whether each
+// goes to the pack rather than being equipped ("club pack" in classes.rec).
+func startingItems(def defs.LoadoutDefinition, byName map[string]int) (idx []int, pack []bool) {
+	for _, entry := range def.Items {
+		name, where, _ := strings.Cut(entry, " ")
+		i, ok := byName[name]
 		if !ok {
 			println("class " + def.InternalName + " starts with " + name + ", which this mod's items.rec does not have")
 			continue
 		}
-		out = append(out, idx)
+		idx, pack = append(idx, i), append(pack, strings.TrimSpace(where) == "pack")
 	}
-	return out
+	return idx, pack
 }
 
-func d1ClassIndex(internalName string) int {
-	switch internalName {
-	case "rogue", "archer":
-		return d1.Rogue
-	case "sorcerer", "mage":
-		return d1.Sorcerer
-	case "monk":
-		return d1.Monk
-	case "bard":
-		return d1.Bard
-	case "barbarian":
-		return d1.Barbarian
+// classIndex is the class's row in the mod's roster, which is also its archetype (see d1.NumArchetypes).
+func (g *GameInstance) classIndex(def defs.LoadoutDefinition) int {
+	for i, c := range g.GetGameData().ClassDefinitions {
+		if c.InternalName == def.InternalName {
+			return i
+		}
 	}
-	return d1.Warrior
+	return 0
 }
 
 func (g *GameInstance) GenerateLoot(dungeonLevel int, count int) []*common.Item {
