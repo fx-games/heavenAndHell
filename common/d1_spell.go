@@ -502,21 +502,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		}
 	case d1.SplTown:
 		return f.openD1Portal(c.caster)
-	case d1.SplStone:
-		var victim *Actor
-		c.freeNear(target, func(p geometry.Point) bool {
-			victim = c.monsterAt(p)
-			return victim != nil && victim.d1Monster.AI != "AI_DIABLO"
-		})
-		if victim == nil {
-			return false
-		}
-		victim.AddStatusEffect(StatusStone, d1.StoneTurns(slvl))
-		c.animations = append(c.animations, NewHitAnimation(victim.MapPosition(), 0.4, defs.IconEffectHit, 2))
-	case d1.SplPhasing:
-		f.d1RandomTeleport(c.caster)
-	case d1.SplManaShield:
-		c.caster.AddStatusEffect(StatusManaShield, -1)
 	case d1.SplGuardian:
 		p, ok := c.freeNear(target, c.emptyFloor)
 		if !ok {
@@ -525,12 +510,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		f.spawnD1Guardian(c.caster, p, d1.GuardianTurns(clvl, slvl))
 	case d1.SplGolem:
 		return f.summonD1Golem(c, target)
-	case d1.SplTeleport:
-		p, ok := c.freeNear(target, func(p geometry.Point) bool { return c.m.IsCurrentlyPassable(p) && !c.m.IsObjectAt(p) })
-		if !ok {
-			return false
-		}
-		f.d1MovePlayer(c.caster, p, "Teleport")
 	case d1.SplChargedBolt:
 		for n := d1.ChargedBolts(slvl); n > 0; n-- {
 			r := d1Rng.Intn(15) + 1

@@ -12,7 +12,7 @@ cast_sfx: IS_CAST2
 launch_sfx: LS_FBOLT1
 impact_sfx: LS_FIRIMP2
 hit_zone: bolt_aoe(20)
-effect: spell_damage(firebolt, fire)
+effect: spell_damage(firebolt|fire)
 
 id: SPL_HEAL
 cast_sfx: IS_CAST8
@@ -23,14 +23,14 @@ targeted: true
 cast_sfx: IS_CAST4
 launch_sfx: LS_LNING1
 hit_zone: ray_aoe(20)
-effect: spell_damage(lightning, lightning)
+effect: spell_damage(lightning|lightning)
 
 id: SPL_FLASH
 resist: magic
 cast_sfx: IS_CAST4
 launch_sfx: LS_NOVA
 hit_zone: box_aoe(1)
-effect: spell_damage(flash, magic)
+effect: spell_damage(flash|magic)
 
 id: SPL_IDENTIFY
 cast_sfx: IS_CAST6
@@ -50,6 +50,8 @@ resist: magic
 targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_SCURIMP
+hit_zone: target_only
+effect: apply_status(stone|12)
 
 id: SPL_INFRA
 cast_sfx: IS_CAST8
@@ -58,10 +60,14 @@ launch_sfx: LS_INFRAVIS
 id: SPL_RNDTELEPORT
 cast_sfx: IS_CAST2
 launch_sfx: LS_TELEPORT
+hit_zone: target_only
+effect: on_self(random_near_teleport|4-6)
 
 id: SPL_MANASHIELD
 cast_sfx: IS_CAST2
 launch_sfx: LS_MSHIELD
+hit_zone: target_only
+effect: on_self(apply_status_self|mana_shield|-1)
 
 id: SPL_FIREBALL
 resist: fire
@@ -69,8 +75,8 @@ targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_FBOLT1
 impact_sfx: LS_FIRIMP2
-hit_zone: bolt_aoe(20, 1)
-effect: spell_damage(fireball, fire)
+hit_zone: bolt_aoe(20|1)
+effect: spell_damage(fireball|fire)
 
 id: SPL_GUARDIAN
 resist: fire
@@ -89,15 +95,15 @@ resist: fire
 targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_FLAMWAVE
-hit_zone: cone_aoe(8, 3)
-effect: spell_damage(wave, fire)
+hit_zone: cone_aoe(8|3)
+effect: spell_damage(wave|fire)
 
 id: SPL_NOVA
 resist: lightning
 cast_sfx: IS_CAST4
 launch_sfx: LS_NOVA
 hit_zone: box_aoe(4)
-effect: spell_damage(nova, lightning)
+effect: spell_damage(nova|lightning)
 
 id: SPL_INFERNO
 resist: fire
@@ -105,7 +111,7 @@ targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_SPOUTSTR
 hit_zone: ray_aoe(3)
-effect: spell_damage(inferno, fire)
+effect: spell_damage(inferno|fire)
 
 id: SPL_GOLEM
 targeted: true
@@ -119,13 +125,15 @@ id: SPL_TELEPORT
 targeted: true
 cast_sfx: IS_CAST6
 launch_sfx: LS_ELEMENTL
+hit_zone: target_only
+effect: blink
 
 id: SPL_APOCA
 resist: none
 cast_sfx: IS_CAST2
 launch_sfx: LS_APOC
 hit_zone: box_aoe(8)
-effect: spell_damage(apocalypse, magic)
+effect: spell_damage(apocalypse|magic)
 
 id: SPL_REPAIR
 cast_sfx: IS_CAST6
@@ -142,8 +150,8 @@ resist: fire
 targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_ELEMENTL
-hit_zone: bolt_aoe(20, 1)
-effect: spell_damage(elemental, fire)
+hit_zone: bolt_aoe(20|1)
+effect: spell_damage(elemental|fire)
 
 id: SPL_CBOLT
 resist: lightning
@@ -158,7 +166,7 @@ cast_sfx: IS_CAST2
 launch_sfx: LS_HOLYBOLT
 impact_sfx: LS_ELECIMP1
 hit_zone: bolt_aoe(20)
-effect: spell_damage(holy_bolt, magic, undead_only)
+effect: spell_damage(holy_bolt|magic|undead_only)
 
 id: SPL_RESURRECT
 targeted: true
@@ -170,7 +178,7 @@ resist: magic
 targeted: true
 cast_sfx: IS_CAST2
 hit_zone: bolt_aoe(20)
-effect: spell_damage(blood_star, magic)
+effect: spell_damage(blood_star|magic)
 health_cost: 5
 
 id: SPL_BONESPIRIT
@@ -180,7 +188,7 @@ cast_sfx: IS_CAST2
 launch_sfx: LS_BONESP
 impact_sfx: LS_BSIMPCT
 hit_zone: bolt_aoe(20)
-effect: spell_damage(bone_spirit, magic, drain_third)
+effect: spell_damage(bone_spirit|magic|drain_third)
 health_cost: 6
 
 id: SPL_MANA
@@ -205,7 +213,7 @@ cast_sfx: IS_CAST2
 launch_sfx: LS_FBOLT1
 impact_sfx: LS_FIRIMP2
 hit_zone: box_aoe(4)
-effect: spell_damage(nova, fire)
+effect: spell_damage(nova|fire)
 
 id: SPL_WARP
 cast_sfx: IS_CAST6
@@ -238,13 +246,13 @@ id: SPL_RUNENOVA
 resist: lightning
 cast_sfx: IS_CAST8
 hit_zone: box_aoe(4)
-effect: spell_damage(nova, lightning)
+effect: spell_damage(nova|lightning)
 
 id: SPL_RUNEIMMOLAT
 resist: fire
 cast_sfx: IS_CAST8
 hit_zone: box_aoe(4)
-effect: spell_damage(nova, fire)
+effect: spell_damage(nova|fire)
 
 id: SPL_RUNESTONE
 resist: magic

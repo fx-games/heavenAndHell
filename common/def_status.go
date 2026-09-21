@@ -21,6 +21,9 @@ func IsValidStatusEffect(name string) bool {
 	switch StatusEffect(name) {
 	case StatusInvisible, StatusStunned, StatusPoisoned, StatusImmobile, StatusBlinded, StatusSlow, StatusHasted, StatusScared, StatusSilenced, StatusPacified, StatusDamageOverTime, StatusConfused, StatusCharmed, StatusBerserk, StatusHaywire, StatusFlying, StatusWinCondition:
 		return true
+	case StatusStone, StatusManaShield, StatusInfravision, StatusVision:
+		// declared next to the spells that apply them; effects reach them by name like any other status
+		return true
 	}
 	return false
 }

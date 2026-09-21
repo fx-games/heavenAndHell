@@ -94,6 +94,8 @@ func (g *Factory) GetAllHitEffects() map[string]func(args util.Arguments) *HitEf
 		"blink":               g.blink,
 		"earthshaker":         g.earthShaker,
 		"spell_damage":        g.spellDamage,
+		"apply_status":        g.applyStatusEffectToSelection,
+		"on_self":             g.onSelf,
 	}
 }
 
@@ -396,6 +398,23 @@ func (g *Factory) applyStatusEffectToSelection(args util.Arguments) *HitEffect {
 		Description: []util.LabelText{
 			util.LabelTextFromString(fmt.Sprintf("Apply %s to target(s)", effectName)),
 		},
+	}
+}
+
+// onSelf (on_self(<name>[, args...])) applies a named untargeted effect to the caster. Both registries already
+// exist; this is the one adapter between them, so a self-cast spell can be declared as data instead of needing a
+// second copy of every effect in targeted form.
+func (g *Factory) onSelf(args util.Arguments) *HitEffect {
+	name := args.Get(0)
+	inner := g.UntargetedEffectFromName(name, util.Arguments(args[min(1, len(args)):]))
+	if inner == nil {
+		return nil
+	}
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			inner.Effect(attacker, EffectSource("Spell"))
+		},
+		Description: inner.Description,
 	}
 }
 

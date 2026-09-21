@@ -1,7 +1,9 @@
 package main
 
 import (
+	"math/rand"
 	"rpg/common"
+	"rpg/d1"
 	"rpg/util"
 	"testing"
 )
@@ -64,6 +66,37 @@ func TestRestoredEffectsResolveByName(t *testing.T) {
 		}
 		if got := factory.NewOnHitEffectFromNameAndArgs(name, util.Arguments{}); got == nil {
 			t.Errorf("targeted effect %q resolved to a nil HitEffect", name)
+		}
+	}
+
+	// Phase 5 folded the D1 spells into this same model: each one names a hit zone and an on-hit effect in its
+	// content, and nothing resolves through a spell enum any more. Every mapping the content declares must
+	// produce a zone that answers with positions and a non-nil effect.
+	for spell, effectName := range d1.SpellEffect {
+		zoneName := d1.SpellHitZone[spell]
+		zone := common.HitZoneFromString(factory.State.GetMap, zoneName)
+		if zone == nil || zone.GetHitPositions == nil {
+			t.Errorf("spell %d: hit zone %q did not resolve", spell, zoneName)
+		}
+		name, args := effectName, util.Arguments{}
+		if util.LooksLikeAFunction(effectName) {
+			name, args = util.GetNameAndArgs(effectName)
+		}
+		if _, exists := factory.GetAllHitEffects()[name]; !exists {
+			t.Errorf("spell %d: effect %q missing from GetAllHitEffects", spell, name)
+			continue
+		}
+		// the cast appends the caster's spell level, so resolve the way castFromData does
+		if got := factory.NewOnHitEffectFromNameAndArgs(name, append(args, "1")); got == nil || got.Activate == nil {
+			t.Errorf("spell %d: effect %q resolved to a nil or inert HitEffect", spell, effectName)
+		}
+	}
+	if len(d1.SpellEffect) == 0 {
+		t.Error("no D1 spell declares an effect; spells.rec did not load")
+	}
+	for name, roll := range common.GetAllDamageRolls() {
+		if got := roll(common.RollContext{Rng: rand.New(rand.NewSource(1)), Mag: 30, Clvl: 5, Slvl: 2}); got.Ticks < 1 {
+			t.Errorf("damage roll %q produced %d ticks, want at least 1", name, got.Ticks)
 		}
 	}
 
