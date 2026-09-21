@@ -43,43 +43,45 @@ var (
 	IconEffectArrow              int32
 )
 
+func tileIcon(name string) int32 { return namedIcon(tilesIcons, name) }
+
 func loadTilesIcons() {
 	tilesIcons = loadIconRec("tiles")
-	IconWhite = tilesIcons["tile.white"]
-	IconTargeting = tilesIcons["tile.targeting"]
-	IconGrass = tilesIcons["tile.grass"]
-	IconDirt = tilesIcons["tile.dirt"]
-	IconMountain = tilesIcons["tile.mountain"]
-	IconWater = tilesIcons["tile.water"]
-	IconWoodenFence = tilesIcons["tile.wooden_fence"] // first guess
-	IconArch = tilesIcons["tile.arch"]
-	IconGrate = tilesIcons["tile.grate"]
-	IconPillar = tilesIcons["tile.pillar"] // first guess
-	IconLamp = tilesIcons["tile.lamp"]     // first guess
-	IconLava = tilesIcons["tile.lava"]
-	IconWallTorch = tilesIcons["tile.wall_torch"] // first guess
-	IconBrazier = tilesIcons["tile.brazier"]      // a small flame (131 is a ring icon)
-	IconCathedralFloor = tilesIcons["tile.cathedral_floor"]
-	IconCatacombsFloor = tilesIcons["tile.catacombs_floor"]
-	IconCatacombsWall = tilesIcons["tile.catacombs_wall"]
-	IconCatacombsWallWithShading = tilesIcons["tile.catacombs_wall_with_shading"]
-	IconDungeonRedEarthFloor = tilesIcons["tile.dungeon_red_earth_floor"]
-	IconDungeonRockyWall = tilesIcons["tile.dungeon_rocky_wall"]
-	IconCathedralWall = tilesIcons["tile.cathedral_wall"]
-	IconCathedralWallWithShading = tilesIcons["tile.cathedral_wall_with_shading"]
-	IconOpenDoor = tilesIcons["tile.open_door"]
-	IconClosedDoor = tilesIcons["tile.closed_door"]
-	IconStairsUp = tilesIcons["tile.stairs_up"]
-	IconStairsDown = tilesIcons["tile.stairs_down"]
-	IconSign = tilesIcons["tile.sign"]
-	IconDecalBlood1 = tilesIcons["decal.blood1"]
-	IconDecalBlood2 = tilesIcons["decal.blood2"]
-	IconDecalBlood3 = tilesIcons["decal.blood3"]
-	IconDecalBlood4 = tilesIcons["decal.blood4"]
-	IconDecalBlood5 = tilesIcons["decal.blood5"]
-	IconEffectLightning = tilesIcons["effect.lightning"]
-	IconEffectFireSmall = tilesIcons["effect.fire_small"]
-	IconEffectFireBig = tilesIcons["effect.fire_big"]
-	IconEffectHit = tilesIcons["effect.hit"]
-	IconEffectArrow = tilesIcons["effect.arrow"]
+	IconWhite = tileIcon("tile.white")
+	IconTargeting = tileIcon("tile.targeting")
+	IconGrass = tileIcon("tile.grass")
+	IconDirt = tileIcon("tile.dirt")
+	IconMountain = tileIcon("tile.mountain")
+	IconWater = tileIcon("tile.water")
+	IconWoodenFence = tileIcon("tile.wooden_fence") // first guess
+	IconArch = tileIcon("tile.arch")
+	IconGrate = tileIcon("tile.grate")
+	IconPillar = tileIcon("tile.pillar") // first guess
+	IconLamp = tileIcon("tile.lamp")     // first guess
+	IconLava = tileIcon("tile.lava")
+	IconWallTorch = tileIcon("tile.wall_torch") // first guess
+	IconBrazier = tileIcon("tile.brazier")      // a small flame (131 is a ring icon)
+	IconCathedralFloor = tileIcon("tile.cathedral_floor")
+	IconCatacombsFloor = tileIcon("tile.catacombs_floor")
+	IconCatacombsWall = tileIcon("tile.catacombs_wall")
+	IconCatacombsWallWithShading = tileIcon("tile.catacombs_wall_with_shading")
+	IconDungeonRedEarthFloor = tileIcon("tile.dungeon_red_earth_floor")
+	IconDungeonRockyWall = tileIcon("tile.dungeon_rocky_wall")
+	IconCathedralWall = tileIcon("tile.cathedral_wall")
+	IconCathedralWallWithShading = tileIcon("tile.cathedral_wall_with_shading")
+	IconOpenDoor = tileIcon("tile.open_door")
+	IconClosedDoor = tileIcon("tile.closed_door")
+	IconStairsUp = tileIcon("tile.stairs_up")
+	IconStairsDown = tileIcon("tile.stairs_down")
+	IconSign = tileIcon("tile.sign")
+	IconDecalBlood1 = tileIcon("decal.blood1")
+	IconDecalBlood2 = tileIcon("decal.blood2")
+	IconDecalBlood3 = tileIcon("decal.blood3")
+	IconDecalBlood4 = tileIcon("decal.blood4")
+	IconDecalBlood5 = tileIcon("decal.blood5")
+	IconEffectLightning = tileIcon("effect.lightning")
+	IconEffectFireSmall = tileIcon("effect.fire_small")
+	IconEffectFireBig = tileIcon("effect.fire_big")
+	IconEffectHit = tileIcon("effect.hit")
+	IconEffectArrow = tileIcon("effect.arrow")
 }

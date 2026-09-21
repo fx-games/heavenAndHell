@@ -1,0 +1,341 @@
+# Heaven&Hell's item icons: sprite-sheet tiles by icon ID. Seeded from the numbers the item records
+# carried before icons moved out of the content record.
+
+internal_name: item.dagger
+icon: 233
+
+internal_name: item.main_gauche
+icon: 644
+
+internal_name: item.sax
+icon: 645
+
+internal_name: item.short_sword
+icon: 646
+
+internal_name: item.long_sword
+icon: 647
+
+internal_name: item.bastard_sword
+icon: 601
+
+internal_name: item.broad_sword
+icon: 649
+
+internal_name: item.zweihander
+icon: 650
+
+internal_name: item.flamberge
+icon: 651
+
+internal_name: item.throwing_axe
+icon: 695
+
+internal_name: item.hand_axe
+icon: 696
+
+internal_name: item.broad_axe
+icon: 697
+
+internal_name: item.battle_axe
+icon: 698
+
+internal_name: item.great_axe
+icon: 699
+
+internal_name: item.war_hammer
+icon: 659
+
+internal_name: item.morning_star
+icon: 168
+
+internal_name: item.whip
+icon: 718
+
+internal_name: item.flail
+icon: 661
+
+internal_name: item.kettenmorgenstern
+icon: 662
+
+internal_name: item.quarterstaff
+icon: 296
+
+internal_name: item.spear
+icon: 611
+
+internal_name: item.partisan
+icon: 724
+
+internal_name: item.trident
+icon: 639
+
+internal_name: item.scythe
+icon: 663
+
+internal_name: item.sling
+icon: 692
+
+internal_name: item.short_bow
+icon: 621
+
+internal_name: item.long_bow
+icon: 622
+
+internal_name: item.light_crossbow
+icon: 122
+
+internal_name: item.heavy_crossbow
+icon: 122
+
+internal_name: item.soft_leather_boots
+icon: 355
+
+internal_name: item.hard_leather_boots
+icon: 356
+
+internal_name: item.steel_boots
+icon: 361
+
+internal_name: item.cloak
+icon: 416
+
+internal_name: item.fur_cloak
+icon: 414
+
+internal_name: item.elven_cloak
+icon: 415
+
+internal_name: item.robe
+icon: 636
+
+internal_name: item.ceremonial_robe
+icon: 609
+
+internal_name: item.partial_leather_armour
+icon: 227
+
+internal_name: item.full_leather_armour
+icon: 229
+
+internal_name: item.leather_brigandine
+icon: 378
+
+internal_name: item.rusted_chain_mail
+icon: 196
+
+internal_name: item.scale_mail
+icon: 198
+
+internal_name: item.chain_mail
+icon: 230
+
+internal_name: item.full_plate_armour
+icon: 199
+
+internal_name: item.leather_gloves
+icon: 384
+
+internal_name: item.gauntlets
+icon: 388
+
+internal_name: item.cesti
+icon: 391
+
+internal_name: item.alchemists_gloves
+icon: 390
+
+internal_name: item.hood
+icon: 208
+
+internal_name: item.hard_leather_cap
+icon: 353
+
+internal_name: item.leather_helmet
+icon: 379
+
+internal_name: item.metal_cap
+icon: 354
+
+internal_name: item.chain_coif
+icon: 350
+
+internal_name: item.steel_helm
+icon: 211
+
+internal_name: item.iron_crown
+icon: 596
+
+internal_name: item.golden_crown
+icon: 597
+
+internal_name: item.jewel_crown
+icon: 598
+
+internal_name: item.leather_buckler
+icon: 204
+
+internal_name: item.metal_buckler
+icon: 203
+
+internal_name: item.small_leather_shield
+icon: 204
+
+internal_name: item.large_leather_shield
+icon: 207
+
+internal_name: item.small_metal_shield
+icon: 203
+
+internal_name: item.large_metal_shield
+icon: 205
+
+internal_name: item.amulet_of_adornment
+icon: 132
+
+internal_name: item.ring_of_protection
+icon: 129
+
+internal_name: item.ring_of_damage
+icon: 130
+
+internal_name: item.ring_of_strength
+icon: 131
+
+internal_name: item.ring_of_dexterity
+icon: 132
+
+internal_name: item.ring_of_intelligence
+icon: 133
+
+internal_name: item.ring_of_running
+icon: 134
+
+internal_name: item.ring_of_fury
+icon: 134
+
+internal_name: item.ring_of_speed
+icon: 134
+
+internal_name: item.healing_potion
+icon: 332
+
+internal_name: item.mana_potion
+icon: 329
+
+internal_name: item.berserk_potion
+icon: 324
+
+internal_name: item.confuse_potion
+icon: 325
+
+internal_name: item.speed_potion
+icon: 333
+
+internal_name: item.strength_potion
+icon: 334
+
+internal_name: item.stoneskin_potion
+icon: 334
+
+internal_name: item.poison_potion
+icon: 325
+
+internal_name: item.scroll_of_random_teleport
+icon: 139
+
+internal_name: item.scroll_of_recall
+icon: 139
+
+internal_name: item.scroll_of_blessing
+icon: 139
+
+internal_name: item.scroll_of_enchant_weapon
+icon: 139
+
+internal_name: item.scroll_of_enchant_armor
+icon: 139
+
+internal_name: item.scroll_of_acquirement
+icon: 139
+
+internal_name: item.scroll_of_summoning
+icon: 139
+
+internal_name: item.scroll_of_earthquake
+icon: 139
+
+internal_name: item.torch
+icon: 352
+
+internal_name: item.lantern
+icon: 247
+
+internal_name: item.dart
+icon: 232
+
+internal_name: item.dart_confusion
+icon: 232
+
+internal_name: item.flask_of_oil
+icon: 246
+
+internal_name: item.food
+icon: 307
+
+internal_name: item.scythe_of_slicing
+icon: 635
+
+internal_name: item.mace_of_destruction
+icon: 632
+
+internal_name: item.blade_of_chaos
+icon: 602
+
+internal_name: item.shadow_cloak
+icon: 411
+
+internal_name: item.shield_of_deflection
+icon: 689
+
+internal_name: item.light_star_glass
+icon: 248
+
+internal_name: item.light_morning_star
+icon: 274
+
+internal_name: item.boots_of_the_shadow_dancer
+icon: 440
+
+internal_name: item.ancient_nightmares_hood
+icon: 467
+
+internal_name: item.plate_mail_of_the_dark_lord
+icon: 441
+
+internal_name: item.wall_of_thorns
+icon: 495
+
+internal_name: item.veil_of_darkness
+icon: 411
+
+internal_name: item.black_hands
+icon: 439
+
+internal_name: item.never_ending_night
+icon: 468
+
+internal_name: item.eternal_darkness
+icon: 468
+
+internal_name: item.amulet_of_shadows
+icon: 496
+
+internal_name: item.shadows_embrace
+icon: 496
+
+internal_name: item.malleus_maleficarum
+icon: 498
+
+internal_name: item.soul_reaver
+icon: 497

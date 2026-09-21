@@ -13,7 +13,9 @@ import (
 // the player's own saves, and a leftover slot from one test must not decide where the next one saves.
 func TestMain(m *testing.M) {
 	files.SelectMod(common.DefaultMod) // content loads through the overlay here too, not just in the game
-	defs.LoadIcons()
+	if err := defs.LoadIcons(); err != nil {
+		panic(err)
+	}
 	dir, err := os.MkdirTemp("", "heavenAndHell_tests")
 	if err != nil {
 		panic(err)

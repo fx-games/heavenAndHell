@@ -1,0 +1,85 @@
+# Heaven&Hell's tile, decal and effect icons, from the game's own other_icons.rec.
+
+internal_name: tile.white
+icon: 18
+
+internal_name: tile.targeting
+icon: 220
+
+internal_name: tile.grass
+icon: 0
+
+internal_name: tile.dirt
+icon: 1
+
+internal_name: tile.mountain
+icon: 7
+
+internal_name: tile.water
+icon: 28
+
+internal_name: tile.cathedral_floor
+icon: 64
+
+internal_name: tile.catacombs_floor
+icon: 86
+
+internal_name: tile.catacombs_wall
+icon: 84
+
+internal_name: tile.catacombs_wall_with_shading
+icon: 85
+
+internal_name: tile.dungeon_red_earth_floor
+icon: 186
+
+internal_name: tile.dungeon_rocky_wall
+icon: 9
+
+internal_name: tile.cathedral_wall
+icon: 56
+
+internal_name: tile.cathedral_wall_with_shading
+icon: 58
+
+internal_name: tile.open_door
+icon: 70
+
+internal_name: tile.closed_door
+icon: 69
+
+internal_name: tile.stairs_up
+icon: 74
+
+internal_name: tile.stairs_down
+icon: 73
+
+internal_name: tile.sign
+icon: 154
+
+internal_name: decal.blood1
+icon: 189
+
+internal_name: decal.blood2
+icon: 190
+
+internal_name: decal.blood3
+icon: 191
+
+internal_name: decal.blood4
+icon: 192
+
+internal_name: decal.blood5
+icon: 193
+
+internal_name: effect.lightning
+icon: 37
+
+internal_name: effect.fire_small
+icon: 109
+
+internal_name: effect.fire_big
+icon: 32
+
+internal_name: effect.hit
+icon: 43

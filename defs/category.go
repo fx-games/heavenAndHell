@@ -1,5 +1,7 @@
 package defs
 
+import "strings"
+
 type ItemCategory int
 
 func (c ItemCategory) HasAlwaysOneCharge() bool {
@@ -93,3 +95,33 @@ const ( // defines the sort order of the inventory
 	ItemCategoryAmmunition
 	ItemCategoryOther
 )
+
+func ItemCategoryFromString(str string) ItemCategory {
+	str = strings.ToLower(str)
+	switch str {
+	case "potion":
+		return ItemCategoryPotion
+	case "scroll":
+		return ItemCategoryScroll
+	case "wand":
+		return ItemCategoryWand
+	case "light":
+		return ItemCategoryLightSource
+	case "weapon":
+		return ItemCategoryWeapon
+	case "armor":
+		return ItemCategoryArmor
+	case "ammo":
+		return ItemCategoryAmmunition
+	case "ring":
+		return ItemCategoryRing
+	case "food":
+		return ItemCategoryFood
+	case "amulet":
+		return ItemCategoryAmulet
+	case "throwable":
+		return ItemCategoryThrowable
+	}
+
+	return -1
+}

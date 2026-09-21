@@ -8,3 +8,7 @@ type ThrowDefinition struct {
 	HitZone       string
 	OnHitEffect   string
 }
+
+func (d ThrowDefinition) IsValid() bool {
+	return d.OnHitEffect != "" || d.Damage.NotZero()
+}

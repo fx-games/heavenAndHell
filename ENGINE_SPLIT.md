@@ -108,6 +108,17 @@ is weak evidence: run it several times.
 phase 5 merge plus the hero-flinch fix. Keep it that way: it is the proof that
 a mod still behaves like its branch. Run it before merging any phase.
 
+**It is flaky, roughly one run in two**, and has been since that commit
+(`fc2e91b`, verified by running it there six times: three failures). It always
+fails the same check:
+
+    PLAYTHROUGH FAILED: doppelganger: 200 blows at <monster> split off no copy
+
+`checkDoppelganger` picks the first eligible monster on the level and demands it
+replicate within 200 blows; whether that monster replicates is an unseeded roll.
+Run it more than once before believing either result. Fixing it means seeding
+that roll or picking a monster that must replicate — not regenerating anything.
+
 Historical note, since it shaped several decisions:
 
 `go run -tags development . playthrough` runs a scripted end-to-end game and
@@ -120,6 +131,51 @@ It is the natural proof of "the mods behave like their branches", so it gets
 repaired near the end, once the effect system is unified - several of its
 failures look like missing effects, which phase 5 is restoring anyway.
 
+## Where the second mod stands
+
+`mods/heavenandhell/` exists and its monsters, items and icons load through the
+same code as `mods/d1/`'s — `defs.ReadMonsters`, `defs.ReadItems`,
+`defs.LoadIcons`, one loader each, no branch on the mod's name. `d1.MonsterData`
+and `d1.ItemData` are aliases for `defs.Monster` and `defs.Item`; Diablo's
+`xl_monst.txt` and `xl_item.txt` are gone, converted into the unified `.rec`
+schema, with `levels.golden` unchanged as the proof.
+
+What that convergence cost, for the next one:
+
+- `health`/`damage`/`weapon_damage` are `util.Dice` and `armor_class` a
+  `stats.Interval`. D1's min..max and H&H's XdY are the same value written two
+  ways ("4-7" is 1d4+3), and `ParseDice` already read both.
+- A `.rec` field is trimmed, so a value cannot end in a space. D1's "Book of "
+  relied on one; the separator moved into `bookSpell`, where it always belonged.
+- Diablo's `NULL` sentinel is not content. Columns that held it are simply
+  absent from the records.
+- `MonstAvailTbl`, a Go literal running parallel to the monster table, is now an
+  `available` field on the record it belonged to.
+
+### Not converged, and why
+
+Stores, effects and dialogue are still one game's each. Each needs engine work
+first, and faking it would mean a second loader:
+
+- **Stores.** D1 stocks a vendor by running a Go predicate over the item table
+  (`storeIdx`, `RndSmithItem` and friends); H&H lists stock per store in
+  `stores.rec`. Converging means either a filter expression in content — which
+  this document rules out — or making D1's vendors declarative. The latter is
+  the real job: a vendor record of level range, purse, slot count and an item
+  filter expressed in the columns items already have.
+- **Effects.** `NewUntargetedActionFromName` resolves straight from the registry;
+  `defs.ReadTargetedDefinitions`/`ReadUntargetedDefinitions` exist but nothing
+  calls them. Giving effects a content layer means giving D1's spells one too,
+  or the mods diverge again.
+- **Dialogue.** The formats converge cheaply (H&H's prose files become `TEXT_*`
+  blocks `loadTexts` already reads), but no H&H NPC, town or quest is content on
+  this branch, so nothing would speak the lines.
+
+The engine's `Icon*` list is the other unfinished edge: it is a fixed set of Go
+vars naming D1 and Hellfire's content (six class icons for classes H&H does not
+have, dungeon furniture it does not draw). A mod's classes should come from its
+own `classes.rec` rather than from that list.
+
 ## Open hazard: icons fail silently
 
 `defs.Icon*` are package vars filled by `defs.LoadIcons()` after mod selection.
@@ -130,6 +186,9 @@ from content binding silently to nothing.
 This becomes load-bearing the moment a SECOND mod ships its own icon names, so
 extracting the H&H content must also make a missing icon name loud: fail the
 load naming every icon the mod did not supply, rather than rendering tile 0.
+
+Done: `LoadIcons` returns an error listing every name the mod did not define.
+It earned itself immediately — it is what produced the 15-name gap above.
 
 ## Verified behaviour of a missing mod (phase 1 input)
 

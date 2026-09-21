@@ -1,6 +1,7 @@
 package defs
 
 import (
+	"fmt"
 	"path"
 	"regexp"
 	"rpg/files"
@@ -22,11 +23,34 @@ import (
 // The sprite sheet they index is the active mod's: a mod that ships its own assets/data/icons and its own sheet
 // gets both. That is why LoadIcons is explicit rather than a package initializer -- the vars must be filled
 // AFTER files.SelectMod, or every Icon* silently carries the engine's number instead of the mod's.
-func LoadIcons() {
+
+// missingIcons collects every name a mod's icons/*.rec did not define, so LoadIcons can name all of them at
+// once instead of the load dying on the first and the rest silently rendering tile 0.
+var missingIcons []string
+
+// namedIcon is the lookup behind every Icon* package var. A name the mod did not supply is recorded rather
+// than resolving to 0: content binding silently to nothing has caused four bugs here, and a second mod with
+// its own icon names is exactly when an unlisted name stops being a typo and starts being a whole game.
+func namedIcon(m map[string]int32, name string) int32 {
+	icon, ok := m[name]
+	if !ok {
+		missingIcons = append(missingIcons, name)
+	}
+	return icon
+}
+
+// LoadIcons fills every Icon* var from the active mod's icons/*.rec. It fails if the mod is missing any of
+// them, listing the lot, because a half-bound icon table renders tile 0 and says nothing.
+func LoadIcons() error {
+	missingIcons = nil
 	loadActorsIcons()
 	loadItemsIcons()
 	loadSkillsIcons()
 	loadTilesIcons()
+	if len(missingIcons) > 0 {
+		return fmt.Errorf("mod %q defines no icon named: %s", files.ActiveMod(), strings.Join(missingIcons, ", "))
+	}
+	return nil
 }
 
 func loadIconRec(name string) map[string]int32 {

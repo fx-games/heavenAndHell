@@ -2,9 +2,35 @@ package defs
 
 import (
 	"rpg/stats"
+	"strings"
 )
 
 type ArmorType int
+
+func ArmorTypeFromString(str string) ArmorType {
+	str = strings.ToLower(str)
+	switch str {
+	case "helmet":
+		return ArmorTypeHelmet
+	case "cuirass":
+		return ArmorTypeCuirass
+	case "gloves":
+		return ArmorTypeGloves
+	case "boots":
+		return ArmorTypeBoots
+	case "cape":
+		return ArmorTypeCape
+	case "amulet":
+		return ArmorTypeAmulet
+	case "ring":
+		return ArmorTypeRing
+	case "shield":
+		return ArmorTypeShield
+	case "defensive_weapon":
+		return ArmorTypeDefensiveWeapon
+	}
+	return ArmorTypeNone
+}
 
 func (t ArmorType) ToString() string {
 	switch t {
@@ -72,4 +98,8 @@ const (
 type ArmorDefinition struct {
 	ArmorType  ArmorType
 	ArmorClass stats.Interval
+}
+
+func (d ArmorDefinition) IsValid() bool {
+	return d.ArmorType != ArmorTypeNone
 }

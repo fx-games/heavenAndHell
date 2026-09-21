@@ -19,19 +19,21 @@ var (
 	IconCorpse                   int32
 )
 
+func actorIcon(name string) int32 { return namedIcon(actorsIcons, name) }
+
 func loadActorsIcons() {
 	actorsIcons = loadIconRec("actors")
-	IconCharacterRogueMale = actorsIcons["class.rogue_male"]
-	IconCharacterRogueFemale = actorsIcons["class.rogue_female"]
-	IconCharacterWarriorMale = actorsIcons["class.warrior_male"]
-	IconCharacterWarriorFemale = actorsIcons["class.warrior_female"]
-	IconCharacterSorcererMale = actorsIcons["class.sorcerer_male"]
-	IconCharacterSorcererFemale = actorsIcons["class.sorcerer_female"]
-	IconCharacterMonkMale = actorsIcons["class.monk_male"]
-	IconCharacterMonkFemale = actorsIcons["class.monk_female"]
-	IconCharacterBardMale = actorsIcons["class.bard_male"]
-	IconCharacterBardFemale = actorsIcons["class.bard_female"]
-	IconCharacterBarbarianMale = actorsIcons["class.barbarian_male"]
-	IconCharacterBarbarianFemale = actorsIcons["class.barbarian_female"]
-	IconCorpse = actorsIcons["corpse.default"]
+	IconCharacterRogueMale = actorIcon("class.rogue_male")
+	IconCharacterRogueFemale = actorIcon("class.rogue_female")
+	IconCharacterWarriorMale = actorIcon("class.warrior_male")
+	IconCharacterWarriorFemale = actorIcon("class.warrior_female")
+	IconCharacterSorcererMale = actorIcon("class.sorcerer_male")
+	IconCharacterSorcererFemale = actorIcon("class.sorcerer_female")
+	IconCharacterMonkMale = actorIcon("class.monk_male")
+	IconCharacterMonkFemale = actorIcon("class.monk_female")
+	IconCharacterBardMale = actorIcon("class.bard_male")
+	IconCharacterBardFemale = actorIcon("class.bard_female")
+	IconCharacterBarbarianMale = actorIcon("class.barbarian_male")
+	IconCharacterBarbarianFemale = actorIcon("class.barbarian_female")
+	IconCorpse = actorIcon("corpse.default")
 }
