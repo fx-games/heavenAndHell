@@ -48,6 +48,7 @@ func (a *SpellAction) Execute(ctx ActionContext) []Action {
 	f := ctx.GameState.factory
 	c := &spellCtx{f: f, caster: a.caster, h: a.caster.hero, s: a.caster.HeroSheet(), spell: a.spell, slvl: a.slvl,
 		m: ctx.GameState.GetMap(), cause: a.cause, dealt: map[*Actor]int{}, ctx: ctx}
+	c.setSpell(a.spell)
 	from := c.origin() // Teleport moves the caster
 	a.castSucceeded = c.cast(a.target)
 	if a.castSucceeded {
@@ -84,6 +85,19 @@ type spellCtx struct {
 	from        *geometry.Point // where the spell comes from when not the caster: a rune
 	heroDealt   int             // whole points the hero's own TARGET_BOTH missiles dealt to him
 	lastBolt    *ProjectileDirectionAnimation
+	// how a hit resolves, set by whatever is dealing the damage rather than read back off a spell id
+	resist     int  // d1.ResistKind*
+	undeadOnly bool // only the undead are harmed (Holy Bolt)
+	drainThird bool // the hit takes a third of what the target has left (Bone Spirit)
+}
+
+// setSpell binds the hit rules of the spell being cast: its resistance kind and the two spells whose hits are
+// special. Nothing below strike reads the spell id.
+func (c *spellCtx) setSpell(spell int) {
+	c.spell = spell
+	c.resist = d1.SpellResist[spell]
+	c.undeadOnly = spell == d1.SplHolyBolt
+	c.drainThird = spell == d1.SplBoneSpirit
 }
 
 func (c *spellCtx) origin() geometry.Point {
@@ -224,11 +238,11 @@ func resistBits(kind int) (resist, immune int) {
 // strike ports MonsterMHit for a player's spell: `ticks` hit rolls of dam64 (1/64) each.
 func (c *spellCtx) strike(a *Actor, dam64, ticks int) bool {
 	mon := a.d1Monster
-	resist, immune := resistBits(d1.SpellResist[c.spell])
-	if mon.MagicRes&immune != 0 || c.spell == d1.SplHolyBolt && mon.Data.Class != "MC_UNDEAD" && mon.AI != "AI_DIABLO" {
+	resist, immune := resistBits(c.resist)
+	if mon.MagicRes&immune != 0 || c.undeadOnly && mon.Data.Class != "MC_UNDEAD" && mon.AI != "AI_DIABLO" {
 		return false
 	}
-	if c.spell == d1.SplBoneSpirit {
+	if c.drainThird {
 		dam64 = (a.GetStats().GetResource(stats.Health).Value() - c.dealt[a]) << 6 / 3
 	}
 	chance := c.h.SpellHitChance(c.s, mon.Level)
@@ -274,7 +288,7 @@ func (c *spellCtx) hurtHero(p geometry.Point, mind, maxd int, shift bool, ticks 
 		return
 	}
 	mis := MisFlashTrap // a magic missile
-	switch d1.SpellResist[c.spell] {
+	switch c.resist {
 	case d1.ResistKindFire:
 		mis = MisFireWall
 	case d1.ResistKindLightning:
@@ -522,6 +536,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 	case d1.SplJester: // missiles_jester: one of nine spells at the Jester's spell level
 		c.spell = [10]int{d1.SplFirebolt, d1.SplFirebolt, d1.SplFireball, d1.SplFireWall, d1.SplGuardian, d1.SplChain,
 			d1.SplTown, d1.SplTeleport, d1.SplApocalypse, d1.SplStone}[d1Rng.Intn(10)]
+		c.setSpell(c.spell)
 		c.ctx.Msg(fmt.Sprintf("The Jester casts %s.", f.Generator.D.Spells[c.spell].Name))
 		return c.cast(target)
 	case d1.SplImmolation: // AddNova + mi_fire_nova: a fireball down every Nova ray
@@ -774,6 +789,7 @@ func (a *spellTickAction) GetDelayInAut() int         { return 0 }
 func (a *spellTickAction) Execute(ctx ActionContext) []Action {
 	c := &spellCtx{f: ctx.GameState.factory, ctx: ctx, caster: a.caster, h: a.caster.hero, s: a.caster.HeroSheet(), spell: a.spell,
 		m: ctx.GameState.GetMap(), cause: a.cause, dealt: map[*Actor]int{}}
+	c.setSpell(a.spell)
 	a.run(c)
 	a.animations = c.animations
 	return c.finish()
