@@ -13,14 +13,15 @@ import (
 // Named quest events. A trigger is only ever evaluated when one of these happens to a named subject: nothing
 // here is polled, and there is no general "on tick".
 const (
-	EventKill       = "on_kill"        // subject: the dead monster's internal name, or a unique's name
-	EventItemPickup = "on_item_pickup" // subject: the item's internal name
-	EventEnterLevel = "on_enter_level" // subject: the dungeon depth the hero arrived on
-	EventTalk       = "on_talk"        // subject: the NPC's internal name
+	EventKill         = "on_kill"          // subject: the dead monster's internal name, or a unique's name
+	EventItemPickup   = "on_item_pickup"   // subject: the item's internal name
+	EventEnterLevel   = "on_enter_level"   // subject: the dungeon depth the hero arrived on
+	EventTalk         = "on_talk"          // subject: the NPC's internal name
+	EventLevelCleared = "on_level_cleared" // subject: the map name; its last monster just died
 )
 
 // QuestEvents are the events a trigger may name, for the loader's check and for anyone adding one.
-var QuestEvents = []string{EventKill, EventItemPickup, EventEnterLevel, EventTalk}
+var QuestEvents = []string{EventKill, EventItemPickup, EventEnterLevel, EventTalk, EventLevelCleared}
 
 // questEnv is what a trigger condition may ask about: quests by key, raw flags, and where the hero is.
 func (s *State) questEnv() defs.QuestEnv {
@@ -52,8 +53,9 @@ func (s *State) questEnv() defs.QuestEnv {
 
 // fireQuestTriggers runs the mod's triggers for one named event and subject, in file order: each one whose
 // condition holds runs its outcomes. Conditions were compiled when the mod loaded; this only evaluates them.
-// speaker is who a say() outcome speaks as; empty for events nobody speaks at.
-func (f *Factory) fireQuestTriggers(event, subject, speaker string) {
+// speaker is who a say() outcome speaks as; empty for events nobody speaks at. It reports whether any fired.
+func (f *Factory) fireQuestTriggers(event, subject, speaker string) bool {
+	fired := false
 	s := f.State
 	env := s.questEnv()
 	for _, t := range s.factory.D1().D.QuestTriggers {
@@ -70,6 +72,7 @@ func (f *Factory) fireQuestTriggers(event, subject, speaker string) {
 				continue
 			}
 		}
+		fired = true
 		for _, do := range t.Do {
 			if !f.runQuestOutcome(do, speaker) {
 				f.Msg(fmt.Sprintf("quest trigger %s/%s: no outcome named %q", event, subject, do.Name()))
@@ -77,6 +80,7 @@ func (f *Factory) fireQuestTriggers(event, subject, speaker string) {
 		}
 		env = s.questEnv() // later triggers see what earlier ones did
 	}
+	return fired
 }
 
 // runQuestOutcome performs one named outcome; false if the engine has no such outcome. This list is the whole
@@ -113,6 +117,17 @@ func (f *Factory) runQuestOutcome(do recfile.StringPredicate, speaker string) bo
 		f.say(speaker, do.GetString(0))
 	case "end_text":
 		f.d1EndTextWindow()
+	case "give_exp": // at the hero's own level, so exactly the amount named
+		if p := s.GetPlayer(); p.hero != nil {
+			f.grantExperience(p, p.hero.Level, do.GetInt(0))
+			f.Msg(fmt.Sprintf("You gain %d experience.", do.GetInt(0)))
+		}
+	case "give_weapon":
+		if it := f.Generator.WeaponItem(do.GetInt(0)); it != nil {
+			item := f.NewD1Item(it)
+			s.GetPlayer().GetInventory().Add(item)
+			f.Msg(fmt.Sprintf("You receive %s.", item.Name()))
+		}
 	default:
 		return false
 	}
@@ -124,7 +139,7 @@ func (f *Factory) runQuestOutcome(do recfile.StringPredicate, speaker string) bo
 func QuestOutcomeExists(name string) bool {
 	switch name {
 	case "complete_quest", "activate_quest", "log_quest", "set_quest_var", "set_flag", "hero_sound", "sound",
-		"say", "refresh_level", "end_text":
+		"say", "refresh_level", "end_text", "give_exp", "give_weapon":
 		return true
 	}
 	return false

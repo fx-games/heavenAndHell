@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"slices"
 
 	"rpg/defs"
 	"rpg/dungen"
@@ -85,7 +86,7 @@ func (g *Factory) NewRandomEnemy(dlvl int) (*Actor, []defs.Monster) {
 	all := g.Generator.D.Monsters
 	var eligible []int
 	for i, mon := range all {
-		if mon.Available() && mon.CanAppearAt(g.RandomSource, dlvl) {
+		if mon.Available() && !slices.Contains(mon.Tags, "unique") && mon.CanAppearAt(g.RandomSource, dlvl) { // a unique lives in its room
 			eligible = append(eligible, i)
 		}
 	}

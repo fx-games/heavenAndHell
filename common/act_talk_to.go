@@ -61,10 +61,15 @@ func (d *TalkToAction) Execute(context ActionContext) []Action {
 		return nil
 	}
 	f := context.GameState.factory
+	// Whatever the mod's on_talk triggers say for this NPC is the conversation; only an NPC with nothing
+	// scripted falls back to the quest topics and gossip menu.
+	talk := func() {
+		if !f.fireQuestTriggers(EventTalk, npc.GetInternalName(), npc.Name()) {
+			context.UserInterface().OpenMenu(d1TalkTopics(context, npc))
+		}
+	}
 	f.playD1Sound(f.D1().D.TextSfx[d1Greeting(f.D1().D.Gossip, npc.GetVendorType())])
-	talkItem := util.MenuItem{MainText: fmt.Sprintf("Talk to %s", npc.Name()), Action: func() {
-		context.UserInterface().OpenMenu(d1TalkTopics(context, npc))
-	}}
+	talkItem := util.MenuItem{MainText: fmt.Sprintf("Talk to %s", npc.Name()), Action: talk}
 	options := append([]util.MenuItem{talkItem}, d1VendorOptions(context, npc)...)
 	context.UserInterface().OpenMenu(options)
 	return nil

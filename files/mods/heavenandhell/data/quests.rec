@@ -1,0 +1,164 @@
+# Heaven & Hell's quests and the town's dialogue, ported from main's getTextFor* chains in common/def_dialogue.go.
+#
+# Main showed each NPC the furthest step of a fixed chain whose flag was set. Here each step is an on_talk trigger,
+# and an NPC's triggers are listed LATEST STEP FIRST: triggers run in file order and later ones see what earlier
+# ones did, so a step that moves a quest on must come after the steps it moves it into, or one talk would play
+# two of them.
+#
+# The texts live in text/town.txt. What main rewarded (a random weapon of some depth and 1000 experience) is
+# give_weapon and give_exp.
+
+%rec: quest
+
+key: meat_jack
+name: Kill Meat Jack
+log_text: TEXT_HH_KIRIOTH_WELCOME
+
+key: poisoned_water
+name: Clean the poisoned water
+log_text: TEXT_HH_ABEL_POISON_QUEST
+
+key: skeleton_king
+name: Kill King Zedek
+log_text: TEXT_HH_SHEKEL_SKELETON_KING_QUEST
+
+key: lucifer
+name: Kill Lucifer
+log_text: TEXT_HH_KIRIOTH_LUCIFER_QUEST
+
+%rec: trigger
+
+# What the dungeon tells the town.
+
+event: on_kill
+subject: meat_jack
+do: set_flag(killed:meat_jack)
+
+event: on_kill
+subject: king_zedek
+do: set_flag(killed:king_zedek)
+
+event: on_kill
+subject: lucifer
+do: set_flag(killed:lucifer)
+
+event: on_level_cleared
+subject: poisoned_water_supply
+do: set_flag(cleared:poisoned_water_supply)
+
+# Elder Kirioth: Meat Jack, then, once King Zedek is dead, Lucifer.
+
+event: on_talk
+subject: kirioth
+when: active("lucifer") and flag("killed:lucifer")
+do: say(TEXT_HH_KIRIOTH_LUCIFER_QUEST_REWARD)
+do: complete_quest(lucifer)
+do: give_weapon(10)
+do: give_exp(1000)
+
+event: on_talk
+subject: kirioth
+when: active("lucifer") and not flag("killed:lucifer")
+do: say(TEXT_HH_KIRIOTH_LUCIFER_QUEST)
+
+event: on_talk
+subject: kirioth
+when: done("meat_jack") and flag("killed:king_zedek") and not active("lucifer") and not done("lucifer")
+do: say(TEXT_HH_KIRIOTH_LUCIFER_QUEST)
+do: activate_quest(lucifer)
+do: log_quest(lucifer)
+
+event: on_talk
+subject: kirioth
+when: done("meat_jack") and not flag("killed:king_zedek")
+do: say(TEXT_HH_KIRIOTH_AFTER_MEAT_JACK)
+
+event: on_talk
+subject: kirioth
+when: active("meat_jack") and flag("killed:meat_jack")
+do: say(TEXT_HH_KIRIOTH_MEAT_JACK_REWARD)
+do: complete_quest(meat_jack)
+do: give_weapon(4)
+do: give_exp(1000)
+
+event: on_talk
+subject: kirioth
+when: active("meat_jack") and not flag("killed:meat_jack")
+do: say(TEXT_HH_KIRIOTH_MEAT_JACK)
+
+event: on_talk
+subject: kirioth
+when: not active("meat_jack") and not done("meat_jack")
+do: say(TEXT_HH_KIRIOTH_WELCOME)
+do: activate_quest(meat_jack)
+do: log_quest(meat_jack)
+
+# Prince Abel: the poisoned water, once Meat Jack is dead.
+
+event: on_talk
+subject: abel
+when: done("poisoned_water")
+do: say(TEXT_HH_ABEL_AFTER_POISON_QUEST)
+
+event: on_talk
+subject: abel
+when: active("poisoned_water") and flag("cleared:poisoned_water_supply")
+do: say(TEXT_HH_ABEL_POISON_QUEST_REWARD)
+do: complete_quest(poisoned_water)
+do: give_weapon(6)
+do: give_exp(1000)
+
+event: on_talk
+subject: abel
+when: active("poisoned_water") and not flag("cleared:poisoned_water_supply")
+do: say(TEXT_HH_ABEL_POISON_QUEST)
+
+event: on_talk
+subject: abel
+when: flag("killed:meat_jack") and not active("poisoned_water") and not done("poisoned_water")
+do: say(TEXT_HH_ABEL_POISON_QUEST)
+do: activate_quest(poisoned_water)
+do: log_quest(poisoned_water)
+
+event: on_talk
+subject: abel
+when: not flag("killed:meat_jack") and not active("poisoned_water") and not done("poisoned_water")
+do: say(TEXT_HH_ABEL_WELCOME)
+
+# Shekel: King Zedek, once the water runs clean.
+
+event: on_talk
+subject: shekel
+when: done("skeleton_king")
+do: say(TEXT_HH_SHEKEL_AFTER_SKELETON_KING)
+
+event: on_talk
+subject: shekel
+when: active("skeleton_king") and flag("killed:king_zedek")
+do: say(TEXT_HH_SHEKEL_SKELETON_KING_QUEST_REWARD)
+do: complete_quest(skeleton_king)
+do: give_weapon(6)
+do: give_exp(1000)
+
+event: on_talk
+subject: shekel
+when: active("skeleton_king") and not flag("killed:king_zedek")
+do: say(TEXT_HH_SHEKEL_SKELETON_KING_QUEST)
+
+event: on_talk
+subject: shekel
+when: flag("cleared:poisoned_water_supply") and not active("skeleton_king") and not done("skeleton_king")
+do: say(TEXT_HH_SHEKEL_SKELETON_KING_QUEST)
+do: activate_quest(skeleton_king)
+do: log_quest(skeleton_king)
+
+event: on_talk
+subject: shekel
+when: not flag("cleared:poisoned_water_supply") and not active("skeleton_king") and not done("skeleton_king")
+do: say(TEXT_HH_SHEKEL_WELCOME)
+
+# Sister Mary only ever welcomes you.
+
+event: on_talk
+subject: mary
+do: say(TEXT_HH_MARY_WELCOME)

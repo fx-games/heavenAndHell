@@ -17,6 +17,30 @@ func (g *MapGenerator) SetSeed(seed int64) {
 	g.d1Quests = &q
 }
 
+// d1Quest is D1's own table row for quest q: its availability roll, its level and its starting vars. The table
+// belongs to D1's level builders, so a mod that builds none of its levels with them gets a plain quest that has
+// not started - not whatever D1 rolled for the quest that happens to share its index.
+func (g *MapGenerator) d1Quest(q int) d1.Quest {
+	if g.d1Quests != nil && q >= 0 && q < len(g.d1Quests) && g.buildsD1Levels() {
+		return g.d1Quests[q]
+	}
+	return d1.Quest{Active: d1.QuestInit}
+}
+
+// buildsD1Levels is whether any dungeon level comes from D1's generators. No level list at all counts, as it
+// does in GenerateMap, where a level without an entry is D1's.
+func (g *MapGenerator) buildsD1Levels() bool {
+	if len(g.levels) <= 1 {
+		return true
+	}
+	for _, l := range g.levels[1:] {
+		if _, ok := l.Config.(d1.LevelParams); ok {
+			return true
+		}
+	}
+	return false
+}
+
 // SetSnapshots sets saved level state applied after a level is generated.
 func (g *MapGenerator) SetSnapshots(snapshots map[string]*LevelSnapshot) { g.snapshots = snapshots }
 

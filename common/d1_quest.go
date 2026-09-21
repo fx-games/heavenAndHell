@@ -54,7 +54,7 @@ func (s *State) QuestActive(q int) int {
 	case f.IsSet(s.QuestFlag(q) + ".active"):
 		return d1.QuestActive
 	}
-	return s.D1Quests()[q].Active
+	return s.mapGen.d1Quest(q).Active
 }
 
 func (s *State) SetQuestActive(q, v int) {
@@ -92,9 +92,9 @@ func (s *State) QuestVar(q, n int) int {
 		return v
 	}
 	if n == 1 {
-		return s.D1Quests()[q].Var1
+		return s.mapGen.d1Quest(q).Var1
 	}
-	return s.D1Quests()[q].Var2
+	return s.mapGen.d1Quest(q).Var2
 }
 
 func (s *State) SetQuestVar(q, n, v int) {
@@ -105,7 +105,7 @@ func (s *State) SetQuestVar(q, n, v int) {
 func (s *State) questHere(q int) bool { return s.questOn(q, s.GetMap()) }
 
 func (s *State) questOn(q int, m *gridmap.GridMap[*Actor, *Item, Object]) bool {
-	qu := s.D1Quests()[q]
+	qu := s.mapGen.d1Quest(q)
 	return qu.Active != d1.QuestNotAvail && m.GetName() == defs.LevelNameFromDepth(qu.Level)
 }
 
@@ -250,7 +250,7 @@ func (f *Factory) dropD1Item(it *d1.Item, pos geometry.Point) {
 func (f *Factory) d1TownerQuests(npc *Actor) bool {
 	s, player, gen, pos := f.State, f.State.GetPlayer(), f.Generator, npc.MapPosition()
 	visited := func(dlvl int) bool { return s.GetLastDungeonLevel() >= dlvl }
-	avail := func(q int) bool { return s.D1Quests()[q].Active != d1.QuestNotAvail }
+	avail := func(q int) bool { return s.mapGen.d1Quest(q).Active != d1.QuestNotAvail }
 	active, v1, v2 := s.QuestActive, func(q int) int { return s.QuestVar(q, 1) }, func(q int) int { return s.QuestVar(q, 2) }
 	name := npc.Name()
 	switch npc.GetVendorType() {
@@ -784,11 +784,8 @@ func randomQuestSpot(m *gridmap.GridMap[*Actor, *Item, Object], keep func(geomet
 func d1QuestKill(ctx ActionContext, mon *D1Monster) {
 	state := ctx.GameState
 	f := state.factory
+	clean := mapClearedBy(state.GetMap(), mon)
 	if state.onSetLevelOf(state.GetMap(), d1.QPWater) && state.QuestActive(d1.QPWater) != d1.QuestInit {
-		clean := true
-		for _, a := range state.GetMap().Actors() {
-			clean = clean && (a.d1Monster == nil || a.d1Monster == mon || a.d1Monster.Golem || !a.IsAlive())
-		}
 		if clean && state.QuestActive(d1.QPWater) != d1.QuestDone {
 			f.completeD1Quest(d1.QPWater)
 			f.PlayD1Sfx("IS_QUESTDN", state.GetPlayer().MapPosition())
@@ -799,6 +796,19 @@ func d1QuestKill(ctx ActionContext, mon *D1Monster) {
 	if mon.Unique != nil {
 		f.fireQuestTriggers(EventKill, mon.Unique.Name, "")
 	}
+	if clean {
+		f.fireQuestTriggers(EventLevelCleared, state.GetMap().GetName(), "")
+	}
+}
+
+// mapClearedBy is whether mon was the last monster standing on m (golems do not count).
+func mapClearedBy(m *gridmap.GridMap[*Actor, *Item, Object], mon *D1Monster) bool {
+	for _, a := range m.Actors() {
+		if a.d1Monster != nil && a.d1Monster != mon && !a.d1Monster.Golem && a.IsAlive() {
+			return false
+		}
+	}
+	return true
 }
 
 // d1EndTextWindow is the end_text outcome: Diablo's death screen.

@@ -25,9 +25,10 @@ type MapGenerator struct {
 	snapshots    map[string]*LevelSnapshot
 	d1Seeds      [d1.NumLevels]int32
 	d1Quests     *d1.Quests
-	d1Levels     map[string]*d1.Level // the generated D1 levels by map name, for changeD1Map
-	walledIn     map[string][]*Actor  // monsters D1 placed inside walls that a map change opens later, by map name
-	levels       []dungeon.Level      // the mod's declared level list, indexed by dungeon level; index 0 is the town
+	d1Levels     map[string]*d1.Level     // the generated D1 levels by map name, for changeD1Map
+	walledIn     map[string][]*Actor      // monsters D1 placed inside walls that a map change opens later, by map name
+	levels       []dungeon.Level          // the mod's declared level list, indexed by dungeon level; index 0 is the town
+	sideLevels   map[string]dungeon.Level // levels off the main descent, by map name
 }
 
 // LoadLevels reads the active mod's levels.rec, which says which generator builds each dungeon level and how
@@ -38,11 +39,16 @@ func (g *MapGenerator) LoadLevels() error {
 		return fmt.Errorf("levels.rec: %w", err)
 	}
 	defer f.Close()
-	levels, err := dungeon.LoadLevels(recfile.Read(f), 0)
+	recs := recfile.Read(f)
+	levels, err := dungeon.LoadLevels(recs, 0)
 	if err != nil {
 		return err
 	}
-	g.levels = levels
+	side, err := dungeon.LoadSideLevels(recs)
+	if err != nil {
+		return err
+	}
+	g.levels, g.sideLevels = levels, side
 	return nil
 }
 
@@ -71,6 +77,9 @@ func (g *MapGenerator) SetFactory(factory *Factory) {
 // populated d1.Level and dungen a bare layout, and pretending those are one return type is the lie this seam
 // was drawn to avoid.
 func (g *MapGenerator) GenerateMap(targetMap string, dungeonLevel int) *gridmap.GridMap[*Actor, *Item, Object] {
+	if side, ok := g.sideLevels[targetMap]; ok {
+		return g.generateDungenMap(targetMap, side.Depth, side) // ponytail: side levels are dungen-only until a D1 mod declares one
+	}
 	lvl := g.levelConfig(dungeonLevel)
 	switch lvl.Config.(type) {
 	case nil, d1.LevelParams:

@@ -139,7 +139,7 @@ func (g *MapGenerator) addDungenStairs(m *gridmap.GridMap[*Actor, *Item, Object]
 	m.AddTransitionAt(entrance, up)
 	placed = append(placed, entrance)
 
-	if dlvl+1 < len(g.levels) && g.levels[dlvl+1].Generator != "" {
+	if lvl.Map == "" && dlvl+1 < len(g.levels) && g.levels[dlvl+1].Generator != "" { // a side level is a dead end
 		m.SetTile(exit, dungenLadderDown)
 		m.AddNamedLocation("ladder_down", exit)
 		m.AddTransitionAt(exit, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl + 1), TargetLocation: "ladder_up"})
@@ -257,6 +257,23 @@ func (g *MapGenerator) paintDungenDecoration(m *gridmap.GridMap[*Actor, *Item, O
 		p := room.ToAbsolutePosition(rel)
 		if m.IsTileWalkable(p) && room.Contains(p) {
 			m.SetTile(p, mapTile)
+		}
+	}
+	// A room's own inhabitants: an NPC entity with a UniqueName is the one place that unique turns up.
+	entities := template.LayerByIdentifier("Entities")
+	if entities == nil {
+		return
+	}
+	for _, e := range entities.Entities {
+		name := e.PropertyByIdentifier("UniqueName")
+		if e.Identifier != "NPC" || name.IsNull() {
+			continue
+		}
+		x, y := entities.ToGridPosition(e.Position[0], e.Position[1])
+		p := room.ToAbsolutePosition(geometry.Point{X: x, Y: y})
+		if a := g.factory.NewMonsterByID(name.AsString()); a != nil && m.CanPlaceActorHere(p) {
+			a.SetDrawPosition(p.ToPointF())
+			m.AddActor(a, p)
 		}
 	}
 }

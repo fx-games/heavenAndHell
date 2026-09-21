@@ -1,0 +1,113 @@
+# Heaven & Hell's town dialogue, from main's files/assets/dialogue/*.txt. This game has no speech, so no sfx.
+# A line of just "+" starts a new paragraph. quests.rec decides who says what, when.
+
+%rec: text
+
+id: TEXT_HH_KIRIOTH_WELCOME
+text: Welcome, my friend!
++
++ I am Kirioth, the eldest of this town.
++
++ You've come at the right time. Our town is under attack by demons and the living dead.
++
++ Please, enter the cathedral to the north-east of town and end this madness.
++
++ There is one particular dangerous demon on the second level of the cathedral.
++
++ You must defeat him to save our town!
+
+id: TEXT_HH_KIRIOTH_MEAT_JACK
+text: Please, that unholy abomination is still waiting on the second floor of the cathedral.
++
++ Hurry, before it's too late.
+
+id: TEXT_HH_KIRIOTH_MEAT_JACK_REWARD
+text: You've done us a great service, friend. Here, take this. It's the least I can do to thank you.
+
+id: TEXT_HH_KIRIOTH_AFTER_MEAT_JACK
+text: Thanks again, for helping us make this town safer for everyone.
+
+id: TEXT_HH_KIRIOTH_LUCIFER_QUEST
+text: It's all clear now.
++
++ It's him, it's always been him.
++
++ Beneath our very feet lies the answer to all our questions.
++
++ You must travel the caves that are located under the catacombs.
++
++ Find the entrance to hell itself and slay the devil.
+
+id: TEXT_HH_KIRIOTH_LUCIFER_QUEST_REWARD
+text: You've done it!
++
++ You've really done it!
++
++ Here, take this as an unworthy reward.
+
+id: TEXT_HH_SHEKEL_WELCOME
+text: Welcome, my friend!
++
++ I am Shekel, the leader of the merchants' guild.
++
++ These demons have been a plague on our town for some days now. It's getting worse by the hour.
++
++ Business has been slow, and customers are afraid to even enter the town.
++
++ I am currently investigating the source of this evil.
++
++ Come back later, and I will tell you what I have found.
+
+id: TEXT_HH_SHEKEL_SKELETON_KING_QUEST
+text: Ah, you've come at the right time.
++
++ My sources tell me, that the evil king Zedek has returned from the dead.
++
++ His tomb is on the fourth level, inside the catacombs.
++
++ You must find him and his devilish undead minions and destroy them once and for all.
++
++ Good luck, brave adventurer.
+
+id: TEXT_HH_SHEKEL_SKELETON_KING_QUEST_REWARD
+text: You've done well, my friend. You've done well.
++
++ Here is your reward.
+
+id: TEXT_HH_SHEKEL_AFTER_SKELETON_KING
+text: We owe you so much!
+
+id: TEXT_HH_ABEL_WELCOME
+text: Welcome, my brother!
++
++ I am Abel.
++
++ Bad things are happening in this town. I am sure you have heard of the abduction of Shekel's son Jim?
++
++ When you have dealt with the immediate threat, I have a request for you.
++
++ Please, kill that abomination that has been terrorizing our townsfolk.
+
+id: TEXT_HH_ABEL_POISON_QUEST
+text: Thanks for dealing with that monster.
++
++ There's still an issue of utmost importance that needs to be addressed.
++
++ For some weeks now our rivers have been polluted by a mysterious substance.
++
++ There are rumors that it's coming from the catacombs.
++
++ Please, find out what's going on. If there are any monsters down there, defeat them, and you'll be rewarded.
+
+id: TEXT_HH_ABEL_POISON_QUEST_REWARD
+text: You've been a great help.
++
++ Please, take this reward.
+
+id: TEXT_HH_ABEL_AFTER_POISON_QUEST
+text: Thanks for cleaning up the water.
+
+id: TEXT_HH_MARY_WELCOME
+text: Welcome, stranger.
++
++ I am sister Mary.

@@ -85,6 +85,10 @@ type Level struct {
 	// the first level's to the town - but only the mod knows what its town calls that doorway, and the engine
 	// may not name it. Declared as "up: <target map>, <target location>".
 	UpTarget *Transition
+	// Map names a side level: one reached by a declared transition rather than by depth, like a quest's cave.
+	// It has a way up (UpTarget) and no way down; Depth is the dungeon level whose monsters and loot it draws on.
+	Map   string
+	Depth int
 }
 
 // LoadLevels reads a mod's whole level list. Levels are indexed by dungeon level, so index 0 (town) stays empty
@@ -105,6 +109,9 @@ func LoadLevels(recs []recfile.Record, numLevels int) ([]Level, error) {
 	}
 	levels := make([]Level, numLevels)
 	for _, r := range recs {
+		if _, side := Field(r, "map"); side {
+			continue // LoadSideLevels' business
+		}
 		dlvl, err := strconv.Atoi(strings.TrimSpace(r.ToMap("").GetStringOrDefault("dlvl", "")))
 		if err != nil {
 			return nil, fmt.Errorf("levels.rec: dlvl: %w", err)
@@ -112,32 +119,9 @@ func LoadLevels(recs []recfile.Record, numLevels int) ([]Level, error) {
 		if dlvl < 1 || dlvl >= numLevels {
 			return nil, fmt.Errorf("levels.rec: dlvl %d out of range", dlvl)
 		}
-		name := strings.TrimSpace(r.ToMap("").GetStringOrDefault("generator", ""))
-		s, ok := Lookup(name)
-		if !ok {
-			return nil, fmt.Errorf("levels.rec: unknown generator %q (have %s)", name, strings.Join(Names(), ", "))
-		}
-		cfg, err := s.Parse(r)
+		l, err := parseLevel(r)
 		if err != nil {
 			return nil, err
-		}
-		l := Level{Generator: name, Config: cfg}
-		l.Name, _ = Field(r, "name")
-		l.Name = strings.ReplaceAll(l.Name, `\n`, "\n") // a level's name is drawn over two lines
-		l.Tiles, _ = Field(r, "tiles")
-		for _, t := range FieldsNamed(r, "transition") {
-			tr, err := parseTransition(t)
-			if err != nil {
-				return nil, err
-			}
-			l.Transitions = append(l.Transitions, tr)
-		}
-		if up, ok := Field(r, "up"); ok {
-			p := strings.Split(up, ",")
-			if len(p) != 2 {
-				return nil, fmt.Errorf("levels.rec: up %q: want target map, target location", up)
-			}
-			l.UpTarget = &Transition{TargetMap: strings.TrimSpace(p[0]), TargetLocation: strings.TrimSpace(p[1]), Up: true}
 		}
 		levels[dlvl] = l
 	}
@@ -147,6 +131,59 @@ func LoadLevels(recs []recfile.Record, numLevels int) ([]Level, error) {
 		}
 	}
 	return levels, nil
+}
+
+// LoadSideLevels reads the records keyed by "map" instead of "dlvl": levels off the main descent, by map name.
+func LoadSideLevels(recs []recfile.Record) (map[string]Level, error) {
+	side := map[string]Level{}
+	for _, r := range recs {
+		name, ok := Field(r, "map")
+		if !ok {
+			continue
+		}
+		l, err := parseLevel(r)
+		if err != nil {
+			return nil, err
+		}
+		depth, err := strconv.Atoi(strings.TrimSpace(r.ToMap("").GetStringOrDefault("depth", "")))
+		if err != nil || l.UpTarget == nil {
+			return nil, fmt.Errorf("levels.rec: side level %q wants a depth and an up", name)
+		}
+		l.Map, l.Depth = name, depth
+		side[name] = l
+	}
+	return side, nil
+}
+
+func parseLevel(r recfile.Record) (Level, error) {
+	name := strings.TrimSpace(r.ToMap("").GetStringOrDefault("generator", ""))
+	s, ok := Lookup(name)
+	if !ok {
+		return Level{}, fmt.Errorf("levels.rec: unknown generator %q (have %s)", name, strings.Join(Names(), ", "))
+	}
+	cfg, err := s.Parse(r)
+	if err != nil {
+		return Level{}, err
+	}
+	l := Level{Generator: name, Config: cfg}
+	l.Name, _ = Field(r, "name")
+	l.Name = strings.ReplaceAll(l.Name, `\n`, "\n") // a level's name is drawn over two lines
+	l.Tiles, _ = Field(r, "tiles")
+	for _, t := range FieldsNamed(r, "transition") {
+		tr, err := parseTransition(t)
+		if err != nil {
+			return Level{}, err
+		}
+		l.Transitions = append(l.Transitions, tr)
+	}
+	if up, ok := Field(r, "up"); ok {
+		p := strings.Split(up, ",")
+		if len(p) != 2 {
+			return Level{}, fmt.Errorf("levels.rec: up %q: want target map, target location", up)
+		}
+		l.UpTarget = &Transition{TargetMap: strings.TrimSpace(p[0]), TargetLocation: strings.TrimSpace(p[1]), Up: true}
+	}
+	return l, nil
 }
 
 // parseTransition reads "location name, target map, target location, up|down".

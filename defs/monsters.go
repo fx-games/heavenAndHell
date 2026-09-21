@@ -102,6 +102,9 @@ func ReadMonsters(fsys fs.FS) ([]Monster, error) {
 		if err != nil {
 			return nil, fmt.Errorf("enemies.rec record %d: %w", i+1, err)
 		}
+		if m.Level == 0 { // a record that names only its depth fights, drops and pays out at that depth, as items do
+			m.Level = m.MinDLvl
+		}
 		out = append(out, m)
 	}
 	return out, nil

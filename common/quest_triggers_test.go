@@ -23,88 +23,105 @@ func loadQuestData(t *testing.T) *d1.Data {
 	return data
 }
 
+// forEachMod runs a content check against every mod's quests, not just the one TestMain selected.
+func forEachMod(t *testing.T, check func(t *testing.T, data *d1.Data)) {
+	for _, mod := range []string{"d1", "heavenandhell"} {
+		t.Run(mod, func(t *testing.T) {
+			withMod(t, mod)
+			check(t, loadQuestData(t))
+		})
+	}
+}
+
 // Every quest the mod declares is usable: a key nothing else uses, a name, and a log text.
 func TestQuestRecordsAreWellFormed(t *testing.T) {
-	data := loadQuestData(t)
-	seen := map[string]bool{}
-	for i, q := range data.QuestDefs {
-		switch {
-		case q.Key == "":
-			t.Errorf("quest %d: no key", i)
-		case seen[q.Key]:
-			t.Errorf("quest %d: duplicate key %q", i, q.Key)
-		case q.Name == "":
-			t.Errorf("quest %q: no name", q.Key)
-		case q.LogText == "":
-			t.Errorf("quest %q: no log_text", q.Key)
+	forEachMod(t, func(t *testing.T, data *d1.Data) {
+		seen := map[string]bool{}
+		for i, q := range data.QuestDefs {
+			switch {
+			case q.Key == "":
+				t.Errorf("quest %d: no key", i)
+			case seen[q.Key]:
+				t.Errorf("quest %d: duplicate key %q", i, q.Key)
+			case q.Name == "":
+				t.Errorf("quest %q: no name", q.Key)
+			case q.LogText == "":
+				t.Errorf("quest %q: no log_text", q.Key)
+			}
+			seen[q.Key] = true
+			if (q.SetMap == "") != (q.SetLevel == 0) {
+				t.Errorf("quest %q: set_map and set_level go together", q.Key)
+			}
 		}
-		seen[q.Key] = true
-		if (q.SetMap == "") != (q.SetLevel == 0) {
-			t.Errorf("quest %q: set_map and set_level go together", q.Key)
-		}
-	}
+	})
 }
 
 // Every trigger names an event the engine fires, a condition that compiled, and outcomes the engine has.
 func TestTriggersResolve(t *testing.T) {
-	data := loadQuestData(t)
-	keys := map[string]bool{}
-	for _, q := range data.QuestDefs {
-		keys[q.Key] = true
-	}
-	for i, tr := range data.QuestTriggers {
-		if !slices.Contains(QuestEvents, tr.Event) {
-			t.Errorf("trigger %d: no such event %q", i, tr.Event)
+	forEachMod(t, func(t *testing.T, data *d1.Data) {
+		keys := map[string]bool{}
+		for _, q := range data.QuestDefs {
+			keys[q.Key] = true
 		}
-		if tr.Subject == "" {
-			t.Errorf("trigger %d (%s): no subject", i, tr.Event)
-		}
-		if tr.When != "" && tr.Cond() == nil {
-			t.Errorf("trigger %d (%s %s): condition did not compile", i, tr.Event, tr.Subject)
-		}
-		for _, do := range tr.Do {
-			if !QuestOutcomeExists(do.Name()) {
-				t.Errorf("trigger %d (%s %s): no outcome named %q", i, tr.Event, tr.Subject, do.Name())
+		for i, tr := range data.QuestTriggers {
+			if !slices.Contains(QuestEvents, tr.Event) {
+				t.Errorf("trigger %d: no such event %q", i, tr.Event)
 			}
-			// the outcomes that name a quest must name one that exists
-			switch do.Name() {
-			case "complete_quest", "activate_quest", "log_quest", "set_quest_var":
-				if !keys[do.GetString(0)] {
-					t.Errorf("trigger %d (%s %s): %s names unknown quest %q", i, tr.Event, tr.Subject, do.Name(), do.GetString(0))
+			if tr.Subject == "" {
+				t.Errorf("trigger %d (%s): no subject", i, tr.Event)
+			}
+			if tr.When != "" && tr.Cond() == nil {
+				t.Errorf("trigger %d (%s %s): condition did not compile", i, tr.Event, tr.Subject)
+			}
+			for _, do := range tr.Do {
+				if !QuestOutcomeExists(do.Name()) {
+					t.Errorf("trigger %d (%s %s): no outcome named %q", i, tr.Event, tr.Subject, do.Name())
+				}
+				// the outcomes that name a quest must name one that exists
+				switch do.Name() {
+				case "say":
+					if data.Texts[do.GetString(0)] == "" {
+						t.Errorf("trigger %d (%s %s): says %q, which texts.rec does not have", i, tr.Event, tr.Subject, do.GetString(0))
+					}
+				case "complete_quest", "activate_quest", "log_quest", "set_quest_var":
+					if !keys[do.GetString(0)] {
+						t.Errorf("trigger %d (%s %s): %s names unknown quest %q", i, tr.Event, tr.Subject, do.Name(), do.GetString(0))
+					}
 				}
 			}
 		}
-	}
+	})
 }
 
 // A condition may only ask about quests the mod declares: a typo in a key is a condition that is quietly always
 // false, which is the worst kind of content bug.
 func TestConditionsNameKnownQuests(t *testing.T) {
-	data := loadQuestData(t)
-	keys := map[string]bool{}
-	for _, q := range data.QuestDefs {
-		keys[q.Key] = true
-	}
-	asked := map[string]bool{}
-	probe := func(key string) bool { asked[key] = true; return false }
-	probeInt := func(key string) int { asked[key] = true; return 0 }
-	env := defs.QuestEnv{Done: probe, Active: probe, Avail: probe, Logged: probe, V1: probeInt, V2: probeInt,
-		Flag: func(string) bool { return false }}
-	for i, tr := range data.QuestTriggers {
-		if tr.Cond() == nil {
-			continue
+	forEachMod(t, func(t *testing.T, data *d1.Data) {
+		keys := map[string]bool{}
+		for _, q := range data.QuestDefs {
+			keys[q.Key] = true
 		}
-		clear(asked)
-		if _, err := expr.Run(tr.Cond(), env); err != nil {
-			t.Errorf("trigger %d (%s %s): %v", i, tr.Event, tr.Subject, err)
-			continue
-		}
-		for key := range asked {
-			if !keys[key] {
-				t.Errorf("trigger %d (%s %s): condition asks about unknown quest %q", i, tr.Event, tr.Subject, key)
+		asked := map[string]bool{}
+		probe := func(key string) bool { asked[key] = true; return false }
+		probeInt := func(key string) int { asked[key] = true; return 0 }
+		env := defs.QuestEnv{Done: probe, Active: probe, Avail: probe, Logged: probe, V1: probeInt, V2: probeInt,
+			Flag: func(string) bool { return false }}
+		for i, tr := range data.QuestTriggers {
+			if tr.Cond() == nil {
+				continue
+			}
+			clear(asked)
+			if _, err := expr.Run(tr.Cond(), env); err != nil {
+				t.Errorf("trigger %d (%s %s): %v", i, tr.Event, tr.Subject, err)
+				continue
+			}
+			for key := range asked {
+				if !keys[key] {
+					t.Errorf("trigger %d (%s %s): condition asks about unknown quest %q", i, tr.Event, tr.Subject, key)
+				}
 			}
 		}
-	}
+	})
 }
 
 // selected is the triggers the engine would run for an event and subject, in order -- the matching half of

@@ -872,6 +872,21 @@ func (g *Generator) TypeItem(dlvl, itype int, imisc string, onlygood bool) *Item
 	return g.setupAllItems(idx, g.R.Seed(), 2*dlvl, dlvl, 1, onlygood, false, false, dlvl > 12)
 }
 
+// WeaponItem is a good weapon of any kind the mod has, at item level 2×dlvl: a quest reward. Nil if the mod has
+// no weapon that deep.
+func (g *Generator) WeaponItem(dlvl int) *Item {
+	var ril []int
+	for i, b := range g.D.Items {
+		if b.Drop != "IDROP_NEVER" && dlvl<<1 >= b.MinMLvl && (b.Class == "ICLASS_WEAPON" || b.IsWeapon()) {
+			ril = append(ril, i)
+		}
+	}
+	if len(ril) == 0 {
+		return nil
+	}
+	return g.setupAllItems(ril[g.random(len(ril))], g.R.Seed(), 2*dlvl, dlvl, 1, true, false, false, dlvl > 12)
+}
+
 // MagicItemWithCurs ports CreateMagicArmor/CreateMagicWeapon: magic items of type itype are rolled until one has
 // graphic curs.
 func (g *Generator) MagicItemWithCurs(dlvl, itype, curs int) *Item {

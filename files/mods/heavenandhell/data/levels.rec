@@ -10,6 +10,10 @@
 #                leads to the one above it and the first level's to the town, but this game's town calls its
 #                cathedral door to_cathedral, and the engine is not allowed to know that name.
 #
+# A record keyed by "map" instead of "dlvl" is a side level: reached only by a transition some other level
+# declares, with a way up (its "up", required) and no way down. "depth" is the dungeon level whose monsters and
+# loot it draws on.
+#
 # How deep this game goes is decided here and nowhere else: the deepest dlvl declared below is the bottom of
 # the dungeon, and the engine gives that level no ladder down.
 #
@@ -29,7 +33,7 @@
 #   doors            false leaves the room openings as corridors instead of placing doors.
 #
 # Every level forbids the other levels' quest rooms, and the Poisoned Water Supply's cave template, which is a
-# set level rather than a dungeon level.
+# side level off level 3 rather than a dungeon level.
 
 dlvl: 1
 generator: accretion
@@ -60,6 +64,7 @@ generator: accretion
 name: Level 3\nCatacombs
 tiles: catacombs
 templates: assets/maps.ldtk
+transition: to_poisoned_water_supply, poisoned_water_supply, ladder_up, down
 template_prefix: Cata
 forbid_room: Cath_template_for_meat_jack
 forbid_room: Hell_template_for_lucifer
@@ -178,6 +183,22 @@ forbid_room: Cata_template_for_king_zedek
 forbid_room: Hell_template_for_lucifer
 forbid_room: Dung_template_for_rogue
 forbid_room: Cave_template_for_poisoned_water
+
+# Abel's quest: the source of the poison in the town's rivers, a cave off the catacombs.
+map: poisoned_water_supply
+depth: 3
+up: !gen_dungeon_level_3, to_poisoned_water_supply
+generator: accretion
+name: Poisoned Water Supply
+tiles: caves
+templates: assets/maps.ldtk
+template_prefix: Cave
+doors: false
+require_room: Cave_template_for_poisoned_water
+forbid_room: Cath_template_for_meat_jack
+forbid_room: Cata_template_for_king_zedek
+forbid_room: Hell_template_for_lucifer
+forbid_room: Dung_template_for_rogue
 
 # megadungeon's knobs, for reference - it takes no templates at all:
 #   width, height             the grid it carves (forced odd). Default 60x60.

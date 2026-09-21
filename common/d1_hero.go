@@ -692,6 +692,20 @@ func d1FallenFear(state *State, pos geometry.Point) {
 	}
 }
 
+// grantExperience adds experience earned against a foe of monLevel, and levels the hero up on it.
+func (f *Factory) grantExperience(player *Actor, monLevel, exp int) {
+	h := player.hero
+	before := h.Level
+	h.AddExperience(monLevel, exp)
+	SyncHero(player)
+	if h.Level > before {
+		player.GetStats().GetResource(stats.Health).SetToMax()
+		player.GetStats().GetResource(stats.Mana).SetToMax()
+		f.Msg(fmt.Sprintf("You reached level %d! Press 'u' to spend %d stat points.", h.Level, h.StatPts))
+		f.RefreshD1Spells(player)
+	}
+}
+
 // d1OnKill ports experience, fallen fear and SpawnItem for a dead D1 monster.
 func d1OnKill(ctx ActionContext, killer, victim *Actor) []Action {
 	state := ctx.GameState
@@ -702,16 +716,8 @@ func d1OnKill(ctx ActionContext, killer, victim *Actor) []Action {
 	if mon.Golem {
 		return nil
 	}
-	if h := killer.hero; h != nil {
-		before := h.Level
-		h.AddExperience(mon.Level, mon.Exp)
-		SyncHero(killer)
-		if h.Level > before {
-			killer.GetStats().GetResource(stats.Health).SetToMax()
-			killer.GetStats().GetResource(stats.Mana).SetToMax()
-			ctx.Msg(fmt.Sprintf("You reached level %d! Press 'u' to spend %d stat points.", h.Level, h.StatPts))
-			state.factory.RefreshD1Spells(killer)
-		}
+	if killer.hero != nil {
+		state.factory.grantExperience(killer, mon.Level, mon.Exp)
 	}
 	whenVisible(ctx.ActionBroker, victim, func() { playCueAt(ctx, victim.D1MonsterSoundCue("death"), victim.MapPosition()) })
 	d1QuestKill(ctx, mon)
