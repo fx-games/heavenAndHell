@@ -95,6 +95,17 @@ It is the natural proof of "the mods behave like their branches", so it gets
 repaired near the end, once the effect system is unified - several of its
 failures look like missing effects, which phase 5 is restoring anyway.
 
+## Open hazard: icons fail silently
+
+`defs.Icon*` are package vars filled by `defs.LoadIcons()` after mod selection.
+Nothing forces that call, and a name a mod's `icons/*.rec` does not define
+resolves to 0 rather than erroring. Four bugs in this project have already come
+from content binding silently to nothing.
+
+This becomes load-bearing the moment a SECOND mod ships its own icon names, so
+extracting the H&H content must also make a missing icon name loud: fail the
+load naming every icon the mod did not supply, rather than rendering tile 0.
+
 ## Phases
 
 0. mod overlay filesystem — done
