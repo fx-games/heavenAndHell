@@ -81,10 +81,79 @@ own Firebolt level, Phasing / the Holy shrine (`AddRndTeleport`), the mana shiel
   direction, `1 + 2·(slvl/2 + 2)` cells wide (each side stops at the first cell missiles can't cross), and the
   flames roll forward. Ours is a cone that widens to 3 cells either side over 8 (`hit_zone: cone_aoe(8|3)`).
 
-## Not yet audited
+- **open — Inferno's burn length.** `AddFlame` gives the flame n cells out (n = 0, 1, 2) `20 + 5n` ticks, and rolls
+  each flame's damage on its own. Ours burns all three cells for 20 ticks (`InfernoTicks(0)`).
+- **open — bolt reach.** 1.09's Firebolt, Lightning, Blood Star and Bone Spirit fly 256 ticks, i.e. until a wall
+  stops them. Ours stop after 20 cells (`bolt_aoe(20)`, `ray_aoe(20)`).
+- **open — Bone Spirit's homing.** `MI_Bonespirit` flies to the target cell; if it gets there without hitting,
+  it turns towards the closest monster within 19 cells in line (`FindClosest`, CrawlTable order), or on in the
+  hero's direction if there is none. Ours stops at the target cell.
+- **open — Teleport's landing.** `AddTeleport` lands on the first free cell (not solid, no monster, object or
+  player) of the six CrawlTable rings around the target, and fails (no mana spent) when there is none. Ours
+  moves onto the target cell or not at all.
+- **open — Town Portal's spot.** `AddTown` opens the portal at the target cell, or the first cell of the six
+  CrawlTable rings around it free of missiles, solids, missile-blocking pieces, objects, players and triggers.
+  Ours opens it next to the hero.
+- **open — Golem's recast.** `AddGolem` kills the old golem (`M_StartKill`: death, corpse) and spends the mana even
+  when `MI_Golem` then finds no free cell. Ours removes the old golem silently, and a cast with nowhere to put
+  the new one does nothing and costs nothing.
+- **open — Telekinesis on monsters.** `DoTelekinesis` never pushes a talking monster (`M_Talker`, `mtalkmsg`).
+  `M_GetKnockback` moves it back against its own facing and puts it in hit recovery. Ours pushes away from the
+  caster (the same thing while it faces the hero), with no hit recovery, and pushes talkers too.
+- **by design — CrawlTable order.** `freeNear` searches square rings; 1.09's CrawlTable rings are rounder and
+  ordered differently, so a crowded target can pick a different free cell.
+- Matched: Lightning's per-cell damage and burn (`slvl/2 + 6` ticks), Blood Star (damage, 5 HP, magic),
+  Bone Spirit's third (6 HP), the golem's numbers (`SpawnGolum`), Identify.
 
-Lightning's and Inferno's per-cell burn, Blood Star, Bone Spirit, Telekinesis, Teleport, Town Portal, Golem,
-Identify; objects (chests, barrels, sarcophagi, bookcases, racks, decapitated bodies, crucified skeletons,
-levers, books, fountains, cauldron, goat shrines, pedestal); the 16 quests; monster special attacks and unique
-monster traits; monster drops and gold; durability, repair and identification; the hero's death; town
-dialogue.
+## Objects (`OperateObject`)
+
+Matched: sarcophagi, barrels and exploding barrels (`BreakBarrel`), skeleton books, bookcases, decapitated
+bodies, armor stands, weapon racks, slain heroes, the four fountains, goat shrines and cauldrons
+(`FindValidShrine`), crucified skeletons, levers, the Staff of Lazarus stand, story books.
+
+- **open — chests on quest levels.** `OperateChest` on a set level always drops `CreateRndItem(..., onlygood =
+  TRUE)`, ignoring `_oVar2`. Ours rolls as on an ordinary level.
+- **open — doors can't be closed.** 1.09 closes an open door when it is clicked again, unless a monster, item or
+  corpse is in the doorway (`OperateL*Door`). Ours never closes one.
+
+## Quests (`quests.cpp`, `TalkToTowner`, `CheckQuestItem`, `CheckQuestKill`)
+
+Matched: the kill and pick-up triggers, Griswold (Magic Rock, Anvil), Adria and Pepin (Black Mushroom,
+Poisoned Water), Cain (Lazarus, Diablo), the dead guy, the quest objects (books, pedestal, tomes).
+
+- **open — Ogden's Sign needs Leoric.** Ogden's banner lines in 1.09 only ask for level 3 visited; our triggers
+  also require `avail("leoric")`. Leoric and Poisoned Water exclude each other, so in a Poisoned Water game the
+  banner quest can never start or be handed in.
+- **open — Ogden's greeting.** Talking to Ogden before ever entering level 1 plays `TEXT_INTRO`. Ours never does.
+
+## Monsters
+
+- **open — packs.** 1.09 ties a leader and its minions (`leaderflag`, `packsize`): a minion won't step 4 or more
+  cells from its leader (`DirOK`); a leader with `mUnqAttr & 2` only moves when its whole pack is around it;
+  leader and minions share `_msquelch`/`_lastx` (whoever is more alert tells the other, and wakes a gargoyle);
+  a minion that strays gets back in line or drops out (`M_UpdateLeader`). Ours sets `Leader` and never reads it.
+- **open — New Game Plus.** Once Diablo is dead we keep the game running with "Nightmare" monsters and loot
+  (`D1NewGamePlus`, `scaleD1NewGamePlus`, `D1ItemLevel`), using devilutionX's AC/to-hit bonuses and an HP bonus in
+  the wrong units, and the end text talks of Gillian's donation. 1.09 plays the ending and goes back to the
+  main menu; Nightmare only exists as a difficulty picked for a multiplayer game.
+- Matched: unique monsters' stats (`mUnqAttr` 4/8), drops (`SpawnItem`, `RndItem` including its Resurrect/Heal
+  Other off-by-one, `RndUItem`, `SpawnUnique`), the Black Mushroom brain.
+
+## Items
+
+- **open — bow wear.** 1.09 wears the bow on every shot (`PM_DoRangeAttack`: `WeaponDur(pnum, 40)`); ours only on
+  a hit. Melee (1 in 30 on a hit), armour (3 in 4 per hit recovery, chest 2 in 3) and shields (1 in 10 per
+  block) match.
+- **open — repair of worthless magic items.** `AddStoreHoldRepair` leaves out an identified magic item whose
+  repair would cost 0; ours charges 1.
+
+## Hero death and saving
+
+- **open — saving.** 1.09 single player saves only on "Save Game" and on quitting; dying leaves Load Game / New
+  Game. We also autosave on every level change, so a death loses at most the current level. (Dropping half the
+  gold and the equipment at death only matters in multiplayer: a single player game can't go on after it.)
+
+## Town
+
+- **open — gossip.** `S_TalkEnter` seeds the gossip roll with the townsperson's `_tSeed`, rolled when the town is
+  loaded: everyone repeats the same line until the hero leaves town. Ours rolls a new line each time.
