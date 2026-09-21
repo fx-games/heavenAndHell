@@ -126,13 +126,15 @@ The plan (user, 2026-09-21):
 
 1. **D1 parity, in progress.** Done: the D1 mod is 1.09 (b224ec8; all 120 golden levels identical to
    14a2d58^'s pre-Hellfire golden with the display passes off), shrines' permanent costs back, items break
-   as in D1, potions always drink, the golem dies on a level change. Hellfire is opt-in engine content (see
-   D1_PLAN.md "Defaults"). Next, as the user picked: traps 1:1 (the three `ponytail:` simplifications in
-   `common/d1_trap.go`), AI 1:1 (`game/ai_d1.go`: same-room check, corpse scan, the Hidden in darkness), then a
-   full system-by-system audit against `reference/devilution-109` (combat, items, stores, spells, monsters,
-   quests, objects), listing every difference before fixing. Oracle for anything generator-side: regenerate
-   `levels.golden` with `hangTorchesOnWalls`/`moveMonstersOffObjects` off and ` DamAcFlags:0` stripped from the
-   item dump, and compare with `git show 14a2d58^:d1/testdata/levels.golden`.
+   as in D1, potions always drink, the golem dies on a level change, traps' fire-arrow burst and nova as in
+   1.09 (7fcd007), and every monster AI compared against monster.cpp (f25226a). Hellfire is opt-in engine
+   content (see D1_PLAN.md "Defaults"). The engine faces east/west only - don't add 8-way facing (user).
+   Next: the full system-by-system audit against `reference/devilution-109` - list every difference in
+   D1_AUDIT.md first, then fix with the user. Known so far: trap missiles don't hit monsters
+   (MonsterTrapHit); the golem's wake-up doesn't reproduce D1's off-by-one monster index; the Hidden's
+   darkness test uses the hero's light radius, not D1's light map. Oracle for anything generator-side:
+   regenerate `levels.golden` with `hangTorchesOnWalls`/`moveMonstersOffObjects` off and ` DamAcFlags:0`
+   stripped from the item dump, and compare with `git show 14a2d58^:d1/testdata/levels.golden`.
 2. **H&H leftovers**: main's on-hit item *hooks* (the other half of its
    enchantments; `common/def_itemhooks.go` has them) are not rolled. An affix
    power cannot carry one without a field on `d1.Item`, and `d1.Item` is dumped
