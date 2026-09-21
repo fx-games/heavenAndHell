@@ -83,6 +83,18 @@ content model.
 about Diablo's formats. The ENGINE may not: it reads one schema, whichever mod
 supplied it.
 
+## Known broken: the playthrough smoke test
+
+`go run -tags development . playthrough` runs a scripted end-to-end game and
+asserts behaviours. It FAILS on `d1-rebuild` too, with several independent
+broken checks, and reports a different one depending on ordering: doppelganger
+(replicate), hit recovery staggering, Hellfire Lightning Wall. It is not a
+regression from the split.
+
+It is the natural proof of "the mods behave like their branches", so it gets
+repaired near the end, once the effect system is unified - several of its
+failures look like missing effects, which phase 5 is restoring anyway.
+
 ## Phases
 
 0. mod overlay filesystem — done
