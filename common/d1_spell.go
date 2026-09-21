@@ -396,7 +396,7 @@ func (c *spellCtx) castAllowed(target geometry.Point) bool {
 }
 
 func (c *spellCtx) cast(target geometry.Point) bool {
-	f, h, s, slvl, o := c.f, c.h, c.s, c.slvl, c.origin()
+	f, h, slvl, o := c.f, c.h, c.slvl, c.origin()
 	clvl := h.Level
 	if !c.castAllowed(target) {
 		return false
@@ -439,22 +439,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		f.spawnD1Guardian(c.caster, p, d1.GuardianTurns(clvl, slvl))
 	case d1.SplGolem:
 		return f.summonD1Golem(c, target)
-	case d1.SplChargedBolt:
-		for n := d1.ChargedBolts(slvl); n > 0; n-- {
-			r := d1Rng.Intn(15) + 1
-			dam := d1.ChargedBoltDamage(d1Rng, s.Mag)
-			p, path := o, []geometry.Point{o}
-			for _, next := range c.chargedBoltCells(o, target, r) {
-				p = next
-				path = append(path, p)
-				if a := c.hitCell(p); a != nil && c.strike(a, dam<<6, 1) {
-					break
-				}
-			}
-			if p != o {
-				c.animations = append(c.animations, NewProjectilePathAnimation(c.caster, path, c.secPerTile(), defs.IconEffectLightning, 2))
-			}
-		}
 	case d1.SplTelekinesis:
 		return f.d1Telekinesis(c, target)
 	default:

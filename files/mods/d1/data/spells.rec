@@ -167,6 +167,8 @@ resist: lightning
 targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_CBOLT
+hit_zone: target_only
+effect: charged_bolts(charged_bolt|lightning)
 
 id: SPL_HBOLT
 resist: none

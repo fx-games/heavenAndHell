@@ -140,6 +140,75 @@ func (a *SpellDamageAction) Execute(ctx ActionContext) []Action {
 	return c.finish()
 }
 
+// charged_bolts(<roll>, <resist>) fires several sparks that each wander off towards the target on their own and
+// stop at the first thing they hit, rolling <roll> separately. It is its own effect rather than a hit zone
+// because how many sparks fly is the caster's spell level, which a zone never sees, and because the union of
+// their paths would lose what makes the spell the spell: each spark spends itself on one victim.
+// ponytail: multi_shot is the nearest thing already in the untargeted registry, but it shoots the equipped bow
+// at the nearest enemies, so nothing of it carries over but the idea.
+func (g *Factory) chargedBolts(args util.Arguments) *HitEffect {
+	rollName := args.Get(0)
+	if _, known := GetAllDamageRolls()[rollName]; !known {
+		g.Msg(fmt.Sprintf("Unknown spell damage roll: %s", rollName))
+		return nil
+	}
+	resist := resistKindByName[args.Get(1)]
+	slvl := args.GetInt(2)
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			g.ActionBroker.Execute(&ChargedBoltsAction{
+				BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, attacker), name: ActionNameFireball},
+				caster:     attacker, roll: rollName, resist: resist, slvl: slvl, target: target})
+		},
+		Description: []util.LabelText{util.LabelTextFromString("Release wandering sparks towards the target")},
+	}
+}
+
+// ChargedBoltsAction is charged_bolts resolving: d1.ChargedBolts(slvl) sparks, each with its own wander seed,
+// its own damage roll and its own path animation.
+type ChargedBoltsAction struct {
+	BaseAction
+	caster     *Actor
+	roll       string
+	resist     int
+	slvl       int
+	target     geometry.Point
+	animations []Animation
+	landed     bool
+}
+
+func (a *ChargedBoltsAction) GetAnimations() []Animation { return a.animations }
+func (a *ChargedBoltsAction) GetDelayInAut() int         { return 0 }
+func (a *ChargedBoltsAction) Succeeded() bool            { return a.landed }
+
+func (a *ChargedBoltsAction) Execute(ctx ActionContext) []Action {
+	f := ctx.GameState.factory
+	c := &spellCtx{f: f, ctx: ctx, caster: a.caster, h: a.caster.hero, s: a.caster.HeroSheet(), slvl: a.slvl,
+		m: ctx.GameState.GetMap(), cause: a.cause, dealt: map[*Actor]int{}, resist: a.resist}
+	if c.h == nil {
+		return nil
+	}
+	origin := a.caster.MapPosition()
+	for n := d1.ChargedBolts(a.slvl); n > 0; n-- {
+		wander := d1Rng.Intn(15) + 1 // drawn before the damage, the order the original missile used
+		roll := GetAllDamageRolls()[a.roll](RollContext{Rng: d1Rng, Mag: c.s.Mag, Clvl: c.h.Level, Slvl: a.slvl})
+		p, path := origin, []geometry.Point{origin}
+		for _, next := range c.chargedBoltCells(origin, a.target, wander) {
+			p = next
+			path = append(path, p)
+			if victim := c.hitCell(p); victim != nil && c.strike(victim, roll.Damage64, roll.Ticks) {
+				a.landed = true
+				break
+			}
+		}
+		if p != origin {
+			c.animations = append(c.animations, NewProjectilePathAnimation(a.caster, path, 0.03, defs.IconEffectLightning, 2))
+		}
+	}
+	a.animations = c.animations
+	return c.finish()
+}
+
 // restore_resource is spell_damage's mirror: the one effect that puts a resource back, on the caster.
 //
 //	effect: restore_resource(<health|mana>, <base>, <per_clvl>, <per_slvl>, <doubled_for>, <raised_by_half_for>)
