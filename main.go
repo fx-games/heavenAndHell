@@ -62,10 +62,21 @@ func main() {
 	}
 }
 
+// mustHaveMod stops with a message naming the mod, instead of letting the first content read fail with the
+// path of some file inside it. One mod is one complete game, so a missing one is not something to limp along
+// without.
+func mustHaveMod(name string) {
+	if files.ModAvailable(name) {
+		return
+	}
+	log.Fatalf("mod %q not found: expected a directory at files/mods/%s (set Mod: in %s)", name, name, common.ConfigFile)
+}
+
 func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 	userConfig := common.NewConfigurationFromRecFile(common.ConfigFile)
 	files.SelectMod(userConfig.Mod) // before anything reads content: assets/ resolves to the mod first from here on
-	defs.LoadIcons()                // and before any Icon* is read: the numbers come from the mod's icon rec files
+	mustHaveMod(userConfig.Mod)
+	defs.LoadIcons() // and before any Icon* is read: the numbers come from the mod's icon rec files
 	startInfos := common.StartInfo{
 		Title:       "RPG",
 		ScreenSize:  userConfig.WindowSize,
@@ -230,7 +241,9 @@ func maptest() {
 	if len(os.Args) > 3 {
 		seed, _ = strconv.ParseInt(os.Args[3], 10, 64)
 	}
-	files.SelectMod(common.NewConfigurationFromRecFile(common.ConfigFile).Mod)
+	modName := common.NewConfigurationFromRecFile(common.ConfigFile).Mod
+	files.SelectMod(modName)
+	mustHaveMod(modName)
 	d1Data, err := d1.Load(files.GetFileSystem())
 	if err != nil {
 		log.Fatal(err)

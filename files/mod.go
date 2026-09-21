@@ -29,6 +29,19 @@ func SelectMod(name string) {
 
 func ActiveMod() string { return activeMod }
 
+// ModAvailable reports whether the selected mod actually has a directory under mods/. Without this check the
+// first content read is what fails, and it blames a file inside the mod ("assets/data/xl_monst.txt") rather
+// than the mod that is missing, which sends whoever hit it looking in the wrong place.
+func ModAvailable(name string) bool {
+	if name == "" {
+		return true // no mod selected: the engine's own assets are the game
+	}
+	if _, err := sourceFileSystem.ReadDir(path.Join("mods", name)); err != nil {
+		return false
+	}
+	return true
+}
+
 // SetFileSystem replaces the source tree and clears the active mod. The build tags do this for the game; tests
 // use it to root the tree at files/ and then SelectMod, so they read through the same overlay the game does.
 func SetFileSystem(fsys FileSystem) { sourceFileSystem, activeMod = fsys, "" }
