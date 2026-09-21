@@ -21,17 +21,17 @@ const (
 )
 
 type Actor struct {
-	speechOnSight []string // lines it may say on first coming into view (a mod record's speech_on_sight)
-	belt         [BeltSize]QuickSlotEntry // the player's quick slots; see BeltEntry
-	mapPosition  geometry.Point
-	drawPosition geometry.PointF
-	icon         int32
-	unicodeIcon  int32
-	asciiIcon    int32
-	cp437Icon    int32
-	corpseIcon   int32
-	fov          *geometry.FOV
-	name         string
+	speechOnSight []string                 // lines it may say on first coming into view (a mod record's speech_on_sight)
+	belt          [BeltSize]QuickSlotEntry // the player's quick slots; see BeltEntry
+	mapPosition   geometry.Point
+	drawPosition  geometry.PointF
+	icon          int32
+	unicodeIcon   int32
+	asciiIcon     int32
+	cp437Icon     int32
+	corpseIcon    int32
+	fov           *geometry.FOV
+	name          string
 
 	inventory                 *Inventory
 	equipment                 *Equipment
