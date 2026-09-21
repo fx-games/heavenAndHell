@@ -52,6 +52,13 @@ Mod (rec/tsv):
   never polled. Outcomes are a fixed set the engine implements.
   The existing hook system (`OnKillHook`, `ItemActionHook`) is the event spine;
   no new event bus.
+- The H&H effect model is the one true effect system: name + args + hit zone +
+  targeting rules, resolvable from a string. D1 spells are re-expressed as
+  mappings onto it. Missing pieces get ADDED to the H&H system in its own style,
+  never forked. D1 spells must "play the same"; bit-exactness is not required.
+- Content loads only AFTER mod selection. No package-level `var x = load...()`.
+  This has caused three silent bugs already (zeroed class tables, two vacuous
+  test suites); treat init-time content binding as a defect on sight.
 - Dungeon generation output must stay byte-identical: `d1/testdata/levels.golden`
   is the referee. A golden diff is a bug, never a regeneration.
 
