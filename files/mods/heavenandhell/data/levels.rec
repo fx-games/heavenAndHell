@@ -1,0 +1,140 @@
+%rec: default
+# Which generation strategy builds each dungeon level, and with which parameters.
+#
+# generator   one of the engine's registered strategies. This mod's levels grow out of hand-drawn room
+#             templates, so they all name "accretion"; "megadungeon" (carve a maze, knock holes in it) is
+#             registered too and takes the knobs listed at the bottom of this file.
+#
+# The knobs accretion takes:
+#   templates        the LDtk project the room templates live in. Defaults to assets/rooms.ldtk, which the mod
+#                    overlay resolves to this mod's own rooms.ldtk.
+#   template_prefix  only templates whose name starts with this are used - which is how a depth gets its look.
+#   require_room     a template this level must contain (its quest room). Repeat the field for more.
+#   forbid_room      a template this level must NOT contain, so another level's quest room cannot turn up here.
+#   rooms            how many rooms to grow to (default 16).
+#   min_rooms        regrow the level until it has at least this many (default 10).
+#   width, height    the scratch grid the level grows into before it is trimmed (default 40x40).
+#   doors            false leaves the room openings as corridors instead of placing doors.
+#
+# Every level forbids the other levels' quest rooms, and the Poisoned Water Supply's cave template, which is a
+# set level rather than a dungeon level.
+
+dlvl: 1
+generator: accretion
+template_prefix: Cath
+forbid_room: Cata_template_for_king_zedek
+forbid_room: Hell_template_for_lucifer
+forbid_room: Dung_template_for_rogue
+forbid_room: Cave_template_for_poisoned_water
+
+dlvl: 2
+generator: accretion
+template_prefix: Cath
+require_room: Cath_template_for_meat_jack
+forbid_room: Cata_template_for_king_zedek
+forbid_room: Hell_template_for_lucifer
+forbid_room: Dung_template_for_rogue
+forbid_room: Cave_template_for_poisoned_water
+
+dlvl: 3
+generator: accretion
+template_prefix: Cata
+forbid_room: Cath_template_for_meat_jack
+forbid_room: Hell_template_for_lucifer
+forbid_room: Dung_template_for_rogue
+forbid_room: Cave_template_for_poisoned_water
+
+dlvl: 4
+generator: accretion
+template_prefix: Cata
+require_room: Cata_template_for_king_zedek
+forbid_room: Cath_template_for_meat_jack
+forbid_room: Hell_template_for_lucifer
+forbid_room: Dung_template_for_rogue
+forbid_room: Cave_template_for_poisoned_water
+
+# The caves and hell levels are open caverns: their room openings stay corridors, no doors.
+dlvl: 5
+generator: accretion
+template_prefix: Cave
+doors: false
+forbid_room: Cath_template_for_meat_jack
+forbid_room: Cata_template_for_king_zedek
+forbid_room: Hell_template_for_lucifer
+forbid_room: Dung_template_for_rogue
+forbid_room: Cave_template_for_poisoned_water
+
+dlvl: 6
+generator: accretion
+template_prefix: Cave
+doors: false
+forbid_room: Cath_template_for_meat_jack
+forbid_room: Cata_template_for_king_zedek
+forbid_room: Hell_template_for_lucifer
+forbid_room: Dung_template_for_rogue
+forbid_room: Cave_template_for_poisoned_water
+
+dlvl: 7
+generator: accretion
+template_prefix: Hell
+doors: false
+forbid_room: Cath_template_for_meat_jack
+forbid_room: Cata_template_for_king_zedek
+forbid_room: Dung_template_for_rogue
+forbid_room: Cave_template_for_poisoned_water
+
+dlvl: 8
+generator: accretion
+template_prefix: Hell
+doors: false
+require_room: Hell_template_for_lucifer
+forbid_room: Cath_template_for_meat_jack
+forbid_room: Cata_template_for_king_zedek
+forbid_room: Dung_template_for_rogue
+forbid_room: Cave_template_for_poisoned_water
+
+dlvl: 9
+generator: accretion
+template_prefix: Dung
+forbid_room: Cath_template_for_meat_jack
+forbid_room: Cata_template_for_king_zedek
+forbid_room: Hell_template_for_lucifer
+forbid_room: Cave_template_for_poisoned_water
+
+dlvl: 10
+generator: accretion
+template_prefix: Dung
+require_room: Dung_template_for_rogue
+forbid_room: Cath_template_for_meat_jack
+forbid_room: Cata_template_for_king_zedek
+forbid_room: Hell_template_for_lucifer
+forbid_room: Cave_template_for_poisoned_water
+
+dlvl: 11
+generator: accretion
+template_prefix: Cath
+forbid_room: Cath_template_for_meat_jack
+forbid_room: Cata_template_for_king_zedek
+forbid_room: Hell_template_for_lucifer
+forbid_room: Dung_template_for_rogue
+forbid_room: Cave_template_for_poisoned_water
+
+dlvl: 12
+generator: accretion
+template_prefix: Cath
+forbid_room: Cath_template_for_meat_jack
+forbid_room: Cata_template_for_king_zedek
+forbid_room: Hell_template_for_lucifer
+forbid_room: Dung_template_for_rogue
+forbid_room: Cave_template_for_poisoned_water
+
+# megadungeon's knobs, for reference - it takes no templates at all:
+#   width, height             the grid it carves (forced odd). Default 60x60.
+#   room_tries                how many times it tries to drop a room in. Default 1266.
+#   min_room_size             the smallest room edge. Default 5.
+#   room_ratio                how far from square a room may be, 0 = square. Default 0.25.
+#   straight_passage_chance   how strongly a corridor keeps its heading. Default 0.5.
+#   imperfect_connect_chance  how often it adds a second way between two regions, making loops. Default 0.5.
+#   door_distance             how far apart two doorways must be. Default 5.
+#   dead_ends                 true keeps dead-end corridors. Default false: they are filled back in.
+#   min_rooms                 regrow until the level has at least this many rooms. Default 10.
