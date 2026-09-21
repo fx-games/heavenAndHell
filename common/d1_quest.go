@@ -435,6 +435,7 @@ func UpdateD1Quests(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 	if m == nil || defs.IsTownLevel(m.GetName()) {
 		return
 	}
+	clear(d1GossipSeeds) // the town's towners are rolled anew on the way back
 	f := s.factory
 	f.d1DungMsgs(m)
 	open := func(loc string, tile gridmap.Tile, to gridmap.Transition) {

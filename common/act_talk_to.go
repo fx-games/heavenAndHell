@@ -6,14 +6,22 @@ import (
 	"rpg/util"
 )
 
-// d1Gossip picks a random gossip text id for a town NPC (S_TalkEnter's gossipstart..gossipend: all but the
-// greeting), or "" if none is available.
+// d1GossipSeeds is each townsperson's _tSeed: rolled on first talk, dropped when the hero reaches the dungeon.
+var d1GossipSeeds = map[VendorType]int64{}
+
+// d1Gossip picks a gossip text id for a town NPC (S_TalkEnter's gossipstart..gossipend: all but the greeting),
+// seeded by the NPC's _tSeed so it repeats until the hero leaves town, or "" if none is available.
 func d1Gossip(gossip map[string][]string, vendorType VendorType) string {
 	ids := gossip[string(vendorType)]
 	if len(ids) < 2 {
 		return ""
 	}
-	return ids[1+rand.Intn(len(ids)-1)]
+	seed, ok := d1GossipSeeds[vendorType]
+	if !ok {
+		seed = rand.Int63()
+		d1GossipSeeds[vendorType] = seed
+	}
+	return ids[1+rand.New(rand.NewSource(seed)).Intn(len(ids)-1)]
 }
 
 // d1Greeting is the NPC's TownerTalk line (TEXT_GRISWOLD1...), played as speech when the store opens.

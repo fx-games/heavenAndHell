@@ -155,5 +155,5 @@ Poisoned Water), Cain (Lazarus, Diablo), the dead guy, the quest objects (books,
 
 ## Town
 
-- **open — gossip.** `S_TalkEnter` seeds the gossip roll with the townsperson's `_tSeed`, rolled when the town is
+- **fixed — gossip.** `S_TalkEnter` seeds the gossip roll with the townsperson's `_tSeed`, rolled when the town is
   loaded: everyone repeats the same line until the hero leaves town. Ours rolls a new line each time.
