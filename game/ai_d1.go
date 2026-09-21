@@ -401,10 +401,17 @@ func (b *d1Brain) golem() (int, func()) {
 	case b.target != nil && best < 2:
 		if tm := b.target.D1Monster(); tm.Squelch == 0 {
 			tm.Squelch, tm.Last = 255, b.pos
-			// D1 then wakes the 5x5 block around the golem, but indexes monster[] off by one, so it wakes whichever
-			// monster comes next in the table; this wakes the ones actually standing there.
+			// D1 then wakes the 5x5 block around the golem, but indexes monster[] off by one (monster[dMonster]
+			// rather than monster[dMonster-1]), so it wakes whichever monster comes next in the table: the one
+			// with the next SpawnIndex. Monsters spawned after the level was made have no slot to follow.
+			next := map[int]bool{}
 			for _, a := range b.g.state.GetMap().Actors() {
-				if om := a.D1Monster(); om != nil && !om.Golem && geometry.DistanceChebyshev(a.MapPosition(), b.pos) <= 2 {
+				if om := a.D1Monster(); om != nil && !om.Golem && om.SpawnIndex >= 0 && geometry.DistanceChebyshev(a.MapPosition(), b.pos) <= 2 {
+					next[om.SpawnIndex+1] = true
+				}
+			}
+			for _, a := range b.g.state.GetMap().Actors() {
+				if om := a.D1Monster(); om != nil && !om.Golem && om.SpawnIndex >= 0 && next[om.SpawnIndex] {
 					om.Squelch = 255
 				}
 			}

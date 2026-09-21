@@ -36,9 +36,9 @@ dumps identical to 1.09's), stores (b224ec8), traps' burst and nova (7fcd007), e
 
 ## Monster AI (f25226a)
 
-- **open — the golem's wake-up.** `MAI_Golum` wakes the 5x5 block around the golem through `monster[_menemy]`
-  instead of `monster[_menemy-1]`, so it wakes the *next* monster in the table. We wake the ones standing there;
-  our monsters have no table index to reproduce the bug with.
+- **fixed — the golem's wake-up.** `MAI_Golum` wakes the 5x5 block around the golem through `monster[_menemy]`
+  instead of `monster[_menemy-1]`, so it wakes the *next* monster in the table. We do the same by SpawnIndex (the
+  level slot); monsters spawned later have none and are skipped.
 - **open — darkness.** `MAI_Sneak` idles where `dLight == lightmax`. We have no light map: a cell counts as dark
   outside the hero's light radius and any lit room.
 - **fixed — combat: experience at the cap.** `AddPlrExperience` sets level 50 outright once experience reaches
