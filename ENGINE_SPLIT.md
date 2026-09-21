@@ -83,7 +83,13 @@ content model.
 about Diablo's formats. The ENGINE may not: it reads one schema, whichever mod
 supplied it.
 
-## Known broken: the playthrough smoke test
+## The playthrough smoke test now passes
+
+`go run -tags development . playthrough` reports PLAYTHROUGH OK as of the
+phase 5 merge plus the hero-flinch fix. Keep it that way: it is the proof that
+a mod still behaves like its branch. Run it before merging any phase.
+
+Historical note, since it shaped several decisions:
 
 `go run -tags development . playthrough` runs a scripted end-to-end game and
 asserts behaviours. It FAILS on `d1-rebuild` too, with several independent
