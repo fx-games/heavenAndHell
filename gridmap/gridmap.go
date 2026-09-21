@@ -420,34 +420,35 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestExploredObject(curr
 	})
 }
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetFreeCellsForDistribution(position geometry.Point, neededCellCount int, freePredicate func(p geometry.Point) bool) []geometry.Point {
-	foundFreeCells := make(SetOfPoints)
-	currentPosition := position
-	openList := make(SetOfPoints)
-	closedList := make(SetOfPoints)
-	closedList[currentPosition] = true
-
-	for _, neighbor := range m.GetFilteredNeighbors(currentPosition, m.IsTileWalkable) {
-		openList[neighbor] = true
-	}
-	for len(foundFreeCells) < neededCellCount && len(openList) > 0 {
-		freeNeighbors := m.GetFilteredNeighbors(currentPosition, freePredicate)
-		for _, neighbor := range freeNeighbors {
-			foundFreeCells[neighbor] = true
-		}
-		// pop from open list
-		pop := openList.Pop()
-		currentPosition = pop
-		for _, neighbor := range m.GetFilteredNeighbors(currentPosition, m.IsTileWalkable) {
-			if !closedList.Contains(neighbor) {
-				openList[neighbor] = true
+	// The flood is a FIFO queue and the result breaks distance ties by coordinate: this used to pop its open
+	// list out of a Go map and sort the result unstably, so which cell an actor, a corpse or a dropped item
+	// landed on changed from run to run and took the whole game's reproducibility with it.
+	seen := SetOfPoints{position: true}
+	queue := []geometry.Point{position}
+	found := make(SetOfPoints)
+	var freeCells []geometry.Point
+	for len(queue) > 0 && len(freeCells) < neededCellCount {
+		currentPosition := queue[0]
+		queue = queue[1:]
+		for _, neighbor := range m.GetFilteredNeighbors(currentPosition, freePredicate) {
+			if !found.Contains(neighbor) {
+				found[neighbor] = true
+				freeCells = append(freeCells, neighbor)
 			}
 		}
-		closedList[currentPosition] = true
+		for _, neighbor := range m.GetFilteredNeighbors(currentPosition, m.IsTileWalkable) {
+			if !seen.Contains(neighbor) {
+				seen[neighbor] = true
+				queue = append(queue, neighbor)
+			}
+		}
 	}
-
-	freeCells := foundFreeCells.ToSlice()
 	sort.Slice(freeCells, func(i, j int) bool {
-		return geometry.DistanceSquared(freeCells[i], position) < geometry.DistanceSquared(freeCells[j], position)
+		di, dj := geometry.DistanceSquared(freeCells[i], position), geometry.DistanceSquared(freeCells[j], position)
+		if di != dj {
+			return di < dj
+		}
+		return lessByCoordinate(freeCells[i], freeCells[j])
 	})
 	return freeCells
 }

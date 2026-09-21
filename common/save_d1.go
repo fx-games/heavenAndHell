@@ -31,6 +31,10 @@ type LevelSnapshot struct {
 	Spawned  []SavedMonster       // skeletons from sarcophagi and barrels
 	Corpses  []SavedMonster       // dead monsters, which scavengers feed on
 	Explored []byte               // explored cells, one bit per cell row by row
+	// Width is the row stride of Explored, i.e. the width of the map it was taken from. Saves from before it
+	// existed used d1.LevelSize, which is what a map a D1 generator built is - but any other map (a mod's own
+	// level) wrote its rows at the wrong stride and lost every cell past the first LevelSize² of them.
+	Width int `json:",omitempty"`
 	// RespawnMonsters makes the level forget its dead the next time it is built: Gillian's donation sets it on
 	// every explored level that isn't loaded right now (State.RespawnD1Monsters).
 	RespawnMonsters bool
@@ -60,9 +64,11 @@ func SnapshotLevel(state *State, m *gridmap.GridMap[*Actor, *Item, Object]) *Lev
 			s.Corpses = append(s.Corpses, SavedMonster{X: p.X, Y: p.Y, Type: mon.Type})
 		}
 	}
-	s.Explored = make([]byte, (d1.LevelSize*d1.LevelSize+7)/8)
-	for i := range d1.LevelSize * d1.LevelSize {
-		if m.IsExplored(geometry.Point{X: i % d1.LevelSize, Y: i / d1.LevelSize}) {
+	size := m.MapSize()
+	s.Width = size.X
+	s.Explored = make([]byte, (size.X*size.Y+7)/8)
+	for i := range size.X * size.Y {
+		if m.IsExplored(geometry.Point{X: i % size.X, Y: i / size.X}) {
 			s.Explored[i/8] |= 1 << (i % 8)
 		}
 	}
@@ -201,9 +207,16 @@ func (s *LevelSnapshot) apply(f *Factory, m *gridmap.GridMap[*Actor, *Item, Obje
 			m.AddDownedActor(a, geometry.Point{X: c.X, Y: c.Y})
 		}
 	}
-	for i := range min(len(s.Explored)*8, d1.LevelSize*d1.LevelSize) {
-		if s.Explored[i/8]&(1<<(i%8)) != 0 {
-			m.SetExplored(geometry.Point{X: i % d1.LevelSize, Y: i / d1.LevelSize})
+	// A snapshot is only ever applied to the level it was taken from, so its stride is this map's width; older
+	// saves have none and were all written by a D1 generator, whose levels are LevelSize wide.
+	width := s.Width
+	if width == 0 {
+		width = d1.LevelSize
+	}
+	size := m.MapSize()
+	for i := range min(len(s.Explored)*8, width*size.Y) {
+		if p := (geometry.Point{X: i % width, Y: i / width}); p.X < size.X && s.Explored[i/8]&(1<<(i%8)) != 0 {
+			m.SetExplored(p)
 		}
 	}
 	for _, it := range append([]*Item(nil), m.Items()...) {
