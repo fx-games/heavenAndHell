@@ -425,6 +425,30 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 			}
 		}
 		f.ActionBroker.Execute(NewSpellDamageAction(c.caster, "lightning", d1.ResistKindLightning, "per_cell", slvl, target, cells))
+	case d1.SplWave: // MI_Wave: a wall of flames across the aim, each rolling on until a wall or the first monster
+		sd := D1DirTo(c.origin(), target)
+		fwd := D1Dirs[sd]
+		blocked := func(p geometry.Point) bool { return !c.m.Contains(p) || !c.m.IsTransparent(p) }
+		var cells []geometry.Point
+		roll := func(p geometry.Point) {
+			for n := 0; n < 112 && !blocked(p); n++ {
+				cells = append(cells, p)
+				if c.monsterAt(p) != nil {
+					return
+				}
+				p = p.Add(fwd)
+			}
+		}
+		center := c.origin().Add(fwd)
+		if !blocked(center) {
+			roll(center)
+			for _, side := range []geometry.Point{D1Dirs[(sd+6)%8], D1Dirs[(sd+2)%8]} {
+				for j, p := 0, center.Add(side); j < slvl/2+2 && !blocked(p); j, p = j+1, p.Add(side) {
+					roll(p)
+				}
+			}
+		}
+		f.ActionBroker.Execute(NewSpellDamageAction(c.caster, "wave", d1.ResistKindFire, "per_cell", slvl, target, cells))
 	case d1.SplStone: // AddStone: the first monster of six CrawlTable rings, never Diablo; no mana without one
 		p, ok := c.freeNear(target, func(p geometry.Point) bool {
 			a := c.monsterAt(p)

@@ -335,6 +335,7 @@ func TestHeavenAndHellCombat(t *testing.T) {
 	}
 	hurt := player.GetStats().GetResource(stats.Health).Value() < full
 	for turn := 0; turn < 200 && foe.IsAlive(); turn++ {
+		player.GetStats().GetResource(stats.Health).SetToMax() // a dead hero earns nothing (AddPlrExperience)
 		broker.Execute(common.NewMeleeAttackAction(cause, player, foe))
 		broker.Execute(common.NewEndPlayerTurnAction(cause, 10))
 	}

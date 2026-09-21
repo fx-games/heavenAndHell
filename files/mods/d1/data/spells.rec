@@ -104,7 +104,6 @@ targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_FLAMWAVE
 hit_zone: cone_aoe(8|3)
-effect: spell_damage(wave|fire)
 
 id: SPL_NOVA
 resist: lightning
