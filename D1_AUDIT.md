@@ -68,7 +68,7 @@ own Firebolt level, Phasing / the Holy shrine (`AddRndTeleport`), the mana shiel
 - **open — Chain Lightning.** `MI_Chain` sends one lightning bolt (`MIS_LIGHTCTRL`) at the target, and one more at
   every monster within `slvl + 2` cells of the caster (CrawlTable rings `1 .. slvl+2`, capped at 18). Ours is a
   beam that jumps up to 6 times within 7 cells (`hit_zone: chain_aoe(6|7)`).
-- **open — Guardian's aim.** `MI_Guardian` fires every 16 ticks at the first monster its scan meets: each of the
+- **fixed — Guardian's aim.** `MI_Guardian` fires every 16 ticks at the first monster its scan meets: each of the
   23 `vCrawlTable` rays, from its 6th point inwards, each point in four mirrored quadrants, on a clear line
   (`Sentfire`). So it reaches 6 cells and prefers far targets in a fixed order. Ours shoots the closest monster
   within 15 cells.

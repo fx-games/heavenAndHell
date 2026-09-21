@@ -497,7 +497,7 @@ func (f *Factory) spawnD1Wall(caster *Actor, p geometry.Point, resist, turns int
 	m.AddObject(wall, p)
 }
 
-// spawnD1Guardian places a Guardian: every other turn it spits a firebolt at the closest monster it can see (MI_Guardian).
+// spawnD1Guardian places a Guardian: every other turn it spits a firebolt at the first monster its scan meets (MI_Guardian).
 func (f *Factory) spawnD1Guardian(caster *Actor, p geometry.Point, turns int) {
 	m := f.State.GetMap()
 	g := NewFire(0)
@@ -514,11 +514,11 @@ func (f *Factory) spawnD1Guardian(caster *Actor, p geometry.Point, turns int) {
 		}
 		f.ActionBroker.Execute(&spellTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
 			caster: caster, spell: d1.SplFirebolt, run: func(c *spellCtx) {
-				var best *Actor
-				for _, a := range m.Actors() {
-					if c.monsterAt(a.MapPosition()) == a && geometry.DistanceChebyshev(p, a.MapPosition()) <= 15 && c.lineClear(p, a.MapPosition()) &&
-						(best == nil || geometry.DistanceSquared(p, a.MapPosition()) < geometry.DistanceSquared(p, best.MapPosition())) {
-						best = a
+				var best *Actor // Sentfire: the first monster in line along the scan
+				for _, o := range d1.GuardianScan {
+					if t := p.Add(geometry.Point{X: o[0], Y: o[1]}); m.Contains(t) && c.monsterAt(t) != nil && c.lineClear(p, t) {
+						best = c.monsterAt(t)
+						break
 					}
 				}
 				if best != nil {

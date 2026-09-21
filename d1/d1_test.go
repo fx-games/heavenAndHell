@@ -533,3 +533,15 @@ func TestDamageRollsTolerateInvertedRange(t *testing.T) {
 		t.Fatalf("MissileDamage64(15,14,shift) = %d, want 64", got)
 	}
 }
+
+// MI_Guardian looks from 6 cells out inwards, first straight along x.
+func TestGuardianScan(t *testing.T) {
+	if GuardianScan[0] != [2]int{6, 0} || GuardianScan[1] != [2]int{-6, 0} {
+		t.Fatalf("scan starts %v", GuardianScan[:4])
+	}
+	for _, o := range GuardianScan {
+		if max(o[0], -o[0], o[1], -o[1]) > 6 {
+			t.Fatalf("scan reaches %v", o)
+		}
+	}
+}

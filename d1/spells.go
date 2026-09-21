@@ -586,3 +586,20 @@ func missilePos(tx, ty int) [2]int {
 	mx, my := tx>>16, ty>>16
 	return [2]int{shift(mx + 2*my), shift(2*my - mx)}
 }
+
+// GuardianScan is the order MI_Guardian tries cells in (Sentfire): each vCrawlTable ray from its 6th point inwards,
+// every point in four mirrored quadrants, skipping a point equal to the one just tried.
+var GuardianScan = func() (out [][2]int) {
+	var last [2]int
+	for j := range vCrawlTable {
+		for k := 10; k >= 0 && (vCrawlTable[j][k] != 0 || vCrawlTable[j][k+1] != 0); k -= 2 {
+			x, y := vCrawlTable[j][k], vCrawlTable[j][k+1]
+			if last == [2]int{x, y} {
+				continue
+			}
+			out = append(out, [2]int{x, y}, [2]int{-x, -y}, [2]int{x, -y}, [2]int{-x, y})
+			last = [2]int{x, y}
+		}
+	}
+	return
+}()
