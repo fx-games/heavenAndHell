@@ -384,6 +384,15 @@ func TestHeavenAndHellContentResolves(t *testing.T) {
 			t.Errorf("monster %s: lost its lines", mon.ID)
 		}
 	}
+	magic := 0
+	for i := 0; i < 400; i++ {
+		if it := f.Generator.FloorItem(1+i%12, false, false); it != nil && it.Magical != 0 && strings.Contains(it.IName, " of ") {
+			magic++
+		}
+	}
+	if magic == 0 {
+		t.Error("400 floor items and not one magic: H&H's enchantments do not roll")
+	}
 	for name := range data.TargetedDefs {
 		if f.NewTargetedActionFromName(name) == nil {
 			t.Errorf("targeted.rec %s does not build", name)
