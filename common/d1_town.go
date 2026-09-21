@@ -250,7 +250,7 @@ func (s *State) RespawnD1Monsters() int {
 	names := s.exploredD1DungeonNames()
 	for _, name := range names {
 		m, loaded := s.dungeonMaps[name]
-		lvl := g.levels[name]
+		lvl := g.d1Levels[name]
 		if !loaded || lvl == nil {
 			if snap := g.snapshots[name]; snap != nil {
 				snap.RespawnMonsters = true

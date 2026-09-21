@@ -180,6 +180,18 @@ func buildMegaDungeon(c MegaDungeonConfig, rnd *rand.Rand) *DungeonMap {
 	return m
 }
 
+// Templates returns the room-template project a configuration draws from, or nil for a generator that draws
+// from none (megadungeon carves its rooms rather than stamping them). The caller wants it to paint the
+// hand-drawn art of a room over the floor the tile set painted, which is the only thing outside this package
+// that needs to see the templates at all.
+func Templates(cfg dungeon.Config, fsys fs.FS) (*ldtk.Project, error) {
+	c, ok := cfg.(AccretionConfig)
+	if !ok {
+		return nil, nil
+	}
+	return loadTemplates(fsys, c.Templates)
+}
+
 // loadTemplates reads an LDtk project out of the active mod.
 func loadTemplates(fsys fs.FS, name string) (*ldtk.Project, error) {
 	b, err := fs.ReadFile(fsys, name)

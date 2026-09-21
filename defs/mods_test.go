@@ -93,13 +93,12 @@ func TestD1ModSuppliesEveryIcon(t *testing.T) {
 }
 
 // The H&H mod does not yet, and this is the exact list, so finishing it is a shrinking list rather than a
-// guess and so a name quietly appearing or vanishing shows up here. Six are classes H&H does not have (monk,
-// bard and barbarian are Hellfire's) and the rest are dungeon furniture and a missile the engine names because
-// D1 draws them -- both are the engine's fixed Icon* list still being shaped like one game's content.
+// guess and so a name quietly appearing or vanishing shows up here. What is left is dungeon furniture and a
+// missile the engine names because D1 draws them: the engine's fixed Icon* list still shaped like one game's
+// content. The six class sprites that used to head this list are gone because classes became content --
+// ClassIcons resolves them from the class a mod declares, so no mod owes the engine Hellfire's monk.
 func TestHeavenAndHellModIconGapIsExactlyThis(t *testing.T) {
 	want := []string{
-		"class.monk_male", "class.monk_female", "class.bard_male", "class.bard_female",
-		"class.barbarian_male", "class.barbarian_female",
 		"tile.wooden_fence", "tile.arch", "tile.grate", "tile.pillar", "tile.lamp", "tile.lava",
 		"tile.wall_torch", "tile.brazier", "effect.arrow",
 	}

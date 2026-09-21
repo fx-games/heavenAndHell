@@ -1,6 +1,7 @@
 package d1
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 )
@@ -80,6 +81,11 @@ var ObjectDisplays map[int]ObjectDisplay
 
 func loadObjectTables(fsys fs.FS, d *Data) error {
 	recs, err := readRecMulti(fsys, "objects.rec")
+	// A mod that does not have this Diablo feature ships no file for it, and an absent feature is not an
+	// error: what the table would have filled stays empty.
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
 	if err != nil {
 		return err
 	}

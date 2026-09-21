@@ -34,7 +34,7 @@ func (f *Factory) d1Doppelganger(original *Actor) {
 
 // d1Warp ports missiles_warp + MI_Teleport: the hero lands beside the nearest stairs or town warp.
 func (f *Factory) d1Warp(c *spellCtx) bool {
-	lvl := f.State.mapGen.levels[c.m.GetName()]
+	lvl := f.State.mapGen.d1Levels[c.m.GetName()]
 	if lvl == nil {
 		return false
 	}

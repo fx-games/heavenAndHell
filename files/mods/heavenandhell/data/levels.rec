@@ -1,5 +1,14 @@
 %rec: default
-# Which generation strategy builds each dungeon level, and with which parameters.
+# Which generation strategy builds each dungeon level, with which parameters, and how it presents itself.
+#
+# The knobs that belong to the LEVEL rather than to any one generator:
+#   name         what the level calls itself on arrival. \n breaks the line.
+#   tiles        which of the engine's tile sets draws it: cathedral, catacombs, caves, hell.
+#   transition   an extra way off this level, beyond the ladders up and down every level gets:
+#                "<location name>, <target map>, <target location>, up|down".
+#
+# How deep this game goes is decided here and nowhere else: the deepest dlvl declared below is the bottom of
+# the dungeon, and the engine gives that level no ladder down.
 #
 # generator   one of the engine's registered strategies. This mod's levels grow out of hand-drawn room
 #             templates, so they all name "accretion"; "megadungeon" (carve a maze, knock holes in it) is
@@ -21,6 +30,9 @@
 
 dlvl: 1
 generator: accretion
+name: Level 1\nCathedral
+tiles: cathedral
+templates: assets/maps.ldtk
 template_prefix: Cath
 forbid_room: Cata_template_for_king_zedek
 forbid_room: Hell_template_for_lucifer
@@ -29,6 +41,9 @@ forbid_room: Cave_template_for_poisoned_water
 
 dlvl: 2
 generator: accretion
+name: Level 2\nCathedral
+tiles: cathedral
+templates: assets/maps.ldtk
 template_prefix: Cath
 require_room: Cath_template_for_meat_jack
 forbid_room: Cata_template_for_king_zedek
@@ -38,6 +53,9 @@ forbid_room: Cave_template_for_poisoned_water
 
 dlvl: 3
 generator: accretion
+name: Level 3\nCatacombs
+tiles: catacombs
+templates: assets/maps.ldtk
 template_prefix: Cata
 forbid_room: Cath_template_for_meat_jack
 forbid_room: Hell_template_for_lucifer
@@ -46,6 +64,10 @@ forbid_room: Cave_template_for_poisoned_water
 
 dlvl: 4
 generator: accretion
+name: Level 4\nCatacombs
+tiles: catacombs
+templates: assets/maps.ldtk
+transition: to_town, Town, to_catacombs, up
 template_prefix: Cata
 require_room: Cata_template_for_king_zedek
 forbid_room: Cath_template_for_meat_jack
@@ -56,6 +78,9 @@ forbid_room: Cave_template_for_poisoned_water
 # The caves and hell levels are open caverns: their room openings stay corridors, no doors.
 dlvl: 5
 generator: accretion
+name: Level 5\nCaves
+tiles: caves
+templates: assets/maps.ldtk
 template_prefix: Cave
 doors: false
 forbid_room: Cath_template_for_meat_jack
@@ -66,6 +91,10 @@ forbid_room: Cave_template_for_poisoned_water
 
 dlvl: 6
 generator: accretion
+name: Level 6\nCaves
+tiles: caves
+templates: assets/maps.ldtk
+transition: to_town, Town, to_caves, up
 template_prefix: Cave
 doors: false
 forbid_room: Cath_template_for_meat_jack
@@ -76,6 +105,9 @@ forbid_room: Cave_template_for_poisoned_water
 
 dlvl: 7
 generator: accretion
+name: Level 7\nHell
+tiles: hell
+templates: assets/maps.ldtk
 template_prefix: Hell
 doors: false
 forbid_room: Cath_template_for_meat_jack
@@ -85,6 +117,9 @@ forbid_room: Cave_template_for_poisoned_water
 
 dlvl: 8
 generator: accretion
+name: Level 8\nHell
+tiles: hell
+templates: assets/maps.ldtk
 template_prefix: Hell
 doors: false
 require_room: Hell_template_for_lucifer
@@ -95,6 +130,9 @@ forbid_room: Cave_template_for_poisoned_water
 
 dlvl: 9
 generator: accretion
+name: Level 9\nDungeon of Doom
+tiles: caves
+templates: assets/maps.ldtk
 template_prefix: Dung
 forbid_room: Cath_template_for_meat_jack
 forbid_room: Cata_template_for_king_zedek
@@ -103,6 +141,9 @@ forbid_room: Cave_template_for_poisoned_water
 
 dlvl: 10
 generator: accretion
+name: Level 10\nDungeon of Doom
+tiles: caves
+templates: assets/maps.ldtk
 template_prefix: Dung
 require_room: Dung_template_for_rogue
 forbid_room: Cath_template_for_meat_jack
@@ -112,6 +153,9 @@ forbid_room: Cave_template_for_poisoned_water
 
 dlvl: 11
 generator: accretion
+name: Level 11\nMerchant District
+tiles: cathedral
+templates: assets/maps.ldtk
 template_prefix: Cath
 forbid_room: Cath_template_for_meat_jack
 forbid_room: Cata_template_for_king_zedek
@@ -121,6 +165,9 @@ forbid_room: Cave_template_for_poisoned_water
 
 dlvl: 12
 generator: accretion
+name: Level 12\nMerchant District
+tiles: cathedral
+templates: assets/maps.ldtk
 template_prefix: Cath
 forbid_room: Cath_template_for_meat_jack
 forbid_room: Cata_template_for_king_zedek

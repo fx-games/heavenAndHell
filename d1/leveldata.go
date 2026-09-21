@@ -2,6 +2,7 @@ package d1
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io/fs"
 	"path"
@@ -34,6 +35,11 @@ func loadLevelData(fsys fs.FS) (levelData, error) {
 		dir := levelTypeDirs[lt]
 		base := dataPath(levelDir, dir)
 		entries, err := fs.ReadDir(fsys, base)
+		if errors.Is(err, fs.ErrNotExist) {
+			// These are Diablo's own megatile tables and set pieces, read only by Diablo's four generators. A
+			// mod whose levels name another generator family ships none of them and needs none of them.
+			return levelData{dun: map[string]dun{}}, nil
+		}
 		if err != nil {
 			return ld, fmt.Errorf("level data: %w", err)
 		}

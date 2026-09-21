@@ -4,6 +4,7 @@ package d1
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io/fs"
 	"path"
@@ -123,6 +124,11 @@ func hellfireItemOrder(d1Items []ItemData) []ItemData {
 		fullRej = 82 // Potion of Full Rejuvenation
 		healing = 87 // Scroll of Healing
 	)
+	// This shuffle is Hellfire's own table layout, by fixed row number. A mod whose items.rec is not Diablo's
+	// table has no such rows and keeps the order it wrote them in, which is the order its own content depends on.
+	if len(d1Items) <= bovine {
+		return d1Items
+	}
 	var out []ItemData
 	out = append(out, d1Items[:fullRej+1]...)
 	out = append(out, d1Items[oils:oils+4]...)
@@ -236,8 +242,8 @@ type Data struct {
 	Monsters       []MonsterData
 	UniqueMonsters []UniqueMonsterData
 	Items          []ItemData
-	ItemIdx        map[string]int      // item internal_name -> index into Items
-	Vendors        map[string]Vendor   // store internal_name -> its record (assets/data/stores.rec)
+	ItemIdx        map[string]int    // item internal_name -> index into Items
+	Vendors        map[string]Vendor // store internal_name -> its record (assets/data/stores.rec)
 	Prefixes       []Affix
 	Suffixes       []Affix
 	UniqueItems    []UniqueItemData
@@ -341,9 +347,18 @@ func Load(fsys fs.FS) (*Data, error) {
 func load(fsys fs.FS) (*Data, error) {
 	d := &Data{}
 	var err error
+	// The xl_* tables are Diablo's own: its unique monsters, its affixes, its unique items, its spell slots and
+	// its object list. A mod that is not Diablo ships none of them and has none of those things - no affix table
+	// means items roll plain, no spell table means no spell book - so a missing file is an absent feature here,
+	// not an error. Diablo itself ships all six, so nothing about D1 changes.
 	tables := map[string][]row{}
+	hasD1Tables := true
 	for _, n := range []string{"xl_umon", "xl_ipre", "xl_isuf", "xl_uitem", "xl_spell", "xl_obj"} {
 		rows, err := readTable(fsys, n+".txt")
+		if errors.Is(err, fs.ErrNotExist) {
+			hasD1Tables = false
+			continue
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -420,8 +435,14 @@ func load(fsys fs.FS) (*Data, error) {
 			Break: r.i("oBreak"), SelFlag: r.i("oSelFlag"), Trap: r.i("oTrapFlag") != 0,
 		})
 	}
-	if len(d.Monsters) != D1MonsterCount || len(d.Items) < D1ItemCount || len(d.Spells) != NumSpells {
+	if hasD1Tables && (len(d.Monsters) != D1MonsterCount || len(d.Items) < D1ItemCount || len(d.Spells) != NumSpells) {
 		return nil, fmt.Errorf("d1 tables: unexpected sizes monsters=%d items=%d spells=%d", len(d.Monsters), len(d.Items), len(d.Spells))
+	}
+	// Spell slots are indexed by SPL_ value all over the engine. A mod with no spell table gets the full run of
+	// empty slots rather than a short slice, so "this game has no spells" reads as every spell being blank
+	// instead of as an index panic on the first lookup.
+	for len(d.Spells) < NumSpells {
+		d.Spells = append(d.Spells, SpellData{})
 	}
 	d.Texts, d.TextSfx, d.Gossip = loadTexts(fsys)
 	levels, err := loadLevelData(fsys)

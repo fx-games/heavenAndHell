@@ -1,0 +1,51 @@
+%rec: default
+# The three classes this game is played with. Classes are content: the engine keeps no roster of them and reads
+# each class' two sprites from this mod's actors.rec by internal_name (class.<internal_name>_male/_female).
+#
+# The hero model itself is the engine's one unified hero, so each class names the hero archetype it plays as
+# (warrior / rogue / sorcerer) and carries its OWN display name over it. The Archer plays as the rogue and the
+# Mage as the sorcerer, which is what they always were.
+#FIELDS: internal_name name gold item stats_* resource_* untargeted_skill targeted_skill
+
+internal_name: warrior
+name: Warrior
+gold: 180
+item: main_gauche
+item: torch
+item: partial_leather_armour
+resource_health: 20
+resource_mana: 1
+stats_strength: 15
+stats_dexterity: 5
+stats_intelligence: 5
+targeted_skill: poison_target
+targeted_skill: earth_shaker
+
+internal_name: rogue
+name: Archer
+gold: 180
+item: short_bow
+item: torch
+item: partial_leather_armour
+resource_health: 15
+resource_mana: 1
+stats_strength: 8
+stats_dexterity: 15
+stats_intelligence: 5
+untargeted_skill: multi_shot
+targeted_skill: blink
+targeted_skill: jump_start(5 | 5)
+
+internal_name: sorcerer
+name: Mage
+gold: 180
+item: dagger
+item: torch
+item: robe
+resource_health: 10
+resource_mana: 4
+stats_strength: 5
+stats_dexterity: 5
+stats_intelligence: 15
+untargeted_skill: heal_health
+targeted_skill: fire_ray

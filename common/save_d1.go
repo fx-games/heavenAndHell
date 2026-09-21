@@ -42,7 +42,7 @@ type LevelSnapshot struct {
 
 func SnapshotLevel(state *State, m *gridmap.GridMap[*Actor, *Item, Object]) *LevelSnapshot {
 	s := &LevelSnapshot{Monsters: map[int]SavedMonster{}}
-	if lvl := state.mapGen.levels[m.GetName()]; lvl != nil {
+	if lvl := state.mapGen.d1Levels[m.GetName()]; lvl != nil {
 		s.Traps = d1SprungTraps(lvl)
 	}
 	for _, a := range m.Actors() {
@@ -120,7 +120,7 @@ func (s *LevelSnapshot) apply(f *Factory, m *gridmap.GridMap[*Actor, *Item, Obje
 	for _, i := range s.Traps {
 		sprung[i] = true
 	}
-	if lvl := f.State.mapGen.levels[m.GetName()]; lvl != nil {
+	if lvl := f.State.mapGen.d1Levels[m.GetName()]; lvl != nil {
 		for _, t := range lvl.Objects {
 			if (t.Kind == d1.ObjTRAPL || t.Kind == d1.ObjTRAPR) && sprung[t.Index] {
 				t.Var4 = 1

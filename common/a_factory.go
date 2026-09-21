@@ -43,7 +43,7 @@ func (g *Factory) playD1Sound(id string) {
 // the same line numbers. So every heroine speaks with the Rogue's, and a man with his class's own, the Warrior's
 // for the Rogue, the Bard and the Barbarian.
 func (g *Factory) d1HeroVoice() string {
-	if sel := g.State.SelectedClass; sel.Icon == defs.FemaleIconByClass[sel.InternalName] {
+	if g.State.SelectedClass.IsFemale() {
 		return "ROGUE"
 	}
 	switch g.State.GetPlayer().Hero().Class {

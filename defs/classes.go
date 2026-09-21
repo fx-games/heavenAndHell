@@ -6,25 +6,14 @@ import (
 	"strings"
 )
 
-// FemaleIconByClass maps a class' internal_name to its female icon; gender only swaps the sprite.
-var FemaleIconByClass = map[string]int32{
-	"warrior":   IconCharacterWarriorFemale,
-	"rogue":     IconCharacterRogueFemale,
-	"sorcerer":  IconCharacterSorcererFemale,
-	"monk":      IconCharacterMonkFemale,
-	"bard":      IconCharacterBardFemale,
-	"barbarian": IconCharacterBarbarianFemale,
-}
-
-// MaleIconByClass maps a class' internal_name to its male icon, kept in sync with actors.rec by
-// ./remap_actors.sh instead of the frozen "icon" numbers classes.rec used to carry.
-var MaleIconByClass = map[string]int32{
-	"warrior":   IconCharacterWarriorMale,
-	"rogue":     IconCharacterRogueMale,
-	"sorcerer":  IconCharacterSorcererMale,
-	"monk":      IconCharacterMonkMale,
-	"bard":      IconCharacterBardMale,
-	"barbarian": IconCharacterBarbarianMale,
+// ClassIcons resolves a class' two sprites from the active mod's actors.rec by the name the mod's classes.rec
+// gave the class: "archer" wants class.archer_male and class.archer_female. The engine keeps no roster of class
+// names - which classes exist is the mod's business - so a name the mod's icon table does not carry resolves to
+// 0 here rather than failing LoadIcons, and is reported when the class is read.
+func ClassIcons(internalName string) (male, female int32, ok bool) {
+	male, maleOK := IconOK(IconID("class", internalName+"_male"))
+	female, femaleOK := IconOK(IconID("class", internalName+"_female"))
+	return male, female, maleOK && femaleOK
 }
 
 type LoadoutDefinition struct {
@@ -37,7 +26,11 @@ type LoadoutDefinition struct {
 	TargetedSkills   []string
 	InternalName     string
 	Name             string
+	FemaleIcon       int32 // the other sprite; Icon carries whichever gender was picked
 }
+
+// IsFemale reports which of the class' two sprites this loadout carries. Saving and the hero's voice ask it.
+func (d LoadoutDefinition) IsFemale() bool { return d.Icon == d.FemaleIcon }
 
 func ReadClassDefinitions(file io.Reader) []LoadoutDefinition {
 	records := recfile.Read(file)
@@ -79,6 +72,6 @@ func NewClassDefFromRecord(record recfile.Record) LoadoutDefinition {
 			def.TargetedSkills = append(def.TargetedSkills, field.Value)
 		}
 	}
-	def.Icon = MaleIconByClass[def.InternalName]
+	def.Icon, def.FemaleIcon, _ = ClassIcons(def.InternalName)
 	return def
 }

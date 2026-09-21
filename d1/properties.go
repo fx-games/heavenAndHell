@@ -1,6 +1,7 @@
 package d1
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 )
@@ -37,6 +38,11 @@ var propertyDefs map[string]propertyDef
 
 func loadPropertyDefs(fsys fs.FS) (map[string]propertyDef, error) {
 	recs, err := readRec(fsys, "properties.rec")
+	// A mod that does not have this Diablo feature ships no file for it, and an absent feature is not an
+	// error: what the table would have filled stays empty.
+	if errors.Is(err, fs.ErrNotExist) {
+		return map[string]propertyDef{}, nil
+	}
 	if err != nil {
 		return nil, err
 	}
