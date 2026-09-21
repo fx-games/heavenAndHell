@@ -226,29 +226,25 @@ another size lost most of its cells. The stride now travels with the bitmap.
 6. per-mod level configs
 7. delete hardcoded paths, both mods boot
 
-8. H&H playable — all but trading. Every class starts in H&H's own town, its
-   three doors lead down and back (`up:` level knob), and the four quests play
-   through main's dialogue chain as `on_talk` triggers (`hh_town_test.go`
-   drives all of it through real talks and kills). Along the way, and binding
-   on every mod from now on:
-   - Each mod owns its sheet, icons, town map, texts, spells and class skills.
-     A hero only gets the skills and starting spells its mod declares
-     (`hero.rec` `start_spells`). LoadIcons no longer demands D1's furniture.
-   - All dialogue text is `texts.rec` (id, sfx, gossip, text), one loader.
-   - Side levels: a `levels.rec` record keyed `map:` instead of `dlvl:`.
-   - D1's quest table (availability rolls) only applies when D1's generators
-     build the levels; before, it leaked into any mod by quest index.
-   - A monster record without `level` fights at its `dlvl`, as items do.
-   - Uniques are placed by their room template, never rolled at random.
-   Not done: d. Vendors. H&H's NPCs open no shop. Menus are a Go switch over
-   D1's shopkeepers (`common/d1_town.go` `d1VendorOptions`) and stock is four
-   D1 algorithms keyed by shop name (`d1/stores.go`, `game/town_d1.go`). The
-   unified shape: a vendor record names its `npc`, its `stock` strategy
-   (smith, witch, healer, boy, list) and its `service`s (buy, sell, repair,
-   recharge, identify, heal...), and the engine implements each once. H&H's
-   records are pure `list` vendors; main's menus are `git show
-   main:common/act_talk_to.go`. Kirioth's free heal ("during the siege") is a
-   `heal` service.
+8. H&H playable — done. Every class starts in H&H's own town, both towns'
+   doors lead down and back, the shops trade, the quests and the evidence
+   notes play through main's dialogue, monsters fight with their own skills,
+   gear and lines, and loot rolls main's enchantments. `hh_town_test.go` drives
+   all of it through a real game; `TestHeavenAndHellContentResolves` fails on
+   anything an H&H record declares that the engine cannot build. Binding on
+   every mod from now on:
+   - Each mod owns its sheet, icons, maps, texts, spells, class skills, music,
+     sound and saves. The engine's own `files/assets` holds only the fallback
+     room (one room, one weapon, one enemy), fonts and tooling material.
+   - One subsystem per concern, configured by data: vendors (stores.rec:
+     npc, stock, buys, service, when), quests and talk (quests.rec triggers on
+     named events, first speaking trigger ends a talk), items (the loader fills
+     D1's view from H&H's category fields), monsters (records without a D1
+     brain get the general AI), towns and side levels (levels.rec `town:` and
+     `map:` records).
+   - All dialogue text is `texts.rec`.
+   - `UpdateD1Quests` (set-piece map changes) stays with D1's level family, on
+     its side of the generator seam, like its generators.
 
 Gameplay changes (shrines, monster abilities, shop seeding, durability, skill trees)
 land after the boundary exists, not before.

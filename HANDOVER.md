@@ -10,8 +10,9 @@ every decision and why).
 - `d1-rebuild` and `main` are **untouched**. Do not merge to them without asking.
 - `main` is an old version of the Heaven&Hell game. It is the SOURCE you read old
   content and code from (`git show main:<path>`), never a base to work on.
-- The last session worked in worktree branch `worktree-agent-a223e92bbd2677d04`. If
-  `engine-split` is behind it, fast-forward first: `git merge --ff-only worktree-agent-a223e92bbd2677d04`.
+- Sessions work in a worktree branch and fast-forward `engine-split` to it when the
+  gates are green (the user asked for that; last one: `worktree-agent-a223e92bbd2677d04`).
+  Commit small and often: the user asked for commits in between, not one big one at the end.
 
 ## The goal
 
@@ -40,7 +41,11 @@ Three gates, all non-negotiable:
    The single exception, already recorded in the contract: a deliberate
    generator simplification, in its own labelled commit, one at a time.
 2. **`playthrough 1` must print PLAYTHROUGH OK** and be byte-identical run to
-   run. It is the behaviour-equivalence proof.
+   run. It is the behaviour-equivalence proof. A refactor must not change its
+   output at all (`md5 -q` two runs, and against the run before your change). A
+   deliberate gameplay change (the user's list below) changes it: diff the output
+   and check every changed line is the intended effect, then say so in the commit.
+   Current baseline, after the shrine change: `afbc3d8254bb4aa6b23d3ed449dc58a1`.
 3. Both build tags green, no new test failures.
 
 ## Done
@@ -60,6 +65,14 @@ Three gates, all non-negotiable:
 | 10 | H&H's 12 levels generate, walk, and populate from its own tables |
 | 11 | H&H playable except trading: hero table, town doors, quests + dialogue, own sheet/icons (see ENGINE_SPLIT.md phase 8) |
 | 12 | Every mod owns its content: D1's sheet, icons and town map moved into `mods/d1`; all dialogue is `texts.rec` |
+| 13 | One vendor subsystem: a stores.rec record names its `npc`s, `stock` strategy, `buys` rule, menu `service`s and a `when` condition. D1's shop switches are gone |
+| 14 | H&H items equippable and complete: the item loader derives type/slot from `category`/`weapon_type`/`armor_type`; `equip_modifier` becomes item powers; use actions, light, ranged, throw, hidden, charges attach from the record. Starting kits and gold are classes.rec data for both mods |
+| 15 | H&H class skills (effects/targeted.rec, untargeted.rec from main), Lucifer's death + gift, the four evidence notes, the hell town (`town:` records in levels.rec), main's enchantments as an H&H affix table |
+| 16 | H&H monsters as their records say: general AI for records without a D1 brain, to-hit from dexterity, full HP, skills, gear, speech on sight, death lines, tags |
+| 17 | D1's town quest talk (TalkToTowner) is `on_approach` triggers in D1's quests.rec |
+| 18 | The fallback room: no mod / missing mod plays the engine's own one room, one weapon, one rat from `files/assets` |
+| 19 | Each mod owns its music and sound exclusively; the engine has no audio. Saves are per mod (`saves/<mod>/`) and refuse another mod's game |
+| 20 | Gameplay: shrines ask gold instead of a permanent loss, and are renamed (objects.rec `cost`) |
 
 Also fixed along the way (all were real, pre-existing bugs):
 - Shop menus crashed on any empty list (`items[0]` before the empty check).
@@ -74,6 +87,10 @@ Also fixed along the way (all were real, pre-existing bugs):
 - Every H&H monster was level 0: ~40% of kills panicked rolling a drop.
 - H&H uniques spawned at random and never in their rooms.
 - `build_release.sh` never copied `files/mods`: a non-embedded release had no game.
+- The playthrough depended on the time of day (the Solar shrine reads the clock):
+  `common.Clock`, pinned by the playthrough.
+- A monster record without animation frames cost 0 AUT per action and spun the
+  turn loop forever; it now acts at its speed.
 
 ## The user's rules for mods (stated in the last session, binding)
 
@@ -83,39 +100,44 @@ Also fixed along the way (all were real, pre-existing bugs):
   subsystem per concern, **no mod-specific implementations**: if D1 and H&H
   both need something, it is one engine feature both configure by data.
 - All dialogue text is in rec format.
+- Each mod owns its music and sound effects exclusively.
+- Save games store the mod they need and are only accessible while that mod is loaded.
+- "We want all the content": everything H&H had on `main` must reach the game.
+  `TestHeavenAndHellContentResolves` builds every H&H item, monster and named skill
+  and fails on anything a record declares that the engine cannot build.
 
 ## Remaining
 
-1. **Vendors, unified.** H&H's four NPCs open no shop. Design and pointers are in
-   ENGINE_SPLIT.md phase 8 "Not done: d". This is the last gap to H&H playable.
-   `hh_town_test.go` is where to prove it (talk -> buy -> sell).
-2. **H&H leftovers from main**, not ported yet: the notes/evidence items and
-   Lucifer's death text (`git show main:files/assets/dialogue/note_*.txt`,
-   `lucifer_death.txt`), Kirioth's missing `kirioth_after_lucifer` text (main
-   never had the file either), and H&H's own spells/skills (classes.rec names
-   them; the engine gives H&H heroes none yet).
-3. **Remaining engine-side D1 hardcodes** that break the no-mod-specific rule:
-   D1 town quest hand-ins (`d1TownerQuests`), `UpdateD1Quests`, vendor menus.
-4. **The fallback room.** With no mod, the engine should run one hardcoded room,
-   one weapon, one enemy. Today a missing mod stops with a clear message
-   (`mod "x" not found: expected a directory at files/mods/x`), which is the
-   floor, not the goal. Engine `files/assets` no longer holds a sheet or map.
-5. **The original gameplay requests**, deferred behind the port and never
-   started. These are the user's own words:
-   - Remove shrine effects with permanent negative outcomes. Decided:
-     permanent stat/spell-level/HP/mana loss is out; temporary debuffs and gold
-     loss are fine; replace with **cost-not-loss**; rename the shrines.
+1. **The rest of the user's gameplay requests** (their words, decisions already made):
    - Remove monster abilities that permanently reduce player stats (Black
      Death's max-HP loss). Other drains stay. Make those monsters harder instead.
+     Look for the max-HP drain in `common/d1_hero.go` / `d1_monster.go` hit code.
    - **Prevent shop save-scumming**: reloading must give the same stock; restock
-     only on reaching a new level. Wirt's item likewise fixed per reload.
+     only on reaching a new level. Wirt's item likewise fixed per reload. Today
+     `game/town_d1.go` restockD1Town runs on every town visit and uses the live
+     RNG; the stock must be derived from (seed, deepest level) or saved.
    - **Remove item destruction**: at 0 durability an item is fully inert (no
      base stats either) but repairable at max cost. Indestructible = never loses
-     durability.
+     durability. Today `d1Broke` (common/d1_town.go) destroys non-uniques.
    - **Skill trees**: 2 points per level, D2-style tiers, 8 skills per class,
      10 ranks each, max 1 point per skill per level-up, respec in town for 1000
      gold. Skill points are ON TOP of attribute points. Save wipe is acceptable.
-     Re-activate H&H spells/skills from git history.
+     Re-activate H&H spells/skills from git history. **Ask the user for the skill
+     list per class before building it**: it is 48 skills of game design, and
+     none of it is decided. H&H's named skills (effects/*.rec) and D1's spells are
+     the material.
+2. **H&H leftovers**: main's on-hit item *hooks* (the other half of its
+   enchantments; `common/def_itemhooks.go` has them) are not rolled. An affix
+   power cannot carry one without a field on `d1.Item`, and `d1.Item` is dumped
+   into `levels.golden` - adding a field changes that dump. Put the hook on the
+   game item (`common.Item.SetItemHooks`) from a record field instead. Kirioth
+   says nothing after Lucifer (main had no text for it either). The evidence
+   notes carry main's placeholder text ("Are you sure about this?").
+3. `UpdateD1Quests` (set-piece map changes) stays engine-side on purpose: it is
+   D1's level family's business, like its generators (the seam in ENGINE_SPLIT.md).
+4. One intermittent failure of the root package under `-tags embedded` was seen
+   once and did not reproduce in 25 runs of the new tests or 4 of the package.
+   If it recurs, capture the failing test's name before rerunning.
 
 ## Traps that have already cost real time
 
@@ -145,8 +167,25 @@ Also fixed along the way (all were real, pre-existing bugs):
 - **Test a mod by playing it.** Every H&H bug last session (crash on class
   skill icon, town load nil deref, quest index panic, level-0 drops, uniques)
   was invisible to unit tests and fell out of one test driving a real game:
-  `newHeavenAndHellGame` in `hh_town_test.go`. Walking `Actors()` while killing
-  skips every other actor: clone the slice.
+  `newHeavenAndHellGame` in `hh_town_test.go` (`newModGame(t, mod, ui)` for any
+  mod, "" for the fallback room). Walking `Actors()` while killing skips every
+  other actor: clone the slice.
+- **Edit `maps.ldtk` as text, never by re-dumping the JSON**: `json.dumps`
+  reformats the whole file (135k changed lines). Clone an entity's text block,
+  and match block ends on the exact indentation - a looser match cut inside an
+  inner brace and produced invalid JSON once.
+- **A clock read breaks reproducibility** like a map iteration does. Any new
+  wall-clock dependence goes through `common.Clock`.
+- **Bisecting in zsh**: `for f in $FILES` does not split words in zsh; use
+  `bash -c` or the run reverts nothing and "proves" nothing (cost an hour).
+  Set work aside in a WIP commit first, never with bare `git stash`.
+- **A mod lacking a file falls back to the engine's** `files/assets` copy, which
+  is now the fallback game's content (hero.rec, classes.rec, items.rec,
+  enemies.rec, icons, sheet, map). Both mods ship every one of those; a new mod
+  that forgets one gets the fallback's silently.
+- **The vendor and quest vocabularies are the engine's API**: `defs.VendorStocks`,
+  `VendorBuyRules`, `VendorServices`; quest events in `common.QuestEvents`, outcomes
+  in `QuestOutcomeExists`. Extend them there, and the loaders reject unknown names.
 
 ## Working agreements that produced good results
 
