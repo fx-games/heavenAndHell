@@ -43,8 +43,15 @@ Mod (rec/tsv):
 
 ## Decisions
 
-- Dropped, not ported: `dungen/`, `defs/enemy.go`, `defs/vendor.go`, `defs/item.go`.
-  The D1 equivalents supersede them.
+- REVERSED: `dungen/` comes back. It was dropped on the reading that D1's
+  generators supersede it, but H&H cannot be PLAYED without its own generators,
+  and a mod that cannot be played is not a mod. `dungen/`'s algorithms
+  (accretion, megadungeon, rogue, room) return as engine generation strategies
+  registered by name, exactly like cathedral/catacombs/caves/hell. H&H also
+  needs its town, NPCs, vendors and quests back.
+- Still dropped: `defs/enemy.go`, `defs/item.go` (the unified `defs.Monster` /
+  `defs.Item` superseded them), `defs/vendor.go` (superseded by the unified
+  vendor record).
 - Ported back from `main` as engine: 18 files of H&H effects/actions/animations,
   giving 18 untargeted + 14 targeted effects + 4 item hooks, reachable by name.
 - Quest triggers use expr-lang expressions over the existing `common.Flags` store,
@@ -68,6 +75,12 @@ Mod (rec/tsv):
   The ONE exception: deliberate simplification of the generators is allowed to
   change output, in its own labelled commit, one simplification at a time, with
   the before/after summarised. Refactors never change it.
+
+## Both games must be PLAYABLE, not merely loadable
+
+A mod is done when you can play it, not when its files parse. For H&H that
+means: generators (`dungen/`), a town, NPCs, vendors and quests. Content
+without the means to reach it is not a finished mod.
 
 ## One content schema
 
