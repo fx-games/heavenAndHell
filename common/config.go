@@ -261,14 +261,19 @@ func SaveMod(recFilename, mod string) error {
 	return setConfigFields(recFilename, [][2]string{{"Mod", mod}})
 }
 
-// setConfigFields replaces each field's line in place. A missing field goes to the top: only the first record is
-// read, so a line appended after a trailing blank line would be ignored.
+// setConfigFields replaces each field's line in place. A missing field goes right after the %rec/# header: only
+// the first record is read, lines above its header are not part of it, and a line appended after a trailing
+// blank line would be ignored too.
 func setConfigFields(recFilename string, fields [][2]string) error {
 	data, err := os.ReadFile(recFilename)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
 	lines := strings.Split(strings.TrimRight(string(data), "\n"), "\n")
+	header := 0
+	for header < len(lines) && (strings.HasPrefix(lines[header], "%") || strings.HasPrefix(lines[header], "#")) {
+		header++
+	}
 	for _, kv := range fields {
 		line, found := kv[0]+": "+kv[1], false
 		for i, l := range lines {
@@ -277,7 +282,7 @@ func setConfigFields(recFilename string, fields [][2]string) error {
 			}
 		}
 		if !found {
-			lines = append([]string{line}, lines...)
+			lines = append(lines[:header], append([]string{line}, lines[header:]...)...)
 		}
 	}
 	return os.WriteFile(recFilename, []byte(strings.Join(lines, "\n")+"\n"), 0o644)

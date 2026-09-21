@@ -8,7 +8,7 @@ import (
 
 func TestSaveModWritesIntoFirstRecord(t *testing.T) {
 	f := filepath.Join(t.TempDir(), "config.rec")
-	os.WriteFile(f, []byte("SoundVolume: 0.5\n\n"), 0o644)
+	os.WriteFile(f, []byte("%rec: default\n\nSoundVolume: 0.5\n\n"), 0o644) // the shape of the real config.rec
 	if err := SaveMod(f, "heavenandhell"); err != nil {
 		t.Fatal(err)
 	}
