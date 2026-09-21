@@ -29,7 +29,10 @@ func playthrough() {
 		fmt.Printf("PLAYTHROUGH FAILED: "+format+"\n", args...)
 		os.Exit(1)
 	}
-	game.SaveDir = filepath.Join(os.TempDir(), "heavenAndHell_playthrough_saves")
+	// Per process: the directory is wiped at startup, so two playthroughs sharing one path delete each other's
+	// saves mid-run. That fails as "load failed: no such file" or a short explored count - symptoms that mimic a
+	// real save/load bug, and cost a wrong diagnosis once already.
+	game.SaveDir = filepath.Join(os.TempDir(), fmt.Sprintf("heavenAndHell_playthrough_saves_%d", os.Getpid()))
 	os.RemoveAll(game.SaveDir)
 	defer os.RemoveAll(game.SaveDir)
 	theGame, _ := createGameAndUIContext() // one instance: ebiten allows a single audio context per process
