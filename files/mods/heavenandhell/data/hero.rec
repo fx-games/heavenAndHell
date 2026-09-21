@@ -1,0 +1,123 @@
+%rec: class
+# THESE NUMBERS ARE A DESIGN CHOICE MADE DURING THE PORT. They are not a port of anything and they are meant to
+# be tuned by playing the game.
+#
+# Heaven & Hell never had this table. Its branch used the `stats` package - strength/dexterity/intelligence plus
+# health and mana resources - which is what its classes.rec still carries, and it had neither growth curves nor
+# caps nor an experience ladder. So nothing here could be carried over row for row, and copying Diablo's rows
+# would have been a lie dressed as a port.
+#
+# What IS derived, and from what:
+#   - starting str/mag/dex come from this mod's own classes.rec (stats_strength / stats_intelligence /
+#     stats_dexterity), doubled: H&H's values run ~5-15 where the engine's formulas expect ~10-30. Each class
+#     keeps its shape - the Warrior stays str-heavy, the Archer dex-heavy, the Mage int-heavy.
+#   - vit has no H&H equivalent, so it is derived from resource_health (20/15/10 -> 30/20/15).
+#   - mana follows resource_mana (1/1/4): the Warrior is mana-poor, the Mage mana-rich.
+#
+# What is CHOSEN, by the role each class' archetype plays: the caps, the 1/64 life and mana curves, the to-hit
+# numbers and the animation frame counts. Warrior tanky and mana-starved, Archer balanced, Mage mana-rich and
+# fragile. The to-hit and frame columns have no H&H source at all and are set to what the engine's formulas are
+# calibrated against for that archetype.
+#
+# Row order is archetype order: warrior, rogue, sorcerer. classes.rec names them Warrior, Archer and Mage.
+
+name: Warrior
+str: 30
+mag: 10
+dex: 10
+vit: 30
+max_str: 240
+max_mag: 40
+max_dex: 70
+max_vit: 120
+to_blk: 30
+adj_life: 20
+adj_mana: 0
+lvl_life: 2.5
+lvl_mana: 0.5
+chr_life: 2
+chr_mana: 0.5
+itm_life: 2
+itm_mana: 0.5
+potion_life: 2
+potion_mana: 1
+spell_life: 2
+mana_cost: 1.25
+magic_to_hit: 50
+melee_to_hit: 70
+ranged_to_hit: 60
+attack_frames: default=16 axe=20
+spell_frames: 20
+hit_frames: 6
+flags: critical_strike
+
+name: Archer
+str: 16
+mag: 10
+dex: 30
+vit: 20
+max_str: 80
+max_mag: 80
+max_dex: 240
+max_vit: 90
+to_blk: 20
+adj_life: 16
+adj_mana: 4
+lvl_life: 2
+lvl_mana: 1.5
+chr_life: 1.5
+chr_mana: 1.5
+itm_life: 1.5
+itm_mana: 1.5
+potion_life: 1.5
+potion_mana: 1.5
+spell_life: 1.5
+mana_cost: 1
+magic_to_hit: 50
+melee_to_hit: 50
+ranged_to_hit: 70
+attack_frames: default=18 axe=22 bow=12 staff=16
+spell_frames: 16
+hit_frames: 7
+flags: trap_sense
+
+name: Mage
+str: 10
+mag: 30
+dex: 10
+vit: 15
+max_str: 40
+max_mag: 240
+max_dex: 80
+max_vit: 70
+to_blk: 10
+adj_life: 10
+adj_mana: 8
+lvl_life: 1
+lvl_mana: 2.5
+chr_life: 1
+chr_mana: 2.5
+itm_life: 1
+itm_mana: 2.5
+potion_life: 1
+potion_mana: 2
+spell_life: 1
+mana_cost: 0.75
+magic_to_hit: 70
+melee_to_hit: 50
+ranged_to_hit: 50
+attack_frames: default=20 sword=16 axe=24 mace=16 staff=16
+spell_frames: 12
+hit_frames: 8
+
+%rec: experience
+# ExpLvls: the experience total each character level needs, level 1 first. Ten per line.
+# Also a design choice - H&H had no experience ladder. This one is 1500 * (1.3^n - 1), rounded to ten, which
+# gives 50 levels ending near 7.5e8. Tune it against how much experience this mod's monsters actually pay.
+
+exp: 0 450 1040 1800 2780 4070 5740 7910 10740 14410
+exp: 19180 25380 33450 43930 57560 75280 98310 128260 167180 217790
+exp: 283570 369100 480280 624810 812700 1056960 1374500 1787300 2323940 3021570
+exp: 3928490 5107490 6640190 8632700 11222950 14590290 18967830 24658630 32056660 41674110
+exp: 54176800 70430290 91559820 119028220 154737130 201158730 261506790 339959280 441947510 574532220
+exp: 746892330
