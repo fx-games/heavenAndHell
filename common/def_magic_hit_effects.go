@@ -96,6 +96,7 @@ func (g *Factory) GetAllHitEffects() map[string]func(args util.Arguments) *HitEf
 		"spell_damage":        g.spellDamage,
 		"apply_status":        g.applyStatusEffectToSelection,
 		"on_self":             g.onSelf,
+		"spawn_wall":          g.spawnWall,
 	}
 }
 
@@ -397,6 +398,34 @@ func (g *Factory) applyStatusEffectToSelection(args util.Arguments) *HitEffect {
 		},
 		Description: []util.LabelText{
 			util.LabelTextFromString(fmt.Sprintf("Apply %s to target(s)", effectName)),
+		},
+	}
+}
+
+// spawnWall (spawn_wall(fire|lightning)) lays a burning wall on every cell of its hit zone, each cell hurting
+// whatever stands in it every turn until it burns out. The shape is the hit zone's business: wall_aoe lays a
+// line across the caster's aim, ring_aoe a ring around him.
+func (g *Factory) spawnWall(args util.Arguments) *HitEffect {
+	kind := args.Get(0)
+	slvl := args.GetInt(1)
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			if attacker.hero == nil {
+				return
+			}
+			for _, p := range hitPositions {
+				if !g.State.GetMap().IsTileWalkable(p) {
+					continue
+				}
+				if kind == "lightning" {
+					g.spawnD1LightningWall(attacker, p, slvl, attacker.hero.Level, 1)
+				} else {
+					g.spawnD1FireWall(attacker, p, slvl, 1)
+				}
+			}
+		},
+		Description: []util.LabelText{
+			util.LabelTextFromString(fmt.Sprintf("Raise a wall of %s", kind)),
 		},
 	}
 }

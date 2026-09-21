@@ -40,6 +40,8 @@ resist: fire
 targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_WALLLOOP
+hit_zone: wall_aoe(11)
+effect: spawn_wall(fire)
 
 id: SPL_TOWN
 cast_sfx: IS_CAST6
@@ -206,6 +208,8 @@ resist: lightning
 targeted: true
 cast_sfx: IS_CAST4
 launch_sfx: LS_LMAG
+hit_zone: wall_aoe(11)
+effect: spawn_wall(lightning)
 
 id: SPL_IMMOLAT
 resist: fire
@@ -230,6 +234,8 @@ cast_sfx: IS_CAST6
 id: SPL_RING
 resist: fire
 cast_sfx: IS_CAST2
+hit_zone: ring_aoe(3)
+effect: spawn_wall(fire)
 
 id: SPL_SEARCH
 cast_sfx: IS_CAST6

@@ -429,30 +429,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		h.Rage = d1.RageTurns(clvl)
 		c.caster.AddParametrizedStatusEffect(f.d1RageEffect(clvl))
 		SyncHero(c.caster)
-	case d1.SplFireWall, d1.SplLightWall: // AddFirewallC, MI_FirewallC / mi_lightning_wall
-		start, ok := c.freeNear(target, func(p geometry.Point) bool {
-			return p != o && c.m.IsTileWalkable(p) && !c.m.IsObjectAt(p) && c.lineClear(o, p)
-		})
-		if !ok {
-			return false
-		}
-		spawn := func(p geometry.Point, layers int) { f.spawnD1FireWall(c.caster, p, d1.SplFireWall, slvl, layers) }
-		if c.spell == d1.SplLightWall {
-			spawn = func(p geometry.Point, layers int) { f.spawnD1LightningWall(c.caster, p, slvl, clvl, layers) }
-		}
-		// the controller lays both arms from the start cell for 6 ticks: 11 cells, two walls on the start cell
-		dir := D1DirTo(o, target)
-		spawn(start, 2)
-		for _, side := range []int{dir + 2, dir + 6} {
-			p := start
-			for i := 1; i < 6; i++ {
-				p = p.Add(D1Dirs[side%8])
-				if !c.m.Contains(p) || !c.m.IsTileWalkable(p) {
-					break
-				}
-				spawn(p, 1)
-			}
-		}
 	case d1.SplMana: // missiles_rech_mana
 		amount := d1Rng.Intn(10) + 1
 		for i := 0; i < clvl; i++ {
@@ -489,17 +465,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		c.ctx.Msg(fmt.Sprintf("You will turn back the next %d blows.", h.Reflections))
 	case d1.SplBerserk:
 		return f.d1Berserk(c, target, slvl)
-	case d1.SplRingOfFire: // missiles_ring + mi_fire_ring: fire walls three cells out, until a wall stops missiles
-		lvl := f.State.mapGen.levels[c.m.GetName()]
-		for _, p := range d1Ring(o, 3) {
-			if !c.m.Contains(p) || lvl != nil && lvl.CellSolid(p.X, p.Y) || c.m.IsObjectAt(p) || !c.lineClear(o, p) {
-				continue
-			}
-			if lvl != nil && lvl.CellMissile(p.X, p.Y) {
-				break
-			}
-			f.spawnD1FireWall(c.caster, p, d1.SplRingOfFire, slvl, 1)
-		}
 	case d1.SplTown:
 		return f.openD1Portal(c.caster)
 	case d1.SplGuardian:
@@ -536,23 +501,23 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 
 // spawnD1FireWall places one cell of a fire wall (AddFirewall, MI_Firewall), for Fire Wall or Ring of Fire.
 // Hellfire's burns the hero too, dlvl·16 ticks longer, and for a flat 8·clvl/64 a tick (AddFirewall's bug).
-func (f *Factory) spawnD1FireWall(caster *Actor, p geometry.Point, spell, slvl, layers int) {
+func (f *Factory) spawnD1FireWall(caster *Actor, p geometry.Point, slvl, layers int) {
 	clvl := caster.hero.Level
 	turns := d1.FireWallTurns(slvl, d1DungeonLevel(f.State))
-	f.spawnD1Wall(caster, p, spell, turns, true, layers, defs.IconEffectFireSmall, func() int { return d1.HellfireFireWallDamage64(clvl) })
+	f.spawnD1Wall(caster, p, d1.ResistKindFire, turns, true, layers, defs.IconEffectFireSmall, func() int { return d1.HellfireFireWallDamage64(clvl) })
 }
 
 // spawnD1LightningWall places one cell of a lightning wall (MIS_LIGHTWALL): 255·(slvl+1) ticks of 16·(2d10 + clvl
 // + 2)/64 a tick, rolled once when it is laid, on monsters and the hero alike.
 func (f *Factory) spawnD1LightningWall(caster *Actor, p geometry.Point, slvl, clvl, layers int) {
 	dam := 16 * (d1Rng.Intn(10) + d1Rng.Intn(10) + clvl + 2) // one roll a controller tick, shared by what it lays
-	f.spawnD1Wall(caster, p, d1.SplLightWall, 255*(slvl+1)/d1.RefWalkTicks, true, layers, defs.IconEffectLightning, func() int { return dam })
+	f.spawnD1Wall(caster, p, d1.ResistKindLightning, 255*(slvl+1)/d1.RefWalkTicks, true, layers, defs.IconEffectLightning, func() int { return dam })
 }
 
 // spawnD1Wall places one wall cell of `layers` walls stacked (a fire wall's start cell holds two), each rolling
 // dam64() once as it is laid: each turn every layer hits the monster standing in it, and with both the hero too,
 // for its 1/64 a tick over a turn's 8 ticks.
-func (f *Factory) spawnD1Wall(caster *Actor, p geometry.Point, spell, turns int, both bool, layers int, icon int32, dam64 func() int) {
+func (f *Factory) spawnD1Wall(caster *Actor, p geometry.Point, resist, turns int, both bool, layers int, icon int32, dam64 func() int) {
 	m := f.State.GetMap()
 	if m.IsObjectAt(p) || turns <= 0 {
 		return
@@ -575,7 +540,7 @@ func (f *Factory) spawnD1Wall(caster *Actor, p geometry.Point, spell, turns int,
 			return
 		}
 		f.ActionBroker.Execute(&spellTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
-			caster: caster, spell: spell, run: func(c *spellCtx) {
+			caster: caster, resist: resist, run: func(c *spellCtx) {
 				c.from = &p
 				for _, d := range dams {
 					if v := c.monsterAt(p); v != nil {
@@ -629,7 +594,8 @@ func (f *Factory) spawnD1Guardian(caster *Actor, p geometry.Point, turns int) {
 type spellTickAction struct {
 	BaseAction
 	caster     *Actor
-	spell      int
+	spell      int // only for the runes, which cast their own spell through the content mapping
+	resist     int // d1.ResistKind* of the damage this tick deals, when it is not a whole spell's
 	run        func(c *spellCtx)
 	animations []Animation
 }
@@ -640,6 +606,9 @@ func (a *spellTickAction) Execute(ctx ActionContext) []Action {
 	c := &spellCtx{f: ctx.GameState.factory, ctx: ctx, caster: a.caster, h: a.caster.hero, s: a.caster.HeroSheet(), spell: a.spell,
 		m: ctx.GameState.GetMap(), cause: a.cause, dealt: map[*Actor]int{}}
 	c.setSpell(a.spell)
+	if a.resist != 0 {
+		c.resist = a.resist
+	}
 	a.run(c)
 	a.animations = c.animations
 	return c.finish()
