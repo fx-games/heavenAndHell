@@ -261,7 +261,7 @@ func SaveMod(recFilename, mod string) error {
 	return setConfigFields(recFilename, [][2]string{{"Mod", mod}})
 }
 
-// setConfigFields replaces each field's line in place. A missing field goes right after the %rec/# header: only
+// setConfigFields replaces each field's line in place. A missing field goes before the first field, past the header: only
 // the first record is read, lines above its header are not part of it, and a line appended after a trailing
 // blank line would be ignored too.
 func setConfigFields(recFilename string, fields [][2]string) error {
@@ -271,7 +271,7 @@ func setConfigFields(recFilename string, fields [][2]string) error {
 	}
 	lines := strings.Split(strings.TrimRight(string(data), "\n"), "\n")
 	header := 0
-	for header < len(lines) && (strings.HasPrefix(lines[header], "%") || strings.HasPrefix(lines[header], "#")) {
+	for header < len(lines) && (lines[header] == "" || strings.HasPrefix(lines[header], "%") || strings.HasPrefix(lines[header], "#")) {
 		header++
 	}
 	for _, kv := range fields {

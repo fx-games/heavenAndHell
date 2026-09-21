@@ -12,8 +12,8 @@ func TestSaveModWritesIntoFirstRecord(t *testing.T) {
 	if err := SaveMod(f, "heavenandhell"); err != nil {
 		t.Fatal(err)
 	}
-	if got := NewConfigurationFromRecFile(f).Mod; got != "heavenandhell" {
-		t.Fatalf("Mod = %q", got)
+	if c := NewConfigurationFromRecFile(f); c.Mod != "heavenandhell" || c.SoundVolume != 0.5 {
+		t.Fatalf("Mod = %q, SoundVolume = %v: the field split the record", c.Mod, c.SoundVolume)
 	}
 	SaveMod(f, "d1")
 	if got := NewConfigurationFromRecFile(f).Mod; got != "d1" {
