@@ -150,6 +150,9 @@ func (g *GameInstance) SaveGame() {
 	}
 }
 
+// SaveSlot is the slot the running game autosaves into; 0 when it belongs to no slot yet.
+func (g *GameInstance) SaveSlot() int { return g.slot }
+
 // QuitSaves reports whether SaveGame, and so quitting (decision 11), would write the game right now.
 func (g *GameInstance) QuitSaves() bool {
 	if !g.autosave || g.slot <= 0 {
@@ -268,8 +271,15 @@ func (g *GameInstance) classByName(internalName string) defs.LoadoutDefinition {
 	return g.dataDefinitions.ClassDefinitions[0]
 }
 
-// LoadGame loads the most recently played slot, which is what Continue does.
-func (g *GameInstance) LoadGame() error { return g.LoadSlot(LatestSaveSlot()) }
+// LoadGame reloads the running game's own slot, and the most recently played one when there is no running game
+// (Continue from the start menu). Going by the directory alone was wrong for a game that has a slot: it reads
+// back whatever file happens to be newest - another hero's save, or slot 0 when the autosave wrote nothing.
+func (g *GameInstance) LoadGame() error {
+	if g.slot > 0 {
+		return g.LoadSlot(g.slot)
+	}
+	return g.LoadSlot(LatestSaveSlot())
+}
 
 // LoadSlot restores a save slot: the world is rebuilt from the seed, then hero, items and level snapshots are
 // applied. Autosaving continues into the slot that was loaded.
