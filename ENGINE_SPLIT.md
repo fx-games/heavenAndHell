@@ -83,6 +83,25 @@ content model.
 about Diablo's formats. The ENGINE may not: it reads one schema, whichever mod
 supplied it.
 
+## The playthrough is nondeterministic - and hides two real save bugs
+
+Seeding both time-seeded RNGs (instance source + `common.d1Rng`, pinned by
+`playthrough <seed>`) was NOT enough: the same seed still produces different
+outcomes run to run. Something below the RNGs varies - Go map iteration order
+is the prime suspect, since the failures cluster in save/load.
+
+The residual variance surfaces two genuine defects, both intermittent:
+
+1. `load failed: open .../slot0.json: no such file or directory` - a load asks
+   for slot 0 when the run saved into slot 1, so `g.slot` is not what the
+   loader thinks it is.
+2. `load forgot explored cells (1253 -> 305)` / `(564 -> 150)` - the explored
+   bitmap comes back short, so a loaded game forgets most of the map.
+
+Both are in the same area as the already-fixed monster-status-on-load bug, so
+a common cause is plausible. Until they are fixed, ONE green playthrough run
+is weak evidence: run it several times.
+
 ## The playthrough smoke test now passes
 
 `go run -tags development . playthrough` reports PLAYTHROUGH OK as of the
