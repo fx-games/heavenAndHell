@@ -185,7 +185,7 @@ func missileIcon(mis D1Missile) int32 {
 // d1MissileSfx is misdat's launch and impact sounds (mlSFX, miSFX) of the monster and trap missiles, as d1.SpellSfx.
 var d1MissileSfx = map[D1Missile][2]string{
 	MisFirebolt: {"LS_FBOLT1", "LS_FIRIMP2"}, MisFireball: {"LS_FBOLT1", "LS_FIRIMP2"},
-	MisLightCtrl: {"LS_LNING1"}, // the MIS_LIGHTNINGs it lays; LIGHTCTRL2's thin ones are silent
+	MisLightCtrl: {"LS_LNING1"}, MisLightning: {"LS_LNING1", "LS_ELECIMP1"}, // the MIS_LIGHTNINGs it lays; LIGHTCTRL2's thin ones are silent
 	MisFlash:     {"LS_NOVA"}, MisFlamec: {"LS_SPOUTSTR"}, MisCbolt: {"LS_CBOLT"}, MisAcid: {"LS_ACID"}, MisAcidPud: {"LS_PUDDLE"},
 	MisNova: {"LS_NOVA"}, MisFireWall: {"LS_WALLLOOP"}, MisFlashTrap: {"LS_NOVA"},
 }
@@ -274,6 +274,7 @@ func (c *missileCtx) fire(mis D1Missile, target geometry.Point, dam int) {
 		}
 	case MisLightning:
 		c.hit(mis, target, target, dam, dam, true, 8)
+		playD1SfxAt(c.ctx, d1MissileSfx[mis][1], target)
 		c.c.animations = append(c.c.animations, NewHitAnimation(target, 0.3, defs.IconEffectLightning, 2))
 	case MisFlash: // the six cells from one left of the caster to one right and below
 		for _, d := range []geometry.Point{{X: -1}, {}, {X: 1}, {X: -1, Y: 1}, {Y: 1}, {X: 1, Y: 1}} {

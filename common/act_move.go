@@ -52,6 +52,9 @@ func (d *MoveAction) Execute(context ActionContext) []Action {
 	actor := d.actor
 	d.originPos = actor.MapPosition()
 	gameMap.MoveActor(actor, d.targetPos) // write state
+	if d.isPlayer {
+		playD1SfxAt(context, "PS_WALK1", d.targetPos) // PM_DoWalk: one step sound per walk
+	}
 
 	d.isMovementVisibleToPlayer = false
 	if d.isPlayer {

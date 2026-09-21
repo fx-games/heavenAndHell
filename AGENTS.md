@@ -109,13 +109,14 @@ A new sound event = one `PlayCue("<name>")` call + one record in `sounds.rec`. D
   the pause menu's Music Player. They are not area themes; `music.rec` is.
 - `voice/` — voice lines registered by directory (`RegisterVoices`), doesn't exist yet; folder absence is fine.
 
-Diablo's and Hellfire's own audio is **not in this game**: no `diablo_sfx/`, no `diablo_music/`, no importer, no
-audio menu option. The events stayed — every effect, every speech id and every theme is a record waiting for a
-file, and `d1.SfxFiles` still records which D1 `.wav` each speech id used to be, keyed the same way as the
-transcriptions of the cut lines in `reference/d1_voice_transcripts.tsv` (one `file<TAB>what it said` per line,
-produced with `transcribe`). Drop your own `.ogg` under `files/assets/` and wire it up with the scripts above; the
-engine only decodes Vorbis, so convert with `oggenc -Q -q 4` (not `ffmpeg -c:a vorbis`: its experimental Vorbis
-encoder produces audible static on speech).
+Diablo 1.09's own audio is the D1 mod's: `files/mods/d1/diablo_sfx/` and `diablo_music/` (gitignored, bring your
+own, like `DIABDAT.MPQ`; converted copies sit in `reference/cut_diablo_audio/`, the old MPQ importer is in git at
+`2d2eb5c^:cmd/d1import/sfx.go`). Every `sfx.<id>` and speech record points at the file 1.09's `sgSFX` gives that id
+(`effects.cpp`), monsters at their `monstdat` set, `music.rec` at the five themes. A record's `fallback:` lines (the
+Angband pack and our own) play only when none of its `sound:` files is on disk, so a checkout without Diablo's audio
+still has sound. Hellfire's audio is not used. Convert new files with `oggenc -Q -q 4` (not `ffmpeg -c:a vorbis`:
+its experimental Vorbis encoder produces audible static on speech). `go:embed mods` embeds whatever is on disk:
+build a release for others from a checkout without `diablo_*`.
 
 ## ASCII mode (`console/`, `textui/`)
 

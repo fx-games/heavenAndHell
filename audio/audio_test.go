@@ -4,6 +4,7 @@ import (
 	"io/fs"
 	"os"
 	"testing"
+	"testing/fstest"
 
 	"rpg/files"
 )
@@ -71,5 +72,20 @@ func TestAreaMusicRegistered(t *testing.T) {
 		if slicesContains(ap.MusicTracks(), theme) {
 			t.Fatalf("%s is listed as a track but has no sound", theme)
 		}
+	}
+}
+
+// fallback: stands in only when none of the event's sound: files is on disk.
+func TestFallbackOnlyWhenSoundsMissing(t *testing.T) {
+	ap := NewAudioPlayer(fstest.MapFS{
+		"s.rec":        {Data: []byte("internal_name: a\nsound: x.ogg\nfallback: y.ogg\n\ninternal_name: b\nsound: gone.ogg\nfallback: y.ogg\n")},
+		"assets/x.ogg": {}, "assets/y.ogg": {},
+	}, SampleRate44100)
+	ap.RegisterSoundEvents("s.rec")
+	if f := ap.availableSounds["a"].Filenames; len(f) != 1 || f[0] != "assets/x.ogg" {
+		t.Errorf("a: %v", f)
+	}
+	if f := ap.availableSounds["b"].Filenames; len(f) != 1 || f[0] != "assets/y.ogg" {
+		t.Errorf("b: %v", f)
 	}
 }

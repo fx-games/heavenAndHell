@@ -247,6 +247,7 @@ event: on_kill
 subject: MT_DIABLO
 when: not done("diablo")
 do: complete_quest(diablo)
+do: sound(USFX_DIABLOD)
 do: end_text()
 
 # The dying townsman on level 2: his last words start the Butcher, and after that he only groans.

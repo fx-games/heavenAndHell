@@ -31,6 +31,7 @@ func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedActio
 		return nil, action
 	case d1.Warrior:
 		return nil, f.d1ItemSkill("Item Repair", d1.SplRepair, d1.CanRepair, func(it *Item) {
+			f.PlayD1Sfx("IS_REPAIR", player.MapPosition()) // DoRepair
 			if d1.RepairItem(it.d1, player.hero.Level, d1Rng.Intn) {
 				name := it.Name()
 				player.GetEquipment().UnEquip(it)
