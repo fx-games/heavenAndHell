@@ -223,7 +223,7 @@ func resistBits(kind int) (resist, immune int) {
 func (c *spellCtx) strike(a *Actor, dam64, ticks int) bool {
 	mon := a.d1Monster
 	resist, immune := resistBits(c.resist)
-	if mon.MagicRes&immune != 0 || c.undeadOnly && mon.Data.Class != "MC_UNDEAD" && mon.AI != "AI_DIABLO" {
+	if d1Untouchable(mon, false) || mon.MagicRes&immune != 0 || c.undeadOnly && mon.Data.Class != "MC_UNDEAD" && mon.AI != "AI_DIABLO" {
 		return false
 	}
 	if c.drainThird {

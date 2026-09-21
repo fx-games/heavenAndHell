@@ -485,15 +485,15 @@ func TestMissileFlightTicksPerTile(t *testing.T) {
 	}
 }
 
-// MI_Manashield: spell level 1 pays 4/9 of the damage, level 7 and up 40/63.
+// MI_Manashield (1.09): any spell level above 0 takes a third off.
 func TestManaShieldCost(t *testing.T) {
 	if got := ManaShieldCost(630, 0); got != 630 {
 		t.Errorf("slvl 0: %d", got)
 	}
-	if got := ManaShieldCost(630, 1); got != 280 {
+	if got := ManaShieldCost(630, 1); got != 420 {
 		t.Errorf("slvl 1: %d", got)
 	}
-	if got := ManaShieldCost(630, 9); got != 400 {
+	if got := ManaShieldCost(630, 9); got != 420 {
 		t.Errorf("slvl 9: %d", got)
 	}
 }

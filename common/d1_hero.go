@@ -264,6 +264,20 @@ func UseD1Potion(user *Actor, miscID string) {
 	SyncHero(user)
 }
 
+// d1Untouchable ports CheckMonsterHit and PlrHitMonst's early outs: a blow at a dormant gargoyle only wakes it,
+// and a counselor-kind off its normal goal can't be hit; nor, by a weapon, an Illusion Weaver retreating.
+// (MM_CHARGE never lasts past its own turn here.)
+func d1Untouchable(mon *D1Monster, weapon bool) bool {
+	switch {
+	case mon.Dormant:
+		mon.Dormant = false
+		return true
+	case mon.Goal != d1GoalNormal && (mon.AI == "AI_COUNSLR" || weapon && mon.Data.ID == "MT_ILLWEAV" && mon.Goal == 2):
+		return true
+	}
+	return false
+}
+
 func d1DungeonLevel(state *State) int { return LevelFromName(state.GetMap().GetName()) }
 
 // resolveD1Attack applies D1's hit formulas when a hero fights a D1 monster.
@@ -282,6 +296,9 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 			chance = 100
 		}
 		d1Alert(def, att)
+		if d1Untouchable(mon, true) {
+			return 0, nil, true
+		}
 		blast := 0
 		if !ranged { // PM_DoAttack: fire and lightning weapons explode on the swing's target, hit or miss (MI_Weapexp)
 			if s.Flags&d1.ISplFireDam != 0 {
@@ -365,6 +382,11 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 			d1BlockWear(ctx.Msg, def)
 			reflect(d1.MonsterDamage(d1Rng, s, minDam, maxDam))
 			return 0, extra, true
+		}
+		if mon.Data.ID == "MT_YZOMBIE" && s.MaxHP > 64 && h.MaxHPBase > 64 { // Black Death: 1 max life, for good
+			h.MaxHPBase -= 64
+			h.HPBase = min(h.HPBase, h.MaxHPBase)
+			SyncHero(def)
 		}
 		dam64 := d1.MonsterDamage(d1Rng, s, minDam, maxDam)
 		dam64 -= reflect(dam64)
@@ -678,10 +700,13 @@ func d1FallenFear(state *State, pos geometry.Point) {
 // grantExperience adds experience earned against a foe of monLevel, and levels the hero up on it.
 func (f *Factory) grantExperience(player *Actor, monLevel, exp int) {
 	h := player.hero
+	if !player.IsAlive() { // AddPlrExperience: a dead hero gets nothing
+		return
+	}
 	before := h.Level
 	h.AddExperience(monLevel, exp)
 	SyncHero(player)
-	if h.Level > before {
+	if h.Level > before && h.Exp < d1.ExpLvls[49] { // the jump to 50 at the cap heals nothing
 		player.GetStats().GetResource(stats.Health).SetToMax()
 		player.GetStats().GetResource(stats.Mana).SetToMax()
 		f.Msg(fmt.Sprintf("You reached level %d! Press 'u' to spend %d stat points.", h.Level, h.StatPts))

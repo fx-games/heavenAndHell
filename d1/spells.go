@@ -350,10 +350,7 @@ func LightningTicks(slvl int) int { return slvl>>1 + 6 }
 
 // ManaShieldCost ports MI_Manashield's reduction of the life lost (diff) before mana pays for it.
 func ManaShieldCost(diff, slvl int) int {
-	if div := 3 * min(slvl, 7); div > 0 {
-		diff -= diff / div
-	}
-	if slvl > 0 {
+	if slvl > 0 { // 1.09; Hellfire divides by 3·min(slvl, 7) instead
 		diff -= diff / 3
 	}
 	return max(diff, 0)

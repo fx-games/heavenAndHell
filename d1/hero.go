@@ -524,11 +524,10 @@ func (h *Hero) HitLeech(rng *rand.Rand, s Sheet, dam int) (hp, mana int) {
 			mana = 5 * d / 100
 		}
 	}
-	if s.Flags&ISplStealLife3 != 0 {
-		hp += 3 * d / 100
-	}
-	if s.Flags&ISplStealLife5 != 0 {
+	if s.Flags&ISplStealLife5 != 0 { // the 5% overrides the 3%, as with mana
 		hp += 5 * d / 100
+	} else if s.Flags&ISplStealLife3 != 0 {
+		hp += 3 * d / 100
 	}
 	return
 }
@@ -655,13 +654,10 @@ func MonsterDamage(rng *rand.Rand, s Sheet, minDam, maxDam int) int {
 // AddExperience ports AddPlrExperience (single player); returns levels gained.
 func (h *Hero) AddExperience(monLevel, exp int) int {
 	e := int(float64(exp) * (float64(monLevel-h.Level)/10 + 1))
-	h.Exp += max(e, 0)
+	h.Exp = min(h.Exp+max(e, 0), 2000000000) // MAXEXP
 	gained := 0
-	if h.Exp >= ExpLvls[49] {
-		for h.Level < 50 {
-			h.nextLevel()
-			gained++
-		}
+	if h.Exp >= ExpLvls[49] { // level 50 outright, without NextPlrLevel's points, life and mana
+		gained, h.Level = 50-h.Level, 50
 		return gained
 	}
 	l := 0
