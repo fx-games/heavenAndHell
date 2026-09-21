@@ -403,8 +403,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		return false
 	}
 	switch c.spell {
-	case d1.SplHeal:
-		st.GetResource(stats.Health).Increase(float64(d1.HealAmount64(d1Rng, h.Class, clvl, slvl) >> 6))
 	case d1.SplChain:
 		c.beam(target)
 		for _, a := range append([]*Actor(nil), c.m.Actors()...) {
@@ -432,25 +430,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		h.Rage = d1.RageTurns(clvl)
 		c.caster.AddParametrizedStatusEffect(f.d1RageEffect(clvl))
 		SyncHero(c.caster)
-	case d1.SplMana: // missiles_rech_mana
-		amount := d1Rng.Intn(10) + 1
-		for i := 0; i < clvl; i++ {
-			amount += d1Rng.Intn(4) + 1
-		}
-		for i := 0; i < slvl; i++ {
-			amount += d1Rng.Intn(6) + 1
-		}
-		switch h.Class {
-		case d1.Sorcerer:
-			amount <<= 1
-		case d1.Rogue, d1.Bard:
-			amount += amount >> 1
-		}
-		h.ManaBase = min(h.ManaBase+amount<<6, h.MaxManaBase)
-		st.GetResource(stats.Mana).Increase(float64(amount))
-	case d1.SplMagi: // missiles_magi
-		h.ManaBase = h.MaxManaBase
-		st.GetResource(stats.Mana).SetToMax()
 	case d1.SplJester: // missiles_jester: one of nine spells at the Jester's spell level
 		c.spell = [10]int{d1.SplFirebolt, d1.SplFirebolt, d1.SplFireball, d1.SplFireWall, d1.SplGuardian, d1.SplChain,
 			d1.SplTown, d1.SplTeleport, d1.SplApocalypse, d1.SplStone}[d1Rng.Intn(10)]

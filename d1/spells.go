@@ -370,22 +370,38 @@ func StoneTurns(slvl int) int { return min(slvl+6, 15) << 4 / RefWalkTicks }
 
 func InfravisionTurns(slvl int) int { return grow(1584, slvl) / RefWalkTicks }
 
-// HealAmount64 ports AddHeal.
-func HealAmount64(rng *rand.Rand, class, clvl, slvl int) int {
-	l := (rnd(rng, 10) + 1) << 6
+// ResourceAmount64 is the curve AddHeal and missiles_rech_mana share, in 1/64 points: 1d<base>, plus
+// 1d<perClvl> for every character level and 1d<perSlvl> for every spell level, then the multiplier the
+// spell gives the classes it favours - boost 2 doubles the roll, 1 raises it by half, 0 leaves it alone.
+// Which classes those are is the content's business; only the shape lives here.
+func ResourceAmount64(rng *rand.Rand, base, perClvl, perSlvl, clvl, slvl, boost int) int {
+	l := (rnd(rng, base) + 1) << 6
 	for i := 0; i < clvl; i++ {
-		l += (rnd(rng, 4) + 1) << 6
+		l += (rnd(rng, perClvl) + 1) << 6
 	}
 	for i := 0; i < slvl; i++ {
-		l += (rnd(rng, 6) + 1) << 6
+		l += (rnd(rng, perSlvl) + 1) << 6
 	}
-	switch class {
-	case Warrior, Barbarian, Monk:
+	switch boost {
+	case 2:
 		l *= 2
-	case Rogue, Bard:
+	case 1:
 		l += l >> 1
 	}
 	return l
+}
+
+// HealAmount64 ports AddHeal: the shared curve with Healing's own class multipliers. It stays because the
+// item tooltips and HealRange64 quote a healing staff's range without casting anything.
+func HealAmount64(rng *rand.Rand, class, clvl, slvl int) int {
+	boost := 0
+	switch class {
+	case Warrior, Barbarian, Monk:
+		boost = 2
+	case Rogue, Bard:
+		boost = 1
+	}
+	return ResourceAmount64(rng, 10, 4, 6, clvl, slvl, boost)
 }
 
 // HealRange64 is HealAmount64's lowest and highest roll.

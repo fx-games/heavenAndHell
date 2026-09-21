@@ -6,7 +6,9 @@ import (
 	"rpg/d1"
 	"rpg/defs"
 	"rpg/geometry"
+	"rpg/stats"
 	"rpg/util"
+	"strings"
 )
 
 // spell_damage is the one damaging on-hit effect. Everything a damaging spell used to differ in - how far and in
@@ -136,4 +138,72 @@ func (a *SpellDamageAction) Execute(ctx ActionContext) []Action {
 		a.animations = append(c.animations, NewProjectileDirectionAnimation(a.caster, a.caster.MapPosition(), last, 0.03, icon, 2))
 	}
 	return c.finish()
+}
+
+// restore_resource is spell_damage's mirror: the one effect that puts a resource back, on the caster.
+//
+//	effect: restore_resource(<health|mana>, <base>, <per_clvl>, <per_slvl>, <doubled_for>, <raised_by_half_for>)
+//	effect: restore_resource(<health|mana>, full)
+//
+// Healing, Mana and the Magi are the same curve read three ways, so the dice and the classes each one favours
+// are numbers in the content and the arithmetic sits in d1.ResourceAmount64 beside the damage rolls. The
+// caster's spell level is appended as the last argument where the action is built, as it is for spell_damage.
+var d1ClassByName = map[string]int{"warrior": d1.Warrior, "rogue": d1.Rogue, "sorcerer": d1.Sorcerer,
+	"monk": d1.Monk, "bard": d1.Bard, "barbarian": d1.Barbarian}
+
+// classSet reads a comma separated list of class names. Commas, because the argument list itself splits on '|'.
+func classSet(list string) map[int]bool {
+	set := map[int]bool{}
+	for _, name := range strings.Split(list, ",") {
+		if class, known := d1ClassByName[strings.TrimSpace(name)]; known {
+			set[class] = true
+		}
+	}
+	return set
+}
+
+func (g *Factory) restoreResource(args util.Arguments) *HitEffect {
+	resource := args.Get(0)
+	if resource != "health" && resource != "mana" {
+		g.Msg(fmt.Sprintf("Unknown resource to restore: %s", resource))
+		return nil
+	}
+	full := args.Get(1) == "full"
+	base, perClvl, perSlvl := args.GetInt(1), args.GetInt(2), args.GetInt(3)
+	doubled, raisedByHalf := classSet(args.Get(4)), classSet(args.Get(5))
+	slvl := args.GetInt(len(args) - 1) // the cast appends it, and the two forms are of different length
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			h := attacker.hero
+			if h == nil {
+				return
+			}
+			boost := 0
+			switch {
+			case doubled[h.Class]:
+				boost = 2
+			case raisedByHalf[h.Class]:
+				boost = 1
+			}
+			st := attacker.GetStats()
+			if resource == "health" {
+				if full {
+					st.GetResource(stats.Health).SetToMax()
+					return
+				}
+				st.GetResource(stats.Health).Increase(float64(d1.ResourceAmount64(d1Rng, base, perClvl, perSlvl, h.Level, slvl, boost) >> 6))
+				return
+			}
+			// mana carries hero bookkeeping health does not: the base pool grows with what is restored
+			if full {
+				h.ManaBase = h.MaxManaBase
+				st.GetResource(stats.Mana).SetToMax()
+				return
+			}
+			amount := d1.ResourceAmount64(d1Rng, base, perClvl, perSlvl, h.Level, slvl, boost) >> 6
+			h.ManaBase = min(h.ManaBase+amount<<6, h.MaxManaBase)
+			st.GetResource(stats.Mana).Increase(float64(amount))
+		},
+		Description: []util.LabelText{util.LabelTextFromString(fmt.Sprintf("Restore the caster's %s", resource))},
+	}
 }

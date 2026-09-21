@@ -16,6 +16,8 @@ effect: spell_damage(firebolt|fire)
 
 id: SPL_HEAL
 cast_sfx: IS_CAST8
+hit_zone: target_only
+effect: restore_resource(health|10|4|6|warrior,barbarian,monk|rogue,bard)
 
 id: SPL_LIGHTNING
 resist: lightning
@@ -198,9 +200,13 @@ health_cost: 6
 
 id: SPL_MANA
 cast_sfx: IS_CAST8
+hit_zone: target_only
+effect: restore_resource(mana|10|4|6|sorcerer|rogue,bard)
 
 id: SPL_MAGI
 cast_sfx: IS_CAST8
+hit_zone: target_only
+effect: restore_resource(mana|full)
 
 id: SPL_JESTER
 targeted: true

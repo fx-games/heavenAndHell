@@ -94,6 +94,7 @@ func (g *Factory) GetAllHitEffects() map[string]func(args util.Arguments) *HitEf
 		"blink":               g.blink,
 		"earthshaker":         g.earthShaker,
 		"spell_damage":        g.spellDamage,
+		"restore_resource":    g.restoreResource,
 		"apply_status":        g.applyStatusEffectToSelection,
 		"on_self":             g.onSelf,
 		"spawn_wall":          g.spawnWall,
