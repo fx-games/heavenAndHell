@@ -33,6 +33,8 @@ const (
 	ActionNameReadMessage       UntargetedActionName = "read_message"
 	ActionNameReplicate         UntargetedActionName = "replicate_with"
 	ActionNameEarthquake        UntargetedActionName = "earthquake"
+	ActionNameRageSelf          UntargetedActionName = "apply_rage_self"
+	ActionNameReflectSelf       UntargetedActionName = "apply_reflect_self"
 )
 
 func (g *Factory) NewUntargetedActionFromName(name string) *UntargetedAction {
@@ -84,6 +86,8 @@ func (g *Factory) GetAllUntargetedEffects() map[string]func(args util.Arguments)
 		string(ActionNameTelefrag):          g.getRandomTelefragAction,
 		string(ActionNameReplicate):         g.getReplicate,
 		string(ActionNameEarthquake):        g.getEarthquake,
+		string(ActionNameRageSelf):          g.getRageSelfAction,
+		string(ActionNameReflectSelf):       g.getReflectSelfAction,
 	}
 }
 

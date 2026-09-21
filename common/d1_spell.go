@@ -398,7 +398,6 @@ func (c *spellCtx) castAllowed(target geometry.Point) bool {
 func (c *spellCtx) cast(target geometry.Point) bool {
 	f, h, s, slvl, o := c.f, c.h, c.s, c.slvl, c.origin()
 	clvl := h.Level
-	st := c.caster.GetStats()
 	if !c.castAllowed(target) {
 		return false
 	}
@@ -422,14 +421,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		if f.UI != nil {
 			f.UI().ShowItemInfo(item)
 		}
-	case d1.SplRage: // AddRage: no raging while already raging, or while too wounded to survive the hangover
-		if h.Rage != 0 || st.GetResource(stats.Health).Value() <= clvl {
-			c.ctx.Msg("You cannot work yourself up again.")
-			return false
-		}
-		h.Rage = d1.RageTurns(clvl)
-		c.caster.AddParametrizedStatusEffect(f.d1RageEffect(clvl))
-		SyncHero(c.caster)
 	case d1.SplJester: // missiles_jester: one of nine spells at the Jester's spell level
 		c.spell = [10]int{d1.SplFirebolt, d1.SplFirebolt, d1.SplFireball, d1.SplFireWall, d1.SplGuardian, d1.SplChain,
 			d1.SplTown, d1.SplTeleport, d1.SplApocalypse, d1.SplStone}[d1Rng.Intn(10)]
@@ -438,15 +429,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		return c.cast(target)
 	case d1.SplWarp: // missiles_warp: to the nearest stairs, beside them
 		return f.d1Warp(c)
-	case d1.SplReflect: // missiles_reflection
-		n := slvl
-		if n == 0 {
-			n = 2
-		}
-		h.Reflections += n * clvl
-		c.ctx.Msg(fmt.Sprintf("You will turn back the next %d blows.", h.Reflections))
-	case d1.SplBerserk:
-		return f.d1Berserk(c, target, slvl)
 	case d1.SplTown:
 		return f.openD1Portal(c.caster)
 	case d1.SplGuardian:

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"rpg/d1"
 	"rpg/geometry"
+	"rpg/util"
 )
 
 // d1Doppelganger ports AddDoppelganger: a fresh monster of the same type (full life, its own rolls) on the first
@@ -67,34 +68,57 @@ func (f *Factory) d1Warp(c *spellCtx) bool {
 	return true
 }
 
-// d1Berserk ports missiles_berserk: the nearest monster around the target that isn't unique, Diablo or immune to
-// magic (resistant ones half the time) turns on its own kind, hitting 20-29% harder plus the spell level.
+// enrage_monster (effect: enrage_monster) ports missiles_berserk: the first monster in the hit zone that isn't
+// unique, Diablo or immune to magic (resistant ones half the time) turns on its own kind, hitting 20-29% harder
+// plus the spell level, which the cast appends as the one argument.
 // ponytail: a berserk monster fights like the golem, in melee; its damage bonus is lost when the level is loaded.
-func (f *Factory) d1Berserk(c *spellCtx, target geometry.Point, slvl int) bool {
-	var victim *Actor
-	c.freeNear(target, func(p geometry.Point) bool {
-		a, ok := c.m.TryGetActorAt(p)
-		if !ok || a.d1Monster == nil || !a.IsAlive() {
-			return false
-		}
-		mon := a.d1Monster
-		if mon.Golem || mon.Berserk || mon.Unique != nil || mon.AI == "AI_DIABLO" || mon.MagicRes&d1.ImmuneMagic != 0 {
-			return false
-		}
-		if mon.MagicRes&d1.ResistMagic != 0 && d1Rng.Intn(2) != 0 {
-			return false
-		}
-		victim = a
-		return true
-	})
-	if victim == nil {
-		return false
+func (g *Factory) enrageMonster(args util.Arguments) *HitEffect {
+	slvl := args.GetInt(0)
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			m := g.State.GetMap()
+			for _, p := range hitPositions {
+				a, ok := m.TryGetActorAt(p)
+				if !ok || a.d1Monster == nil || !a.IsAlive() {
+					continue
+				}
+				mon := a.d1Monster
+				if mon.Golem || mon.Berserk || mon.Unique != nil || mon.AI == "AI_DIABLO" || mon.MagicRes&d1.ImmuneMagic != 0 {
+					continue
+				}
+				if mon.MagicRes&d1.ResistMagic != 0 && d1Rng.Intn(2) != 0 {
+					continue
+				}
+				grow := func(v int) int { return v*(d1Rng.Intn(10)+120)/100 + slvl }
+				mon.MinDam, mon.MaxDam = grow(mon.MinDam), grow(mon.MaxDam)
+				mon.MinDam2, mon.MaxDam2 = grow(mon.MinDam2), grow(mon.MaxDam2)
+				mon.Berserk = true
+				g.Msg(fmt.Sprintf("%s goes berserk!", a.Name()))
+				return
+			}
+		},
+		Description: []util.LabelText{util.LabelTextFromString("Turn a monster on its own kind")},
 	}
-	mon := victim.d1Monster
-	grow := func(v int) int { return v*(d1Rng.Intn(10)+120)/100 + slvl }
-	mon.MinDam, mon.MaxDam = grow(mon.MinDam), grow(mon.MaxDam)
-	mon.MinDam2, mon.MaxDam2 = grow(mon.MinDam2), grow(mon.MaxDam2)
-	mon.Berserk = true
-	c.ctx.Msg(fmt.Sprintf("%s goes berserk!", victim.Name()))
-	return true
+}
+
+// apply_reflect_self ports missiles_reflection: the blows Reflect turns back are the spell level (the argument
+// when it is zero) times the character level. Hero bookkeeping, reached by name like any other self-cast.
+func (g *Factory) getReflectSelfAction(args util.Arguments) UntargetedEffect {
+	whenUnlearned := args.GetIntOrDefault(0, 2)
+	slvl := args.GetInt(len(args) - 1) // the cast appends it
+	return UntargetedEffect{
+		Effect: func(user *Actor, source EffectSource) {
+			h := user.hero
+			if h == nil {
+				return
+			}
+			blows := slvl
+			if blows == 0 {
+				blows = whenUnlearned
+			}
+			h.Reflections += blows * h.Level
+			g.Msg(fmt.Sprintf("You will turn back the next %d blows.", h.Reflections))
+		},
+		Description: []util.LabelText{util.LabelTextFromString("Turn the next blows back on their attacker")},
+	}
 }

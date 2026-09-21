@@ -127,6 +127,8 @@ launch_sfx: LS_GOLUM
 
 id: SPL_BLODBOIL
 cast_sfx: IS_CAST8
+hit_zone: target_only
+effect: on_self(apply_rage_self)
 
 id: SPL_TELEPORT
 targeted: true
@@ -235,10 +237,14 @@ launch_sfx: LS_ETHEREAL
 id: SPL_REFLECT
 cast_sfx: IS_CAST6
 launch_sfx: LS_MSHIELD
+hit_zone: target_only
+effect: on_self(apply_reflect_self|2)
 
 id: SPL_BERSERK
 targeted: true
 cast_sfx: IS_CAST6
+hit_zone: target_only
+effect: enrage_monster
 
 id: SPL_RING
 resist: fire
