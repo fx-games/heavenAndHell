@@ -79,6 +79,14 @@ func TestTriggersResolve(t *testing.T) {
 				}
 				// the outcomes that name a quest must name one that exists
 				switch do.Name() {
+				case "take_item", "drop_item", "spawn_item":
+					if _, ok := data.ItemIdx[do.GetString(0)]; !ok {
+						t.Errorf("trigger %d (%s %s): %s names unknown item %q", i, tr.Event, tr.Subject, do.Name(), do.GetString(0))
+					}
+				case "drop_unique":
+					if !slices.ContainsFunc(data.UniqueItems, func(u d1.UniqueItemData) bool { return u.Name == do.GetString(0) }) {
+						t.Errorf("trigger %d (%s %s): no unique item %q", i, tr.Event, tr.Subject, do.GetString(0))
+					}
 				case "say":
 					if data.Texts[do.GetString(0)] == "" {
 						t.Errorf("trigger %d (%s %s): says %q, which texts.rec does not have", i, tr.Event, tr.Subject, do.GetString(0))
@@ -105,7 +113,7 @@ func TestConditionsNameKnownQuests(t *testing.T) {
 		probe := func(key string) bool { asked[key] = true; return false }
 		probeInt := func(key string) int { asked[key] = true; return 0 }
 		env := defs.QuestEnv{Done: probe, Active: probe, Avail: probe, Logged: probe, V1: probeInt, V2: probeInt,
-			Flag: func(string) bool { return false }}
+			Flag: func(string) bool { return false }, Has: no}
 		for i, tr := range data.QuestTriggers {
 			if tr.Cond() == nil {
 				continue
@@ -174,7 +182,7 @@ func TestOnceTriggersStopFiring(t *testing.T) {
 		t.Helper()
 		env := defs.QuestEnv{
 			Done: no, Active: no, Avail: no, Logged: no, V1: zero, V2: zero,
-			Flag: func(k string) bool { return set[k] },
+			Flag: func(k string) bool { return set[k] }, Has: no,
 		}
 		out, err := expr.Run(tr.Cond(), env)
 		if err != nil {
@@ -207,7 +215,7 @@ func TestOnceTriggersStopFiring(t *testing.T) {
 // either says his piece or groans, never both.
 func TestDeadGuyDialogueIsExclusive(t *testing.T) {
 	data := loadQuestData(t)
-	lines := selected(data, EventTalk, "deadguy")
+	lines := selected(data, EventApproach, "deadguy")
 	if len(lines) != 2 {
 		t.Skipf("this mod has %d deadguy lines", len(lines))
 	}
@@ -227,6 +235,7 @@ func TestDeadGuyDialogueIsExclusive(t *testing.T) {
 			Done:   func(k string) bool { return k == "butcher" && c.state == d1.QuestDone },
 			Active: func(k string) bool { return k == "butcher" && c.state == d1.QuestActive },
 			Avail:  func(k string) bool { return k == "butcher" && c.state != d1.QuestNotAvail },
+			Has:    no,
 			Logged: no,
 			V1:     func(string) int { return c.v1 },
 			V2:     zero,

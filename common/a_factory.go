@@ -6,6 +6,7 @@ import (
 	"rpg/audio"
 	"rpg/d1"
 	"rpg/defs"
+	"rpg/geometry"
 	"rpg/stats"
 	"rpg/util"
 )
@@ -22,8 +23,9 @@ type Factory struct {
 	Generator      *d1.Generator
 	Classes        []defs.LoadoutDefinition // the mod's class roster, in archetype order: each class's own skills
 	Audio          *audio.Player
-	speechCue      string // the D1 speech cue playing, stopped by the next (sfx_STREAM)
-	identifyTarget *Item  // the item picked for the Identify cast in progress
+	speechCue      string         // the D1 speech cue playing, stopped by the next (sfx_STREAM)
+	identifyTarget *Item          // the item picked for the Identify cast in progress
+	talkAt         geometry.Point // where the NPC being talked to stands: drop_item and drop_unique land there
 }
 
 // playD1Sound ports PlaySFX for a D1 sound id (d1.SfxFiles). Speech replaces speech still playing, like D1's

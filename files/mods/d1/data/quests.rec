@@ -249,14 +249,13 @@ when: not done("diablo")
 do: complete_quest(diablo)
 do: end_text()
 
-# The dying townsman on level 2: his last words start the Butcher, and after that he only groans. The groan
-# comes first so that speaking does not immediately satisfy it -- triggers see what earlier ones did.
-event: on_talk
+# The dying townsman on level 2: his last words start the Butcher, and after that he only groans.
+event: on_approach
 subject: deadguy
 when: active("butcher") and v1("butcher") != 0
 do: hero_sound(8)
 
-event: on_talk
+event: on_approach
 subject: deadguy
 when: (avail("butcher") and not done("butcher") and not active("butcher")) or (active("butcher") and v1("butcher") == 0)
 do: activate_quest(butcher)
@@ -337,3 +336,147 @@ subject: 16
 when: not flag("d1:dungmsg:16")
 do: set_flag(d1:dungmsg:16)
 do: sound(PS_DIABLVLINT)
+
+# TalkToTowner's quest steps. Walking up to a townsperson plays their on_approach triggers in this order, and the
+# first one that fires is the whole visit, as the function's return was; "pass" lets Pepin say two things.
+# Quest steps (v1) for the mushroom: 2 tome given, 4 mushroom picked, 5 mushroom given, 7 brain given.
+
+event: on_approach
+subject: ogden
+when: deepest >= 2 and avail("leoric") and v2("leoric") == 0
+do: set_quest_var(leoric, 2, 1)
+do: start_town_quest(leoric)
+do: say(TEXT_KING2)
+
+event: on_approach
+subject: ogden
+when: deepest >= 2 and avail("leoric") and done("leoric") and v2("leoric") == 1
+do: set_quest_var(leoric, 2, 2)
+do: set_quest_var(leoric, 1, 2)
+do: say(TEXT_KING4)
+
+# 1.09 asks about Ogden's Sign only inside Leoric's check.
+event: on_approach
+subject: ogden
+when: deepest >= 3 and avail("leoric") and avail("banner") and not done("banner") and v2("banner") == 0
+do: set_quest_var(banner, 2, 1)
+do: start_town_quest(banner)
+do: say(TEXT_BANNER2)
+
+event: on_approach
+subject: ogden
+when: deepest >= 3 and avail("leoric") and avail("banner") and v2("banner") == 1 and has("tavern_sign")
+do: take_item(tavern_sign)
+do: complete_quest(banner)
+do: set_quest_var(banner, 1, 3)
+do: drop_unique(Harlequin Crest)
+do: say(TEXT_BANNER3)
+
+event: on_approach
+subject: griswold
+when: deepest >= 4 and avail("rock") and v2("rock") == 0
+do: set_quest_var(rock, 2, 1)
+do: start_town_quest(rock)
+do: say(TEXT_INFRA5)
+
+event: on_approach
+subject: griswold
+when: deepest >= 4 and avail("rock") and v2("rock") == 1 and has("magic_rock")
+do: take_item(magic_rock)
+do: complete_quest(rock)
+do: set_quest_var(rock, 2, 2)
+do: set_quest_var(rock, 1, 2)
+do: drop_unique(Empyrean Band)
+do: say(TEXT_INFRA7)
+
+event: on_approach
+subject: griswold
+when: deepest >= 9 and avail("anvil") and not done("anvil") and v2("anvil") == 0 and (v2("rock") == 2 or active("rock") and v2("rock") == 1)
+do: set_quest_var(anvil, 2, 1)
+do: start_town_quest(anvil)
+do: say(TEXT_ANVIL5)
+
+event: on_approach
+subject: griswold
+when: deepest >= 9 and avail("anvil") and v2("anvil") == 1 and has("anvil_of_fury")
+do: take_item(anvil_of_fury)
+do: complete_quest(anvil)
+do: set_quest_var(anvil, 2, 2)
+do: set_quest_var(anvil, 1, 2)
+do: drop_unique(Griswold's Edge)
+do: say(TEXT_ANVIL7)
+
+event: on_approach
+subject: adria
+when: avail("mushroom") and not active("mushroom") and not done("mushroom") and has("fungal_tome")
+do: take_item(fungal_tome)
+do: start_quest(mushroom)
+do: set_quest_var(mushroom, 1, 2)
+do: say(TEXT_MUSH8)
+
+event: on_approach
+subject: adria
+when: active("mushroom") and v1("mushroom") >= 2 and v1("mushroom") <= 4 and has("black_mushroom")
+do: take_item(black_mushroom)
+do: set_quest_var(mushroom, 1, 5)
+do: say(TEXT_MUSH10)
+
+# said once: bit 1 of v2
+event: on_approach
+subject: adria
+when: active("mushroom") and v1("mushroom") >= 2 and v1("mushroom") <= 4 and v2("mushroom") in [0, 2]
+do: or_quest_var(mushroom, 2, 1)
+do: say(TEXT_MUSH9)
+
+event: on_approach
+subject: adria
+when: active("mushroom") and (v1("mushroom") < 2 or v1("mushroom") > 4) and has("spectral_elixir")
+do: complete_quest(mushroom)
+do: say(TEXT_MUSH12)
+
+# said once: bit 2 of v2
+event: on_approach
+subject: adria
+when: active("mushroom") and (v1("mushroom") < 2 or v1("mushroom") > 4) and has("brain") and v2("mushroom") in [0, 1]
+do: or_quest_var(mushroom, 2, 2)
+do: say(TEXT_MUSH11)
+
+event: on_approach
+subject: pepin
+when: deepest >= 1 and avail("pwater") and not active("pwater") and not done("pwater")
+pass: true
+do: start_quest(pwater)
+do: set_quest_var(pwater, 1, 1)
+do: say(TEXT_POISON3)
+
+event: on_approach
+subject: pepin
+when: deepest >= 1 and done("pwater") and v1("pwater") != 2
+pass: true
+do: set_quest_var(pwater, 1, 2)
+do: drop_unique(Ring of Truth)
+do: say(TEXT_POISON5)
+
+event: on_approach
+subject: pepin
+when: active("mushroom") and v1("mushroom") >= 5 and v1("mushroom") < 7 and has("brain")
+do: take_item(brain)
+do: drop_item(spectral_elixir)
+do: set_quest_var(mushroom, 1, 7)
+do: say(TEXT_MUSH4)
+
+event: on_approach
+subject: cain
+when: avail("lazarus") and not active("lazarus") and not done("lazarus") and has("staff_of_lazarus")
+do: take_item(staff_of_lazarus)
+do: set_quest_var(lazarus, 1, 2)
+do: start_quest(lazarus)
+do: say(TEXT_VILE1)
+do: refresh_level()
+
+event: on_approach
+subject: cain
+when: done("lazarus") and v1("lazarus") == 7
+do: set_quest_var(lazarus, 1, 8)
+do: log_quest(diablo)
+do: say(TEXT_VILE3)

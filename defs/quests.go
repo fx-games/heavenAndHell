@@ -43,6 +43,9 @@ type Trigger struct {
 	Subject string
 	When    string
 	Do      []recfile.StringPredicate
+	// Pass lets a conversation go on after this trigger spoke. A talk (on_talk, on_approach) is otherwise one
+	// thing said: the first trigger that fires ends it, as TalkToTowner's return does.
+	Pass bool
 
 	program *vm.Program
 }
@@ -61,6 +64,9 @@ type QuestEnv struct {
 	V1     func(string) int  `expr:"v1"`
 	V2     func(string) int  `expr:"v2"`
 	Depth  int               `expr:"depth"` // the dungeon level the hero is on
+	// Deepest is the deepest dungeon level the hero has reached; Has whether the hero carries an item, by name.
+	Deepest int               `expr:"deepest"`
+	Has     func(string) bool `expr:"has"`
 }
 
 // ReadQuests loads the active mod's quests and triggers and compiles every trigger condition.
@@ -121,6 +127,8 @@ func ReadQuests(fsys fs.FS) ([]Quest, []Trigger, error) {
 				t.Subject = fld.Value
 			case "when":
 				t.When = fld.Value
+			case "pass":
+				t.Pass = fld.AsBool()
 			case "do":
 				p := recfile.StrPredicate(fld.Value)
 				if p == nil {

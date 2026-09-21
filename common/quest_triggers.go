@@ -19,10 +19,11 @@ const (
 	EventTalk         = "on_talk"          // subject: the NPC's internal name
 	EventLevelCleared = "on_level_cleared" // subject: the map name; its last monster just died
 	EventItemUse      = "on_item_use"      // subject: the item's internal name
+	EventApproach     = "on_approach"      // subject: the NPC's internal name, when the hero walks up to it
 )
 
 // QuestEvents are the events a trigger may name, for the loader's check and for anyone adding one.
-var QuestEvents = []string{EventKill, EventItemPickup, EventEnterLevel, EventTalk, EventLevelCleared, EventItemUse}
+var QuestEvents = []string{EventKill, EventItemPickup, EventEnterLevel, EventTalk, EventLevelCleared, EventItemUse, EventApproach}
 
 // questEnv is what a trigger condition may ask about: quests by key, raw flags, and where the hero is.
 func (s *State) questEnv() defs.QuestEnv {
@@ -49,6 +50,12 @@ func (s *State) questEnv() defs.QuestEnv {
 		V1:     qvar(1),
 		V2:     qvar(2),
 		Depth:  d1DungeonLevel(s),
+
+		Deepest: s.GetLastDungeonLevel(),
+		Has: func(item string) bool {
+			idx, ok := s.factory.D1().D.ItemIdx[item]
+			return ok && d1HasItem(s.GetPlayer(), idx) != nil
+		},
 	}
 }
 
@@ -78,6 +85,9 @@ func (f *Factory) fireQuestTriggers(event, subject, speaker string) bool {
 			if !f.runQuestOutcome(do, speaker) {
 				f.Msg(fmt.Sprintf("quest trigger %s/%s: no outcome named %q", event, subject, do.Name()))
 			}
+		}
+		if (event == EventTalk || event == EventApproach) && !t.Pass {
+			break // one conversation, one thing said
 		}
 		env = s.questEnv() // later triggers see what earlier ones did
 	}
@@ -119,6 +129,33 @@ func (f *Factory) runQuestOutcome(do recfile.StringPredicate, speaker string) bo
 			speaker = do.GetString(1)
 		}
 		f.say(speaker, do.GetString(0))
+	case "start_quest": // logged and active
+		if q := quest(0); q >= 0 {
+			s.startQuest(q)
+		}
+	case "start_town_quest": // logged; active with v1 1 only if it had not started
+		if q := quest(0); q >= 0 {
+			s.startTownQuest(q)
+		}
+	case "or_quest_var": // or_quest_var(quest, n, bits): sets bits in a quest variable
+		if q := quest(0); q >= 0 {
+			s.SetQuestVar(q, do.GetInt(1), s.QuestVar(q, do.GetInt(1))|do.GetInt(2))
+		}
+	case "take_item": // take_item(item): out of the hero's pack
+		if idx, ok := f.D1().D.ItemIdx[do.GetString(0)]; ok {
+			d1TakeItem(s.GetPlayer(), idx)
+		}
+	case "drop_item": // drop_item(item): a plain one at the speaker's feet
+		if idx, ok := f.D1().D.ItemIdx[do.GetString(0)]; ok {
+			f.dropD1Item(f.Generator.PlainItem(idx), f.talkAt)
+		}
+	case "drop_unique": // drop_unique(name): the unique item of that name at the speaker's feet
+		for uid, u := range f.D1().D.UniqueItems {
+			if u.Name == do.GetString(0) {
+				f.dropD1Item(f.Generator.SpawnUnique(uid, 0), f.talkAt)
+				break
+			}
+		}
 	case "spawn_item": // spawn_item(item, map, location), or spawn_item(item, here): a plain item of the mod's
 		location := ""
 		if do.ParamCount() > 2 {
@@ -149,7 +186,8 @@ func (f *Factory) runQuestOutcome(do recfile.StringPredicate, speaker string) bo
 func QuestOutcomeExists(name string) bool {
 	switch name {
 	case "complete_quest", "activate_quest", "log_quest", "set_quest_var", "set_flag", "hero_sound", "sound",
-		"say", "refresh_level", "end_text", "give_exp", "give_weapon", "spawn_item":
+		"say", "refresh_level", "end_text", "give_exp", "give_weapon", "spawn_item", "start_quest", "start_town_quest",
+		"or_quest_var", "take_item", "drop_item", "drop_unique":
 		return true
 	}
 	return false

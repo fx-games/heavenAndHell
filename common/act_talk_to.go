@@ -57,10 +57,13 @@ func NewTalkToAction(source Cause, npc *Actor) *TalkToAction {
 }
 func (d *TalkToAction) Execute(context ActionContext) []Action {
 	npc := d.npc
-	if context.GameState.factory.d1TownerQuests(npc) || npc.GetVendorType() == VendorTypeDeadGuy {
+	f := context.GameState.factory
+	f.talkAt = npc.MapPosition()
+	// Walking up to an NPC plays its on_approach triggers (TalkToTowner's quest talk): if one speaks, that is the
+	// whole visit. The dying townsman never has a menu.
+	if f.fireQuestTriggers(EventApproach, npc.GetInternalName(), npc.Name()) || npc.GetVendorType() == VendorTypeDeadGuy {
 		return nil
 	}
-	f := context.GameState.factory
 	// Whatever the mod's on_talk triggers say for this NPC is the conversation; only an NPC with nothing
 	// scripted falls back to the quest topics and gossip menu.
 	talk := func() {
