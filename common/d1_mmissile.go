@@ -63,13 +63,18 @@ func NewMonsterMissileAction(caster *Actor, mis D1Missile, target geometry.Point
 func (a *MonsterMissileAction) GetAnimations() []Animation { return a.animations }
 
 func (a *MonsterMissileAction) Execute(ctx ActionContext) []Action {
-	c := &missileCtx{ctx: ctx, caster: a.caster, mon: a.caster.d1Monster, player: ctx.GameState.GetPlayer(), c: &spellCtx{m: ctx.GameState.GetMap(), caster: a.caster}}
+	m := ctx.GameState.GetMap()
+	t, _ := m.TryGetActorAt(a.target)
+	c := &missileCtx{ctx: ctx, caster: a.caster, mon: a.caster.d1Monster, player: ctx.GameState.GetPlayer(),
+		golem: t != nil && t.d1Monster != nil && t.d1Monster.Golem,
+		c:     &spellCtx{f: ctx.GameState.factory, m: m, caster: a.caster, cause: a.cause, dealt: map[*Actor]int{}}}
 	c.fire(a.mis, a.target, a.dam)
 	a.animations = c.c.animations
+	hits := c.c.finish() // the golem, if it was in the way
 	if c.dealt <= 0 || !c.player.IsAlive() {
-		return nil
+		return hits
 	}
-	return OneAction(NewChangeResourceAction(a.cause, c.player, stats.Health, -float64(c.dealt)))
+	return append(hits, NewChangeResourceAction(a.cause, c.player, stats.Health, -float64(c.dealt)))
 }
 
 type missileCtx struct {
@@ -83,6 +88,7 @@ type missileCtx struct {
 	taken  int       // 64ths that hit the hero, before mana shield
 	block  bool      // the hero blocked a hit
 	trap   bool      // sourceless: it hits monsters too (MonsterTrapHit)
+	golem  bool      // a monster's missile at the golem (MFLAG_TARGETS_MONSTER): it hits the golem too
 }
 
 // hit ports PlayerMHit: `ticks` hit rolls against the player standing at p, from a missile that flew from `from`.
@@ -93,7 +99,7 @@ func (c *missileCtx) hit(mis D1Missile, p, from geometry.Point, mind, maxd int, 
 // hitAs is hit with the missile's resistance kind given: a fire arrow's flight hits as a plain arrow (MI_LArrow).
 func (c *missileCtx) hitAs(mis D1Missile, p, from geometry.Point, mind, maxd int, shift bool, ticks, resist int) bool {
 	c.ctx.GameState.factory.hitD1Object(c.c.m, p, c.attacker())
-	if c.trap && c.trapHitsMonster(p, from, mind, maxd, shift, ticks, resist) {
+	if (c.trap || c.golem) && c.trapHitsMonster(p, from, mind, maxd, shift, ticks, resist) {
 		return true
 	}
 	pl := c.player
@@ -164,6 +170,9 @@ func (c *missileCtx) trapHitsMonster(p, from geometry.Point, mind, maxd int, shi
 		return false
 	}
 	mon := a.d1Monster
+	if !c.trap && !mon.Golem {
+		return false
+	}
 	res, immune := resistBits(resist)
 	if mon.TalkMsg != "" || mon.MagicRes&immune != 0 || d1Untouchable(mon, true) {
 		return false
@@ -340,7 +349,7 @@ func (c *missileCtx) hazard(mis D1Missile, p geometry.Point, turns, dam64 int) {
 	if turns <= 0 || m.IsObjectAt(p) || !m.IsWalkable(p) {
 		return
 	}
-	caster, mon := c.caster, c.mon
+	caster, mon, trap := c.caster, c.mon, c.trap
 	hz := NewFire(0)
 	hz.turnsUntilRemoval, hz.FireWall = turns, mis == MisFireRing || mis == MisFireWall
 	if mis == MisAcidPud { // the other hazards' fire() already played their launch
@@ -348,11 +357,12 @@ func (c *missileCtx) hazard(mis D1Missile, p geometry.Point, turns, dam64 int) {
 		playD1SfxAt(c.ctx, d1MissileSfx[mis][0], p)
 	}
 	burn := func() {
-		if f.State.GetMap() != m || c.player.MapPosition() != p {
+		// a trap's fire burns whoever stands in it; a monster's only the hero
+		if f.State.GetMap() != m || c.player.MapPosition() != p && !(trap && m.IsActorAt(p)) {
 			return
 		}
 		f.ActionBroker.Execute(&hazardTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
-			mc: &missileCtx{caster: caster, mon: mon}, mis: mis, p: p, dam64: dam64})
+			mc: &missileCtx{caster: caster, mon: mon, trap: trap}, mis: mis, p: p, dam64: dam64})
 	}
 	hz.SetDealDamage(func(geometry.Point, func() bool) {})
 	hz.SetOnTurn(func() {
@@ -380,13 +390,15 @@ type hazardTickAction struct {
 func (a *hazardTickAction) GetAnimations() []Animation { return a.animations }
 func (a *hazardTickAction) Execute(ctx ActionContext) []Action {
 	c := a.mc
-	c.ctx, c.player, c.c, c.dealt = ctx, ctx.GameState.GetPlayer(), &spellCtx{m: ctx.GameState.GetMap(), caster: c.caster}, 0
+	c.ctx, c.player, c.dealt = ctx, ctx.GameState.GetPlayer(), 0
+	c.c = &spellCtx{f: ctx.GameState.factory, m: ctx.GameState.GetMap(), caster: c.caster, cause: a.cause, dealt: map[*Actor]int{}}
 	c.hit(a.mis, a.p, a.p, a.dam64, a.dam64, true, d1.RefWalkTicks)
 	a.animations = c.c.animations
+	hits := c.c.finish()
 	if c.dealt <= 0 {
-		return nil
+		return hits
 	}
-	return OneAction(NewChangeResourceAction(a.cause, c.player, stats.Health, -float64(c.dealt)))
+	return append(hits, NewChangeResourceAction(a.cause, c.player, stats.Health, -float64(c.dealt)))
 }
 
 // D1AcidDeath: acid beasts leave a puddle where they die (M_StartKill).
