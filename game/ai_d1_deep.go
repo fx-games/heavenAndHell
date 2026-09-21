@@ -96,12 +96,15 @@ func (b *d1Brain) circle(md int, needDirOK bool) bool {
 }
 
 // roundRanged ports MAI_RoundRanged (magma, storm and acid demons).
-func (b *d1Brain) roundRanged(mis common.D1Missile, dam, less int) (d1Act, bool) {
+func (b *d1Brain) roundRanged(mis common.D1Missile, checkDoors bool, dam, less int) (d1Act, bool) {
 	mon := b.mon
 	if mon.Squelch == 0 {
 		return noAct, false
 	}
 	md := b.dirTo(mon.Last)
+	if checkDoors && mon.Squelch < 255 {
+		b.checkDoors()
+	}
 	v := b.rnd(10000)
 	cast := func() (d1Act, bool) {
 		if b.lineClear(b.enemy) {
@@ -109,7 +112,7 @@ func (b *d1Brain) roundRanged(mis common.D1Missile, dam, less int) (d1Act, bool)
 		}
 		return noAct, false
 	}
-	if b.near(2) || mon.Squelch != 255 {
+	if b.near(2) || mon.Squelch != 255 || !b.sameRoom() {
 		mon.Goal = 1
 	} else if mon.Goal == 4 || !b.near(3) && b.rnd(4<<less) == 0 {
 		if b.circle(md, true) {
@@ -144,15 +147,20 @@ func (b *d1Brain) roundRanged(mis common.D1Missile, dam, less int) (d1Act, bool)
 // rr2 ports MAI_RR2 (balrogs and their kin): fight like a skeleton from afar, flame and circle up close.
 func (b *d1Brain) rr2(mis common.D1Missile) (d1Act, bool) {
 	mon := b.mon
-	if !b.near(5) {
-		return b.skelSd()
+	if !b.near(5) { // MAI_RR2 doesn't return after MAI_SkelSd: when that finds nothing to do, it goes on
+		if act, ok := b.skelSd(); ok {
+			return act, true
+		}
 	}
 	if mon.Squelch == 0 {
 		return noAct, false
 	}
 	md := b.dirTo(mon.Last)
+	if mon.Squelch < 255 {
+		b.checkDoors()
+	}
 	v := b.rnd(100)
-	if b.near(2) || mon.Squelch != 255 {
+	if b.near(2) || mon.Squelch != 255 || !b.sameRoom() {
 		mon.Goal = 1
 	} else if mon.Goal == 4 || !b.near(3) {
 		mon.GoalVar3 = 4
@@ -227,7 +235,7 @@ func (b *d1Brain) garg() (d1Act, bool) {
 	if mon.Squelch == 0 {
 		return noAct, false
 	}
-	if hp.Value() < hp.GetMax()/2 && mon.Unique == nil { // uniques don't heal (MFLAG_NOHEAL)
+	if hp.Value() < hp.GetMax()/2 && !mon.NoHeal {
 		mon.Goal = 2
 	}
 	if mon.Goal == 2 {
@@ -252,16 +260,20 @@ func (b *d1Brain) rhino() (d1Act, bool) {
 		return noAct, false
 	}
 	md := b.dirTo(mon.Last)
+	if mon.Squelch < 255 {
+		b.checkDoors()
+	}
 	v := b.rnd(100)
 	if b.near(2) {
 		mon.Goal = 1
 	} else if mon.Goal == 4 || !b.near(5) && b.rnd(4) != 0 {
-		if b.circle(md, false) {
+		if b.circle(md, false) && b.sameRoom() { // MAI_Rhino stops circling once they no longer share a room
 			if act, ok := b.roundWalk(md); ok {
 				return act, true
 			}
 			return b.delay(b.rnd(10) + 10)
 		}
+		mon.Goal = 1
 	}
 	if mon.Goal != 1 {
 		return noAct, false
@@ -333,6 +345,9 @@ func (b *d1Brain) counselor() (d1Act, bool) {
 		return noAct, false
 	}
 	md := b.dirTo(mon.Last)
+	if mon.Squelch < 255 {
+		b.checkDoors()
+	}
 	v := b.rnd(100)
 	switch mon.Goal {
 	case 2:
@@ -346,7 +361,7 @@ func (b *d1Brain) counselor() (d1Act, bool) {
 	case 4:
 		dist := max(iabs(b.dx), iabs(b.dy))
 		_, dirOK := b.step(md)
-		if b.near(2) || mon.Squelch != 255 {
+		if b.near(2) || mon.Squelch != 255 || !b.sameRoom() {
 			mon.Goal = 1
 			return b.fade(false)
 		}

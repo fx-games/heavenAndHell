@@ -6,6 +6,7 @@ import (
 	"rpg/d1"
 	"rpg/defs"
 	"rpg/geometry"
+	"rpg/gridmap"
 	"rpg/stats"
 	"strings"
 )
@@ -35,8 +36,6 @@ type D1MonsterState struct {
 	Squelch, PathCount                 int
 	Last                               geometry.Point
 	Dir                                int  // index into D1Dirs
-	Enraged                            bool // the player attacked it: it fights back instead of idling or wandering off
-	Flee                               int  // turns left of a fight-or-flight retreat
 	Dormant                            bool // _mFlags & 4 on gargoyles: waiting in stone until the enemy comes close
 	NoHeal                             bool // _mFlags & 8 (MFLAG_NOHEAL): hit by a weapon that stops healing
 	Berserk                            bool // Hellfire's MFLAG_BERSERK | MFLAG_GOLEM: turned on its own kind
@@ -355,4 +354,12 @@ func (g *Factory) scaleD1NewGamePlus(a *Actor) *Actor {
 	st.SetAttribute(stats.Level, m.Level)
 	st.SetAttribute(stats.Experience, m.Exp)
 	return a
+}
+
+// D1FireWallBlocks ports PosOkMonst's fire check: a monster won't step into a fire wall unless it is immune to fire,
+// and Diablo never does.
+func D1FireWallBlocks(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point, mon *D1Monster) bool {
+	o, _ := m.TryGetObjectAt(p)
+	w, ok := o.(*DamageDealingObject)
+	return ok && w.FireWall && (mon.MagicRes&d1.ImmuneFire == 0 || mon.Data.ID == "MT_DIABLO")
 }

@@ -14,6 +14,7 @@ type DamageDealingObject struct {
 	icon                 int32
 	frameCount           int
 	dealDamageAtLocation func(location geometry.Point, startAnimating func() bool)
+	FireWall             bool // a D1 MIS_FIREWALL: monsters that aren't immune to fire won't step in (PosOkMonst)
 }
 
 func (d *DamageDealingObject) Name() string {

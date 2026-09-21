@@ -453,7 +453,7 @@ func (f *Factory) spawnD1Wall(caster *Actor, p geometry.Point, resist, turns int
 		dams[i] = dam64()
 	}
 	wall := NewFire(0)
-	wall.icon, wall.turnsUntilRemoval = icon, turns
+	wall.icon, wall.turnsUntilRemoval, wall.FireWall = icon, turns, resist == d1.ResistKindFire
 	wall.SetDealDamage(func(location geometry.Point, _ func() bool) {})
 	wall.SetOnTurn(func() {
 		if !wall.IsAlive() || f.State.GetMap() != m {

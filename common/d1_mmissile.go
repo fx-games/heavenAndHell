@@ -300,7 +300,7 @@ func (c *missileCtx) hazard(mis D1Missile, p geometry.Point, turns, dam64 int) {
 	}
 	caster, mon := c.caster, c.mon
 	hz := NewFire(0)
-	hz.turnsUntilRemoval = turns
+	hz.turnsUntilRemoval, hz.FireWall = turns, mis == MisFireRing || mis == MisFireWall
 	if mis == MisAcidPud { // the other hazards' fire() already played their launch
 		hz.icon = defs.IconEffectHit
 		playD1SfxAt(c.ctx, d1MissileSfx[mis][0], p)

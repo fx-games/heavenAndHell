@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"rpg/d1"
 	"rpg/geometry"
+	"rpg/gridmap"
 	"rpg/stats"
 	"time"
 )
@@ -521,25 +522,11 @@ func d1ElementalHit(def *Actor, kind, chance int, roll func() int) int {
 	return dam
 }
 
-// Fight or flight, rolled every time the player attacks. Hellspawn don't scare easily: only one already close
-// to death breaks, uniques never do, and the run is short. Knobs, not laws - tune them for how the game plays.
-const (
-	d1FleeBelowHealth = 0.2
-	d1FleeChance      = 40
-	d1FleeTurns       = 6
-)
-
-// d1Alert wakes a monster the player attacks (MonsterMHit) and makes it choose fight or flight. Attacked is
-// enough: a monster that has been swung at fights back rather than idling or wandering off, which in a
-// turn-based game is the difference between D1's AI and a punching bag. The health it rolls against is the
-// health before this blow lands, so a monster breaks one hit later than it would - close enough for a threshold.
+// d1Alert ports MonsterMHit's wake-up: a monster struck while idle (_msquelch 0) starts hunting from where the
+// attacker stood.
 func d1Alert(victim, attacker *Actor) {
-	mon := victim.d1Monster
-	mon.Squelch, mon.Last, mon.Enraged = 255, attacker.MapPosition(), true
-	if mon.Flee == 0 && mon.Unique == nil &&
-		victim.GetStats().GetResource(stats.Health).IsLessThanPercent(d1FleeBelowHealth) &&
-		d1Rng.Intn(100) < d1FleeChance {
-		mon.Flee = d1FleeTurns
+	if mon := victim.d1Monster; mon.Squelch == 0 {
+		mon.Squelch, mon.Last = 255, attacker.MapPosition()
 	}
 }
 
@@ -550,7 +537,7 @@ func d1Alert(victim, attacker *Actor) {
 // his own upkeep, so Blood Star must not stagger the caster who paid for it.
 func d1HitRecovery(f *Factory, victim *Actor, dam int, attacker *Actor) {
 	if victim.d1Monster != nil {
-		d1MonsterGotHit(victim, dam)
+		d1MonsterGotHit(f, victim, dam, attacker)
 		return
 	}
 	if victim.hero != nil && attacker != nil && attacker != victim {
@@ -630,15 +617,42 @@ func D1MonsterRecoveryAUT(mon *D1Monster) int {
 }
 
 // d1MonsterGotHit ports M_StartHit: AI side effects, and the monster loses D1MonsterRecoveryAUT of energy.
-func d1MonsterGotHit(victim *Actor, dam int) {
+func d1MonsterGotHit(f *Factory, victim *Actor, dam int, attacker *Actor) {
 	mon := victim.d1Monster
 	if mon.Data.Family == "Sneak" || dam >= mon.Level+3 {
+		if attacker != nil {
+			mon.Dir = D1DirTo(victim.MapPosition(), attacker.MapPosition())
+		}
+		if mon.Data.ID == "MT_BLINK" && attacker != nil {
+			d1Teleport(f.State.GetMap(), victim, attacker.MapPosition())
+		} else if mon.Data.Family == "Scav" {
+			mon.Goal = 1
+		}
 		if lost := D1MonsterRecoveryAUT(mon); lost > 0 && !victim.HasStatusEffect(StatusStone) && victim.GetEnergy() > -lost {
 			victim.RemoveEnergy(victim.GetEnergy() + lost)
 		}
 		mon.LastMode, mon.StandTicks = D1ModeGotHit, 0
-		if mon.Data.Family == "Scav" {
-			mon.Goal = 1
+	}
+}
+
+// d1Teleport ports M_Teleport (the Blink's escape when hit): a free cell diagonal to or beside the enemy, on a random
+// side. D1's inner loop stops short (k < 1), so the row beyond the enemy is never tried; both coordinates must also
+// differ from where the monster stands.
+func d1Teleport(m *gridmap.GridMap[*Actor, *Item, Object], victim *Actor, enemy geometry.Point) {
+	if victim.HasStatusEffect(StatusStone) {
+		return
+	}
+	pos := victim.MapPosition()
+	rx, ry := 2*d1Rng.Intn(2)-1, 2*d1Rng.Intn(2)-1
+	for j := -1; j <= 1; j++ {
+		for k := -1; k < 1; k++ {
+			p := geometry.Point{X: enemy.X + rx*j, Y: enemy.Y + ry*k}
+			if j == 0 && k == 0 || p.X == pos.X || p.Y == pos.Y || !m.Contains(p) || !m.IsCurrentlyPassable(p) || m.IsObjectAt(p) && !m.IsWalkable(p) {
+				continue
+			}
+			m.MoveActor(victim, p)
+			victim.d1Monster.Dir = D1DirTo(p, enemy)
+			return
 		}
 	}
 }

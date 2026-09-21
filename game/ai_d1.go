@@ -68,27 +68,20 @@ func (g *GameInstance) d1MonsterAction(a *common.Actor) (int, func()) {
 	if mon.Golem || mon.Berserk {
 		return b.golem()
 	}
-	b.enemy, b.target = player.MapPosition(), player
-	if golem := g.golemOnMap(b.pos); golem != nil && geometry.DistanceSquared(b.pos, golem.MapPosition()) < geometry.DistanceSquared(b.pos, b.enemy) {
-		b.enemy, b.target = golem.MapPosition(), golem // M_Enemy: the closest of player, golem and berserk monsters
-	}
+	b.chooseEnemy(player)
 	b.dx, b.dy = b.pos.X-b.enemy.X, b.pos.Y-b.enemy.Y
-	if player.CanSee(b.pos) {
+	switch {
+	case b.target != player: // ProcessMonsters: a monster fighting the golem always knows where it is
+		mon.Last = b.enemy
+	case player.CanSee(b.pos):
 		if mon.Squelch == 0 {
 			g.factory.D1MonsterGreeting(a)
 		}
 		mon.Squelch, mon.Last = 255, b.enemy
-	} else {
+	default:
 		mon.Squelch = max(mon.Squelch-d1.RefWalkTicks, 0)
 	}
 
-	if mon.Flee > 0 {
-		mon.Flee--
-		if act, ok := b.flee(); ok {
-			return b.commit(act)
-		}
-		mon.Flee = 0 // cornered: turn and fight
-	}
 	act, ok := noAct, false
 	for tick := 0; tick < d1.RefWalkTicks && !ok; tick++ {
 		if mon.Data.Flags&d1.MFlagSearch != 0 {
@@ -103,17 +96,60 @@ func (g *GameInstance) d1MonsterAction(a *common.Actor) (int, func()) {
 			mon.StandTicks++
 		}
 	}
-	// A monster the player has attacked doesn't get to spend a turn dithering: its own AI had every tick to
-	// pick something, so now it swings or closes in.
-	if !ok && mon.Enraged {
-		if act, ok = b.attack(); !ok {
-			act, ok = b.callWalk(b.dirTo(b.enemy))
-		}
-	}
 	if !ok {
 		return 10, func() {}
 	}
 	return b.commit(act)
+}
+
+// chooseEnemy ports M_Enemy for a monster that isn't a golem: the player, or the golem when it stands right next to
+// the monster (any golem, for the ranged AIs). The one in the monster's own room wins, then the closer one.
+func (b *d1Brain) chooseEnemy(player *common.Actor) {
+	best, bestSame := -1, false
+	consider := func(a *common.Actor) {
+		p := a.MapPosition()
+		same := common.D1SameRoom(&b.g.state, b.pos, p)
+		dist := max(iabs(b.pos.X-p.X), iabs(b.pos.Y-p.Y))
+		if same && !bestSame || (same || !bestSame) && dist < best || best == -1 {
+			b.enemy, b.target, best, bestSame = p, a, dist, same
+		}
+	}
+	consider(player)
+	ranged := map[string]bool{"AI_SKELBOW": true, "AI_GOATBOW": true, "AI_SUCC": true, "AI_LAZHELP": true}[b.mon.AI] // M_Ranged
+	for _, a := range b.g.state.GetMap().Actors() {
+		if mon := a.D1Monster(); a != b.a && mon != nil && mon.Golem && a.IsAlive() &&
+			(ranged || geometry.DistanceChebyshev(b.pos, a.MapPosition()) < 2) {
+			consider(a)
+		}
+	}
+}
+
+// checkDoors ports MonstCheckDoors: a monster that has lost sight of the player opens the closed doors it stands
+// beside - Cathedral and Catacombs doors facing it along x (left) or y (right), the Caves' the other way round.
+func (b *d1Brain) checkDoors() {
+	m := b.g.state.GetMap()
+	for _, d := range common.D1Dirs {
+		p := b.pos.Add(d)
+		o, _ := m.TryGetObjectAt(p)
+		door, ok := o.(*common.Door)
+		if !ok || door.D1 == nil || !door.IsClosed() {
+			continue
+		}
+		dpx, dpy := iabs(p.X-b.pos.X), iabs(p.Y-b.pos.Y)
+		alongX := dpx == 1 && dpy <= 1
+		alongY := dpx <= 1 && dpy == 1
+		switch door.D1.Kind {
+		case d1.ObjL1LDOOR, d1.ObjL2LDOOR, d1.ObjL3RDOOR:
+			ok = alongX
+		case d1.ObjL1RDOOR, d1.ObjL2RDOOR, d1.ObjL3LDOOR:
+			ok = alongY
+		default:
+			ok = false
+		}
+		if ok {
+			b.g.actionBroker.Execute(common.NewOpenDoorAction(common.AbstractCause("OpenDoor"), b.a, p))
+		}
+	}
 }
 
 func (b *d1Brain) commit(act d1Act) (int, func()) {
@@ -138,17 +174,6 @@ func (b *d1Brain) modeSound(mode int) {
 			f.PlayD1MonsterSound(b.a, "attack")
 		}
 	}
-}
-
-// flee runs from the player on their own dijkstra map, so a broken monster rounds corners and takes doors
-// instead of backing into the nearest wall. False when there is nowhere left to run.
-func (b *d1Brain) flee() (d1Act, bool) {
-	if away := b.g.GetMoveAwayFromPlayer(b.pos); away != b.pos {
-		if _, ok := b.step(b.dirTo(away)); ok {
-			return b.walkTo(away), true
-		}
-	}
-	return b.callWalk(b.dirTo(b.enemy) + 4)
 }
 
 func (b *d1Brain) think() (d1Act, bool) {
@@ -185,13 +210,13 @@ func (b *d1Brain) think() (d1Act, bool) {
 	case "AI_HORKDEMON": // the unique Hork Demon fights like any skeleton until its own behaviour is ported
 		return b.round(true)
 	case "AI_BONED": // MAI_BoneDemon: MAI_RoundRanged with a special attack
-		return b.roundRanged(common.MisFlare, 4, 1)
+		return b.roundRanged(common.MisFlare, true, 4, 1)
 	case "AI_MAGMA":
-		return b.roundRanged(common.MisMagmaball, 4, 0)
+		return b.roundRanged(common.MisMagmaball, true, 4, 0)
 	case "AI_STORM":
-		return b.roundRanged(common.MisLightCtrl2, 4, 0)
+		return b.roundRanged(common.MisLightCtrl2, true, 4, 0)
 	case "AI_ACID":
-		return b.roundRanged(common.MisAcid, 4, 1)
+		return b.roundRanged(common.MisAcid, false, 4, 1)
 	case "AI_MEGA":
 		return b.rr2(common.MisFlamec)
 	case "AI_FAT":
@@ -243,7 +268,7 @@ func (b *d1Brain) think() (d1Act, bool) {
 		b.talker()
 		return noAct, false
 	case "AI_DIABLO":
-		return b.roundRanged(common.MisApoca, 40, 0)
+		return b.roundRanged(common.MisApoca, false, 40, 0)
 	}
 	return b.skelSd()
 }
@@ -259,15 +284,17 @@ func (b *d1Brain) talker() bool {
 }
 
 // skelKing ports MAI_SkelKing: circle now and then, raise skeletons from afar, hit up close.
-// ponytail: D1's same-room check (dTransVal) counts as always true, like the other circling AIs.
 func (b *d1Brain) skelKing() (d1Act, bool) {
 	mon := b.mon
 	if mon.Squelch == 0 {
 		return noAct, false
 	}
 	md := b.dirTo(mon.Last)
+	if mon.Squelch < 255 {
+		b.checkDoors()
+	}
 	v := b.rnd(100)
-	if b.near(2) || mon.Squelch != 255 {
+	if b.near(2) || mon.Squelch != 255 || !b.sameRoom() {
 		mon.Goal = 1
 	} else if mon.Goal == 4 || !b.near(3) && b.rnd(4) == 0 {
 		if mon.Goal != 4 {
@@ -345,43 +372,81 @@ func (b *d1Brain) attack() (d1Act, bool) {
 	}}, true
 }
 
-// golemOnMap is the closest MFLAG_GOLEM monster to pos: the player's golem or a berserk monster.
-func (g *GameInstance) golemOnMap(pos geometry.Point) *common.Actor {
-	var best *common.Actor
-	for _, a := range g.state.GetMap().Actors() {
-		if mon := a.D1Monster(); mon != nil && (mon.Golem || mon.Berserk) && a.IsAlive() && a.MapPosition() != pos &&
-			(best == nil || geometry.DistanceSquared(pos, a.MapPosition()) < geometry.DistanceSquared(pos, best.MapPosition())) {
-			best = a
-		}
-	}
-	return best
-}
+// d1Talkers are M_Talker's AIs: quest monsters that speak before they fight.
+var d1Talkers = map[string]bool{"AI_LAZURUS": true, "AI_WARLORD": true, "AI_GARBUD": true, "AI_ZHAR": true,
+	"AI_SNOTSPIL": true, "AI_LACHDAN": true, "AI_LAZHELP": true}
 
-// golem ports MAI_Golum: fight the closest monster in line, otherwise stay with the player. A berserk monster
-// (Hellfire) fights the same way but doesn't follow the player.
+// golem ports MAI_Golum: M_Enemy over every other monster on the level (one with something left to say excepted),
+// its own room first, then the closest; strike it when adjacent, waking it and the monsters around the golem;
+// otherwise path to it (MAI_Path), and failing that walk the way the player faces (east or west). A berserk monster (Hellfire)
+// fights the same way but has no player to follow.
 func (b *d1Brain) golem() (int, func()) {
 	player := b.g.state.GetPlayer()
+	best, bestSame := -1, false
 	for _, a := range b.g.state.GetMap().Actors() {
 		mon := a.D1Monster()
-		if mon == nil || mon.Golem || mon.Berserk || !a.IsAlive() || geometry.DistanceChebyshev(b.pos, a.MapPosition()) > 15 || !b.lineClear(a.MapPosition()) {
+		if a == b.a || mon == nil || mon.Golem || !a.IsAlive() || d1Talkers[mon.AI] && mon.TalkMsg != "" {
 			continue
 		}
-		if b.target == nil || geometry.DistanceSquared(b.pos, a.MapPosition()) < geometry.DistanceSquared(b.pos, b.enemy) {
-			b.enemy, b.target = a.MapPosition(), a
+		p := a.MapPosition()
+		same := common.D1SameRoom(&b.g.state, b.pos, p)
+		dist := max(iabs(b.pos.X-p.X), iabs(b.pos.Y-p.Y))
+		if same && !bestSame || (same || !bestSame) && dist < best || best == -1 {
+			b.enemy, b.target, best, bestSame = p, a, dist, same
 		}
 	}
 	act, ok := noAct, false
-	if b.target != nil {
-		if act, ok = b.attack(); !ok {
-			act, ok = b.callWalk(b.dirTo(b.enemy))
+	switch {
+	case b.target != nil && best < 2:
+		if tm := b.target.D1Monster(); tm.Squelch == 0 {
+			tm.Squelch, tm.Last = 255, b.pos
+			// D1 then wakes the 5x5 block around the golem, but indexes monster[] off by one, so it wakes whichever
+			// monster comes next in the table; this wakes the ones actually standing there.
+			for _, a := range b.g.state.GetMap().Actors() {
+				if om := a.D1Monster(); om != nil && !om.Golem && geometry.DistanceChebyshev(a.MapPosition(), b.pos) <= 2 {
+					om.Squelch = 255
+				}
+			}
 		}
-	} else if b.mon.Golem && geometry.DistanceChebyshev(b.pos, player.MapPosition()) > 2 {
-		act, ok = b.callWalk(b.dirTo(player.MapPosition()))
+		act, ok = b.attack()
+	case b.target != nil:
+		act, ok = b.golemPath()
+	}
+	if !ok && b.mon.Golem {
+		if b.mon.PathCount++; b.mon.PathCount > 8 {
+			b.mon.PathCount = 5
+		}
+		facing := 7 // D1's _pdir; this engine faces east or west only
+		if player.FlipX() {
+			facing = 3
+		}
+		if act, ok = b.callWalk(facing); !ok {
+			md := b.dirTo(b.enemy)
+			for j := 0; j < 8 && !ok; j++ {
+				act, ok = b.dumbWalk(md + j)
+			}
+		}
 	}
 	if !ok {
 		return 10, func() {}
 	}
 	return act.cost, act.run
+}
+
+// golemPath is MAI_Path for the golem: after five turns without a walkable line to its enemy it takes the first
+// step of a path of up to 25 (FindPath's MAX_PATH_LENGTH). Unlike a monster's, its count never resets.
+func (b *d1Brain) golemPath() (d1Act, bool) {
+	mon := b.mon
+	if b.lineFree() && (mon.PathCount < 5 || mon.PathCount >= 8) {
+		return noAct, false
+	}
+	if mon.Data.Flags&d1.MFlagCanOpenDoor != 0 {
+		b.checkDoors()
+	}
+	if mon.PathCount++; mon.PathCount < 5 {
+		return noAct, false
+	}
+	return b.pathStep()
 }
 
 func (b *d1Brain) shoot() (d1Act, bool) {
@@ -404,7 +469,7 @@ func (b *d1Brain) step(d int) (geometry.Point, bool) {
 	if b.g.state.IsClosedDoorAt(p) {
 		return p, b.mon.Data.Flags&d1.MFlagCanOpenDoor != 0
 	}
-	return p, m.IsCurrentlyPassable(p)
+	return p, m.IsCurrentlyPassable(p) && !common.D1FireWallBlocks(m, p, b.mon)
 }
 
 func (b *d1Brain) walkTo(p geometry.Point) d1Act {
@@ -466,6 +531,23 @@ func (b *d1Brain) roundWalk(md int) (d1Act, bool) {
 	return b.callWalk(md + 4)
 }
 
+// lineNoSolid ports LineClearF(CheckNoSolid): no solid piece of the level between the monster and p.
+func (b *d1Brain) lineNoSolid(p geometry.Point) bool {
+	m := b.g.state.GetMap()
+	line := geometry.LineOfSight(b.pos, p, func(q geometry.Point) bool { return q == b.pos || q == p || m.IsWalkable(q) || m.IsTransparent(q) })
+	return len(line) > 0 && line[len(line)-1] == p
+}
+
+// lineFree ports LineClearF1(PosOkMonst2): no wall, solid object or fire wall between the monster and its enemy.
+// Unlike lineWalkable, other creatures don't block it.
+func (b *d1Brain) lineFree() bool {
+	m := b.g.state.GetMap()
+	line := geometry.LineOfSight(b.pos, b.enemy, func(q geometry.Point) bool {
+		return q == b.pos || q == b.enemy || m.IsWalkable(q) && !common.D1FireWallBlocks(m, q, b.mon)
+	})
+	return len(line) > 0 && line[len(line)-1] == b.enemy
+}
+
 // lineClear ports LineClear: nothing blocks the straight line to p. Lava and fences don't, like D1's missile table.
 func (b *d1Brain) lineClear(p geometry.Point) bool {
 	m := b.g.state.GetMap()
@@ -475,17 +557,30 @@ func (b *d1Brain) lineClear(p geometry.Point) bool {
 	return len(line) > 0 && line[len(line)-1] == p
 }
 
-// path ports MAI_Path for monsters with the search flag: pathfind after 5 ticks without a clear line.
+// path ports MAI_Path for monsters with the search flag: pathfind after 5 ticks without a walkable line.
 func (b *d1Brain) path() (d1Act, bool) {
 	mon := b.mon
 	if mon.Squelch == 0 || mon.Goal != 1 && mon.Goal != 4 && mon.Goal != 5 {
 		return noAct, false
 	}
-	if !b.lineClear(b.enemy) || mon.PathCount >= 5 && mon.PathCount < 8 {
+	if !b.lineFree() || mon.PathCount >= 5 && mon.PathCount < 8 {
+		if mon.Data.Flags&d1.MFlagCanOpenDoor != 0 {
+			b.checkDoors()
+		}
 		mon.PathCount++
 		if mon.PathCount < 5 {
 			return noAct, false
 		}
+		return b.pathStep()
+	}
+	mon.PathCount = 0
+	return noAct, false
+}
+
+// pathStep ports M_PathWalk: the first step of a path to the enemy of at most 25 (FindPath's MAX_PATH_LENGTH). The
+// player's own distance map serves when the enemy is the player.
+func (b *d1Brain) pathStep() (d1Act, bool) {
+	if b.target == b.g.state.GetPlayer() {
 		if next := b.g.GetMoveTowardsPlayer(b.pos); next != b.pos {
 			if _, ok := b.step(b.dirTo(next)); ok {
 				return b.walkTo(next), true
@@ -493,7 +588,18 @@ func (b *d1Brain) path() (d1Act, bool) {
 		}
 		return noAct, false
 	}
-	mon.PathCount = 0
+	dm := b.g.state.GetMap().GetDijkstraMapWithActorsNotBlocking(b.enemy, 25)
+	here, ok := dm[b.pos]
+	if !ok {
+		return noAct, false
+	}
+	for d := 0; d < 8; d++ {
+		if p, free := b.step(d); free {
+			if n, on := dm[p]; on && n < here {
+				return b.walkTo(p), true
+			}
+		}
+	}
 	return noAct, false
 }
 
@@ -512,7 +618,7 @@ func (b *d1Brain) zombie() (d1Act, bool) {
 	if v >= 2*mon.Int+10 {
 		return noAct, false
 	}
-	if b.near(2*mon.Int+4) || mon.Enraged { // MAI_Zombie only homes in from close by; being shot at counts too
+	if b.near(2*mon.Int + 4) { // MAI_Zombie only homes in from close by
 		return b.callWalk(b.dirTo(b.enemy))
 	}
 	md := mon.Dir
@@ -568,10 +674,12 @@ func (b *d1Brain) fallen() (d1Act, bool) {
 			if !mon.NoHeal { // MAI_Fallen: the howl itself heals the howler by 2*int+2, capped at max
 				b.a.GetStats().GetResource(stats.Health).Increase(float64(2*mon.Int + 2))
 			}
+			// D1 bounds-checks the offsets instead of the cells, so the howl only rallies the fallen ones 0..rad
+			// cells to the south-east, the howler included
 			for _, other := range b.g.state.GetMap().Actors() {
-				om := other.D1Monster()
-				if om != nil && om.AI == "AI_FALLEN" && geometry.DistanceChebyshev(other.MapPosition(), b.pos) <= rad {
-					om.Goal, om.GoalVar1 = 5, 5*(6*mon.Int+21)
+				om, d := other.D1Monster(), other.MapPosition().Sub(b.pos)
+				if om != nil && om.AI == "AI_FALLEN" && d.X >= 0 && d.Y >= 0 && d.X <= rad && d.Y <= rad {
+					om.Goal, om.GoalVar1 = 5, 30*mon.Int+105
 				}
 			}
 		}}, true
@@ -600,20 +708,28 @@ func (b *d1Brain) scav() (d1Act, bool) {
 		m := b.g.state.GetMap()
 		if m.IsDownedActorAt(b.pos) {
 			return d1Act{cost: b.attackCost(), mode: common.D1ModeSAttack, run: func() {
-				hp.Increase(1)
+				if !mon.NoHeal {
+					hp.Increase(1)
+				}
 				if hp.Value() >= hp.GetMax()/2+hp.GetMax()/4 {
 					mon.Goal, mon.GoalVar1, mon.GoalVar2 = 1, 0, 0
 				}
 			}}, true
 		}
 		if mon.GoalVar1 == 0 {
-			// ponytail: D1's corpse scan (with its offset bug) is simplified to the nearest corpse within 4.
-			best := -1
-			for y := -4; y <= 4; y++ {
-				for x := -4; x <= 4; x++ {
+			// D1 checks the offsets against the dungeon's bounds instead of the cells, so it only ever looks at
+			// the corpses 0-4 cells to the south-east; a coin decides whether it scans from near or from far.
+			order := []int{0, 1, 2, 3, 4}
+			if b.rnd(2) == 0 {
+				order = []int{4, 3, 2, 1, 0}
+			}
+		scan:
+			for _, y := range order {
+				for _, x := range order {
 					p := b.pos.Add(geometry.Point{X: x, Y: y})
-					if d := max(iabs(x), iabs(y)); m.Contains(p) && m.IsDownedActorAt(p) && (best < 0 || d < best) && b.lineClear(p) {
-						best, mon.GoalVar1, mon.GoalVar2 = d, p.X+1, p.Y+1
+					if m.Contains(p) && m.IsDownedActorAt(p) && b.lineNoSolid(p) {
+						mon.GoalVar1, mon.GoalVar2 = p.X+1, p.Y+1
+						break scan
 					}
 				}
 			}
@@ -656,25 +772,31 @@ func (b *d1Brain) bat() (d1Act, bool) {
 	md := b.dirTo(mon.Last)
 	mon.Dir = md
 	v := b.rnd(100)
+	// MAI_Bat doesn't return after the retreat step: a charge, walk or attack later in the same tick replaces it
+	retreat, retreating := noAct, false
 	if mon.Goal == 2 {
 		if mon.GoalVar1 == 0 {
+			retreat, retreating = b.callWalk(md + 4)
 			mon.GoalVar1++
-			return b.callWalk(md + 4)
+		} else {
+			if b.rnd(2) != 0 {
+				retreat, retreating = b.callWalk(md - 1)
+			} else {
+				retreat, retreating = b.callWalk(md + 1)
+			}
+			mon.Goal = 1
 		}
-		mon.Goal = 1
-		if b.rnd(2) != 0 {
-			return b.callWalk(md - 1)
-		}
-		return b.callWalk(md + 1)
 	}
 	if mon.Data.ID == "MT_GLOOM" && !b.near(5) && v < 4*mon.Int+33 && b.lineWalkable() {
 		return b.charge(false, false)
 	}
 	if !b.near(2) {
 		if b.stoodLong() && v < mon.Int+13 || b.justWalked() && v < mon.Int+63 {
-			return b.callWalk(md)
+			if act, ok := b.callWalk(md); ok {
+				return act, true
+			}
 		}
-		return noAct, false
+		return retreat, retreating
 	}
 	if v < 4*mon.Int+8 {
 		if act, ok := b.attack(); ok {
@@ -689,7 +811,7 @@ func (b *d1Brain) bat() (d1Act, bool) {
 			return act, true
 		}
 	}
-	return noAct, false
+	return retreat, retreating
 }
 
 func (b *d1Brain) fade(out bool) (d1Act, bool) {
@@ -706,9 +828,14 @@ func (b *d1Brain) fade(out bool) (d1Act, bool) {
 	}}, true
 }
 
-// sneak ports MAI_Sneak (Hidden family). ponytail: D1 also idles in total darkness; not ported.
+// sneak ports MAI_Sneak (Hidden family). It does nothing in total darkness (dLight == lightmax): outside the
+// hero's light radius and any lit room.
 func (b *d1Brain) sneak() (d1Act, bool) {
 	mon := b.mon
+	player := b.g.state.GetPlayer()
+	if player.Hero() != nil && geometry.Distance(b.pos, player.MapPosition()) > float64(player.HeroSheet().LightRad) && !b.g.state.GetMap().IsTileLit(b.pos) {
+		return noAct, false
+	}
 	md := b.dirTo(b.enemy)
 	dist := 5 - mon.Int
 	if mon.LastMode == common.D1ModeGotHit {
@@ -746,16 +873,19 @@ func (b *d1Brain) sneak() (d1Act, bool) {
 	return noAct, false
 }
 
-// round ports MAI_Round (goat men, gargoyles): close in, sometimes circle around. ponytail: D1's same-room check
-// (dTransVal) is treated as always true here and in the other circling AIs.
+// round ports MAI_Round (goat men, gargoyles): close in, sometimes circle around - only in the enemy's room
+// (dTransVal), which also ends the circling once they no longer share one.
 func (b *d1Brain) round(special bool) (d1Act, bool) {
 	mon := b.mon
 	if mon.Squelch == 0 {
 		return noAct, false
 	}
 	md := b.dirTo(mon.Last)
+	if mon.Squelch < 255 {
+		b.checkDoors()
+	}
 	v := b.rnd(100)
-	if b.near(2) || mon.Squelch != 255 {
+	if b.near(2) || mon.Squelch != 255 || !b.sameRoom() {
 		mon.Goal = 1
 	} else if mon.Goal == 4 || !b.near(4) && b.rnd(4) == 0 {
 		if mon.Goal != 4 {
@@ -792,7 +922,10 @@ func (b *d1Brain) round(special bool) (d1Act, bool) {
 // ranged ports MAI_Ranged (goat archers, succubi, unique acid beasts): keep distance, fire on a clear line.
 func (b *d1Brain) ranged(fire func() (d1Act, bool)) (d1Act, bool) {
 	mon := b.mon
-	if mon.Squelch == 255 {
+	if mon.Squelch == 255 || b.target != b.g.state.GetPlayer() {
+		if mon.Squelch < 255 {
+			b.checkDoors()
+		}
 		md := b.dirTo(b.enemy)
 		mon.Dir = md
 		if mon.LastMode == common.D1ModeRAttack {
