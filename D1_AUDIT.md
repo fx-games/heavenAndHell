@@ -30,8 +30,9 @@ dumps identical to 1.09's), stores (b224ec8), traps' burst and nova (7fcd007), e
 
 ## Traps
 
-- **open — trap missiles only hit the hero.** 1.09's `CheckMissileCol` for a sourceless missile also hits
-  monsters (`MonsterTrapHit`), and a golem for monster missiles. `common/d1_trap.go`, `common/d1_mmissile.go`.
+- **fixed — trap missiles only hit the hero.** 1.09's `CheckMissileCol` for a sourceless missile also hits
+  monsters (`MonsterTrapHit`), and a golem for monster missiles. Traps now hit monsters; still open: a monster's
+  missile hitting the golem, and the fire ring's lingering walls burning monsters.
 
 ## Monster AI (f25226a)
 

@@ -82,6 +82,7 @@ type missileCtx struct {
 	dealt  int       // whole points
 	taken  int       // 64ths that hit the hero, before mana shield
 	block  bool      // the hero blocked a hit
+	trap   bool      // sourceless: it hits monsters too (MonsterTrapHit)
 }
 
 // hit ports PlayerMHit: `ticks` hit rolls against the player standing at p, from a missile that flew from `from`.
@@ -92,6 +93,9 @@ func (c *missileCtx) hit(mis D1Missile, p, from geometry.Point, mind, maxd int, 
 // hitAs is hit with the missile's resistance kind given: a fire arrow's flight hits as a plain arrow (MI_LArrow).
 func (c *missileCtx) hitAs(mis D1Missile, p, from geometry.Point, mind, maxd int, shift bool, ticks, resist int) bool {
 	c.ctx.GameState.factory.hitD1Object(c.c.m, p, c.attacker())
+	if c.trap && c.trapHitsMonster(p, from, mind, maxd, shift, ticks, resist) {
+		return true
+	}
 	pl := c.player
 	if pl.hero == nil || !pl.IsAlive() || pl.MapPosition() != p {
 		return false
@@ -148,6 +152,43 @@ func (c *missileCtx) hitAs(mis D1Missile, p, from geometry.Point, mind, maxd int
 	if flinch > 0 {
 		D1StartPlrHit(c.ctx.GameState.factory, pl, flinch, c.dealt, false)
 	}
+	c.c.animations = append(c.c.animations, NewHitAnimation(p, 0.3, defs.IconEffectHit, 2))
+	return true
+}
+
+// trapHitsMonster ports CheckMissileCol's sourceless half, MonsterTrapHit: a trap's missile hits the monster in its
+// way too, 90 - AC - distance to hit, a quarter through a resistance.
+func (c *missileCtx) trapHitsMonster(p, from geometry.Point, mind, maxd int, shift bool, ticks, resist int) bool {
+	a, ok := c.c.m.TryGetActorAt(p)
+	if !ok || a.d1Monster == nil || a.GetStats().GetResource(stats.Health).Value() <= c.c.dealt[a] {
+		return false
+	}
+	mon := a.d1Monster
+	res, immune := resistBits(resist)
+	if mon.TalkMsg != "" || mon.MagicRes&immune != 0 || d1Untouchable(mon, true) {
+		return false
+	}
+	hper := max(min(90-mon.AC-geometry.DistanceChebyshev(from, p), 95), 5)
+	total := 0
+	for i := 0; i < ticks; i++ {
+		if d1Rng.Intn(100) < hper || a.HasStatusEffect(StatusStone) {
+			dam := mind + d1Rng.Intn(max(maxd-mind+1, 1))
+			if !shift {
+				dam <<= 6
+			}
+			if mon.MagicRes&res != 0 {
+				dam >>= 2
+			}
+			total += dam
+		}
+	}
+	if total == 0 {
+		return false
+	}
+	if _, seen := c.c.dealt[a]; !seen {
+		c.c.order = append(c.c.order, a)
+	}
+	c.c.dealt[a] += max(total>>6, 1)
 	c.c.animations = append(c.c.animations, NewHitAnimation(p, 0.3, defs.IconEffectHit, 2))
 	return true
 }

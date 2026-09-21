@@ -30,7 +30,7 @@ func (a *TrapMissileAction) GetAnimations() []Animation { return a.animations }
 
 func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 	player := ctx.GameState.GetPlayer()
-	c := &missileCtx{ctx: ctx, from: a.from, player: player, c: &spellCtx{m: ctx.GameState.GetMap()}}
+	c := &missileCtx{ctx: ctx, from: a.from, player: player, trap: true, c: &spellCtx{f: ctx.GameState.factory, m: ctx.GameState.GetMap(), dealt: map[*Actor]int{}}}
 	cl := d1DungeonLevel(ctx.GameState)
 	playD1SfxAt(ctx, d1MissileSfx[a.mis][0], a.from)
 	switch a.mis {
@@ -111,10 +111,12 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 	default:
 		ctx.Msg("The trap misses you.")
 	}
+	c.c.cause = a.cause
+	hits := c.c.finish() // the monsters it hit
 	if c.dealt <= 0 || !player.IsAlive() {
-		return nil
+		return hits
 	}
-	return OneAction(NewChangeResourceAction(a.cause, player, stats.Health, -float64(c.dealt)))
+	return append(hits, NewChangeResourceAction(a.cause, player, stats.Health, -float64(c.dealt)))
 }
 
 // d1TrapTargets are the objects a wall trap watches (Obj_Trap): doors fire it when opened, the rest when used.
