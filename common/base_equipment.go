@@ -1,6 +1,10 @@
 package common
 
-import "rpg/defs"
+import (
+	"slices"
+
+	"rpg/defs"
+)
 
 type Equipment struct {
 	slots     map[defs.SlotName]*Item
@@ -134,9 +138,21 @@ func (e *Equipment) GetWeapon(attackType AttackType) *Item {
 	return nil
 }
 
+// slotsInOrder lists the filled slots by name. Everything built by walking the equipment - the item list a save
+// writes, the item a durability roll reaches first - used to walk a Go map instead, and so came out in a
+// different order on every run.
+func (e *Equipment) slotsInOrder() []defs.SlotName {
+	names := make([]defs.SlotName, 0, len(e.slots))
+	for slot := range e.slots {
+		names = append(names, slot)
+	}
+	slices.Sort(names)
+	return names
+}
+
 func (e *Equipment) GetArmor() []*Item {
 	var armor []*Item
-	for _, item := range e.slots {
+	for _, item := range e.itemsInOrder() {
 		if item.IsArmor() {
 			armor = append(armor, item)
 		}
@@ -215,13 +231,16 @@ func (e *Equipment) GetLightSource() *Item {
 	return e.GetBySlot(defs.SlotNameLightSource)
 }
 
-func (e *Equipment) AllItems() []*Item {
-	var items []*Item
-	for _, item := range e.slots {
-		items = append(items, item)
+// itemsInOrder is AllItems' shared core: the equipped items in slot order.
+func (e *Equipment) itemsInOrder() []*Item {
+	items := make([]*Item, 0, len(e.slots))
+	for _, slot := range e.slotsInOrder() {
+		items = append(items, e.slots[slot])
 	}
 	return items
 }
+
+func (e *Equipment) AllItems() []*Item { return e.itemsInOrder() }
 
 func (e *Equipment) GetSlot(item *Item) defs.SlotName {
 	for slot, slotItem := range e.slots {

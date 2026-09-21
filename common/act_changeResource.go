@@ -4,7 +4,6 @@ import (
 	"math/rand"
 	"rpg/stats"
 	"strings"
-	"time"
 )
 
 type ChangeResourceAction struct {
@@ -69,7 +68,8 @@ func (d *ChangeResourceAction) GetAnimations() []Animation { // TODO: Not allowe
 }
 
 func (d *ChangeResourceAction) prepareAnimations(context ActionContext) []Animation {
-	randomSource := rand.New(rand.NewSource(time.Now().UnixNano()))
+	// seeded from the game's dice rather than the clock: a run replayed from its seed has to roll the same
+	randomSource := rand.New(rand.NewSource(rand.Int63()))
 	var animations []Animation
 	amount := int(d.changedByAmount)
 	if d.resourceName == stats.Health && amount != 0 {
@@ -79,6 +79,9 @@ func (d *ChangeResourceAction) prepareAnimations(context ActionContext) []Animat
 		if amount < 0 {
 			hitAnimation := NewHitAnimation(d.actor.MapPosition(), 0.2, 43, 2)
 			hitAnimation.StartWhenTrue(d.shouldStartAnimation)
+			// rolled here, not in the callback: an animation finishes when the frame says so, and a global
+			// die rolled from there shifts every later roll in the game depending on when it ran
+			playsHitSound := rand.Intn(10) <= 8
 			hitAnimation.SetOnFinished(func() {
 				freeNeighbor := context.GameState.GetMap().GetRandomNeighbor(randomSource, d.actor.MapPosition())
 				roll := randomSource.Intn(9)
@@ -86,7 +89,7 @@ func (d *ChangeResourceAction) prepareAnimations(context ActionContext) []Animat
 					freeNeighbor = d.actor.MapPosition()
 				}
 				context.GameState.AddBloodDecalAt(freeNeighbor)
-				if rand.Intn(10) <= 8 && d.actor != context.GameState.GetPlayer() && (d.actor.IsAlive() || d.actor.d1Monster == nil) {
+				if playsHitSound && d.actor != context.GameState.GetPlayer() && (d.actor.IsAlive() || d.actor.d1Monster == nil) {
 					d.playHitSound(context)
 				}
 			})
