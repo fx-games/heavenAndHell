@@ -128,7 +128,7 @@ Poisoned Water), Cain (Lazarus, Diablo), the dead guy, the quest objects (books,
 
 ## Monsters
 
-- **open — packs.** 1.09 ties a leader and its minions (`leaderflag`, `packsize`): a minion won't step 4 or more
+- **fixed — packs.** 1.09 ties a leader and its minions (`leaderflag`, `packsize`): a minion won't step 4 or more
   cells from its leader (`DirOK`); a leader with `mUnqAttr & 2` only moves when its whole pack is around it;
   leader and minions share `_msquelch`/`_lastx` (whoever is more alert tells the other, and wakes a gargoyle);
   a minion that strays gets back in line or drops out (`M_UpdateLeader`). Ours sets `Leader` and never reads it.

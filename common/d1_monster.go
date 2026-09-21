@@ -23,7 +23,6 @@ type D1Monster struct {
 	AI                     string
 	TalkMsg                string
 	D1MonsterState
-	Leader     *Actor
 	SpawnIndex int     // order of creation on its level, identifies the monster in saves
 	Golem      bool    // the player's golem (AI_GOLUM), fights for the player
 	HitWith    *[3]int // set for one melee attack: to-hit, min and max damage of a special attack
@@ -39,6 +38,7 @@ type D1MonsterState struct {
 	Dormant                            bool // _mFlags & 4 on gargoyles: waiting in stone until the enemy comes close
 	NoHeal                             bool // _mFlags & 8 (MFLAG_NOHEAL): hit by a weapon that stops healing
 	Berserk                            bool // Hellfire's MFLAG_BERSERK | MFLAG_GOLEM: turned on its own kind
+	LeaderIdx, LeaderFlag, PackSize    int  // the pack ties (d1_pack.go)
 }
 
 // D1 monster modes (MON_MODE) the AI compares against.
@@ -255,28 +255,13 @@ func (g *Factory) NewD1MonsterFromLevel(mon *d1.Monster) *Actor {
 		dm.TalkMsg = um.TalkMsg
 	}
 	dm.Dir = mon.Dir
+	dm.LeaderIdx, dm.LeaderFlag, dm.PackSize = mon.Leader, mon.LeaderFlag, mon.PackSize
 	hp := max(mon.HP>>6, 1)
 	st := a.GetStats()
 	st.SetAttribute(stats.MaxHealth, hp)
 	st.GetResource(stats.Health).SetToMax()
 	st.SetAttribute(stats.Level, dm.Level)
 	return g.scaleD1NewGamePlus(a)
-}
-
-// MakeD1Minion ports PlaceGroup's leader handling (leaderf bit 1: stronger, bit 2: follows the leader's AI).
-func MakeD1Minion(minion, leader *Actor, leaderf int) {
-	if leaderf&1 == 0 {
-		return
-	}
-	mon, lead := minion.d1Monster, leader.d1Monster
-	hp := minion.GetStats()
-	hp.SetAttribute(stats.MaxHealth, hp.GetAttribute(stats.MaxHealth)*2)
-	hp.GetResource(stats.Health).SetToMax()
-	mon.Int = lead.Int
-	if leaderf&2 != 0 {
-		mon.Leader = leader
-		mon.AI = lead.AI
-	}
 }
 
 // D1MonsterSections describes a monster for the info window: what it is, its numbers, what it shrugs off and

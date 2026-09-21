@@ -57,6 +57,9 @@ func (d *OnKillHook) After(action Action, context ActionContext) []Action {
 
 	state := context.GameState
 	state.GetVisibility().RemoveActor(victim)
+	if victim != nil && victim.d1Monster != nil {
+		d1ReleasePack(state.GetMap(), victim)
+	}
 	if killer != nil && victim != nil {
 		return d.onKill(context, killer, victim)
 	}

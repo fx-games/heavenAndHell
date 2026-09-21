@@ -157,6 +157,7 @@ func (b *d1Brain) commit(act d1Act) (int, func()) {
 		b.modeSound(act.mode)
 		act.run()
 		b.mon.LastMode, b.mon.StandTicks = act.mode, 0
+		common.D1GroupUnity(b.g.state.GetMap(), b.a)
 	}
 }
 
@@ -467,9 +468,9 @@ func (b *d1Brain) step(d int) (geometry.Point, bool) {
 		return p, false
 	}
 	if b.g.state.IsClosedDoorAt(p) {
-		return p, b.mon.Data.Flags&d1.MFlagCanOpenDoor != 0
+		return p, b.mon.Data.Flags&d1.MFlagCanOpenDoor != 0 && common.D1PackStepOK(m, b.a, p)
 	}
-	return p, m.IsCurrentlyPassable(p) && !common.D1FireWallBlocks(m, p, b.mon)
+	return p, m.IsCurrentlyPassable(p) && !common.D1FireWallBlocks(m, p, b.mon) && common.D1PackStepOK(m, b.a, p)
 }
 
 func (b *d1Brain) walkTo(p geometry.Point) d1Act {
@@ -700,7 +701,7 @@ func (b *d1Brain) scav() (d1Act, bool) {
 	mon := b.mon
 	hp := b.a.GetStats().GetResource(stats.Health)
 	if hp.Value() < hp.GetMax()/2 && mon.Goal != 3 {
-		mon.Leader = nil
+		common.D1LeavePack(b.g.state.GetMap(), mon)
 		mon.Goal, mon.GoalVar3 = 3, 10
 	}
 	if mon.Goal == 3 && mon.GoalVar3 != 0 {

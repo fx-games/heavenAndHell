@@ -1097,7 +1097,9 @@ func d1RaiseManaShield(a *Actor, slvl int) {
 	a.AddStatusEffect(StatusManaShield, map[bool]int{true: -2, false: -1}[slvl > 0])
 }
 
-func d1ShieldTakesThird(a *Actor) bool { return a.statusEffects.AllEntries()[string(StatusManaShield)] == -2 }
+func d1ShieldTakesThird(a *Actor) bool {
+	return a.statusEffects.AllEntries()[string(StatusManaShield)] == -2
+}
 
 func d1ManaShield(def *Actor, dam int) int {
 	if !def.HasStatusEffect(StatusManaShield) || dam <= 0 {

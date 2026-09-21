@@ -115,8 +115,8 @@ type SpellDamageAction struct {
 
 func NewSpellDamageAction(caster *Actor, roll string, resist int, mode string, slvl int, target geometry.Point, hitPositions []geometry.Point) *SpellDamageAction {
 	return &SpellDamageAction{
-		BaseAction:   BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
-		caster:       caster, roll: roll, resist: resist, mode: mode, slvl: slvl,
+		BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
+		caster:     caster, roll: roll, resist: resist, mode: mode, slvl: slvl,
 		target: target, hitPositions: hitPositions,
 	}
 }
