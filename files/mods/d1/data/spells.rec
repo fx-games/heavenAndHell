@@ -237,10 +237,14 @@ cast_sfx: IS_CAST8
 id: SPL_RUNENOVA
 resist: lightning
 cast_sfx: IS_CAST8
+hit_zone: box_aoe(4)
+effect: spell_damage(nova, lightning)
 
 id: SPL_RUNEIMMOLAT
 resist: fire
 cast_sfx: IS_CAST8
+hit_zone: box_aoe(4)
+effect: spell_damage(nova, fire)
 
 id: SPL_RUNESTONE
 resist: magic

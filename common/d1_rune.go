@@ -86,14 +86,8 @@ func d1RuneGoesOff(c *spellCtx, misc string, victim geometry.Point) {
 		// (1.09 adds MIS_LIGHTBALL with no damage set, so there the rune does nothing)
 		dam := 16 * (d1Rng.Intn(10) + d1Rng.Intn(10) + clvl + 2)
 		c.f.spawnD1Wall(c.caster, o, d1.SplRuneLight, 255/d1.RefWalkTicks, true, 1, defs.IconEffectLightning, func() int { return dam })
-	case "IMISC_GR_RUNEF": // MIS_IMMOLATION: AddNova's damage as a fireball down every Nova ray
-		dam := d1.NovaDamage(d1Rng, clvl, 0)
-		for _, r := range d1.NovaRays {
-			c.fireball(o, o.Add(geometry.Point{X: r[0], Y: r[1]}), dam)
-		}
-	case "IMISC_GR_RUNEL": // MIS_NOVA: AddNova's damage down every ray
-		dam := d1.NovaDamage(d1Rng, clvl, 0)
-		c.nova(o, dam)
+	case "IMISC_GR_RUNEF", "IMISC_GR_RUNEL": // MIS_IMMOLATION and MIS_NOVA: the rune's own spell, as its content declares it
+		c.castFromData(o)
 	case "IMISC_RUNES": // AddStone on the monster that stepped on it (not Diablo or Na-Krul)
 		if a := c.monsterAt(victim); a != nil && a.d1Monster.AI != "AI_DIABLO" && a.d1Monster.Data.ID != "MT_NKR" {
 			a.AddStatusEffect(StatusStone, d1.StoneTurns(0))
