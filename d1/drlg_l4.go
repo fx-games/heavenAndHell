@@ -431,7 +431,9 @@ func (g *gen) l4GenerateLevel(entry Entry) {
 		g.l4AddWall()
 		g.floodTrans(6)
 		g.l4FixTransparency()
-		g.l4InitSetPiece()
+		if g.params.SetPieces {
+			g.l4InitSetPiece()
+		}
 		if g.currlevel == 16 {
 			g.l4LoadDiabQuads(true)
 		}
@@ -441,11 +443,12 @@ func (g *gen) l4GenerateLevel(entry Entry) {
 	}
 	g.l4GeneralFix()
 	if g.currlevel != 16 {
-		g.placeThemeRooms(7, 10, 6, 8, true)
+		g.placeThemeRooms(7, 10, 6, g.params.ThemeFreq, true)
 	}
 	g.l4ApplyShadows()
 	g.l4FixCornerTiles()
 	g.l4Substitution()
+	g.placeDecorations()
 	g.savePdungeon()
 	g.checkQuests(g.setPieceRoom.x, g.setPieceRoom.y)
 	if g.currlevel == 15 {
@@ -465,10 +468,4 @@ func (g *gen) l4GenerateLevel(entry Entry) {
 	if g.currlevel == 16 {
 		g.l4LoadDiabQuads(false)
 	}
-}
-
-func (g *gen) createL4(seed int32, entry Entry) {
-	g.rng.SetSeed(seed)
-	g.l4GenerateLevel(entry)
-	g.lPass3(30 - 1)
 }

@@ -514,8 +514,9 @@ func (g *gen) l3PlaceMiniSetRandom(m *miniset, rndper int) bool {
 	return placed
 }
 
-func (g *gen) l3PlaceMiniSetRandom1x1(search, replace byte, rndper int) {
-	g.l3PlaceMiniSetRandom(&miniset{w: 1, h: 1, search: [6][6]byte{{search}}, replace: [6][6]byte{{replace}}}, rndper)
+// l3PlaceDecoration scatters one single-tile decoration the DRLG_L3 way, which also honours l3CanReplaceTile.
+func (g *gen) l3PlaceDecoration(d Decoration) {
+	g.l3PlaceMiniSetRandom(&miniset{w: 1, h: 1, search: [6][6]byte{{d.Search}}, replace: [6][6]byte{{d.Replace}}}, d.Freq)
 }
 
 func (g *gen) l3PlaceLavaPool() bool {
@@ -1002,7 +1003,7 @@ func (g *gen) l3GenerateLevel(entry Entry) {
 			g.sd(sp.x+10, sp.y+5, 45)
 		}
 	}
-	g.placeThemeRooms(5, 10, 7, 0, false)
+	g.placeThemeRooms(5, 10, 7, g.params.ThemeFreq, false)
 	g.l3Fence()
 	for _, s := range []struct {
 		m   *miniset
@@ -1013,16 +1014,6 @@ func (g *gen) l3GenerateLevel(entry Entry) {
 		{&l3L3CREV7, 30}, {&l3L3CREV8, 30}, {&l3L3CREV9, 30}, {&l3L3CREV10, 30}, {&l3L3CREV11, 30}} {
 		g.l3PlaceMiniSetRandom(s.m, s.per)
 	}
-	g.l3PlaceMiniSetRandom1x1(7, 106, 25)
-	g.l3PlaceMiniSetRandom1x1(7, 107, 25)
-	g.l3PlaceMiniSetRandom1x1(7, 108, 25)
-	g.l3PlaceMiniSetRandom1x1(9, 109, 25)
-	g.l3PlaceMiniSetRandom1x1(10, 110, 25)
+	g.placeDecorations()
 	g.savePdungeon()
-}
-
-func (g *gen) createL3(seed int32, entry Entry) {
-	g.rng.SetSeed(seed)
-	g.l3GenerateLevel(entry)
-	g.lPass3(8 - 1)
 }

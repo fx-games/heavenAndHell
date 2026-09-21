@@ -28,18 +28,12 @@ const (
 	EntryTWarpUp              // up to town through a warp
 )
 
-func LevelType(dlvl int) int {
-	switch {
-	case dlvl == 0:
+// LevelType is the tile set dungeon level dlvl is built from, as the active mod's levels.rec declares it.
+func (d *Data) LevelType(dlvl int) int {
+	if dlvl <= 0 || dlvl >= NumLevels {
 		return DTypeTown
-	case dlvl <= 4:
-		return DTypeCathedral
-	case dlvl <= 8:
-		return DTypeCatacombs
-	case dlvl <= 12:
-		return DTypeCaves
 	}
-	return DTypeHell
+	return strategies[d.levels.cfg[dlvl].strategy].ltype
 }
 
 type point struct{ x, y int }
@@ -68,6 +62,8 @@ type gen struct {
 	ltype     int
 	setlevel  bool
 	setLvlNum int
+	strat     strategy
+	params    LevelParams
 
 	population
 
@@ -537,6 +533,14 @@ func (g *gen) createThemeRoom(t themeLoc) {
 			g.sd(xx, hy-2, 59)
 			g.sd(xx-1, hy-2, 58)
 		}
+	}
+}
+
+// placeDecorations scatters the mod's decoration tiles, in the order it declared them, the way this level's
+// strategy places them. The default list per strategy is Diablo's own, so a mod that says nothing changes nothing.
+func (g *gen) placeDecorations() {
+	for _, d := range g.params.Decorations {
+		g.strat.deco(g, d)
 	}
 }
 

@@ -1,0 +1,63 @@
+%rec: default
+# Which generation strategy builds each dungeon level, and with which parameters.
+#
+# generator   one of the engine's registered strategies: cathedral, catacombs, caves, hell.
+# Every other field is optional and defaults to what the strategy does in Diablo, so the records below are
+# deliberately bare: this file is the level -> generator mapping that used to be hardcoded, nothing more.
+#
+# The knobs a strategy takes:
+#   decoration   "name, search tile, replace tile, percent" - one single-tile decoration scattered over the
+#                finished level. Repeat the field for more. Naming it even once replaces the strategy's whole
+#                default list, so "decoration: none" turns decorations off.
+#   theme_freq   how often DRLG_PlaceThemeRooms seeds a theme room (0 = the strategy's own rule).
+#   set_pieces   false keeps the strategy from laying out its set piece (quest rooms, Diablo's pentagram).
+#
+# Level SIZE is not a knob: the generators work in fixed 112x112 and 40x40 arrays.
+
+dlvl: 1
+generator: cathedral
+
+dlvl: 2
+generator: cathedral
+
+dlvl: 3
+generator: cathedral
+
+dlvl: 4
+generator: cathedral
+
+dlvl: 5
+generator: catacombs
+
+dlvl: 6
+generator: catacombs
+
+dlvl: 7
+generator: catacombs
+
+dlvl: 8
+generator: catacombs
+
+dlvl: 9
+generator: caves
+
+dlvl: 10
+generator: caves
+
+dlvl: 11
+generator: caves
+
+dlvl: 12
+generator: caves
+
+dlvl: 13
+generator: hell
+
+dlvl: 14
+generator: hell
+
+dlvl: 15
+generator: hell
+
+dlvl: 16
+generator: hell

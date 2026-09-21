@@ -21,6 +21,7 @@ import (
 type levelData struct {
 	dun      map[string]dun             // "l1/sklkng1" -> set piece
 	til, sol [len(levelTypeDirs)][]byte // by level type (DType*)
+	cfg      levelConfigs               // which strategy builds each dungeon level, from levels.rec
 }
 
 const levelDir = "levels"
@@ -63,6 +64,11 @@ func loadLevelData(fsys fs.FS) (levelData, error) {
 			return ld, fmt.Errorf("level data: %s is missing til.tsv or sol.tsv", dir)
 		}
 	}
+	cfg, err := loadLevelConfigs(fsys)
+	if err != nil {
+		return ld, err
+	}
+	ld.cfg = cfg
 	return ld, nil
 }
 

@@ -526,7 +526,9 @@ func (g *gen) l1FillChambers() {
 	} else {
 		g.l1GenerateHall(hall1.x, hall1.y, 16, v)
 	}
-	g.l1InitSetPiece()
+	if g.params.SetPieces {
+		g.l1InitSetPiece()
+	}
 }
 
 func (g *gen) l1FixTransparency() {
@@ -675,6 +677,7 @@ func (g *gen) l1GenerateLevel(entry Entry) {
 	g.l1FixDirtTiles()
 	g.l1FixCornerTiles()
 	g.l1Substitution()
+	g.placeDecorations()
 	g.l1ApplyShadows()
 	for n := g.rnd(5) + 5; n > 0; n-- {
 		g.placeMiniSet(&l1LAMPS, true)
@@ -682,12 +685,6 @@ func (g *gen) l1GenerateLevel(entry Entry) {
 	g.l1FillFloor()
 	g.savePdungeon()
 	g.checkQuests(g.setPiece.x, g.setPiece.y)
-}
-
-func (g *gen) createL1(seed int32, entry Entry) {
-	g.rng.SetSeed(seed)
-	g.l1GenerateLevel(entry)
-	g.lPass3(t1Dirt - 1)
 }
 
 // loadTransparency ports DRLG_SetMapTrans: room regions from a .DUN's transparency layer.

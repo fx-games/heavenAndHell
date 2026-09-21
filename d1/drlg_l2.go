@@ -58,8 +58,9 @@ func (g *gen) l2PlaceMiniSetRandom(m *miniset, rndper int) {
 	}
 }
 
-func (g *gen) l2PlaceMiniSetRandom1x1(search, replace byte, rndper int) {
-	g.l2PlaceMiniSetRandom(&miniset{w: 1, h: 1, search: [6][6]byte{{search}}, replace: [6][6]byte{{replace}}}, rndper)
+// l2PlaceDecoration scatters one single-tile decoration the DRLG_L2 way (D1's DRLG_PlaceRndTile).
+func (g *gen) l2PlaceDecoration(d Decoration) {
+	g.l2PlaceMiniSetRandom(&miniset{w: 1, h: 1, search: [6][6]byte{{d.Search}}, replace: [6][6]byte{{d.Replace}}}, d.Freq)
 }
 
 func (g *gen) l2InitSetPiece() {
@@ -942,7 +943,9 @@ func (g *gen) l2GenerateLevel(entry Entry) {
 			continue
 		}
 		g.l2FixTilesPatterns()
-		g.l2InitSetPiece()
+		if g.params.SetPieces {
+			g.l2InitSetPiece()
+		}
 		g.floodTrans(3)
 		g.l2FixTransparency()
 		if g.l2PlaceStairs(entry) {
@@ -952,7 +955,7 @@ func (g *gen) l2GenerateLevel(entry Entry) {
 	g.l2FixLockout()
 	g.l2FixDoors()
 	g.l2FixDirtTiles()
-	g.placeThemeRooms(6, 10, 3, 0, false)
+	g.placeThemeRooms(6, 10, 3, g.params.ThemeFreq, false)
 	for _, m := range []*miniset{&l2CTRDOOR1, &l2CTRDOOR2, &l2CTRDOOR3, &l2CTRDOOR4, &l2CTRDOOR5, &l2CTRDOOR6, &l2CTRDOOR7, &l2CTRDOOR8,
 		&l2VARCH33, &l2VARCH34, &l2VARCH35, &l2VARCH36, &l2VARCH37, &l2VARCH38, &l2VARCH39, &l2VARCH40,
 		&l2VARCH1, &l2VARCH2, &l2VARCH3, &l2VARCH4, &l2VARCH5, &l2VARCH6, &l2VARCH7, &l2VARCH8, &l2VARCH9, &l2VARCH10,
@@ -966,13 +969,7 @@ func (g *gen) l2GenerateLevel(entry Entry) {
 		g.l2PlaceMiniSetRandom(m, 100)
 	}
 	g.l2PlaceMiniSetRandom(&l2CRUSHCOL, 99)
-	g.l2PlaceMiniSetRandom1x1(1, 80, 10)
-	g.l2PlaceMiniSetRandom1x1(1, 81, 10)
-	g.l2PlaceMiniSetRandom1x1(1, 82, 10)
-	g.l2PlaceMiniSetRandom1x1(2, 84, 10)
-	g.l2PlaceMiniSetRandom1x1(2, 85, 10)
-	g.l2PlaceMiniSetRandom1x1(2, 86, 10)
-	g.l2PlaceMiniSetRandom1x1(8, 87, 50)
+	g.placeDecorations()
 	for _, s := range []struct {
 		m   *miniset
 		per int
@@ -984,12 +981,6 @@ func (g *gen) l2GenerateLevel(entry Entry) {
 	g.l2ApplyShadows()
 	g.savePdungeon()
 	g.checkQuests(g.setPieceRoom.x, g.setPieceRoom.y)
-}
-
-func (g *gen) createL2(seed int32, entry Entry) {
-	g.rng.SetSeed(seed)
-	g.l2GenerateLevel(entry)
-	g.lPass3(12 - 1)
 }
 
 func iabs(v int) int {
