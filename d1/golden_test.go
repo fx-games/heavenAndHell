@@ -63,7 +63,7 @@ func goldenLevels(t *testing.T, d *Data) []string {
 }
 
 func TestGoldenLevels(t *testing.T) {
-	d, err := Load(os.DirFS("../files"))
+	d, err := Load(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}

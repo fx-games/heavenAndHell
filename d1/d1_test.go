@@ -3,13 +3,12 @@ package d1
 import (
 	"fmt"
 	"math/rand"
-	"os"
 	"strings"
 	"testing"
 )
 
 func TestLoadAndGenerate(t *testing.T) {
-	d, err := Load(os.DirFS("../files"))
+	d, err := Load(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,7 +123,7 @@ func TestHero(t *testing.T) {
 }
 
 func TestStores(t *testing.T) {
-	d, err := Load(os.DirFS("../files"))
+	d, err := Load(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -211,7 +210,7 @@ func TestStores(t *testing.T) {
 }
 
 func TestSpells(t *testing.T) {
-	d, err := Load(os.DirFS("../files"))
+	d, err := Load(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -264,7 +263,7 @@ func TestSpellDescriptionsMatchNames(t *testing.T) {
 }
 
 func TestQuestItemIndices(t *testing.T) {
-	d, err := Load(os.DirFS("../files"))
+	d, err := Load(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -294,7 +293,7 @@ func TestClassSkills(t *testing.T) {
 	if worn := (&Item{Durability: 0, MaxDur: 1}); !RepairItem(worn, 1, zero) {
 		t.Errorf("repair didn't wear out a 0/1 item")
 	}
-	d, err := Load(os.DirFS("../files"))
+	d, err := Load(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -307,7 +306,7 @@ func TestClassSkills(t *testing.T) {
 
 // TestTextSpeech checks that every text's speech and every hero line the quests play is in SfxFiles.
 func TestTextSpeech(t *testing.T) {
-	d, err := Load(os.DirFS("../files"))
+	d, err := Load(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -390,7 +389,7 @@ func TestHellfireClasses(t *testing.T) {
 // TestHellfireItems covers the expansion's item work: a plain Oil settles into one of the ten, and each oil
 // edits only what it is allowed to.
 func TestHellfireItems(t *testing.T) {
-	d, err := Load(os.DirFS("../files"))
+	d, err := Load(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}

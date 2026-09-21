@@ -29,6 +29,10 @@ func SelectMod(name string) {
 
 func ActiveMod() string { return activeMod }
 
+// SetFileSystem replaces the source tree and clears the active mod. The build tags do this for the game; tests
+// use it to root the tree at files/ and then SelectMod, so they read through the same overlay the game does.
+func SetFileSystem(fsys FileSystem) { sourceFileSystem, activeMod = fsys, "" }
+
 // modPath maps assets/foo to mods/<mod>/foo. Anything outside assets/ is engine-internal.
 func (m modFS) modPath(p string) (string, bool) {
 	if activeMod == "" {

@@ -41,8 +41,8 @@ func main() {
 		argCmd := strings.ToLower(os.Args[1])
 		switch argCmd {
 		case "debug_tints":
-			theGame, _ := createGameAndUIContext()
-			debugTints(theGame, os.Args[2:])
+			theGame, uiContext := createGameAndUIContext()
+			debugTints(theGame, uiContext.StartInfos.SpriteSheet, os.Args[2:])
 		case "loot":
 			theGame, _ := createGameAndUIContext()
 			genLoot(theGame)
@@ -64,11 +64,14 @@ func main() {
 
 func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 	userConfig := common.NewConfigurationFromRecFile(common.ConfigFile)
+	files.SelectMod(userConfig.Mod) // before anything reads content: assets/ resolves to the mod first from here on
+	defs.LoadIcons()                // and before any Icon* is read: the numbers come from the mod's icon rec files
 	startInfos := common.StartInfo{
 		Title:       "RPG",
 		ScreenSize:  userConfig.WindowSize,
 		TileScale:   4.0,
 		LDTKMapFile: "assets/maps.ldtk",
+		SpriteSheet: userConfig.SpriteSheet,
 		FontInfos: common.FontInfo{
 			TTFFile: userConfig.DefaultFont,
 			TTFSize: userConfig.DefaultFontSize,
@@ -227,6 +230,7 @@ func maptest() {
 	if len(os.Args) > 3 {
 		seed, _ = strconv.ParseInt(os.Args[3], 10, 64)
 	}
+	files.SelectMod(common.NewConfigurationFromRecFile(common.ConfigFile).Mod)
 	d1Data, err := d1.Load(files.GetFileSystem())
 	if err != nil {
 		log.Fatal(err)

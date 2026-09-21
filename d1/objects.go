@@ -48,7 +48,7 @@ type Object struct {
 }
 
 // The shrine table (names, messages, level caps and availability) and the story book names live in
-// mods/d1/data/objects.rec and are filled by Load.
+// assets/data/objects.rec and are filled by Load.
 var (
 	// ShrineNames are D1's shrinestrs.
 	ShrineNames []string

@@ -9,7 +9,7 @@ import (
 )
 
 // Icons live in four independently remappable rec files under files/assets/data/icons/ (8x8 tiles in
-// assets/classic_roguelike.png), one ID convention throughout: "kind.snake_case_name", e.g. "class.warrior_male",
+// the sprite sheet named by common.Configuration.SpriteSheet), one ID convention throughout: "kind.snake_case_name", e.g. "class.warrior_male",
 // "monster.nzombie", "unique.gharbad_the_weak", "npc.wirt", "corpse.default" (actors.rec); "item.falchion",
 // "item.falchion.magic"/".unique" (per weapon/armor family), "item.heal" (potions/scrolls, keyed by IMISC_*) etc.
 // (items.rec); "tile.grass", "prop.chest1"(+".used"), "decal.blood1", "effect.fire_small" (tiles.rec);
@@ -18,6 +18,17 @@ import (
 // ./remap_items.sh, ./remap_tiles.sh, ./remap_skills.sh — each rec file is read fresh on every game start, no
 // rebuild needed. The H&H constants (IconGrass, ...) are package vars, not consts, for the same
 // reason: their value comes from the rec file, not from the Go source.
+//
+// The sprite sheet they index is the active mod's: a mod that ships its own assets/data/icons and its own sheet
+// gets both. That is why LoadIcons is explicit rather than a package initializer -- the vars must be filled
+// AFTER files.SelectMod, or every Icon* silently carries the engine's number instead of the mod's.
+func LoadIcons() {
+	loadActorsIcons()
+	loadItemsIcons()
+	loadSkillsIcons()
+	loadTilesIcons()
+}
+
 func loadIconRec(name string) map[string]int32 {
 	f, err := files.Open(path.Join("assets", "data", "icons", name+".rec"))
 	if err != nil {

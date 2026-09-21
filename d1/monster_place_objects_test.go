@@ -1,13 +1,12 @@
 package d1
 
 import (
-	"os"
 	"testing"
 )
 
 // A monster must never start the level inside a door or another solid object (moveMonstersOffObjects).
 func TestNoMonsterStartsOnASolidObject(t *testing.T) {
-	d, err := Load(os.DirFS("../files"))
+	d, err := Load(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}

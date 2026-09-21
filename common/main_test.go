@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"rpg/d1"
+	"rpg/defs"
 	"rpg/files"
 )
 
@@ -13,6 +14,8 @@ import (
 // coverage checks) need Load to have run first -- otherwise they range over empty maps and pass without
 // checking anything.
 func TestMain(m *testing.M) {
+	files.SelectMod(DefaultMod)
+	defs.LoadIcons()
 	if _, err := d1.Load(files.GetFileSystem()); err != nil {
 		fmt.Println("d1.Load:", err)
 		os.Exit(1)

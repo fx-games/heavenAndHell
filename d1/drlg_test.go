@@ -35,7 +35,7 @@ func TestDrlgFixtures(t *testing.T) {
 	if _, err := os.Stat(fixtureDir); err != nil {
 		t.Skip("DevilutionX fixtures not in reference/")
 	}
-	d, err := Load(os.DirFS("../files"))
+	d, err := Load(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}
