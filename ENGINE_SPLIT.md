@@ -118,10 +118,12 @@ current "no mod" state, and it is what the fallback room replaces: one
 hardcoded room, one weapon, one enemy, plus a clear message naming the mod
 that could not be found.
 
-Papercut found alongside it: `config.rec` is THREE blank-line-separated rec
-records, and the config parser only reads the first. A setting appended at the
-end of the file - the obvious thing for a player to do - is silently ignored.
-Worth either merging the records or warning on keys found in later ones.
+Papercut found alongside it: the config parser reads `records[0]` only. Today
+`config.rec` is ONE record holding every setting (MiniMapColor included, so
+nothing is being dropped) followed by a trailing blank line. But appending a
+setting at the end of the file - the obvious thing for a player to do - lands
+after that blank line, becomes a second record, and is silently ignored.
+Worth warning when a later record holds keys, rather than dropping them.
 
 ## Phases
 
