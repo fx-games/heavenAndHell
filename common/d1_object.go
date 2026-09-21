@@ -9,7 +9,6 @@ import (
 	"rpg/gridmap"
 	"rpg/stats"
 	"strings"
-	"time"
 )
 
 // D1Object is a D1 dungeon object (decision 12), operated by bumping into it.
@@ -731,7 +730,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 		h.ManaBase = h.MaxManaBase
 		mana.SetToMax()
 	case 32: // Solar
-		switch hour := time.Now().Hour(); {
+		switch hour := Clock().Hour(); {
 		case hour > 20 || hour < 4:
 			f.d1ModifyStat(player, d1.AttrVit, 2)
 		case hour > 18:

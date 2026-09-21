@@ -21,6 +21,7 @@ import (
 	"rpg/stats"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // playthrough is the headless smoke test from D1_PLAN.md: it grows with every milestone and fails loudly.
@@ -49,10 +50,11 @@ func playthrough() {
 	fmt.Printf("playthrough seed: %d (replay with: playthrough %d)\n", seed, seed)
 	theGame.SeedRandom(seed)
 	common.SeedD1Rng(seed)
-	rand.Seed(seed)                                                           // the global source the engine rolls most of its dice on
-	missiles := &missileCounter{}                                             // registered per check: a new game or a load makes a new broker
-	wallTraps, chestTraps := 0, 0                                             // traps that fired while objects were operated
-	for run := 1; run <= len(theGame.GetGameData().ClassDefinitions); run++ { // every class
+	rand.Seed(seed)                                                                         // the global source the engine rolls most of its dice on
+	common.Clock = func() time.Time { return time.Date(2026, 1, 1, 10, 0, 0, 0, time.UTC) } // the Solar shrine reads the hour
+	missiles := &missileCounter{}                                                           // registered per check: a new game or a load makes a new broker
+	wallTraps, chestTraps := 0, 0                                                           // traps that fired while objects were operated
+	for run := 1; run <= len(theGame.GetGameData().ClassDefinitions); run++ {               // every class
 		os.RemoveAll(game.SaveDir) // every run starts in slot 1: a new game never writes over a slot that is taken
 		theGame.NewGame(theGame.GetGameData().ClassDefinitions[run-1], false, "")
 		state := theGame.GetWorldState()

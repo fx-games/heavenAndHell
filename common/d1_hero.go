@@ -11,6 +11,10 @@ import (
 
 var d1Rng = rand.New(rand.NewSource(time.Now().UnixNano()))
 
+// Clock is the wall clock the game consults (the Solar shrine reads the hour, as D1's does). A reproducible run
+// pins it, or its outcome depends on when it was started.
+var Clock = time.Now
+
 // SeedD1Rng makes the D1 rolls that do not hang off the world seed (flinch, armor wear, drops) reproducible.
 // Only reproducible runs use it - the game itself wants a fresh sequence every launch.
 func SeedD1Rng(seed int64) { d1Rng = rand.New(rand.NewSource(seed)) }
@@ -631,11 +635,11 @@ func d1TicksToAUT(ticks int) int { return (ticks*10 + d1.RefWalkTicks/2) / d1.Re
 // MoveCost is a step's AUT: a D1 monster's walk animation, anything else its speed factors (a D1 hero's step is
 // RefWalkTicks).
 func (a *Actor) MoveCost() int {
-	if a.d1Monster != nil {
+	if a.d1Monster != nil && a.d1Monster.Data.Frames[1] > 0 { // a record without animations moves at its speed
 		d := a.d1Monster.Data
 		return d1TicksToAUT(d.Frames[1] * (d.Rate[1] + 1))
 	}
-	return 100 / a.GetMoveSpeed()
+	return 100 / max(a.GetMoveSpeed(), 1)
 }
 
 // AttackCost is an attack's AUT. D1 heroes and monsters take their attack animation's ticks (decision 13),
@@ -646,11 +650,11 @@ func (a *Actor) AttackCost(t AttackType) int {
 		return d1TicksToAUT(a.HeroSheet().MeleeFrames())
 	case a.hero != nil:
 		return d1TicksToAUT(a.HeroSheet().AttackFrames)
-	case a.d1Monster != nil:
+	case a.d1Monster != nil && a.d1Monster.Data.Frames[2] > 0:
 		d := a.d1Monster.Data
 		return d1TicksToAUT(d.Frames[2] * (d.Rate[2] + 1))
 	}
-	return 100 / a.GetAttackSpeed(t)
+	return 100 / max(a.GetAttackSpeed(t), 1)
 }
 
 // D1MonsterRecoveryAUT is the time a hard hit costs a monster: its hit animation minus the part of its attack
