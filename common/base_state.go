@@ -728,6 +728,9 @@ const d1ChurchLightRadius = 19
 // d1ChurchLightPos is where the red light burns: inside the cathedral, a few tiles behind its entrance at (41,6).
 var d1ChurchLightPos = geometry.Point{X: 37, Y: 6}
 
+// D1Lit: some light source's glow reaches p (dLight below lightmax, the hero's own light aside).
+func (s *State) D1Lit(p geometry.Point) bool { return s.d1GlowAt(p).v > 0 }
+
 // d1GlowAt is how much decorative light (wall torches, braziers, the church's red light) falls on a cell, 0..1:
 // brightest at the light, fading to nothing at its radius, only where the light has a clear line. Built once per map.
 func (s *State) d1GlowAt(p geometry.Point) d1Glow {

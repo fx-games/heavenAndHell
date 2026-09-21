@@ -837,11 +837,11 @@ func (b *d1Brain) fade(out bool) (d1Act, bool) {
 }
 
 // sneak ports MAI_Sneak (Hidden family). It does nothing in total darkness (dLight == lightmax): outside the
-// hero's light radius and any lit room.
+// hero's light radius, any lit room and every light source's reach (torches, braziers, portals: D1Lit).
 func (b *d1Brain) sneak() (d1Act, bool) {
 	mon := b.mon
 	player := b.g.state.GetPlayer()
-	if player.Hero() != nil && geometry.Distance(b.pos, player.MapPosition()) > float64(player.HeroSheet().LightRad) && !b.g.state.GetMap().IsTileLit(b.pos) {
+	if player.Hero() != nil && geometry.Distance(b.pos, player.MapPosition()) > float64(player.HeroSheet().LightRad) && !b.g.state.GetMap().IsTileLit(b.pos) && !b.g.state.D1Lit(b.pos) {
 		return noAct, false
 	}
 	md := b.dirTo(b.enemy)

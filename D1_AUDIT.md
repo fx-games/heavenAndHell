@@ -39,8 +39,8 @@ dumps identical to 1.09's), stores (b224ec8), traps' burst and nova (7fcd007), e
 - **fixed — the golem's wake-up.** `MAI_Golum` wakes the 5x5 block around the golem through `monster[_menemy]`
   instead of `monster[_menemy-1]`, so it wakes the *next* monster in the table. We do the same by SpawnIndex (the
   level slot); monsters spawned later have none and are skipped.
-- **open — darkness.** `MAI_Sneak` idles where `dLight == lightmax`. We have no light map: a cell counts as dark
-  outside the hero's light radius and any lit room.
+- **fixed — darkness.** `MAI_Sneak` idles where `dLight == lightmax`: outside the hero's light radius and the reach
+  of every light source (`State.D1Lit`, the torch/brazier/object/portal glow map). Missiles' own light is not in it.
 - **fixed — combat: experience at the cap.** `AddPlrExperience` sets level 50 outright once experience reaches
   `ExpLvlsTbl[49]`, without `NextPlrLevel` (no stat points, life or mana for those levels), and gives a dead
   hero nothing. `d1.Hero.AddExperience` levels up normally.
