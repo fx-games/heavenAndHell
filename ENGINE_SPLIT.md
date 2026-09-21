@@ -83,131 +83,33 @@ content model.
 about Diablo's formats. The ENGINE may not: it reads one schema, whichever mod
 supplied it.
 
-## The playthrough is nondeterministic - and hides two real save bugs
+## The playthrough is the equivalence proof - keep it deterministic
 
-Seeding both time-seeded RNGs (instance source + `common.d1Rng`, pinned by
-`playthrough <seed>`) was NOT enough: the same seed still produces different
-outcomes run to run. Something below the RNGs varies - Go map iteration order
-is the prime suspect, since the failures cluster in save/load.
+`go run -tags development . playthrough [seed]` is reproducible: the same seed
+gives byte-identical output. Verified 3 seeds x 3 runs, plus the fixing agent's
+4 seeds x 5 runs. Run it before merging anything.
 
-The residual variance surfaces two genuine defects, both intermittent:
+Four sources of nondeterminism had to die for that, and they are worth knowing
+because the same mistakes are easy to make again:
 
-1. `load failed: open .../slot0.json: no such file or directory` - a load asks
-   for slot 0 when the run saved into slot 1, so `g.slot` is not what the
-   loader thinks it is.
-2. `load forgot explored cells (1253 -> 305)` / `(564 -> 150)` - the explored
-   bitmap comes back short, so a loaded game forgets most of the map.
+1. The engine rolls most dice on the PACKAGE-LEVEL `math/rand`, not the game's
+   own source. Since Go 1.20 that seeds itself and `rand.Seed` is a silent
+   no-op - `//go:debug randseednop=0` restores it for reproducible runs only.
+2. `gridmap.GetFreeCellsForDistribution` popped its open list out of a map and
+   sorted unstably, so placement varied. Now a FIFO flood with coordinate ties.
+3. `ChangeResourceAction` rolled inside an animation callback (frame-timed) off
+   a `time.Now()` source.
+4. `Equipment.AllItems()` ranged the slots MAP, so save order and which item a
+   durability roll reached first varied. Walked in name order now.
 
-Both are in the same area as the already-fixed monster-status-on-load bug, so
-a common cause is plausible. Until they are fixed, ONE green playthrough run
-is weak evidence: run it several times.
+Still open, deliberately: `common/d1_object.go` branches on `time.Now().Hour()`,
+so a run can differ across an hour boundary.
 
-## The playthrough smoke test now passes
-
-`go run -tags development . playthrough` reports PLAYTHROUGH OK as of the
-phase 5 merge plus the hero-flinch fix. Keep it that way: it is the proof that
-a mod still behaves like its branch. Run it before merging any phase.
-
-**It is flaky, roughly one run in two**, and has been since that commit
-(`fc2e91b`, verified by running it there six times: three failures). It always
-fails the same check:
-
-    PLAYTHROUGH FAILED: doppelganger: 200 blows at <monster> split off no copy
-
-`checkDoppelganger` picks the first eligible monster on the level and demands it
-replicate within 200 blows; whether that monster replicates is an unseeded roll.
-Run it more than once before believing either result. Fixing it means seeding
-that roll or picking a monster that must replicate — not regenerating anything.
-
-Historical note, since it shaped several decisions:
-
-`go run -tags development . playthrough` runs a scripted end-to-end game and
-asserts behaviours. It FAILS on `d1-rebuild` too, with several independent
-broken checks, and reports a different one depending on ordering: doppelganger
-(replicate), hit recovery staggering, Hellfire Lightning Wall. It is not a
-regression from the split.
-
-It is the natural proof of "the mods behave like their branches", so it gets
-repaired near the end, once the effect system is unified - several of its
-failures look like missing effects, which phase 5 is restoring anyway.
-
-## Where the second mod stands
-
-`mods/heavenandhell/` exists and its monsters, items and icons load through the
-same code as `mods/d1/`'s — `defs.ReadMonsters`, `defs.ReadItems`,
-`defs.LoadIcons`, one loader each, no branch on the mod's name. `d1.MonsterData`
-and `d1.ItemData` are aliases for `defs.Monster` and `defs.Item`; Diablo's
-`xl_monst.txt` and `xl_item.txt` are gone, converted into the unified `.rec`
-schema, with `levels.golden` unchanged as the proof.
-
-What that convergence cost, for the next one:
-
-- `health`/`damage`/`weapon_damage` are `util.Dice` and `armor_class` a
-  `stats.Interval`. D1's min..max and H&H's XdY are the same value written two
-  ways ("4-7" is 1d4+3), and `ParseDice` already read both.
-- A `.rec` field is trimmed, so a value cannot end in a space. D1's "Book of "
-  relied on one; the separator moved into `bookSpell`, where it always belonged.
-- Diablo's `NULL` sentinel is not content. Columns that held it are simply
-  absent from the records.
-- `MonstAvailTbl`, a Go literal running parallel to the monster table, is now an
-  `available` field on the record it belonged to.
-
-### Not converged, and why
-
-Stores, effects and dialogue are still one game's each. Each needs engine work
-first, and faking it would mean a second loader:
-
-- **Stores.** D1 stocks a vendor by running a Go predicate over the item table
-  (`storeIdx`, `RndSmithItem` and friends); H&H lists stock per store in
-  `stores.rec`. Converging means either a filter expression in content — which
-  this document rules out — or making D1's vendors declarative. The latter is
-  the real job: a vendor record of level range, purse, slot count and an item
-  filter expressed in the columns items already have.
-- **Effects.** `NewUntargetedActionFromName` resolves straight from the registry;
-  `defs.ReadTargetedDefinitions`/`ReadUntargetedDefinitions` exist but nothing
-  calls them. Giving effects a content layer means giving D1's spells one too,
-  or the mods diverge again.
-- **Dialogue.** The formats converge cheaply (H&H's prose files become `TEXT_*`
-  blocks `loadTexts` already reads), but no H&H NPC, town or quest is content on
-  this branch, so nothing would speak the lines.
-
-The engine's `Icon*` list is the other unfinished edge: it is a fixed set of Go
-vars naming D1 and Hellfire's content (six class icons for classes H&H does not
-have, dungeon furniture it does not draw). A mod's classes should come from its
-own `classes.rec` rather than from that list.
-
-## Open hazard: icons fail silently
-
-`defs.Icon*` are package vars filled by `defs.LoadIcons()` after mod selection.
-Nothing forces that call, and a name a mod's `icons/*.rec` does not define
-resolves to 0 rather than erroring. Four bugs in this project have already come
-from content binding silently to nothing.
-
-This becomes load-bearing the moment a SECOND mod ships its own icon names, so
-extracting the H&H content must also make a missing icon name loud: fail the
-load naming every icon the mod did not supply, rather than rendering tile 0.
-
-Done: `LoadIcons` returns an error listing every name the mod did not define.
-It earned itself immediately — it is what produced the 15-name gap above.
-
-## Verified behaviour of a missing mod (phase 1 input)
-
-With `Mod: nosuchmod`, the engine today dies with:
-
-    open assets/data/xl_monst.txt: no such file or directory
-
-The overlay falls through to `assets/`, which holds no game content, and the
-first content read fails with a path the player cannot act on. That is the
-current "no mod" state, and it is what the fallback room replaces: one
-hardcoded room, one weapon, one enemy, plus a clear message naming the mod
-that could not be found.
-
-Papercut found alongside it: the config parser reads `records[0]` only. Today
-`config.rec` is ONE record holding every setting (MiniMapColor included, so
-nothing is being dropped) followed by a trailing blank line. But appending a
-setting at the end of the file - the obvious thing for a player to do - lands
-after that blank line, becomes a second record, and is silently ignored.
-Worth warning when a later record holds keys, rather than dropping them.
+Two real save defects were hiding behind that variance, now fixed and pinned by
+tests: `LoadGame` asked the directory for its newest slot instead of loading the
+running game's own slot, and the explored bitmap was written and read at a
+hardcoded `d1.LevelSize` stride rather than the map's width, so any level of
+another size lost most of its cells. The stride now travels with the bitmap.
 
 ## Phases
 
