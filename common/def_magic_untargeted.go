@@ -98,6 +98,7 @@ func (g *Factory) GetAllUntargetedEffects() map[string]func(args util.Arguments)
 		string(ActionNameApplyStatusSelf):   g.getApplyStatusAction,
 		string(ActionNameHealMana):          g.getHealManaBy,
 		"true_sight":                        g.getTrueSight,
+		string(ActionNameReadMessage):       g.getReadMessage,
 		string(ActionNameTeleport):          g.getRandomTeleportAction,
 		string(ActionNameBuffSpeed):         g.getSpeedBuff,
 		string(ActionNameBuffDamage):        g.getDamageBuff,
@@ -149,20 +150,6 @@ func (g *Factory) getReplicate(args util.Arguments) UntargetedEffect {
 	}
 }
 
-func (g *Factory) getReadMessage(textForMessage []util.LabelText, onRead func()) UntargetedEffect {
-	effect := func(user *Actor, source EffectSource) {
-		g.UI().OpenTextWindow(textForMessage)
-		if onRead != nil {
-			onRead()
-		}
-	}
-	return UntargetedEffect{
-		Effect: effect,
-		Description: []util.LabelText{
-			util.LabelTextFromString("Read message"),
-		},
-	}
-}
 func (g *Factory) getSpeedBuff(args util.Arguments) UntargetedEffect {
 	amount := util.ParseDice(args.Get(0)).Roll()
 	turnCount := util.ParseDice(args.Get(1)).Roll()
@@ -977,11 +964,20 @@ func (g *Factory) getTrueSight(util.Arguments) UntargetedEffect {
 		Effect: func(user *Actor, _ EffectSource) {
 			user.GetStats().IncrementBy(stats.VisionRange, 7)
 			user.GetStats().IncrementBy(stats.LightRadius, 7)
-			g.State.GetFlags().SetTrue("has_true_sight")
+			g.State.GetFlags().SetTrue(string(FlagHasTrueSight))
 			g.ActionBroker.Execute(NewUpdateFoVAction(AbstractCause("TrueSightActivated"), user))
 			g.Msg("Your eyes open.")
 		},
 		Description: []util.LabelText{util.LabelTextFromString("Can this be real? Can it be trusted?"),
 			util.LabelTextFromString("Only one way to find out...")},
+	}
+}
+
+// getReadMessage reads one of the mod's texts (texts.rec) off a note, any number of times, taking no time.
+func (g *Factory) getReadMessage(args util.Arguments) UntargetedEffect {
+	id := args.Get(0)
+	return UntargetedEffect{
+		Effect:      func(user *Actor, _ EffectSource) { g.say("", id) },
+		Description: []util.LabelText{util.LabelTextFromString("Read it.")},
 	}
 }

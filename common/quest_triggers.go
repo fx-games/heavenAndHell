@@ -18,10 +18,11 @@ const (
 	EventEnterLevel   = "on_enter_level"   // subject: the dungeon depth the hero arrived on
 	EventTalk         = "on_talk"          // subject: the NPC's internal name
 	EventLevelCleared = "on_level_cleared" // subject: the map name; its last monster just died
+	EventItemUse      = "on_item_use"      // subject: the item's internal name
 )
 
 // QuestEvents are the events a trigger may name, for the loader's check and for anyone adding one.
-var QuestEvents = []string{EventKill, EventItemPickup, EventEnterLevel, EventTalk, EventLevelCleared}
+var QuestEvents = []string{EventKill, EventItemPickup, EventEnterLevel, EventTalk, EventLevelCleared, EventItemUse}
 
 // questEnv is what a trigger condition may ask about: quests by key, raw flags, and where the hero is.
 func (s *State) questEnv() defs.QuestEnv {
@@ -118,8 +119,12 @@ func (f *Factory) runQuestOutcome(do recfile.StringPredicate, speaker string) bo
 			speaker = do.GetString(1)
 		}
 		f.say(speaker, do.GetString(0))
-	case "spawn_item": // spawn_item(item, map, location): a plain item of the mod's, lying at a named spot
-		f.spawnItemAt(do.GetString(0), do.GetString(1), do.GetString(2))
+	case "spawn_item": // spawn_item(item, map, location), or spawn_item(item, here): a plain item of the mod's
+		location := ""
+		if do.ParamCount() > 2 {
+			location = do.GetString(2)
+		}
+		f.spawnItemAt(do.GetString(0), do.GetString(1), location)
 	case "end_text":
 		f.d1EndTextWindow()
 	case "give_exp": // at the hero's own level, so exactly the amount named
@@ -158,6 +163,11 @@ func (f *Factory) spawnItemAt(item, mapName, location string) {
 		return
 	}
 	s := f.State
+	if mapName == "here" { // where the hero stands
+		m := s.GetMap()
+		m.AddItem(f.NewD1Item(f.Generator.PlainItem(idx)), getDropPos(m, s.GetPlayer().MapPosition()))
+		return
+	}
 	m := s.GetTownMap(mapName)
 	if m == nil {
 		m = s.GetDungeonMap(mapName)
@@ -167,4 +177,14 @@ func (f *Factory) spawnItemAt(item, mapName, location string) {
 		return
 	}
 	m.AddItem(f.NewD1Item(f.Generator.PlainItem(idx)), getDropPos(m, m.GetNamedLocation(location)))
+}
+
+// ItemUsed fires on_item_use for an item the hero just used, named by its record.
+func (s *State) ItemUsed(item *Item) {
+	if item == nil || item.d1 == nil || s.factory == nil {
+		return
+	}
+	if items := s.factory.D1().D.Items; item.d1.BaseIdx >= 0 && item.d1.BaseIdx < len(items) {
+		s.factory.fireQuestTriggers(EventItemUse, items[item.d1.BaseIdx].InternalName, "")
+	}
 }

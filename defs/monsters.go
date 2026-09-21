@@ -42,6 +42,7 @@ type Monster struct {
 	Treasure, Exp           int
 	BaseSpeed               int
 	Stats                   map[string]int
+	FullHP                  bool // health is the monster's real hit points, not D1's doubled single-player table
 
 	// Behaviour.
 	AI         string // D1 brain name (AI_*); empty for a mod that drives monsters by skills alone
@@ -88,6 +89,21 @@ func (m Monster) MaxDam() int  { return m.Damage.Max() }
 func (m Monster) MinDam2() int { return m.Damage2.Min() }
 func (m Monster) MaxDam2() int { return m.Damage2.Max() }
 
+// fillCombatModel gives a record without a D1 brain (H&H's) the to-hit D1's combat reads and its health as
+// stated. The to-hit is a design choice of the port, tunable in play: five per point of dexterity.
+func fillCombatModel(m *Monster) {
+	if m.Level == 0 { // a record that names only its depth fights, drops and pays out at that depth, as items do
+		m.Level = m.MinDLvl
+	}
+	if m.AI != "" {
+		return
+	}
+	m.FullHP = true
+	if m.Hit == 0 {
+		m.Hit = 5 * m.Stats["dexterity"]
+	}
+}
+
 // ReadMonsters loads the active mod's monsters, in file order -- order is content, not incidental: D1 indexes
 // its monsters by table position in saves and spawn tables.
 func ReadMonsters(fsys fs.FS) ([]Monster, error) {
@@ -102,9 +118,7 @@ func ReadMonsters(fsys fs.FS) ([]Monster, error) {
 		if err != nil {
 			return nil, fmt.Errorf("enemies.rec record %d: %w", i+1, err)
 		}
-		if m.Level == 0 { // a record that names only its depth fights, drops and pays out at that depth, as items do
-			m.Level = m.MinDLvl
-		}
+		fillCombatModel(&m)
 		out = append(out, m)
 	}
 	return out, nil

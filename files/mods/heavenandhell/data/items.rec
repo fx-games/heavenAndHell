@@ -1307,3 +1307,49 @@ cost: 0
 drop: IDROP_NEVER
 category: potion
 untargeted_action: true_sight
+
+# The evidence against the town (main's NewEvidence*): hidden until Lucifer's gift opens the hero's eyes.
+
+name: Purity report
+internal_name: evidence_one
+icon: item.note
+dlvl: 1
+cost: 0
+drop: IDROP_NEVER
+category: scroll
+charges: -1
+hidden: true
+untargeted_action: read_message(TEXT_HH_NOTE_EVIDENCE_ONE)
+
+name: King Zedek's last will
+internal_name: evidence_two
+icon: item.note
+dlvl: 1
+cost: 0
+drop: IDROP_NEVER
+category: scroll
+charges: -1
+hidden: true
+untargeted_action: read_message(TEXT_HH_NOTE_EVIDENCE_TWO)
+
+name: Kirioth's schemes
+internal_name: evidence_three
+icon: item.note
+dlvl: 1
+cost: 0
+drop: IDROP_NEVER
+category: scroll
+charges: -1
+hidden: true
+untargeted_action: read_message(TEXT_HH_NOTE_EVIDENCE_THREE)
+
+name: From K. to S.
+internal_name: evidence_four
+icon: item.note
+dlvl: 1
+cost: 0
+drop: IDROP_NEVER
+category: scroll
+charges: -1
+hidden: true
+untargeted_action: read_message(TEXT_HH_NOTE_EVIDENCE_FOUR)

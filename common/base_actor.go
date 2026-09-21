@@ -21,6 +21,7 @@ const (
 )
 
 type Actor struct {
+	speechOnSight []string // lines it may say on first coming into view (a mod record's speech_on_sight)
 	belt         [BeltSize]QuickSlotEntry // the player's quick slots; see BeltEntry
 	mapPosition  geometry.Point
 	drawPosition geometry.PointF
@@ -769,6 +770,9 @@ func (a *Actor) Clone() *Actor {
 	// TODO equip weapons..
 	return clonedActor
 }
+
+// SpeechOnSight is what the actor may say when it first comes into the hero's view, one line picked at random.
+func (a *Actor) SpeechOnSight() []string { return a.speechOnSight }
 
 func (a *Actor) SetAggroRange(aggroRange int) {
 	a.stats.SetAttribute(stats.AggroRange, aggroRange)

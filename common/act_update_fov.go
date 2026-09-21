@@ -1,5 +1,10 @@
 package common
 
+import (
+	"fmt"
+	"math/rand"
+)
+
 type UpdateFoVAction struct {
 	BaseAction
 	actor *Actor
@@ -73,6 +78,11 @@ func updatePlayerKnowledge(context ActionContext) {
 	}
 	vis.Set(currentlyVisible)
 	for newActor, _ := range cameIntoView {
+		if lines := newActor.SpeechOnSight(); len(lines) > 0 && context.ActionBroker != nil {
+			line := lines[rand.Intn(len(lines))]
+			context.ActionBroker.AddAnimation(NewSpeechAnimation(newActor, []string{line}))
+			context.Msg(fmt.Sprintf("%s says: %s", newActor.Name(), line))
+		}
 		if newActor.IsHostile() {
 			//context.Msg(fmt.Sprintf("%s comes into view", newActor.Name()))
 			aggroRange := newActor.GetAggroRange()

@@ -49,6 +49,7 @@ type Item struct {
 
 	// Diablo's own columns. Its generation walks this table by index and reads these directly.
 	Drop, Class, Loc       string // IDROP_, ICLASS_, ILOC_
+	Hidden                 bool   // unseen and out of reach until the hero has true sight
 	Curs, Type             int    // cursor graphic, ITYPE_ value
 	UniqueBase             string // UITYPE_ name uniques refer to
 	MinMLvl, Durability    int
@@ -221,6 +222,8 @@ func itemFromRecord(rec recfile.Record) (Item, error) {
 			it.TargetedAction = f.Value
 		case "drop":
 			it.Drop = f.Value
+		case "hidden":
+			it.Hidden = f.AsBool()
 		case "class":
 			it.Class = f.Value
 		case "location":

@@ -339,3 +339,6 @@ icon: 498
 
 internal_name: item.soul_reaver
 icon: 497
+
+internal_name: item.note
+icon: 139

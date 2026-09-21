@@ -668,7 +668,7 @@ func (g *GameInstance) killLevel() {
 
 // getAIAction returns the action to execute and the cost in AUT associated with it
 func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
-	if actor.D1Monster() != nil {
+	if actor.D1Monster() != nil && actor.D1Monster().AI != "" { // a D1 brain; a record without one gets the general AI
 		return g.getD1MonsterAction(actor)
 	}
 	autCostMove := actor.MoveCost()

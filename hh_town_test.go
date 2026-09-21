@@ -201,12 +201,35 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 			}
 		}
 	}
-	gift := false
+	var gift *common.Item
 	for _, it := range s.GetTownMap(string(defs.LevelNameTown)).Items() {
-		gift = gift || it.Name() == "Lucifer's gift" && it.HasUntargetedAction()
+		if it.Name() == "Lucifer's gift" && it.HasUntargetedAction() {
+			gift = it
+		}
 	}
-	if !gift {
-		t.Error("Lucifer fell and left no gift in town")
+	if gift == nil {
+		t.Fatal("Lucifer fell and left no gift in town")
+	}
+	gift.GetUntargetedAction().Invoke(player, "test")
+	s.ItemUsed(gift)
+	expect("evidence", d1.QuestActive)
+	if !s.GetFlags().IsSet(string(common.FlagHasTrueSight)) {
+		t.Error("the gift did not open the hero's eyes")
+	}
+	for note, where := range map[string]string{"Purity report": "poisoned_water_supply",
+		"King Zedek's last will": defs.LevelNameFromDepth(4), "Kirioth's schemes": string(defs.LevelNameTown),
+		"From K. to S.": defs.LevelNameFromDepth(6)} {
+		m := s.GetDungeonMap(where)
+		if m == nil {
+			m = s.GetTownMap(where)
+		}
+		found := false
+		for _, it := range m.Items() {
+			found = found || it.Name() == note && it.IsHidden() && it.HasUntargetedAction()
+		}
+		if !found {
+			t.Errorf("no hidden %q on %s", note, where)
+		}
 	}
 	talk("kirioth", "")
 	expect("lucifer", d1.QuestDone)
@@ -270,6 +293,105 @@ func TestHeavenAndHellShops(t *testing.T) {
 		sword := player.GetEquipment().AllItems()[0]
 		if buys := common.D1VendorBuys(who, sword); buys != (npc == "mary") {
 			t.Errorf("%s buys the hero's %s: %v", npc, sword.Name(), buys)
+		}
+	}
+}
+
+// A fight on H&H's first level, through the real attack and turn actions: the monster fights back with its own
+// numbers, the hero hits with the weapon it started with, and the kill pays experience.
+func TestHeavenAndHellCombat(t *testing.T) {
+	g := newHeavenAndHellGame(t, NewDummyUI())
+	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
+	s := g.GetWorldState()
+	player := s.GetPlayer()
+	player.Hero().MaxHPBase += 500 << 6 // survive long enough to see both sides land blows
+	common.SyncHero(player)
+	player.GetStats().GetResource(stats.Health).SetToMax()
+	s.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(1), TargetLocation: "ladder_up"})
+	m := s.GetMap()
+	var foe *common.Actor
+	for _, a := range m.Actors() {
+		if a != player && a.D1Monster() != nil && len(m.GetFreeCardinalNeighbors(a.MapPosition())) > 0 {
+			foe = a
+			break
+		}
+	}
+	if foe == nil {
+		t.Fatal("no monster on level 1")
+	}
+	m.MoveActor(player, m.GetFreeCardinalNeighbors(foe.MapPosition())[0])
+	broker, cause := g.GetActionBroker(), common.NewActorCause("test", player)
+	exp, full := player.Hero().Exp, player.GetStats().GetResource(stats.Health).Value()
+	broker.Execute(common.NewUpdateFoVAction(cause, player))
+	for turn := 0; turn < 30; turn++ { // let it have its go first
+		broker.Execute(common.NewEndPlayerTurnAction(cause, 10))
+	}
+	hurt := player.GetStats().GetResource(stats.Health).Value() < full
+	for turn := 0; turn < 200 && foe.IsAlive(); turn++ {
+		broker.Execute(common.NewMeleeAttackAction(cause, player, foe))
+		broker.Execute(common.NewEndPlayerTurnAction(cause, 10))
+	}
+	if foe.IsAlive() {
+		t.Fatalf("200 swings and %s still stands", foe.Name())
+	}
+	if player.Hero().Exp <= exp {
+		t.Errorf("killing %s paid no experience", foe.Name())
+	}
+	if !hurt {
+		t.Errorf("%s never hit back", foe.Name())
+	}
+}
+
+// Everything H&H's records declare, the engine has to be able to build: every item with the action, slot and
+// modifiers it names, every monster with its skills, gear and lines, every named skill. A name the engine cannot
+// resolve is content silently lost, which is the one thing this split must not do.
+func TestHeavenAndHellContentResolves(t *testing.T) {
+	g := newHeavenAndHellGame(t, NewDummyUI())
+	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
+	f := g.GetFactory()
+	data := f.Generator.D
+	equippable := map[defs.ItemCategory]bool{defs.ItemCategoryWeapon: true, defs.ItemCategoryArmor: true,
+		defs.ItemCategoryRing: true, defs.ItemCategoryAmulet: true, defs.ItemCategoryLightSource: true}
+	known := map[string]bool{"strength": true, "dexterity": true, "intelligence": true, "health": true, "mana": true,
+		"damage": true, "armor_class": true, "light_radius": true, "attack_speed": true, "steal_health": true,
+		"steal_mana": true, "speed": true, "move_speed": true}
+	for idx, b := range data.Items {
+		it := f.NewD1Item(f.Generator.PlainItem(idx))
+		if b.UntargetedAction != "" && !it.HasUntargetedAction() {
+			t.Errorf("item %s: untargeted_action %q does not resolve", b.InternalName, b.UntargetedAction)
+		}
+		if b.TargetedAction != "" && !it.HasTargetedAction() {
+			t.Errorf("item %s: targeted_action %q does not resolve", b.InternalName, b.TargetedAction)
+		}
+		if equippable[b.InventoryCategory] && !it.IsEquippable() && it.SlotName() == defs.SlotNameNotEquippable {
+			t.Errorf("item %s: a %v that cannot be equipped", b.InternalName, b.InventoryCategory)
+		}
+		for _, m := range b.Modifiers {
+			if name, _, _ := strings.Cut(m, "("); !known[name] {
+				t.Errorf("item %s: equip_modifier %q has no engine meaning", b.InternalName, m)
+			}
+		}
+	}
+	for _, mon := range data.Monsters {
+		a := f.NewMonsterByID(mon.ID)
+		if got, want := len(a.GetTargetedSkills())+len(a.GetUntargetedSkills()), len(mon.TargetedSkills)+len(mon.UntargetedSkills); got != want {
+			t.Errorf("monster %s: %d of its %d skills resolve", mon.ID, got, want)
+		}
+		if got := len(a.GetEquipment().AllItems()); got != len(mon.Equipment) {
+			t.Errorf("monster %s: wears %d of its %d items", mon.ID, got, len(mon.Equipment))
+		}
+		if len(mon.SpeechOnSight) != len(a.SpeechOnSight()) {
+			t.Errorf("monster %s: lost its lines", mon.ID)
+		}
+	}
+	for name := range data.TargetedDefs {
+		if f.NewTargetedActionFromName(name) == nil {
+			t.Errorf("targeted.rec %s does not build", name)
+		}
+	}
+	for name := range data.UntargetedDefs {
+		if f.NewUntargetedActionFromName(name) == nil {
+			t.Errorf("untargeted.rec %s does not build", name)
 		}
 	}
 }

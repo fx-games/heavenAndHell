@@ -140,7 +140,7 @@ func (g *Generator) recordPower(it *Item, modifier string, lvl int) {
 	}[name]
 	switch power {
 	case "":
-		return // ponytail: speed and move_speed have no hero-sheet stat yet; add one when movement speed exists
+		return // speed and move_speed are no item power: the item carries them as stat modifiers (applyItemRecord)
 	case "IPL_ACP":
 		lo, hi = 10*lo, 10*hi // percent
 	case "IPL_FASTATTACK":
@@ -862,6 +862,9 @@ func (g *Generator) MonsterHP(m *MonsterData) int {
 	hp := g.random(m.MaxHP()-m.MinHP()+1) + m.MinHP()
 	if m.ID == "MT_DIABLO" {
 		hp = 1666
+	}
+	if m.FullHP {
+		return max(hp, 1)
 	}
 	return max(hp>>1, 1)
 }

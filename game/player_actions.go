@@ -175,6 +175,7 @@ func (a *Actions) ActivateItemActionForPlayer(itemWithAction *common.Item) {
 		}
 
 		a.activateUntargetedAction(user, untargetedAction, common.EffectSource(itemWithAction.GetInternalName()))
+		a.state.ItemUsed(itemWithAction)
 		if itemWithAction.IsPotion() { // potion effects don't end the turn themselves, like spells do
 			a.actionBroker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("Drink"), 10))
 		}

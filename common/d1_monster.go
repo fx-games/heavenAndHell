@@ -133,7 +133,69 @@ func (g *Factory) newD1Monster(mt int, um *d1.UniqueMonsterData) *Actor {
 	if m.Flags&d1.MFlagHidden != 0 {
 		a.AddStatusEffect(StatusInvisible, -1)
 	}
+	g.applyMonsterRecord(a, m)
 	return a
+}
+
+// applyMonsterRecord gives a monster what its record declares beyond D1's columns: its glyph and color, death
+// lines, tags, speed, how far it notices the hero, its skills, its gear and what it says on sight. Diablo's
+// records declare none of it.
+func (g *Factory) applyMonsterRecord(a *Actor, m *d1.MonsterData) {
+	if m.AsciiIcon != 0 {
+		a.SetAsciiIcon(m.AsciiIcon)
+	}
+	if m.UnicodeIcon != 0 {
+		a.SetUnicodeIcon(m.UnicodeIcon)
+	}
+	if m.Color.A != 0 {
+		a.SetColor(m.Color)
+	}
+	if len(m.DeathStringFormats) > 0 {
+		a.SetDeathStringFormats(m.DeathStringFormats)
+	}
+	for _, tag := range m.Tags {
+		switch tag {
+		case "unique":
+			a.SetUnique()
+		case "no_corpse":
+			a.SetNoCorpse()
+		case "flying":
+			a.AddStatusEffect(StatusFlying, -1)
+		}
+	}
+	if m.BaseSpeed > 0 {
+		a.SetBaseSpeed(m.BaseSpeed)
+	}
+	if m.AggroRange > 0 {
+		a.SetAggroRange(m.AggroRange)
+	}
+	a.speechOnSight = m.SpeechOnSight
+	var targeted []*TargetedAction
+	for _, name := range m.TargetedSkills {
+		if s := g.NewTargetedActionFromName(name); s != nil {
+			targeted = append(targeted, s)
+		}
+	}
+	var untargeted []*UntargetedAction
+	for _, name := range m.UntargetedSkills {
+		if s := g.NewUntargetedActionFromName(name); s != nil {
+			untargeted = append(untargeted, s)
+		}
+	}
+	if targeted != nil || untargeted != nil {
+		a.SetTargetedSkills(targeted)
+		a.SetUntargetedSkills(untargeted)
+	}
+	for _, name := range m.Equipment {
+		idx, ok := g.Generator.D.ItemIdx[name]
+		if !ok {
+			g.Msg(fmt.Sprintf("%s is equipped with %q, which this mod's items.rec does not have", m.ID, name))
+			continue
+		}
+		item := g.NewD1Item(g.Generator.PlainItem(idx))
+		a.GetInventory().Add(item)
+		a.GetEquipment().Equip(item)
+	}
 }
 
 // d1VariantTint is InitMonster's tint pick for monster type mt: the Nth color in d1VariantTints, N being how

@@ -496,10 +496,27 @@ func (g *Factory) applyItemRecord(item *Item, b d1.ItemData) {
 			item.SetTargetedAction(action)
 		}
 	}
-	if b.InventoryCategory.HasAlwaysOneCharge() {
+	switch {
+	case b.Charges < 0:
+		item.SetUnlimitedCharges()
+	case b.InventoryCategory.HasAlwaysOneCharge():
 		item.SetCharges(1)
 		item.SetDestroyAfterUse(true)
-	} else if b.Charges != 0 {
+	case b.Charges != 0:
 		item.SetCharges(b.Charges)
+	}
+	for _, m := range b.Modifiers { // what the hero sheet has no power for, the actor's stats carry while equipped
+		lvl := max(b.DLvl, 1)
+		switch m {
+		case "speed":
+			item.AddEquippedModifier(defs.AddToBaseAttributeRandomly(g.RandomSource, stats.BaseSpeed, util.NewTuple(1, lvl)))
+		case "move_speed":
+			item.AddEquippedModifier(&stats.Modifier{Attribute: stats.MoveSpeedFactor, Description: "of running",
+				Value: g.RandomSource.Float64() * float64(lvl) * 0.1, Mode: stats.ModifyAdditive, IsPercentBased: true})
+		}
+	}
+	if b.Hidden {
+		item.Hide()
+		item.ShowNameOnlyInTooltip()
 	}
 }

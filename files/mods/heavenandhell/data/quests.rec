@@ -26,6 +26,10 @@ key: lucifer
 name: Kill Lucifer
 log_text: TEXT_HH_KIRIOTH_LUCIFER_QUEST
 
+key: evidence
+name: Find evidence against humanity
+log_text: TEXT_HH_LUCIFER_DEATH
+
 %rec: trigger
 
 # What the dungeon tells the town.
@@ -47,6 +51,65 @@ do: spawn_item(lucifers_gift, Town, true_sight_potion)
 event: on_level_cleared
 subject: poisoned_water_supply
 do: set_flag(cleared:poisoned_water_supply)
+
+# The evidence, where main's notes say it lies: at the poisoned water supply, at King Zedek's tomb, in Shekel's
+# house, and in the caves. Each stays hidden until the hero drinks Lucifer's gift, which opens the quest.
+
+event: on_level_cleared
+subject: poisoned_water_supply
+do: spawn_item(evidence_one, here)
+
+event: on_kill
+subject: king_zedek
+do: spawn_item(evidence_two, here)
+
+event: on_item_use
+subject: lucifers_gift
+do: activate_quest(evidence)
+do: log_quest(evidence)
+do: spawn_item(evidence_three, Town, shekels_house)
+
+event: on_enter_level
+subject: 6
+when: not flag("placed:evidence_four")
+do: set_flag(placed:evidence_four)
+do: spawn_item(evidence_four, here)
+
+event: on_item_pickup
+subject: evidence_one
+do: set_flag(found:evidence_one)
+
+event: on_item_pickup
+subject: evidence_two
+do: set_flag(found:evidence_two)
+
+event: on_item_pickup
+subject: evidence_three
+do: set_flag(found:evidence_three)
+
+event: on_item_pickup
+subject: evidence_four
+do: set_flag(found:evidence_four)
+
+event: on_item_pickup
+subject: evidence_one
+when: active("evidence") and flag("found:evidence_one") and flag("found:evidence_two") and flag("found:evidence_three") and flag("found:evidence_four")
+do: complete_quest(evidence)
+
+event: on_item_pickup
+subject: evidence_two
+when: active("evidence") and flag("found:evidence_one") and flag("found:evidence_two") and flag("found:evidence_three") and flag("found:evidence_four")
+do: complete_quest(evidence)
+
+event: on_item_pickup
+subject: evidence_three
+when: active("evidence") and flag("found:evidence_one") and flag("found:evidence_two") and flag("found:evidence_three") and flag("found:evidence_four")
+do: complete_quest(evidence)
+
+event: on_item_pickup
+subject: evidence_four
+when: active("evidence") and flag("found:evidence_one") and flag("found:evidence_two") and flag("found:evidence_three") and flag("found:evidence_four")
+do: complete_quest(evidence)
 
 # Elder Kirioth: Meat Jack, then, once King Zedek is dead, Lucifer.
 

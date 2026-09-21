@@ -1462,6 +1462,25 @@
 								"id": "V_String",
 								"params": ["true_sight_potion"]
 							}] }]
+						},
+						{
+							"__identifier": "Location",
+							"__grid": [13,9],
+							"__pivot": [0,0],
+							"__tags": ["META"],
+							"__tile": null,
+							"__smartColor": "#63C74D",
+							"__worldX": -808,
+							"__worldY": -1032,
+							"iid": "3f2b9c1e-6a7d-4f1e-9b8e-5d0c2a7e1b44",
+							"width": 8,
+							"height": 8,
+							"defUid": 46,
+							"px": [104,72],
+							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "shekels_house", "__tile": null, "defUid": 47, "realEditorValues": [{
+								"id": "V_String",
+								"params": ["shekels_house"]
+							}] }]
 						}
 					]
 				},

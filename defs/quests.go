@@ -33,7 +33,7 @@ type Quest struct {
 
 // Trigger fires named outcomes when a named event happens to a named subject and its condition holds.
 //
-// Event is one of the engine's named events (on_kill, on_item_pickup, on_enter_level, on_talk, on_level_cleared) -- never a poll.
+// Event is one of the engine's named events (on_kill, on_item_pickup, on_enter_level, on_talk, on_level_cleared, on_item_use) -- never a poll.
 // Subject is what the event is about, matched verbatim: a monster's internal name or unique name, an item's
 // internal name, a dungeon depth, an NPC. When is an expr-lang expression over the flag store, compiled once at
 // load. Do is an ordered list of engine-implemented outcomes in predicate form, e.g. "complete_quest(blind)";
