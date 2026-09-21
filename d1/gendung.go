@@ -33,7 +33,7 @@ func (d *Data) LevelType(dlvl int) int {
 	if dlvl <= 0 || dlvl >= NumLevels {
 		return DTypeTown
 	}
-	return strategies[d.levels.cfg[dlvl].strategy].ltype
+	return strategyNamed(d.levels.cfg[dlvl].strategy).ltype
 }
 
 type point struct{ x, y int }

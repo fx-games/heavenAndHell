@@ -128,7 +128,7 @@ func (gnr *Generator) CreateLevel(q *Quests, seeds [NumLevels]int32, dlvl, setLe
 		}
 	}()
 	cfg := gnr.D.levels.cfg[dlvl]
-	st := strategies[cfg.strategy]
+	st := strategyNamed(cfg.strategy)
 	g := &gen{quests: q, currlevel: dlvl, ltype: st.ltype, setlevel: setLevel != SLNone, setLvlNum: setLevel,
 		strat: st, params: cfg.params}
 	g.data = gnr.D

@@ -69,7 +69,7 @@ func TestDrlgFixtures(t *testing.T) {
 		for _, e := range f.entries {
 			cfg := d.levels.cfg[f.dlvl]
 			g := &gen{quests: &q, currlevel: f.dlvl, ltype: d.LevelType(f.dlvl),
-				strat: strategies[cfg.strategy], params: cfg.params}
+				strat: strategyNamed(cfg.strategy), params: cfg.params}
 			g.data = d
 			g.createDungeon(f.seed, e.entry)
 			if g.ltype == DTypeHell && len(g.themes) > 0 {
