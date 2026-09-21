@@ -320,6 +320,7 @@ func (b *d1Brain) rnd(n int) int {
 }
 
 func (b *d1Brain) near(r int) bool { return iabs(b.dx) < r && iabs(b.dy) < r }
+func (b *d1Brain) sameRoom() bool  { return common.D1SameRoom(&b.g.state, b.pos, b.enemy) }
 func (b *d1Brain) stoodLong() bool { return b.mon.StandTicks > 20 }
 func (b *d1Brain) justWalked() bool {
 	return b.mon.LastMode == common.D1ModeWalk && b.mon.StandTicks == 0

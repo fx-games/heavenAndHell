@@ -9,6 +9,9 @@ import (
 	"rpg/stats"
 )
 
+// d1MagblosTicks is how long MI_LArrow's fire burst (MFILE_MAGBLOS, 10 frames) checks for a hit: _miAnimLen - 1.
+const d1MagblosTicks = 9
+
 // TrapMissileAction resolves one trap's missile at once, like the monster missiles: AddMissile with no source
 // (id -1), so its damage comes from the dungeon level and PlayerMHit rolls without a monster.
 type TrapMissileAction struct {
@@ -42,9 +45,11 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 				break
 			}
 		}
-		// ponytail: the burst hits once; D1's MAGBLOS animation may roll again on later frames
-		mind, maxd = d1Rng.Intn(10)+1+cl, d1Rng.Intn(10)+1+2*cl
-		c.hit(a.mis, end, a.from, mind, maxd, false, 1)
+		// the burst: MAGBLOS runs _miAnimLen-1 = 9 ticks, each a fresh roll that may hit again (nodel)
+		for tick := 0; tick < d1MagblosTicks; tick++ {
+			mind, maxd = d1Rng.Intn(10)+1+cl, d1Rng.Intn(10)+1+2*cl
+			c.hit(a.mis, end, a.from, mind, maxd, false, 1)
+		}
 		c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(nil, a.from, end, missileSecPerTile(a.mis), defs.IconEffectFireSmall, 2),
 			NewHitAnimation(end, 0.4, defs.IconEffectFireBig, 2))
 	case MisFirebolt: // MI_Firebolt without a source: currlevel + rnd(2·currlevel)
@@ -90,13 +95,12 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 			c.hit(a.mis, a.from.Add(d), a.from, dam, dam, true, d1.FlashTicks)
 		}
 		c.c.animations = append(c.c.animations, NewHitAnimation(a.from, 0.4, defs.IconEffectLightning, 2))
-	case MisNova: // AddNova without a source: currlevel/2 + 3·rnd(3), lightning balls in every direction
+	case MisNova: // AddNova without a source: currlevel/2 + 3·rnd(3). MI_Nova sends a lightning ball towards each of
+		// NovaRays' offsets; each flies until it hits something, so the hero can be struck by every ball crossing its cell
 		dam := cl>>1 + d1Rng.Intn(3) + d1Rng.Intn(3) + d1Rng.Intn(3)
-		// ponytail: one hit on the hero when in line within 7 cells, not D1's 92 balls crossing its cell
-		if p := player.MapPosition(); geometry.DistanceChebyshev(a.from, p) <= 7 && c.c.lineClear(a.from, p) {
-			c.hit(a.mis, p, a.from, dam, dam, false, 1)
+		for _, r := range d1.NovaRays {
+			c.fly(a.mis, c.c.ray(a.from, a.from.Add(geometry.Point{X: r[0], Y: r[1]}), 20), dam, dam, false)
 		}
-		c.c.animations = append(c.c.animations, NewHitAnimation(a.from, 0.4, defs.IconEffectLightning, 2))
 	}
 	a.animations = c.c.animations
 	switch {

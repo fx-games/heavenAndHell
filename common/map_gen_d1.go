@@ -279,3 +279,20 @@ func freeCellsNear(m *gridmap.GridMap[*Actor, *Item, Object], origin geometry.Po
 	}
 	return out
 }
+
+// D1SameRoom ports the AIs' dTransVal comparison: both cells lie in the same transparency region (room) of the
+// current D1 level. Anywhere without D1 level data counts as one room.
+func D1SameRoom(s *State, a, b geometry.Point) bool {
+	lvl := s.mapGen.d1Levels[s.GetMap().GetName()]
+	if lvl == nil {
+		return true
+	}
+	at := func(p geometry.Point) int8 {
+		x, y := p.X+d1.CellOrigin, p.Y+d1.CellOrigin
+		if x < 0 || y < 0 || x >= len(lvl.Trans) || y >= len(lvl.Trans[0]) {
+			return -1
+		}
+		return lvl.Trans[x][y]
+	}
+	return at(a) == at(b)
+}
