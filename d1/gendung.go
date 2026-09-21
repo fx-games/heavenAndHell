@@ -28,22 +28,13 @@ const (
 	EntryTWarpUp              // up to town through a warp
 )
 
-func LevelType(dlvl int) int {
-	switch {
-	case dlvl == 0:
+// LevelType is the tile set dungeon level dlvl is built from, as the active mod's levels.rec declares it.
+func (d *Data) LevelType(dlvl int) int {
+	if dlvl <= 0 || dlvl >= NumLevels {
 		return DTypeTown
-	case dlvl <= 4:
-		return DTypeCathedral
-	case dlvl <= 8:
-		return DTypeCatacombs
-	case dlvl <= 12:
-		return DTypeCaves
 	}
-	return DTypeHell
+	return strategies[d.levels.cfg[dlvl].strategy].ltype
 }
-
-// tileset is the level type whose til/sol a level draws with.
-func (g *gen) tileset() int { return g.ltype }
 
 type point struct{ x, y int }
 
@@ -71,6 +62,8 @@ type gen struct {
 	ltype     int
 	setlevel  bool
 	setLvlNum int
+	strat     strategy
+	params    LevelParams
 
 	population
 
@@ -245,8 +238,13 @@ func (m *miniset) place(g *gen, x, y int, protect bool) {
 	}
 }
 
-// placeMiniSet ports PlaceMiniSet (gendung.cpp); ok is false when it doesn't fit anywhere.
-func (g *gen) placeMiniSet(m *miniset, tries int, drlg1Quirk bool) (x, y int, ok bool) {
+// placeMiniSet ports PlaceMiniSet (gendung.cpp); ok is false when it doesn't fit anywhere. drlg1Quirk is
+// DRLG_L1's own variant, which keeps out of the top-left corner and gets more tries to make up for it.
+func (g *gen) placeMiniSet(m *miniset, drlg1Quirk bool) (x, y int, ok bool) {
+	tries := 199
+	if drlg1Quirk {
+		tries = 1600
+	}
 	sw, sh := m.w, m.h
 	x, y = g.rnd(40-sw), g.rnd(40-sh)
 	for i := 0; i < tries; i, x = i+1, x+1 {
@@ -277,6 +275,85 @@ func (g *gen) placeMiniSet(m *miniset, tries int, drlg1Quirk bool) (x, y int, ok
 		return x, y, true
 	}
 	return 0, 0, false
+}
+
+// roomRules are the two things DRLG_L1's and DRLG_L4's identical room splitter disagree on: the size of the grid
+// rooms are masked into, and which way the recursion and the rotation coin flip go.
+type roomRules struct {
+	bound        int  // 40 for L1's megatile grid, 20 for L4's quarter-grid
+	rotate       bool // the sense of the 1-in-4 rotation flip
+	flipChildren bool // L1 alternates the split axis on the way down, L4 keeps it
+}
+
+var (
+	l1Rooms = roomRules{bound: 40, rotate: true, flipChildren: true}
+	l4Rooms = roomRules{bound: 20, rotate: false}
+)
+
+func (g *gen) mapRoom(r rect, p roomRules) {
+	for y := 0; y < r.h && y+r.y < p.bound; y++ {
+		for x := 0; x < r.w && x+r.x < p.bound; x++ {
+			g.setMask(r.x+x, r.y+y, true)
+		}
+	}
+}
+
+func (g *gen) checkRoom(r rect, p roomRules) bool {
+	if p.bound == 20 && (r.x <= 0 || r.y <= 0) {
+		return false
+	}
+	for y := 0; y < r.h; y++ {
+		for x := 0; x < r.w; x++ {
+			if x+r.x < 0 || x+r.x >= p.bound || y+r.y < 0 || y+r.y >= p.bound || g.masked(r.x+x, r.y+y) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// generateRoom ports DRLG_L1CreateRoom / L4CreateRoom, which are the same recursive splitter.
+func (g *gen) generateRoom(area rect, vertical bool, p roomRules) {
+	rotate := g.flip(4) == p.rotate
+	vertical = !vertical && rotate || vertical && !rotate
+	var room1 rect
+	place1 := false
+	for num := 0; num < 20; num++ {
+		room1.w = (g.rnd(5) + 2) &^ 1
+		room1.h = (g.rnd(5) + 2) &^ 1
+		if vertical {
+			room1.x, room1.y = area.x-room1.w, area.y+area.h/2-room1.h/2
+			place1 = g.checkRoom(rect{room1.x - 1, room1.y - 1, room1.h + 2, room1.w + 1}, p) // D1 bug: width and height swapped
+		} else {
+			room1.x, room1.y = area.x+area.w/2-room1.w/2, area.y-room1.h
+			place1 = g.checkRoom(rect{room1.x - 1, room1.y - 1, room1.w + 2, room1.h + 1}, p)
+		}
+		if place1 {
+			break
+		}
+	}
+	if place1 {
+		g.mapRoom(rect{room1.x, room1.y, min(40-room1.x, room1.w), min(40-room1.y, room1.h)}, p)
+	}
+	room2 := room1
+	var place2 bool
+	if vertical {
+		room2.x = area.x + area.w
+		place2 = g.checkRoom(rect{room2.x, room2.y - 1, room2.w + 1, room2.h + 2}, p)
+	} else {
+		room2.y = area.y + area.h
+		place2 = g.checkRoom(rect{room2.x - 1, room2.y, room2.w + 2, room2.h + 1}, p)
+	}
+	if place2 {
+		g.mapRoom(room2, p)
+	}
+	next := vertical != p.flipChildren
+	if place1 {
+		g.generateRoom(room1, next, p)
+	}
+	if place2 {
+		g.generateRoom(room2, next, p)
+	}
 }
 
 // dun is a .DUN file: size, then layers of little-endian words (tiles; items, monsters, objects and
@@ -456,6 +533,14 @@ func (g *gen) createThemeRoom(t themeLoc) {
 			g.sd(xx, hy-2, 59)
 			g.sd(xx-1, hy-2, 58)
 		}
+	}
+}
+
+// placeDecorations scatters the mod's decoration tiles, in the order it declared them, the way this level's
+// strategy places them. The default list per strategy is Diablo's own, so a mod that says nothing changes nothing.
+func (g *gen) placeDecorations() {
+	for _, d := range g.params.Decorations {
+		g.strat.deco(g, d)
 	}
 }
 

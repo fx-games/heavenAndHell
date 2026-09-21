@@ -711,7 +711,7 @@ func d1OnKill(ctx ActionContext, killer, victim *Actor) []Action {
 	dlvl := d1DungeonLevel(state)
 	if it := state.factory.d1QuestDrop(mon); it != nil {
 		state.AddItemToMapWithDistribution(state.factory.NewD1Item(it), victim.MapPosition())
-	} else if it := state.factory.D1().MonsterDrop(mon.Data, mon.Level, mon.Unique != nil, state.D1ItemLevel(dlvl), d1.LevelType(dlvl) == d1.DTypeHell); it != nil {
+	} else if it := state.factory.D1().MonsterDrop(mon.Data, mon.Level, mon.Unique != nil, state.D1ItemLevel(dlvl), state.factory.D1().D.LevelType(dlvl) == d1.DTypeHell); it != nil {
 		state.AddItemToMapWithDistribution(state.factory.NewD1Item(it), victim.MapPosition())
 	}
 	return nil

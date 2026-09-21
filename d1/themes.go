@@ -241,7 +241,7 @@ func (g *gen) initThemes() {
 	g.zharlib = -1
 	g.rooms = nil
 	g.armorFlag, g.bFountain, g.cauldron, g.mFountain, g.pFountain, g.tFountain, g.treasr = true, true, true, true, true, true, true
-	g.bCrossFlag, g.weaponFlag = false, true
+	g.weaponFlag = true
 	if g.currlevel == 16 {
 		return
 	}
@@ -556,7 +556,6 @@ func (g *gen) createThemeRooms() {
 				}
 			})
 			g.placeThemeMonsts(i, [4]int{6, 8, 3, 9}[lt])
-			g.bCrossFlag = true
 		case ThemeWeaponRack:
 			if g.weaponFlag {
 				g.tfitObj3(i)
