@@ -31,6 +31,7 @@ type StartInfo struct {
 	TileScale         float64
 	Title             string
 	LDTKMapFile       string
+	SpriteSheet       string
 	UserConfiguration *Configuration
 	FileSystem        fs.ReadDirFS
 }
@@ -61,6 +62,10 @@ type Configuration struct {
 	AutoExploreOpenContainers bool // auto explore also bumps chests/barrels/sarcophagi it finds
 
 	Fullscreen bool // set in the video menu or with F11
+
+	// SpriteSheet is the tile atlas the Icon* numbers index. A mod ships its own at assets/, where the overlay
+	// finds it, or names another path here; the engine's default is the fallback.
+	SpriteSheet string
 
 	// Mod names the game to play: files/mods/<Mod> shadows the engine's own assets/. One mod is one complete game.
 	Mod string
@@ -168,6 +173,7 @@ func (c Configuration) ToRecord() recfile.Record {
 		{Name: "AutoExploreOpenContainers", Value: recfile.BoolStr(c.AutoExploreOpenContainers)},
 		{Name: "Fullscreen", Value: recfile.BoolStr(c.Fullscreen)},
 		{Name: "Mod", Value: c.Mod},
+		{Name: "SpriteSheet", Value: c.SpriteSheet},
 	}
 	// written back on every save, so a menu toggle cannot drop the user's palette
 	for _, name := range slices.Sorted(maps.Keys(c.MiniMapColors)) {
@@ -222,6 +228,7 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		AutoExploreOpenContainers: configMap.GetBoolOrFalse("AutoExploreOpenContainers"),
 		Fullscreen:                configMap.GetBoolOrFalse("Fullscreen"),
 		Mod:                       configMap.GetStringOrDefault("Mod", DefaultMod),
+		SpriteSheet:               configMap.GetStringOrDefault("SpriteSheet", DefaultSpriteSheet),
 		MiniMapColors:             parseMiniMapColors(configMap.GetStringOrDefault("MiniMapColor", "")),
 		WindowSize: geometry.Point{ //1280, Y: 800
 			X: configMap.GetIntOrDefault("WindowWidth", 1280),
@@ -234,8 +241,12 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 	return configuration
 }
 
-// DefaultMod is the game played when config.rec does not name one.
-const DefaultMod = "d1"
+// DefaultMod is the game played when config.rec does not name one, and DefaultSpriteSheet the atlas the engine
+// ships. Neither is a mod name the engine knows: the overlay maps assets/ to the active mod on its own.
+const (
+	DefaultMod         = "d1"
+	DefaultSpriteSheet = "assets/classic_roguelike.png"
+)
 
 // ConfigFile is the user configuration next to the game.
 const ConfigFile = "config.rec"

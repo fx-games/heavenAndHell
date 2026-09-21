@@ -17,12 +17,12 @@ import (
 )
 
 // debugTints writes a PNG table of every tinted tile: debug_tints [out.png].
-func debugTints(theGame *game.GameInstance, args []string) {
+func debugTints(theGame *game.GameInstance, spriteSheet string, args []string) {
 	out := "debug-tints.png"
 	if len(args) > 0 {
 		out = args[0]
 	}
-	f, err := files.Open("assets/classic_roguelike.png")
+	f, err := files.Open(spriteSheet)
 	if err != nil {
 		log.Fatal(err)
 	}

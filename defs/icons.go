@@ -9,7 +9,7 @@ import (
 )
 
 // Icons live in four independently remappable rec files under files/assets/data/icons/ (8x8 tiles in
-// assets/classic_roguelike.png), one ID convention throughout: "kind.snake_case_name", e.g. "class.warrior_male",
+// the sprite sheet named by common.Configuration.SpriteSheet), one ID convention throughout: "kind.snake_case_name", e.g. "class.warrior_male",
 // "monster.nzombie", "unique.gharbad_the_weak", "npc.wirt", "corpse.default" (actors.rec); "item.falchion",
 // "item.falchion.magic"/".unique" (per weapon/armor family), "item.heal" (potions/scrolls, keyed by IMISC_*) etc.
 // (items.rec); "tile.grass", "prop.chest1"(+".used"), "decal.blood1", "effect.fire_small" (tiles.rec);

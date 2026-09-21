@@ -41,8 +41,8 @@ func main() {
 		argCmd := strings.ToLower(os.Args[1])
 		switch argCmd {
 		case "debug_tints":
-			theGame, _ := createGameAndUIContext()
-			debugTints(theGame, os.Args[2:])
+			theGame, uiContext := createGameAndUIContext()
+			debugTints(theGame, uiContext.StartInfos.SpriteSheet, os.Args[2:])
 		case "loot":
 			theGame, _ := createGameAndUIContext()
 			genLoot(theGame)
@@ -71,6 +71,7 @@ func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 		ScreenSize:  userConfig.WindowSize,
 		TileScale:   4.0,
 		LDTKMapFile: "assets/maps.ldtk",
+		SpriteSheet: userConfig.SpriteSheet,
 		FontInfos: common.FontInfo{
 			TTFFile: userConfig.DefaultFont,
 			TTFSize: userConfig.DefaultFontSize,
