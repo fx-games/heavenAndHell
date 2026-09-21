@@ -6,7 +6,9 @@ import (
 	"rpg/d1"
 	"rpg/defs"
 	"rpg/geometry"
+	"rpg/stats"
 	"rpg/util"
+	"strings"
 )
 
 // spell_damage is the one damaging on-hit effect. Everything a damaging spell used to differ in - how far and in
@@ -136,4 +138,141 @@ func (a *SpellDamageAction) Execute(ctx ActionContext) []Action {
 		a.animations = append(c.animations, NewProjectileDirectionAnimation(a.caster, a.caster.MapPosition(), last, 0.03, icon, 2))
 	}
 	return c.finish()
+}
+
+// charged_bolts(<roll>, <resist>) fires several sparks that each wander off towards the target on their own and
+// stop at the first thing they hit, rolling <roll> separately. It is its own effect rather than a hit zone
+// because how many sparks fly is the caster's spell level, which a zone never sees, and because the union of
+// their paths would lose what makes the spell the spell: each spark spends itself on one victim.
+// ponytail: multi_shot is the nearest thing already in the untargeted registry, but it shoots the equipped bow
+// at the nearest enemies, so nothing of it carries over but the idea.
+func (g *Factory) chargedBolts(args util.Arguments) *HitEffect {
+	rollName := args.Get(0)
+	if _, known := GetAllDamageRolls()[rollName]; !known {
+		g.Msg(fmt.Sprintf("Unknown spell damage roll: %s", rollName))
+		return nil
+	}
+	resist := resistKindByName[args.Get(1)]
+	slvl := args.GetInt(2)
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			g.ActionBroker.Execute(&ChargedBoltsAction{
+				BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, attacker), name: ActionNameFireball},
+				caster:     attacker, roll: rollName, resist: resist, slvl: slvl, target: target})
+		},
+		Description: []util.LabelText{util.LabelTextFromString("Release wandering sparks towards the target")},
+	}
+}
+
+// ChargedBoltsAction is charged_bolts resolving: d1.ChargedBolts(slvl) sparks, each with its own wander seed,
+// its own damage roll and its own path animation.
+type ChargedBoltsAction struct {
+	BaseAction
+	caster     *Actor
+	roll       string
+	resist     int
+	slvl       int
+	target     geometry.Point
+	animations []Animation
+	landed     bool
+}
+
+func (a *ChargedBoltsAction) GetAnimations() []Animation { return a.animations }
+func (a *ChargedBoltsAction) GetDelayInAut() int         { return 0 }
+func (a *ChargedBoltsAction) Succeeded() bool            { return a.landed }
+
+func (a *ChargedBoltsAction) Execute(ctx ActionContext) []Action {
+	f := ctx.GameState.factory
+	c := &spellCtx{f: f, ctx: ctx, caster: a.caster, h: a.caster.hero, s: a.caster.HeroSheet(), slvl: a.slvl,
+		m: ctx.GameState.GetMap(), cause: a.cause, dealt: map[*Actor]int{}, resist: a.resist}
+	if c.h == nil {
+		return nil
+	}
+	origin := a.caster.MapPosition()
+	for n := d1.ChargedBolts(a.slvl); n > 0; n-- {
+		wander := d1Rng.Intn(15) + 1 // drawn before the damage, the order the original missile used
+		roll := GetAllDamageRolls()[a.roll](RollContext{Rng: d1Rng, Mag: c.s.Mag, Clvl: c.h.Level, Slvl: a.slvl})
+		p, path := origin, []geometry.Point{origin}
+		for _, next := range c.chargedBoltCells(origin, a.target, wander) {
+			p = next
+			path = append(path, p)
+			if victim := c.hitCell(p); victim != nil && c.strike(victim, roll.Damage64, roll.Ticks) {
+				a.landed = true
+				break
+			}
+		}
+		if p != origin {
+			c.animations = append(c.animations, NewProjectilePathAnimation(a.caster, path, 0.03, defs.IconEffectLightning, 2))
+		}
+	}
+	a.animations = c.animations
+	return c.finish()
+}
+
+// restore_resource is spell_damage's mirror: the one effect that puts a resource back, on the caster.
+//
+//	effect: restore_resource(<health|mana>, <base>, <per_clvl>, <per_slvl>, <doubled_for>, <raised_by_half_for>)
+//	effect: restore_resource(<health|mana>, full)
+//
+// Healing, Mana and the Magi are the same curve read three ways, so the dice and the classes each one favours
+// are numbers in the content and the arithmetic sits in d1.ResourceAmount64 beside the damage rolls. The
+// caster's spell level is appended as the last argument where the action is built, as it is for spell_damage.
+var d1ClassByName = map[string]int{"warrior": d1.Warrior, "rogue": d1.Rogue, "sorcerer": d1.Sorcerer,
+	"monk": d1.Monk, "bard": d1.Bard, "barbarian": d1.Barbarian}
+
+// classSet reads a comma separated list of class names. Commas, because the argument list itself splits on '|'.
+func classSet(list string) map[int]bool {
+	set := map[int]bool{}
+	for _, name := range strings.Split(list, ",") {
+		if class, known := d1ClassByName[strings.TrimSpace(name)]; known {
+			set[class] = true
+		}
+	}
+	return set
+}
+
+func (g *Factory) restoreResource(args util.Arguments) *HitEffect {
+	resource := args.Get(0)
+	if resource != "health" && resource != "mana" {
+		g.Msg(fmt.Sprintf("Unknown resource to restore: %s", resource))
+		return nil
+	}
+	full := args.Get(1) == "full"
+	base, perClvl, perSlvl := args.GetInt(1), args.GetInt(2), args.GetInt(3)
+	doubled, raisedByHalf := classSet(args.Get(4)), classSet(args.Get(5))
+	slvl := args.GetInt(len(args) - 1) // the cast appends it, and the two forms are of different length
+	return &HitEffect{
+		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
+			h := attacker.hero
+			if h == nil {
+				return
+			}
+			boost := 0
+			switch {
+			case doubled[h.Class]:
+				boost = 2
+			case raisedByHalf[h.Class]:
+				boost = 1
+			}
+			st := attacker.GetStats()
+			if resource == "health" {
+				if full {
+					st.GetResource(stats.Health).SetToMax()
+					return
+				}
+				st.GetResource(stats.Health).Increase(float64(d1.ResourceAmount64(d1Rng, base, perClvl, perSlvl, h.Level, slvl, boost) >> 6))
+				return
+			}
+			// mana carries hero bookkeeping health does not: the base pool grows with what is restored
+			if full {
+				h.ManaBase = h.MaxManaBase
+				st.GetResource(stats.Mana).SetToMax()
+				return
+			}
+			amount := d1.ResourceAmount64(d1Rng, base, perClvl, perSlvl, h.Level, slvl, boost) >> 6
+			h.ManaBase = min(h.ManaBase+amount<<6, h.MaxManaBase)
+			st.GetResource(stats.Mana).Increase(float64(amount))
+		},
+		Description: []util.LabelText{util.LabelTextFromString(fmt.Sprintf("Restore the caster's %s", resource))},
+	}
 }

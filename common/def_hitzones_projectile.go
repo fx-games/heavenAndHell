@@ -114,6 +114,43 @@ func ConeAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.A
 	}
 }
 
+// ChainAoE (chain_aoe(jumps, reach)) is a beam that re-aims. It lays the cells from the origin to the target,
+// and then keeps going: from the actor it just reached to the nearest actor it has not reached yet, within
+// `reach` cells and in clear line, for at most `jumps` further legs. Chain Lightning is exactly this shape, and
+// so is anything else that wants to arc from victim to victim; bolt_aoe stops at one, ray_aoe never turns.
+func ChainAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
+	jumps := args.GetIntOrDefault(0, 6)
+	reach := args.GetIntOrDefault(1, 7)
+	return &AoEResolver{
+		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
+			currentMap := gridMap()
+			var result []geometry.Point
+			reached := map[geometry.Point]bool{origin: true}
+			from, to := origin, target
+			for leg := 0; leg <= jumps; leg++ {
+				result = append(result, projectileLine(currentMap, from, to, 20)...)
+				reached[to] = true
+				next, found := geometry.Point{}, false
+				for _, actor := range currentMap.Actors() {
+					p := actor.MapPosition()
+					d := geometry.DistanceChebyshev(to, p)
+					if reached[p] || d > reach || !lineIsClear(currentMap, to, p) {
+						continue
+					}
+					if !found || d < geometry.DistanceChebyshev(to, next) {
+						next, found = p, true
+					}
+				}
+				if !found {
+					break
+				}
+				from, to = to, next
+			}
+			return result
+		},
+	}
+}
+
 // projectileLine is the cells a missile from `origin` towards `target` crosses, up to maxLen or the first wall.
 func projectileLine(currentMap *gridmap.GridMap[*Actor, *Item, Object], origin, target geometry.Point, maxLen int) []geometry.Point {
 	open := func(p geometry.Point) bool { return currentMap.Contains(p) && currentMap.IsTransparent(p) }

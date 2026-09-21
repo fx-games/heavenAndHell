@@ -16,6 +16,8 @@ effect: spell_damage(firebolt|fire)
 
 id: SPL_HEAL
 cast_sfx: IS_CAST8
+hit_zone: target_only
+effect: restore_resource(health|10|4|6|warrior,barbarian,monk|rogue,bard)
 
 id: SPL_LIGHTNING
 resist: lightning
@@ -58,6 +60,9 @@ effect: apply_status(stone|12)
 id: SPL_INFRA
 cast_sfx: IS_CAST8
 launch_sfx: LS_INFRAVIS
+hit_zone: target_only
+effect: on_self(apply_status_self|vision|-1|)
+effect: on_self(apply_status_self|infravision|198|)
 
 id: SPL_RNDTELEPORT
 cast_sfx: IS_CAST2
@@ -69,7 +74,7 @@ id: SPL_MANASHIELD
 cast_sfx: IS_CAST2
 launch_sfx: LS_MSHIELD
 hit_zone: target_only
-effect: on_self(apply_status_self|mana_shield|-1)
+effect: on_self(apply_status_self|mana_shield|-1|)
 
 id: SPL_FIREBALL
 resist: fire
@@ -91,6 +96,8 @@ resist: lightning
 targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_LNING1
+hit_zone: chain_aoe(6|7)
+effect: spell_damage(lightning|lightning)
 
 id: SPL_WAVE
 resist: fire
@@ -122,6 +129,8 @@ launch_sfx: LS_GOLUM
 
 id: SPL_BLODBOIL
 cast_sfx: IS_CAST8
+hit_zone: target_only
+effect: on_self(apply_rage_self)
 
 id: SPL_TELEPORT
 targeted: true
@@ -160,6 +169,8 @@ resist: lightning
 targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_CBOLT
+hit_zone: target_only
+effect: charged_bolts(charged_bolt|lightning)
 
 id: SPL_HBOLT
 resist: none
@@ -195,9 +206,13 @@ health_cost: 6
 
 id: SPL_MANA
 cast_sfx: IS_CAST8
+hit_zone: target_only
+effect: restore_resource(mana|10|4|6|sorcerer|rogue,bard)
 
 id: SPL_MAGI
 cast_sfx: IS_CAST8
+hit_zone: target_only
+effect: restore_resource(mana|full)
 
 id: SPL_JESTER
 targeted: true
@@ -226,10 +241,14 @@ launch_sfx: LS_ETHEREAL
 id: SPL_REFLECT
 cast_sfx: IS_CAST6
 launch_sfx: LS_MSHIELD
+hit_zone: target_only
+effect: on_self(apply_reflect_self|2)
 
 id: SPL_BERSERK
 targeted: true
 cast_sfx: IS_CAST6
+hit_zone: target_only
+effect: enrage_monster
 
 id: SPL_RING
 resist: fire
@@ -239,6 +258,9 @@ effect: spawn_wall(fire)
 
 id: SPL_SEARCH
 cast_sfx: IS_CAST6
+hit_zone: target_only
+effect: on_self(apply_status_self|vision|-1|)
+effect: on_self(apply_status_self|infravision|198|)
 
 id: SPL_RUNEFIRE
 resist: fire

@@ -81,12 +81,12 @@ var (
 )
 
 // SpellHitZone and SpellEffect are how a spell is expressed in the engine's one effect model: the named hit zone
-// it reaches over and the named on-hit effect it applies there. SpellHealthCost is what a cast takes out of the
+// it reaches over and the named on-hit effects it applies there, in the order the content declares them. SpellHealthCost is what a cast takes out of the
 // caster's own life, beside its mana. All three are columns of assets/data/spells.rec; a spell without an effect
 // has no mapping yet and still runs from code.
 var (
 	SpellHitZone    map[int]string
-	SpellEffect     map[int]string
+	SpellEffect     map[int][]string
 	SpellHealthCost map[int]int
 )
 
@@ -149,7 +149,7 @@ func loadSpellTables(fsys fs.FS) error {
 		return err
 	}
 	SpellResist, SpellTargeted, SpellSfx = map[int]int{}, map[int]bool{}, map[int][3]string{}
-	SpellHitZone, SpellEffect, SpellHealthCost = map[int]string{}, map[int]string{}, map[int]int{}
+	SpellHitZone, SpellEffect, SpellHealthCost = map[int]string{}, map[int][]string{}, map[int]int{}
 	for _, r := range recs["default"] {
 		m := r.ToMap("")
 		name := m.GetStringOrDefault("id", "")
@@ -169,8 +169,13 @@ func loadSpellTables(fsys fs.FS) error {
 		}
 		SpellSfx[spell] = [3]string{m.GetStringOrDefault("cast_sfx", ""),
 			m.GetStringOrDefault("launch_sfx", ""), m.GetStringOrDefault("impact_sfx", "")}
-		if v := m.GetStringOrDefault("effect", ""); v != "" {
-			SpellEffect[spell] = v
+		// a spell may declare `effect:` more than once; they all fire over the same hit zone, in order
+		for _, f := range r {
+			if f.Name == "effect" && f.Value != "" {
+				SpellEffect[spell] = append(SpellEffect[spell], f.Value)
+			}
+		}
+		if len(SpellEffect[spell]) > 0 {
 			SpellHitZone[spell] = m.GetStringOrDefault("hit_zone", "target_only")
 		}
 		if v := m.GetIntOrDefault("health_cost", 0); v != 0 {
@@ -365,22 +370,38 @@ func StoneTurns(slvl int) int { return min(slvl+6, 15) << 4 / RefWalkTicks }
 
 func InfravisionTurns(slvl int) int { return grow(1584, slvl) / RefWalkTicks }
 
-// HealAmount64 ports AddHeal.
-func HealAmount64(rng *rand.Rand, class, clvl, slvl int) int {
-	l := (rnd(rng, 10) + 1) << 6
+// ResourceAmount64 is the curve AddHeal and missiles_rech_mana share, in 1/64 points: 1d<base>, plus
+// 1d<perClvl> for every character level and 1d<perSlvl> for every spell level, then the multiplier the
+// spell gives the classes it favours - boost 2 doubles the roll, 1 raises it by half, 0 leaves it alone.
+// Which classes those are is the content's business; only the shape lives here.
+func ResourceAmount64(rng *rand.Rand, base, perClvl, perSlvl, clvl, slvl, boost int) int {
+	l := (rnd(rng, base) + 1) << 6
 	for i := 0; i < clvl; i++ {
-		l += (rnd(rng, 4) + 1) << 6
+		l += (rnd(rng, perClvl) + 1) << 6
 	}
 	for i := 0; i < slvl; i++ {
-		l += (rnd(rng, 6) + 1) << 6
+		l += (rnd(rng, perSlvl) + 1) << 6
 	}
-	switch class {
-	case Warrior, Barbarian, Monk:
+	switch boost {
+	case 2:
 		l *= 2
-	case Rogue, Bard:
+	case 1:
 		l += l >> 1
 	}
 	return l
+}
+
+// HealAmount64 ports AddHeal: the shared curve with Healing's own class multipliers. It stays because the
+// item tooltips and HealRange64 quote a healing staff's range without casting anything.
+func HealAmount64(rng *rand.Rand, class, clvl, slvl int) int {
+	boost := 0
+	switch class {
+	case Warrior, Barbarian, Monk:
+		boost = 2
+	case Rogue, Bard:
+		boost = 1
+	}
+	return ResourceAmount64(rng, 10, 4, 6, clvl, slvl, boost)
 }
 
 // HealRange64 is HealAmount64's lowest and highest roll.

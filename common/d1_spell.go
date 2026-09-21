@@ -323,21 +323,6 @@ func (c *spellCtx) bolt(from, to geometry.Point, hit func(a *Actor) bool) (impac
 	return impact, stopped
 }
 
-// beam ports MI_Lightctrl: it lays a bolt on every cell up to the first wall, each rolling its damage once and
-// hitting the monster there every tick it burns (MI_Lightning).
-func (c *spellCtx) beam(to geometry.Point) {
-	cells := c.ray(c.origin(), to, 20)
-	for _, p := range cells {
-		dam := d1.LightningDamage(d1Rng, c.h.Level)
-		if a := c.hitCell(p); a != nil {
-			c.strike(a, dam<<6, d1.LightningTicks(c.slvl))
-		}
-	}
-	if len(cells) > 0 {
-		c.animations = append(c.animations, NewProjectileDirectionAnimation(c.caster, c.origin(), cells[len(cells)-1], c.secPerTile(), c.icon(), 2))
-	}
-}
-
 func (c *spellCtx) payHP(hp int) {
 	c.caster.GetStats().GetResource(stats.Health).Decrease(hp)
 	if !c.caster.IsAlive() {
@@ -349,27 +334,34 @@ func (c *spellCtx) payHP(hp int) {
 // its content declares. handled is false for a spell whose content carries no mapping yet, which then falls back
 // to the switch below. Nothing here knows which spell it is casting.
 func (c *spellCtx) castFromData(target geometry.Point) (ok, handled bool) {
-	effectName := d1.SpellEffect[c.spell]
-	if effectName == "" {
+	declared := d1.SpellEffect[c.spell]
+	if len(declared) == 0 {
 		return false, false
 	}
 	if !c.castAllowed(target) {
 		return false, true
 	}
-	name, args := effectName, util.Arguments{}
-	if util.LooksLikeAFunction(effectName) {
-		name, args = util.GetNameAndArgs(effectName)
-	}
-	// a roll grows with the spell's level, which only the cast knows
-	effect := c.f.NewOnHitEffectFromNameAndArgs(name, append(args, strconv.Itoa(c.slvl)))
-	if effect == nil {
-		return false, true
+	var effects []*HitEffect
+	for _, effectName := range declared {
+		name, args := effectName, util.Arguments{}
+		if util.LooksLikeAFunction(effectName) {
+			name, args = util.GetNameAndArgs(effectName)
+		}
+		// a roll grows with the spell's level, which only the cast knows
+		effect := c.f.NewOnHitEffectFromNameAndArgs(name, append(args, strconv.Itoa(c.slvl)))
+		if effect == nil {
+			return false, true
+		}
+		effects = append(effects, effect)
 	}
 	if hp := d1.SpellHealthCost[c.spell]; hp > 0 {
 		c.payHP(hp)
 	}
 	zone := HitZoneFromString(c.f.State.GetMap, d1.SpellHitZone[c.spell])
-	effect.Activate(c.caster, target, zone.GetHitPositions(c.origin(), target))
+	positions := zone.GetHitPositions(c.origin(), target)
+	for _, effect := range effects {
+		effect.Activate(c.caster, target, positions)
+	}
 	return true, true
 }
 
@@ -389,22 +381,12 @@ func (c *spellCtx) castAllowed(target geometry.Point) bool {
 }
 
 func (c *spellCtx) cast(target geometry.Point) bool {
-	f, h, s, slvl, o := c.f, c.h, c.s, c.slvl, c.origin()
+	f, h, slvl := c.f, c.h, c.slvl
 	clvl := h.Level
-	st := c.caster.GetStats()
 	if !c.castAllowed(target) {
 		return false
 	}
 	switch c.spell {
-	case d1.SplHeal:
-		st.GetResource(stats.Health).Increase(float64(d1.HealAmount64(d1Rng, h.Class, clvl, slvl) >> 6))
-	case d1.SplChain:
-		c.beam(target)
-		for _, a := range append([]*Actor(nil), c.m.Actors()...) {
-			if c.monsterAt(a.MapPosition()) == a && geometry.DistanceChebyshev(o, a.MapPosition()) < min(slvl+3, 19) {
-				c.beam(a.MapPosition())
-			}
-		}
 	case d1.SplIdentify:
 		item := f.identifyTarget
 		if item == nil {
@@ -417,37 +399,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		if f.UI != nil {
 			f.UI().ShowItemInfo(item)
 		}
-	case d1.SplSearch, d1.SplInfra: // Vision: Infravision merged into it. Everything alive on the level shows
-		// until the level changes, and seeing through walls outlasts that by Infravision's own duration.
-		c.caster.AddStatusEffect(StatusVision, -1) // negative turnCount: never decays on its own, see State.MapTransition
-		c.caster.AddStatusEffect(StatusInfravision, d1.InfravisionTurns(slvl))
-	case d1.SplRage: // AddRage: no raging while already raging, or while too wounded to survive the hangover
-		if h.Rage != 0 || st.GetResource(stats.Health).Value() <= clvl {
-			c.ctx.Msg("You cannot work yourself up again.")
-			return false
-		}
-		h.Rage = d1.RageTurns(clvl)
-		c.caster.AddParametrizedStatusEffect(f.d1RageEffect(clvl))
-		SyncHero(c.caster)
-	case d1.SplMana: // missiles_rech_mana
-		amount := d1Rng.Intn(10) + 1
-		for i := 0; i < clvl; i++ {
-			amount += d1Rng.Intn(4) + 1
-		}
-		for i := 0; i < slvl; i++ {
-			amount += d1Rng.Intn(6) + 1
-		}
-		switch h.Class {
-		case d1.Sorcerer:
-			amount <<= 1
-		case d1.Rogue, d1.Bard:
-			amount += amount >> 1
-		}
-		h.ManaBase = min(h.ManaBase+amount<<6, h.MaxManaBase)
-		st.GetResource(stats.Mana).Increase(float64(amount))
-	case d1.SplMagi: // missiles_magi
-		h.ManaBase = h.MaxManaBase
-		st.GetResource(stats.Mana).SetToMax()
 	case d1.SplJester: // missiles_jester: one of nine spells at the Jester's spell level
 		c.spell = [10]int{d1.SplFirebolt, d1.SplFirebolt, d1.SplFireball, d1.SplFireWall, d1.SplGuardian, d1.SplChain,
 			d1.SplTown, d1.SplTeleport, d1.SplApocalypse, d1.SplStone}[d1Rng.Intn(10)]
@@ -456,15 +407,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		return c.cast(target)
 	case d1.SplWarp: // missiles_warp: to the nearest stairs, beside them
 		return f.d1Warp(c)
-	case d1.SplReflect: // missiles_reflection
-		n := slvl
-		if n == 0 {
-			n = 2
-		}
-		h.Reflections += n * clvl
-		c.ctx.Msg(fmt.Sprintf("You will turn back the next %d blows.", h.Reflections))
-	case d1.SplBerserk:
-		return f.d1Berserk(c, target, slvl)
 	case d1.SplTown:
 		return f.openD1Portal(c.caster)
 	case d1.SplGuardian:
@@ -475,22 +417,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		f.spawnD1Guardian(c.caster, p, d1.GuardianTurns(clvl, slvl))
 	case d1.SplGolem:
 		return f.summonD1Golem(c, target)
-	case d1.SplChargedBolt:
-		for n := d1.ChargedBolts(slvl); n > 0; n-- {
-			r := d1Rng.Intn(15) + 1
-			dam := d1.ChargedBoltDamage(d1Rng, s.Mag)
-			p, path := o, []geometry.Point{o}
-			for _, next := range c.chargedBoltCells(o, target, r) {
-				p = next
-				path = append(path, p)
-				if a := c.hitCell(p); a != nil && c.strike(a, dam<<6, 1) {
-					break
-				}
-			}
-			if p != o {
-				c.animations = append(c.animations, NewProjectilePathAnimation(c.caster, path, c.secPerTile(), defs.IconEffectLightning, 2))
-			}
-		}
 	case d1.SplTelekinesis:
 		return f.d1Telekinesis(c, target)
 	default:

@@ -83,6 +83,27 @@ func (f *Factory) d1RageEffect(clvl int) *ParametrizedStatusEffect {
 	}, 2*turns)
 }
 
+// apply_rage_self ports AddRage: no raging while already raging, or while too wounded to survive the hangover.
+// The status below does the rest; this is only the hero bookkeeping that starts it, reached by name.
+func (f *Factory) getRageSelfAction(args util.Arguments) UntargetedEffect {
+	return UntargetedEffect{
+		Effect: func(user *Actor, source EffectSource) {
+			h := user.hero
+			if h == nil {
+				return
+			}
+			if h.Rage != 0 || user.GetStats().GetResource(stats.Health).Value() <= h.Level {
+				f.Msg("You cannot work yourself up again.")
+				return
+			}
+			h.Rage = d1.RageTurns(h.Level)
+			user.AddParametrizedStatusEffect(f.d1RageEffect(h.Level))
+			SyncHero(user)
+		},
+		Description: []util.LabelText{util.LabelTextFromString("Work yourself into a rage")},
+	}
+}
+
 // d1SkillIcon is the skills.rec icon of a spell or class skill.
 func (f *Factory) d1SkillIcon(spell int) int32 {
 	return defs.Icon(defs.IconID("spell", f.Generator.D.Spells[spell].ID))

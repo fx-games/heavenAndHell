@@ -19,6 +19,7 @@ func GetAllHitZones() map[string]func(gridMap func() *gridmap.GridMap[*Actor, *I
 		"ring_aoe":       RingAoE,
 		"box_aoe":        BoxAoE,
 		"cone_aoe":       ConeAoE,
+		"chain_aoe":      ChainAoE,
 	}
 }
 
