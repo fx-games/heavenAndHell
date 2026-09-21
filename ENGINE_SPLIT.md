@@ -62,6 +62,20 @@ Mod (rec/tsv):
 - Dungeon generation output must stay byte-identical: `d1/testdata/levels.golden`
   is the referee. A golden diff is a bug, never a regeneration.
 
+## One content schema
+
+The H&H `.rec` schema is the unified content model, for the same reason the H&H
+effect model is: it is already declarative, names effects by string, and uses
+dice notation. D1's native `xl_*.txt` tables are an IMPORT SOURCE, not a second
+content model.
+
+    Diablo's own files --[cmd/d1import, offline dev tool]--> mods/d1/**.rec
+    mods/<any>/**.rec  --[engine, one loader]-->              game
+
+`cmd/d1import` and `cmd/d1sprites` are offline developer tools and may know
+about Diablo's formats. The ENGINE may not: it reads one schema, whichever mod
+supplied it.
+
 ## Phases
 
 0. mod overlay filesystem — done
