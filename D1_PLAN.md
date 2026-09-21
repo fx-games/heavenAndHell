@@ -110,35 +110,19 @@ Every D1 single-player quest runs as D1 1.09 progresses it (`common/d1_quest.go`
 
 ## Defaults (not grilled)
 
-- **Hellfire is always on, and has no toggle.** Everything of the expansion this game keeps is merged into the
-  default code paths: one item table in Hellfire's `AllItemsList` order, its affixes, spells, classes, stores,
-  shrines and chest traps, and its Cathedral stairs. There is no "Hellfire content" checkbox, no `D1Only` save
-  field and no mid-game upgrade; a save from before the cut loads as full content.
-- Hellfire's six-class roster is in: Monk, Bard and Barbarian, with their skills (Search, Identify, Rage), their
-  attribute tables (devilutionX `txtdata/classes/<class>/attributes.tsv`, which also reproduces D1 1.09's) and
-  their class traits (critical strike, trap sense, iron skin, natural resistance, the Monk's bare-handed block).
-  The Bard dual wields (`SlotNameOneHandedWeapon` resolves to whichever hand is free, like `SlotNameRing`).
-- **Hellfire's items** are in: the thirteen it drops into D1's empty table slots 35-47, the oils, runes, Scroll of
-  Search and Bovine Plate appended past 156 in `xl_item.txt`, 20 uniques, 3 prefixes and 3 suffixes. `Load` lays the
-  table out in Hellfire's own AllItemsList order (`hellfireItemOrder`: oils after Full Rejuvenation, Search after
-  Healing, Bovine Plate in Lightforge's slot, runes last, the Short Staff of Mana), which every item roll walks.
-- **Hellfire's levels, quests, towners and monsters are cut.** The Nest (17-20) and the Crypt (21-24) are gone
-  (`DRLG_L6`/`DRLG_L5` and their tile tables), so the dungeon stops at 16; with them went Farmer's Orchard,
-  Grave Matters, The Defiler, Na-Krul, the Cornerstone of the World, The Jersey's Jersey and the Little Girl, the
-  towners Lester, the Complete Nut and Celia, their quest items, and all 26 of Hellfire's monsters and its three
-  new unique monsters — every one of those only spawned on 17-24, and all seven of their AIs turn out to be
-  `MAI_Ranged`/`MAI_RoundRanged` with a differently coloured flare, so nothing behavioural was lost. Hellfire's
-  quest-item rows stay in `xl_item.txt` (all `IDROP_NEVER`, so unreachable) rather than renumber the table.
-- **Hellfire's spells** are in, in Hellfire's spell table order (37-51, Search moved to 46): Mana, the Magi, the
-  Jester, Lightning Wall, Immolation, Warp, Reflect, Berserk and Ring of Fire, with Hellfire's book and staff rolls
-  (MAX_SPELLS 52, staves always carry a spell, Nova and Apocalypse books) and its fire wall that burns the hero.
-  Doppelganger's weapons split ordinary monsters (AddDoppelganger). The five runes are placeable **traps**
-  (Rune of Lightning as DevilutionX's lightning wall; the fire blast and the wall hurt the hero too); the Go and
-  data identifiers keep D1's own `SPL_RUNE*` / `IMISC_RUNE*` names.
-- **Hellfire's stores** are in (`d1/stores.go`): bigger stocks and value caps, 15 premium items rotating three a
-  level and picked for the hero's class, stats and best gear, Wirt's class-aware item at 25% off, Adria's up to three
-  guaranteed books, no oils at Adria but oils and plain staves at Griswold, uniques recharged, elixirs only below
-  the class maximum, and Pepin healing as you walk in.
+- **The D1 mod is Diablo 1.09, 1:1** (user, 2026-09-21), after `reference/devilution-109`'s non-HELLFIRE side; the
+  only allowed difference is real-time → turn-based. It declares no Hellfire content. This supersedes the earlier
+  "Hellfire is always on" default.
+- **The engine keeps Hellfire as opt-in content.** The Monk/Bard/Barbarian archetypes, Hellfire's spells (37-51),
+  item powers, oils, runes and shrines 26-33 stay in the engine and come alive only when a mod's data declares
+  them: a class row in hero.rec, rows in xl_spell/items/affix tables, 34 shrines in objects.rec. Hellfire's store
+  rules are stores.rec options (`rotate_by`, `tries`, `shuns`/`shun_tries`, `featured_*`, `usable_elixirs_only`,
+  `price_adjust`, `recharge_uniques`, `buys: hellfire_smith|hellfire_witch`); `d1/testdata/hellfire/` holds
+  Hellfire's own tables as the worked example and keeps that support tested. Where the games' *rules* differ and
+  no option exists (staff 1-in-4 power, Diablo's HP, chest trap kinds, Cathedral stairs, mana shield on a level
+  change), the engine follows 1.09.
+- **Hellfire's levels, quests, towners and monsters are cut** from the engine as well (the Nest, the Crypt and
+  everything on them).
 - **Still out**: town cows, the stores' 48-line list cap and belt selling (H&H has neither),
   multiplayer-only items/spells/shrines and difficulty levels (Nightmare/Hell).
 - **Actor descriptions** (right click, `common.ActorInfoSections`) are titled blocks of label/value rows, laid
