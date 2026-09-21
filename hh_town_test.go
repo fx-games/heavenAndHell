@@ -67,7 +67,14 @@ func TestHeavenAndHellTownIsPlayable(t *testing.T) {
 
 func newHeavenAndHellGame(t *testing.T, ui common.UserInterface) *game.GameInstance {
 	t.Helper()
-	files.SelectMod("heavenandhell")
+	return newModGame(t, "heavenandhell", ui)
+}
+
+// newModGame starts a game instance on a mod ("" is none: the engine's own fallback content) and puts the test
+// binary back on the default mod afterwards.
+func newModGame(t *testing.T, mod string, ui common.UserInterface) *game.GameInstance {
+	t.Helper()
+	files.SelectMod(mod)
 	_ = defs.LoadIcons()
 	t.Cleanup(func() {
 		files.SelectMod(common.DefaultMod)

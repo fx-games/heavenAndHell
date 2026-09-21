@@ -1,7 +1,9 @@
 package common
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"math"
 	"math/rand"
 	"path"
@@ -35,6 +37,11 @@ type MapGenerator struct {
 // deep the game goes. Called after mod selection, never at package init: the whole table is content.
 func (g *MapGenerator) LoadLevels() error {
 	f, err := files.Open(path.Join("assets", "data", "levels.rec"))
+	if errors.Is(err, fs.ErrNotExist) {
+		g.levels, g.sideLevels = make([]dungeon.Level, 1), nil // a game that is only its town
+		defs.SetTowns(nil)
+		return nil
+	}
 	if err != nil {
 		return fmt.Errorf("levels.rec: %w", err)
 	}

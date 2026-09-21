@@ -1,0 +1,13 @@
+# The fallback game's one weapon.
+
+name: Short Sword
+internal_name: short_sword
+icon: item.short_sword
+dlvl: 2
+cost: 90
+category: weapon
+weapon_type: sword
+weapon_damage: 1d5
+weapon_speed: 1
+throw_damage: 1-7
+throw_chance_to_break: 0.25

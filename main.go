@@ -62,14 +62,15 @@ func main() {
 	}
 }
 
-// mustHaveMod stops with a message naming the mod, instead of letting the first content read fail with the
-// path of some file inside it. One mod is one complete game, so a missing one is not something to limp along
-// without.
+// mustHaveMod falls back to the engine's own game - one room, one weapon, one enemy - when the configured mod is
+// missing, saying which one and where it was looked for, rather than failing on some file inside it.
 func mustHaveMod(name string) {
 	if files.ModAvailable(name) {
 		return
 	}
-	log.Fatalf("mod %q not found: expected a directory at files/mods/%s (set Mod: in %s)", name, name, common.ConfigFile)
+	log.Printf("mod %q not found: expected a directory at files/mods/%s (set Mod: in %s). Playing the engine's fallback room.",
+		name, name, common.ConfigFile)
+	files.SelectMod("")
 }
 
 func createGameAndUIContext() (*game.GameInstance, common.UIContext) {

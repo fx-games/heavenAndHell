@@ -1,6 +1,7 @@
 package defs
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"path"
@@ -112,6 +113,9 @@ func (v Vendor) Accepts(it Item) bool {
 // ReadVendors reads a mod's stores.rec. Order is the file's, so anything that walks the vendors is reproducible.
 func ReadVendors(fsys fs.FS) ([]Vendor, error) {
 	f, err := fsys.Open(path.Join("assets", "data", "stores.rec"))
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil // a game without shops
+	}
 	if err != nil {
 		return nil, fmt.Errorf("stores.rec: %w", err)
 	}

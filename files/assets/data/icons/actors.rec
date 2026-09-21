@@ -1,0 +1,156 @@
+# Heaven&Hell's actor icons: sprite-sheet tiles by icon ID, the same convention every mod uses.
+# The monster entries are seeded from the icon numbers the monsters themselves carried before the
+# schema moved icons out of the content record.
+
+internal_name: monster.rat
+icon: 760
+
+internal_name: monster.skeleton
+icon: 397
+
+internal_name: monster.skeleton_archer
+icon: 401
+
+internal_name: monster.skeleton_warrior
+icon: 397
+
+internal_name: monster.skeleton_captain
+icon: 400
+
+internal_name: monster.bat
+icon: 93
+
+internal_name: monster.caveling_bear
+icon: 538
+
+internal_name: monster.caveling
+icon: 542
+
+internal_name: monster.fallen
+icon: 426
+
+internal_name: monster.fiend
+icon: 548
+
+internal_name: monster.fiend_horned
+icon: 547
+
+internal_name: monster.fiend_armed
+icon: 546
+
+internal_name: monster.fiend_whip
+icon: 544
+
+internal_name: monster.fiend_glaive
+icon: 545
+
+internal_name: monster.fiend_big
+icon: 543
+
+internal_name: monster.fallen_warrior
+icon: 427
+
+internal_name: monster.fallen_archer
+icon: 425
+
+internal_name: monster.fallen_shaman
+icon: 428
+
+internal_name: monster.caveling_armed
+icon: 541
+
+internal_name: monster.caveling_axe
+icon: 540
+
+internal_name: monster.caveling_big_axe
+icon: 539
+
+internal_name: monster.thief_possessed
+icon: 463
+
+internal_name: monster.skeleton_sorcerer
+icon: 402
+
+internal_name: monster.rogue_kestrel
+icon: 576
+
+internal_name: monster.rogue_bat
+icon: 567
+
+internal_name: monster.rogue_emu
+icon: 570
+
+internal_name: monster.rogue_jackal
+icon: 575
+
+internal_name: monster.rogue_orc
+icon: 580
+
+internal_name: monster.rogue_snake
+icon: 584
+
+internal_name: monster.thief_goblin
+icon: 491
+
+internal_name: monster.goatman
+icon: 95
+
+internal_name: monster.goatman_archer
+icon: 95
+
+internal_name: monster.lucifer
+icon: 261
+
+internal_name: monster.king_zedek
+icon: 259
+
+internal_name: monster.meat_jack
+icon: 258
+
+internal_name: monster.rogue
+icon: 315
+
+internal_name: monster.rogue_dog
+icon: 343
+
+internal_name: monster.evil_shekel
+icon: 287
+
+internal_name: monster.evil_kirioth
+icon: 288
+
+internal_name: monster.adventurer_knight
+icon: 286
+
+internal_name: monster.adventurer_priest
+icon: 314
+
+internal_name: monster.adventurer_barbarian
+icon: 342
+
+internal_name: monster.adventurer_archer
+icon: 370
+
+
+# Class and corpse icons, from the game's own other_icons.rec.
+
+internal_name: class.rogue_male
+icon: 19
+
+internal_name: class.rogue_female
+icon: 47
+
+internal_name: class.warrior_male
+icon: 20
+
+internal_name: class.warrior_female
+icon: 48
+
+internal_name: class.sorcerer_male
+icon: 21
+
+internal_name: class.sorcerer_female
+icon: 49
+
+internal_name: corpse.default
+icon: 135

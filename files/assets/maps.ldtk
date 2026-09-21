@@ -1,0 +1,3614 @@
+{
+	"__header__": {
+		"fileType": "LDtk Project JSON",
+		"app": "LDtk",
+		"doc": "https://ldtk.io/json",
+		"schema": "https://ldtk.io/files/JSON_SCHEMA.json",
+		"appAuthor": "Sebastien 'deepnight' Benard",
+		"appVersion": "1.4.1",
+		"url": "https://ldtk.io"
+	},
+	"iid": "0aad30e0-8990-11ee-aa96-5fbb691582f7",
+	"jsonVersion": "1.4.1",
+	"appBuildId": 471015,
+	"nextUid": 148,
+	"identifierStyle": "Capitalize",
+	"toc": [],
+	"worldLayout": "Free",
+	"worldGridWidth": 256,
+	"worldGridHeight": 256,
+	"defaultLevelWidth": 256,
+	"defaultLevelHeight": 256,
+	"defaultPivotX": 0,
+	"defaultPivotY": 0,
+	"defaultGridSize": 16,
+	"defaultEntityWidth": 16,
+	"defaultEntityHeight": 16,
+	"bgColor": "#40465B",
+	"defaultLevelBgColor": "#000000",
+	"minifyJson": false,
+	"externalLevels": false,
+	"exportTiled": false,
+	"simplifiedExport": false,
+	"imageExportMode": "None",
+	"exportLevelBg": true,
+	"pngFilePattern": null,
+	"backupOnSave": true,
+	"backupLimit": 10,
+	"backupRelPath": null,
+	"levelNamePattern": "Level_%idx",
+	"tutorialDesc": null,
+	"customCommands": [],
+	"flags": [],
+	"defs": {
+		"layers": [
+			{
+				"__type": "Entities",
+				"identifier": "Meta",
+				"type": "Entities",
+				"uid": 45,
+				"doc": null,
+				"uiColor": null,
+				"gridSize": 8,
+				"guideGridWid": 0,
+				"guideGridHei": 0,
+				"displayOpacity": 1,
+				"inactiveOpacity": 0.6,
+				"hideInList": false,
+				"hideFieldsWhenInactive": true,
+				"canSelectWhenInactive": true,
+				"renderInWorldView": true,
+				"pxOffsetX": 0,
+				"pxOffsetY": 0,
+				"parallaxFactorX": 0,
+				"parallaxFactorY": 0,
+				"parallaxScaling": true,
+				"requiredTags": [
+					"META"
+				],
+				"excludedTags": [
+					"NPC",
+					"OBJECT"
+				],
+				"intGridValues": [],
+				"intGridValuesGroups": [],
+				"autoRuleGroups": [],
+				"autoSourceLayerDefUid": null,
+				"tilesetDefUid": null,
+				"tilePivotX": 0,
+				"tilePivotY": 0
+			},
+			{
+				"__type": "Entities",
+				"identifier": "Entities",
+				"type": "Entities",
+				"uid": 34,
+				"doc": null,
+				"uiColor": null,
+				"gridSize": 8,
+				"guideGridWid": 0,
+				"guideGridHei": 0,
+				"displayOpacity": 1,
+				"inactiveOpacity": 0.6,
+				"hideInList": false,
+				"hideFieldsWhenInactive": true,
+				"canSelectWhenInactive": true,
+				"renderInWorldView": true,
+				"pxOffsetX": 0,
+				"pxOffsetY": 0,
+				"parallaxFactorX": 0,
+				"parallaxFactorY": 0,
+				"parallaxScaling": true,
+				"requiredTags": [
+					"NPC",
+					"OBJECT"
+				],
+				"excludedTags": [
+					"META"
+				],
+				"intGridValues": [],
+				"intGridValuesGroups": [],
+				"autoRuleGroups": [],
+				"autoSourceLayerDefUid": null,
+				"tilesetDefUid": null,
+				"tilePivotX": 0,
+				"tilePivotY": 0
+			},
+			{
+				"__type": "Tiles",
+				"identifier": "Tiles",
+				"type": "Tiles",
+				"uid": 41,
+				"doc": null,
+				"uiColor": null,
+				"gridSize": 8,
+				"guideGridWid": 0,
+				"guideGridHei": 0,
+				"displayOpacity": 1,
+				"inactiveOpacity": 1,
+				"hideInList": false,
+				"hideFieldsWhenInactive": false,
+				"canSelectWhenInactive": true,
+				"renderInWorldView": true,
+				"pxOffsetX": 0,
+				"pxOffsetY": 0,
+				"parallaxFactorX": 0,
+				"parallaxFactorY": 0,
+				"parallaxScaling": true,
+				"requiredTags": [],
+				"excludedTags": [],
+				"intGridValues": [],
+				"intGridValuesGroups": [],
+				"autoRuleGroups": [],
+				"autoSourceLayerDefUid": null,
+				"tilesetDefUid": 44,
+				"tilePivotX": 0,
+				"tilePivotY": 0
+			}
+		],
+		"entities": [
+			{
+				"identifier": "NPC",
+				"uid": 33,
+				"tags": [
+					"NPC"
+				],
+				"exportToToc": false,
+				"doc": null,
+				"width": 8,
+				"height": 8,
+				"resizableX": false,
+				"resizableY": false,
+				"minWidth": null,
+				"maxWidth": null,
+				"minHeight": null,
+				"maxHeight": null,
+				"keepAspectRatio": false,
+				"tileOpacity": 1,
+				"fillOpacity": 0.08,
+				"lineOpacity": 0,
+				"hollow": false,
+				"color": "#BE4A2F",
+				"renderMode": "Tile",
+				"showName": false,
+				"tilesetId": 44,
+				"tileRenderMode": "FitInside",
+				"tileRect": {
+					"tilesetUid": 44,
+					"x": 184,
+					"y": 16,
+					"w": 8,
+					"h": 8
+				},
+				"uiTileRect": null,
+				"nineSliceBorders": [],
+				"maxCount": 0,
+				"limitScope": "PerLevel",
+				"limitBehavior": "MoveLastOne",
+				"pivotX": 0,
+				"pivotY": 0,
+				"fieldDefs": [
+					{
+						"identifier": "Name",
+						"doc": null,
+						"__type": "String",
+						"uid": 52,
+						"type": "F_String",
+						"isArray": false,
+						"canBeNull": true,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "ValueOnly",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": true,
+						"editorShowInWorld": true,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null,
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": null
+					},
+					{
+						"identifier": "InternalName",
+						"doc": null,
+						"__type": "String",
+						"uid": 131,
+						"type": "F_String",
+						"isArray": false,
+						"canBeNull": true,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "Hidden",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": false,
+						"editorShowInWorld": true,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null,
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": null
+					},
+					{
+						"identifier": "Tile",
+						"doc": null,
+						"__type": "Tile",
+						"uid": 35,
+						"type": "F_Tile",
+						"isArray": false,
+						"canBeNull": true,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "EntityTile",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": false,
+						"editorShowInWorld": true,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": {
+							"id": "V_String",
+							"params": [
+								"0,24,8,8"
+							]
+						},
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": 44
+					},
+					{
+						"identifier": "Type",
+						"doc": null,
+						"__type": "LocalEnum.NPCCategory",
+						"uid": 51,
+						"type": "F_Enum(50)",
+						"isArray": false,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "Hidden",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": false,
+						"editorShowInWorld": true,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": {
+							"id": "V_String",
+							"params": [
+								"Neutral"
+							]
+						},
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": null
+					},
+					{
+						"identifier": "FlipLookDirection",
+						"doc": null,
+						"__type": "Bool",
+						"uid": 54,
+						"type": "F_Bool",
+						"isArray": false,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "Hidden",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": false,
+						"editorShowInWorld": true,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null,
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": null
+					},
+					{
+						"identifier": "UniqueName",
+						"doc": null,
+						"__type": "String",
+						"uid": 130,
+						"type": "F_String",
+						"isArray": false,
+						"canBeNull": true,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "Hidden",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": false,
+						"editorShowInWorld": true,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null,
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": null
+					},
+					{
+						"identifier": "ASCII",
+						"doc": null,
+						"__type": "String",
+						"uid": 145,
+						"type": "F_String",
+						"isArray": false,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "Hidden",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": false,
+						"editorShowInWorld": true,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": {
+							"id": "V_String",
+							"params": [
+								"@"
+							]
+						},
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": null
+					}
+				]
+			},
+			{
+				"identifier": "Location",
+				"uid": 46,
+				"tags": [
+					"META"
+				],
+				"exportToToc": false,
+				"doc": null,
+				"width": 8,
+				"height": 8,
+				"resizableX": false,
+				"resizableY": false,
+				"minWidth": null,
+				"maxWidth": null,
+				"minHeight": null,
+				"maxHeight": null,
+				"keepAspectRatio": false,
+				"tileOpacity": 1,
+				"fillOpacity": 1,
+				"lineOpacity": 1,
+				"hollow": false,
+				"color": "#63C74D",
+				"renderMode": "Rectangle",
+				"showName": false,
+				"tilesetId": null,
+				"tileRenderMode": "FitInside",
+				"tileRect": null,
+				"uiTileRect": null,
+				"nineSliceBorders": [],
+				"maxCount": 0,
+				"limitScope": "PerLevel",
+				"limitBehavior": "MoveLastOne",
+				"pivotX": 0,
+				"pivotY": 0,
+				"fieldDefs": [
+					{
+						"identifier": "Name",
+						"doc": null,
+						"__type": "String",
+						"uid": 47,
+						"type": "F_String",
+						"isArray": false,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "ValueOnly",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": false,
+						"editorShowInWorld": true,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null,
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": null
+					},
+					{
+						"identifier": "TargetMap",
+						"doc": null,
+						"__type": "String",
+						"uid": 146,
+						"type": "F_String",
+						"isArray": false,
+						"canBeNull": true,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "ValueOnly",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": false,
+						"editorShowInWorld": false,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"exportToToc": false,
+						"searchable": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null,
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": null
+					},
+					{
+						"identifier": "TargetLocation",
+						"doc": null,
+						"__type": "String",
+						"uid": 147,
+						"type": "F_String",
+						"isArray": false,
+						"canBeNull": true,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "ValueOnly",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": false,
+						"editorShowInWorld": false,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"exportToToc": false,
+						"searchable": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null,
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": null
+					}
+				]
+			},
+			{
+				"identifier": "Shrine",
+				"uid": 53,
+				"tags": [
+					"OBJECT"
+				],
+				"exportToToc": false,
+				"doc": null,
+				"width": 8,
+				"height": 8,
+				"resizableX": false,
+				"resizableY": false,
+				"minWidth": null,
+				"maxWidth": null,
+				"minHeight": null,
+				"maxHeight": null,
+				"keepAspectRatio": false,
+				"tileOpacity": 1,
+				"fillOpacity": 0.08,
+				"lineOpacity": 0,
+				"hollow": false,
+				"color": "#D77643",
+				"renderMode": "Tile",
+				"showName": true,
+				"tilesetId": 44,
+				"tileRenderMode": "FitInside",
+				"tileRect": {
+					"tilesetUid": 44,
+					"x": 152,
+					"y": 16,
+					"w": 8,
+					"h": 8
+				},
+				"uiTileRect": null,
+				"nineSliceBorders": [],
+				"maxCount": 0,
+				"limitScope": "PerLevel",
+				"limitBehavior": "MoveLastOne",
+				"pivotX": 0,
+				"pivotY": 0,
+				"fieldDefs": []
+			},
+			{
+				"identifier": "NorthConnector",
+				"uid": 61,
+				"tags": [
+					"META"
+				],
+				"exportToToc": false,
+				"doc": null,
+				"width": 8,
+				"height": 8,
+				"resizableX": false,
+				"resizableY": false,
+				"minWidth": null,
+				"maxWidth": null,
+				"minHeight": null,
+				"maxHeight": null,
+				"keepAspectRatio": false,
+				"tileOpacity": 1,
+				"fillOpacity": 1,
+				"lineOpacity": 1,
+				"hollow": false,
+				"color": "#0099DB",
+				"renderMode": "Rectangle",
+				"showName": true,
+				"tilesetId": null,
+				"tileRenderMode": "FitInside",
+				"tileRect": null,
+				"uiTileRect": null,
+				"nineSliceBorders": [],
+				"maxCount": 0,
+				"limitScope": "PerLevel",
+				"limitBehavior": "MoveLastOne",
+				"pivotX": 0,
+				"pivotY": 0,
+				"fieldDefs": [
+					{
+						"identifier": "ConnectionID",
+						"doc": null,
+						"__type": "Int",
+						"uid": 87,
+						"type": "F_Int",
+						"isArray": false,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "ValueOnly",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": false,
+						"editorShowInWorld": true,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null,
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": null
+					}
+				]
+			},
+			{
+				"identifier": "SouthConnector",
+				"uid": 64,
+				"tags": [
+					"META"
+				],
+				"exportToToc": false,
+				"doc": null,
+				"width": 8,
+				"height": 8,
+				"resizableX": false,
+				"resizableY": false,
+				"minWidth": null,
+				"maxWidth": null,
+				"minHeight": null,
+				"maxHeight": null,
+				"keepAspectRatio": false,
+				"tileOpacity": 1,
+				"fillOpacity": 1,
+				"lineOpacity": 1,
+				"hollow": false,
+				"color": "#0099DB",
+				"renderMode": "Rectangle",
+				"showName": true,
+				"tilesetId": null,
+				"tileRenderMode": "FitInside",
+				"tileRect": null,
+				"uiTileRect": null,
+				"nineSliceBorders": [],
+				"maxCount": 0,
+				"limitScope": "PerLevel",
+				"limitBehavior": "MoveLastOne",
+				"pivotX": 0,
+				"pivotY": 0,
+				"fieldDefs": [
+					{
+						"identifier": "ConnectionID",
+						"doc": null,
+						"__type": "Int",
+						"uid": 88,
+						"type": "F_Int",
+						"isArray": false,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "ValueOnly",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": false,
+						"editorShowInWorld": true,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null,
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": null
+					}
+				]
+			},
+			{
+				"identifier": "EastConnector",
+				"uid": 65,
+				"tags": [
+					"META"
+				],
+				"exportToToc": false,
+				"doc": null,
+				"width": 8,
+				"height": 8,
+				"resizableX": false,
+				"resizableY": false,
+				"minWidth": null,
+				"maxWidth": null,
+				"minHeight": null,
+				"maxHeight": null,
+				"keepAspectRatio": false,
+				"tileOpacity": 1,
+				"fillOpacity": 1,
+				"lineOpacity": 1,
+				"hollow": false,
+				"color": "#0099DB",
+				"renderMode": "Rectangle",
+				"showName": true,
+				"tilesetId": null,
+				"tileRenderMode": "FitInside",
+				"tileRect": null,
+				"uiTileRect": null,
+				"nineSliceBorders": [],
+				"maxCount": 0,
+				"limitScope": "PerLevel",
+				"limitBehavior": "MoveLastOne",
+				"pivotX": 0,
+				"pivotY": 0,
+				"fieldDefs": [
+					{
+						"identifier": "ConnectionID",
+						"doc": null,
+						"__type": "Int",
+						"uid": 89,
+						"type": "F_Int",
+						"isArray": false,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "ValueOnly",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": false,
+						"editorShowInWorld": true,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null,
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": null
+					}
+				]
+			},
+			{
+				"identifier": "WestConnector",
+				"uid": 66,
+				"tags": [
+					"META"
+				],
+				"exportToToc": false,
+				"doc": null,
+				"width": 8,
+				"height": 8,
+				"resizableX": false,
+				"resizableY": false,
+				"minWidth": null,
+				"maxWidth": null,
+				"minHeight": null,
+				"maxHeight": null,
+				"keepAspectRatio": false,
+				"tileOpacity": 1,
+				"fillOpacity": 1,
+				"lineOpacity": 1,
+				"hollow": false,
+				"color": "#0099DB",
+				"renderMode": "Rectangle",
+				"showName": true,
+				"tilesetId": null,
+				"tileRenderMode": "FitInside",
+				"tileRect": null,
+				"uiTileRect": null,
+				"nineSliceBorders": [],
+				"maxCount": 0,
+				"limitScope": "PerLevel",
+				"limitBehavior": "MoveLastOne",
+				"pivotX": 0,
+				"pivotY": 0,
+				"fieldDefs": [
+					{
+						"identifier": "ConnectionID",
+						"doc": null,
+						"__type": "Int",
+						"uid": 90,
+						"type": "F_Int",
+						"isArray": false,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "ValueOnly",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": false,
+						"editorShowInWorld": true,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null,
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": null
+					}
+				]
+			},
+			{
+				"identifier": "POI",
+				"uid": 97,
+				"tags": [
+					"META"
+				],
+				"exportToToc": false,
+				"doc": null,
+				"width": 8,
+				"height": 8,
+				"resizableX": false,
+				"resizableY": false,
+				"minWidth": null,
+				"maxWidth": null,
+				"minHeight": null,
+				"maxHeight": null,
+				"keepAspectRatio": false,
+				"tileOpacity": 1,
+				"fillOpacity": 1,
+				"lineOpacity": 1,
+				"hollow": false,
+				"color": "#EAD4AA",
+				"renderMode": "Rectangle",
+				"showName": true,
+				"tilesetId": null,
+				"tileRenderMode": "FitInside",
+				"tileRect": null,
+				"uiTileRect": null,
+				"nineSliceBorders": [],
+				"maxCount": 0,
+				"limitScope": "PerLevel",
+				"limitBehavior": "MoveLastOne",
+				"pivotX": 0,
+				"pivotY": 0,
+				"fieldDefs": []
+			},
+			{
+				"identifier": "Sign",
+				"uid": 106,
+				"tags": [
+					"OBJECT"
+				],
+				"exportToToc": false,
+				"doc": null,
+				"width": 8,
+				"height": 8,
+				"resizableX": false,
+				"resizableY": false,
+				"minWidth": null,
+				"maxWidth": null,
+				"minHeight": null,
+				"maxHeight": null,
+				"keepAspectRatio": false,
+				"tileOpacity": 1,
+				"fillOpacity": 0.08,
+				"lineOpacity": 0,
+				"hollow": false,
+				"color": "#E4A672",
+				"renderMode": "Tile",
+				"showName": true,
+				"tilesetId": 44,
+				"tileRenderMode": "FitInside",
+				"tileRect": {
+					"tilesetUid": 44,
+					"x": 112,
+					"y": 40,
+					"w": 8,
+					"h": 8
+				},
+				"uiTileRect": null,
+				"nineSliceBorders": [],
+				"maxCount": 0,
+				"limitScope": "PerLevel",
+				"limitBehavior": "MoveLastOne",
+				"pivotX": 0,
+				"pivotY": 0,
+				"fieldDefs": [
+					{
+						"identifier": "Text",
+						"doc": null,
+						"__type": "String",
+						"uid": 107,
+						"type": "F_Text",
+						"isArray": false,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "Hidden",
+						"editorDisplayScale": 1,
+						"editorDisplayPos": "Above",
+						"editorLinkStyle": "StraightArrow",
+						"editorDisplayColor": null,
+						"editorAlwaysShow": false,
+						"editorShowInWorld": true,
+						"editorCutLongValues": true,
+						"editorTextSuffix": null,
+						"editorTextPrefix": null,
+						"useForSmartColor": false,
+						"min": null,
+						"max": null,
+						"regex": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null,
+						"textLanguageMode": null,
+						"symmetricalRef": false,
+						"autoChainRef": true,
+						"allowOutOfLevelRef": true,
+						"allowedRefs": "OnlySame",
+						"allowedRefsEntityUid": null,
+						"allowedRefTags": [],
+						"tilesetUid": null
+					}
+				]
+			},
+			{
+				"identifier": "Door",
+				"uid": 141,
+				"tags": [
+					"OBJECT"
+				],
+				"exportToToc": false,
+				"doc": null,
+				"width": 8,
+				"height": 8,
+				"resizableX": false,
+				"resizableY": false,
+				"minWidth": null,
+				"maxWidth": null,
+				"minHeight": null,
+				"maxHeight": null,
+				"keepAspectRatio": false,
+				"tileOpacity": 1,
+				"fillOpacity": 0.08,
+				"lineOpacity": 0,
+				"hollow": false,
+				"color": "#733E39",
+				"renderMode": "Tile",
+				"showName": true,
+				"tilesetId": 44,
+				"tileRenderMode": "FitInside",
+				"tileRect": {
+					"tilesetUid": 44,
+					"x": 104,
+					"y": 16,
+					"w": 8,
+					"h": 8
+				},
+				"uiTileRect": null,
+				"nineSliceBorders": [],
+				"maxCount": 0,
+				"limitScope": "PerLevel",
+				"limitBehavior": "MoveLastOne",
+				"pivotX": 0,
+				"pivotY": 0,
+				"fieldDefs": []
+			}
+		],
+		"tilesets": [
+			{
+				"__cWid": 28,
+				"__cHei": 28,
+				"identifier": "World",
+				"uid": 44,
+				"relPath": "classic_roguelike.png",
+				"embedAtlas": null,
+				"pxWid": 224,
+				"pxHei": 224,
+				"tileGridSize": 8,
+				"spacing": 0,
+				"padding": 0,
+				"tags": [],
+				"tagsSourceEnumUid": 49,
+				"enumTags": [
+					{
+						"enumValueId": "IsBlockingMovement",
+						"tileIds": [
+							4,
+							5,
+							6,
+							7,
+							9,
+							28,
+							29,
+							56,
+							57,
+							58,
+							69,
+							71,
+							84,
+							85,
+							114,
+							115,
+							116,
+							117,
+							118,
+							119,
+							120,
+							152,
+							153,
+							158,
+							181,
+							182,
+							183,
+							184,
+							240,
+							241,
+							269,
+							297
+						]
+					},
+					{
+						"enumValueId": "IsBlockingView",
+						"tileIds": [
+							4,
+							7,
+							9,
+							56,
+							57,
+							58,
+							69,
+							71,
+							84,
+							85,
+							114,
+							115,
+							116,
+							117,
+							118,
+							119,
+							120,
+							158,
+							181,
+							182,
+							183,
+							184,
+							240,
+							241,
+							269,
+							297
+						]
+					},
+					{
+						"enumValueId": "IsWater",
+						"tileIds": [
+							28,
+							29
+						]
+					},
+					{
+						"enumValueId": "IsDamaging",
+						"tileIds": [
+							159
+						]
+					}
+				],
+				"customData": [],
+				"savedSelections": [],
+				"cachedPixelData": {
+					"opaqueTiles": "0000000000000001111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001111100000000000000000000000010110000000000000000000000000000000000011100000000000000101000000001110000000000000000000000000111000000000000000000000000011000000000000000000000000001111000000000000000000000000111100000000000001000000000011110000000000000000000000001111000000000000000000000000111100000000000000000000000011110000000000000000000000001100000000000000000000000000000011000000000000000000000000001100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+					"averageColors": "23640742236417316364474227b787316731573177424742a536b536b536f779f324f426fcefba97a99bc966a866b855bcb8ccbcb989b7693fff3fff27b727b75e914e915a45774237422fc22fc22abd1abd5b133b133b132b1315951595bc76a98abb86a989a855bdc9cbccb99aa7696abd3abd688a7731a13351333742752185367536753675367536b5314521a57b457b3bce3bce4abd9545b5355abd9bab9cbbbc76a9896eed5cdf59acb4359cab4e913fdd4a454abd37b7357b5a455e91ab7779ad8a878c64ac888c998b898d84357b5b134fdd457b457b3e913e91ada7474257b74abd3abd7abd3abd3abd3abd2abd2abd6baa399a3b64a978a868d954bb643b87379b39647a537a8475756abd3abd2a455364cd856a6367676846647659795bab59565c865788497857536b88789c589c7c75b531f313f212facdfb61f5236b5566a6695566586c963fdd3fdd4a9b46794c98589b5a345da7267528442b85a88aa789ab762a457d927a71bd828b71f2351944f335f6321b131b132b135b139b133fdd3fdd97689c758899878a86858d948734757a7954a67aa668a954a879a99aa953c789c7337cab6fdd2fdd4fdd7fdd3fdd1fdd7fdd1fdd3fdd3fddf878f878f77858446955873396695bbb2a9a4aacb4334944a646a646b6465a455ffff9411ffff0006a897c6368687c944a9a4bde6fff3ffff878f568f8785cda5b745cdead889cddaa45ab240000000000000000000000005fff1fff2fff3e935e937e936dbb775575767a677a667457f778f878f8784bca4b744deeba249cbbcd960000000000000000000000002b782a453fff3a443b6438543ea8378b9a56946497329ebb8b88f568f669e6694dcb00000000cd965cef5ccd5ccd5b35000000000000000000006b886ab96a8766576ccc699b6ab96b886b776c866eb768a7f78bf78bf78af78b00000000ac887fff7ecc0000000000000000000086786a645a735743789ba834b743a955ba65a632a553b99bbb52ac85f668f436f78af66800000000ba960000000000000000000000000000c9636963f89cfabce78b864489548879856986458aac893388a78c86f68bf77af78af68b00008ccdabbbaa9a9aab9cbcb9990000000000000000000000005fc79ea2b446b955b679b742b99bb576b955bc86b953f558f558f668f6680000ab539a449a66a5549ebaab44bd769845aa46000000000000000000008447a3358458000000000000000000000000f89cf89cf78bf78b00009644b9569cb8a765998aa9868c768cda9dca9ba78c988a87abaa0000a32544469446000000000000000000000000f78bf78bf78bf78b0000b523b955c9b6c444c78ac474aa54bab8cba9b896a765a665bbaa0000b44776574448385600000000000000000000f225f8557b767b76e644e644b3230000000000000000000000000000000000000000000000000000000000000000000000000000000000006a6669667b767b76f965f965c864b865986697667753aa45aa44ba689a568a338a34bab8abb7a9b98bb700000000000000000000000000007855785577447744f754f8547fff8fff6fff7fff7fff6fff7fff7fff5fff6fff7fff6fff7fff8fff7fff7fff8fff7fff7fff5fff7fff7fff7fff7fff6fff6fff3fff0000000000005abd5d966d86289b488b5bab699a3b884c985c896b894689b854baacbc97296728562b882bac2aab0000000000000000000049785978586759786b886a756caa47736a8757463843494459436a334734a789aa89a88b399a3957387a3b793c9800000000000000000000000000000000000000005a743a65578a3a885a4339794aab599a699b497aaa75acbbab994866586558657877787800000000000000000000000000000000000000002d833b543a8a29443b95c89cca87ba76a833a6576742689b3b76498a599b599b799b799b00000000000000000000000000000000000000000000000000000000000000000000000047330000000000002989000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000575659635bbc5dde8aac00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+				}
+			}
+		],
+		"enums": [
+			{
+				"identifier": "TilesetMeta",
+				"uid": 49,
+				"values": [
+					{
+						"id": "IsBlockingMovement",
+						"tileRect": null,
+						"color": 16217634
+					},
+					{
+						"id": "IsBlockingView",
+						"tileRect": null,
+						"color": 39387
+					},
+					{
+						"id": "IsWater",
+						"tileRect": null,
+						"color": 2943221
+					},
+					{
+						"id": "IsDamaging",
+						"tileRect": null,
+						"color": 12470831
+					}
+				],
+				"iconTilesetUid": null,
+				"externalRelPath": null,
+				"externalFileChecksum": null,
+				"tags": []
+			},
+			{
+				"identifier": "NPCCategory",
+				"uid": 50,
+				"values": [
+					{
+						"id": "Aggressive",
+						"tileRect": null,
+						"color": 12470831
+					},
+					{
+						"id": "Neutral",
+						"tileRect": null,
+						"color": 14120515
+					},
+					{
+						"id": "Store_weapons",
+						"tileRect": null,
+						"color": 15389866
+					},
+					{
+						"id": "Store_armor",
+						"tileRect": null,
+						"color": 14984818
+					},
+					{
+						"id": "Store_alchemy",
+						"tileRect": null,
+						"color": 7552569
+					},
+					{
+						"id": "Store_general",
+						"tileRect": null,
+						"color": 4073265
+					}
+				],
+				"iconTilesetUid": null,
+				"externalRelPath": null,
+				"externalFileChecksum": null,
+				"tags": []
+			},
+			{
+				"identifier": "TemplateAreas",
+				"uid": 58,
+				"values": [
+					{
+						"id": "UseInCathedral",
+						"tileRect": null,
+						"color": 12470831
+					},
+					{
+						"id": "UseInCatacombs",
+						"tileRect": null,
+						"color": 14120515
+					},
+					{
+						"id": "UseInCaves",
+						"tileRect": null,
+						"color": 15389866
+					},
+					{
+						"id": "UseInHell",
+						"tileRect": null,
+						"color": 14984818
+					}
+				],
+				"iconTilesetUid": null,
+				"externalRelPath": null,
+				"externalFileChecksum": null,
+				"tags": []
+			}
+		],
+		"externalEnums": [],
+		"levelFields": [
+			{
+				"identifier": "DisplayName",
+				"doc": null,
+				"__type": "String",
+				"uid": 48,
+				"type": "F_String",
+				"isArray": false,
+				"canBeNull": false,
+				"arrayMinLength": null,
+				"arrayMaxLength": null,
+				"editorDisplayMode": "Hidden",
+				"editorDisplayScale": 1,
+				"editorDisplayPos": "Above",
+				"editorLinkStyle": "StraightArrow",
+				"editorDisplayColor": null,
+				"editorAlwaysShow": false,
+				"editorShowInWorld": true,
+				"editorCutLongValues": true,
+				"editorTextSuffix": null,
+				"editorTextPrefix": null,
+				"useForSmartColor": false,
+				"min": null,
+				"max": null,
+				"regex": null,
+				"acceptFileTypes": null,
+				"defaultOverride": null,
+				"textLanguageMode": null,
+				"symmetricalRef": false,
+				"autoChainRef": true,
+				"allowOutOfLevelRef": true,
+				"allowedRefs": "OnlySame",
+				"allowedRefsEntityUid": null,
+				"allowedRefTags": [],
+				"tilesetUid": null
+			},
+			{
+				"identifier": "Weight",
+				"doc": null,
+				"__type": "Int",
+				"uid": 79,
+				"type": "F_Int",
+				"isArray": false,
+				"canBeNull": false,
+				"arrayMinLength": null,
+				"arrayMaxLength": null,
+				"editorDisplayMode": "Hidden",
+				"editorDisplayScale": 1,
+				"editorDisplayPos": "Above",
+				"editorLinkStyle": "StraightArrow",
+				"editorDisplayColor": null,
+				"editorAlwaysShow": false,
+				"editorShowInWorld": true,
+				"editorCutLongValues": true,
+				"editorTextSuffix": null,
+				"editorTextPrefix": null,
+				"useForSmartColor": false,
+				"min": null,
+				"max": null,
+				"regex": null,
+				"acceptFileTypes": null,
+				"defaultOverride": null,
+				"textLanguageMode": null,
+				"symmetricalRef": false,
+				"autoChainRef": true,
+				"allowOutOfLevelRef": true,
+				"allowedRefs": "OnlySame",
+				"allowedRefsEntityUid": null,
+				"allowedRefTags": [],
+				"tilesetUid": null
+			},
+			{
+				"identifier": "IsDecoration",
+				"doc": null,
+				"__type": "Bool",
+				"uid": 60,
+				"type": "F_Bool",
+				"isArray": false,
+				"canBeNull": false,
+				"arrayMinLength": null,
+				"arrayMaxLength": null,
+				"editorDisplayMode": "Hidden",
+				"editorDisplayScale": 1,
+				"editorDisplayPos": "Above",
+				"editorLinkStyle": "StraightArrow",
+				"editorDisplayColor": null,
+				"editorAlwaysShow": false,
+				"editorShowInWorld": true,
+				"editorCutLongValues": true,
+				"editorTextSuffix": null,
+				"editorTextPrefix": null,
+				"useForSmartColor": false,
+				"min": null,
+				"max": null,
+				"regex": null,
+				"acceptFileTypes": null,
+				"defaultOverride": null,
+				"textLanguageMode": null,
+				"symmetricalRef": false,
+				"autoChainRef": true,
+				"allowOutOfLevelRef": true,
+				"allowedRefs": "OnlySame",
+				"allowedRefsEntityUid": null,
+				"allowedRefTags": [],
+				"tilesetUid": null
+			},
+			{
+				"identifier": "UsesDecoration",
+				"doc": null,
+				"__type": "String",
+				"uid": 80,
+				"type": "F_String",
+				"isArray": false,
+				"canBeNull": true,
+				"arrayMinLength": null,
+				"arrayMaxLength": null,
+				"editorDisplayMode": "Hidden",
+				"editorDisplayScale": 1,
+				"editorDisplayPos": "Above",
+				"editorLinkStyle": "StraightArrow",
+				"editorDisplayColor": null,
+				"editorAlwaysShow": false,
+				"editorShowInWorld": true,
+				"editorCutLongValues": true,
+				"editorTextSuffix": null,
+				"editorTextPrefix": null,
+				"useForSmartColor": false,
+				"min": null,
+				"max": null,
+				"regex": null,
+				"acceptFileTypes": null,
+				"defaultOverride": null,
+				"textLanguageMode": null,
+				"symmetricalRef": false,
+				"autoChainRef": true,
+				"allowOutOfLevelRef": true,
+				"allowedRefs": "OnlySame",
+				"allowedRefsEntityUid": null,
+				"allowedRefTags": [],
+				"tilesetUid": null
+			},
+			{
+				"identifier": "SlotID",
+				"doc": null,
+				"__type": "Int",
+				"uid": 91,
+				"type": "F_Int",
+				"isArray": false,
+				"canBeNull": false,
+				"arrayMinLength": null,
+				"arrayMaxLength": null,
+				"editorDisplayMode": "Hidden",
+				"editorDisplayScale": 1,
+				"editorDisplayPos": "Above",
+				"editorLinkStyle": "StraightArrow",
+				"editorDisplayColor": null,
+				"editorAlwaysShow": false,
+				"editorShowInWorld": true,
+				"editorCutLongValues": true,
+				"editorTextSuffix": null,
+				"editorTextPrefix": null,
+				"useForSmartColor": false,
+				"min": null,
+				"max": null,
+				"regex": null,
+				"acceptFileTypes": null,
+				"defaultOverride": null,
+				"textLanguageMode": null,
+				"symmetricalRef": false,
+				"autoChainRef": true,
+				"allowOutOfLevelRef": true,
+				"allowedRefs": "OnlySame",
+				"allowedRefsEntityUid": null,
+				"allowedRefTags": [],
+				"tilesetUid": null
+			},
+			{
+				"identifier": "PlugsIntoSlotID",
+				"doc": null,
+				"__type": "Int",
+				"uid": 92,
+				"type": "F_Int",
+				"isArray": false,
+				"canBeNull": false,
+				"arrayMinLength": null,
+				"arrayMaxLength": null,
+				"editorDisplayMode": "Hidden",
+				"editorDisplayScale": 1,
+				"editorDisplayPos": "Above",
+				"editorLinkStyle": "StraightArrow",
+				"editorDisplayColor": null,
+				"editorAlwaysShow": false,
+				"editorShowInWorld": true,
+				"editorCutLongValues": true,
+				"editorTextSuffix": null,
+				"editorTextPrefix": null,
+				"useForSmartColor": false,
+				"min": null,
+				"max": null,
+				"regex": null,
+				"acceptFileTypes": null,
+				"defaultOverride": null,
+				"textLanguageMode": null,
+				"symmetricalRef": false,
+				"autoChainRef": true,
+				"allowOutOfLevelRef": true,
+				"allowedRefs": "OnlySame",
+				"allowedRefsEntityUid": null,
+				"allowedRefTags": [],
+				"tilesetUid": null
+			},
+			{
+				"identifier": "CanBeLit",
+				"doc": null,
+				"__type": "Bool",
+				"uid": 142,
+				"type": "F_Bool",
+				"isArray": false,
+				"canBeNull": false,
+				"arrayMinLength": null,
+				"arrayMaxLength": null,
+				"editorDisplayMode": "Hidden",
+				"editorDisplayScale": 1,
+				"editorDisplayPos": "Above",
+				"editorLinkStyle": "StraightArrow",
+				"editorDisplayColor": null,
+				"editorAlwaysShow": false,
+				"editorShowInWorld": true,
+				"editorCutLongValues": true,
+				"editorTextSuffix": null,
+				"editorTextPrefix": null,
+				"useForSmartColor": false,
+				"min": null,
+				"max": null,
+				"regex": null,
+				"acceptFileTypes": null,
+				"defaultOverride": null,
+				"textLanguageMode": null,
+				"symmetricalRef": false,
+				"autoChainRef": true,
+				"allowOutOfLevelRef": true,
+				"allowedRefs": "OnlySame",
+				"allowedRefsEntityUid": null,
+				"allowedRefTags": [],
+				"tilesetUid": null
+			}
+		]
+	},
+	"levels": [
+		{
+			"identifier": "Town",
+			"iid": "be8021e1-c3f6-4ef5-988e-b57695ec74aa",
+			"uid": 43,
+			"worldX": -912,
+			"worldY": -1104,
+			"worldDepth": 0,
+			"pxWid": 96,
+			"pxHei": 72,
+			"__bgColor": "#000000",
+			"bgColor": "#000000",
+			"useAutoIdentifier": false,
+			"bgRelPath": null,
+			"bgPos": null,
+			"bgPivotX": 0.5,
+			"bgPivotY": 0.5,
+			"__smartColor": "#737373",
+			"__bgPos": null,
+			"externalRelPath": null,
+			"fieldInstances": [
+				{
+					"__identifier": "DisplayName",
+					"__type": "String",
+					"__value": "The Room",
+					"__tile": null,
+					"defUid": 48,
+					"realEditorValues": [
+						{
+							"id": "V_String",
+							"params": [
+								"The Room"
+							]
+						}
+					]
+				},
+				{
+					"__identifier": "Weight",
+					"__type": "Int",
+					"__value": 0,
+					"__tile": null,
+					"defUid": 79,
+					"realEditorValues": []
+				},
+				{
+					"__identifier": "IsDecoration",
+					"__type": "Bool",
+					"__value": false,
+					"__tile": null,
+					"defUid": 60,
+					"realEditorValues": []
+				},
+				{
+					"__identifier": "UsesDecoration",
+					"__type": "String",
+					"__value": null,
+					"__tile": null,
+					"defUid": 80,
+					"realEditorValues": []
+				},
+				{
+					"__identifier": "SlotID",
+					"__type": "Int",
+					"__value": 0,
+					"__tile": null,
+					"defUid": 91,
+					"realEditorValues": []
+				},
+				{
+					"__identifier": "PlugsIntoSlotID",
+					"__type": "Int",
+					"__value": 0,
+					"__tile": null,
+					"defUid": 92,
+					"realEditorValues": []
+				},
+				{
+					"__identifier": "CanBeLit",
+					"__type": "Bool",
+					"__value": false,
+					"__tile": null,
+					"defUid": 142,
+					"realEditorValues": []
+				}
+			],
+			"layerInstances": [
+				{
+					"__identifier": "Meta",
+					"__type": "Entities",
+					"__cWid": 12,
+					"__cHei": 9,
+					"__gridSize": 8,
+					"__opacity": 1,
+					"__pxTotalOffsetX": 0,
+					"__pxTotalOffsetY": 0,
+					"__tilesetDefUid": null,
+					"__tilesetRelPath": null,
+					"iid": "1ac61e52-519d-4c4f-bbf9-dee8856e39bf",
+					"levelId": 43,
+					"layerDefUid": 45,
+					"pxOffsetX": 0,
+					"pxOffsetY": 0,
+					"visible": true,
+					"optionalRules": [],
+					"intGridCsv": [],
+					"autoLayerTiles": [],
+					"seed": 8067180,
+					"overrideTilesetUid": null,
+					"gridTiles": [],
+					"entityInstances": [
+						{
+							"__identifier": "Location",
+							"__grid": [
+								2,
+								4
+							],
+							"__pivot": [
+								0,
+								0
+							],
+							"__tags": [
+								"META"
+							],
+							"__tile": null,
+							"__smartColor": "#63C74D",
+							"__worldX": -896,
+							"__worldY": -1072,
+							"iid": "8ebb2fcf-7245-471e-9107-38623b861621",
+							"width": 8,
+							"height": 8,
+							"defUid": 46,
+							"px": [
+								16,
+								32
+							],
+							"fieldInstances": [
+								{
+									"__identifier": "Name",
+									"__type": "String",
+									"__value": "spawn",
+									"__tile": null,
+									"defUid": 47,
+									"realEditorValues": [
+										{
+											"id": "V_String",
+											"params": [
+												"spawn"
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"__identifier": "Entities",
+					"__type": "Entities",
+					"__cWid": 12,
+					"__cHei": 9,
+					"__gridSize": 8,
+					"__opacity": 1,
+					"__pxTotalOffsetX": 0,
+					"__pxTotalOffsetY": 0,
+					"__tilesetDefUid": null,
+					"__tilesetRelPath": null,
+					"iid": "347e67b9-76b0-4343-af7a-29c5fde50c4b",
+					"levelId": 43,
+					"layerDefUid": 34,
+					"pxOffsetX": 0,
+					"pxOffsetY": 0,
+					"visible": true,
+					"optionalRules": [],
+					"intGridCsv": [],
+					"autoLayerTiles": [],
+					"seed": 1293793,
+					"overrideTilesetUid": null,
+					"gridTiles": [],
+					"entityInstances": [
+						{
+							"__identifier": "NPC",
+							"__grid": [
+								9,
+								4
+							],
+							"__pivot": [
+								0,
+								0
+							],
+							"__tags": [
+								"NPC"
+							],
+							"__tile": {
+								"tilesetUid": 44,
+								"x": 48,
+								"y": 72,
+								"w": 8,
+								"h": 8
+							},
+							"__smartColor": "#BE4A2F",
+							"__worldX": -840,
+							"__worldY": -1072,
+							"iid": "2d1f6725-9a06-4c0c-a6bf-50c03654987e",
+							"width": 8,
+							"height": 8,
+							"defUid": 33,
+							"px": [
+								72,
+								32
+							],
+							"fieldInstances": [
+								{
+									"__identifier": "Name",
+									"__type": "String",
+									"__value": "a rat",
+									"__tile": null,
+									"defUid": 52,
+									"realEditorValues": [
+										{
+											"id": "V_String",
+											"params": [
+												"a rat"
+											]
+										}
+									]
+								},
+								{
+									"__identifier": "InternalName",
+									"__type": "String",
+									"__value": null,
+									"__tile": null,
+									"defUid": 131,
+									"realEditorValues": []
+								},
+								{
+									"__identifier": "Tile",
+									"__type": "Tile",
+									"__value": {
+										"tilesetUid": 44,
+										"x": 48,
+										"y": 72,
+										"w": 8,
+										"h": 8
+									},
+									"__tile": {
+										"tilesetUid": 44,
+										"x": 48,
+										"y": 72,
+										"w": 8,
+										"h": 8
+									},
+									"defUid": 35,
+									"realEditorValues": [
+										{
+											"id": "V_String",
+											"params": [
+												"48,72,8,8"
+											]
+										}
+									]
+								},
+								{
+									"__identifier": "Type",
+									"__type": "LocalEnum.NPCCategory",
+									"__value": "Aggressive",
+									"__tile": null,
+									"defUid": 51,
+									"realEditorValues": [
+										{
+											"id": "V_String",
+											"params": [
+												"Aggressive"
+											]
+										}
+									]
+								},
+								{
+									"__identifier": "FlipLookDirection",
+									"__type": "Bool",
+									"__value": false,
+									"__tile": null,
+									"defUid": 54,
+									"realEditorValues": []
+								},
+								{
+									"__identifier": "UniqueName",
+									"__type": "String",
+									"__value": "rat",
+									"__tile": null,
+									"defUid": 130,
+									"realEditorValues": [
+										{
+											"id": "V_String",
+											"params": [
+												"rat"
+											]
+										}
+									]
+								},
+								{
+									"__identifier": "ASCII",
+									"__type": "String",
+									"__value": "@",
+									"__tile": null,
+									"defUid": 145,
+									"realEditorValues": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"__identifier": "Tiles",
+					"__type": "Tiles",
+					"__cWid": 12,
+					"__cHei": 9,
+					"__gridSize": 8,
+					"__opacity": 1,
+					"__pxTotalOffsetX": 0,
+					"__pxTotalOffsetY": 0,
+					"__tilesetDefUid": 44,
+					"__tilesetRelPath": "classic_roguelike.png",
+					"iid": "c1fd771d-6e7b-4797-8001-fe23f27e1505",
+					"levelId": 43,
+					"layerDefUid": 41,
+					"pxOffsetX": 0,
+					"pxOffsetY": 0,
+					"visible": true,
+					"optionalRules": [],
+					"intGridCsv": [],
+					"autoLayerTiles": [],
+					"seed": 6813506,
+					"overrideTilesetUid": 44,
+					"gridTiles": [
+						{
+							"px": [
+								0,
+								0
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								0
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								8,
+								0
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								1
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								16,
+								0
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								2
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								24,
+								0
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								3
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								32,
+								0
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								4
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								40,
+								0
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								5
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								48,
+								0
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								6
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								56,
+								0
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								7
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								64,
+								0
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								8
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								72,
+								0
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								9
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								80,
+								0
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								10
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								88,
+								0
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								11
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								0,
+								8
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								12
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								8,
+								8
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								13
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								16,
+								8
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								14
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								24,
+								8
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								15
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								32,
+								8
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								16
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								40,
+								8
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								17
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								48,
+								8
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								18
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								56,
+								8
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								19
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								64,
+								8
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								20
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								72,
+								8
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								21
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								80,
+								8
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								22
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								88,
+								8
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								23
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								0,
+								16
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								24
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								8,
+								16
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								25
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								16,
+								16
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								26
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								24,
+								16
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								27
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								32,
+								16
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								28
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								40,
+								16
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								29
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								48,
+								16
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								30
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								56,
+								16
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								31
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								64,
+								16
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								32
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								72,
+								16
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								33
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								80,
+								16
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								34
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								88,
+								16
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								35
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								0,
+								24
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								36
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								8,
+								24
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								37
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								16,
+								24
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								38
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								24,
+								24
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								39
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								32,
+								24
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								40
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								40,
+								24
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								41
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								48,
+								24
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								42
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								56,
+								24
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								43
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								64,
+								24
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								44
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								72,
+								24
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								45
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								80,
+								24
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								46
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								88,
+								24
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								47
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								0,
+								32
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								48
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								8,
+								32
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								49
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								16,
+								32
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								50
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								24,
+								32
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								51
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								32,
+								32
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								52
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								40,
+								32
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								53
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								48,
+								32
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								54
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								56,
+								32
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								55
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								64,
+								32
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								56
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								72,
+								32
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								57
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								80,
+								32
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								58
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								88,
+								32
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								59
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								0,
+								40
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								60
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								8,
+								40
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								61
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								16,
+								40
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								62
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								24,
+								40
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								63
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								32,
+								40
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								64
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								40,
+								40
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								65
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								48,
+								40
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								66
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								56,
+								40
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								67
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								64,
+								40
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								68
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								72,
+								40
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								69
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								80,
+								40
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								70
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								88,
+								40
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								71
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								0,
+								48
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								72
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								8,
+								48
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								73
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								16,
+								48
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								74
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								24,
+								48
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								75
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								32,
+								48
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								76
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								40,
+								48
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								77
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								48,
+								48
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								78
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								56,
+								48
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								79
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								64,
+								48
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								80
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								72,
+								48
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								81
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								80,
+								48
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								82
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								88,
+								48
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								83
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								0,
+								56
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								84
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								8,
+								56
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								85
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								16,
+								56
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								86
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								24,
+								56
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								87
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								32,
+								56
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								88
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								40,
+								56
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								89
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								48,
+								56
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								90
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								56,
+								56
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								91
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								64,
+								56
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								92
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								72,
+								56
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								93
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								80,
+								56
+							],
+							"src": [
+								8,
+								0
+							],
+							"f": 0,
+							"t": 1,
+							"d": [
+								94
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								88,
+								56
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								95
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								0,
+								64
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								96
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								8,
+								64
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								97
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								16,
+								64
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								98
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								24,
+								64
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								99
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								32,
+								64
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								100
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								40,
+								64
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								101
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								48,
+								64
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								102
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								56,
+								64
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								103
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								64,
+								64
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								104
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								72,
+								64
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								105
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								80,
+								64
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								106
+							],
+							"a": 1
+						},
+						{
+							"px": [
+								88,
+								64
+							],
+							"src": [
+								56,
+								0
+							],
+							"f": 0,
+							"t": 7,
+							"d": [
+								107
+							],
+							"a": 1
+						}
+					],
+					"entityInstances": []
+				}
+			],
+			"__neighbours": []
+		}
+	],
+	"worlds": [],
+	"dummyWorldIid": "0aad30e1-8990-11ee-aa96-e5f74dd3b3ad"
+}

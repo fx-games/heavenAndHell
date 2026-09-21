@@ -1,0 +1,13 @@
+%rec: default
+# The engine's fallback game, played when no mod is selected or the chosen one is missing: one room, one weapon,
+# one enemy. It is the floor under every mod, not a game.
+
+internal_name: wanderer
+name: Wanderer
+gold: 0
+item: short_sword
+resource_health: 20
+resource_mana: 1
+stats_strength: 15
+stats_dexterity: 5
+stats_intelligence: 5

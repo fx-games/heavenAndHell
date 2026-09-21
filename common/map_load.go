@@ -49,7 +49,14 @@ func (s *State) NewGridMapFromLDTK(mapName string) (*gridmap.GridMap[*Actor, *It
 		typeOfEntity := entity.Identifier
 		posX, posY := npcLayer.ToGridPosition(entity.Position[0], entity.Position[1])
 		pos := geometry.Point{X: posX, Y: posY}
-		if typeOfEntity == "NPC" {
+		if kind := entity.PropertyByIdentifier("Type"); typeOfEntity == "NPC" && !kind.IsNull() && kind.AsString() == "Aggressive" &&
+			!entity.PropertyByIdentifier("UniqueName").IsNull() {
+			// a hostile NPC is one of the mod's monsters, named as room templates name theirs
+			if a := s.factory.NewMonsterByID(entity.PropertyByIdentifier("UniqueName").AsString()); a != nil {
+				a.SetDrawPosition(pos.ToPointF())
+				loadedMap.AddActor(a, pos)
+			}
+		} else if typeOfEntity == "NPC" {
 			addActorFromEntity(ldtkMapProject, loadedMap, entity, pos)
 		} else if typeOfEntity == "Sign" {
 			signText := entity.PropertyByIdentifier("Text").AsString()

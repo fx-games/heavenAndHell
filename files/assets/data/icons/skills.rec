@@ -1,0 +1,2 @@
+# Heaven&Hell's skill icons. Its effects are not content on this branch yet, so this is empty:
+# the loader reads the file, and any name it does not find is reported by LoadIcons.

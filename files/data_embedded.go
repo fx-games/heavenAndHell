@@ -12,6 +12,8 @@ import "embed"
 // Mods ship with the binary too: a mod is one complete game, and files/mods/<name> is where its data lives.
 //
 //go:embed assets/Bm437_IBM_CGA.png
+//go:embed assets/classic_roguelike.png
+//go:embed assets/maps.ldtk
 //go:embed assets/endMessage.txt
 //go:embed assets/names-female.txt
 //go:embed assets/names-male.txt
