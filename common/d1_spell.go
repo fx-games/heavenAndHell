@@ -625,14 +625,27 @@ func (f *Factory) d1Telekinesis(c *spellCtx, target geometry.Point) bool {
 		return true
 	}
 	if a := c.monsterAt(target); a != nil && !a.HasStatusEffect(StatusStone) {
-		if p := target.Add(D1Dirs[D1DirTo(c.origin(), target)]); m.CanPlaceActorHere(p) {
+		mon := a.d1Monster
+		if d1Talkers[mon.AI] || mon.TalkMsg != "" { // DoTelekinesis leaves M_Talker and mtalkmsg monsters be
+			return true
+		}
+		// M_GetKnockback: a step back against its own facing, into hit recovery
+		if p := target.Add(D1Dirs[(mon.Dir+4)%8]); m.CanPlaceActorHere(p) {
 			m.MoveActor(a, p)
 			a.SetDrawPosition(p.ToPointF())
+			if lost := D1MonsterRecoveryAUT(mon); lost > 0 && a.GetEnergy() > -lost {
+				a.RemoveEnergy(a.GetEnergy() + lost)
+			}
+			mon.LastMode, mon.StandTicks = D1ModeGotHit, 0
 		}
 		return true
 	}
 	return false
 }
+
+// d1Talkers is M_Talker's list of AIs.
+var d1Talkers = map[string]bool{"AI_LAZURUS": true, "AI_WARLORD": true, "AI_GARBUD": true, "AI_ZHAR": true,
+	"AI_SNOTSPIL": true, "AI_LACHDAN": true, "AI_LAZHELP": true}
 
 // summonD1Golem ports AddGolem/SpawnGolum: the old golem dies (M_StartKill, corpse and all), a new one appears
 // near the target. The mana is spent even when MI_Golem then finds no free cell.

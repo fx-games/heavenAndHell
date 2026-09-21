@@ -97,7 +97,7 @@ own Firebolt level, Phasing / the Holy shrine (`AddRndTeleport`), the mana shiel
 - **fixed — Golem's recast.** `AddGolem` kills the old golem (`M_StartKill`: death, corpse) and spends the mana even
   when `MI_Golem` then finds no free cell. Ours removes the old golem silently, and a cast with nowhere to put
   the new one does nothing and costs nothing.
-- **open — Telekinesis on monsters.** `DoTelekinesis` never pushes a talking monster (`M_Talker`, `mtalkmsg`).
+- **fixed — Telekinesis on monsters.** `DoTelekinesis` never pushes a talking monster (`M_Talker`, `mtalkmsg`).
   `M_GetKnockback` moves it back against its own facing and puts it in hit recovery. Ours pushes away from the
   caster (the same thing while it faces the hero), with no hit recovery, and pushes talkers too.
 - **fixed — CrawlTable order.** `freeNear` walks 1.09's own CrawlTable (`d1.CrawlRings`).
