@@ -1,6 +1,7 @@
 package defs
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -147,5 +148,78 @@ func TestBothSchemasSurviveTheSharedDiceField(t *testing.T) {
 	}
 	if len(rat.UntargetedSkills) != 1 || rat.UntargetedSkills[0] != "replicate_with" {
 		t.Errorf("H&H skills did not survive the port: %v", rat.UntargetedSkills)
+	}
+}
+
+// Stores were the last hardcoded content boundary: D1 picked its stock with a Go predicate over the item table
+// and H&H listed it in a .rec. One ReadVendors serves both now, so both halves of that record get checked here --
+// and, the point of the split, each mod's vendors must reach its OWN items and none of the other mod's.
+func TestEachModStocksItsOwnItems(t *testing.T) {
+	for _, tc := range []struct {
+		mod       string
+		vendors   int
+		namesFrom string // a vendor that names its stock outright
+		want      string // an item only this mod has, which some vendor of it can stock
+		absent    string // the other mod's item, which none of its vendors may reach
+	}{
+		{"d1", 5, "witch", "Potion of Full Mana", "Potion of Berserker Rage"},
+		{"heavenandhell", 4, "store_general", "a torch", "Potion of Full Mana"},
+	} {
+		t.Run(tc.mod, func(t *testing.T) {
+			files.SelectMod(tc.mod)
+			vendors, err := ReadVendors(files.GetFileSystem())
+			if err != nil {
+				t.Fatalf("ReadVendors: %v", err)
+			}
+			if len(vendors) != tc.vendors {
+				t.Errorf("loaded %d vendors, want %d", len(vendors), tc.vendors)
+			}
+			items, err := ReadItems(files.GetFileSystem())
+			if err != nil {
+				t.Fatal(err)
+			}
+			byName := map[string]Item{}
+			for _, it := range items {
+				byName[it.InternalName] = it
+			}
+			// The list half: every item a vendor names has to be one of this mod's, or the shop sells nothing.
+			named := 0
+			for _, v := range vendors {
+				for _, name := range slices.Concat(v.Always, v.Sometimes, v.Items) {
+					if _, ok := byName[name]; !ok {
+						t.Errorf("%s stocks %q, which this mod's items.rec does not have", v.InternalName, name)
+					}
+					named++
+				}
+			}
+			if named == 0 {
+				t.Error("no vendor names a single item")
+			}
+			if !slices.ContainsFunc(vendors, func(v Vendor) bool { return v.InternalName == tc.namesFrom }) {
+				t.Errorf("%s has no vendor %q", tc.mod, tc.namesFrom)
+			}
+			// The filter half, and the split itself: what the criteria reach is drawn from this mod's table and
+			// nowhere else, so the other mod's items are out of reach however the criteria are written.
+			reach := map[string]bool{}
+			for _, v := range vendors {
+				for _, name := range slices.Concat(v.Always, v.Sometimes, v.Items) {
+					reach[byName[name].Name] = true
+				}
+				if len(v.Types) == 0 && len(v.ExcludeTypes) == 0 {
+					continue // a pure list vendor, with no criteria to run
+				}
+				for _, it := range items {
+					if it.Drop != "IDROP_NEVER" && v.Accepts(it) {
+						reach[it.Name] = true
+					}
+				}
+			}
+			if !reach[tc.want] {
+				t.Errorf("%s vendors cannot reach their own %q", tc.mod, tc.want)
+			}
+			if reach[tc.absent] {
+				t.Errorf("%s vendors reach the other mod's %q", tc.mod, tc.absent)
+			}
+		})
 	}
 }
