@@ -10,19 +10,31 @@ import (
 // a box and a forward cone. They follow the same contract as the zones in def_hitzones.go - a name, a parameter
 // list, and positions from an origin and a target - and are registered alongside them.
 
-// BoltAoE (bolt_aoe(maxLen)) is a flying bolt: the cells it passes through, ending on the first cell holding an
-// actor or a solid object, or on the wall that stops it. ray_aoe and bresenham_aoe fly straight through actors,
-// so neither can express a missile that is consumed by its first victim.
+// BoltAoE (bolt_aoe(maxLen[, burstRadius])) is a flying bolt: the cells it passes through, ending on the first
+// cell holding an actor or a solid object, or on the wall that stops it. ray_aoe and bresenham_aoe fly straight
+// through actors, so neither can express a missile that is consumed by its first victim. With a burst radius it
+// also covers the square of that radius around where it stopped, which is how Fireball and Elemental explode.
 func BoltAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
 	maxLen := args.GetIntOrDefault(0, 20)
+	burstRadius := args.GetIntOrDefault(1, 0)
 	return &AoEResolver{
 		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
 			currentMap := gridMap()
 			var result []geometry.Point
+			impact := origin
 			for _, p := range projectileLine(currentMap, origin, target, maxLen) {
 				result = append(result, p)
+				impact = p
 				if currentMap.IsActorAt(p) || isSolidObjectAt(currentMap, p) {
 					break
+				}
+			}
+			for dy := -burstRadius; dy <= burstRadius; dy++ {
+				for dx := -burstRadius; dx <= burstRadius; dx++ {
+					p := impact.Add(geometry.Point{X: dx, Y: dy})
+					if currentMap.Contains(p) && lineIsClear(currentMap, impact, p) {
+						result = append(result, p)
+					}
 				}
 			}
 			return result

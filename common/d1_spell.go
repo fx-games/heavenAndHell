@@ -10,6 +10,7 @@ import (
 	"rpg/stats"
 	"rpg/util"
 	"slices"
+	"strconv"
 )
 
 // D1 spell status effects (decision 6: Mana Shield, Infravision and Stone Curse are status effects).
@@ -50,7 +51,11 @@ func (a *SpellAction) Execute(ctx ActionContext) []Action {
 		m: ctx.GameState.GetMap(), cause: a.cause, dealt: map[*Actor]int{}, ctx: ctx}
 	c.setSpell(a.spell)
 	from := c.origin() // Teleport moves the caster
-	a.castSucceeded = c.cast(a.target)
+	if ok, handled := c.castFromData(a.target); handled {
+		a.castSucceeded = ok
+	} else {
+		a.castSucceeded = c.cast(a.target)
+	}
 	if a.castSucceeded {
 		sfx := d1.SpellSfx[a.spell]
 		playD1SfxAt(ctx, sfx[0], from)
@@ -416,18 +421,54 @@ func (c *spellCtx) payHP(hp int) {
 	}
 }
 
+// castFromData resolves the spell through the one effect model: the hit zone, on-hit effect and targeting rules
+// its content declares. handled is false for a spell whose content carries no mapping yet, which then falls back
+// to the switch below. Nothing here knows which spell it is casting.
+func (c *spellCtx) castFromData(target geometry.Point) (ok, handled bool) {
+	effectName := d1.SpellEffect[c.spell]
+	if effectName == "" {
+		return false, false
+	}
+	if !c.castAllowed(target) {
+		return false, true
+	}
+	name, args := effectName, util.Arguments{}
+	if util.LooksLikeAFunction(effectName) {
+		name, args = util.GetNameAndArgs(effectName)
+	}
+	// a roll grows with the spell's level, which only the cast knows
+	effect := c.f.NewOnHitEffectFromNameAndArgs(name, append(args, strconv.Itoa(c.slvl)))
+	if effect == nil {
+		return false, true
+	}
+	if hp := d1.SpellHealthCost[c.spell]; hp > 0 {
+		c.payHP(hp)
+	}
+	zone := HitZoneFromString(c.f.State.GetMap, d1.SpellHitZone[c.spell])
+	effect.Activate(c.caster, target, zone.GetHitPositions(c.origin(), target))
+	return true, true
+}
+
+// castAllowed holds the two checks every cast makes: the spell has to work here, and a spell that needs a victim
+// needs one other than the caster.
+func (c *spellCtx) castAllowed(target geometry.Point) bool {
+	if defs.IsTownLevel(c.m.GetName()) && !c.f.Generator.D.Spells[c.spell].Town {
+		c.ctx.Msg("That spell doesn't work in town.")
+		c.f.PlayD1HeroSound(27)
+		return false
+	}
+	if d1.SpellTargeted[c.spell] && target == c.origin() && c.spell != d1.SplTeleport && c.spell != d1.SplGolem {
+		c.ctx.Msg("You need a target other than yourself.")
+		return false
+	}
+	return true
+}
+
 func (c *spellCtx) cast(target geometry.Point) bool {
 	f, h, s, slvl, o := c.f, c.h, c.s, c.slvl, c.origin()
 	clvl := h.Level
 	st := c.caster.GetStats()
-	inTown := defs.IsTownLevel(c.m.GetName())
-	if inTown && !f.Generator.D.Spells[c.spell].Town {
-		c.ctx.Msg("That spell doesn't work in town.")
-		f.PlayD1HeroSound(27)
-		return false
-	}
-	if d1.SpellTargeted[c.spell] && target == o && c.spell != d1.SplTeleport && c.spell != d1.SplGolem {
-		c.ctx.Msg("You need a target other than yourself.")
+	if !c.castAllowed(target) {
 		return false
 	}
 	switch c.spell {

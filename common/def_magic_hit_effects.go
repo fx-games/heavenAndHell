@@ -93,6 +93,7 @@ func (g *Factory) GetAllHitEffects() map[string]func(args util.Arguments) *HitEf
 		"mind_push":           g.mindPush,
 		"blink":               g.blink,
 		"earthshaker":         g.earthShaker,
+		"spell_damage":        g.spellDamage,
 	}
 }
 
