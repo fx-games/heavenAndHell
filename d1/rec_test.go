@@ -3,6 +3,7 @@ package d1
 import (
 	"fmt"
 	"os"
+	"slices"
 	"testing"
 )
 
@@ -113,7 +114,7 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 	}
 
 	shuns := d.Vendors["boy"].Shuns
-	if len(shuns) != NumClasses || len(shuns["Rogue"]) != 5 ||
+	if len(shuns) != 6 || len(shuns["Rogue"]) != 5 ||
 		shuns["Warrior"][0] != "bow" || shuns["Warrior"][1] != "staff" || shuns["Monk"][1] != "marmor" {
 		t.Errorf("Wirt's shuns did not survive stores.rec: %v", shuns)
 	}
@@ -135,11 +136,12 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 	}
 	// SpellFrames and MaxStats are derived from the class table; both used to be computed at package init, which
 	// would now run before it is loaded.
-	if SpellFrames != [NumClasses]int{20, 16, 12, 18, 16, 20} {
+	// Six is D1's OWN roster, not the engine's: the tables are sized by how many classes this mod declares.
+	if !slices.Equal(SpellFrames, []int{20, 16, 12, 18, 16, 20}) {
 		t.Errorf("SpellFrames = %v", SpellFrames)
 	}
 
-	if ClassNames != [NumClasses]string{"Warrior", "Rogue", "Sorcerer", "Monk", "Bard", "Barbarian"} {
+	if !slices.Equal(ClassNames, []string{"Warrior", "Rogue", "Sorcerer", "Monk", "Bard", "Barbarian"}) {
 		t.Errorf("ClassNames = %v", ClassNames)
 	}
 	// The 1/64 fixed-point columns are the ones a .rec round trip could quietly round off, so check the

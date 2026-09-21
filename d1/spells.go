@@ -222,7 +222,7 @@ var RuneTraps map[string]RuneTrap
 
 // SpellFrames: casting animation length per class (each class' animations.tsv castingFrames). Derived from the
 // class table by Load, not at init: classAttr is empty until hero.rec has been read.
-var SpellFrames [NumClasses]int
+var SpellFrames []int
 
 // SpellLevel ports GetSpellLevel.
 func (h *Hero) SpellLevel(s Sheet, spell int) int {

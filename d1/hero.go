@@ -9,7 +9,9 @@ import (
 	"strings"
 )
 
-// Player classes (PC_): D1's three, then Hellfire's Monk, Bard and Barbarian.
+// Hero archetypes, in D1's PC_ order: the shapes the engine's formulas know how to play. They are NOT a roster -
+// how many classes a game HAS is content, and is the number of rows in the mod's hero.rec. A mod's Nth class
+// plays as the Nth archetype, so a three-class game gets warrior/rogue/sorcerer and names them as it likes.
 const (
 	Warrior = iota
 	Rogue
@@ -17,11 +19,11 @@ const (
 	Monk
 	Bard
 	Barbarian
-	NumClasses
+	NumArchetypes
 )
 
-// ClassNames are the class names, in PC_ order; filled by Load from assets/data/hero.rec.
-var ClassNames [NumClasses]string
+// ClassNames are the class names, in the mod's own order; filled by Load from assets/data/hero.rec.
+var ClassNames []string
 
 // Class flags (PlayerClassFlag), straight off each class' attributes.tsv.
 const (
@@ -59,10 +61,10 @@ type classAttributes struct {
 }
 
 // classAttr is filled by Load from the class section of assets/data/hero.rec.
-var classAttr [NumClasses]classAttributes
+var classAttr []classAttributes
 
 // MaxStats is the attribute cap per class and ATTRIB_ (CharacterAttribute), derived from classAttr by Load.
-var MaxStats [NumClasses][4]int
+var MaxStats [][4]int
 
 // ExpLvls is the experience total each character level needs; filled by Load.
 var ExpLvls [51]int
@@ -95,9 +97,15 @@ func loadHeroTables(fsys fs.FS) error {
 		return err
 	}
 	classes := recs["class"]
-	if len(classes) != NumClasses {
-		return fmt.Errorf("hero.rec: %d classes, want %d", len(classes), NumClasses)
+	// The roster LENGTH is the mod's to choose. The engine's only stake in it is that every row lands on an
+	// archetype whose formulas exist, which is what caps it at NumArchetypes.
+	if len(classes) == 0 || len(classes) > NumArchetypes {
+		return fmt.Errorf("hero.rec: %d classes, want 1..%d", len(classes), NumArchetypes)
 	}
+	ClassNames = make([]string, len(classes))
+	classAttr = make([]classAttributes, len(classes))
+	MaxStats = make([][4]int, len(classes))
+	SpellFrames = make([]int, len(classes))
 	for i, r := range classes {
 		m := r.ToMap("")
 		// fp6 reads one of the 1/64 fixed-point columns, which the file carries as a plain decimal.
