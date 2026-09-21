@@ -981,7 +981,7 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 		hp := a.GetStats().GetResource(stats.Health).GetMax()
 		theGame.GetActionBroker().Execute(common.NewChangeResourceAction(common.NewActorCause("playthrough", state.GetPlayer()), a, stats.Health, -float64(10*hp)))
 		if state.QuestActive(q) != d1.QuestDone {
-			fail("quests: killing %s didn't complete %s", name, d1.QuestNames[q])
+			fail("quests: killing %s didn't complete %s", name, state.QuestDefs()[q].Name)
 		}
 	}
 	objectsOf := func(kind int) (out []*common.D1Object) {
@@ -1225,8 +1225,8 @@ func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
 			fail("quest lines: "+format, args...)
 		}
 	}
-	log := func(q int) { must(state.QuestLog(q), "%s isn't in the quest log", d1.QuestNames[q]) }
-	done := func(q int) { must(state.QuestActive(q) == d1.QuestDone, "%s isn't done", d1.QuestNames[q]) }
+	log := func(q int) { must(state.QuestLog(q), "%s isn't in the quest log", state.QuestDefs()[q].Name) }
+	done := func(q int) { must(state.QuestActive(q) == d1.QuestDone, "%s isn't done", state.QuestDefs()[q].Name) }
 	pickUp := func(idx int) {
 		m := state.GetMap()
 		for _, it := range m.Items() {

@@ -493,14 +493,14 @@ func (g *GameInstance) d1DebugItems() []util.MenuItem {
 			g.state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: at})
 		}})
 	}
-	for _, set := range common.D1SetLevels {
+	for _, set := range g.state.SetLevels() {
 		levels = append(levels, util.MenuItem{MainText: set.Name, Action: func() {
 			g.state.MapTransition(gridmap.Transition{TargetMap: set.Map, TargetLocation: "ladder_up"})
 		}})
 	}
-	for q, name := range d1.QuestNames {
-		quests = append(quests, util.MenuItem{MainText: name, Action: func() {
-			g.state.GetFlags().SetTrue(common.QuestFlag(q))
+	for q, def := range g.state.QuestDefs() {
+		quests = append(quests, util.MenuItem{MainText: def.Name, Action: func() {
+			g.state.GetFlags().SetTrue(g.state.QuestFlag(q))
 			common.UpdateD1Quests(&g.state, g.state.GetMap())
 		}})
 	}

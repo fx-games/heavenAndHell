@@ -1,0 +1,339 @@
+# Diablo's quests: their text, their gossip, where their set levels are, and the triggers that fire them.
+#
+# The engine owns quest LOGIC. This file owns what a quest says, what it rewards and which named event moves it
+# on. A trigger is (event, subject, condition, outcomes): the condition is an expr-lang expression over the flag
+# store, compiled once when this file loads; the outcomes are a fixed set the engine implements by name.
+#
+# Quest order is content: the engine indexes quests by their position here, and saves refer to them by "key".
+
+%rec: quest
+
+key: rock
+name: The Magic Rock
+log_text: TEXT_INFRA5
+gossip: griswold TEXT_INFRA6
+gossip: pepin TEXT_INFRA3
+gossip: ogden TEXT_INFRA2
+gossip: cain TEXT_INFRA1
+gossip: farnham TEXT_INFRA8
+gossip: adria TEXT_INFRA9
+gossip: gillian TEXT_INFRA4
+gossip: wirt TEXT_INFRA10
+
+key: mushroom
+name: Black Mushroom
+log_text: TEXT_MUSH8
+gossip: griswold TEXT_MUSH6
+gossip: ogden TEXT_MUSH2
+gossip: cain TEXT_MUSH1
+gossip: farnham TEXT_MUSH7
+gossip: adria TEXT_MUSH9
+gossip: gillian TEXT_MUSH5
+gossip: wirt TEXT_MUSH13
+
+key: garbud
+name: Gharbad The Weak
+log_text: TEXT_GARBUD1
+
+key: zhar
+name: Zhar the Mad
+log_text: TEXT_ZHAR1
+
+key: veil
+name: Lachdanan
+log_text: TEXT_VEIL9
+gossip: griswold TEXT_VEIL5
+gossip: pepin TEXT_VEIL3
+gossip: ogden TEXT_VEIL2
+gossip: cain TEXT_VEIL1
+gossip: farnham TEXT_VEIL6
+gossip: adria TEXT_VEIL7
+gossip: gillian TEXT_VEIL4
+gossip: wirt TEXT_VEIL8
+
+key: diablo
+name: Diablo
+log_text: TEXT_VILE3
+gossip: cain TEXT_VILE3
+
+key: butcher
+name: The Butcher
+log_text: TEXT_BUTCH9
+gossip: griswold TEXT_BUTCH5
+gossip: pepin TEXT_BUTCH3
+gossip: ogden TEXT_BUTCH2
+gossip: cain TEXT_BUTCH1
+gossip: farnham TEXT_BUTCH6
+gossip: adria TEXT_BUTCH7
+gossip: gillian TEXT_BUTCH4
+gossip: wirt TEXT_BUTCH8
+
+key: banner
+name: Ogden's Sign
+log_text: TEXT_BANNER2
+gossip: griswold TEXT_BANNER6
+gossip: pepin TEXT_BANNER4
+gossip: cain TEXT_BANNER1
+gossip: farnham TEXT_BANNER7
+gossip: adria TEXT_BANNER8
+gossip: gillian TEXT_BANNER5
+gossip: wirt TEXT_BANNER9
+
+key: blind
+name: Halls of the Blind
+log_text: TEXT_BLINDING
+gossip: griswold TEXT_BLIND5
+gossip: pepin TEXT_BLIND3
+gossip: ogden TEXT_BLIND2
+gossip: cain TEXT_BLIND1
+gossip: farnham TEXT_BLIND6
+gossip: adria TEXT_BLIND7
+gossip: gillian TEXT_BLIND4
+gossip: wirt TEXT_BLIND8
+
+key: blood
+name: Valor
+log_text: TEXT_BLOODY
+gossip: griswold TEXT_BLOOD5
+gossip: pepin TEXT_BLOOD3
+gossip: ogden TEXT_BLOOD2
+gossip: cain TEXT_BLOOD1
+gossip: farnham TEXT_BLOOD6
+gossip: adria TEXT_BLOOD7
+gossip: gillian TEXT_BLOOD4
+gossip: wirt TEXT_BLOOD8
+
+key: anvil
+name: Anvil of Fury
+log_text: TEXT_ANVIL5
+gossip: griswold TEXT_ANVIL6
+gossip: pepin TEXT_ANVIL3
+gossip: ogden TEXT_ANVIL2
+gossip: cain TEXT_ANVIL1
+gossip: farnham TEXT_ANVIL8
+gossip: adria TEXT_ANVIL9
+gossip: gillian TEXT_ANVIL4
+gossip: wirt TEXT_ANVIL10
+
+key: warlord
+name: Warlord of Blood
+log_text: TEXT_BLOODWAR
+gossip: griswold TEXT_WARLRD5
+gossip: pepin TEXT_WARLRD3
+gossip: ogden TEXT_WARLRD2
+gossip: cain TEXT_WARLRD1
+gossip: farnham TEXT_WARLRD6
+gossip: adria TEXT_WARLRD7
+gossip: gillian TEXT_WARLRD4
+gossip: wirt TEXT_WARLRD8
+
+key: leoric
+name: The Curse of King Leoric
+log_text: TEXT_KING2
+set_map: !gen_leoric_3
+set_entrance: leoric
+set_name: King Leoric's Tomb
+set_level: 1
+gossip: griswold TEXT_KING7
+gossip: pepin TEXT_KING5
+gossip: ogden TEXT_KING3
+gossip: cain TEXT_KING1
+gossip: farnham TEXT_KING8
+gossip: adria TEXT_KING9
+gossip: gillian TEXT_KING6
+gossip: wirt TEXT_KING10
+
+key: pwater
+name: Poisoned Water Supply
+log_text: TEXT_POISON3
+set_map: !gen_pwater_2
+set_entrance: pwater
+set_name: A Dark Passage
+set_level: 4
+gossip: griswold TEXT_POISON7
+gossip: pepin TEXT_POISON4
+gossip: ogden TEXT_POISON2
+gossip: cain TEXT_POISON1
+gossip: farnham TEXT_POISON8
+gossip: adria TEXT_POISON9
+gossip: gillian TEXT_POISON6
+gossip: wirt TEXT_POISON10
+
+key: schamb
+name: The Chamber of Bone
+log_text: TEXT_BONER
+set_map: !gen_bonechamb_6
+set_entrance: schamb
+set_name: The Chamber of Bone
+set_level: 2
+gossip: griswold TEXT_BONE5
+gossip: pepin TEXT_BONE3
+gossip: ogden TEXT_BONE2
+gossip: cain TEXT_BONE1
+gossip: farnham TEXT_BONE6
+gossip: adria TEXT_BONE7
+gossip: gillian TEXT_BONE4
+gossip: wirt TEXT_BONE8
+
+key: lazarus
+name: Archbishop Lazarus
+log_text: TEXT_VILE1
+set_map: !gen_lazarus_15
+set_entrance: red_portal
+set_name: Lazarus' Lair
+set_level: 5
+gossip: griswold TEXT_VILE9
+gossip: pepin TEXT_VILE7
+gossip: ogden TEXT_VILE4
+gossip: cain TEXT_VILE2
+gossip: farnham TEXT_VILE10
+gossip: adria TEXT_VILE11
+gossip: gillian TEXT_VILE8
+gossip: wirt TEXT_VILE12
+
+
+# --- triggers -------------------------------------------------------------------------------------------
+#
+# event    subject                    fired by
+# on_kill          a monster's internal name, or a unique monster's name
+# on_item_pickup   an item's internal name
+# on_enter_level   the dungeon depth the hero arrives on
+# on_talk          the NPC's internal name -- a dialogue record: condition, text, what saying it does
+
+%rec: trigger
+
+event: on_kill
+subject: MT_SKING
+when: not done("leoric")
+do: complete_quest(leoric)
+do: hero_sound(82)
+
+event: on_kill
+subject: MT_CLEAVER
+when: not done("butcher")
+do: complete_quest(butcher)
+do: hero_sound(80)
+
+event: on_kill
+subject: Gharbad the Weak
+when: not done("garbud")
+do: complete_quest(garbud)
+do: hero_sound(61)
+
+event: on_kill
+subject: Zhar the Mad
+when: not done("zhar")
+do: complete_quest(zhar)
+do: hero_sound(62)
+
+event: on_kill
+subject: Warlord of Blood
+when: not done("warlord")
+do: complete_quest(warlord)
+do: hero_sound(94)
+
+# Lazarus' death opens Diablo's level and the way back out of the lair.
+event: on_kill
+subject: Arch-Bishop Lazarus
+when: not done("lazarus")
+do: complete_quest(lazarus)
+do: hero_sound(83)
+do: set_quest_var(lazarus, 1, 7)
+do: set_quest_var(lazarus, 2, 4)
+do: activate_quest(diablo)
+do: refresh_level()
+
+event: on_kill
+subject: MT_DIABLO
+when: not done("diablo")
+do: complete_quest(diablo)
+do: end_text()
+
+# The dying townsman on level 2: his last words start the Butcher, and after that he only groans. The groan
+# comes first so that speaking does not immediately satisfy it -- triggers see what earlier ones did.
+event: on_talk
+subject: deadguy
+when: active("butcher") and v1("butcher") != 0
+do: hero_sound(8)
+
+event: on_talk
+subject: deadguy
+when: (avail("butcher") and not done("butcher") and not active("butcher")) or (active("butcher") and v1("butcher") == 0)
+do: activate_quest(butcher)
+do: log_quest(butcher)
+do: set_quest_var(butcher, 1, 1)
+do: say(TEXT_BUTCH9)
+
+event: on_item_pickup
+subject: optic_amulet
+do: complete_quest(blind)
+
+event: on_item_pickup
+subject: arkaine_s_valor
+do: complete_quest(blood)
+do: hero_sound(91)
+
+event: on_item_pickup
+subject: golden_elixir
+do: hero_sound(88)
+
+event: on_item_pickup
+subject: black_mushroom
+when: active("mushroom") and v1("mushroom") == 3
+do: hero_sound(95)
+do: set_quest_var(mushroom, 1, 4)
+
+# Picking the anvil or the rock up starts its quest; the shout only comes once the hero knows what it is for.
+event: on_item_pickup
+subject: anvil_of_fury
+when: avail("anvil") and not done("anvil") and not active("anvil")
+do: activate_quest(anvil)
+do: set_quest_var(anvil, 1, 1)
+
+event: on_item_pickup
+subject: anvil_of_fury
+when: logged("anvil")
+do: hero_sound(89)
+
+event: on_item_pickup
+subject: magic_rock
+when: avail("rock") and not done("rock") and not active("rock")
+do: activate_quest(rock)
+do: set_quest_var(rock, 1, 1)
+
+event: on_item_pickup
+subject: magic_rock
+when: logged("rock")
+do: hero_sound(87)
+
+# PlayDungMsgs: the hero's line on first reaching the cathedral, the catacombs, the caves and hell, and
+# Diablo's greeting on 16. Each once, which is what the flag remembers.
+event: on_enter_level
+subject: 1
+when: not flag("d1:dungmsg:1")
+do: set_flag(d1:dungmsg:1)
+do: hero_sound(97)
+
+event: on_enter_level
+subject: 5
+when: not flag("d1:dungmsg:5")
+do: set_flag(d1:dungmsg:5)
+do: hero_sound(96)
+
+event: on_enter_level
+subject: 9
+when: not flag("d1:dungmsg:9")
+do: set_flag(d1:dungmsg:9)
+do: hero_sound(98)
+
+event: on_enter_level
+subject: 13
+when: not flag("d1:dungmsg:13")
+do: set_flag(d1:dungmsg:13)
+do: hero_sound(99)
+
+event: on_enter_level
+subject: 16
+when: not flag("d1:dungmsg:16")
+do: set_flag(d1:dungmsg:16)
+do: sound(PS_DIABLVLINT)

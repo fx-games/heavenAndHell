@@ -16,19 +16,31 @@ import (
 
 // D1's quests (quests.cpp). Which quests a game has comes from its seed (InitQuests, State.D1Quests, not saved);
 // what happened since lives in the saved flags under the quest's key: "quest:<key>" once done, ".active" once
-// active, ".log" once in the quest log, ".v1"/".v2" its _qvar1/_qvar2.
-var d1QuestKeys = [d1.NumQuests]string{"rock", "mushroom", "garbud", "zhar", "veil", "diablo", "butcher", "banner",
-	"blind", "blood", "anvil", "warlord", "leoric", "pwater", "schamb", "lazarus"}
+// active, ".log" once in the quest log, ".v1"/".v2" its _qvar1/_qvar2. The keys, and everything else a quest
+// says or places, come from the mod's quests.rec.
+
+// QuestDefs are the mod's quests, in quest-id order.
+func (s *State) QuestDefs() []defs.Quest { return s.factory.D1().D.QuestDefs }
 
 // QuestFlag is the flag set once quest q is done.
-func QuestFlag(q int) string { return "quest:" + d1QuestKeys[q] }
+func (s *State) QuestFlag(q int) string { return "quest:" + s.QuestDefs()[q].Key }
+
+// QuestByKey is the id of the quest a record names, or -1.
+func (s *State) QuestByKey(key string) int {
+	for i, q := range s.QuestDefs() {
+		if q.Key == key {
+			return i
+		}
+	}
+	return -1
+}
 
 // QuestActive is quests[q]._qactive.
 func (s *State) QuestActive(q int) int {
 	switch f := s.GetFlags(); {
-	case f.IsSet(QuestFlag(q)):
+	case f.IsSet(s.QuestFlag(q)):
 		return d1.QuestDone
-	case f.IsSet(QuestFlag(q) + ".active"):
+	case f.IsSet(s.QuestFlag(q) + ".active"):
 		return d1.QuestActive
 	}
 	return s.D1Quests()[q].Active
@@ -37,20 +49,20 @@ func (s *State) QuestActive(q int) int {
 func (s *State) SetQuestActive(q, v int) {
 	switch v {
 	case d1.QuestDone:
-		s.GetFlags().SetTrue(QuestFlag(q))
+		s.GetFlags().SetTrue(s.QuestFlag(q))
 	case d1.QuestActive:
-		s.GetFlags().SetTrue(QuestFlag(q) + ".active")
+		s.GetFlags().SetTrue(s.QuestFlag(q) + ".active")
 	}
 }
 
-func (s *State) QuestLog(q int) bool { return s.GetFlags().IsSet(QuestFlag(q) + ".log") }
+func (s *State) QuestLog(q int) bool { return s.GetFlags().IsSet(s.QuestFlag(q) + ".log") }
 
 // startQuest makes quest q active and puts it in the quest log.
 func (s *State) startQuest(q int) {
 	if s.QuestActive(q) != d1.QuestDone {
 		s.SetQuestActive(q, d1.QuestActive)
 	}
-	s.GetFlags().SetTrue(QuestFlag(q) + ".log")
+	s.GetFlags().SetTrue(s.QuestFlag(q) + ".log")
 }
 
 // startTownQuest is TalkToTowner's usual start: logged, and only a quest that was still QUEST_INIT becomes active
@@ -60,12 +72,12 @@ func (s *State) startTownQuest(q int) {
 		s.SetQuestActive(q, d1.QuestActive)
 		s.SetQuestVar(q, 1, 1)
 	}
-	s.GetFlags().SetTrue(QuestFlag(q) + ".log")
+	s.GetFlags().SetTrue(s.QuestFlag(q) + ".log")
 }
 
 // QuestVar is quests[q]._qvar1 (n 1) or _qvar2 (n 2).
 func (s *State) QuestVar(q, n int) int {
-	if v, ok := s.GetFlags().AllEntries()[fmt.Sprintf("%s.v%d", QuestFlag(q), n)]; ok {
+	if v, ok := s.GetFlags().AllEntries()[fmt.Sprintf("%s.v%d", s.QuestFlag(q), n)]; ok {
 		return v
 	}
 	if n == 1 {
@@ -75,7 +87,7 @@ func (s *State) QuestVar(q, n int) int {
 }
 
 func (s *State) SetQuestVar(q, n, v int) {
-	s.GetFlags().SetToValue(fmt.Sprintf("%s.v%d", QuestFlag(q), n), v)
+	s.GetFlags().SetToValue(fmt.Sprintf("%s.v%d", s.QuestFlag(q), n), v)
 }
 
 // questHere ports QuestStatus: quest q is available and the player is on its (not set) level.
@@ -92,78 +104,75 @@ func (f *Factory) completeD1Quest(q int) {
 		return
 	}
 	f.State.SetQuestActive(q, d1.QuestDone)
-	f.Msg(fmt.Sprintf("Quest completed: %s", d1.QuestNames[q]))
+	f.Msg(fmt.Sprintf("Quest completed: %s", f.State.QuestDefs()[q].Name))
 }
 
-// D1SetLevel is a quest set level: its map, its D1 set level and quest, and the named location of its entrance
-// on the quest's dungeon level (D1's _qtx/_qty; Lazarus' red portal opens later).
+// D1SetLevel is a quest set level: its map, its set level id and quest, and the named location of its entrance
+// on the quest's dungeon level (D1's _qtx/_qty; Lazarus' red portal opens later). Every field is the mod's:
+// the engine only knows that some quests bring a level of their own.
 type D1SetLevel struct {
 	Map, Entrance, Name string
 	SL, Quest           int
 }
 
-const (
-	D1LeoricLevel  = "!gen_leoric_3"
-	D1LazarusLevel = "!gen_lazarus_15"
-)
-
-var D1SetLevels = []D1SetLevel{
-	{D1LeoricLevel, "leoric", "King Leoric's Tomb", d1.SLSkelKing, d1.QSkelKing},
-	{"!gen_bonechamb_6", "schamb", "The Chamber of Bone", d1.SLBoneChamb, d1.QSchamb},
-	{"!gen_pwater_2", "pwater", "A Dark Passage", d1.SLPoisonWater, d1.QPWater},
-	{D1LazarusLevel, "red_portal", "Lazarus' Lair", d1.SLVileBetrayer, d1.QBetrayer},
+// SetLevels are the quest set levels the mod declares, in quest order.
+func (s *State) SetLevels() []D1SetLevel {
+	var out []D1SetLevel
+	for q, def := range s.QuestDefs() {
+		if def.SetMap != "" {
+			out = append(out, D1SetLevel{def.SetMap, def.SetEntrance, def.SetName, def.SetLevel, q})
+		}
+	}
+	return out
 }
 
-func d1SetLevelOf(mapName string) *D1SetLevel {
-	for i := range D1SetLevels {
-		if D1SetLevels[i].Map == mapName {
-			return &D1SetLevels[i]
+// setLevelOf is the set level a map name belongs to, nil for an ordinary level.
+func (s *State) setLevelOf(mapName string) *D1SetLevel {
+	for _, sl := range s.SetLevels() {
+		if sl.Map == mapName {
+			return &sl
 		}
 	}
 	return nil
 }
 
-// d1TalkList ports towners.cpp's Qtalklist: what each townsperson says about a quest ("" for nothing).
-var d1TalkList = map[VendorType][d1.NumQuests]string{
-	VendorTypeWeapons: {"INFRA6", "MUSH6", "", "", "VEIL5", "", "BUTCH5", "BANNER6", "BLIND5", "BLOOD5", "ANVIL6", "WARLRD5", "KING7", "POISON7", "BONE5", "VILE9"},
-	VendorTypeGeneral: {"INFRA3", "", "", "", "VEIL3", "", "BUTCH3", "BANNER4", "BLIND3", "BLOOD3", "ANVIL3", "WARLRD3", "KING5", "POISON4", "BONE3", "VILE7"},
-	VendorTypeOgden:   {"INFRA2", "MUSH2", "", "", "VEIL2", "", "BUTCH2", "", "BLIND2", "BLOOD2", "ANVIL2", "WARLRD2", "KING3", "POISON2", "BONE2", "VILE4"},
-	VendorTypeCain:    {"INFRA1", "MUSH1", "", "", "VEIL1", "VILE3", "BUTCH1", "BANNER1", "BLIND1", "BLOOD1", "ANVIL1", "WARLRD1", "KING1", "POISON1", "BONE1", "VILE2"},
-	VendorTypeDrunk:   {"INFRA8", "MUSH7", "", "", "VEIL6", "", "BUTCH6", "BANNER7", "BLIND6", "BLOOD6", "ANVIL8", "WARLRD6", "KING8", "POISON8", "BONE6", "VILE10"},
-	VendorTypeWands:   {"INFRA9", "MUSH9", "", "", "VEIL7", "", "BUTCH7", "BANNER8", "BLIND7", "BLOOD7", "ANVIL9", "WARLRD7", "KING9", "POISON9", "BONE7", "VILE11"},
-	VendorTypeBarmaid: {"INFRA4", "MUSH5", "", "", "VEIL4", "", "BUTCH4", "BANNER5", "BLIND4", "BLOOD4", "ANVIL4", "WARLRD4", "KING6", "POISON6", "BONE4", "VILE8"},
-	VendorTypeWirt:    {"INFRA10", "MUSH13", "", "", "VEIL8", "", "BUTCH8", "BANNER9", "BLIND8", "BLOOD8", "ANVIL10", "WARLRD8", "KING10", "POISON10", "BONE8", "VILE12"},
+// onSetLevelOf reports whether m is the set level of quest q.
+func (s *State) onSetLevelOf(m *gridmap.GridMap[*Actor, *Item, Object], q int) bool {
+	sl := s.setLevelOf(m.GetName())
+	return sl != nil && sl.Quest == q
 }
 
-// d1QuestTopic is what npc says about quest q, if S_TalkEnter lists it: the quest is active and logged. Black
-// Mushroom's topic moves from Adria to Pepin once she has the mushroom, and Pepin's ends once he has the brain.
+// questMap is the map name of quest q's set level, "" when it has none.
+func (s *State) questMap(q int) string { return s.QuestDefs()[q].SetMap }
+
+// d1QuestTopic is what npc says about quest q, if S_TalkEnter lists it: the quest is active and logged. What
+// each townsperson says comes from the quest's gossip lines; which of them is offered is the logic below.
+// Black Mushroom's topic moves from Adria to Pepin once she has the mushroom, and Pepin's ends once he has the
+// brain -- the one case the table cannot say.
 func (s *State) d1QuestTopic(npc VendorType, q int) string {
 	if s.QuestActive(q) != d1.QuestActive || !s.QuestLog(q) {
 		return ""
 	}
-	id := d1TalkList[npc][q]
+	id := s.QuestDefs()[q].Gossip[string(npc)]
 	if v := s.QuestVar(d1.QMushroom, 1); q == d1.QMushroom && v >= d1.QSMushGiven {
 		switch npc {
 		case VendorTypeWands:
 			id = ""
 		case VendorTypeGeneral:
 			if v < d1.QSBrainGiven {
-				id = "MUSH3"
+				id = "TEXT_MUSH3"
 			}
 		}
 	}
-	if id == "" {
-		return ""
-	}
-	return "TEXT_" + id
+	return id
 }
 
 // D1QuestLog ports the quest log: the active quests in it, each with its text.
 func (s *State) D1QuestLog() []string {
 	lines := []string{"Quest Log", ""}
-	for q := range d1QuestKeys {
+	for q, def := range s.QuestDefs() {
 		if s.QuestActive(q) == d1.QuestActive && s.QuestLog(q) {
-			lines = append(lines, d1.QuestNames[q], "  "+s.d1Text(d1ClassText(s, d1.QuestMsgs[q])), "")
+			lines = append(lines, def.Name, "  "+s.d1Text(d1ClassText(s, def.LogText)), "")
 		}
 	}
 	if len(lines) == 2 {
@@ -260,14 +269,8 @@ func (f *Factory) d1TownerQuests(npc *Actor) bool {
 				return true
 			}
 		}
-	case VendorTypeDeadGuy:
-		if q := d1.QButcher; active(q) == d1.QuestInit || active(q) == d1.QuestActive && v1(q) == 0 {
-			s.startQuest(q)
-			s.SetQuestVar(q, 1, 1)
-			f.say(name, "TEXT_BUTCH9")
-		} else if active(q) == d1.QuestActive {
-			f.PlayD1HeroSound(8) // his last words are said
-		}
+	case VendorTypeDeadGuy: // the dying townsman says one thing, under one condition: a dialogue record
+		f.fireQuestTriggers(EventTalk, string(VendorTypeDeadGuy), name)
 		return true
 	case VendorTypeWeapons:
 		if visited(4) && avail(d1.QRock) {
@@ -365,7 +368,7 @@ func (f *Factory) d1TownerQuests(npc *Actor) bool {
 		}
 		if active(q) == d1.QuestDone && v1(q) == 7 {
 			s.SetQuestVar(q, 1, 8)
-			s.GetFlags().SetTrue(QuestFlag(d1.QDiablo) + ".log")
+			s.GetFlags().SetTrue(s.QuestFlag(d1.QDiablo) + ".log")
 			f.say(name, "TEXT_VILE3")
 			return true
 		}
@@ -443,7 +446,7 @@ func (f *Factory) d1DoTalk(a *Actor) {
 		if mon.TalkMsg == "TEXT_GARBUD1" {
 			s.SetQuestActive(d1.QGarbud, d1.QuestActive)
 		}
-		s.GetFlags().SetTrue(QuestFlag(d1.QGarbud) + ".log")
+		s.GetFlags().SetTrue(s.QuestFlag(d1.QGarbud) + ".log")
 		if mon.TalkMsg == "TEXT_GARBUD2" && s.QuestVar(d1.QGarbud, 2) == 0 { // MFLAG_QUEST_COMPLETE
 			if it := f.Generator.MonsterDrop(mon.Data, mon.Level, true, dlvl, false); it != nil {
 				f.dropD1Item(it, pos)
@@ -580,7 +583,7 @@ func UpdateD1Quests(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 			if betrayer == d1.QuestActive && s.QuestVar(d1.QBetrayer, 1) == 2 {
 				s.SetQuestVar(d1.QBetrayer, 1, 3)
 			}
-			open("red_portal", d1RedPortal, gridmap.Transition{TargetMap: D1LazarusLevel, TargetLocation: "ladder_up"})
+			open("red_portal", d1RedPortal, gridmap.Transition{TargetMap: s.questMap(d1.QBetrayer), TargetLocation: "ladder_up"})
 		}
 		if betrayer == d1.QuestDone {
 			open("ladder_down", d1StairsDown, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(16), TargetLocation: "ladder_up"})
@@ -589,7 +592,7 @@ func UpdateD1Quests(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 			s.SetQuestVar(q, 1, 1)
 			f.spawnD1QuestItem(m, d1.IdiGldnElix)
 		}
-	case D1LazarusLevel:
+	case s.questMap(d1.QBetrayer):
 		if betrayer == d1.QuestDone { // M_StartKill's MIS_RPORTAL at (35, 32)
 			open("exit", d1RedPortal, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(15), TargetLocation: "red_portal"})
 		}
@@ -626,7 +629,7 @@ func replayD1MapChanges(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 			delete(s.glowCache, m)
 		}
 	}
-	if m.GetName() == D1LazarusLevel { // ResyncQuests: the way to Lazarus, then to Red Vex and Black Jade
+	if s.onSetLevelOf(m, d1.QBetrayer) { // ResyncQuests: the way to Lazarus, then to Red Vex and Black Jade
 		if s.QuestVar(d1.QBetrayer, 1) >= 4 || s.QuestActive(d1.QBetrayer) == d1.QuestDone {
 			gen.changeD1Map(m, 1, 11, 20, 18)
 		}
@@ -643,7 +646,7 @@ func replayD1MapChanges(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 		case d1.ObjLEVER, d1.ObjBLINDBOOK, d1.ObjSTEELTOME, d1.ObjBOOK2R:
 			gen.changeD1Map(m, o.O.Var1, o.O.Var2, o.O.Var3, o.O.Var4)
 		case d1.ObjBOOK2L:
-			if m.GetName() == D1LazarusLevel {
+			if s.onSetLevelOf(m, d1.QBetrayer) {
 				gen.changeD1Map(m, o.O.Var1, o.O.Var2, o.O.Var3, o.O.Var4)
 			}
 		}
@@ -703,7 +706,7 @@ func (f *Factory) d1VileTeleport(player *Actor, p geometry.Point) {
 // Lazarus and teleports the hero in front of him.
 func (f *Factory) d1MagicCircle(o *D1Object, player *Actor) {
 	m, s := f.State.GetMap(), f.State
-	if m.GetName() != D1LazarusLevel || o.pos != pieceCell(d1VileCenter) || d1VileBooksRead(m) < 2 {
+	if !s.onSetLevelOf(m, d1.QBetrayer) || o.pos != pieceCell(d1VileCenter) || d1VileBooksRead(m) < 2 {
 		return
 	}
 	// 1.09 sets _qvar1 4 on every step onto the circle, even after Lazarus spoke (its BUGFIX note); not done again here
@@ -759,26 +762,13 @@ func randomQuestSpot(m *gridmap.GridMap[*Actor, *Item, Object], keep func(geomet
 	return cells[d1Rng.Intn(len(cells))], true
 }
 
-// d1QuestKill ports CheckQuestKill and M_DiabloDeath's quest, plus Poisoned Water's check of CheckQuests: the
-// set level is clean once its last monster dies.
+// d1QuestKill ports Poisoned Water's check of CheckQuests -- the set level is clean once its last monster dies,
+// which is a whole-map question no condition can ask -- and then hands the death to the mod's on_kill triggers,
+// which carry CheckQuestKill and M_DiabloDeath's quest.
 func d1QuestKill(ctx ActionContext, mon *D1Monster) {
 	state := ctx.GameState
 	f := state.factory
-	q := -1
-	switch {
-	case mon.Data.ID == "MT_SKING":
-		q = d1.QSkelKing
-	case mon.Data.ID == "MT_CLEAVER":
-		q = d1.QButcher
-	case mon.Data.ID == "MT_DIABLO":
-		q = d1.QDiablo
-	case mon.Unique != nil:
-		if uq, ok := map[string]int{"Gharbad the Weak": d1.QGarbud, "Zhar the Mad": d1.QZhar, "Arch-Bishop Lazarus": d1.QBetrayer,
-			"Warlord of Blood": d1.QWarlord}[mon.Unique.Name]; ok {
-			q = uq
-		}
-	}
-	if sl := d1SetLevelOf(state.GetMap().GetName()); sl != nil && sl.SL == d1.SLPoisonWater && state.QuestActive(d1.QPWater) != d1.QuestInit {
+	if state.onSetLevelOf(state.GetMap(), d1.QPWater) && state.QuestActive(d1.QPWater) != d1.QuestInit {
 		clean := true
 		for _, a := range state.GetMap().Actors() {
 			clean = clean && (a.d1Monster == nil || a.d1Monster == mon || a.d1Monster.Golem || !a.IsAlive())
@@ -789,28 +779,21 @@ func d1QuestKill(ctx ActionContext, mon *D1Monster) {
 			state.mapGen.cleanD1Water(state.GetMap())
 		}
 	}
-	if q < 0 || state.QuestActive(q) == d1.QuestDone {
-		return
+	f.fireQuestTriggers(EventKill, mon.Data.ID, "")
+	if mon.Unique != nil {
+		f.fireQuestTriggers(EventKill, mon.Unique.Name, "")
 	}
-	f.completeD1Quest(q)
-	if n, ok := map[int]int{d1.QSkelKing: 82, d1.QButcher: 80, d1.QGarbud: 61, d1.QZhar: 62, d1.QBetrayer: 83, d1.QWarlord: 94}[q]; ok {
-		f.PlayD1HeroSound(n)
+}
+
+// d1EndTextWindow is the end_text outcome: Diablo's death screen.
+func (f *Factory) d1EndTextWindow() {
+	if ui := f.UI(); ui != nil {
+		ui.OpenTextWindow(util.ToLabelText(append(d1EndText(), "",
+			"Yet what dwells below has taken his measure. Every level of the dungeon now breeds",
+			"stronger things, and richer spoils. Gillian collects for the town, should you wish",
+			"to see them walk again.")))
 	}
-	switch q {
-	case d1.QBetrayer:
-		state.SetQuestVar(q, 1, 7)
-		state.SetQuestVar(q, 2, 4)
-		state.SetQuestActive(d1.QDiablo, d1.QuestActive)
-		UpdateD1Quests(state, state.GetMap())
-	case d1.QDiablo:
-		if ui := ctx.UserInterface(); ui != nil {
-			ui.OpenTextWindow(util.ToLabelText(append(d1EndText(), "",
-				"Yet what dwells below has taken his measure. Every level of the dungeon now breeds",
-				"stronger things, and richer spoils. Gillian collects for the town, should you wish",
-				"to see them walk again.")))
-		}
-		ctx.Msg("The dungeon stirs: monsters and loot below are stronger now.")
-	}
+	f.Msg("The dungeon stirs: monsters and loot below are stronger now.")
 }
 
 func d1EndText() []string {
@@ -820,32 +803,13 @@ func d1EndText() []string {
 	return strings.Split(string(data), "\n")
 }
 
-// d1QuestItemPickedUp ports CheckQuestItem.
+// d1QuestItemPickedUp ports CheckQuestItem: the mod's on_item_pickup triggers, named by the item picked up.
 func (f *Factory) d1QuestItemPickedUp(it *d1.Item) {
-	s := f.State
-	switch it.BaseIdx {
-	case d1.IdiOptAmulet:
-		f.completeD1Quest(d1.QBlind)
-	case d1.IdiMushroom:
-		if s.QuestActive(d1.QMushroom) == d1.QuestActive && s.QuestVar(d1.QMushroom, 1) == d1.QSMushSpawned {
-			f.PlayD1HeroSound(95)
-			s.SetQuestVar(d1.QMushroom, 1, d1.QSMushPicked)
-		}
-	case d1.IdiAnvil, d1.IdiRock:
-		q := map[int]int{d1.IdiAnvil: d1.QAnvil, d1.IdiRock: d1.QRock}[it.BaseIdx]
-		if s.QuestActive(q) == d1.QuestInit {
-			s.SetQuestActive(q, d1.QuestActive)
-			s.SetQuestVar(q, 1, 1)
-		}
-		if s.QuestLog(q) {
-			f.PlayD1HeroSound(map[int]int{d1.QAnvil: 89, d1.QRock: 87}[q])
-		}
-	case d1.IdiGldnElix:
-		f.PlayD1HeroSound(88)
-	case d1.IdiArmOfVal:
-		f.completeD1Quest(d1.QBlood)
-		f.PlayD1HeroSound(91)
+	items := f.D1().D.Items
+	if it.BaseIdx < 0 || it.BaseIdx >= len(items) {
+		return
 	}
+	f.fireQuestTriggers(EventItemPickup, items[it.BaseIdx].InternalName, "")
 }
 
 // d1QuestDrop ports SpawnItem's Black Mushroom branch: once Adria has the mushroom, the next ordinary monster
@@ -901,7 +865,7 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 				f.dropD1Item(gen.SpawnUnique(d1.UItemOptAmulet, d1DungeonLevel(s)), cell(2*sp[0]+16+5, 2*sp[1]+16+5))
 			}
 		}
-		f.say(o.Name(), d1.QuestMsgs[q])
+		f.say(o.Name(), s.QuestDefs()[q].LogText)
 	case d1.ObjPEDISTAL: // OperatePedistal
 		q := d1.QBlood
 		stones := s.QuestVar(q, 2)
@@ -930,11 +894,11 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 			}
 			UpdateD1Quests(s, m)
 		}
-		f.say(o.Name(), d1.QuestMsgs[d1.QSchamb])
+		f.say(o.Name(), s.QuestDefs()[d1.QSchamb].LogText)
 	case d1.ObjBOOK2L: // OperateBook
-		if m.GetName() == D1LazarusLevel {
+		if s.onSetLevelOf(m, d1.QBetrayer) {
 			f.operateD1VileBook(o, player)
-		} else if sl := d1SetLevelOf(m.GetName()); obj.Active && sl != nil && sl.SL == d1.SLBoneChamb {
+		} else if obj.Active && s.onSetLevelOf(m, d1.QSchamb) {
 			obj.Active = false
 			h := player.hero
 			h.SpellLevels[d1.SplGuardian] = min(h.SpellLevels[d1.SplGuardian]+1, 15)
@@ -973,25 +937,12 @@ func (f *Factory) D1MonsterGreeting(a *Actor) {
 	}
 }
 
-// d1DungMsgs ports PlayDungMsgs: the hero's line on first entering 1, 5, 9 and 13, and Diablo's on 16, each once.
+// d1DungMsgs ports PlayDungMsgs: the mod's on_enter_level triggers, named by the depth reached. Set levels and
+// town have none. The "each once" is the triggers' own business -- they set and test a flag.
 func (f *Factory) d1DungMsgs(m *gridmap.GridMap[*Actor, *Item, Object]) {
-	s := f.State
 	dlvl := LevelFromName(m.GetName())
-	if d1SetLevelOf(m.GetName()) != nil || dlvl == 0 {
+	if f.State.setLevelOf(m.GetName()) != nil || dlvl == 0 {
 		return
 	}
-	once := func(key string) bool {
-		key = "d1:dungmsg:" + key
-		if s.GetFlags().IsSet(key) {
-			return false
-		}
-		s.GetFlags().SetTrue(key)
-		return true
-	}
-	switch {
-	case (dlvl == 1 || dlvl == 5 || dlvl == 9 || dlvl == 13) && once(fmt.Sprint(dlvl)): // cathedral, catacombs, caves, hell
-		f.PlayD1HeroSound(map[int]int{1: 97, 5: 96, 9: 98, 13: 99}[dlvl])
-	case dlvl == 16 && once("16"): // Diablo's greeting; 1.09 checks _pLvlVisited[15] by mistake and never plays it
-		f.playD1Sound("PS_DIABLVLINT")
-	}
+	f.fireQuestTriggers(EventEnterLevel, fmt.Sprint(dlvl), "")
 }

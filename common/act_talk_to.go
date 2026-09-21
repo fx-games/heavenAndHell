@@ -3,7 +3,6 @@ package common
 import (
 	"fmt"
 	"math/rand"
-	"rpg/d1"
 	"rpg/util"
 )
 
@@ -29,9 +28,9 @@ func d1Greeting(gossip map[string][]string, vendorType VendorType) string {
 func d1TalkTopics(context ActionContext, npc *Actor) []util.MenuItem {
 	var items []util.MenuItem
 	state := context.GameState
-	for q, name := range d1.QuestNames {
+	for q, def := range state.QuestDefs() {
 		if id := state.d1QuestTopic(npc.GetVendorType(), q); id != "" {
-			items = append(items, util.MenuItem{MainText: name, Action: func() { state.factory.say(npc.Name(), id) }})
+			items = append(items, util.MenuItem{MainText: def.Name, Action: func() { state.factory.say(npc.Name(), id) }})
 		}
 	}
 	items = append(items, util.MenuItem{MainText: "Gossip", Action: func() {

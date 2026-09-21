@@ -244,6 +244,8 @@ type Data struct {
 	Spells         []SpellData         // index = SPL_ value
 	Objects        []ObjData           // index = OBJ_ value
 	Gossip         map[string][]string // town NPC internal_name -> TEXT_* ids of its gossip, greeting first (assets/data/gossip)
+	QuestDefs      []defs.Quest        // the mod's quests, in quest-id order (assets/data/quests.rec)
+	QuestTriggers  []defs.Trigger      // its triggers, conditions already compiled
 	Texts          map[string]string   // TEXT_* id -> gossip, quest and book text, paragraphs split by "\n\n"
 	TextSfx        map[string]string   // TEXT_* id -> the speech D1 plays with it (alltext's sfxnr, see SfxFiles)
 	levels         levelData           // set pieces and tile tables (assets/data/levels)
@@ -348,6 +350,9 @@ func load(fsys fs.FS) (*Data, error) {
 		tables[n] = rows
 	}
 	if d.Monsters, err = defs.ReadMonsters(fsys); err != nil {
+		return nil, err
+	}
+	if d.QuestDefs, d.QuestTriggers, err = defs.ReadQuests(fsys); err != nil {
 		return nil, err
 	}
 	for _, r := range tables["xl_umon"] {
