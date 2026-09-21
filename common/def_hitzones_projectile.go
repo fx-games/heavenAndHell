@@ -1,0 +1,130 @@
+package common
+
+import (
+	"rpg/geometry"
+	"rpg/gridmap"
+	"rpg/util"
+)
+
+// Hit zones for spells whose shape the original six could not express: a bolt that STOPS on what it hits, a ring,
+// a box and a forward cone. They follow the same contract as the zones in def_hitzones.go - a name, a parameter
+// list, and positions from an origin and a target - and are registered alongside them.
+
+// BoltAoE (bolt_aoe(maxLen)) is a flying bolt: the cells it passes through, ending on the first cell holding an
+// actor or a solid object, or on the wall that stops it. ray_aoe and bresenham_aoe fly straight through actors,
+// so neither can express a missile that is consumed by its first victim.
+func BoltAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
+	maxLen := args.GetIntOrDefault(0, 20)
+	return &AoEResolver{
+		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
+			currentMap := gridMap()
+			var result []geometry.Point
+			for _, p := range projectileLine(currentMap, origin, target, maxLen) {
+				result = append(result, p)
+				if currentMap.IsActorAt(p) || isSolidObjectAt(currentMap, p) {
+					break
+				}
+			}
+			return result
+		},
+	}
+}
+
+// RingAoE (ring_aoe(radius)) is the hollow square ring `radius` cells out from the origin, keeping only the cells
+// the origin has a clear line to. Ring of Fire lays its wall on exactly this shape.
+func RingAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
+	radius := args.GetIntOrDefault(0, 3)
+	return &AoEResolver{
+		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
+			currentMap := gridMap()
+			var result []geometry.Point
+			for _, p := range d1Ring(origin, radius) {
+				if currentMap.Contains(p) && lineIsClear(currentMap, origin, p) {
+					result = append(result, p)
+				}
+			}
+			return result
+		},
+	}
+}
+
+// BoxAoE (box_aoe(radius)) is the filled square of side 2*radius+1 centred on the origin. Apocalypse blasts every
+// monster in such a box, and Flash lights up the one square around the caster.
+func BoxAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
+	radius := args.GetIntOrDefault(0, 1)
+	return &AoEResolver{
+		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
+			currentMap := gridMap()
+			var result []geometry.Point
+			for dy := -radius; dy <= radius; dy++ {
+				for dx := -radius; dx <= radius; dx++ {
+					if p := (geometry.Point{X: origin.X + dx, Y: origin.Y + dy}); currentMap.Contains(p) {
+						result = append(result, p)
+					}
+				}
+			}
+			return result
+		},
+	}
+}
+
+// ConeAoE (cone_aoe(length, halfWidth)) is a front that sets off from the origin towards the target and widens as
+// it goes: Flame Wave's rolling wall of fire. Cells behind a wall are dropped, so the wave does not wash through
+// rock.
+func ConeAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
+	length := args.GetIntOrDefault(0, 8)
+	halfWidth := args.GetIntOrDefault(1, 3)
+	return &AoEResolver{
+		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
+			currentMap := gridMap()
+			dir := D1DirTo(origin, target)
+			forward, left, right := D1Dirs[dir], D1Dirs[(dir+2)%8], D1Dirs[(dir+6)%8]
+			var result []geometry.Point
+			for step := 1; step <= length; step++ {
+				centre := origin.Add(geometry.Point{X: forward.X * step, Y: forward.Y * step})
+				if !currentMap.Contains(centre) || !currentMap.IsTransparent(centre) {
+					break
+				}
+				result = append(result, centre)
+				spread := min(halfWidth, step/2+1)
+				for _, side := range []geometry.Point{left, right} {
+					for w := 1; w <= spread; w++ {
+						p := centre.Add(geometry.Point{X: side.X * w, Y: side.Y * w})
+						if !currentMap.Contains(p) || !currentMap.IsTransparent(p) {
+							break
+						}
+						result = append(result, p)
+					}
+				}
+			}
+			return result
+		},
+	}
+}
+
+// projectileLine is the cells a missile from `origin` towards `target` crosses, up to maxLen or the first wall.
+func projectileLine(currentMap *gridmap.GridMap[*Actor, *Item, Object], origin, target geometry.Point, maxLen int) []geometry.Point {
+	open := func(p geometry.Point) bool { return currentMap.Contains(p) && currentMap.IsTransparent(p) }
+	d := target.Sub(origin)
+	n := max(geometry.Abs(d.X), geometry.Abs(d.Y))
+	if n == 0 {
+		return nil
+	}
+	k := (maxLen + n - 1) / n
+	far := origin.Add(geometry.Point{X: d.X * k, Y: d.Y * k})
+	var cells []geometry.Point
+	for _, p := range geometry.LineOfSight(origin, far, func(p geometry.Point) bool { return p == origin || open(p) })[1:] {
+		if len(cells) == maxLen || !open(p) {
+			break
+		}
+		cells = append(cells, p)
+	}
+	return cells
+}
+
+// lineIsClear: no wall stands between the two cells.
+func lineIsClear(currentMap *gridmap.GridMap[*Actor, *Item, Object], from, to geometry.Point) bool {
+	open := func(p geometry.Point) bool { return currentMap.Contains(p) && currentMap.IsTransparent(p) }
+	los := geometry.LineOfSight(from, to, func(p geometry.Point) bool { return p == from || p == to || open(p) })
+	return len(los) > 0 && los[len(los)-1] == to
+}

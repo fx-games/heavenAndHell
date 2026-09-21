@@ -15,6 +15,10 @@ func GetAllHitZones() map[string]func(gridMap func() *gridmap.GridMap[*Actor, *I
 		"dijkstra_aoe":   DijkstraAoE,
 		"wall_aoe":       WallAoE,
 		"neighbors_only": TilesAroundTarget,
+		"bolt_aoe":       BoltAoE,
+		"ring_aoe":       RingAoE,
+		"box_aoe":        BoxAoE,
+		"cone_aoe":       ConeAoE,
 	}
 }
 
@@ -26,6 +30,10 @@ func HitZoneFromString(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], z
 		if resolver, ok := allHitZones[parametrizedHitZone]; ok {
 			return resolver(gridMap, args)
 		}
+	}
+	// a bare name is a zone that takes no parameters, the way NewTargetingRulesFromString reads one
+	if resolver, ok := allHitZones[zone]; ok {
+		return resolver(gridMap, util.Arguments{})
 	}
 	return OneTargetTile(gridMap, util.Arguments{})
 }
