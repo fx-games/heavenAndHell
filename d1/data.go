@@ -143,6 +143,10 @@ const D1ItemCount = 156
 // through the same defs.ReadItems every mod uses.
 type ItemData = defs.Item
 
+// Vendor is the unified store record (defs.Vendor). Diablo's stores come out of mods/d1/data/stores.rec
+// through the same defs.ReadVendors every mod uses.
+type Vendor = defs.Vendor
+
 // ITYPE_ values.
 const (
 	ITypeMisc = iota
@@ -232,6 +236,8 @@ type Data struct {
 	Monsters       []MonsterData
 	UniqueMonsters []UniqueMonsterData
 	Items          []ItemData
+	ItemIdx        map[string]int      // item internal_name -> index into Items
+	Vendors        map[string]Vendor   // store internal_name -> its record (assets/data/stores.rec)
 	Prefixes       []Affix
 	Suffixes       []Affix
 	UniqueItems    []UniqueItemData
@@ -319,6 +325,12 @@ func Load(fsys fs.FS) (*Data, error) {
 	d, err := load(fsys)
 	if d != nil {
 		d.Items = hellfireItemOrder(d.Items)
+		d.ItemIdx = make(map[string]int, len(d.Items))
+		for i, it := range d.Items {
+			if _, seen := d.ItemIdx[it.InternalName]; !seen {
+				d.ItemIdx[it.InternalName] = i
+			}
+		}
 		d.Spells[SplNova].BookLvl, d.Spells[SplApocalypse].BookLvl = 14, 19 // Hellfire's books of Nova and Apocalypse
 	}
 	return d, err
@@ -443,7 +455,7 @@ func loadRecTables(fsys fs.FS, d *Data) error {
 	if propertyDefs, err = loadPropertyDefs(fsys); err != nil {
 		return err
 	}
-	if err = loadStoreTables(fsys); err != nil {
+	if err = loadStoreTables(fsys, d); err != nil {
 		return err
 	}
 	if err = loadMonsterTables(fsys); err != nil {

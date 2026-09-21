@@ -1,21 +1,59 @@
-%rec: boy_shuns
-# The item types Hellfire's Wirt keeps away from each class, for his first 200 tries (SpawnBoy).
-# One record per class, in PC_ order; shuns is a list of weapon and armour types.
+# Diablo's town vendors in the unified stores.rec schema every mod uses (see defs.Vendor).
+# Ports Hellfire's SpawnSmith/SpawnPremium/SpawnWitch/SpawnHealer/SpawnBoy: where Heaven&Hell names the
+# items a vendor sells, Diablo names the criteria and rolls the whole item table through them. Both are the
+# one record; these vendors just use its filter half.
+#
+# item_count is the stock roll inclusive of both ends, straight off defs.h's store sizes.
+# max_value is MAX_VENDOR_VALUE, tries is how often SpawnOnePremium/SpawnBoy re-rolls for a shopper.
 
-class: Warrior
-shuns: bow staff
+internal_name: smith
+item_count: 10-24
+max_value: 200000
+double_drops: true
+exclude_types: misc gold ring amulet
+exclude_charged_types: staff
 
-class: Rogue
-shuns: sword staff axe mace shield
+internal_name: premium
+item_count: 1
+max_value: 200000
+tries: 150
+min_dlvl_divisor: 4
+exclude_types: misc gold
+slot_levels: -1 -1 -1 0 0 0 0 1 1 1 1 2 2 3 3
 
-class: Sorcerer
-shuns: staff axe bow mace
+internal_name: witch
+item_count: 10-24
+max_value: 200000
+always: potion_of_mana
+always: potion_of_full_mana
+always: scroll_of_town_portal
+types: misc staff
+featured_misc_id: IMISC_BOOK
+featured_count: 0-3
+exclude_misc_ids: IMISC_MANA IMISC_FULLMANA IMISC_HEAL IMISC_FULLHEAL
+exclude_misc_ids: IMISC_OILOF IMISC_OILACC IMISC_OILMAST IMISC_OILSHARP IMISC_OILDEATH IMISC_OILSKILL
+exclude_misc_ids: IMISC_OILBSMTH IMISC_OILFORT IMISC_OILPERM IMISC_OILHARD IMISC_OILIMP
+exclude_spells: SPL_TOWN SPL_RESURRECT SPL_HEALOTHER
 
-class: Monk
-shuns: bow marmor shield mace
+internal_name: healer
+item_count: 10-19
+always: potion_of_healing
+always: potion_of_full_healing
+types: misc
+misc_ids: IMISC_ELIXSTR IMISC_ELIXMAG IMISC_ELIXDEX IMISC_ELIXVIT IMISC_REJUV IMISC_FULLREJUV
+items: scroll_of_healing
 
-class: Bard
-shuns: axe mace staff
-
-class: Barbarian
-shuns: bow staff
+# Wirt. The types he keeps away from each class are Hellfire's SpawnBoy table; he only honours them for his
+# first shun_tries rolls, then takes what he can get.
+internal_name: boy
+item_count: 1
+max_value: 200000
+tries: 250
+shun_tries: 200
+exclude_types: misc gold
+shuns: Warrior bow staff
+shuns: Rogue sword staff axe mace shield
+shuns: Sorcerer staff axe bow mace
+shuns: Monk bow marmor shield mace
+shuns: Bard axe mace staff
+shuns: Barbarian bow staff
