@@ -5,6 +5,7 @@ import (
 	"rpg/common"
 	"rpg/d1"
 	"rpg/util"
+	"strings"
 	"testing"
 )
 
@@ -72,23 +73,55 @@ func TestRestoredEffectsResolveByName(t *testing.T) {
 	// Phase 5 folded the D1 spells into this same model: each one names a hit zone and an on-hit effect in its
 	// content, and nothing resolves through a spell enum any more. Every mapping the content declares must
 	// produce a zone that answers with positions and a non-nil effect.
-	for spell, effectName := range d1.SpellEffect {
+	for spell, declared := range d1.SpellEffect {
 		zoneName := d1.SpellHitZone[spell]
 		zone := common.HitZoneFromString(factory.State.GetMap, zoneName)
 		if zone == nil || zone.GetHitPositions == nil {
 			t.Errorf("spell %d: hit zone %q did not resolve", spell, zoneName)
 		}
-		name, args := effectName, util.Arguments{}
-		if util.LooksLikeAFunction(effectName) {
-			name, args = util.GetNameAndArgs(effectName)
+		// a bare name resolving to the fallback zone is how a typo hides: a misspelt zone silently becomes
+		// target_only. Anything that looks parametrized must name a zone the registry actually knows.
+		if base := zoneName; base != "" {
+			if util.LooksLikeAFunction(base) {
+				base, _ = util.GetNameAndArgs(base)
+			}
+			if _, known := common.GetAllHitZones()[base]; !known {
+				t.Errorf("spell %d: hit zone %q is not a registered zone", spell, zoneName)
+			}
 		}
-		if _, exists := factory.GetAllHitEffects()[name]; !exists {
-			t.Errorf("spell %d: effect %q missing from GetAllHitEffects", spell, name)
-			continue
-		}
-		// the cast appends the caster's spell level, so resolve the way castFromData does
-		if got := factory.NewOnHitEffectFromNameAndArgs(name, append(args, "1")); got == nil || got.Activate == nil {
-			t.Errorf("spell %d: effect %q resolved to a nil or inert HitEffect", spell, effectName)
+		for _, effectName := range declared {
+			name, args := effectName, util.Arguments{}
+			if util.LooksLikeAFunction(effectName) {
+				name, args = util.GetNameAndArgs(effectName)
+			}
+			if _, exists := factory.GetAllHitEffects()[name]; !exists {
+				t.Errorf("spell %d: effect %q missing from GetAllHitEffects", spell, name)
+				continue
+			}
+			// the cast appends the caster's spell level, so resolve the way castFromData does
+			got := factory.NewOnHitEffectFromNameAndArgs(name, append(args, "1"))
+			if got == nil || got.Activate == nil {
+				t.Errorf("spell %d: effect %q resolved to a nil or inert HitEffect", spell, effectName)
+				continue
+			}
+			// on_self hands its remaining arguments to the untargeted registry, so a name that is wrong there
+			// resolves to nil in a way only a cast would notice.
+			if name == "on_self" {
+				if _, known := factory.GetAllUntargetedEffects()[args.Get(0)]; !known {
+					t.Errorf("spell %d: on_self names %q, which is not a registered untargeted effect", spell, args.Get(0))
+				}
+			}
+			// arguments split on '|', not ','. A mapping written with commas resolves its first argument to
+			// the whole list and its later ones to nothing, which every effect below survives silently. So
+			// insist that an effect declaring arguments really got the count it wrote.
+			if util.LooksLikeAFunction(effectName) {
+				if want := strings.Count(effectName[strings.Index(effectName, "(")+1:len(effectName)-1], "|") + 1; len(args) != want {
+					t.Errorf("spell %d: effect %q split into %d arguments, want %d", spell, effectName, len(args), want)
+				}
+				if strings.Contains(effectName, ",") && len(args) == 1 {
+					t.Errorf("spell %d: effect %q separates its arguments with ',' but they split on '|'", spell, effectName)
+				}
+			}
 		}
 	}
 	if len(d1.SpellEffect) == 0 {

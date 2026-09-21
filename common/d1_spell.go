@@ -349,27 +349,34 @@ func (c *spellCtx) payHP(hp int) {
 // its content declares. handled is false for a spell whose content carries no mapping yet, which then falls back
 // to the switch below. Nothing here knows which spell it is casting.
 func (c *spellCtx) castFromData(target geometry.Point) (ok, handled bool) {
-	effectName := d1.SpellEffect[c.spell]
-	if effectName == "" {
+	declared := d1.SpellEffect[c.spell]
+	if len(declared) == 0 {
 		return false, false
 	}
 	if !c.castAllowed(target) {
 		return false, true
 	}
-	name, args := effectName, util.Arguments{}
-	if util.LooksLikeAFunction(effectName) {
-		name, args = util.GetNameAndArgs(effectName)
-	}
-	// a roll grows with the spell's level, which only the cast knows
-	effect := c.f.NewOnHitEffectFromNameAndArgs(name, append(args, strconv.Itoa(c.slvl)))
-	if effect == nil {
-		return false, true
+	var effects []*HitEffect
+	for _, effectName := range declared {
+		name, args := effectName, util.Arguments{}
+		if util.LooksLikeAFunction(effectName) {
+			name, args = util.GetNameAndArgs(effectName)
+		}
+		// a roll grows with the spell's level, which only the cast knows
+		effect := c.f.NewOnHitEffectFromNameAndArgs(name, append(args, strconv.Itoa(c.slvl)))
+		if effect == nil {
+			return false, true
+		}
+		effects = append(effects, effect)
 	}
 	if hp := d1.SpellHealthCost[c.spell]; hp > 0 {
 		c.payHP(hp)
 	}
 	zone := HitZoneFromString(c.f.State.GetMap, d1.SpellHitZone[c.spell])
-	effect.Activate(c.caster, target, zone.GetHitPositions(c.origin(), target))
+	positions := zone.GetHitPositions(c.origin(), target)
+	for _, effect := range effects {
+		effect.Activate(c.caster, target, positions)
+	}
 	return true, true
 }
 
