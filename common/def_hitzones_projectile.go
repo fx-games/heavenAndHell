@@ -1,6 +1,7 @@
 package common
 
 import (
+	"rpg/d1"
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/util"
@@ -37,6 +38,45 @@ func BoltAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.A
 					}
 				}
 			}
+			return result
+		},
+	}
+}
+
+// HomingBoltAoE (homing_bolt_aoe(maxLen)) is Bone Spirit's flight (MI_Bonespirit): a bolt to the target cell that,
+// reaching it without hitting anything, turns towards the closest actor within 18 CrawlTable rings in clear line
+// (FindClosest), or flies on the way it came when there is none. Either way it stops at the first actor or wall.
+func HomingBoltAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
+	maxLen := args.GetIntOrDefault(0, 112)
+	return &AoEResolver{
+		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
+			m := gridMap()
+			var result []geometry.Point
+			fly := func(from, to geometry.Point, stopAtTo bool) bool { // true once something stopped it
+				for _, p := range projectileLine(m, from, to, maxLen) {
+					result = append(result, p)
+					if m.IsActorAt(p) || isSolidObjectAt(m, p) {
+						return true
+					}
+					if stopAtTo && p == to {
+						return false
+					}
+				}
+				return true
+			}
+			if fly(origin, target, true) {
+				return result
+			}
+			for _, ring := range d1.CrawlRings[1:19] {
+				for _, o := range ring {
+					p := target.Add(geometry.Point{X: o[0], Y: o[1]})
+					if p != origin && m.Contains(p) && m.IsActorAt(p) && lineIsClear(m, target, p) {
+						fly(target, p, false)
+						return result
+					}
+				}
+			}
+			fly(target, target.Add(target.Sub(origin)), false)
 			return result
 		},
 	}

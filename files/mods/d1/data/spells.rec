@@ -193,7 +193,7 @@ targeted: true
 cast_sfx: IS_CAST2
 launch_sfx: LS_BONESP
 impact_sfx: LS_BSIMPCT
-hit_zone: bolt_aoe(112)
+hit_zone: homing_bolt_aoe(112)
 effect: spell_damage(bone_spirit|magic|drain_third)
 health_cost: 6
 

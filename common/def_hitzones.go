@@ -9,17 +9,18 @@ import (
 
 func GetAllHitZones() map[string]func(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver {
 	return map[string]func(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.Arguments) *AoEResolver{
-		"target_only":    OneTargetTile,
-		"ray_aoe":        RayAoE,
-		"bresenham_aoe":  BresenhamAoE,
-		"dijkstra_aoe":   DijkstraAoE,
-		"wall_aoe":       WallAoE,
-		"neighbors_only": TilesAroundTarget,
-		"bolt_aoe":       BoltAoE,
-		"ring_aoe":       RingAoE,
-		"box_aoe":        BoxAoE,
-		"cone_aoe":       ConeAoE,
-		"chain_aoe":      ChainAoE,
+		"target_only":     OneTargetTile,
+		"ray_aoe":         RayAoE,
+		"bresenham_aoe":   BresenhamAoE,
+		"dijkstra_aoe":    DijkstraAoE,
+		"wall_aoe":        WallAoE,
+		"neighbors_only":  TilesAroundTarget,
+		"bolt_aoe":        BoltAoE,
+		"homing_bolt_aoe": HomingBoltAoE,
+		"ring_aoe":        RingAoE,
+		"box_aoe":         BoxAoE,
+		"cone_aoe":        ConeAoE,
+		"chain_aoe":       ChainAoE,
 	}
 }
 

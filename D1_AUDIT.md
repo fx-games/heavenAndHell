@@ -85,7 +85,7 @@ own Firebolt level, Phasing / the Holy shrine (`AddRndTeleport`), the mana shiel
   each flame's damage on its own. Ours burns all three cells for 20 ticks (`InfernoTicks(0)`).
 - **fixed — bolt reach.** 1.09's Firebolt, Lightning, Blood Star and Bone Spirit fly 256 ticks, i.e. until a wall
   stops them. Ours stop after 20 cells (`bolt_aoe(20)`, `ray_aoe(20)`).
-- **open — Bone Spirit's homing.** `MI_Bonespirit` flies to the target cell; if it gets there without hitting,
+- **fixed — Bone Spirit's homing.** `MI_Bonespirit` flies to the target cell; if it gets there without hitting,
   it turns towards the closest monster within 19 cells in line (`FindClosest`, CrawlTable order), or on in the
   hero's direction if there is none. Ours stops at the target cell.
 - **fixed — Teleport's landing.** `AddTeleport` lands on the first free cell (not solid, no monster, object or
