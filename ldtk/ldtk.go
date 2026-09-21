@@ -69,7 +69,7 @@ func (p *Property) AsMap() map[string]interface{} {
 }
 
 func (p *Property) IsNull() bool {
-	return p.Value == nil
+	return p == nil || p.Value == nil // an entity without the field at all reads as null too
 }
 
 // AsColor returns a property's value as a color.Color struct. Note that this function doesn't check to ensure the value is the specified type before returning it.

@@ -81,6 +81,10 @@ type Level struct {
 	Name        string // shown on arrival; empty lets the engine name the level
 	Tiles       string // a defs tile set name; empty lets the engine pick by depth
 	Transitions []Transition
+	// UpTarget overrides where this level's OWN ladder up leads. By default it leads to the level above, and
+	// the first level's to the town - but only the mod knows what its town calls that doorway, and the engine
+	// may not name it. Declared as "up: <target map>, <target location>".
+	UpTarget *Transition
 }
 
 // LoadLevels reads a mod's whole level list. Levels are indexed by dungeon level, so index 0 (town) stays empty
@@ -127,6 +131,13 @@ func LoadLevels(recs []recfile.Record, numLevels int) ([]Level, error) {
 				return nil, err
 			}
 			l.Transitions = append(l.Transitions, tr)
+		}
+		if up, ok := Field(r, "up"); ok {
+			p := strings.Split(up, ",")
+			if len(p) != 2 {
+				return nil, fmt.Errorf("levels.rec: up %q: want target map, target location", up)
+			}
+			l.UpTarget = &Transition{TargetMap: strings.TrimSpace(p[0]), TargetLocation: strings.TrimSpace(p[1]), Up: true}
 		}
 		levels[dlvl] = l
 	}

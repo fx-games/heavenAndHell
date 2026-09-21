@@ -6,6 +6,9 @@
 #   tiles        which of the engine's tile sets draws it: cathedral, catacombs, caves, hell.
 #   transition   an extra way off this level, beyond the ladders up and down every level gets:
 #                "<location name>, <target map>, <target location>, up|down".
+#   up           where this level's OWN ladder up leads: "<target map>, <target location>". Every level's
+#                leads to the one above it and the first level's to the town, but this game's town calls its
+#                cathedral door to_cathedral, and the engine is not allowed to know that name.
 #
 # How deep this game goes is decided here and nowhere else: the deepest dlvl declared below is the bottom of
 # the dungeon, and the engine gives that level no ladder down.
@@ -32,6 +35,7 @@ dlvl: 1
 generator: accretion
 name: Level 1\nCathedral
 tiles: cathedral
+up: Town, to_cathedral
 templates: assets/maps.ldtk
 template_prefix: Cath
 forbid_room: Cata_template_for_king_zedek

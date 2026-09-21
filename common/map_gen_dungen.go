@@ -133,6 +133,9 @@ func (g *MapGenerator) addDungenStairs(m *gridmap.GridMap[*Actor, *Item, Object]
 	if dlvl <= 1 {
 		up = gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "to_dungeon"}
 	}
+	if t := lvl.UpTarget; t != nil { // the mod named where its own ladder up leads; the engine may not guess it
+		up = gridmap.Transition{TargetMap: t.TargetMap, TargetLocation: t.TargetLocation}
+	}
 	m.AddTransitionAt(entrance, up)
 	placed = append(placed, entrance)
 

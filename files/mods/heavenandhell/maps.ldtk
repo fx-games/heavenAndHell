@@ -11,7 +11,7 @@
 	"iid": "0aad30e0-8990-11ee-aa96-5fbb691582f7",
 	"jsonVersion": "1.4.1",
 	"appBuildId": 471015,
-	"nextUid": 146,
+	"nextUid": 148,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "Free",
@@ -478,6 +478,80 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "TargetMap",
+					"doc": null,
+					"__type": "String",
+					"uid": 146,
+					"type": "F_String",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "ValueOnly",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": false,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "TargetLocation",
+					"doc": null,
+					"__type": "String",
+					"uid": 147,
+					"type": "F_String",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "ValueOnly",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": false,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -1330,7 +1404,7 @@
 							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "to_cathedral", "__tile": null, "defUid": 47, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["to_cathedral"]
-							}] }]
+							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_1", "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": "ladder_up", "__tile": null, "defUid": 147, "realEditorValues": [] }]
 						},
 						{
 							"__identifier": "Location",
@@ -1349,7 +1423,7 @@
 							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "to_catacombs", "__tile": null, "defUid": 47, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["to_catacombs"]
-							}] }]
+							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_4", "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": "to_town", "__tile": null, "defUid": 147, "realEditorValues": [] }]
 						},
 						{
 							"__identifier": "Location",
@@ -1368,7 +1442,7 @@
 							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "to_caves", "__tile": null, "defUid": 47, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["to_caves"]
-							}] }]
+							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_6", "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": "to_town", "__tile": null, "defUid": 147, "realEditorValues": [] }]
 						},
 						{
 							"__identifier": "Location",
