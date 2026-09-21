@@ -42,7 +42,7 @@ func (d *ChangeResourceAction) Execute(context ActionContext) []Action {
 		}
 		receiver.SetHurt()
 		if d.resourceName == stats.Health && receiver.IsAlive() {
-			d1HitRecovery(receiver, int(-d.changedByAmount))
+			d1HitRecovery(context.GameState.factory, receiver, int(-d.changedByAmount), d.cause.GetActor())
 		}
 		if d.resourceName == stats.Health && receiver.hero != nil && receiver == context.GameState.GetPlayer() {
 			whenVisible(context.ActionBroker, receiver, func() { d1HeroPainSound(context, receiver) })

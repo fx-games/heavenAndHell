@@ -573,9 +573,16 @@ func d1Alert(victim, attacker *Actor) {
 
 // d1HitRecovery ports M_StartHit for any damage a monster takes. The hero flinches only where D1 calls
 // StartPlrHit (D1StartPlrHit).
-func d1HitRecovery(victim *Actor, dam int) {
+// d1HitRecovery routes a blow to the flinch rules for whatever was hit. attacker is who dealt it, nil when the
+// loss is self-inflicted (a spell's health cost, a status effect ticking): the hero flinches at blows, not at
+// his own upkeep, so Blood Star must not stagger the caster who paid for it.
+func d1HitRecovery(f *Factory, victim *Actor, dam int, attacker *Actor) {
 	if victim.d1Monster != nil {
 		d1MonsterGotHit(victim, dam)
+		return
+	}
+	if victim.hero != nil && attacker != nil && attacker != victim {
+		D1StartPlrHit(f, victim, dam<<6, dam, false)
 	}
 }
 
