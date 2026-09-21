@@ -80,6 +80,16 @@ var (
 	SpellSfx      map[int][3]string
 )
 
+// SpellHitZone and SpellEffect are how a spell is expressed in the engine's one effect model: the named hit zone
+// it reaches over and the named on-hit effect it applies there. SpellHealthCost is what a cast takes out of the
+// caster's own life, beside its mana. All three are columns of assets/data/spells.rec; a spell without an effect
+// has no mapping yet and still runs from code.
+var (
+	SpellHitZone    map[int]string
+	SpellEffect     map[int]string
+	SpellHealthCost map[int]int
+)
+
 // spellIDByName binds D1's SPL_ ids to this package's constants, so spells.rec can be keyed by the name D1 uses
 // instead of by the raw slot number.
 var spellIDByName = map[string]int{
@@ -139,6 +149,7 @@ func loadSpellTables(fsys fs.FS) error {
 		return err
 	}
 	SpellResist, SpellTargeted, SpellSfx = map[int]int{}, map[int]bool{}, map[int][3]string{}
+	SpellHitZone, SpellEffect, SpellHealthCost = map[int]string{}, map[int]string{}, map[int]int{}
 	for _, r := range recs["default"] {
 		m := r.ToMap("")
 		name := m.GetStringOrDefault("id", "")
@@ -158,6 +169,13 @@ func loadSpellTables(fsys fs.FS) error {
 		}
 		SpellSfx[spell] = [3]string{m.GetStringOrDefault("cast_sfx", ""),
 			m.GetStringOrDefault("launch_sfx", ""), m.GetStringOrDefault("impact_sfx", "")}
+		if v := m.GetStringOrDefault("effect", ""); v != "" {
+			SpellEffect[spell] = v
+			SpellHitZone[spell] = m.GetStringOrDefault("hit_zone", "target_only")
+		}
+		if v := m.GetIntOrDefault("health_cost", 0); v != 0 {
+			SpellHealthCost[spell] = v
+		}
 	}
 	spellNames, SpellDescriptions = nil, nil
 	for _, r := range recs["slot"] {

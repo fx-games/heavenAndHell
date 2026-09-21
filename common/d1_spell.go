@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"image/color"
 	"rpg/d1"
 	"rpg/defs"
 	"rpg/geometry"
@@ -10,6 +9,7 @@ import (
 	"rpg/stats"
 	"rpg/util"
 	"slices"
+	"strconv"
 )
 
 // D1 spell status effects (decision 6: Mana Shield, Infravision and Stone Curse are status effects).
@@ -48,8 +48,13 @@ func (a *SpellAction) Execute(ctx ActionContext) []Action {
 	f := ctx.GameState.factory
 	c := &spellCtx{f: f, caster: a.caster, h: a.caster.hero, s: a.caster.HeroSheet(), spell: a.spell, slvl: a.slvl,
 		m: ctx.GameState.GetMap(), cause: a.cause, dealt: map[*Actor]int{}, ctx: ctx}
+	c.setSpell(a.spell)
 	from := c.origin() // Teleport moves the caster
-	a.castSucceeded = c.cast(a.target)
+	if ok, handled := c.castFromData(a.target); handled {
+		a.castSucceeded = ok
+	} else {
+		a.castSucceeded = c.cast(a.target)
+	}
 	if a.castSucceeded {
 		sfx := d1.SpellSfx[a.spell]
 		playD1SfxAt(ctx, sfx[0], from)
@@ -84,6 +89,19 @@ type spellCtx struct {
 	from        *geometry.Point // where the spell comes from when not the caster: a rune
 	heroDealt   int             // whole points the hero's own TARGET_BOTH missiles dealt to him
 	lastBolt    *ProjectileDirectionAnimation
+	// how a hit resolves, set by whatever is dealing the damage rather than read back off a spell id
+	resist     int  // d1.ResistKind*
+	undeadOnly bool // only the undead are harmed (Holy Bolt)
+	drainThird bool // the hit takes a third of what the target has left (Bone Spirit)
+}
+
+// setSpell binds the hit rules of the spell being cast: its resistance kind and the two spells whose hits are
+// special. Nothing below strike reads the spell id.
+func (c *spellCtx) setSpell(spell int) {
+	c.spell = spell
+	c.resist = d1.SpellResist[spell]
+	c.undeadOnly = spell == d1.SplHolyBolt
+	c.drainThird = spell == d1.SplBoneSpirit
 }
 
 func (c *spellCtx) origin() geometry.Point {
@@ -153,26 +171,6 @@ func (c *spellCtx) rayToWall(from, to geometry.Point, maxLen int) (cells []geome
 	return cells, wall, false
 }
 
-// flight ports a travelling missile's path (GetMissilePos) from `from` towards `to` at velocity v: the cells it
-// passes, starting with its own, each with the ticks it spends there. It ends at a wall, after a solid object
-// (CheckMissileCol stops it there), or after 20 cells. Missiles that hit every tick they spend on a monster
-// (MI_Lightball, MI_Firemove) hit it that many times.
-func (c *spellCtx) flight(from, to geometry.Point, v int) (cells []geometry.Point, ticks []int) {
-	d := to.Sub(from)
-	for _, t := range d1.MissileFlight(d.X, d.Y, v, 255) {
-		p := from.Add(geometry.Point{X: t[0], Y: t[1]})
-		if n := len(cells); n > 0 && cells[n-1] == p {
-			ticks[n-1]++
-			continue
-		}
-		if n := len(cells); n == 20 || !c.open(p) || n > 0 && isSolidObjectAt(c.m, cells[n-1]) {
-			break
-		}
-		cells, ticks = append(cells, p), append(ticks, 1)
-	}
-	return cells, ticks
-}
-
 func isSolidObjectAt(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point) bool {
 	o := d1ObjectAt(m, p)
 	return o != nil && !o.IsWalkable(nil)
@@ -224,11 +222,11 @@ func resistBits(kind int) (resist, immune int) {
 // strike ports MonsterMHit for a player's spell: `ticks` hit rolls of dam64 (1/64) each.
 func (c *spellCtx) strike(a *Actor, dam64, ticks int) bool {
 	mon := a.d1Monster
-	resist, immune := resistBits(d1.SpellResist[c.spell])
-	if mon.MagicRes&immune != 0 || c.spell == d1.SplHolyBolt && mon.Data.Class != "MC_UNDEAD" && mon.AI != "AI_DIABLO" {
+	resist, immune := resistBits(c.resist)
+	if mon.MagicRes&immune != 0 || c.undeadOnly && mon.Data.Class != "MC_UNDEAD" && mon.AI != "AI_DIABLO" {
 		return false
 	}
-	if c.spell == d1.SplBoneSpirit {
+	if c.drainThird {
 		dam64 = (a.GetStats().GetResource(stats.Health).Value() - c.dealt[a]) << 6 / 3
 	}
 	chance := c.h.SpellHitChance(c.s, mon.Level)
@@ -274,7 +272,7 @@ func (c *spellCtx) hurtHero(p geometry.Point, mind, maxd int, shift bool, ticks 
 		return
 	}
 	mis := MisFlashTrap // a magic missile
-	switch d1.SpellResist[c.spell] {
+	switch c.resist {
 	case d1.ResistKindFire:
 		mis = MisFireWall
 	case d1.ResistKindLightning:
@@ -283,45 +281,6 @@ func (c *spellCtx) hurtHero(p geometry.Point, mind, maxd int, shift bool, ticks 
 	mc := &missileCtx{ctx: c.ctx, from: c.origin(), player: player, c: c}
 	mc.hit(mis, p, c.origin(), mind, maxd, shift, ticks)
 	c.heroDealt += mc.dealt
-}
-
-// fireball ports MI_Fireball: a bolt that bursts on the 3×3 around where it hits, dam whole points.
-func (c *spellCtx) fireball(from, to geometry.Point, dam int) {
-	impact, _ := c.bolt(from, to, func(a *Actor) bool { return c.strike(a, dam<<6, 1) })
-	c.burst(impact, from, dam<<6, 1)
-}
-
-// burst hits the 3×3 around center with `ticks` rolls of dam64, every cell not blocked from `from` (CheckBlock).
-func (c *spellCtx) burst(center, from geometry.Point, dam64, ticks int) {
-	for dy := -1; dy <= 1; dy++ {
-		for dx := -1; dx <= 1; dx++ {
-			p := center.Add(geometry.Point{X: dx, Y: dy})
-			if a := c.hitCell(p); a != nil && c.lineClear(from, p) {
-				c.strike(a, dam64, ticks)
-			}
-		}
-	}
-	c.animations = append(c.animations, NewHitAnimation(center, 0.4, defs.IconEffectFireBig, 2))
-}
-
-// nova ports MI_Nova: a lightning ball down every Nova ray, hitting every tick it spends on a monster
-// (MI_Lightball), dam whole points a hit.
-func (c *spellCtx) nova(o geometry.Point, dam int) {
-	for _, r := range d1.NovaRays {
-		cells, ticks := c.flight(o, o.Add(geometry.Point{X: r[0], Y: r[1]}), 16)
-		for i, p := range cells {
-			if a := c.hitCell(p); a != nil {
-				c.strike(a, dam<<6, ticks[i])
-			}
-		}
-	}
-	c.animations = append(c.animations, NewHitAnimation(o, 0.5, defs.IconEffectLightning, 2))
-}
-
-// boom ports MI_Boom: a blast that rolls to hit every tick until one lands, then hits once.
-func (c *spellCtx) boom(a *Actor, dam64 int) {
-	for i := 0; i < d1.BoomTries && !c.strike(a, dam64, 1); i++ {
-	}
 }
 
 func (c *spellCtx) secPerTile() float64 {
@@ -379,22 +338,6 @@ func (c *spellCtx) beam(to geometry.Point) {
 	}
 }
 
-// home ports the second half of Elemental and Bone Spirit: from where they arrived, find the closest monster.
-// It returns bolt's result; with no monster to fly at, the missile flies off (stopped is false).
-func (c *spellCtx) home(from geometry.Point, dam64 int) (impact geometry.Point, stopped bool) {
-	var best *Actor
-	for _, a := range c.m.Actors() {
-		if c.monsterAt(a.MapPosition()) == a && geometry.DistanceChebyshev(from, a.MapPosition()) < 19 && c.lineClear(from, a.MapPosition()) &&
-			(best == nil || geometry.DistanceSquared(from, a.MapPosition()) < geometry.DistanceSquared(from, best.MapPosition())) {
-			best = a
-		}
-	}
-	if best != nil && best.MapPosition() != from {
-		return c.bolt(from, best.MapPosition(), func(a *Actor) bool { return c.strike(a, dam64, 1) })
-	}
-	return from, false
-}
-
 func (c *spellCtx) payHP(hp int) {
 	c.caster.GetStats().GetResource(stats.Health).Decrease(hp)
 	if !c.caster.IsAlive() {
@@ -402,55 +345,65 @@ func (c *spellCtx) payHP(hp int) {
 	}
 }
 
+// castFromData resolves the spell through the one effect model: the hit zone, on-hit effect and targeting rules
+// its content declares. handled is false for a spell whose content carries no mapping yet, which then falls back
+// to the switch below. Nothing here knows which spell it is casting.
+func (c *spellCtx) castFromData(target geometry.Point) (ok, handled bool) {
+	effectName := d1.SpellEffect[c.spell]
+	if effectName == "" {
+		return false, false
+	}
+	if !c.castAllowed(target) {
+		return false, true
+	}
+	name, args := effectName, util.Arguments{}
+	if util.LooksLikeAFunction(effectName) {
+		name, args = util.GetNameAndArgs(effectName)
+	}
+	// a roll grows with the spell's level, which only the cast knows
+	effect := c.f.NewOnHitEffectFromNameAndArgs(name, append(args, strconv.Itoa(c.slvl)))
+	if effect == nil {
+		return false, true
+	}
+	if hp := d1.SpellHealthCost[c.spell]; hp > 0 {
+		c.payHP(hp)
+	}
+	zone := HitZoneFromString(c.f.State.GetMap, d1.SpellHitZone[c.spell])
+	effect.Activate(c.caster, target, zone.GetHitPositions(c.origin(), target))
+	return true, true
+}
+
+// castAllowed holds the two checks every cast makes: the spell has to work here, and a spell that needs a victim
+// needs one other than the caster.
+func (c *spellCtx) castAllowed(target geometry.Point) bool {
+	if defs.IsTownLevel(c.m.GetName()) && !c.f.Generator.D.Spells[c.spell].Town {
+		c.ctx.Msg("That spell doesn't work in town.")
+		c.f.PlayD1HeroSound(27)
+		return false
+	}
+	if d1.SpellTargeted[c.spell] && target == c.origin() && c.spell != d1.SplTeleport && c.spell != d1.SplGolem {
+		c.ctx.Msg("You need a target other than yourself.")
+		return false
+	}
+	return true
+}
+
 func (c *spellCtx) cast(target geometry.Point) bool {
 	f, h, s, slvl, o := c.f, c.h, c.s, c.slvl, c.origin()
 	clvl := h.Level
 	st := c.caster.GetStats()
-	inTown := defs.IsTownLevel(c.m.GetName())
-	if inTown && !f.Generator.D.Spells[c.spell].Town {
-		c.ctx.Msg("That spell doesn't work in town.")
-		f.PlayD1HeroSound(27)
-		return false
-	}
-	if d1.SpellTargeted[c.spell] && target == o && c.spell != d1.SplTeleport && c.spell != d1.SplGolem {
-		c.ctx.Msg("You need a target other than yourself.")
+	if !c.castAllowed(target) {
 		return false
 	}
 	switch c.spell {
-	case d1.SplFirebolt, d1.SplHolyBolt, d1.SplBloodStar:
-		dam := d1.FireboltDamage(d1Rng, s.Mag, slvl)
-		switch c.spell {
-		case d1.SplHolyBolt:
-			dam = d1.HolyBoltDamage(d1Rng, clvl)
-		case d1.SplBloodStar:
-			dam = d1.BloodStarDamage(s.Mag, slvl)
-			c.payHP(5)
-		}
-		c.bolt(o, target, func(a *Actor) bool { return c.strike(a, dam<<6, 1) })
 	case d1.SplHeal:
 		st.GetResource(stats.Health).Increase(float64(d1.HealAmount64(d1Rng, h.Class, clvl, slvl) >> 6))
-	case d1.SplLightning:
-		c.beam(target)
 	case d1.SplChain:
 		c.beam(target)
 		for _, a := range append([]*Actor(nil), c.m.Actors()...) {
 			if c.monsterAt(a.MapPosition()) == a && geometry.DistanceChebyshev(o, a.MapPosition()) < min(slvl+3, 19) {
 				c.beam(a.MapPosition())
 			}
-		}
-	case d1.SplFlash: // a burst of light over every cell within one square of the caster (d1.FlashRadius)
-		low, high := d1.FlashDamage64(d1Rng, clvl, slvl)
-		for dx := -d1.FlashRadius; dx <= d1.FlashRadius; dx++ {
-			for dy, dam := range map[int]int{-1: high, 0: low, 1: low} {
-				p := o.Add(geometry.Point{X: dx, Y: dy})
-				if a := c.hitCell(p); a != nil {
-					c.strike(a, dam, d1.FlashTicks)
-				}
-				c.animations = append(c.animations, NewHitAnimation(p, 0.4, defs.IconEffectLightning, 2))
-			}
-		}
-		if f.UI != nil {
-			f.UI().FlashScreen(color.RGBA{R: 255, G: 255, B: 255, A: 255}, 0.25)
 		}
 	case d1.SplIdentify:
 		item := f.identifyTarget
@@ -476,30 +429,6 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		h.Rage = d1.RageTurns(clvl)
 		c.caster.AddParametrizedStatusEffect(f.d1RageEffect(clvl))
 		SyncHero(c.caster)
-	case d1.SplFireWall, d1.SplLightWall: // AddFirewallC, MI_FirewallC / mi_lightning_wall
-		start, ok := c.freeNear(target, func(p geometry.Point) bool {
-			return p != o && c.m.IsTileWalkable(p) && !c.m.IsObjectAt(p) && c.lineClear(o, p)
-		})
-		if !ok {
-			return false
-		}
-		spawn := func(p geometry.Point, layers int) { f.spawnD1FireWall(c.caster, p, d1.SplFireWall, slvl, layers) }
-		if c.spell == d1.SplLightWall {
-			spawn = func(p geometry.Point, layers int) { f.spawnD1LightningWall(c.caster, p, slvl, clvl, layers) }
-		}
-		// the controller lays both arms from the start cell for 6 ticks: 11 cells, two walls on the start cell
-		dir := D1DirTo(o, target)
-		spawn(start, 2)
-		for _, side := range []int{dir + 2, dir + 6} {
-			p := start
-			for i := 1; i < 6; i++ {
-				p = p.Add(D1Dirs[side%8])
-				if !c.m.Contains(p) || !c.m.IsTileWalkable(p) {
-					break
-				}
-				spawn(p, 1)
-			}
-		}
 	case d1.SplMana: // missiles_rech_mana
 		amount := d1Rng.Intn(10) + 1
 		for i := 0; i < clvl; i++ {
@@ -522,13 +451,9 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 	case d1.SplJester: // missiles_jester: one of nine spells at the Jester's spell level
 		c.spell = [10]int{d1.SplFirebolt, d1.SplFirebolt, d1.SplFireball, d1.SplFireWall, d1.SplGuardian, d1.SplChain,
 			d1.SplTown, d1.SplTeleport, d1.SplApocalypse, d1.SplStone}[d1Rng.Intn(10)]
+		c.setSpell(c.spell)
 		c.ctx.Msg(fmt.Sprintf("The Jester casts %s.", f.Generator.D.Spells[c.spell].Name))
 		return c.cast(target)
-	case d1.SplImmolation: // AddNova + mi_fire_nova: a fireball down every Nova ray
-		dam := d1.NovaDamage(d1Rng, clvl, slvl)
-		for _, r := range d1.NovaRays {
-			c.fireball(o, o.Add(geometry.Point{X: r[0], Y: r[1]}), dam)
-		}
 	case d1.SplWarp: // missiles_warp: to the nearest stairs, beside them
 		return f.d1Warp(c)
 	case d1.SplReflect: // missiles_reflection
@@ -540,111 +465,16 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		c.ctx.Msg(fmt.Sprintf("You will turn back the next %d blows.", h.Reflections))
 	case d1.SplBerserk:
 		return f.d1Berserk(c, target, slvl)
-	case d1.SplRingOfFire: // missiles_ring + mi_fire_ring: fire walls three cells out, until a wall stops missiles
-		lvl := f.State.mapGen.levels[c.m.GetName()]
-		for _, p := range d1Ring(o, 3) {
-			if !c.m.Contains(p) || lvl != nil && lvl.CellSolid(p.X, p.Y) || c.m.IsObjectAt(p) || !c.lineClear(o, p) {
-				continue
-			}
-			if lvl != nil && lvl.CellMissile(p.X, p.Y) {
-				break
-			}
-			f.spawnD1FireWall(c.caster, p, d1.SplRingOfFire, slvl, 1)
-		}
 	case d1.SplTown:
 		return f.openD1Portal(c.caster)
-	case d1.SplStone:
-		var victim *Actor
-		c.freeNear(target, func(p geometry.Point) bool {
-			victim = c.monsterAt(p)
-			return victim != nil && victim.d1Monster.AI != "AI_DIABLO"
-		})
-		if victim == nil {
-			return false
-		}
-		victim.AddStatusEffect(StatusStone, d1.StoneTurns(slvl))
-		c.animations = append(c.animations, NewHitAnimation(victim.MapPosition(), 0.4, defs.IconEffectHit, 2))
-	case d1.SplPhasing:
-		f.d1RandomTeleport(c.caster)
-	case d1.SplManaShield:
-		c.caster.AddStatusEffect(StatusManaShield, -1)
-	case d1.SplFireball:
-		c.fireball(o, target, d1.FireballDamage(d1Rng, clvl, slvl))
 	case d1.SplGuardian:
 		p, ok := c.freeNear(target, c.emptyFloor)
 		if !ok {
 			return false
 		}
 		f.spawnD1Guardian(c.caster, p, d1.GuardianTurns(clvl, slvl))
-	case d1.SplWave:
-		dir := D1DirTo(o, target)
-		start := o.Add(D1Dirs[dir])
-		if !c.open(start) {
-			return true
-		}
-		starts := []geometry.Point{start}
-		for _, side := range []int{dir + 6, dir + 2} {
-			p := start
-			for j := 0; j < slvl>>1+2; j++ {
-				p = p.Add(D1Dirs[side%8])
-				if !c.open(p) {
-					break
-				}
-				starts = append(starts, p)
-			}
-		}
-		for _, p := range starts {
-			dam := d1.WaveDamage(d1Rng, clvl)
-			cells, ticks := c.flight(p, p.Add(D1Dirs[dir]), 16)
-			for i, q := range cells {
-				if a := c.hitCell(q); a != nil {
-					c.strike(a, dam<<6, ticks[i])
-				}
-			}
-			c.animations = append(c.animations, NewProjectileDirectionAnimation(c.caster, p, cells[len(cells)-1], c.secPerTile(), defs.IconEffectFireSmall, 2))
-		}
-	case d1.SplNova:
-		dam := d1.NovaDamage(d1Rng, clvl, slvl)
-		c.nova(o, dam)
-	case d1.SplInferno:
-		for n, p := range c.ray(o, target, 3) {
-			dam := d1.InfernoDamage64(d1Rng, clvl)
-			if a := c.hitCell(p); a != nil {
-				c.strike(a, dam, d1.InfernoTicks(n))
-			}
-			c.animations = append(c.animations, NewHitAnimation(p, 0.5, defs.IconEffectFireBig, 2))
-		}
 	case d1.SplGolem:
 		return f.summonD1Golem(c, target)
-	case d1.SplTeleport:
-		p, ok := c.freeNear(target, func(p geometry.Point) bool { return c.m.IsCurrentlyPassable(p) && !c.m.IsObjectAt(p) })
-		if !ok {
-			return false
-		}
-		f.d1MovePlayer(c.caster, p, "Teleport")
-	case d1.SplApocalypse:
-		// MI_Apoca: a blast on every monster in the box; 1.09 adds a second one when the caster has line to it
-		dam := d1.ApocalypseDamage(d1Rng, clvl)
-		for _, a := range append([]*Actor(nil), c.m.Actors()...) {
-			if d := a.MapPosition().Sub(o); c.monsterAt(a.MapPosition()) == a && d.X >= -8 && d.X < 8 && d.Y >= -8 && d.Y < 8 {
-				c.boom(a, dam<<6)
-				if c.lineClear(o, a.MapPosition()) {
-					c.boom(a, dam<<6)
-				}
-			}
-		}
-	case d1.SplElemental, d1.SplBoneSpirit:
-		dam := d1.ElementalDamage(d1Rng, clvl, slvl)
-		if c.spell == d1.SplBoneSpirit {
-			c.payHP(6)
-		}
-		arrived, stopped := c.bolt(o, target, func(a *Actor) bool { return c.strike(a, dam<<6, 1) })
-		if !stopped && geometry.DistanceChebyshev(o, arrived) >= geometry.DistanceChebyshev(o, target) {
-			arrived, stopped = c.home(arrived, dam<<6)
-		}
-		if stopped && c.spell == d1.SplElemental { // MI_Element's explosion: dam read as 1/64 a tick
-			c.burst(arrived, o, dam, d1.ElementalBurstTicks)
-		}
 	case d1.SplChargedBolt:
 		for n := d1.ChargedBolts(slvl); n > 0; n-- {
 			r := d1Rng.Intn(15) + 1
@@ -671,23 +501,23 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 
 // spawnD1FireWall places one cell of a fire wall (AddFirewall, MI_Firewall), for Fire Wall or Ring of Fire.
 // Hellfire's burns the hero too, dlvl·16 ticks longer, and for a flat 8·clvl/64 a tick (AddFirewall's bug).
-func (f *Factory) spawnD1FireWall(caster *Actor, p geometry.Point, spell, slvl, layers int) {
+func (f *Factory) spawnD1FireWall(caster *Actor, p geometry.Point, slvl, layers int) {
 	clvl := caster.hero.Level
 	turns := d1.FireWallTurns(slvl, d1DungeonLevel(f.State))
-	f.spawnD1Wall(caster, p, spell, turns, true, layers, defs.IconEffectFireSmall, func() int { return d1.HellfireFireWallDamage64(clvl) })
+	f.spawnD1Wall(caster, p, d1.ResistKindFire, turns, true, layers, defs.IconEffectFireSmall, func() int { return d1.HellfireFireWallDamage64(clvl) })
 }
 
 // spawnD1LightningWall places one cell of a lightning wall (MIS_LIGHTWALL): 255·(slvl+1) ticks of 16·(2d10 + clvl
 // + 2)/64 a tick, rolled once when it is laid, on monsters and the hero alike.
 func (f *Factory) spawnD1LightningWall(caster *Actor, p geometry.Point, slvl, clvl, layers int) {
 	dam := 16 * (d1Rng.Intn(10) + d1Rng.Intn(10) + clvl + 2) // one roll a controller tick, shared by what it lays
-	f.spawnD1Wall(caster, p, d1.SplLightWall, 255*(slvl+1)/d1.RefWalkTicks, true, layers, defs.IconEffectLightning, func() int { return dam })
+	f.spawnD1Wall(caster, p, d1.ResistKindLightning, 255*(slvl+1)/d1.RefWalkTicks, true, layers, defs.IconEffectLightning, func() int { return dam })
 }
 
 // spawnD1Wall places one wall cell of `layers` walls stacked (a fire wall's start cell holds two), each rolling
 // dam64() once as it is laid: each turn every layer hits the monster standing in it, and with both the hero too,
 // for its 1/64 a tick over a turn's 8 ticks.
-func (f *Factory) spawnD1Wall(caster *Actor, p geometry.Point, spell, turns int, both bool, layers int, icon int32, dam64 func() int) {
+func (f *Factory) spawnD1Wall(caster *Actor, p geometry.Point, resist, turns int, both bool, layers int, icon int32, dam64 func() int) {
 	m := f.State.GetMap()
 	if m.IsObjectAt(p) || turns <= 0 {
 		return
@@ -710,7 +540,7 @@ func (f *Factory) spawnD1Wall(caster *Actor, p geometry.Point, spell, turns int,
 			return
 		}
 		f.ActionBroker.Execute(&spellTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
-			caster: caster, spell: spell, run: func(c *spellCtx) {
+			caster: caster, resist: resist, run: func(c *spellCtx) {
 				c.from = &p
 				for _, d := range dams {
 					if v := c.monsterAt(p); v != nil {
@@ -764,7 +594,8 @@ func (f *Factory) spawnD1Guardian(caster *Actor, p geometry.Point, turns int) {
 type spellTickAction struct {
 	BaseAction
 	caster     *Actor
-	spell      int
+	spell      int // only for the runes, which cast their own spell through the content mapping
+	resist     int // d1.ResistKind* of the damage this tick deals, when it is not a whole spell's
 	run        func(c *spellCtx)
 	animations []Animation
 }
@@ -774,6 +605,10 @@ func (a *spellTickAction) GetDelayInAut() int         { return 0 }
 func (a *spellTickAction) Execute(ctx ActionContext) []Action {
 	c := &spellCtx{f: ctx.GameState.factory, ctx: ctx, caster: a.caster, h: a.caster.hero, s: a.caster.HeroSheet(), spell: a.spell,
 		m: ctx.GameState.GetMap(), cause: a.cause, dealt: map[*Actor]int{}}
+	c.setSpell(a.spell)
+	if a.resist != 0 {
+		c.resist = a.resist
+	}
 	a.run(c)
 	a.animations = c.animations
 	return c.finish()
