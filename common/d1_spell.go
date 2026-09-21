@@ -413,6 +413,18 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		f.spawnD1Guardian(c.caster, p, d1.GuardianTurns(clvl, slvl))
 	case d1.SplGolem:
 		return f.summonD1Golem(c, target)
+	case d1.SplChain: // MI_Chain: a Lightning bolt at the target and one at every monster within slvl+2 CrawlTable rings
+		ray := RayAoE(func() *gridmap.GridMap[*Actor, *Item, Object] { return c.m }, util.Arguments{"112"})
+		o := c.origin()
+		cells := ray.GetHitPositions(o, target)
+		for _, ring := range d1.CrawlRings[1:min(slvl+3, 19)] {
+			for _, off := range ring {
+				if t := o.Add(geometry.Point{X: off[0], Y: off[1]}); c.m.Contains(t) && c.monsterAt(t) != nil {
+					cells = append(cells, ray.GetHitPositions(o, t)...)
+				}
+			}
+		}
+		f.ActionBroker.Execute(NewSpellDamageAction(c.caster, "lightning", d1.ResistKindLightning, "per_cell", slvl, target, cells))
 	case d1.SplStone: // AddStone: the first monster of six CrawlTable rings, never Diablo; no mana without one
 		p, ok := c.freeNear(target, func(p geometry.Point) bool {
 			a := c.monsterAt(p)

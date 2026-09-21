@@ -65,7 +65,7 @@ own Firebolt level, Phasing / the Holy shrine (`AddRndTeleport`), the mana shiel
 - **fixed — Mana Shield's reduction.** 1.09's `MI_Manashield` takes a third off the life lost once the spell
   level is above 0 (`diff += diff / -3`). Hellfire instead divides by `3·min(slvl, 7)`. `d1.ManaShieldCost`
   applies both, one after the other, so it matches neither game.
-- **open — Chain Lightning.** `MI_Chain` sends one lightning bolt (`MIS_LIGHTCTRL`) at the target, and one more at
+- **fixed — Chain Lightning.** `MI_Chain` sends one lightning bolt (`MIS_LIGHTCTRL`) at the target, and one more at
   every monster within `slvl + 2` cells of the caster (CrawlTable rings `1 .. slvl+2`, capped at 18). Ours is a
   beam that jumps up to 6 times within 7 cells (`hit_zone: chain_aoe(6|7)`).
 - **fixed — Guardian's aim.** `MI_Guardian` fires every 16 ticks at the first monster its scan meets: each of the
