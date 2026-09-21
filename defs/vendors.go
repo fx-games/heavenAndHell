@@ -40,7 +40,7 @@ type Vendor struct {
 
 	// Who runs it and what they do, all named from the engine's vocabulary. Several records may name the same
 	// npc: its menu is their services in file order, its stock their stock rolls in file order.
-	NPC      string   // the town NPC's internal_name
+	NPCs     []string // the town NPCs' internal_names; several shopkeepers may keep one stock list
 	Stock    string   // the stock strategy: one of VendorStocks, or "" for a vendor that sells nothing
 	Buys     string   // what it buys from the hero: one of VendorBuyRules, or "" for nothing
 	Services []string // menu entries: VendorServices names, some with an argument, e.g. "identify(100)"
@@ -134,7 +134,7 @@ func vendorFromRecord(rec recfile.Record) (Vendor, error) {
 		case "internal_name":
 			v.InternalName = f.Value
 		case "npc":
-			v.NPC = f.Value
+			v.NPCs = append(v.NPCs, f.Value)
 		case "stock":
 			v.Stock = f.Value
 		case "buys":

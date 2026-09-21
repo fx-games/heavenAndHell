@@ -319,7 +319,7 @@ func (g *Generator) BoyItem(clvl int, who *Shopper) *Item {
 func (d *Data) VendorsOf(npc string) []Vendor {
 	var out []Vendor
 	for _, v := range d.VendorList {
-		if v.NPC == npc {
+		if slices.Contains(v.NPCs, npc) {
 			out = append(out, v)
 		}
 	}

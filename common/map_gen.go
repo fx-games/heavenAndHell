@@ -49,6 +49,7 @@ func (g *MapGenerator) LoadLevels() error {
 		return err
 	}
 	g.levels, g.sideLevels = levels, side
+	defs.SetTowns(dungeon.LoadTowns(recs))
 	return nil
 }
 

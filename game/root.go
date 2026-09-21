@@ -822,8 +822,8 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 	if defs.IsTownLevel(newMapName) {
 		currentMap := g.state.GetMap()
 		g.state.SetTownMap(currentMap)
+		g.restockD1Town(currentMap) // every town's shopkeepers
 		if newMapName == string(defs.LevelNameTown) {
-			g.restockD1Town(currentMap)
 			common.PlaceD1Portal(g.GetWorldState(), currentMap)
 		}
 	} else { // dungeon map

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"rpg/geometry"
+	"slices"
 	"sort"
 )
 
@@ -11,8 +12,15 @@ type LevelName string
 
 const LevelNameTown LevelName = "Town"
 
+// towns are the mod's towns beyond the first (levels.rec "town:" records): maps drawn in its LDtk project, not
+// generated, where its shopkeepers live.
+var towns []string
+
+// SetTowns names the active mod's extra towns; called when its levels load.
+func SetTowns(names []string) { towns = names }
+
 func IsTownLevel(levelName string) bool {
-	return levelName == string(LevelNameTown)
+	return levelName == string(LevelNameTown) || slices.Contains(towns, levelName)
 }
 
 type BasicTileMapping struct {

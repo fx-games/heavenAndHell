@@ -112,6 +112,9 @@ func LoadLevels(recs []recfile.Record, numLevels int) ([]Level, error) {
 		if _, side := Field(r, "map"); side {
 			continue // LoadSideLevels' business
 		}
+		if _, town := Field(r, "town"); town {
+			continue // LoadTowns'
+		}
 		dlvl, err := strconv.Atoi(strings.TrimSpace(r.ToMap("").GetStringOrDefault("dlvl", "")))
 		if err != nil {
 			return nil, fmt.Errorf("levels.rec: dlvl: %w", err)
@@ -131,6 +134,17 @@ func LoadLevels(recs []recfile.Record, numLevels int) ([]Level, error) {
 		}
 	}
 	return levels, nil
+}
+
+// LoadTowns reads the records naming a town beyond the first: "town: <LDtk level name>".
+func LoadTowns(recs []recfile.Record) []string {
+	var out []string
+	for _, r := range recs {
+		if name, ok := Field(r, "town"); ok {
+			out = append(out, name)
+		}
+	}
+	return out
 }
 
 // LoadSideLevels reads the records keyed by "map" instead of "dlvl": levels off the main descent, by map name.

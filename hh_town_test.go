@@ -395,3 +395,37 @@ func TestHeavenAndHellContentResolves(t *testing.T) {
 		}
 	}
 }
+
+// The town in hell, main's second town: level 8's caves and level 9's dungeon both lead there and back, and its
+// four shopkeepers keep the same stock lists as their kind upstairs.
+func TestHeavenAndHellHellTown(t *testing.T) {
+	g := newHeavenAndHellGame(t, NewDummyUI())
+	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
+	s := g.GetWorldState()
+	for dlvl, door := range map[int]string{8: "to_caves", 9: "to_dungeon"} {
+		s.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl), TargetLocation: "ladder_up"})
+		d := s.GetMap()
+		there, ok := d.GetTransitionAt(d.GetNamedLocation("to_hell_town"))
+		if !ok || there.TargetMap != "TownHell" || there.TargetLocation != door {
+			t.Fatalf("level %d's way to the hell town: %+v", dlvl, there)
+		}
+		s.MapTransition(there)
+		town := s.GetMap()
+		if town.GetName() != "TownHell" {
+			t.Fatalf("level %d led to %s", dlvl, town.GetName())
+		}
+		back, ok := town.GetTransitionAt(town.GetNamedLocation(door))
+		if !ok || back.TargetMap != defs.LevelNameFromDepth(dlvl) || back.TargetLocation != "to_hell_town" {
+			t.Errorf("the hell town's %s leads to %+v", door, back)
+		}
+	}
+	for _, npc := range []string{"azazel", "samael", "hellfire", "grumpy"} {
+		stocked := false
+		for _, a := range s.GetMap().Actors() {
+			stocked = stocked || a.GetInternalName() == npc && !a.GetInventory().IsEmpty()
+		}
+		if !stocked {
+			t.Errorf("%s has nothing to sell", npc)
+		}
+	}
+}

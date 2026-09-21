@@ -10,6 +10,7 @@
 #                leads to the one above it and the first level's to the town, but this game's town calls its
 #                cathedral door to_cathedral, and the engine is not allowed to know that name.
 #
+# A record keyed by "town" names a town beyond the first: an LDtk level with shopkeepers, not a generated one.
 # A record keyed by "map" instead of "dlvl" is a side level: reached only by a transition some other level
 # declares, with a way up (its "up", required) and no way down. "depth" is the dungeon level whose monsters and
 # loot it draws on.
@@ -127,6 +128,7 @@ forbid_room: Cave_template_for_poisoned_water
 dlvl: 8
 generator: accretion
 name: Level 8\nHell
+transition: to_hell_town, TownHell, to_caves, up
 tiles: hell
 templates: assets/maps.ldtk
 template_prefix: Hell
@@ -140,6 +142,7 @@ forbid_room: Cave_template_for_poisoned_water
 dlvl: 9
 generator: accretion
 name: Level 9\nDungeon of Doom
+transition: to_hell_town, TownHell, to_dungeon, up
 tiles: caves
 templates: assets/maps.ldtk
 template_prefix: Dung
@@ -183,6 +186,9 @@ forbid_room: Cata_template_for_king_zedek
 forbid_room: Hell_template_for_lucifer
 forbid_room: Dung_template_for_rogue
 forbid_room: Cave_template_for_poisoned_water
+
+# The town in hell, drawn in maps.ldtk: reached from level 8's caves and level 9's dungeon.
+town: TownHell
 
 # Abel's quest: the source of the poison in the town's rivers, a cave off the catacombs.
 map: poisoned_water_supply

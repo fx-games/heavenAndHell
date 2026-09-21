@@ -12759,7 +12759,7 @@
 							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "to_caves", "__tile": null, "defUid": 47, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["to_caves"]
-							}] }]
+							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_8", "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": "to_hell_town", "__tile": null, "defUid": 147, "realEditorValues": [] }]
 						},
 						{
 							"__identifier": "Location",
@@ -12778,7 +12778,7 @@
 							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "to_dungeon", "__tile": null, "defUid": 47, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["to_dungeon"]
-							}] }]
+							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_9", "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": "to_hell_town", "__tile": null, "defUid": 147, "realEditorValues": [] }]
 						},
 						{
 							"__identifier": "Location",
@@ -12844,7 +12844,7 @@
 									"id": "V_String",
 									"params": ["Azazel"]
 								}] },
-								{ "__identifier": "InternalName", "__type": "String", "__value": null, "__tile": null, "defUid": 131, "realEditorValues": [] },
+								{ "__identifier": "InternalName", "__type": "String", "__value": "azazel", "__tile": null, "defUid": 131, "realEditorValues": [{ "id": "V_String", "params": ["azazel"] }] },
 								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 64, "y": 72, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 64, "y": 72, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["64,72,8,8"]
@@ -12880,7 +12880,7 @@
 									"id": "V_String",
 									"params": ["Samael"]
 								}] },
-								{ "__identifier": "InternalName", "__type": "String", "__value": null, "__tile": null, "defUid": 131, "realEditorValues": [] },
+								{ "__identifier": "InternalName", "__type": "String", "__value": "samael", "__tile": null, "defUid": 131, "realEditorValues": [{ "id": "V_String", "params": ["samael"] }] },
 								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 168, "y": 24, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 168, "y": 24, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["168,24,8,8"]
@@ -12916,7 +12916,7 @@
 									"id": "V_String",
 									"params": ["Hellfire"]
 								}] },
-								{ "__identifier": "InternalName", "__type": "String", "__value": null, "__tile": null, "defUid": 131, "realEditorValues": [] },
+								{ "__identifier": "InternalName", "__type": "String", "__value": "hellfire", "__tile": null, "defUid": 131, "realEditorValues": [{ "id": "V_String", "params": ["hellfire"] }] },
 								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 152, "y": 24, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 152, "y": 24, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["152,24,8,8"]
@@ -12952,7 +12952,7 @@
 									"id": "V_String",
 									"params": ["Lucifer"]
 								}] },
-								{ "__identifier": "InternalName", "__type": "String", "__value": null, "__tile": null, "defUid": 131, "realEditorValues": [] },
+								{ "__identifier": "InternalName", "__type": "String", "__value": "lucifer_townsman", "__tile": null, "defUid": 131, "realEditorValues": [{ "id": "V_String", "params": ["lucifer_townsman"] }] },
 								{ "__identifier": "Tile", "__type": "Tile", "__value": { "tilesetUid": 44, "x": 72, "y": 72, "w": 8, "h": 8 }, "__tile": { "tilesetUid": 44, "x": 72, "y": 72, "w": 8, "h": 8 }, "defUid": 35, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["72,72,8,8"]
