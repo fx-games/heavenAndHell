@@ -226,36 +226,29 @@ another size lost most of its cells. The stride now travels with the bitmap.
 6. per-mod level configs
 7. delete hardcoded paths, both mods boot
 
-8. H&H playable — partly. Done: terrain dispatch and the DungeonMap -> gridmap
-   conversion; population from H&H's own tables; classes as content. Not done,
-   in the order they block each other:
-   a. `hero.rec` for H&H, and `NumClasses` stopping being six (above). Nothing
-      below this can be reached in a running game until it is.
-   b. The town. `mods/heavenandhell/maps.ldtk` still holds it, intact, with
-      Kirioth, Shekel, Abel and Sister Mary, its signs, doors, spawn and the
-      three dungeon entrances; `NewGridMapFromLDTK` is already mod-agnostic and
-      will build it. What is missing is one data edit: H&H's `Location` entity
-      definition has no `TargetMap`/`TargetLocation` fields, so its entrances
-      are named spots that lead nowhere. D1's Town wires its entrances exactly
-      that way (`to_cathedral` -> `!gen_dungeon_level_1`/`ladder_up`), and
-      main's `setupTownTransitions` hardcoded the same three in Go -
-      `to_cathedral` -> level 1 `ladder_up`, `to_catacombs` -> level 4
-      `to_town`, `to_caves` -> level 6 `to_town`. Add the two fields to the
-      entity def and fill them; no engine change. The other half is the
-      ladder_up on dungeon level 1, which currently targets `Town`/`to_dungeon`
-      because the engine cannot name `to_cathedral`: that wants one more
-      level knob, not a special case.
-   c. Dialogue for those four, as data. The text is `git show
-      main:files/assets/dialogue/*.txt` and the NPC list `git show
-      main:common/def_dialogue.go`; the schema to express it in is the existing
-      `TriggeredDialogue{NeededFlag, DialogueFile, OnShow}` on `on_talk`.
-   d. Vendors. `mods/heavenandhell/data/stores.rec` loads (4 vendors, reaching
-      only H&H's items - `defs.TestEachModStocksItsOwnItems` covers that), and
-      the town NPCs carry their vendor type from their `InternalName`. What is
-      untested is whether trading with them works once the town is reachable.
-   e. Quests: Meat Jack, Lucifer, the poisoned water, the skeleton king, into
-      `mods/heavenandhell/data/quests.rec` on the same trigger schema as D1's.
-      `d.QuestDefs` is 0 for H&H today, which `QuestActive` now tolerates.
+8. H&H playable — all but trading. Every class starts in H&H's own town, its
+   three doors lead down and back (`up:` level knob), and the four quests play
+   through main's dialogue chain as `on_talk` triggers (`hh_town_test.go`
+   drives all of it through real talks and kills). Along the way, and binding
+   on every mod from now on:
+   - Each mod owns its sheet, icons, town map, texts, spells and class skills.
+     A hero only gets the skills and starting spells its mod declares
+     (`hero.rec` `start_spells`). LoadIcons no longer demands D1's furniture.
+   - All dialogue text is `texts.rec` (id, sfx, gossip, text), one loader.
+   - Side levels: a `levels.rec` record keyed `map:` instead of `dlvl:`.
+   - D1's quest table (availability rolls) only applies when D1's generators
+     build the levels; before, it leaked into any mod by quest index.
+   - A monster record without `level` fights at its `dlvl`, as items do.
+   - Uniques are placed by their room template, never rolled at random.
+   Not done: d. Vendors. H&H's NPCs open no shop. Menus are a Go switch over
+   D1's shopkeepers (`common/d1_town.go` `d1VendorOptions`) and stock is four
+   D1 algorithms keyed by shop name (`d1/stores.go`, `game/town_d1.go`). The
+   unified shape: a vendor record names its `npc`, its `stock` strategy
+   (smith, witch, healer, boy, list) and its `service`s (buy, sell, repair,
+   recharge, identify, heal...), and the engine implements each once. H&H's
+   records are pure `list` vendors; main's menus are `git show
+   main:common/act_talk_to.go`. Kirioth's free heal ("during the siege") is a
+   `heal` service.
 
 Gameplay changes (shrines, monster abilities, shop seeding, durability, skill trees)
 land after the boundary exists, not before.
