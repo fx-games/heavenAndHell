@@ -1,4 +1,4 @@
-// Package d1 holds Diablo 1's data tables (loaded verbatim from mods/d1/data) and its generation rules.
+// Package d1 holds Diablo 1's data tables (loaded verbatim from assets/data) and its generation rules.
 // Enum columns stay strings (e.g. "IPL_TOHIT", "AI_ZOMBIE"); only bitfields are numbers.
 package d1
 
@@ -238,7 +238,7 @@ type SpellData struct {
 }
 
 // spellNames are D1's spelldata names and SpellDescriptions one short item-tooltip sentence each, both indexed
-// by spell slot. Filled by Load from the slot section of mods/d1/data/spells.rec.
+// by spell slot. Filled by Load from the slot section of assets/data/spells.rec.
 var (
 	spellNames        []string
 	SpellDescriptions []string
@@ -267,14 +267,14 @@ type Data struct {
 	UniqueItems    []UniqueItemData
 	Spells         []SpellData         // index = SPL_ value
 	Objects        []ObjData           // index = OBJ_ value
-	Gossip         map[string][]string // town NPC internal_name -> TEXT_* ids of its gossip, greeting first (mods/d1/data/gossip)
+	Gossip         map[string][]string // town NPC internal_name -> TEXT_* ids of its gossip, greeting first (assets/data/gossip)
 	Texts          map[string]string   // TEXT_* id -> gossip, quest and book text, paragraphs split by "\n\n"
 	TextSfx        map[string]string   // TEXT_* id -> the speech D1 plays with it (alltext's sfxnr, see SfxFiles)
-	levels         levelData           // set pieces and tile tables (mods/d1/data/levels)
+	levels         levelData           // set pieces and tile tables (assets/data/levels)
 }
 
 // gossipFiles maps a town NPC's internal name (its common.VendorType) to its gossip file's base
-// name in mods/d1/data/gossip, ported from Diablo's own Source/Data/Text/Gossip/*.txt.
+// name in assets/data/gossip, ported from Diablo's own Source/Data/Text/Gossip/*.txt.
 var gossipFiles = map[string]string{
 	"griswold": "griswold", "adria": "adria", "pepin": "pepin", "wirt": "wirt", "cain": "story", "ogden": "ogden",
 	"farnham": "farnham", "gillian": "gillian",

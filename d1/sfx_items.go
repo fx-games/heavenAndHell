@@ -17,7 +17,7 @@ func ItemSnds(curs int) (drop, inv string) {
 	return itemDropSnds[a], itemInvSnds[a]
 }
 
-// The three tables above live in mods/d1/data/item_sounds.rec: a "sound" record per sound class holding its drop
+// The three tables above live in assets/data/item_sounds.rec: a "sound" record per sound class holding its drop
 // and inventory sound, and an "anim" record whose repeated curs fields are ItemCAnimTbl.
 var itemCAnimTbl []int
 var itemDropSnds, itemInvSnds []string

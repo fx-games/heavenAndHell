@@ -23,7 +23,7 @@ type D1Object struct {
 }
 
 // The object display table -- names, light radii, which are looted, which are wall lights and what each one
-// sounds like -- lives in mods/d1/data/objects.rec and is reached through d1.ObjectDisplays.
+// sounds like -- lives in assets/data/objects.rec and is reached through d1.ObjectDisplays.
 func d1ObjectDisplay(kind int) d1.ObjectDisplay { return d1.ObjectDisplays[kind] }
 
 func (o *D1Object) Name() string {

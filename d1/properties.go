@@ -31,7 +31,7 @@ const (
 	KeyArmor  = "armor"
 )
 
-// propertyDefs is filled by Load from mods/d1/data/properties.rec. The wording lives there; the four ways a
+// propertyDefs is filled by Load from assets/data/properties.rec. The wording lives there; the four ways a
 // value turns into a line stay here, because they are code.
 var propertyDefs map[string]propertyDef
 

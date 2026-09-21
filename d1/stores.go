@@ -114,7 +114,7 @@ func (who *Shopper) fits(it *Item, maxVal, floorValue int) bool {
 }
 
 // boyShuns are the item types Hellfire's Wirt keeps away from each class (for his first 200 tries). Filled by
-// Load from the boy_shuns section of mods/d1/data/stores.rec.
+// Load from the boy_shuns section of assets/data/stores.rec.
 var boyShuns [NumClasses][]int
 
 // itemTypeByName names the ITYPE_ values the store tables refer to.

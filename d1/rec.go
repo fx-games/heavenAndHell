@@ -28,7 +28,7 @@ func readRecMulti(fsys fs.FS, name string) (map[string][]recfile.Record, error) 
 }
 
 // MonsterAIDescriptions is a plain-English gloss of each AI_* brain, shown in the actor description popup.
-// Filled by Load from the ai section of mods/d1/data/monsters.rec.
+// Filled by Load from the ai section of assets/data/monsters.rec.
 var MonsterAIDescriptions map[string]string
 
 func loadMonsterTables(fsys fs.FS) error {

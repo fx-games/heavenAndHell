@@ -2,7 +2,7 @@ package d1
 
 import "io/fs"
 
-// oil is one of Hellfire's oils; the table lives in mods/d1/data/oils.rec and is loaded by Load.
+// oil is one of Hellfire's oils; the table lives in assets/data/oils.rec and is loaded by Load.
 type oil struct {
 	MiscID string
 	Name   string

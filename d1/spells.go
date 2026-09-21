@@ -73,7 +73,7 @@ const (
 // SpellResist is the resistance kind of each spell's damaging missile, SpellTargeted the spells that need a
 // target cell, and SpellSfx what D1 plays for a hero's spell as _sfx_id names ("" is silent; sounds.rec's
 // sfx.<id> events): the cast, the launch of its missile and the impact where its bolt stops. All three are
-// columns of mods/d1/data/spells.rec, filled by Load.
+// columns of assets/data/spells.rec, filled by Load.
 var (
 	SpellResist   map[int]int
 	SpellTargeted map[int]bool

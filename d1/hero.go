@@ -19,7 +19,7 @@ const (
 	NumClasses
 )
 
-// ClassNames are the class names, in PC_ order; filled by Load from mods/d1/data/hero.rec.
+// ClassNames are the class names, in PC_ order; filled by Load from assets/data/hero.rec.
 var ClassNames [NumClasses]string
 
 // Class flags (PlayerClassFlag), straight off each class' attributes.tsv.
@@ -57,7 +57,7 @@ type classAttributes struct {
 	Flags                               uint32
 }
 
-// classAttr is filled by Load from the class section of mods/d1/data/hero.rec.
+// classAttr is filled by Load from the class section of assets/data/hero.rec.
 var classAttr [NumClasses]classAttributes
 
 // MaxStats is the attribute cap per class and ATTRIB_ (CharacterAttribute), derived from classAttr by Load.

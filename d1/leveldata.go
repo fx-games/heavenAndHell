@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Level-building data lives in mods/d1/data/levels, imported from Diablo's DIABDAT.MPQ by cmd/d1import: a .txt
+// Level-building data lives in assets/data/levels, imported from Diablo's DIABDAT.MPQ by cmd/d1import: a .txt
 // per set piece (D1's .DUN) and til/sol tables per level type. The parsed shapes match the MPQ's byte layouts
 // exactly, so the generators read them the way they always did.
 //
