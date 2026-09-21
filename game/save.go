@@ -180,7 +180,7 @@ func (g *GameInstance) writeSlot(slot int) {
 	st := player.GetStats()
 	pos := player.MapPosition()
 	sg := saveGame{
-		Class: g.state.SelectedClass.InternalName, Female: g.state.SelectedClass.Icon == defs.FemaleIconByClass[g.state.SelectedClass.InternalName],
+		Class: g.state.SelectedClass.InternalName, Female: g.state.SelectedClass.IsFemale(),
 		Name: player.Name(), Permadeath: g.permadeath, Seed: g.levelSeed, Hero: *player.Hero(),
 		HP: max(st.GetResource(stats.Health).Value(), 1), Mana: st.GetResource(stats.Mana).Value(), Gold: st.GetAttribute(stats.Gold),
 		UniqueDropped: g.factory.D1().UniqueDropped, Flags: g.state.GetFlags().AllEntries(),
@@ -295,7 +295,7 @@ func (g *GameInstance) LoadSlot(slot int) error {
 	g.autosave = false
 	class := g.classByName(sg.Class)
 	if sg.Female {
-		class.Icon = defs.FemaleIconByClass[class.InternalName]
+		class.Icon = class.FemaleIcon
 	}
 	g.resetGame(class, sg.Seed)
 	g.permadeath = sg.Permadeath

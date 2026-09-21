@@ -70,7 +70,7 @@ func (s *NewGameScreen) rowRect(row, col int) geometry.Rect {
 
 func (s *NewGameScreen) icon(row, col int) int32 {
 	if col == 1 {
-		return defs.FemaleIconByClass[s.classes[row].InternalName]
+		return s.classes[row].FemaleIcon
 	}
 	return s.classes[row].Icon
 }

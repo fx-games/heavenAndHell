@@ -284,7 +284,7 @@ func (c *Console) openClassMenu(start func(class defs.LoadoutDefinition, permade
 					return
 				}
 				if index == 1 {
-					class.Icon = defs.FemaleIconByClass[class.InternalName]
+					class.Icon = class.FemaleIcon
 				}
 				c.ui.AskForString("Name", common.RandomHeroName(index == 1), func(name string) {
 					c.ui.OpenChoiceDialogue("New game", "Permadeath deletes the save when you die.", []string{"Normal", "Permadeath"}, func(mode int, _ string) {

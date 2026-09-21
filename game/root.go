@@ -446,10 +446,7 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	// CreatePlrItems as Hellfire does it, on its item table (24 is the healing potion, 3 the warrior's spare club):
 	// the Sorcerer's Short Staff of Mana (5) comes with healing potions, the Monk takes IDI_SHORTSTAFF (36), the
 	// Bard IDI_BARDSWORD and IDI_BARDDAGGER (37, 38), and the Barbarian item 139 with the warrior's shield.
-	for _, idx := range map[int][]int{
-		d1.Warrior: {1, 2, 3, 24, 24}, d1.Rogue: {4, 24, 24}, d1.Sorcerer: {5, 24, 24},
-		d1.Monk: {36, 24, 24}, d1.Bard: {37, 38, 24, 24}, d1.Barbarian: {139, 2, 24, 24},
-	}[hero.Class] {
+	for _, idx := range startingItems(playerStartDefinition, hero.Class, gen.D.ItemIdx) {
 		item := g.factory.NewD1Item(gen.PlainItem(idx))
 		if item.IsEquippable() && idx != 3 { // CreatePlrItems: the warrior's club goes into the pack
 			g.giveAndEquipItemToActor(player, item)
@@ -907,6 +904,30 @@ func (g *GameInstance) getDebugActions() common.DebugActions {
 		GoOneLevelDown: g.actions.goOneLevelDown,
 		GoOneLevelUp:   g.actions.goOneLevelUp,
 	}
+}
+
+// startingItems is the gear a hero starts with, as indices into the active mod's item table. A class that names
+// its own items in classes.rec gets those; a class that names none falls back to CreatePlrItems' list, which is
+// what Diablo's classes.rec does (24 is the healing potion, 3 the warrior's spare club): the Sorcerer's Short
+// Staff of Mana (5) comes with healing potions, the Monk takes IDI_SHORTSTAFF (36), the Bard IDI_BARDSWORD and
+// IDI_BARDDAGGER (37, 38), and the Barbarian item 139 with the warrior's shield.
+func startingItems(def defs.LoadoutDefinition, class int, byName map[string]int) []int {
+	if len(def.Items) == 0 {
+		return map[int][]int{
+			d1.Warrior: {1, 2, 3, 24, 24}, d1.Rogue: {4, 24, 24}, d1.Sorcerer: {5, 24, 24},
+			d1.Monk: {36, 24, 24}, d1.Bard: {37, 38, 24, 24}, d1.Barbarian: {139, 2, 24, 24},
+		}[class]
+	}
+	var out []int
+	for _, name := range def.Items {
+		idx, ok := byName[name]
+		if !ok {
+			println("class " + def.InternalName + " starts with " + name + ", which this mod's items.rec does not have")
+			continue
+		}
+		out = append(out, idx)
+	}
+	return out
 }
 
 func d1ClassIndex(internalName string) int {
