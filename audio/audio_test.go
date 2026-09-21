@@ -4,21 +4,20 @@ import (
 	"io/fs"
 	"os"
 	"testing"
-	"testing/fstest"
 
 	"rpg/files"
 )
 
-// d1Files is the file tree the game reads, on the D1 mod: sound and music are a mod's, never the engine's.
-func d1Files() fs.ReadDirFS {
+// modFiles is the file tree the game reads, on H&H: its audio is in git (D1's is bring-your-own).
+func modFiles() fs.ReadDirFS {
 	files.SetFileSystem(os.DirFS("../files").(files.FileSystem))
-	files.SelectMod("d1")
+	files.SelectMod("heavenandhell")
 	return files.GetFileSystem()
 }
 
 // An event with a missing file keeps its other files and plays a random loaded one of them at run time.
 func TestRandomCueSkipsMissingFiles(t *testing.T) {
-	ap := NewAudioPlayer(d1Files(), SampleRate44100)
+	ap := NewAudioPlayer(modFiles(), SampleRate44100)
 	s := &Sound{
 		Cue:          "test",
 		Filenames:    []string{"assets/sfx/missing.ogg", "assets/sfx/melee_attack/melee_attack_1.ogg", "assets/sfx/melee_attack/melee_attack_2.ogg"},
@@ -57,7 +56,7 @@ func TestPannedScalesEachChannel(t *testing.T) {
 // music.rec holds the five area themes d1AreaMusic asks for, town wired up to the mod's music/town.ogg. A theme with
 // no file assigned stays unregistered, so the current track keeps playing instead.
 func TestAreaMusicRegistered(t *testing.T) {
-	ap := NewAudioPlayer(d1Files(), SampleRate44100)
+	ap := NewAudioPlayer(modFiles(), SampleRate44100)
 	ap.RegisterMusicEvents("assets/data/music.rec")
 	if !slicesContains(ap.MusicTracks(), "town") {
 		t.Fatalf("no town track, got %v", ap.MusicTracks())
@@ -72,20 +71,5 @@ func TestAreaMusicRegistered(t *testing.T) {
 		if slicesContains(ap.MusicTracks(), theme) {
 			t.Fatalf("%s is listed as a track but has no sound", theme)
 		}
-	}
-}
-
-// fallback: stands in only when none of the event's sound: files is on disk.
-func TestFallbackOnlyWhenSoundsMissing(t *testing.T) {
-	ap := NewAudioPlayer(fstest.MapFS{
-		"s.rec":        {Data: []byte("internal_name: a\nsound: x.ogg\nfallback: y.ogg\n\ninternal_name: b\nsound: gone.ogg\nfallback: y.ogg\n")},
-		"assets/x.ogg": {}, "assets/y.ogg": {},
-	}, SampleRate44100)
-	ap.RegisterSoundEvents("s.rec")
-	if f := ap.availableSounds["a"].Filenames; len(f) != 1 || f[0] != "assets/x.ogg" {
-		t.Errorf("a: %v", f)
-	}
-	if f := ap.availableSounds["b"].Filenames; len(f) != 1 || f[0] != "assets/y.ogg" {
-		t.Errorf("b: %v", f)
 	}
 }

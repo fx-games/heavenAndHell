@@ -550,21 +550,14 @@ func (ap *Player) registerEvents(recFile string, setup func(s *Sound)) {
 	defer f.Close()
 	for _, rec := range recfile.Read(f) {
 		var cue string
-		var filenames, fallbacks []string
+		var filenames []string
 		for _, field := range rec {
 			switch field.Name {
 			case "internal_name":
 				cue = field.Value
 			case "sound":
-				if _, err := fs.Stat(ap.files, path.Join("assets", field.Value)); err == nil {
-					filenames = append(filenames, path.Join("assets", field.Value))
-				}
-			case "fallback": // played when none of the sound: files is there (D1's own audio is bring-your-own)
-				fallbacks = append(fallbacks, path.Join("assets", field.Value))
+				filenames = append(filenames, path.Join("assets", field.Value))
 			}
-		}
-		if len(filenames) == 0 {
-			filenames = fallbacks
 		}
 		if len(filenames) == 0 { // an event nobody has assigned a file to yet is simply silent
 			continue

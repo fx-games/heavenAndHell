@@ -2,25 +2,20 @@
 
 internal_name: town
 name: Music - Town
-fallback: music/town.ogg
 sound: diablo_music/town.ogg
 
 internal_name: cathedral
 name: Music - Cathedral (dlvl 1-4)
-fallback: ambience/amb_echo.ogg
 sound: diablo_music/cathedral.ogg
 
 internal_name: catacombs
 name: Music - Catacombs (dlvl 5-8)
-fallback: ambience/amb_creaky.ogg
 sound: diablo_music/catacombs.ogg
 
 internal_name: caves
 name: Music - Caves (dlvl 9-12)
-fallback: ambience/amb_cave.ogg
 sound: diablo_music/caves.ogg
 
 internal_name: hell
 name: Music - Hell (dlvl 13-16)
-fallback: ambience/amb_lava.ogg
 sound: diablo_music/hell.ogg

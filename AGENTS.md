@@ -98,25 +98,31 @@ A new sound event = one `PlayCue("<name>")` call + one record in `sounds.rec`. D
 `playD1SfxAt` / `Factory.PlayD1Sfx` with D1's distance fade and pan (`common/d1_sound.go`), its speech through
 `playD1Sound`; `TestD1SfxHaveSoundEvents` and `TestD1SpeechHaveVoiceEvents` fail when a record is missing.
 
+Heaven & Hell's folders:
+
 - `sfx/`, `ang_sfx/` — this game's own effects and the Dubtrain Angband Sound Pack (CC BY-NC, credited in
-  `LEGAL.md`), referenced from `sounds.rec`. The pack's unconverted `.wav` originals sit in `CC-BY-DASP/`
-  (gitignored) next to its `sound.cfg`, which says what each sample was meant for and is what our wiring follows;
-  a sample we use is converted flat into `ang_sfx/<name>.ogg`. 474 of the 488 events have files this way — the
-  skeletons' `hit` and `sfx.PS_WALK1` are left silent on purpose (they fall back to `skeleton_hit`, and a step on
-  every tile grates, which is why `sound.cfg` leaves `walk` empty too).
+  `LEGAL.md`). The pack's unconverted `.wav` originals sit in `files/assets/CC-BY-DASP/` (gitignored) next to its
+  `sound.cfg`, which says what each sample was meant for; a sample we use is converted flat into
+  `ang_sfx/<name>.ogg`.
 - `music/` — our own tracks (`town.ogg`, wired up in `music.rec`).
 - `ambience/` — extra tracks and ambient loops, registered by directory (`RegisterMusic`) and picked manually from
-  the pause menu's Music Player. They are not area themes; `music.rec` is.
+  the pause menu's Music Player; `music.rec` wires some of them as area themes.
 - `voice/` — voice lines registered by directory (`RegisterVoices`), doesn't exist yet; folder absence is fine.
 
-Diablo 1.09's own audio is the D1 mod's: `files/mods/d1/diablo_sfx/` and `diablo_music/` (gitignored, bring your
-own, like `DIABDAT.MPQ`; converted copies sit in `reference/cut_diablo_audio/`, the old MPQ importer is in git at
-`2d2eb5c^:cmd/d1import/sfx.go`). Every `sfx.<id>` and speech record points at the file 1.09's `sgSFX` gives that id
-(`effects.cpp`), monsters at their `monstdat` set, `music.rec` at the five themes. A record's `fallback:` lines (the
-Angband pack and our own) play only when none of its `sound:` files is on disk, so a checkout without Diablo's audio
-still has sound. Hellfire's audio is not used. Convert new files with `oggenc -Q -q 4` (not `ffmpeg -c:a vorbis`:
-its experimental Vorbis encoder produces audible static on speech). `go:embed mods` embeds whatever is on disk:
-build a release for others from a checkout without `diablo_*`.
+Each mod's audio is its own, and the two never mix:
+
+- **D1 plays only Diablo 1.09's original audio**: `files/mods/d1/diablo_sfx/` and `diablo_music/` (gitignored,
+  bring your own, like `DIABDAT.MPQ`; converted copies sit in `reference/cut_diablo_audio/`, the old MPQ importer is
+  in git at `2d2eb5c^:cmd/d1import/sfx.go`). Every `sfx.<id>` and speech record points at the file 1.09's `sgSFX`
+  gives that id (`effects.cpp`), monsters at their `monstdat` set, `music.rec` at the five themes. Without those
+  folders D1 is silent. Its engine cues (`melee_attack`, `open_door`...) have no file: D1's code plays D1's ids.
+  Hellfire's audio is not used.
+- **Heaven & Hell plays anything but Diablo's**: its own `sfx/`, the Angband pack in `ang_sfx/`, `ambience/` and
+  `music/`, all in `files/mods/heavenandhell/`.
+
+Convert new files with `oggenc -Q -q 4` (not `ffmpeg -c:a vorbis`: its experimental Vorbis encoder produces audible
+static on speech). `go:embed mods` embeds whatever is on disk: build a release for others from a checkout without
+`diablo_*`.
 
 ## ASCII mode (`console/`, `textui/`)
 
