@@ -15,7 +15,9 @@ import (
 // checking anything.
 func TestMain(m *testing.M) {
 	files.SelectMod(DefaultMod)
-	defs.LoadIcons()
+	if err := defs.LoadIcons(); err != nil {
+		panic(err)
+	}
 	if _, err := d1.Load(files.GetFileSystem()); err != nil {
 		fmt.Println("d1.Load:", err)
 		os.Exit(1)
