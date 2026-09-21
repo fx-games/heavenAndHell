@@ -3,8 +3,8 @@ package defs
 import (
 	"fmt"
 	"math/rand"
-	"sort"
 	"rpg/geometry"
+	"sort"
 )
 
 type LevelName string
