@@ -212,19 +212,10 @@ func (a *Actor) equippedD1() []*d1.Item {
 	return items
 }
 
-// d1Broke handles an item whose durability just ran out. Like D1's WeaponDur/ArmorDur/ShieldDur it is destroyed,
-// except uniques: they stay, doing nothing (see Hero.Sheet) until Griswold repairs them.
+// d1Broke handles an item whose durability just ran out: like D1's WeaponDur/ArmorDur/ShieldDur, it is destroyed,
+// uniques too.
 func d1Broke(msg func(string), owner *Actor, broke *d1.Item) {
 	if broke == nil {
-		return
-	}
-	if broke.Magical == 2 {
-		name := broke.Name
-		if broke.Identified {
-			name = broke.IName
-		}
-		msg(fmt.Sprintf("Your %s broke! Griswold can repair it.", name))
-		SyncHero(owner)
 		return
 	}
 	for _, it := range owner.GetEquipment().AllItems() {

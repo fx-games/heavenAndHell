@@ -180,13 +180,6 @@ func (g *Factory) NewD1Item(it *d1.Item) *Item {
 				Effect:      func(user *Actor, _ EffectSource) { UseD1Potion(user, miscID) },
 				Description: []util.LabelText{util.LabelTextFromString(it.Name)},
 			})
-			action.SetCondition(func(user *Actor) bool {
-				if msg, wasted := D1PotionWasted(user, miscID); wasted {
-					g.Msg(msg)
-					return false
-				}
-				return true
-			})
 			item.SetCategory(defs.ItemCategoryPotion)
 			item.SetCharges(1)
 			item.SetDestroyAfterUse(true)

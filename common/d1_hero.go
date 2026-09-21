@@ -207,42 +207,6 @@ func (a *Actor) heroInfoText() []string {
 	return lines
 }
 
-// D1PotionWasted reports a potion the hero has no room for, and the message saying so. Drinking one is refused
-// rather than silently throwing it away; elixirs always do something, so they are never wasted. A rejuvenation
-// potion still counts as useful while either resource is short.
-func D1PotionWasted(user *Actor, miscID string) (string, bool) {
-	if user.hero == nil {
-		return "", false
-	}
-	var health, mana bool
-	switch miscID {
-	case "IMISC_HEAL", "IMISC_FULLHEAL":
-		health = true
-	case "IMISC_MANA", "IMISC_FULLMANA":
-		mana = true
-	case "IMISC_REJUV", "IMISC_FULLREJUV":
-		health, mana = true, true
-	default:
-		return "", false
-	}
-	st := user.GetStats()
-	// a hero who cannot hold mana at all (the Warrior's no-mana gear) has no room for it either
-	noMana := user.HeroSheet().Flags&d1.ISplNoMana != 0
-	if health && !st.GetResource(stats.Health).IsAtMax() {
-		return "", false
-	}
-	if mana && !noMana && !st.GetResource(stats.Mana).IsAtMax() {
-		return "", false
-	}
-	switch {
-	case health && mana:
-		return "You are at full health and mana.", true
-	case mana:
-		return "You are at full mana.", true
-	}
-	return "You are at full health.", true
-}
-
 // UseD1Potion ports UseItem for potions and elixirs.
 func UseD1Potion(user *Actor, miscID string) {
 	h := user.hero

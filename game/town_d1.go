@@ -107,8 +107,8 @@ func (g *GameInstance) stock(inv *common.Inventory, items []*d1.Item, price func
 	}
 }
 
-// onD1MapChanged: the golem follows the player to the new level and the mana shield stays up (unlike D1, which
-// clears both on a level change), and walking back through the town portal closes it.
+// onD1MapChanged: the golem dies where it stood, leaving its corpse (RemovePlrMissiles), the mana shield stays up
+// (Hellfire keeps pManaShield across levels), and walking back through the town portal closes it.
 func (g *GameInstance) onD1MapChanged(oldMapName, newMapName string) {
 	player := g.state.GetPlayer()
 	old := g.state.GetDungeonMap(oldMapName)
@@ -118,7 +118,7 @@ func (g *GameInstance) onD1MapChanged(oldMapName, newMapName string) {
 	if old != nil && old != g.state.GetMap() {
 		if golem := common.D1Golem(old); golem != nil {
 			old.RemoveActor(golem)
-			g.factory.PlaceD1GolemNear(player, common.SaveD1Golem(golem))
+			old.AddDownedActor(golem, golem.MapPosition())
 		}
 	}
 	if h := player.Hero(); h != nil {

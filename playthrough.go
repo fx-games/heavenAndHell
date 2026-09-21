@@ -777,14 +777,12 @@ func castAllSpells(f *common.Factory, broker *common.Broker, state *common.State
 	if state.D1Portal() != nil || state.GetMap().GetName() != portal.Map {
 		fail("spells: town portal round trip didn't close the portal (%v on %s)", state.D1Portal(), state.GetMap().GetName())
 	}
-	if common.D1Golem(state.GetMap()) == nil || shield && !player.HasStatusEffect(common.StatusManaShield) {
+	// the golem dies on a level change (RemovePlrMissiles); Hellfire's mana shield stays up
+	if common.D1Golem(state.GetMap()) != nil || shield && !player.HasStatusEffect(common.StatusManaShield) {
 		fail("spells: after the town portal round trip: golem %v, mana shield %v (had %v)", common.D1Golem(state.GetMap()), player.HasStatusEffect(common.StatusManaShield), shield)
 	}
 	fmt.Printf("spells: %d damage, failed casts %v, mana shield %v\n", dealt, failed, shield)
-	// the golem and the mana shield now outlast level changes: dismiss them so later fights measure the hero's damage
-	if golem := common.D1Golem(state.GetMap()); golem != nil {
-		state.GetMap().RemoveActor(golem)
-	}
+	// the mana shield outlasts level changes: dismiss it so later fights measure the hero's damage
 	player.RemoveStatusEffect(common.StatusManaShield)
 }
 

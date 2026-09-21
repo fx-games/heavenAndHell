@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-// Worn-out items are destroyed like in D1, except uniques: they stay equipped for Griswold to repair.
-func TestD1BrokeDestroysAllButUniques(t *testing.T) {
+// Worn-out items are destroyed like in D1, uniques too.
+func TestD1BrokeDestroysUniquesToo(t *testing.T) {
 	a := NewActor(0)
 	noOwner := func() *Actor { return nil }
 	helm := &Item{getPlayer: noOwner, d1: &d1.Item{Type: d1.ITypeHelm, Class: "ICLASS_ARMOR", MaxDur: 20}}
@@ -18,7 +18,7 @@ func TestD1BrokeDestroysAllButUniques(t *testing.T) {
 	if a.GetEquipment().IsEquipped(helm) {
 		t.Error("a broken helm stays equipped")
 	}
-	if !a.GetEquipment().IsEquipped(body) {
-		t.Error("a broken unique was destroyed")
+	if a.GetEquipment().IsEquipped(body) {
+		t.Error("a broken unique stays equipped")
 	}
 }
