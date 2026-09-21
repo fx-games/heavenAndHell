@@ -29,70 +29,6 @@ func (g *gen) l4InitSetPiece() {
 	g.setPiece = rect{g.setPieceRoom.x, g.setPieceRoom.y, d.w(), d.h()}
 }
 
-func (g *gen) l4MapRoom(r rect) {
-	for y := 0; y < r.h && y+r.y < 20; y++ {
-		for x := 0; x < r.w && x+r.x < 20; x++ {
-			g.setMask(r.x+x, r.y+y, true)
-		}
-	}
-}
-
-func (g *gen) l4CheckRoom(r rect) bool {
-	if r.x <= 0 || r.y <= 0 {
-		return false
-	}
-	for y := 0; y < r.h; y++ {
-		for x := 0; x < r.w; x++ {
-			if x+r.x < 0 || x+r.x >= 20 || y+r.y < 0 || y+r.y >= 20 || g.masked(r.x+x, r.y+y) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-func (g *gen) l4GenerateRoom(area rect, vertical bool) {
-	rotate := !g.flip(4)
-	vertical = !vertical && rotate || vertical && !rotate
-	var room1 rect
-	place1 := false
-	for num := 0; num < 20; num++ {
-		room1.w = (g.rnd(5) + 2) &^ 1
-		room1.h = (g.rnd(5) + 2) &^ 1
-		if vertical {
-			room1.x, room1.y = area.x-room1.w, area.y+area.h/2-room1.h/2
-			place1 = g.l4CheckRoom(rect{room1.x - 1, room1.y - 1, room1.h + 2, room1.w + 1}) // D1 bug: width and height swapped
-		} else {
-			room1.x, room1.y = area.x+area.w/2-room1.w/2, area.y-room1.h
-			place1 = g.l4CheckRoom(rect{room1.x - 1, room1.y - 1, room1.w + 2, room1.h + 1})
-		}
-		if place1 {
-			break
-		}
-	}
-	if place1 {
-		g.l4MapRoom(rect{room1.x, room1.y, min(40-room1.x, room1.w), min(40-room1.y, room1.h)})
-	}
-	room2 := room1
-	var place2 bool
-	if vertical {
-		room2.x = area.x + area.w
-		place2 = g.l4CheckRoom(rect{room2.x, room2.y - 1, room2.w + 1, room2.h + 2})
-	} else {
-		room2.y = area.y + area.h
-		place2 = g.l4CheckRoom(rect{room2.x - 1, room2.y, room2.w + 2, room2.h + 1})
-	}
-	if place2 {
-		g.l4MapRoom(room2)
-	}
-	if place1 {
-		g.l4GenerateRoom(room1, vertical)
-	}
-	if place2 {
-		g.l4GenerateRoom(room2, vertical)
-	}
-}
-
 func (g *gen) l4FirstRoom() {
 	room := rect{0, 0, 14, 14}
 	if g.currlevel != 16 {
@@ -115,8 +51,8 @@ func (g *gen) l4FirstRoom() {
 	} else {
 		g.setPieceRoom = rect{}
 	}
-	g.l4MapRoom(room)
-	g.l4GenerateRoom(room, !g.flip(2))
+	g.mapRoom(room, l4Rooms)
+	g.generateRoom(room, !g.flip(2), l4Rooms)
 }
 
 func (g *gen) l4MirrorLayout() {
@@ -417,7 +353,7 @@ func (g *gen) l4GeneralFix() {
 }
 
 func (g *gen) l4PlaceStairs(entry Entry) bool {
-	x, y, ok := g.placeMiniSet(&l4L4USTAIRS, 199, false)
+	x, y, ok := g.placeMiniSet(&l4L4USTAIRS, false)
 	if !ok {
 		return false
 	}
@@ -431,7 +367,7 @@ func (g *gen) l4PlaceStairs(entry Entry) bool {
 					g.view = point{2*g.setPiece.x + 23, 2*g.setPiece.y + 23}
 				}
 			} else {
-				if x, y, ok = g.placeMiniSet(&l4L4DSTAIRS, 199, false); !ok {
+				if x, y, ok = g.placeMiniSet(&l4L4DSTAIRS, false); !ok {
 					return false
 				}
 				if entry == EntryPrev {
@@ -440,7 +376,7 @@ func (g *gen) l4PlaceStairs(entry Entry) bool {
 			}
 		}
 		if g.currlevel == 13 {
-			if x, y, ok = g.placeMiniSet(&l4L4TWARP, 199, false); !ok {
+			if x, y, ok = g.placeMiniSet(&l4L4TWARP, false); !ok {
 				return false
 			}
 			if entry == EntryTWarpDn {
@@ -449,7 +385,7 @@ func (g *gen) l4PlaceStairs(entry Entry) bool {
 		}
 		return true
 	}
-	if x, y, ok = g.placeMiniSet(&l4L4PENTA2, 199, false); !ok {
+	if x, y, ok = g.placeMiniSet(&l4L4PENTA2, false); !ok {
 		return false
 	}
 	g.quests[QDiablo].X, g.quests[QDiablo].Y = x, y

@@ -903,21 +903,21 @@ func (g *gen) l2FixDoors() {
 }
 
 func (g *gen) l2PlaceStairs(entry Entry) bool {
-	x, y, ok := g.placeMiniSet(&l2USTAIRS, 199, false)
+	x, y, ok := g.placeMiniSet(&l2USTAIRS, false)
 	if !ok {
 		return false
 	}
 	if entry == EntryMain {
 		g.view = point{2*x + 21, 2*y + 20}
 	}
-	if x, y, ok = g.placeMiniSet(&l2DSTAIRS, 199, false); !ok {
+	if x, y, ok = g.placeMiniSet(&l2DSTAIRS, false); !ok {
 		return false
 	}
 	if entry == EntryPrev {
 		g.view = point{2*x + 20, 2*y + 22}
 	}
 	if g.currlevel == 5 {
-		if x, y, ok = g.placeMiniSet(&l2WARPSTAIRS, 199, false); !ok {
+		if x, y, ok = g.placeMiniSet(&l2WARPSTAIRS, false); !ok {
 			return false
 		}
 		if entry == EntryTWarpDn {

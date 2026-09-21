@@ -925,21 +925,21 @@ func (g *gen) l3Lockout() bool {
 }
 
 func (g *gen) l3PlaceStairs(entry Entry) bool {
-	x, y, ok := g.placeMiniSet(&l3L3UP, 199, false)
+	x, y, ok := g.placeMiniSet(&l3L3UP, false)
 	if !ok {
 		return false
 	}
 	if entry == EntryMain {
 		g.view = point{2*x + 17, 2*y + 19}
 	}
-	if x, y, ok = g.placeMiniSet(&l3L3DOWN, 199, false); !ok {
+	if x, y, ok = g.placeMiniSet(&l3L3DOWN, false); !ok {
 		return false
 	}
 	if entry == EntryPrev {
 		g.view = point{2*x + 19, 2*y + 17}
 	}
 	if g.currlevel == 9 {
-		if x, y, ok = g.placeMiniSet(&l3L3HOLDWARP, 199, false); !ok {
+		if x, y, ok = g.placeMiniSet(&l3L3HOLDWARP, false); !ok {
 			return false
 		}
 		if entry == EntryTWarpDn {

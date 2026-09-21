@@ -113,67 +113,6 @@ func (g *gen) l1SelectChamber() (int, int) {
 	return 16, 16
 }
 
-func (g *gen) l1MapRoom(r rect) {
-	for y := 0; y < r.h; y++ {
-		for x := 0; x < r.w; x++ {
-			g.setMask(r.x+x, r.y+y, true)
-		}
-	}
-}
-
-func (g *gen) l1CheckRoom(r rect) bool {
-	for j := 0; j < r.h; j++ {
-		for i := 0; i < r.w; i++ {
-			if i+r.x < 0 || i+r.x >= 40 || j+r.y < 0 || j+r.y >= 40 || g.masked(i+r.x, j+r.y) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-func (g *gen) l1GenerateRoom(area rect, vertical bool) {
-	rotate := g.flip(4)
-	vertical = !vertical && rotate || vertical && !rotate
-	var room1 rect
-	place1 := false
-	for num := 0; num < 20; num++ {
-		room1.w = (g.rnd(5) + 2) &^ 1
-		room1.h = (g.rnd(5) + 2) &^ 1
-		if vertical {
-			room1.x, room1.y = area.x-room1.w, area.y+area.h/2-room1.h/2
-			place1 = g.l1CheckRoom(rect{room1.x - 1, room1.y - 1, room1.h + 2, room1.w + 1}) // D1 bug: width and height swapped
-		} else {
-			room1.x, room1.y = area.x+area.w/2-room1.w/2, area.y-room1.h
-			place1 = g.l1CheckRoom(rect{room1.x - 1, room1.y - 1, room1.w + 2, room1.h + 1})
-		}
-		if place1 {
-			break
-		}
-	}
-	if place1 {
-		g.l1MapRoom(rect{room1.x, room1.y, min(40-room1.x, room1.w), min(40-room1.y, room1.h)})
-	}
-	room2 := room1
-	var place2 bool
-	if vertical {
-		room2.x = area.x + area.w
-		place2 = g.l1CheckRoom(rect{room2.x, room2.y - 1, room2.w + 1, room2.h + 2})
-	} else {
-		room2.y = area.y + area.h
-		place2 = g.l1CheckRoom(rect{room2.x - 1, room2.y, room2.w + 2, room2.h + 1})
-	}
-	if place2 {
-		g.l1MapRoom(room2)
-	}
-	if place1 {
-		g.l1GenerateRoom(room1, !vertical)
-	}
-	if place2 {
-		g.l1GenerateRoom(room2, !vertical)
-	}
-}
-
 func (g *gen) l1FirstRoom() {
 	g.mask = [1600]bool{}
 	g.l1.vertical = g.flip(2)
@@ -198,23 +137,23 @@ func (g *gen) l1FirstRoom() {
 		hallway = rect{hallway.y, hallway.x, hallway.h, hallway.w}
 	}
 	if g.l1.ch1 {
-		g.l1MapRoom(chamber1)
+		g.mapRoom(chamber1, l1Rooms)
 	}
 	if g.l1.ch2 {
-		g.l1MapRoom(chamber2)
+		g.mapRoom(chamber2, l1Rooms)
 	}
 	if g.l1.ch3 {
-		g.l1MapRoom(chamber3)
+		g.mapRoom(chamber3, l1Rooms)
 	}
-	g.l1MapRoom(hallway)
+	g.mapRoom(hallway, l1Rooms)
 	if g.l1.ch1 {
-		g.l1GenerateRoom(chamber1, g.l1.vertical)
+		g.generateRoom(chamber1, g.l1.vertical, l1Rooms)
 	}
 	if g.l1.ch2 {
-		g.l1GenerateRoom(chamber2, g.l1.vertical)
+		g.generateRoom(chamber2, g.l1.vertical, l1Rooms)
 	}
 	if g.l1.ch3 {
-		g.l1GenerateRoom(chamber3, g.l1.vertical)
+		g.generateRoom(chamber3, g.l1.vertical, l1Rooms)
 	}
 }
 
@@ -667,7 +606,7 @@ func (g *gen) l1FixCornerTiles() {
 func (g *gen) l1PlaceStairs(entry Entry) bool {
 	ok := true
 	if g.available(QPWater) {
-		if x, y, found := g.placeMiniSet(&l1PWATERIN, 1600, true); !found {
+		if x, y, found := g.placeMiniSet(&l1PWATERIN, true); !found {
 			ok = false
 		} else {
 			t := g.transVal
@@ -681,7 +620,7 @@ func (g *gen) l1PlaceStairs(entry Entry) bool {
 		}
 	}
 	// Hellfire's Cathedral takes the plain STAIRSUP and keeps going when it doesn't fit
-	if x, y, found := g.placeMiniSet(&l1STAIRSUP, 1600, true); !found {
+	if x, y, found := g.placeMiniSet(&l1STAIRSUP, true); !found {
 		ok = false
 	} else if entry == EntryMain {
 		g.view = point{2*x + 19, 2*y + 20}
@@ -690,7 +629,7 @@ func (g *gen) l1PlaceStairs(entry Entry) bool {
 		if entry == EntryPrev {
 			g.view = point{2*g.setPiece.x + 19, 2*g.setPiece.y + 27}
 		}
-	} else if x, y, found := g.placeMiniSet(&l1STAIRSDOWN, 1600, true); !found {
+	} else if x, y, found := g.placeMiniSet(&l1STAIRSDOWN, true); !found {
 		ok = false
 	} else if entry == EntryPrev {
 		g.view = point{2*x + 19, 2*y + 19}
@@ -738,7 +677,7 @@ func (g *gen) l1GenerateLevel(entry Entry) {
 	g.l1Substitution()
 	g.l1ApplyShadows()
 	for n := g.rnd(5) + 5; n > 0; n-- {
-		g.placeMiniSet(&l1LAMPS, 1600, true)
+		g.placeMiniSet(&l1LAMPS, true)
 	}
 	g.l1FillFloor()
 	g.savePdungeon()

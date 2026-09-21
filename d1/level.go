@@ -153,7 +153,7 @@ func (gnr *Generator) CreateLevel(q *Quests, seeds [NumLevels]int32, dlvl, setLe
 		g.createDungeon(seed, entry)
 		g.initTriggers()
 		g.freeUpstairs()
-		g.sol = g.data.levels.sol[g.tileset()]
+		g.sol = g.data.levels.sol[g.ltype]
 		g.rng.SetSeed(seed)
 		g.getLevelMTypes(SLNone)
 		g.initThemes()
@@ -186,7 +186,7 @@ func (g *gen) createDungeon(seed int32, entry Entry) {
 	g.flags = [112][112]byte{}
 	g.initTrans()
 	g.setPiece, g.setPieceRoom = rect{}, rect{}
-	g.til = g.data.levels.til[g.tileset()]
+	g.til = g.data.levels.til[g.ltype]
 	switch g.ltype {
 	case DTypeCathedral:
 		g.createL1(seed, entry)
@@ -254,33 +254,13 @@ func (g *gen) flagAt(x, y int) byte {
 	return 0
 }
 
-// initTriggers ports InitL1-4Triggers and Hellfire's Crypt and Nest branches (D1's piece numbers are one more than ours).
+// initTriggers ports InitL1-4Triggers (D1's piece numbers are one more than ours).
 func (g *gen) initTriggers() {
 	g.trigs = nil
 	add := func(x, y, msg int) { g.trigs = append(g.trigs, Trigger{x, y, msg}) }
 	for j := 0; j < 112; j++ {
 		for i := 0; i < 112; i++ {
-			switch p := g.piece[i][j] + 1; g.tileset() {
-			case 5: // the Crypt
-				if p == 184 {
-					add(i, j, TrigTownWarpUp)
-				}
-				if p == 158 {
-					add(i, j, TrigPrevLevel)
-				}
-				if p == 126 {
-					add(i, j, TrigNextLevel)
-				}
-			case 6: // the Nest
-				if p == 66 {
-					add(i, j, TrigPrevLevel)
-				}
-				if p == 63 {
-					add(i, j, TrigNextLevel)
-				}
-				if p == 80 {
-					add(i, j, TrigTownWarpUp)
-				}
+			switch p := g.piece[i][j] + 1; g.ltype {
 			case DTypeCathedral:
 				if p == 129 {
 					add(i, j, TrigPrevLevel)

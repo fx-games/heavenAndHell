@@ -81,7 +81,7 @@ type population struct {
 	zharlib                                                                 int
 	themex, themey, themeVar1                                               int
 	armorFlag, bFountain, cauldron, mFountain, pFountain, tFountain, treasr bool
-	weaponFlag, bCrossFlag                                                  bool
+	weaponFlag                                                              bool
 }
 
 func (g *gen) dMon(x, y int) int {
