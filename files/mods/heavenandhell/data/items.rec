@@ -1297,3 +1297,13 @@ weapon_damage: 3-12
 weapon_speed: 0.9
 throw_damage: 1-4
 throw_chance_to_break: 0.03
+
+# Lucifer leaves it in town when he falls (main's NewPotionOfTrueSight). Never sold or dropped.
+name: Lucifer's gift
+internal_name: lucifers_gift
+icon: item.healing_potion
+dlvl: 10
+cost: 0
+drop: IDROP_NEVER
+category: potion
+untargeted_action: true_sight

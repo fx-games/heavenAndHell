@@ -43,17 +43,41 @@ func (g *Factory) NewUntargetedActionFromName(name string) *UntargetedAction {
 	if util.LooksLikeAFunction(name) {
 		name, args = util.GetNameAndArgs(name)
 	}
-
-	// ponytail: main looked the name up in definitions read from untargeted.rec; that data is
-	// content and is not on this branch, so resolve straight from the effect registry.
+	// The mod's effects/untargeted.rec gives the action its name, icon and default arguments; without a record
+	// it still resolves straight from the effect registry, nameless.
+	def, hasDef := g.Generator.D.UntargetedDefs[name]
+	if hasDef && args.IsEmpty() && !def.DefaultArgs.IsEmpty() {
+		args = def.DefaultArgs
+	}
 	effect := g.UntargetedEffectFromName(name, args)
 	if effect == nil {
 		return nil
 	}
 	action := NewUntargetedAction(name, 0)
+	if hasDef {
+		action = NewUntargetedAction(def.Name, def.Icon)
+		action.SetDelay(def.ActivationDelay)
+		if def.ActivationCondition != "" {
+			action.SetCondition(g.NewConditionFromString(def.ActivationCondition))
+		}
+	}
 	action.SetInternalName(name)
 	action.SetEffect(effect)
 	return action
+}
+
+// NewTargetedActionFromName builds a skill the mod's effects/targeted.rec declares; nil for a name it does not.
+func (g *Factory) NewTargetedActionFromName(name string) *TargetedAction {
+	var args util.Arguments
+	if util.LooksLikeAFunction(name) {
+		name, args = util.GetNameAndArgs(name)
+	}
+	def, ok := g.Generator.D.TargetedDefs[name]
+	if !ok {
+		g.Msg(fmt.Sprintf("no targeted action found for name %s", name))
+		return nil
+	}
+	return g.NewTargetedActionFromDefinition(def, args)
 }
 
 func (g *Factory) UntargetedEffectFromName(name string, args util.Arguments) *UntargetedEffect {
@@ -73,6 +97,7 @@ func (g *Factory) GetAllUntargetedEffects() map[string]func(args util.Arguments)
 		string(ActionNameBerserk):           g.getBerserkSelfAction,
 		string(ActionNameApplyStatusSelf):   g.getApplyStatusAction,
 		string(ActionNameHealMana):          g.getHealManaBy,
+		"true_sight":                        g.getTrueSight,
 		string(ActionNameTeleport):          g.getRandomTeleportAction,
 		string(ActionNameBuffSpeed):         g.getSpeedBuff,
 		string(ActionNameBuffDamage):        g.getDamageBuff,
@@ -944,4 +969,19 @@ func (g *Factory) canReplicate(user *Actor) bool {
 	}
 
 	return true
+}
+
+// getTrueSight is Lucifer's gift: the drinker sees and lights seven cells further, for good.
+func (g *Factory) getTrueSight(util.Arguments) UntargetedEffect {
+	return UntargetedEffect{
+		Effect: func(user *Actor, _ EffectSource) {
+			user.GetStats().IncrementBy(stats.VisionRange, 7)
+			user.GetStats().IncrementBy(stats.LightRadius, 7)
+			g.State.GetFlags().SetTrue("has_true_sight")
+			g.ActionBroker.Execute(NewUpdateFoVAction(AbstractCause("TrueSightActivated"), user))
+			g.Msg("Your eyes open.")
+		},
+		Description: []util.LabelText{util.LabelTextFromString("Can this be real? Can it be trusted?"),
+			util.LabelTextFromString("Only one way to find out...")},
+	}
 }

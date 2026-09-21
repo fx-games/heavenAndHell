@@ -41,6 +41,8 @@ do: set_flag(killed:king_zedek)
 event: on_kill
 subject: lucifer
 do: set_flag(killed:lucifer)
+do: say(TEXT_HH_LUCIFER_DEATH, Lucifer)
+do: spawn_item(lucifers_gift, Town, true_sight_potion)
 
 event: on_level_cleared
 subject: poisoned_water_supply

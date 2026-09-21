@@ -786,6 +786,18 @@ func (f *Factory) D1SpellSkills(player *Actor) ([]*TargetedAction, []*Untargeted
 		u.SetInternalName(d1ClassSkillID)
 		untargeted = append(untargeted, u)
 	}
+	if h.Class < len(f.Classes) { // the skills the mod's classes.rec gives the class
+		for _, name := range f.Classes[h.Class].TargetedSkills {
+			if a := f.NewTargetedActionFromName(name); a != nil {
+				targeted = append(targeted, a)
+			}
+		}
+		for _, name := range f.Classes[h.Class].UntargetedSkills {
+			if a := f.NewUntargetedActionFromName(name); a != nil {
+				untargeted = append(untargeted, a)
+			}
+		}
+	}
 	for spell := range h.SpellLevels {
 		if h.SpellLevel(s, spell) <= 0 {
 			continue

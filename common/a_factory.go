@@ -20,6 +20,7 @@ type Factory struct {
 	Msg            func(msg string)
 	QueueAfterTurn func(func())
 	Generator      *d1.Generator
+	Classes        []defs.LoadoutDefinition // the mod's class roster, in archetype order: each class's own skills
 	Audio          *audio.Player
 	speechCue      string // the D1 speech cue playing, stopped by the next (sfx_STREAM)
 	identifyTarget *Item  // the item picked for the Identify cast in progress

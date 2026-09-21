@@ -491,7 +491,11 @@ func (g *Factory) applyItemRecord(item *Item, b d1.ItemData) {
 			item.SetUntargetedAction(action)
 		}
 	}
-	// ponytail: targeted_action (only summon_monster) has no by-name lookup since untargeted.rec went; add one with it.
+	if b.TargetedAction != "" {
+		if action := g.NewTargetedActionFromName(b.TargetedAction); action != nil {
+			item.SetTargetedAction(action)
+		}
+	}
 	if b.InventoryCategory.HasAlwaysOneCharge() {
 		item.SetCharges(1)
 		item.SetDestroyAfterUse(true)

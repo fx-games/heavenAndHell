@@ -22,6 +22,18 @@ func TestHeavenAndHellTownIsPlayable(t *testing.T) {
 	for _, class := range g.GetGameData().ClassDefinitions {
 		g.NewGame(class, false, "")
 		s := g.GetWorldState()
+		skills := map[string]bool{}
+		for _, a := range s.GetPlayer().GetTargetedSkills() {
+			skills[a.GetInternalName()] = true
+		}
+		for _, a := range s.GetPlayer().GetUntargetedSkills() {
+			skills[a.GetInternalName()] = true
+		}
+		for _, name := range append(append([]string{}, class.TargetedSkills...), class.UntargetedSkills...) {
+			if n, _, _ := strings.Cut(name, "("); !skills[n] {
+				t.Errorf("%s lacks its class skill %s (has %v)", class.Name, name, skills)
+			}
+		}
 		armed := false
 		for _, it := range s.GetPlayer().GetEquipment().AllItems() {
 			armed = armed || it.IsWeapon()
@@ -188,6 +200,13 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 				g.GetActionBroker().Execute(common.NewDieAction(cause, a))
 			}
 		}
+	}
+	gift := false
+	for _, it := range s.GetTownMap(string(defs.LevelNameTown)).Items() {
+		gift = gift || it.Name() == "Lucifer's gift" && it.HasUntargetedAction()
+	}
+	if !gift {
+		t.Error("Lucifer fell and left no gift in town")
 	}
 	talk("kirioth", "")
 	expect("lucifer", d1.QuestDone)

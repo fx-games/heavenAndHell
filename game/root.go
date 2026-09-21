@@ -284,6 +284,7 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 		QueueAfterTurn: g.queueAfterTurn,
 		Generator:      d1.NewGenerator(g.gameData(), g.randomSource.Int31()),
 		Audio:          g.audioPlayer,
+		Classes:        g.dataDefinitions.ClassDefinitions,
 	}
 
 	g.state.SetPlayerMessage(g.PlayerMessage)

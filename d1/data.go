@@ -246,6 +246,11 @@ type Data struct {
 	ItemIdx        map[string]int    // item internal_name -> index into Items
 	Vendors        map[string]Vendor // store internal_name -> its record (assets/data/stores.rec)
 	VendorList     []Vendor          // the same records in file order, which is the order an NPC's menu and stock take
+
+	// The mod's named skills and item/shrine actions (effects/targeted.rec, effects/untargeted.rec): what a
+	// class's skill list or an item's action names, with its display name, icon and default arguments.
+	TargetedDefs   map[string]defs.TargetedActionDefinition
+	UntargetedDefs map[string]defs.UntargetedActionDefinition
 	Prefixes       []Affix
 	Suffixes       []Affix
 	UniqueItems    []UniqueItemData
@@ -357,6 +362,19 @@ func load(fsys fs.FS) (*Data, error) {
 	}
 	if d.Items, err = defs.ReadItems(fsys); err != nil {
 		return nil, err
+	}
+	var bad []string
+	logErr := func(s string) { bad = append(bad, s) }
+	if f, err := fsys.Open(dataPath("effects", "targeted.rec")); err == nil {
+		d.TargetedDefs = defs.ReadTargetedDefinitions(f, logErr)
+		f.Close()
+	}
+	if f, err := fsys.Open(dataPath("effects", "untargeted.rec")); err == nil {
+		d.UntargetedDefs = defs.ReadUntargetedDefinitions(f, logErr)
+		f.Close()
+	}
+	if len(bad) > 0 {
+		return nil, fmt.Errorf("effects: %s", strings.Join(bad, "; "))
 	}
 	affixes := func(rows []row) (out []Affix) {
 		for _, r := range rows {
