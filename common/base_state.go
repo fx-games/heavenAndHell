@@ -569,7 +569,7 @@ func (s *State) MapTransition(to gridmap.Transition) {
 		if actor == player {
 			continue
 		}
-		actor.RemoveEnergy(actor.GetEnergy())
+		actor.ResetEnergy()
 		s.timekeeper.AddTimed(actor)
 	}
 

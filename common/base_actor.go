@@ -250,6 +250,13 @@ func (a *Actor) RemoveEnergy(energy int) {
 	a.BeforeTurn()
 }
 
+// ResetEnergy zeroes the energy an actor has banked WITHOUT starting a turn for it. RemoveEnergy is the
+// "this actor just acted" path and ticks status effects and regeneration as a side effect; arriving on a map
+// is not an action, so it must not hand every monster a free turn of healing and debuff countdown.
+func (a *Actor) ResetEnergy() {
+	a.timeEnergy = 0
+}
+
 func (a *Actor) GetAttackSpeed(attackType AttackType) int {
 	// TODO - missing:
 	// - class based attack speed modifier per weapon type (eg. barb swinging axes faster, mages using staves faster)
