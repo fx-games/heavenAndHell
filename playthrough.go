@@ -149,12 +149,6 @@ func playthrough() {
 			if monsters < 10 {
 				fail("run %d dlvl %d: only %d D1 monsters spawned", run, dlvl, monsters)
 			}
-			switch dlvl {
-			case 3:
-				checkDoppelganger(theGame, fail)
-			case 5:
-				checkRune(theGame, fail)
-			}
 			kills, damageTaken, exp := fight(theGame.GetActionBroker(), state, player)
 			if kills == 0 || exp == 0 {
 				fail("run %d dlvl %d: fight didn't work (kills=%d exp=%d)", run, dlvl, kills, exp)
@@ -201,7 +195,6 @@ func playthrough() {
 
 			if run == 3 && dlvl == 2 { // milestone 5: the sorcerer casts every spell
 				castAllSpells(theGame.GetFactory(), theGame.GetActionBroker(), state, player, fail)
-				castHellfireSpells(theGame.GetFactory(), theGame.GetActionBroker(), state, player, fail)
 				player = state.GetPlayer()
 			}
 
@@ -457,79 +450,6 @@ func saveCheckOf(state *common.State) saveCheck {
 	return c
 }
 
-// checkDoppelganger swings a Doppelganger's weapon at an ordinary monster: one blow in ten splits off a copy.
-func checkDoppelganger(theGame *game.GameInstance, fail func(string, ...any)) {
-	state, broker := theGame.GetWorldState(), theGame.GetActionBroker()
-	m, player := state.GetMap(), state.GetPlayer()
-	var weapon *d1.Item
-	for _, it := range player.GetEquipment().AllItems() {
-		if d := it.D1(); d != nil && d.Class == "ICLASS_WEAPON" && d.Type != d1.ITypeBow {
-			weapon = d
-		}
-	}
-	if weapon == nil {
-		return // the class fights with a bow or bare-handed
-	}
-	weapon.DamAcFlags |= d1.IHfDoppelganger
-	defer func() { weapon.DamAcFlags &^= d1.IHfDoppelganger }()
-	count := func(mt int) (n int) {
-		for _, a := range m.Actors() {
-			if mon := a.D1Monster(); mon != nil && mon.Type == mt {
-				n++
-			}
-		}
-		return
-	}
-	for _, a := range m.Actors() {
-		mon := a.D1Monster()
-		if mon == nil || mon.Golem || mon.Unique != nil || !a.IsAlive() || len(m.GetFreeCardinalNeighbors(a.MapPosition())) < 2 {
-			continue
-		}
-		m.MoveActor(player, m.GetFreeCardinalNeighbors(a.MapPosition())[0])
-		before := count(mon.Type)
-		a.AddStatusEffect(common.StatusStone, 1000) // held in place, and every blow lands
-		for swing := 0; swing < 200 && count(mon.Type) == before && a.IsAlive(); swing++ {
-			a.GetStats().GetResource(stats.Health).SetToMax()
-			broker.Execute(common.NewMeleeAttackAction(common.AbstractCause("playthrough"), player, a))
-		}
-		if count(mon.Type) == before {
-			fail("doppelganger: 200 blows at %s split off no copy", a.Name())
-		}
-		a.RemoveStatusEffect(common.StatusStone)
-		return
-	}
-}
-
-// checkRune sets a Rune of Fire under the hero beside a monster: stepping on it (the hero triggers runes too)
-// sets it off. Whether the blast hurts the monster is a to-hit roll, so only the detonation is checked.
-func checkRune(theGame *game.GameInstance, fail func(string, ...any)) {
-	state, f, broker := theGame.GetWorldState(), theGame.GetFactory(), theGame.GetActionBroker()
-	m, player := state.GetMap(), state.GetPlayer()
-	for _, a := range m.Actors() {
-		mon := a.D1Monster()
-		if mon == nil || mon.Golem || !a.IsAlive() || mon.Data.ID == "MT_DIABLO" {
-			continue
-		}
-		free := m.GetFreeCardinalNeighbors(a.MapPosition())
-		if len(free) == 0 {
-			continue
-		}
-		m.MoveActor(player, free[0])
-		rune := f.NewD1Item(f.D1().PlainItem(161)) // Rune of Fire
-		player.GetInventory().Add(rune)
-		rune.GetTargetedAction().Execute(player, player.MapPosition(), player.MapPosition())
-		if player.GetInventory().Has(rune) || !m.IsObjectAt(player.MapPosition()) {
-			fail("rune: the Rune of Fire wasn't set under the hero")
-			return
-		}
-		broker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("playthrough"), 10))
-		if m.IsObjectAt(player.MapPosition()) {
-			fail("rune: the hero stands on the Rune of Fire and it doesn't go off")
-		}
-		return
-	}
-}
-
 // checkTown: D1 shopkeepers with priced D1 stock, gates by depth, broken gear and repairs.
 func checkTown(state *common.State, fail func(string, ...any)) {
 	m := state.GetMap()
@@ -585,92 +505,6 @@ func checkTown(state *common.State, fail func(string, ...any)) {
 
 // castAllSpells teaches the hero all 26 spells and casts each at the nearest monster; then it walks through the
 // town portal and back, which closes it.
-// castHellfireSpells casts Hellfire's spells from memory: Mana and the Magi fill mana, Reflect stores blows,
-// Berserk turns a monster, the walls and rings leave burning cells, Immolation hurts, Warp lands by the stairs and
-// the Jester casts something.
-func castHellfireSpells(f *common.Factory, broker *common.Broker, state *common.State, player *common.Actor, fail func(string, ...any)) {
-	h, m := player.Hero(), state.GetMap()
-	mana := player.GetStats().GetResource(stats.Mana)
-	for sp := d1.SplMana; sp <= d1.SplSearch; sp++ {
-		h.SpellLevels[sp] = 3
-	}
-	f.RefreshD1Spells(player)
-	nearest := func() *common.Actor {
-		var target *common.Actor
-		for _, a := range m.Actors() {
-			if mon := a.D1Monster(); mon != nil && !mon.Golem && !mon.Berserk && a.IsAlive() && len(m.GetFreeCardinalNeighbors(a.MapPosition())) > 0 && (target == nil ||
-				geometry.DistanceChebyshev(a.MapPosition(), player.MapPosition()) < geometry.DistanceChebyshev(target.MapPosition(), player.MapPosition())) {
-				target = a
-			}
-		}
-		return target
-	}
-	cast := func(sp int, target geometry.Point) {
-		mana.SetToMax()
-		f.CastD1FromMemory(player, sp, target)
-	}
-	burning := func() (n int) {
-		for _, o := range m.Objects() {
-			if _, ok := o.(*common.DamageDealingObject); ok {
-				n++
-			}
-		}
-		return
-	}
-
-	mana.SetToMax()
-	mana.Decrease(mana.Value() / 2)
-	low := mana.Value()
-	f.CastD1FromMemory(player, d1.SplMagi, player.MapPosition())
-	if h.ManaBase != h.MaxManaBase-f.D1().D.ManaCost(h, player.HeroSheet(), d1.SplMagi) {
-		fail("hellfire spells: the Magi left mana base %d of %d (mana %d before)", h.ManaBase, h.MaxManaBase, low)
-	}
-	stored := h.Reflections
-	cast(d1.SplReflect, player.MapPosition())
-	if h.Reflections <= stored || h.Reflections > stored+3*h.Level { // monsters may spend some in the turn the cast takes
-		fail("hellfire spells: Reflect went from %d to %d blows, adding up to %d", stored, h.Reflections, 3*h.Level)
-	}
-	target := nearest()
-	if target == nil {
-		fail("hellfire spells: no monster to cast at")
-		return
-	}
-	if free := m.GetFreeCardinalNeighbors(target.MapPosition()); geometry.DistanceChebyshev(target.MapPosition(), player.MapPosition()) > 1 {
-		m.MoveActor(player, free[0])
-		broker.Execute(common.NewUpdateFoVAction(common.AbstractCause("playthrough"), player))
-	}
-	for tries := 0; tries < 20 && !target.D1Monster().Berserk && target.IsAlive(); tries++ { // resistant monsters shrug it off half the time
-		cast(d1.SplBerserk, target.MapPosition())
-	}
-	if target.IsAlive() && target.D1Monster().MagicRes&d1.ImmuneMagic == 0 && target.D1Monster().Unique == nil && !target.D1Monster().Berserk {
-		fail("hellfire spells: Berserk didn't take %s", target.Name())
-	}
-	before := burning()
-	cast(d1.SplRingOfFire, player.MapPosition())
-	if burning() == before {
-		fail("hellfire spells: Ring of Fire lit nothing")
-	}
-	if target = nearest(); target != nil {
-		before = burning()
-		cast(d1.SplLightWall, target.MapPosition())
-		if burning() == before {
-			fail("hellfire spells: Lightning Wall raised nothing")
-		}
-		cast(d1.SplImmolation, player.MapPosition())
-		cast(d1.SplJester, target.MapPosition())
-	}
-	cast(d1.SplMana, player.MapPosition())
-	lvl := state.D1Level(m)
-	cast(d1.SplWarp, player.MapPosition())
-	near := false
-	for _, t := range lvl.Triggers {
-		near = near || geometry.DistanceChebyshev(player.MapPosition(), geometry.Point{X: t.X - d1.CellOrigin, Y: t.Y - d1.CellOrigin}) <= 6
-	}
-	if !near {
-		fail("hellfire spells: Warp left the hero at %v, away from the stairs", player.MapPosition())
-	}
-}
-
 func castAllSpells(f *common.Factory, broker *common.Broker, state *common.State, player *common.Actor, fail func(string, ...any)) {
 	spells := []int{d1.SplFirebolt, d1.SplHeal, d1.SplLightning, d1.SplFlash, d1.SplIdentify, d1.SplFireWall, d1.SplStone,
 		d1.SplInfra, d1.SplPhasing, d1.SplManaShield, d1.SplFireball, d1.SplGuardian, d1.SplChain, d1.SplWave, d1.SplNova,
@@ -777,13 +611,11 @@ func castAllSpells(f *common.Factory, broker *common.Broker, state *common.State
 	if state.D1Portal() != nil || state.GetMap().GetName() != portal.Map {
 		fail("spells: town portal round trip didn't close the portal (%v on %s)", state.D1Portal(), state.GetMap().GetName())
 	}
-	// the golem dies on a level change (RemovePlrMissiles); Hellfire's mana shield stays up
-	if common.D1Golem(state.GetMap()) != nil || shield && !player.HasStatusEffect(common.StatusManaShield) {
+	// the golem and the mana shield end on a level change (RemovePlrMissiles)
+	if common.D1Golem(state.GetMap()) != nil || player.HasStatusEffect(common.StatusManaShield) {
 		fail("spells: after the town portal round trip: golem %v, mana shield %v (had %v)", common.D1Golem(state.GetMap()), player.HasStatusEffect(common.StatusManaShield), shield)
 	}
 	fmt.Printf("spells: %d damage, failed casts %v, mana shield %v\n", dealt, failed, shield)
-	// the mana shield outlasts level changes: dismiss it so later fights measure the hero's damage
-	player.RemoveStatusEffect(common.StatusManaShield)
 }
 
 // boost stands in for a hero who fought their way down: character level 2×dlvl with the points in Str/Dex/Vit.

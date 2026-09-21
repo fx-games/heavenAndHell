@@ -193,7 +193,7 @@ func (g *gen) initMonster(slot, dir, mt, x, y int) *Monster {
 	g.rnd(d.Frames[0] - 1) // _mAnimFrame
 	var hp int
 	if g.mtypes[mt].mtype == MtDIABLO {
-		hp = (g.rnd(1) + 3333) << 6 // Hellfire's Diablo
+		hp = (g.rnd(1) + 1666) << 6
 	} else {
 		hp = (d.MinHP() + g.rnd(d.MaxHP()-d.MinHP()+1)) << 6
 	}

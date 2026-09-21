@@ -194,8 +194,8 @@ func loadSpellTables(fsys fs.FS) error {
 		spellNames = append(spellNames, m.GetStringOrDefault("name", ""))
 		SpellDescriptions = append(SpellDescriptions, m.GetStringOrDefault("description", ""))
 	}
-	if len(spellNames) != NumSpells {
-		return fmt.Errorf("spells.rec: %d spell slots, want %d", len(spellNames), NumSpells)
+	if len(spellNames) > NumSpells {
+		return fmt.Errorf("spells.rec: %d spell slots, at most %d", len(spellNames), NumSpells)
 	}
 	RuneTraps = map[string]RuneTrap{}
 	for _, r := range recs["rune"] {

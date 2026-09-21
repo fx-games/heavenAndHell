@@ -20,11 +20,10 @@ func TestMain(m *testing.M) {
 
 // The tables below moved out of Go source into mods/d1/data/*.rec. These are the values the literals had, spot
 // checked at the ends and the awkward middles, so a mangled .rec fails here rather than in the game.
+// TestRecTablesMatchTheOldLiterals reads the tables with Hellfire's rows (test fixtures: the D1 mod has none), so
+// every table the engine supports is checked, not only the ones 1.09 fills.
 func TestRecTablesMatchTheOldLiterals(t *testing.T) {
-	d, err := Load(testFS())
-	if err != nil {
-		t.Fatal(err)
-	}
+	d := loadHellfire(t)
 
 	if len(oils) != 10 {
 		t.Fatalf("oils = %d, want 10", len(oils))

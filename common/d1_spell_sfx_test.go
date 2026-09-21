@@ -36,7 +36,7 @@ func TestD1SfxHaveSoundEvents(t *testing.T) {
 		drop, inv := d1.ItemSnds(curs)
 		ids = append(ids, drop, inv)
 	}
-	for _, v := range []string{"WARR", "ROGUE", "MAGE", "MONK"} {
+	for _, v := range []string{"WARR", "ROGUE", "MAGE"} { // the D1 mod's classes; the Monk's voice is Hellfire's
 		ids = append(ids, "PS_"+v+"69", "PS_"+v+"71")
 	}
 	ids = append(ids, "PS_DEAD", "PS_SWING", "PS_BFIRE", "PS_WALK1", "IS_ISWORD", "IS_TRAP", "IS_DOOROPEN",

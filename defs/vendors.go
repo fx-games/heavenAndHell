@@ -63,14 +63,18 @@ type Vendor struct {
 	Items                   []string
 	MinDLvlDivisor          int // 0: any item shallow enough. n: also at least dlvl/n deep.
 
-	MaxValue       int    // an item worth more is rolled again; 0 = no cap
-	Tries          int    // rolls before the vendor settles for what it has; 0 = until it likes one
-	DoubleDrops    bool   // items marked IDROP_DOUBLE count twice in the candidate list
-	SlotLevels     []int  // fixed stock slots, each an item level offset (a rotating premium stock)
-	FeaturedMiscID string // a kind of item the vendor puts out first, before the rest
-	FeaturedCount  stats.Interval
-	Shuns          map[string][]string // class name -> item types it keeps away from that class
-	ShunTries      int                 // how long it keeps shunning before it gives up
+	MaxValue        int    // an item worth more is rolled again; 0 = no cap
+	Tries           int    // 0: roll until the item is under max_value (1.09). n: also fit the hero, settling after n rolls (Hellfire)
+	DoubleDrops     bool   // items marked IDROP_DOUBLE count twice in the candidate list
+	SlotLevels      []int  // fixed stock slots, each an item level offset (a rotating premium stock)
+	RotateBy        int    // premium: slots each new level shifts the stock down by (1.09: 2 of 6, Hellfire: 3 of 15)
+	FeaturedMiscID  string // a kind of item the vendor puts out first, before the rest (Hellfire's witch books)
+	FeaturedCount   stats.Interval
+	Shuns           map[string][]string // class name -> item types it keeps away from that class
+	ShunTries       int                 // how long it keeps shunning before it gives up
+	UsableElixirs   bool                // only elixirs of a stat still under the class maximum (Hellfire's HealerItemOk)
+	PriceAdjust     [2]int              // {sign, divisor}: sells at value + sign*value/divisor (1.09 Wirt +1/2, Hellfire -1/4)
+	RechargeUniques bool                // recharges uniques with charges too (Hellfire's WitchRechargeOk)
 
 	program *vm.Program
 }
@@ -81,8 +85,8 @@ func (v Vendor) Cond() *vm.Program { return v.program }
 // The engine's vendor vocabulary. The algorithms behind each name live in the engine; a mod picks by name.
 var (
 	VendorStocks   = []string{"smith", "premium", "witch", "healer", "boy", "list"}
-	VendorBuyRules = []string{"smith", "witch", "any"}
-	VendorServices = []string{"buy", "buy_basic", "buy_premium", "sell", "repair", "recharge", "identify", "heal_on_visit",
+	VendorBuyRules = []string{"smith", "witch", "hellfire_smith", "hellfire_witch", "any"}
+	VendorServices = []string{"buy", "buy_basic", "buy_premium", "sell", "repair", "recharge", "identify", "heal", "heal_on_visit",
 		"donate", "peek", "stash", "transfer"}
 )
 
@@ -193,6 +197,20 @@ func vendorFromRecord(rec recfile.Record) (Vendor, error) {
 			v.FeaturedMiscID = f.Value
 		case "featured_count":
 			v.FeaturedCount = stats.NewIntervalFromString(f.Value)
+		case "rotate_by":
+			v.RotateBy = f.AsInt()
+		case "usable_elixirs_only":
+			v.UsableElixirs = f.AsBool()
+		case "recharge_uniques":
+			v.RechargeUniques = f.AsBool()
+		case "price_adjust":
+			sign, div, ok := strings.Cut(f.Value, "/")
+			n, err1 := strconv.Atoi(sign)
+			d, err2 := strconv.Atoi(div)
+			if !ok || err1 != nil || err2 != nil || d <= 0 || (n != 1 && n != -1) {
+				return v, fmt.Errorf("price_adjust: want +1/n or -1/n, got %q", f.Value)
+			}
+			v.PriceAdjust = [2]int{n, d}
 		case "shun_tries":
 			v.ShunTries = f.AsInt()
 		case "shuns":

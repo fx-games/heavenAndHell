@@ -1,5 +1,5 @@
 %rec: class
-# One row per player class, in PC_ order: D1's three, then Hellfire's Monk, Bard and Barbarian.
+# One row per player class, in PC_ order.
 # Ports devilutionX's txtdata/classes/<class>/attributes.tsv and animations.tsv, which reproduce
 # D1 1.09's player.cpp tables. The life/mana/potion/spell columns are devilutionX's parseFixed6
 # decimals (1/64 multipliers) and are written here as the decimals, not the fixed-point ints.
@@ -96,95 +96,6 @@ attack_frames: default=20 sword=16 axe=24 mace=16 staff=16
 spell_frames: 12
 hit_frames: 8
 start_spells: SPL_FIREBOLT=2
-
-name: Monk
-str: 25
-mag: 15
-dex: 25
-vit: 20
-max_str: 150
-max_mag: 80
-max_dex: 150
-max_vit: 80
-to_blk: 25
-adj_life: 23
-adj_mana: 5.5
-lvl_life: 2
-lvl_mana: 2
-chr_life: 1
-chr_mana: 1
-itm_life: 1.5
-itm_mana: 1.5
-potion_life: 1.5
-potion_mana: 1.5
-spell_life: 2
-mana_cost: 0.75
-magic_to_hit: 50
-melee_to_hit: 50
-ranged_to_hit: 50
-attack_frames: default=12 sword=16 axe=23 bow=20 mace=16 staff=13
-spell_frames: 18
-hit_frames: 6
-
-name: Bard
-str: 20
-mag: 20
-dex: 25
-vit: 20
-max_str: 120
-max_mag: 120
-max_dex: 120
-max_vit: 100
-to_blk: 25
-adj_life: 23
-adj_mana: 3
-lvl_life: 2
-lvl_mana: 2
-chr_life: 1
-chr_mana: 1.5
-itm_life: 1.5
-itm_mana: 1.75
-potion_life: 1.5
-potion_mana: 1.5
-spell_life: 1.5
-mana_cost: 0.75
-magic_to_hit: 60
-melee_to_hit: 50
-ranged_to_hit: 60
-attack_frames: default=18 axe=22 bow=12 staff=16
-spell_frames: 16
-hit_frames: 7
-flags: dual_wield
-
-name: Barbarian
-str: 40
-mag: 0
-dex: 20
-vit: 25
-max_str: 255
-max_mag: 0
-max_dex: 55
-max_vit: 150
-to_blk: 30
-adj_life: 18
-adj_mana: 0
-lvl_life: 2
-lvl_mana: 0
-chr_life: 2
-chr_mana: 1
-itm_life: 2.5
-itm_mana: 1
-potion_life: 2
-potion_mana: 1
-spell_life: 2
-mana_cost: 1
-magic_to_hit: 50
-melee_to_hit: 50
-ranged_to_hit: 50
-attack_frames: default=16 axe=20
-spell_frames: 20
-hit_frames: 6
-flags: critical_strike iron_skin natural_resistance
 
 %rec: experience
 # ExpLvls: the experience total each character level needs, level 1 first. Ten per line.

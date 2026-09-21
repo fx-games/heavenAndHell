@@ -45,7 +45,7 @@ Three gates, all non-negotiable:
    output at all (`md5 -q` two runs, and against the run before your change). A
    deliberate gameplay change (the user's list below) changes it: diff the output
    and check every changed line is the intended effect, then say so in the commit.
-   Current baseline, after the D1 parity fixes: `1e3004895b1a91806de3ca9bba0449df`.
+   Current baseline, after the D1 mod went to 1.09: `34e588494d87489a13209407037c6337`.
 3. Both build tags green, no new test failures.
 
 ## Done

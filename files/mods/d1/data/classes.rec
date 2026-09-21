@@ -22,28 +22,5 @@ internal_name: sorcerer
 name: Sorcerer
 gold: 100
 item: short_staff_of_charged_bolt
-item: potion_of_healing
-item: potion_of_healing
-
-internal_name: monk
-name: Monk
-gold: 100
-item: short_staff
-item: potion_of_healing
-item: potion_of_healing
-
-internal_name: bard
-name: Bard
-gold: 100
-item: sword
-item: dagger
-item: potion_of_healing
-item: potion_of_healing
-
-internal_name: barbarian
-name: Barbarian
-gold: 100
-item: spiked_club
-item: buckler
-item: potion_of_healing
-item: potion_of_healing
+item: potion_of_mana
+item: potion_of_mana

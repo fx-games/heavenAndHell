@@ -49,7 +49,7 @@ func TestDrlgFixtures(t *testing.T) {
 		return b
 	}
 	defer func() { readDunHook = nil }()
-	for _, f := range append(drlgFixtures, drlgHellfireFixtures...) {
+	for _, f := range drlgFixtures {
 		if f.file == "diablo/7-1607627156.dun" {
 			continue // DevilutionX opens the Halls of the Blind from Blind1.DUN; D1 1.09 starts from Blind2.DUN
 		}

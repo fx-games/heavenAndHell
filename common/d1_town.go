@@ -34,6 +34,10 @@ func D1VendorBuys(vendor *Actor, item *Item) bool {
 			return item.d1Data.SmithBuys(item.d1)
 		case "witch":
 			return item.d1Data.WitchBuys(item.d1)
+		case "hellfire_smith":
+			return item.d1Data.HellfireSmithBuys(item.d1)
+		case "hellfire_witch":
+			return item.d1Data.HellfireWitchBuys(item.d1)
 		case "any":
 			return true
 		}
@@ -41,7 +45,7 @@ func D1VendorBuys(vendor *Actor, item *Item) bool {
 	return false
 }
 
-// D1Shopper is what Hellfire's stores look at of the player (SpawnOnePremium, SpawnBoy, HealerItemOk).
+// D1Shopper is what stores with Hellfire's options look at of the player (SpawnOnePremium, SpawnBoy, HealerItemOk).
 func D1Shopper(player *Actor) *d1.Shopper {
 	h, s := player.hero, player.HeroSheet()
 	if h == nil {
@@ -158,13 +162,10 @@ func vendorService(ctx ActionContext, vendor *Actor, service string) (util.MenuI
 	case "identify": // a flat fee, whatever the item (D1's AddStoreHoldId)
 		return d1ServiceOption(ctx, "Identify an item", func(it *d1.Item) bool { return it.Magical != 0 && !it.Identified },
 			func(*d1.Item) int { return arg }, func(it *d1.Item) { it.Identified = true }, true), true
-	case "heal_on_visit": // not a menu entry: coming in is enough (Hellfire's S_StartHealer)
-		player := ctx.GameState.GetPlayer()
-		if hp := player.GetStats().GetResource(stats.Health); !hp.IsAtMax() {
-			playD1SfxAt(ctx, "IS_CAST8", player.MapPosition())
-		}
-		player.HealCompletely()
-		ctx.Msg(fmt.Sprintf("%s tends to your wounds.", vendor.Name()))
+	case "heal": // "Receive healing" (S_HealerEnter): full life, with IS_CAST8 when there was any to restore
+		return util.MenuItem{MainText: "Receive healing", Action: func() { healAtVendor(ctx, vendor) }}, true
+	case "heal_on_visit": // not a menu entry: coming in is enough
+		healAtVendor(ctx, vendor)
 	case "donate": // arg gold per explored level refills the dungeon
 		levels := ctx.GameState.ExploredD1DungeonLevels()
 		if levels == 0 {
@@ -290,4 +291,14 @@ func (s *State) RespawnD1Monsters() int {
 		}
 	}
 	return len(names)
+}
+
+// healAtVendor restores the player's life at a healer.
+func healAtVendor(ctx ActionContext, vendor *Actor) {
+	player := ctx.GameState.GetPlayer()
+	if hp := player.GetStats().GetResource(stats.Health); !hp.IsAtMax() {
+		playD1SfxAt(ctx, "IS_CAST8", player.MapPosition())
+	}
+	player.HealCompletely()
+	ctx.Msg(fmt.Sprintf("%s tends to your wounds.", vendor.Name()))
 }

@@ -2,6 +2,12 @@ package d1
 
 // Generated from DevilutionX test/drlg_l*_test.cpp (single-player Diablo cases).
 var drlgFixtures = []drlgFixture{
+	{"diablo/1-2588.dun", 1, 2588, []questOverride{}, []fixtureEntry{{EntryMain, 77, 46}, {EntryPrev, 49, 49}}},
+	{"diablo/1-743271966.dun", 1, 743271966, []questOverride{}, []fixtureEntry{{EntryMain, 51, 82}, {EntryPrev, 81, 47}}},
+	{"diablo/2-1383137027.dun", 2, 1383137027, []questOverride{{QPWater, "active", QuestInit}, {QButcher, "active", QuestNotAvail}}, []fixtureEntry{{EntryMain, 57, 74}, {EntryPrev, 57, 79}, {EntryRtnLvl, 49, 88}}},
+	{"diablo/3-844660068.dun", 3, 844660068, []questOverride{}, []fixtureEntry{{EntryMain, 67, 52}, {EntryPrev, 85, 45}}},
+	{"diablo/4-609325643.dun", 4, 609325643, []questOverride{{QLtBanner, "active", QuestNotAvail}}, []fixtureEntry{{EntryMain, 85, 78}, {EntryPrev, 55, 47}}},
+	{"diablo/4-902156014.dun", 4, 902156014, []questOverride{{QLtBanner, "active", QuestInit}}, []fixtureEntry{{EntryMain, 75, 56}, {EntryPrev, 51, 59}}},
 	{"diablo/5-1677631846.dun", 5, 1677631846, []questOverride{{QBlood, "active", QuestNotAvail}}, []fixtureEntry{{EntryMain, 27, 28}, {EntryPrev, 26, 62}, {EntryTWarpDn, 33, 56}}},
 	{"diablo/5-68685319.dun", 5, 68685319, []questOverride{{QBlood, "active", QuestInit}}, []fixtureEntry{{EntryMain, 37, 36}, {EntryPrev, 44, 28}, {EntryTWarpDn, 45, 76}}},
 	{"diablo/6-2034738122.dun", 6, 2034738122, []questOverride{{QSchamb, "active", QuestNotAvail}}, []fixtureEntry{{EntryMain, 33, 26}, {EntryPrev, 34, 52}}},
@@ -22,17 +28,4 @@ var drlgFixtures = []drlgFixture{
 	{"diablo/15-1583642716.dun", 15, 1583642716, []questOverride{{QDiablo, "active", QuestInit}}, []fixtureEntry{{EntryMain, 44, 26}, {EntryPrev, 88, 67}}},
 	{"diablo/15-1583642716-changed.dun", 15, 1583642716, []questOverride{{QBetrayer, "active", QuestDone}, {QDiablo, "active", QuestActive}}, []fixtureEntry{{EntryMain, 44, 26}, {EntryPrev, 88, 67}}},
 	{"diablo/16-741281013.dun", 16, 741281013, []questOverride{}, []fixtureEntry{{EntryMain, 58, 42}}},
-}
-
-// Generated from the same tests' Hellfire cases: Hellfire's Cathedral, whose stairs this game always uses.
-var drlgHellfireFixtures = []drlgFixture{
-	{"hellfire/1-401921334.dun", 1, 401921334, []questOverride{}, []fixtureEntry{{EntryMain, 79, 80}, {EntryPrev, 49, 63}}},
-	{"hellfire/1-536340718.dun", 1, 536340718, []questOverride{}, []fixtureEntry{{EntryMain, 55, 72}, {EntryPrev, 49, 63}}},
-	{"hellfire/2-128964898.dun", 2, 128964898, []questOverride{{QPWater, "active", QuestNotAvail}, {QButcher, "active", QuestNotAvail}}, []fixtureEntry{{EntryMain, 55, 68}, {EntryPrev, 49, 63}}},
-	{"hellfire/2-1180526547.dun", 2, 1180526547, []questOverride{{QPWater, "active", QuestNotAvail}, {QButcher, "active", QuestInit}}, []fixtureEntry{{EntryMain, 83, 68}, {EntryPrev, 81, 45}}},
-	{"hellfire/3-1369955278.dun", 3, 1369955278, []questOverride{{QSkelKing, "active", QuestInit}}, []fixtureEntry{{EntryMain, 63, 86}, {EntryPrev, 75, 69}}},
-	{"hellfire/3-1799396623.dun", 3, 1799396623, []questOverride{{QSkelKing, "active", QuestNotAvail}}, []fixtureEntry{{EntryMain, 59, 68}, {EntryPrev, 47, 55}}},
-	{"hellfire/3-1512491184.dun", 3, 1512491184, []questOverride{{QSkelKing, "active", QuestInit}}, []fixtureEntry{{EntryMain, 47, 72}, {EntryPrev, 79, 45}}},
-	{"hellfire/4-1190318991.dun", 4, 1190318991, []questOverride{{QLtBanner, "active", QuestNotAvail}}, []fixtureEntry{{EntryMain, 67, 80}, {EntryPrev, 77, 45}}},
-	{"hellfire/4-1924296259.dun", 4, 1924296259, []questOverride{{QLtBanner, "active", QuestInit}}, []fixtureEntry{{EntryMain, 83, 54}, {EntryPrev, 51, 87}}},
 }

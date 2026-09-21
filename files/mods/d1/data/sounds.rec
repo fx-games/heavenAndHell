@@ -2075,11 +2075,6 @@ internal_name: sfx.PS_BFIRE
 name: Hero - Bow Shot
 sound: ang_sfx/mco_spray_long.ogg
 
-internal_name: sfx.PS_MONK71
-name: Hero - Death (Monk voice)
-sound: ang_sfx/pls_man_scream2.ogg
-sound: ang_sfx/pls_man_yell.ogg
-
 internal_name: sfx.PS_ROGUE71
 name: Hero - Death (Rogue voice)
 sound: ang_sfx/pls_man_scream2.ogg
@@ -2101,12 +2096,6 @@ sound: ang_sfx/plc_die_laugh.ogg
 
 internal_name: sfx.PS_WALK1
 name: Hero - Footstep
-
-internal_name: sfx.PS_MONK69
-name: Hero - Hurt (Monk voice)
-sound: ang_sfx/human_hit/plc_hit_grunt.ogg
-sound: ang_sfx/human_hit/plc_hit_grunt2.ogg
-sound: ang_sfx/pls_man_argoh.ogg
 
 internal_name: sfx.PS_ROGUE69
 name: Hero - Hurt (Rogue voice)

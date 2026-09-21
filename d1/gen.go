@@ -165,9 +165,11 @@ func (g *Generator) isplFlags(s string) uint32 {
 	return 0
 }
 
-// nextSpell walks spells like GetBookSpell/GetStaffSpell, skipping multiplayer-only ones (Hellfire's MAX_SPELLS).
+// nextSpell walks spells like GetBookSpell/GetStaffSpell, skipping multiplayer-only ones. It wraps at MAX_SPELLS,
+// the size of the mod's spell table: 37 for Diablo 1.09, 52 for a table with Hellfire's spells.
 func (g *Generator) nextSpell(ok func(SpellData) bool) int {
-	rv := g.random(NumSpells) + 1
+	n := g.D.SpellCount
+	rv := g.random(n) + 1
 	s, bs := 1, 0
 	for rv > 0 {
 		if ok(g.D.Spells[s]) {
@@ -181,7 +183,7 @@ func (g *Generator) nextSpell(ok func(SpellData) bool) int {
 		if s == 34 { // SPL_HEALOTHER
 			s = 35
 		}
-		if s == NumSpells {
+		if s == n {
 			s = 1
 		}
 	}
@@ -531,7 +533,10 @@ func (g *Generator) itemPower(it *Item, minlvl, maxlvl, flgs int, onlygood bool)
 
 // staffSpell ports GetStaffSpell + GetStaffPower.
 func (g *Generator) staffSpell(it *Item, lvl int, onlygood bool) {
-	// Hellfire's staves always carry a spell
+	if g.random(4) == 0 { // 1.09: one staff in four rolls a power instead of a spell (Hellfire dropped this)
+		g.itemPower(it, lvl>>1, lvl, PLTStaff, onlygood)
+		return
+	}
 	l := max(lvl>>1, 1)
 	bs := g.nextSpell(func(s SpellData) bool { return s.StaffLvl != -1 && l >= s.StaffLvl })
 	sp := g.D.Spells[bs]

@@ -8,6 +8,7 @@ import (
 	"rpg/stats"
 	"rpg/util"
 	"testing"
+	"testing/fstest"
 )
 
 // menuUI captures the menus the NPCs open instead of drawing them.
@@ -20,9 +21,10 @@ type menuUI struct {
 func (m *menuUI) OpenMenu(items []util.MenuItem)         { m.lastMenu = items }
 func (m *menuUI) OpenTextWindow(buffer []util.LabelText) { m.windows = append(m.windows, buffer) }
 
-// Gillian only collects for the town once Diablo is dead, she asks 200 gold per explored dungeon level, and her
+// The donate service: a town NPC collects gold per explored dungeon level once its condition holds, and the
 // donation puts every monster on those levels back on its feet - with D1's Nightmare numbers, since the hero has
-// been through the game once.
+// been through the game once. Diablo 1.09 has no such thing, so the D1 mod doesn't declare it; the test gives
+// Gillian the record a mod would write.
 func TestGillianDonationRespawnsMonsters(t *testing.T) {
 	theGame, _ := createGameAndUIContext()
 	theGame.GetAudio().SetDisablePlayback(true)
@@ -30,6 +32,14 @@ func TestGillianDonationRespawnsMonsters(t *testing.T) {
 	theGame.SetAndInitUserInterface(ui)
 	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 	state := theGame.GetWorldState()
+	vendors, err := defs.ReadVendors(fstest.MapFS{"assets/data/stores.rec": {Data: []byte(
+		"internal_name: barmaid\nnpc: gillian\nwhen: done(\"diablo\")\nservice: donate(200)\n")}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	data := theGame.GetFactory().D1().D
+	data.VendorList = append(data.VendorList, vendors...)
+	defer func() { data.VendorList = data.VendorList[:len(data.VendorList)-1] }()
 
 	gillian := func() *common.Actor {
 		for _, a := range state.GetTownMap(string(defs.LevelNameTown)).Actors() {

@@ -107,8 +107,8 @@ func (g *GameInstance) stock(inv *common.Inventory, items []*d1.Item, price func
 	}
 }
 
-// onD1MapChanged: the golem dies where it stood, leaving its corpse (RemovePlrMissiles), the mana shield stays up
-// (Hellfire keeps pManaShield across levels), and walking back through the town portal closes it.
+// onD1MapChanged ports RemovePlrMissiles for a level change: the golem dies where it stood, leaving its corpse, and
+// the mana shield ends (1.09's InitLevelChange; Hellfire kept it). Walking back through the town portal closes it.
 func (g *GameInstance) onD1MapChanged(oldMapName, newMapName string) {
 	player := g.state.GetPlayer()
 	old := g.state.GetDungeonMap(oldMapName)
@@ -124,6 +124,7 @@ func (g *GameInstance) onD1MapChanged(oldMapName, newMapName string) {
 	if h := player.Hero(); h != nil {
 		h.Reflections = 0 // FreeMissiles: Reflect ends with the level
 	}
+	player.RemoveStatusEffect(common.StatusManaShield)
 	common.UpdateD1Quests(&g.state, g.state.GetMap())
 	g.audioPlayer.PlayMusic(d1AreaMusic(newMapName)) // without that track the current music plays on
 	if p := g.state.D1Portal(); p != nil && defs.IsTownLevel(oldMapName) && newMapName == p.Map &&

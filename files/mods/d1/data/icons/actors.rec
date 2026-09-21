@@ -24,30 +24,6 @@ internal_name: class.sorcerer_female
 icon: 49
 name: Class Sorcerer (female)
 
-internal_name: class.monk_male
-icon: 25
-name: Class Monk (male)
-
-internal_name: class.monk_female
-icon: 53
-name: Class Monk (female)
-
-internal_name: class.bard_male
-icon: 313
-name: Class Bard (male)
-
-internal_name: class.bard_female
-icon: 341
-name: Class Bard (female)
-
-internal_name: class.barbarian_male
-icon: 312
-name: Class Barbarian (male)
-
-internal_name: class.barbarian_female
-icon: 340
-name: Class Barbarian (female)
-
 internal_name: corpse.default
 icon: 135
 name: Corpse

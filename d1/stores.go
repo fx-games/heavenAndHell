@@ -20,7 +20,7 @@ const (
 	IdxLazStaff  = 33
 	idxFirstQst  = 6
 	idxLastQst   = 22
-	premiumSlots = 15 // the most fixed slots a rotating stock may declare (Hellfire's SMITH_PREMIUM_ITEMS)
+	premiumSlots = 15 // the most fixed slots a rotating stock may declare (SMITH_PREMIUM_ITEMS: 6 in 1.09, 15 in Hellfire)
 )
 
 // Shopper is what the stores look at of the hero: its class and stats for what it could use, and what it
@@ -32,9 +32,8 @@ type Shopper struct {
 	Owned                              []*Item // equipped and in the pack
 }
 
-// usableElixir is the one thing Hellfire's HealerItemOk knows that the vendor record cannot say: an elixir is
-// only worth selling while the hero is still under its class maximum. That is a fact about the item, not about
-// the vendor, so it stays in the engine and rides along as an extra filter.
+// usableElixir is Hellfire's HealerItemOk rule a vendor opts into with usable_elixirs_only: an elixir is only worth
+// selling while the hero is still under its class maximum.
 func usableElixir(b ItemData, who *Shopper) bool {
 	if who == nil {
 		return true
@@ -76,8 +75,8 @@ func (who *Shopper) bestOwned(it *Item) int {
 	return best
 }
 
-// fits is Hellfire's SpawnOnePremium/SpawnBoy acceptance: within 1.2x the higher of the hero's stats and its
-// class maximum, and worth at least 80% of its best item of the kind.
+// fits is Hellfire's SpawnOnePremium/SpawnBoy acceptance, for a vendor with tries: within 1.2x the higher of the
+// hero's stats and its class maximum, and worth at least 80% of its best item of the kind.
 func (who *Shopper) fits(it *Item, maxVal, floorValue int) bool {
 	a := classAttr[who.Class]
 	str, mag, dex := max(a.MaxStr, who.Str)*12/10, max(a.MaxMag, who.Mag)*12/10, max(a.MaxDex, who.Dex)*12/10
@@ -95,6 +94,9 @@ func loadStoreTables(fsys fs.FS, d *Data) error {
 	for _, v := range vendors {
 		if len(v.SlotLevels) > premiumSlots {
 			return fmt.Errorf("stores.rec: %s declares %d slots, at most %d fit", v.InternalName, len(v.SlotLevels), premiumSlots)
+		}
+		if v.Stock == "premium" && (v.RotateBy < 1 || len(v.SlotLevels) < 2*v.RotateBy-1) {
+			return fmt.Errorf("stores.rec: %s rotates by %d, which %d slots can't hold", v.InternalName, v.RotateBy, len(v.SlotLevels))
 		}
 		d.Vendors[v.InternalName] = v
 	}
@@ -177,16 +179,17 @@ func (g *Generator) SmithStock(lvl int) []*Item {
 	return out
 }
 
-// PremiumItem ports SpawnOnePremium: one magical item for a fixed slot, re-rolled up to the record's tries for
-// something the shopper could use and that beats 80% of its best one of the kind.
+// PremiumItem ports SpawnOnePremium: one magical item for a fixed slot, rolled until it is worth no more than the
+// record's max_value. With tries it must also be something the shopper could use that beats 80% of its best one of
+// the kind, settling after that many rolls (Hellfire).
 func (g *Generator) PremiumItem(plvl int, who *Shopper) *Item {
 	v := g.D.Vendors["premium"]
 	plvl = min(max(plvl, 1), 30)
 	for count := 1; ; count++ {
 		it := g.storeItem(g.storeIdx(v, plvl, nil), plvl)
-		g.itemBonusSpells(it, plvl>>1, plvl, true, false)
+		g.itemBonus(it, plvl>>1, plvl, true)
 		ok := it.IValue <= v.MaxValue
-		if who != nil {
+		if v.Tries > 0 && who != nil {
 			ok = who.fits(it, v.MaxValue, who.bestOwned(it)*8/10) || count >= v.Tries
 		}
 		if ok {
@@ -203,33 +206,43 @@ type Premium struct {
 }
 
 // RefillPremium ports SpawnPremium: fill bought slots, then rotate in new items while the character outlevels the
-// stock. Each slot's item level offset is the record's slot_levels.
+// stock. Each slot's item level offset is the record's slot_levels. Every level shifts the stock rotate_by slots
+// down; the last 2*rotate_by-1 slots then alternate a new item and one kept from further up (1.09: 2 of 6 slots,
+// Hellfire: 3 of 15).
 func (g *Generator) RefillPremium(p *Premium, clvl int, who *Shopper) {
-	add := g.D.Vendors["premium"].SlotLevels
+	v := g.D.Vendors["premium"]
+	add, k := v.SlotLevels, v.RotateBy
+	n := len(add)
 	p.Level = max(p.Level, 1)
-	for i := range p.Items[:len(add)] {
+	for i := range p.Items[:n] {
 		if p.Items[i] == nil {
 			p.Items[i] = g.PremiumItem(p.Level+add[i], who)
 		}
 	}
 	for p.Level < clvl {
 		p.Level++
-		it := &p.Items
-		copy(it[0:10], it[3:13])
-		it[10] = g.PremiumItem(p.Level+add[10], who)
-		it[11] = it[13]
-		it[12] = g.PremiumItem(p.Level+add[12], who)
-		it[13] = it[14]
-		it[14] = g.PremiumItem(p.Level+add[14], who)
+		old := p.Items
+		head := n - (2*k - 1)
+		copy(p.Items[:head], old[k:k+head])
+		for j := 0; j < 2*k-1; j++ {
+			if j%2 == 0 {
+				p.Items[head+j] = g.PremiumItem(p.Level+add[head+j], who)
+			} else {
+				p.Items[head+j] = old[n-k+1+j/2]
+			}
+		}
 	}
 }
 
-// WitchStock ports SpawnWitch: the record's always stock, then up to featured_count of its featured kind (the
-// spell books, whose price in Magic depends on the hero) and random misc items and staves for the rest.
-// spellLevels are the hero's, for WitchBookLevel.
+// WitchStock ports SpawnWitch: the record's always stock, then up to featured_count of its featured kind (Hellfire's
+// books, whose price in Magic depends on the hero) and random misc items and staves for the rest. spellLevels are
+// the hero's, for WitchBookLevel.
 func (g *Generator) WitchStock(lvl int, spellLevels [NumSpells]int) []*Item {
 	v := g.D.Vendors["witch"]
-	count, featured := g.rollCount(v.ItemCount), g.rollCount(v.FeaturedCount)
+	count, featured := g.rollCount(v.ItemCount), 0
+	if v.FeaturedMiscID != "" {
+		featured = g.rollCount(v.FeaturedCount)
+	}
 	out := g.always(v)
 	var rnd []*Item
 	for i := 1; i < len(g.D.Items) && len(rnd) < featured; i++ {
@@ -280,12 +293,15 @@ func (g *Generator) witchBookLevel(it *Item, spellLevels [NumSpells]int) {
 }
 
 // HealerStock ports SpawnHealer: the record's always stock, then random elixirs, rejuvenation potions and healing
-// scrolls -- only the elixirs the shopper can still use.
+// scrolls; with usable_elixirs_only, only the elixirs the shopper can still use.
 func (g *Generator) HealerStock(lvl int, who *Shopper) []*Item {
 	v := g.D.Vendors["healer"]
 	out := g.always(v)
 	var rnd []*Item
-	ok := func(b ItemData) bool { return usableElixir(b, who) }
+	var ok func(ItemData) bool
+	if v.UsableElixirs {
+		ok = func(b ItemData) bool { return usableElixir(b, who) }
+	}
 	for n := g.rollCount(v.ItemCount); n > len(v.Always); n-- {
 		rnd = append(rnd, g.storeItem(g.storeIdx(v, lvl, ok), lvl))
 	}
@@ -293,15 +309,16 @@ func (g *Generator) HealerStock(lvl int, who *Shopper) []*Item {
 	return append(out, rnd...)
 }
 
-// BoyItem ports SpawnBoy's roll (Wirt's single magic item): up to the record's tries for an item the shopper
-// could use, beating 80% of its best one of the kind and, for its first shun_tries, of a type its class uses.
+// BoyItem ports SpawnBoy's roll (Wirt's single magic item): rolled until it is worth no more than the record's
+// max_value. With tries it must also be something the shopper could use that beats 80% of its best one of the kind
+// and, for its first shun_tries, of a type its class uses (Hellfire).
 func (g *Generator) BoyItem(clvl int, who *Shopper) *Item {
 	v := g.D.Vendors["boy"]
 	for count := 1; ; count++ {
 		it := g.storeItem(g.storeIdx(v, clvl, nil), clvl)
 		g.itemBonus(it, clvl, 2*clvl, true)
 		ok := it.IValue <= v.MaxValue
-		if who != nil {
+		if v.Tries > 0 && who != nil {
 			floor := who.bestOwned(it) * 8 / 10
 			if count < v.ShunTries && slices.Contains(v.Shuns[ClassNames[who.Class]], defs.ItemTypeNames[it.Type]) {
 				floor = 1 << 62
@@ -342,8 +359,14 @@ func (g *Generator) ListStock(v Vendor, lvl int) []*Item {
 // BuyPrice is what a store charges (the identified value).
 func BuyPrice(it *Item) int { return it.IValue }
 
-// WirtPrice ports S_BBuyEnter: Hellfire's Wirt takes 25% off.
-func (d *Data) WirtPrice(it *Item) int { return it.IValue - it.IValue>>2 }
+// WirtPrice ports S_BBuyEnter: the boy's price_adjust on the item's value (1.09: half again, Hellfire: a quarter off).
+func (d *Data) WirtPrice(it *Item) int {
+	adj := d.Vendors["boy"].PriceAdjust
+	if adj[1] == 0 {
+		return it.IValue
+	}
+	return it.IValue + adj[0]*(it.IValue/adj[1])
+}
 
 // SellPrice ports S_StartSSell/S_StartWSell: a quarter of the (identified) value, at least 1.
 func SellPrice(it *Item) int {
@@ -358,8 +381,13 @@ func isQuestItem(it *Item) bool {
 	return it.BaseIdx >= idxFirstQst && it.BaseIdx <= idxLastQst || it.BaseIdx == IdxLazStaff
 }
 
-// SmithBuys ports SmithSellOk; Hellfire's Griswold also buys oils and plain staves, but no quest items.
+// SmithBuys ports 1.09's SmithSellOk.
 func (d *Data) SmithBuys(it *Item) bool {
+	return it.Type != ITypeMisc && it.Type != ITypeGold && it.Type != ITypeStaff && it.BaseIdx != IdxLazStaff
+}
+
+// HellfireSmithBuys ports Hellfire's SmithSellOk: also oils and staves without a spell, but no quest items.
+func (d *Data) HellfireSmithBuys(it *Item) bool {
 	switch {
 	case IsOil(it.MiscID):
 		return true
@@ -369,8 +397,13 @@ func (d *Data) SmithBuys(it *Item) bool {
 	return it.BaseIdx != IdxLazStaff
 }
 
-// WitchBuys ports WitchSellOk; Hellfire's Adria takes no oils or quest items, and only staves with a spell.
+// WitchBuys ports 1.09's WitchSellOk.
 func (d *Data) WitchBuys(it *Item) bool {
+	return (it.Type == ITypeMisc || it.Type == ITypeStaff) && !isQuestItem(it)
+}
+
+// HellfireWitchBuys ports Hellfire's WitchSellOk: no oils or quest items, and only staves with a spell.
+func (d *Data) HellfireWitchBuys(it *Item) bool {
 	ok := it.Type == ITypeMisc && !IsOil(it.MiscID) && it.Class != "ICLASS_QUEST" || it.Type == ITypeStaff && it.Spell != 0
 	return ok && !isQuestItem(it)
 }
@@ -443,9 +476,9 @@ func RepairCost(it *Item) int {
 	return max(v, 1)
 }
 
-// CanRecharge ports WitchRechargeOk; Hellfire's Adria also recharges uniques with charges.
+// CanRecharge ports WitchRechargeOk; with recharge_uniques on the witch's record, uniques with charges too (Hellfire).
 func (d *Data) CanRecharge(it *Item) bool {
-	if (it.MiscID == "IMISC_UNIQUE" || it.MiscID == "IMISC_STAFF") && it.Charges < it.MaxCharges {
+	if d.Vendors["witch"].RechargeUniques && (it.MiscID == "IMISC_UNIQUE" || it.MiscID == "IMISC_STAFF") && it.Charges < it.MaxCharges {
 		return true
 	}
 	return it.Type == ITypeStaff && it.MaxCharges > 0 && it.Charges != it.MaxCharges

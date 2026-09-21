@@ -55,7 +55,7 @@ func TestEachModLoadsItsOwnItems(t *testing.T) {
 		want   string
 		absent string
 	}{
-		{"d1", 168, "The Undead Crown", "Potion of Berserker Rage"},
+		{"d1", 156, "The Undead Crown", "Potion of Berserker Rage"}, // 1.09's table, its empty slots included
 		{"heavenandhell", 118, "Potion of Berserker Rage", "The Undead Crown"},
 	} {
 		t.Run(tc.mod, func(t *testing.T) {
@@ -156,7 +156,7 @@ func TestEachModStocksItsOwnItems(t *testing.T) {
 		want      string // an item only this mod has, which some vendor of it can stock
 		absent    string // the other mod's item, which none of its vendors may reach
 	}{
-		{"d1", 7, "witch", "Potion of Full Mana", "Potion of Berserker Rage"},
+		{"d1", 6, "witch", "Potion of Full Mana", "Potion of Berserker Rage"},
 		{"heavenandhell", 4, "store_general", "a torch", "Potion of Full Mana"},
 	} {
 		t.Run(tc.mod, func(t *testing.T) {

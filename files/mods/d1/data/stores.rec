@@ -1,24 +1,25 @@
 # Diablo's town vendors in the unified stores.rec schema every mod uses (see defs.Vendor).
-# Ports Hellfire's SpawnSmith/SpawnPremium/SpawnWitch/SpawnHealer/SpawnBoy: where Heaven&Hell names the
+# Ports 1.09's SpawnSmith/SpawnPremium/SpawnWitch/SpawnHealer/SpawnBoy: where Heaven&Hell names the
 # items a vendor sells, Diablo names the criteria and rolls the whole item table through them. Both are the
 # one record; these vendors just use its filter half.
 #
 # npc is who runs it, stock the engine's stock strategy, buys what it takes off the hero, service each entry
 # of the NPC's menu (see defs.VendorServices), when a quest condition for the record to count at all.
 #
-# item_count is the stock roll inclusive of both ends, straight off defs.h's store sizes.
-# max_value is MAX_VENDOR_VALUE, tries is how often SpawnOnePremium/SpawnBoy re-rolls for a shopper.
+# item_count is the stock roll inclusive of both ends, the always items included (SpawnSmith's random_(50, 10) + 10
+# and so on). max_value is STORE_MAX_VALUE / BOY_MAX_VALUE: an item worth more is rolled again.
+# Hellfire's store options (tries, shuns, featured_*, usable_elixirs_only, recharge_uniques, the hellfire_* buy
+# rules) are left unset: this is 1.09.
 
 # Griswold's premium stock rolls before his basic stock (SetupTownStores' order) and is listed after it.
 internal_name: premium
 npc: griswold
 stock: premium
-item_count: 1
-max_value: 200000
-tries: 150
+max_value: 140000
 min_dlvl_divisor: 4
-exclude_types: misc gold
-slot_levels: -1 -1 -1 0 0 0 0 1 1 1 1 2 2 3 3
+exclude_types: misc gold staff
+slot_levels: -1 -1 0 0 1 2
+rotate_by: 2
 
 internal_name: smith
 npc: griswold
@@ -28,11 +29,10 @@ service: buy_basic
 service: buy_premium
 service: sell
 service: repair
-item_count: 10-24
-max_value: 200000
+item_count: 10-19
+max_value: 140000
 double_drops: true
-exclude_types: misc gold ring amulet
-exclude_charged_types: staff
+exclude_types: misc gold staff ring amulet
 
 internal_name: witch
 npc: adria
@@ -41,57 +41,38 @@ buys: witch
 service: buy
 service: sell
 service: recharge
-item_count: 10-24
-max_value: 200000
+item_count: 10-17
+max_value: 140000
 always: potion_of_mana
 always: potion_of_full_mana
 always: scroll_of_town_portal
 types: misc staff
-featured_misc_id: IMISC_BOOK
-featured_count: 0-3
 exclude_misc_ids: IMISC_MANA IMISC_FULLMANA IMISC_HEAL IMISC_FULLHEAL
-exclude_misc_ids: IMISC_OILOF IMISC_OILACC IMISC_OILMAST IMISC_OILSHARP IMISC_OILDEATH IMISC_OILSKILL
-exclude_misc_ids: IMISC_OILBSMTH IMISC_OILFORT IMISC_OILPERM IMISC_OILHARD IMISC_OILIMP
 exclude_spells: SPL_TOWN SPL_RESURRECT SPL_HEALOTHER
 
-# Hellfire's Pepin heals as you come in (S_StartHealer).
+# Pepin: "Receive healing" is an entry of his menu (S_StartHealer).
 internal_name: healer
 npc: pepin
 stock: healer
-service: heal_on_visit
+service: heal
 service: buy
-item_count: 10-19
+item_count: 10-17
 always: potion_of_healing
 always: potion_of_full_healing
 types: misc
 misc_ids: IMISC_ELIXSTR IMISC_ELIXMAG IMISC_ELIXDEX IMISC_ELIXVIT IMISC_REJUV IMISC_FULLREJUV
 items: scroll_of_healing
 
-# Wirt. The types he keeps away from each class are Hellfire's SpawnBoy table; he only honours them for his
-# first shun_tries rolls, then takes what he can get.
+# Wirt: 50 gold to look, and his item costs half again its value.
 internal_name: boy
 npc: wirt
 stock: boy
 service: peek(50)
-item_count: 1
-max_value: 200000
-tries: 250
-shun_tries: 200
-exclude_types: misc gold
-shuns: Warrior bow staff
-shuns: Rogue sword staff axe mace shield
-shuns: Sorcerer staff axe bow mace
-shuns: Monk bow marmor shield mace
-shuns: Bard axe mace staff
-shuns: Barbarian bow staff
+max_value: 90000
+price_adjust: +1/2
+exclude_types: misc gold staff
 
 # Cain identifies for a flat 100 gold (AddStoreHoldId), and sells nothing.
 internal_name: story
 npc: cain
 service: identify(100)
-
-# Once Diablo is dead Gillian collects 200 gold per explored level for the town, and the dungeon fills back up.
-internal_name: barmaid
-npc: gillian
-when: done("diablo")
-service: donate(200)

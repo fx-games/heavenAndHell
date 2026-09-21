@@ -255,6 +255,7 @@ type Data struct {
 	Suffixes       []Affix
 	UniqueItems    []UniqueItemData
 	Spells         []SpellData         // index = SPL_ value
+	SpellCount     int                 // the mod's MAX_SPELLS: its spell table's rows, before Spells is padded to NumSpells
 	Objects        []ObjData           // index = OBJ_ value
 	Gossip         map[string][]string // town NPC internal_name -> TEXT_* ids of its gossip, greeting first (texts.rec)
 	QuestDefs      []defs.Quest        // the mod's quests, in quest-id order (assets/data/quests.rec)
@@ -319,7 +320,6 @@ func Load(fsys fs.FS) (*Data, error) {
 				d.ItemIdx[it.InternalName] = i
 			}
 		}
-		d.Spells[SplNova].BookLvl, d.Spells[SplApocalypse].BookLvl = 14, 19 // Hellfire's books of Nova and Apocalypse
 	}
 	return d, err
 }
@@ -428,12 +428,13 @@ func load(fsys fs.FS) (*Data, error) {
 			Break: r.i("oBreak"), SelFlag: r.i("oSelFlag"), Trap: r.i("oTrapFlag") != 0,
 		})
 	}
-	if hasD1Tables && (len(d.Monsters) != D1MonsterCount || len(d.Items) < D1ItemCount || len(d.Spells) != NumSpells) {
+	if hasD1Tables && (len(d.Monsters) != D1MonsterCount || len(d.Items) < D1ItemCount || len(d.Spells) > NumSpells) {
 		return nil, fmt.Errorf("d1 tables: unexpected sizes monsters=%d items=%d spells=%d", len(d.Monsters), len(d.Items), len(d.Spells))
 	}
 	// Spell slots are indexed by SPL_ value all over the engine. A mod with no spell table gets the full run of
 	// empty slots rather than a short slice, so "this game has no spells" reads as every spell being blank
 	// instead of as an index panic on the first lookup.
+	d.SpellCount = len(d.Spells)
 	for len(d.Spells) < NumSpells {
 		d.Spells = append(d.Spells, SpellData{})
 	}

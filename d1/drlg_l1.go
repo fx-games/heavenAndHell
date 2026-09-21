@@ -621,9 +621,12 @@ func (g *gen) l1PlaceStairs(entry Entry) bool {
 			}
 		}
 	}
-	// Hellfire's Cathedral takes the plain STAIRSUP and keeps going when it doesn't fit
-	if x, y, found := g.placeMiniSet(&l1STAIRSUP, true); !found {
-		ok = false
+	stairs := &l1L5STAIRSUP
+	if g.available(QLtBanner) {
+		stairs = &l1STAIRSUP
+	}
+	if x, y, found := g.placeMiniSet(stairs, true); !found {
+		return false
 	} else if entry == EntryMain {
 		g.view = point{2*x + 19, 2*y + 20}
 	}

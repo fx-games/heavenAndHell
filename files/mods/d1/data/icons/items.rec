@@ -185,128 +185,10 @@ reference_image: reference/d1_sprites/items/item.staff_of_lazarus.curs155.png
 name: Staff of Lazarus (quest)
 icon: 643
 
-internal_name: item.oilof
-reference_image: reference/d1_sprites/items/item.oil.curs30.png
-name: Oil (unidentified)
-icon: 333
-
-internal_name: item.oilacc
-reference_image: reference/d1_sprites/items/item.oil_of_accuracy.curs30.png
-name: Oil of Accuracy
-icon: 333
-
-internal_name: item.oilmast
-name: Oil of Mastery
-icon: 333
-
-internal_name: item.oilsharp
-reference_image: reference/d1_sprites/items/item.oil_of_sharpness.curs30.png
-name: Oil of Sharpness
-icon: 333
-
-internal_name: item.oildeath
-name: Oil of Death
-icon: 333
-
-internal_name: item.oilskill
-name: Oil of Skill
-icon: 333
-
-internal_name: item.oilbsmth
-reference_image: reference/d1_sprites/items/item.blacksmith_oil.curs30.png
-name: Blacksmith Oil
-icon: 333
-
-internal_name: item.oilfort
-name: Oil of Fortitude
-icon: 333
-
-internal_name: item.oilperm
-name: Oil of Permanence
-icon: 333
-
-internal_name: item.oilhard
-name: Oil of Hardening
-icon: 333
-
-internal_name: item.oilimp
-name: Oil of Imperviousness
-icon: 333
-
-internal_name: item.runef
-reference_image: reference/d1_sprites/items/item.rune_of_fire.curs193.png
-name: Rune of Fire
-icon: 771
-
-internal_name: item.runel
-reference_image: reference/d1_sprites/items/item.rune_of_lightning.curs195.png
-name: Rune of Lightning
-icon: 772
-
-internal_name: item.gr_runef
-reference_image: reference/d1_sprites/items/item.greater_rune_of_fire.curs194.png
-name: Greater Rune of Fire
-icon: 771
-
-internal_name: item.gr_runel
-reference_image: reference/d1_sprites/items/item.greater_rune_of_lightning.curs196.png
-name: Greater Rune of Lightning
-icon: 772
-
-internal_name: item.runes
-reference_image: reference/d1_sprites/items/item.rune_of_stone.curs197.png
-name: Rune of Stone
-icon: 773
-
-internal_name: item.auric
-reference_image: reference/d1_sprites/items/item.auric_amulet.curs180.png
-name: Auric Amulet
-icon: 134
-
 internal_name: item.note
 reference_image: reference/d1_sprites/items/item.reconstructed_note.curs192.png
 name: Reconstructed Note
 icon: 111
-
-internal_name: item.arenapot
-reference_image: reference/d1_sprites/items/item.arena_potion.curs16.png
-name: Arena Potion
-icon: 332
-
-internal_name: item.rune_bomb
-reference_image: reference/d1_sprites/items/item.rune_bomb.curs187.png
-name: Rune Bomb
-icon: 770
-
-internal_name: item.theodore
-reference_image: reference/d1_sprites/items/item.theodore.curs188.png
-name: Theodore
-icon: 83
-
-internal_name: item.torn_note_1
-reference_image: reference/d1_sprites/items/item.torn_note_1.curs189.png
-name: Torn Note 1
-icon: 139
-
-internal_name: item.torn_note_2
-reference_image: reference/d1_sprites/items/item.torn_note_2.curs190.png
-name: Torn Note 2
-icon: 139
-
-internal_name: item.torn_note_3
-reference_image: reference/d1_sprites/items/item.torn_note_3.curs191.png
-name: Torn Note 3
-icon: 139
-
-internal_name: item.brown_suit
-reference_image: reference/d1_sprites/items/item.brown_suit.curs199.png
-name: Brown Suit
-icon: 608
-
-internal_name: item.grey_suit
-reference_image: reference/d1_sprites/items/item.grey_suit.curs198.png
-name: Grey Suit
-icon: 609
 
 internal_name: item.arkaine_s_valor
 reference_image: reference/d1_sprites/items/item.arkaine_s_valor.curs157.png
@@ -362,11 +244,6 @@ internal_name: item.blade.magic
 reference_image: reference/d1_sprites/items/item.blade.curs56.png
 icon: 146
 name: Sword: Blade (magic)
-
-internal_name: item.bovine_plate
-reference_image: reference/d1_sprites/items/item.bovine_plate.curs226.png
-icon: 199
-name: Heavy Armor: Bovine Plate
 
 internal_name: item.breast_plate
 reference_image: reference/d1_sprites/items/item.breast_plate.curs153.png
@@ -1220,11 +1097,6 @@ internal_name: item.studded_leather_armor.unique
 reference_image: reference/d1_sprites/items/item.the_gladiator_s_bane.unique.png
 icon: 229
 name: Light Armor: Studded Leather Armor (unique)
-
-internal_name: item.sword
-reference_image: reference/d1_sprites/items/item.short_sword.curs64.png
-icon: 646
-name: Sword: Sword
 
 internal_name: item.sword.magic
 reference_image: reference/d1_sprites/items/item.sword.curs64.png

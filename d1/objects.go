@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"slices"
 )
 
 // objects.cpp: objects placed on level creation.
@@ -62,9 +63,10 @@ var (
 	shrineAvail []int // 2 = multiplayer only
 )
 
-// shrineCount is how many shrines D1 and Hellfire have between them; the generator rolls an index into the table,
-// so a short or overlong objects.rec would quietly change which shrines appear.
-const shrineCount = 34
+// shrineCounts are the shrine tables the engine has effects for: D1 1.09's 26 (NUM_SHRINETYPE) and Hellfire's 34,
+// which appends eight. The generator rolls an index into the mod's table, so any other length would quietly change
+// which shrines appear.
+var shrineCounts = []int{26, 34}
 
 // ObjectDisplay is what the game shows and plays for an object kind: the parts of it that are presentation
 // rather than placement, which D1 spread over a handful of small tables.
@@ -118,8 +120,8 @@ func loadObjectTables(fsys fs.FS, d *Data) error {
 		shrineMax = append(shrineMax, m.GetIntOrDefault("max_lvl", 0))
 		shrineAvail = append(shrineAvail, m.GetIntOrDefault("avail", 0))
 	}
-	if len(ShrineNames) != shrineCount {
-		return fmt.Errorf("objects.rec: %d shrines, want %d", len(ShrineNames), shrineCount)
+	if !slices.Contains(shrineCounts, len(ShrineNames)) {
+		return fmt.Errorf("objects.rec: %d shrines, want one of %v", len(ShrineNames), shrineCounts)
 	}
 	StoryBookNames = nil
 	for _, r := range recs["storybook"] {
@@ -446,7 +448,7 @@ func (g *gen) addChestTraps() {
 				if g.ltype == DTypeCatacombs {
 					o.Var4 = g.rnd(2)
 				} else {
-					o.Var4 = g.rnd(6)
+					o.Var4 = g.rnd(3)
 				}
 			}
 		}

@@ -1,41 +1,41 @@
 %rec: shrine
-# D1's 34 shrines (shrinestrs and their MsgStrings), in shrine order: the index is the shrine's Var1.
+# D1's 26 shrines (shrinestrs and their MsgStrings), in shrine order: the index is the shrine's Var1.
 # max_lvl is D1's shrineMax, the deepest dungeon level the shrine may be generated on; avail is shrineAvail,
-# where 2 means multiplayer only and so never appears in this game. The last eight are Hellfire's.
+# where 2 means multiplayer only and so never appears in this game.
 
 name: Mysterious
 message: Some are weakened as one grows strong (-1 all stats, +6 to one random stat permanently)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Hidden
 message: New strength is forged through destruction (+10 max durability on equipped items, one random item -20)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Gloomy
 message: Those who defend seldom attack (+2 armor on all armor, -1 max damage on all weapons)
-max_lvl: 24
+max_lvl: 16
 avail: 1
 
 name: Weird
 message: The sword of justice is swift and sharp (+1 max damage on all weapons)
-max_lvl: 24
+max_lvl: 16
 avail: 1
 
 name: Magical
 message: While the spirit is vigilant the body thrives (Mana Shield)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Stone
 message: The powers of mana refocused renews (recharges all staves)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Religious
 message: Time cannot diminish the power of steel (repairs all items)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Enchanted
@@ -45,133 +45,93 @@ avail: 0
 
 name: Thaumaturgic
 message: What once was opened now is closed (refills all chests on this level)
-max_lvl: 24
+max_lvl: 16
 avail: 1
 
 name: Fascinating
 message: Intensity comes at the cost of wisdom (+2 Firebolt levels, -10% max mana permanently)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Cryptic
 message: Arcane power brings destruction (casts Nova, restores mana)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Magical
 message: While the spirit is vigilant the body thrives (Mana Shield)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Eldritch
 message: Crimson and Azure become as the sun (healing and mana potions in pack become rejuvenation)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Eerie
 message: Knowledge and wisdom at the cost of self (+2 Mag permanently)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Divine
 message: Drink and be refreshed (full life and mana, drops 2 potions)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Holy
 message: Wherever you go, there you are (teleports you to a random spot)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Sacred
 message: Energy comes at the cost of wisdom (+2 Charged Bolt levels, -10% max mana permanently)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Spiritual
 message: Riches abound when least expected (fills empty inventory slots with gold)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Spooky
 message: Where avarice fails, patience gains reward (no effect in single player)
-max_lvl: 24
+max_lvl: 16
 avail: 2
 
 name: Abandoned
 message: The hands of men may be guided by fate (+2 Dex permanently)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Creepy
 message: Strength is bolstered by heavenly faith (+2 Str permanently)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Quiet
 message: The essence of life flows from within (+2 Vit permanently)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Secluded
 message: The way is made clear when viewed from above (reveals the level map)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Ornate
 message: Salvation comes at the cost of wisdom (+2 Holy Bolt levels, -10% max mana permanently)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Glimmering
 message: Mysteries are revealed in the light of reason (identifies all items)
-max_lvl: 24
+max_lvl: 16
 avail: 0
 
 name: Tainted
 message: Those who are last may yet be first (no effect in single player)
-max_lvl: 24
+max_lvl: 16
 avail: 2
-
-name: Oily
-message: That which does not kill you... (+2 to your class' main stat, sets off a fire wall)
-max_lvl: 24
-avail: 0
-
-name: Glowing
-message: Knowledge is power (+1 Mag per 1000 XP, up to +5 for 5% of your XP)
-max_lvl: 24
-avail: 0
-
-name: Mendicant's
-message: Give and you shall receive (half your gold becomes XP)
-max_lvl: 24
-avail: 0
-
-name: Sparkling
-message: Some experience is gained by touch (1000 XP per dungeon level, sets off a flash)
-max_lvl: 24
-avail: 0
-
-name: Town
-message: There's no place like home (opens a town portal)
-max_lvl: 24
-avail: 0
-
-name: Shimmering
-message: Spirtual energy is restored (full mana)
-max_lvl: 24
-avail: 0
-
-name: Solar
-message: The sun's position decides (+2 Dex, Str, Mag or Vit by the time of day)
-max_lvl: 24
-avail: 1
-
-name: Murphy's
-message: That which can break will (halves an equipped item's durability, or takes a third of your gold)
-max_lvl: 24
-avail: 0
 
 %rec: storybook
 # D1's StoryBookName, indexed by a story book's Var3.

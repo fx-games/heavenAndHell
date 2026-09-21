@@ -1,0 +1,512 @@
+%rec: shrine
+# D1's 34 shrines (shrinestrs and their MsgStrings), in shrine order: the index is the shrine's Var1.
+# max_lvl is D1's shrineMax, the deepest dungeon level the shrine may be generated on; avail is shrineAvail,
+# where 2 means multiplayer only and so never appears in this game. The last eight are Hellfire's.
+
+name: Mysterious
+message: Some are weakened as one grows strong (-1 all stats, +6 to one random stat permanently)
+max_lvl: 24
+avail: 0
+
+name: Hidden
+message: New strength is forged through destruction (+10 max durability on equipped items, one random item -20)
+max_lvl: 24
+avail: 0
+
+name: Gloomy
+message: Those who defend seldom attack (+2 armor on all armor, -1 max damage on all weapons)
+max_lvl: 24
+avail: 1
+
+name: Weird
+message: The sword of justice is swift and sharp (+1 max damage on all weapons)
+max_lvl: 24
+avail: 1
+
+name: Magical
+message: While the spirit is vigilant the body thrives (Mana Shield)
+max_lvl: 24
+avail: 0
+
+name: Stone
+message: The powers of mana refocused renews (recharges all staves)
+max_lvl: 24
+avail: 0
+
+name: Religious
+message: Time cannot diminish the power of steel (repairs all items)
+max_lvl: 24
+avail: 0
+
+name: Enchanted
+message: Magic is not always what it seems to be (+1 level to known spells, -2 to one random spell)
+max_lvl: 8
+avail: 0
+
+name: Thaumaturgic
+message: What once was opened now is closed (refills all chests on this level)
+max_lvl: 24
+avail: 1
+
+name: Fascinating
+message: Intensity comes at the cost of wisdom (+2 Firebolt levels, -10% max mana permanently)
+max_lvl: 24
+avail: 0
+
+name: Cryptic
+message: Arcane power brings destruction (casts Nova, restores mana)
+max_lvl: 24
+avail: 0
+
+name: Magical
+message: While the spirit is vigilant the body thrives (Mana Shield)
+max_lvl: 24
+avail: 0
+
+name: Eldritch
+message: Crimson and Azure become as the sun (healing and mana potions in pack become rejuvenation)
+max_lvl: 24
+avail: 0
+
+name: Eerie
+message: Knowledge and wisdom at the cost of self (+2 Mag permanently)
+max_lvl: 24
+avail: 0
+
+name: Divine
+message: Drink and be refreshed (full life and mana, drops 2 potions)
+max_lvl: 24
+avail: 0
+
+name: Holy
+message: Wherever you go, there you are (teleports you to a random spot)
+max_lvl: 24
+avail: 0
+
+name: Sacred
+message: Energy comes at the cost of wisdom (+2 Charged Bolt levels, -10% max mana permanently)
+max_lvl: 24
+avail: 0
+
+name: Spiritual
+message: Riches abound when least expected (fills empty inventory slots with gold)
+max_lvl: 24
+avail: 0
+
+name: Spooky
+message: Where avarice fails, patience gains reward (no effect in single player)
+max_lvl: 24
+avail: 2
+
+name: Abandoned
+message: The hands of men may be guided by fate (+2 Dex permanently)
+max_lvl: 24
+avail: 0
+
+name: Creepy
+message: Strength is bolstered by heavenly faith (+2 Str permanently)
+max_lvl: 24
+avail: 0
+
+name: Quiet
+message: The essence of life flows from within (+2 Vit permanently)
+max_lvl: 24
+avail: 0
+
+name: Secluded
+message: The way is made clear when viewed from above (reveals the level map)
+max_lvl: 24
+avail: 0
+
+name: Ornate
+message: Salvation comes at the cost of wisdom (+2 Holy Bolt levels, -10% max mana permanently)
+max_lvl: 24
+avail: 0
+
+name: Glimmering
+message: Mysteries are revealed in the light of reason (identifies all items)
+max_lvl: 24
+avail: 0
+
+name: Tainted
+message: Those who are last may yet be first (no effect in single player)
+max_lvl: 24
+avail: 2
+
+name: Oily
+message: That which does not kill you... (+2 to your class' main stat, sets off a fire wall)
+max_lvl: 24
+avail: 0
+
+name: Glowing
+message: Knowledge is power (+1 Mag per 1000 XP, up to +5 for 5% of your XP)
+max_lvl: 24
+avail: 0
+
+name: Mendicant's
+message: Give and you shall receive (half your gold becomes XP)
+max_lvl: 24
+avail: 0
+
+name: Sparkling
+message: Some experience is gained by touch (1000 XP per dungeon level, sets off a flash)
+max_lvl: 24
+avail: 0
+
+name: Town
+message: There's no place like home (opens a town portal)
+max_lvl: 24
+avail: 0
+
+name: Shimmering
+message: Spirtual energy is restored (full mana)
+max_lvl: 24
+avail: 0
+
+name: Solar
+message: The sun's position decides (+2 Dex, Str, Mag or Vit by the time of day)
+max_lvl: 24
+avail: 1
+
+name: Murphy's
+message: That which can break will (halves an equipped item's durability, or takes a third of your gold)
+max_lvl: 24
+avail: 0
+
+%rec: storybook
+# D1's StoryBookName, indexed by a story book's Var3.
+
+name: The Great Conflict
+
+name: The Wages of Sin are War
+
+name: The Tale of the Horadrim
+
+name: The Dark Exile
+
+name: The Sin War
+
+name: The Binding of the Three
+
+name: The Realms Beyond
+
+name: Tale of the Three
+
+name: The Black King
+
+
+%rec: object
+# What the game shows and plays for a D1 object, by its OBJ_ id. name is the display name
+# (icons.rec has none); light is the radius of the ones that glow (ProcessObjects' Obj_Light);
+# container marks the ones that are looted, which may give nothing; wall_light marks the
+# decorative lights D1 places directly; sfx is the sound it makes as it is used.
+# Objects with no row here are decoration the game never names.
+
+id: OBJ_L1LIGHT
+wall_light: true
+
+id: OBJ_SKFIRE
+name: Skull Fire
+light: 5
+
+id: OBJ_LEVER
+name: Lever
+sfx: IS_LEVER
+
+id: OBJ_CHEST1
+name: Small Chest
+container: true
+sfx: IS_CHEST
+
+id: OBJ_CHEST2
+name: Chest
+container: true
+sfx: IS_CHEST
+
+id: OBJ_CHEST3
+name: Large Chest
+container: true
+sfx: IS_CHEST
+
+id: OBJ_CANDLE1
+name: Candle
+
+id: OBJ_CANDLE2
+name: Candle
+light: 5
+
+id: OBJ_CANDLEO
+name: Candle
+
+id: OBJ_BANNERL
+name: Banner
+
+id: OBJ_BANNERM
+name: Banner
+
+id: OBJ_BANNERR
+name: Banner
+
+id: OBJ_SKPILE
+name: Skull Pile
+
+id: OBJ_SKSTICK1
+name: Skull on a Stick
+
+id: OBJ_SKSTICK2
+name: Skull on a Stick
+
+id: OBJ_SKSTICK3
+name: Skull on a Stick
+
+id: OBJ_SKSTICK4
+name: Skull on a Stick
+
+id: OBJ_SKSTICK5
+name: Skull on a Stick
+
+id: OBJ_CRUX1
+name: Crucified Skeleton
+
+id: OBJ_CRUX2
+name: Crucified Skeleton
+
+id: OBJ_CRUX3
+name: Crucified Skeleton
+
+id: OBJ_STAND
+name: Stand
+
+id: OBJ_ANGEL
+name: Angel Statue
+
+id: OBJ_BOOK2L
+name: Ancient Tome
+
+id: OBJ_BCROSS
+name: Burning Cross
+light: 10
+
+id: OBJ_NUDEW2R
+name: Tortured Body
+
+id: OBJ_SWITCHSKL
+name: Skull Lever
+sfx: IS_LEVER
+
+id: OBJ_TNUDEM1
+name: Tortured Body
+
+id: OBJ_TNUDEM2
+name: Tortured Body
+
+id: OBJ_TNUDEM3
+name: Tortured Body
+
+id: OBJ_TNUDEM4
+name: Tortured Body
+
+id: OBJ_TNUDEW1
+name: Tortured Body
+
+id: OBJ_TNUDEW2
+name: Tortured Body
+
+id: OBJ_TNUDEW3
+name: Tortured Body
+
+id: OBJ_TORTURE1
+name: Hooked Body
+
+id: OBJ_TORTURE2
+name: Hooked Body
+
+id: OBJ_TORTURE3
+name: Hooked Body
+
+id: OBJ_TORTURE4
+name: Hooked Body
+
+id: OBJ_TORTURE5
+name: Hooked Body
+
+id: OBJ_BOOK2R
+name: Mythical Book
+
+id: OBJ_TORCHL
+wall_light: true
+
+id: OBJ_TORCHR
+wall_light: true
+
+id: OBJ_TORCHL2
+wall_light: true
+
+id: OBJ_TORCHR2
+wall_light: true
+
+id: OBJ_SARC
+name: Sarcophagus
+container: true
+sfx: IS_SARC
+
+id: OBJ_FLAMEHOLE
+name: Flame Hole
+
+id: OBJ_FLAMELVR
+name: Lever
+
+id: OBJ_WATER
+name: Water
+
+id: OBJ_BOOKLVR
+name: Book
+
+id: OBJ_BOOKSHELF
+name: Bookshelf
+
+id: OBJ_WEAPRACK
+name: Weapon Stand
+
+id: OBJ_BARREL
+name: Barrel
+container: true
+
+id: OBJ_BARRELEX
+name: Barrel
+
+id: OBJ_SHRINEL
+name: Shrine
+sfx: IS_MAGIC
+
+id: OBJ_SHRINER
+name: Shrine
+sfx: IS_MAGIC
+
+id: OBJ_SKELBOOK
+name: Skeleton Tome
+container: true
+sfx: IS_ISCROL
+
+id: OBJ_BOOKCASEL
+name: Bookcase
+container: true
+sfx: IS_ISCROL
+
+id: OBJ_BOOKCASER
+name: Bookcase
+container: true
+sfx: IS_ISCROL
+
+id: OBJ_BOOKSTAND
+name: Library Book
+container: true
+sfx: IS_ISCROL
+
+id: OBJ_BOOKCANDLE
+name: Candle
+light: 5
+
+id: OBJ_BLOODFTN
+name: Blood Fountain
+
+id: OBJ_DECAP
+name: Decapitated Body
+container: true
+
+id: OBJ_TCHEST1
+name: Small Chest
+container: true
+sfx: IS_CHEST
+
+id: OBJ_TCHEST2
+name: Chest
+container: true
+sfx: IS_CHEST
+
+id: OBJ_TCHEST3
+name: Large Chest
+container: true
+sfx: IS_CHEST
+
+id: OBJ_BLINDBOOK
+name: Book of the Blind
+
+id: OBJ_BLOODBOOK
+name: Book of Blood
+
+id: OBJ_PEDISTAL
+name: Pedestal of Blood
+
+id: OBJ_PURIFYINGFTN
+name: Purifying Spring
+
+id: OBJ_ARMORSTAND
+name: Armor
+container: true
+
+id: OBJ_ARMORSTANDN
+name: Armor Stand
+
+id: OBJ_GOATSHRINE
+name: Goat Shrine
+sfx: LS_GSHRINE
+
+id: OBJ_CAULDRON
+name: Cauldron
+sfx: LS_CALDRON
+
+id: OBJ_MURKYFTN
+name: Murky Pool
+sfx: LS_FOUNTAIN
+
+id: OBJ_TEARFTN
+name: Fountain of Tears
+sfx: LS_FOUNTAIN
+
+id: OBJ_ALTBOY
+name: Altar
+
+id: OBJ_MCIRCLE1
+name: Magic Circle
+
+id: OBJ_MCIRCLE2
+name: Magic Circle
+
+id: OBJ_STORYCANDLE
+name: Candle
+light: 3
+
+id: OBJ_STEELTOME
+name: Steel Tome
+
+id: OBJ_WARARMOR
+name: Armor
+container: true
+
+id: OBJ_WARWEAP
+name: Weapon Rack
+container: true
+
+id: OBJ_TBCROSS
+name: Burning Cross
+light: 10
+
+id: OBJ_WEAPONRACK
+name: Weapon Rack
+container: true
+
+id: OBJ_WEAPONRACKN
+name: Weapon Rack
+
+id: OBJ_MUSHPATCH
+name: Mushroom Patch
+
+id: OBJ_LAZSTAND
+name: Staff Stand
+
+id: OBJ_SLAINHERO
+name: Slain Hero
+
+id: OBJ_SIGNCHEST
+name: Large Chest

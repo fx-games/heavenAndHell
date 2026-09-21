@@ -107,7 +107,7 @@ icon: 369
 
 internal_name: spell.blodboil
 reference_image: reference/d1_sprites/skills/spell.blodboil.png
-name: Rage
+name: Blood Boil
 icon: 258
 
 internal_name: spell.teleport
@@ -179,79 +179,4 @@ internal_name: spell.bonespirit
 reference_image: reference/d1_sprites/skills/spell.bonespirit.png
 name: Bone Spirit
 icon: 250
-
-internal_name: spell.search
-reference_image: reference/d1_sprites/skills/spell.search.png
-name: Search
-icon: 240
-
-internal_name: spell.mana
-reference_image: reference/d1_sprites/skills/spell.mana.png
-name: Mana
-icon: 329
-
-internal_name: spell.magi
-reference_image: reference/d1_sprites/skills/spell.magi.png
-name: the Magi
-icon: 43
-
-internal_name: spell.jester
-reference_image: reference/d1_sprites/skills/spell.jester.png
-name: the Jester
-icon: 43
-
-internal_name: spell.lightwall
-reference_image: reference/d1_sprites/skills/spell.lightwall.png
-name: Lightning Wall
-icon: 38
-
-internal_name: spell.immolat
-reference_image: reference/d1_sprites/skills/spell.immolat.png
-name: Immolation
-icon: 109
-
-internal_name: spell.warp
-reference_image: reference/d1_sprites/skills/spell.warp.png
-name: Warp
-icon: 215
-
-internal_name: spell.reflect
-reference_image: reference/d1_sprites/skills/spell.reflect.png
-name: Reflect
-icon: 410
-
-internal_name: spell.berserk
-reference_image: reference/d1_sprites/skills/spell.berserk.png
-name: Berserk
-icon: 43
-
-internal_name: spell.firering
-reference_image: reference/d1_sprites/skills/spell.firering.png
-name: Ring of Fire
-icon: 109
-
-internal_name: spell.runefire
-reference_image: reference/d1_sprites/skills/spell.runefire.png
-name: Rune of Fire
-icon: 109
-
-internal_name: spell.runelight
-reference_image: reference/d1_sprites/skills/spell.runelight.png
-name: Rune of Light
-icon: 247
-
-internal_name: spell.runenova
-reference_image: reference/d1_sprites/skills/spell.runenova.png
-name: Rune of Nova
-icon: 43
-
-internal_name: spell.runeimmolat
-reference_image: reference/d1_sprites/skills/spell.runeimmolat.png
-name: Rune of Immolation
-icon: 109
-
-internal_name: spell.runestone
-reference_image: reference/d1_sprites/skills/spell.runestone.png
-name: Rune of Stone
-icon: 775
 

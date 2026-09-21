@@ -3,6 +3,7 @@ package d1
 import (
 	"fmt"
 	"math/rand"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -12,18 +13,17 @@ func TestLoadAndGenerate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(d.Prefixes) != 86 || len(d.Suffixes) != 98 || len(d.UniqueItems) != 111 || len(d.UniqueMonsters) != 97 {
+	// 1.09's tables: no Hellfire affixes, uniques, items or spells
+	if len(d.Prefixes) != D1PrefixCount || len(d.Suffixes) != D1SuffixCount || len(d.UniqueItems) != D1UniqueItemCount || len(d.UniqueMonsters) != 97 {
 		t.Fatalf("sizes: pre=%d suf=%d uitems=%d umon=%d", len(d.Prefixes), len(d.Suffixes), len(d.UniqueItems), len(d.UniqueMonsters))
 	}
-	if len(d.Items) != 166 {
-		t.Fatalf("hellfire table %d", len(d.Items))
+	if len(d.Items) != D1ItemCount || d.SpellCount != 37 {
+		t.Fatalf("1.09 tables: %d items, %d spells", len(d.Items), d.SpellCount)
 	}
-	// Hellfire's AllItemsList order (1.09's itemdat.cpp under HELLFIRE)
-	for idx, name := range map[int]string{5: "Short Staff of Mana", 22: "Map of the Stars", 32: "Bovine Plate", 83: "Blacksmith Oil",
-		86: "Oil", 87: "Elixir of Strength", 91: "Scroll of Healing", 92: "Scroll of Vision", 114: "Book of", 118: "Dagger",
-		160: "Amulet", 161: "Fire Trap", 165: "Stone Trap"} {
+	for idx, name := range map[int]string{5: "Short Staff of Charged Bolt", 22: "Map of the Stars", 32: "Lightforge", 35: "(unused)",
+		47: "(unused)", 48: "Cap", 83: "Elixir of Strength", 87: "Scroll of Healing", 155: "Amulet"} {
 		if d.Items[idx].Name != name {
-			t.Errorf("hellfire item %d is %q, want %q", idx, d.Items[idx].Name, name)
+			t.Errorf("1.09 item %d is %q, want %q", idx, d.Items[idx].Name, name)
 		}
 	}
 	if m := d.Monsters[0]; m.Name != "Zombie" || m.Family != "Zombie" || d.Monsters[4].Family != "FalSpear" || m.AI != "AI_ZOMBIE" || m.Frames[1] != 24 || m.MagicRes != 72 {
@@ -133,7 +133,7 @@ func TestStores(t *testing.T) {
 		for lvl := 6; lvl <= 16; lvl += 5 {
 			smith := g.SmithStock(lvl)
 			for _, it := range smith {
-				if it.Type == ITypeMisc || it.Type == ITypeStaff && it.Spell != 0 || it.Type == ITypeRing || it.Magical != 0 || !it.Identified {
+				if it.Type == ITypeMisc || it.Type == ITypeStaff || it.Type == ITypeRing || it.Magical != 0 || !it.Identified {
 					t.Fatalf("smith sells %+v", it)
 				}
 			}
@@ -144,11 +144,6 @@ func TestStores(t *testing.T) {
 			if witch[0].MiscID != "IMISC_MANA" || witch[1].MiscID != "IMISC_FULLMANA" || witch[2].Spell != 7 || len(witch) < 10 || len(witch) > witchV.ItemCount.Max()+len(witchV.Always) {
 				t.Fatalf("witch stock starts wrong: %s %s %s (%d items)", witch[0].Name, witch[1].Name, witch[2].Name, len(witch))
 			}
-			for _, it := range witch {
-				if IsOil(it.MiscID) {
-					t.Fatalf("witch sells %s", it.Name)
-				}
-			}
 			book := &Item{MiscID: "IMISC_BOOK", Spell: SplFirebolt}
 			var levels [NumSpells]int
 			levels[SplFirebolt] = 2
@@ -156,27 +151,24 @@ func TestStores(t *testing.T) {
 			if want := d.Spells[SplFirebolt].MinInt; book.MinMag != want+want*20/100+(want+want*20/100)*20/100 {
 				t.Fatalf("witch book with spell level 2 needs %d magic (base %d)", book.MinMag, want)
 			}
-			maxed := &Shopper{Class: Warrior, BaseStr: 250} // Hellfire: no Elixir of Strength for a maxed Warrior
-			healer := g.HealerStock(lvl, maxed)
+			healer := g.HealerStock(lvl, nil)
 			if healer[0].MiscID != "IMISC_HEAL" || healer[1].MiscID != "IMISC_FULLHEAL" {
 				t.Fatalf("healer stock starts wrong: %s %s", healer[0].Name, healer[1].Name)
 			}
 			for _, it := range healer[2:] {
-				if it.MiscID == "IMISC_HEAL" || it.MiscID == "IMISC_MANA" || it.MiscID == "IMISC_ELIXSTR" {
+				if it.MiscID == "IMISC_HEAL" || it.MiscID == "IMISC_MANA" {
 					t.Fatalf("healer random stock has %s", it.Name)
 				}
 			}
-			rogue := &Shopper{Class: Rogue, Str: 20, Mag: 15, Dex: 30}
-			boy := g.BoyItem(lvl, rogue)
-			if boy.Magical == 0 || boy.IValue > boyV.MaxValue || d.WirtPrice(boy) >= BuyPrice(boy) {
+			boy := g.BoyItem(lvl, nil)
+			if boy.Magical == 0 || boy.IValue > boyV.MaxValue || d.WirtPrice(boy) != BuyPrice(boy)*3/2 {
 				t.Fatalf("wirt item %+v at %d", boy, d.WirtPrice(boy))
 			}
 		}
 
 		p := &Premium{}
 		g.RefillPremium(p, 1, nil)
-		shift := 3
-		moved := p.Items[shift+1]
+		moved := p.Items[3] // SpawnPremium shifts two slots down per level
 		g.RefillPremium(p, 2, nil)
 		if p.Level != 2 || p.Items[1] != moved || p.Items[len(premiumV.SlotLevels)-1] == nil {
 			t.Fatalf("premium rotation: level %d", p.Level)
@@ -187,13 +179,33 @@ func TestStores(t *testing.T) {
 			t.Fatal("premium slot not refilled")
 		}
 
+		// rotate_by 3 over 15 slots is Hellfire's SpawnPremium: 0-9 from 3-12, 11 from 13, 13 from 14, the rest new
+		hf := premiumV
+		hf.SlotLevels, hf.RotateBy = []int{-1, -1, -1, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3}, 3
+		d.Vendors["premium"] = hf
+		p = &Premium{}
+		g.RefillPremium(p, 1, nil)
+		before := p.Items
+		g.RefillPremium(p, 2, nil)
+		for i, from := range map[int]int{0: 3, 9: 12, 11: 13, 13: 14} {
+			if p.Items[i] != before[from] {
+				t.Errorf("hellfire rotation: slot %d is not old slot %d", i, from)
+			}
+		}
+		for _, i := range []int{10, 12, 14} {
+			if slices.Contains(before[:], p.Items[i]) {
+				t.Errorf("hellfire rotation: slot %d kept an old item", i)
+			}
+		}
+		d.Vendors["premium"] = premiumV
+
 		sword := &Item{Type: ITypeSword, Class: "ICLASS_WEAPON", Value: 400, IValue: 400, MaxDur: 20, Durability: 1}
 		if !d.SmithBuys(sword) || d.WitchBuys(sword) {
 			t.Fatal("sell filters")
 		}
-		oil := &Item{Type: ITypeMisc, MiscID: "IMISC_OILOF", Class: "ICLASS_MISC"}
-		if !d.SmithBuys(oil) || d.WitchBuys(oil) {
-			t.Fatal("oil sell filters")
+		staff := &Item{Type: ITypeStaff, Class: "ICLASS_WEAPON"}
+		if d.SmithBuys(staff) || !d.WitchBuys(staff) {
+			t.Fatal("staff sell filters")
 		}
 	}
 
@@ -345,6 +357,7 @@ func TestHealRangeBoundsRolls(t *testing.T) {
 // TestHellfireClasses pins the three Hellfire classes' starting pools and the Barbarian's Rage state machine,
 // which is the only class skill with a lasting effect.
 func TestHellfireClasses(t *testing.T) {
+	loadHellfire(t)
 	for _, c := range []struct{ class, hp, mana int }{
 		{Warrior, 70, 10}, {Rogue, 45, 22}, {Sorcerer, 30, 70},
 		{Monk, 45, 22}, {Bard, 45, 35}, {Barbarian, 70, 0},
@@ -389,9 +402,13 @@ func TestHellfireClasses(t *testing.T) {
 // TestHellfireItems covers the expansion's item work: a plain Oil settles into one of the ten, and each oil
 // edits only what it is allowed to.
 func TestHellfireItems(t *testing.T) {
-	d, err := Load(testFS())
-	if err != nil {
-		t.Fatal(err)
+	d := loadHellfire(t)
+	// a table with Hellfire's rows is laid out in Hellfire's AllItemsList order
+	for idx, name := range map[int]string{5: "Short Staff of Mana", 32: "Bovine Plate", 83: "Blacksmith Oil",
+		86: "Oil", 87: "Elixir of Strength", 91: "Scroll of Healing", 92: "Scroll of Vision", 161: "Fire Trap", 165: "Stone Trap"} {
+		if d.Items[idx].Name != name {
+			t.Errorf("hellfire item %d is %q, want %q", idx, d.Items[idx].Name, name)
+		}
 	}
 	// a plain "Oil" must never stay plain
 	g := NewGenerator(d, 1)
