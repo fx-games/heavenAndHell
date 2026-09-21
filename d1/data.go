@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"rpg/defs"
+	"rpg/recfile"
 )
 
 type row map[string]string
@@ -249,7 +250,7 @@ type Data struct {
 	UniqueItems    []UniqueItemData
 	Spells         []SpellData         // index = SPL_ value
 	Objects        []ObjData           // index = OBJ_ value
-	Gossip         map[string][]string // town NPC internal_name -> TEXT_* ids of its gossip, greeting first (assets/data/gossip)
+	Gossip         map[string][]string // town NPC internal_name -> TEXT_* ids of its gossip, greeting first (texts.rec)
 	QuestDefs      []defs.Quest        // the mod's quests, in quest-id order (assets/data/quests.rec)
 	QuestTriggers  []defs.Trigger      // its triggers, conditions already compiled
 	Texts          map[string]string   // TEXT_* id -> gossip, quest and book text, paragraphs split by "\n\n"
@@ -257,57 +258,30 @@ type Data struct {
 	levels         levelData           // set pieces and tile tables (assets/data/levels)
 }
 
-// gossipFiles maps a town NPC's internal name (its common.VendorType) to its gossip file's base
-// name in assets/data/gossip, ported from Diablo's own Source/Data/Text/Gossip/*.txt.
-var gossipFiles = map[string]string{
-	"griswold": "griswold", "adria": "adria", "pepin": "pepin", "wirt": "wirt", "cain": "story", "ogden": "ogden",
-	"farnham": "farnham", "gillian": "gillian",
-}
-
-// parseTexts reads a D1 text file (Source/Data/Text): blocks of a "[TEXT_*]" header, a quoted line and a few
-// numeric/sfx fields, blank-line separated. D1's "\n \n" paragraph breaks become "\n\n".
-func parseTexts(data string) (ids, texts, sfx []string) {
-	for _, block := range strings.Split(data, "\n\n") {
-		lines := strings.Split(strings.TrimSpace(block), "\n")
-		if len(lines) < 2 || !strings.HasPrefix(lines[0], "[TEXT_") {
-			continue
-		}
-		quoted := strings.TrimSuffix(strings.TrimSpace(strings.Trim(strings.TrimSpace(lines[1]), "\"")), "|")
-		var paragraphs []string
-		for _, par := range strings.Split(quoted, `\n \n`) {
-			if par = strings.Join(strings.Fields(strings.ReplaceAll(par, `\n`, " ")), " "); par != "" {
-				paragraphs = append(paragraphs, par)
-			}
-		}
-		ids, texts = append(ids, strings.Trim(lines[0], "[]")), append(texts, strings.Join(paragraphs, "\n\n"))
-		sfx = append(sfx, strings.TrimSpace(lines[len(lines)-1]))
-	}
-	return
-}
-
-// loadTexts loads every gossip and quest text by its TEXT_* id, and each NPC's gossip lines (missing files are
-// skipped).
-func loadTexts(fsys fs.FS) (texts, sfx map[string]string, gossip map[string][]string) {
+// loadTextRec reads texts.rec: every quest, book and gossip text by its TEXT_* id, with its speech cue, and each
+// town NPC's gossip ids in file order (greeting first). A mod without the file has nothing to say.
+func loadTextRec(fsys fs.FS) (texts, sfx map[string]string, gossip map[string][]string, err error) {
 	texts, sfx, gossip = map[string]string{}, map[string]string{}, map[string][]string{}
-	for _, dir := range []string{"gossip", "text"} {
-		files, _ := fs.ReadDir(fsys, dataPath(dir))
-		for _, f := range files {
-			data, err := fs.ReadFile(fsys, dataPath(dir, f.Name()))
-			if err != nil {
-				continue
-			}
-			ids, lines, sounds := parseTexts(string(data))
-			for i, id := range ids {
-				texts[id], sfx[id] = lines[i], sounds[i]
-			}
-			for npc, file := range gossipFiles {
-				if dir == "gossip" && file+".txt" == f.Name() {
-					gossip[npc] = ids
-				}
-			}
+	f, err := fsys.Open(dataPath("texts.rec"))
+	if errors.Is(err, fs.ErrNotExist) {
+		return texts, sfx, gossip, nil
+	}
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	defer f.Close()
+	for i, r := range recfile.ReadMulti(f)["text"] {
+		m := r.ToMap("")
+		id := m.GetStringOrDefault("id", "")
+		if id == "" {
+			return nil, nil, nil, fmt.Errorf("texts.rec: text %d has no id", i+1)
+		}
+		texts[id], sfx[id] = m.GetStringOrDefault("text", ""), m.GetStringOrDefault("sfx", "")
+		if npc := m.GetStringOrDefault("gossip", ""); npc != "" {
+			gossip[npc] = append(gossip[npc], id)
 		}
 	}
-	return
+	return texts, sfx, gossip, nil
 }
 
 func (d *Data) MonsterByID(id string) int {
@@ -444,7 +418,9 @@ func load(fsys fs.FS) (*Data, error) {
 	for len(d.Spells) < NumSpells {
 		d.Spells = append(d.Spells, SpellData{})
 	}
-	d.Texts, d.TextSfx, d.Gossip = loadTexts(fsys)
+	if d.Texts, d.TextSfx, d.Gossip, err = loadTextRec(fsys); err != nil {
+		return nil, err
+	}
 	levels, err := loadLevelData(fsys)
 	if err != nil {
 		return nil, err
