@@ -177,6 +177,17 @@ func loadHeroTables(fsys fs.FS) error {
 		return fmt.Errorf("hero.rec: %d experience levels, want %d", len(exp), len(ExpLvls))
 	}
 	copy(ExpLvls[:], exp)
+	WeaponBonuses = nil
+	for i, r := range recs["weapon_bonus"] {
+		m := r.ToMap("")
+		weapon, versus := m.GetStringOrDefault("weapon", ""), m.GetStringOrDefault("versus", "")
+		itype, ok := itypeByName[weapon]
+		pct, convErr := strconv.Atoi(m.GetStringOrDefault("percent", ""))
+		if !ok || weapon == "default" || versus == "" || convErr != nil {
+			return fmt.Errorf("hero.rec: weapon_bonus %d: want weapon (sword, axe, bow, mace, staff), versus (a monster class) and percent", i+1)
+		}
+		WeaponBonuses = append(WeaponBonuses, WeaponBonus{Weapon: itype, Versus: versus, Percent: pct})
+	}
 	heroTablesLoaded = true
 	return nil
 }
@@ -471,11 +482,13 @@ func (h *Hero) meleeDamageOf(s Sheet, d int, double bool, monClass string) int {
 	if double {
 		dam *= 2
 	}
-	switch s.WeaponVsMonsterClass(monClass) {
-	case -50:
+	switch pct := s.WeaponVsMonsterClass(monClass); {
+	case pct == -50: // 1.09's own arithmetic, kept exact
 		dam -= dam >> 1
-	case 50:
+	case pct == 50:
 		dam += dam >> 1
+	case pct != 0:
+		dam += dam * pct / 100
 	}
 	if s.Flags&ISpl3xDamVsDemons != 0 && monClass == "MC_DEMON" {
 		dam *= 3
@@ -483,18 +496,51 @@ func (h *Hero) meleeDamageOf(s Sheet, d int, double bool, monClass string) int {
 	return dam
 }
 
-// WeaponVsMonsterClass is what the weapon in hand does to melee damage against a monster class, as a percentage
-// (+50, -50 or 0): PlrHitMonst's phanditype rule - swords cut flesh and maces crush bone. A sword in either hand
-// wins over a mace. Nothing else, staves and axes included, cares what it is hitting.
+// WeaponBonus is one of the mod's weapon rules (hero.rec's weapon_bonus): melee with a weapon of type Weapon
+// does Percent more (or less) damage to monsters of class Versus. D1's are PlrHitMonst's phanditype rule, swords
+// cut flesh and maces crush bone; a mod without the section has none. Filled by Load.
+type WeaponBonus struct {
+	Weapon  int
+	Versus  string
+	Percent int
+}
+
+var WeaponBonuses []WeaponBonus
+
+// RuledWeapon is the weapon type the bonuses judge the hero by: the first type the rules name that the hero
+// holds, so the file's order settles two weapons (D1: a sword in either hand wins over a mace). -1 for none.
+func (s Sheet) RuledWeapon() int {
+	for _, b := range WeaponBonuses {
+		if s.Holds(b.Weapon) {
+			return b.Weapon
+		}
+	}
+	return -1
+}
+
+// WeaponVsMonsterClass is what the weapon in hand does to melee damage against a monster class, as a percentage.
 func (s Sheet) WeaponVsMonsterClass(monClass string) int {
-	sword, mace := s.Holds(ITypeSword), !s.Holds(ITypeSword) && s.Holds(ITypeMace)
-	switch {
-	case monClass == "MC_UNDEAD" && sword, monClass == "MC_ANIMAL" && mace:
-		return -50
-	case monClass == "MC_UNDEAD" && mace, monClass == "MC_ANIMAL" && sword:
-		return 50
+	return WeaponBonusOf(s.RuledWeapon(), monClass)
+}
+
+// WeaponBonusOf is the rules' percentage for weapon type itype against monClass, 0 when none applies.
+func WeaponBonusOf(itype int, monClass string) int {
+	for _, b := range WeaponBonuses {
+		if b.Weapon == itype && b.Versus == monClass {
+			return b.Percent
+		}
 	}
 	return 0
+}
+
+// WeaponTypeName is the name hero.rec gives weapon type itype.
+func WeaponTypeName(itype int) string {
+	for name, t := range itypeByName {
+		if t == itype && name != "default" {
+			return name
+		}
+	}
+	return ""
 }
 
 // CriticalStrikeChance is the percentage of melee swings that land twice (MeleeDamage's crit roll): the

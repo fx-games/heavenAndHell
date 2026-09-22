@@ -492,14 +492,14 @@ func d1WhyTheseNumbers(h *d1.Hero, s d1.Sheet, mon *D1Monster, dist int) []strin
 	}
 	var why []string
 	if pct := s.WeaponVsMonsterClass(mon.Data.Class); pct != 0 {
-		other := "a mace would do the opposite"
-		if pct < 0 {
-			other = "a mace in hand would turn this around"
-			if !s.Holds(d1.ITypeSword) {
-				other = "a sword in hand would turn this around"
+		line := fmt.Sprintf("Your %s: %+d%% damage vs. %s", d1.WeaponTypeName(s.RuledWeapon()), pct, kind)
+		for _, b := range d1.WeaponBonuses { // the mod's rules name the weapon that would do better
+			if b.Versus == mon.Data.Class && b.Weapon != s.RuledWeapon() && b.Percent > pct {
+				line += fmt.Sprintf(" (a %s: %+d%%)", d1.WeaponTypeName(b.Weapon), b.Percent)
+				break
 			}
 		}
-		why = append(why, fmt.Sprintf("Your weapon: %+d%% damage vs. %s (%s)", pct, kind, other))
+		why = append(why, line)
 	}
 	if s.Flags&d1.ISpl3xDamVsDemons != 0 && mon.Data.Class == "MC_DEMON" {
 		why = append(why, "Your gear triples melee damage against demons")
