@@ -3,7 +3,6 @@ package main
 import (
 	"rpg/common"
 	"rpg/d1"
-	"rpg/defs"
 	"rpg/geometry"
 	"rpg/gridmap"
 	"testing"
@@ -16,7 +15,7 @@ func TestCrawlTableSpells(t *testing.T) {
 	g.GetAudio().SetDisablePlayback(true)
 	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
 	s := g.GetWorldState()
-	s.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(1), TargetLocation: "ladder_up"})
+	s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, 1), TargetLocation: "ladder_up"})
 	m, player := s.GetMap(), s.GetPlayer()
 	var mon *common.Actor
 	var beside geometry.Point

@@ -107,7 +107,7 @@ func (c *missileCtx) hitAs(mis D1Missile, p, from geometry.Point, mind, maxd int
 		return false
 	}
 	h, s := pl.hero, pl.HeroSheet()
-	dist, dlvl := geometry.DistanceChebyshev(from, p), d1DungeonLevel(c.ctx.GameState)
+	dist, dlvl := geometry.DistanceChebyshev(from, p), c.ctx.GameState.CurrentLevel().Depth
 	monLevel := h.Level // PlayerMHit without a monster: no level difference
 	var chance int
 	if c.mon != nil {

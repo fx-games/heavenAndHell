@@ -1,27 +1,10 @@
 package defs
 
 import (
-	"fmt"
 	"math/rand"
 	"rpg/geometry"
-	"slices"
 	"sort"
 )
-
-type LevelName string
-
-const LevelNameTown LevelName = "Town"
-
-// towns are the mod's towns beyond the first (levels.rec "town:" records): maps drawn in its LDtk project, not
-// generated, where its shopkeepers live.
-var towns []string
-
-// SetTowns names the active mod's extra towns; called when its levels load.
-func SetTowns(names []string) { towns = names }
-
-func IsTownLevel(levelName string) bool {
-	return levelName == string(LevelNameTown) || slices.Contains(towns, levelName)
-}
 
 type BasicTileMapping struct {
 	FloorTile       int32
@@ -141,27 +124,4 @@ func Tilemap(name string, randomSource *rand.Rand, isWall func(geometry.Point) b
 		return BasicTileMapping{}, false
 	}
 	return f(randomSource, isWall), true
-}
-
-// D1Tilemap picks the tiles of dungeon level dlvl's type.
-func D1Tilemap(randomSource *rand.Rand, isWall func(geometry.Point) bool, dlvl int) BasicTileMapping {
-	switch (dlvl - 1) / 4 {
-	case 0:
-		return getCathedralTilemap(randomSource, isWall)
-	case 1:
-		return getCatacombsTilemap(randomSource, isWall)
-	case 2:
-		return getCavesTilemap(randomSource, isWall)
-	}
-	return getHellTilemap(randomSource, isWall)
-}
-
-// D1LevelName is the level's name shown on arrival.
-func D1LevelName(dlvl int) string {
-	return fmt.Sprintf("Level %d\n%s", dlvl, [4]string{"Cathedral", "Catacombs", "Caves", "Hell"}[min((dlvl-1)/4, 3)])
-}
-
-func LevelNameFromDepth(level int) string {
-	//!gen_dungeon_level_1
-	return fmt.Sprintf("!gen_dungeon_level_%d", level)
 }

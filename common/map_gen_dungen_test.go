@@ -3,6 +3,7 @@ package common
 import (
 	"math/rand"
 	"path"
+	"slices"
 	"testing"
 
 	"rpg/d1"
@@ -57,7 +58,7 @@ func loadModLevels(t *testing.T) []dungeon.Level {
 		t.Fatalf("levels.rec: %v", err)
 	}
 	defer f.Close()
-	levels, err := dungeon.LoadLevels(recfile.Read(f), 0)
+	levels, err := dungeon.LoadLevels(recfile.Read(f))
 	if err != nil {
 		t.Fatalf("levels.rec: %v", err)
 	}
@@ -92,17 +93,18 @@ func reachable(m *gridmap.GridMap[*Actor, *Item, Object], from geometry.Point) m
 func TestHeavenAndHellLevelsAreWalkable(t *testing.T) {
 	withMod(t, "heavenandhell")
 	levels := loadModLevels(t)
-	if len(levels) != 13 { // dlvl 0 (town) + twelve dungeon levels
-		t.Fatalf("mod declares %d levels, want 13 (town + 12)", len(levels))
-	}
-
-	for dlvl := 1; dlvl < len(levels); dlvl++ {
-		g := modGenerator(t, levels, int64(dlvl)*7919)
-		name := defs.LevelNameFromDepth(dlvl)
-		m := g.GenerateMap(name, dlvl)
+	built := 0
+	for i, l := range levels {
+		if l.Generator == "ldtk" {
+			continue
+		}
+		built++
+		g := modGenerator(t, levels, int64(i+1)*7919)
+		dlvl := l.Map
+		m := g.GenerateMap(l.Map)
 
 		if m.GetDisplayName() == "" {
-			t.Errorf("dlvl %d has no display name", dlvl)
+			t.Errorf("%s has no display name", dlvl)
 		}
 		var floors, walls int
 		width, height := m.GetWidth(), m.GetHeight()
@@ -116,40 +118,36 @@ func TestHeavenAndHellLevelsAreWalkable(t *testing.T) {
 			}
 		}
 		if floors == 0 || walls == 0 {
-			t.Errorf("dlvl %d is not a dungeon: %d walkable, %d solid", dlvl, floors, walls)
+			t.Errorf("%s is not a dungeon: %d walkable, %d solid", dlvl, floors, walls)
 			continue
 		}
 
 		up := m.GetNamedLocation("ladder_up")
 		if !m.IsTileWalkable(up) {
-			t.Errorf("dlvl %d: no way in (ladder_up at %v is not walkable)", dlvl, up)
+			t.Errorf("%s: no way in (ladder_up at %v is not walkable)", dlvl, up)
 			continue
 		}
 		seen := reachable(m, up)
 		if len(seen) < floors/2 {
-			t.Errorf("dlvl %d: only %d of %d walkable cells reachable from the entrance", dlvl, len(seen), floors)
+			t.Errorf("%s: only %d of %d walkable cells reachable from the entrance", dlvl, len(seen), floors)
 		}
 
-		// Every level but the last has a way down, and it must be one you can walk to.
-		if dlvl+1 < len(levels) {
-			down := m.GetNamedLocation("ladder_down")
-			if !seen[down] {
-				t.Errorf("dlvl %d: ladder_down at %v is not reachable from ladder_up at %v", dlvl, down, up)
-			}
-			if _, ok := m.GetTransitionAt(down); !ok {
-				t.Errorf("dlvl %d: ladder_down leads nowhere", dlvl)
-			}
-		} else if _, ok := m.GetTransitionAt(m.GetNamedLocation("ladder_down")); ok {
-			t.Errorf("dlvl %d is the deepest level the mod declares but still has a way down", dlvl)
-		}
-
-		// And every extra way off the level the mod declared is there, and reachable.
-		for _, tr := range levels[dlvl].Transitions {
-			p := m.GetNamedLocation(tr.LocationName)
+		// Every exit the level declares is there, reachable, and (unless it waits on a condition) leads somewhere.
+		for _, e := range l.Exits {
+			p := m.GetNamedLocation(e.Location)
 			if !seen[p] {
-				t.Errorf("dlvl %d: declared transition %q at %v is not reachable", dlvl, tr.LocationName, p)
+				t.Errorf("%s: exit %q at %v is not reachable from ladder_up at %v", dlvl, e.Location, p, up)
+			}
+			if _, ok := m.GetTransitionAt(p); !ok && e.OpenWhen == "" {
+				t.Errorf("%s: exit %q leads nowhere", dlvl, e.Location)
 			}
 		}
+		if _, ok := m.GetTransitionAt(m.GetNamedLocation("ladder_down")); ok && !slices.ContainsFunc(l.Exits, func(e dungeon.Exit) bool { return e.Location == "ladder_down" }) {
+			t.Errorf("%s declares no way down but has one", dlvl)
+		}
+	}
+	if built != 13 {
+		t.Errorf("built %d generated levels, want 13 (twelve deep and the poisoned water supply)", built)
 	}
 }
 
@@ -170,9 +168,13 @@ func TestHeavenAndHellLevelsArePopulatedFromItsOwnTables(t *testing.T) {
 	}
 
 	totalActors, totalItems := 0, 0
-	for dlvl := 1; dlvl < len(levels); dlvl++ {
-		g := modGenerator(t, levels, int64(dlvl)*104729)
-		m := g.GenerateMap(defs.LevelNameFromDepth(dlvl), dlvl)
+	for i, l := range levels {
+		if l.Generator == "ldtk" {
+			continue
+		}
+		dlvl := l.Depth
+		g := modGenerator(t, levels, int64(i+1)*104729)
+		m := g.GenerateMap(l.Map)
 
 		actors := m.Actors()
 		totalActors += len(actors)
@@ -180,15 +182,15 @@ func TestHeavenAndHellLevelsArePopulatedFromItsOwnTables(t *testing.T) {
 		for _, a := range actors {
 			mon, ok := ownMonster[a.GetInternalName()]
 			if !ok {
-				t.Errorf("dlvl %d: %q is not one of this mod's monsters", dlvl, a.GetInternalName())
+				t.Errorf("%s: %q is not one of this mod's monsters", l.Map, a.GetInternalName())
 				continue
 			}
 			// Nothing may turn up deeper than its record allows. Shallower is legal: that is out-of-depth.
 			if mon.MaxDLvl > 0 && dlvl > mon.MaxDLvl {
-				t.Errorf("dlvl %d: %s is capped at dlvl %d", dlvl, mon.ID, mon.MaxDLvl)
+				t.Errorf("%s: %s is capped at dlvl %d", l.Map, mon.ID, mon.MaxDLvl)
 			}
 			if a.GetStats().GetAttribute(stats.MaxHealth) <= 0 {
-				t.Errorf("dlvl %d: %s spawned with no hit points", dlvl, mon.ID)
+				t.Errorf("%s: %s spawned with no hit points", l.Map, mon.ID)
 			}
 		}
 	}
@@ -209,7 +211,7 @@ func TestDungenLevelsAreReproducibleFromTheirSeed(t *testing.T) {
 
 	build := func() string {
 		g := modGenerator(t, levels, 4242)
-		m := g.GenerateMap(defs.LevelNameFromDepth(3), 3)
+		m := g.GenerateMap("catacombs_3")
 		out := make([]byte, 0, m.GetWidth()*m.GetHeight())
 		for y := 0; y < m.GetHeight(); y++ {
 			for x := 0; x < m.GetWidth(); x++ {

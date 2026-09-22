@@ -1,14 +1,11 @@
 package common
 
 import (
-	"errors"
 	"fmt"
-	"io/fs"
 	"math"
 	"math/rand"
 	"path"
-	"strconv"
-	"strings"
+	"slices"
 
 	"rpg/d1"
 	"rpg/defs"
@@ -29,43 +26,54 @@ type MapGenerator struct {
 	d1Quests     *d1.Quests
 	d1Levels     map[string]*d1.Level     // the generated D1 levels by map name, for changeD1Map
 	walledIn     map[string][]*Actor      // monsters D1 placed inside walls that a map change opens later, by map name
-	levels       []dungeon.Level          // the mod's declared level list, indexed by dungeon level; index 0 is the town
-	sideLevels   map[string]dungeon.Level // levels off the main descent, by map name
+	levels       map[string]dungeon.Level // the mod's levels.rec, by map id
+	levelOrder   []string                 // their ids in file order
 }
 
-// LoadLevels reads the active mod's levels.rec, which says which generator builds each dungeon level and how
-// deep the game goes. Called after mod selection, never at package init: the whole table is content.
+// LoadLevels reads the active mod's levels.rec (LEVELS.md). Called after mod selection, never at package init:
+// the whole table is content.
 func (g *MapGenerator) LoadLevels() error {
 	f, err := files.Open(path.Join("assets", "data", "levels.rec"))
-	if errors.Is(err, fs.ErrNotExist) {
-		g.levels, g.sideLevels = make([]dungeon.Level, 1), nil // a game that is only its town
-		defs.SetTowns(nil)
-		return nil
-	}
 	if err != nil {
 		return fmt.Errorf("levels.rec: %w", err)
 	}
 	defer f.Close()
-	recs := recfile.Read(f)
-	levels, err := dungeon.LoadLevels(recs, 0)
+	levels, err := dungeon.LoadLevels(recfile.Read(f))
 	if err != nil {
 		return err
 	}
-	side, err := dungeon.LoadSideLevels(recs)
-	if err != nil {
-		return err
+	for _, l := range levels {
+		_, drawn := l.Config.(ldtkConfig)
+		if l.Tiles == "drawn" && !drawn || l.Tiles != "drawn" && !slices.Contains(defs.TilemapNames(), l.Tiles) {
+			return fmt.Errorf("levels.rec: %s: tiles %q: want one of %v, or drawn for an ldtk level", l.Map, l.Tiles, defs.TilemapNames())
+		}
+		for _, e := range l.Exits {
+			if _, err := compileQuestCondition(e.OpenWhen); e.OpenWhen != "" && err != nil {
+				return fmt.Errorf("levels.rec: %s: exit %s: open_when: %w", l.Map, e.Location, err)
+			}
+		}
 	}
-	g.levels, g.sideLevels = levels, side
-	defs.SetTowns(dungeon.LoadTowns(recs))
+	g.SetLevels(levels)
 	return nil
 }
 
 // SetLevels is LoadLevels for a caller that already has the table (tests, and any tool that builds one level).
-func (g *MapGenerator) SetLevels(levels []dungeon.Level) { g.levels = levels }
+func (g *MapGenerator) SetLevels(levels []dungeon.Level) {
+	g.levels, g.levelOrder = map[string]dungeon.Level{}, nil
+	for _, l := range levels {
+		g.levels[l.Map] = l
+		g.levelOrder = append(g.levelOrder, l.Map)
+	}
+}
 
-// Levels is the mod's declared level list. Read-only: whoever wants to know how deep the dungeon goes asks here
-// rather than carrying a constant.
-func (g *MapGenerator) Levels() []dungeon.Level { return g.levels }
+// Levels is the mod's level list in file order.
+func (g *MapGenerator) Levels() []dungeon.Level {
+	out := make([]dungeon.Level, 0, len(g.levelOrder))
+	for _, id := range g.levelOrder {
+		out = append(out, g.levels[id])
+	}
+	return out
+}
 
 func NewMapGenerator(randomSource *rand.Rand) *MapGenerator {
 	return &MapGenerator{
@@ -76,36 +84,48 @@ func (g *MapGenerator) SetFactory(factory *Factory) {
 	g.factory = factory
 }
 
-// GenerateMap builds one dungeon level with whatever generator the mod declared for it in levels.rec.
+// GenerateMap builds level id with the generator its record names, then lays its declared exits on it.
 //
 // The dispatch is a type switch on the configuration the generator's own Parse produced, which is the seam
 // dungeon.Strategy exists for: the engine stored a Config it cannot read, and here each generation family takes
-// its own type back. It is deliberately NOT a switch on the generator's name or the mod's - the engine never
-// names either - and it is deliberately not a shared "build a level" interface, because D1 hands back a
-// populated d1.Level and dungen a bare layout, and pretending those are one return type is the lie this seam
-// was drawn to avoid.
-func (g *MapGenerator) GenerateMap(targetMap string, dungeonLevel int) *gridmap.GridMap[*Actor, *Item, Object] {
-	if side, ok := g.sideLevels[targetMap]; ok {
-		return g.generateDungenMap(targetMap, side.Depth, side) // ponytail: side levels are dungen-only until a D1 mod declares one
+// its own type back. It is deliberately NOT a switch on the generator's name or the mod's.
+func (g *MapGenerator) GenerateMap(id string) *gridmap.GridMap[*Actor, *Item, Object] {
+	lvl, ok := g.levels[id]
+	if !ok {
+		panic(fmt.Sprintf("levels.rec declares no level %q", id))
 	}
-	lvl := g.levelConfig(dungeonLevel)
-	switch lvl.Config.(type) {
-	case nil, d1.LevelParams:
-		// nil covers a set level, which has no entry of its own in levels.rec and is built by the family that
-		// owns the dungeon level it hangs off.
-		return g.generateD1Map(targetMap, dungeonLevel)
+	var m *gridmap.GridMap[*Actor, *Item, Object]
+	switch cfg := lvl.Config.(type) {
+	case ldtkConfig:
+		m = g.factory.State.loadLDTKLevel(lvl, cfg.Template)
+	case d1.LevelParams:
+		m = g.generateD1Map(lvl, nil)
+	case d1.SetLevelParams:
+		m = g.generateD1Map(lvl, &cfg)
 	default:
-		return g.generateDungenMap(targetMap, dungeonLevel, lvl)
+		m = g.generateDungenMap(lvl)
 	}
+	if lvl.Name != "" {
+		m.SetDisplayName(lvl.Name)
+	}
+	g.factory.State.wireExits(m)
+	return m
 }
 
-// levelConfig is the mod's entry for a dungeon level, or the zero Level when it declared none.
-func (g *MapGenerator) levelConfig(dungeonLevel int) dungeon.Level {
-	if dungeonLevel < 0 || dungeonLevel >= len(g.levels) {
-		return dungeon.Level{}
+// ldtkConfig is the "ldtk" generator's: a level drawn by hand in the mod's LDtk project, under Template.
+type ldtkConfig struct{ Template string }
+
+type ldtkStrategy struct{}
+
+func (ldtkStrategy) Parse(r recfile.Record) (dungeon.Config, error) {
+	t, ok := dungeon.Field(r, "template")
+	if !ok || t == "" {
+		return nil, fmt.Errorf("levels.rec: ldtk needs a template (the LDtk level's identifier)")
 	}
-	return g.levels[dungeonLevel]
+	return ldtkConfig{Template: t}, nil
 }
+
+func init() { dungeon.Register("ldtk", ldtkStrategy{}) }
 
 func minDist(locations []geometry.Point, pos geometry.Point) float64 {
 	minimumDist := math.MaxFloat64
@@ -151,9 +171,6 @@ var d1CathedralColumns = map[byte]bool{3: true}
 
 // addBasicTiles ports the wall/floor/lava/fence/door terrain from a generated d1.Level (piece coordinates 16..95,
 // exposed as cells 0..79) onto the gridmap. Doors are placed as objects afterward, once Level.Objects is walked.
-// d1TypeDlvl maps a level TYPE back to a representative dlvl for D1Tilemap, since a set level's own type (Lazarus'
-// Lair is Cathedral-typed Vile1/2.DUN, drawn with L1 tiles) can differ from the dungeon depth it's reached from.
-var d1TypeDlvl = map[int]int{d1.DTypeCathedral: 1, d1.DTypeCatacombs: 5, d1.DTypeCaves: 9, d1.DTypeHell: 13}
 
 func (g *MapGenerator) addBasicTiles(emptyMap *gridmap.GridMap[*Actor, *Item, Object], lvl *d1.Level) {
 	doorAt := map[geometry.Point]bool{}
@@ -173,7 +190,10 @@ func (g *MapGenerator) setD1Tiles(m *gridmap.GridMap[*Actor, *Item, Object], lvl
 		}
 		return lvl.CellSolid(p.X, p.Y) && !door(p)
 	}
-	tileMap := defs.D1Tilemap(g.randomSource, isWall, d1TypeDlvl[lvl.Type])
+	tileMap, ok := defs.Tilemap(g.levels[m.GetName()].Tiles, g.randomSource, isWall)
+	if !ok {
+		panic(fmt.Sprintf("levels.rec: %s: unknown tile set %q (have %v)", m.GetName(), g.levels[m.GetName()].Tiles, defs.TilemapNames()))
+	}
 	for x := max(x1, 0); x <= min(x2, d1.LevelSize-1); x++ {
 		for y := max(y1, 0); y <= min(y2, d1.LevelSize-1); y++ {
 			mapPos := geometry.Point{X: x, Y: y}
@@ -261,12 +281,6 @@ func (g *MapGenerator) changeD1Map(m *gridmap.GridMap[*Actor, *Item, Object], x1
 		}
 	}
 	g.walledIn[m.GetName()] = waiting
-}
-
-func LevelFromName(targetMap string) int {
-	nameParts := strings.Split(targetMap, "_")
-	level, _ := strconv.Atoi(nameParts[len(nameParts)-1])
-	return level
 }
 
 func MapTileFromLDTK(tileSet *ldtk.Tileset, layer *ldtk.Layer, tile *ldtk.Tile) (geometry.Point, gridmap.Tile) {

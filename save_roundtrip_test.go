@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"rpg/common"
-	"rpg/defs"
 	"rpg/game"
 	"rpg/geometry"
 	"rpg/gridmap"
@@ -34,7 +33,7 @@ func startInDungeon(t *testing.T, slot int) *game.GameInstance {
 	theGame.SetAndInitUserInterface(&slotUI{DummyUI: NewDummyUI(), choose: slot})
 	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "Aidan")
 	state := theGame.GetWorldState()
-	state.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(1), TargetLocation: "ladder_up"})
+	state.MapTransition(gridmap.Transition{TargetMap: levelAt(state, 1), TargetLocation: "ladder_up"})
 	// walk the level a little, so "explored" is much more than what arriving at the stairs lights up
 	m := state.GetMap()
 	player := state.GetPlayer()

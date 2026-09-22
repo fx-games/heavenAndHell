@@ -45,7 +45,9 @@ func TestSpellMenuHotkeys(t *testing.T) {
 	theGame.GetFactory().RefreshD1Spells(player)
 	check("1) Vision (Staff, 5 charges)", "2) Firebolt", "3) Item Repair", "4) Healing", "5) Lightning")
 
-	color := func(i int) any { return common.SpellMenuItems(theGame.GetWorldState(), theGame.GetActions())[i].MainTextColor }
+	color := func(i int) any {
+		return common.SpellMenuItems(theGame.GetWorldState(), theGame.GetActions())[i].MainTextColor
+	}
 	if color(1) != defs.White || color(0) == defs.Red {
 		t.Fatalf("castable lines: skill %v, staff %v", color(1), color(0))
 	}

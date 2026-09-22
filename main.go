@@ -73,8 +73,14 @@ func mustHaveMod(name string) {
 	files.SelectMod("")
 }
 
+// modOverride, when set, is played instead of the config's mod: the playthrough is D1's whatever the user picked.
+var modOverride string
+
 func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 	userConfig := common.NewConfigurationFromRecFile(common.ConfigFile)
+	if modOverride != "" {
+		userConfig.Mod = modOverride
+	}
 	files.SelectMod(userConfig.Mod) // before anything reads content: assets/ resolves to the mod first from here on
 	mustHaveMod(userConfig.Mod)
 	// and before any Icon* is read: the numbers come from the mod's icon rec files

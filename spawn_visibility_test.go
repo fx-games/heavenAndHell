@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"rpg/common"
-	"rpg/defs"
 	"rpg/gridmap"
 	"testing"
 )
@@ -17,7 +16,7 @@ func TestSpawnedSkeletonIsVisibleEnemy(t *testing.T) {
 	player := state.GetPlayer()
 	spawns := 0
 	for dlvl := 1; dlvl <= 4 && spawns < 5; dlvl++ {
-		state.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl), TargetLocation: "ladder_up"})
+		state.MapTransition(gridmap.Transition{TargetMap: levelAt(state, dlvl), TargetLocation: "ladder_up"})
 		m := state.GetMap()
 		for _, obj := range m.Objects() {
 			o, ok := obj.(*common.D1Object)

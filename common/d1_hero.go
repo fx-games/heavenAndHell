@@ -284,7 +284,6 @@ func d1Untouchable(mon *D1Monster, weapon bool) bool {
 	return false
 }
 
-func d1DungeonLevel(state *State) int { return LevelFromName(state.GetMap().GetName()) }
 
 // resolveD1Attack applies D1's hit formulas when a hero fights a D1 monster.
 // handled=false means the pair isn't D1-driven and H&H's formulas apply.
@@ -358,7 +357,7 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 		return dam, extra, true
 	case att.d1Monster != nil && def.hero != nil:
 		h, s, mon := def.hero, def.HeroSheet(), att.d1Monster
-		dlvl := d1DungeonLevel(state)
+		dlvl := state.CurrentLevel().Depth
 		hit, minDam, maxDam := mon.Hit, mon.MinDam, mon.MaxDam
 		if mon.HitWith != nil { // M_StartSpAttack and charges
 			hit, minDam, maxDam = mon.HitWith[0], mon.HitWith[1], mon.HitWith[2]
@@ -473,7 +472,7 @@ func D1ForecastSection(state *State, player, monster *Actor) (D1SheetSection, bo
 		}
 		pool += mana
 	}
-	monChance := h.MonsterMeleeHitChance(s, mon.Hit, mon.Level, d1DungeonLevel(state), mon.Data.Class) * (100 - h.BlockChance(s, mon.Level)) / 100
+	monChance := h.MonsterMeleeHitChance(s, mon.Hit, mon.Level, state.CurrentLevel().Depth, mon.Data.Class) * (100 - h.BlockChance(s, mon.Level)) / 100
 	return D1SheetSection{Title: "Matchup", Rows: [][2]string{
 		{"You", fmt.Sprintf("%d%% to hit, %s", chance, d1BlowsToKill(monster.GetStats().GetResource(stats.Health).Value(), lo, hi))},
 		{"It", fmt.Sprintf("%d%% to hit you, %s", monChance, d1BlowsToKill(pool, max(mon.MinDam+s.GetHit, 1), max(mon.MaxDam+s.GetHit, 1)))},
@@ -739,7 +738,7 @@ func d1OnKill(ctx ActionContext, killer, victim *Actor) []Action {
 	state.factory.d1AcidDeath(ctx, victim)
 	state.dropsFrom = victim
 	defer func() { state.dropsFrom = nil }()
-	dlvl := d1DungeonLevel(state)
+	dlvl := state.CurrentLevel().Depth
 	if it := state.factory.d1QuestDrop(mon); it != nil {
 		state.AddItemToMapWithDistribution(state.factory.NewD1Item(it), victim.MapPosition())
 	} else if it := state.factory.D1().MonsterDrop(mon.Data, mon.Level, mon.Unique != nil, state.D1ItemLevel(dlvl), state.factory.D1().D.LevelType(dlvl) == d1.DTypeHell); it != nil {

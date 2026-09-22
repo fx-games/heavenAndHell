@@ -1,63 +1,237 @@
 %rec: default
-# Which generation strategy builds each dungeon level, and with which parameters.
+# Every level of the game, one record each (LEVELS.md): towns, dungeon levels, quest and side levels alike.
 #
-# generator   one of the engine's registered strategies: cathedral, catacombs, caves, hell.
-# Every other field is optional and defaults to what the strategy does in Diablo, so the records below are
-# deliberately bare: this file is the level -> generator mapping that used to be hardcoded, nothing more.
+# The fields every level has:
+#   map        its id: what exits, quests and saves call it. Never parsed.
+#   name       what it calls itself on arrival. \n breaks the line.
+#   depth      difficulty and progress only (seeds, monster and item levels, "deepest"). Town 0; a quest or side
+#              level takes its parent's.
+#   generator  the algorithm that builds it: d1_cathedral, d1_catacombs, d1_caves, d1_hell (Diablo's four level
+#              generators), d1_set (a quest's set piece; names its quest), accretion, megadungeon, ldtk (drawn
+#              in maps.ldtk; names its template).
+#   tiles      the tile set: cathedral, catacombs, caves, hell, or drawn (an ldtk level's own tiles).
+#   music      a music.rec event; a level without one is silent.
+#   town       true: a town (town-only spells, shopkeepers restock, the portal comes home to the deepest one).
+#   start      true on the one level a new game starts on.
+#   exit       "<location> -> <map id>, <arrival location>": stepping on the location takes you there. An
+#              "open_when:" line after it keeps it shut until the condition (quests.rec's language) holds; an
+#              "exit_tile:" line (stairs_down, stairs_up, red_portal) is what the spot turns into when it opens.
+#              The generator places the locations; this file says where they lead.
 #
-# The knobs a strategy takes:
+# Diablo's generators take these knobs, each defaulting to what Diablo does:
 #   decoration   "name, search tile, replace tile, percent" - one single-tile decoration scattered over the
-#                finished level. Repeat the field for more. Naming it even once replaces the strategy's whole
-#                default list, so "decoration: none" turns decorations off.
+#                finished level. Repeat the field for more; naming one replaces the default list, and
+#                "decoration: none" turns them off.
 #   theme_freq   how often DRLG_PlaceThemeRooms seeds a theme room (0 = the strategy's own rule).
 #   set_pieces   false keeps the strategy from laying out its set piece (quest rooms, Diablo's pentagram).
-#
-# Level SIZE is not a knob: the generators work in fixed 112x112 and 40x40 arrays.
+# D1's levels name their stairs ladder_up and ladder_down, the town warps on 5, 9 and 13 warp, and a quest's
+# entrance its quest key; the set levels name their way out ladder_up (Lazarus' lair: exit).
 
-dlvl: 1
-generator: cathedral
+map: town
+name: Tristram
+depth: 0
+generator: ldtk
+template: Town
+tiles: drawn
+music: town
+town: true
+start: true
+exit: to_cathedral -> cathedral_1, ladder_up
+exit: to_catacombs -> catacombs_5, warp
+open_when: deepest >= 5
+exit: to_caves -> caves_9, warp
+open_when: deepest >= 9
+exit: to_hell -> hell_13, warp
+open_when: deepest >= 13
 
-dlvl: 2
-generator: cathedral
+map: cathedral_1
+name: Level 1\nCathedral
+depth: 1
+generator: d1_cathedral
+tiles: cathedral
+music: cathedral
+exit: ladder_up -> town, to_cathedral
+exit: ladder_down -> cathedral_2, ladder_up
 
-dlvl: 3
-generator: cathedral
+map: cathedral_2
+name: Level 2\nCathedral
+depth: 2
+generator: d1_cathedral
+tiles: cathedral
+music: cathedral
+exit: ladder_up -> cathedral_1, ladder_down
+exit: ladder_down -> cathedral_3, ladder_up
+exit: pwater -> dark_passage, ladder_up
 
-dlvl: 4
-generator: cathedral
+map: cathedral_3
+name: Level 3\nCathedral
+depth: 3
+generator: d1_cathedral
+tiles: cathedral
+music: cathedral
+exit: ladder_up -> cathedral_2, ladder_down
+exit: ladder_down -> cathedral_4, ladder_up
+exit: leoric -> leoric_tomb, ladder_up
 
-dlvl: 5
-generator: catacombs
+map: cathedral_4
+name: Level 4\nCathedral
+depth: 4
+generator: d1_cathedral
+tiles: cathedral
+music: cathedral
+exit: ladder_up -> cathedral_3, ladder_down
+exit: ladder_down -> catacombs_5, ladder_up
 
-dlvl: 6
-generator: catacombs
+map: catacombs_5
+name: Level 5\nCatacombs
+depth: 5
+generator: d1_catacombs
+tiles: catacombs
+music: catacombs
+exit: ladder_up -> cathedral_4, ladder_down
+exit: ladder_down -> catacombs_6, ladder_up
+exit: warp -> town, to_catacombs
 
-dlvl: 7
-generator: catacombs
+map: catacombs_6
+name: Level 6\nCatacombs
+depth: 6
+generator: d1_catacombs
+tiles: catacombs
+music: catacombs
+exit: ladder_up -> catacombs_5, ladder_down
+exit: ladder_down -> catacombs_7, ladder_up
+exit: schamb -> bone_chamber, ladder_up
 
-dlvl: 8
-generator: catacombs
+map: catacombs_7
+name: Level 7\nCatacombs
+depth: 7
+generator: d1_catacombs
+tiles: catacombs
+music: catacombs
+exit: ladder_up -> catacombs_6, ladder_down
+exit: ladder_down -> catacombs_8, ladder_up
 
-dlvl: 9
-generator: caves
+map: catacombs_8
+name: Level 8\nCatacombs
+depth: 8
+generator: d1_catacombs
+tiles: catacombs
+music: catacombs
+exit: ladder_up -> catacombs_7, ladder_down
+exit: ladder_down -> caves_9, ladder_up
 
-dlvl: 10
-generator: caves
+map: caves_9
+name: Level 9\nCaves
+depth: 9
+generator: d1_caves
+tiles: caves
+music: caves
+exit: ladder_up -> catacombs_8, ladder_down
+exit: ladder_down -> caves_10, ladder_up
+exit: warp -> town, to_caves
 
-dlvl: 11
-generator: caves
+map: caves_10
+name: Level 10\nCaves
+depth: 10
+generator: d1_caves
+tiles: caves
+music: caves
+exit: ladder_up -> caves_9, ladder_down
+exit: ladder_down -> caves_11, ladder_up
 
-dlvl: 12
-generator: caves
+map: caves_11
+name: Level 11\nCaves
+depth: 11
+generator: d1_caves
+tiles: caves
+music: caves
+exit: ladder_up -> caves_10, ladder_down
+exit: ladder_down -> caves_12, ladder_up
 
-dlvl: 13
-generator: hell
+map: caves_12
+name: Level 12\nCaves
+depth: 12
+generator: d1_caves
+tiles: caves
+music: caves
+exit: ladder_up -> caves_11, ladder_down
+exit: ladder_down -> hell_13, ladder_up
 
-dlvl: 14
-generator: hell
+map: hell_13
+name: Level 13\nHell
+depth: 13
+generator: d1_hell
+tiles: hell
+music: hell
+exit: ladder_up -> caves_12, ladder_down
+exit: ladder_down -> hell_14, ladder_up
+exit: warp -> town, to_hell
 
-dlvl: 15
-generator: hell
+map: hell_14
+name: Level 14\nHell
+depth: 14
+generator: d1_hell
+tiles: hell
+music: hell
+exit: ladder_up -> hell_13, ladder_down
+exit: ladder_down -> hell_15, ladder_up
 
-dlvl: 16
-generator: hell
+map: hell_15
+name: Level 15\nHell
+depth: 15
+generator: d1_hell
+tiles: hell
+music: hell
+exit: ladder_up -> hell_14, ladder_down
+exit: ladder_down -> hell_16, ladder_up
+open_when: done("lazarus")
+exit_tile: stairs_down
+exit: lazarus -> lazarus_lair, ladder_up
+open_when: v1("lazarus") >= 2 and (active("lazarus") or done("lazarus"))
+exit_tile: red_portal
+
+map: hell_16
+name: Level 16\nHell
+depth: 16
+generator: d1_hell
+tiles: hell
+music: hell
+exit: ladder_up -> hell_15, ladder_down
+
+map: leoric_tomb
+name: King Leoric's Tomb
+depth: 3
+generator: d1_set
+quest: leoric
+tiles: cathedral
+music: cathedral
+exit: ladder_up -> cathedral_3, leoric
+
+map: dark_passage
+name: A Dark Passage
+depth: 2
+generator: d1_set
+quest: pwater
+tiles: caves
+music: caves
+exit: ladder_up -> cathedral_2, pwater
+
+map: bone_chamber
+name: The Chamber of Bone
+depth: 6
+generator: d1_set
+quest: schamb
+tiles: catacombs
+music: catacombs
+exit: ladder_up -> catacombs_6, schamb
+
+map: lazarus_lair
+name: Lazarus' Lair
+depth: 15
+generator: d1_set
+quest: lazarus
+tiles: cathedral
+music: cathedral
+exit: exit -> hell_15, lazarus
+open_when: done("lazarus")
+exit_tile: red_portal

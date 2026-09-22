@@ -199,7 +199,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 	if gen.D.Objects[obj.Kind].SelFlag == 0 { // decoration: nothing to operate
 		return
 	}
-	dlvl := d1DungeonLevel(f.State)
+	dlvl := f.State.CurrentLevel().Depth
 	ilvl, hell := f.State.D1ItemLevel(dlvl), gen.D.LevelType(dlvl) == d1.DTypeHell
 	drop := func(it *d1.Item) {
 		if it != nil {
@@ -250,7 +250,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 	}
 	switch obj.Kind {
 	case d1.ObjCHEST1, d1.ObjCHEST2, d1.ObjCHEST3, d1.ObjTCHEST1, d1.ObjTCHEST2, d1.ObjTCHEST3:
-		setLevel := f.State.setLevelOf(f.State.GetMap().GetName()) != nil
+		setLevel := f.State.d1SetQuest(f.State.GetMap().GetName()) >= 0
 		for j := 0; j < obj.Var1; j++ {
 			if setLevel { // OperateChest: a quest level's chest only holds good items
 				drop(gen.FloorItem(ilvl, true, hell))
@@ -450,7 +450,7 @@ func (f *Factory) breakD1Barrel(o *D1Object, player *Actor) {
 	obj.Active = false // the debris stays, walkable
 	f.PlayD1Sfx(d1BarrelSfx(obj.Kind), o.pos)
 	if obj.Kind == d1.ObjBARREL {
-		dlvl := d1DungeonLevel(f.State)
+		dlvl := f.State.CurrentLevel().Depth
 		ilvl, hell := f.State.D1ItemLevel(dlvl), gen.D.LevelType(dlvl) == d1.DTypeHell
 		if obj.Var2 <= 1 {
 			it := gen.UsefulItem(ilvl)
@@ -567,7 +567,7 @@ func D1ShrineInfoText(o *D1Object) ([]string, bool) {
 // d1Shrine ports OperateShrine for single player.
 func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 	h, gen, m, st := player.hero, f.Generator, f.State.GetMap(), player.GetStats()
-	dlvl := d1DungeonLevel(f.State)
+	dlvl := f.State.CurrentLevel().Depth
 	ilvl, lt := f.State.D1ItemLevel(dlvl), (dlvl-1)/4+1
 	hp, mana := st.GetResource(stats.Health), st.GetResource(stats.Mana)
 	equipped, pack := d1OwnedItems(player)

@@ -500,6 +500,12 @@ func (ap *Player) MusicTracks() []string { return ap.musicTracks }
 func (ap *Player) CurrentMusic() string  { return ap.currentMusic }
 
 // PlayMusic switches the background music to a registered track and reports whether it knows the track.
+// StopMusic silences the background music.
+func (ap *Player) StopMusic() {
+	ap.Stop(ap.currentMusic)
+	ap.currentMusic = ""
+}
+
 func (ap *Player) PlayMusic(cue string) bool {
 	if !slicesContains(ap.musicTracks, cue) || ap.disablePlayback {
 		return false

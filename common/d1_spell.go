@@ -364,7 +364,7 @@ func (c *spellCtx) castFromData(target geometry.Point) (ok, handled bool) {
 // castAllowed holds the two checks every cast makes: the spell has to work here, and a spell that needs a victim
 // needs one other than the caster.
 func (c *spellCtx) castAllowed(target geometry.Point) bool {
-	if defs.IsTownLevel(c.m.GetName()) && !c.f.Generator.D.Spells[c.spell].Town {
+	if c.f.State.Level(c.m.GetName()).Town && !c.f.Generator.D.Spells[c.spell].Town {
 		c.ctx.Msg("That spell doesn't work in town.")
 		c.f.PlayD1HeroSound(27)
 		return false
@@ -484,7 +484,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 // Hellfire's burns the hero too, dlvl·16 ticks longer, and for a flat 8·clvl/64 a tick (AddFirewall's bug).
 func (f *Factory) spawnD1FireWall(caster *Actor, p geometry.Point, slvl, layers int) {
 	clvl := caster.hero.Level
-	turns := d1.FireWallTurns(slvl, d1DungeonLevel(f.State))
+	turns := d1.FireWallTurns(slvl, f.State.CurrentLevel().Depth)
 	f.spawnD1Wall(caster, p, d1.ResistKindFire, turns, true, layers, defs.IconEffectFireSmall, func() int { return d1.HellfireFireWallDamage64(clvl) })
 }
 
@@ -748,7 +748,8 @@ func (f *Factory) PlaceD1GolemNear(player *Actor, g SavedGolem) {
 
 // D1Portal is the open town portal: where it stands in the dungeon.
 type D1Portal struct {
-	Map  string
+	Map  string // the level it was opened on
+	Town string // the town it leads to: the deepest visited when it opened
 	X, Y int
 }
 
@@ -798,7 +799,7 @@ func (f *Factory) openD1Portal(c *spellCtx, target geometry.Point) bool {
 	if !ok {
 		return false
 	}
-	f.State.d1Portal = &D1Portal{Map: m.GetName(), X: p.X, Y: p.Y}
+	f.State.d1Portal = &D1Portal{Map: m.GetName(), Town: f.State.DeepestTown(), X: p.X, Y: p.Y}
 	PlaceD1Portal(f.State, m)
 	return true
 }
@@ -814,8 +815,8 @@ func PlaceD1Portal(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 	var target gridmap.Transition
 	switch {
 	case m.GetName() == p.Map:
-		pos, target = geometry.Point{X: p.X, Y: p.Y}, gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: d1PortalLocation}
-	case m.GetName() == string(defs.LevelNameTown):
+		pos, target = geometry.Point{X: p.X, Y: p.Y}, gridmap.Transition{TargetMap: p.Town, TargetLocation: d1PortalLocation}
+	case m.GetName() == p.Town:
 		pos, target = m.GetNamedLocation(d1PortalLocation), gridmap.Transition{TargetMap: p.Map, TargetLocation: d1PortalLocation}
 	default:
 		return
@@ -834,7 +835,7 @@ func (s *State) CloseD1Portal() {
 	if s.d1Portal == nil {
 		return
 	}
-	maps := []*gridmap.GridMap[*Actor, *Item, Object]{s.GetDungeonMap(s.d1Portal.Map), s.GetTownMap(string(defs.LevelNameTown))}
+	maps := []*gridmap.GridMap[*Actor, *Item, Object]{s.Map(s.d1Portal.Map), s.Map(s.d1Portal.Town)}
 	for _, m := range maps {
 		if m == nil {
 			continue

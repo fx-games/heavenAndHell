@@ -27,14 +27,29 @@ type strategy struct {
 
 func init() {
 	for name, st := range map[string]strategy{
-		"cathedral": {DTypeCathedral, t1Dirt - 1, (*gen).l1GenerateLevel, (*gen).l2PlaceDecoration, ""},
-		"catacombs": {DTypeCatacombs, 12 - 1, (*gen).l2GenerateLevel, (*gen).l2PlaceDecoration, ""},
-		"caves":     {DTypeCaves, 8 - 1, (*gen).l3GenerateLevel, (*gen).l3PlaceDecoration, ""},
-		"hell":      {DTypeHell, 30 - 1, (*gen).l4GenerateLevel, (*gen).l2PlaceDecoration, ""},
+		"d1_cathedral": {DTypeCathedral, t1Dirt - 1, (*gen).l1GenerateLevel, (*gen).l2PlaceDecoration, ""},
+		"d1_catacombs": {DTypeCatacombs, 12 - 1, (*gen).l2GenerateLevel, (*gen).l2PlaceDecoration, ""},
+		"d1_caves":     {DTypeCaves, 8 - 1, (*gen).l3GenerateLevel, (*gen).l3PlaceDecoration, ""},
+		"d1_hell":      {DTypeHell, 30 - 1, (*gen).l4GenerateLevel, (*gen).l2PlaceDecoration, ""},
 	} {
 		st.name = name
 		dungeon.Register(name, st)
 	}
+	dungeon.Register("d1_set", setStrategy{})
+}
+
+// SetLevelParams is a d1_set level: the quest whose set piece it loads (LoadSetMap). The set level number and
+// its leveltype come from 1.09's own quest table, which is this family's knowledge, not the mod's.
+type SetLevelParams struct{ Quest string }
+
+type setStrategy struct{}
+
+func (setStrategy) Parse(r recfile.Record) (dungeon.Config, error) {
+	q, ok := dungeon.Field(r, "quest")
+	if !ok || q == "" {
+		return nil, fmt.Errorf("levels.rec: d1_set needs a quest")
+	}
+	return SetLevelParams{Quest: q}, nil
 }
 
 // strategyNamed recovers D1's own strategy from the shared registry. The assertion is the point of the seam: the
@@ -68,17 +83,17 @@ type LevelParams struct {
 // defaultParams is what each strategy does in Diablo. Level size is deliberately NOT a parameter: the generators'
 // 112x112 and 40x40 arrays are array types, not slices.
 var defaultParams = map[string]LevelParams{
-	"cathedral": {SetPieces: true},
-	"catacombs": {SetPieces: true, Decorations: []Decoration{
+	"d1_cathedral": {SetPieces: true},
+	"d1_catacombs": {SetPieces: true, Decorations: []Decoration{
 		{"cracked floor", 1, 80, 10}, {"pitted floor", 1, 81, 10}, {"stained floor", 1, 82, 10},
 		{"cracked wall", 2, 84, 10}, {"pitted wall", 2, 85, 10}, {"stained wall", 2, 86, 10},
 		{"rubble", 8, 87, 50},
 	}},
-	"caves": {SetPieces: true, Decorations: []Decoration{
+	"d1_caves": {SetPieces: true, Decorations: []Decoration{
 		{"pebbles", 7, 106, 25}, {"gravel", 7, 107, 25}, {"cracks", 7, 108, 25},
 		{"lava crust", 9, 109, 25}, {"lava bubble", 10, 110, 25},
 	}},
-	"hell": {SetPieces: true, ThemeFreq: 8},
+	"d1_hell": {SetPieces: true, ThemeFreq: 8},
 }
 
 // Parse implements dungeon.Strategy: it turns one levels.rec record into this strategy's LevelParams. Fields the
@@ -127,19 +142,26 @@ func loadLevelConfigs(fsys fs.FS) (levelConfigs, error) {
 	if err != nil {
 		return cfgs, err
 	}
-	levels, err := dungeon.LoadLevels(recs, NumLevels)
-	if err != nil {
-		return cfgs, err
-	}
-	for dlvl, l := range levels {
-		if l.Generator == "" {
+	// D1's generator reads its knobs by depth: the one D1 dungeon level each depth has. The whole file is checked
+	// by the engine's loader (dungeon.LoadLevels); other generators' levels, d1_set's included (they build with
+	// their parent depth's), are not its business here.
+	for _, r := range recs {
+		gen, _ := dungeon.Field(r, "generator")
+		st, ok := dungeon.Lookup(gen)
+		if !ok || !strings.HasPrefix(gen, "d1_") {
 			continue
 		}
-		p, ok := l.Config.(LevelParams)
-		if !ok {
-			return cfgs, fmt.Errorf("levels.rec: dlvl %d: generator %q is not a D1 generator", dlvl, l.Generator)
+		cfg, err := st.Parse(r)
+		if err != nil {
+			return cfgs, err
 		}
-		cfgs[dlvl] = levelConfig{strategy: l.Generator, params: p}
+		depth, err := dungeon.Int(r, "depth", 0)
+		if err != nil {
+			return cfgs, err
+		}
+		if p, ok := cfg.(LevelParams); ok && depth > 0 && depth < NumLevels {
+			cfgs[depth] = levelConfig{strategy: gen, params: p}
+		}
 	}
 	return cfgs, nil
 }

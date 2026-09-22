@@ -2,7 +2,6 @@ package main
 
 import (
 	"rpg/common"
-	"rpg/defs"
 	"rpg/gridmap"
 	"testing"
 )
@@ -25,7 +24,7 @@ func TestActorInfoSections(t *testing.T) {
 		t.Fatalf("the hero's window has no Character/Attributes block: %v", titles(sections))
 	}
 
-	state.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(1), TargetLocation: "ladder_up"})
+	state.MapTransition(gridmap.Transition{TargetMap: levelAt(state, 1), TargetLocation: "ladder_up"})
 	var monster *common.Actor
 	for _, a := range state.GetMap().Actors() {
 		if a != player && a.D1Monster() != nil && a.IsAlive() {

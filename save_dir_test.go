@@ -13,6 +13,7 @@ import (
 // the player's own saves, and a leftover slot from one test must not decide where the next one saves.
 func TestMain(m *testing.M) {
 	files.SelectMod(common.DefaultMod) // content loads through the overlay here too, not just in the game
+	modOverride = common.DefaultMod     // and the user's config.rec (whichever mod they last picked) never decides
 	if err := defs.LoadIcons(); err != nil {
 		panic(err)
 	}

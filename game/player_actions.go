@@ -514,8 +514,7 @@ func (a *Actions) goOneLevelUp() {
 		return
 	}
 	currentMap := state.GetMap()
-	mapName := currentMap.GetName()
-	if mapName == string(defs.LevelNameTown) {
+	if state.IsPlayerInTown() {
 		return
 	}
 

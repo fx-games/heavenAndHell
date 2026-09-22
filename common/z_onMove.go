@@ -54,10 +54,6 @@ func (d OnMoveHook) After(action Action, context ActionContext) []Action {
 
 	// player only
 	transitionAtLocation, hasTransition := currentMap.GetTransitionAt(newPos)
-	// like D1's town warps, a town entrance below the cathedral opens once its level was reached
-	if dlvl := LevelFromName(transitionAtLocation.TargetMap); hasTransition && state.IsPlayerInTown() && dlvl > 1 && state.GetLastDungeonLevel() < dlvl {
-		hasTransition = false
-	}
 	if hasTransition {
 		actions = append(actions, NewTransitionAction(action.Cause(), transitionAtLocation))
 	}

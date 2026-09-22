@@ -204,7 +204,7 @@ func (f *Factory) D1Disarm(player *Actor, target geometry.Point) {
 	if o != nil {
 		obj, name = o.O, o.Name()
 	}
-	if obj.TrapFlag && d1Rng.Intn(100) <= d1.DisarmChance(player.HeroSheet().Dex, d1DungeonLevel(f.State)) {
+	if obj.TrapFlag && d1Rng.Intn(100) <= d1.DisarmChance(player.HeroSheet().Dex, f.State.CurrentLevel().Depth) {
 		PlayUICue("disarm")
 		f.State.mapGen.disarmD1Object(m, obj)
 		if o != nil {

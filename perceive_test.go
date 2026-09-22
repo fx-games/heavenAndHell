@@ -2,7 +2,6 @@ package main
 
 import (
 	"rpg/common"
-	"rpg/defs"
 	"rpg/geometry"
 	"rpg/gridmap"
 	"testing"
@@ -15,7 +14,7 @@ func TestInfravisionMonstersCanBeInspected(t *testing.T) {
 	theGame.GetAudio().SetDisablePlayback(true)
 	theGame.NewGame(theGame.GetGameData().ClassDefinitions[1], false, "")
 	state := theGame.GetWorldState()
-	state.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(1), TargetLocation: "ladder_up"})
+	state.MapTransition(gridmap.Transition{TargetMap: levelAt(state, 1), TargetLocation: "ladder_up"})
 	player := state.GetPlayer()
 
 	var hidden *common.Actor

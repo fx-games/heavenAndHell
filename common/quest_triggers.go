@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/vm"
 
 	"rpg/d1"
 	"rpg/defs"
@@ -15,7 +16,7 @@ import (
 const (
 	EventKill         = "on_kill"          // subject: the dead monster's internal name, or a unique's name
 	EventItemPickup   = "on_item_pickup"   // subject: the item's internal name
-	EventEnterLevel   = "on_enter_level"   // subject: the dungeon depth the hero arrived on
+	EventEnterLevel   = "on_enter_level"   // subject: the id of the level the hero arrived on
 	EventTalk         = "on_talk"          // subject: the NPC's internal name
 	EventLevelCleared = "on_level_cleared" // subject: the map name; its last monster just died
 	EventItemUse      = "on_item_use"      // subject: the item's internal name
@@ -49,9 +50,9 @@ func (s *State) questEnv() defs.QuestEnv {
 		Flag:   s.GetFlags().IsSet,
 		V1:     qvar(1),
 		V2:     qvar(2),
-		Depth:  d1DungeonLevel(s),
+		Depth:  s.CurrentLevel().Depth,
 
-		Deepest: s.GetLastDungeonLevel(),
+		Deepest: s.Deepest(),
 		Has: func(item string) bool {
 			idx, ok := s.factory.D1().D.ItemIdx[item]
 			return ok && d1HasItem(s.GetPlayer(), idx) != nil
@@ -206,10 +207,7 @@ func (f *Factory) spawnItemAt(item, mapName, location string) {
 		m.AddItem(f.NewD1Item(f.Generator.PlainItem(idx)), getDropPos(m, s.GetPlayer().MapPosition()))
 		return
 	}
-	m := s.GetTownMap(mapName)
-	if m == nil {
-		m = s.GetDungeonMap(mapName)
-	}
+	m := s.Map(mapName)
 	if m == nil {
 		f.Msg(fmt.Sprintf("spawn_item: map %q is not built", mapName))
 		return
@@ -225,4 +223,31 @@ func (s *State) ItemUsed(item *Item) {
 	if items := s.factory.D1().D.Items; item.d1.BaseIdx >= 0 && item.d1.BaseIdx < len(items) {
 		s.factory.fireQuestTriggers(EventItemUse, items[item.d1.BaseIdx].InternalName, "")
 	}
+}
+
+// questConditions caches compiled conditions that live outside quests.rec (levels.rec's open_when).
+var questConditions = map[string]*vm.Program{}
+
+// compileQuestCondition compiles one condition in the trigger language.
+func compileQuestCondition(cond string) (*vm.Program, error) {
+	if p, ok := questConditions[cond]; ok {
+		return p, nil
+	}
+	p, err := expr.Compile(cond, expr.Env(defs.QuestEnv{}), expr.AsBool())
+	if err != nil {
+		return nil, err
+	}
+	questConditions[cond] = p
+	return p, nil
+}
+
+// questCondition evaluates cond against the quests as they stand; a condition that fails to run is false.
+func (f *Factory) questCondition(cond string) bool {
+	p, err := compileQuestCondition(cond)
+	if err != nil {
+		return false
+	}
+	out, err := expr.Run(p, f.State.questEnv())
+	ok, _ := out.(bool)
+	return err == nil && ok
 }

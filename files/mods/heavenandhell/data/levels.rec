@@ -1,26 +1,22 @@
 %rec: default
-# Which generation strategy builds each dungeon level, with which parameters, and how it presents itself.
+# Every level of the game, one record each (LEVELS.md): towns, dungeon levels, quest and side levels alike.
 #
-# The knobs that belong to the LEVEL rather than to any one generator:
-#   name         what the level calls itself on arrival. \n breaks the line.
-#   tiles        which of the engine's tile sets draws it: cathedral, catacombs, caves, hell.
-#   transition   an extra way off this level, beyond the ladders up and down every level gets:
-#                "<location name>, <target map>, <target location>, up|down".
-#   up           where this level's OWN ladder up leads: "<target map>, <target location>". Every level's
-#                leads to the one above it and the first level's to the town, but this game's town calls its
-#                cathedral door to_cathedral, and the engine is not allowed to know that name.
-#
-# A record keyed by "town" names a town beyond the first: an LDtk level with shopkeepers, not a generated one.
-# A record keyed by "map" instead of "dlvl" is a side level: reached only by a transition some other level
-# declares, with a way up (its "up", required) and no way down. "depth" is the dungeon level whose monsters and
-# loot it draws on.
-#
-# How deep this game goes is decided here and nowhere else: the deepest dlvl declared below is the bottom of
-# the dungeon, and the engine gives that level no ladder down.
-#
-# generator   one of the engine's registered strategies. This mod's levels grow out of hand-drawn room
-#             templates, so they all name "accretion"; "megadungeon" (carve a maze, knock holes in it) is
-#             registered too and takes the knobs listed at the bottom of this file.
+# The fields every level has:
+#   map        its id: what exits, quests and saves call it. Never parsed.
+#   name       what it calls itself on arrival. \n breaks the line.
+#   depth      difficulty and progress only (seeds, monster and item levels, "deepest"). Town 0; a quest or side
+#              level takes its parent's.
+#   generator  the algorithm that builds it: d1_cathedral, d1_catacombs, d1_caves, d1_hell (Diablo's four level
+#              generators), d1_set (a quest's set piece; names its quest), accretion, megadungeon, ldtk (drawn
+#              in maps.ldtk; names its template).
+#   tiles      the tile set: cathedral, catacombs, caves, hell, or drawn (an ldtk level's own tiles).
+#   music      a music.rec event; a level without one is silent.
+#   town       true: a town (town-only spells, shopkeepers restock, the portal comes home to the deepest one).
+#   start      true on the one level a new game starts on.
+#   exit       "<location> -> <map id>, <arrival location>": stepping on the location takes you there. An
+#              "open_when:" line after it keeps it shut until the condition (quests.rec's language) holds; an
+#              "exit_tile:" line (stairs_down, stairs_up, red_portal) is what the spot turns into when it opens.
+#              The generator places the locations; this file says where they lead.
 #
 # The knobs accretion takes:
 #   templates        the LDtk project the room templates live in. Defaults to assets/rooms.ldtk, which the mod
@@ -35,12 +31,29 @@
 #
 # Every level forbids the other levels' quest rooms, and the Poisoned Water Supply's cave template, which is a
 # side level off level 3 rather than a dungeon level.
+# A generated level names its stairwells after its exits: ladder_up by the entrance, ladder_down far away.
 
-dlvl: 1
-generator: accretion
+map: town
+name: Tristram
+depth: 0
+generator: ldtk
+template: Town
+tiles: drawn
+music: town
+town: true
+start: true
+exit: to_cathedral -> cathedral_1, ladder_up
+exit: to_catacombs -> catacombs_4, to_town
+exit: to_caves -> caves_6, to_town
+
+map: cathedral_1
 name: Level 1\nCathedral
+depth: 1
+generator: accretion
 tiles: cathedral
-up: Town, to_cathedral
+music: cathedral
+exit: ladder_up -> town, to_cathedral
+exit: ladder_down -> cathedral_2, ladder_up
 templates: assets/maps.ldtk
 template_prefix: Cath
 forbid_room: Cata_template_for_king_zedek
@@ -48,10 +61,14 @@ forbid_room: Hell_template_for_lucifer
 forbid_room: Dung_template_for_rogue
 forbid_room: Cave_template_for_poisoned_water
 
-dlvl: 2
-generator: accretion
+map: cathedral_2
 name: Level 2\nCathedral
+depth: 2
+generator: accretion
 tiles: cathedral
+music: cathedral
+exit: ladder_up -> cathedral_1, ladder_down
+exit: ladder_down -> catacombs_3, ladder_up
 templates: assets/maps.ldtk
 template_prefix: Cath
 require_room: Cath_template_for_meat_jack
@@ -60,24 +77,32 @@ forbid_room: Hell_template_for_lucifer
 forbid_room: Dung_template_for_rogue
 forbid_room: Cave_template_for_poisoned_water
 
-dlvl: 3
-generator: accretion
+map: catacombs_3
 name: Level 3\nCatacombs
+depth: 3
+generator: accretion
 tiles: catacombs
+music: catacombs
+exit: ladder_up -> cathedral_2, ladder_down
+exit: ladder_down -> catacombs_4, ladder_up
+exit: to_poisoned_water_supply -> poisoned_water_supply, ladder_up
 templates: assets/maps.ldtk
-transition: to_poisoned_water_supply, poisoned_water_supply, ladder_up, down
 template_prefix: Cata
 forbid_room: Cath_template_for_meat_jack
 forbid_room: Hell_template_for_lucifer
 forbid_room: Dung_template_for_rogue
 forbid_room: Cave_template_for_poisoned_water
 
-dlvl: 4
-generator: accretion
+map: catacombs_4
 name: Level 4\nCatacombs
+depth: 4
+generator: accretion
 tiles: catacombs
+music: catacombs
+exit: ladder_up -> catacombs_3, ladder_down
+exit: ladder_down -> caves_5, ladder_up
+exit: to_town -> town, to_catacombs
 templates: assets/maps.ldtk
-transition: to_town, Town, to_catacombs, up
 template_prefix: Cata
 require_room: Cata_template_for_king_zedek
 forbid_room: Cath_template_for_meat_jack
@@ -85,11 +110,14 @@ forbid_room: Hell_template_for_lucifer
 forbid_room: Dung_template_for_rogue
 forbid_room: Cave_template_for_poisoned_water
 
-# The caves and hell levels are open caverns: their room openings stay corridors, no doors.
-dlvl: 5
-generator: accretion
+map: caves_5
 name: Level 5\nCaves
+depth: 5
+generator: accretion
 tiles: caves
+music: caves
+exit: ladder_up -> catacombs_4, ladder_down
+exit: ladder_down -> caves_6, ladder_up
 templates: assets/maps.ldtk
 template_prefix: Cave
 doors: false
@@ -99,12 +127,16 @@ forbid_room: Hell_template_for_lucifer
 forbid_room: Dung_template_for_rogue
 forbid_room: Cave_template_for_poisoned_water
 
-dlvl: 6
-generator: accretion
+map: caves_6
 name: Level 6\nCaves
+depth: 6
+generator: accretion
 tiles: caves
+music: caves
+exit: ladder_up -> caves_5, ladder_down
+exit: ladder_down -> hell_7, ladder_up
+exit: to_town -> town, to_caves
 templates: assets/maps.ldtk
-transition: to_town, Town, to_caves, up
 template_prefix: Cave
 doors: false
 forbid_room: Cath_template_for_meat_jack
@@ -113,10 +145,14 @@ forbid_room: Hell_template_for_lucifer
 forbid_room: Dung_template_for_rogue
 forbid_room: Cave_template_for_poisoned_water
 
-dlvl: 7
-generator: accretion
+map: hell_7
 name: Level 7\nHell
+depth: 7
+generator: accretion
 tiles: hell
+music: hell
+exit: ladder_up -> caves_6, ladder_down
+exit: ladder_down -> hell_8, ladder_up
 templates: assets/maps.ldtk
 template_prefix: Hell
 doors: false
@@ -125,11 +161,15 @@ forbid_room: Cata_template_for_king_zedek
 forbid_room: Dung_template_for_rogue
 forbid_room: Cave_template_for_poisoned_water
 
-dlvl: 8
-generator: accretion
+map: hell_8
 name: Level 8\nHell
-transition: to_hell_town, TownHell, to_caves, up
+depth: 8
+generator: accretion
 tiles: hell
+music: hell
+exit: ladder_up -> hell_7, ladder_down
+exit: ladder_down -> doom_9, ladder_up
+exit: to_hell_town -> hell_town, to_caves
 templates: assets/maps.ldtk
 template_prefix: Hell
 doors: false
@@ -139,11 +179,15 @@ forbid_room: Cata_template_for_king_zedek
 forbid_room: Dung_template_for_rogue
 forbid_room: Cave_template_for_poisoned_water
 
-dlvl: 9
-generator: accretion
+map: doom_9
 name: Level 9\nDungeon of Doom
-transition: to_hell_town, TownHell, to_dungeon, up
+depth: 9
+generator: accretion
 tiles: caves
+music: caves
+exit: ladder_up -> hell_8, ladder_down
+exit: ladder_down -> doom_10, ladder_up
+exit: to_hell_town -> hell_town, to_dungeon
 templates: assets/maps.ldtk
 template_prefix: Dung
 forbid_room: Cath_template_for_meat_jack
@@ -151,10 +195,14 @@ forbid_room: Cata_template_for_king_zedek
 forbid_room: Hell_template_for_lucifer
 forbid_room: Cave_template_for_poisoned_water
 
-dlvl: 10
-generator: accretion
+map: doom_10
 name: Level 10\nDungeon of Doom
+depth: 10
+generator: accretion
 tiles: caves
+music: caves
+exit: ladder_up -> doom_9, ladder_down
+exit: ladder_down -> merchant_11, ladder_up
 templates: assets/maps.ldtk
 template_prefix: Dung
 require_room: Dung_template_for_rogue
@@ -163,10 +211,14 @@ forbid_room: Cata_template_for_king_zedek
 forbid_room: Hell_template_for_lucifer
 forbid_room: Cave_template_for_poisoned_water
 
-dlvl: 11
-generator: accretion
+map: merchant_11
 name: Level 11\nMerchant District
+depth: 11
+generator: accretion
 tiles: cathedral
+music: cathedral
+exit: ladder_up -> doom_10, ladder_down
+exit: ladder_down -> merchant_12, ladder_up
 templates: assets/maps.ldtk
 template_prefix: Cath
 forbid_room: Cath_template_for_meat_jack
@@ -175,10 +227,13 @@ forbid_room: Hell_template_for_lucifer
 forbid_room: Dung_template_for_rogue
 forbid_room: Cave_template_for_poisoned_water
 
-dlvl: 12
-generator: accretion
+map: merchant_12
 name: Level 12\nMerchant District
+depth: 12
+generator: accretion
 tiles: cathedral
+music: cathedral
+exit: ladder_up -> merchant_11, ladder_down
 templates: assets/maps.ldtk
 template_prefix: Cath
 forbid_room: Cath_template_for_meat_jack
@@ -188,15 +243,25 @@ forbid_room: Dung_template_for_rogue
 forbid_room: Cave_template_for_poisoned_water
 
 # The town in hell, drawn in maps.ldtk: reached from level 8's caves and level 9's dungeon.
-town: TownHell
+map: hell_town
+name: The Town in Hell
+depth: 8
+generator: ldtk
+template: TownHell
+tiles: drawn
+music: town
+town: true
+exit: to_caves -> hell_8, to_hell_town
+exit: to_dungeon -> doom_9, to_hell_town
 
 # Abel's quest: the source of the poison in the town's rivers, a cave off the catacombs.
 map: poisoned_water_supply
-depth: 3
-up: !gen_dungeon_level_3, to_poisoned_water_supply
-generator: accretion
 name: Poisoned Water Supply
+depth: 3
+generator: accretion
 tiles: caves
+music: caves
+exit: ladder_up -> catacombs_3, to_poisoned_water_supply
 templates: assets/maps.ldtk
 template_prefix: Cave
 doors: false
@@ -205,14 +270,3 @@ forbid_room: Cath_template_for_meat_jack
 forbid_room: Cata_template_for_king_zedek
 forbid_room: Hell_template_for_lucifer
 forbid_room: Dung_template_for_rogue
-
-# megadungeon's knobs, for reference - it takes no templates at all:
-#   width, height             the grid it carves (forced odd). Default 60x60.
-#   room_tries                how many times it tries to drop a room in. Default 1266.
-#   min_room_size             the smallest room edge. Default 5.
-#   room_ratio                how far from square a room may be, 0 = square. Default 0.25.
-#   straight_passage_chance   how strongly a corridor keeps its heading. Default 0.5.
-#   imperfect_connect_chance  how often it adds a second way between two regions, making loops. Default 0.5.
-#   door_distance             how far apart two doorways must be. Default 5.
-#   dead_ends                 true keeps dead-end corridors. Default false: they are filled back in.
-#   min_rooms                 regrow until the level has at least this many rooms. Default 10.

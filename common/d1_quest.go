@@ -106,7 +106,7 @@ func (s *State) questHere(q int) bool { return s.questOn(q, s.GetMap()) }
 
 func (s *State) questOn(q int, m *gridmap.GridMap[*Actor, *Item, Object]) bool {
 	qu := s.mapGen.d1Quest(q)
-	return qu.Active != d1.QuestNotAvail && m.GetName() == defs.LevelNameFromDepth(qu.Level)
+	return qu.Active != d1.QuestNotAvail && q < len(s.QuestDefs()) && m.GetName() == s.QuestDefs()[q].Level
 }
 
 // completeD1Quest marks quest q done and says so.
@@ -118,47 +118,35 @@ func (f *Factory) completeD1Quest(q int) {
 	f.Msg(fmt.Sprintf("Quest completed: %s", f.State.QuestDefs()[q].Name))
 }
 
-// D1SetLevel is a quest set level: its map, its set level id and quest, and the named location of its entrance
-// on the quest's dungeon level (D1's _qtx/_qty; Lazarus' red portal opens later). Every field is the mod's:
-// the engine only knows that some quests bring a level of their own.
-type D1SetLevel struct {
-	Map, Entrance, Name string
-	SL, Quest           int
-}
-
-// SetLevels are the quest set levels the mod declares, in quest order.
-func (s *State) SetLevels() []D1SetLevel {
-	var out []D1SetLevel
-	for q, def := range s.QuestDefs() {
-		if def.SetMap != "" {
-			out = append(out, D1SetLevel{def.SetMap, def.SetEntrance, def.SetName, def.SetLevel, q})
-		}
+// d1SetQuest is the quest whose set level (a d1_set record) level id is, -1 for any other level.
+func (s *State) d1SetQuest(id string) int {
+	if cfg, ok := s.Level(id).Config.(d1.SetLevelParams); ok {
+		return s.QuestByKey(cfg.Quest)
 	}
-	return out
-}
-
-// setLevelOf is the set level a map name belongs to, nil for an ordinary level.
-func (s *State) setLevelOf(mapName string) *D1SetLevel {
-	for _, sl := range s.SetLevels() {
-		if sl.Map == mapName {
-			return &sl
-		}
-	}
-	return nil
+	return -1
 }
 
 // onSetLevelOf reports whether m is the set level of quest q.
 func (s *State) onSetLevelOf(m *gridmap.GridMap[*Actor, *Item, Object], q int) bool {
-	sl := s.setLevelOf(m.GetName())
-	return sl != nil && sl.Quest == q
+	return q >= 0 && s.d1SetQuest(m.GetName()) == q
 }
 
-// questMap is the map name of quest q's set level, "" when it has none.
-func (s *State) questMap(q int) string {
-	if q >= len(s.QuestDefs()) {
-		return "" // a quest this mod does not have has no level of its own
+// questLevel is the id of the level quest q belongs to (quests.rec's level), "" for a quest the mod lacks.
+func (s *State) questLevel(q int) string {
+	if q < 0 || q >= len(s.QuestDefs()) {
+		return ""
 	}
-	return s.QuestDefs()[q].SetMap
+	return s.QuestDefs()[q].Level
+}
+
+// questMap is the id of quest q's set level, "" when it has none.
+func (s *State) questMap(q int) string {
+	for _, l := range s.mapGen.Levels() {
+		if cfg, ok := l.Config.(d1.SetLevelParams); ok && s.QuestByKey(cfg.Quest) == q {
+			return l.Map
+		}
+	}
+	return ""
 }
 
 // d1QuestTopic is what npc says about quest q, if S_TalkEnter lists it: the quest is active and logged. What
@@ -309,7 +297,7 @@ func (f *Factory) d1DoTalk(a *Actor) {
 	mon, s, pos := a.d1Monster, f.State, a.MapPosition()
 	mon.Goal = d1GoalTalking
 	f.say(a.Name(), mon.TalkMsg)
-	dlvl := d1DungeonLevel(s)
+	dlvl := s.CurrentLevel().Depth
 	switch mon.AI {
 	case "AI_GARBUD":
 		if mon.TalkMsg == "TEXT_GARBUD1" {
@@ -432,41 +420,24 @@ var (
 // is dead (InitVPTriggers), the portal back from his lair, the map changes that levers, books, the Pedestal of
 // Blood and Snotspill made (ObjChangeMap), and the quest items D1 spawns on arrival (ResyncQuests).
 func UpdateD1Quests(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
-	if m == nil || defs.IsTownLevel(m.GetName()) {
+	if m == nil || s.Level(m.GetName()).Town {
 		return
 	}
 	clear(d1GossipSeeds) // the town's towners are rolled anew on the way back
 	f := s.factory
 	f.d1DungMsgs(m)
-	open := func(loc string, tile gridmap.Tile, to gridmap.Transition) {
-		p := m.GetNamedLocation(loc)
-		if _, done := m.GetTransitionAt(p); done || m.GetNamedLocationByPos(p) != loc {
-			return
-		}
-		m.SetTile(p, tile)
-		m.AddTransitionAt(p, to)
-	}
+	s.wireExits(m) // the red portal on 15, the stairs down once Lazarus is dead, the way out of his lair
 	betrayer := s.QuestActive(d1.QBetrayer)
 	switch m.GetName() {
-	case defs.LevelNameFromDepth(15):
-		if s.QuestVar(d1.QBetrayer, 1) >= 2 && betrayer != d1.QuestInit {
-			if betrayer == d1.QuestActive && s.QuestVar(d1.QBetrayer, 1) == 2 {
-				s.SetQuestVar(d1.QBetrayer, 1, 3)
-			}
-			open("red_portal", d1RedPortal, gridmap.Transition{TargetMap: s.questMap(d1.QBetrayer), TargetLocation: "ladder_up"})
-		}
-		if betrayer == d1.QuestDone {
-			open("ladder_down", d1StairsDown, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(16), TargetLocation: "ladder_up"})
+	case s.questLevel(d1.QBetrayer):
+		if betrayer == d1.QuestActive && s.QuestVar(d1.QBetrayer, 1) == 2 { // the portal is seen open
+			s.SetQuestVar(d1.QBetrayer, 1, 3)
 		}
 		if q := d1.QVeil; s.QuestActive(q) == d1.QuestActive && s.QuestVar(q, 1) == 0 {
 			s.SetQuestVar(q, 1, 1)
 			f.spawnD1QuestItem(m, d1.IdiGldnElix)
 		}
-	case s.questMap(d1.QBetrayer):
-		if betrayer == d1.QuestDone { // M_StartKill's MIS_RPORTAL at (35, 32)
-			open("exit", d1RedPortal, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(15), TargetLocation: "red_portal"})
-		}
-	case defs.LevelNameFromDepth(9):
+	case s.questLevel(d1.QMushroom):
 		if q := d1.QMushroom; s.QuestActive(q) == d1.QuestInit && s.QuestVar(q, 1) == d1.QSInit {
 			s.SetQuestVar(q, 1, d1.QSTomeSpawned)
 			f.spawnD1QuestItem(m, d1.IdiFungalTm)
@@ -743,7 +714,7 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 			}
 			UpdateD1Quests(s, m)
 			if q == d1.QBlind {
-				f.dropD1Item(gen.SpawnUnique(d1.UItemOptAmulet, d1DungeonLevel(s)), cell(2*sp[0]+16+5, 2*sp[1]+16+5))
+				f.dropD1Item(gen.SpawnUnique(d1.UItemOptAmulet, s.CurrentLevel().Depth), cell(2*sp[0]+16+5, 2*sp[1]+16+5))
 			}
 		}
 		f.say(o.Name(), s.QuestDefs()[q].LogText)
@@ -765,7 +736,7 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 			}
 			obj.Active = false
 			f.Msg("The last blood stone sinks home. The pedestal drinks, and the hall below lights up.")
-			f.dropD1Item(gen.SpawnUnique(d1.UItemArmOfVal, d1DungeonLevel(s)), cell(2*sp[0]+25, 2*sp[1]+19))
+			f.dropD1Item(gen.SpawnUnique(d1.UItemArmOfVal, s.CurrentLevel().Depth), cell(2*sp[0]+25, 2*sp[1]+19))
 		}
 	case d1.ObjBOOK2R: // OperateSChambBk
 		if q := d1.QSchamb; obj.Active {
@@ -818,12 +789,8 @@ func (f *Factory) D1MonsterGreeting(a *Actor) {
 	}
 }
 
-// d1DungMsgs ports PlayDungMsgs: the mod's on_enter_level triggers, named by the depth reached. Set levels and
-// town have none. The "each once" is the triggers' own business -- they set and test a flag.
+// d1DungMsgs ports PlayDungMsgs: the mod's on_enter_level triggers, named by the level reached. The "each once"
+// is the triggers' own business -- they set and test a flag.
 func (f *Factory) d1DungMsgs(m *gridmap.GridMap[*Actor, *Item, Object]) {
-	dlvl := LevelFromName(m.GetName())
-	if f.State.setLevelOf(m.GetName()) != nil || dlvl == 0 {
-		return
-	}
-	f.fireQuestTriggers(EventEnterLevel, fmt.Sprint(dlvl), "")
+	f.fireQuestTriggers(EventEnterLevel, m.GetName(), "")
 }

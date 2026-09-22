@@ -6,7 +6,6 @@ import (
 	"github.com/expr-lang/expr"
 
 	"rpg/d1"
-	"rpg/defs"
 	"rpg/stats"
 	"rpg/util"
 	"sort"
@@ -237,12 +236,15 @@ const FlagWirtItemSeen = "wirt_item_seen"
 // save only kept a snapshot of.
 func (s *State) exploredD1DungeonNames() []string {
 	seen := map[string]bool{}
-	for name := range s.dungeonMaps {
-		seen[name] = true
+	for name := range s.maps {
+		seen[name] = !s.Level(name).Town
 	}
 	for name := range s.mapGen.snapshots {
-		if !defs.IsTownLevel(name) {
-			seen[name] = true
+		seen[name] = !s.Level(name).Town
+	}
+	for name, below := range seen {
+		if !below {
+			delete(seen, name)
 		}
 	}
 	names := make([]string, 0, len(seen))
@@ -266,7 +268,7 @@ func (s *State) RespawnD1Monsters() int {
 	}
 	names := s.exploredD1DungeonNames()
 	for _, name := range names {
-		m, loaded := s.dungeonMaps[name]
+		m, loaded := s.maps[name]
 		lvl := g.d1Levels[name]
 		if !loaded || lvl == nil {
 			if snap := g.snapshots[name]; snap != nil {

@@ -42,7 +42,7 @@ func TestGillianDonationRespawnsMonsters(t *testing.T) {
 	defer func() { data.VendorList = data.VendorList[:len(data.VendorList)-1] }()
 
 	gillian := func() *common.Actor {
-		for _, a := range state.GetTownMap(string(defs.LevelNameTown)).Actors() {
+		for _, a := range state.Map("town").Actors() {
 			if a.GetVendorType() == common.VendorTypeBarmaid {
 				return a
 			}
@@ -60,10 +60,10 @@ func TestGillianDonationRespawnsMonsters(t *testing.T) {
 
 	// two dungeon levels explored, Diablo still alive: nothing to donate to yet
 	for _, dlvl := range []int{1, 2} {
-		state.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl), TargetLocation: "ladder_up"})
+		state.MapTransition(gridmap.Transition{TargetMap: levelAt(state, dlvl), TargetLocation: "ladder_up"})
 	}
 	dungeon := state.GetMap()
-	state.MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: common.D1TownGates[1]})
+	state.MapTransition(gridmap.Transition{TargetMap: "town", TargetLocation: "to_cathedral"})
 	if levels := state.ExploredD1DungeonLevels(); levels != 2 {
 		t.Fatalf("explored 2 dungeon levels, counted %d", levels)
 	}

@@ -29,14 +29,12 @@ func parseOne(t *testing.T, rec string) (levelConfig, int) {
 	if len(recs) != 1 {
 		t.Fatalf("want one record, got %d", len(recs))
 	}
-	levels, err := dungeon.LoadLevels(recs, NumLevels)
-	if err != nil && !strings.Contains(err.Error(), "no generator for dungeon level") {
+	levels, err := dungeon.LoadLevels(recs)
+	if err != nil {
 		t.Fatal(err)
 	}
-	for dlvl, l := range levels {
-		if l.Generator != "" {
-			return levelConfig{strategy: l.Generator, params: l.Config.(LevelParams)}, dlvl
-		}
+	for _, l := range levels {
+		return levelConfig{strategy: l.Generator, params: l.Config.(LevelParams)}, l.Depth
 	}
 	t.Fatal("no level parsed")
 	return levelConfig{}, 0
@@ -50,8 +48,8 @@ func TestModParamsReachTheGenerator(t *testing.T) {
 		t.Fatal(err)
 	}
 	// The mod's own record for level 6 (a catacombs level), as the file declares it.
-	base, dlvl := parseOne(t, "dlvl: 6\ngenerator: catacombs\n")
-	if dlvl != 6 || base.strategy != "catacombs" {
+	base, dlvl := parseOne(t, "map: catacombs_6\ndepth: 6\ntiles: catacombs\nstart: true\ngenerator: d1_catacombs\n")
+	if dlvl != 6 || base.strategy != "d1_catacombs" {
 		t.Fatalf("parsed %d/%q", dlvl, base.strategy)
 	}
 	if got := buildWith(t, d, 6, base); got != buildWith(t, d, 6, d.levels.cfg[6]) {
@@ -60,10 +58,10 @@ func TestModParamsReachTheGenerator(t *testing.T) {
 	want := buildWith(t, d, 6, base)
 
 	for _, tc := range []struct{ name, rec string }{
-		{"decorations", "dlvl: 6\ngenerator: catacombs\ndecoration: mod tile, 1, 80, 100\n"},
-		{"no decorations", "dlvl: 6\ngenerator: catacombs\ndecoration: none\n"},
-		{"theme frequency", "dlvl: 6\ngenerator: catacombs\ntheme_freq: 3\n"},
-		{"set pieces off", "dlvl: 6\ngenerator: catacombs\nset_pieces: false\n"},
+		{"decorations", "map: catacombs_6\ndepth: 6\ntiles: catacombs\nstart: true\ngenerator: d1_catacombs\ndecoration: mod tile, 1, 80, 100\n"},
+		{"no decorations", "map: catacombs_6\ndepth: 6\ntiles: catacombs\nstart: true\ngenerator: d1_catacombs\ndecoration: none\n"},
+		{"theme frequency", "map: catacombs_6\ndepth: 6\ntiles: catacombs\nstart: true\ngenerator: d1_catacombs\ntheme_freq: 3\n"},
+		{"set pieces off", "map: catacombs_6\ndepth: 6\ntiles: catacombs\nstart: true\ngenerator: d1_catacombs\nset_pieces: false\n"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cfg, _ := parseOne(t, tc.rec)

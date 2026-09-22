@@ -1,8 +1,8 @@
 package game
 
 import (
+	"cmp"
 	"fmt"
-	"github.com/flopp/go-findfont"
 	"log"
 	"math"
 	"math/rand"
@@ -20,6 +20,8 @@ import (
 	"rpg/util"
 	"strings"
 	"time"
+
+	"github.com/flopp/go-findfont"
 )
 
 type GameInstance struct {
@@ -307,23 +309,18 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 		Configuration:  g.configuration,
 		QueueAfterTurn: g.queueAfterTurn,
 	})
-	g.state.SetOnMapChanged(g.onMapChanged)
-	g.state.MapTransition(gridmap.Transition{
-		TargetMap:      string(defs.LevelNameTown),
-		TargetLocation: "spawn",
-	})
-
 	mapGen := common.NewMapGenerator(g.randomSource)
-	if err := mapGen.LoadLevels(); err != nil { // which generator builds each level, and how deep the game goes
+	if err := mapGen.LoadLevels(); err != nil { // every level of the game (LEVELS.md)
 		panic(err)
 	}
 	mapGen.SetFactory(g.factory)
 	mapGen.SetSeed(g.levelSeed)
 	mapGen.SetSnapshots(g.levelSnapshots)
-
-	// set references
 	g.state.SetMapGenerator(mapGen)
-	common.UpdateD1Quests(&g.state, g.state.GetMap()) // the town was built before there were quests
+
+	g.state.SetOnMapChanged(g.onMapChanged)
+	g.state.MapTransition(gridmap.Transition{TargetMap: g.state.StartLevel().Map, TargetLocation: "spawn"})
+	common.UpdateD1Quests(&g.state, g.state.GetMap())
 
 	townSpawn := g.state.GetMap().GetNamedLocation("spawn")
 	g.state.SetTownSpawn(townSpawn)
@@ -342,7 +339,7 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 		g.audioPlayer.RegisterMusic(path.Join("assets", "music")) // our own tracks
 		g.audioPlayer.RegisterMusicEvents(path.Join("assets", "data", "music.rec"))
 		g.audioPlayer.RegisterVoices(path.Join("assets", "voice"))
-		g.audioPlayer.PlayMusic(g.d1AreaMusic(g.state.GetMap().GetName())) // tracks register after the first map change
+		g.playLevelMusic() // tracks register after the first map change
 	}
 
 	g.state.GetFlags().SetTrue("game_started")
@@ -392,7 +389,7 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 		g.state.GetTimeKeeper().PlayerTakesTurn(lost)
 	}
 	// ISPL_DRAINLIFE (ProcessPlayers): a cursed item drains 4/64 HP per tick outside town
-	if player.IsAlive() && player.Hero() != nil && player.HeroSheet().Flags&d1.ISplDrainLife != 0 && !defs.IsTownLevel(g.state.GetMap().GetName()) {
+	if player.IsAlive() && player.Hero() != nil && player.HeroSheet().Flags&d1.ISplDrainLife != 0 && !g.state.IsPlayerInTown() {
 		g.actionBroker.Execute(common.NewChangeResourceAction(common.AbstractCause("Drain life"), player, stats.Health, -float64(autUsed*d1.RefWalkTicks*4)/10/64))
 	}
 
@@ -497,15 +494,12 @@ func (g *GameInstance) GetWorldState() *common.State {
 // d1DebugItems: go to a level, god mode, complete a quest (decision 16).
 func (g *GameInstance) d1DebugItems() []util.MenuItem {
 	var levels, quests []util.MenuItem
-	for dlvl := 1; dlvl <= 16; dlvl++ {
-		name, at := defs.LevelNameFromDepth(dlvl), "ladder_up"
-		levels = append(levels, util.MenuItem{MainText: fmt.Sprintf("Level %d", dlvl), Action: func() {
-			g.state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: at})
-		}})
-	}
-	for _, set := range g.state.SetLevels() {
-		levels = append(levels, util.MenuItem{MainText: set.Name, Action: func() {
-			g.state.MapTransition(gridmap.Transition{TargetMap: set.Map, TargetLocation: "ladder_up"})
+	for _, l := range g.state.Levels() {
+		if l.Town {
+			continue
+		}
+		levels = append(levels, util.MenuItem{MainText: strings.ReplaceAll(cmp.Or(l.Name, l.Map), "\n", " "), Action: func() {
+			g.state.MapTransition(gridmap.Transition{TargetMap: l.Map, TargetLocation: "ladder_up"})
 		}})
 	}
 	for q, def := range g.state.QuestDefs() {
@@ -821,25 +815,19 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 	g.actions.stopAutoMove() // path & queued moves belong to the old map
 
-	if defs.IsTownLevel(newMapName) {
+	old, now := g.state.Level(oldMapName), g.state.Level(newMapName)
+	if now.Town {
 		currentMap := g.state.GetMap()
-		g.state.SetTownMap(currentMap)
 		g.restockD1Town(currentMap) // every town's shopkeepers
-		if newMapName == string(defs.LevelNameTown) {
-			common.PlaceD1Portal(g.GetWorldState(), currentMap)
-		}
-	} else { // dungeon map
-		g.state.SetDungeonMap(newMapName, g.state.GetMap())
+		common.PlaceD1Portal(g.GetWorldState(), currentMap)
+	} else {
 		g.state.GetFlags().SetTrue(common.FlagBeenUnderground) // town brightens up once the player has been below
-		if dlvl := common.LevelFromName(newMapName); dlvl > g.state.GetLastDungeonLevel() {
-			g.state.SetLastDungeonLevel(dlvl) // opens town gates, raises store item levels
-		}
 	}
 
-	switch old, now := common.LevelFromName(oldMapName), common.LevelFromName(newMapName); {
-	case defs.IsTownLevel(oldMapName):
+	switch {
+	case old.Town && !now.Town:
 		g.GetAudio().PlayCue("enter_dungeon")
-	case defs.IsTownLevel(newMapName) || now < old:
+	case now.Town || now.Depth < old.Depth:
 		common.PlayUICue("stairs_up")
 	default:
 		common.PlayUICue("stairs_down")

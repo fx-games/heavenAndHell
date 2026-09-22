@@ -49,9 +49,6 @@ func TestQuestRecordsAreWellFormed(t *testing.T) {
 				t.Errorf("quest %q: no log_text", q.Key)
 			}
 			seen[q.Key] = true
-			if (q.SetMap == "") != (q.SetLevel == 0) {
-				t.Errorf("quest %q: set_map and set_level go together", q.Key)
-			}
 		}
 	})
 }

@@ -418,7 +418,7 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 		// icons that engine-split does not define; fall back to the rocky/red-earth theme.
 		defFloorIcon := defs.IconDungeonRedEarthFloor
 
-		floorNumber := g.State.GetCurrentDungeonLevel()
+		floorNumber := g.State.CurrentLevel().Depth
 
 		switch floorNumber {
 		case 1, 2:
@@ -744,22 +744,14 @@ func (g *Factory) getPlayerRecallAction(args util.Arguments) UntargetedEffect {
 	return UntargetedEffect{
 		Effect: func(user *Actor, source EffectSource) {
 			recallAction := func() {
-				currentMapName := g.State.GetMap().GetName()
-				isInTown := defs.IsTownLevel(currentMapName)
-
 				var dest gridmap.Transition
-
-				if isInTown {
-					dest = gridmap.Transition{
-						TargetMap:      defs.LevelNameFromDepth(g.State.GetLastDungeonLevel()),
-						TargetLocation: "ladder_up",
+				if g.State.IsPlayerInTown() {
+					if g.State.DeepestLevel() == "" {
+						return // nowhere below yet
 					}
-				} else { // in dungeon
-					currentLevel := LevelFromName(currentMapName)
-					if g.State.GetLastDungeonLevel() < currentLevel {
-						g.State.SetLastDungeonLevel(currentLevel)
-					}
-					dest = gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"}
+					dest = gridmap.Transition{TargetMap: g.State.DeepestLevel(), TargetLocation: "ladder_up"}
+				} else {
+					dest = gridmap.Transition{TargetMap: g.State.DeepestTown(), TargetLocation: "spawn"}
 				}
 
 				g.State.TransitionTo(dest)

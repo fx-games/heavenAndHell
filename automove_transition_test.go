@@ -1,8 +1,6 @@
 package main
 
 import (
-	"rpg/common"
-	"rpg/defs"
 	"rpg/gridmap"
 	"testing"
 )
@@ -14,7 +12,7 @@ func TestAutoMovePathIsDroppedOnMapTransition(t *testing.T) {
 	theGame.GetAudio().SetDisablePlayback(true)
 	theGame.NewGame(theGame.GetGameData().ClassDefinitions[1], false, "")
 	state := theGame.GetWorldState()
-	state.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(1), TargetLocation: "ladder_up"})
+	state.MapTransition(gridmap.Transition{TargetMap: levelAt(state, 1), TargetLocation: "ladder_up"})
 
 	player := state.GetPlayer()
 	before := player.MapPosition()
@@ -28,7 +26,7 @@ func TestAutoMovePathIsDroppedOnMapTransition(t *testing.T) {
 		t.Skip("no auto-move path on this seed")
 	}
 
-	state.MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: common.D1TownGates[1]})
+	state.MapTransition(gridmap.Transition{TargetMap: "town", TargetLocation: "to_cathedral"})
 	state.PlayerTookTurn(10) // panicked here: stale path from level 1 indexed into the town map
 	if !state.GetMap().Contains(player.MapPosition()) {
 		t.Fatalf("player at %v is off the town map", player.MapPosition())

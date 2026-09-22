@@ -1457,14 +1457,8 @@
 									"id": "V_String",
 									"params": ["to_cathedral"]
 								}] },
-								{ "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_1", "__tile": null, "defUid": 146, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["!gen_dungeon_level_1"]
-								}] },
-								{ "__identifier": "TargetLocation", "__type": "String", "__value": "ladder_up", "__tile": null, "defUid": 147, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["ladder_up"]
-								}] }
+								{ "__identifier": "TargetMap", "__type": "String", "__value": null, "__tile": null, "defUid": 146, "realEditorValues": [] },
+								{ "__identifier": "TargetLocation", "__type": "String", "__value": null, "__tile": null, "defUid": 147, "realEditorValues": [] }
 							],
 							"__worldX": -584,
 							"__worldY": -1056
@@ -1486,14 +1480,8 @@
 									"id": "V_String",
 									"params": ["to_catacombs"]
 								}] },
-								{ "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_5", "__tile": null, "defUid": 146, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["!gen_dungeon_level_5"]
-								}] },
-								{ "__identifier": "TargetLocation", "__type": "String", "__value": "warp", "__tile": null, "defUid": 147, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["warp"]
-								}] }
+								{ "__identifier": "TargetMap", "__type": "String", "__value": null, "__tile": null, "defUid": 146, "realEditorValues": [] },
+								{ "__identifier": "TargetLocation", "__type": "String", "__value": null, "__tile": null, "defUid": 147, "realEditorValues": [] }
 							],
 							"__worldX": -512,
 							"__worldY": -944
@@ -1515,14 +1503,8 @@
 									"id": "V_String",
 									"params": ["to_caves"]
 								}] },
-								{ "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_9", "__tile": null, "defUid": 146, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["!gen_dungeon_level_9"]
-								}] },
-								{ "__identifier": "TargetLocation", "__type": "String", "__value": "warp", "__tile": null, "defUid": 147, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["warp"]
-								}] }
+								{ "__identifier": "TargetMap", "__type": "String", "__value": null, "__tile": null, "defUid": 146, "realEditorValues": [] },
+								{ "__identifier": "TargetLocation", "__type": "String", "__value": null, "__tile": null, "defUid": 147, "realEditorValues": [] }
 							],
 							"__worldX": -504,
 							"__worldY": -1072
@@ -1544,14 +1526,8 @@
 									"id": "V_String",
 									"params": ["to_hell"]
 								}] },
-								{ "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_13", "__tile": null, "defUid": 146, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["!gen_dungeon_level_13"]
-								}] },
-								{ "__identifier": "TargetLocation", "__type": "String", "__value": "warp", "__tile": null, "defUid": 147, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["warp"]
-								}] }
+								{ "__identifier": "TargetMap", "__type": "String", "__value": null, "__tile": null, "defUid": 146, "realEditorValues": [] },
+								{ "__identifier": "TargetLocation", "__type": "String", "__value": null, "__tile": null, "defUid": 147, "realEditorValues": [] }
 							],
 							"__worldX": -464,
 							"__worldY": -1048

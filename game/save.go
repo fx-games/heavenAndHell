@@ -68,7 +68,9 @@ type saveGame struct {
 	Map            string
 	X, Y           int
 	Levels         map[string]*common.LevelSnapshot
-	Deepest        int
+	Deepest        int    // shown in the slot list
+	DeepestLevel   string // the deepest level and town visited (State.Visit)
+	DeepestTown    string
 	Premium        d1.Premium
 	Boy            *d1.Item
 	BoyLevel       int
@@ -216,7 +218,11 @@ func (g *GameInstance) writeSlot(slot int) {
 	if slot <= 0 || player == nil || !player.IsAlive() || player.Hero() == nil {
 		return
 	}
-	g.forgetBoughtD1Stock(g.state.GetTownMap(string(defs.LevelNameTown)))
+	for id, m := range g.state.Maps() {
+		if g.state.Level(id).Town {
+			g.forgetBoughtD1Stock(m)
+		}
+	}
 	st := player.GetStats()
 	pos := player.MapPosition()
 	sg := saveGame{
@@ -225,7 +231,7 @@ func (g *GameInstance) writeSlot(slot int) {
 		HP: max(st.GetResource(stats.Health).Value(), 1), Mana: st.GetResource(stats.Mana).Value(), Gold: st.GetAttribute(stats.Gold),
 		UniqueDropped: g.factory.D1().UniqueDropped, Flags: g.state.GetFlags().AllEntries(),
 		Map: g.state.GetMap().GetName(), X: pos.X, Y: pos.Y, Levels: map[string]*common.LevelSnapshot{},
-		Deepest: g.state.GetLastDungeonLevel(), Premium: g.premium, Boy: g.boyItem, BoyLevel: g.boyLevel, Portal: g.state.D1Portal(),
+		Deepest: g.state.Deepest(), DeepestLevel: g.state.DeepestLevel(), DeepestTown: g.state.DeepestTown(), Premium: g.premium, Boy: g.boyItem, BoyLevel: g.boyLevel, Portal: g.state.D1Portal(),
 		Status: maps.Clone(player.GetStatusEffects().AllEntries()), SavedAt: time.Now(),
 	}
 	if golem := common.D1Golem(g.state.GetMap()); golem != nil {
@@ -255,8 +261,10 @@ func (g *GameInstance) writeSlot(slot int) {
 	for name, snap := range g.levelSnapshots {
 		sg.Levels[name] = snap
 	}
-	for name, m := range g.state.DungeonMaps() {
-		sg.Levels[name] = common.SnapshotLevel(&g.state, m)
+	for name, m := range g.state.Maps() {
+		if !g.state.Level(name).Town {
+			sg.Levels[name] = common.SnapshotLevel(&g.state, m)
+		}
 	}
 	data, err := json.Marshal(sg)
 	if err != nil {
@@ -382,16 +390,14 @@ func (g *GameInstance) LoadSlot(slot int) error {
 	for name, snap := range sg.Levels {
 		g.levelSnapshots[name] = snap
 	}
-	g.state.SetLastDungeonLevel(max(sg.Deepest, 1))
+	g.state.SetVisited(sg.DeepestLevel, sg.DeepestTown)
 	g.premium, g.boyItem, g.boyLevel = sg.Premium, sg.Boy, sg.BoyLevel
 	g.state.SetD1Portal(sg.Portal)
 	g.storesShown = false // the reset stocked the town; keep the saved premium and Wirt items on the next visit
 
 	target := gridmap.Transition{TargetMap: sg.Map, TargetLocation: "ladder_up"}
-	if defs.IsTownLevel(sg.Map) {
+	if g.state.Level(sg.Map).Town {
 		target.TargetLocation = "spawn"
-	} else if dlvl := common.LevelFromName(sg.Map); dlvl == 17 || dlvl == 21 { // the Nest and the Crypt start at a warp
-		target.TargetLocation = "warp"
 	}
 	g.state.MapTransition(target)
 	m := g.state.GetMap()

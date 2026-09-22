@@ -47,8 +47,7 @@ type PlayerActions interface {
 }
 type State struct {
 	currentMap     *gridmap.GridMap[*Actor, *Item, Object]
-	townMaps       map[string]*gridmap.GridMap[*Actor, *Item, Object]
-	dungeonMaps    map[string]*gridmap.GridMap[*Actor, *Item, Object]
+	maps           map[string]*gridmap.GridMap[*Actor, *Item, Object] // every level built this game, by id
 	d1Portal       *D1Portal
 	player         *Actor
 	camera         Camera
@@ -59,7 +58,8 @@ type State struct {
 
 	visibility          *Visibility
 	townMapSpawn        geometry.Point
-	deepestDungeonLevel int
+	deepestLevel        string // the deepest non-town level visited (Visit)
+	deepestTown         string // the deepest town visited: where the town portal leads
 	flags               *Flags
 	playerStashInTown   *Inventory
 	playerDijkstraMap   map[geometry.Point]int
@@ -88,19 +88,10 @@ func (s *State) GetWorldTexture() renderer.TextureAtlas {
 func (s *State) GetPlayerStashInTown() *Inventory {
 	return s.playerStashInTown
 }
-func (s *State) GetCurrentDungeonLevel() int {
-	currentMapName := s.GetMap().GetName()
-	if defs.IsTownLevel(currentMapName) {
-		return 0
-	}
-	return LevelFromName(currentMapName)
-}
 func NewState(ldtkProject *ldtk.Project) State {
 
 	return State{
-		dungeonMaps:         make(map[string]*gridmap.GridMap[*Actor, *Item, Object]),
-		deepestDungeonLevel: 1,
-		townMaps:            make(map[string]*gridmap.GridMap[*Actor, *Item, Object]),
+		maps:                make(map[string]*gridmap.GridMap[*Actor, *Item, Object]),
 		flags:               NewFlags(),
 		playerStashInTown:   NewInventory(32),
 		ldtkProject:         ldtkProject,
@@ -126,20 +117,19 @@ func (s *State) D1Quests() *d1.Quests {
 // D1LevelType is a map's leveltype (d1.DTypeTown ... DTypeHell): a set level's from its quest (_qlvltype), a
 // dungeon level's from the mod's levels.rec - its tiles: set, or else its D1 generator's.
 func (s *State) D1LevelType(mapName string) int {
-	if defs.IsTownLevel(mapName) {
+	lvl := s.Level(mapName)
+	switch cfg := lvl.Config.(type) {
+	case d1.SetLevelParams:
+		if q := s.QuestByKey(cfg.Quest); q >= 0 && s.D1Quests() != nil {
+			return s.D1Quests()[q].LvlType
+		}
+	case d1.LevelParams:
+		return s.factory.Generator.D.LevelType(lvl.Depth)
+	}
+	if lvl.Town {
 		return d1.DTypeTown
 	}
-	if sl := s.setLevelOf(mapName); sl != nil && s.D1Quests() != nil {
-		return s.D1Quests()[sl.Quest].LvlType
-	}
-	lvl, side := s.mapGen.sideLevels[mapName]
-	if !side {
-		lvl = s.mapGen.levelConfig(LevelFromName(mapName))
-	}
-	if i := slices.Index([]string{"town", "cathedral", "catacombs", "caves", "hell"}, lvl.Tiles); i >= 0 {
-		return i // a dungen level's tile set names its type
-	}
-	return s.factory.Generator.D.LevelType(LevelFromName(mapName))
+	return max(slices.Index([]string{"town", "cathedral", "catacombs", "caves", "hell"}, lvl.Tiles), 0)
 }
 
 func (s *State) GetVisibility() *Visibility {
@@ -211,34 +201,6 @@ func (s *State) SetPlayerMessage(msg func(string)) {
 func (s *State) SetPlayerTurnHandler(playerTookTurn func(int)) {
 	s.playerTookTurn = playerTookTurn
 }
-func (s *State) SetTownMap(currentMap *gridmap.GridMap[*Actor, *Item, Object]) {
-	s.townMaps[currentMap.GetName()] = currentMap
-}
-
-func (s *State) SetDungeonMap(name string, dungeonMap *gridmap.GridMap[*Actor, *Item, Object]) {
-	s.dungeonMaps[name] = dungeonMap
-}
-
-func (s *State) GetTownMap(name string) *gridmap.GridMap[*Actor, *Item, Object] {
-	if townMap, exists := s.townMaps[name]; exists {
-		return townMap
-	}
-	return nil
-}
-
-func (s *State) GetDungeonMap(name string) *gridmap.GridMap[*Actor, *Item, Object] {
-	return s.dungeonMaps[name]
-}
-
-func (s *State) DungeonMaps() map[string]*gridmap.GridMap[*Actor, *Item, Object] {
-	return s.dungeonMaps
-}
-
-func (s *State) HasDungeonMap(name string) bool {
-	_, exists := s.dungeonMaps[name]
-	return exists
-}
-
 func (s *State) SetTownSpawn(spawn geometry.Point) {
 	s.townMapSpawn = spawn
 }
@@ -246,31 +208,14 @@ func (s *State) GetTownSpawn() geometry.Point {
 	return s.townMapSpawn
 
 }
-func (s *State) SetLastDungeonLevel(level int) {
-	s.deepestDungeonLevel = level
-}
-
-func (s *State) GetLastDungeonLevel() int {
-	return s.deepestDungeonLevel
-}
-
 func (s *State) OnActorSpawned(actor *Actor) {
 	s.timekeeper.AddTimed(actor)
-}
-
-func (s *State) HasTownMap(mapName string) bool {
-	_, exists := s.townMaps[mapName]
-	return exists
 }
 
 func (s *State) GetFlags() *Flags {
 	return s.flags
 }
 
-func (s *State) IsPlayerInTown() bool {
-	mapName := s.GetMap().GetName()
-	return defs.IsTownLevel(mapName)
-}
 
 func (s *State) PlayerStandsInLitArea() bool {
 	currentMap := s.GetMap()
@@ -458,8 +403,7 @@ func (s *State) mixLightSourceColor(drawColor, noLightSource color.RGBA, worldTi
 // for this game and isn't done yet, blue otherwise.
 func (s *State) GetWaterColor() color.RGBA {
 	name, q := s.GetMap().GetName(), s.QuestActive(d1.QPWater)
-	sl := s.setLevelOf(name)
-	if (defs.IsTownLevel(name) || sl != nil && sl.SL == d1.SLPoisonWater) && q != d1.QuestNotAvail && q != d1.QuestDone {
+	if (s.Level(name).Town || s.d1SetQuest(name) == d1.QPWater) && q != d1.QuestNotAvail && q != d1.QuestDone {
 		return color.RGBA{R: 199, G: 251, B: 161, A: 255}
 	}
 	return color.RGBA{R: 86, G: 112, B: 194, A: 255}
@@ -546,23 +490,12 @@ func (s *State) MapTransition(to gridmap.Transition) {
 
 	// change map
 	targetMap := to.TargetMap
-	if defs.IsTownLevel(targetMap) {
-		if s.HasTownMap(targetMap) {
-			s.SetCurrentMap(s.GetTownMap(targetMap))
-		} else {
-			// load map
-			townMap, atlas := s.NewGridMapFromLDTK(targetMap)
-			s.SetCurrentMap(townMap)
-			s.worldTexture = atlas
-		}
-	} else if s.HasDungeonMap(targetMap) {
-		s.SetCurrentMap(s.GetDungeonMap(targetMap))
-	} else {
-		// generate the map and set it
-		generatedMap := s.mapGen.GenerateMap(targetMap, LevelFromName(targetMap))
-		s.SetDungeonMap(targetMap, generatedMap)
-		s.SetCurrentMap(generatedMap)
+	if !s.HasMap(targetMap) {
+		s.SetMap(targetMap, s.mapGen.GenerateMap(targetMap))
 	}
+	s.SetCurrentMap(s.Map(targetMap))
+	s.Visit(targetMap)
+	s.wireExits(s.GetMap()) // an exit may have opened since (open_when: deepest, quests)
 	newlyLoadedMap := s.GetMap()
 	newlyLoadedMap.SetCardinalMovementOnly(s.config.CardinalMovementOnly)
 
@@ -762,7 +695,7 @@ func (s *State) d1GlowAt(p geometry.Point) d1Glow {
 	if !ok {
 		glow = map[geometry.Point]d1Glow{}
 		church := geometry.Point{X: -1, Y: -1}
-		if defs.IsTownLevel(m.GetName()) {
+		if s.Level(m.GetName()).Town {
 			church = d1ChurchLightPos
 		}
 		for y := 0; y < m.MapSize().Y; y++ {

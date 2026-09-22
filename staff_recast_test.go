@@ -2,7 +2,6 @@ package main
 
 import (
 	"rpg/d1"
-	"rpg/defs"
 	"rpg/gridmap"
 	"testing"
 )
@@ -13,7 +12,7 @@ func TestRecastStaffSpell(t *testing.T) {
 	theGame.GetAudio().SetDisablePlayback(true)
 	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 	state := theGame.GetWorldState()
-	state.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(1), TargetLocation: "ladder_up"}) // no spells in town
+	state.MapTransition(gridmap.Transition{TargetMap: levelAt(state, 1), TargetLocation: "ladder_up"}) // no spells in town
 	player := state.GetPlayer()
 	staff := theGame.GetFactory().NewD1Item(&d1.Item{Name: "Staff of Infravision", Type: d1.ITypeStaff, Spell: d1.SplInfra, Charges: 5, MaxCharges: 5})
 	player.GetInventory().Add(staff)

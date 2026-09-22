@@ -16,7 +16,7 @@ func TestChurchGlowsRedInTown(t *testing.T) {
 	state := theGame.GetWorldState()
 	town := state.GetMap()
 
-	entrance := town.GetNamedLocation(common.D1TownGates[1])
+	entrance := town.GetNamedLocation("to_cathedral")
 	far := geometry.Point{X: entrance.X - 25, Y: entrance.Y + 10}
 	if !town.Contains(entrance) || !town.Contains(far) {
 		t.Fatalf("church at %v / reference cell at %v are off the town map", entrance, far)
@@ -69,7 +69,7 @@ func TestTownPortalGlowsBlue(t *testing.T) {
 	before := state.ApplyLighting(next, white, 0)
 	farBefore := state.ApplyLighting(far, white, 0)
 
-	state.SetD1Portal(&common.D1Portal{Map: "level_1", X: 10, Y: 10})
+	state.SetD1Portal(&common.D1Portal{Map: "cathedral_1", Town: town.GetName(), X: 10, Y: 10})
 	common.PlaceD1Portal(state, town)
 	if lit := state.ApplyLighting(next, white, 0); lit.B <= before.B || lit.B <= lit.R {
 		t.Fatalf("next to the portal: %v before, %v with it open: no blue light", before, lit)

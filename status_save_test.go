@@ -3,7 +3,6 @@ package main
 import (
 	"path/filepath"
 	"rpg/common"
-	"rpg/defs"
 	"rpg/game"
 	"rpg/gridmap"
 	"testing"
@@ -18,7 +17,7 @@ func TestStatusEffectsSurviveSaveLoad(t *testing.T) {
 	theGame.SetAndInitUserInterface(ui)
 	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "Aidan")
 	state := theGame.GetWorldState()
-	state.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(1), TargetLocation: "ladder_up"})
+	state.MapTransition(gridmap.Transition{TargetMap: levelAt(state, 1), TargetLocation: "ladder_up"})
 
 	var stoned *common.Actor
 	for _, a := range state.GetMap().Actors() {

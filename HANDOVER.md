@@ -45,7 +45,7 @@ Three gates, all non-negotiable:
    output at all (`md5 -q` two runs, and against the run before your change). A
    deliberate gameplay change (the user's list below) changes it: diff the output
    and check every changed line is the intended effect, then say so in the commit.
-   Current baseline, after the AI pass: `4b168425928ed32b6ec661feb0585002`.
+   Current baseline, after the levels refactor: `160cc8b42230c81723947c7622e44d46`.
 3. Both build tags green, no new test failures.
 
 ## Done

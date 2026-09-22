@@ -1,8 +1,10 @@
 package common
 
 import (
+	"fmt"
 	"path"
 	"rpg/defs"
+	"rpg/dungeon"
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/ldtk"
@@ -11,11 +13,17 @@ import (
 	"strings"
 )
 
-func (s *State) NewGridMapFromLDTK(mapName string) (*gridmap.GridMap[*Actor, *Item, Object], renderer.TextureAtlas) {
+// loadLDTKLevel is the "ldtk" generator: level lvl as drawn under template in the mod's LDtk project. Its named
+// locations come from the drawing; where they lead is levels.rec's business (exits), not the drawing's.
+func (s *State) loadLDTKLevel(lvl dungeon.Level, template string) *gridmap.GridMap[*Actor, *Item, Object] {
 	ldtkMapProject := s.ldtkProject
 	worldTileset := ldtkMapProject.TilesetByIdentifier("World")
+	mapName := lvl.Map
 
-	currentMap := ldtkMapProject.LevelByIdentifier(mapName)
+	currentMap := ldtkMapProject.LevelByIdentifier(template)
+	if currentMap == nil {
+		panic(fmt.Sprintf("levels.rec: %s: maps.ldtk has no level %q", lvl.Map, template))
+	}
 	locations := loadLocations(currentMap)
 
 	mapDisplayName := currentMap.PropertyByIdentifier("DisplayName").AsString()
@@ -32,17 +40,6 @@ func (s *State) NewGridMapFromLDTK(mapName string) (*gridmap.GridMap[*Actor, *It
 	for _, tile := range environmentLayer.Tiles {
 		pos, tileType := MapTileFromLDTK(worldTileset, environmentLayer, tile)
 		loadedMap.SetTile(pos, tileType)
-	}
-
-	// a Location with a TargetMap is a transition, e.g. the town entrances
-	metaLayer := currentMap.LayerByIdentifier("Meta")
-	for _, entity := range metaLayer.Entities {
-		if targetMap := entity.PropertyByIdentifier("TargetMap"); entity.Identifier == "Location" && !targetMap.IsNull() {
-			posX, posY := metaLayer.ToGridPosition(entity.Position[0], entity.Position[1])
-			pos := geometry.Point{X: posX, Y: posY}
-			loadedMap.SetTile(pos, loadedMap.GetCell(pos).TileType.WithSpecial(gridmap.SpecialTileStairsDown))
-			loadedMap.AddTransitionAt(pos, gridmap.Transition{TargetMap: targetMap.AsString(), TargetLocation: entity.PropertyByIdentifier("TargetLocation").AsString()})
-		}
 	}
 
 	for _, entity := range npcLayer.Entities {
@@ -70,8 +67,8 @@ func (s *State) NewGridMapFromLDTK(mapName string) (*gridmap.GridMap[*Actor, *It
 
 	}
 
-	textureAtlas := renderer.NewTextureAtlas(path.Join("assets", worldTileset.Path), worldTileset.GridSize, worldTileset.GridSize)
-	return loadedMap, textureAtlas
+	s.worldTexture = renderer.NewTextureAtlas(path.Join("assets", worldTileset.Path), worldTileset.GridSize, worldTileset.GridSize)
+	return loadedMap
 }
 
 func (s *State) addSignFromEntity(loadedMap *gridmap.GridMap[*Actor, *Item, Object], inscription []string, pos geometry.Point) {

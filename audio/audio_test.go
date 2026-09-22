@@ -53,7 +53,7 @@ func TestPannedScalesEachChannel(t *testing.T) {
 	}
 }
 
-// music.rec holds the five area themes d1AreaMusic asks for, town wired up to the mod's music/town.ogg. A theme with
+// music.rec holds the area themes levels.rec's music fields name, town wired up to the mod's music/town.ogg. A theme with
 // no file assigned stays unregistered, so the current track keeps playing instead.
 func TestAreaMusicRegistered(t *testing.T) {
 	ap := NewAudioPlayer(modFiles(), SampleRate44100)

@@ -36,6 +36,7 @@ func playthrough() {
 	game.SaveDir = filepath.Join(os.TempDir(), fmt.Sprintf("heavenAndHell_playthrough_saves_%d", os.Getpid()))
 	os.RemoveAll(game.SaveDir)
 	defer os.RemoveAll(game.SaveDir)
+	modOverride = "d1"
 	theGame, _ := createGameAndUIContext() // one instance: ebiten allows a single audio context per process
 	theGame.GetAudio().SetDisablePlayback(true)
 	// A smoke test that plays a different dungeon every launch reports a different result every launch: this
@@ -71,7 +72,7 @@ func playthrough() {
 		common.SyncHero(player)
 		player.GetStats().GetResource(stats.Health).SetToMax()
 		for dlvl := 1; dlvl <= 16; dlvl++ {
-			name, entry := defs.LevelNameFromDepth(dlvl), "ladder_up"
+			name, entry := levelAt(state, dlvl), "ladder_up"
 			state.MapTransition(gridmap.Transition{TargetMap: name, TargetLocation: entry})
 			m := state.GetMap()
 			if m.GetName() != name {
@@ -239,7 +240,7 @@ func playthrough() {
 		}
 	}
 	// milestone 3: the D1 town after a trip down to level 16
-	theGame.GetWorldState().MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"})
+	theGame.GetWorldState().MapTransition(gridmap.Transition{TargetMap: "town", TargetLocation: "spawn"})
 	checkTown(theGame.GetWorldState(), fail)
 	if wallTraps == 0 || chestTraps == 0 { // Catacombs and Caves chests are trapped 1 in 10, trap walls 10-25%
 		fail("traps: %d wall traps and %d chest traps fired in 3 runs", wallTraps, chestTraps)
@@ -481,8 +482,8 @@ func checkTown(state *common.State, fail func(string, ...any)) {
 	if _, ok := m.GetTransitionAt(m.GetNamedLocation("to_cathedral")); !ok {
 		fail("town: cathedral gate is closed")
 	}
-	for dlvl, gate := range common.D1TownGates { // all open after level 16, each leading to its level's warp
-		if t, ok := m.GetTransitionAt(m.GetNamedLocation(gate)); !ok || t.TargetMap != defs.LevelNameFromDepth(dlvl) {
+	for dlvl, gate := range map[int]string{1: "to_cathedral", 5: "to_catacombs", 9: "to_caves", 13: "to_hell"} { // all open after level 16
+		if t, ok := m.GetTransitionAt(m.GetNamedLocation(gate)); !ok || t.TargetMap != levelAt(state, dlvl) {
 			fail("town: %s gate leads to %+v", gate, t)
 		}
 	}
@@ -603,7 +604,7 @@ func castAllSpells(f *common.Factory, broker *common.Broker, state *common.State
 	}
 	shield := player.HasStatusEffect(common.StatusManaShield)
 	portal := *state.D1Portal()
-	state.MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"})
+	state.MapTransition(gridmap.Transition{TargetMap: "town", TargetLocation: "spawn"})
 	if !state.GetMap().IsObjectAt(state.GetMap().GetNamedLocation("portal")) {
 		fail("spells: no town portal in town")
 	}
@@ -825,7 +826,7 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 		return
 	}
 
-	travel(defs.LevelNameFromDepth(3), "ladder_up")
+	travel(levelAt(state, 3), "ladder_up")
 	// D1 monsters heal over time, unless a no-heal weapon hit them
 	var healer, noHeal *common.Actor
 	for _, a := range state.GetMap().Actors() {
@@ -901,12 +902,12 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 		through("leoric")
 		slay("Skeleton King", d1.QSkelKing)
 		through("ladder_up")
-		if state.GetMap().GetName() != defs.LevelNameFromDepth(3) {
+		if state.GetMap().GetName() != levelAt(state, 3) {
 			fail("quests: Leoric's tomb leads to %s", state.GetMap().GetName())
 		}
 	}
 
-	m := travel(defs.LevelNameFromDepth(15), "ladder_up")
+	m := travel(levelAt(state, 15), "ladder_up")
 	if _, open := m.GetTransitionAt(m.GetNamedLocation("ladder_down")); open {
 		fail("quests: level 15's stairs down are open before Lazarus died")
 	}
@@ -926,13 +927,13 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 	}
 	m.RemoveItem(staff)
 	state.GetPlayer().GetInventory().Add(staff)
-	travel(string(defs.LevelNameTown), "spawn")
+	travel("town", "spawn")
 	talkTo(theGame, common.VendorTypeCain)
 	if state.QuestVar(d1.QBetrayer, 1) != 2 || d1Carried(state.GetPlayer(), d1.IdiLazStaff) {
 		fail("quests: Cain didn't take the staff")
 	}
-	travel(defs.LevelNameFromDepth(15), "ladder_up")
-	through("red_portal")
+	travel(levelAt(state, 15), "ladder_up")
+	through("lazarus")
 	m = state.GetMap()
 	if _, open := m.GetTransitionAt(m.GetNamedLocation("exit")); open {
 		fail("quests: the lair's portal is open before Lazarus died")
@@ -1044,11 +1045,11 @@ func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
 	for q := range state.D1Quests() {
 		state.D1Quests()[q].Active, state.D1Quests()[q].Var2 = d1.QuestInit, 0
 	}
+	state.GetFlags().SetTrue("d1:intro") // travel skips level 1, so Ogden would greet a newcomer instead (TEXT_INTRO)
 	player := func() *common.Actor { return state.GetPlayer() }
 	cause := func() common.Cause { return common.NewActorCause("playthrough", player()) }
 	travel := func(dlvl int) *gridmap.GridMap[*common.Actor, *common.Item, common.Object] {
-		state.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl), TargetLocation: "ladder_up"})
-		state.SetLastDungeonLevel(max(state.GetLastDungeonLevel(), dlvl))
+		state.MapTransition(gridmap.Transition{TargetMap: levelAt(state, dlvl), TargetLocation: "ladder_up"})
 		common.UpdateD1Quests(state, state.GetMap())
 		return state.GetMap()
 	}
@@ -1193,7 +1194,7 @@ func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
 	travel(6) // The Chamber of Bone
 	opens("schamb", func() { object(d1.ObjBOOK2R).ActorBumpedInto(player(), nil) })
 	log(d1.QSchamb)
-	state.MapTransition(gridmap.Transition{TargetMap: "!gen_bonechamb_6", TargetLocation: "ladder_up"})
+	state.MapTransition(gridmap.Transition{TargetMap: "bone_chamber", TargetLocation: "ladder_up"})
 	guardian := player().Hero().SpellLevels[d1.SplGuardian]
 	object(d1.ObjBOOK2L).ActorBumpedInto(player(), nil)
 	must(player().Hero().SpellLevels[d1.SplGuardian] == guardian+1, "the Ancient Tome taught no Guardian")
@@ -1258,13 +1259,13 @@ func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
 
 	townWater := func(poisoned bool) { // foul until the quest is done
 		c := state.GetWaterColor()
-		must(defs.IsTownLevel(state.GetMap().GetName()) && (c.G > c.B) == poisoned, "town water poisoned=%v wanted on %s (quest %d), color %v", poisoned, state.GetMap().GetName(), state.QuestActive(d1.QPWater), c)
+		must(state.IsPlayerInTown() && (c.G > c.B) == poisoned, "town water poisoned=%v wanted on %s (quest %d), color %v", poisoned, state.GetMap().GetName(), state.QuestActive(d1.QPWater), c)
 	}
 	talkTo(theGame, common.VendorTypeGeneral) // Poisoned Water Supply
 	log(d1.QPWater)
 	townWater(true)
 	travel(2)
-	state.MapTransition(gridmap.Transition{TargetMap: "!gen_pwater_2", TargetLocation: "ladder_up"})
+	state.MapTransition(gridmap.Transition{TargetMap: "dark_passage", TargetLocation: "ladder_up"})
 	water := func(want string) { // the foul water is tinted light green, the clean water blue
 		n := 0
 		for y := 0; y < d1.LevelSize; y++ {
@@ -1316,8 +1317,8 @@ func pullD1Levers(state *common.State) (pulled int) {
 // talkTo walks to town and talks to the townsperson of vendor type v, like bumping into them.
 func talkTo(theGame *game.GameInstance, v common.VendorType) {
 	state := theGame.GetWorldState()
-	if !defs.IsTownLevel(state.GetMap().GetName()) {
-		state.MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"})
+	if !state.IsPlayerInTown() {
+		state.MapTransition(gridmap.Transition{TargetMap: "town", TargetLocation: "spawn"})
 	}
 	for _, a := range state.GetMap().Actors() {
 		if a.GetVendorType() == v {
@@ -1474,3 +1475,14 @@ func (u *identifyPickUI) OpenItemList(items []*common.TextualStack) {
 }
 
 func (u *identifyPickUI) ShowItemInfo(item *common.Item) { u.shown = item }
+
+// levelAt is the first level at depth dlvl that is not a town, in levels.rec's order: the main dungeon level
+// there, for this tool and the tests that walk the dungeon by depth. The game itself names levels by id.
+func levelAt(state *common.State, dlvl int) string {
+	for _, l := range state.Levels() {
+		if l.Depth == dlvl && !l.Town {
+			return l.Map
+		}
+	}
+	return ""
+}

@@ -31,7 +31,7 @@ func (a *TrapMissileAction) GetAnimations() []Animation { return a.animations }
 func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 	player := ctx.GameState.GetPlayer()
 	c := &missileCtx{ctx: ctx, from: a.from, player: player, trap: true, c: &spellCtx{f: ctx.GameState.factory, m: ctx.GameState.GetMap(), dealt: map[*Actor]int{}}}
-	cl := d1DungeonLevel(ctx.GameState)
+	cl := ctx.GameState.CurrentLevel().Depth
 	playD1SfxAt(ctx, d1MissileSfx[a.mis][0], a.from)
 	switch a.mis {
 	case MisArrow: // MI_Arrow: currlevel..2·currlevel

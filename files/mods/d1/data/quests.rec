@@ -9,6 +9,7 @@
 %rec: quest
 
 key: rock
+level: catacombs_5
 name: The Magic Rock
 log_text: TEXT_INFRA5
 gossip: griswold TEXT_INFRA6
@@ -21,6 +22,7 @@ gossip: gillian TEXT_INFRA4
 gossip: wirt TEXT_INFRA10
 
 key: mushroom
+level: caves_9
 name: Black Mushroom
 log_text: TEXT_MUSH8
 gossip: griswold TEXT_MUSH6
@@ -32,14 +34,17 @@ gossip: gillian TEXT_MUSH5
 gossip: wirt TEXT_MUSH13
 
 key: garbud
+level: cathedral_4
 name: Gharbad The Weak
 log_text: TEXT_GARBUD1
 
 key: zhar
+level: catacombs_8
 name: Zhar the Mad
 log_text: TEXT_ZHAR1
 
 key: veil
+level: hell_14
 name: Lachdanan
 log_text: TEXT_VEIL9
 gossip: griswold TEXT_VEIL5
@@ -52,11 +57,13 @@ gossip: gillian TEXT_VEIL4
 gossip: wirt TEXT_VEIL8
 
 key: diablo
+level: hell_15
 name: Diablo
 log_text: TEXT_VILE3
 gossip: cain TEXT_VILE3
 
 key: butcher
+level: cathedral_2
 name: The Butcher
 log_text: TEXT_BUTCH9
 gossip: griswold TEXT_BUTCH5
@@ -69,6 +76,7 @@ gossip: gillian TEXT_BUTCH4
 gossip: wirt TEXT_BUTCH8
 
 key: banner
+level: cathedral_4
 name: Ogden's Sign
 log_text: TEXT_BANNER2
 gossip: griswold TEXT_BANNER6
@@ -80,6 +88,7 @@ gossip: gillian TEXT_BANNER5
 gossip: wirt TEXT_BANNER9
 
 key: blind
+level: catacombs_7
 name: Halls of the Blind
 log_text: TEXT_BLINDING
 gossip: griswold TEXT_BLIND5
@@ -92,6 +101,7 @@ gossip: gillian TEXT_BLIND4
 gossip: wirt TEXT_BLIND8
 
 key: blood
+level: catacombs_5
 name: Valor
 log_text: TEXT_BLOODY
 gossip: griswold TEXT_BLOOD5
@@ -104,6 +114,7 @@ gossip: gillian TEXT_BLOOD4
 gossip: wirt TEXT_BLOOD8
 
 key: anvil
+level: caves_10
 name: Anvil of Fury
 log_text: TEXT_ANVIL5
 gossip: griswold TEXT_ANVIL6
@@ -116,6 +127,7 @@ gossip: gillian TEXT_ANVIL4
 gossip: wirt TEXT_ANVIL10
 
 key: warlord
+level: hell_13
 name: Warlord of Blood
 log_text: TEXT_BLOODWAR
 gossip: griswold TEXT_WARLRD5
@@ -128,12 +140,9 @@ gossip: gillian TEXT_WARLRD4
 gossip: wirt TEXT_WARLRD8
 
 key: leoric
+level: cathedral_3
 name: The Curse of King Leoric
 log_text: TEXT_KING2
-set_map: !gen_leoric_3
-set_entrance: leoric
-set_name: King Leoric's Tomb
-set_level: 1
 gossip: griswold TEXT_KING7
 gossip: pepin TEXT_KING5
 gossip: ogden TEXT_KING3
@@ -144,12 +153,9 @@ gossip: gillian TEXT_KING6
 gossip: wirt TEXT_KING10
 
 key: pwater
+level: cathedral_2
 name: Poisoned Water Supply
 log_text: TEXT_POISON3
-set_map: !gen_pwater_2
-set_entrance: pwater
-set_name: A Dark Passage
-set_level: 4
 gossip: griswold TEXT_POISON7
 gossip: pepin TEXT_POISON4
 gossip: ogden TEXT_POISON2
@@ -160,12 +166,9 @@ gossip: gillian TEXT_POISON6
 gossip: wirt TEXT_POISON10
 
 key: schamb
+level: catacombs_6
 name: The Chamber of Bone
 log_text: TEXT_BONER
-set_map: !gen_bonechamb_6
-set_entrance: schamb
-set_name: The Chamber of Bone
-set_level: 2
 gossip: griswold TEXT_BONE5
 gossip: pepin TEXT_BONE3
 gossip: ogden TEXT_BONE2
@@ -176,12 +179,9 @@ gossip: gillian TEXT_BONE4
 gossip: wirt TEXT_BONE8
 
 key: lazarus
+level: hell_15
 name: Archbishop Lazarus
 log_text: TEXT_VILE1
-set_map: !gen_lazarus_15
-set_entrance: red_portal
-set_name: Lazarus' Lair
-set_level: 5
 gossip: griswold TEXT_VILE9
 gossip: pepin TEXT_VILE7
 gossip: ogden TEXT_VILE4
@@ -309,31 +309,31 @@ do: hero_sound(87)
 # PlayDungMsgs: the hero's line on first reaching the cathedral, the catacombs, the caves and hell, and
 # Diablo's greeting on 16. Each once, which is what the flag remembers.
 event: on_enter_level
-subject: 1
+subject: cathedral_1
 when: not flag("d1:dungmsg:1")
 do: set_flag(d1:dungmsg:1)
 do: hero_sound(97)
 
 event: on_enter_level
-subject: 5
+subject: catacombs_5
 when: not flag("d1:dungmsg:5")
 do: set_flag(d1:dungmsg:5)
 do: hero_sound(96)
 
 event: on_enter_level
-subject: 9
+subject: caves_9
 when: not flag("d1:dungmsg:9")
 do: set_flag(d1:dungmsg:9)
 do: hero_sound(98)
 
 event: on_enter_level
-subject: 13
+subject: hell_13
 when: not flag("d1:dungmsg:13")
 do: set_flag(d1:dungmsg:13)
 do: hero_sound(99)
 
 event: on_enter_level
-subject: 16
+subject: hell_16
 when: not flag("d1:dungmsg:16")
 do: set_flag(d1:dungmsg:16)
 do: sound(PS_DIABLVLINT)

@@ -1,8 +1,10 @@
 package common
 
 import (
+	"fmt"
 	"rpg/d1"
 	"rpg/defs"
+	"rpg/dungeon"
 	"rpg/geometry"
 	"rpg/gridmap"
 )
@@ -30,10 +32,7 @@ func (g *MapGenerator) d1Quest(q int) d1.Quest {
 // buildsD1Levels is whether any dungeon level comes from D1's generators. No level list at all counts, as it
 // does in GenerateMap, where a level without an entry is D1's.
 func (g *MapGenerator) buildsD1Levels() bool {
-	if len(g.levels) <= 1 {
-		return true
-	}
-	for _, l := range g.levels[1:] {
+	for _, l := range g.levels {
 		if _, ok := l.Config.(d1.LevelParams); ok {
 			return true
 		}
@@ -52,12 +51,18 @@ func toCell(px, py int) geometry.Point {
 // d1DoorObjectKinds is repeated from map_gen.go's d1DoorKinds so this file doesn't need to import it twice; see
 // there for why doors are terrain + an H&H Door object, not a D1Object.
 
-// generateD1Map builds dungeon level dlvl (1-24), or a quest set level entered from it, with D1's own generators.
-func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMap[*Actor, *Item, Object] {
-	setLevel := g.factory.State.setLevelOf(targetMap)
+// generateD1Map builds a D1 dungeon level, or with set a quest set level (LoadSetMap), with D1's own generators.
+// It places the named locations D1's triggers mark; levels.rec's exits say where they lead.
+func (g *MapGenerator) generateD1Map(level dungeon.Level, set *d1.SetLevelParams) *gridmap.GridMap[*Actor, *Item, Object] {
+	targetMap, dlvl := level.Map, level.Depth
 	sl := d1.SLNone
-	if setLevel != nil {
-		sl = setLevel.SL
+	if set != nil {
+		if q := g.factory.State.QuestByKey(set.Quest); q >= 0 {
+			sl = g.d1Quests[q].SetLevel
+		}
+		if sl == d1.SLNone {
+			panic(fmt.Sprintf("levels.rec: %s: quest %q has no D1 set level", targetMap, set.Quest))
+		}
 	}
 	lvl, err := g.factory.D1().CreateLevel(g.d1Quests, g.d1Seeds, dlvl, sl, d1.EntryMain)
 	if err != nil {
@@ -72,12 +77,10 @@ func (g *MapGenerator) generateD1Map(targetMap string, dlvl int) *gridmap.GridMa
 	m.SetName(targetMap)
 	g.addBasicTiles(m, lvl)
 
-	if setLevel == nil {
-		g.wireD1Triggers(m, lvl, dlvl)
-		m.SetDisplayName(defs.D1LevelName(dlvl))
+	if set == nil {
+		g.placeD1Triggers(m, lvl, dlvl)
 	} else {
-		g.wireD1SetLevelReturn(m, lvl, setLevel, dlvl)
-		m.SetDisplayName(setLevel.Name)
+		g.placeD1SetLevelReturn(m, lvl, sl)
 	}
 
 	g.placeD1Monsters(m, lvl)
@@ -104,69 +107,60 @@ func (g *MapGenerator) setPiece(m *gridmap.GridMap[*Actor, *Item, Object]) [4]in
 	return [4]int{}
 }
 
-// D1TownGates are the town locations of the entrances to levels 1, 5, 9 and 13.
-var D1TownGates = map[int]string{1: "to_cathedral", 5: "to_catacombs", 9: "to_caves", 13: "to_hell"}
+var d1StairsUp = gridmap.Tile{DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp}
 
-// wireD1Triggers places the stairs/warp tiles D1's own generator positioned (Level.Triggers), plus the quest
-// entrances on ordinary dungeon levels (CheckQuests: King Leoric's Tomb, the Chamber of Bone, the Poisoned Water
-// Supply) and level 15's Lazarus portal spot (the portal itself opens later, from UpdateD1Quests).
-func (g *MapGenerator) wireD1Triggers(m *gridmap.GridMap[*Actor, *Item, Object], lvl *d1.Level, dlvl int) {
+// placeD1Triggers draws the stairs and warp D1's own generator positioned (Level.Triggers) and names them
+// ladder_up, ladder_down and warp, plus each available quest's entrance on its level (CheckQuests), named by the
+// quest's key. Lazarus' spot is only named: its red portal opens when levels.rec's exit condition holds.
+func (g *MapGenerator) placeD1Triggers(m *gridmap.GridMap[*Actor, *Item, Object], lvl *d1.Level, dlvl int) {
 	for _, t := range lvl.Triggers {
 		p := toCell(t.X, t.Y)
 		switch t.Msg {
 		case d1.TrigPrevLevel:
 			m.AddNamedLocation("ladder_up", p)
-			up := gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl - 1), TargetLocation: "ladder_down"}
-			if dlvl == 1 {
-				up = gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: D1TownGates[1]}
-			}
-			m.SetTile(p, gridmap.Tile{DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp})
-			m.AddTransitionAt(p, up)
+			m.SetTile(p, d1StairsUp)
 		case d1.TrigNextLevel:
 			m.AddNamedLocation("ladder_down", p)
 			m.SetTile(p, d1StairsDown)
-			m.AddTransitionAt(p, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl + 1), TargetLocation: "ladder_up"})
 		case d1.TrigTownWarpUp:
 			m.AddNamedLocation("warp", p)
 			warpTile := d1StairsDown
 			warpTile.DefinedDescription = "a way back to town"
 			m.SetTile(p, warpTile)
-			m.AddTransitionAt(p, gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: D1TownGates[dlvl]})
 		}
 	}
-
-	for _, sl := range g.factory.State.SetLevels() {
-		q := g.d1Quests[sl.Quest]
-		if q.Level != dlvl || q.Active == d1.QuestNotAvail {
+	for q, def := range g.factory.State.QuestDefs() {
+		if q >= len(g.d1Quests) {
+			break
+		}
+		qu := g.d1Quests[q]
+		if qu.SetLevel == d1.SLNone || qu.Level != dlvl || qu.Active == d1.QuestNotAvail {
 			continue
 		}
-		p := toCell(q.X, q.Y)
-		m.AddNamedLocation(sl.Entrance, p)
-		if sl.SL == d1.SLVileBetrayer {
-			m.AddNamedLocation("ladder_down", toCell(q.X+3, q.Y+3)) // L4PENTA2's stairs piece (370), InitL4Triggers
+		p := toCell(qu.X, qu.Y)
+		m.AddNamedLocation(def.Key, p)
+		if qu.SetLevel == d1.SLVileBetrayer {
+			m.AddNamedLocation("ladder_down", toCell(qu.X+3, qu.Y+3)) // L4PENTA2's stairs piece (370), InitL4Triggers
 			continue
 		}
 		tile := d1StairsDown
-		tile.DefinedDescription = "the way to " + sl.Name
+		tile.DefinedDescription = "a way further down"
 		m.SetTile(p, tile)
-		m.AddTransitionAt(p, gridmap.Transition{TargetMap: sl.Map, TargetLocation: "ladder_up"})
 	}
 }
 
-// wireD1SetLevelReturn places where the player arrives in a quest set level, and its way back out (SetReturnLvlPos).
-// Lazarus' Lair has no return trigger in D1 either - the way home only opens once Lazarus is dead (UpdateD1Quests),
-// so only the named location is set there.
-func (g *MapGenerator) wireD1SetLevelReturn(m *gridmap.GridMap[*Actor, *Item, Object], lvl *d1.Level, sl *D1SetLevel, dlvl int) {
+// placeD1SetLevelReturn names where the player arrives in a quest set level, its way back out (SetReturnLvlPos),
+// and for Lazarus' Lair the portal spot (exit) whose way home opens once he is dead.
+func (g *MapGenerator) placeD1SetLevelReturn(m *gridmap.GridMap[*Actor, *Item, Object], lvl *d1.Level, sl int) {
 	for _, t := range lvl.Triggers {
 		if t.Msg != d1.TrigReturnLevel {
 			continue
 		}
 		p := toCell(t.X, t.Y)
 		m.AddNamedLocation("ladder_up", p)
-		m.SetTile(p, gridmap.Tile{DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp})
-		m.AddTransitionAt(p, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl), TargetLocation: sl.Entrance})
+		m.SetTile(p, d1StairsUp)
 	}
-	if sl.SL == d1.SLVileBetrayer {
+	if sl == d1.SLVileBetrayer {
 		m.AddNamedLocation("ladder_up", toCell(lvl.View[0], lvl.View[1]))
 		m.AddNamedLocation("exit", pieceCell(D1VilePortal))
 	}

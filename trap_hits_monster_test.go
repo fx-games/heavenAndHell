@@ -2,7 +2,6 @@ package main
 
 import (
 	"rpg/common"
-	"rpg/defs"
 	"rpg/gridmap"
 	"rpg/stats"
 	"testing"
@@ -14,7 +13,7 @@ func TestTrapArrowHitsMonster(t *testing.T) {
 	g.GetAudio().SetDisablePlayback(true)
 	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
 	s := g.GetWorldState()
-	s.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(1), TargetLocation: "ladder_up"})
+	s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, 1), TargetLocation: "ladder_up"})
 	m := s.GetMap()
 	for _, a := range m.Actors() {
 		if a == s.GetPlayer() {

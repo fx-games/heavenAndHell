@@ -1404,7 +1404,7 @@
 							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "to_cathedral", "__tile": null, "defUid": 47, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["to_cathedral"]
-							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_1", "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": "ladder_up", "__tile": null, "defUid": 147, "realEditorValues": [] }]
+							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": null, "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": null, "__tile": null, "defUid": 147, "realEditorValues": [] }]
 						},
 						{
 							"__identifier": "Location",
@@ -1423,7 +1423,7 @@
 							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "to_catacombs", "__tile": null, "defUid": 47, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["to_catacombs"]
-							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_4", "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": "to_town", "__tile": null, "defUid": 147, "realEditorValues": [] }]
+							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": null, "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": null, "__tile": null, "defUid": 147, "realEditorValues": [] }]
 						},
 						{
 							"__identifier": "Location",
@@ -1442,7 +1442,7 @@
 							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "to_caves", "__tile": null, "defUid": 47, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["to_caves"]
-							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_6", "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": "to_town", "__tile": null, "defUid": 147, "realEditorValues": [] }]
+							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": null, "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": null, "__tile": null, "defUid": 147, "realEditorValues": [] }]
 						},
 						{
 							"__identifier": "Location",
@@ -12759,7 +12759,7 @@
 							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "to_caves", "__tile": null, "defUid": 47, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["to_caves"]
-							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_8", "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": "to_hell_town", "__tile": null, "defUid": 147, "realEditorValues": [] }]
+							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": null, "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": null, "__tile": null, "defUid": 147, "realEditorValues": [] }]
 						},
 						{
 							"__identifier": "Location",
@@ -12778,7 +12778,7 @@
 							"fieldInstances": [{ "__identifier": "Name", "__type": "String", "__value": "to_dungeon", "__tile": null, "defUid": 47, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["to_dungeon"]
-							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": "!gen_dungeon_level_9", "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": "to_hell_town", "__tile": null, "defUid": 147, "realEditorValues": [] }]
+							}] }, { "__identifier": "TargetMap", "__type": "String", "__value": null, "__tile": null, "defUid": 146, "realEditorValues": [] }, { "__identifier": "TargetLocation", "__type": "String", "__value": null, "__tile": null, "defUid": 147, "realEditorValues": [] }]
 						},
 						{
 							"__identifier": "Location",

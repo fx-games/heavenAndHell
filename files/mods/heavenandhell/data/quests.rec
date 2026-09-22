@@ -46,7 +46,7 @@ event: on_kill
 subject: lucifer
 do: set_flag(killed:lucifer)
 do: say(TEXT_HH_LUCIFER_DEATH, Lucifer)
-do: spawn_item(lucifers_gift, Town, true_sight_potion)
+do: spawn_item(lucifers_gift, town, true_sight_potion)
 
 event: on_level_cleared
 subject: poisoned_water_supply
@@ -67,10 +67,10 @@ event: on_item_use
 subject: lucifers_gift
 do: activate_quest(evidence)
 do: log_quest(evidence)
-do: spawn_item(evidence_three, Town, shekels_house)
+do: spawn_item(evidence_three, town, shekels_house)
 
 event: on_enter_level
-subject: 6
+subject: caves_6
 when: not flag("placed:evidence_four")
 do: set_flag(placed:evidence_four)
 do: spawn_item(evidence_four, here)

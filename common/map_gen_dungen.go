@@ -25,7 +25,8 @@ import (
 // parsed", and each builds its own levels its own way past that point.
 
 // generateDungenMap builds one dungen level and lays it out as a gridmap.
-func (g *MapGenerator) generateDungenMap(targetMap string, dlvl int, lvl dungeon.Level) *gridmap.GridMap[*Actor, *Item, Object] {
+func (g *MapGenerator) generateDungenMap(lvl dungeon.Level) *gridmap.GridMap[*Actor, *Item, Object] {
+	targetMap, dlvl := lvl.Map, lvl.Depth
 	layout, err := dungen.Build(lvl.Config, g.randomSource, g.fsys())
 	if err != nil {
 		panic(err)
@@ -34,10 +35,9 @@ func (g *MapGenerator) generateDungenMap(targetMap string, dlvl int, lvl dungeon
 	m := gridmap.NewEmptyMap[*Actor, *Item, Object](width, height)
 	m.SetName(targetMap)
 	m.SetMetaString(layout.GetMetaInfo())
-	m.SetDisplayName(g.dungenLevelName(lvl, dlvl))
 
 	g.addDungenTiles(m, layout, g.dungenTilemap(lvl, dlvl, layout))
-	stairs := g.addDungenStairs(m, layout, lvl, dlvl)
+	stairs := g.addDungenStairs(m, layout, lvl)
 	g.decorateDungenRooms(m, layout, lvl, dlvl)
 	g.populateDungenLevel(m, layout, dlvl, stairs)
 
@@ -47,26 +47,13 @@ func (g *MapGenerator) generateDungenMap(targetMap string, dlvl int, lvl dungeon
 	return m
 }
 
-// dungenLevelName is what the level calls itself on arrival: what the mod declared, or a bare depth if it
-// declared nothing, because the engine has no business inventing a theme name for someone else's game.
-func (g *MapGenerator) dungenLevelName(lvl dungeon.Level, dlvl int) string {
-	if lvl.Name != "" {
-		return lvl.Name
-	}
-	return fmt.Sprintf("Level %d", dlvl)
-}
-
-// dungenTilemap resolves the tile set the mod named for this level. A level that names none falls back to the
-// depth-keyed pick, so a levels.rec with nothing but generators still draws something sensible.
+// dungenTilemap resolves the tile set the level names.
 func (g *MapGenerator) dungenTilemap(lvl dungeon.Level, dlvl int, layout *dungen.DungeonMap) defs.BasicTileMapping {
 	isWall := func(p geometry.Point) bool { return !layout.Contains(p) || layout.GetTileAt(p) == dungen.Wall }
-	if lvl.Tiles != "" {
-		if tm, ok := defs.Tilemap(lvl.Tiles, g.randomSource, isWall); ok {
-			return tm
-		}
-		panic(fmt.Sprintf("levels.rec: dlvl %d: unknown tile set %q (have %v)", dlvl, lvl.Tiles, defs.TilemapNames()))
+	if tm, ok := defs.Tilemap(lvl.Tiles, g.randomSource, isWall); ok {
+		return tm
 	}
-	return defs.D1Tilemap(g.randomSource, isWall, dlvl)
+	panic(fmt.Sprintf("levels.rec: %s: unknown tile set %q (have %v)", lvl.Map, lvl.Tiles, defs.TilemapNames()))
 }
 
 // addDungenTiles paints the layout: a wall cell is a wall, a door cell is floor with a door object standing on
@@ -102,12 +89,11 @@ var (
 		IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsDown}
 )
 
-// addDungenStairs puts the way up and the way down on the level, plus whatever extra transitions the mod
-// declared for it, and returns where they all ended up (monsters keep their distance from them).
-//
-// The deepest level a mod declared gets no way down: the engine does not know how deep a game goes, so it asks
-// the level table rather than assuming a next level exists.
-func (g *MapGenerator) addDungenStairs(m *gridmap.GridMap[*Actor, *Item, Object], layout *dungen.DungeonMap, lvl dungeon.Level, dlvl int) []geometry.Point {
+// addDungenStairs places a stairwell for each exit the level declares and names it by the exit's location:
+// ladder_up by the entrance, ladder_down as far from it as the layout allows, any other exit on the spots
+// furthest from both. A stairwell leading to a shallower level looks like a way up. It returns where they went
+// (monsters keep their distance from them); where each leads is wireExits' business.
+func (g *MapGenerator) addDungenStairs(m *gridmap.GridMap[*Actor, *Item, Object], layout *dungen.DungeonMap, lvl dungeon.Level) []geometry.Point {
 	spots := layout.GetPotentialStairPositions()
 	if len(spots) < 2 {
 		// A level too cramped for two stair spots would be a level you cannot leave. Rather than crash on a bad
@@ -115,59 +101,40 @@ func (g *MapGenerator) addDungenStairs(m *gridmap.GridMap[*Actor, *Item, Object]
 		spots = append(spots, g.dungenFallbackStairs(m, layout)...)
 	}
 	var placed []geometry.Point
-
-	entrance := spots[g.randomSource.Intn(len(spots))]
-	spots = removePoint(spots, entrance)
-	slices.SortStableFunc(spots, func(a, b geometry.Point) int {
-		return cmp.Compare(a.ManhattanDistanceTo(entrance), b.ManhattanDistanceTo(entrance))
-	})
-	exit := spots[len(spots)-1]
-	if g.randomSource.Intn(2) == 1 {
-		exit = spots[g.randomSource.Intn(len(spots))]
-	}
-	spots = removePoint(spots, exit)
-
-	m.SetTile(entrance, dungenLadderUp)
-	m.AddNamedLocation("ladder_up", entrance)
-	up := gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl - 1), TargetLocation: "ladder_down"}
-	if dlvl <= 1 {
-		up = gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "to_dungeon"}
-	}
-	if t := lvl.UpTarget; t != nil { // the mod named where its own ladder up leads; the engine may not guess it
-		up = gridmap.Transition{TargetMap: t.TargetMap, TargetLocation: t.TargetLocation}
-	}
-	m.AddTransitionAt(entrance, up)
-	placed = append(placed, entrance)
-
-	if lvl.Map == "" && dlvl+1 < len(g.levels) && g.levels[dlvl+1].Generator != "" { // a side level is a dead end
-		m.SetTile(exit, dungenLadderDown)
-		m.AddNamedLocation("ladder_down", exit)
-		m.AddTransitionAt(exit, gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl + 1), TargetLocation: "ladder_up"})
-		placed = append(placed, exit)
-	} else {
-		spots = append(spots, exit) // the bottom of the dungeon: that spot is free for a declared transition
-	}
-
-	// The extra ways off this level go on the spots furthest from the two ladders, so a shortcut back to town
-	// does not open next to the stairs you came down.
-	slices.SortStableFunc(spots, func(a, b geometry.Point) int {
-		return cmp.Compare(minDist(placed, a), minDist(placed, b))
-	})
-	for _, t := range lvl.Transitions {
-		if len(spots) == 0 {
-			println(fmt.Sprintf("ERR: no stair position left for transition %q on %s", t.LocationName, m.GetName()))
-			break
-		}
-		p := spots[len(spots)-1]
-		spots = spots[:len(spots)-1]
+	put := func(e dungeon.Exit, p geometry.Point) {
 		tile := dungenLadderDown
-		if t.Up {
+		if target := g.levels[e.Target]; target.Town || target.Depth < lvl.Depth || e.Location == "ladder_up" {
 			tile = dungenLadderUp
 		}
 		m.SetTile(p, tile)
-		m.AddNamedLocation(t.LocationName, p)
-		m.AddTransitionAt(p, gridmap.Transition{TargetMap: t.TargetMap, TargetLocation: t.TargetLocation})
+		m.AddNamedLocation(e.Location, p)
+		spots = removePoint(spots, p)
 		placed = append(placed, p)
+	}
+	entrance := spots[g.randomSource.Intn(len(spots))]
+	var rest []dungeon.Exit
+	for _, e := range lvl.Exits {
+		if e.Location == "ladder_up" {
+			put(e, entrance)
+		} else {
+			rest = append(rest, e)
+		}
+	}
+	for _, e := range rest {
+		if len(spots) == 0 {
+			println(fmt.Sprintf("ERR: no stair position left for exit %q on %s", e.Location, m.GetName()))
+			break
+		}
+		// ladder_down as far from the entrance as it gets (or, half the time, anywhere); the rest furthest from
+		// every stair so far, so a shortcut back to town does not open next to the stairs you came down
+		slices.SortStableFunc(spots, func(a, b geometry.Point) int {
+			return cmp.Compare(minDist(append(placed, entrance), a), minDist(append(placed, entrance), b))
+		})
+		p := spots[len(spots)-1]
+		if e.Location == "ladder_down" && g.randomSource.Intn(2) == 1 {
+			p = spots[g.randomSource.Intn(len(spots))]
+		}
+		put(e, p)
 	}
 	return placed
 }
@@ -206,7 +173,7 @@ func (g *MapGenerator) decorateDungenRooms(m *gridmap.GridMap[*Actor, *Item, Obj
 	proj, _ := dungen.Templates(lvl.Config, g.fsys()) // nil for a generator that draws no templates
 
 	rooms := layout.AllRooms()
-	litWanted := int(math.Ceil(float64(len(rooms)) * min(dungenMaxLit, max(0, 1.0-float64(dlvl)/float64(max(len(g.levels)-1, 1))))))
+	litWanted := int(math.Ceil(float64(len(rooms)) * min(dungenMaxLit, max(0, 1.0-float64(dlvl)/float64(max(g.maxDepth(), 1))))))
 	lit := 0
 	for _, i := range g.randomSource.Perm(len(rooms)) {
 		room := rooms[i]
@@ -280,3 +247,11 @@ func (g *MapGenerator) paintDungenDecoration(m *gridmap.GridMap[*Actor, *Item, O
 
 // fsys is the active mod's file system, for the generators that read room templates out of it.
 func (g *MapGenerator) fsys() fs.FS { return files.GetFileSystem() }
+
+// maxDepth is the deepest depth any level declares.
+func (g *MapGenerator) maxDepth() (d int) {
+	for _, l := range g.levels {
+		d = max(d, l.Depth)
+	}
+	return
+}

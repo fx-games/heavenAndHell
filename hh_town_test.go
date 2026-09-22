@@ -43,11 +43,11 @@ func TestHeavenAndHellTownIsPlayable(t *testing.T) {
 		if !armed || s.GetPlayer().HeroSheet().MaxDam <= 1 {
 			t.Errorf("%s starts unarmed (max damage %d)", class.Name, s.GetPlayer().HeroSheet().MaxDam)
 		}
-		if s.GetMap().GetName() != string(defs.LevelNameTown) {
+		if s.GetMap().GetName() != "town" {
 			t.Fatalf("%s starts on %q, not in town", class.Name, s.GetMap().GetName())
 		}
 		for _, door := range []string{"to_cathedral", "to_catacombs", "to_caves"} {
-			s.MapTransition(gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"})
+			s.MapTransition(gridmap.Transition{TargetMap: "town", TargetLocation: "spawn"})
 			down, ok := s.GetMap().GetTransitionAt(s.GetMap().GetNamedLocation(door))
 			if !ok {
 				t.Errorf("%s: the town's %s leads nowhere", class.Name, door)
@@ -60,7 +60,7 @@ func TestHeavenAndHellTownIsPlayable(t *testing.T) {
 				continue
 			}
 			up, ok := d.GetTransitionAt(d.GetNamedLocation(down.TargetLocation))
-			if want := (gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: door}); !ok || up != want {
+			if want := (gridmap.Transition{TargetMap: "town", TargetLocation: door}); !ok || up != want {
 				t.Errorf("%s: the way back from %s leads to %+v, want %+v", class.Name, d.GetName(), up, want)
 			}
 		}
@@ -118,7 +118,7 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	s := g.GetWorldState()
 	player := s.GetPlayer()
 	cause := common.NewActorCause("test", player)
-	town := gridmap.Transition{TargetMap: string(defs.LevelNameTown), TargetLocation: "spawn"}
+	town := gridmap.Transition{TargetMap: "town", TargetLocation: "spawn"}
 
 	talk := func(npc, wantText string) {
 		t.Helper()
@@ -175,7 +175,7 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	expect("meat_jack", d1.QuestActive)
 	talk("kirioth", "still waiting")
 
-	kill(defs.LevelNameFromDepth(2), "meat_jack")
+	kill(levelAt(s, 2), "meat_jack")
 	items, exp := len(player.GetInventory().Items()), player.Hero().Exp
 	talk("kirioth", "")
 	expect("meat_jack", d1.QuestDone)
@@ -185,7 +185,7 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 
 	talk("abel", "rivers")
 	expect("poisoned_water", d1.QuestActive)
-	s.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(3), TargetLocation: "ladder_up"})
+	s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, 3), TargetLocation: "ladder_up"})
 	down, ok := s.GetMap().GetTransitionAt(s.GetMap().GetNamedLocation("to_poisoned_water_supply"))
 	if !ok || down.TargetMap != "poisoned_water_supply" {
 		t.Fatalf("level 3 has no way to the poisoned water supply: %+v", down)
@@ -196,14 +196,14 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 
 	talk("shekel", "Zedek")
 	expect("skeleton_king", d1.QuestActive)
-	kill(defs.LevelNameFromDepth(4), "king_zedek")
+	kill(levelAt(s, 4), "king_zedek")
 	talk("shekel", "")
 	expect("skeleton_king", d1.QuestDone)
 
 	talk("kirioth", "")
 	expect("lucifer", d1.QuestActive)
 	for dlvl := 5; dlvl <= 12 && !s.GetFlags().IsSet("killed:lucifer"); dlvl++ {
-		s.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl), TargetLocation: "ladder_up"})
+		s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, dlvl), TargetLocation: "ladder_up"})
 		for _, a := range slices.Clone(s.GetMap().Actors()) {
 			if a.GetInternalName() == "lucifer" {
 				g.GetActionBroker().Execute(common.NewDieAction(cause, a))
@@ -211,7 +211,7 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 		}
 	}
 	var gift *common.Item
-	for _, it := range s.GetTownMap(string(defs.LevelNameTown)).Items() {
+	for _, it := range s.Map("town").Items() {
 		if it.Name() == "Lucifer's gift" && it.HasUntargetedAction() {
 			gift = it
 		}
@@ -226,12 +226,9 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 		t.Error("the gift did not open the hero's eyes")
 	}
 	for note, where := range map[string]string{"Purity report": "poisoned_water_supply",
-		"King Zedek's last will": defs.LevelNameFromDepth(4), "Kirioth's schemes": string(defs.LevelNameTown),
-		"From K. to S.": defs.LevelNameFromDepth(6)} {
-		m := s.GetDungeonMap(where)
-		if m == nil {
-			m = s.GetTownMap(where)
-		}
+		"King Zedek's last will": levelAt(s, 4), "Kirioth's schemes": "town",
+		"From K. to S.": levelAt(s, 6)} {
+		m := s.Map(where)
 		found := false
 		for _, it := range m.Items() {
 			found = found || it.Name() == note && it.IsHidden() && it.HasUntargetedAction()
@@ -316,7 +313,7 @@ func TestHeavenAndHellCombat(t *testing.T) {
 	player.Hero().MaxHPBase += 500 << 6 // survive long enough to see both sides land blows
 	common.SyncHero(player)
 	player.GetStats().GetResource(stats.Health).SetToMax()
-	s.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(1), TargetLocation: "ladder_up"})
+	s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, 1), TargetLocation: "ladder_up"})
 	m := s.GetMap()
 	var foe *common.Actor
 	for _, a := range m.Actors() {
@@ -422,19 +419,19 @@ func TestHeavenAndHellHellTown(t *testing.T) {
 	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
 	s := g.GetWorldState()
 	for dlvl, door := range map[int]string{8: "to_caves", 9: "to_dungeon"} {
-		s.MapTransition(gridmap.Transition{TargetMap: defs.LevelNameFromDepth(dlvl), TargetLocation: "ladder_up"})
+		s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, dlvl), TargetLocation: "ladder_up"})
 		d := s.GetMap()
 		there, ok := d.GetTransitionAt(d.GetNamedLocation("to_hell_town"))
-		if !ok || there.TargetMap != "TownHell" || there.TargetLocation != door {
+		if !ok || there.TargetMap != "hell_town" || there.TargetLocation != door {
 			t.Fatalf("level %d's way to the hell town: %+v", dlvl, there)
 		}
 		s.MapTransition(there)
 		town := s.GetMap()
-		if town.GetName() != "TownHell" {
+		if town.GetName() != "hell_town" {
 			t.Fatalf("level %d led to %s", dlvl, town.GetName())
 		}
 		back, ok := town.GetTransitionAt(town.GetNamedLocation(door))
-		if !ok || back.TargetMap != defs.LevelNameFromDepth(dlvl) || back.TargetLocation != "to_hell_town" {
+		if !ok || back.TargetMap != levelAt(s, dlvl) || back.TargetLocation != "to_hell_town" {
 			t.Errorf("the hell town's %s leads to %+v", door, back)
 		}
 	}

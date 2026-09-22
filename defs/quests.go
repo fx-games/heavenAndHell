@@ -13,7 +13,7 @@ import (
 	"rpg/recfile"
 )
 
-// Quest is one quest's content: its name, the text its log shows, where its set level lives and what each town
+// Quest is one quest's content: its name, the text its log shows, the level it belongs to and what each town
 // NPC says about it. The quest's *logic* stays in the engine; this record holds only what a mod authors.
 //
 // Key is the quest's stable id. Everything the engine remembers about the quest hangs off it in the Flags
@@ -23,9 +23,9 @@ type Quest struct {
 	Name    string
 	LogText string // TEXT_* id the quest log shows
 
-	// Set-level placement, empty for a quest that has no set level of its own.
-	SetMap, SetEntrance, SetName string
-	SetLevel                     int // the engine's set-level id
+	// Level is the id (levels.rec) of the level the quest belongs to; its set level, if any, is a levels.rec
+	// record of its own that names this quest.
+	Level string
 
 	// Gossip is town NPC internal name -> the TEXT_* id it says about this quest while the quest is running.
 	Gossip map[string]string
@@ -92,14 +92,8 @@ func ReadQuests(fsys fs.FS) ([]Quest, []Trigger, error) {
 				q.Name = fld.Value
 			case "log_text":
 				q.LogText = fld.Value
-			case "set_map":
-				q.SetMap = fld.Value
-			case "set_entrance":
-				q.SetEntrance = fld.Value
-			case "set_name":
-				q.SetName = fld.Value
-			case "set_level":
-				q.SetLevel = fld.AsInt()
+			case "level":
+				q.Level = fld.Value
 			case "gossip":
 				npc, id, ok := strings.Cut(fld.Value, " ")
 				if !ok {
