@@ -28,6 +28,7 @@
 #   min_rooms        regrow the level until it has at least this many (default 10).
 #   width, height    the scratch grid the level grows into before it is trimmed (default 40x40).
 #   doors            false leaves the room openings as corridors instead of placing doors.
+#   mirror           false keeps rooms as drawn apart from turning them; by default they may also be flipped.
 #
 # Every level forbids the other levels' quest rooms, and the Poisoned Water Supply's cave template, which is a
 # side level off level 3 rather than a dungeon level.

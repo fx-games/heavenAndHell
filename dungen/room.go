@@ -17,6 +17,7 @@ type DungeonRoom struct {
 	rotationMatrix          [2][2]int
 	inverseRotationMatrix   [2][2]int
 	rotationOffset          geometry.CompassDirection
+	mirrored                bool
 	usedTemplate            string
 	roomId                  int
 	wallTiles               []geometry.Point
@@ -45,6 +46,9 @@ func (r *DungeonRoom) GetFreeConnectionsWithRotatedDirection() map[geometry.Poin
 // transformDirection turns a template's connector direction into the placed room's, always within [0, 360):
 // an unwrapped sum (North 270 + a 270 rotation = 540) has an Opposite that no wrapped direction ever equals.
 func (r *DungeonRoom) transformDirection(d geometry.CompassDirection) geometry.CompassDirection {
+	if r.mirrored { // East and West swap, North and South stay
+		d = 180 - d + 360
+	}
 	d += r.rotationOffset
 	for d >= 360 {
 		d -= 360
@@ -178,48 +182,26 @@ func (r *DungeonRoom) Contains(absolutePosition geometry.Point) bool {
 }
 
 func (r *DungeonRoom) SetRotationCount(count int) {
-	switch count {
-	case 0:
-		r.rotationMatrix = [2][2]int{
-			{1, 0},
-			{0, 1},
-		}
-		r.inverseRotationMatrix = [2][2]int{
-			{1, 0},
-			{0, 1},
-		}
-		r.rotationOffset = 0
-	case 1:
-		r.rotationMatrix = [2][2]int{
-			{0, -1},
-			{1, 0},
-		}
-		r.inverseRotationMatrix = [2][2]int{
-			{0, 1},
-			{-1, 0},
-		}
-		r.rotationOffset = 90
-	case 2:
-		r.rotationMatrix = [2][2]int{
-			{-1, 0},
-			{0, -1},
-		}
-		r.inverseRotationMatrix = [2][2]int{
-			{-1, 0},
-			{0, -1},
-		}
-		r.rotationOffset = 180
-	case 3:
-		r.rotationMatrix = [2][2]int{
-			{0, 1},
-			{-1, 0},
-		}
-		r.inverseRotationMatrix = [2][2]int{
-			{0, -1},
-			{1, 0},
-		}
-		r.rotationOffset = 270
+	r.SetTransform(count, false)
+}
+
+// SetTransform turns the room by count quarter turns clockwise, after flipping it left to right if mirrored.
+func (r *DungeonRoom) SetTransform(count int, mirrored bool) {
+	rotations := [4][2][2]int{
+		{{1, 0}, {0, 1}},
+		{{0, -1}, {1, 0}},
+		{{-1, 0}, {0, -1}},
+		{{0, 1}, {-1, 0}},
 	}
+	rot, inv := rotations[count&3], rotations[(4-count)&3]
+	if mirrored {
+		// flip first: rot*F negates rot's first column, F*inv negates inv's first row
+		rot = [2][2]int{{-rot[0][0], rot[0][1]}, {-rot[1][0], rot[1][1]}}
+		inv = [2][2]int{{-inv[0][0], -inv[0][1]}, {inv[1][0], inv[1][1]}}
+	}
+	r.rotationMatrix, r.inverseRotationMatrix = rot, inv
+	r.rotationOffset = geometry.CompassDirection(90 * (count & 3))
+	r.mirrored = mirrored
 }
 
 func (r *DungeonRoom) findCenter() geometry.Point {
@@ -307,6 +289,7 @@ func (r *DungeonRoom) Clone() *DungeonRoom {
 		rotationMatrix:          r.rotationMatrix,
 		inverseRotationMatrix:   r.inverseRotationMatrix,
 		rotationOffset:          r.rotationOffset,
+		mirrored:                r.mirrored,
 		usedTemplate:            r.usedTemplate,
 		usedDecorationLevelName: r.usedDecorationLevelName,
 		wallTiles:               make([]geometry.Point, 0),

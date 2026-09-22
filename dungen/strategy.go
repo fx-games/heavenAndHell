@@ -39,13 +39,14 @@ type AccretionConfig struct {
 	MinRooms      int      // regrow the level until it has at least this many
 	Width, Height int
 	Doors         bool
+	Mirror        bool // rooms may be flipped as well as turned
 }
 
 type accretion struct{}
 
 func (accretion) Parse(r recfile.Record) (dungeon.Config, error) {
 	c := AccretionConfig{Templates: "assets/rooms.ldtk", Rooms: 16, MinRooms: 10,
-		Width: accretionScratch, Height: accretionScratch, Doors: true}
+		Width: accretionScratch, Height: accretionScratch, Doors: true, Mirror: true}
 	if v, ok := dungeon.Field(r, "templates"); ok {
 		c.Templates = v
 	}
@@ -57,6 +58,9 @@ func (accretion) Parse(r recfile.Record) (dungeon.Config, error) {
 	c.Forbid = dungeon.FieldsNamed(r, "forbid_room")
 	if v, ok := dungeon.Field(r, "doors"); ok {
 		c.Doors = v != "false"
+	}
+	if v, ok := dungeon.Field(r, "mirror"); ok {
+		c.Mirror = v != "false"
 	}
 	var err error
 	for _, k := range []struct {
@@ -150,6 +154,7 @@ func buildAccretion(c AccretionConfig, rnd *rand.Rand, fsys fs.FS) (*DungeonMap,
 	g.LoadTemplatesFrom(proj, c.Prefix)
 	g.SetLevelRules(rules)
 	g.SetRoomCount(c.Rooms)
+	g.SetMirroring(c.Mirror)
 	if len(g.roomTemplates) == 0 {
 		return nil, fmt.Errorf("dungen: %s has no room templates with prefix %q", c.Templates, c.Prefix)
 	}

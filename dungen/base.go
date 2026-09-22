@@ -196,62 +196,24 @@ func (m *DungeonMap) SetDoor(x int, y int) {
 	m.tiles[x+y*m.width] = Door
 }
 
+// CanPlaceRoom says whether a room fits: its floor lands on solid wall, inside the map, and touches no floor
+// already there, not even diagonally, so rooms stay walled off from each other except where they connect.
 func (m *DungeonMap) CanPlaceRoom(room *DungeonRoom) bool {
-	nb := geometry.Neighbors{}
-	absoluteFloorTiles := room.GetAbsoluteFloorTiles()
-	for _, tile := range absoluteFloorTiles {
-		if !m.Contains(tile) {
-			return false
-		}
-		tileAt := m.GetTileAt(tile)
-		if tileAt != Wall {
-			return false
-		}
-		unusableNeighborTiles := nb.All(tile, func(pos geometry.Point) bool {
-			return !m.Contains(pos)
-		})
-		if len(unusableNeighborTiles) > 0 {
-			return false
-		}
-	}
-	return true
+	return m.CanPlaceRoomNextTo(room, nil)
 }
 
-func (m *DungeonMap) CanPlaceRoomPermissive(room *DungeonRoom) bool {
+// CanPlaceRoomNextTo is CanPlaceRoom for a room attaching to host, whose floor it may touch: some templates
+// are drawn to sit flush in another (a quest room in the hole of a ring room).
+func (m *DungeonMap) CanPlaceRoomNextTo(room, host *DungeonRoom) bool {
 	nb := geometry.Neighbors{}
-	absoluteFloorTiles := room.GetAbsoluteFloorTiles()
-	for _, tile := range absoluteFloorTiles {
-		if !m.Contains(tile) {
+	for _, tile := range room.GetAbsoluteFloorTiles() {
+		if !m.Contains(tile) || m.GetTileAt(tile) != Wall {
 			return false
 		}
-		tileAt := m.GetTileAt(tile)
-		if tileAt != Wall {
-			return false
-		}
-		unusableNeighborTiles := nb.All(tile, func(pos geometry.Point) bool {
-			return !m.Contains(pos)
+		blocked := nb.All(tile, func(pos geometry.Point) bool {
+			return !m.Contains(pos) || m.GetTileAt(pos) != Wall && (host == nil || !host.Contains(pos))
 		})
-		if len(unusableNeighborTiles) > 0 {
-			return false
-		}
-	}
-	return true
-}
-func (m *DungeonMap) CanPlaceRoomRestrictive(room *DungeonRoom) bool {
-	nb := geometry.Neighbors{}
-	absoluteFloorTiles := room.GetAbsoluteFloorTiles()
-	for _, tile := range absoluteFloorTiles {
-		if !m.Contains(tile) {
-			return false
-		}
-		tileAt := m.GetTileAt(tile)
-		if tileAt != Wall {
-			return false
-		}
-		unusableNeighborTiles := nb.All(tile, func(pos geometry.Point) bool {
-			return !m.Contains(pos) || m.GetTileAt(pos) != Wall
-		})
-		if len(unusableNeighborTiles) > 0 {
+		if len(blocked) > 0 {
 			return false
 		}
 	}
@@ -288,7 +250,8 @@ func (m *DungeonMap) CouldBeADoor(pos geometry.Point) (geometry.CompassDirection
 
 	return geometry.East, false
 }
-func (m *DungeonMap) addMoreDoors(rnd *rand.Rand, minPathDistance int, spawnChance float64) {
+// addMoreDoors opens walls between two rooms that are far apart on foot, as doors or as bare openings.
+func (m *DungeonMap) addMoreDoors(rnd *rand.Rand, minPathDistance int, spawnChance float64, asDoor bool) {
 	m.TraverseTilesRandomly(rnd, func(mapPos geometry.Point) {
 		if direction, ok := m.CouldBeADoor(mapPos); ok {
 			if rnd.Float64() > spawnChance {
@@ -298,7 +261,7 @@ func (m *DungeonMap) addMoreDoors(rnd *rand.Rand, minPathDistance int, spawnChan
 			posTwo := mapPos.Add(direction.Opposite().ToPoint())
 			path := m.GetJPSPath(posOne, posTwo)
 			if len(path) == 0 || len(path) > minPathDistance {
-				m.AddDoorAndConnect(mapPos, direction)
+				m.AddDoorAndConnect(mapPos, direction, asDoor)
 			}
 		}
 	})
@@ -319,7 +282,7 @@ func (m *DungeonMap) IsWalkable(pos geometry.Point) bool {
 	return tileAt != Wall
 }
 
-func (m *DungeonMap) AddDoorAndConnect(absoluteDoorPos geometry.Point, direction geometry.CompassDirection) {
+func (m *DungeonMap) AddDoorAndConnect(absoluteDoorPos geometry.Point, direction geometry.CompassDirection, asDoor bool) {
 	posOne := absoluteDoorPos.Add(direction.ToPoint())
 	posTwo := absoluteDoorPos.Add(direction.Opposite().ToPoint())
 
@@ -333,7 +296,11 @@ func (m *DungeonMap) AddDoorAndConnect(absoluteDoorPos geometry.Point, direction
 	roomOne.AddConnectedRoom(absoluteDoorPos, roomTwo)
 	roomTwo.AddConnectedRoom(absoluteDoorPos, roomOne)
 
-	m.SetDoor(absoluteDoorPos.X, absoluteDoorPos.Y)
+	if asDoor {
+		m.SetDoor(absoluteDoorPos.X, absoluteDoorPos.Y)
+	} else {
+		m.SetCorridor(absoluteDoorPos.X, absoluteDoorPos.Y)
+	}
 }
 
 func (m *DungeonMap) GetRoomAt(posOne geometry.Point) *DungeonRoom {

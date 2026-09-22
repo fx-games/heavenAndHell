@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"fmt"
 	"maps"
+	"math"
 	"math/rand"
 	"rpg/geometry"
 	"rpg/ldtk"
@@ -61,6 +62,7 @@ type AccretionGenerator struct {
 	currentRoomId   int
 	levelRules      TemplateRules
 	placedTemplates map[string]bool
+	mirror          bool
 }
 
 func NewAccretionGenerator(randomSource *rand.Rand) *AccretionGenerator {
@@ -192,6 +194,11 @@ func (g *AccretionGenerator) Generate(width, height int) (*DungeonMap, error) {
 	repCounter := 0
 	currentSlotID := 0
 	for len(dMap.rooms) < maxRooms && repCounter < 100 {
+		// A slot room whose partner will not fit is given up on rather than retried until the loop gives up on
+		// the whole level.
+		if currentSlotID != 0 && repCounter >= slotPatience {
+			currentSlotID = 0
+		}
 		nextRoom, err := g.nextRoomForGenerator(currentSlotID)
 		if err != nil {
 			return nil, err
@@ -200,7 +207,7 @@ func (g *AccretionGenerator) Generate(width, height int) (*DungeonMap, error) {
 			println(fmt.Sprintf("=== room %d ===", nextRoom.roomId))
 			nextRoom.PrintUntransformed()
 		}
-		for _, existingRoom := range dMap.rooms {
+		for _, existingRoom := range g.attachOrder(dMap.rooms) {
 			if g.tryConnectTo(dMap, nextRoom, existingRoom) {
 				repCounter = 0
 				dMap.AddRoomAndSetTiles(nextRoom)
@@ -229,12 +236,9 @@ func (g *AccretionGenerator) Generate(width, height int) (*DungeonMap, error) {
 		dMap.PrintPlannedDoors()
 	}
 
-	if g.levelRules.NoDoors {
-		dMap.ConnectRoomsOnMap(false)
-	} else {
-		dMap.ConnectRoomsOnMap(true)
-		dMap.addMoreDoors(g.random, 10, 0.8)
-	}
+	// Growing makes a tree; the extra openings make loops, so the way back is not always the way in.
+	dMap.ConnectRoomsOnMap(!g.levelRules.NoDoors)
+	dMap.addMoreDoors(g.random, 10, 0.8, !g.levelRules.NoDoors)
 
 	return dMap, nil
 }
@@ -247,6 +251,21 @@ func (g *AccretionGenerator) MissingRequired() string {
 		}
 	}
 	return ""
+}
+
+// slotPatience is how many failed placements a slot's partner room gets before growth moves on without it.
+const slotPatience = 10
+
+// attachOrder is the order a new room tries the placed rooms in: random, weighted towards the newest, so a level
+// grows outwards instead of crowding around its first room (weighted shuffle, Efraimidis-Spirakis).
+func (g *AccretionGenerator) attachOrder(rooms []*DungeonRoom) []*DungeonRoom {
+	keys := make(map[*DungeonRoom]float64, len(rooms))
+	for i, room := range rooms {
+		keys[room] = math.Pow(g.random.Float64(), 1/float64(i+1))
+	}
+	order := slices.Clone(rooms)
+	slices.SortStableFunc(order, func(a, b *DungeonRoom) int { return cmp.Compare(keys[b], keys[a]) })
+	return order
 }
 
 func (g *AccretionGenerator) randomRect(width int, height int) geometry.Rect {
@@ -262,11 +281,14 @@ func (g *AccretionGenerator) tryConnectTo(dMap *DungeonMap, newRoom *DungeonRoom
 	}
 	freeConnections := existingRoom.GetFreeConnectionsWithRotatedDirection()
 	relPositions := getSortedKeys(freeConnections)
-	randomRotationOrder := g.random.Perm(4)
-	for rotationCount := 0; rotationCount < 4; rotationCount++ {
-		newRoom.SetRotationCount(randomRotationOrder[rotationCount])
+	orientations := 4
+	if g.mirror {
+		orientations = 8
+	}
+	for _, orientation := range g.random.Perm(orientations) {
+		newRoom.SetTransform(orientation%4, orientation >= 4)
 		if g.printDebugSteps {
-			println(fmt.Sprintf("=== rotation %d for room %d ===", rotationCount, newRoom.roomId))
+			println(fmt.Sprintf("=== orientation %d for room %d ===", orientation, newRoom.roomId))
 			newRoom.PrintRotated()
 		}
 		for _, relativeConnectionPos := range relPositions {
@@ -287,7 +309,7 @@ func (g *AccretionGenerator) tryConnectTo(dMap *DungeonMap, newRoom *DungeonRoom
 					println(fmt.Sprintf("> EXISTING ROOM %d", existingRoom.roomId))
 					existingRoom.PrintTransformedWithHighlight(relativeConnectionPos)
 				}
-				if dMap.CanPlaceRoom(newRoom) {
+				if dMap.CanPlaceRoomNextTo(newRoom, existingRoom) {
 					if g.printDebugSteps {
 						println(fmt.Sprintf("=== CONNECTED ==="))
 					}
@@ -408,6 +430,11 @@ func (g *AccretionGenerator) addTemplateFromLevel(level *ldtk.Level) {
 
 func (g *AccretionGenerator) SetRoomCount(maxRoomCount int) {
 	g.maxRoomCount = maxRoomCount
+}
+
+// SetMirroring lets rooms be flipped as well as turned, which doubles the layouts each template gives.
+func (g *AccretionGenerator) SetMirroring(mirror bool) {
+	g.mirror = mirror
 }
 
 func (g *AccretionGenerator) SetDebugSteps(debug bool) {

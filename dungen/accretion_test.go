@@ -35,3 +35,26 @@ func TestConnectorOrderIgnoresWidth(t *testing.T) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
+
+// Every one of the eight orientations maps a room's tiles and back again, and turns a connector the same way
+// it turns the floor behind it: the connector still sits just outside that floor, facing away from it.
+func TestOrientationsKeepConnectorsOnTheirFloor(t *testing.T) {
+	room := NewDungeonRoomFromTemplate("t")
+	room.SetFloorTiles([]geometry.Point{{X: 1, Y: 1}, {X: 2, Y: 1}, {X: 1, Y: 2}})
+	room.SetConnections(map[geometry.Point]RoomConnection{
+		{X: 1, Y: 0}: {OutwardDirection: geometry.North}, {X: 3, Y: 1}: {OutwardDirection: geometry.East},
+		{X: 1, Y: 3}: {OutwardDirection: geometry.South}, {X: 0, Y: 2}: {OutwardDirection: geometry.West}})
+	for orientation := 0; orientation < 8; orientation++ {
+		room.SetTransform(orientation%4, orientation >= 4)
+		room.SetPositionOffset(geometry.Point{X: 10, Y: 10})
+		for rel, c := range room.GetFreeConnectionsWithRotatedDirection() {
+			abs := room.ToAbsolutePosition(rel)
+			if back := room.ToRelativePosition(abs); back != rel {
+				t.Errorf("orientation %d: %v maps back to %v", orientation, rel, back)
+			}
+			if inside := abs.Sub(c.OutwardDirection.ToPoint()); !room.Contains(inside) {
+				t.Errorf("orientation %d: connector %v faces %v, away from no floor", orientation, rel, c.OutwardDirection)
+			}
+		}
+	}
+}
