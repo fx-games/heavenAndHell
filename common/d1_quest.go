@@ -414,7 +414,6 @@ var (
 	d1RedPortal  = gridmap.Tile{DefinedIcon: 72, DefinedDescription: "a red portal", IsWalkable: true, IsTransparent: true}
 )
 
-
 // Lazarus' lair (Vile2.DUN), in piece coordinates: the magic circles in front of the two Books of Vileness and where
 // they teleport the hero, the central circle and the one in front of Lazarus it leads to, and the return portal.
 var (
@@ -699,4 +698,3 @@ func (f *Factory) D1MonsterGreeting(a *Actor) {
 		f.playD1Sound("USFX_CLEAVER")
 	}
 }
-

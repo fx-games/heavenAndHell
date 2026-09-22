@@ -109,6 +109,9 @@ func (g *Factory) NewD1Item(it *d1.Item) *Item {
 	item.d1, item.d1Data = it, g.Generator.D
 	item.SetInternalName(it.Name)
 	item.SetBaseCost(it.IValue)
+	if hooks := d1ItemHooks(it); len(hooks) > 0 {
+		item.SetItemHooks(hooks)
+	}
 	durability := stats.NewResource(0, flatFunc(it.MaxDur), it.Durability)
 	switch it.Type {
 	case d1.ITypeSword, d1.ITypeAxe, d1.ITypeMace, d1.ITypeBow, d1.ITypeStaff:

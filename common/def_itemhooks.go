@@ -3,9 +3,32 @@ package common
 import (
 	"math/rand"
 
+	"rpg/d1"
+
 	"rpg/stats"
 	"rpg/util"
 )
+
+// ItemHookPowers are the affix powers that carry an on-hit hook instead of a stat: a mod's affix table names one
+// in PLPower (H&H's xl_isuf.txt), D1's own generator skips it like any power it doesn't know, and NewD1Item hangs
+// the hook on the game item. The names are the engine's vocabulary; a mod only picks from them.
+var ItemHookPowers = map[string]func() ItemActionHook{
+	"HOOK_MANA_ON_KILL":     restoreManaOnKill,
+	"HOOK_FIREBALL_ON_SHOT": fireballOnRanged,
+	"HOOK_RETURN_DAMAGE":    returnDamageOnHit,
+	"HOOK_TRIPLE_DAMAGE":    randomlyTripleDamageOnMelee,
+}
+
+// d1ItemHooks are the hooks a rolled item's affixes carry.
+func d1ItemHooks(it *d1.Item) []ItemActionHook {
+	var hooks []ItemActionHook
+	for _, power := range []string{it.PrePower, it.SufPower} {
+		if newHook, ok := ItemHookPowers[power]; ok {
+			hooks = append(hooks, newHook())
+		}
+	}
+	return hooks
+}
 
 func NewHooksForItem(source *rand.Rand, level int, count int) []ItemActionHook {
 	hooksFactories := []func() ItemActionHook{

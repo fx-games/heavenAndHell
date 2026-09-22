@@ -32,6 +32,9 @@ func (d *MeleeAttackAction) Execute(context ActionContext) []Action {
 		d.defender.SetLookDirFromPoI(d.attacker.MapPosition())
 		d.attacker.SetLookDirFromPoI(d.defender.MapPosition())
 		d.playSound(context)
+		if d.damageFactor != 1 && dam > 0 { // an item hook's multiplier (H&H's "of fury")
+			dam = int(float64(dam) * d.damageFactor)
+		}
 		d.totalDamageDealt = dam
 		if dam <= 0 {
 			return extra

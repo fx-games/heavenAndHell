@@ -129,17 +129,15 @@ The plan (user, 2026-09-21):
    as in D1, potions always drink, the golem dies on a level change, traps' fire-arrow burst and nova as in
    1.09 (7fcd007), and every monster AI compared against monster.cpp (f25226a). Hellfire is opt-in engine
    content (see D1_PLAN.md "Defaults"). The engine faces east/west only - don't add 8-way facing (user).
-   Next: the full system-by-system audit against `reference/devilution-109` - list every difference in
-   D1_AUDIT.md first, then fix with the user. Known so far: trap missiles don't hit monsters
-   (MonsterTrapHit); the golem's wake-up doesn't reproduce D1's off-by-one monster index; the Hidden's
-   darkness test uses the hero's light radius, not D1's light map. Oracle for anything generator-side:
+   The system-by-system audit against `reference/devilution-109` is D1_AUDIT.md; every entry there is fixed
+   or by design, the three once-known gaps included (MonsterTrapHit, the golem's off-by-one wake-up, the
+   Hidden's darkness via `State.D1Lit`). Oracle for anything generator-side:
    regenerate `levels.golden` with `hangTorchesOnWalls`/`moveMonstersOffObjects` off and ` DamAcFlags:0`
    stripped from the item dump, and compare with `git show 14a2d58^:d1/testdata/levels.golden`.
-2. **H&H leftovers**: main's on-hit item *hooks* (the other half of its
-   enchantments; `common/def_itemhooks.go` has them) are not rolled. An affix
-   power cannot carry one without a field on `d1.Item`, and `d1.Item` is dumped
-   into `levels.golden` - adding a field changes that dump. Put the hook on the
-   game item (`common.Item.SetItemHooks`) from a record field instead. Kirioth
+2. **H&H leftovers**: main's on-hit item hooks roll again: H&H's xl_isuf.txt
+   names them as powers (`common.ItemHookPowers`: HOOK_MANA_ON_KILL, ..._FIREBALL_ON_SHOT,
+   ..._RETURN_DAMAGE, ..._TRIPLE_DAMAGE), D1's generator skips a power it doesn't
+   know, and `NewD1Item` hangs the hook on the game item. Kirioth
    says nothing after Lucifer (main had no text for it either). The evidence
    notes carry main's placeholder text ("Are you sure about this?").
 3. ~~`UpdateD1Quests` stays engine-side~~: superseded (user, 2026-09-22). Map
