@@ -1353,6 +1353,17 @@ drop: IDROP_NEVER
 category: potion
 untargeted_action: true_sight
 
+# Lucifer's note, left at the hero's feet when they drink his gift: the evidence quest's opening, to read again.
+name: A note signed "The Morningstar"
+internal_name: lucifers_note
+icon: item.note
+dlvl: 1
+cost: 0
+drop: IDROP_NEVER
+category: scroll
+charges: -1
+untargeted_action: read_message(TEXT_HH_NOTE_LUCIFER)
+
 # The evidence against the town (main's NewEvidence*): hidden until Lucifer's gift opens the hero's eyes.
 
 name: Purity report

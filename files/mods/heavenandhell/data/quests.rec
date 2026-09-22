@@ -50,7 +50,7 @@ log_text: TEXT_HH_KIRIOTH_LUCIFER_QUEST
 
 key: evidence
 name: Find evidence against humanity
-log_text: TEXT_HH_LUCIFER_DEATH
+log_text: TEXT_HH_NOTE_LUCIFER
 
 %rec: trigger
 
@@ -87,6 +87,8 @@ do: spawn_item(evidence_two, here)
 
 event: on_item_use
 subject: lucifers_gift
+do: say(TEXT_HH_NOTE_LUCIFER, A note)
+do: spawn_item(lucifers_note, here)
 do: activate_quest(evidence)
 do: log_quest(evidence)
 do: spawn_item(evidence_three, town, shekels_house)
@@ -117,21 +119,29 @@ event: on_item_pickup
 subject: evidence_one
 when: active("evidence") and flag("found:evidence_one") and flag("found:evidence_two") and flag("found:evidence_three") and flag("found:evidence_four")
 do: complete_quest(evidence)
+do: say(TEXT_HH_LUCIFER_RANT, Lucifer)
+do: give_exp(1000)
 
 event: on_item_pickup
 subject: evidence_two
 when: active("evidence") and flag("found:evidence_one") and flag("found:evidence_two") and flag("found:evidence_three") and flag("found:evidence_four")
 do: complete_quest(evidence)
+do: say(TEXT_HH_LUCIFER_RANT, Lucifer)
+do: give_exp(1000)
 
 event: on_item_pickup
 subject: evidence_three
 when: active("evidence") and flag("found:evidence_one") and flag("found:evidence_two") and flag("found:evidence_three") and flag("found:evidence_four")
 do: complete_quest(evidence)
+do: say(TEXT_HH_LUCIFER_RANT, Lucifer)
+do: give_exp(1000)
 
 event: on_item_pickup
 subject: evidence_four
 when: active("evidence") and flag("found:evidence_one") and flag("found:evidence_two") and flag("found:evidence_three") and flag("found:evidence_four")
 do: complete_quest(evidence)
+do: say(TEXT_HH_LUCIFER_RANT, Lucifer)
+do: give_exp(1000)
 
 # Elder Kirioth: Meat Jack, then, once King Zedek is dead, Lucifer.
 

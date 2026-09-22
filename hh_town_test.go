@@ -219,9 +219,20 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	if gift == nil {
 		t.Fatal("Lucifer fell and left no gift in town")
 	}
+	ui.texts = nil
 	gift.GetUntargetedAction().Invoke(player, "test")
 	s.ItemUsed(gift)
 	expect("evidence", d1.QuestActive)
+	if len(ui.texts) != 1 || !strings.Contains(ui.texts[0], "among the seeing") {
+		t.Errorf("drinking the gift: got %q, want Lucifer's note", ui.texts)
+	}
+	lucifersNote := false
+	for _, it := range s.GetMap().Items() {
+		lucifersNote = lucifersNote || strings.Contains(it.Name(), "Morningstar") && it.HasUntargetedAction()
+	}
+	if !lucifersNote {
+		t.Error("Lucifer's note was not left at the hero's feet")
+	}
 	if !s.GetFlags().IsSet(string(common.FlagHasTrueSight)) {
 		t.Error("the gift did not open the hero's eyes")
 	}
@@ -239,6 +250,52 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	}
 	talk("kirioth", "")
 	expect("lucifer", d1.QuestDone)
+
+	// Picking up the four pieces of evidence, in any order, ends the quest once: Lucifer finds the hero, as his
+	// dying words promised, and tells them what the notes mean.
+	pickUp := func(where, note string) {
+		t.Helper()
+		if where == "town" {
+			s.MapTransition(town)
+		} else {
+			s.MapTransition(gridmap.Transition{TargetMap: where, TargetLocation: "ladder_up"})
+		}
+		m := s.GetMap()
+		for _, it := range m.Items() {
+			if it.Name() == note {
+				m.RemoveItem(it)
+				m.AddItem(it, player.MapPosition())
+				g.GetActionBroker().Execute(common.NewPickUpAction(cause, player))
+				return
+			}
+		}
+		t.Fatalf("no %q on %s", note, where)
+	}
+	exp = player.Hero().Exp
+	pickUp("town", "Kirioth's schemes")
+	pickUp(levelAt(s, 6), "From K. to S.")
+	pickUp("poisoned_water_supply", "Purity report")
+	expect("evidence", d1.QuestActive)
+	ui.texts = nil
+	pickUp(levelAt(s, 4), "King Zedek's last will")
+	expect("evidence", d1.QuestDone)
+	if len(ui.texts) != 1 || !strings.Contains(ui.texts[0], "mankind itself") {
+		t.Errorf("the last piece of evidence: got %q, want Lucifer's rant", ui.texts)
+	}
+	if player.Hero().Exp != exp+1000 {
+		t.Errorf("the evidence quest's reward: %d -> %d exp", exp, player.Hero().Exp)
+	}
+	ui.texts = nil
+	for _, it := range player.GetInventory().Items() {
+		if it.Name() == "Purity report" {
+			player.GetInventory().Remove(it)
+			s.GetMap().AddItem(it, player.MapPosition())
+		}
+	}
+	g.GetActionBroker().Execute(common.NewPickUpAction(cause, player))
+	if len(ui.texts) != 0 {
+		t.Errorf("picking a note up again replayed %q", ui.texts)
+	}
 }
 
 // H&H's four shops, as main had them: stocked from their own lists, each with its own menu, Mary buying from the

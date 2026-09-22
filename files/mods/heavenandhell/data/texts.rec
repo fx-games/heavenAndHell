@@ -129,16 +129,62 @@ text: These bones may be broken, but my spirit can't die. We'll meet again.
 +
 + You will find a gift of mine, when you return to your cozy little town. It might help open your eyes.
 
-# The evidence notes. main only ever had this placeholder text in all four.
+# Lucifer's note, left with his gift (main's note_lucifer.txt, which nothing loaded): it opens the evidence quest.
+
+id: TEXT_HH_NOTE_LUCIFER
+text: Congratulations, for now you are among the seeing.
++
++ Look at the world around you again. Then come and find me.
++
++ Oh, one last thing. You can attack EVERYONE with a "SHIFT" of your attention.
++
++ - The Morningstar
+
+# The evidence notes, one for each of plan.txt's "crimes of the people". main only had a placeholder for them.
 
 id: TEXT_HH_NOTE_EVIDENCE_ONE
-text: Are you sure about this?
+text: Report of the waterworks crew, for the Union.
++
++ The sickness did not come up from the caves. We traced it to the barrels from Master Shekel's potion works, poured into the cistern by night while his own guards kept watch.
++
++ By morning the criers blamed the Union for the foul water. Three of our brothers hang in the square for it.
++
++ Whoever finds this: the poison is Shekel's.
 
 id: TEXT_HH_NOTE_EVIDENCE_TWO
-text: Are you sure about this?
+text: I, Zedek, king of this land, set down my last will while I still can.
++
++ My counsellor Kirioth whispers to my brother, and Abel no longer meets my eyes. I fear a knife in the dark.
++
++ Should I fall by my brother's hand, let it be known that the crown was stolen, not inherited, and that my people owe the thief nothing.
 
 id: TEXT_HH_NOTE_EVIDENCE_THREE
-text: Are you sure about this?
+text: Kept in case the old man ever forgets who his friends are. - S.
++
++ K. promised: the crown for Abel, the waterworks and the potion trade for me, and for himself the power beneath the town.
++
++ He took twelve of the poor from the lower quarter down to the old cathedral. None came back. That night the ground shook, and K. spoke of a prince he had called up and would bind to his will.
++
++ He did not bind it.
 
 id: TEXT_HH_NOTE_EVIDENCE_FOUR
-text: Are you sure about this?
+text: S.,
++
++ The laboratory in the caves is ready. Send the next subjects down by the kitchen stairs, as before.
++
++ So far: seven dead, two fled, one kept. Your boy survived the treatment. He is stronger than ten men now, and always hungry.
++
++ Tell his mother it was the fever. - K.
+
+# Lucifer keeps his word once the evidence is in (plan.txt's "Lucifer's Rant").
+
+id: TEXT_HH_LUCIFER_RANT
+text: So you still don't understand, do you?
++
++ Think about it. What is the reason you are unable to defeat me? Or any human in the centuries before?
++
++ It's simple, really. You are fighting a mere idea, a concept you brought to life yourself.
++
++ And for what pitiful reason did you invent me? As a scapegoat for all your own evil deeds. Like a child, you blame me for what is really your own fault.
++
++ Look around you and open your eyes to the truth. The true enemy of mankind is, and always has been, mankind itself.
