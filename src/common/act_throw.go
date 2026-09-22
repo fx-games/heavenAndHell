@@ -59,7 +59,7 @@ func (d *ThrowAction) Execute(context ActionContext) []Action {
 
 		doesHit := hitChance > 0 && hitChance >= rand.Float64()
 		if doesHit && throwInfo.Damage.NotZero() { // deal direct throw damage
-			damage := throwInfo.Damage.LinearRandom()
+			damage := throwInfo.Damage.Roll()
 			logAttack(context, d.attacker, d.defender, damage)
 			actions = append(actions, NewChangeResourceAction(NewActorCause(ActionNameThrow, d.attacker), d.defender, stats.Health, float64(-damage)))
 			d.damageAmount += damage
@@ -80,8 +80,6 @@ func (d *ThrowAction) GetAnimations() []Animation {
 		d.thrownItem.SetDrawnToScreen(true)
 	})
 	return OneAnimation(animation)
-	//return OneAnimation(NewProjectileAnimation(d.attacker, d.flightPath, 0.02, 41, 1))
-	//return &DummyAnimation{time: 5, cancelRunningAnimations: true}
 }
 func (d *ThrowAction) GetDamageFactor() float64 {
 	return d.damageFactor

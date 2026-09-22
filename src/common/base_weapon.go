@@ -2,17 +2,18 @@ package common
 
 import (
 	"fmt"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"image/color"
 	"rpg/src/defs"
 	"rpg/src/stats"
 	"rpg/src/util"
 	"strings"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type ThrowStats struct {
-	Damage        stats.Interval
+	Damage        util.Interval
 	OnHitEffect   *HitEffect
 	ChanceToBreak float64
 	HitZone       *AoEResolver

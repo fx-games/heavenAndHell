@@ -15,7 +15,6 @@ type RangedAttackAction struct {
 	damageAmount           int
 	defender               *Actor
 	targetPos              geometry.Point
-	defenders              []*Actor
 	additionalOnHitActions func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) []Action
 }
 
@@ -215,8 +214,6 @@ func (d *RangedAttackAction) GetAnimations() []Animation {
 		projectileIcon = weapon.GetWeaponStats().ProjectileIcon // D1 monsters shoot without a weapon item
 	}
 	return OneAnimation(NewProjectileDirectionAnimation(d.attacker, d.attacker.MapPosition(), d.targetPos, 0.02, projectileIcon, 1))
-	//return OneAnimation(NewProjectileAnimation(d.attacker, d.flightPath, 0.02, 41, 1))
-	//return &DummyAnimation{time: 5, cancelRunningAnimations: true}
 }
 func (d *RangedAttackAction) GetDamageFactor() float64 {
 	return d.damageFactor

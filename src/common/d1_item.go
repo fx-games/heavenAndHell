@@ -125,7 +125,7 @@ func (g *Factory) NewD1Item(it *d1.Item) *Item {
 		})
 		if it.Type == d1.ITypeSword || it.Type == d1.ITypeAxe || it.Type == d1.ITypeMace {
 			item.SetThrowComponent(&ThrowStats{
-				Damage:        stats.NewInterval(it.MinDam, it.MaxDam),
+				Damage:        util.NewInterval(it.MinDam, it.MaxDam),
 				ChanceToBreak: 0.25,
 				HitZone:       OneTargetTile(g.State.GetMap, nil),
 			})
@@ -141,7 +141,7 @@ func (g *Factory) NewD1Item(it *d1.Item) *Item {
 		}
 		item.SetArmorComponent(&ArmorStats{BaseArmor: it.AC, Type: armorType, Durability: durability})
 		item.SetThrowComponent(&ThrowStats{ // house rule, D1 has no throwing
-			Damage:        stats.NewInterval(0, it.AC),
+			Damage:        util.NewInterval(0, it.AC),
 			ChanceToBreak: 0.25,
 			HitZone:       OneTargetTile(g.State.GetMap, nil),
 		})

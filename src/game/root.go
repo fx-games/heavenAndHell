@@ -27,7 +27,6 @@ import (
 type GameInstance struct {
 	switchMod func() // SetModSwitcher
 	// base infos / config
-	title                       string
 	deviceIndependentScreenSize geometry.Point
 	configuration               *common.Configuration
 	startInfo                   common.StartInfo
@@ -42,21 +41,16 @@ type GameInstance struct {
 
 	// random
 	randomSource *rand.Rand
-	worldTicks   uint64
 
 	// rendering
 
 	// input
-	mousePosInPixels geometry.Point
-	mousePosOnMap    geometry.Point
 
 	feeds map[string]string // last text written per feed file
 
 	// player state
-	isResting bool
 
 	// game state
-	shouldQuitGame   bool
 	quitToAscii      bool
 	debugModeEnabled bool
 	godMode          bool
@@ -142,7 +136,6 @@ func (g *GameInstance) getMoveOnPlayerDijkstraMap(from geometry.Point, towardsPl
 			return false
 		}
 		return compareFunc(neighborDist, currentDistanceToPlayer) // depends on rolling direction on our dijkstra map
-		//return neighborDist < currentDistanceToPlayer // depends on rolling direction on our dijkstra map
 	})
 
 	if len(neighbors) == 0 {
@@ -156,7 +149,6 @@ func (g *GameInstance) getMoveOnPlayerDijkstraMap(from geometry.Point, towardsPl
 
 	for _, neighbor := range neighbors {
 		neighborDist, _ := dijkstraMap[neighbor]
-		//if neighborDist < nearestDist {  // depends on rolling direction on our dijkstra map
 		if compareFunc(neighborDist, nearestDist) {
 			nearestDist = neighborDist
 			nearestPos = neighbor
@@ -325,8 +317,6 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 
 	townSpawn := g.state.GetMap().GetNamedLocation("spawn")
 	g.state.SetTownSpawn(townSpawn)
-
-	//g.spawnActorOnMap(g.state.GetPlayer(), townSpawn, playerStartDefinition)
 
 	// load audio: every cue comes from a rec file the player can rewire without a rebuild — sound events
 	// (assets/data/sounds.rec, scripts/remap_sounds.sh), speech (voices.rec, scripts/remap_voices.sh) and the area themes
@@ -589,17 +579,6 @@ func (g *GameInstance) showDebugMenu() {
 			},
 		},
 		{
-			MainText: "Toggle UI Overlays", // should be an ui specific option
-			Action: func() {
-				if g.uiController.HasOverlays() {
-					//g.uiController.ClearAllOverlays()
-					//g.mapRenderer.OnScreenSizeChanged(g.GetDeviceIndependentScreenSize())
-				} else {
-					//g.setupUI()
-				}
-			},
-		},
-		{
 			MainText: "Debug Map Info",
 			Action: func() {
 				visibleMap := g.uiController.GetVisibleMap()
@@ -683,7 +662,6 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 
 	canAct := !actor.HasStatusEffect(common.StatusStunned)
 	if !canAct {
-		//println(fmt.Sprintf("%s is still unable to act. (Stunned)", actor.Name()))
 		return 10, func() {}
 	}
 
@@ -691,7 +669,6 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 	canAttack := actor.GetEnergy() >= minCostAttack && !actor.HasStatusEffect(common.StatusPacified)
 
 	if !canMove && !canAttack {
-		//println(fmt.Sprintf("%s can neither move nor attack. (Immobile & Pacified)", actor.Name()))
 		return 10, func() {}
 	}
 
@@ -885,7 +862,6 @@ func (g *GameInstance) GetActions() common.PlayerActions {
 }
 
 func (g *GameInstance) PlayerMessage(message string) {
-	//println(text)
 	rawText := common.RemoveColorCodes(message)
 	if g.logHook != nil {
 		g.logHook(rawText)

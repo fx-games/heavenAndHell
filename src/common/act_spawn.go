@@ -2,12 +2,10 @@ package common
 
 import (
 	"fmt"
-	"rpg/src/geometry"
 )
 
 type SpawnAction struct {
 	BaseAction
-	spawnPos          geometry.Point
 	spawnFunc         func()
 	actionDescription string
 }

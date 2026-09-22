@@ -45,9 +45,7 @@ func (d *KnockbackAction) Execute(context ActionContext) []Action {
 	// calculate new position
 	d.originPos = actor.MapPosition()
 	destPos := d.originPos.Add(d.direction.Mul(d.distance + 1))
-	los := gameMap.BresenhamLine(d.originPos, destPos, func(pos geometry.Point) bool {
-		return true
-	})
+	los := gameMap.BresenhamLine(d.originPos, destPos, nil) // walls end it; IsCurrentlyPassable below stops at actors
 	d.targetPos = d.originPos
 	var actions []Action
 	distanceMoved := 0

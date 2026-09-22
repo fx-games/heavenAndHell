@@ -14,26 +14,14 @@ func StrInt(value string) int {
 	atoi, _ := strconv.Atoi(value)
 	return atoi
 }
-func Int32Str(value int32) string {
-	return strconv.FormatInt(int64(value), 10)
-}
 func BoolStr(value bool) string {
 	if value {
 		return "true"
 	}
 	return "false"
 }
-func StringsStr(value []string) string {
-	return strings.Join(value, "\n")
-}
 func StrBool(value string) bool {
 	return value == "true"
-}
-func ToPredicate(name string, params ...string) string {
-	return name + "(" + strings.Join(params, ",") + ")"
-}
-func ToPredicateSep(name, sep string, params ...string) string {
-	return name + "(" + strings.Join(params, sep) + ")"
 }
 
 type StringPredicate []string

@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"rpg/src/recfile"
-	"rpg/src/stats"
 	"rpg/src/util"
 )
 
@@ -19,7 +18,7 @@ import (
 // Where the two schemas said the same thing in different words they were merged rather than doubled up:
 //
 //	weapon_damage   D1's iMinDam..iMaxDam and H&H's XdY, both as util.Dice. MinDam/MaxDam are the D1 view.
-//	armor_class     D1's iMinAC..iMaxAC and H&H's interval are the same stats.Interval. MinAC/MaxAC likewise.
+//	armor_class     D1's iMinAC..iMaxAC and H&H's interval are the same util.Interval. MinAC/MaxAC likewise.
 //	cost            D1's iValue. Cost and Value are the one number under both games' names.
 //	dlvl            D1's iMinMLvl.
 //	icon            an icon ID the mod defines, never a raw sheet number (see LoadIcons).
@@ -179,7 +178,7 @@ func itemFromRecord(rec recfile.Record) (Item, error) {
 		case "armor_type":
 			it.Armor.ArmorType = ArmorTypeFromString(f.Value)
 		case "armor_class":
-			it.Armor.ArmorClass = stats.NewIntervalFromString(f.Value)
+			it.Armor.ArmorClass = util.NewIntervalFromString(f.Value)
 			it.MinAC, it.MaxAC = it.Armor.ArmorClass.Min(), it.Armor.ArmorClass.Max()
 		case "weapon_type":
 			it.Weapon.WeaponType = WeaponTypeFromString(f.Value)
@@ -203,7 +202,7 @@ func itemFromRecord(rec recfile.Record) (Item, error) {
 		case "throw_hit_zone":
 			it.Throw.HitZone = f.Value
 		case "throw_damage":
-			it.Throw.Damage = stats.NewIntervalFromString(f.Value)
+			it.Throw.Damage = util.NewIntervalFromString(f.Value)
 		case "throw_chance_to_break":
 			it.Throw.ChanceToBreak = f.AsFloat()
 		case "throw_on_hit_effect":

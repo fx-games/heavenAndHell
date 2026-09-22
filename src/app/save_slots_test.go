@@ -121,8 +121,9 @@ func TestLegacySaveMigratesToSlotOne(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.Chdir(cwd)
-	defer func() { game.SaveDir = filepath.Join(dir, "saves") }() // never leave the real save directory armed
-	game.SaveDir = "saves"                                        // only the real save directory migrates, so the test uses it inside its own temp cwd
+	realDir := game.DefaultSaveDir
+	defer func() { game.SaveDir, game.DefaultSaveDir = filepath.Join(dir, "saves"), realDir }() // never leave it armed
+	game.SaveDir, game.DefaultSaveDir = "saves", "saves"                                        // only the real save directory migrates: pretend it is this temp cwd's
 	if err := os.WriteFile(game.LegacySaveFile, saved, 0o644); err != nil {
 		t.Fatal(err)
 	}

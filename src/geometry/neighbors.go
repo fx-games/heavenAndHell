@@ -49,18 +49,3 @@ func (nb *Neighbors) Cardinal(p Point, keep func(Point) bool) []Point {
 	}
 	return nb.ps
 }
-
-// Diagonal returns 4 adjacent diagonal (inter-cardinal) positions, filtered by
-// keep function.
-func (nb *Neighbors) Diagonal(p Point, keep func(Point) bool) []Point {
-	nb.ps = nb.ps[:0]
-	for y := -1; y <= 1; y += 2 {
-		for x := -1; x <= 1; x += 2 {
-			q := p.Shift(x, y)
-			if keep(q) {
-				nb.ps = append(nb.ps, q)
-			}
-		}
-	}
-	return nb.ps
-}

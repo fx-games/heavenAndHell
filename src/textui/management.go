@@ -1,7 +1,6 @@
 package textui
 
 import (
-	"github.com/gdamore/tcell/v2"
 	"github.com/memmaker/go/cview"
 )
 
@@ -152,8 +151,4 @@ func (u *UI) applyListStyle(list *cview.List) {
 	list.SetSelectedTextColor(bg)
 	list.SetSelectedBackgroundColor(fg)
 	list.SetForceSelectedTextColor(true)
-}
-
-func EscapeKeyEvent() *tcell.EventKey {
-	return tcell.NewEventKey(tcell.KeyEscape, 0, tcell.ModNone)
 }

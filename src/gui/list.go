@@ -1,9 +1,10 @@
 package gui
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
 	"rpg/src/defs"
+
+	"github.com/hajimehoshi/ebiten/v2"
 
 	"rpg/src/geometry"
 	"rpg/src/util"
@@ -28,7 +29,8 @@ type IconList struct {
 	getElements     func() []IconListElement
 	selectedIndex   int
 	tileSize        geometry.Point
-	needsScrolling  bool
+	scroll          ScrollingContent
+	visibleRows     int // rows that fit on screen; the rest scroll
 	topLeft         geometry.Point
 	borderPadding   int
 	lineSpacing     int
@@ -77,17 +79,15 @@ func (i *IconList) OnMouseMoved(x int, y int) (bool, Tooltip) {
 		return false, NoTooltip{}
 	}
 	yStart := i.topLeft.Y + i.borderPadding
-	yEnd := i.topLeft.Y + i.borderPadding + i.posInfo.ItemSizes[0].Y
-	for index, element := range i.currentElements {
-
+	first, end := i.scroll.visible(len(i.currentElements))
+	for index := first; index < end; index++ {
+		yEnd := yStart + i.posInfo.ItemSizes[index].Y
 		// we only check the y coordinate, because the x coordinate is always the same
 		if y >= yStart && y <= yEnd {
 			i.selectedIndex = index
-			return true, NewElementTooltip(i.uiController, element, geometry.Point{X: x, Y: y})
+			return true, NewElementTooltip(i.uiController, i.currentElements[index], geometry.Point{X: x, Y: y})
 		}
-
-		yStart = yStart + int(i.lineSpacing) + i.posInfo.ItemSizes[index].Y
-		yEnd = yEnd + int(i.lineSpacing) + i.posInfo.ItemSizes[index].Y
+		yStart = yEnd + i.lineSpacing
 	}
 	return false, NoTooltip{}
 }
@@ -98,7 +98,7 @@ func (i *IconList) contains(x int, y int) bool {
 }
 
 func (i *IconList) OnMouseWheel(x int, y int, dy float64) bool {
-	return false
+	return i.contains(x, y) && i.scroll.OnMouseWheel(x, y, dy)
 }
 
 func (i *IconList) Draw() {
@@ -109,7 +109,9 @@ func (i *IconList) Draw() {
 	itemDrawX := i.topLeft.X + i.borderPadding
 	itemDrawY := i.topLeft.Y + i.borderPadding + i.posInfo.YOffsetForFirstLine
 
-	for eIndex, element := range i.currentElements {
+	first, end := i.scroll.visible(len(i.currentElements))
+	for eIndex := first; eIndex < end; eIndex++ {
+		element := i.currentElements[eIndex]
 		icon := element.InventoryIcon()
 		iconWidth := int(float64(i.tileSize.X) * i.iconScale)
 		iconHeight := int(float64(i.tileSize.Y) * i.iconScale)
@@ -125,6 +127,8 @@ func (i *IconList) Draw() {
 		renderer.DrawTTFOnScreen(float64(textDrawX), float64(itemDrawY), element.Name(), drawColor)
 		itemDrawY += i.posInfo.ItemSizes[eIndex].Y + i.lineSpacing
 	}
+	right := i.topLeft.X + i.posInfo.SizeInPixels.X - i.borderPadding
+	i.scroll.drawArrows(renderer, right, i.topLeft.Y+i.borderPadding+i.posInfo.YOffsetForFirstLine, i.topLeft.Y+i.posInfo.SizeInPixels.Y-i.borderPadding)
 }
 
 func (i *IconList) ShouldClose() bool {
@@ -134,12 +138,24 @@ func (i *IconList) ShouldClose() bool {
 func (i *IconList) Layout() {
 	i.updateElements()
 	iconWidthWithPadding := int(float64(i.tileSize.X)*i.iconScale) + i.iconPadding
-	i.topLeft, i.posInfo = GetAutoFitRectWithExtraSpace(i.currentElements, i.uiController.GetScreenSize(), i.lineSpacing, geometry.Point{X: i.borderPadding*2 + iconWidthWithPadding, Y: i.borderPadding * 2}, i.uiController.GetRenderer().MeasureString)
+	screen := i.uiController.GetScreenSize()
+	i.topLeft, i.posInfo = GetAutoFitRectWithExtraSpace(i.currentElements, screen, i.lineSpacing, geometry.Point{X: i.borderPadding*2 + iconWidthWithPadding, Y: i.borderPadding * 2}, i.uiController.GetRenderer().MeasureString)
+	i.fitToScreen(screen)
 
 	tileHeight := i.tileSize.Y
 	lineHeight := i.posInfo.YOffsetForFirstLine
 	// make the tileheight the same as the line height
 	i.iconScale = float64(lineHeight) / float64(tileHeight)
+}
+
+// fitToScreen shortens a list taller than the screen to the rows that fit, and lets the rest scroll.
+func (i *IconList) fitToScreen(screen geometry.Point) {
+	pad := 2 * i.borderPadding
+	i.posInfo.SizeInPixels.Y -= pad
+	i.visibleRows = fitRows(&i.posInfo, len(i.currentElements), screen.Y-2*pad)
+	i.posInfo.SizeInPixels.Y += pad
+	i.topLeft.Y = (screen.Y - i.posInfo.SizeInPixels.Y) / 2
+	i.scroll.keepOffsetInRange()
 }
 
 func (i *IconList) updateElements() {
@@ -169,7 +185,7 @@ func NewIconList(uiController *UIController, tileSize geometry.Point, dataSource
 		iconPadding:   6,
 	}
 
-	//i.infoLabel = NewCustomLabel(uiController, i.layoutLabel)
+	i.scroll = newRowScroller(func() int { return len(i.currentElements) }, &i.visibleRows)
 	i.Layout()
 	return i
 }

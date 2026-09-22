@@ -1,9 +1,9 @@
 package defs
 
-import "rpg/src/stats"
+import "rpg/src/util"
 
 type ThrowDefinition struct {
-	Damage        stats.Interval
+	Damage        util.Interval
 	ChanceToBreak float64
 	HitZone       string
 	OnHitEffect   string

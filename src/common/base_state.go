@@ -433,8 +433,6 @@ func (s *State) applyLighting(mapPos geometry.Point, drawColor color.RGBA, world
 				drawColor = multiplyColors(drawColor, d1HeroTorch.LightColor)
 			}
 		}
-		//light := 255 // 1.0 -> 100% of original value
-		//dark := 20   // 0.0 -> 12,75% of original value
 		percentagOfValue := darkPercentage + ((lightPercentage - darkPercentage) * percentageLightness)
 		if !playerStandsInLitArea {
 			drawColor = s.mixLightSourceColor(drawColor, color.RGBA{127, 127, 127, 255}, worldTick)
@@ -547,7 +545,6 @@ func (s *State) MapTransition(to gridmap.Transition) {
 			return false
 		}
 	})
-	//oldPosOnOldMap := g.state.GetPlayer().MapPosition()
 	// remove player from current map
 	oldMapName := ""
 	if s.GetMap() != nil && s.GetPlayer() != nil {
@@ -604,7 +601,6 @@ func (s *State) MapTransition(to gridmap.Transition) {
 	if s.onMapChanged != nil {
 		s.onMapChanged(oldMapName, to.TargetMap)
 	}
-	//g.ShowLogMessage(fmt.Sprintf("Travel from (%d, %d) to (%d, %d)", oldPosOnOldMap.X, oldPosOnOldMap.Y, freeTargetLocation.X, freeTargetLocation.Y))
 }
 
 func (s *State) AddItemToMapWithDistribution(item *Item, pos geometry.Point) {
@@ -699,7 +695,6 @@ func multiplyColors(drawColor color.RGBA, lightColor color.RGBA) color.RGBA {
 	rValN := uint8(float64(rVal) * (float64(lightColor.R) / 255.0))
 	gValN := uint8(float64(gVal) * (float64(lightColor.G) / 255.0))
 	bValN := uint8(float64(bVal) * (float64(lightColor.B) / 255.0))
-	//aValN := uint8(float64(aVal) * percentagOfValue)
 	drawColor = color.RGBA{R: rValN, G: gValN, B: bValN, A: 255}
 	return drawColor
 }
@@ -709,7 +704,6 @@ func multiplyColor(drawColor color.RGBA, percentagOfValue float64) color.RGBA {
 	rValN := uint8(float64(rVal) * percentagOfValue)
 	gValN := uint8(float64(gVal) * percentagOfValue)
 	bValN := uint8(float64(bVal) * percentagOfValue)
-	//aValN := uint8(float64(aVal) * percentagOfValue)
 	drawColor = color.RGBA{R: rValN, G: gValN, B: bValN, A: 255}
 	return drawColor
 }

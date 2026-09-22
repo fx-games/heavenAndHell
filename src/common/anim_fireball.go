@@ -6,11 +6,9 @@ import (
 )
 
 type FireballAnimation struct {
-	projectileAnimation  *ProjectileDirectionAnimation
-	hitAnimations        []Animation
-	caster               *Actor
-	flightIcon           int32
-	flightIconFrameCount int
+	projectileAnimation *ProjectileDirectionAnimation
+	hitAnimations       []Animation
+	caster              *Actor
 }
 
 func (m *FireballAnimation) GetActor() *Actor {
@@ -26,7 +24,7 @@ func NewFireballAnimation(caster *Actor, destination geometry.Point, flightIcon 
 	secondsPerTile := 0.02
 	targetPos := destination
 
-	projectileAnimation := NewProjectileDirectionAnimation(caster, caster.MapPosition(), targetPos, secondsPerTile, flightIcon, 2)
+	projectileAnimation := NewProjectileDirectionAnimation(caster, caster.MapPosition(), targetPos, secondsPerTile, flightIcon, flightIconFrameCount)
 
 	var hitAnimations []Animation
 	for _, pos := range hitPositions {

@@ -1,7 +1,7 @@
 package defs
 
 import (
-	"rpg/src/stats"
+	"rpg/src/util"
 	"strings"
 )
 
@@ -97,7 +97,7 @@ const (
 
 type ArmorDefinition struct {
 	ArmorType  ArmorType
-	ArmorClass stats.Interval
+	ArmorClass util.Interval
 }
 
 func (d ArmorDefinition) IsValid() bool {

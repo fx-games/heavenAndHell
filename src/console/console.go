@@ -13,9 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/memmaker/go/cview"
-	mgeom "github.com/memmaker/go/geometry"
-	"github.com/memmaker/go/textiles"
 	"rpg/files"
 	"rpg/src/common"
 	"rpg/src/defs"
@@ -23,6 +20,10 @@ import (
 	"rpg/src/stats"
 	"rpg/src/textui"
 	"rpg/src/util"
+
+	"github.com/memmaker/go/cview"
+	mgeom "github.com/memmaker/go/geometry"
+	"github.com/memmaker/go/textiles"
 )
 
 type Console struct {

@@ -1,9 +1,10 @@
 package util
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
 	"rpg/src/geometry"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func GetLoopingFrameFromTick(tick uint64, delayBetweenFramesInSeconds float64, frameCount int) int32 {
@@ -29,13 +30,6 @@ func secondsToTicksF(seconds float64) float64 {
 
 func safeTPS() float64 {
 	return max(60, ebiten.ActualTPS())
-}
-
-func LerpPoint(start, end geometry.Point, percent float64) geometry.Point {
-	return geometry.Point{
-		X: int(float64(start.X) + float64(end.X-start.X)*percent),
-		Y: int(float64(start.Y) + float64(end.Y-start.Y)*percent),
-	}
 }
 
 func LerpPointF(start, end geometry.PointF, percent float64) geometry.PointF {

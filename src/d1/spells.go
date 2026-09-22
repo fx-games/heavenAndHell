@@ -328,10 +328,6 @@ const BoomTries = 15
 // tick for the missile's damage read as 1/64.
 const ElementalBurstTicks = 14
 
-func FireWallDamage64(rng *rand.Rand, clvl int) int {
-	return 16 * (rnd(rng, 10) + rnd(rng, 10) + clvl + 2) >> 1
-}
-
 // HellfireFireWallDamage64 is Hellfire's AddFirewall: a misplaced parenthesis turns the roll into plr._pLevel.
 func HellfireFireWallDamage64(clvl int) int { return clvl << 4 >> 1 }
 

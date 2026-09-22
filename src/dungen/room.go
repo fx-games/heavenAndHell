@@ -172,31 +172,6 @@ func (r *DungeonRoom) SetTransform(count int, mirrored bool) {
 	r.mirrored = mirrored
 }
 
-func (r *DungeonRoom) findCenter() geometry.Point {
-	minX := math.MaxInt
-	minY := math.MaxInt
-	maxX := -math.MaxInt
-	maxY := -math.MaxInt
-	for point, _ := range r.floorTiles {
-		if point.X < minX {
-			minX = point.X
-		}
-		if point.Y < minY {
-			minY = point.Y
-		}
-		if point.X > maxX {
-			maxX = point.X
-		}
-		if point.Y > maxY {
-			maxY = point.Y
-		}
-	}
-	return geometry.Point{
-		X: (minX + maxX) / 2,
-		Y: (minY + maxY) / 2,
-	}
-}
-
 func NewDungeonRoomFromRect(random *rand.Rand, bounds geometry.Rect) *DungeonRoom {
 	rectRoom := &DungeonRoom{
 		floorTiles:     roomTilesFromRect(bounds),

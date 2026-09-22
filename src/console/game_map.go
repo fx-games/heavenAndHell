@@ -8,14 +8,15 @@ import (
 	"strings"
 	"unicode"
 
-	mgeom "github.com/memmaker/go/geometry"
-	"github.com/memmaker/go/textiles"
 	"rpg/src/common"
 	"rpg/src/d1"
 	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
 	"rpg/src/util"
+
+	mgeom "github.com/memmaker/go/geometry"
+	"github.com/memmaker/go/textiles"
 )
 
 // textui.MapSource

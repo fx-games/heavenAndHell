@@ -19,11 +19,11 @@ import (
 	"time"
 )
 
-const defaultSaveDir = "saves"
+var DefaultSaveDir = files.AppPath("saves") // next to the binary in a release, like config.rec
 
 // SaveDir holds the save slots, one directory per mod: <mod>/slot<N>.json with its screenshot beside it as
 // slot<N>.png. A mod's games are its own: another mod neither lists nor loads them.
-var SaveDir = defaultSaveDir
+var SaveDir = DefaultSaveDir
 
 // saveMod is the mod whose saves are in play: the active one, or "fallback" for the engine's own room.
 func saveMod() string {
@@ -121,7 +121,7 @@ func readSaveSlot(slot int) common.SaveSlot {
 // save directory takes part: a test or a smoke run pointing SaveDir somewhere else must not walk off with the
 // player's own game.
 func migrateLegacySave() {
-	if SaveDir != defaultSaveDir {
+	if SaveDir != DefaultSaveDir {
 		return
 	}
 	// Slots written before saves were kept per mod lie in SaveDir itself, and every one of them is D1's.

@@ -1,10 +1,11 @@
 package gui
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/util"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type BasicMenu struct {
@@ -23,6 +24,8 @@ type BasicMenu struct {
 	closeOnSelect bool
 	cancelable    bool
 	bounds        geometry.Rect
+	scroll        ScrollingContent
+	visibleRows   int // items that fit on screen; the rest scroll
 }
 
 func NewBasicMenu(uiController *UIController) *BasicMenu {
@@ -34,8 +37,11 @@ func NewBasicMenu(uiController *UIController) *BasicMenu {
 		cancelable:     true,
 		borderPadding:  geometry.Point{X: 40, Y: 40},
 	}
+	b.scroll = newRowScroller(func() int { return len(b.items) }, &b.visibleRows)
 	b.layoutFunc = func() {
 		b.posInfo = SizeNeededForText(b.uiController.GetRenderer().MeasureString, b.items, 10)
+		b.visibleRows = fitRows(&b.posInfo, len(b.items), b.uiController.GetScreenSize().Y-2*b.borderPadding.Y)
+		b.scroll.keepOffsetInRange()
 		b.layoutCentered()
 	}
 	return b
@@ -101,7 +107,17 @@ func (i *BasicMenu) OnMouseMoved(x int, y int) (bool, Tooltip) {
 }
 
 func (i *BasicMenu) OnMouseWheel(x int, y int, dy float64) bool {
-	return false
+	if !i.scroll.OnMouseWheel(x, y, dy) {
+		return false
+	}
+	i.itemBounds = i.calcItemBounds()
+	return true
+}
+
+// followSelection scrolls the keyboard selection into view.
+func (i *BasicMenu) followSelection() {
+	i.scroll.MakeIndexVisible(i.selectedIndex)
+	i.itemBounds = i.calcItemBounds()
 }
 
 func (i *BasicMenu) ShouldClose() bool {
@@ -131,10 +147,10 @@ func (i *BasicMenu) drawStringArray(lines []util.MenuItem) {
 		return
 	}
 	uiRenderer := i.uiController.GetRenderer()
-	//startPos := geometry.Point{X: i.topLeft.X + 2, Y: startAtY}
-	//tWidth, tHeight := uiRenderer.MeasureString(linesAsOneString)
 	drawY := i.topLeft.Y + i.posInfo.YOffsetForFirstLine
-	for lineIndex, line := range lines {
+	first, end := i.scroll.visible(len(lines))
+	for lineIndex := first; lineIndex < end; lineIndex++ {
+		line := lines[lineIndex]
 		if line.MainText == "" {
 			drawY += i.posInfo.YOffsetForFirstLine + i.posInfo.LineDist
 			continue
@@ -150,9 +166,7 @@ func (i *BasicMenu) drawStringArray(lines []util.MenuItem) {
 			textWithColorCodes := line.MainTextWithColorCodes
 			if lineIndex == i.selectedIndex {
 				textWithColorCodes[0].Color = defs.LightTextColor
-				//textWithColorCodes = "[:lightText]" + textWithColorCodes
 			} else {
-				//textWithColorCodes = "[:darkText]" + textWithColorCodes
 				textWithColorCodes[0].Color = defs.DarkTextColor
 			}
 			uiRenderer.DrawTTFOnScreenWithColorCodes(float64(drawX), float64(drawY), textWithColorCodes)
@@ -170,7 +184,7 @@ func (i *BasicMenu) drawStringArray(lines []util.MenuItem) {
 
 		drawY += sizeY + i.posInfo.LineDist
 	}
-
+	i.scroll.drawArrows(uiRenderer, i.topLeft.X+i.posInfo.SizeInPixels.X+i.borderPadding.X/4, i.topLeft.Y+i.posInfo.YOffsetForFirstLine, i.topLeft.Y+i.posInfo.SizeInPixels.Y)
 }
 
 func (i *BasicMenu) layoutCentered() {
@@ -195,6 +209,7 @@ func (i *BasicMenu) selectionUp() {
 	} else {
 		i.selectedIndex--
 	}
+	i.followSelection()
 }
 
 func (i *BasicMenu) selectionDown() {
@@ -204,6 +219,7 @@ func (i *BasicMenu) selectionDown() {
 	} else {
 		i.selectedIndex++
 	}
+	i.followSelection()
 }
 
 func (i *BasicMenu) confirmSelection() {
@@ -232,7 +248,9 @@ func (i *BasicMenu) calcItemBounds() []geometry.Rect {
 	itemBounds := make([]geometry.Rect, len(i.items))
 	drawY := i.topLeft.Y
 	padding := i.borderPadding.Div(2)
-	for lineIndex, line := range i.items {
+	first, end := i.scroll.visible(len(i.items))
+	for lineIndex := first; lineIndex < end; lineIndex++ {
+		line := i.items[lineIndex]
 		if line.MainText == "" {
 			drawY += i.posInfo.YOffsetForFirstLine + i.posInfo.LineDist
 			continue

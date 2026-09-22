@@ -8,7 +8,7 @@ import (
 	"slices"
 
 	"rpg/src/defs"
-	"rpg/src/stats"
+	"rpg/src/util"
 )
 
 // Item indexes (IDI_) used by generation and starting gear.
@@ -115,7 +115,7 @@ func (d *Data) idx(internalName string) int {
 }
 
 // rollCount rolls a stock size out of the record's interval, both ends included.
-func (g *Generator) rollCount(i stats.Interval) int {
+func (g *Generator) rollCount(i util.Interval) int {
 	return g.random(i.Max()-i.Min()+1) + i.Min()
 }
 

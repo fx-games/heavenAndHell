@@ -2,16 +2,13 @@ package stats
 
 import (
 	"fmt"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"image/color"
 	"math"
 	"strings"
-)
 
-func StatFromString(statName string) Name {
-	return Name(strings.ToLower(statName))
-}
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+)
 
 type Name string
 
@@ -51,38 +48,6 @@ const (
 
 	LightRadius Name = "light_radius"
 )
-
-func GetAllAttributeNames() []Name {
-	return []Name{
-		Level,
-		Strength,
-		Intelligence,
-		Dexterity,
-		BaseSpeed,
-	}
-}
-
-func GetAttributesForModifiersByLevel(level int) []Name {
-	/*
-	   BaseSpeed:            10, // we now would need an attack speed and a movement speed modifier
-	              AttackSpeedFactor:    1,
-	              MoveSpeedFactor:      1,
-	              EnhancedDamageFactor: 1,
-
-	              MaxHealth: 10,
-	              MaxMana:   10,
-	*/
-	switch {
-	case level < 3:
-		return []Name{Strength, Intelligence, Dexterity}
-	case level >= 3 && level < 5:
-		return []Name{Strength, Intelligence, Dexterity, MaxHealth, MaxMana}
-	case level >= 5 && level < 7:
-		return []Name{Strength, Intelligence, Dexterity, MaxHealth, MaxMana, AttackSpeedFactor, MoveSpeedFactor}
-	default:
-		return []Name{Strength, Intelligence, Dexterity, MaxHealth, MaxMana, AttackSpeedFactor, MoveSpeedFactor, DamageBonus}
-	}
-}
 
 type ModificationMode bool
 

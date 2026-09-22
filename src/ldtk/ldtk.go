@@ -3,11 +3,12 @@ package ldtk
 import (
 	"encoding/json"
 	"errors"
-	"github.com/tidwall/gjson"
 	"image"
 	"image/color"
 	"path/filepath"
 	"strconv"
+
+	"github.com/tidwall/gjson"
 )
 
 // Package ldtkgo is a loader for LDtk projects, written in Golang. The general idea is to load a project using ldtkgo.LoadFile() or ldtkgo.LoadBytes(), and then use the resulting Project.

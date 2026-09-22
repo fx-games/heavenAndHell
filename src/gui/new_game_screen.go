@@ -1,11 +1,12 @@
 package gui
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
 	"rpg/src/common"
 	"rpg/src/defs"
 	"rpg/src/geometry"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 const newGameIconSize = 32 // 8px tiles at scale 4
@@ -40,7 +41,6 @@ func (u *UIController) OpenNewGameScreen(start func(class defs.LoadoutDefinition
 
 func (s *NewGameScreen) permadeathRow() int { return len(s.classes) }
 func (s *NewGameScreen) nameRow() int       { return len(s.classes) + 1 }
-func (s *NewGameScreen) startRow() int      { return len(s.classes) + 2 }
 func (s *NewGameScreen) backRow() int       { return len(s.classes) + 4 }
 
 func (s *NewGameScreen) Layout() {

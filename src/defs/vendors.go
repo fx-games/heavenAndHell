@@ -13,7 +13,7 @@ import (
 	"github.com/expr-lang/expr/vm"
 
 	"rpg/src/recfile"
-	"rpg/src/stats"
+	"rpg/src/util"
 )
 
 // ItemTypeNames names the item_type numbers a mod writes in items.rec, in that order, so a store record can
@@ -48,9 +48,9 @@ type Vendor struct {
 	When     string   // an expr-lang condition over quests (as in quests.rec) for the record to count at all
 
 	Purse          int
-	ItemCount      stats.Interval // how many items the vendor stocks, the always list included
+	ItemCount      util.Interval // how many items the vendor stocks, the always list included
 	TurnoverItems  int
-	SometimesCount stats.Interval
+	SometimesCount util.Interval
 	Always         []string // item internal_names always in stock
 	Sometimes      []string // item internal_names it may stock
 
@@ -69,7 +69,7 @@ type Vendor struct {
 	SlotLevels      []int  // fixed stock slots, each an item level offset (a rotating premium stock)
 	RotateBy        int    // premium: slots each new level shifts the stock down by (1.09: 2 of 6, Hellfire: 3 of 15)
 	FeaturedMiscID  string // a kind of item the vendor puts out first, before the rest (Hellfire's witch books)
-	FeaturedCount   stats.Interval
+	FeaturedCount   util.Interval
 	Shuns           map[string][]string // class name -> item types it keeps away from that class
 	ShunTries       int                 // how long it keeps shunning before it gives up
 	UsableElixirs   bool                // only elixirs of a stat still under the class maximum (Hellfire's HealerItemOk)
@@ -154,11 +154,11 @@ func vendorFromRecord(rec recfile.Record) (Vendor, error) {
 		case "purse":
 			v.Purse = f.AsInt()
 		case "item_count":
-			v.ItemCount = stats.NewIntervalFromString(f.Value)
+			v.ItemCount = util.NewIntervalFromString(f.Value)
 		case "turnover_items":
 			v.TurnoverItems = f.AsInt()
 		case "sometimes_count":
-			v.SometimesCount = stats.NewIntervalFromString(f.Value)
+			v.SometimesCount = util.NewIntervalFromString(f.Value)
 		case "always":
 			v.Always = append(v.Always, f.Value)
 		case "sometimes":
@@ -196,7 +196,7 @@ func vendorFromRecord(rec recfile.Record) (Vendor, error) {
 		case "featured_misc_id":
 			v.FeaturedMiscID = f.Value
 		case "featured_count":
-			v.FeaturedCount = stats.NewIntervalFromString(f.Value)
+			v.FeaturedCount = util.NewIntervalFromString(f.Value)
 		case "rotate_by":
 			v.RotateBy = f.AsInt()
 		case "usable_elixirs_only":

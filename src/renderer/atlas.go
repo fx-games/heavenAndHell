@@ -1,12 +1,13 @@
 package renderer
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"image"
 	"image/color"
 	"log"
 	"rpg/files"
 	"rpg/src/geometry"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type CellDrawInfo struct {

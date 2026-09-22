@@ -128,24 +128,6 @@ func (s *State) onSetLevelOf(m *gridmap.GridMap[*Actor, *Item, Object], q int) b
 	return q >= 0 && s.d1SetQuest(m.GetName()) == q
 }
 
-// questLevel is the id of the level quest q belongs to (quests.rec's level), "" for a quest the mod lacks.
-func (s *State) questLevel(q int) string {
-	if q < 0 || q >= len(s.QuestDefs()) {
-		return ""
-	}
-	return s.QuestDefs()[q].Level
-}
-
-// questMap is the id of quest q's set level, "" when it has none.
-func (s *State) questMap(q int) string {
-	for _, l := range s.mapGen.Levels() {
-		if cfg, ok := l.Config.(d1.SetLevelParams); ok && s.QuestByKey(cfg.Quest) == q {
-			return l.Map
-		}
-	}
-	return ""
-}
-
 // d1QuestTopic is what npc says about quest q, if S_TalkEnter lists it: the quest is active and logged. What
 // each townsperson says comes from the quest's gossip lines; which of them is offered is the logic below.
 // Black Mushroom's topic moves from Adria to Pepin once she has the mushroom, and Pepin's ends once he has the
@@ -473,8 +455,6 @@ func d1VileBooksRead(m *gridmap.GridMap[*Actor, *Item, Object]) (n int) {
 	}
 	return
 }
-
-func isD1Skull(kind int) bool { return kind == d1.ObjSWITCHSKL }
 
 // d1ObjectGroupUsed ports OperateLever's and BreakCrux's check: every object of the kind in group v is used.
 func d1ObjectGroupUsed(m *gridmap.GridMap[*Actor, *Item, Object], kind func(int) bool, v int) bool {

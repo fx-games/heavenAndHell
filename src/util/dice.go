@@ -63,20 +63,8 @@ func (r Dice) Roll() int {
 	return result
 }
 
-func (r Dice) RollWithBonus(bonus int) int {
-	return r.Roll() + bonus
-}
-
 func (r Dice) DiceCount() int {
 	return r.dice
-}
-
-func (r Dice) Avg() int {
-	return r.Min() + (r.Max()-r.Min())/2
-}
-
-func (r Dice) RollPyramid() int {
-	return int((float64(r.Roll()) + float64(r.Roll())) * 0.5)
 }
 
 func (r Dice) WithBonus(plus int) Dice {
@@ -85,19 +73,6 @@ func (r Dice) WithBonus(plus int) Dice {
 
 func (r Dice) NotZero() bool {
 	return r.dice > 0 || r.sides > 0 || r.bonus > 0
-}
-
-func (r Dice) ExpectedValue() int {
-	if r.isFixed() {
-		return r.Min()
-	}
-	// erwartungswert
-	sum := 0.0
-	p := 1.0 / float64(r.sides)
-	for i := 1; i < r.sides; i++ {
-		sum += float64(i) * p
-	}
-	return int(float64(r.dice)*sum) + r.bonus
 }
 
 func ParseDice(dice string) Dice {
@@ -157,6 +132,63 @@ func ParseDice(dice string) Dice {
 	return NewDice(numDice, numSides, bonus)
 }
 
-func InSix(count int) bool {
-	return rand.Intn(6)+1 <= count
+// Interval is a flat range, every value from min to max equally likely; Dice is a sum of rolls (bell-shaped).
+// Both parse "min-max"; only Dice parses "NdM+B".
+type Interval struct {
+	min int
+	max int
+}
+
+func NewInterval(min, max int) Interval {
+	return Interval{
+		min: min,
+		max: max,
+	}
+}
+
+func NewIntervalFromString(str string) Interval {
+	if !strings.Contains(str, "-") {
+		minDamg, _ := strconv.Atoi(str)
+		return Interval{
+			min: minDamg,
+			max: minDamg,
+		}
+	}
+	var minDamg, maxDamg int
+	fmt.Sscanf(str, "%d-%d", &minDamg, &maxDamg)
+	return Interval{
+		min: minDamg,
+		max: maxDamg,
+	}
+}
+
+func (i Interval) Min() int {
+	return i.min
+}
+
+func (i Interval) Max() int {
+	return i.max
+}
+
+func (i Interval) Roll() int {
+	if i.min == i.max {
+		return i.min
+	}
+	// 2..6 (2,3,4,5,6) -> 6-2 = 4 -> Intn(4+1) -> 0..4 -> +2 -> 2..6
+	return rand.Intn(i.max-i.min+1) + i.min
+}
+
+func (i Interval) ToString() string {
+	if i.min == i.max {
+		return fmt.Sprintf("%d", i.min)
+	}
+	return fmt.Sprintf("%d-%d", i.min, i.max)
+}
+
+func (i Interval) NotZero() bool {
+	return i.min != 0 || i.max != 0
+}
+
+func (i Interval) AsTuple() Tuple[int, int] {
+	return Tuple[int, int]{Item1: i.min, Item2: i.max}
 }

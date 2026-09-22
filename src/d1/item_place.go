@@ -173,26 +173,6 @@ func (g *gen) initItems() {
 	}
 }
 
-// questItemSpot ports SpawnQuestItem's randarea: a random spot with randarea×randarea free cells, shrinking the
-// area after 1000 tries.
-func (g *gen) questItemSpot(randarea int) (x, y int) {
-	for tries := 1; ; tries++ {
-		if tries > 1000 && randarea > 1 {
-			randarea--
-		}
-		x, y = g.rnd(112), g.rnd(112)
-		ok := true
-		for i := 0; i < randarea && ok; i++ {
-			for j := 0; j < randarea && ok; j++ {
-				ok = g.itemSpaceOk(i+x, j+y)
-			}
-		}
-		if ok {
-			return
-		}
-	}
-}
-
 // addInitItems ports AddInitItems: 3-5 potions lying around.
 func (g *gen) addInitItems() {
 	for n := g.rnd(3) + 3; n > 0; n-- {

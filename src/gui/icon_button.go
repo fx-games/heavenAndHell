@@ -1,10 +1,11 @@
 package gui
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/util"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type ButtonOverlay struct {

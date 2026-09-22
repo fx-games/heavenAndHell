@@ -1,9 +1,10 @@
 package gui
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
 	"rpg/src/common"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func (u *UIController) Update() error {

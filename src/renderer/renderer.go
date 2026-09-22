@@ -1,10 +1,6 @@
 package renderer
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text"
-	"github.com/hajimehoshi/ebiten/v2/vector"
-	"golang.org/x/image/font"
 	"image"
 	"image/color"
 	"regexp"
@@ -12,6 +8,11 @@ import (
 	"rpg/src/util"
 	"strconv"
 	"strings"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text"
+	"github.com/hajimehoshi/ebiten/v2/vector"
+	"golang.org/x/image/font"
 )
 
 // what do we need?
@@ -60,7 +61,6 @@ func (g *TileRenderer) SetDefaultColors(borderColor, fillColor color.Color) {
 func (g *TileRenderer) MeasureString(textToMeasure string) (float64, float64) {
 	_, advance := font.BoundString(g.ttfFont, textToMeasure)
 	height := g.ttfFont.Metrics().Ascent + g.ttfFont.Metrics().Descent
-	//return float64((bounds.Max.X - bounds.Min.X).Round()) / g.deviceScale, float64((bounds.Max.Y - bounds.Min.Y).Round()) / g.deviceScale
 	return float64((advance).Ceil()) / g.deviceScale, float64((height).Round()) / g.deviceScale
 }
 func (g *TileRenderer) SetDefaultAtlas(atlas TextureAtlas) {
@@ -96,8 +96,6 @@ func (g *TileRenderer) SetFont(font BitmapFont) {
 }
 func (g *TileRenderer) DrawDefaultBorder(topLeftScreen geometry.Point, size geometry.Point) {
 
-	//scale := g.deviceScale
-
 	drawX := float64(topLeftScreen.X) * g.deviceScale
 	drawY := float64(topLeftScreen.Y) * g.deviceScale
 
@@ -119,7 +117,6 @@ func (g *TileRenderer) DrawDefaultBorder(topLeftScreen geometry.Point, size geom
 	scaleWithBorderY := heightWithBorder / float64(tileSize.Y)
 	g.op.GeoM.Scale(scaleWithBorderX, scaleWithBorderY)
 	g.op.GeoM.Translate(float64(drawX)-borderSize, float64(drawY)-borderSize)
-	//g.op.GeoM.Translate(float64(drawX), float64(drawY))
 	g.currentRenderTarget.DrawImage(ExtractSubImageFromAtlas(g.whiteTile, g.defaultAtlas), g.op)
 
 	g.op.ColorScale.Reset()
@@ -152,8 +149,6 @@ func (g *TileRenderer) DrawImageOnScreen(screenX int, screenY int, size geometry
 
 func (g *TileRenderer) DrawColoredBorder(topLeftScreen geometry.Point, size geometry.Point, fillColor, borderColor color.Color) {
 
-	//scale := g.deviceScale
-
 	drawX := float64(topLeftScreen.X) * g.deviceScale
 	drawY := float64(topLeftScreen.Y) * g.deviceScale
 
@@ -175,7 +170,6 @@ func (g *TileRenderer) DrawColoredBorder(topLeftScreen geometry.Point, size geom
 	g.op.GeoM.Reset()
 	g.op.GeoM.Scale(scaleWithBorderX, scaleWithBorderY)
 	g.op.GeoM.Translate(float64(drawX)-borderSize, float64(drawY)-borderSize)
-	//g.op.GeoM.Translate(float64(drawX), float64(drawY))
 	g.currentRenderTarget.DrawImage(ExtractSubImageFromAtlas(g.whiteTile, g.defaultAtlas), g.op)
 
 	g.op.ColorScale.Reset()
@@ -264,7 +258,6 @@ func (g *TileRenderer) SetGlobalScaleColor(color [4]float32) {
 }
 func (g *TileRenderer) DrawTile(screenX float64, screenY float64, atlas TextureAtlas, index int32, scale geometry.PointF, tintColor color.Color, flipX bool) {
 	g.op.ColorScale.Reset()
-	//g.op.ColorScale.SetR()
 
 	// CORRECT: g.op.ColorScale.ScaleWithColor(tintColor)
 
@@ -359,7 +352,6 @@ func (g *TileRenderer) DrawTTFOnScreenWithColorCodes(screenX, screenY float64, t
 		drawOptions.ColorScale.Reset()
 		drawOptions.ColorScale.ScaleWithColor(textPart.Color)
 		text.DrawWithOptions(g.currentRenderTarget, textPart.Text, g.ttfFont, drawOptions)
-		//text.Draw(g.currentRenderTarget, textPart.Text, g.ttfFont, screenX+offset, screenY, textPart.Color)
 	}
 
 }
@@ -374,7 +366,6 @@ func (g *TileRenderer) DrawCharOnScreen(screenX, screenY int, char rune, scale f
 	}
 	fontScale := g.deviceScale * scale
 	g.op.ColorScale.Reset()
-	//g.op.ColorScale.ScaleWithColor(textColor)
 	_, _, _, alphaByte := textColor.RGBA()
 	alphaFloat := float32(float64(alphaByte) / 65535.0)
 	g.op.ColorScale.ScaleAlpha(alphaFloat)

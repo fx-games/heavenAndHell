@@ -5,7 +5,6 @@ import (
 
 	"rpg/src/defs"
 	"rpg/src/dungeon"
-	"rpg/src/geometry"
 	"rpg/src/gridmap"
 )
 
@@ -111,15 +110,4 @@ func (s *State) wireExits(m *gridmap.GridMap[*Actor, *Item, Object]) {
 		}
 		m.AddTransitionAt(p, gridmap.Transition{TargetMap: e.Target, TargetLocation: e.Arrival})
 	}
-}
-
-// exitSpot is where on level id the exit leading to target starts, for code that needs the way between two
-// levels (the recall spell). ok false when the level declares none.
-func (s *State) exitSpot(m *gridmap.GridMap[*Actor, *Item, Object], target string) (geometry.Point, bool) {
-	for _, e := range s.Level(m.GetName()).Exits {
-		if e.Target == target {
-			return m.GetNamedLocation(e.Location), true
-		}
-	}
-	return geometry.Point{}, false
 }

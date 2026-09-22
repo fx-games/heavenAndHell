@@ -8,7 +8,6 @@ import (
 	"rpg/src/dungen"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
-	"rpg/src/stats"
 	"rpg/src/util"
 )
 
@@ -122,7 +121,7 @@ func (g *Factory) groupSpawnOf(mon defs.Monster) []defs.Monster {
 		name, count := entry, 1
 		if util.LooksLikeAFunction(entry) {
 			n, args := util.GetNameAndArgs(entry)
-			name, count = n, stats.NewIntervalFromString(args.Get(0)).LinearRandom()
+			name, count = n, util.NewIntervalFromString(args.Get(0)).Roll()
 		}
 		companion, ok := g.monsterByID(name)
 		if !ok {

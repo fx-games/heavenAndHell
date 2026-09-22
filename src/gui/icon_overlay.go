@@ -1,12 +1,13 @@
 package gui
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
 	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/util"
 	"strconv"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type IconDataSource struct {

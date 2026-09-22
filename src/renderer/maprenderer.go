@@ -1,10 +1,11 @@
 package renderer
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
 	"math"
 	"rpg/src/geometry"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type MapRenderer struct {

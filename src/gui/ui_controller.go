@@ -2,9 +2,6 @@ package gui
 
 import (
 	"fmt"
-	"github.com/hajimehoshi/ebiten/v2"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
 	"image/color"
 	"io"
 	"math"
@@ -20,6 +17,10 @@ import (
 	"slices"
 	"sort"
 	"strings"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 type TilemapAnimInfo struct {
@@ -117,7 +118,6 @@ type UIController struct {
 	setToExactFit    bool
 	manualScroll     bool // arrow keys panned the map; suspends auto-centering until recentered
 	isFullScreen     bool
-	logHook          func(string)
 	worldTicks       uint64
 	thumbnail        *ebiten.Image // the last unobstructed frame, scaled down, for a save slot's screenshot
 	shouldQuitGame   bool
@@ -204,13 +204,10 @@ func GetAutoFitRectWithExtraSpace[T fmt.Stringer](text []T, screenSize geometry.
 	posInfo.SizeInPixels.Y += padding.Y
 
 	startX := (screenSize.X - posInfo.SizeInPixels.X) / 2
-	//endX := startX + width
 
 	startY := (screenSize.Y - posInfo.SizeInPixels.Y) / 2
-	//endY := startY + height
 
 	topLeft := geometry.Point{X: startX, Y: startY}
-	//bottomRight := geometry.Point{X: endX, Y: endY}
 	return topLeft, posInfo
 }
 
@@ -454,8 +451,8 @@ func (u *UIController) OpenTextWindow(buffer []util.LabelText) {
 	}
 	textWindow := NewCenteredTextLabel(u)
 	textWindow.SetCanBeClosed(true)
+	textWindow.SetBorderPadding(geometry.Point{X: 15, Y: 15}) // before SetText: the layout fits the window to the screen with it
 	textWindow.SetText(util.WrapLabelText(buffer, u.GetScreenSize().X*2/3, u.tileRenderer.MeasureString))
-	textWindow.SetBorderPadding(geometry.Point{X: 15, Y: 15})
 	u.PushWidget(textWindow)
 }
 
@@ -1125,7 +1122,6 @@ func (u *UIController) SetTTFFont(file io.ReaderAt, size float64) {
 	if faceErr != nil {
 		println(faceErr.Error())
 	}
-	//mplusBigFont = text.FaceWithLineHeight(mplusBigFont, 54) // adjust line height
 	u.tileRenderer.SetTTF(fontFace)
 }
 
@@ -1290,7 +1286,6 @@ func (u *UIController) Layout(outsideWidth, outsideHeight int) (screenWidth, scr
 }
 
 func (u *UIController) LayoutF(outsideWidth, outsideHeight float64) (screenWidth, screenHeight float64) {
-	//u.deviceDPIScale = ebiten.DeviceScaleFactor()
 	intWidth := int(outsideWidth)
 	intHeight := int(outsideHeight)
 	if u.screenSize.X != intWidth || u.screenSize.Y != intHeight {
@@ -1388,7 +1383,6 @@ func (u *UIController) OpenPlayerStashInTown() {
 	gui := u
 	stashInTown := state.GetPlayerStashInTown()
 	playerInv := state.GetPlayer().GetInventory()
-	//playerEquip := g.state.GetPlayer().GetEquipment()
 
 	// NEW
 	onDrop := func(item *common.Item) {
@@ -1624,7 +1618,6 @@ func (u *UIController) ShowLog() {
 		buffer = buffer[len(buffer)-20:]
 	}
 	u.OpenTextWindow(toGradientLabelText(u.tileRenderer.ParseColorCodedText, buffer))
-	//logWindow.ScrollToBottom()
 }
 
 func (u *UIController) OpenListInventory() {
@@ -1834,7 +1827,6 @@ func (u *UIController) showFlags() {
 	state := u.context.GameState()
 	asStrings := state.GetFlags().AsStrings()
 	u.OpenTextWindow(util.ToLabelText(asStrings))
-	//logWindow.ScrollToBottom()
 }
 
 func (u *UIController) setTileScale(scale float64) {

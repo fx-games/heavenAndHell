@@ -201,7 +201,7 @@ func RemoveTimedEffectsBySource(timekeeper *TimeKeeper, source EffectSource) {
 }
 
 func (g *Factory) getDamageBuff(args util.Arguments) UntargetedEffect {
-	intervalRange := stats.NewIntervalFromString(args.Get(0))
+	intervalRange := util.NewIntervalFromString(args.Get(0))
 	turnCount := args.GetInt(1)
 	effect := func(user *Actor, source EffectSource) {
 		modifier := defs.AddToBaseAttributeRandomly(g.RandomSource, stats.DamageBonus, intervalRange.AsTuple())
@@ -328,28 +328,15 @@ func (g *Factory) getHealHealthAndMana(args util.Arguments) UntargetedEffect {
 		},
 	}
 }
-func (g *Factory) getHealHealth(args util.Arguments) UntargetedEffect {
-	effect := func(user *Actor, source EffectSource) {
-		healHealthAction := NewChangeResourceAction(NewActorCause("Full Heal", user), user, stats.Health, float64(user.GetStats().GetAttribute(stats.MaxHealth)))
-		g.ActionBroker.Execute(healHealthAction)
-		g.UI().UpdateStatsLabel()
-	}
-	return UntargetedEffect{
-		Effect: effect,
-		Description: []util.LabelText{
-			util.LabelTextFromString("Completely heal health"),
-		},
-	}
-}
 func (g *Factory) logIfPlayer(user *Actor, message string) {
 	if user == g.State.GetPlayer() {
 		g.Msg(message)
 	}
 }
 func (g *Factory) getHealHealthBy(args util.Arguments) UntargetedEffect {
-	interval := stats.NewIntervalFromString(args.Get(0))
+	interval := util.NewIntervalFromString(args.Get(0))
 	effect := func(user *Actor, source EffectSource) {
-		healHealthAction := NewChangeResourceAction(NewActorCause("Heal", user), user, stats.Health, float64(interval.LinearRandom()))
+		healHealthAction := NewChangeResourceAction(NewActorCause("Heal", user), user, stats.Health, float64(interval.Roll()))
 		g.ActionBroker.Execute(healHealthAction)
 		g.logIfPlayer(user, "You feel better")
 		g.tryEndTurn(user, 100/user.GetBaseSpeed())
@@ -363,9 +350,9 @@ func (g *Factory) getHealHealthBy(args util.Arguments) UntargetedEffect {
 }
 
 func (g *Factory) getHealManaBy(args util.Arguments) UntargetedEffect {
-	interval := stats.NewIntervalFromString(args.Get(0))
+	interval := util.NewIntervalFromString(args.Get(0))
 	effect := func(user *Actor, source EffectSource) {
-		healHealthAction := NewChangeResourceAction(NewActorCause("Mana Surge", user), user, stats.Mana, float64(interval.LinearRandom()))
+		healHealthAction := NewChangeResourceAction(NewActorCause("Mana Surge", user), user, stats.Mana, float64(interval.Roll()))
 		g.ActionBroker.Execute(healHealthAction)
 		g.Msg("You feel a surge of mana")
 		g.tryEndTurn(user, 100/user.GetBaseSpeed())
@@ -555,7 +542,7 @@ func (g *Factory) tryEndTurn(user *Actor, autUsed int) {
 }
 
 func (g *Factory) getBlessing(args util.Arguments) UntargetedEffect {
-	//interval := stats.NewIntervalFromString(args.Get(0))
+	//interval := util.NewIntervalFromString(args.Get(0))
 	turnCount := args.GetInt(0)
 	effect := func(user *Actor, source EffectSource) {
 
@@ -628,7 +615,7 @@ func (g *Factory) getBerserkSelfAction(args util.Arguments) UntargetedEffect {
 	if args.IsEmpty() {
 		g.Msg(fmt.Sprintf("Berserk effect requires arguments"))
 	}
-	intervalRange := stats.NewIntervalFromString(args.Get(0))
+	intervalRange := util.NewIntervalFromString(args.Get(0))
 	turnCount := args.GetInt(1)
 	effect := func(user *Actor, source EffectSource) {
 		applyStatusAction := NewApplyStatusAction(NewActorCause("ApplyStatusEffect", user), user, StatusBerserk, turnCount)
@@ -714,7 +701,7 @@ func (g *Factory) getRandomTeleportAction(args util.Arguments) UntargetedEffect 
 	if args.IsEmpty() {
 		g.Msg(fmt.Sprintf("Teleport effect requires arguments"))
 	}
-	distanceInterval := stats.NewIntervalFromString(args.Get(0))
+	distanceInterval := util.NewIntervalFromString(args.Get(0))
 
 	effect := func(user *Actor, source EffectSource) {
 		currentMap := g.State.GetMap()
@@ -888,14 +875,6 @@ func (g *Factory) NewConditionFromString(condition string) func(user *Actor) boo
 func (g *Factory) hasEnchentableArmor(user *Actor) bool {
 	if !user.GetInventory().HasEnchantableArmor() {
 		g.Msg("You have no armor to enchant")
-		return false
-	}
-	return true
-}
-
-func (g *Factory) doesntHaveDamageBuff(user *Actor) bool {
-	if user.GetStats().IsBuffed(stats.DamageBonus) {
-		g.Msg("Your damage output is already magically enhanced.")
 		return false
 	}
 	return true

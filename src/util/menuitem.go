@@ -71,13 +71,6 @@ func LabelTextFromString(text string) LabelText {
 func LabelTextFromStringWithColor(text string, textColor color.Color) LabelText {
 	return LabelText{Text: text, TextColor: textColor}
 }
-func IndexToXY(index int, width int) (int, int) {
-	return index % width, index / width
-}
-
-func XYToIndex(x int, y int, width int) int {
-	return y*width + x
-}
 
 // WrapLabelText greedily word-wraps plain lines wider than maxWidth pixels; color-coded lines pass through.
 func WrapLabelText(lines []LabelText, maxWidth int, measureString func(line string) (float64, float64)) []LabelText {

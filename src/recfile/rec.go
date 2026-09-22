@@ -2,7 +2,6 @@ package recfile
 
 import (
 	"bufio"
-	"encoding/csv"
 	"fmt"
 	"io"
 	"regexp"
@@ -225,12 +224,6 @@ func (r *RecReader) End() map[string][]Record {
 	return r.records
 }
 
-func (r *RecReader) ReadLines(data []string) map[string][]Record {
-	for _, line := range data {
-		r.ReadLine(line)
-	}
-	return r.End()
-}
 func defaultOnly(records map[string][]Record) []Record {
 	return records["default"]
 }
@@ -247,15 +240,6 @@ func ReadMulti(input io.Reader) map[string][]Record {
 }
 func Write(file io.StringWriter, records []Record) error {
 	return WriteMulti(file, map[string][]Record{"default": records})
-}
-func WriteCSV(output io.Writer, fieldNames []string, records []Record) {
-	csvWriter := csv.NewWriter(output)
-	csvWriter.Write(fieldNames)
-	for _, record := range records {
-		asValues := record.ToFixedSizeValueList(fieldNames)
-		csvWriter.Write(asValues)
-	}
-	csvWriter.Flush()
 }
 func WriteMulti(file io.StringWriter, recordsInCategories map[string][]Record) error {
 	sanitizeFieldname := func(s string) string {

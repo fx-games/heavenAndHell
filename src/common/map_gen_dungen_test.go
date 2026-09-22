@@ -68,19 +68,7 @@ func loadModLevels(t *testing.T) []dungeon.Level {
 // reachable flood-fills the walkable cells from a start, through doors: a door cell is floor with a door object
 // standing on it, so walkability alone answers "can the hero get there".
 func reachable(m *gridmap.GridMap[*Actor, *Item, Object], from geometry.Point) map[geometry.Point]bool {
-	seen := map[geometry.Point]bool{from: true}
-	queue := []geometry.Point{from}
-	for len(queue) > 0 {
-		p := queue[0]
-		queue = queue[1:]
-		for _, n := range m.GetFilteredNeighbors(p, m.Contains) {
-			if !seen[n] && m.IsTileWalkable(n) {
-				seen[n] = true
-				queue = append(queue, n)
-			}
-		}
-	}
-	return seen
+	return m.Reachable(from, m.IsTileWalkable)
 }
 
 // The point of the whole dispatch: selecting a mod whose levels name a dungen generator has to give you a

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"image/color"
 	"testing"
 
 	"rpg/src/geometry"
@@ -74,3 +75,26 @@ func TestMoveWaitsForProjectileHit(t *testing.T) {
 		t.Fatal("didn't move after the hit")
 	}
 }
+
+// A multi-frame projectile shows its frames during flight, however fast it flies.
+func TestProjectileCyclesFramesInFlight(t *testing.T) {
+	bolt := NewProjectileDirectionAnimation(nil, geometry.Point{}, geometry.Point{X: 4}, 0.02, 100, 2)
+	seen := map[int32]bool{}
+	r := &iconRecorder{}
+	for !bolt.IsDone() {
+		bolt.Draw(r)
+		seen[r.icon] = true
+		bolt.Tick()
+	}
+	if !seen[100] || !seen[101] {
+		t.Fatalf("frames seen in flight: %v", seen)
+	}
+}
+
+type iconRecorder struct{ icon int32 }
+
+func (r *iconRecorder) DrawOnMap(geometry.Point, int32, color.Color)                           {}
+func (r *iconRecorder) DrawStringOnMapWithOffset(_, _ geometry.Point, _ string, _ color.Color) {}
+func (r *iconRecorder) MeasureString(string) (float64, float64)                                { return 0, 0 }
+func (r *iconRecorder) GetScaledTileSize() geometry.PointF                                     { return geometry.PointF{} }
+func (r *iconRecorder) DrawOnMapF(_ geometry.PointF, icon int32, _ color.Color)                { r.icon = icon }

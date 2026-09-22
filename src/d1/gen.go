@@ -885,9 +885,6 @@ func (g *Generator) GroupSize(dlvl int) int {
 	return 1
 }
 
-// MonsterCount ports InitMonsters: one monster per 30 walkable D1 tiles, capped at 190.
-func MonsterCount(walkableTiles int) int { return min(walkableTiles/30, 190) }
-
 // PlainItem ports SetPlrHandItem: a base item without random AC or affixes (starting gear).
 func (g *Generator) PlainItem(idx int) *Item {
 	b := g.D.Items[idx]

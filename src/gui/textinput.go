@@ -1,10 +1,11 @@
 package gui
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
 	"rpg/src/geometry"
 	"strings"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type EndAction int

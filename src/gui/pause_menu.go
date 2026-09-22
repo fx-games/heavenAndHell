@@ -5,9 +5,10 @@ import (
 	"math"
 	"strings"
 
-	"github.com/hajimehoshi/ebiten/v2"
 	"rpg/src/common"
 	"rpg/src/util"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // openPauseMenu is ESC during the game. The game is turn-based, so nothing moves while a menu is open.

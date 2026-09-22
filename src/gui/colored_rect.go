@@ -1,9 +1,10 @@
 package gui
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
 	"rpg/src/geometry"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type ColoredRect struct {

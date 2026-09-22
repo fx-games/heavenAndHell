@@ -26,14 +26,6 @@ func (r row) i(k string) int {
 	}
 	return v
 }
-func (r row) arr(k string) (out [6]int) {
-	for n, p := range strings.Split(r[k], ",") {
-		if n < 6 {
-			out[n], _ = strconv.Atoi(strings.TrimSpace(p))
-		}
-	}
-	return
-}
 
 // dataPath locates one of the active mod's data files. Diablo 1 is a mod like any other: the engine never names
 // it, so every read goes to assets/data and the overlay in package files resolves it to mods/<active>/data.
@@ -313,15 +305,6 @@ func (d *Data) MonsterByID(id string) int {
 		}
 	}
 	return -1
-}
-
-// family extracts "Zombie" from `Monsters\\Zombie\\Zombie%c.CL2`.
-func family(graphic string) string {
-	parts := strings.FieldsFunc(graphic, func(r rune) bool { return r == '\\' })
-	if len(parts) < 2 {
-		return graphic
-	}
-	return parts[1]
 }
 
 // Load reads the tables.

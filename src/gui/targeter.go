@@ -1,13 +1,14 @@
 package gui
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"rpg/src/common"
 	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/renderer"
 	"slices"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type Targeter struct {

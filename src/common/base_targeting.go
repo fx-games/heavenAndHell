@@ -11,7 +11,6 @@ import (
 
 type RangedTargetingRules struct {
 	isOnMap       func(geometry.Point) bool
-	getActorAt    func(geometry.Point) *Actor
 	targets       func() []geometry.Point // valid targets, nearest first
 	attacker      *Actor
 	aoe           *AoEResolver

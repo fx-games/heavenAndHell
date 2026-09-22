@@ -2,11 +2,12 @@ package gui
 
 import (
 	"fmt"
-	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
 	"rpg/src/geometry"
 	"rpg/src/util"
 	"strings"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type BasicLabel struct {
@@ -22,6 +23,8 @@ type BasicLabel struct {
 	borderPadding  geometry.Point
 	bounds         geometry.Rect
 	canBeClosed    bool
+	scroll         ScrollingContent // zero value (no scrolling) unless the label is a text window
+	visibleRows    int
 }
 
 func (i *BasicLabel) OnCommand(command CommandType) bool {
@@ -31,7 +34,12 @@ func (i *BasicLabel) OnCommand(command CommandType) bool {
 	case PlayerCommandCancel:
 		i.shouldClose = true
 		return true
-
+	case PlayerCommandUp:
+		i.scroll.ScrollUp(1)
+		return true
+	case PlayerCommandDown:
+		i.scroll.ScrollDown(1)
+		return true
 	}
 	return false
 }
@@ -65,7 +73,7 @@ func (i *BasicLabel) OnMouseMoved(x int, y int) (bool, Tooltip) {
 }
 
 func (i *BasicLabel) OnMouseWheel(x int, y int, dy float64) bool {
-	return false
+	return i.scroll.OnMouseWheel(x, y, dy)
 }
 
 func (i *BasicLabel) ShouldClose() bool {
@@ -95,10 +103,10 @@ func (i *BasicLabel) drawStringArray(lines []util.LabelText) {
 		return
 	}
 	uiRenderer := i.uiController.GetRenderer()
-	//startPos := geometry.Point{X: i.topLeft.X + 2, Y: startAtY}
-	//tWidth, tHeight := uiRenderer.MeasureString(linesAsOneString)
 	drawY := i.topLeft.Y + i.posInfo.YOffsetForFirstLine + int(2.0)
-	for lineIndex, line := range lines {
+	first, end := i.scroll.visible(len(lines))
+	for lineIndex := first; lineIndex < end; lineIndex++ {
+		line := lines[lineIndex]
 		if line.Text == "" {
 			drawY += i.posInfo.YOffsetForFirstLine + i.posInfo.LineDist
 			continue
@@ -120,7 +128,7 @@ func (i *BasicLabel) drawStringArray(lines []util.LabelText) {
 		}
 		drawY += sizeY + i.posInfo.LineDist
 	}
-
+	i.scroll.drawArrows(uiRenderer, i.topLeft.X+i.posInfo.SizeInPixels.X+i.borderPadding.X/4, i.topLeft.Y+i.posInfo.YOffsetForFirstLine, i.topLeft.Y+i.posInfo.SizeInPixels.Y)
 }
 
 func (i *BasicLabel) SetText(name []util.LabelText) {
@@ -143,7 +151,6 @@ func SizeNeededForText[T fmt.Stringer](measureString func(line string) (float64,
 	maxLength := 0
 	totalHeight := 0
 	yOffFirstLine := 0
-	//previousHeight := 0
 	var itemSizes []geometry.Point
 	for i, line := range text {
 		w, h := measureString(line.String())
@@ -166,7 +173,6 @@ func SizeNeededForText[T fmt.Stringer](measureString func(line string) (float64,
 			maxLength = width
 		}
 		totalHeight += height
-		//previousHeight = height
 	}
 	totalHeight += lineDist * (len(text) - 1)
 	return PositionInfo{
@@ -195,8 +201,11 @@ func NewCenteredTextLabel(uiController *UIController) *BasicLabel {
 		centered:       false,
 		drawBackground: true,
 	}
+	b.scroll = newRowScroller(func() int { return len(b.textLines) }, &b.visibleRows)
 	b.layoutFunc = func() {
 		b.posInfo = SizeNeededForText(b.uiController.GetRenderer().MeasureString, b.textLines, 10)
+		b.visibleRows = fitRows(&b.posInfo, len(b.textLines), b.uiController.GetScreenSize().Y-2*b.borderPadding.Y-8)
+		b.scroll.keepOffsetInRange()
 		b.layoutCentered()
 		b.bounds = geometry.NewRect(b.topLeft.X, b.topLeft.Y, b.topLeft.X+b.posInfo.SizeInPixels.X, b.topLeft.Y+b.posInfo.SizeInPixels.Y)
 	}

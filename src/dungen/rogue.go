@@ -18,11 +18,6 @@ type RogueGenerator struct {
 	random        *rand.Rand
 }
 
-// NewRogueGenerator uses Rogue's own knobs: an 80x24 screen, up to three gone rooms and up to four extra passages.
-func NewRogueGenerator(random *rand.Rand) *RogueGenerator {
-	return &RogueGenerator{cols: 80, rows: 24, maxGone: 3, extraPassages: 4, doors: true, random: random}
-}
-
 // rogueCell is one of the nine grid cells: a room's floor, or the single spot a gone room's passages meet at.
 type rogueCell struct {
 	gone  bool

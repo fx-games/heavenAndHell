@@ -32,15 +32,6 @@ func (t Transition) Encode() string {
 	return fmt.Sprintf("transition(%s, %s)", t.TargetMap, t.TargetLocation)
 }
 
-func MustDecodeTransition(str string) Transition {
-	var t Transition
-	_, err := fmt.Sscanf(str, "transition(%s, %s)", &t.TargetMap, &t.TargetLocation)
-	if err != nil {
-		panic(err)
-	}
-	return t
-}
-
 type MapObject interface {
 	MapPosition() geometry.Point
 	Icon(tick uint64) int32
@@ -73,20 +64,6 @@ func (t ZoneType) ToString() string {
 		return "Drop Off"
 	}
 	return "Unknown"
-}
-
-func NewZoneTypeFromString(str string) ZoneType {
-	switch str {
-	case "Public":
-		return ZoneTypePublic
-	case "Private":
-		return ZoneTypePrivate
-	case "High Security":
-		return ZoneTypeHighSecurity
-	case "Drop Off":
-		return ZoneTypeDropOff
-	}
-	return ZoneTypePublic
 }
 
 const (
@@ -124,11 +101,6 @@ func (i ZoneInfo) ToString() string {
 	return fmt.Sprintf("%s (%s)", i.Name, i.Type.ToString())
 }
 
-func NewZone(name string) *ZoneInfo {
-	return &ZoneInfo{
-		Name: name,
-	}
-}
 func NewPublicZone(name string) *ZoneInfo {
 	return &ZoneInfo{
 		Name: name,
@@ -145,11 +117,6 @@ type GlobalMapDataOnDisk struct {
 	MaxVisionRange    int
 	TimeOfDay         time.Time
 	AmbienceSoundCue  string
-}
-
-func (d GlobalMapDataOnDisk) ToString() string {
-	return fmt.Sprintf("Mission Title: %s\nWidth: %d\nHeight: %d\nPlayer Spawn: %s\nMax Light Intensity: %f\nMax Vision Range: %d\nTime of Day: %s\nAmbience Sound Cue: %s",
-		d.MissionTitle, d.Width, d.Height, d.PlayerSpawn.String(), d.MaxLightIntensity, d.MaxVisionRange, d.TimeOfDay.String(), d.AmbienceSoundCue)
 }
 
 type GridMap[ActorType interface {
@@ -180,13 +147,11 @@ type GridMap[ActorType interface {
 	pathfinder  *geometry.PathRange
 	listOfZones []*ZoneInfo
 	zoneMap     []*ZoneInfo
-	player      ActorType
 
 	timeOfDay time.Time
 
-	namedLocations   map[string]geometry.Point
-	ambienceSoundCue string
-	noClip           bool
+	namedLocations map[string]geometry.Point
+	noClip         bool
 
 	transitionMap map[geometry.Point]Transition
 	secretDoors   map[geometry.Point]bool
@@ -356,25 +321,11 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetRandomNeighbor(source *ran
 
 type SetOfPoints map[geometry.Point]bool
 
-func (s *SetOfPoints) Pop() geometry.Point {
-	for k := range *s {
-		delete(*s, k)
-		return k
-	}
-	return geometry.Point{}
-}
 func (s *SetOfPoints) Contains(p geometry.Point) bool {
 	_, ok := (*s)[p]
 	return ok
 }
 
-func (s *SetOfPoints) ToSlice() []geometry.Point {
-	result := make([]geometry.Point, 0)
-	for k := range *s {
-		result = append(result, k)
-	}
-	return result
-}
 func lessByCoordinate(a, b geometry.Point) bool {
 	return a.Y < b.Y || (a.Y == b.Y && a.X < b.X)
 }
@@ -770,6 +721,20 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetFilteredNeighbors(pos geom
 	neighbors := geometry.Neighbors{}
 	filtered := neighbors.All(pos, filter)
 	return filtered
+}
+
+// Reachable flood-fills the 8-connected cells from `from` that are on the map and pass `passable`.
+func (m *GridMap[ActorType, ItemType, ObjectType]) Reachable(from geometry.Point, passable func(geometry.Point) bool) map[geometry.Point]bool {
+	seen := map[geometry.Point]bool{from: true}
+	for queue := []geometry.Point{from}; len(queue) > 0; queue = queue[1:] {
+		for _, n := range m.GetFilteredNeighbors(queue[0], m.Contains) {
+			if !seen[n] && passable(n) {
+				seen[n] = true
+				queue = append(queue, n)
+			}
+		}
+	}
+	return seen
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetFilteredNeighborsForMovement(pos geometry.Point, filter func(geometry.Point) bool) []geometry.Point {
@@ -1236,15 +1201,14 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsPassableForProjectile(p geo
 // BresenhamLine returns a list of points that are on the line between source and destination.
 // NOTE: Will remove the source point from the list
 func (m *GridMap[ActorType, ItemType, ObjectType]) BresenhamLine(source geometry.Point, destination geometry.Point, isBlocking func(mapPos geometry.Point) bool) []geometry.Point {
-	los := geometry.BresenhamLine(source, destination, func(x, y int) bool {
-		p := geometry.Point{X: x, Y: y}
+	los := geometry.LineOfSight(source, destination, func(p geometry.Point) bool {
 		if !m.Contains(p) {
 			return false
 		}
 		if p == source {
 			return true
 		}
-		if isBlocking == nil && isBlocking(p) {
+		if isBlocking != nil && isBlocking(p) {
 			return false
 		}
 		return m.IsWalkable(p)
@@ -1810,19 +1774,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsTileLit(pos geometry.Point)
 		return false
 	}
 	return m.GetCell(pos).IsLit
-}
-
-func GetLocationsInRadius(origin geometry.Point, radius float64, keep func(point geometry.Point) bool) []geometry.Point {
-	result := make([]geometry.Point, 0)
-	for y := origin.Y - int(radius); y <= origin.Y+int(radius); y++ {
-		for x := origin.X - int(radius); x <= origin.X+int(radius); x++ {
-			pos := geometry.Point{X: x, Y: y}
-			if geometry.Distance(origin, pos) <= radius && keep(pos) {
-				result = append(result, pos)
-			}
-		}
-	}
-	return result
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) IsValidSprintTarget(attacker geometry.Point, target geometry.Point, maxSprint int) bool {

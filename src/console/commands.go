@@ -3,13 +3,14 @@ package console
 import (
 	"strings"
 
-	"github.com/memmaker/go/cview"
-	mgeom "github.com/memmaker/go/geometry"
 	"rpg/src/common"
 	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/textui"
 	"rpg/src/util"
+
+	"github.com/memmaker/go/cview"
+	mgeom "github.com/memmaker/go/geometry"
 )
 
 // setupCommands binds the commands of the mod's data/ascii/keymap.txt to the game.

@@ -400,10 +400,6 @@ func (g *AccretionGenerator) SetMirroring(mirror bool) {
 	g.mirror = mirror
 }
 
-func (g *AccretionGenerator) SetDebugSteps(debug bool) {
-	g.printDebugSteps = debug
-}
-
 func (g *AccretionGenerator) SetLevelRules(rules TemplateRules) {
 	g.levelRules = rules
 }

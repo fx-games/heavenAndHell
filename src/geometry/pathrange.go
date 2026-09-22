@@ -155,3 +155,29 @@ func (pq *priorityQueue) Pop() *node {
 	*pq = old[0 : i-1]
 	return n
 }
+
+// initAstar and checkNodesIdx are adapted from github.com/beefsack/go-astar (MIT, Copyright (c) 2014 Michael
+// Charles Alexander), via the removed astar.go; JPS and Dijkstra share the node map they manage.
+func (pr *PathRange) initAstar() {
+	if pr.AstarNodes == nil {
+		pr.AstarNodes = &nodeMap{}
+		max := pr.Rg.Size()
+		pr.AstarNodes.Nodes = make([]node, max.X*max.Y)
+		pr.AstarQueue = make(priorityQueue, 0, max.X*max.Y)
+	}
+}
+
+func checkNodesIdx(nm *nodeMap) {
+	if nm.Idx+1 > 0 {
+		return
+	}
+	for i, n := range nm.Nodes {
+		idx := 0
+		if n.Idx == nm.Idx {
+			idx = 1
+		}
+		n.Idx = idx
+		nm.Nodes[i] = n
+	}
+	nm.Idx = 1
+}

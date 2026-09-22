@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 	"fmt"
-	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
 	_ "image/png"
 	"log"
@@ -15,27 +14,14 @@ import (
 	"rpg/src/defs"
 	"rpg/src/game"
 	"rpg/src/gui"
-	"rpg/src/osr"
 	"rpg/src/renderer"
-	"rpg/src/util"
 	"strconv"
 	"strings"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func Main() {
-	/*
-		cpuProfileFile, err := os.Create("cpu.prof")
-		if err != nil {
-			panic(err)
-		}
-		defer cpuProfileFile.Close()
-
-		// start CPU profiling
-		if err := pprof.StartCPUProfile(cpuProfileFile); err != nil {
-			panic(err)
-		}
-		defer pprof.StopCPUProfile()
-	*/
 	if len(os.Args) > 1 {
 		argCmd := strings.ToLower(os.Args[1])
 		switch argCmd {
@@ -49,10 +35,6 @@ func Main() {
 			maptest()
 		case "ascii":
 			runGameWithConsole(createGameAndUIContext())
-		case "osr":
-			osrSim()
-		case "validate":
-			return
 		case "playthrough":
 			playthrough()
 		}
@@ -124,113 +106,6 @@ func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 		Definitions: theGame.GetGameData(),
 	}
 	return theGame, uiContext
-}
-
-func osrSim() {
-	// Helmet / Shield
-	// 0 Unarmored +1, +2, +3
-	// 1 Light +1, +2, +3
-	// 2 Heavy +1, +2, +3
-	// 2*5 = 10
-	// Armor
-	// 0 Unarmored +1, +2, +3
-	// 2 Light +1, +2, +3
-	// 4 Heavy +1, +2, +3
-	// 4+3 = 7
-	// => Leather Armor AC = 2
-	// => Full Light AC = 4
-	// => Full Heavy AC = 8
-	// => FULLY ENCHANTED HEAVY AC = 17
-	// => Full Enchantment adds 3x3 = 9 to AC
-
-	// Hit Points (1d8 as hit dice)
-	// Level 1: 1-8
-	// Level 5: 5-40
-	// Level 10: 10-80
-	// => For a MAX HP and FULLY PROTECTED Fighter it would take 80+17 = 97 damage to kill him in one hit
-	// => Anything dealing less than 17 damage in one blow won't even scratch him
-	fighterLevelOne := osr.NewAverageFighter("Young Conan")
-	fighterLevelOne.SetArmorClass(0) // leather & shield
-	fighterLevelFive := osr.NewAverageFighter("Teenage Conan")
-	fighterLevelFive.SetArmorClass(4) // chain & shield
-	fighterLevelFive.LevelTo(osr.GetFighterSpecs(), 5)
-
-	fighterLevelTen := osr.NewAverageFighter("Conan")
-	fighterLevelTen.SetArmorClass(8) // magical plate & shield
-	fighterLevelTen.SetDamageDice(util.ParseDice("1d12+2"))
-	fighterLevelTen.LevelTo(osr.GetFighterSpecs(), 10)
-	// max fighter always wins vs a kobold
-	// min fighter still has 20-40% chance to win the fight
-	// random fighter usually has a 50-80% chance to win the fight
-
-	kobold := osr.NewMonster(osr.MonsterSpecs{
-		Name:       "Kobold",
-		AC:         0, // 0 protection
-		AttackDice: util.ParseDice("1d6"),
-		HitDice:    util.ParseDice("1d8"),
-	})
-
-	ghoul := osr.NewMonster(osr.MonsterSpecs{
-		Name:       "Ghoul",
-		AC:         4, // 1 protection
-		AttackDice: util.ParseDice("1d6"),
-		HitDice:    util.ParseDice("5d8"),
-	})
-
-	manticore := osr.NewMonster(osr.MonsterSpecs{
-		Name:       "Manticore",
-		AC:         8, // 2 protection
-		AttackDice: util.ParseDice("1d12+2"),
-		HitDice:    util.ParseDice("10d8"),
-	})
-
-	enemies := []*osr.Character{kobold, ghoul, manticore}
-
-	iterations := 10000
-	silent := true
-
-	table := make(map[*osr.Character]map[*osr.Character]float64)
-	table[fighterLevelOne] = make(map[*osr.Character]float64)
-	table[fighterLevelFive] = make(map[*osr.Character]float64)
-	table[fighterLevelTen] = make(map[*osr.Character]float64)
-	for _, enemy := range enemies {
-		srFX := osr.SurvivalRate(fighterLevelOne, enemy, silent, iterations)
-		table[fighterLevelOne][enemy] = srFX
-	}
-
-	for _, enemy := range enemies {
-		srFX := osr.SurvivalRate(fighterLevelFive, enemy, silent, iterations)
-		table[fighterLevelFive][enemy] = srFX
-	}
-
-	for _, enemy := range enemies {
-		srFX := osr.SurvivalRate(fighterLevelTen, enemy, silent, iterations)
-		table[fighterLevelTen][enemy] = srFX
-	}
-
-	for _, fighter := range []*osr.Character{fighterLevelOne, fighterLevelFive, fighterLevelTen} {
-		fmt.Println(fighter.CombatInfo())
-	}
-	for _, enemy := range enemies {
-		fmt.Println(enemy.CombatInfo())
-	}
-	// print as csv matrix table
-	fmt.Println("/," + namesFrom(enemies))
-	for _, fighter := range []*osr.Character{fighterLevelOne, fighterLevelFive, fighterLevelTen} {
-		fmt.Print(fighter.GetName() + ",")
-		for _, enemy := range enemies {
-			fmt.Printf("%.2f,", table[fighter][enemy])
-		}
-		fmt.Println()
-	}
-}
-
-func namesFrom(enemies []*osr.Character) string {
-	names := make([]string, len(enemies))
-	for i, enemy := range enemies {
-		names[i] = enemy.GetName()
-	}
-	return strings.Join(names, ",")
 }
 
 func genLoot(theGame *game.GameInstance) {

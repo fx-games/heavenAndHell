@@ -1,7 +1,6 @@
 package gui
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
 	"rpg/src/common"
 	"rpg/src/defs"
@@ -12,6 +11,8 @@ import (
 	"rpg/src/util"
 	"slices"
 	"unsafe"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func (u *UIController) Draw(screen *ebiten.Image) {
@@ -41,7 +42,6 @@ func (u *UIController) Draw(screen *ebiten.Image) {
 		u.tileRenderer.DrawColoredRect(geometry.Point{X: 0, Y: int(u.message.GetHeight() - h - pad)},
 			geometry.Point{X: int(w + 2*pad), Y: int(h + 2*pad)}, color.RGBA{A: 160})
 
-		//u.tileRenderer.DrawTTFOnScreen(1, height+2, common.RemoveColorCodes(u.message.GetText()), color.Black)
 		u.tileRenderer.DrawTTFOnScreenWithColorCodes(1, u.message.GetHeight(), u.message.GetColorcodedText())
 		u.message.ticksLeft--
 	}
@@ -192,7 +192,6 @@ func (u *UIController) drawActorWithBobbingAnimation(actor *common.Actor, atlas 
 	if percentage > 1 {
 		percentage = 2 - percentage
 	}
-	//u.tileRenderer.DrawDefaultScaleTile(float64(screenPos.X), float64(screenPos.Y), u.worldTexture, actor.Icon(u.worldTicks), color.White)
 	scaleUp := geometry.PointF{X: 1, Y: 1}
 	scaleDown := geometry.PointF{X: 1.05, Y: 0.95}
 	currentScale := util.LerpPointF(scaleUp, scaleDown, percentage)
@@ -280,12 +279,6 @@ func AsciiIconAndColor(t gridmap.Tile) (int32, color.RGBA) {
 }
 
 func CodePage437IconAndColor(t gridmap.Tile) (int32, color.RGBA) {
-	//*
-	//if tileAt.IsWalkable {
-	//			icon = int32(util.UnicodeToCP437Byte('∙'))
-	//		} else {
-	//			icon = int32(util.UnicodeToCP437Byte('█'))
-	//		}*/
 	switch t.Special {
 	case gridmap.SpecialTileWater:
 		return int32(util.UnicodeToCP437Byte('≈')), defs.Blue

@@ -21,15 +21,6 @@ func (p Point) String() string {
 	return fmt.Sprintf("(%d,%d)", p.X, p.Y)
 }
 
-func NewPointFromString(s string) (Point, error) {
-	var x, y int
-	_, err := fmt.Sscanf(s, "(%d,%d)", &x, &y)
-	if err != nil {
-		return Point{}, err
-	}
-	return Point{X: x, Y: y}, nil
-}
-
 // Shift returns a new point with coordinates shifted by (x,y). It's a
 // shorthand for p.Add(Point{x,y}).
 func (p Point) Shift(x, y int) Point {
@@ -128,23 +119,6 @@ func (p Point) RotateRight() Point {
 		X: p.Y,
 		Y: -p.X,
 	}
-}
-
-func NewPointFromEncodedString(encoded string) (Point, error) {
-	var x, y int
-	_, err := fmt.Sscanf(encoded, "(%d,%d)", &x, &y)
-	if err != nil {
-		return Point{}, err
-	}
-	return Point{X: x, Y: y}, nil
-}
-
-func MustDecodePoint(encoded string) Point {
-	p, err := NewPointFromEncodedString(encoded)
-	if err != nil {
-		panic(err)
-	}
-	return p
 }
 
 func Distance(p, q Point) float64 {

@@ -1,8 +1,9 @@
 package gui
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"rpg/src/geometry"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type MinimapOverlay struct {

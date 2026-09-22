@@ -734,27 +734,20 @@ func objectAt(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], p 
 	return -1
 }
 
+// reachable is what the hero can walk to from p: doors and barrels are no obstacle, other solid objects are.
 func reachable(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], p geometry.Point) map[geometry.Point]bool {
-	seen := map[geometry.Point]bool{p: true}
-	for queue := []geometry.Point{p}; len(queue) > 0; queue = queue[1:] {
-		for _, d := range common.D1Dirs {
-			q := queue[0].Add(d)
-			if seen[q] || !m.Contains(q) || !m.IsTileWalkable(q) {
-				continue
-			}
-			if m.IsObjectAt(q) {
-				o := m.ObjectAt(q)
-				d1o, isD1 := o.(*common.D1Object)
-				_, isDoor := o.(*common.Door)
-				if !o.IsWalkable(nil) && !isDoor && !(isD1 && (d1o.O.Kind == d1.ObjBARREL || d1o.O.Kind == d1.ObjBARRELEX)) {
-					continue
-				}
-			}
-			seen[q] = true
-			queue = append(queue, q)
+	return m.Reachable(p, func(q geometry.Point) bool {
+		if !m.IsTileWalkable(q) {
+			return false
 		}
-	}
-	return seen
+		if !m.IsObjectAt(q) {
+			return true
+		}
+		o := m.ObjectAt(q)
+		d1o, isD1 := o.(*common.D1Object)
+		_, isDoor := o.(*common.Door)
+		return o.IsWalkable(nil) || isDoor || isD1 && (d1o.O.Kind == d1.ObjBARREL || d1o.O.Kind == d1.ObjBARRELEX)
+	})
 }
 
 func actorNamed(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], name string) *common.Actor {

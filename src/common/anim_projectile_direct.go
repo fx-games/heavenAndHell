@@ -127,8 +127,8 @@ func (m *ProjectileDirectionAnimation) Draw(renderer TileRenderer) {
 		return
 	}
 	icon := m.firstTile
-	if m.frameCount > 1 {
-		icon += util.GetLoopingFrameFromTick(m.ticksAlive, 0.1, m.frameCount)
+	if m.frameCount > 1 { // one frame per tile flown: a timer is too slow for a flight that lasts a few ticks
+		icon += int32(int(m.flown()) % m.frameCount)
 	}
 	renderer.DrawOnMapF(m.position(float64(m.ticksAlive)/float64(m.ticksNeeded)), icon, color.White)
 }

@@ -28,18 +28,6 @@ type Cue struct {
 	CurrentIndex int
 }
 
-func (c *Cue) Next() string {
-	if c.IsRandom {
-		randomIndex := rand.Intn(len(c.AudioCues))
-		return c.AudioCues[randomIndex]
-	}
-	if c.CurrentIndex >= len(c.AudioCues) {
-		c.CurrentIndex = 0
-	}
-	c.CurrentIndex++
-	return c.AudioCues[c.CurrentIndex]
-}
-
 type Player struct {
 	context         *audio.Context
 	availableSounds map[string]*Sound
