@@ -1,6 +1,7 @@
 package common
 
 import (
+	"cmp"
 	"fmt"
 	"io/fs"
 	"maps"
@@ -217,7 +218,7 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		VoiceVolume:               configMap.GetFloatOrDefault("VoiceVolume", 1),
 		AutoExploreOpenContainers: configMap.GetBoolOrFalse("AutoExploreOpenContainers"),
 		Fullscreen:                configMap.GetBoolOrFalse("Fullscreen"),
-		Mod:                       configMap.GetStringOrDefault("Mod", DefaultMod),
+		Mod:                       cmp.Or(configMap["Mod"], DefaultMod), // an empty "Mod:" is no mod named either
 		SpriteSheet:               configMap.GetStringOrDefault("SpriteSheet", DefaultSpriteSheet),
 		MiniMapColors:             parseMiniMapColors(configMap.GetStringOrDefault("MiniMapColor", "")),
 		WindowSize: geometry.Point{ //1280, Y: 800

@@ -1,6 +1,5 @@
 %rec: default
 
-Mod: d1
 AudioEnabled: true
 ActorBobbingEnabled: true
 DrawTilesBehindActors: false
