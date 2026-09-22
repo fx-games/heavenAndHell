@@ -169,6 +169,10 @@ func (f *Factory) runQuestOutcome(do recfile.StringPredicate, speaker string) bo
 		f.spawnItemAt(do.GetString(0), do.GetString(1), location)
 	case "spawn_monster": // spawn_monster(monster, location): on the hero's level, at a named location or "anywhere"
 		f.spawnMonster(do.GetString(0), do.GetString(1))
+	case "add_npc": // add_npc(npc, map, location): a townsperson drawn somewhere in maps.ldtk, next to location
+		f.addNPC(do.GetString(0), do.GetString(1), do.GetString(2))
+	case "remove_npc": // remove_npc(npc, map)
+		f.removeNPC(do.GetString(0), do.GetString(1))
 	case "end_text":
 		f.d1EndTextWindow()
 	case "give_exp": // at the hero's own level, so exactly the amount named
@@ -194,7 +198,7 @@ func QuestOutcomeExists(name string) bool {
 	switch name {
 	case "complete_quest", "activate_quest", "log_quest", "set_quest_var", "set_flag", "hero_sound", "sound",
 		"say", "refresh_level", "place_item", "end_text", "give_exp", "give_weapon", "spawn_item", "start_quest", "start_town_quest",
-		"or_quest_var", "take_item", "drop_item", "drop_unique", "spawn_monster":
+		"or_quest_var", "take_item", "drop_item", "drop_unique", "spawn_monster", "add_npc", "remove_npc":
 		return true
 	}
 	return false

@@ -17,7 +17,7 @@
 #                     set_flag(name) say(text [, speaker]) sound(id) hero_sound(n) end_text() give_exp(n)
 #                     give_weapon(dlvl) take_item(item) drop_item(item) drop_unique(name) place_item(item, location
 #                     or anywhere) spawn_item(item, map, location | here) spawn_monster(monster, location or
-#                     anywhere) refresh_level()
+#                     anywhere) add_npc(npc, map, location) remove_npc(npc, map) refresh_level()
 #   pass              true: an on_talk / on_approach trigger that fired still lets the next one speak (normally one
 #                     conversation says one thing)
 #

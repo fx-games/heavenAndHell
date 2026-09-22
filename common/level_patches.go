@@ -160,6 +160,7 @@ func Arrive(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 	if m == nil {
 		return
 	}
+	s.applyNPCChanges(m)
 	if s.Level(m.GetName()).Town {
 		s.factory.fireQuestTriggers(EventEnterLevel, m.GetName(), "")
 		return
