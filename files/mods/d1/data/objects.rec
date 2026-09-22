@@ -1,4 +1,18 @@
 %rec: shrine
+# objects.rec: D1's dungeon objects as the game shows them. Three sections:
+# %rec: shrine, D1's shrines in shrine order (the index is the shrine's kind); 26 records, or Hellfire's count:
+#   name / message    the shrine's name and what it says when used
+#   max_lvl           the deepest dungeon level it may appear on
+#   avail             2: multiplayer only, so it never appears here; any other value: it may appear
+# %rec: storybook, the story books' titles, indexed by the book's number
+#   name              the title
+# %rec: object, how an object (by xl_obj.txt's OBJ_ id) is named and lit:
+#   id                OBJ_ name; required
+#   name              its shown name (objects without a record are nameless decoration)
+#   light             the radius it glows with; wall_light true: a decorative light D1 hangs itself
+#   container         true: it is looted (it may hold nothing)
+#   sfx               sfx.rec id it plays when used
+#
 # D1's 26 shrines (shrinestrs and their MsgStrings), in shrine order: the index is the shrine's Var1.
 # max_lvl is D1's shrineMax, the deepest dungeon level the shrine may be generated on; avail is shrineAvail,
 # where 2 means multiplayer only and so never appears in this game.

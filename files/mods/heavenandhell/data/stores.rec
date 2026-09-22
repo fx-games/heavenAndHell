@@ -1,3 +1,35 @@
+# stores.rec: the town's shops and services, one record per stock or menu. A record either names its items (a
+# list) or filters the whole items.rec table (Diablo's shops); several records may share an npc, whose menu is
+# their services and whose stock their rolls, in file order.
+# Who and what:
+#   internal_name     the record's id
+#   npc               the townsperson (internal name) it belongs to; repeatable (shopkeepers sharing one stock)
+#   stock             how it stocks: smith, premium, witch, healer, boy (Diablo's rolls) or list; none: sells nothing
+#   buys              what it buys from the hero: smith, witch, hellfire_smith, hellfire_witch or any; none: nothing
+#   service           a menu entry: buy buy_basic buy_premium sell repair recharge identify heal heal_on_visit donate
+#                     peek stash transfer, some with an argument, e.g. identify(100); repeatable
+#   when              a quest condition (quests.rec's language) for the record to count at all
+# A list:
+#   always / sometimes   an item (internal_name) always / possibly in stock; repeatable
+#   item_count        how many items it stocks, "min-max", the always items included
+#   sometimes_count   how many of the sometimes items, "min-max"
+#   turnover_items    items replaced each time the hero comes back
+#   purse             gold it has for buying from the hero
+# A filter (empty: no opinion):
+#   types / exclude_types   item types: misc sword axe bow mace shield larmor helm marmor harmor staff gold ring
+#                     amulet food
+#   misc_ids / exclude_misc_ids   IMISC_ kinds; exclude_spells SPL_ names; exclude_charged_types types whose
+#                     spell-carrying items it won't stock; items: named items that are in regardless
+#   min_dlvl_divisor  n: an item must also be at least (level)/n deep
+#   max_value         an item worth more is rolled again (0: no cap); tries: n rolls to fit the hero, then settle
+#   double_drops      true: IDROP_DOUBLE items count twice
+#   slot_levels       a premium stock's fixed slots, each an item level offset; rotate_by: slots it shifts each level
+#   featured_misc_id / featured_count   a kind of item put out first, and how many
+#   shuns "<class> <type> ..." types it keeps away from a class (repeatable); shun_tries how long it tries
+#   usable_elixirs_only   only elixirs of a stat still under the class maximum
+#   recharge_uniques  recharges unique items too
+#   price_adjust      +1/n or -1/n: sells at value plus or minus value/n
+#
 # Heaven&Hell's four town shops, ported from the branch that had its own defs.VendorDefinition loader.
 # These vendors use the record's list half: they name their stock instead of filtering the item table.
 # Who runs each and its menu are main's getVendorOptions: Mary buys and sells, Abel keeps your stash, Shekel

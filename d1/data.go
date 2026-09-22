@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"path"
 	"strconv"
@@ -46,7 +47,18 @@ func readTable(fsys fs.FS, name string) ([]row, error) {
 		return nil, err
 	}
 	defer f.Close()
-	cr := csv.NewReader(f)
+	// Lines starting with "##" document the table and are skipped; a single "#" is part of D1's own header row.
+	raw, err := io.ReadAll(f)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", name, err)
+	}
+	var kept []string
+	for _, line := range strings.Split(string(raw), "\n") {
+		if !strings.HasPrefix(line, "##") {
+			kept = append(kept, line)
+		}
+	}
+	cr := csv.NewReader(strings.NewReader(strings.Join(kept, "\n")))
 	cr.Comma = '\t'
 	cr.LazyQuotes = true
 	cr.FieldsPerRecord = -1

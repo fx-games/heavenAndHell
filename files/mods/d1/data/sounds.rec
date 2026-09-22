@@ -1,4 +1,12 @@
 %rec: default
+# sounds.rec: the game's sound events (attacks, hits, level ups, UI cues, monsters, ...), one record each. The
+# engine plays an event by its internal_name; an event with no sound is silent. Remap with ./remap_sounds.sh.
+# Fields:
+#   internal_name     the event's id, as the engine and other files (sfx fields) name it
+#   name              what the remap tool shows
+#   tile              an icon the remap tool shows next to it; not read by the game
+#   sound             a file to play, relative to the mod's folder; repeatable (one is picked at random each time)
+#
 
 internal_name: melee_attack
 name: Player - Attack

@@ -1,5 +1,17 @@
 %rec: default
-#FIELDS: internal_name icon dlvl name activation_condition allowed_usage default_args
+# effects/untargeted.rec: the untargeted skills and item actions (drunk, read, used on the spot), one record each.
+# internal_name is the engine effect it runs; the record gives it a name, icon and defaults.
+# Fields:
+#   internal_name     the engine effect (heal_health, apply_berserk_self, replicate_with, ...); required
+#   name              its shown name
+#   icon              its tile number on the sprite sheet
+#   dlvl              the dungeon level it belongs to (item level of the potions and scrolls that carry it)
+#   default_args      the effect's arguments when the user doesn't give any, split by |
+#   allowed_usage     what may carry it, "a | b": wand, shrine (other words, such as scroll, are ignored)
+#   activation_condition   it only works when this holds: can_replicate, can_enchant_armor, can_enchant_weapon,
+#                     has_true_sight
+#   activation_delay  turns before it takes effect once used (0: at once)
+#
 
 internal_name: replicate_with
 icon: 194

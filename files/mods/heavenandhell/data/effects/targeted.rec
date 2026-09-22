@@ -1,5 +1,17 @@
 %rec: default
-#FIELDS: name internal_name icon dlvl targeting hit_zone effect
+# effects/targeted.rec: the targeted skills and item actions (aimed at a cell), one record each; classes.rec,
+# enemies.rec and items.rec name them by internal_name. What an effect does is the engine's; this names and
+# aims it.
+# Fields:
+#   internal_name     the skill's id; required
+#   name              its shown name
+#   icon              its tile number on the sprite sheet
+#   dlvl              the dungeon level it belongs to (item level of the wands and scrolls that carry it)
+#   targeting         how the target is picked: direct, melee, ranged, jumpstart, earthshaker
+#   hit_zone          the cells it reaches, as in items.rec's throw_hit_zone (target_only, dijkstra_aoe(3), ...)
+#   effect            what it does there: an engine effect with arguments split by |, e.g. fireball(8),
+#                     spell_damage(...), confuse, poison, steal_item, mind_push, summon_monster(rat)
+#
 
 name: Steal Item
 internal_name: steal_item

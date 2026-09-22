@@ -1,3 +1,19 @@
+## xl_ipre.txt: the magic item prefixes, Diablo's PL_Prefix table, one tab-separated row each, ended by a row whose power is
+## IPL_INVALID. Lines starting with ## are comments; the first other line names the columns.
+## Columns:
+##   PLName      the prefix as it reads in the item's name ("King's ...")
+##   PLPower     the power it grants: an IPL_ name (IPL_TOHIT, IPL_DAMP, IPL_STR, IPL_LIGHT, ...), or one of the
+##               engine's HOOK_ powers (HOOK_MANA_ON_KILL, HOOK_FIREBALL_ON_SHOT, HOOK_RETURN_DAMAGE, HOOK_TRIPLE_DAMAGE)
+##               for an on-hit effect instead of a stat
+##   PLParam1 / PLParam2   the power's value range, rolled between them
+##   PLMinLvl    the lowest item level it rolls on
+##   PLIType     the item kinds it may appear on, "PLT_WEAP|PLT_BOW|PLT_STAFF|PLT_ARMO|PLT_SHLD|PLT_MISC"
+##   PLGOE       its alignment: 0 neutral, 1 evil (a curse), 16 good; one item never carries an evil prefix
+##               and a good suffix together
+##   PLDouble    1: it counts twice in the roll (twice as likely)
+##   PLOk        1: it may also roll where only good powers are allowed (premium stock, quest rewards)
+##   PLMinVal / PLMaxVal   the item's price at PLParam1 and at PLParam2 (interpolated between)
+##   PLMultVal   how strongly it multiplies the item's price
 PLName(s)	PLPower(i)	PLParam1(i)	PLParam2(i)	PLMinLvl(i)	PLIType(i)	PLGOE(i)	PLDouble(i)	PLOk(i)	PLMinVal(i)	PLMaxVal(i)	PLMultVal(i)
 Tin	IPL_TOHIT_CURSE	6	10	3	PLT_WEAP|PLT_BOW|PLT_MISC	0	1	0	0	0	-3
 Brass	IPL_TOHIT_CURSE	1	5	1	PLT_WEAP|PLT_BOW|PLT_MISC	0	1	0	0	0	-2

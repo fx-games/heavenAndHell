@@ -1,4 +1,20 @@
 %rec: default
+# spells.rec: what the game does for each spell, beyond xl_spell.txt's numbers. Three sections:
+# %rec: default, one record per spell:
+#   id                SPL_ name; required
+#   resist            the resistance its damage is checked against: none, fire, lightning or magic
+#   targeted          true: the spell needs a target cell
+#   cast_sfx / launch_sfx / impact_sfx   sfx.rec ids for the cast, the missile's launch and its impact; blank is silent
+#   hit_zone          the cells it reaches (target_only, bolt_aoe(n), ray_aoe(n), box_aoe(n), ring_aoe(n), cone_aoe(n|w),
+#                     chain_aoe(n|r), dijkstra_aoe(n), wall_aoe, neighbors_only, homing_bolt_aoe, bresenham_aoe)
+#   effect            what it does there, an engine effect with arguments split by |: spell_damage, restore_resource,
+#                     apply_status, on_self, fireball, summon_monster, blink, spawn_wall, charged_bolts, ...; repeatable,
+#                     all fire over the same hit zone in order
+#   health_cost       life it costs to cast (Blood Star, Bone Spirit)
+# %rec: slot, one record per spell slot, in slot order from 0:
+#   name / description   the spell's name and its one-line tooltip
+# %rec: rune (optional), a rune trap: id (its item's id), spell (SPL_ it casts), effect (as above)
+#
 # Per-spell data the xl_spell table has no columns for, keyed by the spell's SPL_ id.
 # resist is the resistance its damaging missile is checked against (none/fire/lightning/magic; absent means
 # the spell deals no resistible damage). targeted marks the spells that need a target cell (sTargeted, plus

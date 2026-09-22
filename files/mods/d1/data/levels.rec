@@ -17,6 +17,8 @@
 #              "open_when:" line after it keeps it shut until the condition (quests.rec's language) holds; an
 #              "exit_tile:" line (stairs_down, stairs_up, red_portal) is what the spot turns into when it opens.
 #              The generator places the locations; this file says where they lead.
+#   template   (ldtk) the maps.ldtk level it is drawn as.
+#   quest      (d1_set) the quests.rec key whose set piece it loads; D1's quest table gives the set level.
 #
 # Diablo's generators take these knobs, each defaulting to what Diablo does:
 #   decoration   "name, search tile, replace tile, percent" - one single-tile decoration scattered over the

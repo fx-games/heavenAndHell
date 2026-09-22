@@ -1,3 +1,20 @@
+## xl_obj.txt: Diablo's dungeon objects (AllObjects), one tab-separated row per OBJ_ id; objects.rec gives them names
+## and lights. Lines starting with ## are comments; the first other line names the columns.
+## Columns:
+##   (first)     the OBJ_ id
+##   oload       1: placed at random on levels of its type; any other value: only its level, quest or theme room
+##               places it; -1 ends the table
+##   ofindex     the graphics file (OFILE_)
+##   ominlvl / omaxlvl   the dungeon levels it may be placed on at random
+##   olvltype    the level type it belongs to (1 cathedral, 2 catacombs, 3 caves, 4 hell, 0 any)
+##   otheme      the theme room it belongs to (-1 none)
+##   oquest      the quest whose level it belongs to (-1 none)
+##   oAnimFlag / oAnimDelay / oAnimLen / oAnimWidth   whether it animates, how fast, its frames, its sprite width
+##   oSolidFlag  1: nothing can walk through it; oMissFlag 1: missiles fly through it
+##   oLightFlag  1: it lets light through
+##   oBreak      1: it breaks when hit (barrels, crucified skeletons), 0 not, -1 already broken
+##   oSelFlag    how it is picked: 0 not at all, 1 on its own cell, 2 from beside it, 3 either
+##   oTrapFlag   1: it may carry a trap
 #	oload(i)	ofindex(i)	ominlvl(i)	omaxlvl(i)	olvltype(i)	otheme(i)	oquest(i)	oAnimFlag(i)	oAnimDelay(i)	oAnimLen(i)	oAnimWidth(i)	oSolidFlag(i)	oMissFlag(i)	oLightFlag(i)	oBreak(i)	oSelFlag(i)	oTrapFlag(i)
 OBJ_L1LIGHT	1	OFILE_L1BRAZ	1	4	1	-1	-1	1	1	26	64	1	1	0	0	0	0
 OBJ_L1LDOOR	1	OFILE_L1DOORS	1	4	1	-1	-1	0	1	0	64	0	0	1	0	3	1

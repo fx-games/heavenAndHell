@@ -1,3 +1,25 @@
+# quests.rec: the quests and the triggers that move them. Quest order is content (saves refer to quests by key).
+# %rec: quest, one record per quest:
+#   key               the quest's id, used by triggers and saves; required
+#   name              its name in the quest log
+#   level             levels.rec map id of the level it belongs to (its boss, its set piece, its entrance)
+#   log_text          texts.rec id shown in the quest log
+#   gossip            "<npc> <text id>": what that townsperson says about it while it is active; repeatable
+# %rec: trigger, one record per trigger; triggers run in file order and later ones see what earlier ones did:
+#   event             on_kill, on_item_pickup, on_item_use, on_enter_level, on_level_cleared, on_talk, on_approach
+#   subject           what the event is about: a monster's internal or unique name (on_kill), an item's internal
+#                     name (on_item_pickup, on_item_use), a level id (on_enter_level, on_level_cleared), an NPC's
+#                     internal name (on_talk: its dialogue; on_approach: walking up to it)
+#   when              a condition; empty: always. Functions: done(q) active(q) avail(q) logged(q) flag(name)
+#                     v1(q) v2(q) (the quest's two variables) has(item); numbers: depth, deepest; and or not == < >=
+#   do                an outcome, repeatable, in order: complete_quest(q) activate_quest(q) start_quest(q)
+#                     start_town_quest(q) log_quest(q) set_quest_var(q, n, value) or_quest_var(q, n, bits)
+#                     set_flag(name) say(text [, speaker]) sound(id) hero_sound(n) end_text() give_exp(n)
+#                     give_weapon(dlvl) take_item(item) drop_item(item) drop_unique(name) place_item(item, location
+#                     or anywhere) spawn_item(item, map, location | here) refresh_level()
+#   pass              true: an on_talk / on_approach trigger that fired still lets the next one speak (normally one
+#                     conversation says one thing)
+#
 # Diablo's quests: their text, their gossip, where their set levels are, and the triggers that fire them.
 #
 # The engine owns quest LOGIC. This file owns what a quest says, what it rewards and which named event moves it
@@ -197,7 +219,7 @@ gossip: wirt TEXT_VILE12
 # event    subject                    fired by
 # on_kill          a monster's internal name, or a unique monster's name
 # on_item_pickup   an item's internal name
-# on_enter_level   the dungeon depth the hero arrives on
+# on_enter_level   the id of the level the hero arrives on (levels.rec's map)
 # on_talk          the NPC's internal name -- a dialogue record: condition, text, what saying it does
 
 %rec: trigger

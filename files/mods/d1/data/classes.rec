@@ -1,5 +1,17 @@
 %rec: default
-#FIELDS: internal_name name gold
+# classes.rec: the classes a new hero can pick, one record each, in the order the class menu lists them. Record N is
+# the same class as hero.rec's class record N, which holds its numbers and rules.
+# Fields:
+#   internal_name     the class's id; its sprites are icons/actors.rec's class.<internal_name>_male / _female
+#   name              what the class menu shows
+#   gold              gold a new hero starts with
+#   item              an item a new hero starts with, by items.rec internal_name; repeatable. Weapons and armour
+#                     are equipped; "<item> pack" puts it in the pack instead of a hand
+#   targeted_skill    a targeted skill (effects/targeted.rec) the class knows; repeatable
+#   untargeted_skill  an untargeted skill (effects/untargeted.rec) the class knows; repeatable
+#   stats_<stat>      read but not used: the hero's attributes come from hero.rec
+#   resource_<name>   read but not used: life and mana come from hero.rec
+#
 # Row order is archetype order. item is CreatePlrItems' kit; "pack" puts it in the pack instead of a hand.
 
 internal_name: warrior

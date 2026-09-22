@@ -1,4 +1,11 @@
 %rec: sound
+# item_sounds.rec: the sounds items make. Two sections:
+# %rec: sound, one record per sound class, numbered from 0 in file order:
+#   drop              sfx.rec id when an item of the class lands on the floor
+#   inv               sfx.rec id when it goes into the pack or is used
+# %rec: anim, which cursor graphic (items.rec's cursor) belongs to which sound class:
+#   curs              the cursor numbers of one sound class, space separated; record N is class N; repeatable
+#
 # One row per item sound class, in ItemDropSnds/ItemInvSnds order: the sound an item of this
 # class makes hitting the floor, and the one it makes entering the pack or being used.
 

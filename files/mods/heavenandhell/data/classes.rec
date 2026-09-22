@@ -1,11 +1,23 @@
 %rec: default
+# classes.rec: the classes a new hero can pick, one record each, in the order the class menu lists them. Record N is
+# the same class as hero.rec's class record N, which holds its numbers and rules.
+# Fields:
+#   internal_name     the class's id; its sprites are icons/actors.rec's class.<internal_name>_male / _female
+#   name              what the class menu shows
+#   gold              gold a new hero starts with
+#   item              an item a new hero starts with, by items.rec internal_name; repeatable. Weapons and armour
+#                     are equipped; "<item> pack" puts it in the pack instead of a hand
+#   targeted_skill    a targeted skill (effects/targeted.rec) the class knows; repeatable
+#   untargeted_skill  an untargeted skill (effects/untargeted.rec) the class knows; repeatable
+#   stats_<stat>      read but not used: the hero's attributes come from hero.rec
+#   resource_<name>   read but not used: life and mana come from hero.rec
+#
 # The three classes this game is played with. Classes are content: the engine keeps no roster of them and reads
 # each class' two sprites from this mod's actors.rec by internal_name (class.<internal_name>_male/_female).
 #
 # The hero model itself is the engine's one unified hero, so each class names the hero archetype it plays as
 # (warrior / rogue / sorcerer) and carries its OWN display name over it. The Archer plays as the rogue and the
 # Mage as the sorcerer, which is what they always were.
-#FIELDS: internal_name name gold item stats_* resource_* untargeted_skill targeted_skill
 
 internal_name: warrior
 name: Warrior

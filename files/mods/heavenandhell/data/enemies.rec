@@ -1,3 +1,44 @@
+# enemies.rec: every monster, one record each. Order is content: D1 refers to monsters by their position here.
+# One schema serves every mod; a mod fills in what its game uses.
+# Identity and look:
+#   internal_name     id (D1's MT_* name, or "rat"); required
+#   name              shown name
+#   icon              icons/actors.rec id, e.g. monster.nzombie
+#   ascii / unicode / cp437   the glyph in the text renderers
+#   color             "R G B", the glyph's colour
+#   graphics_family / graphics_size   D1's graphics folder and its memory budget per level (level monster mix)
+#   frames / rate     six numbers each: animation lengths and speeds for stand, walk, attack, hit, death, special
+# Where it spawns:
+#   dlvl              the shallowest level it appears on; max_dlvl the deepest (0: no limit)
+#   level             its monster level (to-hit, experience, drops); defaults to dlvl
+#   available         0 never spawns at random (only placed by quests or rooms); otherwise it may
+#   out_of_depth_chance / min_level_for_ood   chance to appear above its dlvl, from this dungeon level on
+#   group_spawn       companions spawned with it: "<internal_name>" or "<internal_name>(<count or min-max>)"; repeatable
+# Combat:
+#   health            hit points: a range "4-7" (a monster with an ai rolls it and halves it, as D1's single player does), dice "1d3+1" or
+#                     a number; a monster without an ai takes it as stated
+#   damage / damage2  its first and second attack's damage, same notation
+#   hit / hit2        to-hit of each attack (without an ai: defaults to 5 x stats_dexterity)
+#   afnum / afnum2    animation frame on which each attack lands
+#   magic_res / magic_res2   resistance and immunity bits (D1's mMagicRes: IMUNE_/RESIST_ magic, fire, lightning)
+#   treasure          what it drops (D1's mTreasure): 0x4000 never drops anything, 0x8000 + n always drops unique item n
+#   stats_<stat>      stats_armor_class and stats_experience are its AC and experience; stats_strength /
+#                     _dexterity / _intelligence feed the skill-driven combat of a monster without an ai
+#   base_speed        how fast it acts, for a monster without an ai
+# Behaviour:
+#   ai                a D1 brain (AI_ZOMBIE, AI_SKELSD, ...; see monsters.rec); empty: skills and aggro_range drive it
+#   class             MC_UNDEAD, MC_DEMON or MC_ANIMAL (hero.rec's weapon bonuses and some spells read it)
+#   flags             bits: 0x01 hidden, 0x10 fights other monsters, 0x20 golem, 0x80 knocks back, 0x100 searches,
+#                     0x200 opens doors, 0x1000 no life steal
+#   int               its intelligence (D1's mInt: how clever its ai plays)
+#   aggro_range       how far it notices the hero, for a monster without an ai
+#   tags              "a | b": unique (never rolled at random, it lives in its room), no_corpse, flying
+#   targeted_skill / untargeted_skill   skills from effects/*.rec it uses; repeatable
+#   equipment         an item it carries, by internal_name; repeatable
+# Words:
+#   speech_on_sight / speech_on_hurt   lines it may say on first sight / when hurt; repeatable
+#   death_string      a death message format (%s is its name); repeatable
+#
 # Heaven&Hell's monsters in the unified enemies.rec schema every mod uses (see defs.Monster),
 # ported from the game's own enemies/enemies.rec and enemies/unique_enemies.rec. The uniques are
 # the records tagged "unique"; that tag is what told them apart on the old branch too.

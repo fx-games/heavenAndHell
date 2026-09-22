@@ -1,3 +1,15 @@
+## xl_quest.txt: Diablo's quest table (questlist), one tab-separated row per quest, kept for reference only: the game
+## does not read it (quests.rec and the engine's port of InitQuests hold what it needs). Lines starting with ## are
+## comments; the first other line names the columns.
+## Columns:
+##   _qdlvl      the dungeon level it takes place on; _qdmultlvl the same in multiplayer
+##   _qlvlt      the level type of its set level (DTYPE_CATHEDRAL ... DTYPE_HELL; DTYPE_NONE: none)
+##   _qdtype     the quest's Q_ id
+##   _qdrnd      1.09's _qdrnd (100 for every quest)
+##   _qslvl      its set level (SL_ number; 0: it has none)
+##   _qflags     1.09's _qflags (QUEST_SINGLE)
+##   _qdmsg      the texts.rec id said when it is found
+##   _qlstr      its name
 _qdlvl(i)	_qdmultlvl(i)	_qlvlt(i)	#_qdtype(i)	_qdrnd(i)	_qslvl(i)	_qflags(i)	_qdmsg(i)	_qlstr(s)
 5	-1	DTYPE_NONE	Q_ROCK	100	0	0	TEXT_INFRA5	The Magic Rock
 9	-1	DTYPE_NONE	Q_MUSHROOM	100	0	0	TEXT_MUSH8	Black Mushroom

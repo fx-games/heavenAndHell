@@ -1,3 +1,12 @@
+# icons/tiles.rec: which sprite-sheet tile draws each tiles icon ID, one record each: map tiles (tile.<name>), objects (prop.<name>), wall decals (decal.<name>) and missiles (effect.<name>).
+# Every other file names icons by these IDs, never by number; an ID the game asks for that no record defines
+# stops the game at start with its name.
+# Fields:
+#   internal_name     the icon ID, "kind.snake_case_name"
+#   icon              the tile's number on the mod's sprite sheet (classic_roguelike.png), row by row from 0
+#   name              a description for the mod author; not read
+#   reference_image   the original graphic it stands in for; not read
+#
 # Heaven&Hell's tile, decal and effect icons, from the game's own other_icons.rec.
 
 internal_name: tile.white

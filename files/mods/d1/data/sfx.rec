@@ -1,4 +1,10 @@
 %rec: default
+# sfx.rec: every D1 sound id and the file it was in Diablo, one record each. The game plays voices.rec and
+# sounds.rec, not these files; this table is the key into reference/d1_voice_transcripts.tsv.
+# Fields:
+#   id                the _sfx_id (IS_SARC, TSFX_BMAID1, ...)
+#   file              Diablo's file for it, lowercased, as .ogg
+#
 # Every speech and quest sound id D1 has (_sfx_id, effects.cpp's sgSFX), mapped to the file it was in Diablo
 # (the .wav path lowercased, as .ogg). Generated from devilution 1.09's enums.h and effects.cpp. D1's own audio
 # is not in this game: the ids are the records of assets/data/voices.rec, which is what the game plays, and the

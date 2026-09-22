@@ -1,4 +1,13 @@
 %rec: default
+# properties.rec: how each magical power reads in an item's tooltip, one record per power.
+# Fields:
+#   key               the power, as the engine tags it (damage, to_hit, strength, fire_resist, light, ...); required
+#   kind              signed (format takes the value), ranged (min and max), text (the line as is), tiers (see tier)
+#   format            a printf line, e.g. "%+d to strength"
+#   scale             multiplies the value before it is printed (default 1)
+#   better            how comparing two items rates a bigger value: 1 better, -1 worse, 0 not compared
+#   tier              for kind tiers: one line per tier, lowest first, the value picks one; repeatable
+#
 # Every magical power an item can show, by the key PropertyList tags it with. kind picks the formatter:
 #   signed  - format takes the value once  ("%+d to strength")
 #   ranged  - format takes min and max     ("fire hit damage: %d-%d")

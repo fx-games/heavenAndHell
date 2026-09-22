@@ -17,6 +17,12 @@
 #              "open_when:" line after it keeps it shut until the condition (quests.rec's language) holds; an
 #              "exit_tile:" line (stairs_down, stairs_up, red_portal) is what the spot turns into when it opens.
 #              The generator places the locations; this file says where they lead.
+#   template   (ldtk) the maps.ldtk level it is drawn as.
+#   quest      (d1_set) the quests.rec key whose set piece it loads; D1's quest table gives the set level.
+#   patch      "<name> = <region>": part of a built level that opens later, in the order they apply; the region
+#              is D1's ("x1 y1 x2 y2" megatiles, or used / group / range OBJ_...), so only D1 levels use it. An
+#              "apply_when:" line holds it back until the condition holds; "patch_objects:" names a .DUN whose
+#              objects come with it.
 #
 # The knobs accretion takes:
 #   templates        the LDtk project the room templates live in. Defaults to assets/rooms.ldtk, which the mod
@@ -31,6 +37,15 @@
 #   wall_tile, floor_tile  the tile IDs that mean wall and floor in a template's Tiles layer (default 56, 64).
 #   mirror           false keeps rooms as drawn apart from turning them; by default they may also be flipped.
 #
+# The knobs megadungeon takes (it carves a maze and knocks rooms into it; no level here uses it yet):
+#   width, height            the grid it carves (default 60x60)
+#   room_tries, min_room_size, room_ratio   how many rooms it tries to place, their smallest side, how far from
+#                            square they may be (defaults 1266, 5, 0.25)
+#   min_rooms                regrow until it has at least this many (default 10)
+#   straight_passage_chance, imperfect_connect_chance   how straight the maze runs and how often a room gets a
+#                            second opening (defaults 0.5)
+#   door_distance            the least distance between two doors (default 5)
+#   dead_ends                true keeps the maze's dead ends; by default they are filled in
 # Every level forbids the other levels' quest rooms, and the Poisoned Water Supply's cave template, which is a
 # side level off level 3 rather than a dungeon level.
 # A generated level names its stairwells after its exits: ladder_up by the entrance, ladder_down far away.

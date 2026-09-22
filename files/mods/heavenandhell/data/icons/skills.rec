@@ -1,2 +1,11 @@
+# icons/skills.rec: which sprite-sheet tile draws each skills icon ID, one record each: spells and skills (spell.<id>), shown in the spell book and hotbar.
+# Every other file names icons by these IDs, never by number; an ID the game asks for that no record defines
+# stops the game at start with its name.
+# Fields:
+#   internal_name     the icon ID, "kind.snake_case_name"
+#   icon              the tile's number on the mod's sprite sheet (classic_roguelike.png), row by row from 0
+#   name              a description for the mod author; not read
+#   reference_image   the original graphic it stands in for; not read
+#
 # Heaven&Hell's skill icons. Its effects are not content on this branch yet, so this is empty:
 # the loader reads the file, and any name it does not find is reported by LoadIcons.

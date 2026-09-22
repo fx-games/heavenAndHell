@@ -1,3 +1,12 @@
+## xl_uitem.txt: the unique items, Diablo's UniqueItemList, one tab-separated row each. Lines starting with ## are
+## comments; the first other line names the columns.
+## Columns:
+##   UIName      its name
+##   UIItemId    the base it is built on, an items.rec unique_base (UITYPE_ name)
+##   UIMinLvl    the lowest item level it drops on
+##   UINumPL     how many of the six power slots below it uses
+##   UIValue     its price
+##   UIPower1..6 an IPL_ power (as in xl_isuf.txt), each with its value range UIParam(2n-1) / UIParam(2n)
 UIName(s)	UIItemId(i)	UIMinLvl(i)	UINumPL(i)	UIValue(i)	UIPower1(i)	UIParam1(i)	UIParam2(i)	UIPower2(i)	UIParam3(i)	UIParam4(i)	UIPower3(i)	UIParam5(i)	UIParam6(i)	UIPower4(i)	UIParam7(i)	UIParam8(i)	UIPower5(i)	UIParam9(i)	UIParam10(i)	UIPower6(i)	UIParam11(i)	UIParam12(i)
 The Butcher's Cleaver	UITYPE_CLEAVER	1	3	3650	IPL_STR	10	10	IPL_SETDAM	4	24	IPL_SETDUR	10	10	IPL_TOHIT	0	0	IPL_TOHIT	0	0	IPL_TOHIT	0	0
 The Undead Crown	UITYPE_SKCROWN	1	3	16650	IPL_RNDSTEALLIFE	0	0	IPL_SETAC	8	8	IPL_INVCURS	77	0	IPL_TOHIT	0	0	IPL_TOHIT	0	0	IPL_TOHIT	0	0

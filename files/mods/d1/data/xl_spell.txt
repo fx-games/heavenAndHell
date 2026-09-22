@@ -1,3 +1,18 @@
+## xl_spell.txt: Diablo's spells (spelldata), one tab-separated row per SPL_ id; spells.rec says what each does.
+## Lines starting with ## are comments; the first other line names the columns.
+## Columns:
+##   sName       the SPL_ id
+##   sManaCost   its mana cost at spell level 1; sManaAdj how much less it costs per level, sMinMana its least cost
+##   sType       its school: STYPE_FIRE, STYPE_LIGHTNING or STYPE_MAGIC
+##   sNameText   its name; sSkillText the name of the scroll or staff that carries it
+##   sBookLvl / sStaffLvl   the item level of its book and of its staff (-1: none drops)
+##   sTargeted   1: it is aimed at a cell
+##   sTownSpell  1: it may be cast in town
+##   sMinInt     the magic needed to learn it from a book
+##   sSFX        the sound of casting it
+##   sMissiles   the missiles it launches (MIS_ names)
+##   sStaffMin / sStaffMax   the charges a staff of it gets
+##   sBookCost / sStaffCost  the price of its book and of a staff of it
 #sName(i)	sManaCost(i)	sType(i)	sNameText(s)	sSkillText(s)	sBookLvl(i)	sStaffLvl(i)	sTargeted(i)	sTownSpell(i)	sMinInt(i)	sSFX(i)	sMissiles(a)	sManaAdj(i)	sMinMana(i)	sStaffMin(i)	sStaffMax(i)	sBookCost(i)	sStaffCost(i)
 SPL_NULL	0	0	NULL	NULL	0	0	0	0	0	0	"0, 0, 0"	0	0	40	80	0	0
 SPL_FIREBOLT	6	STYPE_FIRE	Firebolt	Firebolt	1	1	1	0	15	IS_CAST2	"MIS_FIREBOLT, 0, 0"	1	3	40	80	1000	50

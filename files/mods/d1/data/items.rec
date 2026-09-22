@@ -1,3 +1,47 @@
+# items.rec: every base item, one record each. Order is content: D1 rolls items by walking this table. One schema
+# serves every mod; a mod fills in the fields its game uses and leaves the rest out.
+# Identity:
+#   internal_name     id other files use (classes.rec, stores.rec, quests.rec); required
+#   name / short_name the shown name, and the short one that fits the belt
+#   icon              icons/items.rec id, e.g. item.dagger
+# Where it appears:
+#   dlvl              the shallowest dungeon level it drops on (D1's iMinMLvl); max_level the deepest (0: none)
+#   out_of_depth_chance / min_level_for_ood   chance to drop above its dlvl, from this dungeon level on
+#   drop              IDROP_REGULAR, IDROP_DOUBLE (twice as likely) or IDROP_NEVER (quests and stores only)
+#   hidden            true: unseen and out of reach until the hero has true sight (H&H's evidence)
+#   cost              its value in gold (D1's iValue)
+# What it is (a record names either category or D1's class/item_type):
+#   category          potion scroll wand light weapon armor ammo ring food amulet throwable
+#   class / location / item_type   D1's ICLASS_ (WEAPON, ARMOR, MISC, GOLD, QUEST), ILOC_ (ONEHAND, TWOHAND,
+#                     ARMOR, HELM, RING, AMULET, BELT, UNEQUIPABLE) and ITYPE_ number
+#   cursor            D1's inventory graphic number (ICURS_), which also picks its sound (item_sounds.rec)
+#   unique_base       UITYPE_ name the unique items (xl_uitem.txt) built on it refer to
+#   durability        maximum durability (255: indestructible)
+#   requires_strength / requires_magic / requires_dexterity   what the hero needs to use it
+#   flags             D1's ISPL_ bits, "ISPL_NONE" or several separated by |
+#   misc_id / spell   D1's IMISC_ kind (IMISC_FULLHEAL, IMISC_SCROLL, IMISC_BOOK, IMISC_STAFF, ...) and the SPL_ it casts
+# Weapons:
+#   weapon_type       sword axe mace bow crossbow shield scythe spear whip dagger sling
+#   weapon_damage     a range "2-6" or dice "1d4"
+#   weapon_speed / weapon_two_handed / weapon_armor_penetration   attack speed factor, true for two hands, AC ignored
+#   ranged_max_range / ranged_accuracy_at_min_range / ranged_accuracy_at_max_range / ranged_projectile_icon
+#                     a missile weapon's reach, accuracy (0..1) at either end, and the icon its shot flies with
+# Armour:
+#   armor_type        helmet cuirass gloves boots cape amulet ring shield defensive_weapon
+#   armor_class       a range "3-5" (rolled) or a number
+# Throwing:
+#   throw_damage      "min-max" damage when thrown; throw_chance_to_break 0..1 that it breaks on landing
+#   throw_hit_zone    what a throw hits: target_only, neighbors_only, ray_aoe, bolt_aoe, dijkstra_aoe(n), box_aoe(n), ...
+#   throw_on_hit_effect   an effect (effects/targeted.rec) it applies to what it hits
+# Light sources:
+#   charges           turns a light burns, or uses a wand or scroll has
+#   light_color       "R G B" of its light; light_flicker_pattern (fire) and light_flicker_frame_delay (seconds)
+# Powers:
+#   equip_modifier    what it does while worn: strength, dexterity, intelligence, health, mana, damage, armor_class,
+#                     light_radius, attack_speed, steal_health, steal_mana, speed, move_speed; "name(n)" gives n,
+#                     a bare name rolls up to the item level; repeatable
+#   untargeted_action / targeted_action   the effect (effects/*.rec) using it triggers
+#
 # Diablo 1's items in the unified items.rec schema every mod uses (see defs.Item).
 # Converted once from Hellfire's own itemdat table; the engine no longer reads xl_item.txt.
 # Order is content: D1 rolls items by walking this table, so a row moving is a gameplay change.

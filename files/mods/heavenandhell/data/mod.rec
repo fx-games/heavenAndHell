@@ -1,6 +1,12 @@
 %rec: default
+# mod.rec: rules and settings this mod fixes; they win over config.rec and the player cannot change them. One
+# record only (a blank line would start a second one, which is not read). Fields, all optional:
+#   AutosaveOnLevelChange   true / false: whether the game saves on every level change
+#   Lighting                aura: a light around the hero always, radius 10 plus the gear's light affixes (Diablo);
+#                           carried: only the equipped light source lights the dark while it burns (Angband).
+#                           Default aura
+#
 
-# Rules this mod fixes: they win over config.rec and the player cannot change them.
 # Lighting: carried is Angband's: in the dark the hero sees only by the light source they carry, as far as it
 # (and any other light_radius gear) reaches, and only while it has charges left to burn.
 Lighting: carried

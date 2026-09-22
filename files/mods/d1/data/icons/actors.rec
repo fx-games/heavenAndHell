@@ -1,4 +1,13 @@
 %rec: default
+# icons/actors.rec: which sprite-sheet tile draws each actors icon ID, one record each: heroes (class.<class>_male/_female), monsters (monster.<id>), uniques (unique.<name>), townspeople (npc.<name>) and corpses (corpse.<name>).
+# Every other file names icons by these IDs, never by number; an ID the game asks for that no record defines
+# stops the game at start with its name.
+# Fields:
+#   internal_name     the icon ID, "kind.snake_case_name"
+#   icon              the tile's number on the mod's sprite sheet (classic_roguelike.png), row by row from 0
+#   name              a description for the mod author; not read
+#   reference_image   the original graphic it stands in for; not read
+#
 
 internal_name: class.rogue_male
 icon: 19

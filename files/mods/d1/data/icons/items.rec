@@ -1,4 +1,13 @@
 %rec: default
+# icons/items.rec: which sprite-sheet tile draws each items icon ID, one record each: items (item.<internal_name>), with .used / .magic / .unique variants where a mod has them.
+# Every other file names icons by these IDs, never by number; an ID the game asks for that no record defines
+# stops the game at start with its name.
+# Fields:
+#   internal_name     the icon ID, "kind.snake_case_name"
+#   icon              the tile's number on the mod's sprite sheet (classic_roguelike.png), row by row from 0
+#   name              a description for the mod author; not read
+#   reference_image   the original graphic it stands in for; not read
+#
 
 internal_name: item.misc
 reference_image: reference/d1_sprites/items/item.magic_rock.curs76.png

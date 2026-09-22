@@ -1,4 +1,12 @@
 %rec: default
+# voices.rec: spoken lines (heroes, townspeople, bosses, quest books), one record per D1 _sfx_id. The engine plays
+# a line by its internal_name; one without a sound is silent. Remap with ./remap_voices.sh.
+# Fields:
+#   internal_name     the line's id (TSFX_WITCH1, PS_WARR69, ...)
+#   name              what the remap tool shows
+#   text              what the line said in Diablo, for the remap tool; not read by the game
+#   sound             the file to play, relative to the mod's folder; repeatable (one is picked at random)
+#
 
 # D1's speech, one record per _sfx_id: internal_name is the cue the game plays, text: what the line said in
 # Diablo (reference/d1_voice_transcripts.tsv). No sound: means silent — assign one with ./remap_voices.sh.

@@ -1,3 +1,11 @@
+# texts.rec: every line of dialogue, book and quest text, by id. quests.rec, objects and townspeople say them.
+# %rec: text
+#   id                the text's id (TEXT_...); required
+#   text              the words; they continue on lines that start with "+ ", and a line of just "+" starts a paragraph
+#   sfx               voices.rec id spoken with it (none: silent)
+#   gossip            the townsperson (internal name) who may say it as gossip; their gossip goes in file order,
+#                     the greeting first
+#
 # Heaven & Hell's town dialogue, from main's files/assets/dialogue/*.txt. This game has no speech, so no sfx.
 # A line of just "+" starts a new paragraph. quests.rec decides who says what, when.
 

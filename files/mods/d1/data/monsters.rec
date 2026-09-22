@@ -1,4 +1,9 @@
 %rec: ai
+# monsters.rec: a plain-English description of each monster brain, shown in the monster info popup.
+# %rec: ai
+#   id                an AI_ name, as enemies.rec's ai field uses it
+#   description       what that brain does, one sentence
+#
 # A plain-English gloss of each AI_* brain, shown in the actor description popup. Not shared with the AI
 # itself (game/ai_d1.go's think()): if a brain's behaviour changes, update its line here too.
 

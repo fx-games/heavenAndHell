@@ -1,4 +1,11 @@
 %rec: default
+# music.rec: the music events, one record each. levels.rec's music names one; the pause menu's Music Player lists
+# all of them. Remap with ./remap_music.sh.
+# Fields:
+#   internal_name     the event's id
+#   name              what the remap tool and the Music Player show
+#   sound             the file to play, relative to the mod's folder; repeatable (one is picked at random)
+#
 # Heaven & Hell's area themes, by level type (music_start(leveltype)): the town's own track and Abaddon's music.
 # The rest of ambience/ (battle_music_3/4 and the ambient loops) is in the pause menu's Music Player.
 

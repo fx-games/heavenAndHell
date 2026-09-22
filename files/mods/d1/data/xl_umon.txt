@@ -1,3 +1,16 @@
+## xl_umon.txt: the unique monsters, Diablo's UniqMonst table, one tab-separated row each. Lines starting with ## are
+## comments; the first other line names the columns.
+## Columns:
+##   mtype       the enemies.rec monster (MT_ name) it is a stronger version of
+##   mName       its name; mTrnName the palette (colour translation) it is drawn with
+##   mlevel      its monster level; mmaxhp its hit points
+##   mAi         the AI_ brain it uses (see monsters.rec); mint its intelligence
+##   mMinDamage / mMaxDamage   its damage
+##   mMagicRes   its resistance and immunity bits (as enemies.rec's magic_res)
+##   mUnqAttr    bits: 1 it leads a pack of its own kind, 2 it only moves with its whole pack around it, 4 its to-hit
+##               is mUnqVar1, 8 its armour class is mUnqVar1
+##   mUnqVar1    the to-hit or armour class that bits 4 and 8 set; mUnqVar2 unused (1.09 never reads it)
+##   mtalkmsg    the texts.rec id it says when the hero comes near (0: none)
 mtype(i)	mName(s)	mTrnName(s)	mlevel(i)	mmaxhp(i)	mAi(i)	mint(i)	mMinDamage(i)	mMaxDamage(i)	mMagicRes(i)	mUnqAttr(i)	mUnqVar1(i)	mUnqVar2(i)	mtalkmsg(i)
 MT_NGOATMC	Gharbad the Weak	BSDB	4	120	AI_GARBUD	3	8	16	96	0	0	0	TEXT_GARBUD1
 MT_SKING	Skeleton King	GENRL	0	240	AI_SKELKING	3	6	16	78	1	0	0	0

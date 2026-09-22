@@ -1,3 +1,11 @@
+# texts.rec: every line of dialogue, book and quest text, by id. quests.rec, objects and townspeople say them.
+# %rec: text
+#   id                the text's id (TEXT_...); required
+#   text              the words; they continue on lines that start with "+ ", and a line of just "+" starts a paragraph
+#   sfx               voices.rec id spoken with it (none: silent)
+#   gossip            the townsperson (internal name) who may say it as gossip; their gossip goes in file order,
+#                     the greeting first
+#
 # Every quest, book and gossip text Diablo says, by its TEXT_* id: ported from Source/Data/Text.
 #   sfx     the speech cue played with it.
 #   gossip  the town NPC who says it as gossip; an NPC's gossip is in file order, its greeting first.

@@ -1,13 +1,45 @@
+# hero.rec: the hero's numbers and rules, per class. Three sections.
+# %rec: class, one record per class, in classes.rec's order (record N is classes.rec's class N):
+#   name              the class's name
+#   str / mag / dex / vit             a new hero's attributes; max_str / max_mag / max_dex / max_vit their caps
+#   to_blk            chance to block with a shield, before dexterity and level
+#   adj_life / adj_mana               the flat part of the starting life and mana
+#   lvl_life / lvl_mana               life and mana gained per character level
+#   chr_life / chr_mana               life per point of vitality, mana per point of magic, when it is raised
+#   itm_life / itm_mana               the same, for vitality and magic that items give
+#   potion_life / potion_mana         multiplier on what a healing / mana potion restores
+#   spell_life        multiplier on the Healing spell; mana_cost multiplier on every spell's mana cost
+#                     (the life/mana/potion/spell numbers are decimals: 1 = normal, 0.5 = half, as in devilutionX)
+#   magic_to_hit / melee_to_hit / ranged_to_hit   the class's to-hit bonus for each kind of attack
+#   spell_to_hit      extra to-hit for its magic missiles (Sorcerer 20, Bard 10)
+#   attack_frames     attack animation length by weapon: "default=16 axe=20" (sword axe bow mace staff)
+#   spell_frames / hit_frames         cast animation length, and hit recovery length
+#   start_spells      spells a new hero knows: "SPL_FIREBOLT=2 ..." (spell = level)
+#   heal_boost        Healing and potions: 2 doubles the roll, 1 adds half, 0 neither
+#   flags             what the class does differently, any of: critical_strike (level% of swings hit twice),
+#                     trap_sense (sees traps), iron_skin (+level/4 AC), natural_resistance (+level to every
+#                     resistance), dual_wield, trained_fists (bare hands hit level/2..level), parry (blocks with
+#                     a staff, one one-hander or bare hands), full_missile_bonus (missiles get the whole damage
+#                     bonus), half_shield (a shield without a weapon counts half), vitality_damage (+level*vit/100
+#                     melee), shield_slows_bare_hands, flinch_resist (hit recovery needs level/4 more damage), and
+#                     at most one melee damage formula: str_dex_damage, staff_and_fist_damage,
+#                     blade_and_bow_damage, heavy_weapon_damage (none: level*str/100)
+#   key               what spells.rec's effects call the class (default: name, lowercased)
+#   skill             its class skill: repair, disarm, recharge, vision, identify or rage (none: no skill)
+#   voice / female_voice              its PS_<voice>nn sound set (WARR, ROGUE, MAGE, MONK), male and female
+#   death_sound       said on death instead of PS_<voice>71
+#   text_prefix       its version of the quest books' texts: TEXT_<prefix>BONER
+#   oily              what the Oily shrine gives it: "str 2"; repeatable
+#   slain_hero        what the Slain Hero leaves it: breast_plate, long_war_bow, war_staff, bastard_sword,
+#                     battle_axe or lightning_book
+# %rec: experience
+#   exp               the experience each level needs, level 1 first, ten numbers per line; repeatable (51 in all)
+# %rec: weapon_bonus (optional), melee damage by weapon type against a monster class:
+#   weapon            sword, axe, bow, mace or staff; the first weapon listed that the hero holds is the one judged
+#   versus            a monster class (enemies.rec's class: MC_UNDEAD, MC_ANIMAL, MC_DEMON)
+#   percent           more (or, negative, less) damage, e.g. 50 or -50
+#
 %rec: class
-# Everything a class does differently is a flag or a field of its record, which any class may take:
-#   flags: critical_strike trap_sense iron_skin natural_resistance dual_wield trained_fists parry
-#          full_missile_bonus half_shield vitality_damage shield_slows_bare_hands flinch_resist, and at most
-#          one damage formula: str_dex_damage staff_and_fist_damage blade_and_bow_damage heavy_weapon_damage
-#          (none: clvl*Str/100)
-#   key (effects' class lists), spell_to_hit, heal_boost (2 doubles Healing and potions, 1 adds half),
-#   skill (repair disarm recharge vision identify rage), voice / female_voice (PS_<voice>nn), death_sound,
-#   text_prefix (the quest books' class texts), oily (the Oily shrine: "str 2", repeatable),
-#   slain_hero (breast_plate long_war_bow war_staff bastard_sword battle_axe lightning_book)
 # One row per player class, in PC_ order: D1's three, then Hellfire's Monk, Bard and Barbarian.
 # Ports devilutionX's txtdata/classes/<class>/attributes.tsv and animations.tsv, which reproduce
 # D1 1.09's player.cpp tables. The life/mana/potion/spell columns are devilutionX's parseFixed6
