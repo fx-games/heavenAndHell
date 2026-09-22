@@ -21,6 +21,7 @@ import (
 func init() {
 	dungeon.Register("accretion", accretion{})
 	dungeon.Register("megadungeon", megadungeon{})
+	dungeon.Register("rogue", rogue{})
 }
 
 // scratchSize is the grid an algorithm grows into before it is trimmed. It is a knob, but these are the sizes
@@ -127,6 +128,42 @@ func (megadungeon) Parse(r recfile.Record) (dungeon.Config, error) {
 	return c, nil
 }
 
+// RogueConfig is what a mod declares for the rogue generator (Rogue 5.4's nine-cell rooms and passages). The
+// defaults are Rogue's own.
+type RogueConfig struct {
+	Width, Height int  // at least 30x15, so each of the nine cells can hold a room
+	MaxGone       int  // up to this many cells hold only a corridor junction instead of a room
+	ExtraPassages int  // up to this many passages beyond the ones that connect everything
+	Doors         bool // passages meet rooms at doors; false: at open doorways
+}
+
+type rogue struct{}
+
+func (rogue) Parse(r recfile.Record) (dungeon.Config, error) {
+	c := RogueConfig{Width: 80, Height: 24, MaxGone: 3, ExtraPassages: 4, Doors: true}
+	var err error
+	for _, k := range []struct {
+		name string
+		into *int
+	}{{"width", &c.Width}, {"height", &c.Height}, {"max_gone_rooms", &c.MaxGone}, {"extra_passages", &c.ExtraPassages}} {
+		if *k.into, err = dungeon.Int(r, k.name, *k.into); err != nil {
+			return nil, err
+		}
+	}
+	if v, ok := dungeon.Field(r, "doors"); ok {
+		c.Doors = v != "false"
+	}
+	switch {
+	case c.Width < 30 || c.Height < 15:
+		return nil, fmt.Errorf("levels.rec: rogue needs at least width 30 and height 15, not %dx%d", c.Width, c.Height)
+	case c.MaxGone < 0 || c.MaxGone > 8:
+		return nil, fmt.Errorf("levels.rec: rogue max_gone_rooms %d: want 0..8 (one cell keeps its room)", c.MaxGone)
+	case c.ExtraPassages < 0:
+		return nil, fmt.Errorf("levels.rec: rogue extra_passages %d: want 0 or more", c.ExtraPassages)
+	}
+	return c, nil
+}
+
 // Build runs whichever of these algorithms a level's configuration names and returns its layout. It is dungen's
 // own entry point, not part of dungeon.Strategy: D1 hands its caller a populated d1.Level and this hands back a
 // bare DungeonMap, and pretending those are the same return type is what the narrow interface avoids.
@@ -138,6 +175,10 @@ func Build(cfg dungeon.Config, rnd *rand.Rand, fsys fs.FS) (*DungeonMap, error) 
 		return buildAccretion(c, rnd, fsys)
 	case MegaDungeonConfig:
 		return buildMegaDungeon(c, rnd), nil
+	case RogueConfig:
+		g := &RogueGenerator{cols: c.Width, rows: c.Height, maxGone: c.MaxGone, extraPassages: c.ExtraPassages,
+			doors: c.Doors, random: rnd}
+		return g.Generate(), nil
 	}
 	return nil, fmt.Errorf("dungen: %T is not one of this family's configurations", cfg)
 }

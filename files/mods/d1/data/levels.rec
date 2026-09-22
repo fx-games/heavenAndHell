@@ -7,7 +7,7 @@
 #   depth      difficulty and progress only (seeds, monster and item levels, "deepest"). Town 0; a quest or side
 #              level takes its parent's.
 #   generator  the algorithm that builds it: d1_cathedral, d1_catacombs, d1_caves, d1_hell (Diablo's four level
-#              generators), d1_set (a quest's set piece; names its quest), accretion, megadungeon, ldtk (drawn
+#              generators), d1_set (a quest's set piece; names its quest), accretion, megadungeon, rogue, ldtk (drawn
 #              in maps.ldtk; names its template).
 #   tiles      the tile set: cathedral, catacombs, caves, hell, or drawn (an ldtk level's own tiles).
 #   music      a music.rec event; a level without one is silent.
