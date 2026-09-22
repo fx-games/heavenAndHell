@@ -162,10 +162,36 @@ func assertConnected(t *testing.T, seed int, name string, m *DungeonMap) {
 // TestMegaDungeonRejectsBadKnobs: a room bigger than the level used to panic rand.Intn mid-generation.
 func TestMegaDungeonRejectsBadKnobs(t *testing.T) {
 	for _, kv := range [][2]string{{"width", "8"}, {"min_room_size", "2"}, {"room_tries", "0"},
-		{"straight_passage_chance", "1.5"}, {"imperfect_connect_chance", "-1"}} {
+		{"straight_passage_chance", "1.5"}, {"imperfect_connect_chance", "-1"}, {"room_size_spread", "0"}} {
 		r := recfile.Record{{Name: "generator", Value: "megadungeon"}, {Name: kv[0], Value: kv[1]}}
 		if _, err := (megadungeon{}).Parse(r); err == nil {
 			t.Errorf("%s: %s was accepted", kv[0], kv[1])
 		}
 	}
+}
+
+func TestAccretionRejectsBadLoopChance(t *testing.T) {
+	r := recfile.Record{{Name: "generator", Value: "accretion"}, {Name: "template_prefix", Value: "Cath"},
+		{Name: "loop_chance", Value: "2"}}
+	if _, err := (accretion{}).Parse(r); err == nil {
+		t.Error("loop_chance 2 was accepted")
+	}
+}
+
+// TestMegaDungeonWithoutDoors: doors: false opens the connectors instead, and the level stays one piece.
+func TestMegaDungeonWithoutDoors(t *testing.T) {
+	cfg, err := megadungeon{}.Parse(recfile.Record{{Name: "generator", Value: "megadungeon"}, {Name: "doors", Value: "false"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, err := Build(cfg, rand.New(rand.NewSource(1)), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tile := range m.tiles {
+		if tile == Door {
+			t.Fatal("doors: false still placed a door")
+		}
+	}
+	assertConnected(t, 1, "megadungeon", m)
 }

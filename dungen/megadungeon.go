@@ -38,6 +38,8 @@ type MegaDungeonGenerator struct {
 	doorDistance           int
 	requiredConnections    []geometry.Point
 	optionalConnections    []geometry.Point
+	roomSizeSpread         int
+	doors                  bool
 }
 
 // sortPoints puts points in coordinate order, so a list gathered out of a map has an order at all.
@@ -74,7 +76,7 @@ func (c *MegaDungeonGenerator) Generate(width, height int) *DungeonMap {
 
 func (c *MegaDungeonGenerator) addRooms(emptyMap *DungeonMap) {
 	for i := 0; i < c.roomTries; i++ {
-		roomSize := makeOddForSize(c.randomSource, c.minRoomSize, c.randomSource.Intn(5)+c.minRoomSize)
+		roomSize := makeOddForSize(c.randomSource, c.minRoomSize, c.randomSource.Intn(c.roomSizeSpread)+c.minRoomSize)
 		// we want a ration between 1 and 1.2
 		aspectRatio := c.randomSource.Float64()*c.roomRatioInterval + 1
 		roomWidth := roomSize
@@ -312,15 +314,19 @@ func (c *MegaDungeonGenerator) mergeRegions(regionOne Region, regionTwo Region, 
 }
 
 func (c *MegaDungeonGenerator) placeDoorsAtConnections(emptyMap *DungeonMap) {
+	open := emptyMap.SetDoor
+	if !c.doors {
+		open = emptyMap.SetCorridor
+	}
 	var placedDoors []geometry.Point
 	for _, connector := range c.requiredConnections {
-		emptyMap.SetDoor(connector.X, connector.Y)
+		open(connector.X, connector.Y)
 		placedDoors = append(placedDoors, connector)
 	}
 
 	for _, connector := range c.optionalConnections {
 		if c.hasMinDistToConnectors(placedDoors, connector, c.doorDistance) {
-			emptyMap.SetDoor(connector.X, connector.Y)
+			open(connector.X, connector.Y)
 			placedDoors = append(placedDoors, connector)
 		}
 	}

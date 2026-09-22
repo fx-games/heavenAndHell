@@ -36,6 +36,8 @@
 #   doors            false leaves the room openings as corridors instead of placing doors.
 #   wall_tile, floor_tile  the tile IDs that mean wall and floor in a template's Tiles layer (default 56, 64).
 #   mirror           false keeps rooms as drawn apart from turning them; by default they may also be flipped.
+#   loop_distance, loop_chance  after growing, a wall between two rooms at least loop_distance steps apart on
+#                    foot opens with loop_chance, so the way back is not always the way in (defaults 10, 0.8).
 #
 # The knobs megadungeon takes (it carves a maze and knocks rooms into it; no level here uses it yet):
 #   width, height            the grid it carves (default 60x60)
@@ -45,6 +47,8 @@
 #   straight_passage_chance, imperfect_connect_chance   how straight the maze runs and how often a room gets a
 #                            second opening (defaults 0.5)
 #   door_distance            the least distance between two doors (default 5)
+#   room_size_spread         a room's side is min_room_size plus 0 to room_size_spread-1 (default 5)
+#   doors                    false leaves the connectors as bare openings
 #   dead_ends                true keeps the maze's dead ends; by default they are filled in
 #
 # The knobs rogue takes (Rogue's nine rooms in a 3x3 grid, joined by passages; no level here uses it yet):

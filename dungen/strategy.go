@@ -43,6 +43,8 @@ type AccretionConfig struct {
 	Doors         bool
 	Mirror        bool // rooms may be flipped as well as turned
 	Tiles         TileIDs
+	LoopDistance  int     // a wall between two rooms this far apart on foot (or farther) may open into a loop
+	LoopChance    float64 // how likely each such wall opens
 }
 
 type accretion struct{}
@@ -50,7 +52,7 @@ type accretion struct{}
 func (accretion) Parse(r recfile.Record) (dungeon.Config, error) {
 	c := AccretionConfig{Templates: "assets/rooms.ldtk", Rooms: 16, MinRooms: 10,
 		Width: accretionScratch, Height: accretionScratch, Doors: true, Mirror: true,
-		Tiles: TileIDs{Wall: 56, Floor: 64}}
+		Tiles: TileIDs{Wall: 56, Floor: 64}, LoopDistance: 10, LoopChance: 0.8}
 	if v, ok := dungeon.Field(r, "templates"); ok {
 		c.Templates = v
 	}
@@ -71,10 +73,16 @@ func (accretion) Parse(r recfile.Record) (dungeon.Config, error) {
 		name string
 		into *int
 	}{{"rooms", &c.Rooms}, {"min_rooms", &c.MinRooms}, {"width", &c.Width}, {"height", &c.Height},
-		{"wall_tile", &c.Tiles.Wall}, {"floor_tile", &c.Tiles.Floor}} {
+		{"wall_tile", &c.Tiles.Wall}, {"floor_tile", &c.Tiles.Floor}, {"loop_distance", &c.LoopDistance}} {
 		if *k.into, err = dungeon.Int(r, k.name, *k.into); err != nil {
 			return nil, err
 		}
+	}
+	if c.LoopChance, err = dungeon.Float(r, "loop_chance", c.LoopChance); err != nil {
+		return nil, err
+	}
+	if c.LoopChance < 0 || c.LoopChance > 1 {
+		return nil, fmt.Errorf("levels.rec: accretion loop_chance must be between 0 and 1")
 	}
 	return c, nil
 }
@@ -92,6 +100,8 @@ type MegaDungeonConfig struct {
 	DoorDistance           int
 	RemoveDeadEnds         bool
 	MinRooms               int
+	RoomSizeSpread         int  // a room's side is min_room_size plus up to this much less one
+	Doors                  bool // false leaves the connectors as bare openings
 }
 
 type megadungeon struct{}
@@ -99,13 +109,14 @@ type megadungeon struct{}
 func (megadungeon) Parse(r recfile.Record) (dungeon.Config, error) {
 	c := MegaDungeonConfig{Width: megadungeonScratch, Height: megadungeonScratch, RoomTries: 1266, MinRoomSize: 5,
 		StraightPassageChance: 0.5, ImperfectConnectChance: 0.5, RoomRatioInterval: 0.25, DoorDistance: 5,
-		RemoveDeadEnds: true, MinRooms: 10}
+		RemoveDeadEnds: true, MinRooms: 10, RoomSizeSpread: 5, Doors: true}
 	var err error
 	for _, k := range []struct {
 		name string
 		into *int
 	}{{"width", &c.Width}, {"height", &c.Height}, {"room_tries", &c.RoomTries},
-		{"min_room_size", &c.MinRoomSize}, {"door_distance", &c.DoorDistance}, {"min_rooms", &c.MinRooms}} {
+		{"min_room_size", &c.MinRoomSize}, {"door_distance", &c.DoorDistance}, {"min_rooms", &c.MinRooms},
+		{"room_size_spread", &c.RoomSizeSpread}} {
 		if *k.into, err = dungeon.Int(r, k.name, *k.into); err != nil {
 			return nil, err
 		}
@@ -115,20 +126,21 @@ func (megadungeon) Parse(r recfile.Record) (dungeon.Config, error) {
 		into *float64
 	}{{"straight_passage_chance", &c.StraightPassageChance},
 		{"imperfect_connect_chance", &c.ImperfectConnectChance}, {"room_ratio", &c.RoomRatioInterval}} {
-		if v, ok := dungeon.Field(r, k.name); ok {
-			if _, err := fmt.Sscanf(v, "%f", k.into); err != nil {
-				return nil, fmt.Errorf("levels.rec: %s %q: %w", k.name, v, err)
-			}
+		if *k.into, err = dungeon.Float(r, k.name, *k.into); err != nil {
+			return nil, err
 		}
 	}
 	if v, ok := dungeon.Field(r, "dead_ends"); ok {
 		c.RemoveDeadEnds = v != "true" // "dead_ends: true" keeps them; they are filled in otherwise
 	}
+	if v, ok := dungeon.Field(r, "doors"); ok {
+		c.Doors = v != "false"
+	}
 	switch {
 	case c.MinRoomSize < 3 || c.Width < c.MinRoomSize+4 || c.Height < c.MinRoomSize+4:
 		return nil, fmt.Errorf("levels.rec: megadungeon needs min_room_size >= 3 and width, height >= min_room_size+4")
-	case c.RoomTries < 1 || c.DoorDistance < 0 || c.RoomRatioInterval < 0:
-		return nil, fmt.Errorf("levels.rec: megadungeon room_tries must be >= 1, door_distance and room_ratio >= 0")
+	case c.RoomTries < 1 || c.RoomSizeSpread < 1 || c.DoorDistance < 0 || c.RoomRatioInterval < 0:
+		return nil, fmt.Errorf("levels.rec: megadungeon room_tries, room_size_spread must be >= 1, door_distance and room_ratio >= 0")
 	case c.StraightPassageChance < 0 || c.StraightPassageChance > 1 || c.ImperfectConnectChance < 0 || c.ImperfectConnectChance > 1:
 		return nil, fmt.Errorf("levels.rec: megadungeon chances must be between 0 and 1")
 	}
@@ -210,6 +222,7 @@ func buildAccretion(c AccretionConfig, rnd *rand.Rand, fsys fs.FS) (*DungeonMap,
 	g.SetLevelRules(rules)
 	g.SetRoomCount(c.Rooms)
 	g.SetMirroring(c.Mirror)
+	g.loopDistance, g.loopChance = c.LoopDistance, c.LoopChance
 	if len(g.roomTemplates) == 0 {
 		return nil, fmt.Errorf("dungen: %s has no room templates with prefix %q", c.Templates, c.Prefix)
 	}
@@ -241,7 +254,7 @@ func buildMegaDungeon(c MegaDungeonConfig, rnd *rand.Rand) (*DungeonMap, error) 
 		g := &MegaDungeonGenerator{randomSource: rnd, roomTries: c.RoomTries, minRoomSize: c.MinRoomSize,
 			straightPassageChance: c.StraightPassageChance, imperfectConnectChance: c.ImperfectConnectChance,
 			roomRatioInterval: c.RoomRatioInterval, doorDistance: c.DoorDistance,
-			removeDeadEnds: c.RemoveDeadEnds}
+			removeDeadEnds: c.RemoveDeadEnds, roomSizeSpread: c.RoomSizeSpread, doors: c.Doors}
 		m = g.Generate(c.Width, c.Height)
 		if len(m.AllRooms()) >= c.MinRooms {
 			return m, nil

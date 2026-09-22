@@ -257,3 +257,16 @@ func Int(r recfile.Record, key string, def int) (int, error) {
 	}
 	return n, nil
 }
+
+// Float parses one decimal knob, naming the field when it does not.
+func Float(r recfile.Record, key string, def float64) (float64, error) {
+	v, ok := Field(r, key)
+	if !ok {
+		return def, nil
+	}
+	f, err := strconv.ParseFloat(v, 64)
+	if err != nil {
+		return def, fmt.Errorf("levels.rec: %s %q: %w", key, v, err)
+	}
+	return f, nil
+}

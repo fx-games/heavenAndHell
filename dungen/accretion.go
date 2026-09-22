@@ -32,12 +32,16 @@ type AccretionGenerator struct {
 	levelRules      TemplateRules
 	placedTemplates map[string]bool
 	mirror          bool
+	loopDistance    int
+	loopChance      float64
 }
 
 func NewAccretionGenerator(randomSource *rand.Rand) *AccretionGenerator {
 	return &AccretionGenerator{
 		random:        randomSource,
 		currentRoomId: 0,
+		loopDistance:  10,
+		loopChance:    0.8,
 	}
 }
 
@@ -207,7 +211,7 @@ func (g *AccretionGenerator) Generate(width, height int) (*DungeonMap, error) {
 
 	// Growing makes a tree; the extra openings make loops, so the way back is not always the way in.
 	dMap.ConnectRoomsOnMap(!g.levelRules.NoDoors)
-	dMap.addMoreDoors(g.random, 10, 0.8, !g.levelRules.NoDoors)
+	dMap.addMoreDoors(g.random, g.loopDistance, g.loopChance, !g.levelRules.NoDoors)
 
 	return dMap, nil
 }
