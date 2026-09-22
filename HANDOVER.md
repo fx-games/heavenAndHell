@@ -29,7 +29,9 @@ shekel (merchant_12); with all three handed in, kirioth (the true Kirioth appear
 `TestHeavenAndHellQuestsPlayThrough`.
 
 Still waiting on the user: review of the texts Claude drafted (the four evidence notes, all of act two's
-lines in H&H `texts.rec`). The town's NPC Kirioth and Shekel stay standing after their "true" selves die.
+lines in H&H `texts.rec`). Quests can `add_npc` (copies the NPC's entity from anywhere in maps.ldtk) and
+`remove_npc`; both are flags replayed in `Arrive`, so they survive a load. Shekel and Kirioth leave town when
+their true selves die, and Lucifer moves in. add_npc only finds NPCs drawn in maps.ldtk, not D1's towners.
 
 Also fixed this session and committed: `e2f14d3` (package-level `gridmap.Tile` vars captured `defs.Icon*`
 before `LoadIcons`, so D1 stairs, arches, grates, lava and water drew as grass) and `4c658e0` (the lighting
