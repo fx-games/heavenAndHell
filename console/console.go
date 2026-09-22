@@ -347,7 +347,7 @@ func (c *Console) OpenShopMenuFiltered(vendor *common.Actor, filter func(*common
 	for _, stack := range stacks {
 		item := stack[0]
 		items = append(items, textui.VendorItem{
-			Name:         itemName(stack, common.ShopItemName(c.config.ItemNamesInShop, stack)),
+			Name:         itemName(stack, stack.ShopName()),
 			Price:        item.BuyPrice(),
 			TooExpensive: item.BuyPrice() > gold,
 			Buy: func() {
@@ -372,7 +372,7 @@ func (c *Console) BeginPlayerSellingTo(vendor *common.Actor) {
 	for _, stack := range stacks {
 		item := stack[0]
 		items = append(items, textui.VendorItem{
-			Name:  itemName(stack, common.ShopItemName(c.config.ItemNamesInShop, stack)),
+			Name:  itemName(stack, stack.ShopName()),
 			Price: common.D1SellPrice(item),
 			Buy: func() {
 				c.msg(common.SellItem(player, item))
@@ -417,7 +417,7 @@ func (c *Console) OpenServiceMenu(items []*common.Item, price func(*common.Item)
 	var vendorItems []textui.VendorItem
 	for _, item := range items {
 		vendorItems = append(vendorItems, textui.VendorItem{
-			Name:         itemName(common.InventoryStack{item}, item.BandStyleName()),
+			Name:         itemName(common.InventoryStack{item}, item.InventoryName()),
 			Price:        price(item),
 			TooExpensive: price(item) > gold,
 			Buy:          func() { pick(item) },
@@ -443,7 +443,7 @@ func (c *Console) OpenPlayerStashInTown() {
 	labels := func(stacks []common.InventoryStack) []string {
 		var result []string
 		for _, stack := range stacks {
-			result = append(result, itemName(stack, stack.BandStyleName()))
+			result = append(result, itemName(stack, stack.InventoryName()))
 		}
 		return result
 	}

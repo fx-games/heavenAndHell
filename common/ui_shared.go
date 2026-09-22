@@ -323,17 +323,6 @@ func SellItem(player *Actor, item *Item) string {
 	return fmt.Sprintf("You sold [:darkText]%s[:white] for [:darkText]%d[:white] gold", item.Name(), price)
 }
 
-// ShopItemName names a stack the way config.rec's ItemNamesInShop asks for.
-func ShopItemName(scheme ItemNamingScheme, stack InventoryStack) string {
-	switch scheme {
-	case ItemNamingSchemeEnchantments:
-		return stack.PlusName()
-	case ItemNamingSchemeBandStyle:
-		return stack.BandStyleName()
-	}
-	return stack.Name()
-}
-
 // configToggle is a menu item that flips a boolean setting, saves config.rec and calls reopen.
 func configToggle(cfg *Configuration, name string, value *bool, reopen func()) util.MenuItem {
 	state := "Off"

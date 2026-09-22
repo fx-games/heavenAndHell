@@ -95,7 +95,7 @@ func (g *GameInstance) sendEquipmentToWindowClient() {
 
 		//itemLine := fmt.Sprintf("[:white]%c) %s%s", 'a'+index, itemColor, item.Name())
 		shortcut := inventory.GetLetterForItem(item)
-		itemLineWithoutColor := fmt.Sprintf("%c) %s", shortcut, item.BandStyleName())
+		itemLineWithoutColor := fmt.Sprintf("%c) %s", shortcut, item.InventoryName())
 		//minLineLength := len(itemLineWithoutColor) + len(slotDesc) + 1
 
 		//asStrings = append(asStrings, itemLine)
@@ -114,7 +114,7 @@ func (g *GameInstance) sendEquipmentToWindowClient() {
 		slotName := equipment.GetSlot(item)
 		slotDesc := fmt.Sprintf("[:white]<-- %s", slotName.ToString())
 		shortcut := inventory.GetLetterForItem(item)
-		itemLine := fmt.Sprintf("[:white]%c) %s%s", shortcut, itemColor, item.BandStyleName())
+		itemLine := fmt.Sprintf("[:white]%c) %s%s", shortcut, itemColor, item.InventoryName())
 
 		withoutColor := common.RemoveColorCodes(slotDesc)
 		padForSlot := (maxSlotLength + 1) - len(withoutColor)

@@ -758,53 +758,6 @@ func flatFunc(i int) func() int {
 	}
 }
 
-func (i *Item) BandStyleName() string {
-	name := i.Name()
-	if i.d1 != nil { // same D1 fields as the tooltip; D1 has no Angband-style +N enchantment
-		if i.d1.MaxDam > 0 {
-			name = fmt.Sprintf("%s (%d-%d)", name, i.d1.MinDam, i.d1.MaxDam)
-		}
-		if i.d1.AC > 0 {
-			name = fmt.Sprintf("%s [%d]", name, i.d1.AC)
-		}
-	} else if i.IsWeapon() {
-		weaponValues := i.GetWeaponStats().NameParts()
-		name = fmt.Sprintf("%s %s", name, weaponValues)
-	}
-
-	if i.d1 == nil && i.IsArmor() {
-		armorValues := i.GetArmorStats().NameParts()
-		name = fmt.Sprintf("%s %s", name, armorValues)
-	}
-
-	if i.IsLightSource() && !i.HasInfiniteCharges() {
-		name = fmt.Sprintf("%s (%d turns)", name, i.GetCharges())
-	}
-
-	return name
-}
-
-func (i *Item) PlusName() string {
-	name := i.Name()
-	if i.d1 != nil {
-		return name // D1 items have no +N enchantment
-	}
-	if i.IsWeapon() && i.IsArmor() {
-		weaponPlus := fmt.Sprintf("+%d", i.GetWeaponStats().Plus)
-		armorPlus := fmt.Sprintf("+%d", i.GetArmorStats().Plus)
-		return fmt.Sprintf("%s %s %s", name, weaponPlus, armorPlus)
-	}
-	if i.IsWeapon() {
-		weaponPlus := fmt.Sprintf("+%d", i.GetWeaponStats().Plus)
-		return fmt.Sprintf("%s %s", name, weaponPlus)
-	}
-	if i.IsArmor() {
-		armorPlus := fmt.Sprintf("+%d", i.GetArmorStats().Plus)
-		return fmt.Sprintf("%s %s", name, armorPlus)
-	}
-	return name
-}
-
 func (i *Item) SetDestroyAfterUse(value bool) {
 	i.destroyAfterUse = value
 }

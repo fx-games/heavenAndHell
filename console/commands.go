@@ -226,7 +226,7 @@ type invEntry struct {
 
 func (e invEntry) Shortcut() rune { return e.key }
 
-func (e invEntry) InventoryName() string { return itemName(e.stack, e.stack.BandStyleName()) }
+func (e invEntry) InventoryName() string { return itemName(e.stack, e.stack.InventoryName()) }
 
 func (e invEntry) RightColumn() string { return "" }
 

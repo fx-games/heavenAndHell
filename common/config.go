@@ -13,14 +13,6 @@ import (
 	"strings"
 )
 
-type ItemNamingScheme string
-
-const (
-	ItemNamingSchemeShort        ItemNamingScheme = "Short"
-	ItemNamingSchemeEnchantments ItemNamingScheme = "Enchantments"
-	ItemNamingSchemeBandStyle    ItemNamingScheme = "BandStyle"
-)
-
 type FontInfo struct {
 	TTFFile string
 	TTFSize float64
@@ -46,8 +38,6 @@ type Configuration struct {
 	AutoPickup           bool
 	CardinalMovementOnly bool
 	KeepPlayerCentered   bool
-
-	ItemNamesInShop ItemNamingScheme
 
 	DrawTilesBehindActors  bool
 	DrawTilesBehindItems   bool
@@ -163,10 +153,6 @@ func (c Configuration) ToRecord() recfile.Record {
 			Value: recfile.BoolStr(c.ServeLog),
 		},
 		{
-			Name:  "ItemNamesInShop",
-			Value: string(c.ItemNamesInShop),
-		},
-		{
 			Name:  "FlipActorsHorizontally",
 			Value: recfile.BoolStr(c.FlipActorsHorizontally),
 		},
@@ -226,7 +212,6 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		ServeEquipment:            configMap.GetBoolOrFalse("ServeEquipment"),
 		ServeLog:                  configMap.GetBoolOrFalse("ServeLog"),
 		FlipActorsHorizontally:    configMap.GetBoolOrTrue("FlipActorsHorizontally"),
-		ItemNamesInShop:           ItemNamingScheme(configMap.GetStringOrDefault("ItemNamesInShop", string(ItemNamingSchemeEnchantments))),
 		SoundVolume:               configMap.GetFloatOrDefault("SoundVolume", 1),
 		MusicVolume:               configMap.GetFloatOrDefault("MusicVolume", 1),
 		VoiceVolume:               configMap.GetFloatOrDefault("VoiceVolume", 1),

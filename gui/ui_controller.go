@@ -73,7 +73,6 @@ type UIConfig struct {
 	DrawTilesBehindItems   bool
 	DrawTilesBehindObjects bool
 	ActorBobbingEnabled    bool
-	ItemNamesInShop        common.ItemNamingScheme
 	KeepPlayerCentered     bool
 }
 
@@ -829,7 +828,7 @@ func (u *UIController) BeginPlayerSellingTo(vendor *common.Actor) {
 	for _, itemStack := range common.SellableStacks(vendor, player) {
 		typedItem := itemStack[0]
 		sellPrice := common.D1SellPrice(typedItem)
-		itemName := common.ShopItemName(u.configuration.ItemNamesInShop, itemStack)
+		itemName := itemStack.ShopName()
 		if !typedItem.MeetsRequirements() {
 			itemName = fmt.Sprintf("[:red]%s[:white]", itemName)
 		}
@@ -1717,7 +1716,7 @@ func (u *UIController) OpenServiceMenu(items []*common.Item, price func(*common.
 			Tooltip:  item.GetTooltipLines(u.ParseColorCodedText),
 			Icon:     item.InventoryIcon(),
 			TextColumns: []util.LabelText{
-				{Text: item.BandStyleName(), TextColor: nameColor},
+				{Text: item.ShopName(), TextColor: nameColor},
 				{Text: fmt.Sprintf("%d", cost), TextWithColorCodes: u.ParseColorCodedText(fmt.Sprintf("[:%s]%d", priceColor, cost)), UseColorCodes: true},
 			},
 			Action: func() {
@@ -1818,16 +1817,7 @@ func (u *UIController) openShopMenuWithHandler(inventory *common.Inventory, filt
 		if cannotPayForItem {
 			colorCodeForPrice = "negative"
 		}
-		itemName := item.Name()
-		if u.configuration.ItemNamesInShop == common.ItemNamingSchemeEnchantments {
-			itemName = item.PlusName()
-		} else if u.configuration.ItemNamesInShop == common.ItemNamingSchemeBandStyle {
-			itemName = item.BandStyleName()
-		}
-		if len(i) > 1 {
-			itemName = fmt.Sprintf("%s (x%d)", itemName, len(i))
-		}
-		nameString := fmt.Sprintf("%s", itemName)
+		nameString := i.ShopName()
 		nameColor := item.TintColor()
 		if !item.MeetsRequirements() {
 			nameColor = defs.Red

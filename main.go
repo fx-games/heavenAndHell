@@ -242,7 +242,7 @@ func genLoot(theGame *game.GameInstance) {
 	dungeonLevel, _ := strconv.Atoi(os.Args[2])
 	items := theGame.GenerateLoot(dungeonLevel, 10)
 	for _, item := range items {
-		fmt.Println(item.BandStyleName())
+		fmt.Println(item.InventoryName())
 	}
 }
 

@@ -1,0 +1,7 @@
+%rec: default
+# How an item reads in the inventory (inventory:) and in the buy and sell screens (shop:, the inventory's when
+# left out): a Go text/template over the item. Fields: .Name .Count (the stack) .IsWeapon .IsArmor .Dice
+# .MinDam .MaxDam .ToDam (flat bonus damage) .AC .ACBonus .Charges .MaxCharge .Dur .MaxDur .Turns (a light's).
+# Heaven & Hell's, Angband style: a weapon's dice and bonus in (), armour's class and bonus in [].
+
+inventory: {{.Name}}{{if .IsWeapon}} ({{.Dice}}, {{printf "%+d" .ToDam}}){{end}}{{if .IsArmor}} [{{.AC}}, {{printf "%+d" .ACBonus}}]{{end}}{{if .Turns}} ({{.Turns}} turns){{end}}{{if gt .Count 1}} (x{{.Count}}){{end}}

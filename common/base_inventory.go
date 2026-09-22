@@ -62,14 +62,6 @@ func appendStacks(name string, stackCount int) string {
 	return name
 }
 
-func (i InventoryStack) PlusName() string {
-	return appendStacks(i[0].PlusName(), len(i))
-}
-
-func (i InventoryStack) BandStyleName() string {
-	return appendStacks(i[0].BandStyleName(), len(i))
-}
-
 func (i InventoryStack) String() string {
 	return i.Name()
 }
@@ -194,10 +186,7 @@ func (i *Inventory) AsColorCodedStrings() []string {
 	for _, item := range items {
 		itemColor := defs.ColorCodeFromColor(item.TintColor())
 		itemLetter := i.GetLetterForItemStack(item)
-		itemLine := fmt.Sprintf("[:white]%c) %s%s", itemLetter, itemColor, item.BandStyleName())
-		if item.Counter() > 1 {
-			itemLine = fmt.Sprintf("[:white]%c) %s%s (x%d)", itemLetter, itemColor, item.BandStyleName(), item.Counter())
-		}
+		itemLine := fmt.Sprintf("[:white]%c) %s%s", itemLetter, itemColor, item.InventoryName())
 		asStrings = append(asStrings, itemLine)
 	}
 	return asStrings
@@ -360,7 +349,7 @@ func (t *TextualStack) TintColor() color.RGBA {
 }
 
 func (t *TextualStack) Name() string {
-	return fmt.Sprintf("%c) %s", t.letter, t.InventoryStack.BandStyleName())
+	return fmt.Sprintf("%c) %s", t.letter, t.InventoryStack.InventoryName())
 }
 
 func (t *TextualStack) String() string {

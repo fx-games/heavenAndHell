@@ -1,0 +1,7 @@
+%rec: default
+# How an item reads in the inventory (inventory:) and in the buy and sell screens (shop:, the inventory's when
+# left out): a Go text/template over the item. Fields: .Name .Count (the stack) .IsWeapon .IsArmor .Dice
+# .MinDam .MaxDam .ToDam (flat bonus damage) .AC .ACBonus .Charges .MaxCharge .Dur .MaxDur .Turns (a light's).
+# Diablo's: the damage range and armour class after the name.
+
+inventory: {{.Name}}{{if gt .MaxDam 0}} ({{.MinDam}}-{{.MaxDam}}){{end}}{{if gt .AC 0}} [{{.AC}}]{{end}}{{if .Turns}} ({{.Turns}} turns){{end}}{{if gt .Count 1}} (x{{.Count}}){{end}}

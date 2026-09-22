@@ -202,6 +202,9 @@ func NewGameInstance(startInfo common.StartInfo, uiController common.UserInterfa
 		panic(err)
 	}
 	g.d1Data = d1Data
+	if err := common.LoadItemNameTemplates(); err != nil {
+		panic(err)
+	}
 	g.ResetGame(g.dataDefinitions.ClassDefinitions[0])
 	return g
 }
@@ -310,7 +313,7 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 		QueueAfterTurn: g.queueAfterTurn,
 	})
 	mapGen := common.NewMapGenerator(g.randomSource)
-	mapGen.SetFactory(g.factory) // LoadLevels checks patches against the mod's D1 objects
+	mapGen.SetFactory(g.factory)                // LoadLevels checks patches against the mod's D1 objects
 	if err := mapGen.LoadLevels(); err != nil { // every level of the game (LEVELS.md)
 		panic(err)
 	}
