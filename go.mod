@@ -7,7 +7,6 @@ require (
 	github.com/flopp/go-findfont v0.1.0
 	github.com/gdamore/tcell/v2 v2.13.10
 	github.com/hajimehoshi/ebiten/v2 v2.10.2
-	github.com/james-barrow/golang-ipc v1.2.4
 	github.com/memmaker/go v0.0.0-20260914173848-285120b22147
 	github.com/tidwall/gjson v1.19.0
 	golang.org/x/image v0.46.0
@@ -16,7 +15,6 @@ require (
 
 require (
 	code.rocketnine.space/tslocum/cbind v0.1.5 // indirect
-	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/ebitengine/gomobile v0.0.0-20260820040257-d11f821a26a6 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect

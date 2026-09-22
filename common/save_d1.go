@@ -6,11 +6,13 @@ import (
 	"rpg/geometry"
 	"rpg/gridmap"
 	"rpg/stats"
+	"slices"
 )
 
 // Decision 11: a level is rebuilt from its seed, then this snapshot restores what changed.
 type SavedMonster struct {
 	HP, X, Y int
+	MaxHP    int             `json:",omitempty"` // rolled when the monster was made; 0 in older saves: the new roll's
 	Type     int             // only for monsters that objects spawned (not part of the generated level) and corpses
 	State    *D1MonsterState // nil in saves from before AI state was kept
 	Status   map[string]int  `json:",omitempty"` // status effects (Stone Curse, ...) and their turns left
@@ -38,6 +40,16 @@ type LevelSnapshot struct {
 	// RespawnMonsters makes the level forget its dead the next time it is built: Gillian's donation sets it on
 	// every explored level that isn't loaded right now (State.RespawnD1Monsters).
 	RespawnMonsters bool
+	// Spots are where the level's generator put its monsters (respawn.go): a dungen level rolls them with the
+	// factory's own random source, which a rebuild can't replay.
+	Spots     []geometry.Point `json:",omitempty"`
+	OpenDoors []geometry.Point `json:",omitempty"` // open doors that aren't D1's (those are in Doors)
+	Decals    []SavedDecal     `json:",omitempty"` // blood and the like
+}
+
+type SavedDecal struct {
+	X, Y int
+	Icon int32
 }
 
 func SnapshotLevel(state *State, m *gridmap.GridMap[*Actor, *Item, Object]) *LevelSnapshot {
@@ -50,7 +62,7 @@ func SnapshotLevel(state *State, m *gridmap.GridMap[*Actor, *Item, Object]) *Lev
 			p := a.MapPosition()
 			// at least 1 HP: regeneration leaves monsters alive below 1
 			state := mon.D1MonsterState
-			saved := SavedMonster{HP: max(a.GetStats().GetResource(stats.Health).Value(), 1), X: p.X, Y: p.Y, Type: mon.Type, State: &state, Status: maps.Clone(a.statusEffects.AllEntries())}
+			saved := SavedMonster{HP: max(a.GetStats().GetResource(stats.Health).Value(), 1), MaxHP: a.GetStats().GetAttribute(stats.MaxHealth), X: p.X, Y: p.Y, Type: mon.Type, State: &state, Status: maps.Clone(a.statusEffects.AllEntries())}
 			if mon.SpawnIndex < 0 {
 				s.Spawned = append(s.Spawned, saved)
 			} else {
@@ -90,7 +102,16 @@ func SnapshotLevel(state *State, m *gridmap.GridMap[*Actor, *Item, Object]) *Lev
 			if o.D1 != nil && o.isOpen {
 				s.Doors = append(s.Doors, o.D1.Index)
 			}
+			if o.D1 == nil && o.isOpen {
+				s.OpenDoors = append(s.OpenDoors, o.position)
+			}
 		}
+	}
+	if r := state.mapGen.rosters[m.GetName()]; r != nil {
+		s.Spots = r.spots
+	}
+	for p, icon := range m.Decals() {
+		s.Decals = append(s.Decals, SavedDecal{p.X, p.Y, icon})
 	}
 	for _, it := range m.Items() {
 		if it.d1 != nil {
@@ -155,9 +176,18 @@ func (s *LevelSnapshot) apply(f *Factory, m *gridmap.GridMap[*Actor, *Item, Obje
 			if o.D1 != nil && open[o.D1.Index] {
 				o.isOpen = true // its wall traps are restored above, so opening it doesn't fire them again
 			}
+			if o.D1 == nil && slices.Contains(s.OpenDoors, o.position) {
+				o.isOpen = true
+			}
 		}
 	}
 	f.State.applyPatches(m)
+	if s.Spots != nil {
+		f.State.mapGen.roster(m.GetName()).spots = s.Spots
+	}
+	for _, d := range s.Decals {
+		m.AddDecal(geometry.Point{X: d.X, Y: d.Y}, d.Icon)
+	}
 	if s.RespawnMonsters { // the level keeps the monsters the generator just placed, and buries its corpses
 		s.RespawnMonsters = false
 		s.Monsters, s.Spawned, s.Corpses = map[int]SavedMonster{}, nil, nil
@@ -190,6 +220,9 @@ func (s *LevelSnapshot) apply(f *Factory, m *gridmap.GridMap[*Actor, *Item, Obje
 					continue
 				}
 				p = near[0]
+			}
+			if at[i].MaxHP > 0 {
+				a.GetStats().SetAttribute(stats.MaxHealth, at[i].MaxHP)
 			}
 			SetResource(a.GetStats().GetResource(stats.Health), at[i].HP)
 			if at[i].State != nil {

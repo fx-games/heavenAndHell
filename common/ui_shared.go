@@ -345,7 +345,15 @@ func GameplaySettings(cfg *Configuration, permadeath bool, reopen func()) []util
 	if !permadeath {
 		items = append(items, AutosaveToggle(cfg, reopen))
 	}
-	return items
+	return append(items,
+		configToggle(cfg, "Feed: inventory", &cfg.FeedInventory, reopen),
+		configToggle(cfg, "Feed: equipment", &cfg.FeedEquipment, reopen),
+		configToggle(cfg, "Feed: character", &cfg.FeedCharacter, reopen),
+		configToggle(cfg, "Feed: visible items", &cfg.FeedVisibleItems, reopen),
+		configToggle(cfg, "Feed: visible actors", &cfg.FeedVisibleActors, reopen),
+		configToggle(cfg, "Feed: log", &cfg.FeedLog, reopen),
+		configToggle(cfg, "Feed: quest journal", &cfg.FeedQuests, reopen),
+	)
 }
 
 // AutosaveToggle is configToggle for AutosaveOnLevelChange, shown but locked when the mod fixes it.

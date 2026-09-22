@@ -43,10 +43,14 @@ type Configuration struct {
 	DrawTilesBehindActors  bool
 	DrawTilesBehindItems   bool
 	DrawTilesBehindObjects bool
-	ServeStats             bool
-	ServeInventory         bool
-	ServeLog               bool
-	ServeEquipment         bool
+	// text feeds: ANSI files under feeds/, rewritten when their content changes (see game/feeds.go)
+	FeedInventory          bool
+	FeedEquipment          bool
+	FeedCharacter          bool
+	FeedVisibleItems       bool
+	FeedVisibleActors      bool
+	FeedLog                bool
+	FeedQuests             bool
 	FlipActorsHorizontally bool
 
 	SoundVolume, MusicVolume, VoiceVolume float64 // 0..1, set in the audio menu
@@ -137,22 +141,13 @@ func (c Configuration) ToRecord() recfile.Record {
 			Name:  "KeepPlayerCentered",
 			Value: recfile.BoolStr(c.KeepPlayerCentered),
 		},
-		{
-			Name:  "ServeStats",
-			Value: recfile.BoolStr(c.ServeStats),
-		},
-		{
-			Name:  "ServeInventory",
-			Value: recfile.BoolStr(c.ServeInventory),
-		},
-		{
-			Name:  "ServeEquipment",
-			Value: recfile.BoolStr(c.ServeEquipment),
-		},
-		{
-			Name:  "ServeLog",
-			Value: recfile.BoolStr(c.ServeLog),
-		},
+		{Name: "FeedInventory", Value: recfile.BoolStr(c.FeedInventory)},
+		{Name: "FeedEquipment", Value: recfile.BoolStr(c.FeedEquipment)},
+		{Name: "FeedCharacter", Value: recfile.BoolStr(c.FeedCharacter)},
+		{Name: "FeedVisibleItems", Value: recfile.BoolStr(c.FeedVisibleItems)},
+		{Name: "FeedVisibleActors", Value: recfile.BoolStr(c.FeedVisibleActors)},
+		{Name: "FeedLog", Value: recfile.BoolStr(c.FeedLog)},
+		{Name: "FeedQuests", Value: recfile.BoolStr(c.FeedQuests)},
 		{
 			Name:  "FlipActorsHorizontally",
 			Value: recfile.BoolStr(c.FlipActorsHorizontally),
@@ -208,10 +203,13 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		DrawTilesBehindActors:     configMap.GetBoolOrFalse("DrawTilesBehindActors"),
 		DrawTilesBehindItems:      configMap.GetBoolOrFalse("DrawTilesBehindItems"),
 		DrawTilesBehindObjects:    configMap.GetBoolOrFalse("DrawTilesBehindObjects"),
-		ServeStats:                configMap.GetBoolOrFalse("ServeStats"),
-		ServeInventory:            configMap.GetBoolOrFalse("ServeInventory"),
-		ServeEquipment:            configMap.GetBoolOrFalse("ServeEquipment"),
-		ServeLog:                  configMap.GetBoolOrFalse("ServeLog"),
+		FeedInventory:             configMap.GetBoolOrFalse("FeedInventory"),
+		FeedEquipment:             configMap.GetBoolOrFalse("FeedEquipment"),
+		FeedCharacter:             configMap.GetBoolOrFalse("FeedCharacter"),
+		FeedVisibleItems:          configMap.GetBoolOrFalse("FeedVisibleItems"),
+		FeedVisibleActors:         configMap.GetBoolOrFalse("FeedVisibleActors"),
+		FeedLog:                   configMap.GetBoolOrFalse("FeedLog"),
+		FeedQuests:                configMap.GetBoolOrFalse("FeedQuests"),
 		FlipActorsHorizontally:    configMap.GetBoolOrTrue("FlipActorsHorizontally"),
 		SoundVolume:               configMap.GetFloatOrDefault("SoundVolume", 1),
 		MusicVolume:               configMap.GetFloatOrDefault("MusicVolume", 1),

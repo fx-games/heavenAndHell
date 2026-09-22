@@ -64,7 +64,7 @@ func (g *MapGenerator) generateD1Map(level dungeon.Level, set *d1.SetLevelParams
 			panic(fmt.Sprintf("levels.rec: %s: quest %q has no D1 set level", targetMap, set.Quest))
 		}
 	}
-	lvl, err := g.factory.D1().CreateLevel(g.d1Quests, g.d1Seeds, dlvl, sl, d1.EntryMain)
+	lvl, err := g.factory.D1().CreateLevel(g.d1Quests, g.d1LevelSeeds(targetMap, dlvl), dlvl, sl, d1.EntryMain)
 	if err != nil {
 		panic(err)
 	}
@@ -175,6 +175,7 @@ func (g *MapGenerator) placeD1Monsters(m *gridmap.GridMap[*Actor, *Item, Object]
 		g.walledIn = map[string][]*Actor{}
 	}
 	g.walledIn[m.GetName()] = nil
+	delete(g.rosters, m.GetName())
 	for i, mon := range lvl.Monsters {
 		if mon == nil || mon.Reserved || mon.Hidden {
 			continue
@@ -191,6 +192,11 @@ func (g *MapGenerator) placeD1Monsters(m *gridmap.GridMap[*Actor, *Item, Object]
 			continue
 		}
 		m.AddActor(a, p)
+		g.addSpawn(m, a, func() *Actor {
+			b := g.factory.NewD1MonsterFromLevel(mon)
+			b.d1Monster.SpawnIndex = i
+			return b
+		}, func(b *Actor) bool { return b.d1Monster != nil && b.d1Monster.SpawnIndex == i })
 	}
 }
 

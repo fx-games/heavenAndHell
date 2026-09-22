@@ -7,6 +7,17 @@
 #                           Default aura
 #   LightInTown             carried only, true / false: whether the light source glows in town too. Default true
 #   LightBurnsInTown        carried only, true / false: whether it uses up charges there. Default false
+#   Respawn                 disabled: dead is dead (default); enabled: every monster is back each time a dungeon
+#                           level is entered; timed: RespawnCount of them per RespawnTurns turns away; town_visits:
+#                           RespawnCount of them per town visit since the level was left
+#   RespawnCount, RespawnTurns  numbers for timed / town_visits
+#   RespawnUniques          none: respawns are ordinary monsters (default); random: a unique of the depth may be
+#                           rolled too; same: the level's own dead uniques come back. Respawns are always rolled
+#                           afresh from the monster table, never copies of the dead
+#   PersistLevels           true / false: false forgets a dungeon level when it is left and builds a new one on the
+#                           next visit (Angband). Default true
+#   PersistQuestLevels      true / false: true keeps a quest's level (and a set piece) as it is, never rebuilt nor
+#                           respawned; false lets the rules above apply to it too. Default true
 # A light source's color, flicker and radius are its own: items.rec's light_color, light_flicker_pattern
 # (fire, smooth, steady or numbers), light_flicker_frame_delay and equip_modifier light_radius(n).
 #

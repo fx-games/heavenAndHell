@@ -51,8 +51,13 @@ func (g *MapGenerator) populateDungenLevel(m *gridmap.GridMap[*Actor, *Item, Obj
 				continue
 			}
 			enemy.SetDrawPosition(p.ToPointF())
+			enemy.d1Monster.SpawnIndex = -1 // generated with a random source a load can't replay: saved whole
 			m.AddActor(enemy, p)
-			g.spawnDungenCompanions(m, p, companions, dlvl)
+			g.addSpawn(m, enemy, nil, nil)
+			for _, c := range g.spawnDungenCompanions(m, p, companions) {
+				c.d1Monster.SpawnIndex = -1
+				g.addSpawn(m, c, nil, nil)
+			}
 		case g.randomSource.Intn(100) < dungenItemPercent && m.CanPlaceItemHere(p):
 			if it := g.factory.D1().FloorItem(dlvl, false, false); it != nil {
 				m.AddItem(g.factory.NewD1Item(it), p)
@@ -62,7 +67,8 @@ func (g *MapGenerator) populateDungenLevel(m *gridmap.GridMap[*Actor, *Item, Obj
 }
 
 // spawnDungenCompanions puts a monster's group_spawn around it, as close as there is room for.
-func (g *MapGenerator) spawnDungenCompanions(m *gridmap.GridMap[*Actor, *Item, Object], leader geometry.Point, companions []defs.Monster, dlvl int) {
+// Returns the ones it placed.
+func (g *MapGenerator) spawnDungenCompanions(m *gridmap.GridMap[*Actor, *Item, Object], leader geometry.Point, companions []defs.Monster) (placed []*Actor) {
 	if len(companions) == 0 {
 		return
 	}
@@ -77,16 +83,27 @@ func (g *MapGenerator) spawnDungenCompanions(m *gridmap.GridMap[*Actor, *Item, O
 		}
 		a.SetDrawPosition(spots[i].ToPointF())
 		m.AddActor(a, spots[i])
+		placed = append(placed, a)
 	}
+	return
 }
 
 // NewRandomEnemy rolls one monster for dungeon level dlvl out of the active mod's own table, plus whatever its
 // record says spawns alongside it. Nil when the mod's table has nothing that can appear this deep.
 func (g *Factory) NewRandomEnemy(dlvl int) (*Actor, []defs.Monster) {
+	return g.rollEnemy(dlvl, false, nil)
+}
+
+// rollEnemy is NewRandomEnemy that may also roll a unique, except one taken says is already about.
+func (g *Factory) rollEnemy(dlvl int, uniques bool, taken func(id string) bool) (*Actor, []defs.Monster) {
 	all := g.Generator.D.Monsters
 	var eligible []int
 	for i, mon := range all {
-		if mon.Available() && !slices.Contains(mon.Tags, "unique") && mon.CanAppearAt(g.RandomSource, dlvl) { // a unique lives in its room
+		unique := slices.Contains(mon.Tags, "unique")
+		if unique && (!uniques || taken(mon.ID)) {
+			continue
+		}
+		if mon.Available() && mon.CanAppearAt(g.RandomSource, dlvl) { // a unique lives in its room
 			eligible = append(eligible, i)
 		}
 	}

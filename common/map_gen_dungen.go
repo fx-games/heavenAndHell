@@ -242,8 +242,11 @@ func (g *MapGenerator) paintDungenDecoration(m *gridmap.GridMap[*Actor, *Item, O
 		x, y := entities.ToGridPosition(e.Position[0], e.Position[1])
 		p := room.ToAbsolutePosition(geometry.Point{X: x, Y: y})
 		if a := g.factory.NewMonsterByID(name.AsString()); a != nil && m.CanPlaceActorHere(p) {
+			a.d1Monster.SpawnIndex = -1 // saved whole, like the rest of a dungen level's monsters
 			a.SetDrawPosition(p.ToPointF())
 			m.AddActor(a, p)
+			id := name.AsString()
+			g.addSpawn(m, a, func() *Actor { return g.factory.NewMonsterByID(id) }, sameName(id))
 		}
 	}
 }

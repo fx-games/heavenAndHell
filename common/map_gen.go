@@ -28,6 +28,8 @@ type MapGenerator struct {
 	walledIn     map[string][]*Actor      // monsters D1 placed inside walls that a map change opens later, by map name
 	levels       map[string]dungeon.Level // the mod's levels.rec, by map id
 	levelOrder   []string                 // their ids in file order
+	rosters      map[string]*roster       // where each level's generator placed its monsters, for Respawn (respawn.go)
+	generations  map[string]int           // how often each level was forgotten (PersistLevels: false), saved
 }
 
 // LoadLevels reads the active mod's levels.rec (LEVELS.md). Called after mod selection, never at package init:
@@ -97,6 +99,11 @@ func (g *MapGenerator) GenerateMap(id string) *gridmap.GridMap[*Actor, *Item, Ob
 	if !ok {
 		panic(fmt.Sprintf("levels.rec declares no level %q", id))
 	}
+	// the level's own random source, so a load rebuilds what was saved (respawn.go)
+	shared := g.randomSource
+	g.randomSource = g.levelRand(id)
+	defer func() { g.randomSource = shared }()
+	delete(g.rosters, id)
 	var m *gridmap.GridMap[*Actor, *Item, Object]
 	switch cfg := lvl.Config.(type) {
 	case ldtkConfig:

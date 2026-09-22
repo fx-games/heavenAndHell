@@ -12,10 +12,13 @@ WindowWidth: 1280
 WindowHeight: 800
 CardinalMovementOnly: false
 KeepPlayerCentered: true
-ServeStats: true
-ServeInventory: true
-ServeEquipment: true
-ServeLog: true
+FeedInventory: false
+FeedEquipment: false
+FeedCharacter: false
+FeedVisibleItems: false
+FeedVisibleActors: false
+FeedLog: false
+FeedQuests: false
 ItemNamesInShop: BandStyle
 FlipActorsHorizontally: true
 SoundVolume: 0.1

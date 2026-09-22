@@ -1719,6 +1719,9 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) AddDecal(pos geometry.Point, 
 	m.decals[pos] = decalIcon
 }
 
+// Decals are every decal on the map by cell; the map's own, not a copy.
+func (m *GridMap[ActorType, ItemType, ObjectType]) Decals() map[geometry.Point]int32 { return m.decals }
+
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetDecal(pos geometry.Point) (int32, bool) {
 	decal, ok := m.decals[pos]
 	if !ok {

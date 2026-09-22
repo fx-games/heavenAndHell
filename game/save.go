@@ -75,10 +75,11 @@ type saveGame struct {
 	Boy            *d1.Item
 	BoyLevel       int
 	Portal         *common.D1Portal
-	Golem          *common.SavedGolem // the golem follows the hero (onD1MapChanged)
-	ManaShield     bool               // only in saves from before Status was kept
-	Status         map[string]int     // the hero's status effects and their turns left
-	SavedAt        time.Time          // when this slot was last written; zero in saves from before slots
+	Golem          *common.SavedGolem  // the golem follows the hero (onD1MapChanged)
+	ManaShield     bool                // only in saves from before Status was kept
+	Status         map[string]int      // the hero's status effects and their turns left
+	SavedAt        time.Time           // when this slot was last written; zero in saves from before slots
+	Dungeon        common.DungeonClock // mod.rec's respawn timers and each level's generation
 }
 
 // ListSaveSlots reads every slot's metadata, in slot order, without loading a game. A slot that can't be read
@@ -235,7 +236,7 @@ func (g *GameInstance) writeSlot(slot int) {
 		UniqueDropped: g.factory.D1().UniqueDropped, Flags: g.state.GetFlags().AllEntries(),
 		Map: g.state.GetMap().GetName(), X: pos.X, Y: pos.Y, Levels: map[string]*common.LevelSnapshot{},
 		Deepest: g.state.Deepest(), DeepestLevel: g.state.DeepestLevel(), DeepestTown: g.state.DeepestTown(), Premium: g.premium, Boy: g.boyItem, BoyLevel: g.boyLevel, Portal: g.state.D1Portal(),
-		Status: maps.Clone(player.GetStatusEffects().AllEntries()), SavedAt: time.Now(),
+		Status: maps.Clone(player.GetStatusEffects().AllEntries()), SavedAt: time.Now(), Dungeon: g.state.DungeonClock(),
 	}
 	if golem := common.D1Golem(g.state.GetMap()); golem != nil {
 		saved := common.SaveD1Golem(golem)
@@ -402,7 +403,9 @@ func (g *GameInstance) LoadSlot(slot int) error {
 	if g.state.Level(sg.Map).Town {
 		target.TargetLocation = "spawn"
 	}
+	g.state.SetDungeonClock(sg.Dungeon) // before the transition: the level rebuilds as its saved generation
 	g.state.MapTransition(target)
+	g.state.SetDungeonClock(sg.Dungeon) // and after it: arriving is no town visit, and no turn passed
 	m := g.state.GetMap()
 	if p := (geometry.Point{X: sg.X, Y: sg.Y}); p != player.MapPosition() && m.CanPlaceActorHere(p) {
 		m.MoveActor(player, p)

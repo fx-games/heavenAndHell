@@ -50,11 +50,7 @@ type GameInstance struct {
 	mousePosInPixels geometry.Point
 	mousePosOnMap    geometry.Point
 
-	// textserver
-	serverStats     *TextServer
-	serverInventory *TextServer
-	serverEquipment *TextServer
-	serverLog       *TextServer
+	feeds map[string]string // last text written per feed file
 
 	// player state
 	isResting bool
@@ -256,7 +252,7 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 	g.configuration = g.startInfo.UserConfiguration
 	g.deviceIndependentScreenSize = g.startInfo.ScreenSize
 
-	g.startWindowServers()
+	g.feeds = nil // a new or loaded game rewrites every feed on its first turn
 
 	ldtkFileName := g.startInfo.LDTKMapFile
 	ldtkFile, _ := files.ReadFile(ldtkFileName)
@@ -267,6 +263,7 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 
 	g.state = common.NewState(ldtkProject)
 	g.state.SetLighting(common.Lighting())
+	g.state.SetDungeonRules(common.ReadDungeonRules())
 	g.state.SetPlayerMessage(g.PlayerMessage)
 	g.state.SetTimeKeeper(timeKeeper)
 	g.state.SelectedClass = playerStartDefinition
@@ -428,6 +425,7 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 	}
 
 	g.uiController.OnPlayerTurnTaken()
+	g.writeFeeds()
 
 	if g.refreshThumbnail { // once, so the new hero's slot shows their own game and not the menu behind it
 		g.refreshThumbnail = false
@@ -437,7 +435,6 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 
 func (g *GameInstance) updateStatsDisplay() {
 	g.uiController.UpdateStatsLabel()
-	g.sendStatsToWindowClient()
 }
 
 func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition) *common.Actor {
@@ -477,11 +474,11 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	player.GetEquipment().SetOnChangeHandler(func() {
 		common.SyncHero(player)
 		g.factory.RefreshD1Spells(player)
-		g.sendEquipmentToWindowClient()
+		g.writeFeeds()
 		g.uiController.RefreshIconBars() // equipping takes no turn and leaves the pack as it is
 	})
 	player.GetInventory().SetOnChangeHandler(func() {
-		g.sendInventoryToWindowClient()
+		g.writeFeeds()
 		g.uiController.RefreshIconBars() // buying, selling and the stash change the pack without taking a turn
 	})
 	return player
@@ -893,6 +890,7 @@ func (g *GameInstance) PlayerMessage(message string) {
 	if g.logHook != nil {
 		g.logHook(rawText)
 	}
+	g.appendLogFeed(message)
 	if len(g.logBuffer) > 200 {
 		g.logBuffer = g.logBuffer[1:]
 	}

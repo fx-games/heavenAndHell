@@ -59,8 +59,11 @@ type State struct {
 
 	visibility        *Visibility
 	townMapSpawn      geometry.Point
-	deepestLevel      string // the deepest non-town level visited (Visit)
-	deepestTown       string // the deepest town visited: where the town portal leads
+	townVisits        int                   // how often the hero entered a town (Respawn: town_visits)
+	lastSeen          map[string]LevelClock // when the hero last left each dungeon level (respawn.go)
+	dungeonRules      DungeonRules          // the mod's Respawn and PersistLevels (mod.rec)
+	deepestLevel      string                // the deepest non-town level visited (Visit)
+	deepestTown       string                // the deepest town visited: where the town portal leads
 	flags             *Flags
 	playerStashInTown *Inventory
 	playerDijkstraMap map[geometry.Point]int
@@ -550,6 +553,7 @@ func (s *State) MapTransition(to gridmap.Transition) {
 	if s.GetMap() != nil && s.GetPlayer() != nil {
 		s.GetMap().RemoveActor(s.GetPlayer())
 		oldMapName = s.GetMap().GetName()
+		s.leaveLevel(oldMapName)
 	}
 
 	player := s.GetPlayer()
@@ -563,6 +567,7 @@ func (s *State) MapTransition(to gridmap.Transition) {
 		s.SetMap(targetMap, s.mapGen.GenerateMap(targetMap))
 	}
 	s.SetCurrentMap(s.Map(targetMap))
+	s.enterLevel(s.GetMap())
 	s.Visit(targetMap)
 	s.wireExits(s.GetMap()) // an exit may have opened since (open_when: deepest, quests)
 	newlyLoadedMap := s.GetMap()
