@@ -5,8 +5,15 @@
 #   Lighting                aura: a light around the hero always, radius 10 plus the gear's light affixes (Diablo);
 #                           carried: only the equipped light source lights the dark while it burns (Angband).
 #                           Default aura
+#   LightInTown             carried only, true / false: whether the light source glows in town too. Default true
+#   LightBurnsInTown        carried only, true / false: whether it uses up charges there. Default false
+# A light source's color, flicker and radius are its own: items.rec's light_color, light_flicker_pattern
+# (fire, smooth, steady or numbers), light_flicker_frame_delay and equip_modifier light_radius(n).
 #
 
 # Lighting: carried is Angband's: in the dark the hero sees only by the light source they carry, as far as it
 # (and any other light_radius gear) reaches, and only while it has charges left to burn.
 Lighting: carried
+# The torch lights the town's streets too, but burns no fuel there.
+LightInTown: true
+LightBurnsInTown: false

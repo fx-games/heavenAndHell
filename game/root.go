@@ -373,7 +373,7 @@ func (g *GameInstance) GetUserInterface() common.UserInterface {
 
 func (g *GameInstance) handleLightSource() {
 	player := g.state.GetPlayer()
-	if player.GetEquipment().HasLightSourceEquipped() && !g.state.PlayerStandsInLitArea() {
+	if g.state.LightBurns() {
 		lightSource := player.GetEquipment().GetLightSource()
 		asGameItem := lightSource
 		asGameItem.UseCharge()

@@ -35,7 +35,8 @@
 #   throw_on_hit_effect   an effect (effects/targeted.rec) it applies to what it hits
 # Light sources:
 #   charges           turns a light burns, or uses a wand or scroll has
-#   light_color       "R G B" of its light; light_flicker_pattern (fire) and light_flicker_frame_delay (seconds)
+#   light_color       "R G B" of its light; light_flicker_pattern (fire, smooth, steady, or the brightness per
+#                     frame as numbers, e.g. "1.0 0.9 0.8 0.9") and light_flicker_frame_delay (seconds per frame)
 # Powers:
 #   equip_modifier    what it does while worn: strength, dexterity, intelligence, health, mana, damage, armor_class,
 #                     light_radius, attack_speed, steal_health, steal_mana, speed, move_speed; "name(n)" gives n,

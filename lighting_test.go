@@ -1,8 +1,12 @@
 package main
 
 import (
+	"image/color"
 	"testing"
 
+	"rpg/common"
+	"rpg/defs"
+	"rpg/geometry"
 	"rpg/gridmap"
 )
 
@@ -36,5 +40,44 @@ func TestLightingIsTheMods(t *testing.T) {
 	}
 	if !s.GetMap().IsTileLit(player.MapPosition()) && s.GetPlayerVisionRange() != 0 {
 		t.Errorf("H&H: sees %d cells in the dark without a light", s.GetPlayerVisionRange())
+	}
+}
+
+// A carried light glows in town too, tinted and fading at its radius, without burning fuel there (H&H's mod.rec);
+// taking it off leaves the town as it was.
+func TestCarriedLightGlowsInTown(t *testing.T) {
+	h := newHeavenAndHellGame(t, NewDummyUI())
+	h.NewGame(h.GetGameData().ClassDefinitions[0], false, "")
+	s := h.GetWorldState()
+	if !s.IsPlayerInTown() {
+		t.Fatal("the game does not start in town")
+	}
+	player := s.GetPlayer()
+	h.GetActionBroker().Execute(common.NewUpdateFoVAction(common.AbstractCause("test"), player))
+	p := player.MapPosition()
+	base := color.RGBA{R: 200, G: 200, B: 200, A: 255}
+	torch := player.GetEquipment().GetLightSource()
+	lit := s.ApplyLighting(p, base, 0)
+	far := s.ApplyLighting(p.Add(geometry.Point{X: 5}), base, 0)
+	if s.LightBurns() {
+		t.Error("the torch burns fuel in town")
+	}
+	player.GetEquipment().UnEquip(torch)
+	dark := s.ApplyLighting(p, base, 0)
+	farDark := s.ApplyLighting(p.Add(geometry.Point{X: 5}), base, 0)
+	if lit == dark || lit.B >= lit.R {
+		t.Errorf("the torch does not light its own cell in town: %v with it, %v without", lit, dark)
+	}
+	if far != farDark {
+		t.Errorf("the torch reaches 5 cells in town: %v with it, %v without", far, farDark)
+	}
+}
+
+func TestFlickerPatterns(t *testing.T) {
+	if got := defs.FlickerPattern("0.5 1"); len(got) != 2 || got[0] != 0.5 {
+		t.Errorf("a mod's own pattern: %v", got)
+	}
+	if len(defs.FlickerPattern("smooth")) == len(defs.FlickerPattern("fire")) {
+		t.Error("smooth flickers like fire")
 	}
 }

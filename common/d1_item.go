@@ -477,7 +477,7 @@ func (g *Factory) applyItemRecord(item *Item, b d1.ItemData) {
 	if b.InventoryCategory == defs.ItemCategoryLightSource {
 		light := d1HeroTorch
 		if b.Light.IsValid() {
-			light = LightStats{LightColor: util.GetColorFromRGBString(b.Light.LightColor), FlickerPattern: defs.GetFireFlickerPattern(),
+			light = LightStats{LightColor: util.GetColorFromRGBString(b.Light.LightColor), FlickerPattern: defs.FlickerPattern(b.Light.FlickerPattern),
 				FlickerFrameDelay: b.Light.FlickerFrameDelay}
 		}
 		item.SetLightComponent(&light)

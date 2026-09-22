@@ -46,7 +46,7 @@ type PlayerActions interface {
 	CloseDoorAt(mapPos geometry.Point) bool
 }
 type State struct {
-	lighting       string // the mod's Lighting: "aura" or "carried"
+	lighting       LightRules // the mod's lighting rules (mod.rec)
 	currentMap     *gridmap.GridMap[*Actor, *Item, Object]
 	maps           map[string]*gridmap.GridMap[*Actor, *Item, Object] // every level built this game, by id
 	d1Portal       *D1Portal
@@ -209,30 +209,66 @@ func (s *State) PlayerCanSeeNeighbors() bool {
 	return s.PlayerLightRadius() > 0 || s.PlayerStandsInLitArea()
 }
 
-// Lighting is how the mod lights the hero's way, its mod.rec's "Lighting:":
+// LightRules is how the mod lights the hero's way, from its mod.rec:
 //
-//	aura     Diablo's: a light around the hero always, radius 10 plus the gear's light affixes (Sheet.LightRad)
-//	carried  Angband's: only the equipped light source while it burns, radius what the gear adds to light_radius
-//
-// A mod that doesn't say gets the aura.
-func Lighting() string {
+//	Lighting          aura: Diablo's, a light around the hero always, radius 10 plus the gear's light affixes
+//	                  (Sheet.LightRad); carried: Angband's, only the equipped light source while it burns, radius
+//	                  what the gear adds to light_radius. Default aura
+//	LightInTown       carried only: whether the light source glows in town too. Default true
+//	LightBurnsInTown  carried only: whether it uses up charges there. Default false
+type LightRules struct {
+	Model       string
+	InTown      bool
+	BurnsInTown bool
+}
+
+// Lighting reads the mod's LightRules.
+func Lighting() LightRules {
+	r := LightRules{Model: "aura", InTown: true}
 	if v, _ := ModSetting("Lighting"); v == "carried" {
-		return "carried"
+		r.Model = "carried"
 	}
-	return "aura"
+	if v, ok := ModSetting("LightInTown"); ok {
+		r.InTown = v == "true"
+	}
+	if v, _ := ModSetting("LightBurnsInTown"); v == "true" {
+		r.BurnsInTown = true
+	}
+	return r
+}
+
+// carriedLight is the hero's equipped light source while it shines under the mod's rules: it has charges left,
+// and in town only if the mod lets lights glow there. Nil under Diablo's aura.
+func (s *State) carriedLight() *Item {
+	if s.lighting.Model != "carried" || (s.IsPlayerInTown() && !s.lighting.InTown) {
+		return nil
+	}
+	light := s.GetPlayer().GetEquipment().GetLightSource()
+	if light == nil || !light.IsLightSource() || !light.HasChargesLeft() {
+		return nil
+	}
+	return light
+}
+
+// LightBurns reports whether the hero's light source uses up a charge this turn: in the dark of the dungeon, and
+// in town only where the mod says lights burn there.
+func (s *State) LightBurns() bool {
+	if s.IsPlayerInTown() && s.lighting.Model == "carried" {
+		return s.lighting.BurnsInTown && s.carriedLight() != nil
+	}
+	return s.GetPlayer().GetEquipment().HasLightSourceEquipped() && !s.PlayerStandsInLitArea()
 }
 
 // PlayerLightRadius is how far the hero's own light reaches in the dark, under the mod's Lighting.
 func (s *State) PlayerLightRadius() int {
 	actor := s.GetPlayer()
-	if s.lighting != "carried" {
+	if s.lighting.Model != "carried" {
 		if actor.hero != nil {
 			return actor.HeroSheet().LightRad
 		}
 		return 0
 	}
-	light := actor.GetEquipment().GetLightSource()
-	if light == nil || !light.HasChargesLeft() {
+	if s.carriedLight() == nil {
 		return 0
 	}
 	radius := actor.GetStats().GetAttribute(stats.LightRadius)
@@ -244,8 +280,8 @@ func (s *State) PlayerLightRadius() int {
 	return max(radius, 0)
 }
 
-// SetLighting picks the mod's lighting (Lighting) for this game.
-func (s *State) SetLighting(lighting string) { s.lighting = lighting }
+// SetLighting picks the mod's lighting rules (Lighting) for this game.
+func (s *State) SetLighting(rules LightRules) { s.lighting = rules }
 func (s *State) IsDaylight() bool {
 	return s.IsPlayerInTown() && !s.GetFlags().IsSet("town_changed_to_night")
 }
@@ -280,7 +316,29 @@ func (s *State) LitByVision(mapPos geometry.Point) bool {
 // ApplyLighting shades what is drawn at mapPos: distance from the player, lit and unlit dungeon rooms, torches,
 // and on top of all of it the church's red light, which has to show in the town's daylight too.
 func (s *State) ApplyLighting(mapPos geometry.Point, drawColor color.RGBA, worldTick uint64) color.RGBA {
-	return s.applyPortalLight(mapPos, s.applyRedLight(mapPos, s.applyLighting(mapPos, drawColor, worldTick), worldTick), worldTick)
+	return s.applyPortalLight(mapPos, s.applyRedLight(mapPos, s.applyTownLight(mapPos, drawColor, s.applyLighting(mapPos, drawColor, worldTick), worldTick), worldTick), worldTick)
+}
+
+// applyTownLight lets a carried light glow in town, where the daylight (or the gloom before the first descent)
+// otherwise decides alone: the tile's own color, tinted by the light and flickering, over what the town shows,
+// fading out at the light's radius.
+func (s *State) applyTownLight(mapPos geometry.Point, base, shaded color.RGBA, worldTick uint64) color.RGBA {
+	if !s.IsDaylight() || !s.GetPlayer().CanSee(mapPos) {
+		return shaded
+	}
+	light := s.carriedLight()
+	if light == nil {
+		return shaded
+	}
+	reach := float64(s.PlayerLightRadius() + 1)
+	d := geometry.Distance(s.GetPlayer().MapPosition(), mapPos)
+	if d >= reach {
+		return shaded
+	}
+	stats := light.GetLightStats()
+	flicker := stats.FlickerPattern[util.GetLoopingFrameFromTick(worldTick, stats.FlickerFrameDelay, len(stats.FlickerPattern))]
+	falloff := 1 - d/reach
+	return lerpRGBA(shaded, multiplyColors(base, multiplyColor(stats.LightColor, flicker)), falloff*falloff)
 }
 
 // applyPortalLight bathes the cells right around an open town portal in a cold, shimmering light blue, lifted out
@@ -388,14 +446,14 @@ var d1HeroTorch = LightStats{LightColor: color.RGBA{R: 255, G: 223, B: 117, A: 2
 
 func (s *State) mixLightSourceColor(drawColor, noLightSource color.RGBA, worldTick uint64) color.RGBA {
 	state := s
-	if s.lighting != "carried" && s.GetPlayer().hero != nil {
+	if s.lighting.Model != "carried" && s.GetPlayer().hero != nil {
 		flicker := d1HeroTorch.FlickerPattern[util.GetLoopingFrameFromTick(worldTick, d1HeroTorch.FlickerFrameDelay, len(d1HeroTorch.FlickerPattern))]
 		return multiplyColors(drawColor, multiplyColor(d1HeroTorch.LightColor, flicker))
 	}
 	equipment := state.GetPlayer().GetEquipment()
 	if equipment.HasLightSourceEquipped() {
 		lightSource := equipment.GetLightSource()
-		if lightSource.HasChargesLeft() {
+		if lightSource.HasChargesLeft() && (s.lighting.Model != "carried" || s.carriedLight() != nil) {
 			lightStats := lightSource.GetLightStats()
 			lightColor := lightStats.LightColor
 			flickerPattern := lightStats.FlickerPattern
