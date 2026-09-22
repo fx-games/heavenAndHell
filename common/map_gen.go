@@ -153,7 +153,7 @@ func d1IsFenceMega(v byte) bool { return v >= 121 && v <= 153 }
 
 // d1CathedralSeeThrough is what the Cathedral megatiles with pieces D1's sight passes are drawn as: arches, fences,
 // the pillar and the lamp (drlg_l1_data.go's t1*Arch*, t1*Fence*, t1Pillar, l1LAMPS).
-var d1CathedralSeeThrough = func() map[byte]gridmap.Tile {
+func d1CathedralSeeThrough() map[byte]gridmap.Tile {
 	arch := gridmap.Tile{DefinedIcon: defs.IconArch, DefinedDescription: "an arch", IsTransparent: true}
 	grate := gridmap.Tile{DefinedIcon: defs.IconGrate, DefinedDescription: "a grate", IsTransparent: true}
 	return map[byte]gridmap.Tile{5: arch, 8: arch, 9: arch, 10: arch, 11: arch, 12: arch, 14: arch, 33: arch, 34: arch,
@@ -161,7 +161,7 @@ var d1CathedralSeeThrough = func() map[byte]gridmap.Tile {
 		27: grate, 29: grate, 32: grate, 35: grate, 36: grate, 37: grate, 38: grate,
 		15:  {DefinedIcon: defs.IconPillar, DefinedDescription: "a pillar", IsTransparent: true},
 		128: {DefinedIcon: defs.IconLamp, DefinedDescription: "a lamp", IsTransparent: true}}
-}()
+}
 
 // d1CathedralColumns are Cathedral megatiles whose art is a free-standing column, exactly like the arch pieces
 // that stand next to them in an arcade, but whose cell blocks sight in D1's own SOL table - so they fell through
@@ -197,13 +197,14 @@ func (g *MapGenerator) setD1Tiles(m *gridmap.GridMap[*Actor, *Item, Object], lvl
 	if !ok {
 		panic(fmt.Sprintf("levels.rec: %s: unknown tile set %q (have %v)", m.GetName(), g.levels[m.GetName()].Tiles, defs.TilemapNames()))
 	}
+	seeThroughTiles := d1CathedralSeeThrough()
 	for x := max(x1, 0); x <= min(x2, d1.LevelSize-1); x++ {
 		for y := max(y1, 0); y <= min(y2, d1.LevelSize-1); y++ {
 			mapPos := geometry.Point{X: x, Y: y}
 			if _, ok := m.GetTransitionAt(mapPos); ok { // a map change keeps the stairs wireD1Triggers put there
 				continue
 			}
-			seeThroughTile, seeThrough := d1CathedralSeeThrough[lvl.CellMega(x, y)]
+			seeThroughTile, seeThrough := seeThroughTiles[lvl.CellMega(x, y)]
 			switch {
 			case door(mapPos):
 				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: tileMap.FloorTile, DefinedDescription: "a floor", IsWalkable: true, IsTransparent: true})
@@ -228,31 +229,35 @@ func (g *MapGenerator) setD1Tiles(m *gridmap.GridMap[*Actor, *Item, Object], lvl
 	}
 }
 
-var (
-	d1Lava          = gridmap.Tile{DefinedIcon: defs.IconLava, DefinedDescription: "lava", IsTransparent: true}
-	d1PoisonedWater = gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "poisoned water", IsTransparent: true, Special: gridmap.SpecialTileWater}
-	d1CleanWater    = gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "clean water", IsTransparent: true, Special: gridmap.SpecialTileWater}
-)
+func d1Lava() gridmap.Tile {
+	return gridmap.Tile{DefinedIcon: defs.IconLava, DefinedDescription: "lava", IsTransparent: true}
+}
+func d1PoisonedWater() gridmap.Tile {
+	return gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "poisoned water", IsTransparent: true, Special: gridmap.SpecialTileWater}
+}
+func d1CleanWater() gridmap.Tile {
+	return gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "clean water", IsTransparent: true, Special: gridmap.SpecialTileWater}
+}
 
 // d1LavaTile is what a cave's lava pieces show: lava, except in the Poisoned Water Supply, where D1's palette
 // (L3pfoul.pal, then L3pwater.pal once the quest is done) turns them into foul water and then clean water, tinted
 // by State.GetWaterColor.
 func (g *MapGenerator) d1LavaTile(m *gridmap.GridMap[*Actor, *Item, Object]) gridmap.Tile {
 	if !g.factory.State.onSetLevelOf(m, d1.QPWater) {
-		return d1Lava
+		return d1Lava()
 	}
 	if g.factory.State.QuestActive(d1.QPWater) == d1.QuestDone {
-		return d1CleanWater
+		return d1CleanWater()
 	}
-	return d1PoisonedWater
+	return d1PoisonedWater()
 }
 
 // cleanD1Water ports the Poisoned Water Supply's palette change once the quest is done.
 func (g *MapGenerator) cleanD1Water(m *gridmap.GridMap[*Actor, *Item, Object]) {
 	for y := 0; y < d1.LevelSize; y++ {
 		for x := 0; x < d1.LevelSize; x++ {
-			if p := (geometry.Point{X: x, Y: y}); m.GetCell(p).TileType.DefinedDescription == d1PoisonedWater.DefinedDescription {
-				m.SetTile(p, d1CleanWater)
+			if p := (geometry.Point{X: x, Y: y}); m.GetCell(p).TileType.DefinedDescription == d1PoisonedWater().DefinedDescription {
+				m.SetTile(p, d1CleanWater())
 			}
 		}
 	}

@@ -19,8 +19,10 @@ const (
 	StatusInfravision StatusEffect = "infravision"
 )
 
-var d1SpellIcons = map[string]int32{
-	"STYPE_FIRE": defs.IconEffectFireSmall, "STYPE_LIGHTNING": defs.IconEffectLightning, "STYPE_MAGIC": defs.IconEffectHit,
+func d1SpellIcons() map[string]int32 {
+	return map[string]int32{
+		"STYPE_FIRE": defs.IconEffectFireSmall, "STYPE_LIGHTNING": defs.IconEffectLightning, "STYPE_MAGIC": defs.IconEffectHit,
+	}
 }
 
 // SpellAction is one cast of a D1 spell, resolved instantly (decision 6).
@@ -283,7 +285,7 @@ func (c *spellCtx) secPerTile() float64 {
 	return d1.MissileSecondsPerTile(d1.SpellMissileVel(c.spell, c.slvl))
 }
 
-func (c *spellCtx) icon() int32 { return d1SpellIcons[c.f.Generator.D.Spells[c.spell].Type] }
+func (c *spellCtx) icon() int32 { return d1SpellIcons()[c.f.Generator.D.Spells[c.spell].Type] }
 
 // bolt flies from `from` towards `to` until it hits a monster or a wall; a miss flies on (CheckMissileCol).
 // It returns where it stopped: the monster's, solid object's or wall's cell (a wall stops a missile on it), else

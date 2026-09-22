@@ -79,10 +79,12 @@ func (s *State) SetVisited(level, town string) { s.deepestLevel, s.deepestTown =
 func (s *State) IsPlayerInTown() bool { return s.CurrentLevel().Town }
 
 // exitTiles are what an exit's spot turns into when it opens (exit_tile).
-var exitTiles = map[string]gridmap.Tile{
-	"stairs_down": d1StairsDown,
-	"stairs_up":   {DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp},
-	"red_portal":  d1RedPortal,
+func exitTiles() map[string]gridmap.Tile {
+	return map[string]gridmap.Tile{
+		"stairs_down": d1StairsDown(),
+		"stairs_up":   {DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp},
+		"red_portal":  d1RedPortal,
+	}
 }
 
 // wireExits lays the level's declared exits on m: each open one becomes a transition on its location. It runs when
@@ -100,7 +102,7 @@ func (s *State) wireExits(m *gridmap.GridMap[*Actor, *Item, Object]) {
 		if e.OpenWhen != "" && !s.factory.questCondition(e.OpenWhen) {
 			continue
 		}
-		if t, ok := exitTiles[e.Tile]; ok {
+		if t, ok := exitTiles()[e.Tile]; ok {
 			m.SetTile(p, t)
 		} else if e.Tile != "" {
 			panic(fmt.Sprintf("levels.rec: %s: unknown exit_tile %q", m.GetName(), e.Tile))

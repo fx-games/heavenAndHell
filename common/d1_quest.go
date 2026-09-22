@@ -405,10 +405,12 @@ func (f *Factory) D1TalkerTurn(a *Actor, visible bool) bool {
 	return mon.Goal != d1GoalInquiring && mon.Goal != d1GoalTalking
 }
 
-var (
-	d1StairsDown = gridmap.Tile{DefinedIcon: defs.IconStairsDown, DefinedDescription: "stairs leading down", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsDown}
-	d1RedPortal  = gridmap.Tile{DefinedIcon: 72, DefinedDescription: "a red portal", IsWalkable: true, IsTransparent: true}
-)
+// d1StairsDown is a func, not a var: package vars are set before defs.LoadIcons binds the icon IDs.
+func d1StairsDown() gridmap.Tile {
+	return gridmap.Tile{DefinedIcon: defs.IconStairsDown, DefinedDescription: "stairs leading down", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsDown}
+}
+
+var d1RedPortal = gridmap.Tile{DefinedIcon: 72, DefinedDescription: "a red portal", IsWalkable: true, IsTransparent: true}
 
 // Lazarus' lair (Vile2.DUN), in piece coordinates: the magic circles in front of the two Books of Vileness and where
 // they teleport the hero, the central circle and the one in front of Lazarus it leads to, and the return portal.

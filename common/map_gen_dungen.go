@@ -82,12 +82,15 @@ func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object],
 	}
 }
 
-var (
-	dungenLadderUp = gridmap.Tile{DefinedIcon: defs.IconStairsUp, DefinedDescription: "a ladder leading up",
+func dungenLadderUp() gridmap.Tile {
+	return gridmap.Tile{DefinedIcon: defs.IconStairsUp, DefinedDescription: "a ladder leading up",
 		IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp}
-	dungenLadderDown = gridmap.Tile{DefinedIcon: defs.IconStairsDown, DefinedDescription: "a ladder leading down",
+}
+
+func dungenLadderDown() gridmap.Tile {
+	return gridmap.Tile{DefinedIcon: defs.IconStairsDown, DefinedDescription: "a ladder leading down",
 		IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsDown}
-)
+}
 
 // addDungenStairs places a stairwell for each exit the level declares and names it by the exit's location:
 // ladder_up by the entrance, ladder_down as far from it as the layout allows, any other exit on the spots
@@ -102,9 +105,9 @@ func (g *MapGenerator) addDungenStairs(m *gridmap.GridMap[*Actor, *Item, Object]
 	}
 	var placed []geometry.Point
 	put := func(e dungeon.Exit, p geometry.Point) {
-		tile := dungenLadderDown
+		tile := dungenLadderDown()
 		if target := g.levels[e.Target]; target.Town || target.Depth < lvl.Depth || e.Location == "ladder_up" {
-			tile = dungenLadderUp
+			tile = dungenLadderUp()
 		}
 		m.SetTile(p, tile)
 		m.AddNamedLocation(e.Location, p)

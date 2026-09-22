@@ -107,7 +107,9 @@ func (g *MapGenerator) setPiece(m *gridmap.GridMap[*Actor, *Item, Object]) [4]in
 	return [4]int{}
 }
 
-var d1StairsUp = gridmap.Tile{DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp}
+func d1StairsUp() gridmap.Tile {
+	return gridmap.Tile{DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp}
+}
 
 // placeD1Triggers draws the stairs and warp D1's own generator positioned (Level.Triggers) and names them
 // ladder_up, ladder_down and warp, plus each available quest's entrance on its level (CheckQuests), named by the
@@ -118,13 +120,13 @@ func (g *MapGenerator) placeD1Triggers(m *gridmap.GridMap[*Actor, *Item, Object]
 		switch t.Msg {
 		case d1.TrigPrevLevel:
 			m.AddNamedLocation("ladder_up", p)
-			m.SetTile(p, d1StairsUp)
+			m.SetTile(p, d1StairsUp())
 		case d1.TrigNextLevel:
 			m.AddNamedLocation("ladder_down", p)
-			m.SetTile(p, d1StairsDown)
+			m.SetTile(p, d1StairsDown())
 		case d1.TrigTownWarpUp:
 			m.AddNamedLocation("warp", p)
-			warpTile := d1StairsDown
+			warpTile := d1StairsDown()
 			warpTile.DefinedDescription = "a way back to town"
 			m.SetTile(p, warpTile)
 		}
@@ -143,7 +145,7 @@ func (g *MapGenerator) placeD1Triggers(m *gridmap.GridMap[*Actor, *Item, Object]
 			m.AddNamedLocation("ladder_down", toCell(qu.X+3, qu.Y+3)) // L4PENTA2's stairs piece (370), InitL4Triggers
 			continue
 		}
-		tile := d1StairsDown
+		tile := d1StairsDown()
 		tile.DefinedDescription = "a way further down"
 		m.SetTile(p, tile)
 	}
@@ -158,7 +160,7 @@ func (g *MapGenerator) placeD1SetLevelReturn(m *gridmap.GridMap[*Actor, *Item, O
 		}
 		p := toCell(t.X, t.Y)
 		m.AddNamedLocation("ladder_up", p)
-		m.SetTile(p, d1StairsUp)
+		m.SetTile(p, d1StairsUp())
 	}
 	if sl == d1.SLVileBetrayer {
 		m.AddNamedLocation("ladder_up", toCell(lvl.View[0], lvl.View[1]))

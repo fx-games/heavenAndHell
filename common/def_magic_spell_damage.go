@@ -69,9 +69,11 @@ var resistKindByName = map[string]int{
 	"none": d1.ResistNone, "fire": d1.ResistKindFire, "lightning": d1.ResistKindLightning, "magic": d1.ResistKindMagic,
 }
 
-var damageIconByResist = map[int]int32{
-	d1.ResistKindFire: defs.IconEffectFireSmall, d1.ResistKindLightning: defs.IconEffectLightning,
-	d1.ResistNone: defs.IconEffectHit, d1.ResistKindMagic: defs.IconEffectHit,
+func damageIconByResist() map[int]int32 {
+	return map[int]int32{
+		d1.ResistKindFire: defs.IconEffectFireSmall, d1.ResistKindLightning: defs.IconEffectLightning,
+		d1.ResistNone: defs.IconEffectHit, d1.ResistKindMagic: defs.IconEffectHit,
+	}
 }
 
 // spellDamageModeAndLevel reads spell_damage's optional mode and the spell level the cast appends after it.
@@ -139,7 +141,7 @@ func (a *SpellDamageAction) Execute(ctx ActionContext) []Action {
 		return GetAllDamageRolls()[a.roll](RollContext{Rng: d1Rng, Mag: c.s.Mag, Clvl: c.h.Level, Slvl: a.slvl, Cell: cell})
 	}
 	roll := rollAt(0)
-	icon := damageIconByResist[a.resist]
+	icon := damageIconByResist()[a.resist]
 	for i, p := range a.hitPositions {
 		if a.mode == "per_cell" && i > 0 {
 			roll = rollAt(i)
