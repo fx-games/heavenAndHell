@@ -56,7 +56,7 @@ func TestEachModLoadsItsOwnItems(t *testing.T) {
 		absent string
 	}{
 		{"d1", 156, "The Undead Crown", "Potion of Berserker Rage"}, // 1.09's table, its empty slots included
-		{"heavenandhell", 119, "Potion of Berserker Rage", "The Undead Crown"},
+		{"heavenandhell", 120, "Potion of Berserker Rage", "The Undead Crown"},
 	} {
 		t.Run(tc.mod, func(t *testing.T) {
 			files.SelectMod(tc.mod)

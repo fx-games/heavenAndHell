@@ -1364,6 +1364,17 @@ category: scroll
 charges: -1
 untargeted_action: read_message(TEXT_HH_NOTE_LUCIFER)
 
+# King Zedek's crown, in Shekel's house until the second act's skeleton_army quest buries it in his tomb.
+name: King Zedek's crown
+internal_name: zedeks_crown
+icon: item.iron_crown
+dlvl: 1
+cost: 0
+drop: IDROP_NEVER
+category: scroll
+charges: -1
+untargeted_action: read_message(TEXT_HH_ZEDEK_CROWN)
+
 # The evidence against the town (main's NewEvidence*): hidden until Lucifer's gift opens the hero's eyes.
 
 name: Purity report

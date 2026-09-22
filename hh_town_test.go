@@ -120,9 +120,10 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	cause := common.NewActorCause("test", player)
 	town := gridmap.Transition{TargetMap: "town", TargetLocation: "spawn"}
 
-	talk := func(npc, wantText string) {
+	windows := 1 // how many text windows one talk opens
+	talkIn := func(where gridmap.Transition, npc, wantText string) {
 		t.Helper()
-		s.MapTransition(town)
+		s.MapTransition(where)
 		var who *common.Actor
 		for _, a := range s.GetMap().Actors() {
 			if a.GetInternalName() == npc {
@@ -130,7 +131,7 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 			}
 		}
 		if who == nil {
-			t.Fatalf("no %s in town", npc)
+			t.Fatalf("no %s on %s", npc, where.TargetMap)
 		}
 		ui.menus, ui.texts = nil, nil
 		g.GetActionBroker().Execute(common.NewTalkToAction(cause, who))
@@ -142,13 +143,18 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 				item.Action()
 			}
 		}
-		if len(ui.texts) != 1 || !strings.Contains(ui.texts[0], wantText) {
-			t.Fatalf("talking to %s: got %q, want one window saying %q", npc, ui.texts, wantText)
+		if len(ui.texts) != windows || !strings.Contains(ui.texts[0], wantText) {
+			t.Fatalf("talking to %s: got %q, want %d window(s), the first saying %q", npc, ui.texts, windows, wantText)
 		}
 	}
+	talk := func(npc, wantText string) { t.Helper(); talkIn(town, npc, wantText) }
 	kill := func(depthOrMap, internalName string) {
 		t.Helper()
-		s.MapTransition(gridmap.Transition{TargetMap: depthOrMap, TargetLocation: "ladder_up"})
+		if depthOrMap == "town" {
+			s.MapTransition(town)
+		} else {
+			s.MapTransition(gridmap.Transition{TargetMap: depthOrMap, TargetLocation: "ladder_up"})
+		}
 		found := false
 		for _, a := range slices.Clone(s.GetMap().Actors()) { // dying removes from the list being walked
 			if a != player && a.IsAlive() && (internalName == "" || a.GetInternalName() == internalName) {
@@ -296,6 +302,55 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	if len(ui.texts) != 0 {
 		t.Errorf("picking a note up again replayed %q", ui.texts)
 	}
+
+	// The second act: Lucifer, in the town in hell, sends the hero after the town's true villains.
+	hellTown := gridmap.Transition{TargetMap: "hell_town", TargetLocation: "to_caves"}
+	lucifer := func(want string) { t.Helper(); talkIn(hellTown, "lucifer_townsman", want) }
+	lucifer("settle the town's accounts")
+	for _, q := range []string{"adventurers", "skeleton_army", "shekel"} {
+		expect(q, d1.QuestActive)
+	}
+	lucifer("debts are still open")
+
+	for _, adventurer := range []string{"adventurer_knight", "adventurer_priest", "adventurer_barbarian", "adventurer_archer"} {
+		kill(levelAt(s, 9), adventurer)
+	}
+	kill(levelAt(s, 12), "evil_shekel")
+
+	crownIn := func() *common.Item {
+		for _, it := range player.GetInventory().Items() {
+			if it.Name() == "King Zedek's crown" {
+				return it
+			}
+		}
+		return nil
+	}
+	pickUp("town", "King Zedek's crown")
+	s.ItemUsed(crownIn()) // anywhere but his tomb, it is only a crown
+	if crownIn() == nil {
+		t.Fatal("the crown was buried in town")
+	}
+	s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, 4), TargetLocation: "ladder_up"})
+	s.ItemUsed(crownIn())
+	if crownIn() != nil {
+		t.Fatal("the crown was not buried in King Zedek's tomb")
+	}
+
+	exp = player.Hero().Exp
+	windows = 3
+	lucifer("Four fewer heroes") // all three debts settle in one talk, each in its own window
+	windows = 1
+	for _, q := range []string{"adventurers", "skeleton_army", "shekel"} {
+		expect(q, d1.QuestDone)
+	}
+	if player.Hero().Exp != exp+6000 {
+		t.Errorf("the second act's rewards: %d -> %d exp", exp, player.Hero().Exp)
+	}
+	lucifer("One debt remains")
+	expect("kirioth", d1.QuestActive)
+	kill("town", "evil_kirioth")
+	expect("kirioth", d1.QuestDone)
+	lucifer("It is done")
 }
 
 // H&H's four shops, as main had them: stocked from their own lists, each with its own menu, Mary buying from the

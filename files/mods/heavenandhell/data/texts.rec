@@ -188,3 +188,53 @@ text: So you still don't understand, do you?
 + And for what pitiful reason did you invent me? As a scapegoat for all your own evil deeds. Like a child, you blame me for what is really your own fault.
 +
 + Look around you and open your eyes to the truth. The true enemy of mankind is, and always has been, mankind itself.
+
+# The second act (plan.txt's "Quests #2"): Lucifer, in the town in hell, sends the hero after the town's true
+# villains. Drafted by Claude from plan.txt; not yet reviewed.
+
+id: TEXT_HH_LUCIFER_ACT2_OFFER
+text: So your eyes are open at last. Good.
++
++ Then let us settle the town's accounts. Four debts are owed, and three can be collected now.
++
++ The adventurers who came down after you butcher everything they meet on the ninth level, and they call it heroism. End them.
++
++ King Zedek's army still marches because their king was never laid to rest. Shekel keeps his crown as a trophy in his house. Take it back and bury it in his tomb.
++
++ And Shekel himself, the man who poisoned the water and blamed the workers, hides in the merchant district below. He will not see you coming.
+
+id: TEXT_HH_LUCIFER_ACT2_WAITING
+text: The adventurers on the ninth level, Zedek's crown, Shekel in the merchant district. The debts are still open.
+
+id: TEXT_HH_LUCIFER_ADVENTURERS_DONE
+text: Four fewer heroes. The ninth level is quiet, and nobody up there will mourn them.
+
+id: TEXT_HH_LUCIFER_SKELETON_ARMY_DONE
+text: The dead king rests, and his army with him. They were the only ones in that town who kept their oaths.
+
+id: TEXT_HH_LUCIFER_SHEKEL_DONE
+text: Shekel is dead. The water will stay clean now, and the workers will never know who to thank.
+
+id: TEXT_HH_LUCIFER_KIRIOTH_OFFER
+text: One debt remains, and it is the largest.
++
++ Kirioth. He turned a prince against his king, sold a boy to Shekel's experiments, and fed the poor to the ritual that summoned me, thinking he could hold my leash.
++
++ He waits for you in town. When you arrive, he will finally show you his true face. Finish it.
+
+id: TEXT_HH_LUCIFER_KIRIOTH_WAITING
+text: Kirioth still breathes. Go to town.
+
+id: TEXT_HH_KIRIOTH_DEATH
+text: You... were supposed to be my hero.
+
+id: TEXT_HH_LUCIFER_ENDING
+text: It is done. The town is free of the men who ruled it, and no one will ever call you a hero for it.
++
++ Now you understand what I have always been: the one they blame. Walk with me, and we will see how long the next ones last.
+
+id: TEXT_HH_ZEDEK_CROWN
+text: A king's crown, dented where a blade struck it from behind. It belongs in King Zedek's tomb, on the fourth level.
+
+id: TEXT_HH_ZEDEK_CROWN_BURIED
+text: You lay the crown in the dust of King Zedek's tomb. Somewhere below, a thousand bones settle at once.

@@ -11,12 +11,13 @@
 #                     name (on_item_pickup, on_item_use), a level id (on_enter_level, on_level_cleared), an NPC's
 #                     internal name (on_talk: its dialogue; on_approach: walking up to it)
 #   when              a condition; empty: always. Functions: done(q) active(q) avail(q) logged(q) flag(name)
-#                     v1(q) v2(q) (the quest's two variables) has(item); numbers: depth, deepest; and or not == < >=
+#                     v1(q) v2(q) (the quest's two variables) has(item); numbers: depth, deepest; map (the level id); and or not == < >=
 #   do                an outcome, repeatable, in order: complete_quest(q) activate_quest(q) start_quest(q)
 #                     start_town_quest(q) log_quest(q) set_quest_var(q, n, value) or_quest_var(q, n, bits)
 #                     set_flag(name) say(text [, speaker]) sound(id) hero_sound(n) end_text() give_exp(n)
 #                     give_weapon(dlvl) take_item(item) drop_item(item) drop_unique(name) place_item(item, location
-#                     or anywhere) spawn_item(item, map, location | here) refresh_level()
+#                     or anywhere) spawn_item(item, map, location | here) spawn_monster(monster, location or
+#                     anywhere) refresh_level()
 #   pass              true: an on_talk / on_approach trigger that fired still lets the next one speak (normally one
 #                     conversation says one thing)
 #
@@ -51,6 +52,28 @@ log_text: TEXT_HH_KIRIOTH_LUCIFER_QUEST
 key: evidence
 name: Find evidence against humanity
 log_text: TEXT_HH_NOTE_LUCIFER
+
+# The second act, given by Lucifer in the town in hell once the evidence is found (plan.txt's "Quests #2").
+
+key: adventurers
+name: Kill the butchering adventurers
+level: doom_9
+log_text: TEXT_HH_LUCIFER_ACT2_OFFER
+
+key: skeleton_army
+name: Bring peace to the skeleton army
+level: catacombs_4
+log_text: TEXT_HH_ZEDEK_CROWN
+
+key: shekel
+name: Kill Shekel
+level: merchant_12
+log_text: TEXT_HH_LUCIFER_ACT2_OFFER
+
+key: kirioth
+name: Kill Kirioth
+level: town
+log_text: TEXT_HH_LUCIFER_KIRIOTH_OFFER
 
 %rec: trigger
 
@@ -259,3 +282,123 @@ do: say(TEXT_HH_SHEKEL_WELCOME)
 event: on_talk
 subject: mary
 do: say(TEXT_HH_MARY_WELCOME)
+
+# The second act. Its bosses turn up the first time the hero enters their level while the quest is active; the
+# four adventurers each set one bit of the quest's v1, so all four dead is 15.
+
+event: on_enter_level
+subject: doom_9
+when: active("adventurers") and not flag("placed:adventurers")
+do: set_flag(placed:adventurers)
+do: spawn_monster(adventurer_knight, anywhere)
+do: spawn_monster(adventurer_priest, anywhere)
+do: spawn_monster(adventurer_barbarian, anywhere)
+do: spawn_monster(adventurer_archer, anywhere)
+
+event: on_kill
+subject: adventurer_knight
+do: or_quest_var(adventurers, 1, 1)
+
+event: on_kill
+subject: adventurer_priest
+do: or_quest_var(adventurers, 1, 2)
+
+event: on_kill
+subject: adventurer_barbarian
+do: or_quest_var(adventurers, 1, 4)
+
+event: on_kill
+subject: adventurer_archer
+do: or_quest_var(adventurers, 1, 8)
+
+event: on_item_use
+subject: zedeks_crown
+when: map == "catacombs_4"
+do: say(TEXT_HH_ZEDEK_CROWN_BURIED, King Zedek's crown)
+do: take_item(zedeks_crown)
+do: set_flag(buried:zedeks_crown)
+
+event: on_enter_level
+subject: merchant_12
+when: active("shekel") and not flag("placed:evil_shekel")
+do: set_flag(placed:evil_shekel)
+do: spawn_monster(evil_shekel, anywhere)
+
+event: on_kill
+subject: evil_shekel
+do: set_flag(killed:evil_shekel)
+
+event: on_enter_level
+subject: town
+when: active("kirioth") and not flag("placed:evil_kirioth")
+do: set_flag(placed:evil_kirioth)
+do: spawn_monster(evil_kirioth, spawn)
+
+event: on_kill
+subject: evil_kirioth
+do: say(TEXT_HH_KIRIOTH_DEATH, Kirioth)
+do: complete_quest(kirioth)
+do: give_exp(5000)
+
+# Lucifer, in the town in hell: latest step first. The hand-ins pass, so one talk can settle several debts.
+
+event: on_talk
+subject: lucifer_townsman
+when: done("kirioth")
+do: say(TEXT_HH_LUCIFER_ENDING)
+
+event: on_talk
+subject: lucifer_townsman
+when: active("kirioth")
+do: say(TEXT_HH_LUCIFER_KIRIOTH_WAITING)
+
+event: on_talk
+subject: lucifer_townsman
+when: done("adventurers") and done("skeleton_army") and done("shekel") and not active("kirioth") and not done("kirioth")
+do: say(TEXT_HH_LUCIFER_KIRIOTH_OFFER)
+do: activate_quest(kirioth)
+do: log_quest(kirioth)
+
+event: on_talk
+subject: lucifer_townsman
+when: active("adventurers") and v1("adventurers") == 15
+pass: true
+do: say(TEXT_HH_LUCIFER_ADVENTURERS_DONE)
+do: complete_quest(adventurers)
+do: give_weapon(12)
+do: give_exp(2000)
+
+event: on_talk
+subject: lucifer_townsman
+when: active("skeleton_army") and flag("buried:zedeks_crown")
+pass: true
+do: say(TEXT_HH_LUCIFER_SKELETON_ARMY_DONE)
+do: complete_quest(skeleton_army)
+do: give_weapon(12)
+do: give_exp(2000)
+
+event: on_talk
+subject: lucifer_townsman
+when: active("shekel") and flag("killed:evil_shekel")
+pass: true
+do: say(TEXT_HH_LUCIFER_SHEKEL_DONE)
+do: complete_quest(shekel)
+do: give_weapon(13)
+do: give_exp(2000)
+
+event: on_talk
+subject: lucifer_townsman
+when: active("adventurers") or active("skeleton_army") or active("shekel")
+do: say(TEXT_HH_LUCIFER_ACT2_WAITING)
+
+event: on_talk
+subject: lucifer_townsman
+when: done("evidence") and not active("adventurers") and not done("adventurers")
+do: say(TEXT_HH_LUCIFER_ACT2_OFFER)
+do: activate_quest(adventurers)
+do: activate_quest(skeleton_army)
+do: activate_quest(shekel)
+do: log_quest(adventurers)
+do: log_quest(skeleton_army)
+do: log_quest(shekel)
+do: spawn_item(zedeks_crown, town, shekels_house)
