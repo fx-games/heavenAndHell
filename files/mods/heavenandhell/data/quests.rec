@@ -17,7 +17,7 @@
 #                     set_flag(name) say(text [, speaker]) sound(id) hero_sound(n) end_text() give_exp(n)
 #                     give_weapon(dlvl) take_item(item) drop_item(item) drop_unique(name) place_item(item, location
 #                     or anywhere) spawn_item(item, map, location | here) spawn_monster(monster, location or
-#                     anywhere) refresh_level()
+#                     anywhere) add_npc(npc, map, location) remove_npc(npc, map) refresh_level()
 #   pass              true: an on_talk / on_approach trigger that fired still lets the next one speak (normally one
 #                     conversation says one thing)
 #
@@ -327,6 +327,7 @@ do: spawn_monster(evil_shekel, anywhere)
 event: on_kill
 subject: evil_shekel
 do: set_flag(killed:evil_shekel)
+do: remove_npc(shekel, town)
 
 event: on_enter_level
 subject: town
@@ -339,6 +340,8 @@ subject: evil_kirioth
 do: say(TEXT_HH_KIRIOTH_DEATH, Kirioth)
 do: complete_quest(kirioth)
 do: give_exp(5000)
+do: remove_npc(kirioth, town)
+do: add_npc(lucifer_townsman, town, spawn)
 
 # Lucifer, in the town in hell: latest step first. The hand-ins pass, so one talk can settle several debts.
 

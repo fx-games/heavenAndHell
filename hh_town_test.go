@@ -350,7 +350,33 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	expect("kirioth", d1.QuestActive)
 	kill("town", "evil_kirioth")
 	expect("kirioth", d1.QuestDone)
+	for _, a := range s.Map("town").Actors() {
+		if n := a.GetInternalName(); n == "shekel" || n == "kirioth" {
+			t.Errorf("%s still stands in town after his true self died", n)
+		}
+	}
 	lucifer("It is done")
+	talk("lucifer_townsman", "It is done") // and he has come up to town
+
+	// The town is rebuilt from its drawing on load; the quests' changes to who lives there must survive that.
+	old := game.SaveDir
+	t.Cleanup(func() { game.SaveDir = old })
+	game.SaveDir = filepath.Join(t.TempDir(), "saves")
+	g.SaveToSlot(1)
+	if err := g.LoadSlot(1); err != nil {
+		t.Fatal(err)
+	}
+	s = g.GetWorldState()
+	player = s.GetPlayer()
+	cause = common.NewActorCause("test", player)
+	var townsfolk []string
+	for _, a := range s.Map("town").Actors() {
+		townsfolk = append(townsfolk, a.GetInternalName())
+	}
+	if slices.Contains(townsfolk, "kirioth") || slices.Contains(townsfolk, "shekel") || !slices.Contains(townsfolk, "lucifer_townsman") {
+		t.Errorf("after loading, town holds %v", townsfolk)
+	}
+
 }
 
 // H&H's four shops, as main had them: stocked from their own lists, each with its own menu, Mary buying from the
