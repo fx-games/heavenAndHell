@@ -841,7 +841,7 @@ func (b *d1Brain) fade(out bool) (d1Act, bool) {
 func (b *d1Brain) sneak() (d1Act, bool) {
 	mon := b.mon
 	player := b.g.state.GetPlayer()
-	if player.Hero() != nil && geometry.Distance(b.pos, player.MapPosition()) > float64(player.HeroSheet().LightRad) && !b.g.state.GetMap().IsTileLit(b.pos) && !b.g.state.D1Lit(b.pos) {
+	if player.Hero() != nil && geometry.Distance(b.pos, player.MapPosition()) > float64(b.g.state.PlayerLightRadius()) && !b.g.state.GetMap().IsTileLit(b.pos) && !b.g.state.D1Lit(b.pos) {
 		return noAct, false
 	}
 	md := b.dirTo(b.enemy)

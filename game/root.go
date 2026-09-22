@@ -266,6 +266,7 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 	println(fmt.Sprintf("Timekeeper created.."))
 
 	g.state = common.NewState(ldtkProject)
+	g.state.SetLighting(common.Lighting())
 	g.state.SetPlayerMessage(g.PlayerMessage)
 	g.state.SetTimeKeeper(timeKeeper)
 	g.state.SelectedClass = playerStartDefinition

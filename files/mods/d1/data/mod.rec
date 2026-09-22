@@ -3,3 +3,5 @@
 # Settings this mod fixes: they win over config.rec and the player cannot change them.
 # 1.09 single player saves only on "Save Game" and on quitting.
 AutosaveOnLevelChange: false
+# Lighting: aura is Diablo's, a light around the hero always, radius 10 plus the gear's light affixes.
+Lighting: aura

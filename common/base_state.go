@@ -46,6 +46,7 @@ type PlayerActions interface {
 	CloseDoorAt(mapPos geometry.Point) bool
 }
 type State struct {
+	lighting       string // the mod's Lighting: "aura" or "carried"
 	currentMap     *gridmap.GridMap[*Actor, *Item, Object]
 	maps           map[string]*gridmap.GridMap[*Actor, *Item, Object] // every level built this game, by id
 	d1Portal       *D1Portal
@@ -205,8 +206,46 @@ func (s *State) PlayerStandsInLitArea() bool {
 }
 
 func (s *State) PlayerCanSeeNeighbors() bool {
-	return s.GetPlayer().hero != nil || s.GetPlayer().GetEquipment().HasLightSourceEquipped() || s.PlayerStandsInLitArea()
+	return s.PlayerLightRadius() > 0 || s.PlayerStandsInLitArea()
 }
+
+// Lighting is how the mod lights the hero's way, its mod.rec's "Lighting:":
+//
+//	aura     Diablo's: a light around the hero always, radius 10 plus the gear's light affixes (Sheet.LightRad)
+//	carried  Angband's: only the equipped light source while it burns, radius what the gear adds to light_radius
+//
+// A mod that doesn't say gets the aura.
+func Lighting() string {
+	if v, _ := ModSetting("Lighting"); v == "carried" {
+		return "carried"
+	}
+	return "aura"
+}
+
+// PlayerLightRadius is how far the hero's own light reaches in the dark, under the mod's Lighting.
+func (s *State) PlayerLightRadius() int {
+	actor := s.GetPlayer()
+	if s.lighting != "carried" {
+		if actor.hero != nil {
+			return actor.HeroSheet().LightRad
+		}
+		return 0
+	}
+	light := actor.GetEquipment().GetLightSource()
+	if light == nil || !light.HasChargesLeft() {
+		return 0
+	}
+	radius := actor.GetStats().GetAttribute(stats.LightRadius)
+	for _, it := range actor.GetEquipment().AllItems() {
+		if it.d1 != nil {
+			radius += it.d1.PLLight
+		}
+	}
+	return max(radius, 0)
+}
+
+// SetLighting picks the mod's lighting (Lighting) for this game.
+func (s *State) SetLighting(lighting string) { s.lighting = lighting }
 func (s *State) IsDaylight() bool {
 	return s.IsPlayerInTown() && !s.GetFlags().IsSet("town_changed_to_night")
 }
@@ -224,16 +263,7 @@ func (s *State) GetPlayerVisionRange() int {
 		if s.GetMap().IsTileLit(actor.MapPosition()) {
 			return visionRange
 		}
-		if actor.hero != nil { // D1: light radius 10 plus item bonuses, no torch needed
-			return actor.HeroSheet().LightRad
-		}
-		equipment := actor.GetEquipment()
-		if equipment.HasLightSourceEquipped() {
-			lightRadius := actor.GetStats().GetAttribute(stats.LightRadius) // used in dungeons (=darkness)
-			visionRange = lightRadius
-		} else {
-			visionRange = 0
-		}
+		visionRange = s.PlayerLightRadius() // the mod's Lighting: Diablo's aura or the light source carried
 	} else if s.GetFlags().IsSet("town_changed_to_night") {
 		visionRange = visionRange / 2
 	}
@@ -358,7 +388,7 @@ var d1HeroTorch = LightStats{LightColor: color.RGBA{R: 255, G: 223, B: 117, A: 2
 
 func (s *State) mixLightSourceColor(drawColor, noLightSource color.RGBA, worldTick uint64) color.RGBA {
 	state := s
-	if s.GetPlayer().hero != nil {
+	if s.lighting != "carried" && s.GetPlayer().hero != nil {
 		flicker := d1HeroTorch.FlickerPattern[util.GetLoopingFrameFromTick(worldTick, d1HeroTorch.FlickerFrameDelay, len(d1HeroTorch.FlickerPattern))]
 		return multiplyColors(drawColor, multiplyColor(d1HeroTorch.LightColor, flicker))
 	}

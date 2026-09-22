@@ -123,11 +123,14 @@ func TestHeavenAndHellItemHooksRollAndFire(t *testing.T) {
 	}
 	far := monster.MapPosition()
 	placed := false
-	for dy := -2; dy <= 2 && !placed; dy++ {
-		for dx := -2; dx <= 2 && !placed; dx++ {
-			if p := far.Add(geometry.Point{X: dx, Y: dy}); p != far && m.CanPlaceActorHere(p) {
-				m.MoveActor(bystander, p)
-				placed = true
+	for reach := 1; reach <= 2 && !placed; reach++ { // beside the target first: the blast is centred on it
+		for dy := -reach; dy <= reach && !placed; dy++ {
+			for dx := -reach; dx <= reach && !placed; dx++ {
+				p := far.Add(geometry.Point{X: dx, Y: dy})
+				if p != far && max(dx, -dx, dy, -dy) == reach && m.CanPlaceActorHere(p) {
+					m.MoveActor(bystander, p)
+					placed = true
+				}
 			}
 		}
 	}
@@ -135,6 +138,8 @@ func TestHeavenAndHellItemHooksRollAndFire(t *testing.T) {
 		t.Fatalf("no room for a second monster within 2 of %v", far)
 	}
 	wear("HOOK_FIREBALL_ON_SHOT")
+	player.GetStats().SetAttribute(stats.LightRadius, 10) // the blast is aimed at what the hero sees; a torch sees 1
+	g.GetActionBroker().Execute(common.NewUpdateFoVAction(cause, player))
 	bystander.GetStats().GetResource(stats.Health).SetToMax()
 	hurt := health(bystander)
 	for i := 0; i < 5 && health(bystander) == hurt; i++ {

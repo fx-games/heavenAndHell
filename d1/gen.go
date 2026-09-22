@@ -901,6 +901,9 @@ func (g *Generator) PlainItem(idx int) *Item {
 	if it.MiscID == "IMISC_OILOF" { // a plain Oil never stays plain, whichever path made it
 		g.getOilType(it, 1)
 	}
+	for _, m := range b.Modifiers { // what the record says it does (H&H's torch: light_radius(1)); D1's say nothing
+		g.recordPower(it, m, 1)
+	}
 	return it
 }
 

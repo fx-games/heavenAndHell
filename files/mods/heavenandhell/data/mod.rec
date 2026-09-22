@@ -1,0 +1,6 @@
+%rec: default
+
+# Rules this mod fixes: they win over config.rec and the player cannot change them.
+# Lighting: carried is Angband's: in the dark the hero sees only by the light source they carry, as far as it
+# (and any other light_radius gear) reaches, and only while it has charges left to burn.
+Lighting: carried
