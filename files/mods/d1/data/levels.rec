@@ -11,6 +11,7 @@
 #              in maps.ldtk; names its template).
 #   tiles      the tile set: cathedral, catacombs, caves, hell, or drawn (an ldtk level's own tiles).
 #   music      a music.rec event; a level without one is silent.
+#   glyphs     an 8x8 glyph atlas in the mod folder (Bm437_IBM_CGA.png): the level is drawn as text with it.
 #   town       true: a town (town-only spells, shopkeepers restock, the portal comes home to the deepest one).
 #   start      true on the one level a new game starts on.
 #   exit       "<location> -> <map id>, <arrival location>": stepping on the location takes you there. An

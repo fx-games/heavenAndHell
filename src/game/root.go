@@ -1,0 +1,952 @@
+package game
+
+import (
+	"cmp"
+	"fmt"
+	"log"
+	"math"
+	"math/rand"
+	"os"
+	"path"
+	"rpg/files"
+	"rpg/src/audio"
+	"rpg/src/common"
+	"rpg/src/d1"
+	"rpg/src/defs"
+	"rpg/src/geometry"
+	"rpg/src/gridmap"
+	"rpg/src/ldtk"
+	"rpg/src/stats"
+	"rpg/src/util"
+	"strings"
+	"time"
+
+	"github.com/flopp/go-findfont"
+)
+
+type GameInstance struct {
+	switchMod func() // SetModSwitcher
+	// base infos / config
+	title                       string
+	deviceIndependentScreenSize geometry.Point
+	configuration               *common.Configuration
+	startInfo                   common.StartInfo
+
+	// dependencies
+	uiController common.UserInterface
+	audioPlayer  *audio.Player
+
+	// world state
+	state        common.State
+	actionBroker *common.Broker // registered hooks
+
+	// random
+	randomSource *rand.Rand
+	worldTicks   uint64
+
+	// rendering
+
+	// input
+	mousePosInPixels geometry.Point
+	mousePosOnMap    geometry.Point
+
+	feeds map[string]string // last text written per feed file
+
+	// player state
+	isResting bool
+
+	// game state
+	shouldQuitGame   bool
+	quitToAscii      bool
+	debugModeEnabled bool
+	godMode          bool
+	heroLevel        int // last seen character level, for the level-up sound
+
+	// event handler
+	executeAfterTurn []func()
+
+	// data definitions
+	dataDefinitions  defs.DataContainer
+	d1Data           *d1.Data
+	levelSeed        int64
+	levelSnapshots   map[string]*common.LevelSnapshot
+	autosave         bool // on once a game was started or loaded through the menus
+	slot             int  // the save slot this game autosaves into; 0 for the throwaway game behind the start menu
+	refreshThumbnail bool // the slot's screenshot predates this game; the first player turn saves once more
+	permadeath       bool
+	premium          d1.Premium // Griswold's premium stock
+	boyItem          *d1.Item   // Wirt's item
+	boyLevel         int
+	storesShown      bool // stores were stocked this session, so missing items were bought
+
+	actions *Actions
+	factory *common.Factory
+
+	logHook     func(string)
+	logBuffer   []string
+	onMapChange func()
+}
+
+func (g *GameInstance) SetConsoleMode(consoleMode bool) {
+	// only disable audio for now
+	g.audioPlayer.SetDisablePlayback(consoleMode)
+}
+
+func (g *GameInstance) GetActionBroker() *common.Broker {
+	return g.actionBroker
+}
+func (g *GameInstance) GetMoveTowardsPlayer(from geometry.Point) geometry.Point {
+	return g.getMoveOnPlayerDijkstraMap(from, true)
+}
+
+func (g *GameInstance) GetMoveAwayFromPlayer(from geometry.Point) geometry.Point {
+	return g.getMoveOnPlayerDijkstraMap(from, false)
+}
+func (g *GameInstance) getMoveOnPlayerDijkstraMap(from geometry.Point, towardsPlayer bool) geometry.Point {
+	dijkstraMap := g.state.GetPlayerDijkstraMap()
+	if dijkstraMap == nil {
+		return from
+	}
+	currentDistanceToPlayer, exist := dijkstraMap[from]
+	if !exist {
+		return from
+	}
+	var compareFunc func(a, b int) bool
+	if towardsPlayer {
+		compareFunc = func(a, b int) bool { return a < b }
+	} else {
+		compareFunc = func(a, b int) bool { return a > b }
+	}
+	currentMap := g.state.GetMap()
+	neighbors := currentMap.GetFilteredNeighborsForMovement(from, func(pos geometry.Point) bool { // choose a possible next step
+		if !currentMap.IsCurrentlyPassable(pos) { // only walk on passable tiles
+			return false
+		}
+		if _, existsTransition := currentMap.GetTransitionAt(pos); existsTransition { // don't walk on transitions
+			return false
+		}
+		neighborDist, neighborExists := dijkstraMap[pos]
+		if !neighborExists {
+			return false
+		}
+		neighborsWithTransition := currentMap.GetFilteredNeighbors(pos, func(pos geometry.Point) bool { // in fact, don't walk on tiles next to transitions either
+			if !currentMap.IsCurrentlyPassable(pos) {
+				return false
+			}
+			if _, existsTransition := currentMap.GetTransitionAt(pos); existsTransition {
+				return true
+			}
+			return false
+		})
+		if len(neighborsWithTransition) > 0 {
+			return false
+		}
+		return compareFunc(neighborDist, currentDistanceToPlayer) // depends on rolling direction on our dijkstra map
+		//return neighborDist < currentDistanceToPlayer // depends on rolling direction on our dijkstra map
+	})
+
+	if len(neighbors) == 0 {
+		return from
+	}
+	// we found some locations we can move to, that also bring us closer to the player
+	// which of these is the closest to the player?
+
+	nearestDist := math.MaxInt
+	nearestPos := from
+
+	for _, neighbor := range neighbors {
+		neighborDist, _ := dijkstraMap[neighbor]
+		//if neighborDist < nearestDist {  // depends on rolling direction on our dijkstra map
+		if compareFunc(neighborDist, nearestDist) {
+			nearestDist = neighborDist
+			nearestPos = neighbor
+		}
+	}
+
+	return nearestPos
+}
+
+func (g *GameInstance) GetAudio() *audio.Player {
+	return g.audioPlayer
+}
+
+// SeedRandom replaces the instance's random source, so a run that starts new games picks the same world seeds
+// every time. Only reproducible runs use it.
+func (g *GameInstance) SeedRandom(seed int64) { g.randomSource = rand.New(rand.NewSource(seed)) }
+
+func NewGameInstance(startInfo common.StartInfo, uiController common.UserInterface) *GameInstance {
+	g := &GameInstance{
+		startInfo:    startInfo,
+		uiController: uiController,
+		randomSource: rand.New(rand.NewSource(time.Now().UnixNano())),
+		audioPlayer:  audio.NewAudioPlayer(startInfo.FileSystem, audio.SampleRate44100),
+	}
+	println(fmt.Sprintf("GameInstance created.."))
+	println(fmt.Sprintf("Random source loaded.."))
+	cfg := startInfo.UserConfiguration
+	common.UICues = g.audioPlayer
+	g.audioPlayer.SetSoundVolume(cfg.SoundVolume)
+	g.audioPlayer.SetMusicVolume(cfg.MusicVolume)
+	g.audioPlayer.SetVoiceVolume(cfg.VoiceVolume)
+	println(fmt.Sprintf("Audio player loaded.."))
+	g.dataDefinitions = defs.LoadGameData(func(err string) {
+		println(err)
+	})
+	println(fmt.Sprintf("Data definitions loaded.."))
+	d1Data, err := d1.Load(files.GetFileSystem())
+	if err != nil {
+		panic(err)
+	}
+	g.d1Data = d1Data
+	if err := common.LoadItemNameTemplates(); err != nil {
+		panic(err)
+	}
+	g.ResetGame(g.dataDefinitions.ClassDefinitions[0])
+	return g
+}
+
+func (g *GameInstance) hasEnergyForAction(being common.TimedBeing) (int, func()) {
+	switch typedBeing := being.(type) {
+	case *common.Actor:
+		return g.getAIAction(typedBeing)
+	case Turner:
+		return g.getTurnerAction(being.GetBaseSpeed(), being.GetEnergy(), typedBeing)
+	}
+	return 0, nil
+}
+func (g *GameInstance) giveAndEquipItemToActor(actor *common.Actor, item *common.Item) {
+	actor.GetInventory().Add(item)
+	g.actionBroker.Execute(common.NewEquipItemAction(common.AbstractCause("Game Start"), actor, item))
+}
+
+// getActionContext requires the following fields to be initialized:
+// g.audioPlayer, g.dataDefinitions, g.state
+func (g *GameInstance) getActionContext() common.ActionContext {
+	return common.ActionContext{
+		GameState:     g.GetWorldState(),
+		UserInterface: g.GetUserInterface,
+		AudioPlayer:   g.audioPlayer,
+		Data:          g.dataDefinitions,
+		Msg:           g.PlayerMessage,
+	}
+}
+
+func (g *GameInstance) ResetGame(playerStartDefinition defs.LoadoutDefinition) {
+	g.resetGame(playerStartDefinition, g.randomSource.Int63())
+}
+
+func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, seed int64) {
+	g.levelSeed = seed
+	g.heroLevel = 0
+	g.levelSnapshots = map[string]*common.LevelSnapshot{}
+	g.premium, g.boyItem, g.boyLevel, g.storesShown = d1.Premium{}, nil, 0, false
+	// we have loaded at this point:
+	// - random source
+	// - audio player
+	// - data definitions
+	g.actions = nil
+	g.actionBroker = nil
+	g.factory = nil
+	//g.uiController =
+
+	g.configuration = g.startInfo.UserConfiguration
+	g.deviceIndependentScreenSize = g.startInfo.ScreenSize
+
+	g.feeds = nil // a new or loaded game rewrites every feed on its first turn
+
+	ldtkFileName := g.startInfo.LDTKMapFile
+	ldtkFile, _ := files.ReadFile(ldtkFileName)
+	ldtkProject, _ := ldtk.Open(ldtkFile)
+
+	timeKeeper := common.NewTimeKeeper(g.hasEnergyForAction)
+	println(fmt.Sprintf("Timekeeper created.."))
+
+	g.state = common.NewState(ldtkProject)
+	g.state.SetLighting(common.Lighting())
+	g.state.SetDungeonRules(common.ReadDungeonRules())
+	g.state.SetPlayerMessage(g.PlayerMessage)
+	g.state.SetTimeKeeper(timeKeeper)
+	g.state.SelectedClass = playerStartDefinition
+
+	g.actionBroker = common.NewBroker(g.getActionContext())
+	g.actionBroker.RegisterHook(common.NewOnHealthChangedHook())
+
+	g.actionBroker.RegisterHook(common.NewMainOnMoveHook(g.configuration.AutoPickup)) // update fov, etc.
+	g.actionBroker.RegisterHook(common.NewMainOnMeleeHook())
+	g.actionBroker.RegisterHook(common.NewMainOnRangedHook())
+	g.actionBroker.RegisterHook(common.NewMainOnKillHook())
+
+	g.actionBroker.RegisterHook(common.NewMainOnDropHook())
+	g.actionBroker.RegisterHook(common.NewMainOnEquipHook())
+
+	g.factory = &common.Factory{
+		ActionBroker:   g.actionBroker,
+		RandomSource:   g.randomSource,
+		State:          g.GetWorldState(),
+		UI:             g.GetUserInterface,
+		GetTimeKeeper:  g.state.GetTimeKeeper,
+		Msg:            g.PlayerMessage,
+		QueueAfterTurn: g.queueAfterTurn,
+		Generator:      d1.NewGenerator(g.gameData(), g.randomSource.Int31()),
+		Audio:          g.audioPlayer,
+		Classes:        g.dataDefinitions.ClassDefinitions,
+	}
+
+	g.state.SetPlayerMessage(g.PlayerMessage)
+	g.state.SetPlayerTurnHandler(g.onPlayerTurnTaken)
+	g.state.SetAnimator(g.actionBroker)
+	g.state.SetActionBroker(g.actionBroker)
+	g.state.SetFactory(g.factory)
+
+	g.createPlayer(playerStartDefinition)
+	g.actions = NewActions(PlayerActionsContext{
+		Player:         g.state.GetPlayer(),
+		ActionBroker:   g.actionBroker,
+		State:          g.GetWorldState(),
+		UI:             g.GetUserInterface,
+		GetTimeKeeper:  g.state.GetTimeKeeper,
+		Msg:            g.PlayerMessage,
+		Animator:       g.actionBroker,
+		Configuration:  g.configuration,
+		QueueAfterTurn: g.queueAfterTurn,
+	})
+	mapGen := common.NewMapGenerator(g.randomSource)
+	mapGen.SetFactory(g.factory)                // LoadLevels checks patches against the mod's D1 objects
+	if err := mapGen.LoadLevels(); err != nil { // every level of the game (docs/LEVELS.md)
+		panic(err)
+	}
+	mapGen.SetSeed(g.levelSeed)
+	mapGen.SetSnapshots(g.levelSnapshots)
+	g.state.SetMapGenerator(mapGen)
+
+	g.state.SetOnMapChanged(g.onMapChanged)
+	g.state.MapTransition(gridmap.Transition{TargetMap: g.state.StartLevel().Map, TargetLocation: "spawn"})
+	common.Arrive(&g.state, g.state.GetMap())
+
+	townSpawn := g.state.GetMap().GetNamedLocation("spawn")
+	g.state.SetTownSpawn(townSpawn)
+
+	//g.spawnActorOnMap(g.state.GetPlayer(), townSpawn, playerStartDefinition)
+
+	// load audio: every cue comes from a rec file the player can rewire without a rebuild — sound events
+	// (assets/data/sounds.rec, scripts/remap_sounds.sh), speech (voices.rec, scripts/remap_voices.sh) and the area themes
+	// (music.rec, scripts/remap_music.sh). Events with no file assigned stay silent.
+	if g.configuration.AudioEnabled {
+		g.audioPlayer.RegisterSoundEvents(path.Join("assets", "data", "sounds.rec"))
+		g.audioPlayer.RegisterVoiceEvents(path.Join("assets", "data", "voices.rec"))
+		preload := []string{"enter_dungeon", "level_up", "missile_hit_human", "heavy_hit_human", "skeleton_hit"}
+		g.audioPlayer.PreLoadCuesIntoMemory(preload)
+		g.audioPlayer.RegisterMusic(path.Join("assets", "ambience"))
+		g.audioPlayer.RegisterMusic(path.Join("assets", "music")) // our own tracks
+		g.audioPlayer.RegisterMusicEvents(path.Join("assets", "data", "music.rec"))
+		g.audioPlayer.RegisterVoices(path.Join("assets", "voice"))
+		g.playLevelMusic() // tracks register after the first map change
+	}
+
+	g.state.GetFlags().SetTrue("game_started")
+
+	g.actionBroker.Execute(common.NewUpdateFoVAction(common.AbstractCause("Game Start"), g.state.GetPlayer()))
+
+	g.uiController.UpdateStatsLabel()
+
+	g.state.GetFlags().SetTrue(string(common.FlagStoryModeEnabled))
+}
+
+// SetAndInitUserInterface will be called after the game has finished initialization
+// So we have to inform every component about the ui
+func (g *GameInstance) SetAndInitUserInterface(ui common.UserInterface) {
+	g.uiController = ui
+	ui.SetPlayerMessage(g.PlayerMessage)
+	ui.OnMapChanged()
+	ui.SetDebugActions(g.getDebugActions)
+}
+func (g *GameInstance) queueAfterTurn(call func()) {
+	g.executeAfterTurn = append(g.executeAfterTurn, call)
+}
+
+func (g *GameInstance) GetUserInterface() common.UserInterface {
+	return g.uiController
+}
+
+func (g *GameInstance) handleLightSource() {
+	player := g.state.GetPlayer()
+	if g.state.LightBurns() {
+		lightSource := player.GetEquipment().GetLightSource()
+		asGameItem := lightSource
+		asGameItem.UseCharge()
+	}
+}
+func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
+	player := g.state.GetPlayer()
+
+	g.state.GetTimeKeeper().PlayerTakesTurn(autUsed)
+	// D1 hit recovery: the world goes on while the hero flinches; a hard hit meanwhile restarts it.
+	// ponytail: at most 50 recoveries in a row, so a stun-lock can't freeze the game.
+	for n := 0; n < 50 && player.IsAlive(); n++ {
+		lost := player.TakeHitRecovery()
+		if lost == 0 {
+			break
+		}
+		g.state.GetTimeKeeper().PlayerTakesTurn(lost)
+	}
+	// ISPL_DRAINLIFE (ProcessPlayers): a cursed item drains 4/64 HP per tick outside town
+	if player.IsAlive() && player.Hero() != nil && player.HeroSheet().Flags&d1.ISplDrainLife != 0 && !g.state.IsPlayerInTown() {
+		g.actionBroker.Execute(common.NewChangeResourceAction(common.AbstractCause("Drain life"), player, stats.Health, -float64(autUsed*d1.RefWalkTicks*4)/10/64))
+	}
+
+	common.D1BurningCross(&g.state, player, autUsed)
+
+	// execute after turn events, =?
+	for _, event := range g.executeAfterTurn {
+		event()
+	}
+	g.executeAfterTurn = make([]func(), 0)
+
+	g.checkForLevelUp()
+
+	player.BeforeTurn()
+	g.handleLightSource()
+	if g.godMode {
+		player.GetStats().GetResource(stats.Health).SetToMax()
+		player.GetStats().GetResource(stats.Mana).SetToMax()
+	}
+
+	// automatic pickup & player movement..
+	if g.configuration.AutoPickup && g.state.GetMap().IsItemAt(player.MapPosition()) {
+		itemAtLocation := g.state.GetMap().ItemAt(player.MapPosition())
+		if itemAtLocation != nil && player.CanPickup(itemAtLocation) && !itemAtLocation.IsDroppedByPlayer() {
+			pickUpAction := common.NewPickUpAction(common.AbstractCause("AutoPickup"), player)
+			endTurnAction := common.NewEndPlayerTurnAction(pickUpAction.Cause(), pickUpAction.GetDelayInAut())
+			g.actionBroker.Execute(pickUpAction)
+			g.actionBroker.Execute(endTurnAction)
+		}
+	} else {
+		g.actions.nextStepOnPlayerPath()
+	}
+
+	g.uiController.OnPlayerTurnTaken()
+	g.writeFeeds()
+
+	if g.refreshThumbnail { // once, so the new hero's slot shows their own game and not the menu behind it
+		g.refreshThumbnail = false
+		g.SaveGame()
+	}
+}
+
+func (g *GameInstance) updateStatsDisplay() {
+	g.uiController.UpdateStatsLabel()
+}
+
+func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition) *common.Actor {
+	// The hero's per-class numbers - starting attributes, their caps, the life and mana curves, to-hit and the
+	// animation lengths - are content, and they live in the mod's hero.rec. Building a hero without them would
+	// give a character sheet of zeroes that looks like a game until you played it, which is exactly the class of
+	// bug this split keeps producing. Stop here instead, naming the file.
+	if !d1.HeroTablesLoaded() {
+		log.Fatalf("mod %q has no hero: expected files/mods/%s/data/hero.rec with this game's per-class numbers",
+			files.ActiveMod(), files.ActiveMod())
+	}
+	player := common.NewActor(playerStartDefinition.Icon)
+	player.SetAsciiIcon('@')
+	player.SetCP437Icon(int32(util.UnicodeToCP437Byte('☺')))
+	player.SetColor(defs.White)
+	player.SetName("Player")
+	g.state.SetPlayer(player)
+
+	hero := d1.NewHero(g.classIndex(playerStartDefinition))
+	player.SetHero(hero)
+	gen := g.factory.D1()
+	idxs, pack := startingItems(playerStartDefinition, gen.D.ItemIdx)
+	for i, idx := range idxs {
+		item := g.factory.NewD1Item(gen.PlainItem(idx))
+		if item.IsEquippable() && !pack[i] {
+			g.giveAndEquipItemToActor(player, item)
+		} else {
+			player.GetInventory().Add(item)
+		}
+	}
+	player.GetStats().SetAttribute(stats.Gold, playerStartDefinition.Gold)
+	common.SyncHero(player)
+	player.GetStats().GetResource(stats.Health).SetToMax()
+	player.GetStats().GetResource(stats.Mana).SetToMax()
+	player.GetStats().SetOnChangeHandler(g.updateStatsDisplay)
+	g.factory.RefreshD1Spells(player)
+	player.GetEquipment().SetOnChangeHandler(func() {
+		common.SyncHero(player)
+		g.factory.RefreshD1Spells(player)
+		g.writeFeeds()
+		g.uiController.RefreshIconBars() // equipping takes no turn and leaves the pack as it is
+	})
+	player.GetInventory().SetOnChangeHandler(func() {
+		g.writeFeeds()
+		g.uiController.RefreshIconBars() // buying, selling and the stash change the pack without taking a turn
+	})
+	return player
+}
+
+func (g *GameInstance) gameData() *d1.Data { return g.d1Data }
+
+func (g *GameInstance) GetFactory() *common.Factory { return g.factory }
+
+func (g *GameInstance) GetWorldState() *common.State {
+	return &g.state
+}
+
+// d1DebugItems: go to a level, god mode, complete a quest (decision 16).
+func (g *GameInstance) d1DebugItems() []util.MenuItem {
+	var levels, quests []util.MenuItem
+	for _, l := range g.state.Levels() {
+		if l.Town {
+			continue
+		}
+		levels = append(levels, util.MenuItem{MainText: strings.ReplaceAll(cmp.Or(l.Name, l.Map), "\n", " "), Action: func() {
+			g.state.MapTransition(gridmap.Transition{TargetMap: l.Map, TargetLocation: "ladder_up"})
+		}})
+	}
+	for q, def := range g.state.QuestDefs() {
+		quests = append(quests, util.MenuItem{MainText: def.Name, Action: func() {
+			g.state.GetFlags().SetTrue(g.state.QuestFlag(q))
+			g.state.QuestsChanged(g.state.GetMap())
+		}})
+	}
+	quests = append(quests, util.MenuItem{MainText: "Cain has the Staff of Lazarus", Action: func() {
+		g.state.SetQuestActive(d1.QBetrayer, d1.QuestActive)
+		g.state.SetQuestVar(d1.QBetrayer, 1, 2)
+		g.state.QuestsChanged(g.state.GetMap())
+	}})
+	return []util.MenuItem{
+		{MainText: "Go to level", Action: func() { g.uiController.OpenMenu(levels) }},
+		{MainText: "Toggle god mode", Action: func() { g.godMode = !g.godMode }},
+		{MainText: "Complete quest", Action: func() { g.uiController.OpenMenu(quests) }},
+		{MainText: "Spawn random unique", Action: func() {
+			player := g.state.GetPlayer()
+			if a := g.factory.SpawnRandomD1Unique(player.MapPosition()); a != nil {
+				g.uiController.ShowLogMessage(fmt.Sprintf("Spawned %s", a.Name()))
+			} else {
+				g.uiController.ShowLogMessage("No free space to spawn it")
+			}
+		}},
+	}
+}
+
+func (g *GameInstance) showDebugMenu() {
+	g.uiController.OpenMenu(append(g.d1DebugItems(), []util.MenuItem{
+		{
+			MainText: "Toggle Debug Mode",
+			Action: func() {
+				g.debugModeEnabled = !g.debugModeEnabled
+			},
+		},
+		{
+			MainText: "Open class selection",
+			Action: func() {
+				g.uiController.OpenNewGameScreen(g.NewGame, func() {}) // back returns to the game
+			},
+		},
+		{
+			MainText: "Drop to ASCII Mode",
+			Action: func() {
+				g.quitToAscii = true
+			},
+		},
+		{
+			MainText: "Toggle Map Info",
+			Action:   g.uiController.ToggleMapInfo,
+		},
+		{
+			MainText: "Toggle Fog of War",
+			Action:   g.uiController.ToggleFogOfWar,
+		},
+		{
+			MainText: "Cycle Rendering Mode",
+			Action:   g.uiController.CycleRenderingMode,
+		},
+		{
+			MainText: "Kill everything on this level",
+			Action:   g.killLevel,
+		},
+		{
+			MainText: "Go one level up",
+			Action:   g.actions.goOneLevelUp,
+		},
+		{
+			MainText: "Go one level down",
+			Action:   g.actions.goOneLevelDown,
+		},
+		{
+			MainText: "Enchant Stash to +10",
+			Action: func() {
+				stash := g.state.GetPlayerStashInTown()
+				for _, item := range stash.Items() {
+					gameItem := item
+					if item.IsWeapon() {
+						gameItem.GetWeaponStats().Plus = 10
+					}
+					if item.IsArmor() {
+						gameItem.GetArmorStats().Plus = 10
+					}
+				}
+			},
+		},
+		{
+			MainText: "Toggle UI Overlays", // should be an ui specific option
+			Action: func() {
+				if g.uiController.HasOverlays() {
+					//g.uiController.ClearAllOverlays()
+					//g.mapRenderer.OnScreenSizeChanged(g.GetDeviceIndependentScreenSize())
+				} else {
+					//g.setupUI()
+				}
+			},
+		},
+		{
+			MainText: "Debug Map Info",
+			Action: func() {
+				visibleMap := g.uiController.GetVisibleMap()
+				g.PlayerMessage(fmt.Sprintf("Visible map: (%d, %d) - (%d, %d)", visibleMap.Min.X, visibleMap.Min.Y, visibleMap.Max.X, visibleMap.Max.Y))
+			},
+		},
+		{
+			MainText: "Test Font Loading",
+			Action: func() {
+				foundFonts := findfont.List()
+				for _, fontFile := range foundFonts {
+					if strings.HasSuffix(fontFile, ".ttf") {
+						g.PlayerMessage(fontFile)
+					}
+				}
+			},
+		},
+		{
+			MainText: "Open Stash",
+			Action:   g.uiController.OpenPlayerStashInTown,
+		},
+		{
+			MainText: "give stuff",
+			Action: func() {
+				playerStats := g.state.GetPlayer().GetStats()
+				playerStats.SetAttribute(stats.MaxHealth, 10000)
+				playerStats.GetResource(stats.Health).Increase(10000)
+				playerStats.SetAttribute(stats.MaxMana, 10000)
+				playerStats.GetResource(stats.Mana).Increase(10000)
+				playerStats.SetAttribute(stats.Gold, 200000)
+
+				inv := g.state.GetPlayer().GetInventory()
+				for i := 0; i < 10; i++ {
+					inv.Add(g.factory.NewD1Item(g.factory.D1().PlainItem(d1.IdxHeal)))
+					inv.Add(g.factory.NewD1Item(g.factory.D1().PlainItem(d1.IdxMana)))
+				}
+				g.uiController.UpdateStatsLabel()
+			},
+		},
+		{
+			MainText: "give 10k XP",
+			Action: func() {
+				player := g.state.GetPlayer()
+				player.Hero().AddExperience(player.Hero().Level, 10000)
+				common.SyncHero(player)
+				g.uiController.UpdateStatsLabel()
+			},
+		},
+	}...))
+}
+
+func (g *GameInstance) killLevel() {
+	actorsOnMap := g.state.GetMap().Actors()
+	for i := len(actorsOnMap) - 1; i >= 0; i-- {
+		actor := actorsOnMap[i]
+		if actor == g.state.GetPlayer() || !actor.IsAlive() || actor.IsUnique() {
+			continue
+		}
+		currentHP := actor.GetStats().GetResource(stats.Health).Value() * 2
+		g.actionBroker.Execute(common.NewChangeResourceAction(common.NewActorCause("Kill All", g.state.GetPlayer()), actor, stats.Health, float64(-currentHP)))
+	}
+}
+
+// getAIAction returns the action to execute and the cost in AUT associated with it
+func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
+	if actor.D1Monster() != nil && actor.D1Monster().AI != "" { // a D1 brain; a record without one gets the general AI
+		return g.getD1MonsterAction(actor)
+	}
+	autCostMove := actor.MoveCost()
+	autCostMeleeAttack := actor.AttackCost(common.MeleeAttack)
+	autCostRangedAttack := actor.AttackCost(common.RangedAttack)
+	minCostAttack := min(autCostMeleeAttack, autCostRangedAttack)
+
+	minCost := min(autCostMove, minCostAttack)
+	if actor.GetEnergy() < minCost { // don't act at all, conserve energy
+		return 0, nil
+	}
+	if actor.IsVendor() { // vendors just wait by default
+		return 10, func() {}
+	}
+
+	canAct := !actor.HasStatusEffect(common.StatusStunned)
+	if !canAct {
+		//println(fmt.Sprintf("%s is still unable to act. (Stunned)", actor.Name()))
+		return 10, func() {}
+	}
+
+	canMove := actor.GetEnergy() >= autCostMove && !actor.HasStatusEffect(common.StatusImmobile)
+	canAttack := actor.GetEnergy() >= minCostAttack && !actor.HasStatusEffect(common.StatusPacified)
+
+	if !canMove && !canAttack {
+		//println(fmt.Sprintf("%s can neither move nor attack. (Immobile & Pacified)", actor.Name()))
+		return 10, func() {}
+	}
+
+	isScared := actor.HasStatusEffect(common.StatusScared)
+	if isScared && canMove {
+		return autCostMove, func() {
+			targetPos := g.GetMoveAwayFromPlayer(actor.MapPosition())
+			if g.state.IsClosedDoorAt(targetPos) {
+				g.actionBroker.Execute(common.NewOpenDoorAction(common.AbstractCause("OpenDoor"), actor, targetPos))
+			}
+			g.actionBroker.Execute(common.NewMoveAction(common.AbstractCause("Movement"), actor, targetPos, false))
+		}
+	}
+
+	isConfused := actor.HasStatusEffect(common.StatusConfused)
+
+	if isConfused && canMove {
+		return autCostMove, func() {
+			possibleNeighbors := g.state.GetMap().GetFilteredNeighbors(actor.MapPosition(), func(point geometry.Point) bool {
+				return g.state.GetMap().IsWalkable(point)
+			})
+			if len(possibleNeighbors) == 0 {
+				return
+			}
+			randomNeighbor := possibleNeighbors[g.randomSource.Intn(len(possibleNeighbors))]
+			if g.state.IsClosedDoorAt(randomNeighbor) {
+				g.actionBroker.Execute(common.NewOpenDoorAction(common.AbstractCause("OpenDoor"), actor, randomNeighbor))
+			}
+			if g.state.GetMap().IsActorAt(randomNeighbor) {
+				actorAt := g.state.GetMap().ActorAt(randomNeighbor)
+				// attack
+				g.actionBroker.Execute(common.NewMeleeAttackAction(common.AbstractCause("MeleeAttack"), actor, actorAt))
+			} else {
+				g.actionBroker.Execute(common.NewMoveAction(common.AbstractCause("Movement"), actor, randomNeighbor, false))
+			}
+		}
+	}
+
+	// random movement for idle actors
+	if actor.GetState() == common.ActorStateIdle && canMove {
+		return autCostMove, func() {
+			freeNeighbor := g.state.GetMap().GetRandomFreeAndSafeNeighbor(g.randomSource, actor.MapPosition())
+			if freeNeighbor != actor.MapPosition() {
+				if g.state.IsClosedDoorAt(freeNeighbor) {
+					g.actionBroker.Execute(common.NewOpenDoorAction(common.AbstractCause("OpenDoor"), actor, freeNeighbor))
+				}
+				moveAction := common.NewMoveAction(common.AbstractCause("Movement"), actor, freeNeighbor, false)
+				if g.actions.IsPlayerAutoMoving() {
+					moveAction.DisableAnimation()
+				}
+				g.actionBroker.Execute(moveAction)
+			}
+		}
+	}
+
+	player := g.state.GetPlayer()
+	if actor.GetState() == common.ActorStateAttacking && player.IsAlive() {
+		// can use a skill?
+		playerPosition := player.MapPosition()
+
+		untargetedSkills := actor.GetUntargetedSkills()
+		if len(untargetedSkills) > 0 {
+			for _, skill := range untargetedSkills {
+				if !skill.CanActivate(actor) {
+					continue
+				}
+				skillUseChance := g.randomSource.Intn(10) == 0
+				if !skillUseChance {
+					continue
+				}
+				return skill.GetTimeNeededInAut(), func() {
+					skill.Invoke(actor, "ai_skill_usage")
+				}
+			}
+		}
+
+		targetedSkills := actor.GetTargetedSkills()
+		if len(targetedSkills) > 0 {
+			for _, skill := range targetedSkills {
+				skillUseChance := g.randomSource.Intn(10) == 0
+				if !skillUseChance {
+					continue
+				}
+				targetingRules := skill.GetTargetingRules(actor, g.GetWorldState().GetMap())
+				targetInfo := targetingRules.OnTargetChanged(playerPosition)
+				if !targetInfo.IsValid {
+					continue
+				}
+				return skill.GetTimeNeededInAut(), func() {
+					skill.Execute(actor, actor.MapPosition(), playerPosition)
+				}
+			}
+		}
+
+		canRangedAttack := actor.GetEnergy() >= autCostRangedAttack && actor.GetEquipment().HasRangedWeaponEquipped() && !actor.HasStatusEffect(common.StatusPacified)
+		canSeePlayer := actor.CanSee(playerPosition)
+		if canRangedAttack && canSeePlayer {
+			return autCostRangedAttack, func() {
+				g.actionBroker.Execute(common.NewRangedAttackAction(common.AbstractCause("RangedAttack"), actor, playerPosition))
+			}
+		}
+		var dist int
+		dist = g.state.GetMap().MoveDistance(actor.MapPosition(), playerPosition)
+		if dist <= 1 && canAttack {
+			return autCostMeleeAttack, func() {
+				g.actionBroker.Execute(common.NewMeleeAttackAction(common.AbstractCause("MeleeAttack"), actor, player))
+			}
+		} else if canMove {
+			return autCostMove, func() {
+				targetPos := g.GetMoveTowardsPlayer(actor.MapPosition())
+				if g.state.IsClosedDoorAt(targetPos) {
+					g.actionBroker.Execute(common.NewOpenDoorAction(common.AbstractCause("OpenDoor"), actor, targetPos))
+				}
+				g.actionBroker.Execute(common.NewMoveAction(common.AbstractCause("Movement"), actor, targetPos, false))
+			}
+		}
+	}
+
+	return 10, func() {}
+}
+
+func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
+	g.actions.stopAutoMove() // path & queued moves belong to the old map
+
+	old, now := g.state.Level(oldMapName), g.state.Level(newMapName)
+	if now.Town {
+		currentMap := g.state.GetMap()
+		g.restockD1Town(currentMap) // every town's shopkeepers
+		common.PlaceD1Portal(g.GetWorldState(), currentMap)
+	} else {
+		g.state.GetFlags().SetTrue(common.FlagBeenUnderground) // town brightens up once the player has been below
+	}
+
+	switch {
+	case old.Town && !now.Town:
+		g.GetAudio().PlayCue("enter_dungeon")
+	case now.Town || now.Depth < old.Depth:
+		common.PlayUICue("stairs_up")
+	default:
+		common.PlayUICue("stairs_down")
+	}
+	g.onD1MapChanged(oldMapName, newMapName)
+
+	g.actions.updateFoV()
+	if g.configuration.AutosavesOnLevelChange() {
+		g.SaveGame()
+	}
+	g.uiController.OnMapChanged()
+
+	if g.onMapChange != nil {
+		g.onMapChange()
+	}
+}
+
+type Turner interface {
+	Turn()
+}
+
+func (g *GameInstance) getTurnerAction(baseSpeed int, energy int, being Turner) (int, func()) {
+	cost := 100 / baseSpeed
+	if energy < cost {
+		return 0, nil
+	}
+	return baseSpeed, being.Turn
+}
+
+// checkForLevelUp plays the level-up sound once per new character level (CanLevelUp stays true while stat points
+// are unspent). The first turn after a new game or load only records the level.
+func (g *GameInstance) checkForLevelUp() {
+	h := g.state.GetPlayer().Hero()
+	if h == nil {
+		return
+	}
+	if g.heroLevel != 0 && h.Level > g.heroLevel {
+		g.GetAudio().PlayCue("level_up")
+	}
+	g.heroLevel = h.Level
+}
+
+func (g *GameInstance) ErrLog(errorMessage string) {
+	// write to stderr
+	fmt.Fprintln(os.Stderr, errorMessage)
+}
+
+func (g *GameInstance) GetGameData() defs.DataContainer {
+	return g.dataDefinitions
+}
+
+func (g *GameInstance) GetActions() common.PlayerActions {
+	return g.actions
+}
+
+func (g *GameInstance) PlayerMessage(message string) {
+	//println(text)
+	rawText := common.RemoveColorCodes(message)
+	if g.logHook != nil {
+		g.logHook(rawText)
+	}
+	g.appendLogFeed(message)
+	if len(g.logBuffer) > 200 {
+		g.logBuffer = g.logBuffer[1:]
+	}
+	g.logBuffer = append(g.logBuffer, message)
+
+	g.GetUserInterface().ShowLogMessage(message)
+}
+
+func (g *GameInstance) SetLogHook(hook func(string)) {
+	g.logHook = hook
+}
+
+func (g *GameInstance) GetLog() []string {
+	return g.logBuffer
+}
+
+func (g *GameInstance) getDebugActions() common.DebugActions {
+	return common.DebugActions{
+		KillLevel:      g.killLevel,
+		OpenDebugMenu:  g.showDebugMenu,
+		GoOneLevelDown: g.actions.goOneLevelDown,
+		GoOneLevelUp:   g.actions.goOneLevelUp,
+	}
+}
+
+// startingItems is the gear a hero starts with, as indices into the active mod's item table, and whether each
+// goes to the pack rather than being equipped ("club pack" in classes.rec).
+func startingItems(def defs.LoadoutDefinition, byName map[string]int) (idx []int, pack []bool) {
+	for _, entry := range def.Items {
+		name, where, _ := strings.Cut(entry, " ")
+		i, ok := byName[name]
+		if !ok {
+			println("class " + def.InternalName + " starts with " + name + ", which this mod's items.rec does not have")
+			continue
+		}
+		idx, pack = append(idx, i), append(pack, strings.TrimSpace(where) == "pack")
+	}
+	return idx, pack
+}
+
+// classIndex is the class's row in the mod's roster; hero.rec's record of the same row holds its rules.
+func (g *GameInstance) classIndex(def defs.LoadoutDefinition) int {
+	for i, c := range g.GetGameData().ClassDefinitions {
+		if c.InternalName == def.InternalName {
+			return i
+		}
+	}
+	return 0
+}
+
+func (g *GameInstance) GenerateLoot(dungeonLevel int, count int) []*common.Item {
+	var result []*common.Item
+	for len(result) < count {
+		if it := g.factory.D1().FloorItem(dungeonLevel, true, dungeonLevel > 12); it != nil {
+			result = append(result, g.factory.NewD1Item(it))
+		}
+	}
+	return result
+}

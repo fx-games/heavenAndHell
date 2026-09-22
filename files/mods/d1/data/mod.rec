@@ -18,6 +18,8 @@
 #                           next visit (Angband). Default true
 #   PersistQuestLevels      true / false: true keeps a quest's level (and a set piece) as it is, never rebuilt nor
 #                           respawned; false lets the rules above apply to it too. Default true
+#   Font                    the UI font, a file in the mod's fonts/ folder. Required. Only a default: the player
+#                           picks another in the menus
 # A light source's color, flicker and radius are its own: items.rec's light_color, light_flicker_pattern
 # (fire, smooth, steady or numbers), light_flicker_frame_delay and equip_modifier light_radius(n).
 #
@@ -26,3 +28,4 @@
 AutosaveOnLevelChange: false
 # Lighting: aura is Diablo's, a light around the hero always, radius 10 plus the gear's light affixes.
 Lighting: aura
+Font: Ac437_EagleSpCGA_Alt3.ttf

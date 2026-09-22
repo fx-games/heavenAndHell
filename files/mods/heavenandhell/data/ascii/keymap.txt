@@ -1,0 +1,74 @@
+# Key bindings of ASCII mode (go run -tags development . ascii). Same keys as the tile UI where a terminal allows.
+# Format: key -> command. Keys: a letter or symbol, Space, Enter, Tab, Backtab, Esc, Up/Down/Left/Right, F1-F12, Ctrl+x.
+
+% main
+
+w -> north
+s -> south
+a -> west
+d -> east
+# the arrow keys scroll the map, like the tile UI
+Up -> scroll_map_up
+Down -> scroll_map_down
+Left -> scroll_map_left
+Right -> scroll_map_right
+# shift: attack even what isn't hostile
+W -> force_north
+S -> force_south
+A -> force_west
+D -> force_east
+
+. -> wait
+g -> pickup
+o -> auto_explore
+Tab -> auto_attack
+Backtab -> force_auto_attack
+z -> rest
+
+f -> aimed_ranged_attack
+q -> quick_ranged_attack
+t -> throw
+e -> spells
+Space -> recast_spell
+
+i -> inventory
+c -> character
+u -> level_up
+l -> log
+r -> quest_log
+x -> center_map
+# looking around with the keyboard; the tile UI hovers and right clicks with the mouse instead
+v -> look
+? -> examine
+
+Esc -> system_menu
+F1 -> help
+
+b -> flags
+p -> wiz_kill_level
+j -> wiz_level_up
+k -> wiz_level_down
+F9 -> wiz_fog_of_war
+F10 -> wizard
+
+% targeting
+
+Tab -> target_next
++ -> target_next
+Backtab -> target_previous
+- -> target_previous
+Esc -> target_cancel
+Space -> target_confirm
+Enter -> target_confirm
+f -> target_confirm
+e -> target_confirm
+t -> target_confirm
+
+w -> north
+s -> south
+a -> west
+d -> east
+Up -> north
+Down -> south
+Left -> west
+Right -> east

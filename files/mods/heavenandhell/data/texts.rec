@@ -238,3 +238,8 @@ text: A king's crown, dented where a blade struck it from behind. It belongs in 
 
 id: TEXT_HH_ZEDEK_CROWN_BURIED
 text: You lay the crown in the dust of King Zedek's tomb. Somewhere below, a thousand bones settle at once.
+
+id: TEXT_HH_END
+text: Kirioth is dead, and the last of the men who ruled the town in hell with him. You have won.
++
++ Lucifer waits in the town. He has a few words left for you.

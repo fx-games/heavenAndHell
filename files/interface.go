@@ -5,9 +5,17 @@ import (
 	"io"
 	"io/fs"
 	"log"
+	"path/filepath"
 )
 
 var sourceFileSystem FileSystem
+
+// appDir is where the game keeps the files it writes (config.rec): next to the binary in a release, the working
+// directory ("") when run from the repo.
+var appDir string
+
+// AppPath is name in the game's own folder, see appDir.
+func AppPath(name string) string { return filepath.Join(appDir, name) }
 
 type FileSystem interface {
 	fs.ReadFileFS

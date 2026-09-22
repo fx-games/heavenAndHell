@@ -5,9 +5,8 @@ import (
 	"path"
 )
 
-// A mod is one complete game: its files shadow the engine's own under assets/.
-// Lookups try mods/<name>/<p> first and fall back to assets/<p>, so engine-owned
-// resources (fonts, shaders, the fallback room) stay in one place.
+// A mod is one complete game: every assets/<p> the game reads is mods/<name>/<p>. There is no engine fallback;
+// files/assets holds only source material the game never reads.
 type modFS struct {
 	name string
 	base FileSystem
@@ -68,27 +67,21 @@ func cutAssets(p string) (string, bool) {
 
 func (m modFS) Open(name string) (fs.File, error) {
 	if p, ok := m.modPath(name); ok {
-		if f, err := m.base.Open(p); err == nil {
-			return f, nil
-		}
+		return m.base.Open(p)
 	}
 	return m.base.Open(name)
 }
 
 func (m modFS) ReadFile(name string) ([]byte, error) {
 	if p, ok := m.modPath(name); ok {
-		if b, err := m.base.ReadFile(p); err == nil {
-			return b, nil
-		}
+		return m.base.ReadFile(p)
 	}
 	return m.base.ReadFile(name)
 }
 
 func (m modFS) ReadDir(name string) ([]fs.DirEntry, error) {
 	if p, ok := m.modPath(name); ok {
-		if e, err := m.base.ReadDir(p); err == nil {
-			return e, nil
-		}
+		return m.base.ReadDir(p)
 	}
 	return m.base.ReadDir(name)
 }
