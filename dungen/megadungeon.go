@@ -49,7 +49,7 @@ func sortPoints(p []geometry.Point) {
 func (c *MegaDungeonGenerator) Generate(width, height int) *DungeonMap {
 	c.regionLookup = make(map[geometry.Point]Region)
 	c.allRegions = make([]Region, 0)
-	c.allConnections = make([]geometry.Point, 0)
+	c.allConnections, c.requiredConnections, c.optionalConnections = nil, nil, nil
 
 	if width%2 == 0 { // must be odd
 		width--
@@ -83,6 +83,9 @@ func (c *MegaDungeonGenerator) addRooms(emptyMap *DungeonMap) {
 			roomWidth = makeOddForSize(c.randomSource, c.minRoomSize, int(float64(roomWidth)*aspectRatio))
 		} else {
 			roomHeight = makeOddForSize(c.randomSource, c.minRoomSize, int(float64(roomHeight)*aspectRatio))
+		}
+		if roomWidth >= emptyMap.width-1 || roomHeight >= emptyMap.height-1 {
+			continue // a room this big does not fit the level
 		}
 		// pick a random spot
 		x := c.randomSource.Intn(emptyMap.width-roomWidth-1) + 1
@@ -160,10 +163,9 @@ func (c *MegaDungeonGenerator) chooseRandomConnector(regionOne Region, connector
 	allPos := make([]geometry.Point, 0)
 	for _, conns := range connectors[regionOne] {
 		for _, pos := range conns {
-			if !c.hasMinDistToConnectors(c.allConnections, pos, c.doorDistance) {
-				continue
+			if c.hasMinDistToConnectors(c.allConnections, pos, c.doorDistance) {
+				allPos = append(allPos, pos)
 			}
-			allPos = append(allPos, conns...)
 		}
 	}
 	if len(allPos) == 0 {
@@ -324,22 +326,6 @@ func (c *MegaDungeonGenerator) placeDoorsAtConnections(emptyMap *DungeonMap) {
 	}
 }
 
-func (c *MegaDungeonGenerator) findConnectors() []geometry.Point {
-	rootRegion := c.allRegions[0]
-	var connectors []geometry.Point
-	return c.connectorsFromRegionRecursive(rootRegion, connectors)
-}
-
-func (c *MegaDungeonGenerator) connectorsFromRegionRecursive(currentRegion Region, connectors []geometry.Point) []geometry.Point {
-	if merged, ok := currentRegion.(*MergedRegion); ok {
-		connectors = append(connectors, merged.connector)
-		for _, region := range merged.regions {
-			connectors = c.connectorsFromRegionRecursive(region, connectors)
-		}
-	}
-	return connectors
-}
-
 func (c *MegaDungeonGenerator) hasMinDistToConnectors(existingConnections []geometry.Point, pos geometry.Point, minDist int) bool {
 	for _, connector := range existingConnections {
 		if geometry.DistanceManhattan(pos, connector) < minDist {
@@ -367,7 +353,7 @@ func fillMaze(emptyMap *DungeonMap, start geometry.Point, straightChance float64
 
 		randomIndexes := rnd.Perm(len(neighbours))
 
-		if rnd.Float64() > straightChance {
+		if rnd.Float64() < straightChance {
 			neighborInPrevDirection := pos.Add(prevDirection)
 			if isCompletelyFreeForCarving(emptyMap, pos, neighborInPrevDirection) {
 				emptyMap.SetCorridor(neighborInPrevDirection.X, neighborInPrevDirection.Y)

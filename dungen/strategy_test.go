@@ -79,7 +79,7 @@ func TestMegaDungeonIsWalkable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for seed := int64(1); seed <= 3; seed++ {
+	for seed := int64(1); seed <= 100; seed++ {
 		m, err := Build(cfg, rand.New(rand.NewSource(seed)), nil)
 		if err != nil {
 			t.Fatal(err)
@@ -156,5 +156,16 @@ func assertConnected(t *testing.T, seed int, name string, m *DungeonMap) {
 	}
 	if len(seen) != total {
 		t.Errorf("seed %d (%s): %d of %d walkable cells are cut off from the rest", seed, name, total-len(seen), total)
+	}
+}
+
+// TestMegaDungeonRejectsBadKnobs: a room bigger than the level used to panic rand.Intn mid-generation.
+func TestMegaDungeonRejectsBadKnobs(t *testing.T) {
+	for _, kv := range [][2]string{{"width", "8"}, {"min_room_size", "2"}, {"room_tries", "0"},
+		{"straight_passage_chance", "1.5"}, {"imperfect_connect_chance", "-1"}} {
+		r := recfile.Record{{Name: "generator", Value: "megadungeon"}, {Name: kv[0], Value: kv[1]}}
+		if _, err := (megadungeon{}).Parse(r); err == nil {
+			t.Errorf("%s: %s was accepted", kv[0], kv[1])
+		}
 	}
 }

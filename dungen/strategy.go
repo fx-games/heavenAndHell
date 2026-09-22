@@ -7,7 +7,6 @@ import (
 	"math/rand"
 
 	"rpg/dungeon"
-	"rpg/geometry"
 	"rpg/ldtk"
 	"rpg/recfile"
 	"sync"
@@ -125,6 +124,14 @@ func (megadungeon) Parse(r recfile.Record) (dungeon.Config, error) {
 	if v, ok := dungeon.Field(r, "dead_ends"); ok {
 		c.RemoveDeadEnds = v != "true" // "dead_ends: true" keeps them; they are filled in otherwise
 	}
+	switch {
+	case c.MinRoomSize < 3 || c.Width < c.MinRoomSize+4 || c.Height < c.MinRoomSize+4:
+		return nil, fmt.Errorf("levels.rec: megadungeon needs min_room_size >= 3 and width, height >= min_room_size+4")
+	case c.RoomTries < 1 || c.DoorDistance < 0 || c.RoomRatioInterval < 0:
+		return nil, fmt.Errorf("levels.rec: megadungeon room_tries must be >= 1, door_distance and room_ratio >= 0")
+	case c.StraightPassageChance < 0 || c.StraightPassageChance > 1 || c.ImperfectConnectChance < 0 || c.ImperfectConnectChance > 1:
+		return nil, fmt.Errorf("levels.rec: megadungeon chances must be between 0 and 1")
+	}
 	return c, nil
 }
 
@@ -174,7 +181,7 @@ func Build(cfg dungeon.Config, rnd *rand.Rand, fsys fs.FS) (*DungeonMap, error) 
 	case AccretionConfig:
 		return buildAccretion(c, rnd, fsys)
 	case MegaDungeonConfig:
-		return buildMegaDungeon(c, rnd), nil
+		return buildMegaDungeon(c, rnd)
 	case RogueConfig:
 		g := &RogueGenerator{cols: c.Width, rows: c.Height, maxGone: c.MaxGone, extraPassages: c.ExtraPassages,
 			doors: c.Doors, random: rnd}
@@ -228,19 +235,19 @@ func buildAccretion(c AccretionConfig, rnd *rand.Rand, fsys fs.FS) (*DungeonMap,
 
 const accretionTries = 256
 
-func buildMegaDungeon(c MegaDungeonConfig, rnd *rand.Rand) *DungeonMap {
+func buildMegaDungeon(c MegaDungeonConfig, rnd *rand.Rand) (*DungeonMap, error) {
 	var m *DungeonMap
 	for try := 0; try < 32; try++ {
 		g := &MegaDungeonGenerator{randomSource: rnd, roomTries: c.RoomTries, minRoomSize: c.MinRoomSize,
 			straightPassageChance: c.StraightPassageChance, imperfectConnectChance: c.ImperfectConnectChance,
 			roomRatioInterval: c.RoomRatioInterval, doorDistance: c.DoorDistance,
-			removeDeadEnds: c.RemoveDeadEnds, regionLookup: map[geometry.Point]Region{}}
+			removeDeadEnds: c.RemoveDeadEnds}
 		m = g.Generate(c.Width, c.Height)
 		if len(m.AllRooms()) >= c.MinRooms {
-			return m
+			return m, nil
 		}
 	}
-	return m
+	return nil, fmt.Errorf("dungen: megadungeon still had %d of min_rooms %d in 32 tries", len(m.AllRooms()), c.MinRooms)
 }
 
 // Templates returns the room-template project a configuration draws from, or nil for a generator that draws
