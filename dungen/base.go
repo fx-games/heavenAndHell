@@ -250,6 +250,7 @@ func (m *DungeonMap) CouldBeADoor(pos geometry.Point) (geometry.CompassDirection
 
 	return geometry.East, false
 }
+
 // addMoreDoors opens walls between two rooms that are far apart on foot, as doors or as bare openings.
 func (m *DungeonMap) addMoreDoors(rnd *rand.Rand, minPathDistance int, spawnChance float64, asDoor bool) {
 	m.TraverseTilesRandomly(rnd, func(mapPos geometry.Point) {

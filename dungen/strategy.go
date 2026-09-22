@@ -1,6 +1,7 @@
 package dungen
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"io/fs"
 	"math/rand"
@@ -9,6 +10,7 @@ import (
 	"rpg/geometry"
 	"rpg/ldtk"
 	"rpg/recfile"
+	"sync"
 )
 
 // This is H&H's side of the engine's generation registry (package dungeon). The algorithms below are genuinely
@@ -40,13 +42,15 @@ type AccretionConfig struct {
 	Width, Height int
 	Doors         bool
 	Mirror        bool // rooms may be flipped as well as turned
+	Tiles         TileIDs
 }
 
 type accretion struct{}
 
 func (accretion) Parse(r recfile.Record) (dungeon.Config, error) {
 	c := AccretionConfig{Templates: "assets/rooms.ldtk", Rooms: 16, MinRooms: 10,
-		Width: accretionScratch, Height: accretionScratch, Doors: true, Mirror: true}
+		Width: accretionScratch, Height: accretionScratch, Doors: true, Mirror: true,
+		Tiles: TileIDs{Wall: 56, Floor: 64}}
 	if v, ok := dungeon.Field(r, "templates"); ok {
 		c.Templates = v
 	}
@@ -66,7 +70,8 @@ func (accretion) Parse(r recfile.Record) (dungeon.Config, error) {
 	for _, k := range []struct {
 		name string
 		into *int
-	}{{"rooms", &c.Rooms}, {"min_rooms", &c.MinRooms}, {"width", &c.Width}, {"height", &c.Height}} {
+	}{{"rooms", &c.Rooms}, {"min_rooms", &c.MinRooms}, {"width", &c.Width}, {"height", &c.Height},
+		{"wall_tile", &c.Tiles.Wall}, {"floor_tile", &c.Tiles.Floor}} {
 		if *k.into, err = dungeon.Int(r, k.name, *k.into); err != nil {
 			return nil, err
 		}
@@ -151,7 +156,9 @@ func buildAccretion(c AccretionConfig, rnd *rand.Rand, fsys fs.FS) (*DungeonMap,
 		rules.ForbidTemplates[n] = true
 	}
 	g := NewAccretionGenerator(rnd)
-	g.LoadTemplatesFrom(proj, c.Prefix)
+	if err := g.LoadTemplatesFrom(proj, c.Prefix, c.Tiles); err != nil {
+		return nil, err
+	}
 	g.SetLevelRules(rules)
 	g.SetRoomCount(c.Rooms)
 	g.SetMirroring(c.Mirror)
@@ -204,15 +211,24 @@ func Templates(cfg dungeon.Config, fsys fs.FS) (*ldtk.Project, error) {
 	return loadTemplates(fsys, c.Templates)
 }
 
+// parsedTemplates caches LDtk projects by content, so a level does not re-parse the whole project each time it
+// is built, and a different mod's file of the same name is never mistaken for it. Projects are only read.
+var parsedTemplates sync.Map // [sha256.Size]byte -> *ldtk.Project
+
 // loadTemplates reads an LDtk project out of the active mod.
 func loadTemplates(fsys fs.FS, name string) (*ldtk.Project, error) {
 	b, err := fs.ReadFile(fsys, name)
 	if err != nil {
 		return nil, fmt.Errorf("dungen templates %s: %w", name, err)
 	}
+	key := sha256.Sum256(b)
+	if p, ok := parsedTemplates.Load(key); ok {
+		return p.(*ldtk.Project), nil
+	}
 	p, err := ldtk.Read(b)
 	if err != nil {
 		return nil, fmt.Errorf("dungen templates %s: %w", name, err)
 	}
+	parsedTemplates.Store(key, p)
 	return p, nil
 }

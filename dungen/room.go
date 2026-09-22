@@ -141,38 +141,6 @@ func (r *DungeonRoom) GetUsedAbsoluteDoorTiles() []geometry.Point {
 	return result
 }
 
-/*
-func (r *DungeonRoom) AddCorridor(direction geometry.CompassDirection, length int) {
-    // remove door tile from available door tiles
-    doorPos, ok := r.HasFreeRelativeDoorInDirection(direction)
-    if !ok {
-        return
-    }
-    delete(r.availableConnections, doorPos)
-
-    // add corridor tiles
-    for i := 0; i < length; i++ {
-        r.floorTiles[doorPos.Add(direction.ToPoint().Mul(i))] = true
-    }
-
-    // add door tile at the end of the corridor
-    newDoorPos := doorPos.Add(direction.ToPoint().Mul(length))
-    r.availableConnections[newDoorPos] = direction
-
-    if length > 1 {
-        // add another set of doors at 90 degrees to the corridor
-        startPos := doorPos.Add(direction.ToPoint().Mul(length - 1))
-
-        secondDoor := startPos.Add(direction.TurnRightBy90().ToPoint())
-        r.availableConnections[secondDoor] = direction.TurnRightBy90()
-
-        thirdDoor := startPos.Add(direction.TurnLeftBy90().ToPoint())
-        r.availableConnections[thirdDoor] = direction.TurnLeftBy90()
-    }
-}
-
-*/
-
 func (r *DungeonRoom) Contains(absolutePosition geometry.Point) bool {
 	relative := r.ToRelativePosition(absolutePosition)
 	if _, ok := r.floorTiles[relative]; ok {
@@ -232,7 +200,7 @@ func (r *DungeonRoom) findCenter() geometry.Point {
 func NewDungeonRoomFromRect(random *rand.Rand, bounds geometry.Rect) *DungeonRoom {
 	rectRoom := &DungeonRoom{
 		floorTiles:     roomTilesFromRect(bounds),
-		bounds:		 bounds,
+		bounds:         bounds,
 		connectedRooms: make(map[geometry.Point]*DungeonRoom),
 		availableConnections: map[geometry.Point]RoomConnection{
 			bounds.GetRandomPointOnEdge(random, geometry.North).Add(geometry.North.ToPoint()): {
@@ -253,21 +221,6 @@ func NewDungeonRoomFromRect(random *rand.Rand, bounds geometry.Rect) *DungeonRoo
 			},
 		},
 	}
-	// choose a random direction or none
-
-	/*
-	   switch random.Intn(5) {
-	   case 0:
-	       rectRoom.AddCorridor(geometry.North, random.Intn(4)+1)
-	   case 1:
-	       rectRoom.AddCorridor(geometry.South, random.Intn(4)+1)
-	   case 2:
-	       rectRoom.AddCorridor(geometry.East, random.Intn(4)+1)
-	   case 3:
-	       rectRoom.AddCorridor(geometry.West, random.Intn(4)+1)
-	   }
-
-	*/
 	rectRoom.SetRotationCount(0)
 	return rectRoom
 }

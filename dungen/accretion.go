@@ -19,37 +19,6 @@ type TemplateRules struct {
 	NoDoors          bool
 }
 
-func (r TemplateRules) WithNoDoors() TemplateRules {
-	r.NoDoors = true
-	return r
-}
-
-func (r TemplateRules) WithForbidden(templateName string) TemplateRules {
-	r.ForbidTemplates[templateName] = true
-	return r
-}
-
-func NewTemplateRules(requiredRooms map[int][]string, forLevel int, templatePrefix string) TemplateRules {
-	rules := TemplateRules{
-		RequireTemplates: make(map[string]bool),
-		ForbidTemplates:  make(map[string]bool),
-		TemplatePrefix:   templatePrefix,
-	}
-	for level, rooms := range requiredRooms {
-		if level == forLevel {
-			for _, room := range rooms {
-				rules.RequireTemplates[room] = true
-			}
-		} else {
-			for _, room := range rooms {
-				rules.ForbidTemplates[room] = true
-			}
-		}
-
-	}
-	return rules
-}
-
 type RoomConnection struct {
 	OutwardDirection geometry.CompassDirection
 	ConnectionID     int
@@ -268,13 +237,6 @@ func (g *AccretionGenerator) attachOrder(rooms []*DungeonRoom) []*DungeonRoom {
 	return order
 }
 
-func (g *AccretionGenerator) randomRect(width int, height int) geometry.Rect {
-	randWidth := max(3, g.random.Intn(width))
-	randHeight := max(3, g.random.Intn(height))
-	rect := geometry.NewRect(0, 0, randWidth, randHeight)
-	return rect
-}
-
 func (g *AccretionGenerator) tryConnectTo(dMap *DungeonMap, newRoom *DungeonRoom, existingRoom *DungeonRoom) bool {
 	if g.printDebugSteps {
 		println(fmt.Sprintf("=== try connect room %d to room %d ===", newRoom.roomId, existingRoom.roomId))
@@ -296,8 +258,6 @@ func (g *AccretionGenerator) tryConnectTo(dMap *DungeonMap, newRoom *DungeonRoom
 			if relativeNewDoorPos, ok := newRoom.HasMatchingConnection(roomConnection); ok {
 				rotatedRelativeDoorPos := newRoom.GetRotatedRelativeDoorPosition(relativeNewDoorPos)
 				// both have free doors in opposite directions
-				// PROBLEM IS HERE-> we don't set the position offset for the new room correctly
-				// probably only occurs when the new room is rotated
 				absoluteDoorPos := existingRoom.GetAbsoluteDoorPosition(relativeConnectionPos)
 
 				// the new room should be placed so that the new door is at the same position as the existing door
@@ -349,24 +309,30 @@ func comparePoints(a, b geometry.Point) int {
 	return cmp.Or(cmp.Compare(a.Y, b.Y), cmp.Compare(a.X, b.X))
 }
 
+// TileIDs are the tiles in a template's Tiles layer that mean floor and wall; everything else is ignored.
+type TileIDs struct{ Wall, Floor int }
 
-
-func (g *AccretionGenerator) LoadTemplatesFrom(templates *ldtk.Project, prefix string) {
+// LoadTemplatesFrom adds every non-decoration template whose name starts with prefix. A template whose
+// connectors do not sit on the edge of its floor is refused: placed, it would open onto nothing, and that is
+// what cut levels in two.
+func (g *AccretionGenerator) LoadTemplatesFrom(templates *ldtk.Project, prefix string, ids TileIDs) error {
 	for _, level := range templates.Levels {
-		if strings.HasPrefix(level.Identifier, prefix) {
-			isDecoration := level.PropertyByIdentifier("IsDecoration").AsBool()
-			if isDecoration {
-				continue
-			}
-			g.addTemplateFromLevel(level)
+		if !strings.HasPrefix(level.Identifier, prefix) || level.PropertyByIdentifier("IsDecoration").AsBool() {
+			continue
 		}
+		room := templateFromLevel(level, ids)
+		for _, pos := range getSortedKeys(room.availableConnections) {
+			c := room.availableConnections[pos]
+			if !room.floorTiles[pos.Sub(c.OutwardDirection.ToPoint())] {
+				return fmt.Errorf("dungen: template %s: connector at %v faces %v, away from no floor tile", level.Identifier, pos, c.OutwardDirection)
+			}
+		}
+		g.roomTemplates = append(g.roomTemplates, room)
 	}
+	return nil
 }
 
-func (g *AccretionGenerator) addTemplateFromLevel(level *ldtk.Level) {
-	wallId := 56
-	floorId := 64
-
+func templateFromLevel(level *ldtk.Level, ids TileIDs) *DungeonRoom {
 	tileLayer := level.LayerByIdentifier("Tiles")
 	metaLayer := level.LayerByIdentifier("Meta")
 
@@ -375,9 +341,9 @@ func (g *AccretionGenerator) addTemplateFromLevel(level *ldtk.Level) {
 	for _, tile := range tileLayer.Tiles {
 		posX, posY := tileLayer.ToGridPosition(tile.Position[0], tile.Position[1])
 		pos := geometry.Point{X: posX, Y: posY}
-		if tile.ID == floorId {
+		if tile.ID == ids.Floor {
 			floorTiles = append(floorTiles, pos)
-		} else if tile.ID == wallId {
+		} else if tile.ID == ids.Wall {
 			wallTiles = append(wallTiles, pos)
 		}
 	}
@@ -417,15 +383,8 @@ func (g *AccretionGenerator) addTemplateFromLevel(level *ldtk.Level) {
 	if !level.PropertyByIdentifier("UsesDecoration").IsNull() {
 		dRoom.SetDecorationLevelName(level.PropertyByIdentifier("UsesDecoration").AsString())
 	}
-	/* hmm, how to do this?
-	if !level.PropertyByIdentifier("ForceAppearanceInLevel").IsNull() {
-		mustAppearInLevel := level.PropertyByIdentifier("ForceAppearanceInLevel").AsInt()
 
-	}
-
-	*/
-
-	g.roomTemplates = append(g.roomTemplates, dRoom)
+	return dRoom
 }
 
 func (g *AccretionGenerator) SetRoomCount(maxRoomCount int) {
