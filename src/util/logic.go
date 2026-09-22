@@ -30,17 +30,6 @@ func (a Arguments) GetInt(index int) int {
 	return result
 }
 
-func (a Arguments) GetFloat(i int) float64 {
-	if i >= len(a) || i < 0 {
-		return 0
-	}
-	result, err := strconv.ParseFloat(a[i], 64)
-	if err != nil {
-		return 0
-	}
-	return result
-}
-
 func (a Arguments) IsEmpty() bool {
 	return len(a) == 0
 }
@@ -56,16 +45,16 @@ func (a Arguments) GetIntOrDefault(index int, defaultValue int) int {
 	return result
 }
 
+var funcCallPattern = regexp.MustCompile(`([A-Za-z_]+)\((.*)\)`)
+
 func LooksLikeAFunction(line string) bool {
-	regexpPattern := regexp.MustCompile(`([A-Za-z_]+)\((.*)\)`)
-	return regexpPattern.MatchString(line)
+	return funcCallPattern.MatchString(line)
 }
 func NewArgumentsFromString(args string) Arguments {
 	return trimAll(strings.Split(args, "|"))
 }
 func GetNameAndArgs(line string) (string, Arguments) {
-	regexpPattern := regexp.MustCompile(`([A-Za-z_]+)\((.*)\)`)
-	matches := regexpPattern.FindStringSubmatch(line)
+	matches := funcCallPattern.FindStringSubmatch(line)
 	if matches == nil {
 		return line, Arguments{}
 	}

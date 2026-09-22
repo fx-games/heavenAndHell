@@ -91,8 +91,7 @@ func (d *KnockbackAction) Execute(context ActionContext) []Action {
 			return d.isNotAnimated() || d.animation.IsDone()
 		})
 		actions = append(actions, actionPushed)
-		if gameMap.IsActorAt(d.obstaclePos) {
-			hitActor := gameMap.ActorAt(d.obstaclePos)
+		if hitActor, ok := gameMap.TryGetActorAt(d.obstaclePos); ok {
 			action := NewChangeResourceAction(d.Cause(), hitActor, stats.Health, -5)
 			action.SetAnimationStartPredicate(func() bool {
 				return d.isNotAnimated() || d.animation.IsDone()

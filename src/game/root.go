@@ -173,18 +173,18 @@ func NewGameInstance(startInfo common.StartInfo, uiController common.UserInterfa
 		randomSource: rand.New(rand.NewSource(time.Now().UnixNano())),
 		audioPlayer:  audio.NewAudioPlayer(startInfo.FileSystem, audio.SampleRate44100),
 	}
-	println(fmt.Sprintf("GameInstance created.."))
-	println(fmt.Sprintf("Random source loaded.."))
+	println("GameInstance created..")
+	println("Random source loaded..")
 	cfg := startInfo.UserConfiguration
 	common.UICues = g.audioPlayer
 	g.audioPlayer.SetSoundVolume(cfg.SoundVolume)
 	g.audioPlayer.SetMusicVolume(cfg.MusicVolume)
 	g.audioPlayer.SetVoiceVolume(cfg.VoiceVolume)
-	println(fmt.Sprintf("Audio player loaded.."))
+	println("Audio player loaded..")
 	g.dataDefinitions = defs.LoadGameData(func(err string) {
 		println(err)
 	})
-	println(fmt.Sprintf("Data definitions loaded.."))
+	println("Data definitions loaded..")
 	d1Data, err := d1.Load(files.GetFileSystem())
 	if err != nil {
 		panic(err)
@@ -251,7 +251,7 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 	ldtkProject, _ := ldtk.Open(ldtkFile)
 
 	timeKeeper := common.NewTimeKeeper(g.hasEnergyForAction)
-	println(fmt.Sprintf("Timekeeper created.."))
+	println("Timekeeper created..")
 
 	g.state = common.NewState(ldtkProject)
 	g.state.SetLighting(common.Lighting())
@@ -402,9 +402,8 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 	}
 
 	// automatic pickup & player movement..
-	if g.configuration.AutoPickup && g.state.GetMap().IsItemAt(player.MapPosition()) {
-		itemAtLocation := g.state.GetMap().ItemAt(player.MapPosition())
-		if itemAtLocation != nil && player.CanPickup(itemAtLocation) && !itemAtLocation.IsDroppedByPlayer() {
+	if itemAtLocation, ok := g.state.GetMap().TryGetItemAt(player.MapPosition()); g.configuration.AutoPickup && ok {
+		if player.CanPickup(itemAtLocation) && !itemAtLocation.IsDroppedByPlayer() {
 			pickUpAction := common.NewPickUpAction(common.AbstractCause("AutoPickup"), player)
 			endTurnAction := common.NewEndPlayerTurnAction(pickUpAction.Cause(), pickUpAction.GetDelayInAut())
 			g.actionBroker.Execute(pickUpAction)
@@ -697,8 +696,7 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 			if g.state.IsClosedDoorAt(randomNeighbor) {
 				g.actionBroker.Execute(common.NewOpenDoorAction(common.AbstractCause("OpenDoor"), actor, randomNeighbor))
 			}
-			if g.state.GetMap().IsActorAt(randomNeighbor) {
-				actorAt := g.state.GetMap().ActorAt(randomNeighbor)
+			if actorAt, ok := g.state.GetMap().TryGetActorAt(randomNeighbor); ok {
 				// attack
 				g.actionBroker.Execute(common.NewMeleeAttackAction(common.AbstractCause("MeleeAttack"), actor, actorAt))
 			} else {
@@ -770,8 +768,7 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 				g.actionBroker.Execute(common.NewRangedAttackAction(common.AbstractCause("RangedAttack"), actor, playerPosition))
 			}
 		}
-		var dist int
-		dist = g.state.GetMap().MoveDistance(actor.MapPosition(), playerPosition)
+		dist := g.state.GetMap().MoveDistance(actor.MapPosition(), playerPosition)
 		if dist <= 1 && canAttack {
 			return autCostMeleeAttack, func() {
 				g.actionBroker.Execute(common.NewMeleeAttackAction(common.AbstractCause("MeleeAttack"), actor, player))

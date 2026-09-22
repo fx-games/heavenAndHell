@@ -726,10 +726,9 @@ func dumpMap(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], rea
 
 // reachable walks from p through floor, doors and barrels (bumping breaks them).
 func objectAt(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], p geometry.Point) int {
-	if m.IsObjectAt(p) {
-		if o, ok := m.ObjectAt(p).(*common.D1Object); ok {
-			return o.O.Kind
-		}
+	obj, _ := m.TryGetObjectAt(p)
+	if o, ok := obj.(*common.D1Object); ok {
+		return o.O.Kind
 	}
 	return -1
 }
@@ -740,10 +739,10 @@ func reachable(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], p
 		if !m.IsTileWalkable(q) {
 			return false
 		}
-		if !m.IsObjectAt(q) {
+		o, ok := m.TryGetObjectAt(q)
+		if !ok {
 			return true
 		}
-		o := m.ObjectAt(q)
 		d1o, isD1 := o.(*common.D1Object)
 		_, isDoor := o.(*common.Door)
 		return o.IsWalkable(nil) || isDoor || isD1 && (d1o.O.Kind == d1.ObjBARREL || d1o.O.Kind == d1.ObjBARRELEX)

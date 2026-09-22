@@ -86,10 +86,11 @@ func (a *Actions) beginActionTargeting(action *common.TargetedAction, chargedIte
 func (a *Actions) PickUpItem() {
 	state := a.state
 	player := state.GetPlayer()
-	if !player.IsAlive() || !state.GetMap().IsItemAt(player.MapPosition()) {
+	item, ok := state.GetMap().TryGetItemAt(player.MapPosition())
+	if !player.IsAlive() || !ok {
 		return
 	}
-	if !player.CanPickup(state.GetMap().ItemAt(player.MapPosition())) {
+	if !player.CanPickup(item) {
 		state.Factory().PlayD1HeroSound(14 + rand.Intn(3)) // AutoGetItem: "I can't carry any more"
 		return
 	}
@@ -246,10 +247,7 @@ func (a *Actions) ManualMovePlayer(direction geometry.Point) {
 		if rand.Intn(3) != 0 { // one in three chance to succeed with movement
 			// pick a different random direction..
 			possibleDirectionsRemaining := state.GetMap().GetFilteredDirectionsForMovement(func(dir geometry.Point) bool {
-				if dir == direction {
-					return false
-				}
-				return true
+				return dir != direction
 			})
 			direction = possibleDirectionsRemaining[rand.Intn(len(possibleDirectionsRemaining))]
 		}
@@ -292,8 +290,8 @@ func (a *Actions) nextStepOnPlayerPath() {
 		// pop first element
 		nextStep := a.playerPath[0]
 
-		if state.GetMap().IsActorAt(nextStep) {
-			if !a.playerPerceives(state.GetMap().ActorAt(nextStep)) {
+		if blocker, ok := state.GetMap().TryGetActorAt(nextStep); ok {
+			if !a.playerPerceives(blocker) {
 				msg("Something is in the way")
 			}
 			a.stopAutoMove()
@@ -304,14 +302,13 @@ func (a *Actions) nextStepOnPlayerPath() {
 			return
 		}
 
-		if state.GetMap().IsObjectAt(nextStep) {
+		if objectAt, ok := state.GetMap().TryGetObjectAt(nextStep); ok {
 			if a.state.IsClosedDoorAt(nextStep) {
 				openDoorAction := common.NewOpenDoorAction(common.AbstractCause("Player Movement"), state.GetPlayer(), nextStep)
 				a.actionBroker.QueueForExecution(openDoorAction)
 				a.actionBroker.QueueForExecution(common.NewEndPlayerTurnAction(openDoorAction.Cause(), openDoorAction.GetDelayInAut()))
 				return
 			} else if !a.autoExplore || a.config.AutoExploreOpenContainers {
-				objectAt := state.GetMap().ObjectAt(nextStep)
 				if !objectAt.IsWalkable(state.GetPlayer()) {
 					a.stopAutoMove()
 					msg(fmt.Sprintf("You bump into %s", objectAt.Name()))
@@ -371,8 +368,8 @@ func (a *Actions) allowedForAutoExplore(targetPos geometry.Point) func(point geo
 		}
 		// an actor the player can't see is no wall to plan around: in the dark the path ran into one's cell, found
 		// no way and exploring stopped without a word. The step itself bumps into it (nextStepOnPlayerPath).
-		if currentMap.IsActorAt(point) && !a.playerPerceives(currentMap.ActorAt(point)) && !currentMap.IsStairsAt(point) {
-			return currentMap.IsWalkableFor(point, currentMap.ActorAt(point)) && !currentMap.IsObviousHazardAt(point)
+		if blocker, ok := currentMap.TryGetActorAt(point); ok && !a.playerPerceives(blocker) && !currentMap.IsStairsAt(point) {
+			return currentMap.IsWalkableFor(point, blocker) && !currentMap.IsObviousHazardAt(point)
 		}
 		// the explore target itself may be an unopened container to bump (Open Containers option)
 		return a.config.AutoExploreOpenContainers && point == targetPos && currentMap.IsObjectAt(point)
@@ -421,8 +418,7 @@ func (a *Actions) StartPlayerAutoMovement(targetPos geometry.Point) {
 
 	// check for item directly beneath us.. if so, pick it up
 	if a.config.AutoPickup {
-		if currentMap.IsItemAt(playerPosition) {
-			itemAt := currentMap.ItemAt(playerPosition)
+		if itemAt, ok := currentMap.TryGetItemAt(playerPosition); ok {
 			if !itemAt.IsDroppedByPlayer() {
 				pickUpAction := common.NewPickUpAction(common.AbstractCause("PickUp"), player)
 				a.actionBroker.Execute(pickUpAction)
@@ -585,7 +581,6 @@ func (a *Actions) QuickRangedAttack() {
 		return
 	}
 	a.playerRangedAttack(state.GetPlayer(), target)
-	return
 }
 
 // hostileInSight: a visible enemy the player could aim at, path or no path.
@@ -666,7 +661,6 @@ func (a *Actions) AimedRangedAttack() {
 		return
 	}
 	a.defaultRangedTargeting(a.playerRangedAttack) // execute ranged attack action and end turn)
-	return
 }
 func (a *Actions) defaultRangedTargeting(onTargetSelected func(player *common.Actor, targetPos geometry.Point)) {
 	state := a.state
@@ -689,7 +683,7 @@ func (a *Actions) beginRangedTargeting(targetRules common.TargetRules, onSelecte
 			onSelected(attacker, target)
 		},
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Ranged attack")),
+			util.LabelTextFromString("Ranged attack"),
 		},
 	}
 	a.ui().BeginTargeting(targetRules, onHit)
@@ -742,7 +736,7 @@ func (a *Actions) AutoAttack() {
 	var visibleEnemies []*common.Actor
 
 	if gui.IsPlayerForcingAggression() {
-		for actor, _ := range state.GetVisibility().GetVisibleActors() {
+		for actor := range state.GetVisibility().GetVisibleActors() {
 			visibleEnemies = append(visibleEnemies, actor)
 		}
 	} else {
@@ -793,11 +787,11 @@ func (a *Actions) AutoAttack() {
 			distMap = append(distMap, util.NewTuple(freeAttackPosition, distanceTo))
 		}
 		slices.SortStableFunc(distMap, func(i, j util.Tuple[geometry.Point, int]) int {
-			return cmp.Compare(i.GetItem2(), j.GetItem2())
+			return cmp.Compare(i.Item2, j.Item2)
 		})
 
 		for _, distTuple := range distMap {
-			targetPos := distTuple.GetItem1()
+			targetPos := distTuple.Item1
 			walkPath := currentMap.GetJPSPath(player.MapPosition(), targetPos, currentMap.CurrentlyPassableAndSafeForActor(player))
 			if len(walkPath) <= 1 {
 				continue
@@ -859,9 +853,9 @@ func (a *Actions) RangedAttackAt(mapPos geometry.Point) bool {
 	if currentMap.MoveDistance(player.MapPosition(), mapPos) <= 1 {
 		return false // adjacent: let the normal click-to-move-into-melee handling take it
 	}
+	target, isActor := currentMap.TryGetActorAt(mapPos)
 	switch {
-	case currentMap.IsActorAt(mapPos):
-		target := currentMap.ActorAt(mapPos)
+	case isActor:
 		if !target.IsVisible() || !target.IsHostileTo(player) || target.IsVendor() {
 			return false
 		}
@@ -941,7 +935,8 @@ func (a *Actions) SetQueueAfterTurn(afterTurn func(call func())) {
 // ShowObjectInfoAt opens the description popup for a shrine at mapPos, analogous to ShowActorInfoAt. No-op for
 // anything that isn't a previewable shrine.
 func (a *Actions) ShowObjectInfoAt(mapPos geometry.Point) {
-	obj, ok := a.state.GetMap().ObjectAt(mapPos).(*common.D1Object)
+	o, _ := a.state.GetMap().TryGetObjectAt(mapPos)
+	obj, ok := o.(*common.D1Object)
 	if !ok {
 		return
 	}
@@ -954,7 +949,8 @@ func (a *Actions) ShowObjectInfoAt(mapPos geometry.Point) {
 
 // ShowActorInfoAt opens the description window for the actor at mapPos.
 func (a *Actions) ShowActorInfoAt(mapPos geometry.Point) {
-	title, sections := common.ActorInfoSections(a.state, a.state.GetMap().ActorAt(mapPos))
+	actor, _ := a.state.GetMap().TryGetActorAt(mapPos)
+	title, sections := common.ActorInfoSections(a.state, actor)
 	a.ui().OpenInfoWindow(title, sections)
 }
 

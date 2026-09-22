@@ -5,11 +5,9 @@ import (
 	"encoding/gob"
 	"fmt"
 	"io"
-	"math"
 	"math/rand"
 	"os"
 	"rpg/src/geometry"
-	"rpg/src/util"
 	"sort"
 	"strconv"
 	"time"
@@ -189,11 +187,15 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) SetZone(position geometry.Poi
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) RemoveItemAt(position geometry.Point) {
-	m.RemoveItem(m.ItemAt(position))
+	if item, ok := m.TryGetItemAt(position); ok {
+		m.RemoveItem(item)
+	}
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) RemoveObjectAt(position geometry.Point) {
-	m.RemoveObject(m.ObjectAt(position))
+	if object, ok := m.TryGetObjectAt(position); ok {
+		m.RemoveObject(object)
+	}
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) RemoveObject(obj ObjectType) {
@@ -257,10 +259,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) CellAt(location geometry.Poin
 	return m.cells[m.mapWidth*location.Y+location.X]
 }
 
-func (m *GridMap[ActorType, ItemType, ObjectType]) ItemAt(location geometry.Point) ItemType {
-	return *m.cells[m.mapWidth*location.Y+location.X].Item
-}
-
 func (m *GridMap[ActorType, ItemType, ObjectType]) IsItemAt(location geometry.Point) bool {
 	return m.cells[m.mapWidth*location.Y+location.X].Item != nil
 }
@@ -270,7 +268,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) SetActorToDowned(a ActorType)
 		return
 	}
 	m.allDownedActors = append(m.allDownedActors, a)
-	if m.IsDownedActorAt(a.MapPosition()) && m.DownedActorAt(a.MapPosition()) != a {
+	if other, ok := m.TryGetDownedActorAt(a.MapPosition()); ok && other != a {
 		m.displaceDownedActor(a)
 		return
 	}
@@ -286,7 +284,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) SetActorToRemoved(person Acto
 func (m *GridMap[ActorType, ItemType, ObjectType]) SetActorToNormal(person ActorType) {
 	m.RemoveDownedActor(person)
 	m.allActors = append(m.allActors, person)
-	if m.IsActorAt(person.MapPosition()) && m.ActorAt(person.MapPosition()) != person {
+	if m.IsActorAt(person.MapPosition()) && m.actorAt(person.MapPosition()) != person {
 		m.displaceActor(person)
 		return
 	}
@@ -330,46 +328,6 @@ func lessByCoordinate(a, b geometry.Point) bool {
 	return a.Y < b.Y || (a.Y == b.Y && a.X < b.X)
 }
 
-// NearestByPathCost floods the explored, walkable part of the map once from
-// currentPosition and returns the candidate with the lowest path cost, or
-// currentPosition if there is none. Straight-line distance is the wrong metric
-// in a dungeon: the closest candidate as the crow flies is regularly the one
-// behind a wall, three rooms away by foot.
-func (m *GridMap[ActorType, ItemType, ObjectType]) NearestByPathCost(currentPosition geometry.Point, isCandidate func(p geometry.Point) bool) geometry.Point {
-	// ponytail: full flood per call; cache it per turn if profiling ever cares.
-	nearest, lowestCost := currentPosition, math.MaxInt32
-	for loc, cost := range m.GetDijkstraMapForExploredWithActorsNotBlocking(currentPosition, 1000) {
-		// Map iteration order is random, so ties need a deterministic winner:
-		// without one the target flips between equidistant candidates.
-		better := cost < lowestCost || (cost == lowestCost && lessByCoordinate(loc, nearest))
-		if better && loc != currentPosition && isCandidate(loc) {
-			nearest, lowestCost = loc, cost
-		}
-	}
-	return nearest
-}
-
-// GetNearestUnexploredWalkablePosition returns the nearest frontier tile: an
-// explored tile that borders the unknown. The unexplored tile itself is not a
-// reachable target through known terrain, its explored neighbor is.
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestUnexploredWalkablePosition(currentPosition geometry.Point) geometry.Point {
-	return m.NearestByPathCost(currentPosition, func(p geometry.Point) bool {
-		return len(m.GetFilteredNeighbors(p, func(n geometry.Point) bool {
-			return m.IsTileWalkable(n) && !m.IsExplored(n)
-		})) > 0
-	})
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestExploredItem(currentPosition geometry.Point, filter func(item ItemType) bool) geometry.Point {
-	return m.NearestByPathCost(currentPosition, func(p geometry.Point) bool {
-		return m.IsItemAt(p) && filter(m.ItemAt(p))
-	})
-}
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestExploredObject(currentPosition geometry.Point, filter func(object ObjectType) bool) geometry.Point {
-	return m.NearestByPathCost(currentPosition, func(p geometry.Point) bool {
-		return m.IsObjectAt(p) && filter(m.ObjectAt(p))
-	})
-}
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetFreeCellsForDistribution(position geometry.Point, neededCellCount int, freePredicate func(p geometry.Point) bool) []geometry.Point {
 	// The flood is a FIFO queue and the result breaks distance ties by coordinate: this used to pop its open
 	// list out of a Go map and sort the result unstably, so which cell an actor, a corpse or a dropped item
@@ -436,20 +394,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsSpecialAt(pos geometry.Poin
 	return special == specialValue
 }
 
-func (m *GridMap[ActorType, ItemType, ObjectType]) WavePropagationFrom(pos geometry.Point, size int, pressure int) map[int][]geometry.Point {
-	soundAnimationMap := make(map[int][]geometry.Point)
-	m.pathfinder.DijkstraMap(m.getDijkstraMapperWithActorsNotBlocking(), []geometry.Point{pos}, size)
-	for _, v := range m.pathfinder.DijkstraIterNodes {
-		cost := v.Cost
-		point := v.P
-		if soundAnimationMap[cost] == nil {
-			soundAnimationMap[cost] = make([]geometry.Point, 0)
-		}
-		soundAnimationMap[cost] = append(soundAnimationMap[cost], point)
-	}
-	return soundAnimationMap
-}
-
 type DijkstraMapper struct {
 	neighbors func(geometry.Point) []geometry.Point
 	cost      func(geometry.Point, geometry.Point) int
@@ -461,78 +405,6 @@ func (d DijkstraMapper) Neighbors(point geometry.Point) []geometry.Point {
 
 func (d DijkstraMapper) Cost(point geometry.Point, point2 geometry.Point) int {
 	return d.cost(point, point2)
-}
-func (m *GridMap[ActorType, ItemType, ObjectType]) getDijkstraMapperWithActorsNotBlocking() DijkstraMapper {
-	return DijkstraMapper{
-		neighbors: func(point geometry.Point) []geometry.Point {
-			return m.GetFilteredNeighbors(point, func(p geometry.Point) bool {
-				return m.Contains(p) && m.IsWalkable(p)
-			})
-		},
-		cost: func(point geometry.Point, point2 geometry.Point) int {
-			return int(geometry.Distance(point, point2) * 10)
-		},
-	}
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) getDijkstraMapperForExploredWithActorsNotBlocking() DijkstraMapper {
-	return DijkstraMapper{
-		neighbors: func(point geometry.Point) []geometry.Point {
-			return m.GetFilteredNeighbors(point, func(p geometry.Point) bool {
-				return m.Contains(p) && m.IsTileWalkable(p) && m.IsExplored(p)
-			})
-		},
-		cost: func(point geometry.Point, point2 geometry.Point) int {
-			return int(geometry.Distance(point, point2) * 10)
-		},
-	}
-}
-func (m *GridMap[ActorType, ItemType, ObjectType]) getDijkstraMapper(passable func(pos geometry.Point) bool) DijkstraMapper {
-	return DijkstraMapper{
-		neighbors: func(point geometry.Point) []geometry.Point {
-			return m.GetFilteredNeighbors(point, func(p geometry.Point) bool {
-				return m.Contains(p) && passable(p)
-			})
-		},
-		cost: func(point geometry.Point, point2 geometry.Point) int {
-			return int(geometry.Distance(point, point2) * 10)
-		},
-	}
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetDijkstraMapWithActorsNotBlocking(start geometry.Point, maxCost int) map[geometry.Point]int {
-	nodes := m.pathfinder.DijkstraMap(m.getDijkstraMapperWithActorsNotBlocking(), []geometry.Point{start}, maxCost*10)
-
-	dijkstraMap := make(map[geometry.Point]int)
-	for _, v := range nodes {
-		dijkstraMap[v.P] = v.Cost
-	}
-	return dijkstraMap
-}
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetDijkstraMapForExploredWithActorsNotBlocking(start geometry.Point, maxCost int) map[geometry.Point]int {
-	nodes := m.pathfinder.DijkstraMap(m.getDijkstraMapperForExploredWithActorsNotBlocking(), []geometry.Point{start}, maxCost*10)
-
-	dijkstraMap := make(map[geometry.Point]int)
-	for _, v := range nodes {
-		dijkstraMap[v.P] = v.Cost
-	}
-	return dijkstraMap
-}
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetDijkstraMap(start geometry.Point, maxCost int, passable func(point geometry.Point) bool) map[geometry.Point]int {
-	nodes := m.pathfinder.DijkstraMap(m.getDijkstraMapper(passable), []geometry.Point{start}, maxCost*10)
-
-	dijkstraMap := make(map[geometry.Point]int)
-	for _, v := range nodes {
-		dijkstraMap[v.P] = v.Cost
-	}
-	return dijkstraMap
-}
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetConnected(startLocation geometry.Point, traverse func(p geometry.Point) bool) []geometry.Point {
-	results := make([]geometry.Point, 0)
-	for _, node := range m.pathfinder.BreadthFirstMap(MapPather{neighborPredicate: traverse, allNeighbors: m.GetAllCardinalNeighbors}, []geometry.Point{startLocation}, 100) {
-		results = append(results, node.P)
-	}
-	return results
 }
 
 // update for entities:
@@ -669,10 +541,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsActorAt(location geometry.P
 	return m.cells[location.X+location.Y*m.mapWidth].Actor != nil
 }
 
-func (m *GridMap[ActorType, ItemType, ObjectType]) ActorAt(location geometry.Point) ActorType {
-	return *m.cells[location.X+location.Y*m.mapWidth].Actor
-}
-
 func (m *GridMap[ActorType, ItemType, ObjectType]) IsDownedActorAt(location geometry.Point) bool {
 	if !m.Contains(location) {
 		return false
@@ -680,17 +548,10 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsDownedActorAt(location geom
 	return m.cells[location.X+location.Y*m.mapWidth].DownedActor != nil
 }
 
-func (m *GridMap[ActorType, ItemType, ObjectType]) DownedActorAt(location geometry.Point) ActorType {
-	return *m.cells[location.X+location.Y*m.mapWidth].DownedActor
-}
-
 func (m *GridMap[ActorType, ItemType, ObjectType]) IsObjectAt(location geometry.Point) bool {
 	return m.cells[location.X+location.Y*m.mapWidth].Object != nil
 }
 
-func (m *GridMap[ActorType, ItemType, ObjectType]) ObjectAt(location geometry.Point) ObjectType {
-	return *m.cells[location.X+location.Y*m.mapWidth].Object
-}
 func (m *GridMap[ActorType, ItemType, ObjectType]) ZoneAt(p geometry.Point) *ZoneInfo {
 	return m.zoneMap[m.mapWidth*p.Y+p.X]
 }
@@ -721,20 +582,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetFilteredNeighbors(pos geom
 	neighbors := geometry.Neighbors{}
 	filtered := neighbors.All(pos, filter)
 	return filtered
-}
-
-// Reachable flood-fills the 8-connected cells from `from` that are on the map and pass `passable`.
-func (m *GridMap[ActorType, ItemType, ObjectType]) Reachable(from geometry.Point, passable func(geometry.Point) bool) map[geometry.Point]bool {
-	seen := map[geometry.Point]bool{from: true}
-	for queue := []geometry.Point{from}; len(queue) > 0; queue = queue[1:] {
-		for _, n := range m.GetFilteredNeighbors(queue[0], m.Contains) {
-			if !seen[n] && passable(n) {
-				seen[n] = true
-				queue = append(queue, n)
-			}
-		}
-	}
-	return seen
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetFilteredNeighborsForMovement(pos geometry.Point, filter func(geometry.Point) bool) []geometry.Point {
@@ -781,26 +628,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) displaceActor(a ActorType) {
 	freePos := free[0]
 	m.MoveActor(a, freePos)
 }
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetJPSPath(start geometry.Point, end geometry.Point, isWalkable func(geometry.Point) bool) []geometry.Point {
-	if !isWalkable(end) {
-		end = m.getNearestFreeNeighbor(start, end, isWalkable)
-	}
-	//println(fmt.Sprintf("JPS from %v to %v", start, end))
-	return m.pathfinder.JPSPath([]geometry.Point{}, start, end, isWalkable, !m.cardinalMovementOnly)
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) getNearestFreeNeighbor(origin, pos geometry.Point, isFree func(geometry.Point) bool) geometry.Point {
-	dist := math.MaxInt32
-	nearest := pos
-	for _, neighbor := range m.NeighborsCardinal(pos, isFree) {
-		d := geometry.DistanceManhattan(origin, neighbor)
-		if d < dist {
-			dist = d
-			nearest = neighbor
-		}
-	}
-	return nearest
-}
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) getCurrentlyPassableNeighbors(pos geometry.Point) []geometry.Point {
 	neighbors := geometry.Neighbors{}
@@ -818,7 +645,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsCurrentlyPassable(p geometr
 func (m *GridMap[ActorType, ItemType, ObjectType]) CurrentlyPassableAndSafeForActor(person ActorType) func(p geometry.Point) bool {
 	return func(p geometry.Point) bool {
 		if !m.Contains(p) ||
-			(m.IsActorAt(p) && m.ActorAt(p) != person) {
+			(m.IsActorAt(p) && m.actorAt(p) != person) {
 			return false
 		}
 		if _, isTransition := m.GetTransitionAt(p); isTransition { // a path walked for the player never crosses a portal or stairs
@@ -832,7 +659,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsWalkable(p geometry.Point) 
 		return false
 	}
 	var noActor ActorType
-	if m.IsObjectAt(p) && (!m.ObjectAt(p).IsWalkable(noActor)) {
+	if m.IsObjectAt(p) && (!m.objectAt(p).IsWalkable(noActor)) {
 		return false
 	}
 	cellAt := m.GetCell(p)
@@ -846,7 +673,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsWalkableFor(p geometry.Poin
 		return false
 	}
 
-	if m.IsActorAt(p) && m.ActorAt(p) != person {
+	if m.IsActorAt(p) && m.actorAt(p) != person {
 		return false
 	}
 
@@ -854,7 +681,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsWalkableFor(p geometry.Poin
 		return true
 	}
 
-	if m.IsObjectAt(p) && (!m.ObjectAt(p).IsWalkable(person)) {
+	if m.IsObjectAt(p) && (!m.objectAt(p).IsWalkable(person)) {
 		return false
 	}
 
@@ -874,7 +701,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsInHostileZone(person ActorT
 func (m *GridMap[ActorType, ItemType, ObjectType]) CurrentlyPassableForActor(person ActorType) func(p geometry.Point) bool {
 	return func(p geometry.Point) bool {
 		if !m.Contains(p) ||
-			(m.IsActorAt(p) && m.ActorAt(p) != person) {
+			(m.IsActorAt(p) && m.actorAt(p) != person) {
 			return false
 		}
 		return m.IsWalkableFor(p, person)
@@ -933,60 +760,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetNeighborWithSpecial(pos ge
 		}
 	}
 	return pos
-}
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestSpecialTile(pos geometry.Point, tile SpecialTileType) geometry.Point {
-	result := pos
-	allPositions := m.GetAllSpecialTilePositions(tile)
-
-	m.pathfinder.DijkstraMap(m.currentlyPassablePather(), []geometry.Point{pos}, 100)
-
-	sort.Slice(allPositions, func(i, j int) bool {
-		return m.pathfinder.DijkstraMapAt(allPositions[i]) < m.pathfinder.DijkstraMapAt(allPositions[j])
-	})
-	if len(allPositions) > 0 {
-		result = allPositions[0]
-	}
-	return result
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestTile(pos geometry.Point, filter func(tile Tile) bool) geometry.Point {
-	result := pos
-
-	allReachableExplored := m.GetDijkstraMapForExploredWithActorsNotBlocking(pos, 1000)
-	minDist := math.MaxInt32
-
-	for loc, dist := range allReachableExplored {
-		if filter(m.GetCell(loc).TileType) {
-			if dist < minDist {
-				result = loc
-				minDist = dist
-			}
-		}
-	}
-	return result
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestActor(pos geometry.Point, filter func(actor ActorType) bool) ActorType {
-	var nearestActor ActorType
-	nearestDistance := math.MaxInt32
-	for _, actor := range m.allActors {
-		if filter(actor) {
-			dist := geometry.DistanceSquared(pos, actor.MapPosition())
-			if dist < nearestDistance {
-				nearestDistance = dist
-				nearestActor = actor
-			}
-		}
-	}
-	return nearestActor
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) currentlyPassablePather() MapPather {
-	return MapPather{
-		allNeighbors:      m.getCurrentlyPassableNeighbors,
-		neighborPredicate: func(pos geometry.Point) bool { return true },
-		pathCostFunc:      func(from geometry.Point, to geometry.Point) int { return 1 },
-	}
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) SwapDownedPositions(downedActorOne ActorType, downedActorTwo ActorType) {
@@ -1064,49 +837,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) Apply(f func(cell MapCell[Act
 	}
 }
 
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestDropOffPosition(pos geometry.Point) geometry.Point {
-	nearestLocation := geometry.Point{X: 1, Y: 1}
-	shortestDistance := math.MaxInt
-	for index, c := range m.zoneMap {
-		xPos := index % m.mapWidth
-		yPos := index / m.mapWidth
-		curPos := geometry.Point{X: xPos, Y: yPos}
-		curDist := geometry.DistanceManhattan(curPos, pos)
-		isItemHere := m.IsItemAt(curPos)
-		isValidZone := c.IsDropOff()
-		if !isItemHere && isValidZone && curDist < shortestDistance {
-			nearestLocation = curPos
-			shortestDistance = curDist
-		}
-	}
-	return nearestLocation
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) FindNearestItem(pos geometry.Point, predicate func(item ItemType) bool) ItemType {
-	var nearestItem ItemType
-	nearestDistance := math.MaxInt
-	for _, item := range m.allItems {
-		if predicate(item) {
-			curDist := geometry.DistanceManhattan(item.MapPosition(), pos)
-			if curDist < nearestDistance {
-				nearestItem = item
-				nearestDistance = curDist
-			}
-		}
-	}
-	return nearestItem
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) FindAllNearbyActors(source geometry.Point, maxDist int, keep func(actor ActorType) bool) []ActorType {
-	results := make([]ActorType, 0)
-	for _, actor := range m.allActors {
-		if keep(actor) && geometry.DistanceManhattan(actor.MapPosition(), source) <= maxDist {
-			results = append(results, actor)
-		}
-	}
-	return results
-}
-
 func (m *GridMap[ActorType, ItemType, ObjectType]) IsNamedLocationAt(positionInWorld geometry.Point) bool {
 	for _, loc := range m.namedLocations {
 		if loc == positionInWorld {
@@ -1174,47 +904,12 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) NeighborsCardinal(pos geometr
 	return neighbors.Cardinal(pos, filter)
 }
 
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetNearestWalkableNeighbor(start geometry.Point, dest geometry.Point) geometry.Point {
-	minDist := math.MaxInt
-	var minPos geometry.Point
-	for _, neighbor := range m.NeighborsCardinal(dest, m.IsWalkable) {
-		dist := geometry.DistanceManhattan(neighbor, start)
-		if dist < minDist {
-			minDist = dist
-			minPos = neighbor
-		}
-	}
-	return minPos
-}
 func (m *GridMap[ActorType, ItemType, ObjectType]) IsPassableForProjectile(p geometry.Point) bool {
 	isTileWalkable := m.IsTileWalkable(p)
 	isActorOnTile := m.IsActorAt(p)
-	isObjectOnTile := m.IsObjectAt(p)
-	isObjectBlocking := false
-	if isObjectOnTile {
-		objectOnTile := m.ObjectAt(p)
-		isObjectBlocking = !objectOnTile.IsPassableForProjectile()
-	}
+	objectOnTile, isObjectOnTile := m.TryGetObjectAt(p)
+	isObjectBlocking := isObjectOnTile && !objectOnTile.IsPassableForProjectile()
 	return isTileWalkable && !isActorOnTile && !isObjectBlocking
-}
-
-// BresenhamLine returns a list of points that are on the line between source and destination.
-// NOTE: Will remove the source point from the list
-func (m *GridMap[ActorType, ItemType, ObjectType]) BresenhamLine(source geometry.Point, destination geometry.Point, isBlocking func(mapPos geometry.Point) bool) []geometry.Point {
-	los := geometry.LineOfSight(source, destination, func(p geometry.Point) bool {
-		if !m.Contains(p) {
-			return false
-		}
-		if p == source {
-			return true
-		}
-		if isBlocking != nil && isBlocking(p) {
-			return false
-		}
-		return m.IsWalkable(p)
-	})
-	withoutSource := los[1:]
-	return withoutSource
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) SetAllExplored() {
@@ -1279,40 +974,54 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) RandomPosAround(pos geometry.
 	return neighbors[rand.Intn(len(neighbors))]
 }
 
+// actorAt, downedActorAt, objectAt and itemAt dereference the cell: only call them after the matching IsXAt.
+// Other packages use TryGetXAt.
+func (m *GridMap[ActorType, ItemType, ObjectType]) actorAt(p geometry.Point) ActorType {
+	return *m.cells[p.X+p.Y*m.mapWidth].Actor
+}
+
+func (m *GridMap[ActorType, ItemType, ObjectType]) downedActorAt(p geometry.Point) ActorType {
+	return *m.cells[p.X+p.Y*m.mapWidth].DownedActor
+}
+
+func (m *GridMap[ActorType, ItemType, ObjectType]) objectAt(p geometry.Point) ObjectType {
+	return *m.cells[p.X+p.Y*m.mapWidth].Object
+}
+
+func (m *GridMap[ActorType, ItemType, ObjectType]) itemAt(p geometry.Point) ItemType {
+	return *m.cells[p.X+p.Y*m.mapWidth].Item
+}
+
 func (m *GridMap[ActorType, ItemType, ObjectType]) TryGetActorAt(pos geometry.Point) (ActorType, bool) {
-	var noActor ActorType
-	isActorAt := m.IsActorAt(pos)
-	if !isActorAt {
-		return noActor, false
+	var none ActorType
+	if !m.IsActorAt(pos) {
+		return none, false
 	}
-	return m.ActorAt(pos), isActorAt
+	return m.actorAt(pos), true
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) TryGetDownedActorAt(pos geometry.Point) (ActorType, bool) {
-	var noActor ActorType
-	isDownedActorAt := m.IsDownedActorAt(pos)
-	if !isDownedActorAt {
-		return noActor, false
+	var none ActorType
+	if !m.IsDownedActorAt(pos) {
+		return none, false
 	}
-	return m.DownedActorAt(pos), isDownedActorAt
+	return m.downedActorAt(pos), true
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) TryGetObjectAt(pos geometry.Point) (ObjectType, bool) {
-	var noObject ObjectType
-	isObjectAt := m.IsObjectAt(pos)
-	if !isObjectAt {
-		return noObject, false
+	var none ObjectType
+	if !m.IsObjectAt(pos) {
+		return none, false
 	}
-	return m.ObjectAt(pos), isObjectAt
+	return m.objectAt(pos), true
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) TryGetItemAt(pos geometry.Point) (ItemType, bool) {
-	var noItem ItemType
-	isItemAt := m.IsItemAt(pos)
-	if !isItemAt {
-		return noItem, false
+	var none ItemType
+	if !m.IsItemAt(pos) {
+		return none, false
 	}
-	return m.ItemAt(pos), isItemAt
+	return m.itemAt(pos), true
 }
 
 // AddActor puts an actor on the map at spawnPos and reports whether that worked. Spawning is not walking: an
@@ -1417,7 +1126,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) WriteTiles(out io.Writer) {
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) ReadTiles(in io.Reader) {
-	for i, _ := range m.cells {
+	for i := range m.cells {
 		m.cells[i].TileType = NewTileFromBinary(in)
 	}
 }
@@ -1501,8 +1210,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) iterateMapForActors(location 
 	for y := location.Y - radius; y <= location.Y+radius; y++ {
 		for x := location.X - radius; x <= location.X+radius; x++ {
 			pos := geometry.Point{X: x, Y: y}
-			if m.IsActorAt(pos) {
-				actorAt := m.ActorAt(pos)
+			if actorAt, ok := m.TryGetActorAt(pos); ok {
 				if filter(actorAt) {
 					result = append(result, actorAt)
 				}
@@ -1540,72 +1248,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetRandomLocation(filter func
 		if endCounter <= 0 {
 			return geometry.Point{}, false
 		}
-	}
-}
-func (m *GridMap[ActorType, ItemType, ObjectType]) Print() {
-	// walls and floors only
-	for y := 0; y < m.mapHeight; y++ {
-		for x := 0; x < m.mapWidth; x++ {
-			pos := geometry.Point{X: x, Y: y}
-			if m.IsTileWalkable(pos) {
-				fmt.Printf(".")
-			} else {
-				fmt.Printf("#")
-			}
-		}
-		fmt.Printf("\n")
-	}
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) PrintStairsAndActors() {
-	// walls and floors only
-	for y := 0; y < m.mapHeight; y++ {
-		for x := 0; x < m.mapWidth; x++ {
-			pos := geometry.Point{X: x, Y: y}
-			if m.IsStairsAt(pos) {
-				special := m.GetCell(pos).TileType.Special
-				if special == SpecialTileStairsUp {
-					fmt.Printf("<")
-				} else if special == SpecialTileStairsDown {
-					fmt.Printf(">")
-				}
-
-			} else if m.IsActorAt(pos) {
-				fmt.Printf("a")
-			} else if m.IsTileWalkable(pos) {
-				fmt.Printf(".")
-			} else {
-				fmt.Printf("#")
-			}
-		}
-		fmt.Printf("\n")
-	}
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) PrintWithHighlight(hiPos geometry.Point) {
-	// walls and floors only
-	for y := 0; y < m.mapHeight; y++ {
-		for x := 0; x < m.mapWidth; x++ {
-			pos := geometry.Point{X: x, Y: y}
-			if pos == hiPos {
-				fmt.Printf("X")
-			} else if m.IsStairsAt(pos) {
-				special := m.GetCell(pos).TileType.Special
-				if special == SpecialTileStairsUp {
-					fmt.Printf("<")
-				} else if special == SpecialTileStairsDown {
-					fmt.Printf(">")
-				}
-
-			} else if m.IsActorAt(pos) {
-				fmt.Printf("a")
-			} else if m.IsTileWalkable(pos) {
-				fmt.Printf(".")
-			} else {
-				fmt.Printf("#")
-			}
-		}
-		fmt.Printf("\n")
 	}
 }
 
@@ -1654,29 +1296,10 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) MoveDistance(pOne geometry.Po
 }
 func (m *GridMap[ActorType, ItemType, ObjectType]) ApplyToActorsAt(positions []geometry.Point, applyFunc func(actor ActorType)) {
 	for _, pos := range positions {
-		if !m.IsActorAt(pos) {
-			continue
+		if actor, ok := m.TryGetActorAt(pos); ok {
+			applyFunc(actor)
 		}
-		applyFunc(m.ActorAt(pos))
 	}
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) RayCast(origin, direction geometry.PointF, isBlockingRay func(geometry.Point) bool) util.HitInfo2D {
-	direction = direction.Normalize()
-	hitInfo := util.Raycast2D(origin.X, origin.Y, direction.X, direction.Y, func(x, y int64) bool {
-		currentMapCell := geometry.Point{X: int(x), Y: int(y)}
-		return isBlockingRay(currentMapCell)
-	})
-	return hitInfo
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) ReflectingRayCast(origin, direction geometry.PointF, maxReflections int, isBlockingRay func(geometry.Point) bool) []util.HitInfo2D {
-	direction = direction.Normalize()
-	hitInfos := util.ReflectingRaycast2D(origin.X, origin.Y, direction.X, direction.Y, maxReflections, func(x, y int64) bool {
-		currentMapCell := geometry.Point{X: int(x), Y: int(y)}
-		return isBlockingRay(currentMapCell)
-	})
-	return hitInfos
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) AddDecal(pos geometry.Point, decalIcon int32) {
@@ -1693,73 +1316,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetDecal(pos geometry.Point) 
 	}
 	return decal, true
 }
-func (m *GridMap[ActorType, ItemType, ObjectType]) JumpOverPositions(origin geometry.Point, target geometry.Point, maxSprint, maxJump int) JumpOverInfo {
-	direction := target.Sub(origin)
-	beyondTargetPos := target.Add(direction)
-	lineOfSprint := m.BresenhamLine(origin, beyondTargetPos, func(pos geometry.Point) bool {
-		return !m.Contains(pos)
-	})
-
-	var sprint []geometry.Point
-	var jump []geometry.Point
-	var jumpedPos geometry.Point
-	actorFound := false
-
-	for _, pos := range lineOfSprint {
-		if m.IsCurrentlyPassable(pos) {
-			if actorFound {
-				jump = append(jump, pos)
-				if len(jump) >= maxJump {
-					break
-				}
-			} else {
-				sprint = append(sprint, pos)
-				if len(sprint) >= maxSprint {
-					break
-				}
-			}
-		} else if m.IsActorAt(pos) {
-			jumpedPos = pos
-			actorFound = true
-		}
-	}
-	return JumpOverInfo{
-		Sprint:     sprint,
-		Jump:       jump,
-		JumpedPos:  jumpedPos,
-		ActorFound: actorFound,
-	}
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) SprintToPosition(origin geometry.Point, target geometry.Point, maxSprint int) SprintTooInfo {
-	lineOfSprint := m.BresenhamLine(origin, target, func(pos geometry.Point) bool { return !m.Contains(pos) })
-
-	var sprint []geometry.Point
-	var sprintEndPos geometry.Point
-	var emptyTileFound bool
-
-	for _, pos := range lineOfSprint {
-		if !m.IsActorAt(pos) && m.IsCurrentlyPassable(pos) {
-			sprint = append(sprint, pos)
-			if len(sprint) >= maxSprint {
-				break
-			}
-		} else {
-			break
-		}
-	}
-
-	if len(sprint) <= maxSprint && len(sprint) > 0 {
-		emptyTileFound = true
-		sprintEndPos = sprint[len(sprint)-1]
-	}
-
-	return SprintTooInfo{
-		Sprint:         sprint,
-		SprintEndPos:   sprintEndPos,
-		EmptyTileFound: emptyTileFound,
-	}
-}
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) GetWidth() int {
 	return m.mapWidth
@@ -1774,18 +1330,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsTileLit(pos geometry.Point)
 		return false
 	}
 	return m.GetCell(pos).IsLit
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) IsValidSprintTarget(attacker geometry.Point, target geometry.Point, maxSprint int) bool {
-	sprintInfo := m.SprintToPosition(attacker, target, maxSprint)
-	isValid := false
-	for _, pos := range sprintInfo.Sprint {
-		if pos == target {
-			isValid = true
-			break
-		}
-	}
-	return isValid
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) IsBorderWall(point geometry.Point) bool {

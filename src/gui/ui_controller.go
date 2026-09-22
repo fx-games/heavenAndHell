@@ -890,11 +890,7 @@ func (u *UIController) BeginPlayerSellingTo(vendor *common.Actor) {
 		return
 	}
 	sort.Slice(sellItems, func(a, b int) bool { return sellItems[a].ShortCut < sellItems[b].ShortCut })
-	goldAmount := player.GetStats().GetAttribute(stats.Gold)
-	menu := NewShopMenu(u, u.worldTexture.GetTileSize())
-	u.PushWidget(menu)
-	menu.SetHeader("You have:", fmt.Sprintf("%d gold", goldAmount))
-	menu.SetItems(sellItems, []Alignment{AlignmentLeft, AlignmentRight})
+	u.pushShopMenu(sellItems)
 }
 
 // openLevelUpMenu is the same window as 'c': it has a "+" next to every attribute a point can still go into.
@@ -1184,7 +1180,7 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 
 	// animate the worldIcon
 	if u.renderingMode == GraphicRendering && (state.GetPlayer().CanSee(mapPos) || u.disableFogOfWar) {
-		if !u.configuration.DrawTilesBehindActors && currentMap.IsActorAt(mapPos) && currentMap.ActorAt(mapPos).IsVisible() {
+		if !u.configuration.DrawTilesBehindActors && actorVisibleAt(currentMap, mapPos) {
 			return []renderer.CellDrawInfo{}
 		}
 		if info, ok := u.tilemapAnimations[worldIcon]; ok {
@@ -1203,10 +1199,10 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 
 	// corpses lie under objects and items (loot dropped on a corpse stays visible)
 	var corpse *renderer.CellDrawInfo
-	if currentMap.IsDownedActorAt(mapPos) && state.GetPlayer().GetFOV().Visible(mapPos) && !currentMap.DownedActorAt(mapPos).VisualsPending() {
+	if downed, ok := currentMap.TryGetDownedActorAt(mapPos); ok && state.GetPlayer().GetFOV().Visible(mapPos) && !downed.VisualsPending() {
 		corpse = &renderer.CellDrawInfo{
 			Atlas: u.GetCurrentAtlas(),
-			Icon:  currentMap.DownedActorAt(mapPos).Icon(u.worldTicks),
+			Icon:  downed.Icon(u.worldTicks),
 			Color: drawColor,
 		}
 	}
@@ -1229,8 +1225,7 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 	}
 
 	// 2. objects
-	if currentMap.IsObjectAt(mapPos) {
-		objectAt := currentMap.ObjectAt(mapPos)
+	if objectAt, ok := currentMap.TryGetObjectAt(mapPos); ok {
 		objIcon := objectAt.Icon(u.worldTicks)
 		drawObject := renderer.CellDrawInfo{
 			Atlas: u.worldTexture,
@@ -1349,7 +1344,7 @@ func (u *UIController) BeginThrowTargeting(targetRules common.TargetRules, onSel
 			onSelected(attacker, target)
 		},
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Throw")),
+			util.LabelTextFromString("Throw"),
 		},
 	})
 }
@@ -1660,36 +1655,12 @@ func (u *UIController) OpenServiceMenu(items []*common.Item, price func(*common.
 		stacks[i] = common.InventoryStack{it}
 	}
 	common.SortInventory(stacks)
-	gold := u.context.GameState().GetPlayer().GetStats().GetAttribute(stats.Gold)
-	var menuItems []ShopMenuItem
-	for idx, stack := range stacks {
-		item, cost := stack[0], price(stack[0])
-		priceColor := "darkText"
-		if cost > gold {
-			priceColor = "negative"
-		}
-		nameColor := item.TintColor()
-		if !item.MeetsRequirements() {
-			nameColor = defs.Red
-		}
-		menuItems = append(menuItems, ShopMenuItem{
-			ShortCut: 'a' + rune(idx),
-			Tooltip:  item.GetTooltipLines(u.ParseColorCodedText),
-			Icon:     item.InventoryIcon(),
-			TextColumns: []util.LabelText{
-				{Text: item.ShopName(), TextColor: nameColor},
-				{Text: fmt.Sprintf("%d", cost), TextWithColorCodes: u.ParseColorCodedText(fmt.Sprintf("[:%s]%d", priceColor, cost)), UseColorCodes: true},
-			},
-			Action: func() {
-				u.PopWidget() // pick reopens the list if anything is left, else it's back to the menu below
-				pick(item)
-			},
-		})
-	}
-	menu := NewShopMenu(u, u.worldTexture.GetTileSize())
-	u.PushWidget(menu)
-	menu.SetHeader("You have:", fmt.Sprintf("%d gold", gold))
-	menu.SetItems(menuItems, []Alignment{AlignmentLeft, AlignmentRight})
+	u.pushShopMenu(u.priceRows(stacks, func(s common.InventoryStack) string { return s[0].ShopName() }, price,
+		func(row *ShopMenuItem, item *common.Item) { row.Tooltip = item.GetTooltipLines(u.ParseColorCodedText) },
+		func(item *common.Item) {
+			u.PopWidget() // pick reopens the list if anything is left, else it's back to the menu below
+			pick(item)
+		}))
 }
 
 func (u *UIController) OpenListInventoryForSelection(filter func(element *common.Item) bool, onSelected func(invItemKey rune)) {
@@ -1749,72 +1720,54 @@ func (u *UIController) OpenShopMenu(vendor *common.Actor) {
 // OpenShopMenuFiltered is OpenShopMenu restricted to a subset of the vendor's stock, e.g. Griswold's basic vs.
 // premium items (S_StartSBuy/S_ScrollSBuy split those into two separate menus in D1).
 func (u *UIController) OpenShopMenuFiltered(vendor *common.Actor, filter func(*common.Item) bool) {
-	u.openShopMenuWithHandler(vendor.GetInventory(), filter, func(item *common.Item) {
-		u.tryToBuy(item, vendor, filter)
-	})
+	stacks := vendor.GetInventory().StackedItemsWithFilter(filter)
+	if len(stacks) == 0 {
+		return
+	}
+	common.SortInventory(stacks)
+	u.pushShopMenu(u.priceRows(stacks, common.InventoryStack.ShopName, (*common.Item).BuyPrice,
+		func(row *ShopMenuItem, item *common.Item) {
+			row.MakeTooltip = func(mousePos geometry.Point) Tooltip { return NewItemCompareTooltip(u, item, mousePos) }
+		},
+		func(item *common.Item) { u.tryToBuy(item, vendor, filter) }))
 }
-func (u *UIController) openShopMenuWithHandler(inventory *common.Inventory, filter func(*common.Item) bool, handler func(item *common.Item)) {
-	if inventory.IsEmpty() {
-		return
-	}
-	player := u.context.GameState().GetPlayer()
-	goldAmount := player.GetStats().GetAttribute(stats.Gold)
 
-	var menuItems []ShopMenuItem
-	inventoryStacks := inventory.StackedItemsWithFilter(filter)
-	if len(inventoryStacks) == 0 {
-		return
-	}
-	common.SortInventory(inventoryStacks)
-	textParser := u.ParseColorCodedText
-
-	for itemIndex, i := range inventoryStacks {
-
-		item := i[0]
-		cost := item.BuyPrice()
-		cannotPayForItem := cost > goldAmount
-
-		colorCodeForPrice := "darkText"
-		if cannotPayForItem {
-			colorCodeForPrice = "negative"
+// priceRows lays out stacks as shop rows with a-z shortcuts: the name, red when the hero can't use the item, and the
+// price, red when it is more than the hero's gold.
+func (u *UIController) priceRows(stacks []common.InventoryStack, name func(common.InventoryStack) string, price func(*common.Item) int,
+	tooltip func(*ShopMenuItem, *common.Item), onPick func(*common.Item)) []ShopMenuItem {
+	gold := u.context.GameState().GetPlayer().GetStats().GetAttribute(stats.Gold)
+	rows := make([]ShopMenuItem, len(stacks))
+	for idx, stack := range stacks {
+		item, cost := stack[0], price(stack[0])
+		priceColor := "darkText"
+		if cost > gold {
+			priceColor = "negative"
 		}
-		nameString := i.ShopName()
 		nameColor := item.TintColor()
 		if !item.MeetsRequirements() {
 			nameColor = defs.Red
 		}
-		priceString := fmt.Sprintf("%d", cost)
-		priceStringWithColor := fmt.Sprintf("[:%s]%d", colorCodeForPrice, cost)
-		// shortcuts start with 0 => 'a'
-		shortCut := rune('a') + rune(itemIndex)
-
-		menuItems = append(menuItems, ShopMenuItem{
-			ShortCut:    shortCut,
-			MakeTooltip: func(mousePos geometry.Point) Tooltip { return NewItemCompareTooltip(u, item, mousePos) },
-			Icon:        item.InventoryIcon(),
+		rows[idx] = ShopMenuItem{
+			ShortCut: 'a' + rune(idx),
+			Icon:     item.InventoryIcon(),
 			TextColumns: []util.LabelText{
-				{
-					Text: nameString,
-					//TextWithColorCodes: textParser(nameStringWithColor),
-					UseColorCodes: false,
-					TextColor:     nameColor,
-				},
-				{
-					Text:               priceString,
-					TextWithColorCodes: textParser(priceStringWithColor),
-					UseColorCodes:      true,
-				},
+				{Text: name(stack), TextColor: nameColor},
+				{Text: fmt.Sprintf("%d", cost), TextWithColorCodes: u.ParseColorCodedText(fmt.Sprintf("[:%s]%d", priceColor, cost)), UseColorCodes: true},
 			},
-			Action: func() {
-				handler(item)
-			},
-		})
+			Action: func() { onPick(item) },
+		}
+		tooltip(&rows[idx], item)
 	}
+	return rows
+}
 
+// pushShopMenu opens the buy/sell/service window on rows, headed by the hero's gold.
+func (u *UIController) pushShopMenu(rows []ShopMenuItem) {
 	menu := NewShopMenu(u, u.worldTexture.GetTileSize())
 	u.PushWidget(menu)
-	menu.SetHeader("You have:", fmt.Sprintf("%d gold", goldAmount))
-	menu.SetItems(menuItems, []Alignment{AlignmentLeft, AlignmentRight})
+	menu.SetHeader("You have:", fmt.Sprintf("%d gold", u.context.GameState().GetPlayer().GetStats().GetAttribute(stats.Gold)))
+	menu.SetItems(rows, []Alignment{AlignmentLeft, AlignmentRight})
 }
 
 func (u *UIController) tryToBuy(item *common.Item, seller *common.Actor, filter func(*common.Item) bool) {
@@ -1859,14 +1812,17 @@ func (u *UIController) updateMapTileHoverInfo(mapPos geometry.Point) {
 		return
 	}
 	var name string
+	actor, isActor := m.TryGetActorAt(mapPos)
+	item, isItem := m.TryGetItemAt(mapPos)
+	object, isObject := m.TryGetObjectAt(mapPos)
 	switch { // infravision reveals the monster, not the floor it stands on
-	case m.IsActorAt(mapPos) && m.ActorAt(mapPos).IsVisible():
-		name = m.ActorAt(mapPos).Name()
+	case isActor && actor.IsVisible():
+		name = actor.Name()
 	case !player.CanSee(mapPos):
-	case m.IsItemAt(mapPos):
-		name = m.ItemAt(mapPos).Name()
-	case m.IsObjectAt(mapPos):
-		name = m.ObjectAt(mapPos).Name()
+	case isItem:
+		name = item.Name()
+	case isObject:
+		name = object.Name()
 	}
 	if name == "" {
 		u.inventory.infoLabel.ClearText()

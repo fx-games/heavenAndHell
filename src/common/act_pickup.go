@@ -25,10 +25,10 @@ func (d *PickUpAction) Execute(context ActionContext) []Action {
 	actor := d.actor
 	actorPos := actor.MapPosition()
 
-	if !gameMap.IsItemAt(actorPos) {
+	item, ok := gameMap.TryGetItemAt(actorPos)
+	if !ok {
 		return nil
 	}
-	item := gameMap.ItemAt(actorPos)
 
 	gameMap.RemoveItem(item)
 

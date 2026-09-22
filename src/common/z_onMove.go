@@ -67,8 +67,7 @@ func (d OnMoveHook) After(action Action, context ActionContext) []Action {
 
 func (d OnMoveHook) logObjectsAtLocation(context ActionContext, pos geometry.Point) *Item {
 	state := context.GameState
-	if state.GetMap().IsItemAt(pos) {
-		item := state.GetMap().ItemAt(pos)
+	if item, ok := state.GetMap().TryGetItemAt(pos); ok {
 		context.Msg(fmt.Sprintf("You see [:darkText]%s", item.Name()))
 		return item
 	}
@@ -79,8 +78,8 @@ func TriggerCellEffectsDuringMovementForActor(state *State, sourceAction Action,
 	if actor.HasStatusEffect(StatusFlying) {
 		return nil
 	}
-	if currentMap := state.GetMap(); currentMap.IsObjectAt(mapPos) {
-		currentMap.ObjectAt(mapPos).ActorWalkedOn(actor, startAnimating)
+	if object, ok := state.GetMap().TryGetObjectAt(mapPos); ok {
+		object.ActorWalkedOn(actor, startAnimating)
 	}
 	return nil
 }

@@ -25,7 +25,7 @@ func (v *Visibility) Set(visible map[*Actor]bool) {
 
 func (v *Visibility) GetVisibleEnemyCount(isEnemy func(*Actor) bool) int {
 	count := 0
-	for actor, _ := range v.visibleActors {
+	for actor := range v.visibleActors {
 		if actor.IsVisible() && isEnemy(actor) {
 			count++
 		}
@@ -39,7 +39,7 @@ func (v *Visibility) RemoveActor(victim *Actor) {
 
 func (v *Visibility) GetVisibleEnemies() []*Actor {
 	enemies := make([]*Actor, 0)
-	for actor, _ := range v.visibleActors {
+	for actor := range v.visibleActors {
 		if actor.IsVisible() && actor.IsHostile() {
 			enemies = append(enemies, actor)
 		}

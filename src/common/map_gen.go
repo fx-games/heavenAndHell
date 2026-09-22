@@ -278,8 +278,8 @@ func (g *MapGenerator) changeD1Map(m *gridmap.GridMap[*Actor, *Item, Object], x1
 		return
 	}
 	g.setD1Tiles(m, lvl, 2*x1, 2*y1, 2*x2+1, 2*y2+1, func(p geometry.Point) bool {
-		if m.IsObjectAt(p) { // a door built before the change stays a door, not a wall under its object
-			_, isDoor := m.ObjectAt(p).(*Door)
+		if obj, ok := m.TryGetObjectAt(p); ok { // a door built before the change stays a door, not a wall under its object
+			_, isDoor := obj.(*Door)
 			return isDoor
 		}
 		return lvl.CellDoor(p.X, p.Y)

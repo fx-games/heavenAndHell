@@ -16,10 +16,9 @@ func (f *Factory) d1Doppelganger(original *Actor) {
 		if !m.Contains(p) || !m.CanPlaceActorHere(p) {
 			continue
 		}
-		if m.IsObjectAt(p) {
-			if o, isD1 := m.ObjectAt(p).(*D1Object); isD1 && o.O.Solid {
-				continue
-			}
+		obj, _ := m.TryGetObjectAt(p)
+		if o, isD1 := obj.(*D1Object); isD1 && o.O.Solid {
+			continue
 		}
 		a := f.NewD1Monster(original.d1Monster.Type)
 		a.d1Monster.SpawnIndex = -1 // saved in LevelSnapshot.Spawned

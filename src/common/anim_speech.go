@@ -52,8 +52,6 @@ func (m *SpeechAnimation) Draw(renderer TileRenderer) {
 	}
 	originPos := m.actor.MapPosition()
 	textString := strings.Join(m.textToSpeak, "\n")
-	percentDone := float64(m.ticksAlive) / float64(m.ticksNeeded)
-	percentDone = util.EaseInExpo(percentDone)
 
 	tWidth, _ := renderer.MeasureString(textString)
 	// we want to center that string on a 16 pixel wide tile

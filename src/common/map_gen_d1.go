@@ -208,10 +208,11 @@ func canPlaceD1Monster(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Poi
 	if m.CanPlaceActorHere(p) {
 		return true
 	}
-	if !m.Contains(p) || !m.IsObjectAt(p) {
+	if !m.Contains(p) {
 		return false
 	}
-	_, isD1 := m.ObjectAt(p).(*D1Object)
+	obj, _ := m.TryGetObjectAt(p)
+	_, isD1 := obj.(*D1Object)
 	return isD1 && m.GetCell(p).TileType.IsWalkable && !m.IsActorAt(p) && !m.IsObviousHazardAt(p)
 }
 

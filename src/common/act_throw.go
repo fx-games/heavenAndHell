@@ -50,10 +50,10 @@ func (d *ThrowAction) Execute(context ActionContext) []Action {
 	actions = append(actions, moveItem)
 
 	currentMap := context.GameState.GetMap()
-	if !currentMap.IsActorAt(d.targetPos) {
+	if defender, ok := currentMap.TryGetActorAt(d.targetPos); !ok {
 		context.GameState.factory.hitD1Object(currentMap, d.targetPos, d.attacker) // a thrown item that hits a barrel breaks it
 	} else {
-		d.defender = currentMap.ActorAt(d.targetPos)
+		d.defender = defender
 
 		hitChance := CalculateThrowHitChance(d.attacker, d.defender)
 

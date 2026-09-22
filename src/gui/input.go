@@ -3,6 +3,7 @@ package gui
 import (
 	"rpg/src/common"
 	"rpg/src/geometry"
+	"rpg/src/gridmap"
 	"rpg/src/util"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -355,7 +356,7 @@ func (u *UIController) onMapClicked(mouseButton ebiten.MouseButton, mapPos geome
 	act := u.context.PlayerAction()
 	state := u.context.GameState()
 	currentMap := state.GetMap()
-	if mouseButton == ebiten.MouseButtonRight && currentMap.IsActorAt(mapPos) && currentMap.ActorAt(mapPos).IsVisible() && state.GetPlayer().CanPerceive(mapPos) {
+	if mouseButton == ebiten.MouseButtonRight && actorVisibleAt(currentMap, mapPos) && state.GetPlayer().CanPerceive(mapPos) {
 		act.ShowActorInfoAt(mapPos)
 	} else if mouseButton == ebiten.MouseButtonRight && currentMap.IsObjectAt(mapPos) && state.GetPlayer().CanSee(mapPos) {
 		act.ShowObjectInfoAt(mapPos)
@@ -367,4 +368,9 @@ func (u *UIController) onMapClicked(mouseButton ebiten.MouseButton, mapPos geome
 		act.CancelAutoMove()
 		act.StartPlayerAutoMovement(mapPos)
 	}
+}
+
+func actorVisibleAt(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], p geometry.Point) bool {
+	a, ok := m.TryGetActorAt(p)
+	return ok && a.IsVisible()
 }

@@ -56,10 +56,10 @@ func (c *Console) canSeeCell(pos geometry.Point) bool {
 func (c *Console) visibleActorAt(pos geometry.Point) *common.Actor {
 	state := c.context.GameState()
 	currentMap, player := state.GetMap(), state.GetPlayer()
-	if !currentMap.IsActorAt(pos) {
+	actor, ok := currentMap.TryGetActorAt(pos)
+	if !ok {
 		return nil
 	}
-	actor := currentMap.ActorAt(pos)
 	if !actor.IsVisible() || !c.disableFog && !player.CanPerceive(pos) {
 		return nil
 	}
@@ -79,8 +79,8 @@ func (c *Console) VisibleIconAt(loc mgeom.Point) textiles.TextIcon {
 		icon = textiles.TextIcon{Char: itemGlyph(item), Fg: item.TintColor()}
 	} else if objectIcon, isObject := c.objectIconAt(pos); isObject {
 		icon = objectIcon
-	} else if currentMap.IsDownedActorAt(pos) {
-		icon = textiles.TextIcon{Char: '%', Fg: currentMap.DownedActorAt(pos).GetColor()}
+	} else if downed, ok := currentMap.TryGetDownedActorAt(pos); ok {
+		icon = textiles.TextIcon{Char: '%', Fg: downed.GetColor()}
 	} else {
 		icon = c.tileIcon(pos)
 	}
@@ -212,10 +212,10 @@ var objectGlyphs = []struct {
 
 func (c *Console) objectIconAt(pos geometry.Point) (textiles.TextIcon, bool) {
 	currentMap := c.context.GameState().GetMap()
-	if !currentMap.IsObjectAt(pos) {
+	object, ok := currentMap.TryGetObjectAt(pos)
+	if !ok {
 		return textiles.TextIcon{}, false
 	}
-	object := currentMap.ObjectAt(pos)
 	if door, isDoor := object.(*common.Door); isDoor {
 		if door.IsClosed() {
 			return textiles.TextIcon{Char: '+', Fg: defs.Brown}, true
@@ -252,11 +252,11 @@ func (c *Console) describe(loc mgeom.Point) string {
 	if !c.canSeeCell(pos) {
 		return " "
 	}
-	switch {
-	case currentMap.IsItemAt(pos):
-		return currentMap.ItemAt(pos).Name()
-	case currentMap.IsObjectAt(pos) && currentMap.ObjectAt(pos).Name() != "":
-		return currentMap.ObjectAt(pos).Name()
+	if item, ok := currentMap.TryGetItemAt(pos); ok {
+		return item.Name()
+	}
+	if object, ok := currentMap.TryGetObjectAt(pos); ok && object.Name() != "" {
+		return object.Name()
 	}
 	return " "
 }

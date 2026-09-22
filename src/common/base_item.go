@@ -611,18 +611,18 @@ func (i *Item) GetTooltipLines(parseColorCodedText func(string) []util.ColoredTe
 	if len(i.GetEquippedModifiers()) > 0 {
 		info = append(info, util.LabelTextFromString(""))
 		for _, m := range i.GetEquippedModifiers() {
-			info = append(info, util.LabelTextFromString(fmt.Sprintf("%s", m.ToString())))
+			info = append(info, util.LabelTextFromString(m.ToString()))
 		}
 	}
 	if len(i.GetItemHooks()) > 0 {
 		info = append(info, util.LabelTextFromString(""), util.LabelTextFromString("Effects"))
 		for _, h := range i.GetItemHooks() {
-			info = append(info, util.LabelTextFromString(fmt.Sprintf("%s", h.ToString())))
+			info = append(info, util.LabelTextFromString(h.ToString()))
 		}
 	}
 	if i.HasAction() { // wands
 		if i.HasInfiniteCharges() {
-			//info = append(info, common.LabelTextFromString(fmt.Sprintf("Has infinite charges")))
+			//info = append(info, common.LabelTextFromString("Has infinite charges"))
 			if i.targetedAction != nil {
 				info = append(info, i.targetedAction.GetDescription()...)
 			}
@@ -631,7 +631,7 @@ func (i *Item) GetTooltipLines(parseColorCodedText func(string) []util.ColoredTe
 			}
 		} else {
 			if i.SelfDestructs() {
-				info = append(info, util.LabelTextFromString(fmt.Sprintf("Is destroyed after use")))
+				info = append(info, util.LabelTextFromString("Is destroyed after use"))
 			}
 
 			if i.targetedAction != nil {
@@ -653,7 +653,7 @@ func (i *Item) GetTooltipLines(parseColorCodedText func(string) []util.ColoredTe
 	if i.IsLightSource() {
 		info = append(info, util.LabelTextFromString(""))
 		if i.HasInfiniteCharges() {
-			info = append(info, util.LabelTextFromString(fmt.Sprintf("Provides light")))
+			info = append(info, util.LabelTextFromString("Provides light"))
 		} else {
 			info = append(info, util.LabelTextFromString(fmt.Sprintf("Provides light for %d turns", i.GetCharges())))
 		}
@@ -661,8 +661,8 @@ func (i *Item) GetTooltipLines(parseColorCodedText func(string) []util.ColoredTe
 
 	if i.IsThrowable() {
 		info = append(info, util.LabelTextFromString(""))
-		info = append(info, util.LabelTextFromString(fmt.Sprintf("Can be thrown")))
-		info = append(info, util.LabelTextFromString(fmt.Sprintf("Press \"v\" to throw an item")))
+		info = append(info, util.LabelTextFromString("Can be thrown"))
+		info = append(info, util.LabelTextFromString("Press \"v\" to throw an item"))
 		info = append(info, util.LabelTextFromString(""))
 		info = append(info, i.GetThrowStats().ToLabelText()...)
 	}

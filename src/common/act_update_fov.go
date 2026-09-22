@@ -52,8 +52,7 @@ func updatePlayerKnowledge(context ActionContext) {
 
 	for _, p := range player.VisionMap() {
 		currentMap.SetExplored(p)
-		if state.GetMap().IsActorAt(p) {
-			visibleActor := state.GetMap().ActorAt(p)
+		if visibleActor, ok := state.GetMap().TryGetActorAt(p); ok {
 			if visibleActor == player {
 				continue
 			}
@@ -71,13 +70,13 @@ func updatePlayerKnowledge(context ActionContext) {
 		}
 	}
 
-	for previouslyVisible, _ := range vis.GetVisibleActors() {
+	for previouslyVisible := range vis.GetVisibleActors() {
 		if _, exists := currentlyVisible[previouslyVisible]; !exists {
 			wentOutOfView[previouslyVisible] = true
 		}
 	}
 	vis.Set(currentlyVisible)
-	for newActor, _ := range cameIntoView {
+	for newActor := range cameIntoView {
 		if lines := newActor.SpeechOnSight(); len(lines) > 0 && context.ActionBroker != nil {
 			line := lines[rand.Intn(len(lines))]
 			context.ActionBroker.AddAnimation(NewSpeechAnimation(newActor, []string{line}))
@@ -93,7 +92,7 @@ func updatePlayerKnowledge(context ActionContext) {
 			}
 		}
 	}
-	for oldActor, _ := range wentOutOfView {
+	for oldActor := range wentOutOfView {
 		if oldActor.IsHostile() {
 			//context.Msg(fmt.Sprintf("%s leaves your field of view", oldActor.Name()))
 		}

@@ -164,9 +164,7 @@ func (t *TextInput) OnKeyPressed(key ebiten.Key, shiftPressed bool) {
 	}
 	if len(t.currentText) < t.maxLength {
 		printable := key.String()
-		if strings.HasPrefix(printable, "Digit") {
-			printable = printable[5:]
-		}
+		printable = strings.TrimPrefix(printable, "Digit")
 		// only accept standard printable ascii characters
 		if len(printable) != 1 || printable[0] < 32 || printable[0] > 126 {
 			return

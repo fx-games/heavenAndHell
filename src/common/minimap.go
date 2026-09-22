@@ -54,8 +54,7 @@ func MiniMapColor(state *State, cfg *Configuration, mapPos geometry.Point) [4]by
 		}
 		return miniMapColor(cfg, "wallUnlit")
 	}
-	if currentMap.IsActorAt(mapPos) && currentMap.ActorAt(mapPos).IsVisible() {
-		actorAt := currentMap.ActorAt(mapPos)
+	if actorAt, ok := currentMap.TryGetActorAt(mapPos); ok && actorAt.IsVisible() {
 		if actorAt.IsHostileTo(state.GetPlayer()) {
 			return miniMapColor(cfg, "hostileActor")
 		}

@@ -25,7 +25,7 @@ func TestAddActorIsAllOrNothing(t *testing.T) {
 	if got := len(m.Actors()); got != 1 {
 		t.Fatalf("%d actors on the map, want 1", got)
 	}
-	if m.ActorAt(at) != first {
+	if a, _ := m.TryGetActorAt(at); a != first {
 		t.Fatal("the cell does not hold the actor that was placed on it")
 	}
 }

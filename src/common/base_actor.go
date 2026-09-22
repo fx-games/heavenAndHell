@@ -380,10 +380,7 @@ func (a *Actor) CanLevelUp() bool {
 	currentLevel := a.GetStats().GetAttribute(stats.Level)
 	currentXP := a.GetStats().GetAttribute(stats.Experience)
 	xpNeeded := a.GetXPForLevel(currentLevel + 1)
-	if currentXP >= xpNeeded {
-		return true
-	}
-	return false
+	return currentXP >= xpNeeded
 }
 
 func (a *Actor) GetXPForLevel(level int) int {

@@ -50,7 +50,7 @@ func TestStatusEffectsSurviveSaveLoad(t *testing.T) {
 	if got := state.GetPlayer().GetStatusEffects().AllEntries()[string(common.StatusInfravision)]; got != wantInfravision {
 		t.Fatalf("hero's infravision after load: %d turns, want %d", got, wantInfravision)
 	}
-	a := state.GetMap().ActorAt(pos)
+	a, _ := state.GetMap().TryGetActorAt(pos)
 	if a == nil {
 		t.Fatalf("no monster at %v after load", pos)
 	}

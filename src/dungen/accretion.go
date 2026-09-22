@@ -267,7 +267,7 @@ func (g *AccretionGenerator) tryConnectTo(dMap *DungeonMap, newRoom *DungeonRoom
 				// the new room should be placed so that the new door is at the same position as the existing door
 				newRoom.SetPositionOffset(absoluteDoorPos.Sub(rotatedRelativeDoorPos))
 				if g.printDebugSteps {
-					println(fmt.Sprintf("=== CONNECTION POSSIBLE ==="))
+					println("=== CONNECTION POSSIBLE ===")
 					println(fmt.Sprintf("> NEW ROOM %d", newRoom.roomId))
 					newRoom.PrintTransformedWithHighlight(relativeNewDoorPos)
 					println(fmt.Sprintf("> EXISTING ROOM %d", existingRoom.roomId))
@@ -275,18 +275,18 @@ func (g *AccretionGenerator) tryConnectTo(dMap *DungeonMap, newRoom *DungeonRoom
 				}
 				if dMap.CanPlaceRoomNextTo(newRoom, existingRoom) {
 					if g.printDebugSteps {
-						println(fmt.Sprintf("=== CONNECTED ==="))
+						println("=== CONNECTED ===")
 					}
 					newRoom.AddConnectedRoom(relativeNewDoorPos, existingRoom)
 					existingRoom.AddConnectedRoom(relativeConnectionPos, newRoom)
 					return true
 				} else if g.printDebugSteps && newRoom.GetPlugsIntoSlotId() > 0 {
-					println(fmt.Sprintf("=== COULD NOT FIT ==="))
+					println("=== COULD NOT FIT ===")
 					println(fmt.Sprintf("> NEW ROOM %d", newRoom.roomId))
 					newRoom.PrintTransformedWithHighlight(relativeNewDoorPos)
 					println(fmt.Sprintf("> EXISTING ROOM %d", existingRoom.roomId))
 					existingRoom.PrintTransformedWithHighlight(relativeConnectionPos)
-					println(fmt.Sprintf("> MAP"))
+					println("> MAP")
 					dMap.PrintWithHighlight(absoluteDoorPos)
 				}
 			}

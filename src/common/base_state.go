@@ -481,10 +481,10 @@ func (s *State) GetWaterColor() color.RGBA {
 
 func (s *State) IsDoorAt(pos geometry.Point) (*Door, bool) {
 	currentMap := s.GetMap()
-	if !currentMap.IsObjectAt(pos) {
+	objectAt, ok := currentMap.TryGetObjectAt(pos)
+	if !ok {
 		return nil, false
 	}
-	objectAt := currentMap.ObjectAt(pos)
 	door, isDoorHere := objectAt.(*Door)
 	return door, isDoorHere
 }
@@ -664,8 +664,7 @@ func (s *State) GetAllPOIs() []geometry.Point {
 }
 func getDropPos(gameMap *gridmap.GridMap[*Actor, *Item, Object], actorPos geometry.Point) geometry.Point {
 	isFree := func(pos geometry.Point) bool {
-		if gameMap.IsActorAt(pos) {
-			actorAt := gameMap.ActorAt(pos)
+		if actorAt, ok := gameMap.TryGetActorAt(pos); ok {
 			if actorAt.IsVendor() {
 				return false
 			}
@@ -773,14 +772,13 @@ func (s *State) d1GlowAt(p geometry.Point) d1Glow {
 				if icon, has := m.GetDecal(src); has && icon == defs.IconWallTorch {
 					r = d1LightRadius(icon)
 				}
-				if m.IsObjectAt(src) { // ObjectAt dereferences the cell's object: only call it where there is one
-					if wl, ok := m.ObjectAt(src).(*d1WallLight); ok {
-						r = d1LightRadius(wl.icon)
-					} else if o, ok := m.ObjectAt(src).(*D1Object); ok {
-						r = d1ObjectDisplay(o.O.Kind).Light
-					} else if _, ok := m.ObjectAt(src).(*d1PortalObject); ok {
-						r, kind = d1PortalLightRadius, glowPortal
-					}
+				switch o, _ := m.TryGetObjectAt(src); o := o.(type) {
+				case *d1WallLight:
+					r = d1LightRadius(o.icon)
+				case *D1Object:
+					r = d1ObjectDisplay(o.O.Kind).Light
+				case *d1PortalObject:
+					r, kind = d1PortalLightRadius, glowPortal
 				}
 				if src == church {
 					r, kind = d1ChurchLightRadius, glowRed

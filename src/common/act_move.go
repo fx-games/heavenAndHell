@@ -109,10 +109,7 @@ func PlayerMoveToAttack(actor *Actor, relativeDirection geometry.Point, forceAtt
 	state := context.GameState
 	gameMap := state.GetMap()
 	targetPos := actor.MapPosition().Add(relativeDirection)
-	isObjectAt := gameMap.IsObjectAt(targetPos)
-
-	if isObjectAt {
-		objectAtPos := gameMap.ObjectAt(targetPos)
+	if objectAtPos, ok := gameMap.TryGetObjectAt(targetPos); ok {
 		if state.IsClosedDoorAt(targetPos) {
 			return NewOpenDoorAction(NewActorCause("Open door", actor), actor, targetPos)
 		} else {
@@ -124,10 +121,9 @@ func PlayerMoveToAttack(actor *Actor, relativeDirection geometry.Point, forceAtt
 		}
 	}
 
-	isActorAt := gameMap.IsActorAt(targetPos)
+	actorAtPos, isActorAt := gameMap.TryGetActorAt(targetPos)
 	isTargetFree := !isActorAt && gameMap.IsWalkable(targetPos)
 	if isActorAt {
-		actorAtPos := gameMap.ActorAt(targetPos)
 		if actorAtPos.IsVendor() && !forceAttack {
 			return NewTalkToAction(NewActorCause("Talk to", actor), actorAtPos)
 		} else if mon := actorAtPos.d1Monster; mon != nil && mon.TalkMsg != "" && actor.hero != nil && !forceAttack {

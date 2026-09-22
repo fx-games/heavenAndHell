@@ -79,8 +79,6 @@ func (d *Broker) Execute(action Action) {
 	}
 
 	d.callAfterHooks(action)
-
-	return
 }
 
 func (d *Broker) QueueForExecutionAtTheSameTime(actions []Action) {

@@ -49,12 +49,12 @@ func (d *RangedAttackAction) Execute(context ActionContext) []Action {
 
 	d.damageAmount = 0
 
-	if !currentMap.IsActorAt(d.targetPos) {
+	defender, ok := currentMap.TryGetActorAt(d.targetPos)
+	if !ok {
 		context.GameState.factory.hitD1Object(currentMap, d.targetPos, d.attacker) // an arrow shot at a barrel breaks it
 		return actions
 	}
-
-	d.defender = currentMap.ActorAt(d.targetPos)
+	d.defender = defender
 
 	if dam, extra, handled := resolveD1Attack(context, d.attacker, d.defender, true); handled {
 		d.damageAmount = dam

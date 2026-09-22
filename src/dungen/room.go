@@ -95,14 +95,14 @@ func (r *DungeonRoom) ToRelativePosition(absolutePos geometry.Point) geometry.Po
 
 func (r *DungeonRoom) GetAbsoluteFloorTiles() []geometry.Point {
 	result := make([]geometry.Point, 0)
-	for point, _ := range r.floorTiles {
+	for point := range r.floorTiles {
 		result = append(result, r.ToAbsolutePosition(point))
 	}
 	return result
 }
 func (r *DungeonRoom) GetRelativeFloorTiles() []geometry.Point {
 	result := make([]geometry.Point, 0)
-	for point, _ := range r.floorTiles {
+	for point := range r.floorTiles {
 		result = append(result, point)
 	}
 	slices.SortFunc(result, comparePoints)
@@ -110,7 +110,7 @@ func (r *DungeonRoom) GetRelativeFloorTiles() []geometry.Point {
 }
 func (r *DungeonRoom) GetAbsoluteRoomTiles() []geometry.Point {
 	result := make([]geometry.Point, 0)
-	for point, _ := range r.floorTiles {
+	for point := range r.floorTiles {
 		result = append(result, r.ToAbsolutePosition(point))
 	}
 	for _, point := range r.wallTiles {
@@ -132,7 +132,7 @@ func (r *DungeonRoom) AddConnectedRoom(doorPos geometry.Point, room *DungeonRoom
 
 func (r *DungeonRoom) GetUsedAbsoluteDoorTiles() []geometry.Point {
 	result := make([]geometry.Point, 0)
-	for point, _ := range r.availableConnections {
+	for point := range r.availableConnections {
 		if _, ok := r.connectedRooms[point]; !ok {
 			continue
 		}
@@ -228,18 +228,14 @@ func (r *DungeonRoom) Clone() *DungeonRoom {
 		plugsIntoSlotId:         r.plugsIntoSlotId,
 		canBeLit:                r.canBeLit,
 	}
-	for point, _ := range r.floorTiles {
+	for point := range r.floorTiles {
 		newRoom.floorTiles[point] = true
 	}
-	for _, point := range r.wallTiles {
-		newRoom.wallTiles = append(newRoom.wallTiles, point)
-	}
+	newRoom.wallTiles = append(newRoom.wallTiles, r.wallTiles...)
 	for point, direction := range r.availableConnections {
 		newRoom.availableConnections[point] = direction
 	}
-	for _, point := range r.poiPositions {
-		newRoom.poiPositions = append(newRoom.poiPositions, point)
-	}
+	newRoom.poiPositions = append(newRoom.poiPositions, r.poiPositions...)
 	return newRoom
 }
 
@@ -265,7 +261,7 @@ func (r *DungeonRoom) GetRelativeBoundingRectIncludingConnectors() geometry.Rect
 	minY := math.MaxInt
 	maxX := -math.MaxInt
 	maxY := -math.MaxInt
-	for point, _ := range r.floorTiles {
+	for point := range r.floorTiles {
 		if point.X < minX {
 			minX = point.X
 		}
@@ -279,7 +275,7 @@ func (r *DungeonRoom) GetRelativeBoundingRectIncludingConnectors() geometry.Rect
 			maxY = point.Y
 		}
 	}
-	for point, _ := range r.availableConnections {
+	for point := range r.availableConnections {
 		if point.X < minX {
 			minX = point.X
 		}
@@ -456,10 +452,7 @@ func (r *DungeonRoom) CanBeLit() bool {
 
 func (r *DungeonRoom) IsCornerPosition(posOne geometry.Point) bool {
 	shifted := posOne.Sub(r.roomPositionOffset)
-	if r.bounds.IsOnCorner(shifted) {
-		return true
-	}
-	return false
+	return r.bounds.IsOnCorner(shifted)
 }
 func NewDungeonRoomFromTemplate(templateName string) *DungeonRoom {
 	rectRoom := &DungeonRoom{

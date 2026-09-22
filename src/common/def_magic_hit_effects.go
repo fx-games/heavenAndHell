@@ -133,10 +133,10 @@ func (g *Factory) confuseTarget(args util.Arguments) *HitEffect {
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			currentMap := g.State.GetMap()
-			if !currentMap.IsActorAt(target) {
+			hitActor, ok := currentMap.TryGetActorAt(target)
+			if !ok {
 				return
 			}
-			hitActor := currentMap.ActorAt(target)
 			g.ActionBroker.Execute(NewApplyStatusAction(NewActorCause("Confused", attacker), hitActor, StatusConfused, turns))
 		},
 		Description: []util.LabelText{
@@ -153,10 +153,10 @@ func (g *Factory) berserkTarget(args util.Arguments) *HitEffect {
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			currentMap := g.State.GetMap()
-			if !currentMap.IsActorAt(target) {
+			hitActor, ok := currentMap.TryGetActorAt(target)
+			if !ok {
 				return
 			}
-			hitActor := currentMap.ActorAt(target)
 			g.ActionBroker.Execute(NewApplyStatusAction(NewActorCause("Berserked", attacker), hitActor, StatusBerserk, turns))
 		},
 		Description: []util.LabelText{
@@ -175,10 +175,10 @@ func (g *Factory) poisonTarget(args util.Arguments) *HitEffect {
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			currentMap := g.State.GetMap()
-			if !currentMap.IsActorAt(target) {
+			hitActor, ok := currentMap.TryGetActorAt(target)
+			if !ok {
 				return
 			}
-			hitActor := currentMap.ActorAt(target)
 			poisonEffect := g.NewPoisonedEffect(turns, damagePerTurn.Roll())
 			g.ActionBroker.Execute(NewApplyStatusParametrizedAction(NewActorCause("Poisoned", attacker), hitActor, poisonEffect))
 		},
@@ -192,10 +192,10 @@ func (g *Factory) immobilizeTarget(args util.Arguments) *HitEffect {
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			currentMap := g.State.GetMap()
-			if !currentMap.IsActorAt(target) {
+			hitActor, ok := currentMap.TryGetActorAt(target)
+			if !ok {
 				return
 			}
-			hitActor := currentMap.ActorAt(target)
 			g.ActionBroker.Execute(NewApplyStatusAction(NewActorCause("Poisoned", attacker), hitActor, StatusImmobile, turns))
 		},
 		Description: []util.LabelText{
@@ -313,8 +313,7 @@ func (g *Factory) jumpStart(args util.Arguments) *HitEffect {
 func (g *Factory) spawnFireAt(location geometry.Point) {
 	fire := NewFire(3)
 	procFireAtLocation := func(location geometry.Point, startAnimating func() bool) {
-		if g.State.GetMap().IsActorAt(location) {
-			actor := g.State.GetMap().ActorAt(location)
+		if actor, ok := g.State.GetMap().TryGetActorAt(location); ok {
 			action := NewChangeResourceAction(AbstractCause("Fire"), actor, stats.Health, -3)
 			action.SetAnimationStartPredicate(startAnimating)
 			g.ActionBroker.Execute(action)
@@ -347,7 +346,7 @@ func (g *Factory) fireZone(args util.Arguments) *HitEffect {
 			g.ActionBroker.Execute(damageSpellAction)
 		},
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Create a small fiery explosion,")),
+			util.LabelTextFromString("Create a small fiery explosion,"),
 			util.LabelTextFromString(fmt.Sprintf("dealing %s damage to all targets", damageInterval.String())),
 		},
 	}
@@ -492,10 +491,10 @@ func (g *Factory) earthShaker(args util.Arguments) *HitEffect {
 			g.ActionBroker.Execute(sprintAction)
 			var attackActions []Action
 			for _, pos := range hitPositions {
-				if !currentMap.IsActorAt(pos) {
+				actorAt, ok := currentMap.TryGetActorAt(pos)
+				if !ok {
 					continue
 				}
-				actorAt := currentMap.ActorAt(pos)
 				meleeAttackAction := NewMeleeAttackAction(NewActorCause("EarthShaker", attacker), attacker, actorAt)
 				meleeAttackAction.DisableAnimation()
 				attackActions = append(attackActions, meleeAttackAction)

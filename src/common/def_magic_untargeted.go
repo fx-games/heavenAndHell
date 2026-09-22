@@ -439,7 +439,7 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 		delete(areaOfEffect, user.MapPosition())
 
 		shuffleAreaOfEffect := func() {
-			for pos, _ := range areaOfEffect {
+			for pos := range areaOfEffect {
 				if generator.Intn(2) == 0 {
 					continue
 				}
@@ -467,7 +467,7 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 		getNearestFreePositionInAoE := func(origin geometry.Point) geometry.Point {
 			minDistance := math.MaxInt64
 			nearestFree := origin
-			for pos, _ := range areaOfEffect {
+			for pos := range areaOfEffect {
 				if !currentMap.CanPlaceActorHere(pos) {
 					continue
 				}
@@ -489,7 +489,7 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 			return false
 		}
 		var affectedActorActions []Action
-		for pos, _ := range areaOfEffect {
+		for pos := range areaOfEffect {
 			if !isSomethingStuckHere(pos) {
 				continue
 			}
@@ -501,14 +501,12 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 				currentMap.RemoveObjectAt(pos)
 			}
 
-			if currentMap.IsDownedActorAt(pos) { // destroy corpses on affected tiles
-				downedActor := currentMap.DownedActorAt(pos)
+			if downedActor, ok := currentMap.TryGetDownedActorAt(pos); ok { // destroy corpses on affected tiles
 				currentMap.RemoveDownedActor(downedActor)
 			}
 
-			if currentMap.IsActorAt(pos) {
+			if hitActor, ok := currentMap.TryGetActorAt(pos); ok {
 				// move around the actors to the nearest free position and damage them in the process
-				hitActor := currentMap.ActorAt(pos)
 				newPos := getNearestFreePositionInAoE(hitActor.MapPosition())
 				moveAction := NewMoveAction(NewActorCause("Earthquake", user), hitActor, newPos, false)
 				affectedActorActions = append(affectedActorActions, moveAction)
@@ -613,7 +611,7 @@ func (g *Factory) getStoneSkinBuff(args util.Arguments) UntargetedEffect {
 
 func (g *Factory) getBerserkSelfAction(args util.Arguments) UntargetedEffect {
 	if args.IsEmpty() {
-		g.Msg(fmt.Sprintf("Berserk effect requires arguments"))
+		g.Msg("Berserk effect requires arguments")
 	}
 	intervalRange := util.NewIntervalFromString(args.Get(0))
 	turnCount := args.GetInt(1)
@@ -666,8 +664,7 @@ func (g *Factory) getRandomTelefragAction(args util.Arguments) UntargetedEffect 
 		currentMap := g.State.GetMap()
 		var visEnemies []*Actor
 		for _, visPos := range user.GetFOV().Visibles {
-			if currentMap.IsActorAt(visPos) {
-				actorAt := currentMap.ActorAt(visPos)
+			if actorAt, ok := currentMap.TryGetActorAt(visPos); ok {
 				if (actorAt.IsHostileTo(user) || gui().IsPlayerForcingAggression()) && actorAt.IsAlive() && actorAt != user {
 					visEnemies = append(visEnemies, actorAt)
 				}
@@ -691,15 +688,15 @@ func (g *Factory) getRandomTelefragAction(args util.Arguments) UntargetedEffect 
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Magically displace a random visible enemy")),
-			util.LabelTextFromString(fmt.Sprintf("with your own body, killing it instantly")),
+			util.LabelTextFromString("Magically displace a random visible enemy"),
+			util.LabelTextFromString("with your own body, killing it instantly"),
 		},
 	}
 }
 
 func (g *Factory) getRandomTeleportAction(args util.Arguments) UntargetedEffect {
 	if args.IsEmpty() {
-		g.Msg(fmt.Sprintf("Teleport effect requires arguments"))
+		g.Msg("Teleport effect requires arguments")
 	}
 	distanceInterval := util.NewIntervalFromString(args.Get(0))
 
@@ -842,10 +839,10 @@ func (g *Factory) getVisibleEnemiesByDistance(user *Actor) []*Actor {
 	currentMap := g.State.GetMap()
 	var nearbyEnemies []*Actor
 	for _, visPos := range user.GetFOV().Visibles {
-		if !currentMap.IsActorAt(visPos) {
+		actor, ok := currentMap.TryGetActorAt(visPos)
+		if !ok {
 			continue
 		}
-		actor := currentMap.ActorAt(visPos)
 		if (actor.IsHostileTo(user) || g.UI().IsPlayerForcingAggression()) && actor.IsAlive() && user != actor {
 			nearbyEnemies = append(nearbyEnemies, actor)
 		}
@@ -905,11 +902,8 @@ func (g *Factory) canReplicate(user *Actor) bool {
 
 	origin := user.MapPosition()
 	cloneNeighbors := currentMap.GetFilteredNeighbors(origin, func(p geometry.Point) bool {
-		if !currentMap.Contains(p) || !currentMap.IsActorAt(p) {
-			return false
-		}
-		actorAt := currentMap.ActorAt(p)
-		return actorAt.GetInternalName() == user.GetInternalName()
+		actorAt, ok := currentMap.TryGetActorAt(p)
+		return ok && actorAt.GetInternalName() == user.GetInternalName()
 	})
 
 	if len(cloneNeighbors) != 1 {

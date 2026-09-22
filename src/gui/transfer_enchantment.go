@@ -13,7 +13,7 @@ func (u *UIController) OpenTransferEnchantmentMenu() {
 	playerInventory := player.GetInventory()
 	msg := u.msg
 	if playerInventory.IsEmpty() {
-		msg(fmt.Sprintf("You have no items"))
+		msg("You have no items")
 		return
 	}
 	itemsWithEnchantments := make([]*common.Item, 0)
@@ -24,7 +24,7 @@ func (u *UIController) OpenTransferEnchantmentMenu() {
 		}
 	}
 	if len(itemsWithEnchantments) == 0 {
-		msg(fmt.Sprintf("You have no items with enchantments"))
+		msg("You have no items with enchantments")
 		return
 	}
 	var menuItems []util.MenuItem

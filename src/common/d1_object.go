@@ -109,18 +109,20 @@ func (o *D1Object) UsesTurn(actor *Actor) bool {
 }
 
 func d1DoorAt(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point) (*Door, bool) {
-	if !m.Contains(p) || !m.IsObjectAt(p) {
+	if !m.Contains(p) {
 		return nil, false
 	}
-	door, ok := m.ObjectAt(p).(*Door)
+	obj, _ := m.TryGetObjectAt(p)
+	door, ok := obj.(*Door)
 	return door, ok
 }
 
 func d1ObjectAt(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point) *D1Object {
-	if !m.Contains(p) || !m.IsObjectAt(p) {
+	if !m.Contains(p) {
 		return nil
 	}
-	o, _ := m.ObjectAt(p).(*D1Object)
+	obj, _ := m.TryGetObjectAt(p)
+	o, _ := obj.(*D1Object)
 	return o
 }
 

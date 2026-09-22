@@ -172,8 +172,10 @@ func (c *Console) showDetailsAt(loc mgeom.Point) {
 	currentMap := c.context.GameState().GetMap()
 	if actor := c.visibleActorAt(pos); actor != nil {
 		c.context.PlayerAction().ShowActorInfoAt(pos)
-	} else if currentMap.Contains(pos) && c.canSeeCell(pos) && currentMap.IsItemAt(pos) {
-		c.showItemInfo(currentMap.ItemAt(pos))
+	} else if currentMap.Contains(pos) && c.canSeeCell(pos) {
+		if item, ok := currentMap.TryGetItemAt(pos); ok {
+			c.showItemInfo(item)
+		}
 	}
 }
 

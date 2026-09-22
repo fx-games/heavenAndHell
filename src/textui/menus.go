@@ -40,12 +40,11 @@ func (u *UI) OpenMenuWithTitleAndClose(title string, actions []MenuItem, onClose
 // setModalTitle sets a centered modal's title and widens the modal to fit it.
 func (u *UI) setModalTitle(modal cview.Primitive, title string) {
 	modal.(interface{ SetTitle(string) }).SetTitle(title)
-	x, y, w, h := modal.GetRect()
+	_, y, w, h := modal.GetRect()
 	if needed := cview.TaggedStringWidth(title) + 4; needed > w {
 		screenW, _ := u.screenSize()
 		w = min(needed, screenW)
-		x = (screenW - w) / 2
-		modal.SetRect(x, y, w, h)
+		modal.SetRect((screenW-w)/2, y, w, h)
 	}
 }
 

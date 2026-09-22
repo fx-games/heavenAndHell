@@ -423,7 +423,7 @@ func (o *IconOverlay) SetCanBeClosed(canBeClosed bool) {
 }
 
 func (o *IconOverlay) Close() {
-	if o.shouldClose == true || !o.canBeClosed {
+	if o.shouldClose || !o.canBeClosed {
 		return
 	}
 	o.shouldClose = true

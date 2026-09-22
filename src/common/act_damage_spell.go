@@ -45,10 +45,10 @@ func (d *DamageSpellAction) Execute(context ActionContext) []Action {
 
 	var hitActions []Action
 	for _, pos := range d.hitPositions {
-		if !currentMap.IsActorAt(pos) {
+		hitActor, ok := currentMap.TryGetActorAt(pos)
+		if !ok {
 			continue
 		}
-		hitActor := currentMap.ActorAt(pos)
 		hitActions = append(hitActions, NewChangeResourceAction(NewActorCause(d.actionDescription, d.caster), hitActor, stats.Health, float64(-d.damageAmount)))
 	}
 	casterPart := fmt.Sprintf("%s casts", d.caster.Name())
