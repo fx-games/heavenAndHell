@@ -13,15 +13,16 @@ import (
 // Recharge and, from Hellfire, the Monk's Vision, the Bard's Identify and the Barbarian's Rage. They cost no
 // mana; like D1's cursor, repair, recharge and identify ask for an item and disarm for an object.
 func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedAction) {
-	if f.Generator.D.Spells[d1ClassSkillSpell[player.hero.Class]].ID == "" {
-		return nil, nil // the mod declares no such skill: a class skill is content, not a D1 birthright
+	skill := d1.Class(player.hero.Class).Skill
+	if spell, ok := d1.ClassSkills[skill]; !ok || f.Generator.D.Spells[spell].ID == "" {
+		return nil, nil // hero.rec names no skill, or the mod has no such spell: a class skill is content
 	}
-	switch player.hero.Class {
-	case d1.Monk:
+	switch skill {
+	case "vision":
 		return nil, f.d1CastSkill("Vision", d1.SplSearch)
-	case d1.Barbarian:
+	case "rage":
 		return nil, f.d1CastSkill("Rage", d1.SplRage)
-	case d1.Bard:
+	case "identify":
 		action := NewUntargetedAction("Identify", f.d1SkillIcon(d1.SplIdentify))
 		action.SetEffect(&UntargetedEffect{Effect: func(p *Actor, _ EffectSource) {
 			f.pickD1IdentifyTarget(p, func() {
@@ -29,7 +30,7 @@ func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedActio
 			})
 		}, Description: []util.LabelText{util.LabelTextFromString(d1.SpellDescriptions[d1.SplIdentify])}})
 		return nil, action
-	case d1.Warrior:
+	case "repair":
 		return nil, f.d1ItemSkill("Item Repair", d1.SplRepair, d1.CanRepair, func(it *Item) {
 			f.PlayD1Sfx("IS_REPAIR", player.MapPosition()) // DoRepair
 			if d1.RepairItem(it.d1, player.hero.Level, d1Rng.Intn) {
@@ -41,7 +42,7 @@ func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedActio
 			}
 			f.Msg(fmt.Sprintf("You repair your %s.", it.Name()))
 		})
-	case d1.Sorcerer:
+	case "recharge":
 		return nil, f.d1ItemSkill("Staff Recharge", d1.SplRecharge, func(it *d1.Item) bool { return it.Type == d1.ITypeStaff && f.Generator.D.CanRecharge(it) }, func(it *Item) {
 			f.Generator.D.RechargeItem(it.d1, player.hero.Level, d1Rng.Intn)
 			f.Msg(fmt.Sprintf("You recharge your %s.", it.Name()))
@@ -107,10 +108,6 @@ func (f *Factory) getRageSelfAction(args util.Arguments) UntargetedEffect {
 		Description: []util.LabelText{util.LabelTextFromString("Work yourself into a rage")},
 	}
 }
-
-// d1ClassSkillSpell is the spell behind each archetype's class skill, in class order.
-var d1ClassSkillSpell = [...]int{d1.Warrior: d1.SplRepair, d1.Rogue: d1.SplDisarm, d1.Sorcerer: d1.SplRecharge,
-	d1.Monk: d1.SplSearch, d1.Bard: d1.SplIdentify, d1.Barbarian: d1.SplRage}
 
 // d1SkillIcon is the skills.rec icon of a spell or class skill.
 func (f *Factory) d1SkillIcon(spell int) int32 {

@@ -595,7 +595,7 @@ func D1StartPlrHit(f *Factory, a *Actor, dam64, dealt int, force bool) {
 
 // d1BarbarianBonus is what a Barbarian's StartPlrHit adds to the flinch threshold.
 func d1BarbarianBonus(h *d1.Hero) int {
-	if h.Class == d1.Barbarian {
+	if d1.HasClassFlag(h.Class, d1.ClassFlinchResist) {
 		return h.Level / 4
 	}
 	return 0

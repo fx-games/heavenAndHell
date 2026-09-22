@@ -1,4 +1,13 @@
 %rec: class
+# Everything a class does differently is a flag or a field of its record, which any class may take:
+#   flags: critical_strike trap_sense iron_skin natural_resistance dual_wield trained_fists parry
+#          full_missile_bonus half_shield vitality_damage shield_slows_bare_hands flinch_resist, and at most
+#          one damage formula: str_dex_damage staff_and_fist_damage blade_and_bow_damage heavy_weapon_damage
+#          (none: clvl*Str/100)
+#   key (effects' class lists), spell_to_hit, heal_boost (2 doubles Healing and potions, 1 adds half),
+#   skill (repair disarm recharge vision identify rage), voice / female_voice (PS_<voice>nn), death_sound,
+#   text_prefix (the quest books' class texts), oily (the Oily shrine: "str 2", repeatable),
+#   slain_hero (breast_plate long_war_bow war_staff bastard_sword battle_axe lightning_book)
 # One row per player class, in PC_ order: D1's three, then Hellfire's Monk, Bard and Barbarian.
 # Ports devilutionX's txtdata/classes/<class>/attributes.tsv and animations.tsv, which reproduce
 # D1 1.09's player.cpp tables. The life/mana/potion/spell columns are devilutionX's parseFixed6
@@ -36,6 +45,14 @@ attack_frames: default=16 axe=20
 spell_frames: 20
 hit_frames: 6
 flags: critical_strike
+key: warrior
+heal_boost: 2
+skill: repair
+voice: WARR
+female_voice: ROGUE
+death_sound: PS_DEAD
+oily: str 2
+slain_hero: breast_plate
 
 name: Rogue
 str: 20
@@ -65,7 +82,15 @@ ranged_to_hit: 70
 attack_frames: default=18 axe=22 bow=12 staff=16
 spell_frames: 16
 hit_frames: 7
-flags: trap_sense
+flags: trap_sense str_dex_damage full_missile_bonus
+key: rogue
+heal_boost: 1
+skill: disarm
+voice: WARR
+female_voice: ROGUE
+text_prefix: R
+oily: dex 2
+slain_hero: long_war_bow
 
 name: Sorcerer
 str: 15
@@ -96,6 +121,15 @@ attack_frames: default=20 sword=16 axe=24 mace=16 staff=16
 spell_frames: 12
 hit_frames: 8
 start_spells: SPL_FIREBOLT=2
+flags: shield_slows_bare_hands
+key: sorcerer
+spell_to_hit: 20
+skill: recharge
+voice: MAGE
+female_voice: ROGUE
+text_prefix: M
+oily: mag 2
+slain_hero: lightning_book
 
 name: Monk
 str: 25
@@ -125,6 +159,16 @@ ranged_to_hit: 50
 attack_frames: default=12 sword=16 axe=23 bow=20 mace=16 staff=13
 spell_frames: 18
 hit_frames: 6
+flags: trained_fists parry staff_and_fist_damage
+key: monk
+heal_boost: 2
+skill: vision
+voice: MONK
+female_voice: ROGUE
+text_prefix: H
+oily: str 1
+oily: dex 1
+slain_hero: war_staff
 
 name: Bard
 str: 20
@@ -154,7 +198,17 @@ ranged_to_hit: 60
 attack_frames: default=18 axe=22 bow=12 staff=16
 spell_frames: 16
 hit_frames: 7
-flags: dual_wield
+flags: dual_wield blade_and_bow_damage full_missile_bonus
+key: bard
+spell_to_hit: 10
+heal_boost: 1
+skill: identify
+voice: WARR
+female_voice: ROGUE
+text_prefix: B
+oily: dex 1
+oily: mag 1
+slain_hero: bastard_sword
 
 name: Barbarian
 str: 40
@@ -184,8 +238,14 @@ ranged_to_hit: 50
 attack_frames: default=16 axe=20
 spell_frames: 20
 hit_frames: 6
-flags: critical_strike iron_skin natural_resistance
-
+flags: critical_strike iron_skin natural_resistance heavy_weapon_damage vitality_damage half_shield flinch_resist
+key: barbarian
+heal_boost: 2
+skill: rage
+voice: WARR
+female_voice: ROGUE
+oily: vit 2
+slain_hero: battle_axe
 %rec: experience
 # ExpLvls: the experience total each character level needs, level 1 first. Ten per line.
 

@@ -255,12 +255,7 @@ func (d *Data) ManaCost(h *Hero, s Sheet, spell int) int {
 // MI_Arrow and MI_LArrow ever advance _midist.
 func (h *Hero) SpellHitChance(s Sheet, mlvl int) int {
 	hper := s.Mag + 50 - mlvl<<1
-	switch h.Class {
-	case Sorcerer:
-		hper += 20
-	case Bard:
-		hper += 10
-	}
+	hper += Class(h.Class).SpellToHit
 	return clamp(hper, 5, 95)
 }
 
@@ -397,23 +392,16 @@ func ResourceAmount64(rng *rand.Rand, base, perClvl, perSlvl, clvl, slvl, boost 
 // HealAmount64 ports AddHeal: the shared curve with Healing's own class multipliers. It stays because the
 // item tooltips and HealRange64 quote a healing staff's range without casting anything.
 func HealAmount64(rng *rand.Rand, class, clvl, slvl int) int {
-	boost := 0
-	switch class {
-	case Warrior, Barbarian, Monk:
-		boost = 2
-	case Rogue, Bard:
-		boost = 1
-	}
-	return ResourceAmount64(rng, 10, 4, 6, clvl, slvl, boost)
+	return ResourceAmount64(rng, 10, 4, 6, clvl, slvl, Class(class).HealBoost)
 }
 
 // HealRange64 is HealAmount64's lowest and highest roll.
 func HealRange64(class, clvl, slvl int) (int, int) {
 	lo, hi := (1+clvl+slvl)<<6, (10+4*clvl+6*slvl)<<6
-	switch class {
-	case Warrior, Barbarian, Monk:
+	switch Class(class).HealBoost {
+	case 2:
 		return lo * 2, hi * 2
-	case Rogue, Bard:
+	case 1:
 		return lo + lo>>1, hi + hi>>1
 	}
 	return lo, hi

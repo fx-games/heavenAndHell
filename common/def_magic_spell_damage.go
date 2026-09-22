@@ -232,14 +232,11 @@ func (a *ChargedBoltsAction) Execute(ctx ActionContext) []Action {
 // Healing, Mana and the Magi are the same curve read three ways, so the dice and the classes each one favours
 // are numbers in the content and the arithmetic sits in d1.ResourceAmount64 beside the damage rolls. The
 // caster's spell level is appended as the last argument where the action is built, as it is for spell_damage.
-var d1ClassByName = map[string]int{"warrior": d1.Warrior, "rogue": d1.Rogue, "sorcerer": d1.Sorcerer,
-	"monk": d1.Monk, "bard": d1.Bard, "barbarian": d1.Barbarian}
-
-// classSet reads a comma separated list of class names. Commas, because the argument list itself splits on '|'.
+// classSet reads a comma separated list of class keys (hero.rec's key). Commas, because the argument list itself splits on '|'.
 func classSet(list string) map[int]bool {
 	set := map[int]bool{}
 	for _, name := range strings.Split(list, ",") {
-		if class, known := d1ClassByName[strings.TrimSpace(name)]; known {
+		if class := d1.ClassByKey(strings.TrimSpace(name)); class >= 0 {
 			set[class] = true
 		}
 	}

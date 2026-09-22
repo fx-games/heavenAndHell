@@ -287,19 +287,13 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 	case d1.ObjDECAP:
 		drop(gen.FloorItem(ilvl, false, hell))
 	case d1.ObjSLAINHERO: // OperateSlainHero: a class's own reward, and the hero's line about it
-		switch player.hero.Class {
-		case d1.Warrior:
-			drop(gen.MagicItemWithCurs(ilvl, d1.ITypeHArmor, d1.ICursBreastPlate))
-		case d1.Rogue:
-			drop(gen.MagicItemWithCurs(ilvl, d1.ITypeBow, d1.ICursLongWarBow))
-		case d1.Monk:
-			drop(gen.MagicItemWithCurs(ilvl, d1.ITypeStaff, d1.ICursWarStaff))
-		case d1.Bard:
-			drop(gen.MagicItemWithCurs(ilvl, d1.ITypeSword, d1.ICursBastardSword))
-		case d1.Barbarian:
-			drop(gen.MagicItemWithCurs(ilvl, d1.ITypeAxe, d1.ICursBattleAxe))
-		default:
+		switch reward := d1.Class(player.hero.Class).SlainHero; reward {
+		case "lightning_book":
 			drop(gen.SpellBook(ilvl, d1.SplLightning))
+		case "":
+		default:
+			r := d1.SlainHeroRewards[reward]
+			drop(gen.MagicItemWithCurs(ilvl, r[0], r[1]))
 		}
 		f.PlayD1HeroSound(9)
 	case d1.ObjARMORSTAND, d1.ObjWARARMOR:
@@ -708,9 +702,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 			}
 		}
 	case 26: // Oily
-		for _, a := range map[int][][2]int{d1.Warrior: {{d1.AttrStr, 2}}, d1.Rogue: {{d1.AttrDex, 2}},
-			d1.Sorcerer: {{d1.AttrMag, 2}}, d1.Barbarian: {{d1.AttrVit, 2}}, d1.Monk: {{d1.AttrStr, 1}, {d1.AttrDex, 1}},
-			d1.Bard: {{d1.AttrDex, 1}, {d1.AttrMag, 1}}}[h.Class] {
+		for _, a := range d1.Class(h.Class).Oily {
 			f.d1ModifyStat(player, a[0], a[1])
 		}
 		f.ActionBroker.QueueForExecution(NewTrapMissileAction(pos, MisFireWall, player.MapPosition()))

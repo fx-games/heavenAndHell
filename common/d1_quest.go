@@ -187,16 +187,12 @@ func (s *State) D1QuestLog() []string {
 
 func (s *State) d1Text(id string) string { return s.factory.D1().D.Texts[id] }
 
-// d1ClassTextPrefix picks the class each book is read aloud by (OperateBookLever): Hellfire gives the Monk (H) and
-// the Bard (B) their own texts, and its Barbarian reads the Warrior's.
-var d1ClassTextPrefix = [d1.NumArchetypes]string{d1.Warrior: "", d1.Rogue: "R", d1.Sorcerer: "M", d1.Monk: "H", d1.Bard: "B", d1.Barbarian: ""}
-
 // d1ClassText picks the hero's class version of a book's text (TEXT_BONER, TEXT_RBONER, TEXT_MBONER).
 func d1ClassText(s *State, id string) string {
 	if !strings.HasSuffix(id, "BONER") && !strings.HasSuffix(id, "BLOODY") && !strings.HasSuffix(id, "BLINDING") && !strings.HasSuffix(id, "BLOODWAR") {
 		return id
 	}
-	return "TEXT_" + d1ClassTextPrefix[s.GetPlayer().Hero().Class] + strings.TrimPrefix(id, "TEXT_")
+	return "TEXT_" + d1.Class(s.GetPlayer().Hero().Class).TextPrefix + strings.TrimPrefix(id, "TEXT_")
 }
 
 // say ports InitQTextMsg: a quest text in a text window, and its speech.

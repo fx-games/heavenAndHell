@@ -9,9 +9,8 @@ import (
 	"strings"
 )
 
-// Hero archetypes, in D1's PC_ order: the shapes the engine's formulas know how to play. They are NOT a roster -
-// how many classes a game HAS is content, and is the number of rows in the mod's hero.rec. A mod's Nth class
-// plays as the Nth archetype, so a three-class game gets warrior/rogue/sorcerer and names them as it likes.
+// D1 and Hellfire's class rows, in D1's PC_ order (hero.rec's). Only the tests name them: a class is its hero.rec
+// record, and everything it does differently from another is a flag or field there, which any class may take.
 const (
 	Warrior = iota
 	Rogue
@@ -19,7 +18,6 @@ const (
 	Monk
 	Bard
 	Barbarian
-	NumArchetypes
 )
 
 // ClassNames are the class names, in the mod's own order; filled by Load from assets/data/hero.rec.
@@ -32,7 +30,22 @@ const (
 	ClassIronSkin                      // +clvl/4 armor class
 	ClassNaturalResistance             // +clvl to every resistance
 	ClassDualWield                     // may hold a weapon in the off hand (not modelled, see D1_PLAN.md)
+	// What used to be `switch h.Class`: each is the rule one of Hellfire's classes had, now any class's to take.
+	ClassTrainedFists        // bare fists hit for clvl/2..clvl (the Monk's)
+	ClassParry               // blocks with a staff, one one-hander or bare hands; the staff blocks fast (the Monk's)
+	ClassStrDexDamage        // melee bonus clvl*(Str+Dex)/200 (the Rogue's)
+	ClassStaffAndFistDamage  // clvl*(Str+Dex)/150 with a staff or bare hands, /300 otherwise (the Monk's)
+	ClassBladeAndBowDamage   // clvl*(Str+Dex)/150 with a sword, /250 with a bow, else clvl*Str/100 (the Bard's)
+	ClassHeavyWeaponDamage   // clvl*Str/75 with an axe or mace, /300 with a bow, else /100 (the Barbarian's)
+	ClassVitalityDamage      // +clvl*Vit/100 melee bonus, unless shield-only or with a staff or bow (the Barbarian's)
+	ClassHalfShield          // a shield without a weapon is worth only half its AC (the Barbarian's)
+	ClassFullMissileBonus    // missiles get the whole damage bonus, not half (the Rogue's and the Bard's)
+	ClassShieldSlowsBareHand // bare hands behind a shield attack in 16 frames (the Sorcerer's)
+	ClassFlinchResist        // hit recovery needs clvl/4 more damage to start (the Barbarian's)
 )
+
+// damageFlags are the melee damage bonus formulas; a class takes at most one (none: clvl*Str/100, the Warrior's).
+const damageFlags = ClassStrDexDamage | ClassStaffAndFistDamage | ClassBladeAndBowDamage | ClassHeavyWeaponDamage
 
 // HasClassFlag reports a PlayerClassFlag of the class, e.g. ClassTrapSense.
 func HasClassFlag(class int, flag uint32) bool { return classAttr[class].Flags&flag != 0 }
@@ -59,6 +72,45 @@ type classAttributes struct {
 	SpellFrames, HitFrames              int
 	Flags                               uint32
 	StartSpells                         map[int]int // spell levels a new hero of this class knows
+	Key                                 string      // what spells.rec's effects call the class ("warrior")
+	SpellToHit                          int         // added to magic missiles' to-hit (Sorcerer 20, Bard 10)
+	HealBoost                           int         // Healing and potions: 2 doubles the roll, 1 adds half
+	Skill                               string      // the class skill, one of ClassSkills; "" for none
+	Voice, FemaleVoice                  string      // PS_<voice>nn sound set
+	DeathSound                          string      // said on death instead of PS_<voice>71
+	TextPrefix                          string      // quest books' class version, TEXT_<prefix>BONER
+	Oily                                [][2]int    // the Oily shrine's gains: attribute, points
+	SlainHero                           string      // the Slain Hero's reward, one of SlainHeroRewards or lightning_book
+}
+
+// SlainHeroRewards are the magic items OperateSlainHero can leave, by the name hero.rec's slain_hero gives them:
+// the item type and graphic that pick the base item.
+var SlainHeroRewards = map[string][2]int{"breast_plate": {ITypeHArmor, ICursBreastPlate},
+	"long_war_bow": {ITypeBow, ICursLongWarBow}, "war_staff": {ITypeStaff, ICursWarStaff},
+	"bastard_sword": {ITypeSword, ICursBastardSword}, "battle_axe": {ITypeAxe, ICursBattleAxe}}
+
+// ClassSkills are the class skills the engine implements; a class names one in hero.rec's skill.
+var ClassSkills = map[string]int{"repair": SplRepair, "disarm": SplDisarm, "recharge": SplRecharge,
+	"vision": SplSearch, "identify": SplIdentify, "rage": SplRage}
+
+var attrByName = map[string]int{"str": AttrStr, "mag": AttrMag, "dex": AttrDex, "vit": AttrVit}
+
+// Class is the class record of class (hero.rec), the zero record for one the mod doesn't have.
+func Class(class int) classAttributes {
+	if class < 0 || class >= len(classAttr) {
+		return classAttributes{}
+	}
+	return classAttr[class]
+}
+
+// ClassByKey is the class whose key is key, -1 for none.
+func ClassByKey(key string) int {
+	for i, a := range classAttr {
+		if a.Key == key {
+			return i
+		}
+	}
+	return -1
 }
 
 // classAttr is filled by Load from the class section of assets/data/hero.rec.
@@ -76,7 +128,12 @@ var itypeByName = map[string]int{"default": 0, "sword": ITypeSword, "axe": IType
 	"mace": ITypeMace, "staff": ITypeStaff}
 
 var classFlagByName = map[string]uint32{"critical_strike": ClassCriticalStrike, "trap_sense": ClassTrapSense,
-	"iron_skin": ClassIronSkin, "natural_resistance": ClassNaturalResistance, "dual_wield": ClassDualWield}
+	"iron_skin": ClassIronSkin, "natural_resistance": ClassNaturalResistance, "dual_wield": ClassDualWield,
+	"trained_fists": ClassTrainedFists, "parry": ClassParry, "str_dex_damage": ClassStrDexDamage,
+	"staff_and_fist_damage": ClassStaffAndFistDamage, "blade_and_bow_damage": ClassBladeAndBowDamage,
+	"heavy_weapon_damage": ClassHeavyWeaponDamage, "vitality_damage": ClassVitalityDamage,
+	"half_shield": ClassHalfShield, "full_missile_bonus": ClassFullMissileBonus,
+	"shield_slows_bare_hands": ClassShieldSlowsBareHand, "flinch_resist": ClassFlinchResist}
 
 // heroTablesLoaded records whether the active mod supplied hero.rec. It is NOT optional in the way the xl_*
 // tables are: those describe features a mod may not have, while this one is the hero's own numbers, and a game
@@ -98,10 +155,9 @@ func loadHeroTables(fsys fs.FS) error {
 		return err
 	}
 	classes := recs["class"]
-	// The roster LENGTH is the mod's to choose. The engine's only stake in it is that every row lands on an
-	// archetype whose formulas exist, which is what caps it at NumArchetypes.
-	if len(classes) == 0 || len(classes) > NumArchetypes {
-		return fmt.Errorf("hero.rec: %d classes, want 1..%d", len(classes), NumArchetypes)
+	// The roster is the mod's: any number of classes, each rule a flag or field of its own record.
+	if len(classes) == 0 {
+		return fmt.Errorf("hero.rec: no classes")
 	}
 	ClassNames = make([]string, len(classes))
 	classAttr = make([]classAttributes, len(classes))
@@ -155,6 +211,31 @@ func loadHeroTables(fsys fs.FS) error {
 				return fmt.Errorf("hero.rec: unknown class flag %q", f)
 			}
 			a.Flags |= bit
+		}
+		if n := a.Flags & damageFlags; n&(n-1) != 0 {
+			return fmt.Errorf("hero.rec: %s: more than one damage formula flag", m.GetStringOrDefault("name", ""))
+		}
+		a.Key = m.GetStringOrDefault("key", strings.ToLower(m.GetStringOrDefault("name", "")))
+		a.SpellToHit, a.HealBoost = m.GetIntOrDefault("spell_to_hit", 0), m.GetIntOrDefault("heal_boost", 0)
+		a.Skill, a.TextPrefix = m.GetStringOrDefault("skill", ""), m.GetStringOrDefault("text_prefix", "")
+		if _, ok := ClassSkills[a.Skill]; a.Skill != "" && !ok {
+			return fmt.Errorf("hero.rec: %s: unknown skill %q", m.GetStringOrDefault("name", ""), a.Skill)
+		}
+		a.Voice = m.GetStringOrDefault("voice", "WARR")
+		a.FemaleVoice = m.GetStringOrDefault("female_voice", a.Voice)
+		a.DeathSound = m.GetStringOrDefault("death_sound", "")
+		a.SlainHero = m.GetStringOrDefault("slain_hero", "")
+		if _, ok := SlainHeroRewards[a.SlainHero]; a.SlainHero != "" && a.SlainHero != "lightning_book" && !ok {
+			return fmt.Errorf("hero.rec: %s: unknown slain_hero %q", m.GetStringOrDefault("name", ""), a.SlainHero)
+		}
+		for _, f := range fieldsNamed(r, "oily") {
+			attr, pts, _ := strings.Cut(strings.TrimSpace(f), " ")
+			n, convErr := strconv.Atoi(strings.TrimSpace(pts))
+			at, ok := attrByName[attr]
+			if !ok || convErr != nil {
+				return fmt.Errorf("hero.rec: %s: oily %q: want <str|mag|dex|vit> <points>", m.GetStringOrDefault("name", ""), f)
+			}
+			a.Oily = append(a.Oily, [2]int{at, n})
 		}
 		ClassNames[i] = m.GetStringOrDefault("name", "")
 		classAttr[i] = a
@@ -342,11 +423,11 @@ func (h *Hero) Sheet(equipped []*Item) Sheet {
 		if hasShieldOnly {
 			s.MaxDam = 3
 		}
-		if h.Class == Monk {
+		if a.Flags&ClassTrainedFists != 0 {
 			s.MinDam, s.MaxDam = max(s.MinDam, h.Level/2), max(s.MaxDam, h.Level)
 		}
 	}
-	if h.Class == Monk { // CalcPlrBlockFlag: the Monk parries with a staff, a single one-hander or bare hands
+	if a.Flags&ClassParry != 0 { // CalcPlrBlockFlag: the Monk parries with a staff, a single one-hander or bare hands
 		switch {
 		case s.Holds(ITypeStaff):
 			s.Block = true
@@ -371,16 +452,16 @@ func (h *Hero) Sheet(equipped []*Item) Sheet {
 	s.Dex = max(dadd+h.BaseDex, 0)
 	s.Vit = max(vadd+h.BaseVit, 0)
 	strDex := h.Level * (s.Str + s.Dex)
-	switch h.Class { // CalcPlrDamage's damage bonus, which every Hellfire class weighs differently
-	case Rogue:
+	switch { // CalcPlrDamage's damage bonus, which every Hellfire class weighs differently
+	case a.Flags&ClassStrDexDamage != 0:
 		s.DamageMod = strDex / 200
-	case Monk:
+	case a.Flags&ClassStaffAndFistDamage != 0:
 		if s.Holds(ITypeStaff) || bareHanded {
 			s.DamageMod = strDex / 150
 		} else {
 			s.DamageMod = strDex / 300
 		}
-	case Bard:
+	case a.Flags&ClassBladeAndBowDamage != 0:
 		switch {
 		case s.Holds(ITypeSword):
 			s.DamageMod = strDex / 150
@@ -389,7 +470,7 @@ func (h *Hero) Sheet(equipped []*Item) Sheet {
 		default:
 			s.DamageMod = h.Level * s.Str / 100
 		}
-	case Barbarian:
+	case a.Flags&ClassHeavyWeaponDamage != 0:
 		switch {
 		case s.Holds(ITypeAxe) || s.Holds(ITypeMace):
 			s.DamageMod = h.Level * s.Str / 75
@@ -398,13 +479,13 @@ func (h *Hero) Sheet(equipped []*Item) Sheet {
 		default:
 			s.DamageMod = h.Level * s.Str / 100
 		}
-		if hasShieldOnly { // a Barbarian hides behind only half a shield
-			s.AC -= shieldAC / 2
-		} else if !s.Holds(ITypeStaff) && !s.Holds(ITypeBow) {
-			s.DamageMod += h.Level * s.Vit / 100
-		}
 	default:
 		s.DamageMod = h.Level * s.Str / 100
+	}
+	if hasShieldOnly && a.Flags&ClassHalfShield != 0 { // a Barbarian hides behind only half a shield
+		s.AC -= shieldAC / 2
+	} else if !hasShieldOnly && a.Flags&ClassVitalityDamage != 0 && !s.Holds(ITypeStaff) && !s.Holds(ITypeBow) {
+		s.DamageMod += h.Level * s.Vit / 100
 	}
 	if a.Flags&ClassIronSkin != 0 {
 		s.BonusAC += h.Level / 4
@@ -436,7 +517,7 @@ func (h *Hero) Sheet(equipped []*Item) Sheet {
 	s.AttackFrames = a.AttackFrames[0]
 	if n, ok := a.AttackFrames[s.WeaponType]; ok {
 		s.AttackFrames = n
-	} else if h.Class == Sorcerer && hasShieldOnly && s.WeaponType == ITypeMisc {
+	} else if a.Flags&ClassShieldSlowsBareHand != 0 && hasShieldOnly && s.WeaponType == ITypeMisc {
 		s.AttackFrames = 16
 	}
 	return s
@@ -554,7 +635,7 @@ func (h *Hero) CriticalStrikeChance() int {
 
 // FullMissileDamageBonus reports a class that adds its whole Str/Dex damage bonus to missiles instead of half of
 // it (arrowDamageOf).
-func FullMissileDamageBonus(class int) bool { return class == Rogue || class == Bard }
+func FullMissileDamageBonus(class int) bool { return Class(class).Flags&ClassFullMissileBonus != 0 }
 
 // HitLeech ports PlrHitMonst's life/mana steal; dam in whole points, returns gains in 1/64.
 func (h *Hero) HitLeech(rng *rand.Rand, s Sheet, dam int) (hp, mana int) {
@@ -597,7 +678,7 @@ func (h *Hero) ArrowBlastDamage(rng *rand.Rand, s Sheet, mind, maxd int) int {
 
 func (h *Hero) arrowDamageOf(s Sheet, dam int) int {
 	dam += s.BonusDamMod + dam*s.BonusDam/100
-	if h.Class == Rogue || h.Class == Bard {
+	if FullMissileDamageBonus(h.Class) {
 		return dam + s.DamageMod
 	}
 	return dam + s.DamageMod>>1
@@ -798,3 +879,7 @@ func (h *Hero) PotionManaRange(maxMana int) (int, int) {
 
 // RefWalkTicks is D1's walk step in ticks, one 10-AUT turn: the D1 clock (decision 13).
 const RefWalkTicks = 8
+
+// SetClassFlagForTest gives class a class flag, as a hero.rec line would; for tests that move a rule between
+// classes.
+func SetClassFlagForTest(class int, flag uint32) { classAttr[class].Flags |= flag }

@@ -1,4 +1,13 @@
 %rec: class
+# Everything a class does differently is a flag or a field of its record, which any class may take:
+#   flags: critical_strike trap_sense iron_skin natural_resistance dual_wield trained_fists parry
+#          full_missile_bonus half_shield vitality_damage shield_slows_bare_hands flinch_resist, and at most
+#          one damage formula: str_dex_damage staff_and_fist_damage blade_and_bow_damage heavy_weapon_damage
+#          (none: clvl*Str/100)
+#   key (effects' class lists), spell_to_hit, heal_boost (2 doubles Healing and potions, 1 adds half),
+#   skill (repair disarm recharge vision identify rage), voice / female_voice (PS_<voice>nn), death_sound,
+#   text_prefix (the quest books' class texts), oily (the Oily shrine: "str 2", repeatable),
+#   slain_hero (breast_plate long_war_bow war_staff bastard_sword battle_axe lightning_book)
 # THESE NUMBERS ARE A DESIGN CHOICE MADE DURING THE PORT. They are not a port of anything and they are meant to
 # be tuned by playing the game.
 #
@@ -50,6 +59,14 @@ attack_frames: default=16 axe=20
 spell_frames: 20
 hit_frames: 6
 flags: critical_strike
+key: warrior
+heal_boost: 2
+skill: repair
+voice: WARR
+female_voice: ROGUE
+death_sound: PS_DEAD
+oily: str 2
+slain_hero: breast_plate
 
 name: Archer
 str: 16
@@ -79,7 +96,15 @@ ranged_to_hit: 70
 attack_frames: default=18 axe=22 bow=12 staff=16
 spell_frames: 16
 hit_frames: 7
-flags: trap_sense
+flags: trap_sense str_dex_damage full_missile_bonus
+key: archer
+heal_boost: 1
+skill: disarm
+voice: WARR
+female_voice: ROGUE
+text_prefix: R
+oily: dex 2
+slain_hero: long_war_bow
 
 name: Mage
 str: 10
@@ -109,7 +134,15 @@ ranged_to_hit: 50
 attack_frames: default=20 sword=16 axe=24 mace=16 staff=16
 spell_frames: 12
 hit_frames: 8
-
+flags: shield_slows_bare_hands
+key: mage
+spell_to_hit: 20
+skill: recharge
+voice: MAGE
+female_voice: ROGUE
+text_prefix: M
+oily: mag 2
+slain_hero: lightning_book
 %rec: experience
 # ExpLvls: the experience total each character level needs, level 1 first. Ten per line.
 # Also a design choice - H&H had no experience ladder. This one is 1500 * (1.3^n - 1), rounded to ten, which

@@ -76,8 +76,8 @@ func d1HeroPainSound(ctx ActionContext, hero *Actor) {
 	id := "PS_" + voice + "69"
 	if !hero.IsAlive() {
 		id = "PS_" + voice + "71"
-		if hero.hero.Class == d1.Warrior {
-			id = "PS_DEAD"
+		if death := d1.Class(hero.hero.Class).DeathSound; death != "" {
+			id = death
 		}
 	}
 	playD1SfxAt(ctx, id, hero.MapPosition())

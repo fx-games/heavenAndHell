@@ -932,7 +932,7 @@ func startingItems(def defs.LoadoutDefinition, byName map[string]int) (idx []int
 	return idx, pack
 }
 
-// classIndex is the class's row in the mod's roster, which is also its archetype (see d1.NumArchetypes).
+// classIndex is the class's row in the mod's roster; hero.rec's record of the same row holds its rules.
 func (g *GameInstance) classIndex(def defs.LoadoutDefinition) int {
 	for i, c := range g.GetGameData().ClassDefinitions {
 		if c.InternalName == def.InternalName {
