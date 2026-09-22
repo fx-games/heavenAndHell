@@ -93,6 +93,7 @@ type UIController struct {
 	screenSize               geometry.Point
 	uiBarWidth               int
 	uiBar                    *ColoredRect
+	stashOpen                bool // shows the sidebar even when the option hides it
 	elevatedOverlay          UIWidget
 
 	statsLabel *BasicLabel
@@ -234,7 +235,7 @@ func (u *UIController) ChangeMapZoom(sign int) {
 
 	windowSize := u.GetDeviceIndependentScreenSize()
 	if u.HasOverlays() {
-		windowSize = windowSize.Sub(geometry.Point{X: u.uiBarWidth, Y: 0})
+		windowSize = windowSize.Sub(geometry.Point{X: u.GetUIBarWidth(), Y: 0})
 	}
 
 	centerMapPos := u.mapRenderer.GetVisibleMap().Center()
@@ -257,7 +258,7 @@ func (u *UIController) disableScrolling() {
 
 	windowSize := u.GetDeviceIndependentScreenSize()
 	if u.HasOverlays() {
-		windowSize = windowSize.Sub(geometry.Point{X: u.uiBarWidth, Y: 0})
+		windowSize = windowSize.Sub(geometry.Point{X: u.GetUIBarWidth(), Y: 0})
 	}
 	// calculate exact scale to fit
 	mapSizeW := float64(mapSize.X) * float64(tileSize.X)
@@ -313,7 +314,7 @@ func (u *UIController) OnMouseClicked(button ebiten.MouseButton, screenX int, sc
 		return true
 	}
 
-	for _, overlay := range u.overlays {
+	for _, overlay := range u.visibleOverlays() {
 		if handled := overlay.OnMouseClicked(button, screenX, screenY); handled {
 			u.isMouseCapturedByUI = true
 			return true
@@ -326,7 +327,7 @@ func (u *UIController) OnMouseClicked(button ebiten.MouseButton, screenX int, sc
 func (u *UIController) OnMouseMoved(screenX int, screenY int) (bool, Tooltip) {
 	u.isMouseCapturedByUI = false
 
-	for _, overlay := range u.overlays {
+	for _, overlay := range u.visibleOverlays() {
 		if handled, toolTip := overlay.OnMouseMoved(screenX, screenY); handled {
 			u.isMouseCapturedByUI = true
 			return handled, toolTip
@@ -357,7 +358,7 @@ func (u *UIController) drawUI() {
 
 	defer u.drawTooltip()
 	defer u.drawDraggedIcon()
-	for _, overlay := range u.overlays {
+	for _, overlay := range u.visibleOverlays() {
 		if overlay == u.elevatedOverlay {
 			continue
 		}
@@ -369,7 +370,7 @@ func (u *UIController) drawUI() {
 	renderer := u.GetRenderer()
 	dimmed := u.screenSize
 	if _, sheet := u.GetTopModal().(*CharacterSheet); sheet {
-		dimmed.X -= u.uiBarWidth // the sidebar stays live under the character sheet
+		dimmed.X -= u.GetUIBarWidth() // the sidebar stays live under the character sheet
 	}
 	renderer.DrawColoredRect(geometry.Point{X: 0, Y: 0}, dimmed, color.RGBA{A: 140})
 
@@ -580,7 +581,7 @@ func (u *UIController) OnScreenSizeChanged() {
 	}
 	screenSizeForMap := newScreenSize
 	if u.HasOverlays() {
-		screenSizeForMap = newScreenSize.Sub(geometry.Point{X: u.uiBarWidth, Y: 0})
+		screenSizeForMap = newScreenSize.Sub(geometry.Point{X: u.GetUIBarWidth(), Y: 0})
 	}
 	u.tileRenderer.SetDeviceScale(u.deviceDPIScale)
 	u.mapRenderer.OnScreenSizeChanged(screenSizeForMap)
@@ -594,11 +595,29 @@ func (u *UIController) ClearAllOverlays() {
 	u.overlays = []UIWidget{}
 }
 
+// visibleOverlays are the overlays drawn and under the mouse. A hidden sidebar leaves only the status effects,
+// which sit on the map; hidden widgets still take keyboard commands.
+func (u *UIController) visibleOverlays() []UIWidget {
+	if u.sidebarHidden() {
+		return []UIWidget{u.timer}
+	}
+	return u.overlays
+}
+
 func (u *UIController) HasOverlays() bool {
 	return len(u.overlays) > 0
 }
 
+// sidebarHidden: the player's option, except that the stash needs the pack beside it.
+func (u *UIController) sidebarHidden() bool {
+	return u.configuration.HideSidebar && !u.stashOpen
+}
+
+// GetUIBarWidth is the room the sidebar takes from the map: none while it is hidden.
 func (u *UIController) GetUIBarWidth() int {
+	if u.sidebarHidden() {
+		return 0
+	}
 	return u.uiBarWidth
 }
 
@@ -665,6 +684,8 @@ func (u *UIController) OpenStash(playerInv *common.Inventory, stashInTown *commo
 	paddingX := 20
 	offsetFromBottomRightCorner := geometry.Point{X: screenSize.X - invBounds.Max.X + invBounds.Size().X + paddingX, Y: screenSize.Y - invBounds.Max.Y} //- invBounds.Size().X - paddingX, Y: invBounds.Min.Y}
 
+	u.stashOpen = true
+	u.OnScreenSizeChanged()
 	stashInv := u.OpenInventoryModal(offsetFromBottomRightCorner, tileSize, dataSource)
 	u.ElevateOverlay(u.inventory)
 
@@ -672,6 +693,8 @@ func (u *UIController) OpenStash(playerInv *common.Inventory, stashInTown *commo
 	u.inventory.SetOnSelectedHandler(toStashHandler)
 
 	onClose := func() { // revert inventory..
+		u.stashOpen = false
+		u.OnScreenSizeChanged()
 		u.StopElevation()
 		u.inventory.SetOnSelectedHandler(oldHandler)
 	}
@@ -1103,7 +1126,7 @@ func (u *UIController) OnMapChanged() {
 
 	gridSize := u.worldTexture.GetTileSize()
 	mapWindow := renderer.NewMapWindow(
-		u.GetDeviceIndependentScreenSize().Sub(geometry.Point{X: u.uiBarWidth, Y: 0}),
+		u.GetDeviceIndependentScreenSize().Sub(geometry.Point{X: u.GetUIBarWidth(), Y: 0}),
 		geometry.Point{X: loadedMap.GetWidth(), Y: loadedMap.GetHeight()},
 		gridSize,
 		u.GetTileScaleFactor,
@@ -1117,82 +1140,8 @@ func (u *UIController) OnMapChanged() {
 	u.OnPlayerTurnTaken()
 }
 
-// defaultMiniMapColors are the built-in minimap colors; config.rec's
-// "MiniMapColor: <name>=rrggbb" lines override them by name.
-var defaultMiniMapColors = map[string][4]byte{
-	"player":        {100, 255, 100, 255},
-	"unexplored":    {10, 10, 10, 255},
-	"stairsUp":      {255, 204, 0, 255},
-	"stairsDown":    {255, 255, 255, 255},
-	"waterUnlit":    {43, 56, 97, 255},
-	"floorUnlit":    {35, 30, 51, 255},
-	"wallUnlit":     {85, 95, 112, 255},
-	"hostileActor":  {255, 0, 0, 255},
-	"peacefulActor": {220, 120, 75, 255},
-	"water":         {86, 112, 194, 255},
-	"floor":         {77, 60, 102, 255},
-	"wall":          {170, 191, 224, 255},
-}
-
-// miniMapColor resolves a minimap color name against config.rec, falling back to the built-in.
-func (u *UIController) miniMapColor(name string) [4]byte {
-	if fromConfig, ok := u.configuration.MiniMapColors[name]; ok {
-		return fromConfig
-	}
-	return defaultMiniMapColors[name]
-}
-
 func (u *UIController) getMiniMapColor(mapPos geometry.Point, tileColor *[4]byte) {
-	state := u.context.GameState()
-	currentMap := state.GetMap()
-	if state.GetPlayer().MapPosition() == mapPos {
-		*tileColor = u.miniMapColor("player")
-		return
-	}
-	if !currentMap.IsExplored(mapPos) {
-		*tileColor = u.miniMapColor("unexplored")
-		return
-	}
-	if currentMap.IsSpecialAt(mapPos, gridmap.SpecialTileStairsUp) {
-		*tileColor = u.miniMapColor("stairsUp")
-		return
-	}
-	if currentMap.IsSpecialAt(mapPos, gridmap.SpecialTileStairsDown) {
-		*tileColor = u.miniMapColor("stairsDown")
-		return
-	}
-	if !state.GetPlayer().CanSee(mapPos) {
-		if currentMap.IsSpecialAt(mapPos, gridmap.SpecialTileWater) {
-			*tileColor = u.miniMapColor("waterUnlit")
-			return
-		}
-		if currentMap.IsWalkable(mapPos) {
-			*tileColor = u.miniMapColor("floorUnlit")
-		} else {
-			*tileColor = u.miniMapColor("wallUnlit")
-		}
-		return
-	}
-	if currentMap.IsActorAt(mapPos) && currentMap.ActorAt(mapPos).IsVisible() {
-		actorAt := currentMap.ActorAt(mapPos)
-		if actorAt.IsHostileTo(state.GetPlayer()) {
-			*tileColor = u.miniMapColor("hostileActor")
-			return
-		}
-		*tileColor = u.miniMapColor("peacefulActor")
-		return
-	}
-
-	if currentMap.IsSpecialAt(mapPos, gridmap.SpecialTileWater) {
-		*tileColor = u.miniMapColor("water")
-		return
-	}
-
-	if currentMap.IsWalkable(mapPos) {
-		*tileColor = u.miniMapColor("floor")
-	} else {
-		*tileColor = u.miniMapColor("wall")
-	}
+	*tileColor = common.MiniMapColor(u.context.GameState(), u.configuration, mapPos)
 }
 
 func prepend[T any](slice []T, s T) []T {

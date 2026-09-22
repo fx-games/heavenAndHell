@@ -81,31 +81,9 @@ func ColorFromName(name string) color.RGBA {
 		return White
 	}
 }
-func ColorCodeFromColor(color color.Color) string {
-	switch color {
-	case Red:
-		return "[:red]"
-	case Blue:
-		return "[:blue]"
-	case Green:
-		return "[:green]"
-	case Yellow:
-		return "[:yellow]"
-	case DarkTextColor:
-		return "[:darkText]"
-	case LightTextColor:
-		return "[:lightText]"
-	case MagicHighlightColor:
-		return "[:magic]"
-	case RareHighlightColor:
-		return "[:rare]"
-	case SetHighlightColor:
-		return "[:set]"
-	case InvColorUnique:
-		return "[:unique]"
-	default:
-		return "[:white]"
-	}
+func ColorCodeFromColor(c color.Color) string {
+	r, g, b, _ := c.RGBA()
+	return fmt.Sprintf("[:%d,%d,%d]", r>>8, g>>8, b>>8)
 }
 
 func RGBAToColorCode(color color.RGBA) string {

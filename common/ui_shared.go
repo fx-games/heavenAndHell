@@ -353,6 +353,7 @@ func GameplaySettings(cfg *Configuration, permadeath bool, reopen func()) []util
 		configToggle(cfg, "Feed: visible actors", &cfg.FeedVisibleActors, reopen),
 		configToggle(cfg, "Feed: log", &cfg.FeedLog, reopen),
 		configToggle(cfg, "Feed: quest journal", &cfg.FeedQuests, reopen),
+		configToggle(cfg, "Feed: minimap", &cfg.FeedMinimap, reopen),
 	)
 }
 

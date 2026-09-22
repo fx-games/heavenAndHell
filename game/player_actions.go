@@ -293,7 +293,9 @@ func (a *Actions) nextStepOnPlayerPath() {
 		nextStep := a.playerPath[0]
 
 		if state.GetMap().IsActorAt(nextStep) {
-			//actorAt := state.GetMap().ActorAt(nextStep)
+			if !a.playerPerceives(state.GetMap().ActorAt(nextStep)) {
+				msg("Something is in the way")
+			}
 			a.stopAutoMove()
 			if !a.autoExplore { // never explore into another actor, only deliberately
 				direction := nextStep.Sub(state.GetPlayer().MapPosition())
@@ -353,6 +355,8 @@ func (a *Actions) continuePlayerAutoMovement(targetPos geometry.Point) {
 	}
 	pathToTarget := currentMap.GetJPSPath(a.state.GetPlayer().MapPosition(), targetPos, isWalkable)
 	if len(pathToTarget) <= 1 {
+		a.logError("No way on from here")
+		a.stopAutoMove()
 		return
 	}
 	a.playerPath = pathToTarget[1:]
@@ -360,15 +364,24 @@ func (a *Actions) continuePlayerAutoMovement(targetPos geometry.Point) {
 }
 func (a *Actions) allowedForAutoExplore(targetPos geometry.Point) func(point geometry.Point) bool {
 	return func(point geometry.Point) bool {
-		currentMap := a.state.GetMap()
-		isWalkable := currentMap.CurrentlyPassableAndSafeForActor(a.state.GetPlayer())
+		currentMap, player := a.state.GetMap(), a.state.GetPlayer()
+		isWalkable := currentMap.CurrentlyPassableAndSafeForActor(player)
 		if isWalkable(point) && !currentMap.IsStairsAt(point) {
 			return true
+		}
+		// an actor the player can't see is no wall to plan around: in the dark the path ran into one's cell, found
+		// no way and exploring stopped without a word. The step itself bumps into it (nextStepOnPlayerPath).
+		if currentMap.IsActorAt(point) && !a.playerPerceives(currentMap.ActorAt(point)) && !currentMap.IsStairsAt(point) {
+			return currentMap.IsWalkableFor(point, currentMap.ActorAt(point)) && !currentMap.IsObviousHazardAt(point)
 		}
 		// the explore target itself may be an unopened container to bump (Open Containers option)
 		return a.config.AutoExploreOpenContainers && point == targetPos && currentMap.IsObjectAt(point)
 	}
 }
+func (a *Actions) playerPerceives(actor *common.Actor) bool {
+	return actor.IsVisible() && a.state.GetPlayer().CanPerceive(actor.MapPosition())
+}
+
 func (a *Actions) allowedForAutoMove(targetPos geometry.Point) func(point geometry.Point) bool {
 	return func(point geometry.Point) bool {
 		currentMap := a.state.GetMap()
@@ -384,8 +397,9 @@ func (a *Actions) StartPlayerAutoMovement(targetPos geometry.Point) {
 	}
 	currentMap := a.state.GetMap()
 
-	// single step, like a manual move..
-	if currentMap.MoveDistance(player.MapPosition(), targetPos) == 1 {
+	// single step, like a manual move - but not for auto explore: a manual move cancels it, and in the dark the
+	// next unexplored cell is usually the neighbor, so exploring stopped after every step
+	if !a.autoExplore && currentMap.MoveDistance(player.MapPosition(), targetPos) == 1 {
 		// this seems to be an intended action..
 		direction := targetPos.Sub(player.MapPosition())
 		a.ManualMovePlayer(direction)
@@ -425,6 +439,9 @@ func (a *Actions) StartPlayerAutoMovement(targetPos geometry.Point) {
 	}
 	pathToTarget := currentMap.GetJPSPath(playerPosition, targetPos, isWalkable)
 	if len(pathToTarget) <= 1 {
+		if a.autoExplore {
+			a.logError("No way on from here")
+		}
 		a.stopAutoMove()
 		return
 	}

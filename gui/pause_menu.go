@@ -60,6 +60,12 @@ func (u *UIController) openVideoMenu() {
 			u.toggleFullscreen()
 			u.reopen(u.openVideoMenu)
 		}},
+		{MainText: "Sidebar: " + map[bool]string{true: "Off", false: "On"}[u.configuration.HideSidebar], Action: func() {
+			u.configuration.HideSidebar = !u.configuration.HideSidebar
+			u.configuration.SaveToRecFile(common.ConfigFile)
+			u.OnScreenSizeChanged() // the map takes or gives back the sidebar's room
+			u.reopen(u.openVideoMenu)
+		}},
 		{MainText: "Back", Action: u.PopWidget},
 	})
 }

@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"rpg/common"
 	"rpg/defs"
+	"rpg/geometry"
 	"slices"
 	"strings"
 )
@@ -31,11 +32,12 @@ func (g *GameInstance) writeFeeds() {
 		{c.FeedInventory, "inventory", g.state.GetPlayer().GetInventory().AsColorCodedStrings},
 		{c.FeedEquipment, "equipment", g.equipmentFeed},
 		{c.FeedCharacter, "character", func() []string {
-			return common.SectionLines(common.ActorInfoSections(&g.state, g.state.GetPlayer()))
+			return headings(common.SectionLines(common.ActorInfoSections(&g.state, g.state.GetPlayer())))
 		}},
 		{c.FeedVisibleItems, "visible_items", g.visibleItemsFeed},
 		{c.FeedVisibleActors, "visible_actors", g.visibleActorsFeed},
-		{c.FeedQuests, "quests", g.state.D1QuestLog},
+		{c.FeedQuests, "quests", func() []string { return headings(g.state.D1QuestLog()) }},
+		{c.FeedMinimap, "minimap", g.minimapFeed},
 	}
 	if g.feeds == nil {
 		g.feeds = map[string]string{}
@@ -153,11 +155,53 @@ func (g *GameInstance) visibleActorsFeed() []string {
 	return lines
 }
 
+// minimapFeed draws the minimap's colors with half blocks: each character is two cells stacked, the upper one
+// its foreground and the lower one its background, so the map keeps its shape in a terminal.
+// ponytail: the whole map, unexplored margins included; crop to the explored bounds if it gets too wide.
+func (g *GameInstance) minimapFeed() []string {
+	size := g.state.GetMap().MapSize()
+	color := func(x, y int) [4]byte {
+		return common.MiniMapColor(&g.state, g.configuration, geometry.Point{X: x, Y: y})
+	}
+	var lines []string
+	for y := 0; y < size.Y; y += 2 {
+		var line strings.Builder
+		for x := 0; x < size.X; x++ {
+			top, bottom := color(x, y), [4]byte{}
+			if y+1 < size.Y {
+				bottom = color(x, y+1)
+			}
+			fmt.Fprintf(&line, "\x1b[38;2;%d;%d;%dm\x1b[48;2;%d;%d;%dm▀", top[0], top[1], top[2], bottom[0], bottom[1], bottom[2])
+		}
+		lines = append(lines, line.String())
+	}
+	return lines
+}
+
+// headings colors the unindented lines of a text window (titles, quest names) gold and the labels of its
+// indented "label: value" rows gray.
+func headings(lines []string) []string {
+	out := make([]string, len(lines))
+	for i, line := range lines {
+		switch {
+		case line == "":
+		case !strings.HasPrefix(line, " "):
+			line = "[:lightText]" + line + "[:white]"
+		default:
+			if label, value, ok := strings.Cut(line, ": "); ok {
+				line = "[:darkText]" + label + ":[:white] " + value
+			}
+		}
+		out[i] = line
+	}
+	return out
+}
+
 var colorCode = regexp.MustCompile(`\[:([\w,]+)\]`)
 
 var ansiColors = map[string]string{
-	"white": "37", "red": "31", "green": "32", "yellow": "33", "blue": "34",
-	"darkText": "90", "lightText": "97", "magic": "94", "rare": "93", "set": "92", "unique": "33",
+	"white": "37", "red": "31",
+	"darkText": "38;2;175;131;59", "lightText": "38;2;224;176;33", // defs.DarkTextColor, defs.LightTextColor
 }
 
 // ansi turns the game's color codes ([:red], [:24,54,222]) into ANSI escapes, resetting at each line end.

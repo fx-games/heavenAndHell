@@ -51,6 +51,8 @@ type Configuration struct {
 	FeedVisibleActors      bool
 	FeedLog                bool
 	FeedQuests             bool
+	FeedMinimap            bool
+	HideSidebar            bool // the tile UI's right-hand bar; the map takes its room
 	FlipActorsHorizontally bool
 
 	SoundVolume, MusicVolume, VoiceVolume float64 // 0..1, set in the audio menu
@@ -148,6 +150,8 @@ func (c Configuration) ToRecord() recfile.Record {
 		{Name: "FeedVisibleActors", Value: recfile.BoolStr(c.FeedVisibleActors)},
 		{Name: "FeedLog", Value: recfile.BoolStr(c.FeedLog)},
 		{Name: "FeedQuests", Value: recfile.BoolStr(c.FeedQuests)},
+		{Name: "FeedMinimap", Value: recfile.BoolStr(c.FeedMinimap)},
+		{Name: "HideSidebar", Value: recfile.BoolStr(c.HideSidebar)},
 		{
 			Name:  "FlipActorsHorizontally",
 			Value: recfile.BoolStr(c.FlipActorsHorizontally),
@@ -210,6 +214,8 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		FeedVisibleActors:         configMap.GetBoolOrFalse("FeedVisibleActors"),
 		FeedLog:                   configMap.GetBoolOrFalse("FeedLog"),
 		FeedQuests:                configMap.GetBoolOrFalse("FeedQuests"),
+		FeedMinimap:               configMap.GetBoolOrFalse("FeedMinimap"),
+		HideSidebar:               configMap.GetBoolOrFalse("HideSidebar"),
 		FlipActorsHorizontally:    configMap.GetBoolOrTrue("FlipActorsHorizontally"),
 		SoundVolume:               configMap.GetFloatOrDefault("SoundVolume", 1),
 		MusicVolume:               configMap.GetFloatOrDefault("MusicVolume", 1),

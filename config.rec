@@ -12,20 +12,24 @@ WindowWidth: 1280
 WindowHeight: 800
 CardinalMovementOnly: false
 KeepPlayerCentered: true
-FeedInventory: false
+FeedInventory: true
 FeedEquipment: false
-FeedCharacter: false
-FeedVisibleItems: false
-FeedVisibleActors: false
+FeedCharacter: true
+FeedVisibleItems: true
+FeedVisibleActors: true
 FeedLog: false
 FeedQuests: false
-ItemNamesInShop: BandStyle
+FeedMinimap: false
+HideSidebar: false
 FlipActorsHorizontally: true
 SoundVolume: 0.1
 MusicVolume: 0.8
 VoiceVolume: 0.2
 AutoExploreOpenContainers: true
+AutosaveOnLevelChange: true
 Fullscreen: false
+Mod: heavenandhell
+SpriteSheet: assets/classic_roguelike.png
 MiniMapColor: floor=4d3c66
 MiniMapColor: floorUnlit=231e33
 MiniMapColor: hostileActor=ff0000
@@ -38,3 +42,4 @@ MiniMapColor: wall=aabfe0
 MiniMapColor: wallUnlit=555f70
 MiniMapColor: water=5670c2
 MiniMapColor: waterUnlit=2b3861
+

@@ -9,3 +9,10 @@ func TestANSI(t *testing.T) {
 		t.Fatalf("got %q", got)
 	}
 }
+
+func TestHeadings(t *testing.T) {
+	got := headings([]string{"Title", "", " Life: 10"})
+	if got[0] != "[:lightText]Title[:white]" || got[1] != "" || got[2] != "[:darkText] Life:[:white] 10" {
+		t.Fatalf("got %q", got)
+	}
+}

@@ -120,7 +120,7 @@ func (s *CharacterSheet) Layout() {
 	}
 	s.size = geometry.Point{X: s.colW[0] + sheetColGap + s.colW[1], Y: max(height[0], height[1]) + s.lineH/2}
 	// centre over the map, not the screen: the sidebar stays uncovered so the inventory can be used alongside
-	area := s.u.GetScreenSize().Sub(geometry.Point{X: s.u.uiBarWidth})
+	area := s.u.GetScreenSize().Sub(geometry.Point{X: s.u.GetUIBarWidth()})
 	s.topLeft = area.Sub(s.size).Div(2)
 	s.topLeft.X = max(s.topLeft.X, sheetPad)
 	s.topLeft.X, s.topLeft.Y = max(s.topLeft.X, sheetPad), max(s.topLeft.Y, sheetPad)
@@ -253,7 +253,7 @@ func (s *CharacterSheet) OnMouseMoved(x int, y int) (bool, Tooltip) {
 }
 
 func (s *CharacterSheet) overSidebar(x int) bool {
-	return x >= s.u.GetScreenSize().X-s.u.uiBarWidth
+	return x >= s.u.GetScreenSize().X-s.u.GetUIBarWidth()
 }
 
 func (s *CharacterSheet) OnMouseWheel(x int, y int, dy float64) bool { return true }
