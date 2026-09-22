@@ -14,6 +14,23 @@ every decision and why).
   gates are green (the user asked for that; last one: `worktree-agent-a223e92bbd2677d04`).
   Commit small and often: the user asked for commits in between, not one big one at the end.
 
+## Open tasks from the 2026-09-22 session
+
+All five requests are done and committed on `engine-split` (gates green, playthrough still `94bc8c05...`):
+hell_8's crash (`69bcc49`: accretion regrows up to 256 times, Hell's pieces reach 10 rooms on ~7% of tries;
+walkability now runs 100 seeds), Rogue's generator (`a7575d0`), Lucifer's note + evidence quest (`f101549`),
+the options menu's Gameplay section (`1ac9538`), the megadungeon audit (`14a9ff7`). Hellfire needed nothing.
+
+Still waiting on the user:
+- Review the four evidence notes' text in H&H `texts.rec` (drafted by Claude from plan.txt).
+- Was `4c658e0` setting `config.rec` to `Mod: d1` meant (it undid 43faef5's H&H default)?
+- Not built: the second act after Lucifer's Rant (plan.txt's "Quests #2"); main never had it.
+
+Also fixed this session and committed: `e2f14d3` (package-level `gridmap.Tile` vars captured `defs.Icon*`
+before `LoadIcons`, so D1 stairs, arches, grates, lava and water drew as grass) and `4c658e0` (the lighting
+work; it also set `config.rec` to `Mod: d1`, undoing 43faef5's H&H default. Ask the user whether that was meant).
+Tests need `-tags embedded` (or `development` for the root package); without a tag they fail on asset paths.
+
 ## The goal
 
 One content-free engine plus mods. **One mod is one complete game** — mods do not
@@ -139,7 +156,7 @@ The plan (user, 2026-09-21):
    ..._RETURN_DAMAGE, ..._TRIPLE_DAMAGE), D1's generator skips a power it doesn't
    know, and `NewD1Item` hangs the hook on the game item. Kirioth
    says nothing after Lucifer (main had no text for it either). The evidence
-   notes carry main's placeholder text ("Are you sure about this?").
+   notes have drafted text now (see "Open tasks" above; needs the user's review).
 3. ~~`UpdateD1Quests` stays engine-side~~: superseded (user, 2026-09-22). Map
    changes are levels.rec patches (LEVELS.md); only reading a region is D1's.
 4. One intermittent failure of the root package under `-tags embedded` was seen
