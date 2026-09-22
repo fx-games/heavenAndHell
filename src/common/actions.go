@@ -73,6 +73,9 @@ type UserInterface interface {
 	QuitGame()
 	OpenMenu(options []util.MenuItem)
 	OpenUncancelableMenu(options []util.MenuItem) // like OpenMenu, but ESC/cancel does nothing (e.g. the start menu)
+	// OpenSettingsMenu is the shared Video/Audio/Gameplay/Font settings screen, reachable from both the start
+	// and pause menus; back returns to whichever menu opened it.
+	OpenSettingsMenu(back func())
 	OpenTextWindow(msg []util.LabelText)
 	// OpenInfoWindow lays out titled sections of label/value rows (ActorInfoSections) as a window.
 	OpenInfoWindow(title string, sections []D1SheetSection)

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
-	"strings"
 
 	"rpg/src/common"
 	"rpg/src/util"
@@ -21,17 +20,27 @@ func (u *UIController) openPauseMenu() {
 			util.MenuItem{MainText: "Save game", Action: func() { u.context.OpenSaveMenu(func() {}) }},
 			util.MenuItem{MainText: "Load game", Action: func() { u.context.OpenLoadMenu(func() {}) }})
 	}
-	quit := "Quit game"
+	quit := "Quit"
 	if u.context.QuitSaves != nil && u.context.QuitSaves() {
 		quit = "Save & Quit"
 	}
 	u.OpenMenu(append(items, []util.MenuItem{
-		{MainText: "Video", Action: u.openVideoMenu},
-		{MainText: "Audio", Action: u.openAudioMenu},
-		{MainText: "Gameplay", Action: u.openGameplayMenu},
+		{MainText: "Settings", Action: func() { u.OpenSettingsMenu(u.PopWidget) }},
 		{MainText: "Back to main menu", Action: u.context.BackToMainMenu},
 		{MainText: quit, Action: u.QuitGame},
 	}...))
+}
+
+// OpenSettingsMenu is the shared settings screen (Video, Audio, Gameplay, Font), reachable from both the
+// start and pause menus; back returns to whichever menu opened it.
+func (u *UIController) OpenSettingsMenu(back func()) {
+	u.OpenMenu([]util.MenuItem{
+		{MainText: "Video", Action: u.openVideoMenu},
+		{MainText: "Audio", Action: u.openAudioMenu},
+		{MainText: "Gameplay", Action: u.openGameplayMenu},
+		{MainText: "Font", Action: u.openFontMenu},
+		{MainText: "Back", Action: back},
+	})
 }
 
 // reopen rebuilds the menu on top in place, so its labels show the new state without stacking a second copy.
@@ -69,7 +78,6 @@ func (u *UIController) openVideoMenu() {
 			u.OnScreenSizeChanged() // the map takes or gives back the sidebar's room
 			u.reopen(u.openVideoMenu)
 		}},
-		{MainText: "Font: " + strings.TrimSuffix(u.configuration.FontName(), ".ttf"), Action: u.openFontMenu},
 		{MainText: "Back", Action: u.PopWidget},
 	})
 }

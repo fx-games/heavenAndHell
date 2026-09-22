@@ -139,17 +139,20 @@ func (c *Console) openSystemMenu() {
 			util.MenuItem{MainText: "Save game", Action: func() { c.context.OpenSaveMenu(c.openSystemMenu) }},
 			util.MenuItem{MainText: "Load game", Action: func() { c.context.OpenLoadMenu(c.openSystemMenu) }})
 	}
+	quit := "Quit"
+	if c.context.QuitSaves != nil && c.context.QuitSaves() {
+		quit = "Save & Quit"
+	}
 	c.OpenMenu(append(items, []util.MenuItem{
-		{MainText: "Gameplay", Action: c.openGameplayMenu},
-		{MainText: "Key bindings", Action: c.showHelp},
+		{MainText: "Settings", Action: func() { c.OpenSettingsMenu(c.openSystemMenu) }},
 		{MainText: "Back to main menu", Action: c.context.BackToMainMenu},
-		{MainText: "Quit game", Action: c.ui.QuitGame},
+		{MainText: quit, Action: c.ui.QuitGame},
 	}...))
 }
 
-func (c *Console) openGameplayMenu() {
-	items := common.GameplaySettings(c.config, c.context.IsPermadeath(), c.openGameplayMenu)
-	c.OpenMenu(append(items, util.MenuItem{MainText: "Back", Action: c.openSystemMenu}))
+func (c *Console) openGameplayMenu(back func()) {
+	items := common.GameplaySettings(c.config, c.context.IsPermadeath(), func() { c.openGameplayMenu(back) })
+	c.OpenMenu(append(items, util.MenuItem{MainText: "Back", Action: back}))
 }
 
 // look moves a cursor over the map; confirming shows details of what is there, like right clicking in the tile UI.

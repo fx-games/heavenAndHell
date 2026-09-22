@@ -243,6 +243,16 @@ func (c *Console) OpenUncancelableMenu(options []util.MenuItem) {
 	c.ui.OpenMenuNotClosable("", menuItems(options))
 }
 
+// OpenSettingsMenu is the shared settings screen, reachable from both the start and pause menus; back returns
+// to whichever menu opened it. The terminal has no video/audio settings, so this is Gameplay and Key bindings.
+func (c *Console) OpenSettingsMenu(back func()) {
+	c.OpenMenu([]util.MenuItem{
+		{MainText: "Gameplay", Action: func() { c.openGameplayMenu(back) }},
+		{MainText: "Key bindings", Action: c.showHelp},
+		{MainText: "Back", Action: back},
+	})
+}
+
 func (c *Console) OpenTextWindow(msg []util.LabelText) {
 	if len(msg) > 0 {
 		c.ui.OpenTextWindow(labelsToText(msg))

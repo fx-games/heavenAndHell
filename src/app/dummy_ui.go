@@ -82,6 +82,11 @@ func (d DummyUI) OpenUncancelableMenu(options []util.MenuItem) {
 
 }
 
+func (d DummyUI) OpenSettingsMenu(back func()) {
+	//TODO implement me
+
+}
+
 func (d DummyUI) ShowItemInfo(item *common.Item) {}
 
 func (d DummyUI) OpenInfoWindow(title string, sections []common.D1SheetSection) {}

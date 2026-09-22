@@ -16,7 +16,6 @@ import (
 	"rpg/src/gridmap"
 	"rpg/src/stats"
 	"rpg/src/util"
-	"strings"
 	"time"
 )
 
@@ -509,16 +508,7 @@ func (g *GameInstance) StartMenuItems(afterDeath bool) []util.MenuItem {
 		items = append(items, util.MenuItem{MainText: "Mod: " + files.ActiveMod(), Action: func() { g.openModPicker(mods, back) }})
 	}
 	if !afterDeath {
-		cfg := g.configuration
-		items = append(items, util.MenuItem{MainText: "Font: " + strings.TrimSuffix(cfg.FontName(), ".ttf"), Action: func() {
-			var open func()
-			open = func() {
-				g.uiController.OpenUncancelableMenu(common.FontMenu(cfg, g.uiController.SetFont, open, func() {
-					g.uiController.OpenUncancelableMenu(g.StartMenuItems(false))
-				}))
-			}
-			open()
-		}})
+		items = append(items, util.MenuItem{MainText: "Settings", Action: func() { g.uiController.OpenSettingsMenu(back) }})
 	}
 	return append(items, util.MenuItem{MainText: "Quit", Action: g.uiController.QuitGame})
 }
