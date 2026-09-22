@@ -130,6 +130,7 @@ female_voice: ROGUE
 text_prefix: M
 oily: mag 2
 slain_hero: lightning_book
+
 %rec: experience
 # ExpLvls: the experience total each character level needs, level 1 first. Ten per line.
 

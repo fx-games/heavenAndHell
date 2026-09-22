@@ -143,6 +143,7 @@ female_voice: ROGUE
 text_prefix: M
 oily: mag 2
 slain_hero: lightning_book
+
 %rec: experience
 # ExpLvls: the experience total each character level needs, level 1 first. Ten per line.
 # Also a design choice - H&H had no experience ladder. This one is 1500 * (1.3^n - 1), rounded to ten, which

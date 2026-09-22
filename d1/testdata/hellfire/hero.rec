@@ -246,6 +246,7 @@ voice: WARR
 female_voice: ROGUE
 oily: vit 2
 slain_hero: battle_axe
+
 %rec: experience
 # ExpLvls: the experience total each character level needs, level 1 first. Ten per line.
 
