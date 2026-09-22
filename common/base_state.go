@@ -56,18 +56,18 @@ type State struct {
 
 	onMapChanged func(oldName, newName string)
 
-	visibility          *Visibility
-	townMapSpawn        geometry.Point
-	deepestLevel        string // the deepest non-town level visited (Visit)
-	deepestTown         string // the deepest town visited: where the town portal leads
-	flags               *Flags
-	playerStashInTown   *Inventory
-	playerDijkstraMap   map[geometry.Point]int
-	timekeeper          *TimeKeeper
-	actions             *Broker
-	animator            Animator
-	dropsFrom           *Actor   // the monster dying right now: its loot shows when it falls
-	dying               []*Actor // dead, but still drawn standing until the killing projectile reaches them
+	visibility        *Visibility
+	townMapSpawn      geometry.Point
+	deepestLevel      string // the deepest non-town level visited (Visit)
+	deepestTown       string // the deepest town visited: where the town portal leads
+	flags             *Flags
+	playerStashInTown *Inventory
+	playerDijkstraMap map[geometry.Point]int
+	timekeeper        *TimeKeeper
+	actions           *Broker
+	animator          Animator
+	dropsFrom         *Actor   // the monster dying right now: its loot shows when it falls
+	dying             []*Actor // dead, but still drawn standing until the killing projectile reaches them
 
 	config Configuration
 
@@ -91,11 +91,11 @@ func (s *State) GetPlayerStashInTown() *Inventory {
 func NewState(ldtkProject *ldtk.Project) State {
 
 	return State{
-		maps:                make(map[string]*gridmap.GridMap[*Actor, *Item, Object]),
-		flags:               NewFlags(),
-		playerStashInTown:   NewInventory(32),
-		ldtkProject:         ldtkProject,
-		visibility:          NewVisibility(),
+		maps:              make(map[string]*gridmap.GridMap[*Actor, *Item, Object]),
+		flags:             NewFlags(),
+		playerStashInTown: NewInventory(32),
+		ldtkProject:       ldtkProject,
+		visibility:        NewVisibility(),
 	}
 }
 func (s *State) SetAnimator(animator Animator) {
@@ -112,24 +112,6 @@ func (s *State) SetMapGenerator(mapGen *MapGenerator) {
 // disabled, so callers can tell an absent quest boss from a missing one.
 func (s *State) D1Quests() *d1.Quests {
 	return s.mapGen.d1Quests
-}
-
-// D1LevelType is a map's leveltype (d1.DTypeTown ... DTypeHell): a set level's from its quest (_qlvltype), a
-// dungeon level's from the mod's levels.rec - its tiles: set, or else its D1 generator's.
-func (s *State) D1LevelType(mapName string) int {
-	lvl := s.Level(mapName)
-	switch cfg := lvl.Config.(type) {
-	case d1.SetLevelParams:
-		if q := s.QuestByKey(cfg.Quest); q >= 0 && s.D1Quests() != nil {
-			return s.D1Quests()[q].LvlType
-		}
-	case d1.LevelParams:
-		return s.factory.Generator.D.LevelType(lvl.Depth)
-	}
-	if lvl.Town {
-		return d1.DTypeTown
-	}
-	return max(slices.Index([]string{"town", "cathedral", "catacombs", "caves", "hell"}, lvl.Tiles), 0)
 }
 
 func (s *State) GetVisibility() *Visibility {
@@ -215,7 +197,6 @@ func (s *State) OnActorSpawned(actor *Actor) {
 func (s *State) GetFlags() *Flags {
 	return s.flags
 }
-
 
 func (s *State) PlayerStandsInLitArea() bool {
 	currentMap := s.GetMap()

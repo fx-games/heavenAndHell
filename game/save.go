@@ -125,7 +125,7 @@ func migrateLegacySave() {
 	// Slots written before saves were kept per mod lie in SaveDir itself, and every one of them is D1's.
 	for slot := 1; slot <= MaxSaveSlots; slot++ {
 		for _, name := range []string{fmt.Sprintf("slot%d.json", slot), fmt.Sprintf("slot%d.png", slot)} {
-			old, moved := filepath.Join(SaveDir, name), filepath.Join(SaveDir, common.DefaultMod, name)
+			old, moved := filepath.Join(SaveDir, name), filepath.Join(SaveDir, legacyMod, name)
 			if _, err := os.Stat(old); err != nil {
 				continue
 			}
@@ -137,7 +137,7 @@ func migrateLegacySave() {
 			}
 		}
 	}
-	legacy := filepath.Join(SaveDir, common.DefaultMod, "slot1.json")
+	legacy := filepath.Join(SaveDir, legacyMod, "slot1.json")
 	if _, err := os.Stat(LegacySaveFile); err != nil {
 		return
 	}
@@ -150,11 +150,14 @@ func migrateLegacySave() {
 	_ = os.Rename(LegacySaveFile, legacy)
 }
 
+// legacyMod is whose saves the ones from before mods are: the game was D1 then.
+const legacyMod = "d1"
+
 // forThisMod is whether the save belongs to the running mod. A save from before mods is D1's.
 func (sg saveGame) forThisMod() bool {
 	mod := sg.Mod
 	if mod == "" {
-		mod = common.DefaultMod
+		mod = legacyMod
 	}
 	return mod == saveMod()
 }

@@ -70,7 +70,7 @@ Three gates, all non-negotiable:
 | 15 | H&H class skills (effects/targeted.rec, untargeted.rec from main), Lucifer's death + gift, the four evidence notes, the hell town (`town:` records in levels.rec), main's enchantments as an H&H affix table |
 | 16 | H&H monsters as their records say: general AI for records without a D1 brain, to-hit from dexterity, full HP, skills, gear, speech on sight, death lines, tags |
 | 17 | D1's town quest talk (TalkToTowner) is `on_approach` triggers in D1's quests.rec |
-| 18 | The fallback room: no mod / missing mod plays the engine's own one room, one weapon, one rat from `files/assets` |
+| 18 | ~~The fallback room~~, removed again by LEVELS.md step 5: a missing mod is an error; default mod `heavenandhell` |
 | 19 | Each mod owns its music and sound exclusively; the engine has no audio. Saves are per mod (`saves/<mod>/`) and refuse another mod's game |
 | 20 | Shrine gold costs, later reverted (D1 stays true to the original) |
 
@@ -177,7 +177,7 @@ The plan (user, 2026-09-21):
   skill icon, town load nil deref, quest index panic, level-0 drops, uniques)
   was invisible to unit tests and fell out of one test driving a real game:
   `newHeavenAndHellGame` in `hh_town_test.go` (`newModGame(t, mod, ui)` for any
-  mod, "" for the fallback room). Walking `Actors()` while killing skips every
+  mod; the package's own tests default to `testMod`, d1). Walking `Actors()` while killing skips every
   other actor: clone the slice.
 - **Edit `maps.ldtk` as text, never by re-dumping the JSON**: `json.dumps`
   reformats the whole file (135k changed lines). Clone an entity's text block,
@@ -188,10 +188,10 @@ The plan (user, 2026-09-21):
 - **Bisecting in zsh**: `for f in $FILES` does not split words in zsh; use
   `bash -c` or the run reverts nothing and "proves" nothing (cost an hour).
   Set work aside in a WIP commit first, never with bare `git stash`.
-- **A mod lacking a file falls back to the engine's** `files/assets` copy, which
-  is now the fallback game's content (hero.rec, classes.rec, items.rec,
-  enemies.rec, icons, sheet, map). Both mods ship every one of those; a new mod
-  that forgets one gets the fallback's silently.
+- **A mod lacking a file falls back to the engine's** `files/assets` copy. The
+  fallback game is gone (LEVELS.md step 5), so a mod that forgets hero.rec,
+  classes.rec, items.rec, enemies.rec, icons, its sheet or maps.ldtk now fails
+  to load instead of silently borrowing another game's.
 - **The vendor and quest vocabularies are the engine's API**: `defs.VendorStocks`,
   `VendorBuyRules`, `VendorServices`; quest events in `common.QuestEvents`, outcomes
   in `QuestOutcomeExists`. Extend them there, and the loaders reject unknown names.

@@ -79,7 +79,7 @@ func newModGame(t *testing.T, mod string, ui common.UserInterface) *game.GameIns
 	files.SelectMod(mod)
 	_ = defs.LoadIcons()
 	t.Cleanup(func() {
-		files.SelectMod(common.DefaultMod)
+		files.SelectMod(testMod)
 		if err := defs.LoadIcons(); err != nil {
 			t.Fatal(err)
 		}

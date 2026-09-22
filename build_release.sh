@@ -37,7 +37,7 @@ CC=/usr/local/Cellar/mingw-w64/11.0.1/toolchain-x86_64/bin/x86_64-w64-mingw32-gc
 # copy assets: exactly what the game reads at run time, the same list files/data_embedded.go embeds.
 # Working material
 # (assets/sources.for.tiles, assets/maps/backups, the raw music packs) has no business in a build either.
-RUNTIME_ASSETS="Bm437_IBM_CGA.png classic_roguelike.png maps.ldtk endMessage.txt names-female.txt names-male.txt data fonts"
+RUNTIME_ASSETS="Bm437_IBM_CGA.png endMessage.txt names-female.txt names-male.txt data fonts"
 
 copy_assets() {
   dest="$1/assets"

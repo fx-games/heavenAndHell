@@ -62,15 +62,19 @@ func main() {
 	}
 }
 
-// mustHaveMod falls back to the engine's own game - one room, one weapon, one enemy - when the configured mod is
-// missing, saying which one and where it was looked for, rather than failing on some file inside it.
-func mustHaveMod(name string) {
+// modError says which mod is missing and where it was looked for, rather than failing later on some file inside
+// it. There is no engine game to fall back to: a mod must exist, load and start (LEVELS.md).
+func modError(name string) error {
 	if files.ModAvailable(name) {
-		return
+		return nil
 	}
-	log.Printf("mod %q not found: expected a directory at files/mods/%s (set Mod: in %s). Playing the engine's fallback room.",
-		name, name, common.ConfigFile)
-	files.SelectMod("")
+	return fmt.Errorf("mod %q not found: expected a directory at files/mods/%s (set Mod: in %s)", name, name, common.ConfigFile)
+}
+
+func mustHaveMod(name string) {
+	if err := modError(name); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // modOverride, when set, is played instead of the config's mod: the playthrough is D1's whatever the user picked.

@@ -246,10 +246,10 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 	return configuration
 }
 
-// DefaultMod is the game played when config.rec does not name one, and DefaultSpriteSheet the atlas the engine
-// ships. Neither is a mod name the engine knows: the overlay maps assets/ to the active mod on its own.
+// DefaultMod is the game played when config.rec does not name one, and DefaultSpriteSheet where a mod keeps its
+// atlas: the overlay maps assets/ to the active mod.
 const (
-	DefaultMod         = "d1"
+	DefaultMod         = "heavenandhell"
 	DefaultSpriteSheet = "assets/classic_roguelike.png"
 )
 

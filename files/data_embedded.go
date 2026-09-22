@@ -12,8 +12,6 @@ import "embed"
 // its music and sound included. The engine owns no audio of its own.
 //
 //go:embed assets/Bm437_IBM_CGA.png
-//go:embed assets/classic_roguelike.png
-//go:embed assets/maps.ldtk
 //go:embed assets/endMessage.txt
 //go:embed assets/names-female.txt
 //go:embed assets/names-male.txt

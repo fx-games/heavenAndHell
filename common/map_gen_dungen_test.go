@@ -23,9 +23,9 @@ func withMod(t *testing.T, name string) {
 	files.SelectMod(name)
 	_ = defs.LoadIcons() // a mod may still owe the engine an icon; what it DID supply is bound either way
 	t.Cleanup(func() {
-		files.SelectMod(DefaultMod)
+		files.SelectMod(testMod)
 		if err := defs.LoadIcons(); err != nil {
-			t.Fatalf("restoring %s icons: %v", DefaultMod, err)
+			t.Fatalf("restoring %s icons: %v", testMod, err)
 		}
 	})
 }

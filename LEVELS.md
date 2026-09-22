@@ -87,5 +87,7 @@ exits, `State.Level(id)` and one map store, generators only place locations, `op
 120 D1 golden dumps are byte-identical; `playthrough 1` passes on the d1 mod (it now pins that mod itself, as
 does the root test package, instead of following config.rec).
 
-Next: steps 3 (patches + place_item, delete `UpdateD1Quests`), 4 (delete `D1LevelType`), 5 (no fallback game,
-default mod heavenandhell; `TestFallbackRoom` is skipped until then).
+Steps 4 (music from the record, `D1LevelType` deleted) and 5 (no fallback game, default mod heavenandhell, a
+missing mod stops the game with an error naming it) are done too.
+
+Next: step 3 (patches + place_item, delete `UpdateD1Quests`).
