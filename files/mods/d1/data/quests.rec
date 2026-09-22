@@ -11,12 +11,13 @@
 #                     name (on_item_pickup, on_item_use), a level id (on_enter_level, on_level_cleared), an NPC's
 #                     internal name (on_talk: its dialogue; on_approach: walking up to it)
 #   when              a condition; empty: always. Functions: done(q) active(q) avail(q) logged(q) flag(name)
-#                     v1(q) v2(q) (the quest's two variables) has(item); numbers: depth, deepest; and or not == < >=
+#                     v1(q) v2(q) (the quest's two variables) has(item); numbers: depth, deepest; map (the level id); and or not == < >=
 #   do                an outcome, repeatable, in order: complete_quest(q) activate_quest(q) start_quest(q)
 #                     start_town_quest(q) log_quest(q) set_quest_var(q, n, value) or_quest_var(q, n, bits)
 #                     set_flag(name) say(text [, speaker]) sound(id) hero_sound(n) end_text() give_exp(n)
 #                     give_weapon(dlvl) take_item(item) drop_item(item) drop_unique(name) place_item(item, location
-#                     or anywhere) spawn_item(item, map, location | here) refresh_level()
+#                     or anywhere) spawn_item(item, map, location | here) spawn_monster(monster, location or
+#                     anywhere) refresh_level()
 #   pass              true: an on_talk / on_approach trigger that fired still lets the next one speak (normally one
 #                     conversation says one thing)
 #

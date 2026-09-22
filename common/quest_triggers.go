@@ -8,6 +8,7 @@ import (
 
 	"rpg/d1"
 	"rpg/defs"
+	"rpg/geometry"
 	"rpg/recfile"
 )
 
@@ -51,6 +52,7 @@ func (s *State) questEnv() defs.QuestEnv {
 		V1:     qvar(1),
 		V2:     qvar(2),
 		Depth:  s.CurrentLevel().Depth,
+		Map:    s.CurrentLevel().Map,
 
 		Deepest: s.Deepest(),
 		Has: func(item string) bool {
@@ -165,6 +167,8 @@ func (f *Factory) runQuestOutcome(do recfile.StringPredicate, speaker string) bo
 			location = do.GetString(2)
 		}
 		f.spawnItemAt(do.GetString(0), do.GetString(1), location)
+	case "spawn_monster": // spawn_monster(monster, location): on the hero's level, at a named location or "anywhere"
+		f.spawnMonster(do.GetString(0), do.GetString(1))
 	case "end_text":
 		f.d1EndTextWindow()
 	case "give_exp": // at the hero's own level, so exactly the amount named
@@ -190,7 +194,7 @@ func QuestOutcomeExists(name string) bool {
 	switch name {
 	case "complete_quest", "activate_quest", "log_quest", "set_quest_var", "set_flag", "hero_sound", "sound",
 		"say", "refresh_level", "place_item", "end_text", "give_exp", "give_weapon", "spawn_item", "start_quest", "start_town_quest",
-		"or_quest_var", "take_item", "drop_item", "drop_unique":
+		"or_quest_var", "take_item", "drop_item", "drop_unique", "spawn_monster":
 		return true
 	}
 	return false
@@ -215,6 +219,33 @@ func (f *Factory) spawnItemAt(item, mapName, location string) {
 		return
 	}
 	m.AddItem(f.NewD1Item(f.Generator.PlainItem(idx)), getDropPos(m, m.GetNamedLocation(location)))
+}
+
+// spawnMonster puts one monster of the mod's on the level the hero is on: next to a named location, or "anywhere"
+// for a random open spot away from the stairs up, as place_item does.
+func (f *Factory) spawnMonster(id, location string) {
+	a := f.NewMonsterByID(id)
+	if a == nil {
+		f.Msg(fmt.Sprintf("spawn_monster: this mod has no monster %q", id))
+		return
+	}
+	m := f.State.GetMap()
+	var p geometry.Point
+	if location == "anywhere" {
+		spot, ok := randomQuestSpot(m, m.CanPlaceActorHere)
+		if !ok {
+			return
+		}
+		p = spot
+	} else if cells := freeCellsNear(m, m.GetNamedLocation(location), 1, m.CanPlaceActorHere); len(cells) > 0 {
+		p = cells[0]
+	} else {
+		return
+	}
+	a.d1Monster.SpawnIndex = -1 // saved in LevelSnapshot.Spawned
+	a.SetDrawPosition(p.ToPointF())
+	m.AddActor(a, p)
+	f.State.OnActorSpawned(a)
 }
 
 // placeItem lays one plain item of the mod's on the level the hero is on: at a named location, or "anywhere"

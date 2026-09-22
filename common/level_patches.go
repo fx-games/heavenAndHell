@@ -155,9 +155,13 @@ func (s *State) QuestsChanged(m *gridmap.GridMap[*Actor, *Item, Object]) {
 }
 
 // Arrive is what arriving on a level does beyond the transition itself: the level's on_enter_level triggers
-// (PlayDungMsgs, ResyncQuests' items), then QuestsChanged. A town has neither.
+// (PlayDungMsgs, ResyncQuests' items), then QuestsChanged. A town has only the triggers.
 func Arrive(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
-	if m == nil || s.Level(m.GetName()).Town {
+	if m == nil {
+		return
+	}
+	if s.Level(m.GetName()).Town {
+		s.factory.fireQuestTriggers(EventEnterLevel, m.GetName(), "")
 		return
 	}
 	clear(d1GossipSeeds) // the town's towners are rolled anew on the way back

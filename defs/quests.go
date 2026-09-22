@@ -64,6 +64,7 @@ type QuestEnv struct {
 	V1     func(string) int  `expr:"v1"`
 	V2     func(string) int  `expr:"v2"`
 	Depth  int               `expr:"depth"` // the dungeon level the hero is on
+	Map    string            `expr:"map"`   // the levels.rec id of the level the hero is on
 	// Deepest is the deepest dungeon level the hero has reached; Has whether the hero carries an item, by name.
 	Deepest int               `expr:"deepest"`
 	Has     func(string) bool `expr:"has"`
