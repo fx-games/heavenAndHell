@@ -6,20 +6,17 @@ import (
 	"rpg/src/util"
 )
 
-// d1GossipSeeds is each townsperson's _tSeed: rolled on first talk, dropped when the hero reaches the dungeon.
-var d1GossipSeeds = map[VendorType]int64{}
-
 // d1Gossip picks a gossip text id for a town NPC (S_TalkEnter's gossipstart..gossipend: all but the greeting),
 // seeded by the NPC's _tSeed so it repeats until the hero leaves town, or "" if none is available.
-func d1Gossip(gossip map[string][]string, vendorType VendorType) string {
+func d1Gossip(gossip map[string][]string, seeds map[VendorType]int64, vendorType VendorType) string {
 	ids := gossip[string(vendorType)]
 	if len(ids) < 2 {
 		return ""
 	}
-	seed, ok := d1GossipSeeds[vendorType]
+	seed, ok := seeds[vendorType]
 	if !ok {
-		seed = rand.Int63()
-		d1GossipSeeds[vendorType] = seed
+		seed = rng.Int63()
+		seeds[vendorType] = seed
 	}
 	return ids[1+rand.New(rand.NewSource(seed)).Intn(len(ids)-1)]
 }
@@ -42,7 +39,7 @@ func d1TalkTopics(context ActionContext, npc *Actor) []util.MenuItem {
 		}
 	}
 	items = append(items, util.MenuItem{MainText: "Gossip", Action: func() {
-		if id := d1Gossip(state.factory.D1().D.Gossip, npc.GetVendorType()); id != "" {
+		if id := d1Gossip(state.factory.D1().D.Gossip, state.gossipSeeds, npc.GetVendorType()); id != "" {
 			state.factory.say(npc.Name(), id)
 		}
 	}})
@@ -76,7 +73,7 @@ func (d *TalkToAction) Execute(context ActionContext) []Action {
 	// scripted falls back to the quest topics and gossip menu.
 	talk := func() {
 		if !f.fireQuestTriggers(EventTalk, npc.GetInternalName(), npc.Name()) {
-			context.UserInterface().OpenMenu(d1TalkTopics(context, npc))
+			context.Show(ChooseOption{d1TalkTopics(context, npc)})
 		}
 	}
 	f.playD1Sound(f.D1().D.TextSfx[d1Greeting(f.D1().D.Gossip, npc.GetVendorType())])
@@ -85,10 +82,6 @@ func (d *TalkToAction) Execute(context ActionContext) []Action {
 	}
 	talkItem := util.MenuItem{MainText: fmt.Sprintf("Talk to %s", npc.Name()), Action: talk}
 	options := append([]util.MenuItem{talkItem}, d1VendorOptions(context, npc)...)
-	context.UserInterface().OpenMenu(options)
-	return nil
-}
-
-func (d *TalkToAction) GetAnimations() []Animation {
+	context.Show(ChooseOption{options})
 	return nil
 }

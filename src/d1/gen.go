@@ -854,8 +854,8 @@ const shrineThaumaturgic = 8
 // Single-player only, so shrineAvail==2 (multiplayer-only) shrines never appear.
 func (g *Generator) RandomShrine(dlvl int) int {
 	for {
-		rv := g.random(len(ShrineNames))
-		if rv == shrineThaumaturgic || shrineAvail[rv] == 2 || dlvl > shrineMax[rv] {
+		rv := g.random(len(g.D.ShrineNames))
+		if rv == shrineThaumaturgic || g.D.shrineAvail[rv] == 2 || dlvl > g.D.shrineMax[rv] {
 			continue
 		}
 		return rv

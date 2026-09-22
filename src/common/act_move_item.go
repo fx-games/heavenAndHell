@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"math/rand"
 	"rpg/src/geometry"
 )
 
@@ -39,16 +38,12 @@ func (d *MoveItemAction) Execute(context ActionContext) []Action {
 
 	inventory := d.holder.GetInventory()
 	inventory.Remove(d.item)
-	if rand.Float64() >= d.chanceToBreak {
+	if rng.Float64() >= d.chanceToBreak {
 		state.AddItemToMapWithDistribution(d.item, d.targetPos) // a throw can end at a wall: land on the nearest free cell
 	} else {
 		context.Msg(fmt.Sprintf("%s breaks!", d.item.Name()))
 	}
 
-	return nil
-}
-
-func (d *MoveItemAction) GetAnimations() []Animation {
 	return nil
 }
 

@@ -13,8 +13,6 @@ type oil struct {
 	Value  int
 }
 
-var oils []oil
-
 func loadOils(fsys fs.FS) ([]oil, error) {
 	recs, err := readRec(fsys, "oils.rec")
 	// A mod that does not have this Diablo feature ships no file for it, and an absent feature is not an
@@ -39,11 +37,11 @@ func loadOils(fsys fs.FS) ([]oil, error) {
 }
 
 // IsOil reports one of Hellfire's oils (IMISC_OILFIRST < id < IMISC_OILLAST), the generic "Oil" included.
-func IsOil(miscID string) bool {
+func (d *Data) IsOil(miscID string) bool {
 	if miscID == "IMISC_OILOF" {
 		return true
 	}
-	for _, o := range oils {
+	for _, o := range d.oils {
 		if o.MiscID == miscID {
 			return true
 		}
@@ -57,12 +55,12 @@ func (g *Generator) getOilType(it *Item, maxLvl int) {
 		maxLvl = 1
 	}
 	var rnd []int
-	for i, o := range oils {
+	for i, o := range g.D.oils {
 		if o.MinLvl <= maxLvl {
 			rnd = append(rnd, i)
 		}
 	}
-	o := oils[rnd[g.random(len(rnd))]]
+	o := g.D.oils[rnd[g.random(len(rnd))]]
 	it.Name, it.IName, it.MiscID = o.Name, o.Name, o.MiscID
 	it.Value, it.IValue = o.Value, o.Value
 }

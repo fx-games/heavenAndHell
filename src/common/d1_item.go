@@ -188,7 +188,7 @@ func (g *Factory) NewD1Item(it *d1.Item) *Item {
 			item.SetDestroyAfterUse(true)
 			item.SetUntargetedAction(action)
 		default:
-			if d1.IsOil(it.MiscID) { // Hellfire's oils: pick an item out of the pack and pour it on
+			if g.Generator.D.IsOil(it.MiscID) { // Hellfire's oils: pick an item out of the pack and pour it on
 				g.d1OilAction(item, it.MiscID, it.Name)
 			}
 			g.d1RuneAction(item, it)
@@ -266,7 +266,7 @@ func (i *Item) d1TooltipLines(cmp map[string]int) []string {
 		if player := i.getPlayer(); player != nil && player.hero != nil {
 			h, sh := player.hero, player.HeroSheet()
 			if it.Spell == d1.SplHeal {
-				lo, hi := d1.HealRange64(h.Class, h.Level, h.SpellLevel(sh, it.Spell))
+				lo, hi := h.Rules().HealRange64(h.Class, h.Level, h.SpellLevel(sh, it.Spell))
 				add("Spell heals %d-%d life", lo>>6, hi>>6)
 			}
 			if t := d1.SpellDamageText(it.Spell, sh.Mag, h.Level, h.SpellLevel(sh, it.Spell)); t != "" {
@@ -323,7 +323,7 @@ func (i *Item) d1TooltipLines(cmp map[string]int) []string {
 	if it.Magical > 0 && !it.Identified {
 		add("Not Identified")
 	} else {
-		for _, l := range it.PropertyLines(cmp) {
+		for _, l := range i.d1Data.PropertyLines(it, cmp) {
 			if l.Cmp == 0 { // affixes stand out from the base stats; a comparison's green/red wins over the blue
 				lines = append(lines, "[:magic]"+l.Text+"[:white]")
 				continue
@@ -404,12 +404,12 @@ func (e *Equipment) D1CompareForEquipping(candidate *Item) ([]EquippedComparison
 		}
 		wornKnown := !(worn.d1.Magical > 0 && !worn.d1.Identified)
 		known := wornKnown && !(candidate.d1.Magical > 0 && !candidate.d1.Identified)
-		c := EquippedComparison{Item: worn, Cmp: worn.d1.Compare(candidate.d1, known)}
+		c := EquippedComparison{Item: worn, Cmp: worn.d1Data.Compare(worn.d1, candidate.d1, known)}
 		if !wornKnown { // an unidentified candidate says so in its own tooltip
 			c.Note = "Affixes unknown (not identified)"
 		}
 		result = append(result, c)
-		candidateCmps = append(candidateCmps, candidate.d1.Compare(worn.d1, known))
+		candidateCmps = append(candidateCmps, candidate.d1Data.Compare(candidate.d1, worn.d1, known))
 	}
 	mainHand := e.GetBySlot(defs.SlotNameMainHand)
 	switch candidate.SlotName() {
@@ -421,7 +421,7 @@ func (e *Equipment) D1CompareForEquipping(candidate *Item) ([]EquippedComparison
 	case defs.SlotNameTwoHandedWeapon:
 		compare(mainHand)
 		if shield := e.GetBySlot(defs.SlotNameOffHand); shield != nil && shield.d1 != nil {
-			lost := shield.d1.Compare(nil, !(shield.d1.Magical > 0 && !shield.d1.Identified))
+			lost := shield.d1Data.Compare(shield.d1, nil, !(shield.d1.Magical > 0 && !shield.d1.Identified))
 			for key := range lost {
 				lost[key] = -lost[key] // everything the shield gives is lost
 			}

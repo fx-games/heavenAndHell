@@ -2,12 +2,11 @@ package common
 
 type SwapPositionsAction struct {
 	BaseAction
-	actorOne                  *Actor
-	actorTwo                  *Actor
-	isPlayer                  bool
-	animationDelay            float64
-	isMovementVisibleToPlayer bool
-	animationDisabled         bool
+	actorOne          *Actor
+	actorTwo          *Actor
+	isPlayer          bool
+	animationDelay    float64
+	animationDisabled bool
 }
 
 func NewSwapPositionsAction(source Cause, actorOne, actorTwo *Actor, isPlayer bool) *SwapPositionsAction {
@@ -32,30 +31,9 @@ func (d *SwapPositionsAction) Execute(context ActionContext) []Action {
 
 	gameMap.SwapPositions(d.actorOne, d.actorTwo) // write state
 
-	d.isMovementVisibleToPlayer = false
-	if d.isPlayer {
-		d.isMovementVisibleToPlayer = true
-	} else {
-		player := state.GetPlayer()
-		d.isMovementVisibleToPlayer = player.CanSee(d.actorOne.MapPosition()) || player.CanSee(d.actorTwo.MapPosition())
-	}
-	if d.isNotAnimated() {
-		d.actorOne.SetDrawPosition(d.actorOne.MapPosition().ToPointF())
-		d.actorTwo.SetDrawPosition(d.actorTwo.MapPosition().ToPointF())
-	}
+	context.ActionBroker.Emit(Swapped{One: d.actorOne, Two: d.actorTwo, Delay: d.animationDelay, ByPlayer: d.isPlayer,
+		Quiet: d.animationDisabled})
 	return nil
-}
-
-func (d *SwapPositionsAction) GetAnimations() []Animation {
-	if d.isNotAnimated() {
-		return nil
-	}
-	return OneAnimation(NewSwapAnimation(d.actorOne, d.actorTwo, d.animationDelay, d.isPlayer))
-	//return &DummyAnimation{time: 5, cancelRunningAnimations: true}
-}
-
-func (d *SwapPositionsAction) isNotAnimated() bool {
-	return !d.isMovementVisibleToPlayer || d.animationDisabled
 }
 
 func (d *SwapPositionsAction) GetActors() []*Actor {

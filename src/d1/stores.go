@@ -34,11 +34,11 @@ type Shopper struct {
 
 // usableElixir is Hellfire's HealerItemOk rule a vendor opts into with usable_elixirs_only: an elixir is only worth
 // selling while the hero is still under its class maximum.
-func usableElixir(b ItemData, who *Shopper) bool {
+func usableElixir(d *Data, b ItemData, who *Shopper) bool {
 	if who == nil {
 		return true
 	}
-	a := classAttr[who.Class]
+	a := d.classAttr[who.Class]
 	switch b.MiscID {
 	case "IMISC_ELIXSTR":
 		return who.BaseStr < a.MaxStr
@@ -77,8 +77,8 @@ func (who *Shopper) bestOwned(it *Item) int {
 
 // fits is Hellfire's SpawnOnePremium/SpawnBoy acceptance, for a vendor with tries: within 1.2x the higher of the
 // hero's stats and its class maximum, and worth at least 80% of its best item of the kind.
-func (who *Shopper) fits(it *Item, maxVal, floorValue int) bool {
-	a := classAttr[who.Class]
+func (who *Shopper) fits(d *Data, it *Item, maxVal, floorValue int) bool {
+	a := d.classAttr[who.Class]
 	str, mag, dex := max(a.MaxStr, who.Str)*12/10, max(a.MaxMag, who.Mag)*12/10, max(a.MaxDex, who.Dex)*12/10
 	return it.IValue <= maxVal && it.MinStr <= str && it.MinMag <= mag && it.MinDex <= dex && it.IValue >= floorValue
 }
@@ -190,7 +190,7 @@ func (g *Generator) PremiumItem(plvl int, who *Shopper) *Item {
 		g.itemBonus(it, plvl>>1, plvl, true)
 		ok := it.IValue <= v.MaxValue
 		if v.Tries > 0 && who != nil {
-			ok = who.fits(it, v.MaxValue, who.bestOwned(it)*8/10) || count >= v.Tries
+			ok = who.fits(g.D, it, v.MaxValue, who.bestOwned(it)*8/10) || count >= v.Tries
 		}
 		if ok {
 			it.Identified = true
@@ -300,7 +300,7 @@ func (g *Generator) HealerStock(lvl int, who *Shopper) []*Item {
 	var rnd []*Item
 	var ok func(ItemData) bool
 	if v.UsableElixirs {
-		ok = func(b ItemData) bool { return usableElixir(b, who) }
+		ok = func(b ItemData) bool { return usableElixir(g.D, b, who) }
 	}
 	for n := g.rollCount(v.ItemCount); n > len(v.Always); n-- {
 		rnd = append(rnd, g.storeItem(g.storeIdx(v, lvl, ok), lvl))
@@ -320,10 +320,10 @@ func (g *Generator) BoyItem(clvl int, who *Shopper) *Item {
 		ok := it.IValue <= v.MaxValue
 		if v.Tries > 0 && who != nil {
 			floor := who.bestOwned(it) * 8 / 10
-			if count < v.ShunTries && slices.Contains(v.Shuns[ClassNames[who.Class]], defs.ItemTypeNames[it.Type]) {
+			if count < v.ShunTries && slices.Contains(v.Shuns[g.D.ClassNames[who.Class]], defs.ItemTypeNames[it.Type]) {
 				floor = 1 << 62
 			}
-			ok = who.fits(it, v.MaxValue, floor) || count >= v.Tries
+			ok = who.fits(g.D, it, v.MaxValue, floor) || count >= v.Tries
 		}
 		if ok {
 			it.Identified = true
@@ -389,7 +389,7 @@ func (d *Data) SmithBuys(it *Item) bool {
 // HellfireSmithBuys ports Hellfire's SmithSellOk: also oils and staves without a spell, but no quest items.
 func (d *Data) HellfireSmithBuys(it *Item) bool {
 	switch {
-	case IsOil(it.MiscID):
+	case d.IsOil(it.MiscID):
 		return true
 	case it.Type == ITypeMisc, it.Type == ITypeGold, it.Type == ITypeStaff && it.Spell != 0, it.Class == "ICLASS_QUEST":
 		return false
@@ -404,7 +404,7 @@ func (d *Data) WitchBuys(it *Item) bool {
 
 // HellfireWitchBuys ports Hellfire's WitchSellOk: no oils or quest items, and only staves with a spell.
 func (d *Data) HellfireWitchBuys(it *Item) bool {
-	ok := it.Type == ITypeMisc && !IsOil(it.MiscID) && it.Class != "ICLASS_QUEST" || it.Type == ITypeStaff && it.Spell != 0
+	ok := it.Type == ITypeMisc && !d.IsOil(it.MiscID) && it.Class != "ICLASS_QUEST" || it.Type == ITypeStaff && it.Spell != 0
 	return ok && !isQuestItem(it)
 }
 

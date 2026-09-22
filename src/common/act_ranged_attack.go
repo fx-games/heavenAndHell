@@ -2,8 +2,6 @@ package common
 
 import (
 	"math"
-	"math/rand"
-	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/stats"
 )
@@ -35,6 +33,7 @@ func NewRangedAttackAction(source Cause, attacker *Actor, targetPos geometry.Poi
 }
 
 func (d *RangedAttackAction) Execute(context ActionContext) []Action {
+	context.ActionBroker.Emit(Shot{Attacker: d.attacker, From: d.attacker.MapPosition(), To: d.targetPos})
 	// the hero's bow twangs (PS_BFIRE, PM_DoRangeAttack); a D1 monster's shot sounds as its mode starts (M_DoRAttack)
 	if d.attacker == context.GameState.GetPlayer() {
 		if !playD1SfxAt(context, "PS_BFIRE", d.attacker.MapPosition()) {
@@ -68,7 +67,7 @@ func (d *RangedAttackAction) Execute(context ActionContext) []Action {
 
 	hitChance := CalculateRangedWeaponHitChance(d.attacker, d.defender)
 
-	if rand.Float64() > hitChance {
+	if rng.Float64() > hitChance {
 		// missed the attack
 		logMissed(context, d.attacker, d.defender)
 		return actions
@@ -79,7 +78,7 @@ func (d *RangedAttackAction) Execute(context ActionContext) []Action {
 		evasionChance = 0.25
 	}
 
-	if rand.Float64() < evasionChance {
+	if rng.Float64() < evasionChance {
 		// dodged the attack
 		logDodged(context, d.attacker, d.defender)
 		// play miss audio cue?
@@ -120,7 +119,7 @@ func CalculateRangedDamage(damageRoll int, damageMultiplier float64, attacker, d
 		dndStyleModifier := defaultModifierPattern(defenderDex)
 		shield := defender.GetEquipment().GetShield()
 		shieldAC := max(1, shield.GetArmorStats().GetTotalArmorClass()+dndStyleModifier)
-		if shieldAC > blockedDamage && rand.Float64() > 0.5 {
+		if shieldAC > blockedDamage && rng.Float64() > 0.5 {
 			blockedDamage = shieldAC
 		}
 	}
@@ -132,7 +131,7 @@ func CalculateRangedDamage(damageRoll int, damageMultiplier float64, attacker, d
 
 func GetRangedDamageRoll(attacker *Actor) int {
 	damageDice := attacker.GetDamageDice(RangedAttack)
-	damageRoll := damageDice.Roll()
+	damageRoll := damageDice.Roll(rng)
 	return damageRoll
 }
 func GetArmorPenetrationOfEquippedRangedWeapon(attacker *Actor) int {
@@ -208,13 +207,6 @@ func defaultModifierPattern(attribute int) int {
 	return 0
 }
 
-func (d *RangedAttackAction) GetAnimations() []Animation {
-	projectileIcon := defs.IconEffectArrow
-	if weapon := d.attacker.GetEquipment().GetWeapon(RangedAttack); weapon != nil && weapon.GetWeaponStats().ProjectileIcon > -1 {
-		projectileIcon = weapon.GetWeaponStats().ProjectileIcon // D1 monsters shoot without a weapon item
-	}
-	return OneAnimation(NewProjectileDirectionAnimation(d.attacker, d.attacker.MapPosition(), d.targetPos, 0.02, projectileIcon, 1))
-}
 func (d *RangedAttackAction) GetDamageFactor() float64 {
 	return d.damageFactor
 }

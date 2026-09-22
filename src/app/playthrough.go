@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"image/color"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"rpg/src/common"
@@ -35,7 +34,7 @@ func playthrough() {
 	theGame.GetAudio().SetDisablePlayback(true)
 	// A smoke test that plays a different dungeon every launch reports a different result every launch: this
 	// used to pass about five runs in six, which is indistinguishable from "the change you just made is fine".
-	// Both time-seeded sources get pinned, and the seed is printed so a failure can be replayed verbatim.
+	// The game's one random source gets pinned, and the seed is printed so a failure can be replayed verbatim.
 	seed := int64(1)
 	if len(os.Args) > 2 {
 		if parsed, err := strconv.ParseInt(os.Args[2], 10, 64); err == nil {
@@ -44,8 +43,6 @@ func playthrough() {
 	}
 	fmt.Printf("playthrough seed: %d (replay with: playthrough %d)\n", seed, seed)
 	theGame.SeedRandom(seed)
-	common.SeedD1Rng(seed)
-	rand.Seed(seed)                                                                         // the global source the engine rolls most of its dice on
 	common.Clock = func() time.Time { return time.Date(2026, 1, 1, 10, 0, 0, 0, time.UTC) } // the Solar shrine reads the hour
 	missiles := &missileCounter{}                                                           // registered per check: a new game or a load makes a new broker
 	wallTraps, chestTraps := 0, 0                                                           // traps that fired while objects were operated
@@ -617,7 +614,7 @@ func castAllSpells(f *common.Factory, broker *common.Broker, state *common.State
 func boost(player *common.Actor, dlvl int) {
 	h := player.Hero()
 	if want := min(2*dlvl, 50); h.Level < want {
-		h.AddExperience(h.Level, d1.ExpLvls[want-2]-h.Exp)
+		h.AddExperience(h.Level, h.Rules().ExpLvls[want-2]-h.Exp)
 	}
 	for ; h.StatPts > 0; h.StatPts-- {
 		h.AddBaseStat([]int{d1.AttrStr, d1.AttrDex, d1.AttrVit}[h.StatPts%3], 1)
@@ -1396,7 +1393,7 @@ func checkItemEffects(broker *common.Broker, state *common.State, fail func(stri
 // Staff Recharge, the Monk's Vision, the Bard's Identify and the Barbarian's Rage. Rage lingers ticked through
 // fury and hangover and checked on both sides; Vision lingers until the level changes.
 func checkClassSkill(f *common.Factory, player *common.Actor, fail func(string, ...any)) {
-	h, name := player.Hero(), d1.ClassNames[player.Hero().Class]
+	h, name := player.Hero(), player.Hero().Rules().ClassNames[player.Hero().Class]
 	calm := player.GetStats().GetAttribute(stats.Strength)
 	// D1SpellSkills always puts the class skill first, targeted for the Rogue and untargeted for everyone else
 	switch skills := player.GetUntargetedSkills(); {
@@ -1435,7 +1432,7 @@ func checkDualWield(player *common.Actor, fail func(string, ...any)) {
 	isWeapon := func(it *common.Item) bool { return it != nil && it.D1() != nil && it.D1().Class == "ICLASS_WEAPON" }
 	if player.Hero().Class != d1.Bard {
 		if isWeapon(off) {
-			fail("%s: a weapon ended up in the off hand", d1.ClassNames[player.Hero().Class])
+			fail("%s: a weapon ended up in the off hand", player.Hero().Rules().ClassNames[player.Hero().Class])
 		}
 		return
 	}

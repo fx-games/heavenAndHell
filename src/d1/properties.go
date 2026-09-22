@@ -32,10 +32,6 @@ const (
 	KeyArmor  = "armor"
 )
 
-// propertyDefs is filled by Load from assets/data/properties.rec. The wording lives there; the four ways a
-// value turns into a line stay here, because they are code.
-var propertyDefs map[string]propertyDef
-
 func loadPropertyDefs(fsys fs.FS) (map[string]propertyDef, error) {
 	recs, err := readRec(fsys, "properties.rec")
 	// A mod that does not have this Diablo feature ships no file for it, and an absent feature is not an
@@ -77,12 +73,12 @@ func loadPropertyDefs(fsys fs.FS) (map[string]propertyDef, error) {
 }
 
 // Text formats the property as its tooltip line.
-func (p Property) Text() string {
-	d, ok := propertyDefs[p.Key]
-	if !ok || d.format == nil {
+func (d *Data) PropertyText(p Property) string {
+	def, ok := d.propertyDefs[p.Key]
+	if !ok || def.format == nil {
 		return fmt.Sprintf("%s %+d", p.Key, p.Min) // the mod's properties.rec does not describe this power
 	}
-	return d.format(p.Min, p.Max)
+	return def.format(p.Min, p.Max)
 }
 
 // PropertyList lists an item's magical powers (a compact PrintItemPower), in tooltip order.
@@ -171,7 +167,7 @@ func (it *Item) compared(affixes bool) map[string]Property {
 
 // Compare rates each of it's Damage, Armor and (if affixes) property values against other's: +1 better, -1 worse,
 // 0 same. A value other lacks counts as zero; ranges compare by midpoint. other == nil compares against nothing.
-func (it *Item) Compare(other *Item, affixes bool) map[string]int {
+func (d *Data) Compare(it, other *Item, affixes bool) map[string]int {
 	mine, theirs := it.compared(affixes), map[string]Property{}
 	if other != nil {
 		theirs = other.compared(affixes)
@@ -180,7 +176,7 @@ func (it *Item) Compare(other *Item, affixes bool) map[string]int {
 	for key, p := range mine {
 		q := theirs[key]
 		diff := p.Min + p.Max - q.Min - q.Max // twice the midpoint difference
-		result[key] = propertyDefs[key].better * sign(diff)
+		result[key] = d.propertyDefs[key].better * sign(diff)
 	}
 	return result
 }
@@ -202,27 +198,18 @@ type PropertyLine struct {
 }
 
 // PropertyLines formats PropertyList with each line's cmp; equal resists that compare alike merge into Resist All.
-func (it *Item) PropertyLines(cmp map[string]int) []PropertyLine {
+func (d *Data) PropertyLines(it *Item, cmp map[string]int) []PropertyLine {
 	allRes := it.PLFR == it.PLLR && it.PLLR == it.PLMR && cmp["fr"] == cmp["lr"] && cmp["lr"] == cmp["mr"]
 	var lines []PropertyLine
 	for _, p := range it.PropertyList() {
 		if allRes && (p.Key == "lr" || p.Key == "mr") {
 			continue
 		}
-		line := PropertyLine{p.Text(), cmp[p.Key]}
+		line := PropertyLine{d.PropertyText(p), cmp[p.Key]}
 		if allRes && p.Key == "fr" {
 			line.Text = fmt.Sprintf("Resist All: %+d%%", p.Min)
 		}
 		lines = append(lines, line)
 	}
 	return lines
-}
-
-// Properties describes an item's magical powers as tooltip lines.
-func (it *Item) Properties() []string {
-	var s []string
-	for _, l := range it.PropertyLines(nil) {
-		s = append(s, l.Text)
-	}
-	return s
 }

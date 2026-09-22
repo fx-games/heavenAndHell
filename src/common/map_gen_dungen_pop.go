@@ -1,7 +1,7 @@
 package common
 
 import (
-	"fmt"
+	"log/slog"
 	"slices"
 
 	"rpg/src/defs"
@@ -121,11 +121,11 @@ func (g *Factory) groupSpawnOf(mon defs.Monster) []defs.Monster {
 		name, count := entry, 1
 		if util.LooksLikeAFunction(entry) {
 			n, args := util.GetNameAndArgs(entry)
-			name, count = n, util.NewIntervalFromString(args.Get(0)).Roll()
+			name, count = n, util.NewIntervalFromString(args.Get(0)).Roll(rng)
 		}
 		companion, ok := g.monsterByID(name)
 		if !ok {
-			println(fmt.Sprintf("%s spawns with %q, which this mod's enemies.rec does not have", mon.ID, name))
+			slog.Warn("monster spawns with an enemy the mod's enemies.rec does not have", "monster", mon.ID, "enemy", name)
 			continue
 		}
 		for i := 0; i < count; i++ {

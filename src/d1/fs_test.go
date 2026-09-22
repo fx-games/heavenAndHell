@@ -60,10 +60,5 @@ func loadHellfire(t *testing.T) *Data {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() {
-		if _, err := Load(testFS()); err != nil {
-			t.Fatal(err)
-		}
-	})
 	return d
 }

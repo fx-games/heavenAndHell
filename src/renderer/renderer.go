@@ -3,6 +3,7 @@ package renderer
 import (
 	"image"
 	"image/color"
+	"log/slog"
 	"regexp"
 	"rpg/src/geometry"
 	"rpg/src/util"
@@ -10,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/font"
 )
@@ -35,6 +36,7 @@ type TileRenderer struct {
 
 	whiteTile int32
 	ttfFont   font.Face
+	ttfFace   *text.GoXFace // ttfFont for ebiten's text/v2
 
 	colorFromName      func(name string) color.RGBA
 	defaultBorderColor color.Color
@@ -53,6 +55,18 @@ func (g *TileRenderer) SetColorFromName(colorFromName func(name string) color.RG
 }
 func (g *TileRenderer) SetTTF(font font.Face) {
 	g.ttfFont = font
+	if font != nil {
+		g.ttfFace = text.NewGoXFace(font)
+	}
+}
+
+// drawTTF draws s with its baseline at geo's origin, where text v1 put it (v2 puts the top of the line there).
+func (g *TileRenderer) drawTTF(s string, geo ebiten.GeoM, c color.Color) {
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(0, -g.ttfFace.Metrics().HAscent)
+	op.GeoM.Concat(geo)
+	op.ColorScale.ScaleWithColor(c)
+	text.Draw(g.currentRenderTarget, s, g.ttfFace, op)
 }
 func (g *TileRenderer) SetDefaultColors(borderColor, fillColor color.Color) {
 	g.defaultBorderColor = borderColor
@@ -327,37 +341,30 @@ func (g *TileRenderer) DrawDefaultScaleCharOnScreen(screenX, screenY float64, ch
 	g.DrawCharOnScreen(int(screenX), int(screenY), char, g.fontScale, textColor)
 }
 func (g *TileRenderer) DrawTTFOnScreen(screenX, screenY float64, textToDraw string, textColor color.Color) {
-	screenX = screenX * g.deviceScale
-	screenY = screenY * g.deviceScale
-	text.Draw(g.currentRenderTarget, textToDraw, g.ttfFont, int(screenX), int(screenY), textColor)
+	var geo ebiten.GeoM
+	geo.Translate(float64(int(screenX*g.deviceScale)), float64(int(screenY*g.deviceScale)))
+	g.drawTTF(textToDraw, geo, textColor)
 }
 
 // DrawTTFOnScreenScaled is DrawTTFOnScreen with the text drawn scale times its size.
 func (g *TileRenderer) DrawTTFOnScreenScaled(screenX, screenY float64, textToDraw string, textColor color.Color, scale float64) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(scale, scale)
-	op.GeoM.Translate(screenX*g.deviceScale, screenY*g.deviceScale)
-	op.ColorScale.ScaleWithColor(textColor)
-	text.DrawWithOptions(g.currentRenderTarget, textToDraw, g.ttfFont, op)
+	var geo ebiten.GeoM
+	geo.Scale(scale, scale)
+	geo.Translate(screenX*g.deviceScale, screenY*g.deviceScale)
+	g.drawTTF(textToDraw, geo, textColor)
 }
 
 func (g *TileRenderer) DrawTTFOnScreenWithColorCodes(screenX, screenY float64, textToDraw []util.ColoredTextPart) {
-	drawOptions := &ebiten.DrawImageOptions{}
-	screenXF := screenX * g.deviceScale
-	screenYF := screenY * g.deviceScale
 	for _, textPart := range textToDraw {
-		offset := textPart.XOffset * (g.deviceScale)
-		drawOptions.GeoM.Reset()
-		drawOptions.GeoM.Translate(screenXF+offset, screenYF)
-		drawOptions.ColorScale.Reset()
-		drawOptions.ColorScale.ScaleWithColor(textPart.Color)
-		text.DrawWithOptions(g.currentRenderTarget, textPart.Text, g.ttfFont, drawOptions)
+		var geo ebiten.GeoM
+		geo.Translate((screenX+textPart.XOffset)*g.deviceScale, screenY*g.deviceScale)
+		g.drawTTF(textPart.Text, geo, textPart.Color)
 	}
 
 }
 func (g *TileRenderer) DrawCharOnScreen(screenX, screenY int, char rune, scale float64, textColor color.Color) {
 	if !g.font.IsLoaded() {
-		println("font not loaded")
+		slog.Warn("font not loaded")
 		return
 	}
 	textureIndex, ok := g.font.fontMap[char]

@@ -1,22 +1,9 @@
 package d1
 
 import (
-	"fmt"
-	"os"
 	"slices"
 	"testing"
 )
-
-// The tables are loaded, not compiled in, so a test that touches one needs Load to have run. Doing it here means
-// a single test run in isolation behaves like the whole package, rather than depending on some earlier test
-// having loaded the data first.
-func TestMain(m *testing.M) {
-	if _, err := Load(testFS()); err != nil {
-		fmt.Println("d1.Load:", err)
-		os.Exit(1)
-	}
-	os.Exit(m.Run())
-}
 
 // The tables below moved out of Go source into mods/d1/data/*.rec. These are the values the literals had, spot
 // checked at the ends and the awkward middles, so a mangled .rec fails here rather than in the game.
@@ -25,8 +12,8 @@ func TestMain(m *testing.M) {
 func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 	d := loadHellfire(t)
 
-	if len(oils) != 10 {
-		t.Fatalf("oils = %d, want 10", len(oils))
+	if len(d.oils) != 10 {
+		t.Fatalf("oils = %d, want 10", len(d.oils))
 	}
 	for _, c := range []struct {
 		i      int
@@ -40,7 +27,7 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		{7, "IMISC_OILPERM", "Oil of Permanence", 17, 15000},
 		{9, "IMISC_OILIMP", "Oil of Imperviousness", 10, 2500},
 	} {
-		got := oils[c.i]
+		got := d.oils[c.i]
 		if got.MiscID != c.miscID || got.Name != c.name || got.MinLvl != c.lvl || got.Value != c.value {
 			t.Errorf("oils[%d] = %+v, want %s/%s/%d/%d", c.i, got, c.miscID, c.name, c.lvl, c.value)
 		}
@@ -62,18 +49,18 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		t.Errorf("SpellDescriptions[Firebolt] = %q", SpellDescriptions[SplFirebolt])
 	}
 
-	if len(RuneTraps) != 5 || RuneTraps["IMISC_RUNEF"] != (RuneTrap{SplRuneFire, "a fire explosion"}) ||
-		RuneTraps["IMISC_GR_RUNEL"] != (RuneTrap{SplRuneNova, "a lightning nova"}) {
-		t.Errorf("RuneTraps did not survive spells.rec: %v", RuneTraps)
+	if len(d.RuneTraps) != 5 || d.RuneTraps["IMISC_RUNEF"] != (RuneTrap{SplRuneFire, "a fire explosion"}) ||
+		d.RuneTraps["IMISC_GR_RUNEL"] != (RuneTrap{SplRuneNova, "a lightning nova"}) {
+		t.Errorf("RuneTraps did not survive spells.rec: %v", d.RuneTraps)
 	}
 
-	if len(MonsterAIDescriptions) != 35 || MonsterAIDescriptions["AI_ZOMBIE"] != "Shambles slowly toward you." ||
-		MonsterAIDescriptions["AI_LACHDAN"] != "Never fights." {
-		t.Errorf("MonsterAIDescriptions did not survive monsters.rec (%d entries)", len(MonsterAIDescriptions))
+	if len(d.MonsterAIDescriptions) != 35 || d.MonsterAIDescriptions["AI_ZOMBIE"] != "Shambles slowly toward you." ||
+		d.MonsterAIDescriptions["AI_LACHDAN"] != "Never fights." {
+		t.Errorf("MonsterAIDescriptions did not survive monsters.rec (%d entries)", len(d.MonsterAIDescriptions))
 	}
 
-	if len(ObjectDisplays) != 89 {
-		t.Errorf("ObjectDisplays = %d, want 89", len(ObjectDisplays))
+	if len(d.ObjectDisplays) != 89 {
+		t.Errorf("ObjectDisplays = %d, want 89", len(d.ObjectDisplays))
 	}
 	for _, c := range []struct {
 		kind int
@@ -85,13 +72,13 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		{ObjGOATSHRINE, ObjectDisplay{Name: "Goat Shrine", Sfx: "LS_GSHRINE"}},
 		{ObjBCROSS, ObjectDisplay{Name: "Burning Cross", Light: 10}},
 	} {
-		if got := ObjectDisplays[c.kind]; got != c.want {
+		if got := d.ObjectDisplays[c.kind]; got != c.want {
 			t.Errorf("ObjectDisplays[%d] = %+v, want %+v", c.kind, got, c.want)
 		}
 	}
 
-	if len(propertyDefs) != 41 {
-		t.Errorf("propertyDefs = %d, want 41", len(propertyDefs))
+	if len(d.propertyDefs) != 41 {
+		t.Errorf("propertyDefs = %d, want 41", len(d.propertyDefs))
 	}
 	// One of each formatter kind, including the light radius, the only property that scales its value.
 	for _, c := range []struct {
@@ -104,11 +91,11 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		{Property{"attackspeed", 3, 3}, "faster attack"},
 		{Property{"light", 2, 2}, "+20% light radius"},
 	} {
-		if got := c.p.Text(); got != c.want {
+		if got := d.PropertyText(c.p); got != c.want {
 			t.Errorf("%s text = %q, want %q", c.p.Key, got, c.want)
 		}
 	}
-	if propertyDefs["gethit"].better != -1 || propertyDefs["rndarrowvel"].better != 0 || propertyDefs["str"].better != 1 {
+	if d.propertyDefs["gethit"].better != -1 || d.propertyDefs["rndarrowvel"].better != 0 || d.propertyDefs["str"].better != 1 {
 		t.Error("property better did not survive properties.rec")
 	}
 
@@ -136,12 +123,12 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 	// SpellFrames and MaxStats are derived from the class table; both used to be computed at package init, which
 	// would now run before it is loaded.
 	// Six is D1's OWN roster, not the engine's: the tables are sized by how many classes this mod declares.
-	if !slices.Equal(SpellFrames, []int{20, 16, 12, 18, 16, 20}) {
-		t.Errorf("SpellFrames = %v", SpellFrames)
+	if !slices.Equal(d.SpellFrames, []int{20, 16, 12, 18, 16, 20}) {
+		t.Errorf("SpellFrames = %v", d.SpellFrames)
 	}
 
-	if !slices.Equal(ClassNames, []string{"Warrior", "Rogue", "Sorcerer", "Monk", "Bard", "Barbarian"}) {
-		t.Errorf("ClassNames = %v", ClassNames)
+	if !slices.Equal(d.ClassNames, []string{"Warrior", "Rogue", "Sorcerer", "Monk", "Bard", "Barbarian"}) {
+		t.Errorf("ClassNames = %v", d.ClassNames)
 	}
 	// The 1/64 fixed-point columns are the ones a .rec round trip could quietly round off, so check the
 	// fractional ones and a whole one against what fp() produced from the literal.
@@ -159,27 +146,27 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		{Bard, func(a classAttributes) int { return a.ChrMana }, fp(1.5), "bard chr_mana"},
 		{Barbarian, func(a classAttributes) int { return a.ItmLife }, fp(2.5), "barbarian itm_life"},
 	} {
-		if got := c.got(classAttr[c.class]); got != c.want {
+		if got := c.got(d.classAttr[c.class]); got != c.want {
 			t.Errorf("%s = %d, want %d", c.what, got, c.want)
 		}
 	}
-	if got := classAttr[Sorcerer].AttackFrames; got[0] != 20 || got[ITypeAxe] != 24 || got[ITypeStaff] != 16 || len(got) != 5 {
+	if got := d.classAttr[Sorcerer].AttackFrames; got[0] != 20 || got[ITypeAxe] != 24 || got[ITypeStaff] != 16 || len(got) != 5 {
 		t.Errorf("sorcerer AttackFrames = %v", got)
 	}
-	if !HasClassFlag(Barbarian, ClassIronSkin) || !HasClassFlag(Barbarian, ClassNaturalResistance) ||
-		!HasClassFlag(Rogue, ClassTrapSense) || HasClassFlag(Sorcerer, ClassCriticalStrike) {
+	if !d.HasClassFlag(Barbarian, ClassIronSkin) || !d.HasClassFlag(Barbarian, ClassNaturalResistance) ||
+		!d.HasClassFlag(Rogue, ClassTrapSense) || d.HasClassFlag(Sorcerer, ClassCriticalStrike) {
 		t.Error("class flags did not survive hero.rec")
 	}
-	if MaxStats[Warrior] != [4]int{250, 50, 60, 100} || MaxStats[Barbarian] != [4]int{255, 0, 55, 150} {
-		t.Errorf("MaxStats = %v", MaxStats)
+	if d.MaxStats[Warrior] != [4]int{250, 50, 60, 100} || d.MaxStats[Barbarian] != [4]int{255, 0, 55, 150} {
+		t.Errorf("MaxStats = %v", d.MaxStats)
 	}
-	if ExpLvls[0] != 0 || ExpLvls[1] != 2000 || ExpLvls[50] != 1583495809 {
-		t.Errorf("ExpLvls ends = %d/%d/%d", ExpLvls[0], ExpLvls[1], ExpLvls[50])
+	if d.ExpLvls[0] != 0 || d.ExpLvls[1] != 2000 || d.ExpLvls[50] != 1583495809 {
+		t.Errorf("ExpLvls ends = %d/%d/%d", d.ExpLvls[0], d.ExpLvls[1], d.ExpLvls[50])
 	}
 
-	if len(ShrineNames) != 34 || len(ShrineMessages) != 34 || len(shrineMax) != 34 || len(shrineAvail) != 34 {
+	if len(d.ShrineNames) != 34 || len(d.ShrineMessages) != 34 || len(d.shrineMax) != 34 || len(d.shrineAvail) != 34 {
 		t.Fatalf("shrine tables = %d/%d/%d/%d, want 34 each",
-			len(ShrineNames), len(ShrineMessages), len(shrineMax), len(shrineAvail))
+			len(d.ShrineNames), len(d.ShrineMessages), len(d.shrineMax), len(d.shrineAvail))
 	}
 	// The generator rolls an index into these, so the level caps and the multiplayer-only markers decide which
 	// shrines a dungeon level can hold.
@@ -195,46 +182,46 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		{32, "Solar", 24, 1},
 		{33, "Murphy's", 24, 0},
 	} {
-		if ShrineNames[c.i] != c.name || shrineMax[c.i] != c.max || shrineAvail[c.i] != c.avail {
+		if d.ShrineNames[c.i] != c.name || d.shrineMax[c.i] != c.max || d.shrineAvail[c.i] != c.avail {
 			t.Errorf("shrine %d = %s/%d/%d, want %s/%d/%d",
-				c.i, ShrineNames[c.i], shrineMax[c.i], shrineAvail[c.i], c.name, c.max, c.avail)
+				c.i, d.ShrineNames[c.i], d.shrineMax[c.i], d.shrineAvail[c.i], c.name, c.max, c.avail)
 		}
 	}
-	if len(StoryBookNames) != 9 || StoryBookNames[0] != "The Great Conflict" || StoryBookNames[8] != "The Black King" {
-		t.Errorf("StoryBookNames = %v", StoryBookNames)
+	if len(d.StoryBookNames) != 9 || d.StoryBookNames[0] != "The Great Conflict" || d.StoryBookNames[8] != "The Black King" {
+		t.Errorf("StoryBookNames = %v", d.StoryBookNames)
 	}
 
-	if len(SfxFiles) != 746 {
-		t.Errorf("SfxFiles = %d entries, want 746", len(SfxFiles))
+	if len(d.SfxFiles) != 746 {
+		t.Errorf("SfxFiles = %d entries, want 746", len(d.SfxFiles))
 	}
 	for id, want := range map[string]string{
 		"IS_SARC":      "items/sarc.ogg",
 		"PS_MONK1":     "monk/monk01.ogg",
 		"USFX_DIABLOD": "monsters/diablod.ogg",
 	} {
-		if SfxFiles[id] != want {
-			t.Errorf("SfxFiles[%s] = %q, want %q", id, SfxFiles[id], want)
+		if d.SfxFiles[id] != want {
+			t.Errorf("SfxFiles[%s] = %q, want %q", id, d.SfxFiles[id], want)
 		}
 	}
 
-	if len(itemCAnimTbl) != 229 || len(itemDropSnds) != 43 || len(itemInvSnds) != 43 {
-		t.Fatalf("item sound tables = %d/%d/%d, want 229/43/43", len(itemCAnimTbl), len(itemDropSnds), len(itemInvSnds))
+	if len(d.itemCAnimTbl) != 229 || len(d.itemDropSnds) != 43 || len(d.itemInvSnds) != 43 {
+		t.Fatalf("item sound tables = %d/%d/%d, want 229/43/43", len(d.itemCAnimTbl), len(d.itemDropSnds), len(d.itemInvSnds))
 	}
 	for _, c := range []struct{ curs, anim int }{{0, 20}, {4, 4}, {41, 0}, {150, 14}, {228, 0}} {
-		if itemCAnimTbl[c.curs] != c.anim {
-			t.Errorf("itemCAnimTbl[%d] = %d, want %d", c.curs, itemCAnimTbl[c.curs], c.anim)
+		if d.itemCAnimTbl[c.curs] != c.anim {
+			t.Errorf("itemCAnimTbl[%d] = %d, want %d", c.curs, d.itemCAnimTbl[c.curs], c.anim)
 		}
 	}
-	if d, i := ItemSnds(4); d != "IS_GOLD" || i != "IS_GOLD" { // gold, anim 4
+	if d, i := d.ItemSnds(4); d != "IS_GOLD" || i != "IS_GOLD" { // gold, anim 4
 		t.Errorf("ItemSnds(4) = %q/%q, want IS_GOLD/IS_GOLD", d, i)
 	}
-	if d, i := ItemSnds(0); d != "IS_FPOT" || i != "IS_IPOT" { // anim 20
+	if d, i := d.ItemSnds(0); d != "IS_FPOT" || i != "IS_IPOT" { // anim 20
 		t.Errorf("ItemSnds(0) = %q/%q, want IS_FPOT/IS_IPOT", d, i)
 	}
-	if d, i := ItemSnds(-1); d != "" || i != "" {
+	if d, i := d.ItemSnds(-1); d != "" || i != "" {
 		t.Errorf("ItemSnds(-1) = %q/%q, want empty", d, i)
 	}
-	if d, i := ItemSnds(len(itemCAnimTbl)); d != "" || i != "" {
+	if d, i := d.ItemSnds(len(d.itemCAnimTbl)); d != "" || i != "" {
 		t.Errorf("ItemSnds(out of range) = %q/%q, want empty", d, i)
 	}
 }

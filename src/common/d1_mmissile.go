@@ -48,19 +48,16 @@ var d1MissileResist = map[D1Missile]int{
 // bolts fly until they hit the player or a wall, lines and flashes roll D1's per-tick hits in one go.
 type MonsterMissileAction struct {
 	BaseAction
-	caster     *Actor
-	mis        D1Missile
-	target     geometry.Point
-	dam        int
-	animations []Animation
+	caster *Actor
+	mis    D1Missile
+	target geometry.Point
+	dam    int
 }
 
 func NewMonsterMissileAction(caster *Actor, mis D1Missile, target geometry.Point, dam int) *MonsterMissileAction {
 	return &MonsterMissileAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameMonsterMissile, caster), name: ActionNameMonsterMissile},
 		caster: caster, mis: mis, target: target, dam: dam}
 }
-
-func (a *MonsterMissileAction) GetAnimations() []Animation { return a.animations }
 
 func (a *MonsterMissileAction) Execute(ctx ActionContext) []Action {
 	m := ctx.GameState.GetMap()
@@ -69,7 +66,7 @@ func (a *MonsterMissileAction) Execute(ctx ActionContext) []Action {
 		golem: t != nil && t.d1Monster != nil && t.d1Monster.Golem,
 		c:     &spellCtx{f: ctx.GameState.factory, m: m, caster: a.caster, cause: a.cause, dealt: map[*Actor]int{}}}
 	c.fire(a.mis, a.target, a.dam)
-	a.animations = c.c.animations
+	c.c.emit(ctx.ActionBroker)
 	hits := c.c.finish() // the golem, if it was in the way
 	if c.dealt <= 0 || !c.player.IsAlive() {
 		return hits
@@ -123,16 +120,16 @@ func (c *missileCtx) hitAs(mis D1Missile, p, from geometry.Point, mind, maxd int
 	}
 	total, blocked, flinch := 0, false, 0
 	for i := 0; i < ticks; i++ {
-		if d1Rng.Intn(100) >= chance {
+		if rng.Intn(100) >= chance {
 			continue
 		}
-		dam := d1.MissileDamage64(d1Rng, s, mind, maxd, shift)
+		dam := d1.MissileDamage64(rng, s, mind, maxd, shift)
 		if c.mon == nil {
-			dam = d1.TrapDamage64(d1Rng, s, mind, maxd, shift)
+			dam = d1.TrapDamage64(rng, s, mind, maxd, shift)
 		}
 		if resper > 0 { // a resisted hit doesn't flinch
 			dam -= resper * dam / 100
-		} else if d1Rng.Intn(100) < block {
+		} else if rng.Intn(100) < block {
 			blocked = true
 			continue
 		} else {
@@ -158,7 +155,7 @@ func (c *missileCtx) hitAs(mis D1Missile, p, from geometry.Point, mind, maxd int
 	if flinch > 0 {
 		D1StartPlrHit(c.ctx.GameState.factory, pl, flinch, c.dealt, false)
 	}
-	c.c.animations = append(c.c.animations, NewHitAnimation(p, 0.3, defs.IconEffectHit, 2))
+	c.c.flash(p, 0.3, defs.IconEffectHit)
 	return true
 }
 
@@ -180,8 +177,8 @@ func (c *missileCtx) trapHitsMonster(p, from geometry.Point, mind, maxd int, shi
 	hper := max(min(90-mon.AC-geometry.DistanceChebyshev(from, p), 95), 5)
 	total := 0
 	for i := 0; i < ticks; i++ {
-		if d1Rng.Intn(100) < hper || a.HasStatusEffect(StatusStone) {
-			dam := mind + d1Rng.Intn(max(maxd-mind+1, 1))
+		if rng.Intn(100) < hper || a.HasStatusEffect(StatusStone) {
+			dam := mind + rng.Intn(max(maxd-mind+1, 1))
 			if !shift {
 				dam <<= 6
 			}
@@ -198,7 +195,7 @@ func (c *missileCtx) trapHitsMonster(p, from geometry.Point, mind, maxd int, shi
 		c.c.order = append(c.c.order, a)
 	}
 	c.c.dealt[a] += max(total>>6, 1)
-	c.c.animations = append(c.c.animations, NewHitAnimation(p, 0.3, defs.IconEffectHit, 2))
+	c.c.flash(p, 0.3, defs.IconEffectHit)
 	return true
 }
 
@@ -219,7 +216,7 @@ func (c *missileCtx) attacker() *Actor {
 }
 
 func (c *missileCtx) monsterDamage() int {
-	return c.mon.MinDam + d1Rng.Intn(max(c.mon.MaxDam-c.mon.MinDam+1, 1))
+	return c.mon.MinDam + rng.Intn(max(c.mon.MaxDam-c.mon.MinDam+1, 1))
 }
 
 func missileIcon(mis D1Missile) int32 {
@@ -275,12 +272,11 @@ func (c *missileCtx) fly(mis D1Missile, cells []geometry.Point, mind, maxd int, 
 		}
 	}
 	if impact := d1MissileSfx[mis][1]; last != from {
-		b := NewProjectileDirectionAnimation(c.caster, from, last, missileSecPerTile(mis), missileIcon(mis), 2)
+		flight := []geometry.Point{from, last}
 		if wander {
-			b = NewProjectilePathAnimation(c.caster, path, missileSecPerTile(mis), missileIcon(mis), 2)
+			flight = path
 		}
-		b.SetOnFinish(func() { playD1SfxAt(c.ctx, impact, last) })
-		c.c.animations = append(c.c.animations, b)
+		c.c.events = append(c.c.events, Missile{By: c.caster, Path: flight, SecPerTile: missileSecPerTile(mis), Icon: missileIcon(mis), ArriveSfx: impact})
 	} else {
 		playD1SfxAt(c.ctx, impact, last)
 	}
@@ -301,11 +297,11 @@ func (c *missileCtx) fire(mis D1Missile, target geometry.Point, dam int) {
 			if c.mon.Data.Level >= 2 {
 				d = 2
 			}
-			c.hazard(MisAcidPud, end, (d1Rng.Intn(15)+40*(c.mon.Int+1))/d1.RefWalkTicks, d)
+			c.hazard(MisAcidPud, end, (rng.Intn(15)+40*(c.mon.Int+1))/d1.RefWalkTicks, d)
 		}
 	case MisCbolt:
 		for i := 0; i < 3; i++ { // M_DoRAttack: three sparks, each wandering like the hero's (MI_Cbolt)
-			c.fly(mis, c.c.chargedBoltCells(o, target, d1Rng.Intn(15)+1), 15, 15, true)
+			c.fly(mis, c.c.chargedBoltCells(o, target, rng.Intn(15)+1), 15, 15, true)
 		}
 	case MisFireball:
 		end, _ := c.bolt(mis, target, dam, dam)
@@ -320,12 +316,12 @@ func (c *missileCtx) fire(mis D1Missile, target geometry.Point, dam int) {
 			}
 		}
 		if len(cells) > 0 {
-			c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(c.caster, o, cells[len(cells)-1], missileSecPerTile(mis), missileIcon(mis), 2))
+			c.c.missile(c.caster, []geometry.Point{o, cells[len(cells)-1]}, missileSecPerTile(mis), missileIcon(mis))
 		}
 	case MisLightning:
 		c.hit(mis, target, target, dam, dam, true, 8)
 		playD1SfxAt(c.ctx, d1MissileSfx[mis][1], target)
-		c.c.animations = append(c.c.animations, NewHitAnimation(target, 0.3, defs.IconEffectLightning, 2))
+		c.c.flash(target, 0.3, defs.IconEffectLightning)
 	case MisFlash: // the six cells from one left of the caster to one right and below
 		for _, d := range []geometry.Point{{X: -1}, {}, {X: 1}, {X: -1, Y: 1}, {Y: 1}, {X: 1, Y: 1}} {
 			c.hit(mis, o.Add(d), o, 2*c.mon.Level, 2*c.mon.Level, true, d1.FlashTicks)
@@ -333,7 +329,7 @@ func (c *missileCtx) fire(mis D1Missile, target geometry.Point, dam int) {
 	case MisApoca: // AddDiabApoca: MIS_BOOM2 on the player when the line is clear
 		if p := c.player.MapPosition(); c.c.lineClear(o, p) {
 			c.hit(mis, p, o, dam, dam, false, 1)
-			c.c.animations = append(c.c.animations, NewHitAnimation(p, 0.4, defs.IconEffectFireBig, 2))
+			c.c.flash(p, 0.4, defs.IconEffectFireBig)
 		}
 	case MisFlamec: // MI_Flamec: flames on the next three cells towards the target, the n-th burning 20+5n ticks
 		for n, p := range c.c.ray(o, target, 3) {
@@ -380,20 +376,18 @@ func (c *missileCtx) hazard(mis D1Missile, p geometry.Point, turns, dam64 int) {
 
 type hazardTickAction struct {
 	BaseAction
-	mc         *missileCtx
-	mis        D1Missile
-	p          geometry.Point
-	dam64      int
-	animations []Animation
+	mc    *missileCtx
+	mis   D1Missile
+	p     geometry.Point
+	dam64 int
 }
 
-func (a *hazardTickAction) GetAnimations() []Animation { return a.animations }
 func (a *hazardTickAction) Execute(ctx ActionContext) []Action {
 	c := a.mc
 	c.ctx, c.player, c.dealt = ctx, ctx.GameState.GetPlayer(), 0
 	c.c = &spellCtx{f: ctx.GameState.factory, m: ctx.GameState.GetMap(), caster: c.caster, cause: a.cause, dealt: map[*Actor]int{}}
 	c.hit(a.mis, a.p, a.p, a.dam64, a.dam64, true, d1.RefWalkTicks)
-	a.animations = c.c.animations
+	c.c.emit(ctx.ActionBroker)
 	hits := c.c.finish()
 	if c.dealt <= 0 {
 		return hits
@@ -406,6 +400,6 @@ func (f *Factory) d1AcidDeath(ctx ActionContext, victim *Actor) {
 	if mon := victim.d1Monster; mon.Data.Family == "Acid" {
 		c := &missileCtx{ctx: ctx, caster: victim, mon: mon, player: ctx.GameState.GetPlayer(), c: &spellCtx{m: ctx.GameState.GetMap(), caster: victim}}
 		p := victim.MapPosition()
-		c.hazard(MisAcidPud, p, (d1Rng.Intn(15)+40*(mon.Int+1))/d1.RefWalkTicks, mon.Int+1)
+		c.hazard(MisAcidPud, p, (rng.Intn(15)+40*(mon.Int+1))/d1.RefWalkTicks, mon.Int+1)
 	}
 }

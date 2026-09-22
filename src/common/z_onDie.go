@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"math/rand"
 
 	"rpg/src/stats"
 )
@@ -84,7 +83,7 @@ func (d *OnKillHook) onKill(context ActionContext, killer, victim *Actor) []Acti
 
 	awardXP := int(float64(victimXP) * multiplier)
 
-	awardGold := rand.Intn(victimXP) + victimXP + rand.Intn(awardXP) + awardXP
+	awardGold := rng.Intn(victimXP) + victimXP + rng.Intn(awardXP) + awardXP
 
 	// should technically be its own action, if we wanted to hook this..
 	killer.GetStats().IncrementBy(stats.Experience, awardXP)

@@ -14,7 +14,7 @@ func ActorInfoSections(state *State, actor *Actor) (string, []D1SheetSection) {
 	case actor.hero != nil:
 		sections = append(actor.D1SheetSections(), actor.d1AttributeSection())
 	case actor.d1Monster != nil:
-		sections = actor.D1MonsterSections()
+		sections = actor.D1MonsterSections(state.factory.Generator.D)
 	default:
 		sections = actor.plainActorSections()
 	}

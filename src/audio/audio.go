@@ -3,9 +3,9 @@ package audio
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"io/fs"
+	"log/slog"
 	"math/rand"
 	"path"
 	"slices"
@@ -132,12 +132,11 @@ func (s *Sound) IsLoaded() bool {
 
 func (s *Sound) Load(ap *Player) bool {
 	for i, filename := range s.Filenames {
-		print(fmt.Sprintf("Loading %s...", filename))
 		s.Samples[i] = ap.LoadOGG(filename)
-		println("done")
+		slog.Debug("loaded sound", "file", filename, "ok", len(s.Samples[i]) > 0)
 	}
 	if !s.IsLoaded() {
-		println("ERR: Sound cue not found: " + s.Cue)
+		slog.Warn("sound cue not found", "cue", s.Cue)
 		return false
 	}
 	return true
@@ -180,7 +179,6 @@ type ActiveSound struct {
 
 type NullHandle struct{}
 
-func (h *NullHandle) Close() error    { return nil }
 func (h *NullHandle) IsPlaying() bool { return false }
 
 type SampleRate int
@@ -219,7 +217,7 @@ func (ap *Player) UnloadAll() {
 func (ap *Player) StopAll() {
 	for cue, sounds := range ap.activeSounds {
 		for _, sound := range sounds {
-			sound.player.Close()
+			sound.player.PauseAndStopReading()
 		}
 		delete(ap.activeSounds, cue)
 	}
@@ -261,14 +259,13 @@ func (ap *Player) OpenOGG(filename string) *audio.Player {
 func (ap *Player) Stop(cue string) {
 	if _, ok := ap.activeSounds[cue]; ok {
 		for _, sound := range ap.activeSounds[cue] {
-			sound.player.Close()
+			sound.player.PauseAndStopReading()
 		}
 		delete(ap.activeSounds, cue)
 	}
 }
 
 type Handle interface {
-	Close() error
 	IsPlaying() bool
 }
 
@@ -283,7 +280,7 @@ func (ap *Player) StartLoop(cue string) Handle {
 		sound.IsLooping = true
 		return ap.startPlaying(sound, ap.effectiveMusicVolume(), nil)
 	} else {
-		println("ERR: Sound cue not found: " + cue)
+		slog.Warn("sound cue not found", "cue", cue)
 	}
 	return &NullHandle{}
 }
@@ -296,7 +293,7 @@ func (ap *Player) StartLoopStream(cue string) Handle {
 		sound.IsLooping = true
 		player := sound.OpenStream(ap)
 		if player == nil {
-			println("ERR: Could not open music: " + cue)
+			slog.Warn("could not open music", "cue", cue)
 			return &NullHandle{}
 		}
 		player.Rewind()
@@ -305,7 +302,7 @@ func (ap *Player) StartLoopStream(cue string) Handle {
 		ap.addActiveSound(sound, player, nil)
 		return player
 	} else {
-		println("ERR: Sound cue not found: " + cue)
+		slog.Warn("sound cue not found", "cue", cue)
 	}
 	return &NullHandle{}
 }
@@ -333,7 +330,7 @@ func (ap *Player) PlayCue(cue string) Handle {
 		}
 		return ap.startPlaying(sound, ap.volumeFor(sound), nil)
 	} else {
-		println("ERR: Sound cue not found: " + cue)
+		slog.Warn("sound cue not found", "cue", cue)
 	}
 	return &NullHandle{}
 }
@@ -358,7 +355,7 @@ func (ap *Player) PlayCueWithCallback(cue string, callback func()) Handle {
 		}
 		return ap.startPlaying(sound, ap.volumeFor(sound), callback)
 	} else {
-		println("ERR: Sound cue not found: " + cue)
+		slog.Warn("sound cue not found", "cue", cue)
 	}
 	return &NullHandle{}
 }
@@ -385,7 +382,7 @@ func (ap *Player) Update() {
 					sound.player.Play()
 					continue
 				}
-				sound.player.Close()
+				sound.player.PauseAndStopReading()
 				if sound.callback != nil {
 					sound.callback()
 				}
@@ -405,7 +402,7 @@ func (ap *Player) PreLoadCuesIntoMemory(soundCues []string) {
 	for _, soundCue := range soundCues {
 		if sound, ok := ap.availableSounds[soundCue]; ok {
 			if !sound.IsLoaded() {
-				println(fmt.Sprintf("Loading sound cue '%s'", soundCue))
+				slog.Debug("loading sound cue", "cue", soundCue)
 				sound.Load(ap)
 			}
 		}
@@ -415,7 +412,7 @@ func (ap *Player) UnloadCues(soundCues []string) {
 	for _, soundCue := range soundCues {
 		if sound, ok := ap.availableSounds[soundCue]; ok {
 			if sound.IsLoaded() {
-				println(fmt.Sprintf("Unloading sound cue '%s'", soundCue))
+				slog.Debug("unloading sound cue", "cue", soundCue)
 				sound.Unload()
 			}
 		}
@@ -538,7 +535,7 @@ func (ap *Player) registerEvents(recFile string, setup func(s *Sound)) {
 		return // a mod without music, speech or sound has none: nothing is shared between mods
 	}
 	if err != nil {
-		println("ERR: Sound events not readable: " + recFile + ": " + err.Error())
+		slog.Error("sound events not readable", "file", recFile, "err", err)
 		return
 	}
 	defer f.Close()

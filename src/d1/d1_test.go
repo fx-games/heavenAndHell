@@ -85,11 +85,12 @@ func TestLoadAndGenerate(t *testing.T) {
 }
 
 func TestHero(t *testing.T) {
-	w := NewHero(Warrior)
+	d := testData(t)
+	w := d.NewHero(Warrior)
 	if w.MaxHPBase>>6 != 70 || w.MaxManaBase>>6 != 10 {
 		t.Fatalf("warrior start hp=%d mana=%d", w.MaxHPBase>>6, w.MaxManaBase>>6)
 	}
-	sorc := NewHero(Sorcerer)
+	sorc := d.NewHero(Sorcerer)
 	if sorc.MaxHPBase>>6 != 30 || sorc.MaxManaBase>>6 != 70 {
 		t.Fatalf("sorcerer start hp=%d mana=%d", sorc.MaxHPBase>>6, sorc.MaxManaBase>>6)
 	}
@@ -216,7 +217,7 @@ func TestStores(t *testing.T) {
 	if broke := WeaponDur(rand.New(rand.NewSource(1)), []*Item{sword}, 1); broke != sword || sword.Durability != 0 {
 		t.Fatalf("weapon should break, durability %d", sword.Durability)
 	}
-	if s := NewHero(Warrior).Sheet([]*Item{sword}); s.Active[0] || s.MinDam != 1 {
+	if s := d.NewHero(Warrior).Sheet([]*Item{sword}); s.Active[0] || s.MinDam != 1 {
 		t.Fatalf("broken weapon still counts: %+v", s)
 	}
 }
@@ -226,7 +227,7 @@ func TestSpells(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sorc, rogue, warrior := NewHero(Sorcerer), NewHero(Rogue), NewHero(Warrior)
+	sorc, rogue, warrior := d.NewHero(Sorcerer), d.NewHero(Rogue), d.NewHero(Warrior)
 	if sorc.SpellLevels[SplFirebolt] != 2 {
 		t.Fatalf("sorcerer starts with firebolt level %d", sorc.SpellLevels[SplFirebolt])
 	}
@@ -251,9 +252,10 @@ func TestSpells(t *testing.T) {
 }
 
 func TestPotionRangeMatchesRolls(t *testing.T) {
+	d := testData(t)
 	rng := rand.New(rand.NewSource(1))
 	for _, class := range []int{Warrior, Rogue, Sorcerer} {
-		h := &Hero{Class: class}
+		h := &Hero{d: d, Class: class}
 		maxV := 80 << 6
 		hlo, hhi := h.PotionHealRange(maxV)
 		mlo, mhi := h.PotionManaRange(maxV)
@@ -323,13 +325,13 @@ func TestTextSpeech(t *testing.T) {
 		t.Fatal(err)
 	}
 	for id, sfx := range d.TextSfx {
-		if _, ok := SfxFiles[sfx]; !ok {
+		if _, ok := d.SfxFiles[sfx]; !ok {
 			t.Errorf("%s: speech %q has no file", id, sfx)
 		}
 	}
 	for _, n := range []int{8, 9, 13, 14, 15, 16, 24, 27, 35, 61, 69, 71, 62, 80, 82, 83, 87, 88, 89, 91, 94, 95, 97, 98, 99} {
 		for _, class := range []string{"WARR", "ROGUE", "MAGE"} {
-			if id := "PS_" + class + fmt.Sprint(n); SfxFiles[id] == "" {
+			if id := "PS_" + class + fmt.Sprint(n); d.SfxFiles[id] == "" {
 				t.Errorf("hero line %s has no file", id)
 			}
 		}
@@ -340,12 +342,13 @@ func TestTextSpeech(t *testing.T) {
 }
 
 func TestHealRangeBoundsRolls(t *testing.T) {
+	d := testData(t)
 	rng := rand.New(rand.NewSource(1))
 	for _, class := range []int{Warrior, Rogue, Sorcerer} {
-		lo, hi := HealRange64(class, 7, 3)
+		lo, hi := d.HealRange64(class, 7, 3)
 		seenLo, seenHi := 1<<30, 0
 		for range 20000 {
-			v := HealAmount64(rng, class, 7, 3)
+			v := d.HealAmount64(rng, class, 7, 3)
 			seenLo, seenHi = min(seenLo, v), max(seenHi, v)
 		}
 		if seenLo < lo || seenHi > hi {
@@ -357,18 +360,18 @@ func TestHealRangeBoundsRolls(t *testing.T) {
 // TestHellfireClasses pins the three Hellfire classes' starting pools and the Barbarian's Rage state machine,
 // which is the only class skill with a lasting effect.
 func TestHellfireClasses(t *testing.T) {
-	loadHellfire(t)
+	d := loadHellfire(t)
 	for _, c := range []struct{ class, hp, mana int }{
 		{Warrior, 70, 10}, {Rogue, 45, 22}, {Sorcerer, 30, 70},
 		{Monk, 45, 22}, {Bard, 45, 35}, {Barbarian, 70, 0},
 	} {
-		h := NewHero(c.class)
+		h := d.NewHero(c.class)
 		if h.MaxHPBase>>6 != c.hp || h.MaxManaBase>>6 != c.mana {
-			t.Errorf("%s starts with hp=%d mana=%d, want %d/%d", ClassNames[c.class], h.MaxHPBase>>6, h.MaxManaBase>>6, c.hp, c.mana)
+			t.Errorf("%s starts with hp=%d mana=%d, want %d/%d", d.ClassNames[c.class], h.MaxHPBase>>6, h.MaxManaBase>>6, c.hp, c.mana)
 		}
 	}
 
-	h := NewHero(Barbarian)
+	h := d.NewHero(Barbarian)
 	h.Level = 10
 	calm := h.Sheet(nil)
 	if calm.FR != 10 || calm.BonusAC != 2 { // natural resistance and iron skin scale with the level
@@ -387,7 +390,7 @@ func TestHellfireClasses(t *testing.T) {
 	}
 
 	// the Monk fights bare-handed, blocks with his staff and swings it faster than anyone
-	monk := NewHero(Monk)
+	monk := d.NewHero(Monk)
 	monk.Level = 20
 	fists := monk.Sheet(nil)
 	if fists.MinDam != 10 || fists.MaxDam != 20 || !fists.Block || fists.AttackFrames != 12 {
@@ -424,7 +427,7 @@ func TestHellfireItems(t *testing.T) {
 	}
 	for _, lvl := range []int{1, 5, 20} {
 		it := g.PlainItem(oilIdx)
-		if it.MiscID == "IMISC_OILOF" || it.Value == 0 || !IsOil(it.MiscID) {
+		if it.MiscID == "IMISC_OILOF" || it.Value == 0 || !d.IsOil(it.MiscID) {
 			t.Fatalf("lvl %d: oil stayed %s (%s, %d gold)", lvl, it.MiscID, it.Name, it.Value)
 		}
 	}
@@ -544,4 +547,19 @@ func TestGuardianScan(t *testing.T) {
 			t.Fatalf("scan reaches %v", o)
 		}
 	}
+}
+
+var shared *Data
+
+// testData is the D1 mod's rules, loaded once for the tests that only read them.
+func testData(t *testing.T) *Data {
+	t.Helper()
+	if shared == nil {
+		d, err := Load(testFS())
+		if err != nil {
+			t.Fatal(err)
+		}
+		shared = d
+	}
+	return shared
 }

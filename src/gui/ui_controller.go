@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"io"
+	"log/slog"
 	"math"
 	"path"
 	"rpg/files"
@@ -65,7 +66,7 @@ func NewUIController(tileRenderer *renderer.TileRenderer, context common.UIConte
 		configuration:  config,
 		context:        context,
 		worldTexture:   context.GameState().GetWorldTexture(),
-		deviceDPIScale: ebiten.DeviceScaleFactor(),
+		deviceDPIScale: ebiten.Monitor().DeviceScaleFactor(),
 	}
 	u.setTileScale(4)
 	return u
@@ -576,7 +577,7 @@ func (u *UIController) GetScreenSize() geometry.Point {
 }
 
 func (u *UIController) OnScreenSizeChanged() {
-	u.deviceDPIScale = ebiten.DeviceScaleFactor()
+	u.deviceDPIScale = ebiten.Monitor().DeviceScaleFactor()
 	newScreenSize := u.GetDeviceIndependentScreenSize()
 
 	for _, overlay := range u.overlays {
@@ -1106,7 +1107,7 @@ func (u *UIController) getCurrentTimedEffects() []UIElement {
 func (u *UIController) SetTTFFont(file io.ReaderAt, size float64) {
 	tt, err := opentype.ParseReaderAt(file)
 	if err != nil {
-		println(err.Error())
+		slog.Error("font", "err", err)
 		return
 	}
 	dpi := 72 * u.deviceDPIScale
@@ -1116,7 +1117,7 @@ func (u *UIController) SetTTFFont(file io.ReaderAt, size float64) {
 		Hinting: font.HintingVertical,
 	})
 	if faceErr != nil {
-		println(faceErr.Error())
+		slog.Error("font face", "err", faceErr)
 	}
 	u.tileRenderer.SetTTF(fontFace)
 }
@@ -1270,7 +1271,7 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 
 func (u *UIController) GetDeviceIndependentScreenSize() geometry.Point {
 	if u.isFullScreen {
-		w, h := ebiten.ScreenSizeInFullscreen()
+		w, h := ebiten.Monitor().Size()
 		return geometry.Point{X: w, Y: h}
 	}
 	return u.screenSize

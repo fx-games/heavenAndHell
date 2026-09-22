@@ -13,7 +13,7 @@ import (
 // Recharge and, from Hellfire, the Monk's Vision, the Bard's Identify and the Barbarian's Rage. They cost no
 // mana; like D1's cursor, repair, recharge and identify ask for an item and disarm for an object.
 func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedAction) {
-	skill := d1.Class(player.hero.Class).Skill
+	skill := f.Generator.D.Class(player.hero.Class).Skill
 	if spell, ok := d1.ClassSkills[skill]; !ok || f.Generator.D.Spells[spell].ID == "" {
 		return nil, nil // hero.rec names no skill, or the mod has no such spell: a class skill is content
 	}
@@ -33,7 +33,7 @@ func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedActio
 	case "repair":
 		return nil, f.d1ItemSkill("Item Repair", d1.SplRepair, d1.CanRepair, func(it *Item) {
 			f.PlayD1Sfx("IS_REPAIR", player.MapPosition()) // DoRepair
-			if d1.RepairItem(it.d1, player.hero.Level, d1Rng.Intn) {
+			if d1.RepairItem(it.d1, player.hero.Level, rng.Intn) {
 				name := it.Name()
 				player.GetEquipment().UnEquip(it)
 				player.GetInventory().Remove(it)
@@ -44,7 +44,7 @@ func (f *Factory) d1ClassSkill(player *Actor) (*TargetedAction, *UntargetedActio
 		})
 	case "recharge":
 		return nil, f.d1ItemSkill("Staff Recharge", d1.SplRecharge, func(it *d1.Item) bool { return it.Type == d1.ITypeStaff && f.Generator.D.CanRecharge(it) }, func(it *Item) {
-			f.Generator.D.RechargeItem(it.d1, player.hero.Level, d1Rng.Intn)
+			f.Generator.D.RechargeItem(it.d1, player.hero.Level, rng.Intn)
 			f.Msg(fmt.Sprintf("You recharge your %s.", it.Name()))
 		})
 	}
@@ -128,7 +128,7 @@ func (f *Factory) d1ItemSkill(name string, spell int, applies func(*d1.Item) boo
 			f.Msg("You have nothing for that.")
 			return
 		}
-		openD1ItemList(f.UI(), player, items, func(item *Item) {
+		openD1ItemList(f.Show, player, items, func(item *Item) {
 			perform(item)
 			item.RefreshD1()
 			SyncHero(player)
@@ -139,7 +139,7 @@ func (f *Factory) d1ItemSkill(name string, spell int, applies func(*d1.Item) boo
 }
 
 // openD1ItemList lets the player pick one of items in the inventory list's look and hotkeys; suffix may be nil.
-func openD1ItemList(ui UserInterface, player *Actor, items []*Item, pick func(*Item)) {
+func openD1ItemList(show func(UIRequest), player *Actor, items []*Item, pick func(*Item)) {
 	inv := player.GetInventory()
 	stacks := make([]InventoryStack, len(items))
 	for i, it := range items {
@@ -155,12 +155,12 @@ func openD1ItemList(ui UserInterface, player *Actor, items []*Item, pick func(*I
 			letter, extra = extra, extra+1
 		}
 		entry := NewTextualStack(stack, letter, func(rune) {
-			ui.PopAll()
+			show(CloseMenus{})
 			pick(item)
 		})
 		list = append(list, entry)
 	}
-	ui.OpenItemList(list)
+	show(ChooseFromList{list})
 }
 
 // d1HeroItems are the pack's items and the equipped ones that aren't in it.
@@ -201,7 +201,7 @@ func (f *Factory) D1Disarm(player *Actor, target geometry.Point) {
 	if o != nil {
 		obj, name = o.O, o.Name()
 	}
-	if obj.TrapFlag && d1Rng.Intn(100) <= d1.DisarmChance(player.HeroSheet().Dex, f.State.CurrentLevel().Depth) {
+	if obj.TrapFlag && rng.Intn(100) <= d1.DisarmChance(player.HeroSheet().Dex, f.State.CurrentLevel().Depth) {
 		PlayUICue("disarm")
 		f.State.mapGen.disarmD1Object(m, obj)
 		if o != nil {
@@ -252,8 +252,8 @@ func (f *Factory) d1OilAction(item *Item, oil, name string) {
 			f.Msg("You have nothing to use that on.")
 			return
 		}
-		openD1ItemList(f.UI(), player, targets, func(target *Item) {
-			if !d1.ApplyOil(oil, target.d1, d1Rng.Intn) {
+		openD1ItemList(f.Show, player, targets, func(target *Item) {
+			if !d1.ApplyOil(oil, target.d1, rng.Intn) {
 				f.Msg(fmt.Sprintf("The %s does nothing for your %s.", name, target.Name()))
 				return
 			}

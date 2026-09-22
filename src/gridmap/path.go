@@ -160,7 +160,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) GetJPSPath(start geometry.Poi
 	if !isWalkable(end) {
 		end = m.getNearestFreeNeighbor(start, end, isWalkable)
 	}
-	//println(fmt.Sprintf("JPS from %v to %v", start, end))
 	return m.pathfinder.JPSPath([]geometry.Point{}, start, end, isWalkable, !m.cardinalMovementOnly)
 }
 

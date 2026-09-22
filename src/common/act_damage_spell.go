@@ -39,6 +39,7 @@ func (d *DamageSpellAction) SetFlightIcon(icon int32, frameCount int) {
 	d.flightIconFrameCount = frameCount
 }
 func (d *DamageSpellAction) Execute(context ActionContext) []Action {
+	context.ActionBroker.Emit(Fireball{Caster: d.caster, To: d.targetPos, Icon: d.flightIcon, Frames: d.flightIconFrameCount, Hits: d.hitPositions})
 	d.damageAmount = int(float64(d.baseDamage) * d.damageFactor)
 	state := context.GameState
 	currentMap := state.GetMap()
@@ -57,11 +58,6 @@ func (d *DamageSpellAction) Execute(context ActionContext) []Action {
 	}
 	context.Msg(fmt.Sprintf("%s %s", casterPart, d.actionDescription))
 	return hitActions
-}
-
-func (d *DamageSpellAction) GetAnimations() []Animation {
-	animation := NewFireballAnimation(d.caster, d.targetPos, d.flightIcon, d.flightIconFrameCount, d.hitPositions)
-	return OneAnimation(animation)
 }
 
 func (d *DamageSpellAction) GetDamageFactor() float64 {

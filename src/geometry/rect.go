@@ -198,13 +198,6 @@ func (rg Rect) ToHalfWidth() Rect {
 	}
 }
 
-func (rg Rect) GetRandomPoint() Point {
-	return Point{
-		X: rg.Min.X + rand.Intn(rg.Max.X-rg.Min.X),
-		Y: rg.Min.Y + rand.Intn(rg.Max.Y-rg.Min.Y),
-	}
-}
-
 func (rg Rect) BisectAtColumn(col int) (Rect, Rect) {
 	return rg.Columns(0, col), rg.Columns(col, rg.Size().X)
 }

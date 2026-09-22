@@ -1,7 +1,6 @@
 package app
 
 import (
-	"rpg/src/common"
 	"rpg/src/gridmap"
 	"testing"
 )
@@ -12,7 +11,6 @@ import (
 func TestAutoExploreKeepsGoingInTheDark(t *testing.T) {
 	g := newHeavenAndHellGame(t, NewDummyUI())
 	g.SeedRandom(1)
-	common.SeedD1Rng(1)
 	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
 	var last string
 	g.SetLogHook(func(s string) {

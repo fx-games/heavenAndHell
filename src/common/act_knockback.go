@@ -3,7 +3,6 @@ package common
 import (
 	"rpg/src/geometry"
 	"rpg/src/stats"
-	"rpg/src/util"
 )
 
 type KnockbackAction struct {
@@ -16,7 +15,6 @@ type KnockbackAction struct {
 	originPos         geometry.Point
 	targetPos         geometry.Point
 	obstaclePos       geometry.Point
-	animation         *MovementAnimation
 }
 
 func NewKnockbackAction(source Cause, actor *Actor, direction geometry.Point, distance int) *KnockbackAction {
@@ -79,53 +77,22 @@ func (d *KnockbackAction) Execute(context ActionContext) []Action {
 	d.distance = distanceMoved
 	if distanceMoved > 0 {
 		gameMap.MoveActorFrom(actor, d.originPos, d.targetPos) // write state
-		if d.isNotAnimated() {
-			actor.SetDrawPosition(d.targetPos.ToPointF())
-		}
 	}
+	context.ActionBroker.Emit(KnockedBack{Actor: actor, From: d.originPos, To: d.targetPos, Delay: d.animationDelay, Quiet: d.animationDisabled})
+	landed := func() bool { return actor.DrawPosition().ToPoint() == d.targetPos } // the push is over
 
 	if !gameMap.IsCurrentlyPassable(d.obstaclePos) {
 		// problem.. this will trigger at the same tick as the knockback animation begins..
 		actionPushed := NewChangeResourceAction(d.Cause(), actor, stats.Health, -5)
-		actionPushed.SetAnimationStartPredicate(func() bool {
-			return d.isNotAnimated() || d.animation.IsDone()
-		})
+		actionPushed.SetAnimationStartPredicate(landed)
 		actions = append(actions, actionPushed)
 		if hitActor, ok := gameMap.TryGetActorAt(d.obstaclePos); ok {
 			action := NewChangeResourceAction(d.Cause(), hitActor, stats.Health, -5)
-			action.SetAnimationStartPredicate(func() bool {
-				return d.isNotAnimated() || d.animation.IsDone()
-			})
+			action.SetAnimationStartPredicate(landed)
 			actions = append(actions, action)
 		}
 	}
-	d.prepareAnimation()
-	//println(fmt.Sprintf("Actor %s moved to %s", actor.Action(), d.targetPos))
 	return actions
-}
-func (d *KnockbackAction) GetAnimations() []Animation {
-	if d.isNotAnimated() {
-		return nil
-	}
-	d.animation.SetSimplePath(d.originPos, d.targetPos)
-	return OneAnimation(d.animation)
-	//return &DummyAnimation{time: 5, cancelRunningAnimations: true}
-}
-
-func (d *KnockbackAction) prepareAnimation() {
-	// but really, the state of this movement animation should determine
-	// when exactly the "walked on cell" effect animations trigger.
-	realDistance := geometry.Distance(d.originPos, d.targetPos)
-	ticksNeeded := util.SecondsToTicks(d.animationDelay * realDistance)
-	d.animation = &MovementAnimation{
-		actor:       d.actor,
-		ticksNeeded: ticksNeeded,
-		isForPlayer: false,
-	}
-}
-
-func (d *KnockbackAction) isNotAnimated() bool {
-	return d.animationDisabled || d.distance == 0
 }
 
 func (d *KnockbackAction) GetActor() *Actor {

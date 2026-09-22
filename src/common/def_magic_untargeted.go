@@ -151,8 +151,8 @@ func (g *Factory) getReplicate(args util.Arguments) UntargetedEffect {
 }
 
 func (g *Factory) getSpeedBuff(args util.Arguments) UntargetedEffect {
-	amount := util.ParseDice(args.Get(0)).Roll()
-	turnCount := util.ParseDice(args.Get(1)).Roll()
+	amount := util.ParseDice(args.Get(0)).Roll(rng)
+	turnCount := util.ParseDice(args.Get(1)).Roll(rng)
 	effect := func(user *Actor, source EffectSource) {
 		modifier := &stats.Modifier{
 			Attribute:      stats.BaseSpeed,
@@ -226,7 +226,7 @@ func (g *Factory) getEnchantWeapon(args util.Arguments) UntargetedEffect {
 	effect := func(user *Actor, source EffectSource) {
 		isWeapon := func(element *Item) bool { return element.IsWeapon() }
 		selected := func(itemKey rune) {
-			g.UI().PopAll()
+			g.Show(CloseMenus{})
 			inventory := user.GetInventory()
 			selectedItem := inventory.GetItemByLetter(itemKey)
 			weaponStats := selectedItem.GetWeaponStats()
@@ -239,7 +239,7 @@ func (g *Factory) getEnchantWeapon(args util.Arguments) UntargetedEffect {
 		}
 
 		if user == g.State.GetPlayer() {
-			g.UI().OpenListInventoryForSelection(isWeapon, selected)
+			g.Show(ChooseInventoryItem{isWeapon, selected})
 		} else if user.GetEquipment().HasWeaponEquipped() {
 			// select wielded weapon
 			wieldedWeapon := user.GetEquipment().GetBySlot(defs.SlotNameMainHand)
@@ -262,7 +262,7 @@ func (g *Factory) getEnchantArmor(args util.Arguments) UntargetedEffect {
 	effect := func(user *Actor, source EffectSource) {
 		isArmor := func(element *Item) bool { return element.IsArmor() }
 		selected := func(itemKey rune) {
-			g.UI().PopAll()
+			g.Show(CloseMenus{})
 			inventory := user.GetInventory()
 			selectedItem := inventory.GetItemByLetter(itemKey)
 			weaponStats := selectedItem.GetArmorStats()
@@ -275,7 +275,7 @@ func (g *Factory) getEnchantArmor(args util.Arguments) UntargetedEffect {
 		}
 
 		if user == g.State.GetPlayer() {
-			g.UI().OpenListInventoryForSelection(isArmor, selected)
+			g.Show(ChooseInventoryItem{isArmor, selected})
 		} else if user.GetEquipment().HasArmorEquipped() {
 			// select worn armor
 			wornArmor := user.GetEquipment().GetBySlot(defs.SlotNameArmorTorso)
@@ -296,7 +296,7 @@ func (g *Factory) getEnchantArmor(args util.Arguments) UntargetedEffect {
 func (g *Factory) getAcquirement(args util.Arguments) UntargetedEffect {
 	level := 12
 	if !args.IsEmpty() {
-		level = util.ParseDice(args.Get(0)).Roll()
+		level = util.ParseDice(args.Get(0)).Roll(rng)
 	}
 	effect := func(user *Actor, source EffectSource) {
 		// ponytail: main's GenerateMagicItem rolled from defs.ItemDefinition, which is content and is
@@ -336,7 +336,7 @@ func (g *Factory) logIfPlayer(user *Actor, message string) {
 func (g *Factory) getHealHealthBy(args util.Arguments) UntargetedEffect {
 	interval := util.NewIntervalFromString(args.Get(0))
 	effect := func(user *Actor, source EffectSource) {
-		healHealthAction := NewChangeResourceAction(NewActorCause("Heal", user), user, stats.Health, float64(interval.Roll()))
+		healHealthAction := NewChangeResourceAction(NewActorCause("Heal", user), user, stats.Health, float64(interval.Roll(rng)))
 		g.ActionBroker.Execute(healHealthAction)
 		g.logIfPlayer(user, "You feel better")
 		g.tryEndTurn(user, 100/user.GetBaseSpeed())
@@ -352,7 +352,7 @@ func (g *Factory) getHealHealthBy(args util.Arguments) UntargetedEffect {
 func (g *Factory) getHealManaBy(args util.Arguments) UntargetedEffect {
 	interval := util.NewIntervalFromString(args.Get(0))
 	effect := func(user *Actor, source EffectSource) {
-		healHealthAction := NewChangeResourceAction(NewActorCause("Mana Surge", user), user, stats.Mana, float64(interval.Roll()))
+		healHealthAction := NewChangeResourceAction(NewActorCause("Mana Surge", user), user, stats.Mana, float64(interval.Roll(rng)))
 		g.ActionBroker.Execute(healHealthAction)
 		g.Msg("You feel a surge of mana")
 		g.tryEndTurn(user, 100/user.GetBaseSpeed())
@@ -573,7 +573,7 @@ func (g *Factory) getBlessing(args util.Arguments) UntargetedEffect {
 }
 func (g *Factory) getStoneSkinBuff(args util.Arguments) UntargetedEffect {
 	//amount := args.GetInt(0)
-	turnCount := util.ParseDice(args.Get(0)).Roll()
+	turnCount := util.ParseDice(args.Get(0)).Roll(rng)
 	effect := func(user *Actor, source EffectSource) {
 		speedMod := &stats.Modifier{
 			Attribute:      stats.BaseSpeed,
@@ -703,7 +703,7 @@ func (g *Factory) getRandomTeleportAction(args util.Arguments) UntargetedEffect 
 	effect := func(user *Actor, source EffectSource) {
 		currentMap := g.State.GetMap()
 		origin := user.MapPosition()
-		location, found := currentMap.GetRandomLocation(func(location geometry.Point) bool {
+		location, found := currentMap.GetRandomLocation(rng, func(location geometry.Point) bool {
 			dist := location.ChebyshevDistanceTo(origin)
 			return currentMap.IsCurrentlyPassable(location) && dist >= distanceInterval.Min() && dist <= distanceInterval.Max()
 		})

@@ -53,7 +53,3 @@ func (d *PickUpAction) Execute(context ActionContext) []Action {
 
 	return nil
 }
-
-func (d *PickUpAction) GetAnimations() []Animation {
-	return nil
-}

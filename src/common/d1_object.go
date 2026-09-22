@@ -23,10 +23,12 @@ type D1Object struct {
 
 // The object display table -- names, light radii, which are looted, which are wall lights and what each one
 // sounds like -- lives in assets/data/objects.rec and is reached through d1.ObjectDisplays.
-func d1ObjectDisplay(kind int) d1.ObjectDisplay { return d1.ObjectDisplays[kind] }
+func (f *Factory) d1ObjectDisplay(kind int) d1.ObjectDisplay {
+	return f.Generator.D.ObjectDisplays[kind]
+}
 
 func (o *D1Object) Name() string {
-	if player := o.f.State.GetPlayer(); o.O.TrapFlag && player != nil && player.hero != nil && d1.HasClassFlag(player.hero.Class, d1.ClassTrapSense) {
+	if player := o.f.State.GetPlayer(); o.O.TrapFlag && player != nil && player.hero != nil && player.hero.Rules().HasClassFlag(player.hero.Class, d1.ClassTrapSense) {
 		return "Trapped " + o.name() // GetObjectStr: only a rogue's trap sense sees it
 	}
 	return o.name()
@@ -34,20 +36,20 @@ func (o *D1Object) Name() string {
 
 func (o *D1Object) name() string {
 	if k := o.O.Kind; k == d1.ObjSHRINEL || k == d1.ObjSHRINER {
-		return d1.ShrineNames[o.O.Var1] + " Shrine"
+		return o.f.Generator.D.ShrineNames[o.O.Var1] + " Shrine"
 	}
-	if o.O.Kind == d1.ObjSTORYBOOK && o.O.Var3 >= 0 && o.O.Var3 < len(d1.StoryBookNames) {
-		return d1.StoryBookNames[o.O.Var3]
+	if o.O.Kind == d1.ObjSTORYBOOK && o.O.Var3 >= 0 && o.O.Var3 < len(o.f.Generator.D.StoryBookNames) {
+		return o.f.Generator.D.StoryBookNames[o.O.Var3]
 	}
 	if o.O.Kind == d1.ObjBOOK2L && o.f.State.onSetLevelOf(o.f.State.GetMap(), d1.QBetrayer) {
 		return "Book of Vileness"
 	}
-	return d1ObjectDisplay(o.O.Kind).Name
+	return o.f.d1ObjectDisplay(o.O.Kind).Name
 }
 
 // IsUnlootedContainer is what auto explore's Open Containers option bumps.
 func (o *D1Object) IsUnlootedContainer() bool {
-	return o.O.Active && d1ObjectDisplay(o.O.Kind).Container
+	return o.O.Active && o.f.d1ObjectDisplay(o.O.Kind).Container
 }
 
 func (o *D1Object) broken() bool {
@@ -157,11 +159,11 @@ func (o *d1WallLight) ActorBumpedInto(*Actor, func() bool) {}
 // pre-spawned sarcophagus/barrel skeleton resolved to its monster type from the level's (still-hidden) monster
 // list, everything else as an interactive D1Object.
 func d1PlaceObject(f *Factory, m *gridmap.GridMap[*Actor, *Item, Object], lvl *d1.Level, o *d1.Object, p geometry.Point) {
-	if lvl.CellSolid(p.X, p.Y) && f.Generator.D.Objects[o.Kind].SelFlag == 0 && !d1ObjectDisplay(o.Kind).WallLight { // hangs on a wall
+	if lvl.CellSolid(p.X, p.Y) && f.Generator.D.Objects[o.Kind].SelFlag == 0 && !f.d1ObjectDisplay(o.Kind).WallLight { // hangs on a wall
 		m.AddDecal(p, defs.Icon(defs.PropIconID(f.Generator.D.Objects[o.Kind].Name)))
 		return
 	}
-	if d1ObjectDisplay(o.Kind).WallLight {
+	if f.d1ObjectDisplay(o.Kind).WallLight {
 		icon := defs.IconBrazier
 		onFloor := !lvl.CellSolid(p.X, p.Y)
 		if o.Kind != d1.ObjL1LIGHT {
@@ -237,11 +239,11 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		return
 	}
 	obj.Active = false
-	f.PlayD1Sfx(d1ObjectDisplay(obj.Kind).Sfx, o.pos)
+	f.PlayD1Sfx(f.d1ObjectDisplay(obj.Kind).Sfx, o.pos)
 	if d1TrapTargets[obj.Kind] { // Obj_Trap notices the used object on the next tick
 		defer f.springD1WallTraps(f.State.GetMap(), obj.X, obj.Y)
 	}
-	if d1ObjectDisplay(obj.Kind).Container { // looting that yields no item and no monster still says so
+	if f.d1ObjectDisplay(obj.Kind).Container { // looting that yields no item and no monster still says so
 		m := f.State.GetMap()
 		items, actors := len(m.Items()), len(m.Actors())
 		defer func() {
@@ -279,7 +281,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 	case d1.ObjGOATSHRINE, d1.ObjCAULDRON:
 		f.d1Shrine(player, gen.RandomShrine(dlvl), o.pos)
 	case d1.ObjSKELBOOK, d1.ObjBOOKSTAND:
-		if d1Rng.Intn(5) != 0 {
+		if rng.Intn(5) != 0 {
 			drop(gen.TypeItem(ilvl, d1.ITypeMisc, "IMISC_SCROLL", false))
 		} else {
 			drop(gen.TypeItem(ilvl, d1.ITypeMisc, "IMISC_BOOK", false))
@@ -289,7 +291,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 	case d1.ObjDECAP:
 		drop(gen.FloorItem(ilvl, false, hell))
 	case d1.ObjSLAINHERO: // OperateSlainHero: a class's own reward, and the hero's line about it
-		switch reward := d1.Class(player.hero.Class).SlainHero; reward {
+		switch reward := f.Generator.D.Class(player.hero.Class).SlainHero; reward {
 		case "lightning_book":
 			drop(gen.SpellBook(ilvl, d1.SplLightning))
 		case "":
@@ -299,7 +301,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		}
 		f.PlayD1HeroSound(9)
 	case d1.ObjARMORSTAND, d1.ObjWARARMOR:
-		unique := d1Rng.Intn(2) != 0
+		unique := rng.Intn(2) != 0
 		switch {
 		case dlvl <= 5:
 			drop(gen.TypeItem(ilvl, d1.ITypeLArmor, "", true))
@@ -311,7 +313,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 			drop(gen.TypeItem(ilvl, d1.ITypeHArmor, "", true))
 		}
 	case d1.ObjWEAPONRACK, d1.ObjWARWEAP:
-		t := [4]int{d1.ITypeSword, d1.ITypeAxe, d1.ITypeBow, d1.ITypeMace}[d1Rng.Intn(4)]
+		t := [4]int{d1.ITypeSword, d1.ITypeAxe, d1.ITypeBow, d1.ITypeMace}[rng.Intn(4)]
 		drop(gen.TypeItem(ilvl, t, "", dlvl > 4))
 	case d1.ObjMURKYFTN:
 		player.AddStatusEffect(StatusInfravision, d1.InfravisionTurns(2*((dlvl-1)/4+1)))
@@ -323,8 +325,8 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		msg("You pull the lever. Something rumbles in the distance.")
 		f.State.QuestsChanged(f.State.GetMap())
 	case d1.ObjTEARFTN:
-		from := d1Rng.Intn(4)
-		to := d1Rng.Intn(3)
+		from := rng.Intn(4)
+		to := rng.Intn(3)
 		if to >= from {
 			to++
 		}
@@ -392,7 +394,10 @@ func (f *Factory) SpawnRandomD1Unique(pos geometry.Point) *Actor {
 			pickable = append(pickable, i)
 		}
 	}
-	a := f.NewD1UniqueMonster(pickable[d1Rng.Intn(len(pickable))])
+	if len(pickable) == 0 { // a mod without fighting uniques
+		return nil
+	}
+	a := f.NewD1UniqueMonster(pickable[rng.Intn(len(pickable))])
 	a.d1Monster.SpawnIndex = -1 // saved in LevelSnapshot.Spawned
 	a.SetDrawPosition(cells[0].ToPointF())
 	m.AddActor(a, cells[0])
@@ -433,11 +438,15 @@ func (f *Factory) breakD1Crux(o *D1Object) {
 // d1BlastAction shows an exploding barrel's fire; the damage is queued as separate actions.
 type d1BlastAction struct {
 	BaseAction
-	animations []Animation
+	cells []geometry.Point // the fire, shown when the queue gets to it
 }
 
-func (a *d1BlastAction) Execute(ActionContext) []Action { return nil }
-func (a *d1BlastAction) GetAnimations() []Animation     { return a.animations }
+func (a *d1BlastAction) Execute(ctx ActionContext) []Action {
+	for _, p := range a.cells {
+		ctx.ActionBroker.Emit(Flash{At: p, Seconds: 0.5, Icon: defs.IconEffectFireBig})
+	}
+	return nil
+}
 
 // breakD1Barrel ports BreakBarrel: a normal barrel holds an item or a skeleton, an exploding one burns its 3×3 area
 // and sets off exploding barrels next to it.
@@ -465,7 +474,7 @@ func (f *Factory) breakD1Barrel(o *D1Object, player *Actor) {
 	for y := o.pos.Y - 1; y <= o.pos.Y+1; y++ {
 		for x := o.pos.X - 1; x <= o.pos.X+1; x++ {
 			if p := (geometry.Point{X: x, Y: y}); m.Contains(p) && m.IsTransparent(p) {
-				blast.animations = append(blast.animations, NewHitAnimation(p, 0.5, defs.IconEffectFireBig, 2))
+				blast.cells = append(blast.cells, p)
 			}
 		}
 	}
@@ -476,8 +485,8 @@ func (f *Factory) breakD1Barrel(o *D1Object, player *Actor) {
 			if a, ok := m.TryGetActorAt(p); ok && a.IsAlive() {
 				dam := 0
 				switch {
-				case a.hero != nil && d1Rng.Intn(100) < 40: // PlayerMHit with a fire missile from no monster
-					dam64 := 8<<6 + d1Rng.Intn(8<<6+1)
+				case a.hero != nil && rng.Intn(100) < 40: // PlayerMHit with a fire missile from no monster
+					dam64 := 8<<6 + rng.Intn(8<<6+1)
 					if fr := a.HeroSheet().FR; fr > 0 { // PlayerMHit: a resisted hit doesn't flinch
 						dam64 -= dam64 * fr / 100
 					} else {
@@ -486,10 +495,10 @@ func (f *Factory) breakD1Barrel(o *D1Object, player *Actor) {
 					dam = dam64 >> 6
 				case a.d1Monster != nil: // MonsterTrapHit
 					mon := a.d1Monster
-					if mon.MagicRes&d1.ImmuneFire != 0 || d1Rng.Intn(100) >= min(max(90-mon.AC, 5), 95) {
+					if mon.MagicRes&d1.ImmuneFire != 0 || rng.Intn(100) >= min(max(90-mon.AC, 5), 95) {
 						break
 					}
-					dam = d1Rng.Intn(4) + 1
+					dam = rng.Intn(4) + 1
 					if mon.MagicRes&d1.ResistFire != 0 {
 						dam >>= 2
 					}
@@ -553,7 +562,7 @@ func D1ShrineInfoText(o *D1Object) ([]string, bool) {
 	switch o.O.Kind {
 	case d1.ObjSHRINEL, d1.ObjSHRINER:
 		shrine := o.O.Var1
-		return []string{d1.ShrineNames[shrine] + " Shrine", "", d1.ShrineMessages[shrine]}, true
+		return []string{o.f.Generator.D.ShrineNames[shrine] + " Shrine", "", o.f.Generator.D.ShrineMessages[shrine]}, true
 	case d1.ObjGOATSHRINE, d1.ObjCAULDRON:
 		return []string{o.Name(), "", "Its effect is chosen at random when touched."}, true
 	}
@@ -581,7 +590,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 		for attr := d1.AttrStr; attr <= d1.AttrVit; attr++ {
 			f.d1ModifyStat(player, attr, -1)
 		}
-		f.d1ModifyStat(player, d1Rng.Intn(4), 6)
+		f.d1ModifyStat(player, rng.Intn(4), 6)
 	case 1: // Hidden
 		var durable []*Item
 		for _, it := range equipped {
@@ -591,7 +600,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 			}
 		}
 		if len(durable) > 0 {
-			d := durable[d1Rng.Intn(len(durable))].d1
+			d := durable[rng.Intn(len(durable))].d1
 			d.Durability, d.MaxDur = max(d.Durability-20, 1), max(d.MaxDur-20, 1)
 		}
 	case 2: // Gloomy
@@ -631,7 +640,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 			for _, s := range known {
 				h.SpellLevels[s] = min(h.SpellLevels[s]+1, 15)
 			}
-			s := known[d1Rng.Intn(len(known))]
+			s := known[rng.Intn(len(known))]
 			h.SpellLevels[s] = max(h.SpellLevels[s]-2, 0)
 		}
 	case 8: // Thaumaturgic
@@ -684,7 +693,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 	case 17: // Spiritual
 		inv := player.GetInventory()
 		for n := inv.maxItemStacks - len(inv.StackedItems()); n > 0; n-- {
-			st.IncrementBy(stats.Gold, 5*lt+d1Rng.Intn(10*lt))
+			st.IncrementBy(stats.Gold, 5*lt+rng.Intn(10*lt))
 		}
 	case 19: // Abandoned
 		f.d1ModifyStat(player, d1.AttrDex, 2)
@@ -704,7 +713,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 			}
 		}
 	case 26: // Oily
-		for _, a := range d1.Class(h.Class).Oily {
+		for _, a := range h.Rules().Class(h.Class).Oily {
 			f.d1ModifyStat(player, a[0], a[1])
 		}
 		f.ActionBroker.QueueForExecution(NewTrapMissileAction(pos, MisFireWall, player.MapPosition()))
@@ -741,7 +750,7 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 	case 33: // Murphy's
 		broke := false
 		for _, it := range equipped {
-			if d := it.d1; d1Rng.Intn(3) == 0 && d.Durability != d1.DurIndestructible && d.Durability != 0 {
+			if d := it.d1; rng.Intn(3) == 0 && d.Durability != d1.DurIndestructible && d.Durability != 0 {
 				d.Durability /= 2
 				broke = true
 				if d.Durability == 0 {
@@ -759,5 +768,5 @@ func (f *Factory) d1Shrine(player *Actor, shrine int, pos geometry.Point) {
 	}
 	SyncHero(player)
 	f.RefreshD1Spells(player)
-	f.Msg(d1.ShrineMessages[shrine])
+	f.Msg(f.Generator.D.ShrineMessages[shrine])
 }

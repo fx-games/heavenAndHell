@@ -44,7 +44,7 @@ func TestSaveSlots(t *testing.T) {
 	if ui.asked != 1 {
 		t.Fatalf("a new game with every slot free picked one itself instead of asking (asked %d times)", ui.asked)
 	}
-	slots := game.ListSaveSlots()
+	slots := game.ListSaveSlots(nil)
 	if len(slots) != game.MaxSaveSlots {
 		t.Fatalf("got %d slots, want %d", len(slots), game.MaxSaveSlots)
 	}
@@ -61,7 +61,7 @@ func TestSaveSlots(t *testing.T) {
 	if ui.confirmed != "" {
 		t.Fatalf("saving into an empty slot asked to confirm: %q", ui.confirmed)
 	}
-	slots = game.ListSaveSlots()
+	slots = game.ListSaveSlots(nil)
 	if !slots[0].Used || !slots[2].Used {
 		t.Fatalf("after saving to slot 3: slot1=%v slot3=%v", slots[0].Used, slots[2].Used)
 	}
@@ -73,7 +73,7 @@ func TestSaveSlots(t *testing.T) {
 	if ui.confirmed == "" {
 		t.Fatal("overwriting another save did not ask for confirmation")
 	}
-	if got := game.ListSaveSlots()[0]; !got.SavedAt.Equal(slots[0].SavedAt) || got.Name != "Aidan" {
+	if got := game.ListSaveSlots(nil)[0]; !got.SavedAt.Equal(slots[0].SavedAt) || got.Name != "Aidan" {
 		t.Fatal("slot 1 was written although the overwrite was refused")
 	}
 
@@ -91,7 +91,7 @@ func TestSaveSlots(t *testing.T) {
 	if ui.confirmed == "" {
 		t.Fatal("a new game replaced an existing save without asking")
 	}
-	if got := game.ListSaveSlots()[4]; got.Name == "Warriv" {
+	if got := game.ListSaveSlots(nil)[4]; got.Name == "Warriv" {
 		t.Fatal("the new game was started although the replacement was refused")
 	}
 }
@@ -127,7 +127,7 @@ func TestLegacySaveMigratesToSlotOne(t *testing.T) {
 	if err := os.WriteFile(game.LegacySaveFile, saved, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if slot := game.ListSaveSlots()[0]; !slot.Used || slot.Name != "Moreina" {
+	if slot := game.ListSaveSlots(nil)[0]; !slot.Used || slot.Name != "Moreina" {
 		t.Fatalf("the old save did not turn up in slot 1: %+v", slot)
 	}
 	if _, err := os.Stat(game.LegacySaveFile); err == nil {

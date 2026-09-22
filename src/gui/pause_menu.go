@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+	"log/slog"
 	"math"
 	"strings"
 
@@ -139,6 +140,6 @@ func (u *UIController) saveVolumes() {
 	ap := u.context.AudioPlayer
 	u.configuration.SoundVolume, u.configuration.MusicVolume, u.configuration.VoiceVolume = ap.GetSoundVolume(), ap.GetMusicVolume(), ap.GetVoiceVolume()
 	if err := u.configuration.SaveVolumes(common.ConfigFile); err != nil {
-		println("ERR: could not save the volume settings: " + err.Error())
+		slog.Error("could not save the volume settings", "err", err)
 	}
 }

@@ -2,23 +2,17 @@ package common
 
 import (
 	"rpg/src/geometry"
-	"rpg/src/util"
 )
 
 type MoveAction struct {
 	BaseAction
-	actor                     *Actor
-	targetPos                 geometry.Point
-	originPos                 geometry.Point
-	isPlayer                  bool
-	animationDelay            float64
-	isMovementVisibleToPlayer bool
-	animationDisabled         bool
-	Step                      bool // a walk of the hero's own: D1 plays a footstep (PM_DoWalk's PS_WALK1)
-}
-
-func (d *MoveAction) IsMovementVisibleToPlayer() bool {
-	return d.isMovementVisibleToPlayer
+	actor             *Actor
+	targetPos         geometry.Point
+	originPos         geometry.Point
+	isPlayer          bool
+	animationDelay    float64
+	animationDisabled bool
+	Step              bool // a walk of the hero's own: D1 plays a footstep (PM_DoWalk's PS_WALK1)
 }
 
 func NewMoveAction(source Cause, actor *Actor, targetPos geometry.Point, isPlayer bool) *MoveAction {
@@ -57,36 +51,9 @@ func (d *MoveAction) Execute(context ActionContext) []Action {
 		playD1SfxAt(context, "PS_WALK1", d.targetPos)
 	}
 
-	d.isMovementVisibleToPlayer = false
-	if d.isPlayer {
-		d.isMovementVisibleToPlayer = true
-	} else {
-		player := state.GetPlayer()
-		d.isMovementVisibleToPlayer = player.CanSee(d.GetOldPos()) || player.CanSee(d.GetNewPos())
-	}
-	if d.isNotAnimated() {
-		actor.SetDrawPosition(d.targetPos.ToPointF())
-	}
-	//println(fmt.Sprintf("Actor %s moved to %s", actor.Action(), d.targetPos))
+	context.ActionBroker.Emit(Moved{Actor: actor, From: d.originPos, To: d.targetPos, Delay: d.animationDelay,
+		ByPlayer: d.isPlayer, Quiet: d.animationDisabled})
 	return nil
-}
-
-func (d *MoveAction) GetAnimations() []Animation {
-	if d.isNotAnimated() {
-		return nil
-	}
-	ticksNeeded := util.SecondsToTicks(d.animationDelay)
-	return OneAnimation(&MovementAnimation{
-		actor:       d.actor,
-		path:        []geometry.Point{d.originPos, d.targetPos},
-		ticksNeeded: ticksNeeded,
-		isForPlayer: d.isPlayer,
-	})
-	//return &DummyAnimation{time: 5, cancelRunningAnimations: true}
-}
-
-func (d *MoveAction) isNotAnimated() bool {
-	return !d.isMovementVisibleToPlayer || d.animationDisabled
 }
 
 func (d *MoveAction) GetActor() *Actor {

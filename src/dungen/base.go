@@ -28,7 +28,6 @@ func (m *DungeonMap) GetJPSPath(start geometry.Point, end geometry.Point) []geom
 	if !m.IsWalkable(end) || !m.IsWalkable(start) {
 		return []geometry.Point{}
 	}
-	//println(fmt.Sprintf("JPS from %v to %v", start, end))
 	return m.pathfinder.JPSPath([]geometry.Point{}, start, end, m.IsWalkable, false)
 }
 func (m *DungeonMap) AddRoomAndSetTiles(room *DungeonRoom) {
@@ -122,7 +121,6 @@ func (m *DungeonMap) GetPotentialStairPositions() []geometry.Point {
 				continue
 			}
 			result = append(result, matchPos)
-			//println(fmt.Sprintf("Found potential stair position at %v", matchPos))
 			//m.PrintWithHighlight(matchPos)
 		}
 	}

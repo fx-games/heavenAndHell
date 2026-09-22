@@ -1,6 +1,7 @@
 package game
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"image/png"
@@ -87,16 +88,16 @@ type saveGame struct {
 // counts as empty, so a corrupt file is offered for overwriting rather than blocking the screen.
 // ponytail: parses each slot's whole JSON for its header; write the metadata to its own small file if listing
 // five saves ever becomes noticeable.
-func ListSaveSlots() []common.SaveSlot {
+func ListSaveSlots(classNames []string) []common.SaveSlot {
 	migrateLegacySave()
 	slots := make([]common.SaveSlot, 0, MaxSaveSlots)
 	for slot := 1; slot <= MaxSaveSlots; slot++ {
-		slots = append(slots, readSaveSlot(slot))
+		slots = append(slots, readSaveSlot(slot, classNames))
 	}
 	return slots
 }
 
-func readSaveSlot(slot int) common.SaveSlot {
+func readSaveSlot(slot int, classNames []string) common.SaveSlot {
 	info := common.SaveSlot{Slot: slot}
 	data, err := os.ReadFile(slotPath(slot))
 	if err != nil {
@@ -108,8 +109,8 @@ func readSaveSlot(slot int) common.SaveSlot {
 	}
 	info.Used, info.Name, info.Level = true, sg.Name, sg.Hero.Level
 	info.Deepest, info.Permadeath, info.SavedAt = sg.Deepest, sg.Permadeath, sg.SavedAt
-	if sg.Hero.Class >= 0 && sg.Hero.Class < len(d1.ClassNames) {
-		info.Class = d1.ClassNames[sg.Hero.Class]
+	if sg.Hero.Class >= 0 && sg.Hero.Class < len(classNames) {
+		info.Class = classNames[sg.Hero.Class]
 	}
 	if _, err := os.Stat(slotThumbPath(slot)); err == nil {
 		info.ThumbPath = slotThumbPath(slot)
@@ -171,7 +172,7 @@ func HasSave() bool { return LatestSaveSlot() > 0 }
 func LatestSaveSlot() int {
 	latest := 0
 	var newest time.Time
-	for _, s := range ListSaveSlots() {
+	for _, s := range ListSaveSlots(nil) {
 		if s.Used && (latest == 0 || s.SavedAt.After(newest)) {
 			latest, newest = s.Slot, s.SavedAt
 		}
@@ -181,7 +182,7 @@ func LatestSaveSlot() int {
 
 // FirstFreeSaveSlot is the lowest empty slot, or 0 when every slot is taken.
 func FirstFreeSaveSlot() int {
-	for _, s := range ListSaveSlots() {
+	for _, s := range ListSaveSlots(nil) {
 		if !s.Used {
 			return s.Slot
 		}
@@ -280,13 +281,7 @@ func (g *GameInstance) writeSlot(slot int) {
 		g.ErrLog(fmt.Sprintf("saving failed: %v", err))
 		return
 	}
-	path := slotPath(slot)
-	tmp := path + ".tmp" // write then rename, so a crash never leaves a half-written save
-	if err := os.WriteFile(tmp, data, 0o644); err != nil {
-		g.ErrLog(fmt.Sprintf("saving failed: %v", err))
-		return
-	}
-	if err := os.Rename(tmp, path); err != nil {
+	if err := util.WriteFileAtomic(slotPath(slot), data); err != nil {
 		g.ErrLog(fmt.Sprintf("saving failed: %v", err))
 		return
 	}
@@ -302,17 +297,10 @@ func (g *GameInstance) writeSlotThumbnail(slot int) {
 		os.Remove(slotThumbPath(slot))
 		return
 	}
-	file, err := os.Create(slotThumbPath(slot) + ".tmp")
-	if err != nil {
-		return
+	var buf bytes.Buffer
+	if png.Encode(&buf, shot) == nil {
+		_ = util.WriteFileAtomic(slotThumbPath(slot), buf.Bytes())
 	}
-	if err := png.Encode(file, shot); err != nil {
-		file.Close()
-		_ = os.Remove(file.Name())
-		return
-	}
-	file.Close()
-	_ = os.Rename(file.Name(), slotThumbPath(slot))
 }
 
 func (g *GameInstance) classByName(internalName string) defs.LoadoutDefinition {
@@ -361,6 +349,7 @@ func (g *GameInstance) LoadSlot(slot int) error {
 		player.SetName(sg.Name)
 	}
 	*player.Hero() = sg.Hero
+	g.d1Data.Adopt(player.Hero()) // the rules pointer does not travel through JSON
 	copy(g.factory.D1().UniqueDropped, sg.UniqueDropped)
 	for k, v := range sg.Flags {
 		g.state.GetFlags().SetToValue(k, v)
@@ -430,7 +419,7 @@ func (g *GameInstance) LoadSlot(slot int) error {
 // confirmed first, so a new hero never silently writes over an old one.
 func (g *GameInstance) NewGame(class defs.LoadoutDefinition, permadeath bool, name string) {
 	back := func() { g.uiController.OpenUncancelableMenu(g.StartMenuItems(false)) }
-	g.uiController.OpenSaveSlots("New game - pick a save slot", ListSaveSlots(),
+	g.uiController.OpenSaveSlots("New game - pick a save slot", ListSaveSlots(g.d1Data.ClassNames),
 		// ownSlot 0: a new hero is nobody's running game, so replacing even the slot that is open right now asks
 		func(slot int) {
 			g.confirmOverwrite(slot, 0, func() { g.startNewGame(class, permadeath, name, slot) })
@@ -455,7 +444,7 @@ func (g *GameInstance) startNewGame(class defs.LoadoutDefinition, permadeath boo
 // confirmOverwrite asks before a save is written over, and never writes on a "no". An empty slot and ownSlot -
 // the slot the game asking is already autosaving into - need no question, since neither loses a hero.
 func (g *GameInstance) confirmOverwrite(slot, ownSlot int, write func()) {
-	info := readSaveSlot(slot)
+	info := readSaveSlot(slot, g.d1Data.ClassNames)
 	if !info.Used || slot == ownSlot {
 		write()
 		return
@@ -465,7 +454,7 @@ func (g *GameInstance) confirmOverwrite(slot, ownSlot int, write func()) {
 
 // OpenSaveMenu is the pause menu's "Save game": pick a slot, confirm if it holds someone else's game.
 func (g *GameInstance) OpenSaveMenu(back func()) {
-	g.uiController.OpenSaveSlots("Save game", ListSaveSlots(), func(slot int) {
+	g.uiController.OpenSaveSlots("Save game", ListSaveSlots(g.d1Data.ClassNames), func(slot int) {
 		g.confirmOverwrite(slot, g.slot, func() {
 			g.SaveToSlot(slot)
 			g.PlayerMessage(fmt.Sprintf("Game saved to slot %d.", slot))
@@ -475,8 +464,8 @@ func (g *GameInstance) OpenSaveMenu(back func()) {
 
 // OpenLoadMenu is "Load game" in the start and pause menus. An empty slot is simply not loadable.
 func (g *GameInstance) OpenLoadMenu(back func()) {
-	g.uiController.OpenSaveSlots("Load game", ListSaveSlots(), func(slot int) {
-		if !readSaveSlot(slot).Used {
+	g.uiController.OpenSaveSlots("Load game", ListSaveSlots(g.d1Data.ClassNames), func(slot int) {
+		if !readSaveSlot(slot, nil).Used {
 			g.OpenLoadMenu(back) // an empty slot holds nothing to load: put the screen back up
 			return
 		}

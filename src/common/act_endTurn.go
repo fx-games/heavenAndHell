@@ -24,7 +24,3 @@ func (d *EndTurnAction) Execute(context ActionContext) []Action {
 
 	return nil
 }
-
-func (d *EndTurnAction) GetAnimations() []Animation {
-	return nil
-}

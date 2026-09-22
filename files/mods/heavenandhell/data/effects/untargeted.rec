@@ -84,7 +84,7 @@ internal_name: buff_armor
 icon: 116
 dlvl: 1
 name: Bless
-default_args: 4-6 | 5
+default_args: 5
 allowed_usage: wand | shrine
 
 internal_name: enchant_weapon

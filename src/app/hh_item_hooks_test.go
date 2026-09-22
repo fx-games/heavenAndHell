@@ -17,7 +17,7 @@ import (
 func TestHeavenAndHellItemHooksRollAndFire(t *testing.T) {
 	g := newHeavenAndHellGame(t, NewDummyUI())
 	g.SeedRandom(1) // the rolls and the blows below are chance: pinned, so a failure is one to replay
-	common.SeedD1Rng(1)
+	common.SeedRandom(1)
 	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
 	f, s := g.GetFactory(), g.GetWorldState()
 	player := s.GetPlayer()

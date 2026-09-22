@@ -2,6 +2,7 @@ package dungen
 
 import (
 	"cmp"
+	"log/slog"
 	"math/rand"
 	"rpg/src/geometry"
 	"rpg/src/util"
@@ -138,7 +139,7 @@ func (c *MegaDungeonGenerator) connectRegions(emptyMap *DungeonMap) {
 
 		connectingRegion, connectorPos := c.chooseRandom(connectorsToOther)
 		if connectingRegion == nil {
-			println("ERR: no connecting region")
+			slog.Error("no connecting region")
 			return
 		}
 		c.requiredConnections = append(c.requiredConnections, connectorPos)

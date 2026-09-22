@@ -18,12 +18,12 @@ func TestSavesBelongToTheirMod(t *testing.T) {
 	d1Game := newModGame(t, "d1", NewDummyUI())
 	d1Game.NewGame(d1Game.GetGameData().ClassDefinitions[0], false, "")
 	d1Game.SaveToSlot(1)
-	if !game.ListSaveSlots()[0].Used {
+	if !game.ListSaveSlots(nil)[0].Used {
 		t.Fatal("the D1 save is not listed under D1")
 	}
 
 	hh := newModGame(t, "heavenandhell", NewDummyUI())
-	for _, slot := range game.ListSaveSlots() {
+	for _, slot := range game.ListSaveSlots(nil) {
 		if slot.Used {
 			t.Errorf("H&H lists slot %d, a D1 game", slot.Slot)
 		}
@@ -43,7 +43,7 @@ func TestSavesBelongToTheirMod(t *testing.T) {
 	}
 
 	files.SelectMod("d1")
-	if !game.ListSaveSlots()[0].Used {
+	if !game.ListSaveSlots(nil)[0].Used {
 		t.Error("back on D1, its save is gone")
 	}
 }

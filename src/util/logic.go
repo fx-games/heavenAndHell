@@ -1,6 +1,7 @@
 package util
 
 import (
+	"log/slog"
 	"regexp"
 	"strconv"
 	"strings"
@@ -25,6 +26,7 @@ func (a Arguments) GetInt(index int) int {
 	}
 	result, err := strconv.Atoi(a[index])
 	if err != nil {
+		slog.Warn("mod data: argument is not an integer, using 0", "value", a[index])
 		return 0
 	}
 	return result
@@ -40,6 +42,7 @@ func (a Arguments) GetIntOrDefault(index int, defaultValue int) int {
 	}
 	result, err := strconv.Atoi(a[index])
 	if err != nil {
+		slog.Warn("mod data: argument is not an integer, using the default", "value", a[index])
 		return defaultValue
 	}
 	return result

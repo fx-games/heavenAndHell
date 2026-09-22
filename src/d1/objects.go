@@ -49,20 +49,6 @@ type Object struct {
 	Active       bool     // game state (not part of D1's placement): true until opened, broken or pulled
 }
 
-// The shrine table (names, messages, level caps and availability) and the story book names live in
-// assets/data/objects.rec and are filled by Load.
-var (
-	// ShrineNames are D1's shrinestrs.
-	ShrineNames []string
-	// ShrineMessages are the MsgStrings each shrine shows, with a note on what the shrine does.
-	ShrineMessages []string
-	// StoryBookNames are D1's StoryBookName, indexed by a story book's Var3.
-	StoryBookNames []string
-
-	shrineMax   []int // deepest dungeon level a shrine may be generated on
-	shrineAvail []int // 2 = multiplayer only
-)
-
 // shrineCounts are the shrine tables the engine has effects for: D1 1.09's 26 (NUM_SHRINETYPE) and Hellfire's 34,
 // which appends eight. The generator rolls an index into the mod's table, so any other length would quietly change
 // which shrines appear.
@@ -78,9 +64,6 @@ type ObjectDisplay struct {
 	Sfx       string // the sound it makes as it is used
 }
 
-// ObjectDisplays is keyed by object kind (Obj*); filled by Load from the object section of objects.rec.
-var ObjectDisplays map[int]ObjectDisplay
-
 func loadObjectTables(fsys fs.FS, d *Data) error {
 	recs, err := readRecMulti(fsys, "objects.rec")
 	// A mod that does not have this Diablo feature ships no file for it, and an absent feature is not an
@@ -95,7 +78,7 @@ func loadObjectTables(fsys fs.FS, d *Data) error {
 	for i, o := range d.Objects {
 		kindByName[o.Name] = i
 	}
-	ObjectDisplays = make(map[int]ObjectDisplay, len(recs["object"]))
+	d.ObjectDisplays = make(map[int]ObjectDisplay, len(recs["object"]))
 	for _, r := range recs["object"] {
 		m := r.ToMap("")
 		id := m.GetStringOrDefault("id", "")
@@ -103,7 +86,7 @@ func loadObjectTables(fsys fs.FS, d *Data) error {
 		if !ok {
 			return fmt.Errorf("objects.rec: unknown object %q", id)
 		}
-		ObjectDisplays[kind] = ObjectDisplay{
+		d.ObjectDisplays[kind] = ObjectDisplay{
 			Name:      m.GetStringOrDefault("name", ""),
 			Light:     m.GetIntOrDefault("light", 0),
 			Container: m.GetBoolOrFalse("container"),
@@ -111,21 +94,21 @@ func loadObjectTables(fsys fs.FS, d *Data) error {
 			Sfx:       m.GetStringOrDefault("sfx", ""),
 		}
 	}
-	ShrineNames, ShrineMessages = nil, nil
-	shrineMax, shrineAvail = nil, nil
+	d.ShrineNames, d.ShrineMessages = nil, nil
+	d.shrineMax, d.shrineAvail = nil, nil
 	for _, r := range recs["shrine"] {
 		m := r.ToMap("")
-		ShrineNames = append(ShrineNames, m.GetStringOrDefault("name", ""))
-		ShrineMessages = append(ShrineMessages, m.GetStringOrDefault("message", ""))
-		shrineMax = append(shrineMax, m.GetIntOrDefault("max_lvl", 0))
-		shrineAvail = append(shrineAvail, m.GetIntOrDefault("avail", 0))
+		d.ShrineNames = append(d.ShrineNames, m.GetStringOrDefault("name", ""))
+		d.ShrineMessages = append(d.ShrineMessages, m.GetStringOrDefault("message", ""))
+		d.shrineMax = append(d.shrineMax, m.GetIntOrDefault("max_lvl", 0))
+		d.shrineAvail = append(d.shrineAvail, m.GetIntOrDefault("avail", 0))
 	}
-	if !slices.Contains(shrineCounts, len(ShrineNames)) {
-		return fmt.Errorf("objects.rec: %d shrines, want one of %v", len(ShrineNames), shrineCounts)
+	if !slices.Contains(shrineCounts, len(d.ShrineNames)) {
+		return fmt.Errorf("objects.rec: %d shrines, want one of %v", len(d.ShrineNames), shrineCounts)
 	}
-	StoryBookNames = nil
+	d.StoryBookNames = nil
 	for _, r := range recs["storybook"] {
-		StoryBookNames = append(StoryBookNames, r.ToMap("").GetStringOrDefault("name", ""))
+		d.StoryBookNames = append(d.StoryBookNames, r.ToMap("").GetStringOrDefault("name", ""))
 	}
 	return nil
 }
@@ -773,8 +756,8 @@ func (g *gen) addObject(kind, ox, oy int) {
 	case ObjSHRINEL, ObjSHRINER:
 		o.PreFlag = true
 		for {
-			v := g.rnd(len(ShrineNames))
-			if g.currlevel <= shrineMax[v] && shrineAvail[v] != 2 {
+			v := g.rnd(len(g.data.ShrineNames))
+			if g.currlevel <= g.data.shrineMax[v] && g.data.shrineAvail[v] != 2 {
 				o.Var1 = v
 				break
 			}

@@ -144,7 +144,7 @@ var spellIDByName = map[string]int{
 var resistKindByName = map[string]int{"none": ResistNone, "fire": ResistKindFire,
 	"lightning": ResistKindLightning, "magic": ResistKindMagic}
 
-func loadSpellTables(fsys fs.FS) error {
+func loadSpellTables(fsys fs.FS, d *Data) error {
 	recs, err := readRecMulti(fsys, "spells.rec")
 	// A mod that does not have this Diablo feature ships no file for it, and an absent feature is not an
 	// error: what the table would have filled stays empty.
@@ -197,7 +197,7 @@ func loadSpellTables(fsys fs.FS) error {
 	if len(spellNames) > NumSpells {
 		return fmt.Errorf("spells.rec: %d spell slots, at most %d", len(spellNames), NumSpells)
 	}
-	RuneTraps = map[string]RuneTrap{}
+	d.RuneTraps = map[string]RuneTrap{}
 	for _, r := range recs["rune"] {
 		m := r.ToMap("")
 		name := m.GetStringOrDefault("spell", "")
@@ -205,7 +205,7 @@ func loadSpellTables(fsys fs.FS) error {
 		if !ok {
 			return fmt.Errorf("spells.rec: rune: unknown spell %q", name)
 		}
-		RuneTraps[m.GetStringOrDefault("id", "")] = RuneTrap{Spell: spell, Effect: m.GetStringOrDefault("effect", "")}
+		d.RuneTraps[m.GetStringOrDefault("id", "")] = RuneTrap{Spell: spell, Effect: m.GetStringOrDefault("effect", "")}
 	}
 	return nil
 }
@@ -216,13 +216,6 @@ type RuneTrap struct {
 	Spell  int
 	Effect string
 }
-
-// RuneTraps is filled by Load from the rune section of spells.rec.
-var RuneTraps map[string]RuneTrap
-
-// SpellFrames: casting animation length per class (each class' animations.tsv castingFrames). Derived from the
-// class table by Load, not at init: classAttr is empty until hero.rec has been read.
-var SpellFrames []int
 
 // SpellLevel ports GetSpellLevel.
 func (h *Hero) SpellLevel(s Sheet, spell int) int {
@@ -244,7 +237,7 @@ func (d *Data) ManaCost(h *Hero, s Sheet, spell int) int {
 	if spell == SplHeal {
 		ma = (sd.Mana + 2*h.Level - adj) << 6
 	}
-	ma = ma * classAttr[h.Class].ManaCost >> 6
+	ma = ma * d.classAttr[h.Class].ManaCost >> 6
 	if sd.MinMana > ma>>6 {
 		ma = sd.MinMana << 6
 	}
@@ -255,7 +248,7 @@ func (d *Data) ManaCost(h *Hero, s Sheet, spell int) int {
 // MI_Arrow and MI_LArrow ever advance _midist.
 func (h *Hero) SpellHitChance(s Sheet, mlvl int) int {
 	hper := s.Mag + 50 - mlvl<<1
-	hper += Class(h.Class).SpellToHit
+	hper += h.d.Class(h.Class).SpellToHit
 	return clamp(hper, 5, 95)
 }
 
@@ -387,14 +380,14 @@ func ResourceAmount64(rng *rand.Rand, base, perClvl, perSlvl, clvl, slvl, boost 
 
 // HealAmount64 ports AddHeal: the shared curve with Healing's own class multipliers. It stays because the
 // item tooltips and HealRange64 quote a healing staff's range without casting anything.
-func HealAmount64(rng *rand.Rand, class, clvl, slvl int) int {
-	return ResourceAmount64(rng, 10, 4, 6, clvl, slvl, Class(class).HealBoost)
+func (d *Data) HealAmount64(rng *rand.Rand, class, clvl, slvl int) int {
+	return ResourceAmount64(rng, 10, 4, 6, clvl, slvl, d.Class(class).HealBoost)
 }
 
 // HealRange64 is HealAmount64's lowest and highest roll.
-func HealRange64(class, clvl, slvl int) (int, int) {
+func (d *Data) HealRange64(class, clvl, slvl int) (int, int) {
 	lo, hi := (1+clvl+slvl)<<6, (10+4*clvl+6*slvl)<<6
-	switch Class(class).HealBoost {
+	switch d.Class(class).HealBoost {
 	case 2:
 		return lo * 2, hi * 2
 	case 1:

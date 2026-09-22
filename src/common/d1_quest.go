@@ -7,7 +7,6 @@ import (
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
 	"rpg/src/stats"
-	"rpg/src/util"
 	"strings"
 )
 
@@ -171,7 +170,7 @@ func d1ClassText(s *State, id string) string {
 	if !strings.HasSuffix(id, "BONER") && !strings.HasSuffix(id, "BLOODY") && !strings.HasSuffix(id, "BLINDING") && !strings.HasSuffix(id, "BLOODWAR") {
 		return id
 	}
-	return "TEXT_" + d1.Class(s.GetPlayer().Hero().Class).TextPrefix + strings.TrimPrefix(id, "TEXT_")
+	return "TEXT_" + s.factory.Generator.D.Class(s.GetPlayer().Hero().Class).TextPrefix + strings.TrimPrefix(id, "TEXT_")
 }
 
 // say ports InitQTextMsg: a quest text in a text window, and its speech.
@@ -179,8 +178,8 @@ func (f *Factory) say(speaker, id string) {
 	id = d1ClassText(f.State, id)
 	f.playD1Sound(f.D1().D.TextSfx[id])
 	text := f.State.d1Text(id)
-	if ui := f.UI(); ui != nil && text != "" {
-		ui.OpenTextWindow(util.ToLabelText(append([]string{speaker, ""}, strings.Split(text, "\n\n")...)))
+	if f.Show != nil && text != "" {
+		f.Show(ShowText{append([]string{speaker, ""}, strings.Split(text, "\n\n")...)})
 	}
 }
 
@@ -485,7 +484,7 @@ func randomQuestSpot(m *gridmap.GridMap[*Actor, *Item, Object], keep func(geomet
 	if len(cells) == 0 {
 		return geometry.Point{}, false
 	}
-	return cells[d1Rng.Intn(len(cells))], true
+	return cells[rng.Intn(len(cells))], true
 }
 
 // d1QuestKill ports Poisoned Water's check of CheckQuests -- the set level is clean once its last monster dies,
@@ -524,8 +523,8 @@ func mapClearedBy(m *gridmap.GridMap[*Actor, *Item, Object], mon *D1Monster) boo
 // endTextWindow is the end_text(text) outcome: the mod's game is won, and texts.rec's text says so.
 func (f *Factory) endTextWindow(id string) {
 	PlayUICue("you_win")
-	if ui := f.UI(); ui != nil {
-		ui.OpenTextWindow(util.ToLabelText(strings.Split(f.State.d1Text(id), "\n")))
+	if f.Show != nil {
+		f.Show(ShowText{strings.Split(f.State.d1Text(id), "\n")})
 	}
 }
 

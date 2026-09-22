@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"fmt"
 	"log"
+	"log/slog"
 	"math"
 	"math/rand"
 	"os"
@@ -19,7 +20,6 @@ import (
 	"rpg/src/stats"
 	"rpg/src/util"
 	"strings"
-	"time"
 
 	"github.com/flopp/go-findfont"
 )
@@ -162,29 +162,25 @@ func (g *GameInstance) GetAudio() *audio.Player {
 	return g.audioPlayer
 }
 
-// SeedRandom replaces the instance's random source, so a run that starts new games picks the same world seeds
+// SeedRandom pins the game's random source, so a run that starts new games picks the same world seeds
 // every time. Only reproducible runs use it.
-func (g *GameInstance) SeedRandom(seed int64) { g.randomSource = rand.New(rand.NewSource(seed)) }
+func (g *GameInstance) SeedRandom(seed int64) { common.SeedRandom(seed) }
 
 func NewGameInstance(startInfo common.StartInfo, uiController common.UserInterface) *GameInstance {
 	g := &GameInstance{
 		startInfo:    startInfo,
 		uiController: uiController,
-		randomSource: rand.New(rand.NewSource(time.Now().UnixNano())),
+		randomSource: common.Random(),
 		audioPlayer:  audio.NewAudioPlayer(startInfo.FileSystem, audio.SampleRate44100),
 	}
-	println("GameInstance created..")
-	println("Random source loaded..")
 	cfg := startInfo.UserConfiguration
 	common.UICues = g.audioPlayer
 	g.audioPlayer.SetSoundVolume(cfg.SoundVolume)
 	g.audioPlayer.SetMusicVolume(cfg.MusicVolume)
 	g.audioPlayer.SetVoiceVolume(cfg.VoiceVolume)
-	println("Audio player loaded..")
 	g.dataDefinitions = defs.LoadGameData(func(err string) {
-		println(err)
+		slog.Warn("game data", "err", err)
 	})
-	println("Data definitions loaded..")
 	d1Data, err := d1.Load(files.GetFileSystem())
 	if err != nil {
 		panic(err)
@@ -217,6 +213,7 @@ func (g *GameInstance) getActionContext() common.ActionContext {
 	return common.ActionContext{
 		GameState:     g.GetWorldState(),
 		UserInterface: g.GetUserInterface,
+		Show:          func(r common.UIRequest) { show(g.GetUserInterface(), r) },
 		AudioPlayer:   g.audioPlayer,
 		Data:          g.dataDefinitions,
 		Msg:           g.PlayerMessage,
@@ -251,7 +248,6 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 	ldtkProject, _ := ldtk.Open(ldtkFile)
 
 	timeKeeper := common.NewTimeKeeper(g.hasEnergyForAction)
-	println("Timekeeper created..")
 
 	g.state = common.NewState(ldtkProject)
 	g.state.SetLighting(common.Lighting())
@@ -276,6 +272,7 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 		RandomSource:   g.randomSource,
 		State:          g.GetWorldState(),
 		UI:             g.GetUserInterface,
+		Show:           func(r common.UIRequest) { show(g.factory.UI(), r) }, // f.UI, which a test may swap
 		GetTimeKeeper:  g.state.GetTimeKeeper,
 		Msg:            g.PlayerMessage,
 		QueueAfterTurn: g.queueAfterTurn,
@@ -431,7 +428,7 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	// animation lengths - are content, and they live in the mod's hero.rec. Building a hero without them would
 	// give a character sheet of zeroes that looks like a game until you played it, which is exactly the class of
 	// bug this split keeps producing. Stop here instead, naming the file.
-	if !d1.HeroTablesLoaded() {
+	if !g.d1Data.HeroTablesLoaded() {
 		log.Fatalf("mod %q has no hero: expected files/mods/%s/data/hero.rec with this game's per-class numbers",
 			files.ActiveMod(), files.ActiveMod())
 	}
@@ -442,7 +439,7 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	player.SetName("Player")
 	g.state.SetPlayer(player)
 
-	hero := d1.NewHero(g.classIndex(playerStartDefinition))
+	hero := g.d1Data.NewHero(g.classIndex(playerStartDefinition))
 	player.SetHero(hero)
 	gen := g.factory.D1()
 	idxs, pack := startingItems(playerStartDefinition, gen.D.ItemIdx)
@@ -896,7 +893,7 @@ func startingItems(def defs.LoadoutDefinition, byName map[string]int) (idx []int
 		name, where, _ := strings.Cut(entry, " ")
 		i, ok := byName[name]
 		if !ok {
-			println("class " + def.InternalName + " starts with " + name + ", which this mod's items.rec does not have")
+			slog.Warn("class starts with an item the mod's items.rec does not have", "class", def.InternalName, "item", name)
 			continue
 		}
 		idx, pack = append(idx, i), append(pack, strings.TrimSpace(where) == "pack")

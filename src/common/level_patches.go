@@ -165,7 +165,7 @@ func Arrive(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
 		s.factory.fireQuestTriggers(EventEnterLevel, m.GetName(), "")
 		return
 	}
-	clear(d1GossipSeeds) // the town's towners are rolled anew on the way back
+	clear(s.gossipSeeds) // the town's towners are rolled anew on the way back
 	s.factory.fireQuestTriggers(EventEnterLevel, m.GetName(), "")
 	s.QuestsChanged(m)
 }

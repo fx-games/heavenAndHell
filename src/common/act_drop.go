@@ -42,10 +42,6 @@ func (d *DropAction) Execute(context ActionContext) []Action {
 	return nil
 }
 
-func (d *DropAction) GetAnimations() []Animation {
-	return nil
-}
-
 func (d *DropAction) GetActor() *Actor {
 	return d.actor
 }

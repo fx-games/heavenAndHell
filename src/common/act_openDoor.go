@@ -1,6 +1,7 @@
 package common
 
 import (
+	"log/slog"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
 )
@@ -31,12 +32,12 @@ func NewOpenDoorAction(source Cause, actor *Actor, doorPosition geometry.Point) 
 func (d *OpenDoorAction) Execute(context ActionContext) []Action {
 	objectAt, exists := context.GameState.GetMap().TryGetObjectAt(d.doorPos)
 	if !exists {
-		println("ERR: no object at door position")
+		slog.Error("no object at door position")
 		return []Action{}
 	}
 	door, isDoor := objectAt.(*Door)
 	if !isDoor {
-		println("ERR: object at door position is not a door")
+		slog.Error("object at door position is not a door")
 		return []Action{}
 	}
 	d.door = door
@@ -53,10 +54,6 @@ func (d *OpenDoorAction) Execute(context ActionContext) []Action {
 	return actions
 }
 
-func (d *OpenDoorAction) GetAnimations() []Animation {
-	return nil
-}
-
 // CloseDoorAction shuts an open door (OperateL1Door and kin on an open door). CanCloseDoorAt says when it may.
 type CloseDoorAction struct {
 	BaseAction
@@ -68,8 +65,7 @@ func NewCloseDoorAction(source Cause, actor *Actor, doorPosition geometry.Point)
 	return &CloseDoorAction{BaseAction: BaseAction{cause: source, name: ActionNameOpenDoor}, actor: actor, doorPos: doorPosition}
 }
 
-func (d *CloseDoorAction) GetDelayInAut() int         { return 10 }
-func (d *CloseDoorAction) GetAnimations() []Animation { return nil }
+func (d *CloseDoorAction) GetDelayInAut() int { return 10 }
 func (d *CloseDoorAction) Execute(context ActionContext) []Action {
 	o, _ := context.GameState.GetMap().TryGetObjectAt(d.doorPos)
 	door, ok := o.(*Door)

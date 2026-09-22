@@ -19,7 +19,6 @@ func (u *UIController) Update() error {
 	u.worldTicks++
 	if u.ticksUntilTooltipAppears > 0 {
 		u.ticksUntilTooltipAppears--
-		//println("decrementing tooltip ticks", u.ticksUntilTooltipAppears)
 	}
 	state := u.context.GameState()
 	player := state.GetPlayer()

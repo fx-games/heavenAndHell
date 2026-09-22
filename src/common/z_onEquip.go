@@ -94,7 +94,7 @@ func (d OnEquipHook) After(action Action, context ActionContext) []Action {
 		}
 	}
 
-	context.UserInterface().ShowFullStats() // problem, this is a modal in the console UI..
+	context.Show(ShowStats{}) // problem, this is a modal in the console UI..
 
 	if item.IsModifyingLight() {
 		return OneAction(NewUpdateFoVAction(action.Cause(), actor))

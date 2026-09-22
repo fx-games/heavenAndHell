@@ -26,14 +26,14 @@ func TestD1SfxHaveSoundEvents(t *testing.T) {
 	for _, s := range d1MissileSfx {
 		ids = append(ids, s[:]...)
 	}
-	for _, d := range d1.ObjectDisplays {
+	for _, d := range testD1.ObjectDisplays {
 		ids = append(ids, d.Sfx)
 	}
 	for _, kind := range []int{d1.ObjBARREL, d1.ObjBARRELEX} {
 		ids = append(ids, d1BarrelSfx(kind))
 	}
 	for curs := 0; curs < 200; curs++ {
-		drop, inv := d1.ItemSnds(curs)
+		drop, inv := testD1.ItemSnds(curs)
 		ids = append(ids, drop, inv)
 	}
 	for _, v := range []string{"WARR", "ROGUE", "MAGE"} { // the D1 mod's classes; the Monk's voice is Hellfire's
@@ -56,10 +56,10 @@ func TestD1SpeechHaveVoiceEvents(t *testing.T) {
 	}
 	defer f.Close()
 	b, _ := io.ReadAll(f)
-	if len(d1.SfxFiles) == 0 {
-		t.Fatal("d1.SfxFiles is empty") // TestMain loads it; an empty map would check nothing
+	if len(testD1.SfxFiles) == 0 {
+		t.Fatal("SfxFiles is empty") // TestMain loads it; an empty map would check nothing
 	}
-	for id := range d1.SfxFiles {
+	for id := range testD1.SfxFiles {
 		if !strings.Contains(string(b), "internal_name: "+id+"\n") {
 			t.Errorf("voices.rec has no %s", id)
 		}

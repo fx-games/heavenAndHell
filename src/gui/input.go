@@ -296,12 +296,6 @@ func (u *UIController) handleMouseInput() {
 	u.mousePosInPixels.Y = mousePosInPixelsY
 
 	newMapPos := u.mapRenderer.GetMapCellAtScreenPos(u.mousePosInPixels)
-	/*
-	   if newMapPos != u.mousePosOnMap {
-	       println(fmt.Sprintf("Mouse pos: %d, %d", newMapPos.X, newMapPos.Y))
-	   }
-
-	*/
 	if newMapPos != u.mousePosOnMap && u.targeter != nil {
 		u.targeter.OnMouseMoved(newMapPos)
 	}

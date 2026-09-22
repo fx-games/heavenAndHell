@@ -1,15 +1,12 @@
 package gridmap
 
 import (
-	"bytes"
-	"encoding/gob"
 	"fmt"
 	"io"
+	"log/slog"
 	"math/rand"
-	"os"
 	"rpg/src/geometry"
 	"sort"
-	"strconv"
 	"time"
 )
 
@@ -232,29 +229,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) SetPlayerSpawn(position geome
 	m.playerSpawn = position
 }
 
-func (m *GridMap[ActorType, ItemType, ObjectType]) SaveToDisk(path string) error {
-	file, _ := os.Open(path)
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	encodeErr := enc.Encode(m)
-	encodedMap := buf.Bytes()
-	writeCount, writeErr := file.Write(encodedMap)
-	if encodeErr == nil && writeErr == nil {
-		println("Map saved to file: " + path + ", length: " + strconv.Itoa(writeCount))
-		return nil
-	} else {
-		println("Error saving map to file: " + path)
-		if encodeErr != nil {
-			println(encodeErr.Error())
-			return encodeErr
-		} else if writeErr != nil {
-			println(writeErr.Error())
-			return writeErr
-		}
-	}
-	return nil
-}
-
 func (m *GridMap[ActorType, ItemType, ObjectType]) CellAt(location geometry.Point) MapCell[ActorType, ItemType, ObjectType] {
 	return m.cells[m.mapWidth*location.Y+location.X]
 }
@@ -264,7 +238,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsItemAt(location geometry.Po
 }
 func (m *GridMap[ActorType, ItemType, ObjectType]) SetActorToDowned(a ActorType) {
 	if !m.RemoveActor(a) {
-		println("Could not remove actor from map")
+		slog.Error("could not remove actor from map")
 		return
 	}
 	m.allDownedActors = append(m.allDownedActors, a)
@@ -920,17 +894,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) SetAllExplored() {
 	}
 }
 
-func (m *GridMap[ActorType, ItemType, ObjectType]) RandomSpawnPosition() geometry.Point {
-	for {
-		x := rand.Intn(m.mapWidth)
-		y := rand.Intn(m.mapHeight)
-		pos := geometry.Point{X: x, Y: y}
-		if m.IsCurrentlyPassable(pos) {
-			return pos
-		}
-	}
-}
-
 func (m *GridMap[ActorType, ItemType, ObjectType]) AddNamedLocation(name string, point geometry.Point) {
 	m.namedLocations[name] = point
 }
@@ -961,17 +924,6 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) RemoveNamedLocation(namedLoca
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) IsDamagingTileAt(p geometry.Point) bool {
 	return m.CellAt(p).TileType.Special == SpecialTileDamaging
-}
-
-func (m *GridMap[ActorType, ItemType, ObjectType]) RandomPosAround(pos geometry.Point) geometry.Point {
-	neighbors := m.NeighborsAll(pos, func(p geometry.Point) bool {
-		return m.Contains(p)
-	})
-	if len(neighbors) == 0 {
-		return pos
-	}
-	neighbors = append(neighbors, pos)
-	return neighbors[rand.Intn(len(neighbors))]
 }
 
 // actorAt, downedActorAt, objectAt and itemAt dereference the cell: only call them after the matching IsXAt.
@@ -1235,11 +1187,11 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) SetNamedLocations(locations [
 	}
 }
 
-func (m *GridMap[ActorType, ItemType, ObjectType]) GetRandomLocation(filter func(location geometry.Point) bool) (geometry.Point, bool) {
+func (m *GridMap[ActorType, ItemType, ObjectType]) GetRandomLocation(source *rand.Rand, filter func(location geometry.Point) bool) (geometry.Point, bool) {
 	endCounter := 1000000
 	for {
-		x := rand.Intn(m.mapWidth)
-		y := rand.Intn(m.mapHeight)
+		x := source.Intn(m.mapWidth)
+		y := source.Intn(m.mapHeight)
 		pos := geometry.Point{X: x, Y: y}
 		if filter(pos) {
 			return pos, true

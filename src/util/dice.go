@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"log/slog"
 	"math/rand"
 	"regexp"
 	"strconv"
@@ -51,14 +52,14 @@ func (r Dice) ShortString() string {
 	}
 	return fmt.Sprintf("%dd%d%+d", r.dice, r.sides, r.bonus)
 }
-func (r Dice) Roll() int {
+func (r Dice) Roll(rng *rand.Rand) int {
 	if r.isFixed() {
 		flatValue := r.Min()
 		return flatValue
 	}
 	result := r.bonus
 	for i := 0; i < r.dice; i++ {
-		result += 1 + rand.Intn(r.sides)
+		result += 1 + rng.Intn(r.sides)
 	}
 	return result
 }
@@ -75,7 +76,17 @@ func (r Dice) NotZero() bool {
 	return r.dice > 0 || r.sides > 0 || r.bonus > 0
 }
 
+// ParseDice reads "N", "min-max" or "NdS+B". Anything else is 0, with a warning: a typo in mod data should not
+// pass as a harmless zero.
 func ParseDice(dice string) Dice {
+	d, ok := parseDice(dice)
+	if !ok && strings.TrimSpace(dice) != "" {
+		slog.Warn("mod data: not a dice expression, using 0", "value", dice)
+	}
+	return d
+}
+
+func parseDice(dice string) (Dice, bool) {
 	// check if it's an interval, eg. 12-24
 	dice = strings.ToLower(strings.Replace(dice, " ", "", -1))
 
@@ -92,26 +103,26 @@ func ParseDice(dice string) Dice {
 	if !hasDiceNotation && !isInterval && isFlatNumber {
 		match := flatNumberPattern.FindStringSubmatch(dice)
 		if match == nil {
-			return Dice{0, 0, 0}
+			return Dice{}, false
 		}
 		numVal, _ := strconv.Atoi(match[1])
-		return NewDice(0, 0, numVal)
+		return NewDice(0, 0, numVal), true
 	}
 
 	if !hasDiceNotation && !isFlatNumber && isInterval {
 		match := intervalPattern.FindStringSubmatch(dice)
 		if match == nil {
-			return Dice{0, 0, 0}
+			return Dice{}, false
 		}
 		minVal, _ := strconv.Atoi(match[1])
 		maxVal, _ := strconv.Atoi(match[2])
 		dieRange := (maxVal - minVal) + 1
 		dieBonus := minVal - 1
-		return NewDice(1, dieRange, dieBonus)
+		return NewDice(1, dieRange, dieBonus), true
 	}
 
 	if !hasDiceNotation {
-		return Dice{0, 0, 0}
+		return Dice{}, false
 	}
 
 	// dice is a string in the format "NdM" where N is the number of dice to roll and M is the number of sides on each die
@@ -124,12 +135,12 @@ func ParseDice(dice string) Dice {
 	pattern := regexp.MustCompile(`(\d+)d(\d+)\s*[+\-]\s*(\d+)`)
 	match := pattern.FindStringSubmatch(dice)
 	if match == nil {
-		return Dice{0, 0, 0}
+		return Dice{}, false
 	}
 	numDice, _ := strconv.Atoi(match[1])
 	numSides, _ := strconv.Atoi(match[2])
 	bonus, _ := strconv.Atoi(match[3])
-	return NewDice(numDice, numSides, bonus)
+	return NewDice(numDice, numSides, bonus), true
 }
 
 // Interval is a flat range, every value from min to max equally likely; Dice is a sum of rolls (bell-shaped).
@@ -148,14 +159,19 @@ func NewInterval(min, max int) Interval {
 
 func NewIntervalFromString(str string) Interval {
 	if !strings.Contains(str, "-") {
-		minDamg, _ := strconv.Atoi(str)
+		minDamg, err := strconv.Atoi(str)
+		if err != nil && str != "" {
+			slog.Warn("mod data: not a number or range, using 0", "value", str)
+		}
 		return Interval{
 			min: minDamg,
 			max: minDamg,
 		}
 	}
 	var minDamg, maxDamg int
-	fmt.Sscanf(str, "%d-%d", &minDamg, &maxDamg)
+	if n, _ := fmt.Sscanf(str, "%d-%d", &minDamg, &maxDamg); n != 2 {
+		slog.Warn("mod data: not a range", "value", str)
+	}
 	return Interval{
 		min: minDamg,
 		max: maxDamg,
@@ -170,12 +186,12 @@ func (i Interval) Max() int {
 	return i.max
 }
 
-func (i Interval) Roll() int {
+func (i Interval) Roll(rng *rand.Rand) int {
 	if i.min == i.max {
 		return i.min
 	}
 	// 2..6 (2,3,4,5,6) -> 6-2 = 4 -> Intn(4+1) -> 0..4 -> +2 -> 2..6
-	return rand.Intn(i.max-i.min+1) + i.min
+	return rng.Intn(i.max-i.min+1) + i.min
 }
 
 func (i Interval) ToString() string {

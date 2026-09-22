@@ -10,7 +10,7 @@ import (
 
 // d1RuneAction makes a trap item placeable.
 func (f *Factory) d1RuneAction(item *Item, it *d1.Item) {
-	rune, ok := d1.RuneTraps[it.MiscID]
+	rune, ok := f.Generator.D.RuneTraps[it.MiscID]
 	if !ok {
 		return
 	}
@@ -52,7 +52,7 @@ func (f *Factory) spawnD1Rune(caster *Actor, misc string, p geometry.Point) {
 		}
 		m.RemoveObject(rune)
 		rune.turnsUntilRemoval = 0
-		spell := d1.RuneTraps[misc].Spell
+		spell := f.Generator.D.RuneTraps[misc].Spell
 		from := p
 		f.ActionBroker.Execute(&spellTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
 			caster: caster, spell: spell, run: func(c *spellCtx) {
@@ -71,7 +71,7 @@ func d1RuneGoesOff(c *spellCtx, misc string, victim geometry.Point) {
 	o, clvl := c.origin(), c.h.Level
 	switch misc {
 	case "IMISC_RUNEF": // missiles_rune_explosion: 2·(clvl + 2d10) + 4 on the 3×3 around the rune
-		dam := 2*(clvl+d1Rng.Intn(10)+d1Rng.Intn(10)) + 4
+		dam := 2*(clvl+rng.Intn(10)+rng.Intn(10)) + 4
 		for dy := -1; dy <= 1; dy++ {
 			for dx := -1; dx <= 1; dx++ {
 				p := o.Add(geometry.Point{X: dx, Y: dy})
@@ -81,17 +81,17 @@ func d1RuneGoesOff(c *spellCtx, misc string, victim geometry.Point) {
 				c.hurtHero(p, dam, dam, false, 1)
 			}
 		}
-		c.animations = append(c.animations, NewHitAnimation(o, 0.5, defs.IconEffectFireBig, 2))
+		c.flash(o, 0.5, defs.IconEffectFireBig)
 	case "IMISC_RUNEL": // AddRuneOfLight: a lightning wall piece of 16·(2d10 + clvl + 2) a tick on the rune for 255 ticks
 		// (1.09 adds MIS_LIGHTBALL with no damage set, so there the rune does nothing)
-		dam := 16 * (d1Rng.Intn(10) + d1Rng.Intn(10) + clvl + 2)
+		dam := 16 * (rng.Intn(10) + rng.Intn(10) + clvl + 2)
 		c.f.spawnD1Wall(c.caster, o, d1.ResistKindLightning, 255/d1.RefWalkTicks, true, 1, defs.IconEffectLightning, func() int { return dam })
 	case "IMISC_GR_RUNEF", "IMISC_GR_RUNEL": // MIS_IMMOLATION and MIS_NOVA: the rune's own spell, as its content declares it
 		c.castFromData(o)
 	case "IMISC_RUNES": // AddStone on the monster that stepped on it (not Diablo or Na-Krul)
 		if a := c.monsterAt(victim); a != nil && a.d1Monster.AI != "AI_DIABLO" && a.d1Monster.Data.ID != "MT_NKR" {
 			a.AddStatusEffect(StatusStone, d1.StoneTurns(0))
-			c.animations = append(c.animations, NewHitAnimation(victim, 0.4, defs.IconEffectHit, 2))
+			c.flash(victim, 0.4, defs.IconEffectHit)
 		}
 	}
 }

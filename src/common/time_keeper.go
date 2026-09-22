@@ -31,7 +31,6 @@ func (t *TimeKeeper) SetTimed(timedBeings []TimedBeing) {
 func (t *TimeKeeper) PlayerTakesTurn(playerAutUsed int) {
 	t.autCounter += uint64(playerAutUsed)
 	t.turnCounter++
-	//println(fmt.Sprintf("Player takes turn %d using %d aut", t.turnCounter, playerAutUsed))
 	//for _, actor := range t.timed {
 	// PROBLEM: We are technically doing a recursive call of this function here.
 	// Each time an after hook executes during our turn that then triggers another turn..

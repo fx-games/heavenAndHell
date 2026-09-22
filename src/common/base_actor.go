@@ -103,7 +103,6 @@ func (a *Actor) IsHurt() bool {
 	return a.hurtTicks > 0
 }
 func (a *Actor) AddEnergy(energy int) {
-	//println(fmt.Sprintf("%s restored %d energy", a.name, energy))
 	a.timeEnergy += energy
 }
 
@@ -247,7 +246,6 @@ func (a *Actor) TakeHitRecovery() int {
 
 func (a *Actor) RemoveEnergy(energy int) {
 	a.timeEnergy -= energy
-	//println(fmt.Sprintf("%s used %d energy", a.name, energy))
 	a.BeforeTurn()
 }
 

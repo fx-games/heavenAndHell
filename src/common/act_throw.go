@@ -1,7 +1,6 @@
 package common
 
 import (
-	"math/rand"
 	"rpg/src/geometry"
 	"rpg/src/stats"
 )
@@ -32,8 +31,7 @@ func NewThrowAction(source Cause, attacker *Actor, thrownItem *Item, targetPos g
 
 func (d *ThrowAction) Execute(context ActionContext) []Action {
 	context.AudioPlayer.PlayCue("bow_fire")
-
-	d.thrownItem.SetDrawnToScreen(false) // hide for animation
+	context.ActionBroker.Emit(Thrown{Thrower: d.attacker, Item: d.thrownItem, From: d.attacker.MapPosition(), To: d.targetPos})
 
 	throwInfo := d.thrownItem.GetThrowStats()
 
@@ -57,9 +55,9 @@ func (d *ThrowAction) Execute(context ActionContext) []Action {
 
 		hitChance := CalculateThrowHitChance(d.attacker, d.defender)
 
-		doesHit := hitChance > 0 && hitChance >= rand.Float64()
+		doesHit := hitChance > 0 && hitChance >= rng.Float64()
 		if doesHit && throwInfo.Damage.NotZero() { // deal direct throw damage
-			damage := throwInfo.Damage.Roll()
+			damage := throwInfo.Damage.Roll(rng)
 			logAttack(context, d.attacker, d.defender, damage)
 			actions = append(actions, NewChangeResourceAction(NewActorCause(ActionNameThrow, d.attacker), d.defender, stats.Health, float64(-damage)))
 			d.damageAmount += damage
@@ -73,14 +71,6 @@ func (d *ThrowAction) Execute(context ActionContext) []Action {
 	return actions
 }
 
-func (d *ThrowAction) GetAnimations() []Animation {
-	animation := NewProjectileDirectionAnimation(d.attacker, d.attacker.MapPosition(), d.targetPos, 0.04, 41, 1)
-	animation.SetIcon(d.thrownItem.Icon(0))
-	animation.SetOnFinish(func() {
-		d.thrownItem.SetDrawnToScreen(true)
-	})
-	return OneAnimation(animation)
-}
 func (d *ThrowAction) GetDamageFactor() float64 {
 	return d.damageFactor
 }

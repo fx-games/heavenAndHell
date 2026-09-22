@@ -111,7 +111,6 @@ type SpellDamageAction struct {
 	slvl         int
 	target       geometry.Point
 	hitPositions []geometry.Point
-	animations   []Animation
 	landed       bool
 }
 
@@ -123,8 +122,7 @@ func NewSpellDamageAction(caster *Actor, roll string, resist int, mode string, s
 	}
 }
 
-func (a *SpellDamageAction) GetAnimations() []Animation { return a.animations }
-func (a *SpellDamageAction) GetDelayInAut() int         { return 0 }
+func (a *SpellDamageAction) GetDelayInAut() int { return 0 }
 
 // Succeeded: the spell found something to act on. A spell that did nothing costs nothing.
 func (a *SpellDamageAction) Succeeded() bool { return a.landed }
@@ -138,7 +136,7 @@ func (a *SpellDamageAction) Execute(ctx ActionContext) []Action {
 		return nil
 	}
 	rollAt := func(cell int) SpellRoll {
-		return GetAllDamageRolls()[a.roll](RollContext{Rng: d1Rng, Mag: c.s.Mag, Clvl: c.h.Level, Slvl: a.slvl, Cell: cell})
+		return GetAllDamageRolls()[a.roll](RollContext{Rng: rng, Mag: c.s.Mag, Clvl: c.h.Level, Slvl: a.slvl, Cell: cell})
 	}
 	roll := rollAt(0)
 	icon := damageIconByResist()[a.resist]
@@ -152,7 +150,8 @@ func (a *SpellDamageAction) Execute(ctx ActionContext) []Action {
 	}
 	if len(a.hitPositions) > 0 {
 		last := a.hitPositions[len(a.hitPositions)-1]
-		a.animations = append(c.animations, NewProjectileDirectionAnimation(a.caster, a.caster.MapPosition(), last, 0.03, icon, 2))
+		c.missile(a.caster, []geometry.Point{a.caster.MapPosition(), last}, 0.03, icon)
+		c.emit(ctx.ActionBroker) // a spell that hit no cell shows nothing
 	}
 	return c.finish()
 }
@@ -185,18 +184,16 @@ func (g *Factory) chargedBolts(args util.Arguments) *HitEffect {
 // its own damage roll and its own path animation.
 type ChargedBoltsAction struct {
 	BaseAction
-	caster     *Actor
-	roll       string
-	resist     int
-	slvl       int
-	target     geometry.Point
-	animations []Animation
-	landed     bool
+	caster *Actor
+	roll   string
+	resist int
+	slvl   int
+	target geometry.Point
+	landed bool
 }
 
-func (a *ChargedBoltsAction) GetAnimations() []Animation { return a.animations }
-func (a *ChargedBoltsAction) GetDelayInAut() int         { return 0 }
-func (a *ChargedBoltsAction) Succeeded() bool            { return a.landed }
+func (a *ChargedBoltsAction) GetDelayInAut() int { return 0 }
+func (a *ChargedBoltsAction) Succeeded() bool    { return a.landed }
 
 func (a *ChargedBoltsAction) Execute(ctx ActionContext) []Action {
 	f := ctx.GameState.factory
@@ -207,8 +204,8 @@ func (a *ChargedBoltsAction) Execute(ctx ActionContext) []Action {
 	}
 	origin := a.caster.MapPosition()
 	for n := d1.ChargedBolts(a.slvl); n > 0; n-- {
-		wander := d1Rng.Intn(15) + 1 // drawn before the damage, the order the original missile used
-		roll := GetAllDamageRolls()[a.roll](RollContext{Rng: d1Rng, Mag: c.s.Mag, Clvl: c.h.Level, Slvl: a.slvl})
+		wander := rng.Intn(15) + 1 // drawn before the damage, the order the original missile used
+		roll := GetAllDamageRolls()[a.roll](RollContext{Rng: rng, Mag: c.s.Mag, Clvl: c.h.Level, Slvl: a.slvl})
 		p, path := origin, []geometry.Point{origin}
 		for _, next := range c.chargedBoltCells(origin, a.target, wander) {
 			p = next
@@ -219,10 +216,10 @@ func (a *ChargedBoltsAction) Execute(ctx ActionContext) []Action {
 			}
 		}
 		if p != origin {
-			c.animations = append(c.animations, NewProjectilePathAnimation(a.caster, path, 0.03, defs.IconEffectLightning, 2))
+			c.missile(a.caster, path, 0.03, defs.IconEffectLightning)
 		}
 	}
-	a.animations = c.animations
+	c.emit(ctx.ActionBroker)
 	return c.finish()
 }
 
@@ -235,10 +232,10 @@ func (a *ChargedBoltsAction) Execute(ctx ActionContext) []Action {
 // are numbers in the content and the arithmetic sits in d1.ResourceAmount64 beside the damage rolls. The
 // caster's spell level is appended as the last argument where the action is built, as it is for spell_damage.
 // classSet reads a comma separated list of class keys (hero.rec's key). Commas, because the argument list itself splits on '|'.
-func classSet(list string) map[int]bool {
+func classSet(d *d1.Data, list string) map[int]bool {
 	set := map[int]bool{}
 	for _, name := range strings.Split(list, ",") {
-		if class := d1.ClassByKey(strings.TrimSpace(name)); class >= 0 {
+		if class := d.ClassByKey(strings.TrimSpace(name)); class >= 0 {
 			set[class] = true
 		}
 	}
@@ -253,7 +250,7 @@ func (g *Factory) restoreResource(args util.Arguments) *HitEffect {
 	}
 	full := args.Get(1) == "full"
 	base, perClvl, perSlvl := args.GetInt(1), args.GetInt(2), args.GetInt(3)
-	doubled, raisedByHalf := classSet(args.Get(4)), classSet(args.Get(5))
+	doubled, raisedByHalf := classSet(g.Generator.D, args.Get(4)), classSet(g.Generator.D, args.Get(5))
 	slvl := args.GetInt(len(args) - 1) // the cast appends it, and the two forms are of different length
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
@@ -274,7 +271,7 @@ func (g *Factory) restoreResource(args util.Arguments) *HitEffect {
 					st.GetResource(stats.Health).SetToMax()
 					return
 				}
-				st.GetResource(stats.Health).Increase(float64(d1.ResourceAmount64(d1Rng, base, perClvl, perSlvl, h.Level, slvl, boost) >> 6))
+				st.GetResource(stats.Health).Increase(float64(d1.ResourceAmount64(rng, base, perClvl, perSlvl, h.Level, slvl, boost) >> 6))
 				return
 			}
 			// mana carries hero bookkeeping health does not: the base pool grows with what is restored
@@ -283,7 +280,7 @@ func (g *Factory) restoreResource(args util.Arguments) *HitEffect {
 				st.GetResource(stats.Mana).SetToMax()
 				return
 			}
-			amount := d1.ResourceAmount64(d1Rng, base, perClvl, perSlvl, h.Level, slvl, boost) >> 6
+			amount := d1.ResourceAmount64(rng, base, perClvl, perSlvl, h.Level, slvl, boost) >> 6
 			h.ManaBase = min(h.ManaBase+amount<<6, h.MaxManaBase)
 			st.GetResource(stats.Mana).Increase(float64(amount))
 		},

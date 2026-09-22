@@ -20,9 +20,6 @@ const (
 	Barbarian
 )
 
-// ClassNames are the class names, in the mod's own order; filled by Load from assets/data/hero.rec.
-var ClassNames []string
-
 // Class flags (PlayerClassFlag), straight off each class' attributes.tsv.
 const (
 	ClassCriticalStrike    = 1 << iota // clvl% of melee swings hit twice
@@ -48,7 +45,7 @@ const (
 const damageFlags = ClassStrDexDamage | ClassStaffAndFistDamage | ClassBladeAndBowDamage | ClassHeavyWeaponDamage
 
 // HasClassFlag reports a PlayerClassFlag of the class, e.g. ClassTrapSense.
-func HasClassFlag(class int, flag uint32) bool { return classAttr[class].Flags&flag != 0 }
+func (d *Data) HasClassFlag(class int, flag uint32) bool { return d.classAttr[class].Flags&flag != 0 }
 
 // fp is devilutionX's parseFixed6: the attributes.tsv decimals are 1/64 multipliers.
 func fp(v float64) int { return int(v * 64) }
@@ -96,31 +93,22 @@ var ClassSkills = map[string]int{"repair": SplRepair, "disarm": SplDisarm, "rech
 var attrByName = map[string]int{"str": AttrStr, "mag": AttrMag, "dex": AttrDex, "vit": AttrVit}
 
 // Class is the class record of class (hero.rec), the zero record for one the mod doesn't have.
-func Class(class int) classAttributes {
-	if class < 0 || class >= len(classAttr) {
+func (d *Data) Class(class int) classAttributes {
+	if class < 0 || class >= len(d.classAttr) {
 		return classAttributes{}
 	}
-	return classAttr[class]
+	return d.classAttr[class]
 }
 
 // ClassByKey is the class whose key is key, -1 for none.
-func ClassByKey(key string) int {
-	for i, a := range classAttr {
+func (d *Data) ClassByKey(key string) int {
+	for i, a := range d.classAttr {
 		if a.Key == key {
 			return i
 		}
 	}
 	return -1
 }
-
-// classAttr is filled by Load from the class section of assets/data/hero.rec.
-var classAttr []classAttributes
-
-// MaxStats is the attribute cap per class and ATTRIB_ (CharacterAttribute), derived from classAttr by Load.
-var MaxStats [][4]int
-
-// ExpLvls is the experience total each character level needs; filled by Load.
-var ExpLvls [51]int
 
 // itypeByName and classFlagByName name the columns of hero.rec that are enums rather than numbers, so the file
 // reads as words instead of as the bit patterns and ITYPE_ numbers they compile to.
@@ -135,18 +123,11 @@ var classFlagByName = map[string]uint32{"critical_strike": ClassCriticalStrike, 
 	"half_shield": ClassHalfShield, "full_missile_bonus": ClassFullMissileBonus,
 	"shield_slows_bare_hands": ClassShieldSlowsBareHand, "flinch_resist": ClassFlinchResist}
 
-// heroTablesLoaded records whether the active mod supplied hero.rec. It is NOT optional in the way the xl_*
-// tables are: those describe features a mod may not have, while this one is the hero's own numbers, and a game
-// with no hero numbers has no hero. It is tolerated only so that the rest of a mod - its monsters, items,
-// vendors and levels - can be loaded and worked on, and HeroTablesLoaded exists so nothing quietly builds a
-// hero out of a table of zeroes. Zeroed class tables have silently broken this engine once already.
-var heroTablesLoaded bool
-
 // HeroTablesLoaded reports whether the active mod declared the hero's per-class numbers.
-func HeroTablesLoaded() bool { return heroTablesLoaded }
+func (d *Data) HeroTablesLoaded() bool { return d.heroTablesLoaded }
 
-func loadHeroTables(fsys fs.FS) error {
-	heroTablesLoaded = false
+func loadHeroTables(fsys fs.FS, d *Data) error {
+	d.heroTablesLoaded = false
 	recs, err := readRecMulti(fsys, "hero.rec")
 	if errors.Is(err, fs.ErrNotExist) {
 		return nil
@@ -159,10 +140,10 @@ func loadHeroTables(fsys fs.FS) error {
 	if len(classes) == 0 {
 		return fmt.Errorf("hero.rec: no classes")
 	}
-	ClassNames = make([]string, len(classes))
-	classAttr = make([]classAttributes, len(classes))
-	MaxStats = make([][4]int, len(classes))
-	SpellFrames = make([]int, len(classes))
+	d.ClassNames = make([]string, len(classes))
+	d.classAttr = make([]classAttributes, len(classes))
+	d.MaxStats = make([][4]int, len(classes))
+	d.SpellFrames = make([]int, len(classes))
 	for i, r := range classes {
 		m := r.ToMap("")
 		// fp6 reads one of the 1/64 fixed-point columns, which the file carries as a plain decimal.
@@ -188,11 +169,11 @@ func loadHeroTables(fsys fs.FS) error {
 			name, frames, ok := strings.Cut(f, "=")
 			itype, known := itypeByName[name]
 			if !ok || !known {
-				return fmt.Errorf("hero.rec: %s: bad attack_frames %q", ClassNames[i], f)
+				return fmt.Errorf("hero.rec: %s: bad attack_frames %q", d.ClassNames[i], f)
 			}
 			n, convErr := strconv.Atoi(frames)
 			if convErr != nil {
-				return fmt.Errorf("hero.rec: %s: attack_frames %q: %w", ClassNames[i], f, convErr)
+				return fmt.Errorf("hero.rec: %s: attack_frames %q: %w", d.ClassNames[i], f, convErr)
 			}
 			a.AttackFrames[itype] = n
 		}
@@ -237,10 +218,10 @@ func loadHeroTables(fsys fs.FS) error {
 			}
 			a.Oily = append(a.Oily, [2]int{at, n})
 		}
-		ClassNames[i] = m.GetStringOrDefault("name", "")
-		classAttr[i] = a
-		MaxStats[i] = [4]int{a.MaxStr, a.MaxMag, a.MaxDex, a.MaxVit}
-		SpellFrames[i] = a.SpellFrames
+		d.ClassNames[i] = m.GetStringOrDefault("name", "")
+		d.classAttr[i] = a
+		d.MaxStats[i] = [4]int{a.MaxStr, a.MaxMag, a.MaxDex, a.MaxVit}
+		d.SpellFrames[i] = a.SpellFrames
 	}
 	var exp []int
 	for _, r := range recs["experience"] {
@@ -254,11 +235,11 @@ func loadHeroTables(fsys fs.FS) error {
 			}
 		}
 	}
-	if len(exp) != len(ExpLvls) {
-		return fmt.Errorf("hero.rec: %d experience levels, want %d", len(exp), len(ExpLvls))
+	if len(exp) != len(d.ExpLvls) {
+		return fmt.Errorf("hero.rec: %d experience levels, want %d", len(exp), len(d.ExpLvls))
 	}
-	copy(ExpLvls[:], exp)
-	WeaponBonuses = nil
+	copy(d.ExpLvls[:], exp)
+	d.WeaponBonuses = nil
 	for i, r := range recs["weapon_bonus"] {
 		m := r.ToMap("")
 		weapon, versus := m.GetStringOrDefault("weapon", ""), m.GetStringOrDefault("versus", "")
@@ -267,23 +248,23 @@ func loadHeroTables(fsys fs.FS) error {
 		if !ok || weapon == "default" || versus == "" || convErr != nil {
 			return fmt.Errorf("hero.rec: weapon_bonus %d: want weapon (sword, axe, bow, mace, staff), versus (a monster class) and percent", i+1)
 		}
-		WeaponBonuses = append(WeaponBonuses, WeaponBonus{Weapon: itype, Versus: versus, Percent: pct})
+		d.WeaponBonuses = append(d.WeaponBonuses, WeaponBonus{Weapon: itype, Versus: versus, Percent: pct})
 	}
-	heroTablesLoaded = true
+	d.heroTablesLoaded = true
 	return nil
 }
 
 // HitRecoveryTicks ports PM_DoGotHit: the hit animation, one to three frames shorter with the recovery affixes.
-func HitRecoveryTicks(class int, flags uint32) int {
+func (d *Data) HitRecoveryTicks(class int, flags uint32) int {
 	switch {
 	case flags&ISplFastestRecover != 0:
-		return classAttr[class].HitFrames - 3
+		return d.classAttr[class].HitFrames - 3
 	case flags&ISplFasterRecover != 0:
-		return classAttr[class].HitFrames - 2
+		return d.classAttr[class].HitFrames - 2
 	case flags&ISplFastRecover != 0:
-		return classAttr[class].HitFrames - 1
+		return d.classAttr[class].HitFrames - 1
 	}
-	return classAttr[class].HitFrames
+	return d.classAttr[class].HitFrames
 }
 
 // Attributes (ATTRIB_).
@@ -306,12 +287,20 @@ type Hero struct {
 	Rage                               int      // the Barbarian's Rage: turns of fury left, or minus the turns of hangover left
 	SkillOrder                         []string // skill bar order the player dragged (skill names); not D1's
 	Reflections                        int      // Hellfire's Reflect (wReflections): melee blows left to turn back, until the next level
+
+	d *Data // the rules this hero plays by; a loaded hero gets them back through Data.Adopt
 }
 
+// Adopt binds a hero read back from a save to these rules.
+func (d *Data) Adopt(h *Hero) { h.d = d }
+
+// Rules are the tables the hero plays by.
+func (h *Hero) Rules() *Data { return h.d }
+
 // NewHero ports CreatePlayer, with calculateBaseLife/Mana in place of D1's per-class multipliers.
-func NewHero(class int) *Hero {
-	a := classAttr[class]
-	h := &Hero{Class: class, BaseStr: a.Str, BaseMag: a.Mag, BaseDex: a.Dex, BaseVit: a.Vit, Level: 1, BaseToBlk: a.ToBlk}
+func (d *Data) NewHero(class int) *Hero {
+	a := d.classAttr[class]
+	h := &Hero{d: d, Class: class, BaseStr: a.Str, BaseMag: a.Mag, BaseDex: a.Dex, BaseVit: a.Vit, Level: 1, BaseToBlk: a.ToBlk}
 	hp := a.AdjLife + a.LvlLife*h.Level + a.ChrLife*h.BaseVit
 	mana := a.AdjMana + a.LvlMana*h.Level + a.ChrMana*h.BaseMag
 	h.HPBase, h.MaxHPBase, h.ManaBase, h.MaxManaBase = hp, hp, mana, mana
@@ -363,7 +352,7 @@ func (h *Hero) Sheet(equipped []*Item) Sheet {
 		}
 	}
 
-	a := classAttr[h.Class]
+	a := h.d.classAttr[h.Class]
 	s := Sheet{LightRad: 10, Active: active}
 	var sadd, madd, dadd, vadd, ihp, imana int
 	var shieldAC, weapons, twoHanders int
@@ -541,20 +530,20 @@ func clamp(v, lo, hi int) int { return min(max(v, lo), hi) }
 
 // MeleeHitChance ports PlrHitMonst's to-hit.
 func (h *Hero) MeleeHitChance(s Sheet, monAC int) int {
-	hper := s.EnAc + s.Dex>>1 - monAC + h.Level + classAttr[h.Class].MeleeToHit
+	hper := s.EnAc + s.Dex>>1 - monAC + h.Level + h.d.classAttr[h.Class].MeleeToHit
 	return clamp(hper+s.BonusToHit, 5, 95)
 }
 
 // MeleeDamage ports PlrHitMonst's damage roll (whole points). monClass is MC_UNDEAD/MC_DEMON/MC_ANIMAL.
 func (h *Hero) MeleeDamage(rng *rand.Rand, s Sheet, monClass string) int {
 	d := s.MinDam + rng.Intn(max(s.MaxDam-s.MinDam+1, 1))
-	crit := classAttr[h.Class].Flags&ClassCriticalStrike != 0
+	crit := h.d.classAttr[h.Class].Flags&ClassCriticalStrike != 0
 	return h.meleeDamageOf(s, d, crit && rng.Intn(100) < h.Level, monClass)
 }
 
 // MeleeDamageRange is MeleeDamage's lowest roll without and highest roll with the warrior's double damage.
 func (h *Hero) MeleeDamageRange(s Sheet, monClass string) (lo, hi int) {
-	crit := classAttr[h.Class].Flags&ClassCriticalStrike != 0 && h.Level > 0
+	crit := h.d.classAttr[h.Class].Flags&ClassCriticalStrike != 0 && h.Level > 0
 	return h.meleeDamageOf(s, s.MinDam, false, monClass), h.meleeDamageOf(s, s.MaxDam, crit, monClass)
 }
 
@@ -563,7 +552,7 @@ func (h *Hero) meleeDamageOf(s Sheet, d int, double bool, monClass string) int {
 	if double {
 		dam *= 2
 	}
-	switch pct := s.WeaponVsMonsterClass(monClass); {
+	switch pct := h.d.WeaponVsMonsterClass(s, monClass); {
 	case pct == -50: // 1.09's own arithmetic, kept exact
 		dam -= dam >> 1
 	case pct == 50:
@@ -586,12 +575,10 @@ type WeaponBonus struct {
 	Percent int
 }
 
-var WeaponBonuses []WeaponBonus
-
 // RuledWeapon is the weapon type the bonuses judge the hero by: the first type the rules name that the hero
 // holds, so the file's order settles two weapons (D1: a sword in either hand wins over a mace). -1 for none.
-func (s Sheet) RuledWeapon() int {
-	for _, b := range WeaponBonuses {
+func (d *Data) RuledWeapon(s Sheet) int {
+	for _, b := range d.WeaponBonuses {
 		if s.Holds(b.Weapon) {
 			return b.Weapon
 		}
@@ -600,13 +587,13 @@ func (s Sheet) RuledWeapon() int {
 }
 
 // WeaponVsMonsterClass is what the weapon in hand does to melee damage against a monster class, as a percentage.
-func (s Sheet) WeaponVsMonsterClass(monClass string) int {
-	return WeaponBonusOf(s.RuledWeapon(), monClass)
+func (d *Data) WeaponVsMonsterClass(s Sheet, monClass string) int {
+	return d.WeaponBonusOf(d.RuledWeapon(s), monClass)
 }
 
 // WeaponBonusOf is the rules' percentage for weapon type itype against monClass, 0 when none applies.
-func WeaponBonusOf(itype int, monClass string) int {
-	for _, b := range WeaponBonuses {
+func (d *Data) WeaponBonusOf(itype int, monClass string) int {
+	for _, b := range d.WeaponBonuses {
 		if b.Weapon == itype && b.Versus == monClass {
 			return b.Percent
 		}
@@ -627,7 +614,7 @@ func WeaponTypeName(itype int) string {
 // CriticalStrikeChance is the percentage of melee swings that land twice (MeleeDamage's crit roll): the
 // character's level, for the classes that have it, and 0 for the rest.
 func (h *Hero) CriticalStrikeChance() int {
-	if !HasClassFlag(h.Class, ClassCriticalStrike) {
+	if !h.d.HasClassFlag(h.Class, ClassCriticalStrike) {
 		return 0
 	}
 	return min(h.Level, 100)
@@ -635,7 +622,9 @@ func (h *Hero) CriticalStrikeChance() int {
 
 // FullMissileDamageBonus reports a class that adds its whole Str/Dex damage bonus to missiles instead of half of
 // it (arrowDamageOf).
-func FullMissileDamageBonus(class int) bool { return Class(class).Flags&ClassFullMissileBonus != 0 }
+func (d *Data) FullMissileDamageBonus(class int) bool {
+	return d.Class(class).Flags&ClassFullMissileBonus != 0
+}
 
 // HitLeech ports PlrHitMonst's life/mana steal; dam in whole points, returns gains in 1/64.
 func (h *Hero) HitLeech(rng *rand.Rand, s Sheet, dam int) (hp, mana int) {
@@ -661,7 +650,7 @@ func (h *Hero) HitLeech(rng *rand.Rand, s Sheet, dam int) (hp, mana int) {
 
 // ArrowHitChance ports MonsterMHit for physical missiles; dist in cells.
 func (h *Hero) ArrowHitChance(s Sheet, monAC, dist int) int {
-	hper := h.Level + classAttr[h.Class].RangedToHit - monAC + s.EnAc + s.BonusToHit + s.Dex - dist*dist>>1
+	hper := h.Level + h.d.classAttr[h.Class].RangedToHit - monAC + s.EnAc + s.BonusToHit + s.Dex - dist*dist>>1
 	return clamp(hper, 5, 95)
 }
 
@@ -678,7 +667,7 @@ func (h *Hero) ArrowBlastDamage(rng *rand.Rand, s Sheet, mind, maxd int) int {
 
 func (h *Hero) arrowDamageOf(s Sheet, dam int) int {
 	dam += s.BonusDamMod + dam*s.BonusDam/100
-	if FullMissileDamageBonus(h.Class) {
+	if h.d.FullMissileDamageBonus(h.Class) {
 		return dam + s.DamageMod
 	}
 	return dam + s.DamageMod>>1
@@ -783,12 +772,12 @@ func (h *Hero) AddExperience(monLevel, exp int) int {
 	e := int(float64(exp) * (float64(monLevel-h.Level)/10 + 1))
 	h.Exp = min(h.Exp+max(e, 0), 2000000000) // MAXEXP
 	gained := 0
-	if h.Exp >= ExpLvls[49] { // level 50 outright, without NextPlrLevel's points, life and mana
+	if h.Exp >= h.d.ExpLvls[49] { // level 50 outright, without NextPlrLevel's points, life and mana
 		gained, h.Level = 50-h.Level, 50
 		return gained
 	}
 	l := 0
-	for h.Exp >= ExpLvls[l] {
+	for h.Exp >= h.d.ExpLvls[l] {
 		l++
 	}
 	for ; h.Level < l; gained++ {
@@ -798,7 +787,7 @@ func (h *Hero) AddExperience(monLevel, exp int) int {
 }
 
 func (h *Hero) statDiff() int {
-	m := MaxStats[h.Class]
+	m := h.d.MaxStats[h.Class]
 	return m[AttrStr] - h.BaseStr + m[AttrMag] - h.BaseMag + m[AttrDex] - h.BaseDex + m[AttrVit] - h.BaseVit
 }
 
@@ -810,7 +799,7 @@ func (h *Hero) nextLevel() {
 	} else {
 		h.StatPts += 5
 	}
-	a := classAttr[h.Class]
+	a := h.d.classAttr[h.Class]
 	hp, mana := a.LvlLife+1, a.LvlMana+1 // single player: one extra 1/64 of each per level
 	h.MaxHPBase += hp
 	h.HPBase = h.MaxHPBase
@@ -821,18 +810,18 @@ func (h *Hero) nextLevel() {
 // AddBaseStat ports ModifyPlr{Str,Mag,Dex,Vit}: raises a base attribute (capped) and returns HP/mana gained in 1/64.
 func (h *Hero) AddBaseStat(attr, n int) (hp, mana int) {
 	base := [4]*int{&h.BaseStr, &h.BaseMag, &h.BaseDex, &h.BaseVit}[attr]
-	n = max(min(n, MaxStats[h.Class][attr]-*base), -*base) // ModifyPlr* caps at MaxStats, CheckStats floors at 0
+	n = max(min(n, h.d.MaxStats[h.Class][attr]-*base), -*base) // ModifyPlr* caps at MaxStats, CheckStats floors at 0
 	if n == 0 {
 		return 0, 0
 	}
 	*base += n
 	switch attr {
 	case AttrMag:
-		mana = n * classAttr[h.Class].ChrMana
+		mana = n * h.d.classAttr[h.Class].ChrMana
 		h.MaxManaBase += mana
 		h.ManaBase += mana
 	case AttrVit:
-		hp = n * classAttr[h.Class].ChrLife
+		hp = n * h.d.classAttr[h.Class].ChrLife
 		h.MaxHPBase += hp
 		h.HPBase += hp
 	}
@@ -842,7 +831,7 @@ func (h *Hero) AddBaseStat(attr, n int) (hp, mana int) {
 // SpendStatPoint spends one level-up point on an attribute; false if none left or capped.
 func (h *Hero) SpendStatPoint(attr int) bool {
 	base := [4]int{h.BaseStr, h.BaseMag, h.BaseDex, h.BaseVit}[attr]
-	if h.StatPts <= 0 || base >= MaxStats[h.Class][attr] {
+	if h.StatPts <= 0 || base >= h.d.MaxStats[h.Class][attr] {
 		return false
 	}
 	h.AddBaseStat(attr, 1)
@@ -858,22 +847,22 @@ func potionAmount(maxV, roll, factor int) int {
 
 // PotionHeal ports UseItem's IMISC_HEAL amount in 1/64; maxHP in 1/64.
 func (h *Hero) PotionHeal(rng *rand.Rand, maxHP int) int {
-	return potionAmount(maxHP, rng.Intn(max(maxHP>>8, 1)), classAttr[h.Class].PotionLife)
+	return potionAmount(maxHP, rng.Intn(max(maxHP>>8, 1)), h.d.classAttr[h.Class].PotionLife)
 }
 
 // PotionMana ports UseItem's IMISC_MANA amount in 1/64; maxMana in 1/64.
 func (h *Hero) PotionMana(rng *rand.Rand, maxMana int) int {
-	return potionAmount(maxMana, rng.Intn(max(maxMana>>8, 1)), classAttr[h.Class].PotionMana)
+	return potionAmount(maxMana, rng.Intn(max(maxMana>>8, 1)), h.d.classAttr[h.Class].PotionMana)
 }
 
 // PotionHealRange and PotionManaRange are the lowest and highest PotionHeal/PotionMana rolls, in 1/64.
 func (h *Hero) PotionHealRange(maxHP int) (int, int) {
-	f := classAttr[h.Class].PotionLife
+	f := h.d.classAttr[h.Class].PotionLife
 	return potionAmount(maxHP, 0, f), potionAmount(maxHP, max(maxHP>>8, 1)-1, f)
 }
 
 func (h *Hero) PotionManaRange(maxMana int) (int, int) {
-	f := classAttr[h.Class].PotionMana
+	f := h.d.classAttr[h.Class].PotionMana
 	return potionAmount(maxMana, 0, f), potionAmount(maxMana, max(maxMana>>8, 1)-1, f)
 }
 
@@ -882,4 +871,4 @@ const RefWalkTicks = 8
 
 // SetClassFlagForTest gives class a class flag, as a hero.rec line would; for tests that move a rule between
 // classes.
-func SetClassFlagForTest(class int, flag uint32) { classAttr[class].Flags |= flag }
+func (d *Data) SetClassFlagForTest(class int, flag uint32) { d.classAttr[class].Flags |= flag }

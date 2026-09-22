@@ -3,6 +3,7 @@ package stats
 import (
 	"fmt"
 	"image/color"
+	"log/slog"
 	"math"
 	"strings"
 
@@ -245,7 +246,7 @@ func (a *AttributeHolder) Decrement(name Name) {
 
 func (a *AttributeHolder) SetAttribute(attributeName Name, value int) {
 	if _, ok := a.attributes[attributeName]; !ok {
-		println("attribute not found", attributeName)
+		slog.Warn("attribute not found", "name", attributeName)
 		return
 	}
 	a.attributes[attributeName] = float64(value)
@@ -254,7 +255,7 @@ func (a *AttributeHolder) SetAttribute(attributeName Name, value int) {
 
 func (a *AttributeHolder) SetAttributeAsFloat(attr Name, value float64) {
 	if _, ok := a.attributes[attr]; !ok {
-		println("attribute not found", attr)
+		slog.Warn("attribute not found", "name", attr)
 		return
 	}
 	a.attributes[attr] = value

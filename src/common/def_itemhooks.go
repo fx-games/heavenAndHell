@@ -74,7 +74,7 @@ func chanceToTripleDamage(itemContext *ItemContext, action Action, context Actio
 	if attacker != itemContext.GetActor() {
 		return nil
 	}
-	if rand.Intn(100) < 5 {
+	if rng.Intn(100) < 5 {
 		meleeAction.SetDamageFactor(3)
 	}
 	return nil

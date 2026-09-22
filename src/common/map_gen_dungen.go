@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"math"
 	"slices"
 
@@ -125,7 +126,7 @@ func (g *MapGenerator) addDungenStairs(m *gridmap.GridMap[*Actor, *Item, Object]
 	}
 	for _, e := range rest {
 		if len(spots) == 0 {
-			println(fmt.Sprintf("ERR: no stair position left for exit %q on %s", e.Location, m.GetName()))
+			slog.Error("no stair position left", "exit", e.Location, "map", m.GetName())
 			break
 		}
 		// ladder_down as far from the entrance as it gets (or, half the time, anywhere); the rest furthest from

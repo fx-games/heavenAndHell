@@ -2,9 +2,7 @@ package common
 
 import (
 	"math"
-	"math/rand"
 	"rpg/src/stats"
-	"rpg/src/util"
 )
 
 type MeleeAttackAction struct {
@@ -27,6 +25,9 @@ func NewMeleeAttackAction(source Cause, attacker *Actor, defender *Actor) *Melee
 
 func (d *MeleeAttackAction) Execute(context ActionContext) []Action {
 	var actions []Action
+	if !d.disableAnimation {
+		context.ActionBroker.Emit(MeleeSwing{Attacker: d.attacker, From: d.attacker.MapPosition(), To: d.defender.MapPosition()})
+	}
 
 	if dam, extra, handled := resolveD1Attack(context, d.attacker, d.defender, false); handled {
 		d.defender.SetLookDirFromPoI(d.attacker.MapPosition())
@@ -48,7 +49,7 @@ func (d *MeleeAttackAction) Execute(context ActionContext) []Action {
 		evasionChance = 0.25
 	}
 
-	if rand.Float64() < evasionChance {
+	if rng.Float64() < evasionChance {
 		// dodged the attack
 		logDodged(context, d.attacker, d.defender)
 		// play miss audio cue?
@@ -107,7 +108,7 @@ func CalculateMeleeDamage(damageRoll int, damageFactor float64, attacker, defend
 		dndStyleModifierDefender := defaultModifierPattern(defenderDex)
 		shield := defender.GetEquipment().GetShield()
 		shieldAC := max(1, shield.GetArmorStats().GetTotalArmorClass()+dndStyleModifierDefender)
-		if shieldAC > blockedDamage && rand.Float64() > 0.5 {
+		if shieldAC > blockedDamage && rng.Float64() > 0.5 {
 			blockedDamage = shieldAC
 		}
 	}
@@ -126,7 +127,7 @@ func GetArmorPenetrationOfEquippedMeleeWeapon(attacker *Actor) int {
 
 func GetMeleeDamageRoll(attacker *Actor) int {
 	damageDice := attacker.GetDamageDice(MeleeAttack)
-	damageRoll := damageDice.Roll()
+	damageRoll := damageDice.Roll(rng)
 	return damageRoll
 }
 
@@ -138,20 +139,6 @@ func GetWeaponQualityFactor(attacker *Actor) float64 {
 	return weaponUsed.Durability.AsPercentage()
 }
 
-func (d *MeleeAttackAction) GetAnimations() []Animation {
-	if d.disableAnimation {
-		return nil
-	}
-	ticksNeeded := util.SecondsToTicks(0.2)
-	animation := &MeleeAttackAnimation{
-		actor:       d.attacker,
-		targetPos:   d.defender.MapPosition(),
-		origin:      d.attacker.MapPosition(),
-		ticksNeeded: ticksNeeded,
-		ticksLeft:   ticksNeeded,
-	}
-	return OneAnimation(animation)
-}
 func (d *MeleeAttackAction) GetDamageFactor() float64 {
 	return d.damageFactor
 }

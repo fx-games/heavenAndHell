@@ -122,10 +122,13 @@ type UserInterface interface {
 type ActionContext struct {
 	GameState     *State
 	UserInterface func() UserInterface
-	AudioPlayer   *audio.Player
-	Data          defs.DataContainer
-	ActionBroker  *Broker
-	Msg           func(message string)
+	// Show hands the frontend something the player has to see or choose (ui_requests.go). Rules use it instead
+	// of opening windows themselves.
+	Show         func(UIRequest)
+	AudioPlayer  *audio.Player
+	Data         defs.DataContainer
+	ActionBroker *Broker
+	Msg          func(message string)
 }
 
 type ActionHook interface {
@@ -152,7 +155,6 @@ type Action interface {
 	Cause() Cause
 	Name() ActionName
 	Execute(context ActionContext) []Action
-	GetAnimations() []Animation
 	GetDelayInAut() int
 }
 

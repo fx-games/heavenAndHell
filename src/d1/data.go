@@ -244,6 +244,8 @@ var (
 const D1MonsterCount = 112
 
 type Data struct {
+	tables
+
 	Monsters       []MonsterData
 	UniqueMonsters []UniqueMonsterData
 	Items          []ItemData
@@ -450,35 +452,34 @@ func load(fsys fs.FS) (*Data, error) {
 	return d, nil
 }
 
-// loadRecTables fills the package-level tables that used to be Go literals. They stay package-level because the
-// code reading them (ItemSnds and friends) is called from all over and has no Data to hand.
+// loadRecTables fills d's rule tables (tables) from the mod's data/*.rec files.
 func loadRecTables(fsys fs.FS, d *Data) error {
 	var err error
-	if oils, err = loadOils(fsys); err != nil {
+	if d.oils, err = loadOils(fsys); err != nil {
 		return err
 	}
-	if itemCAnimTbl, itemDropSnds, itemInvSnds, err = loadItemSounds(fsys); err != nil {
+	if d.itemCAnimTbl, d.itemDropSnds, d.itemInvSnds, err = loadItemSounds(fsys); err != nil {
 		return err
 	}
-	if SfxFiles, err = loadSfxFiles(fsys); err != nil {
+	if d.SfxFiles, err = loadSfxFiles(fsys); err != nil {
 		return err
 	}
 	if err = loadObjectTables(fsys, d); err != nil {
 		return err
 	}
-	if err = loadHeroTables(fsys); err != nil {
+	if err = loadHeroTables(fsys, d); err != nil {
 		return err
 	}
-	if err = loadSpellTables(fsys); err != nil {
+	if err = loadSpellTables(fsys, d); err != nil {
 		return err
 	}
-	if propertyDefs, err = loadPropertyDefs(fsys); err != nil {
+	if d.propertyDefs, err = loadPropertyDefs(fsys); err != nil {
 		return err
 	}
 	if err = loadStoreTables(fsys, d); err != nil {
 		return err
 	}
-	if err = loadMonsterTables(fsys); err != nil {
+	if err = loadMonsterTables(fsys, d); err != nil {
 		return err
 	}
 	return nil

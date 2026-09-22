@@ -26,10 +26,6 @@ func (d *ApplyStatusAction) Execute(context ActionContext) []Action {
 	return nil
 }
 
-func (d *ApplyStatusAction) GetAnimations() []Animation {
-	return nil
-}
-
 func (d *ApplyStatusAction) GetActor() *Actor {
 	return d.actor
 }

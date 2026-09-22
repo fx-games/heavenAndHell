@@ -92,7 +92,7 @@ func d1ServiceOption(ctx ActionContext, label string, applies func(*d1.Item) boo
 			}
 			return
 		}
-		ctx.UserInterface().OpenServiceMenu(items, func(it *Item) int { return cost(it.d1) }, func(it *Item) {
+		ctx.Show(ChooseService{Items: items, Price: func(it *Item) int { return cost(it.d1) }, Pick: func(it *Item) {
 			price := cost(it.d1)
 			done := PayGold(ctx, player, price)
 			if done {
@@ -103,9 +103,9 @@ func d1ServiceOption(ctx ActionContext, label string, applies func(*d1.Item) boo
 			}
 			open(true)
 			if done && len(showAfter) > 0 && showAfter[0] {
-				ctx.UserInterface().ShowItemInfo(it)
+				ctx.Show(ShowItem{it})
 			}
-		})
+		}})
 	}
 	return util.MenuItem{MainText: label, Action: func() { open(false) }}
 }
@@ -133,7 +133,6 @@ func d1VendorOptions(ctx ActionContext, vendor *Actor) []util.MenuItem {
 
 // vendorService builds one named service; false when it has nothing to offer right now.
 func vendorService(ctx ActionContext, vendor *Actor, service string) (util.MenuItem, bool) {
-	gui := ctx.UserInterface()
 	data := ctx.GameState.factory.D1().D
 	name, arg := service, 0
 	if util.LooksLikeAFunction(service) {
@@ -142,17 +141,17 @@ func vendorService(ctx ActionContext, vendor *Actor, service string) (util.MenuI
 	}
 	switch name {
 	case "buy":
-		return util.MenuItem{MainText: "Buy items", Action: func() { gui.OpenShopMenu(vendor) }}, true
+		return util.MenuItem{MainText: "Buy items", Action: func() { ctx.Show(OpenShop{Vendor: vendor}) }}, true
 	case "buy_basic":
 		return util.MenuItem{MainText: "Buy basic items", Action: func() {
-			gui.OpenShopMenuFiltered(vendor, func(item *Item) bool { return !item.IsPremiumStock() })
+			ctx.Show(OpenShop{vendor, func(item *Item) bool { return !item.IsPremiumStock() }})
 		}}, true
 	case "buy_premium":
 		return util.MenuItem{MainText: "Buy premium items", Action: func() {
-			gui.OpenShopMenuFiltered(vendor, func(item *Item) bool { return item.IsPremiumStock() })
+			ctx.Show(OpenShop{vendor, func(item *Item) bool { return item.IsPremiumStock() }})
 		}}, true
 	case "sell":
-		return util.MenuItem{MainText: "Sell items", Action: func() { gui.BeginPlayerSellingTo(vendor) }}, true
+		return util.MenuItem{MainText: "Sell items", Action: func() { ctx.Show(OpenSelling{vendor}) }}, true
 	case "repair":
 		return d1ServiceOption(ctx, "Repair items", d1.CanRepair, d1.RepairCost, func(it *d1.Item) { it.Durability = it.MaxDur }), true
 	case "recharge":
@@ -176,7 +175,7 @@ func vendorService(ctx ActionContext, vendor *Actor, service string) (util.MenuI
 				return
 			}
 			n := ctx.GameState.RespawnD1Monsters()
-			gui.OpenTextWindow(util.ToLabelText([]string{vendor.Name(), "", "I am very grateful. This will go to a good cause."}))
+			ctx.Show(ShowText{[]string{vendor.Name(), "", "I am very grateful. This will go to a good cause."}})
 			ctx.Msg(fmt.Sprintf("Something stirs on %d dungeon levels.", n))
 		}}, true
 	case "peek": // a look fee of arg, paid once per item: looking again is free until the stock changes
@@ -191,13 +190,13 @@ func vendorService(ctx ActionContext, vendor *Actor, service string) (util.MenuI
 		return util.MenuItem{MainText: label, Action: func() {
 			if flags.IsSet(FlagWirtItemSeen) || PayGold(ctx, ctx.GameState.GetPlayer(), arg) {
 				flags.SetTrue(FlagWirtItemSeen)
-				gui.OpenShopMenu(vendor)
+				ctx.Show(OpenShop{Vendor: vendor})
 			}
 		}}, true
 	case "stash":
-		return util.MenuItem{MainText: "Open your stash", Action: gui.OpenPlayerStashInTown}, true
+		return util.MenuItem{MainText: "Open your stash", Action: func() { ctx.Show(OpenStash{}) }}, true
 	case "transfer":
-		return util.MenuItem{MainText: "Transfer an enchantment", Action: gui.OpenTransferEnchantmentMenu}, true
+		return util.MenuItem{MainText: "Transfer an enchantment", Action: func() { ctx.Show(OpenEnchantmentTransfer{}) }}, true
 	}
 	return util.MenuItem{}, false
 }

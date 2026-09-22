@@ -227,7 +227,7 @@ func (g *MapGenerator) placeD1Objects(m *gridmap.GridMap[*Actor, *Item, Object],
 				door.D1 = o
 				door.rogue = func() bool {
 					p := g.factory.State.GetPlayer()
-					return p != nil && p.hero != nil && d1.HasClassFlag(p.hero.Class, d1.ClassTrapSense)
+					return p != nil && p.hero != nil && p.hero.Rules().HasClassFlag(p.hero.Class, d1.ClassTrapSense)
 				}
 			}
 			continue

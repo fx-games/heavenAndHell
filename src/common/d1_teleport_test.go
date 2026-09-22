@@ -10,7 +10,7 @@ import (
 // never in the row beyond the enemy (D1's k < 1).
 func TestD1TeleportBesideTheEnemy(t *testing.T) {
 	for seed := int64(1); seed <= 20; seed++ {
-		SeedD1Rng(seed)
+		SeedRandom(seed)
 		m := gridmap.NewEmptyMap[*Actor, *Item, Object](20, 20)
 		blink := NewActor(0)
 		blink.d1Monster = &D1Monster{}

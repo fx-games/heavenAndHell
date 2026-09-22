@@ -8,6 +8,9 @@ type Broker struct {
 	queuedActions      [][]Action
 	context            ActionContext
 	ticks              uint64
+	presenter          Presenter
+	events             []Event // emitted by the actions executing right now, presented when each one finishes
+	depth              int     // how many Executes are running
 }
 
 // NewBroker creates a new broker
@@ -19,6 +22,7 @@ func NewBroker(context ActionContext) *Broker {
 		runningAnimations:  make([]Animation, 0),
 		movementAnimations: make(map[*Actor]*MovementAnimation),
 		queuedActions:      make([][]Action, 0),
+		presenter:          Present,
 	}
 	context.ActionBroker = b
 	b.context = context
@@ -67,9 +71,13 @@ func (d *Broker) Execute(action Action) {
 	var chainedActions []Action
 	d.callBeforeHooks(action)
 
+	mark := len(d.events)
+	d.depth++
 	chainedActions = action.Execute(d.context)
-	animation := action.GetAnimations()
-	if animation != nil {
+	d.depth--
+	animation := d.present(d.events[mark:])
+	d.events = d.events[:mark]
+	if len(animation) > 0 {
 		d.startAnimations(animation)
 		d.syncToProjectiles(animation, chainedActions)
 	}
@@ -79,6 +87,26 @@ func (d *Broker) Execute(action Action) {
 	}
 
 	d.callAfterHooks(action)
+}
+
+// Emit reports what just happened. During an Execute it is shown when that action finishes, like the action's
+// own animations; outside of one, right away.
+func (d *Broker) Emit(ev Event) {
+	if d.depth > 0 {
+		d.events = append(d.events, ev)
+		return
+	}
+	d.startAnimations(d.present([]Event{ev}))
+}
+
+func (d *Broker) present(events []Event) []Animation {
+	var animations []Animation
+	for _, ev := range events {
+		if d.presenter != nil {
+			animations = append(animations, d.presenter(d, ev)...)
+		}
+	}
+	return animations
 }
 
 func (d *Broker) QueueForExecutionAtTheSameTime(actions []Action) {
@@ -108,10 +136,8 @@ func (d *Broker) callAfterHooks(action Action) {
 			for _, chainedAction := range chained {
 				d.Execute(chainedAction)
 			}
-			//println(fmt.Sprintf("(%s) After Hook %s executed", action.Action(), hook.ActionName()))
 		}
 	}
-	//println(fmt.Sprintf("(%s) Action executed", action.Action()))
 }
 
 func (d *Broker) callBeforeHooks(action Action) {
@@ -122,7 +148,6 @@ func (d *Broker) callBeforeHooks(action Action) {
 				d.Execute(chainedAction)
 			}
 
-			//println(fmt.Sprintf("(%s) Before Hook %s executed", action.Action(), hook.ActionName()))
 		}
 	}
 }

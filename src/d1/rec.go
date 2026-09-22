@@ -28,25 +28,21 @@ func readRecMulti(fsys fs.FS, name string) (map[string][]recfile.Record, error) 
 	return recfile.ReadMulti(f), nil
 }
 
-// MonsterAIDescriptions is a plain-English gloss of each AI_* brain, shown in the actor description popup.
-// Filled by Load from the ai section of assets/data/monsters.rec.
-var MonsterAIDescriptions map[string]string
-
-func loadMonsterTables(fsys fs.FS) error {
+func loadMonsterTables(fsys fs.FS, d *Data) error {
 	recs, err := readRecMulti(fsys, "monsters.rec")
 	// monsters.rec glosses the AI_* brains in plain English for the actor popup. A mod whose monsters are driven
 	// by skills rather than by Diablo's brains names no AI_* at all and ships no file; the glossary stays empty.
 	if errors.Is(err, fs.ErrNotExist) {
-		MonsterAIDescriptions = map[string]string{}
+		d.MonsterAIDescriptions = map[string]string{}
 		return nil
 	}
 	if err != nil {
 		return err
 	}
-	MonsterAIDescriptions = make(map[string]string, len(recs["ai"]))
+	d.MonsterAIDescriptions = make(map[string]string, len(recs["ai"]))
 	for _, r := range recs["ai"] {
 		m := r.ToMap("")
-		MonsterAIDescriptions[m.GetStringOrDefault("id", "")] = m.GetStringOrDefault("description", "")
+		d.MonsterAIDescriptions[m.GetStringOrDefault("id", "")] = m.GetStringOrDefault("description", "")
 	}
 	return nil
 }

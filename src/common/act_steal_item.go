@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"math/rand"
 )
 
 type StealItemAction struct {
@@ -30,7 +29,7 @@ func (d *StealItemAction) Execute(context ActionContext) []Action {
 		return nil
 	}
 
-	randomItem := victimItems[rand.Intn(len(victimItems))]
+	randomItem := victimItems[rng.Intn(len(victimItems))]
 
 	victimInventory := d.victim.GetInventory()
 	victimInventory.Remove(randomItem)
@@ -45,9 +44,5 @@ func (d *StealItemAction) Execute(context ActionContext) []Action {
 
 	msg(fmt.Sprintf("%s stole [:darkText]%s", name, randomItem.Name()))
 
-	return nil
-}
-
-func (d *StealItemAction) GetAnimations() []Animation {
 	return nil
 }

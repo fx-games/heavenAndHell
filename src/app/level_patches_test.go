@@ -21,7 +21,7 @@ func TestEveryMapChangingObjectHasAPatch(t *testing.T) {
 		g, _ := createGameAndUIContext()
 		g.GetAudio().SetDisablePlayback(true)
 		g.SeedRandom(seed)
-		common.SeedD1Rng(seed)
+		common.SeedRandom(seed)
 		g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
 		s := g.GetWorldState()
 		for q := range s.D1Quests() { // every quest's set piece, not just the ones this seed rolled

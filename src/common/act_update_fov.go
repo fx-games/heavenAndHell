@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"math/rand"
 )
 
 type UpdateFoVAction struct {
@@ -78,8 +77,8 @@ func updatePlayerKnowledge(context ActionContext) {
 	vis.Set(currentlyVisible)
 	for newActor := range cameIntoView {
 		if lines := newActor.SpeechOnSight(); len(lines) > 0 && context.ActionBroker != nil {
-			line := lines[rand.Intn(len(lines))]
-			context.ActionBroker.AddAnimation(NewSpeechAnimation(newActor, []string{line}))
+			line := lines[rng.Intn(len(lines))]
+			context.ActionBroker.Emit(Said{Actor: newActor, Line: line})
 			context.Msg(fmt.Sprintf("%s says: %s", newActor.Name(), line))
 		}
 		if newActor.IsHostile() {
@@ -97,8 +96,4 @@ func updatePlayerKnowledge(context ActionContext) {
 			//context.Msg(fmt.Sprintf("%s leaves your field of view", oldActor.Name()))
 		}
 	}
-}
-
-func (d *UpdateFoVAction) GetAnimations() []Animation {
-	return nil
 }

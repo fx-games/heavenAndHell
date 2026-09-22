@@ -342,7 +342,7 @@ func (i *Item) IsRangedWeapon() bool {
 func (i *Item) SlotName() defs.SlotName {
 	if i.d1 != nil {
 		owner := i.getPlayer()
-		return d1SlotName(i.d1, owner != nil && owner.hero != nil && d1.HasClassFlag(owner.hero.Class, d1.ClassDualWield))
+		return d1SlotName(i.d1, owner != nil && owner.hero != nil && owner.hero.Rules().HasClassFlag(owner.hero.Class, d1.ClassDualWield))
 	}
 	if i.IsLightSource() {
 		return defs.SlotNameLightSource

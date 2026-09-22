@@ -17,9 +17,6 @@ func (d *BaseAction) Cause() Cause {
 func (d *BaseAction) Name() ActionName {
 	return d.name
 }
-func (d *BaseAction) GetAnimations() []Animation {
-	return nil
-}
 
 func (d *BaseAction) GetDelayInAut() int {
 	return 10

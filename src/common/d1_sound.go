@@ -76,7 +76,7 @@ func d1HeroPainSound(ctx ActionContext, hero *Actor) {
 	id := "PS_" + voice + "69"
 	if !hero.IsAlive() {
 		id = "PS_" + voice + "71"
-		if death := d1.Class(hero.hero.Class).DeathSound; death != "" {
+		if death := hero.hero.Rules().Class(hero.hero.Class).DeathSound; death != "" {
 			id = death
 		}
 	}
@@ -88,7 +88,7 @@ func d1ItemSfx(item *Item) (drop, inv string) {
 	if item == nil || item.d1 == nil {
 		return "", ""
 	}
-	return d1.ItemSnds(item.d1.Curs)
+	return item.d1Data.ItemSnds(item.d1.Curs)
 }
 
 // playD1ItemInvSfx plays the sound of an item going into the hero's pack or onto them (CheckInvPaste).

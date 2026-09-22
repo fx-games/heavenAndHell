@@ -3,6 +3,7 @@ package textui
 import (
 	"image/color"
 	"io"
+	"log/slog"
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
@@ -51,7 +52,7 @@ func loadUIColors(record recfile.Record, palette textiles.ColorPalette) map[UICo
 	for _, field := range record {
 		uiColor := palette.Get(field.Value)
 		if uiColor.A == 0 { // not in the palette: better a visible default than black on black
-			println("WARNING: no palette color named", field.Value)
+			slog.Warn("no palette color", "name", field.Value)
 			uiColor = color.RGBA{R: 200, G: 200, B: 200, A: 255}
 		}
 		uiColors[UIColorFromString(field.Name)] = uiColor
@@ -99,7 +100,7 @@ func UIColorFromString(s string) UIColor {
 	case "statusbarforeground":
 		return UIColorStatusBarForeground
 	}
-	println("WARNING: Unknown color: ", s)
+	slog.Warn("unknown color", "name", s)
 	return UIColorUIForeground
 }
 
@@ -137,7 +138,7 @@ func BorderCaseFromString(s string) BorderCases {
 	if border, ok := borderNames[strings.ToLower(s)]; ok {
 		return border
 	}
-	println("WARNING: Unknown border case: ", s)
+	slog.Warn("unknown border case", "name", s)
 	return BorderHorizontal
 }
 

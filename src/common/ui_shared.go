@@ -275,7 +275,7 @@ func LevelUpMenuItems(player *Actor, reopen, done func()) []util.MenuItem {
 			if total != base {
 				label += fmt.Sprintf(" (%d)", total)
 			}
-			label += fmt.Sprintf(" / %d", d1.MaxStats[h.Class][choice.attr])
+			label += fmt.Sprintf(" / %d", h.Rules().MaxStats[h.Class][choice.attr])
 		}
 		items = append(items, util.MenuItem{MainText: label, Action: func() {
 			player.LevelUp(stat)

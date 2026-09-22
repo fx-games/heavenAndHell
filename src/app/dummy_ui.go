@@ -3,6 +3,7 @@ package app
 import (
 	"image"
 	"image/color"
+	"log/slog"
 	"rpg/src/common"
 	"rpg/src/defs"
 	"rpg/src/geometry"
@@ -51,7 +52,7 @@ func (d DummyUI) HasOverlays() bool {
 
 func (d DummyUI) ShowLogMessage(message string) {
 	//TODO implement me
-	println(message)
+	slog.Debug("log message", "text", message)
 }
 
 func (d DummyUI) Cancel() {

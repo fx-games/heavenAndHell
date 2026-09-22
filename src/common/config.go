@@ -1,9 +1,11 @@
 package common
 
 import (
+	"bytes"
 	"cmp"
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"maps"
 	"os"
 	"path"
@@ -176,15 +178,14 @@ func (c Configuration) ToRecord() recfile.Record {
 }
 
 func (c Configuration) SaveToRecFile(recFilename string) {
-	file, err := os.Create(recFilename)
-	if err != nil {
+	var buf bytes.Buffer
+	recfile.Write(&buf, []recfile.Record{c.ToRecord()})
+	if err := util.WriteFileAtomic(recFilename, buf.Bytes()); err != nil {
 		panic(err)
 	}
-	defer file.Close()
-	recfile.Write(file, []recfile.Record{c.ToRecord()})
 }
 func NewConfigurationFromRecFile(recFilename string) Configuration {
-	println(fmt.Sprintf("Loading configuration from %s", recFilename))
+	slog.Debug("loading configuration", "file", recFilename)
 	file, err := os.Open(recFilename)
 	configExists := false
 	var configMap recfile.DataMap
@@ -282,7 +283,7 @@ func setConfigFields(recFilename string, fields [][2]string) error {
 			lines = append(lines[:header], append([]string{line}, lines[header:]...)...)
 		}
 	}
-	return os.WriteFile(recFilename, []byte(strings.Join(lines, "\n")+"\n"), 0o644)
+	return util.WriteFileAtomic(recFilename, []byte(strings.Join(lines, "\n")+"\n"))
 }
 
 // ModSetting is a setting the active mod fixes in its data/mod.rec, and whether it does. The player can't change

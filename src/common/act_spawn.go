@@ -34,7 +34,3 @@ func (d *SpawnAction) Execute(context ActionContext) []Action {
 	context.Msg(fmt.Sprintf("%s %s", casterPart, d.actionDescription))
 	return nil
 }
-
-func (d *SpawnAction) GetAnimations() []Animation {
-	return nil
-}

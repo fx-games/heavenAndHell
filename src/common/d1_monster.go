@@ -266,7 +266,7 @@ func (g *Factory) NewD1MonsterFromLevel(mon *d1.Monster) *Actor {
 
 // D1MonsterSections describes a monster for the info window: what it is, its numbers, what it shrugs off and
 // how it fights.
-func (a *Actor) D1MonsterSections() []D1SheetSection {
+func (a *Actor) D1MonsterSections(d *d1.Data) []D1SheetSection {
 	mon := a.d1Monster
 	class := strings.ToLower(strings.TrimPrefix(mon.Data.Class, "MC_"))
 	kind := fmt.Sprintf("Level %d %s", mon.Level, class)
@@ -299,7 +299,7 @@ func (a *Actor) D1MonsterSections() []D1SheetSection {
 	if len(resists) > 0 {
 		sections = append(sections, D1SheetSection{Title: "Resistances", Rows: resists})
 	}
-	if behavior := d1.MonsterAIDescriptions[mon.AI]; behavior != "" {
+	if behavior := d.MonsterAIDescriptions[mon.AI]; behavior != "" {
 		sections = append(sections, D1SheetSection{Title: "Behavior", Notes: []string{behavior}})
 	}
 	return sections

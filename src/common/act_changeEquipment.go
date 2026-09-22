@@ -76,10 +76,6 @@ func (d *ChangeEquipmentAction) Execute(context ActionContext) []Action {
 	return nil
 }
 
-func (d *ChangeEquipmentAction) GetAnimations() []Animation {
-	return nil
-}
-
 func (d *ChangeEquipmentAction) GetMode() EquipmentChangeMode {
 	return d.mode
 }

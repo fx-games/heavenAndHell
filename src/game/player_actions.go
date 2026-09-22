@@ -3,7 +3,6 @@ package game
 import (
 	"cmp"
 	"fmt"
-	"math/rand"
 	"rpg/src/audio"
 	"rpg/src/common"
 	"rpg/src/d1"
@@ -91,7 +90,7 @@ func (a *Actions) PickUpItem() {
 		return
 	}
 	if !player.CanPickup(item) {
-		state.Factory().PlayD1HeroSound(14 + rand.Intn(3)) // AutoGetItem: "I can't carry any more"
+		state.Factory().PlayD1HeroSound(14 + common.Random().Intn(3)) // AutoGetItem: "I can't carry any more"
 		return
 	}
 	pickUpAction := common.NewPickUpAction(common.AbstractCause("PickUpAction"), player)
@@ -244,12 +243,12 @@ func (a *Actions) ManualMovePlayer(direction geometry.Point) {
 	//g.actionBroker.CancelAllAnimations()
 
 	if player.HasStatusEffect(common.StatusConfused) {
-		if rand.Intn(3) != 0 { // one in three chance to succeed with movement
+		if common.Random().Intn(3) != 0 { // one in three chance to succeed with movement
 			// pick a different random direction..
 			possibleDirectionsRemaining := state.GetMap().GetFilteredDirectionsForMovement(func(dir geometry.Point) bool {
 				return dir != direction
 			})
-			direction = possibleDirectionsRemaining[rand.Intn(len(possibleDirectionsRemaining))]
+			direction = possibleDirectionsRemaining[common.Random().Intn(len(possibleDirectionsRemaining))]
 		}
 	}
 
@@ -265,6 +264,7 @@ func (a *Actions) getActionContext() common.ActionContext {
 	return common.ActionContext{
 		GameState:     a.state,
 		UserInterface: a.ui,
+		Show:          func(r common.UIRequest) { show(a.ui(), r) },
 		AudioPlayer:   a.audio,
 		Data:          a.definitions,
 		ActionBroker:  a.actionBroker,

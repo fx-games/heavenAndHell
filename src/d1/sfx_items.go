@@ -10,18 +10,16 @@ import (
 
 // ItemSnds is the sound an item makes landing on the floor (ItemDropSnds) and going into the inventory or being
 // used (ItemInvSnds), by its cursor graphic (ItemCAnimTbl). Generated from devilution 1.09's items.cpp, HELLFIRE.
-func ItemSnds(curs int) (drop, inv string) {
-	if curs < 0 || curs >= len(itemCAnimTbl) {
+func (d *Data) ItemSnds(curs int) (drop, inv string) {
+	if curs < 0 || curs >= len(d.itemCAnimTbl) {
 		return "", ""
 	}
-	a := itemCAnimTbl[curs]
-	return itemDropSnds[a], itemInvSnds[a]
+	a := d.itemCAnimTbl[curs]
+	return d.itemDropSnds[a], d.itemInvSnds[a]
 }
 
 // The three tables above live in assets/data/item_sounds.rec: a "sound" record per sound class holding its drop
 // and inventory sound, and an "anim" record whose repeated curs fields are ItemCAnimTbl.
-var itemCAnimTbl []int
-var itemDropSnds, itemInvSnds []string
 
 func loadItemSounds(fsys fs.FS) (canim []int, drop, inv []string, err error) {
 	recs, err := readRecMulti(fsys, "item_sounds.rec")

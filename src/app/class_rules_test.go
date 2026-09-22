@@ -11,23 +11,24 @@ import (
 func TestClassRulesAreTheirRecords(t *testing.T) {
 	h := newHeavenAndHellGame(t, NewDummyUI())
 	h.NewGame(h.GetGameData().ClassDefinitions[0], false, "")
-	archer, mage := d1.ClassByKey("archer"), d1.ClassByKey("mage")
-	if archer < 0 || mage < 0 || d1.ClassByKey("rogue") >= 0 {
-		t.Fatalf("H&H class keys: archer %d, mage %d, rogue %d", archer, mage, d1.ClassByKey("rogue"))
+	rules := h.GetWorldState().GetPlayer().Hero().Rules()
+	archer, mage := rules.ClassByKey("archer"), rules.ClassByKey("mage")
+	if archer < 0 || mage < 0 || rules.ClassByKey("rogue") >= 0 {
+		t.Fatalf("H&H class keys: archer %d, mage %d, rogue %d", archer, mage, rules.ClassByKey("rogue"))
 	}
-	if !d1.FullMissileDamageBonus(archer) || d1.FullMissileDamageBonus(mage) {
+	if !rules.FullMissileDamageBonus(archer) || rules.FullMissileDamageBonus(mage) {
 		t.Error("full_missile_bonus: the Archer's flag, not the Mage's")
 	}
-	if got := d1.Class(mage).SpellToHit; got != 20 {
+	if got := rules.Class(mage).SpellToHit; got != 20 {
 		t.Errorf("Mage spell_to_hit %d, want 20", got)
 	}
 	// a flag moves with the record: give the Mage the Monk's fists and the Mage fights like a monk
-	hero := d1.NewHero(mage)
+	hero := rules.NewHero(mage)
 	hero.Level = 20
 	if s := hero.Sheet(nil); s.MaxDam >= 20 {
 		t.Fatalf("Mage's bare hands already hit for %d", s.MaxDam)
 	}
-	d1.SetClassFlagForTest(mage, d1.ClassTrainedFists)
+	rules.SetClassFlagForTest(mage, d1.ClassTrainedFists)
 	if s := hero.Sheet(nil); s.MinDam != 10 || s.MaxDam != 20 {
 		t.Errorf("a Mage with trained_fists: %d-%d, want 10-20", s.MinDam, s.MaxDam)
 	}

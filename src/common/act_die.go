@@ -25,13 +25,12 @@ func (d *DieAction) Execute(context ActionContext) []Action {
 	gameMap := state.GetMap() // read state
 	msg := context.Msg
 	actor := d.actor
-	ui := context.UserInterface()
 	if actor == state.GetPlayer() {
 		msg(fmt.Sprintf("You die. CoD: %s", d.cause.ToString()))
 		state.factory.PlayD1HeroSound(71)
 		PlayUICue("player_death")
 		PlayUICue("game_over")
-		ui.ShowGameOverMenu()
+		context.Show(ShowGameOver{})
 	} else {
 		if actor.VisualsPending() {
 			state.dying = append(state.dying, actor)
@@ -60,9 +59,6 @@ func (d *DieAction) getCorpsePos(gameMap *gridmap.GridMap[*Actor, *Item, Object]
 	}
 	dropPos := freeCells[0]
 	return dropPos
-}
-func (d *DieAction) GetAnimations() []Animation {
-	return nil
 }
 
 func (d *DieAction) GetActor() *Actor {

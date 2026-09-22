@@ -1,0 +1,33 @@
+%rec: default
+
+AudioEnabled: false
+ActorBobbingEnabled: true
+DrawTilesBehindActors: false
+DrawTilesBehindItems: false
+DrawTilesBehindObjects: false
+Font: 
+DefaultFontSize: 16
+AutoPickup: true
+WindowWidth: 1280
+WindowHeight: 800
+CardinalMovementOnly: false
+KeepPlayerCentered: true
+FeedInventory: false
+FeedEquipment: false
+FeedCharacter: false
+FeedVisibleItems: false
+FeedVisibleActors: false
+FeedLog: false
+FeedQuests: false
+FeedMinimap: false
+HideSidebar: false
+FlipActorsHorizontally: true
+SoundVolume: 1
+MusicVolume: 1
+VoiceVolume: 1
+AutoExploreOpenContainers: false
+AutosaveOnLevelChange: true
+Fullscreen: false
+Mod: heavenandhell
+SpriteSheet: assets/classic_roguelike.png
+

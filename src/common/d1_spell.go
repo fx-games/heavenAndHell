@@ -31,7 +31,6 @@ type SpellAction struct {
 	caster        *Actor
 	spell, slvl   int
 	target        geometry.Point
-	animations    []Animation
 	castSucceeded bool
 }
 
@@ -40,8 +39,7 @@ func NewSpellAction(caster *Actor, spell, slvl int, target geometry.Point) *Spel
 		caster: caster, spell: spell, slvl: slvl, target: target}
 }
 
-func (a *SpellAction) GetAnimations() []Animation { return a.animations }
-func (a *SpellAction) GetDelayInAut() int         { return D1CastAut(a.caster) }
+func (a *SpellAction) GetDelayInAut() int { return D1CastAut(a.caster) }
 
 // Succeeded: false when the spell found nothing to act on (D1 then doesn't take mana).
 func (a *SpellAction) Succeeded() bool { return a.castSucceeded }
@@ -63,17 +61,16 @@ func (a *SpellAction) Execute(ctx ActionContext) []Action {
 		playD1SfxAt(ctx, sfx[1], from)
 		ctx.Msg(fmt.Sprintf("You cast %s.", f.Generator.D.Spells[a.spell].Name))
 	}
-	a.animations = c.animations
+	c.emit(ctx.ActionBroker)
 	return c.finish()
 }
 
 // D1CastAut: casting takes the class's spell animation (decision 13).
 func D1CastAut(caster *Actor) int {
-	class := 0
-	if caster.hero != nil {
-		class = caster.hero.Class
+	if caster.hero == nil { // only the hero casts D1 spells (NewSpellAction)
+		return 0
 	}
-	return d1TicksToAUT(d1.SpellFrames[class])
+	return d1TicksToAUT(caster.hero.Rules().SpellFrames[caster.hero.Class])
 }
 
 type spellCtx struct {
@@ -87,10 +84,10 @@ type spellCtx struct {
 	cause       Cause
 	dealt       map[*Actor]int // whole points, applied once per victim in finish
 	order       []*Actor
-	animations  []Animation
+	events      []Event         // what the spell did, emitted when its action finishes
 	from        *geometry.Point // where the spell comes from when not the caster: a rune
 	heroDealt   int             // whole points the hero's own TARGET_BOTH missiles dealt to him
-	lastBolt    *ProjectileDirectionAnimation
+	lastBolt    int             // 1 + the index of the last bolt in events, 0 for none
 	// how a hit resolves, set by whatever is dealing the damage rather than read back off a spell id
 	resist     int  // d1.ResistKind*
 	undeadOnly bool // only the undead are harmed (Holy Bolt)
@@ -230,7 +227,7 @@ func (c *spellCtx) strike(a *Actor, dam64, ticks int) bool {
 	chance := c.h.SpellHitChance(c.s, mon.Level)
 	total := 0
 	for i := 0; i < ticks; i++ {
-		if a.HasStatusEffect(StatusStone) || d1Rng.Intn(100) < chance {
+		if a.HasStatusEffect(StatusStone) || rng.Intn(100) < chance {
 			total += dam64
 		}
 	}
@@ -245,8 +242,32 @@ func (c *spellCtx) strike(a *Actor, dam64, ticks int) bool {
 		c.order = append(c.order, a)
 	}
 	c.dealt[a] += total >> 6
-	c.animations = append(c.animations, NewHitAnimation(a.MapPosition(), 0.3, defs.IconEffectHit, 2))
+	c.flash(a.MapPosition(), 0.3, defs.IconEffectHit)
 	return true
+}
+
+// lastMissile is the spell's last bolt so far.
+func (c *spellCtx) lastMissile() (Missile, bool) {
+	if c.lastBolt == 0 {
+		return Missile{}, false
+	}
+	return c.events[c.lastBolt-1].(Missile), true
+}
+
+func (c *spellCtx) flash(p geometry.Point, seconds float64, icon int32) {
+	c.events = append(c.events, Flash{At: p, Seconds: seconds, Icon: icon})
+}
+
+// missile is a straight flight (or one through several cells) of the spell's.
+func (c *spellCtx) missile(by *Actor, path []geometry.Point, secPerTile float64, icon int32) {
+	c.events = append(c.events, Missile{By: by, Path: path, SecPerTile: secPerTile, Icon: icon})
+}
+
+// emit hands the spell's events to the broker.
+func (c *spellCtx) emit(b *Broker) {
+	for _, ev := range c.events {
+		b.Emit(ev)
+	}
 }
 
 func (c *spellCtx) finish() []Action {
@@ -309,12 +330,12 @@ func (c *spellCtx) bolt(from, to geometry.Point, hit func(a *Actor) bool) (impac
 	if !stopped {
 		impact = last
 	}
-	if b := c.lastBolt; b != nil && b.End() == from { // Elemental's homing leg flies on from where the first one stopped
-		b.Extend(last)
+	if b, ok := c.lastMissile(); ok && b.Path[len(b.Path)-1] == from { // Elemental's homing leg flies on from where the first one stopped
+		b.Path = append(b.Path, last)
+		c.events[c.lastBolt-1] = b
 	} else if sfx := d1.SpellSfx[c.spell][2]; last != from {
-		c.lastBolt = NewProjectileDirectionAnimation(c.caster, from, last, c.secPerTile(), c.icon(), 2)
-		c.lastBolt.SetOnFinish(func() { playD1SfxAt(c.ctx, sfx, last) })
-		c.animations = append(c.animations, c.lastBolt)
+		c.events = append(c.events, Missile{By: c.caster, Path: []geometry.Point{from, last}, SecPerTile: c.secPerTile(), Icon: c.icon(), ArriveSfx: sfx})
+		c.lastBolt = len(c.events)
 	} else {
 		playD1SfxAt(c.ctx, sfx, last)
 	}
@@ -395,12 +416,12 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 		item.RefreshD1()
 		SyncHero(c.caster)
 		f.Msg(fmt.Sprintf("It is %s.", item.Name()))
-		if f.UI != nil {
-			f.UI().ShowItemInfo(item)
+		if f.Show != nil {
+			f.Show(ShowItem{item})
 		}
 	case d1.SplJester: // missiles_jester: one of nine spells at the Jester's spell level
 		c.spell = [10]int{d1.SplFirebolt, d1.SplFirebolt, d1.SplFireball, d1.SplFireWall, d1.SplGuardian, d1.SplChain,
-			d1.SplTown, d1.SplTeleport, d1.SplApocalypse, d1.SplStone}[d1Rng.Intn(10)]
+			d1.SplTown, d1.SplTeleport, d1.SplApocalypse, d1.SplStone}[rng.Intn(10)]
 		c.setSpell(c.spell)
 		c.ctx.Msg(fmt.Sprintf("The Jester casts %s.", f.Generator.D.Spells[c.spell].Name))
 		return c.cast(target)
@@ -493,7 +514,7 @@ func (f *Factory) spawnD1FireWall(caster *Actor, p geometry.Point, slvl, layers 
 // spawnD1LightningWall places one cell of a lightning wall (MIS_LIGHTWALL): 255·(slvl+1) ticks of 16·(2d10 + clvl
 // + 2)/64 a tick, rolled once when it is laid, on monsters and the hero alike.
 func (f *Factory) spawnD1LightningWall(caster *Actor, p geometry.Point, slvl, clvl, layers int) {
-	dam := 16 * (d1Rng.Intn(10) + d1Rng.Intn(10) + clvl + 2) // one roll a controller tick, shared by what it lays
+	dam := 16 * (rng.Intn(10) + rng.Intn(10) + clvl + 2) // one roll a controller tick, shared by what it lays
 	f.spawnD1Wall(caster, p, d1.ResistKindLightning, 255*(slvl+1)/d1.RefWalkTicks, true, layers, defs.IconEffectLightning, func() int { return dam })
 }
 
@@ -563,7 +584,7 @@ func (f *Factory) spawnD1Guardian(caster *Actor, p geometry.Point, turns int) {
 					}
 				}
 				if best != nil {
-					dam := d1.FireboltDamage(d1Rng, c.s.Mag, c.h.SpellLevel(c.s, d1.SplFirebolt))
+					dam := d1.FireboltDamage(rng, c.s.Mag, c.h.SpellLevel(c.s, d1.SplFirebolt))
 					playD1SfxAt(c.ctx, d1.SpellSfx[d1.SplFirebolt][1], p)
 					c.bolt(p, best.MapPosition(), func(a *Actor) bool { return c.strike(a, dam<<6, 1) })
 				}
@@ -576,15 +597,13 @@ func (f *Factory) spawnD1Guardian(caster *Actor, p geometry.Point, turns int) {
 // spellTickAction resolves the damage of a lingering spell (fire wall, guardian) on its turn.
 type spellTickAction struct {
 	BaseAction
-	caster     *Actor
-	spell      int // only for the runes, which cast their own spell through the content mapping
-	resist     int // d1.ResistKind* of the damage this tick deals, when it is not a whole spell's
-	run        func(c *spellCtx)
-	animations []Animation
+	caster *Actor
+	spell  int // only for the runes, which cast their own spell through the content mapping
+	resist int // d1.ResistKind* of the damage this tick deals, when it is not a whole spell's
+	run    func(c *spellCtx)
 }
 
-func (a *spellTickAction) GetAnimations() []Animation { return a.animations }
-func (a *spellTickAction) GetDelayInAut() int         { return 0 }
+func (a *spellTickAction) GetDelayInAut() int { return 0 }
 func (a *spellTickAction) Execute(ctx ActionContext) []Action {
 	c := &spellCtx{f: ctx.GameState.factory, ctx: ctx, caster: a.caster, h: a.caster.hero, s: a.caster.HeroSheet(), spell: a.spell,
 		m: ctx.GameState.GetMap(), cause: a.cause, dealt: map[*Actor]int{}}
@@ -593,7 +612,7 @@ func (a *spellTickAction) Execute(ctx ActionContext) []Action {
 		c.resist = a.resist
 	}
 	a.run(c)
-	a.animations = c.animations
+	c.emit(ctx.ActionBroker)
 	return c.finish()
 }
 
@@ -609,11 +628,11 @@ func (f *Factory) d1MovePlayer(player *Actor, p geometry.Point, why ActionName) 
 func (f *Factory) d1RandomTeleport(player *Actor) {
 	m, p := f.State.GetMap(), player.MapPosition()
 	for try := 0; try < 500; try++ {
-		dx, dy := d1Rng.Intn(3)+4, d1Rng.Intn(3)+4
-		if d1Rng.Intn(2) == 1 {
+		dx, dy := rng.Intn(3)+4, rng.Intn(3)+4
+		if rng.Intn(2) == 1 {
 			dx = -dx
 		}
-		if d1Rng.Intn(2) == 1 {
+		if rng.Intn(2) == 1 {
 			dy = -dy
 		}
 		if q := p.Add(geometry.Point{X: dx, Y: dy}); m.CanPlaceActorHere(q) && !m.IsObjectAt(q) {
@@ -636,8 +655,8 @@ func (f *Factory) pickD1IdentifyTarget(player *Actor, cast func()) {
 		f.Msg("You have nothing to identify.")
 		return
 	}
-	if f.UI != nil {
-		openD1ItemList(f.UI(), player, items, func(item *Item) {
+	if f.Show != nil {
+		openD1ItemList(f.Show, player, items, func(item *Item) {
 			f.identifyTarget = item
 			cast()
 			f.identifyTarget = nil

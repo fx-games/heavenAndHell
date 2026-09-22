@@ -85,10 +85,10 @@ func (g *Factory) enrageMonster(args util.Arguments) *HitEffect {
 				if mon.Golem || mon.Berserk || mon.Unique != nil || mon.AI == "AI_DIABLO" || mon.MagicRes&d1.ImmuneMagic != 0 {
 					continue
 				}
-				if mon.MagicRes&d1.ResistMagic != 0 && d1Rng.Intn(2) != 0 {
+				if mon.MagicRes&d1.ResistMagic != 0 && rng.Intn(2) != 0 {
 					continue
 				}
-				grow := func(v int) int { return v*(d1Rng.Intn(10)+120)/100 + slvl }
+				grow := func(v int) int { return v*(rng.Intn(10)+120)/100 + slvl }
 				mon.MinDam, mon.MaxDam = grow(mon.MinDam), grow(mon.MaxDam)
 				mon.MinDam2, mon.MaxDam2 = grow(mon.MinDam2), grow(mon.MaxDam2)
 				mon.Berserk = true

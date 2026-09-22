@@ -18,15 +18,12 @@ type TrapMissileAction struct {
 	BaseAction
 	from, target geometry.Point
 	mis          D1Missile
-	animations   []Animation
 }
 
 func NewTrapMissileAction(from geometry.Point, mis D1Missile, target geometry.Point) *TrapMissileAction {
 	return &TrapMissileAction{BaseAction: BaseAction{cause: AbstractCause("a trap"), name: ActionNameMonsterMissile},
 		from: from, target: target, mis: mis}
 }
-
-func (a *TrapMissileAction) GetAnimations() []Animation { return a.animations }
 
 func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 	player := ctx.GameState.GetPlayer()
@@ -37,7 +34,7 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 	case MisArrow: // MI_Arrow: currlevel..2·currlevel
 		c.bolt(a.mis, a.target, cl, 2*cl)
 	case MisFarrow: // MI_LArrow: the arrow hits as a plain one, then bursts in fire where it stopped
-		mind, maxd := d1Rng.Intn(10)+1+cl, d1Rng.Intn(10)+1+2*cl
+		mind, maxd := rng.Intn(10)+1+cl, rng.Intn(10)+1+2*cl
 		end := a.from
 		for _, p := range c.c.ray(a.from, a.target, 20) {
 			end = p
@@ -47,16 +44,16 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 		}
 		// the burst: MAGBLOS runs _miAnimLen-1 = 9 ticks, each a fresh roll that may hit again (nodel)
 		for tick := 0; tick < d1MagblosTicks; tick++ {
-			mind, maxd = d1Rng.Intn(10)+1+cl, d1Rng.Intn(10)+1+2*cl
+			mind, maxd = rng.Intn(10)+1+cl, rng.Intn(10)+1+2*cl
 			c.hit(a.mis, end, a.from, mind, maxd, false, 1)
 		}
-		c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(nil, a.from, end, missileSecPerTile(a.mis), defs.IconEffectFireSmall, 2),
-			NewHitAnimation(end, 0.4, defs.IconEffectFireBig, 2))
+		c.c.missile(nil, []geometry.Point{a.from, end}, missileSecPerTile(a.mis), defs.IconEffectFireSmall)
+		c.c.flash(end, 0.4, defs.IconEffectFireBig)
 	case MisFirebolt: // MI_Firebolt without a source: currlevel + rnd(2·currlevel)
-		d := cl + d1Rng.Intn(2*cl)
+		d := cl + rng.Intn(2*cl)
 		c.bolt(a.mis, a.target, d, d)
 	case MisLightCtrl: // MI_Lightctrl: a lightning (8 ticks, in 1/64) on every cell of the line
-		dam := d1Rng.Intn(cl) + 2*cl
+		dam := rng.Intn(cl) + 2*cl
 		cells := c.c.ray(a.from, a.target, 20)
 		for _, p := range cells {
 			if c.hit(a.mis, p, a.from, dam, dam, true, 8) {
@@ -64,7 +61,7 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 			}
 		}
 		if len(cells) > 0 {
-			c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(nil, a.from, cells[len(cells)-1], missileSecPerTile(a.mis), defs.IconEffectLightning, 2))
+			c.c.missile(nil, []geometry.Point{a.from, cells[len(cells)-1]}, missileSecPerTile(a.mis), defs.IconEffectLightning)
 		}
 	case MisFireRing: // mi_fire_ring: fire walls on the ring three cells out that the chest sees, until one lands on
 		// a piece that stops missiles; each burns (10 + currlevel)·16 ticks at currlevel·8/64 a tick
@@ -88,21 +85,21 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 		if p := player.MapPosition(); c.c.lineClear(a.from, p) {
 			c.hit(a.mis, p, a.from, 8*lvl, 8*lvl, true, 2)
 		}
-		c.c.animations = append(c.c.animations, NewProjectileDirectionAnimation(nil, a.from, player.MapPosition(), missileSecPerTile(a.mis), defs.IconEffectFireBig, 2))
+		c.c.missile(nil, []geometry.Point{a.from, player.MapPosition()}, missileSecPerTile(a.mis), defs.IconEffectFireBig)
 	case MisFlashTrap: // AddFlash for the players: monster[0]'s level (the golem slot) ·2, on the six cells below
 		dam := 2 * ctx.GameState.factory.Generator.D.Monsters[d1.MtGOLEM].Level
 		for _, d := range []geometry.Point{{X: -1}, {}, {X: 1}, {X: -1, Y: 1}, {Y: 1}, {X: 1, Y: 1}} {
 			c.hit(a.mis, a.from.Add(d), a.from, dam, dam, true, d1.FlashTicks)
 		}
-		c.c.animations = append(c.c.animations, NewHitAnimation(a.from, 0.4, defs.IconEffectLightning, 2))
+		c.c.flash(a.from, 0.4, defs.IconEffectLightning)
 	case MisNova: // AddNova without a source: currlevel/2 + 3·rnd(3). MI_Nova sends a lightning ball towards each of
 		// NovaRays' offsets; each flies until it hits something, so the hero can be struck by every ball crossing its cell
-		dam := cl>>1 + d1Rng.Intn(3) + d1Rng.Intn(3) + d1Rng.Intn(3)
+		dam := cl>>1 + rng.Intn(3) + rng.Intn(3) + rng.Intn(3)
 		for _, r := range d1.NovaRays {
 			c.fly(a.mis, c.c.ray(a.from, a.from.Add(geometry.Point{X: r[0], Y: r[1]}), 20), dam, dam, false)
 		}
 	}
-	a.animations = c.c.animations
+	c.c.emit(ctx.ActionBroker)
 	switch {
 	case c.taken > 0:
 		ctx.Msg(fmt.Sprintf("The trap hits you for %d damage.", max(c.taken>>6, 1)))
@@ -194,7 +191,7 @@ func (f *Factory) d1StealPotions(player *Actor) {
 	}
 	inv := player.GetInventory()
 	for _, it := range inv.Items() {
-		if it.d1 == nil || it.d1.Type != d1.ITypeMisc || d1Rng.Intn(2) == 0 {
+		if it.d1 == nil || it.d1.Type != d1.ITypeMisc || rng.Intn(2) == 0 {
 			continue
 		}
 		into := ""
@@ -207,12 +204,12 @@ func (f *Factory) d1StealPotions(player *Actor) {
 		case "IMISC_FULLMANA":
 			into = "IMISC_MANA"
 		case "IMISC_FULLREJUV":
-			into = [3]string{"IMISC_FULLMANA", "IMISC_FULLHEAL", "IMISC_REJUV"}[d1Rng.Intn(3)]
+			into = [3]string{"IMISC_FULLMANA", "IMISC_FULLHEAL", "IMISC_REJUV"}[rng.Intn(3)]
 		default:
 			continue
 		}
 		if it.d1.MiscID == "IMISC_REJUV" {
-			d1Rng.Intn(2)
+			rng.Intn(2)
 		}
 		if idx := byMisc(into); idx >= 0 {
 			inv.Remove(it)

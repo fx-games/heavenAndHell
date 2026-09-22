@@ -22,6 +22,7 @@ import (
 )
 
 func Main() {
+	setupLogging()
 	if len(os.Args) > 1 {
 		argCmd := strings.ToLower(os.Args[1])
 		switch argCmd {

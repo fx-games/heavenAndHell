@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log/slog"
 	"regexp"
 	"strconv"
 	"strings"
@@ -70,12 +71,18 @@ func (d DataMap) GetInt(key string) (int, error) {
 
 func (d DataMap) GetBoolOrFalse(key string) bool {
 	if value, ok := d[key]; ok {
+		if value != "true" && value != "false" {
+			badValue(key, value, "true or false")
+		}
 		return value == "true"
 	}
 	return false
 }
 func (d DataMap) GetBoolOrTrue(key string) bool {
 	if value, ok := d[key]; ok {
+		if value != "true" && value != "false" {
+			badValue(key, value, "true or false")
+		}
 		return value == "true"
 	}
 	return true
@@ -92,6 +99,7 @@ func (d DataMap) GetFloatOrDefault(key string, defaultValue float64) float64 {
 		if floatVal, err := strconv.ParseFloat(value, 64); err == nil {
 			return floatVal
 		}
+		badValue(key, value, "a number")
 	}
 	return defaultValue
 }
@@ -101,8 +109,14 @@ func (d DataMap) GetIntOrDefault(key string, defaultValue int) int {
 		if intVal, err := strconv.Atoi(value); err == nil {
 			return intVal
 		}
+		badValue(key, value, "an integer")
 	}
 	return defaultValue
+}
+
+// badValue warns about a field that is there but does not parse, which is otherwise read as its default.
+func badValue(key, value, want string) {
+	slog.Warn("mod data: field is not "+want+", using the default", "field", key, "value", value)
 }
 
 func (r Record) ToMap(listSeperator string) DataMap {
@@ -245,7 +259,7 @@ func WriteMulti(file io.StringWriter, recordsInCategories map[string][]Record) e
 	sanitizeFieldname := func(s string) string {
 		saneFieldname := strings.ReplaceAll(s, " ", "_")
 		if saneFieldname != s {
-			println(fmt.Sprintf("WARNING - Sanitizing fieldname: '%s' -> '%s'", s, saneFieldname))
+			slog.Warn("sanitizing field name", "from", s, "to", saneFieldname)
 		}
 		return saneFieldname
 	}

@@ -3,8 +3,8 @@ package common
 import (
 	"fmt"
 	"image/color"
+	"log/slog"
 	"math"
-	"math/rand"
 	"rpg/src/d1"
 	"rpg/src/defs"
 	"rpg/src/geometry"
@@ -83,6 +83,8 @@ type State struct {
 	SelectedClass defs.LoadoutDefinition
 	worldTexture  renderer.TextureAtlas
 
+	gossipSeeds map[VendorType]int64 // each townsperson's _tSeed: rolled on first talk, dropped when the hero reaches the dungeon
+
 	glowCache map[*gridmap.GridMap[*Actor, *Item, Object]]map[geometry.Point]d1Glow // decorative light per map (d1GlowAt)
 }
 
@@ -100,6 +102,7 @@ func NewState(ldtkProject *ldtk.Project) State {
 		playerStashInTown: NewInventory(32),
 		ldtkProject:       ldtkProject,
 		visibility:        NewVisibility(),
+		gossipSeeds:       map[VendorType]int64{},
 	}
 }
 func (s *State) SetAnimator(animator Animator) {
@@ -513,7 +516,7 @@ func (s *State) AddBloodDecalAt(mapPos geometry.Point) {
 		icon = existingDecal + 1
 	} else {
 		bloodDecals := []int32{defs.IconDecalBlood1, defs.IconDecalBlood2, defs.IconDecalBlood3, defs.IconDecalBlood4, defs.IconDecalBlood5}
-		icon = bloodDecals[rand.Intn(len(bloodDecals))]
+		icon = bloodDecals[rng.Intn(len(bloodDecals))]
 	}
 	currentMap.AddDecal(mapPos, icon)
 }
@@ -582,7 +585,7 @@ func (s *State) MapTransition(to gridmap.Transition) {
 		panic(fmt.Sprintf("no space for player at %v", targetLocation))
 	}
 
-	freeTargetLocation := freeTargetLocations[rand.Intn(len(freeTargetLocations))]
+	freeTargetLocation := freeTargetLocations[rng.Intn(len(freeTargetLocations))]
 	// add player to new map
 	player.SetDrawPosition(freeTargetLocation.ToPointF())
 	newlyLoadedMap.AddActor(player, freeTargetLocation)
@@ -682,7 +685,7 @@ func getDropPos(gameMap *gridmap.GridMap[*Actor, *Item, Object], actorPos geomet
 		freeCells = freeCellsNear(gameMap, actorPos, gameMap.MapSize().X*gameMap.MapSize().Y, isFree)
 	}
 	if len(freeCells) == 0 {
-		println("ERR: No free cells for item drop")
+		slog.Error("no free cells for item drop")
 		return actorPos
 	}
 	dropPos := freeCells[0]
@@ -776,7 +779,7 @@ func (s *State) d1GlowAt(p geometry.Point) d1Glow {
 				case *d1WallLight:
 					r = d1LightRadius(o.icon)
 				case *D1Object:
-					r = d1ObjectDisplay(o.O.Kind).Light
+					r = s.factory.d1ObjectDisplay(o.O.Kind).Light
 				case *d1PortalObject:
 					r, kind = d1PortalLightRadius, glowPortal
 				}

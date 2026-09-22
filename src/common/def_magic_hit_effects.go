@@ -128,7 +128,7 @@ func (g *Factory) NewOnHitEffectFromNameAndArgs(effectName string, args util.Arg
 func (g *Factory) confuseTarget(args util.Arguments) *HitEffect {
 	turns := 5
 	if !args.IsEmpty() {
-		turns = util.ParseDice(args.Get(0)).Roll()
+		turns = util.ParseDice(args.Get(0)).Roll(rng)
 	}
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
@@ -148,7 +148,7 @@ func (g *Factory) confuseTarget(args util.Arguments) *HitEffect {
 func (g *Factory) berserkTarget(args util.Arguments) *HitEffect {
 	turns := 5
 	if !args.IsEmpty() {
-		turns = util.ParseDice(args.Get(0)).Roll()
+		turns = util.ParseDice(args.Get(0)).Roll(rng)
 	}
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
@@ -169,7 +169,7 @@ func (g *Factory) poisonTarget(args util.Arguments) *HitEffect {
 	turns := 3
 	damagePerTurn := util.ParseDice("1d3")
 	if !args.IsEmpty() {
-		turns = util.ParseDice(args.Get(0)).Roll()
+		turns = util.ParseDice(args.Get(0)).Roll(rng)
 		damagePerTurn = util.ParseDice(args.Get(1))
 	}
 	return &HitEffect{
@@ -179,7 +179,7 @@ func (g *Factory) poisonTarget(args util.Arguments) *HitEffect {
 			if !ok {
 				return
 			}
-			poisonEffect := g.NewPoisonedEffect(turns, damagePerTurn.Roll())
+			poisonEffect := g.NewPoisonedEffect(turns, damagePerTurn.Roll(rng))
 			g.ActionBroker.Execute(NewApplyStatusParametrizedAction(NewActorCause("Poisoned", attacker), hitActor, poisonEffect))
 		},
 		Description: []util.LabelText{
@@ -247,7 +247,7 @@ func (g *Factory) randomD1MonsterTypeOnLevel() int {
 }
 
 func (g *Factory) summonRandomMonster(args util.Arguments) *HitEffect {
-	dlvl := util.ParseDice(args.Get(0)).Roll()
+	dlvl := util.ParseDice(args.Get(0)).Roll(rng)
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			for _, hitPos := range hitPositions {
@@ -341,7 +341,7 @@ func (g *Factory) fireZone(args util.Arguments) *HitEffect {
 			if !attacker.GetInventory().HasLightSource() {
 				return
 			}
-			damagePerTile := damageInterval.Roll()
+			damagePerTile := damageInterval.Roll(rng)
 			damageSpellAction := NewDamageSpellAction(NewActorCause("Flask of Oil", attacker), attacker, damagePerTile, target, hitPositions)
 			g.ActionBroker.Execute(damageSpellAction)
 		},

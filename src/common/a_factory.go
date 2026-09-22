@@ -8,7 +8,6 @@ import (
 	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/stats"
-	"rpg/src/util"
 )
 
 // Will turn definitions into actual game objects
@@ -17,6 +16,7 @@ type Factory struct {
 	RandomSource   *rand.Rand
 	State          *State
 	UI             func() UserInterface
+	Show           func(UIRequest) // see ActionContext.Show
 	GetTimeKeeper  func() *TimeKeeper
 	Msg            func(msg string)
 	QueueAfterTurn func(func())
@@ -46,7 +46,7 @@ func (g *Factory) playD1Sound(id string) {
 // the same line numbers. So every heroine speaks with the Rogue's, and a man with his class's own, the Warrior's
 // for the Rogue, the Bard and the Barbarian.
 func (g *Factory) d1HeroVoice() string {
-	class := d1.Class(g.State.GetPlayer().Hero().Class)
+	class := g.Generator.D.Class(g.State.GetPlayer().Hero().Class)
 	if g.State.SelectedClass.IsFemale() {
 		return class.FemaleVoice
 	}
@@ -66,13 +66,13 @@ func (g *Factory) D1() *d1.Generator { return g.Generator }
 
 func (g *Factory) NewSign(inscription []string) *BumpObject {
 	return NewBumpObject("a sign", defs.IconSign, func(actor *Actor, startAnimating func() bool) {
-		g.UI().OpenTextWindow(util.ToLabelText(inscription))
+		g.Show(ShowText{inscription})
 	})
 }
 
 func (g *Factory) NewStash() *BumpObject {
 	return NewBumpObject("your stash", defs.Icon("prop.chest1"), func(actor *Actor, startAnimating func() bool) {
-		g.UI().OpenPlayerStashInTown()
+		g.Show(OpenStash{})
 	})
 }
 

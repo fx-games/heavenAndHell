@@ -11,15 +11,19 @@ import (
 	"time"
 )
 
-var d1Rng = rand.New(rand.NewSource(time.Now().UnixNano()))
+// rng is the one random source every roll of the running game draws from, so a seed replays a whole game.
+var rng = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // Clock is the wall clock the game consults (the Solar shrine reads the hour, as D1's does). A reproducible run
 // pins it, or its outcome depends on when it was started.
 var Clock = time.Now
 
-// SeedD1Rng makes the D1 rolls that do not hang off the world seed (flinch, armor wear, drops) reproducible.
-// Only reproducible runs use it - the game itself wants a fresh sequence every launch.
-func SeedD1Rng(seed int64) { d1Rng = rand.New(rand.NewSource(seed)) }
+// SeedRandom pins the game's random source. Only reproducible runs use it - the game itself wants a fresh
+// sequence every launch.
+func SeedRandom(seed int64) { rng.Seed(seed) } // in place: everyone holding Random() follows
+
+// Random is the game's random source.
+func Random() *rand.Rand { return rng }
 
 func (a *Actor) Hero() *d1.Hero     { return a.hero }
 func (a *Actor) SetHero(h *d1.Hero) { a.hero = h }
@@ -80,7 +84,7 @@ func (a *Actor) D1SheetAttributes() []D1SheetAttribute {
 	names := [4]stats.Name{stats.Strength, stats.Magic, stats.Dexterity, stats.Vitality}
 	var out []D1SheetAttribute
 	for i, label := range [4]string{"Strength", "Magic", "Dexterity", "Vitality"} {
-		attr, name, maximum := i, names[i], d1.MaxStats[h.Class][i]
+		attr, name, maximum := i, names[i], h.Rules().MaxStats[h.Class][i]
 		out = append(out, D1SheetAttribute{Label: label, Base: base[attr], Total: total[attr], Max: maximum,
 			CanRaise: h.StatPts > 0 && base[attr] < maximum,
 			Raise:    func() { a.LevelUp(name) }})
@@ -96,9 +100,9 @@ func (a *Actor) D1SheetSections() []D1SheetSection {
 	return []D1SheetSection{
 		{Title: "Character", Rows: [][2]string{
 			{"Name", a.name},
-			{"Class", d1.ClassNames[h.Class]},
+			{"Class", h.Rules().ClassNames[h.Class]},
 			{"Level", fmt.Sprintf("%d", h.Level)},
-			{"Experience", fmt.Sprintf("%d / %d", h.Exp, d1.ExpLvls[min(h.Level, 50)])},
+			{"Experience", fmt.Sprintf("%d / %d", h.Exp, h.Rules().ExpLvls[min(h.Level, 50)])},
 			{"Gold", fmt.Sprintf("%d", st.GetAttribute(stats.Gold))},
 		}},
 		{Title: "Condition", Rows: [][2]string{
@@ -152,19 +156,19 @@ func (a *Actor) d1DamageVsClassRows() [][2]string {
 func (a *Actor) d1TraitRows() [][2]string {
 	h, s := a.hero, a.HeroSheet()
 	rows := [][2]string{{"Missile damage bonus", "half of Str/Dex"}}
-	if d1.FullMissileDamageBonus(h.Class) {
+	if h.Rules().FullMissileDamageBonus(h.Class) {
 		rows[0][1] = "all of Str/Dex"
 	}
 	if crit := h.CriticalStrikeChance(); crit > 0 {
 		rows = append(rows, [2]string{"Critical strike", fmt.Sprintf("%d%% of swings hit twice", crit)})
 	}
-	if d1.HasClassFlag(h.Class, d1.ClassTrapSense) {
+	if h.Rules().HasClassFlag(h.Class, d1.ClassTrapSense) {
 		rows = append(rows, [2]string{"Trap sense", "sees traps on doors and chests"})
 	}
-	if d1.HasClassFlag(h.Class, d1.ClassIronSkin) {
+	if h.Rules().HasClassFlag(h.Class, d1.ClassIronSkin) {
 		rows = append(rows, [2]string{"Iron skin", fmt.Sprintf("+%d armor class from level", h.Level/4)})
 	}
-	if d1.HasClassFlag(h.Class, d1.ClassNaturalResistance) {
+	if h.Rules().HasClassFlag(h.Class, d1.ClassNaturalResistance) {
 		rows = append(rows, [2]string{"Natural resistance", fmt.Sprintf("+%d%% to every resistance", h.Level)})
 	}
 	if s.Flags&d1.ISplNoMana != 0 {
@@ -223,10 +227,10 @@ func UseD1Potion(user *Actor, miscID string) {
 	s := user.HeroSheet()
 	hp, mana := user.GetStats().GetResource(stats.Health), user.GetStats().GetResource(stats.Mana)
 	noMana := s.Flags&d1.ISplNoMana != 0
-	heal := func() { hp.Increase(float64(h.PotionHeal(d1Rng, s.MaxHP) >> 6)) }
+	heal := func() { hp.Increase(float64(h.PotionHeal(rng, s.MaxHP) >> 6)) }
 	restore := func() {
 		if !noMana {
-			mana.Increase(float64(h.PotionMana(d1Rng, s.MaxMana) >> 6))
+			mana.Increase(float64(h.PotionMana(rng, s.MaxMana) >> 6))
 		}
 	}
 	elixir := func(attr, n int) {
@@ -306,27 +310,27 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 		blast := 0
 		if !ranged { // PM_DoAttack: fire and lightning weapons explode on the swing's target, hit or miss (MI_Weapexp)
 			if s.Flags&d1.ISplFireDam != 0 {
-				blast += d1ElementalHit(def, d1.ResistKindFire, h.SpellHitChance(s, mon.Level), func() int { return s.FMinDam + d1Rng.Intn(max(s.FMaxDam-s.FMinDam+1, 1)) })
+				blast += d1ElementalHit(def, d1.ResistKindFire, h.SpellHitChance(s, mon.Level), func() int { return s.FMinDam + rng.Intn(max(s.FMaxDam-s.FMinDam+1, 1)) })
 			}
 			if s.Flags&d1.ISplLightDam != 0 {
-				blast += d1ElementalHit(def, d1.ResistKindLightning, h.SpellHitChance(s, mon.Level), func() int { return s.LMinDam + d1Rng.Intn(max(s.LMaxDam-s.LMinDam+1, 1)) })
+				blast += d1ElementalHit(def, d1.ResistKindLightning, h.SpellHitChance(s, mon.Level), func() int { return s.LMinDam + rng.Intn(max(s.LMaxDam-s.LMinDam+1, 1)) })
 			}
 		}
 		if ranged { // PM_DoRangeAttack wears the bow on every shot, a melee blow only when it lands
-			d1Broke(ctx.Msg, att, d1.WeaponDur(d1Rng, att.equippedD1(), 40))
+			d1Broke(ctx.Msg, att, d1.WeaponDur(rng, att.equippedD1(), 40))
 		}
-		if d1Rng.Intn(100) >= chance {
+		if rng.Intn(100) >= chance {
 			logMissed(ctx, att, def)
 			return blast, nil, true
 		}
 		if !ranged {
-			d1Broke(ctx.Msg, att, d1.WeaponDur(d1Rng, att.equippedD1(), 30))
+			d1Broke(ctx.Msg, att, d1.WeaponDur(rng, att.equippedD1(), 30))
 		}
 		if ranged {
-			dam = h.ArrowDamage(d1Rng, s)
+			dam = h.ArrowDamage(rng, s)
 		} else {
-			dam = h.MeleeDamage(d1Rng, s, mon.Data.Class)
-			if lhp, lmana := h.HitLeech(d1Rng, s, dam); lhp>>6 > 0 || lmana>>6 > 0 {
+			dam = h.MeleeDamage(rng, s, mon.Data.Class)
+			if lhp, lmana := h.HitLeech(rng, s, dam); lhp>>6 > 0 || lmana>>6 > 0 {
 				extra = append(extra,
 					NewChangeResourceAction(NewActorCause("Life steal", att), att, stats.Health, float64(lhp>>6)),
 					NewChangeResourceAction(NewActorCause("Mana steal", att), att, stats.Mana, float64(lmana>>6)))
@@ -337,7 +341,7 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 			if s.Flags&d1.ISplLightArrows != 0 {
 				kind, mind, maxd = d1.ResistKindLightning, s.LMinDam, s.LMaxDam
 			}
-			blast = d1ElementalHit(def, kind, h.ArrowHitChance(s, mon.AC, dist), func() int { return h.ArrowBlastDamage(d1Rng, s, mind, maxd) })
+			blast = d1ElementalHit(def, kind, h.ArrowHitChance(s, mon.AC, dist), func() int { return h.ArrowBlastDamage(rng, s, mind, maxd) })
 		}
 		dam = d1HellfireHit(ctx, att, def, ranged, s, dam, &extra)
 		dam = max(dam, 0) + blast
@@ -366,7 +370,7 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 		if ranged {
 			chance = h.MonsterArrowHitChance(s, hit, mon.Level, dist, dlvl)
 		}
-		if d1Rng.Intn(100) >= chance {
+		if rng.Intn(100) >= chance {
 			logMissed(ctx, att, def)
 			return 0, nil, true
 		}
@@ -376,15 +380,15 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 				return 0
 			}
 			h.Reflections--
-			mdam := dam64 * (d1Rng.Intn(10) + 20) / 100
+			mdam := dam64 * (rng.Intn(10) + 20) / 100
 			extra = append(extra, NewChangeResourceAction(NewActorCause("Reflect", def), att, stats.Health, -float64(mdam)/64))
 			return mdam
 		}
-		if d1Rng.Intn(100) < h.BlockChance(s, mon.Level) {
+		if rng.Intn(100) < h.BlockChance(s, mon.Level) {
 			ctx.Msg(fmt.Sprintf("You block the attack of %s.", att.Name()))
 			playD1SfxAt(ctx, "IS_ISWORD", def.MapPosition()) // StartPlrBlock
 			d1BlockWear(ctx.Msg, def)
-			reflect(d1.MonsterDamage(d1Rng, s, minDam, maxDam))
+			reflect(d1.MonsterDamage(rng, s, minDam, maxDam))
 			return 0, extra, true
 		}
 		if mon.Data.ID == "MT_YZOMBIE" && s.MaxHP > 64 && h.MaxHPBase > 64 { // Black Death: 1 max life, for good
@@ -392,7 +396,7 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 			h.HPBase = min(h.HPBase, h.MaxHPBase)
 			SyncHero(def)
 		}
-		dam64 := d1.MonsterDamage(d1Rng, s, minDam, maxDam)
+		dam64 := d1.MonsterDamage(rng, s, minDam, maxDam)
 		dam64 -= reflect(dam64)
 		dam = d1ManaShield(def, max(dam64, 0)>>6)
 		D1StartPlrHit(state.factory, def, dam64, dam, false)
@@ -405,18 +409,18 @@ func resolveD1Attack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, 
 			}
 		}
 		if !ranged && s.Flags&d1.ISplThorns != 0 {
-			extra = append(extra, NewChangeResourceAction(NewActorCause("Thorns", def), att, stats.Health, -float64(d1Rng.Intn(3)+1)))
+			extra = append(extra, NewChangeResourceAction(NewActorCause("Thorns", def), att, stats.Health, -float64(rng.Intn(3)+1)))
 		}
 		return dam, extra, true
 	case att.d1Monster != nil && def.d1Monster != nil: // the golem and the monsters fighting it: M_TryM2MHit
 		mon := att.d1Monster
 		mon.HitWith = nil
-		if !def.HasStatusEffect(StatusStone) && d1Rng.Intn(100) >= mon.Hit {
+		if !def.HasStatusEffect(StatusStone) && rng.Intn(100) >= mon.Hit {
 			logMissed(ctx, att, def)
 			return 0, nil, true
 		}
 		d1Alert(def, att)
-		return mon.MinDam + d1Rng.Intn(max(mon.MaxDam-mon.MinDam+1, 1)), nil, true
+		return mon.MinDam + rng.Intn(max(mon.MaxDam-mon.MinDam+1, 1)), nil, true
 	}
 	return 0, nil, false
 }
@@ -490,10 +494,10 @@ func d1WhyTheseNumbers(h *d1.Hero, s d1.Sheet, mon *D1Monster, dist int) []strin
 		return nil
 	}
 	var why []string
-	if pct := s.WeaponVsMonsterClass(mon.Data.Class); pct != 0 {
-		line := fmt.Sprintf("Your %s: %+d%% damage vs. %s", d1.WeaponTypeName(s.RuledWeapon()), pct, kind)
-		for _, b := range d1.WeaponBonuses { // the mod's rules name the weapon that would do better
-			if b.Versus == mon.Data.Class && b.Weapon != s.RuledWeapon() && b.Percent > pct {
+	if pct := h.Rules().WeaponVsMonsterClass(s, mon.Data.Class); pct != 0 {
+		line := fmt.Sprintf("Your %s: %+d%% damage vs. %s", d1.WeaponTypeName(h.Rules().RuledWeapon(s)), pct, kind)
+		for _, b := range h.Rules().WeaponBonuses { // the mod's rules name the weapon that would do better
+			if b.Versus == mon.Data.Class && b.Weapon != h.Rules().RuledWeapon(s) && b.Percent > pct {
 				line += fmt.Sprintf(" (a %s: %+d%%)", d1.WeaponTypeName(b.Weapon), b.Percent)
 				break
 			}
@@ -539,7 +543,7 @@ func d1BlowsToKill(hp, lo, hi int) string {
 func d1ElementalHit(def *Actor, kind, chance int, roll func() int) int {
 	mon := def.d1Monster
 	resist, immune := resistBits(kind)
-	if mon.MagicRes&immune != 0 || !def.HasStatusEffect(StatusStone) && d1Rng.Intn(100) >= chance {
+	if mon.MagicRes&immune != 0 || !def.HasStatusEffect(StatusStone) && rng.Intn(100) >= chance {
 		return 0
 	}
 	dam := max(roll(), 0)
@@ -586,15 +590,15 @@ func D1StartPlrHit(f *Factory, a *Actor, dam64, dealt int, force bool) {
 		f.Msg("You are staggered!")
 		f.PlayD1HeroSound(69)
 	}
-	a.hitRecovery = max(a.hitRecovery, d1TicksToAUT(d1.HitRecoveryTicks(h.Class, a.HeroSheet().Flags)))
-	if d1Rng.Intn(4) != 0 {
-		d1Broke(f.Msg, a, d1.ArmorDur(d1Rng, a.equippedD1()))
+	a.hitRecovery = max(a.hitRecovery, d1TicksToAUT(h.Rules().HitRecoveryTicks(h.Class, a.HeroSheet().Flags)))
+	if rng.Intn(4) != 0 {
+		d1Broke(f.Msg, a, d1.ArmorDur(rng, a.equippedD1()))
 	}
 }
 
 // d1BarbarianBonus is what a Barbarian's StartPlrHit adds to the flinch threshold.
 func d1BarbarianBonus(h *d1.Hero) int {
-	if d1.HasClassFlag(h.Class, d1.ClassFlinchResist) {
+	if h.Rules().HasClassFlag(h.Class, d1.ClassFlinchResist) {
 		return h.Level / 4
 	}
 	return 0
@@ -602,7 +606,7 @@ func d1BarbarianBonus(h *d1.Hero) int {
 
 // d1BlockWear ports PM_DoBlock: a block wears the shield 1 in 10 times.
 func d1BlockWear(msg func(string), a *Actor) {
-	if d1Rng.Intn(10) == 0 {
+	if rng.Intn(10) == 0 {
 		d1Broke(msg, a, d1.ShieldDur(a.equippedD1()))
 	}
 }
@@ -670,7 +674,7 @@ func d1Teleport(m *gridmap.GridMap[*Actor, *Item, Object], victim *Actor, enemy 
 		return
 	}
 	pos := victim.MapPosition()
-	rx, ry := 2*d1Rng.Intn(2)-1, 2*d1Rng.Intn(2)-1
+	rx, ry := 2*rng.Intn(2)-1, 2*rng.Intn(2)-1
 	for j := -1; j <= 1; j++ {
 		for k := -1; k < 1; k++ {
 			p := geometry.Point{X: enemy.X + rx*j, Y: enemy.Y + ry*k}
@@ -710,7 +714,7 @@ func (f *Factory) grantExperience(player *Actor, monLevel, exp int) {
 	before := h.Level
 	h.AddExperience(monLevel, exp)
 	SyncHero(player)
-	if h.Level > before && h.Exp < d1.ExpLvls[49] { // the jump to 50 at the cap heals nothing
+	if h.Level > before && h.Exp < h.Rules().ExpLvls[49] { // the jump to 50 at the cap heals nothing
 		player.GetStats().GetResource(stats.Health).SetToMax()
 		player.GetStats().GetResource(stats.Mana).SetToMax()
 		f.Msg(fmt.Sprintf("You reached level %d! Press 'u' to spend %d stat points.", h.Level, h.StatPts))
@@ -751,14 +755,14 @@ func d1OnKill(ctx ActionContext, killer, victim *Actor) []Action {
 // Decay wears the weapon out one hit at a time and is handled in d1DecayWeapons. A Doppelganger's melee blow splits
 // an ordinary monster in two.
 func d1HellfireHit(ctx ActionContext, att, def *Actor, ranged bool, s d1.Sheet, dam int, extra *[]Action) int {
-	if s.DamAcFlags&d1.IHfDevastation != 0 && d1Rng.Intn(100) < 5 {
+	if s.DamAcFlags&d1.IHfDevastation != 0 && rng.Intn(100) < 5 {
 		dam *= 3
 	}
-	if mon := def.d1Monster; !ranged && s.DamAcFlags&d1.IHfDoppelganger != 0 && mon.AI != "AI_DIABLO" && mon.Unique == nil && d1Rng.Intn(100) < 10 {
+	if mon := def.d1Monster; !ranged && s.DamAcFlags&d1.IHfDoppelganger != 0 && mon.AI != "AI_DIABLO" && mon.Unique == nil && rng.Intn(100) < 10 {
 		ctx.GameState.factory.d1Doppelganger(def)
 	}
 	if s.DamAcFlags&d1.IHfJesters != 0 {
-		dam = d1.JesterDamage(dam, d1Rng.Intn)
+		dam = d1.JesterDamage(dam, rng.Intn)
 	}
 	if s.DamAcFlags&d1.IHfPeril != 0 {
 		if self := s.GetHit; self > 0 {

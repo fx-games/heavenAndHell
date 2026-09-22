@@ -21,10 +21,6 @@ func (d *ApplyStatusParametrizedAction) Execute(context ActionContext) []Action 
 	return nil
 }
 
-func (d *ApplyStatusParametrizedAction) GetAnimations() []Animation {
-	return nil
-}
-
 func (d *ApplyStatusParametrizedAction) GetActor() *Actor {
 	return d.actor
 }

@@ -3,12 +3,14 @@ package game
 import (
 	"cmp"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
 	"rpg/src/common"
 	"rpg/src/defs"
 	"rpg/src/geometry"
+	"rpg/src/util"
 	"slices"
 	"strings"
 )
@@ -60,15 +62,11 @@ func (g *GameInstance) writeFeeds() {
 func writeFeedFile(name, text string) {
 	path := filepath.Join(feedDir, name+".ans")
 	if err := os.MkdirAll(feedDir, 0o755); err != nil {
-		println("ERR: feed " + name + ": " + err.Error())
+		slog.Error("feed", "name", name, "err", err)
 		return
 	}
-	if err := os.WriteFile(path+".tmp", []byte(text), 0o644); err != nil {
-		println("ERR: feed " + name + ": " + err.Error())
-		return
-	}
-	if err := os.Rename(path+".tmp", path); err != nil {
-		println("ERR: feed " + name + ": " + err.Error())
+	if err := util.WriteFileAtomic(path, []byte(text)); err != nil {
+		slog.Error("feed", "name", name, "err", err)
 	}
 }
 
@@ -82,7 +80,7 @@ func (g *GameInstance) appendLogFeed(message string) {
 	}
 	f, err := os.OpenFile(filepath.Join(feedDir, "log.ans"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
-		println("ERR: feed log: " + err.Error())
+		slog.Error("feed", "name", "log", "err", err)
 		return
 	}
 	defer f.Close()
