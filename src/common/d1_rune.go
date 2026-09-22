@@ -41,7 +41,7 @@ func (f *Factory) spawnD1Rune(caster *Actor, misc string, p geometry.Point) {
 	m := f.State.GetMap()
 	rune := NewFire(0)
 	rune.icon, rune.turnsUntilRemoval = defs.IconEffectHit, 1<<30
-	rune.SetDealDamage(func(geometry.Point, func() bool) {})
+	rune.SetDealDamage(func(geometry.Point) {})
 	rune.SetOnTurn(func() {
 		if f.State.GetMap() != m {
 			return

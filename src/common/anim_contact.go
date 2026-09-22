@@ -2,16 +2,11 @@ package common
 
 import "rpg/src/geometry"
 
-// syncToProjectiles holds back the hit visuals of an action that fires projectiles (hit flashes, damage numbers,
-// hurt tint, death) until the projectile reaches the victim. The state has changed already, so a cancel or the
-// player acting again skips the flight and shows them at once.
-func (d *Broker) syncToProjectiles(anims []Animation, chained []Action) {
-	var flying []*ProjectileDirectionAnimation
-	for _, a := range anims {
-		if p, ok := a.(*ProjectileDirectionAnimation); ok {
-			flying = append(flying, p)
-		}
-	}
+// syncToProjectiles holds back the hit flashes of an action that fires projectiles until the projectile gets
+// there. The state has changed already, so a cancel or the player acting again skips the flight and shows them
+// at once.
+func (d *Broker) syncToProjectiles(anims []Animation) {
+	flying := flightsIn(anims)
 	if len(flying) == 0 {
 		return
 	}
@@ -20,11 +15,32 @@ func (d *Broker) syncToProjectiles(anims []Animation, chained []Action) {
 			h.StartWhenTrue(d.contact(flying, h.targetPos))
 		}
 	}
-	for _, a := range chained {
-		if c, ok := a.(*ChangeResourceAction); ok && c.shouldStartAnimation == nil {
-			c.SetAnimationStartPredicate(d.contact(flying, c.actor.MapPosition()))
+}
+
+// flightsIn are the projectiles among anims.
+func flightsIn(anims []Animation) []*ProjectileDirectionAnimation {
+	var flying []*ProjectileDirectionAnimation
+	for _, a := range anims {
+		if p, ok := a.(*ProjectileDirectionAnimation); ok {
+			flying = append(flying, p)
 		}
 	}
+	return flying
+}
+
+// whenShown is when a blow that landed at p on actor may be shown: once the missile that caused it arrives, or
+// once the player has seen the actor reach p (a step, or a push). nil means right away, which is the usual case:
+// a blow between two actors standing still.
+func (d *Broker) whenShown(p geometry.Point, actor *Actor) func() bool {
+	if len(d.flights) > 0 {
+		if flying := d.flights[len(d.flights)-1]; len(flying) > 0 {
+			return d.contact(flying, p)
+		}
+	}
+	if actor == nil || actor.DrawPosition().ToPoint() == p {
+		return nil
+	}
+	return func() bool { return actor.DrawPosition().ToPoint() == p }
 }
 
 // contact is true once the projectile passing closest to p got there, or once the player took another turn, which

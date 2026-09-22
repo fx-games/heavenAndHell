@@ -8,30 +8,26 @@ warnings, the Bless default args), dependency updates and the deprecated Ebiten 
 
 ## 1. Finish separating rules from presentation (S2 follow-up)
 
-**Where it stands.** No action builds an animation any more: actions `Emit` events (`common/events.go`) and
-`Present` (`common/present.go`) turns them into animations and sounds. What still leaks:
+**Where it stands.** No action builds an animation: actions `Emit` events (`common/events.go`) and `Present`
+(`common/present.go`) turns them into animations and sounds. The "show this when…" callbacks are gone too: the
+presenter decides for itself when a blow may be shown (`Broker.whenShown`: once the missile arrives, else once
+the victim is drawn where it was hit), and it owns `visualGate`, `shownHealth` and `moveHold`. The presenter
+rolls its own dice (`Broker.fx`) for what only affects the screen; where blood lands stays a rules roll, because
+it is saved with the map, while when it appears is the presenter's.
 
-- **"Show when" callbacks.** `ChangeResourceAction.SetAnimationStartPredicate`, the `startAnimating func() bool`
-  parameter of `ActorWalkedOn` / `ActorBumpedInto` (map objects, bumpers, damagers, doors), knockback's
-  `landed`, and `Broker.syncToProjectiles`, which reaches into chained actions to set their predicate.
-  *Suggestion:* let the presenter decide. The broker keeps the flights the parent action launched while its
-  chained actions run; `presentHealthChanged` gates on contact with them (today's `contact`), otherwise on the
-  actor being drawn at `HealthChanged.At`. `HealthChanged` carries the health before the change so the
-  presenter can set `shownHealth` and `visualGate` itself. The `startAnimating` parameter and
-  `SetAnimationStartPredicate` then go away. Walking into a fire would show its damage on arrival instead of
-  at the first step, so look at it in the game before and after.
-- **The presenter rolls the game's dice.** `presentHealthChanged` draws `rng.Int63()` and `rng.Intn(10)` for
-  blood placement and hit sounds, so what is shown changes what happens next. *Suggestion:* give the presenter
-  its own `*rand.Rand`. That changes every seeded outcome once: re-record the playthrough baseline in the
-  same commit.
-- **Headless runs still animate.** Tests tick through animations they never draw. With the two points above
-  done, `Broker.presenter` can be nil in tests (faster, and a check that the rules really don't need them).
+What is still open:
+
+- **Headless runs still animate.** Tests tick through animations nobody draws. `Broker.presenter` can now be
+  nil; wire that up for tests and see what breaks (it should only be pacing, see below).
 - **Presentation state on the model.** `Actor.visualGate`, `moveHold`, `shownHealth`, `DrawPosition`,
-  `State.dying`, `State.worldTexture`, `State.animator`, `State.glowCache`. *Suggestion:* move them into a
-  view-model the presenter owns, keyed by actor, once the callbacks are gone.
+  `State.dying`, `State.worldTexture`, `State.animator`, `State.glowCache`. Only the presenter writes the first
+  three now. *Suggestion:* move them into a view model the presenter owns, keyed by actor.
 - **The broker paces the game by animations.** `checkForQueuedActions` runs queued actions only when no
-  animation is running. That is a UI pacing decision inside the rules' scheduler. *Suggestion:* a
-  `Pacer` interface the frontend implements (`Busy() bool`), nil meaning never busy.
+  animation is running, so a UI pacing decision sits in the rules' scheduler. *Suggestion:* a `Pacer` interface
+  the frontend implements (`Busy() bool`), nil meaning never busy. Needed before a nil presenter is useful.
+- **Sounds are still played by the rules.** Melee swings, bow twangs, door and item cues, `PlayUICue` on death.
+  *Suggestion:* the events are already there (`MeleeSwing`, `Shot`, `Died` would be new) - move each cue to the
+  presenter as its event is added.
 
 ## 2. Rules still querying the UI (S3 follow-up)
 
@@ -48,8 +44,7 @@ warnings, the Bless default args), dependency updates and the deprecated Ebiten 
 
 `common` is about 21.6k lines in 109 files, and its file prefixes are packages in disguise: `act_*`
 (actions), `anim_*` + `present.go` (presentation), `d1_*` (the Diablo rules), `def_*` (effects), `base_*` /
-`o_*` (model), `a_*` / `z_*` (plumbing and hooks). *Suggestion:* once item 1 has cut the animation
-callbacks, move out in this order: `anim_*` + `present.go` → `fx` (depends on the model, not the other way
+`o_*` (model), `a_*` / `z_*` (plumbing and hooks). *Suggestion:* move out in this order: `anim_*` + `present.go` → `fx` (depends on the model, not the other way
 round), then `d1_*` → `rules/d1`, then `act_*` → `rules`. Each step is mechanical once nothing points back.
 `docs/ENGINE_SPLIT.md` already sets the direction (no d1-shaped concepts in engine APIs); this is the package
 side of it.
@@ -93,13 +88,11 @@ and console under 10%.
 - **Unused generators.** `rogue` and `megadungeon` (`dungen/`, about 700 lines with tests) are registered but no
   mod's `levels.rec` uses them. Keep them if they are there for modders; otherwise delete them.
 - **Sound variety uses the global RNG.** `audio.Sound.Next` picks random variants with `math/rand`'s global
-  source. It's harmless (not game state) but inconsistent; pass the presenter's RNG once item 1 has one.
+  source. It's harmless (not game state) but inconsistent; use the presenter's `Broker.fx` instead.
 - **Config write failure panics.** `Configuration.SaveToRecFile` panics if the write fails (now atomic). Return
   the error and log it; losing a settings change is not worth a crash.
 - **New indirect dependencies.** `text/v2` pulled in `go-text/typesetting` and `srwiley/rasterx`. They're pure Go
   (the cgo-free build still works), but the binary is bigger. Nothing to do; just know it.
-- **The UI in rules for game over.** Done via `ShowGameOver`, but death still plays two UI cues directly
-  (`PlayUICue`). Cues are presentation: an event (`Died{Actor}`) would let the presenter play them.
 - **`d1GossipSeeds` pattern.** Other package-level state in `common`: `UICues` (the audio player), `Clock` (the
   Solar shrine's hour), `questConditions`, `itemNameTemplates`. The last two are caches of mod data, so they
   belong on the mod's data, like `d1.Data` now. `UICues` and `Clock` are test seams and fine as they are.

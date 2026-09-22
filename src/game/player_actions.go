@@ -312,7 +312,7 @@ func (a *Actions) nextStepOnPlayerPath() {
 				if !objectAt.IsWalkable(state.GetPlayer()) {
 					a.stopAutoMove()
 					msg(fmt.Sprintf("You bump into %s", objectAt.Name()))
-					objectAt.ActorBumpedInto(state.GetPlayer(), common.AnimateNow())
+					objectAt.ActorBumpedInto(state.GetPlayer())
 					if o, ok := objectAt.(*common.D1Object); ok && o.UsesTurn(state.GetPlayer()) {
 						a.actionBroker.QueueForExecution(common.NewEndPlayerTurnAction(common.AbstractCause("Operate"), 10))
 					}

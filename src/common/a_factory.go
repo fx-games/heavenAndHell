@@ -65,13 +65,13 @@ func (g *Factory) PlayD1HeroSound(n int) {
 func (g *Factory) D1() *d1.Generator { return g.Generator }
 
 func (g *Factory) NewSign(inscription []string) *BumpObject {
-	return NewBumpObject("a sign", defs.IconSign, func(actor *Actor, startAnimating func() bool) {
+	return NewBumpObject("a sign", defs.IconSign, func(actor *Actor) {
 		g.Show(ShowText{inscription})
 	})
 }
 
 func (g *Factory) NewStash() *BumpObject {
-	return NewBumpObject("your stash", defs.Icon("prop.chest1"), func(actor *Actor, startAnimating func() bool) {
+	return NewBumpObject("your stash", defs.Icon("prop.chest1"), func(actor *Actor) {
 		g.Show(OpenStash{})
 	})
 }

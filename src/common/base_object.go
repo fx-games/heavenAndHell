@@ -12,7 +12,7 @@ type Object interface {
 	IsTransparent() bool
 	IsPassableForProjectile() bool
 	Turn()
-	ActorWalkedOn(actor *Actor, startAnimating func() bool)
-	ActorBumpedInto(actor *Actor, startAnimating func() bool)
+	ActorWalkedOn(actor *Actor)
+	ActorBumpedInto(actor *Actor)
 	Name() string
 }

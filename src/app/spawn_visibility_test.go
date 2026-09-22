@@ -31,7 +31,7 @@ func TestSpawnedSkeletonIsVisibleEnemy(t *testing.T) {
 			player.SetDrawPosition(free[0].ToPointF())
 			theGame.GetActionBroker().Execute(common.NewUpdateFoVAction(common.AbstractCause("test"), player))
 			before := len(m.Actors())
-			o.ActorBumpedInto(player, nil)
+			o.ActorBumpedInto(player)
 			if len(m.Actors()) == before {
 				continue
 			}

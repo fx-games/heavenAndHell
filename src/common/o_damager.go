@@ -13,7 +13,7 @@ type DamageDealingObject struct {
 	damagePerTurn        int
 	icon                 int32
 	frameCount           int
-	dealDamageAtLocation func(location geometry.Point, startAnimating func() bool)
+	dealDamageAtLocation func(location geometry.Point)
 	FireWall             bool // a D1 MIS_FIREWALL: monsters that aren't immune to fire won't step in (PosOkMonst)
 }
 
@@ -21,12 +21,12 @@ func (d *DamageDealingObject) Name() string {
 	return "fire"
 }
 
-func (d *DamageDealingObject) ActorBumpedInto(actor *Actor, startAnimating func() bool) {
+func (d *DamageDealingObject) ActorBumpedInto(actor *Actor) {
 
 }
 
-func (d *DamageDealingObject) ActorWalkedOn(actor *Actor, startAnimating func() bool) {
-	d.DealDamage(startAnimating)
+func (d *DamageDealingObject) ActorWalkedOn(actor *Actor) {
+	d.DealDamage()
 }
 
 func (d *DamageDealingObject) IsAlive() bool {
@@ -64,11 +64,11 @@ func (d *DamageDealingObject) Turn() {
 	}
 }
 
-func (d *DamageDealingObject) DealDamage(startAnimating func() bool) {
-	d.dealDamageAtLocation(d.position, startAnimating)
+func (d *DamageDealingObject) DealDamage() {
+	d.dealDamageAtLocation(d.position)
 }
 
-func (d *DamageDealingObject) SetDealDamage(dealDamageAtLocation func(location geometry.Point, startAnimating func() bool)) {
+func (d *DamageDealingObject) SetDealDamage(dealDamageAtLocation func(location geometry.Point)) {
 	d.dealDamageAtLocation = dealDamageAtLocation
 }
 

@@ -56,12 +56,8 @@ func (d *KnockbackAction) Execute(context ActionContext) []Action {
 
 			gameMap.MoveActor(actor, pos) // write state
 
-			startAnimating := func() bool {
-				return actor.DrawPosition().ToPoint() == pos
-			}
-
 			// Should be an action
-			actions = append(actions, TriggerCellEffectsDuringMovementForActor(state, d, actor, pos, startAnimating)...)
+			actions = append(actions, TriggerCellEffectsDuringMovementForActor(state, d, actor, pos)...)
 
 			if distanceMoved == d.distance {
 				if i+1 < len(los) {
@@ -79,16 +75,13 @@ func (d *KnockbackAction) Execute(context ActionContext) []Action {
 		gameMap.MoveActorFrom(actor, d.originPos, d.targetPos) // write state
 	}
 	context.ActionBroker.Emit(KnockedBack{Actor: actor, From: d.originPos, To: d.targetPos, Delay: d.animationDelay, Quiet: d.animationDisabled})
-	landed := func() bool { return actor.DrawPosition().ToPoint() == d.targetPos } // the push is over
 
 	if !gameMap.IsCurrentlyPassable(d.obstaclePos) {
 		// problem.. this will trigger at the same tick as the knockback animation begins..
 		actionPushed := NewChangeResourceAction(d.Cause(), actor, stats.Health, -5)
-		actionPushed.SetAnimationStartPredicate(landed)
 		actions = append(actions, actionPushed)
 		if hitActor, ok := gameMap.TryGetActorAt(d.obstaclePos); ok {
 			action := NewChangeResourceAction(d.Cause(), hitActor, stats.Health, -5)
-			action.SetAnimationStartPredicate(landed)
 			actions = append(actions, action)
 		}
 	}

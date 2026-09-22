@@ -95,7 +95,7 @@ func playthrough() {
 				}
 				for _, obj := range m.Objects() {
 					if o, ok := obj.(*common.D1Object); ok && o.O.Kind == d1.ObjSTEELTOME && reach[m.GetFreeCardinalNeighbors(o.MapPosition())[0]] {
-						o.ActorBumpedInto(player, nil)
+						o.ActorBumpedInto(player)
 					}
 				}
 				reach = reachable(m, up)
@@ -394,7 +394,7 @@ func operateObjects(state *common.State, player *common.Actor) (objects, used, d
 		objects++
 		switch o.O.Kind {
 		case d1.ObjCHEST1, d1.ObjCHEST2, d1.ObjCHEST3, d1.ObjTCHEST1, d1.ObjTCHEST2, d1.ObjTCHEST3, d1.ObjSARC, d1.ObjBARREL, d1.ObjSHRINEL, d1.ObjSHRINER:
-			o.ActorBumpedInto(player, nil)
+			o.ActorBumpedInto(player)
 			if !o.O.Active {
 				used++
 			}
@@ -898,7 +898,7 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 	if len(stands) != 1 || !reachable(m, m.GetNamedLocation("ladder_up"))[stands[0].MapPosition()] && len(m.GetFreeCardinalNeighbors(stands[0].MapPosition())) == 0 {
 		fail("quests: %d staff stands on level 15", len(stands))
 	}
-	stands[0].ActorBumpedInto(state.GetPlayer(), nil)
+	stands[0].ActorBumpedInto(state.GetPlayer())
 	var staff *common.Item
 	for _, it := range m.Items() {
 		if it.D1() != nil && it.D1().Name == "Staff of Lazarus" {
@@ -940,7 +940,7 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 	}
 	for _, book := range books {
 		start := player.MapPosition()
-		book.ActorBumpedInto(player, nil) // not on its circle: nothing happens
+		book.ActorBumpedInto(player) // not on its circle: nothing happens
 		if !book.O.Active || player.MapPosition() != start {
 			fail("quests: a Book of Vileness worked away from its circle")
 		}
@@ -952,14 +952,14 @@ func questPath(theGame *game.GameInstance, fail func(string, ...any)) {
 			fail("quests: the magic circle at %v can't be walked to from the lair's entrance", circle)
 		}
 		m.MoveActor(player, circle)
-		book.ActorBumpedInto(player, nil)
+		book.ActorBumpedInto(player)
 		theGame.GetActionBroker().Execute(common.NewEndPlayerTurnAction(common.AbstractCause("playthrough"), 10))
 		if book.O.Active || geometry.DistanceChebyshev(player.MapPosition(), circle) < 10 {
 			fail("quests: the Book of Vileness at %v didn't teleport the hero (now at %v)", book.MapPosition(), player.MapPosition())
 		}
 	}
 	m.MoveActor(player, center.MapPosition())
-	center.ActorWalkedOn(player, nil)
+	center.ActorWalkedOn(player)
 	if state.QuestVar(d1.QBetrayer, 1) != 4 || player.MapPosition() != (geometry.Point{X: 35 - 16, Y: 46 - 16}) {
 		fail("quests: the central circle didn't lead to Lazarus (qvar1 %d, hero at %v)", state.QuestVar(d1.QBetrayer, 1), player.MapPosition())
 	}
@@ -1129,7 +1129,7 @@ func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
 			if before != walkable() {
 				fail("quest lines: Leoric's tomb opened before the last crucified skeleton broke")
 			}
-			o.ActorBumpedInto(player(), nil)
+			o.ActorBumpedInto(player())
 			cruxes++
 		}
 	}
@@ -1144,7 +1144,7 @@ func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
 	travel(4)
 	f.TalkToD1Monster(monster("AI_SNOTSPIL"))
 	must(state.QuestVar(d1.QLtBanner, 1) == 2, "Snotspill's talk didn't send the hero for the banner")
-	object(d1.ObjSIGNCHEST).ActorBumpedInto(player(), nil)
+	object(d1.ObjSIGNCHEST).ActorBumpedInto(player())
 	pickUp(d1.IdiBanner)
 	garbud := monster("AI_GARBUD") // Gharbad the Weak: talks, gives, talks, and fights
 	for n := 1; n <= 4; n++ {
@@ -1162,11 +1162,11 @@ func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
 
 	travel(5) // The Magic Rock, Valor
 	pickUp(d1.IdiRock)
-	object(d1.ObjBLOODBOOK).ActorBumpedInto(player(), nil)
+	object(d1.ObjBLOODBOOK).ActorBumpedInto(player())
 	log(d1.QBlood)
 	for i := 0; i < 3; i++ {
 		pickUp(d1.IdiBldStone)
-		object(d1.ObjPEDISTAL).ActorBumpedInto(player(), nil)
+		object(d1.ObjPEDISTAL).ActorBumpedInto(player())
 	}
 	pickUp(d1.IdiArmOfVal)
 	done(d1.QBlood)
@@ -1175,16 +1175,16 @@ func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
 	reward(d1.UItemInfraRing)
 
 	travel(6) // The Chamber of Bone
-	opens("schamb", func() { object(d1.ObjBOOK2R).ActorBumpedInto(player(), nil) })
+	opens("schamb", func() { object(d1.ObjBOOK2R).ActorBumpedInto(player()) })
 	log(d1.QSchamb)
 	state.MapTransition(gridmap.Transition{TargetMap: "bone_chamber", TargetLocation: "ladder_up"})
 	guardian := player().Hero().SpellLevels[d1.SplGuardian]
-	object(d1.ObjBOOK2L).ActorBumpedInto(player(), nil)
+	object(d1.ObjBOOK2L).ActorBumpedInto(player())
 	must(player().Hero().SpellLevels[d1.SplGuardian] == guardian+1, "the Ancient Tome taught no Guardian")
 	done(d1.QSchamb)
 
 	travel(7) // Halls of the Blind
-	object(d1.ObjBLINDBOOK).ActorBumpedInto(player(), nil)
+	object(d1.ObjBLINDBOOK).ActorBumpedInto(player())
 	pickUp(d1.IdiOptAmulet)
 	done(d1.QBlind)
 
@@ -1197,7 +1197,7 @@ func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
 	talkTo(theGame, common.VendorTypeWands)
 	log(d1.QMushroom)
 	travel(9)
-	object(d1.ObjMUSHPATCH).ActorBumpedInto(player(), nil)
+	object(d1.ObjMUSHPATCH).ActorBumpedInto(player())
 	pickUp(d1.IdiMushroom)
 	talkTo(theGame, common.VendorTypeWands)
 	must(state.QuestVar(d1.QMushroom, 1) == d1.QSMushGiven, "Adria didn't take the mushroom")
@@ -1287,7 +1287,7 @@ func pullD1Levers(state *common.State) (pulled int) {
 			if o, ok := obj.(*common.D1Object); ok && o.O.Kind == d1.ObjSWITCHSKL && o.O.Active {
 				for _, p := range m.GetAllCardinalNeighbors(o.MapPosition()) { // monsters may crowd round a lever
 					if reach[p] && o.O.Active {
-						o.ActorBumpedInto(state.GetPlayer(), nil)
+						o.ActorBumpedInto(state.GetPlayer())
 						pulled, progress = pulled+1, true
 					}
 				}

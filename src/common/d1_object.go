@@ -92,13 +92,13 @@ func (o *D1Object) IsWalkable(*Actor) bool {
 func (o *D1Object) IsTransparent() bool           { return true }
 func (o *D1Object) IsPassableForProjectile() bool { return true }
 func (o *D1Object) Turn()                         {}
-func (o *D1Object) ActorWalkedOn(actor *Actor, _ func() bool) {
+func (o *D1Object) ActorWalkedOn(actor *Actor) {
 	if actor == o.f.State.GetPlayer() && (o.O.Kind == d1.ObjMCIRCLE1 || o.O.Kind == d1.ObjMCIRCLE2) {
 		o.f.d1MagicCircle(o, actor)
 	}
 }
 
-func (o *D1Object) ActorBumpedInto(actor *Actor, _ func() bool) {
+func (o *D1Object) ActorBumpedInto(actor *Actor) {
 	if actor == o.f.State.GetPlayer() && actor.hero != nil {
 		o.f.operateD1Object(o, actor)
 	}
@@ -144,16 +144,16 @@ type d1WallLight struct {
 	onFloor bool
 }
 
-func (o *d1WallLight) Name() string                        { return "" }
-func (o *d1WallLight) MapPosition() geometry.Point         { return o.pos }
-func (o *d1WallLight) SetMapPosition(p geometry.Point)     { o.pos = p }
-func (o *d1WallLight) Icon(uint64) int32                   { return o.icon }
-func (o *d1WallLight) IsWalkable(*Actor) bool              { return !o.onFloor }
-func (o *d1WallLight) IsTransparent() bool                 { return true }
-func (o *d1WallLight) IsPassableForProjectile() bool       { return true }
-func (o *d1WallLight) Turn()                               {}
-func (o *d1WallLight) ActorWalkedOn(*Actor, func() bool)   {}
-func (o *d1WallLight) ActorBumpedInto(*Actor, func() bool) {}
+func (o *d1WallLight) Name() string                    { return "" }
+func (o *d1WallLight) MapPosition() geometry.Point     { return o.pos }
+func (o *d1WallLight) SetMapPosition(p geometry.Point) { o.pos = p }
+func (o *d1WallLight) Icon(uint64) int32               { return o.icon }
+func (o *d1WallLight) IsWalkable(*Actor) bool          { return !o.onFloor }
+func (o *d1WallLight) IsTransparent() bool             { return true }
+func (o *d1WallLight) IsPassableForProjectile() bool   { return true }
+func (o *d1WallLight) Turn()                           {}
+func (o *d1WallLight) ActorWalkedOn(*Actor)            {}
+func (o *d1WallLight) ActorBumpedInto(*Actor)          {}
 
 // d1PlaceObject renders one of D1's generated objects: a wall light as a decal or decorative fixture, a
 // pre-spawned sarcophagus/barrel skeleton resolved to its monster type from the level's (still-hidden) monster

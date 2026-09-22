@@ -45,7 +45,7 @@ func (d OnMoveHook) After(action Action, context ActionContext) []Action {
 	newPos := moveAction.GetNewPos()
 	currentMap := state.GetMap()
 
-	actions = append(actions, TriggerCellEffectsDuringMovementForActor(state, action, actor, newPos, AnimateNow())...)
+	actions = append(actions, TriggerCellEffectsDuringMovementForActor(state, action, actor, newPos)...)
 
 	if actor != state.GetPlayer() {
 		actions = append(actions, NewUpdateFoVAction(action.Cause(), actor))
@@ -74,12 +74,12 @@ func (d OnMoveHook) logObjectsAtLocation(context ActionContext, pos geometry.Poi
 	return nil
 }
 
-func TriggerCellEffectsDuringMovementForActor(state *State, sourceAction Action, actor *Actor, mapPos geometry.Point, startAnimating func() bool) []Action {
+func TriggerCellEffectsDuringMovementForActor(state *State, sourceAction Action, actor *Actor, mapPos geometry.Point) []Action {
 	if actor.HasStatusEffect(StatusFlying) {
 		return nil
 	}
 	if object, ok := state.GetMap().TryGetObjectAt(mapPos); ok {
-		object.ActorWalkedOn(actor, startAnimating)
+		object.ActorWalkedOn(actor)
 	}
 	return nil
 }

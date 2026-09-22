@@ -360,7 +360,7 @@ func (c *missileCtx) hazard(mis D1Missile, p geometry.Point, turns, dam64 int) {
 		f.ActionBroker.Execute(&hazardTickAction{BaseAction: BaseAction{cause: NewActorCause(ActionNameFireball, caster), name: ActionNameFireball},
 			mc: &missileCtx{caster: caster, mon: mon, trap: trap}, mis: mis, p: p, dam64: dam64})
 	}
-	hz.SetDealDamage(func(geometry.Point, func() bool) {})
+	hz.SetDealDamage(func(geometry.Point) {})
 	hz.SetOnTurn(func() {
 		if !hz.IsAlive() || f.State.GetMap() != m {
 			m.RemoveObject(hz)

@@ -312,11 +312,9 @@ func (g *Factory) jumpStart(args util.Arguments) *HitEffect {
 
 func (g *Factory) spawnFireAt(location geometry.Point) {
 	fire := NewFire(3)
-	procFireAtLocation := func(location geometry.Point, startAnimating func() bool) {
+	procFireAtLocation := func(location geometry.Point) {
 		if actor, ok := g.State.GetMap().TryGetActorAt(location); ok {
-			action := NewChangeResourceAction(AbstractCause("Fire"), actor, stats.Health, -3)
-			action.SetAnimationStartPredicate(startAnimating)
-			g.ActionBroker.Execute(action)
+			g.ActionBroker.Execute(NewChangeResourceAction(AbstractCause("Fire"), actor, stats.Health, -3))
 		}
 	}
 	onTurn := func() {
@@ -324,14 +322,14 @@ func (g *Factory) spawnFireAt(location geometry.Point) {
 			g.State.RemoveObject(fire)
 			return
 		}
-		fire.DealDamage(nil)
+		fire.DealDamage()
 	}
 	fire.SetOnTurn(onTurn)
 	fire.SetDealDamage(procFireAtLocation)
 	g.GetTimeKeeper().AddTimed(fire)
 
 	g.State.SpawnObject(location, fire)
-	procFireAtLocation(location, AnimateNow())
+	procFireAtLocation(location)
 }
 
 func (g *Factory) fireZone(args util.Arguments) *HitEffect {

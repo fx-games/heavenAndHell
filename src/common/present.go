@@ -1,7 +1,6 @@
 package common
 
 import (
-	"math/rand"
 	"strings"
 
 	"rpg/src/defs"
@@ -68,7 +67,7 @@ func Present(b *Broker, ev Event) []Animation {
 	case Fireball:
 		return OneAnimation(NewFireballAnimation(ev.Caster, ev.To, ev.Icon, ev.Frames, ev.Hits))
 	case HealthChanged:
-		return presentHealthChanged(b.context, ev)
+		return presentHealthChanged(b, ev)
 	}
 	return nil
 }
@@ -79,34 +78,35 @@ func sees(b *Broker, byPlayer bool, a, c geometry.Point) bool {
 	return byPlayer || player.CanSee(a) || player.CanSee(c)
 }
 
-// presentHealthChanged is the damage number, and for a hit the flash, the blood and the hit sound.
-func presentHealthChanged(context ActionContext, ev HealthChanged) []Animation {
-	// seeded from the game's dice rather than the clock: a run replayed from its seed has to roll the same
-	randomSource := rand.New(rand.NewSource(rng.Int63()))
-	animations := []Animation{}
+// presentHealthChanged is the damage number, and for a hit the flash, the blood and the hit sound. A blow whose
+// missile is still in the air, or that landed on an actor the player is still watching move, is held back until
+// it arrives; until then the actor keeps its old health, tint and, if it died, its feet.
+func presentHealthChanged(b *Broker, ev HealthChanged) []Animation {
+	context, actor := b.context, ev.Actor
+	show := b.whenShown(ev.At, actor)
+	if ev.Amount < 0 && show != nil && !actor.VisualsPending() {
+		actor.shownHealth = ev.Before
+		actor.visualGate = show // tint and death wait for the blow too
+	}
 	number := NewDamageNumberAnimation(ev.At, int(ev.Amount))
-	number.StartWhenTrue(ev.ShowWhen)
-	animations = append(animations, number)
+	number.StartWhenTrue(show)
+	animations := []Animation{number}
 	if ev.Amount >= 0 {
 		return animations
 	}
+	if actor.hero != nil && actor == context.GameState.GetPlayer() {
+		whenVisible(b, actor, func() { d1HeroPainSound(context, actor) })
+	}
 	hit := NewHitAnimation(ev.At, 0.2, 43, 2)
-	hit.StartWhenTrue(ev.ShowWhen)
-	// rolled here, not in the callback: an animation finishes when the frame says so, and a global die rolled
-	// from there shifts every later roll in the game depending on when it ran
-	playsHitSound := rng.Intn(10) <= 8
-	actor := ev.Actor
+	hit.StartWhenTrue(show)
+	playsHitSound := b.fx.Intn(10) <= 8 // how it sounds is nobody's business but the presenter's
 	hit.SetOnFinished(func() {
-		freeNeighbor := context.GameState.GetMap().GetRandomNeighbor(randomSource, actor.MapPosition())
-		if randomSource.Intn(9) == 0 {
-			freeNeighbor = actor.MapPosition()
-		}
-		context.GameState.AddBloodDecalAt(freeNeighbor)
+		context.GameState.AddBloodDecalAt(ev.Blood)
 		if playsHitSound && actor != context.GameState.GetPlayer() && (actor.IsAlive() || actor.d1Monster == nil) {
 			playHitSound(context, ev)
 		}
 	})
-	if ev.ShowWhen != nil {
+	if show != nil {
 		actor.moveHold = hit
 	}
 	return append(animations, hit)

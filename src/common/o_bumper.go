@@ -7,7 +7,7 @@ import (
 type BumpObject struct {
 	position   geometry.Point
 	icon       int32
-	activation func(actor *Actor, startAnimating func() bool)
+	activation func(actor *Actor)
 	name       string
 }
 
@@ -19,12 +19,12 @@ func (d *BumpObject) Turn() {
 
 }
 
-func (d *BumpObject) ActorWalkedOn(actor *Actor, startAnimating func() bool) {
+func (d *BumpObject) ActorWalkedOn(actor *Actor) {
 
 }
 
-func (d *BumpObject) ActorBumpedInto(actor *Actor, startAnimating func() bool) {
-	d.activation(actor, startAnimating)
+func (d *BumpObject) ActorBumpedInto(actor *Actor) {
+	d.activation(actor)
 }
 
 func (d *BumpObject) MapPosition() geometry.Point {
@@ -51,7 +51,7 @@ func (d *BumpObject) IsPassableForProjectile() bool {
 	return true
 }
 
-func NewBumpObject(name string, icon int32, onActivation func(actor *Actor, startAnimating func() bool)) *BumpObject {
+func NewBumpObject(name string, icon int32, onActivation func(actor *Actor)) *BumpObject {
 	return &BumpObject{
 		name:       name,
 		icon:       icon,

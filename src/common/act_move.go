@@ -80,7 +80,7 @@ func PlayerMoveToAttack(actor *Actor, relativeDirection geometry.Point, forceAtt
 		if state.IsClosedDoorAt(targetPos) {
 			return NewOpenDoorAction(NewActorCause("Open door", actor), actor, targetPos)
 		} else {
-			objectAtPos.ActorBumpedInto(actor, AnimateNow())
+			objectAtPos.ActorBumpedInto(actor)
 			if o, ok := objectAtPos.(*D1Object); ok && o.UsesTurn(actor) {
 				state.factory.ActionBroker.Execute(NewEndPlayerTurnAction(NewActorCause("Operate", actor), 10))
 				return nil
@@ -109,10 +109,4 @@ func PlayerMoveToAttack(actor *Actor, relativeDirection geometry.Point, forceAtt
 
 	state.GetMap().SetExplored(targetPos)
 	return nil
-}
-
-func AnimateNow() func() bool {
-	return func() bool {
-		return true
-	}
 }

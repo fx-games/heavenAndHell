@@ -532,7 +532,7 @@ func (f *Factory) spawnD1Wall(caster *Actor, p geometry.Point, resist, turns int
 	}
 	wall := NewFire(0)
 	wall.icon, wall.turnsUntilRemoval, wall.FireWall = icon, turns, resist == d1.ResistKindFire
-	wall.SetDealDamage(func(location geometry.Point, _ func() bool) {})
+	wall.SetDealDamage(func(location geometry.Point) {})
 	wall.SetOnTurn(func() {
 		if !wall.IsAlive() || f.State.GetMap() != m {
 			m.RemoveObject(wall)
@@ -564,7 +564,7 @@ func (f *Factory) spawnD1Guardian(caster *Actor, p geometry.Point, turns int) {
 	m := f.State.GetMap()
 	g := NewFire(0)
 	g.icon, g.frameCount, g.turnsUntilRemoval = defs.IconEffectFireBig, 2, turns
-	g.SetDealDamage(func(geometry.Point, func() bool) {})
+	g.SetDealDamage(func(geometry.Point) {})
 	g.SetOnTurn(func() {
 		if !g.IsAlive() || f.State.GetMap() != m {
 			m.RemoveObject(g)
@@ -787,12 +787,12 @@ func (o *d1PortalObject) SetMapPosition(p geometry.Point) { o.pos = p }
 func (o *d1PortalObject) Icon(tick uint64) int32 {
 	return []int32{defs.Icon("prop.portal"), defs.Icon("prop.portal.2")}[util.GetLoopingFrameFromTick(tick, 0.3, 2)]
 }
-func (o *d1PortalObject) IsWalkable(*Actor) bool              { return true }
-func (o *d1PortalObject) IsTransparent() bool                 { return true }
-func (o *d1PortalObject) IsPassableForProjectile() bool       { return true }
-func (o *d1PortalObject) Turn()                               {}
-func (o *d1PortalObject) ActorWalkedOn(*Actor, func() bool)   {}
-func (o *d1PortalObject) ActorBumpedInto(*Actor, func() bool) {}
+func (o *d1PortalObject) IsWalkable(*Actor) bool        { return true }
+func (o *d1PortalObject) IsTransparent() bool           { return true }
+func (o *d1PortalObject) IsPassableForProjectile() bool { return true }
+func (o *d1PortalObject) Turn()                         {}
+func (o *d1PortalObject) ActorWalkedOn(*Actor)          {}
+func (o *d1PortalObject) ActorBumpedInto(*Actor)        {}
 
 func (s *State) D1Portal() *D1Portal     { return s.d1Portal }
 func (s *State) SetD1Portal(p *D1Portal) { s.d1Portal = p }

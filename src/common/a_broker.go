@@ -1,5 +1,7 @@
 package common
 
+import "math/rand"
+
 type Broker struct {
 	beforeHooks        map[ActionName][]ActionHook
 	afterHooks         map[ActionName][]ActionHook
@@ -9,8 +11,10 @@ type Broker struct {
 	context            ActionContext
 	ticks              uint64
 	presenter          Presenter
-	events             []Event // emitted by the actions executing right now, presented when each one finishes
-	depth              int     // how many Executes are running
+	fx                 *rand.Rand                        // the presenter's dice: what is shown never decides what happens
+	flights            [][]*ProjectileDirectionAnimation // per running Execute, what it sent flying
+	events             []Event                           // emitted by the actions executing right now, presented when each one finishes
+	depth              int                               // how many Executes are running
 }
 
 // NewBroker creates a new broker
@@ -23,6 +27,7 @@ func NewBroker(context ActionContext) *Broker {
 		movementAnimations: make(map[*Actor]*MovementAnimation),
 		queuedActions:      make([][]Action, 0),
 		presenter:          Present,
+		fx:                 rand.New(rand.NewSource(rand.Int63())),
 	}
 	context.ActionBroker = b
 	b.context = context
@@ -79,12 +84,14 @@ func (d *Broker) Execute(action Action) {
 	d.events = d.events[:mark]
 	if len(animation) > 0 {
 		d.startAnimations(animation)
-		d.syncToProjectiles(animation, chainedActions)
+		d.syncToProjectiles(animation)
 	}
 
+	d.flights = append(d.flights, flightsIn(animation)) // what a chained blow may have to wait for
 	for _, chainedAction := range chainedActions {
 		d.Execute(chainedAction)
 	}
+	d.flights = d.flights[:len(d.flights)-1]
 
 	d.callAfterHooks(action)
 }

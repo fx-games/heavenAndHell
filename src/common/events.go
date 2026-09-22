@@ -13,14 +13,16 @@ type MeleeSwing struct {
 	From, To geometry.Point
 }
 
-// HealthChanged is a change to an actor's health (Amount < 0: damage). ShowWhen, when set, holds the feedback
-// until it is true: a projectile still has to arrive.
+// HealthChanged is a change to an actor's health (Amount < 0: damage). Before is the health it had, to draw
+// while the blow is still on its way, and Blood is where a hit stains the floor - the cell is rolled here
+// because it is saved with the map, while when it appears is the presenter's business.
 type HealthChanged struct {
-	Actor    *Actor
-	At       geometry.Point
-	Amount   float64
-	Cause    ActionName
-	ShowWhen func() bool
+	Actor  *Actor
+	At     geometry.Point
+	Amount float64
+	Before int
+	Cause  ActionName
+	Blood  geometry.Point
 }
 
 // Moved is a step (or push, or teleport) from From to To. The player sees it animated, over Delay seconds, when

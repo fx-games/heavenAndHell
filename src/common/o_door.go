@@ -27,10 +27,10 @@ func (d *Door) Name() string {
 	}
 	return "a door"
 }
-func (d *Door) ActorWalkedOn(actor *Actor, startAnimating func() bool) {
+func (d *Door) ActorWalkedOn(actor *Actor) {
 	d.Open()
 }
-func (d *Door) ActorBumpedInto(actor *Actor, startAnimating func() bool) {
+func (d *Door) ActorBumpedInto(actor *Actor) {
 
 }
 

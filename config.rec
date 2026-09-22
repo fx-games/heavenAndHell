@@ -5,6 +5,7 @@ ActorBobbingEnabled: true
 DrawTilesBehindActors: false
 DrawTilesBehindItems: false
 DrawTilesBehindObjects: false
+Font: Ac437_EagleSpCGA_Alt3.ttf
 DefaultFontSize: 16
 AutoPickup: true
 WindowWidth: 1280
