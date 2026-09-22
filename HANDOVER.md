@@ -21,10 +21,15 @@ hell_8's crash (`69bcc49`: accretion regrows up to 256 times, Hell's pieces reac
 walkability now runs 100 seeds), Rogue's generator (`a7575d0`), Lucifer's note + evidence quest (`f101549`),
 the options menu's Gameplay section (`1ac9538`), the megadungeon audit (`14a9ff7`). Hellfire needed nothing.
 
-Still waiting on the user:
-- Review the four evidence notes' text in H&H `texts.rec` (drafted by Claude from plan.txt).
-- Was `4c658e0` setting `config.rec` to `Mod: d1` meant (it undid 43faef5's H&H default)?
-- Not built: the second act after Lucifer's Rant (plan.txt's "Quests #2"); main never had it.
+Later the same day: H&H is the default mod again (`815d5ce`, config.rec names none); every generator's
+hardcoded shape is a knob, listed in LEVELS.md (`bb01848`); the second act is built (`c550855` engine:
+`spawn_monster`, `map` in conditions, `on_enter_level` fires in towns; `bfa2655` content). Lucifer in the town
+in hell gives adventurers (doom_9), skeleton_army (Zedek's crown from Shekel's house, used in catacombs_4) and
+shekel (merchant_12); with all three handed in, kirioth (the true Kirioth appears at town's spawn). Covered by
+`TestHeavenAndHellQuestsPlayThrough`.
+
+Still waiting on the user: review of the texts Claude drafted (the four evidence notes, all of act two's
+lines in H&H `texts.rec`). The town's NPC Kirioth and Shekel stay standing after their "true" selves die.
 
 Also fixed this session and committed: `e2f14d3` (package-level `gridmap.Tile` vars captured `defs.Icon*`
 before `LoadIcons`, so D1 stairs, arches, grates, lava and water drew as grass) and `4c658e0` (the lighting
