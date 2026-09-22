@@ -336,12 +336,16 @@ func configToggle(cfg *Configuration, name string, value *bool, reopen func()) u
 	}}
 }
 
-// AutoExploreSettings are the pause menu's auto explore toggles.
-func AutoExploreSettings(cfg *Configuration, reopen func()) []util.MenuItem {
-	return []util.MenuItem{
-		configToggle(cfg, "Open Containers", &cfg.AutoExploreOpenContainers, reopen),
-		configToggle(cfg, "Pickup loot", &cfg.AutoPickup, reopen),
+// GameplaySettings are the pause menu's Gameplay toggles. Permadeath has one life and one autosave: no toggle.
+func GameplaySettings(cfg *Configuration, permadeath bool, reopen func()) []util.MenuItem {
+	items := []util.MenuItem{
+		configToggle(cfg, "Auto explore opens containers", &cfg.AutoExploreOpenContainers, reopen),
+		configToggle(cfg, "Auto explore picks up loot", &cfg.AutoPickup, reopen),
 	}
+	if !permadeath {
+		items = append(items, AutosaveToggle(cfg, reopen))
+	}
+	return items
 }
 
 // AutosaveToggle is configToggle for AutosaveOnLevelChange, shown but locked when the mod fixes it.

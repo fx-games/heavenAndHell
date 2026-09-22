@@ -16,8 +16,7 @@ func (u *UIController) openPauseMenu() {
 	if !u.context.IsPermadeath() {
 		items = append(items,
 			util.MenuItem{MainText: "Save game", Action: func() { u.context.OpenSaveMenu(func() {}) }},
-			util.MenuItem{MainText: "Load game", Action: func() { u.context.OpenLoadMenu(func() {}) }},
-			common.AutosaveToggle(u.configuration, func() { u.reopen(u.openPauseMenu) }))
+			util.MenuItem{MainText: "Load game", Action: func() { u.context.OpenLoadMenu(func() {}) }})
 	}
 	quit := "Quit game"
 	if u.context.QuitSaves != nil && u.context.QuitSaves() {
@@ -26,7 +25,7 @@ func (u *UIController) openPauseMenu() {
 	u.OpenMenu(append(items, []util.MenuItem{
 		{MainText: "Video", Action: u.openVideoMenu},
 		{MainText: "Audio", Action: u.openAudioMenu},
-		{MainText: "Auto explore", Action: u.openAutoExploreMenu},
+		{MainText: "Gameplay", Action: u.openGameplayMenu},
 		{MainText: "Back to main menu", Action: u.context.BackToMainMenu},
 		{MainText: quit, Action: u.QuitGame},
 	}...))
@@ -65,9 +64,10 @@ func (u *UIController) openVideoMenu() {
 	})
 }
 
-// openAutoExploreMenu toggles auto-explore behavior, saved to config.rec.
-func (u *UIController) openAutoExploreMenu() {
-	u.OpenMenu(append(common.AutoExploreSettings(u.configuration, func() { u.reopen(u.openAutoExploreMenu) }), util.MenuItem{MainText: "Back", Action: u.PopWidget}))
+// openGameplayMenu holds the gameplay toggles, saved to config.rec.
+func (u *UIController) openGameplayMenu() {
+	items := common.GameplaySettings(u.configuration, u.context.IsPermadeath(), func() { u.reopen(u.openGameplayMenu) })
+	u.OpenMenu(append(items, util.MenuItem{MainText: "Back", Action: u.PopWidget}))
 }
 
 // openAudioMenu: volume sliders (left/right change them by 10%, Enter steps up and wraps), saved to config.rec,

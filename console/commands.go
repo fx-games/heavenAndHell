@@ -136,17 +136,19 @@ func (c *Console) openSystemMenu() {
 	if !c.context.IsPermadeath() { // permadeath has one life and one autosave: nothing to pick
 		items = append(items,
 			util.MenuItem{MainText: "Save game", Action: func() { c.context.OpenSaveMenu(c.openSystemMenu) }},
-			util.MenuItem{MainText: "Load game", Action: func() { c.context.OpenLoadMenu(c.openSystemMenu) }},
-			common.AutosaveToggle(c.config, c.openSystemMenu))
+			util.MenuItem{MainText: "Load game", Action: func() { c.context.OpenLoadMenu(c.openSystemMenu) }})
 	}
 	c.OpenMenu(append(items, []util.MenuItem{
-		{MainText: "Auto explore", Action: func() {
-			c.OpenMenu(append(common.AutoExploreSettings(c.config, c.openSystemMenu), util.MenuItem{MainText: "Back", Action: c.openSystemMenu}))
-		}},
+		{MainText: "Gameplay", Action: c.openGameplayMenu},
 		{MainText: "Key bindings", Action: c.showHelp},
 		{MainText: "Back to main menu", Action: c.context.BackToMainMenu},
 		{MainText: "Quit game", Action: c.ui.QuitGame},
 	}...))
+}
+
+func (c *Console) openGameplayMenu() {
+	items := common.GameplaySettings(c.config, c.context.IsPermadeath(), c.openGameplayMenu)
+	c.OpenMenu(append(items, util.MenuItem{MainText: "Back", Action: c.openSystemMenu}))
 }
 
 // look moves a cursor over the map; confirming shows details of what is there, like right clicking in the tile UI.
