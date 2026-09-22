@@ -15,7 +15,7 @@ Common fields, owned by the engine:
 | `map` | required | the level's id: clean, opaque, never parsed (`town`, `cathedral_3`, `leoric_tomb`) |
 | `name` | | display name |
 | `depth` | required | difficulty and progress only: seeds, monster/item levels, "deepest", store stock. Town 0; a quest or side level takes its parent's depth. Several levels may share one |
-| `generator` | required | the algorithm, one name per distinct algorithm in the engine (`d1_cathedral`, `d1_catacombs`, `d1_caves`, `d1_hell`, `d1_set`, `accretion`, `megadungeon`, `rogue`, `ldtk`) |
+| `generator` | required | the algorithm, one name per distinct algorithm in the engine (`d1_cathedral`, `d1_catacombs`, `d1_caves`, `d1_hell`, `d1_set`, `accretion`, `ldtk`, ...) |
 | `tiles` | required | the tile set |
 | `music` | | a `music.rec` event; without it the level has no music |
 | `town` | | `true`: town rules (town-only spells, restocking, no monsters) |
@@ -27,21 +27,6 @@ Each generator declares the extra fields it reads (D1: decorations, set pieces, 
 `accretion`: templates, rooms, doors; `ldtk`: `template`). Anything else is a load error, as are a missing
 required field, an unknown generator, a duplicate `map`, an exit to a missing level or location, and zero or
 several `start` records. One test loads every mod through this check.
-
-### Generator knobs
-
-Any mod may use any generator. Every knob is optional and defaults to the generator's original behaviour.
-
-| generator | knobs (default) |
-|---|---|
-| `d1_cathedral`, `d1_catacombs`, `d1_caves`, `d1_hell` | `decoration` (repeatable, `name, search, replace, percent`; `none` clears; per-strategy list), `theme_freq` (strategy's own), `set_pieces` (true). Level size is fixed at 112x112 |
-| `d1_set` | `quest` (required) |
-| `accretion` | `templates` (assets/rooms.ldtk), `template_prefix` (required), `require_room`, `forbid_room` (repeatable), `rooms` (16), `min_rooms` (10), `width`, `height` (40), `doors` (true), `mirror` (true), `wall_tile` (56), `floor_tile` (64), `loop_distance` (10), `loop_chance` (0.8) |
-| `megadungeon` | `width`, `height` (60), `room_tries` (1266), `min_room_size` (5), `room_size_spread` (5), `room_ratio` (0.25), `min_rooms` (10), `straight_passage_chance` (0.5), `imperfect_connect_chance` (0.5), `door_distance` (5), `dead_ends` (false: filled in), `doors` (true) |
-| `rogue` | `width` (80), `height` (24), `max_gone_rooms` (3), `extra_passages` (4), `doors` (true) |
-| `ldtk` | `template` (required) |
-
-Each mod's `levels.rec` header describes the knobs of the generators it uses.
 
 There is no `type:`. D1's leveltype belongs to D1's generators (the cathedral algorithm is leveltype 1; `d1_set`
 names its quest, and 1.09's quest table gives the set level and its `_qlvltype`). The engine has no notion of

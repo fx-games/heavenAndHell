@@ -56,6 +56,12 @@
 #   max_gone_rooms   up to this many of the nine cells hold only a passage junction instead of a room (default 3)
 #   extra_passages   up to this many passages beyond the ones that join every room, for loops (default 4)
 #   doors            false opens passages into rooms as doorways instead of doors
+# Diablo's generators take these knobs, each defaulting to what Diablo does:
+#   decoration   "name, search tile, replace tile, percent" - one single-tile decoration scattered over the
+#                finished level. Repeat the field for more; naming one replaces the default list, and
+#                "decoration: none" turns them off.
+#   theme_freq   how often DRLG_PlaceThemeRooms seeds a theme room (0 = the strategy's own rule).
+#   set_pieces   false keeps the strategy from laying out its set piece (quest rooms, Diablo's pentagram).
 # Every level forbids the other levels' quest rooms, and the Poisoned Water Supply's cave template, which is a
 # side level off level 3 rather than a dungeon level.
 # A generated level names its stairwells after its exits: ladder_up by the entrance, ladder_down far away.
