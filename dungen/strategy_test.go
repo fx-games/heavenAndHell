@@ -58,7 +58,7 @@ func TestHeavenAndHellLevelsAreWalkable(t *testing.T) {
 			continue
 		}
 		// Every level, several seeds: a split shows up on some seeds only (the cave levels' connectors did).
-		for seed := int64(1); seed <= 20; seed++ {
+		for seed := int64(1); seed <= 100; seed++ {
 			m, err := Build(l.Config, rand.New(rand.NewSource(seed)), fsys)
 			if err != nil {
 				t.Fatalf("level %s (%s): %v", l.Map, l.Generator, err)

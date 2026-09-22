@@ -167,8 +167,9 @@ func buildAccretion(c AccretionConfig, rnd *rand.Rand, fsys fs.FS) (*DungeonMap,
 	}
 	// The generator grows a level and can grow a stunted one; H&H regrew it until it was big enough. Bounded,
 	// because "keep rolling until it is good" with no bound is a hang waiting for a bad seed.
+	// Hell's small pieces grow 10 rooms on ~7% of tries, so the bound is generous: 256 misses is ~1e-8.
 	var why string
-	for try := 0; try < 32; try++ {
+	for try := 0; try < accretionTries; try++ {
 		m, err := g.Generate(c.Width, c.Height)
 		if err != nil {
 			return nil, err
@@ -181,8 +182,10 @@ func buildAccretion(c AccretionConfig, rnd *rand.Rand, fsys fs.FS) (*DungeonMap,
 			return m, nil
 		}
 	}
-	return nil, fmt.Errorf("dungen: %s level %s in 32 tries", c.Prefix, why)
+	return nil, fmt.Errorf("dungen: %s level %s in %d tries", c.Prefix, why, accretionTries)
 }
+
+const accretionTries = 256
 
 func buildMegaDungeon(c MegaDungeonConfig, rnd *rand.Rand) *DungeonMap {
 	var m *DungeonMap
