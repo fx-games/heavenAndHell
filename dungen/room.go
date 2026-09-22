@@ -1,11 +1,9 @@
 package dungen
 
 import (
-	"cmp"
 	"math"
 	"math/rand"
 	"rpg/geometry"
-	"rpg/util"
 	"slices"
 )
 
@@ -36,12 +34,22 @@ func (r *DungeonRoom) GetFreeConnectionsWithRotatedDirection() map[geometry.Poin
 		roomConnection := r.availableConnections[point]
 		if _, ok := r.connectedRooms[point]; !ok {
 			result[point] = RoomConnection{
-				OutwardDirection: roomConnection.OutwardDirection + r.rotationOffset,
+				OutwardDirection: r.transformDirection(roomConnection.OutwardDirection),
 				ConnectionID:     roomConnection.ConnectionID,
 			}
 		}
 	}
 	return result
+}
+
+// transformDirection turns a template's connector direction into the placed room's, always within [0, 360):
+// an unwrapped sum (North 270 + a 270 rotation = 540) has an Opposite that no wrapped direction ever equals.
+func (r *DungeonRoom) transformDirection(d geometry.CompassDirection) geometry.CompassDirection {
+	d += r.rotationOffset
+	for d >= 360 {
+		d -= 360
+	}
+	return d
 }
 
 func (r *DungeonRoom) HasMatchingConnection(otherConnection RoomConnection) (geometry.Point, bool) {
@@ -53,12 +61,7 @@ func (r *DungeonRoom) HasMatchingConnection(otherConnection RoomConnection) (geo
 		}
 		roomConnection := r.availableConnections[pos]
 
-		dir := roomConnection.OutwardDirection
-		dir = dir + r.rotationOffset
-		if dir >= 360 {
-			dir = dir - 360
-		}
-		if dir == neededDirection && ((neededId == 0 && roomConnection.ConnectionID == 0) || roomConnection.ConnectionID == neededId) {
+		if r.transformDirection(roomConnection.OutwardDirection) == neededDirection && roomConnection.ConnectionID == neededId {
 			return pos, true
 		}
 	}
@@ -98,12 +101,7 @@ func (r *DungeonRoom) GetRelativeFloorTiles() []geometry.Point {
 	for point, _ := range r.floorTiles {
 		result = append(result, point)
 	}
-	//REMOVE THIS; debug needs only
-	slices.SortStableFunc(result, func(i, j geometry.Point) int {
-		idxI := util.XYToIndex(i.X, i.Y, 20)
-		idxJ := util.XYToIndex(j.X, j.Y, 20)
-		return cmp.Compare(idxI, idxJ)
-	})
+	slices.SortFunc(result, comparePoints)
 	return result
 }
 func (r *DungeonRoom) GetAbsoluteRoomTiles() []geometry.Point {

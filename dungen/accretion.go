@@ -3,10 +3,10 @@ package dungen
 import (
 	"cmp"
 	"fmt"
+	"maps"
 	"math/rand"
 	"rpg/geometry"
 	"rpg/ldtk"
-	"rpg/util"
 	"slices"
 	"strings"
 )
@@ -80,7 +80,7 @@ func (g *AccretionGenerator) getTemplatesForLevel() []*DungeonRoom {
 	return templates
 }
 
-func (g *AccretionGenerator) getNewRoomFromRandomTemplateForSlot(slotID int) *DungeonRoom {
+func (g *AccretionGenerator) getNewRoomFromRandomTemplateForSlot(slotID int) (*DungeonRoom, error) {
 	var matchingRooms []*DungeonRoom
 
 	missingTemplates := make(map[string]bool)
@@ -128,46 +128,48 @@ func (g *AccretionGenerator) getNewRoomFromRandomTemplateForSlot(slotID int) *Du
 	}
 
 	if len(matchingRooms) == 0 {
-		println("no matching rooms for slot " + fmt.Sprintf("%d", slotID))
-		for _, room := range g.getTemplatesForLevel() {
-			println("room " + room.GetTemplateName() + " slot " + fmt.Sprintf("%d", room.GetPlugsIntoSlotId()))
-		}
-		panic("no matching rooms for slot " + fmt.Sprintf("%d", slotID))
+		return nil, fmt.Errorf("dungen: no %q template plugs into slot %d", g.levelRules.TemplatePrefix, slotID)
 	}
 
 	randomTemplate := matchingRooms[g.random.Intn(len(matchingRooms))]
-	clonedRoom := randomTemplate.Clone()
-	return clonedRoom
+	return randomTemplate.Clone(), nil
 }
 
-func (g *AccretionGenerator) getFirstRoom() *DungeonRoom {
-	return g.getNewRoomFromRandomTemplateWithZeroIDs()
-}
-func (g *AccretionGenerator) getNewRoomFromRandomTemplateWithZeroIDs() *DungeonRoom {
-	var subsetWithZeroIDConnections []*DungeonRoom
+// getFirstRoom picks the room a level grows from: one whose connectors take any room (connection ID 0).
+func (g *AccretionGenerator) getFirstRoom() (*DungeonRoom, error) {
+	var candidates []*DungeonRoom
 	for _, room := range g.getTemplatesForLevel() {
 		if room.HasOnlyZeroIDConnections() {
-			subsetWithZeroIDConnections = append(subsetWithZeroIDConnections, room)
+			candidates = append(candidates, room)
 		}
 	}
-	randomTemplate := subsetWithZeroIDConnections[g.random.Intn(len(subsetWithZeroIDConnections))]
-	clonedRoom := randomTemplate.Clone()
-	return clonedRoom
+	if len(candidates) == 0 {
+		return nil, fmt.Errorf("dungen: no %q template has only unnumbered connectors to start a level from", g.levelRules.TemplatePrefix)
+	}
+	return candidates[g.random.Intn(len(candidates))].Clone(), nil
 }
 
-func (g *AccretionGenerator) nextRoomForGenerator(slotID int) *DungeonRoom {
-	var newRoom *DungeonRoom
-	newRoom = g.getNewRoomFromRandomTemplateForSlot(slotID)
+func (g *AccretionGenerator) nextRoomForGenerator(slotID int) (*DungeonRoom, error) {
+	newRoom, err := g.getNewRoomFromRandomTemplateForSlot(slotID)
+	if err != nil {
+		return nil, err
+	}
 	newRoom.SetId(g.currentRoomId)
 	g.currentRoomId++
-	return newRoom
+	return newRoom, nil
 }
 
-func (g *AccretionGenerator) Generate(width, height int) *DungeonMap {
+// Generate grows one level. It fails only on template data that cannot build a level at all; a level that came
+// out small or without its required rooms is the caller's to judge (see MissingRequired).
+func (g *AccretionGenerator) Generate(width, height int) (*DungeonMap, error) {
 	g.placedTemplates = make(map[string]bool)
+	g.currentRoomId = 0
 	dMap := NewDungeonMap(width, height)
 
-	firstRoom := g.getFirstRoom()
+	firstRoom, err := g.getFirstRoom()
+	if err != nil {
+		return nil, err
+	}
 	firstRoom.SetId(g.currentRoomId)
 	g.currentRoomId++
 
@@ -176,7 +178,7 @@ func (g *AccretionGenerator) Generate(width, height int) *DungeonMap {
 	firstRoom.SetPositionOffset(centerMapPos)
 
 	if !dMap.CanPlaceRoom(firstRoom) {
-		panic("first room cannot be placed") // TODO
+		return nil, fmt.Errorf("dungen: template %s does not fit a %dx%d level", firstRoom.GetTemplateName(), width, height)
 	}
 
 	dMap.AddRoomAndSetTiles(firstRoom)
@@ -190,7 +192,10 @@ func (g *AccretionGenerator) Generate(width, height int) *DungeonMap {
 	repCounter := 0
 	currentSlotID := 0
 	for len(dMap.rooms) < maxRooms && repCounter < 100 {
-		nextRoom := g.nextRoomForGenerator(currentSlotID)
+		nextRoom, err := g.nextRoomForGenerator(currentSlotID)
+		if err != nil {
+			return nil, err
+		}
 		if g.printDebugSteps {
 			println(fmt.Sprintf("=== room %d ===", nextRoom.roomId))
 			nextRoom.PrintUntransformed()
@@ -231,9 +236,17 @@ func (g *AccretionGenerator) Generate(width, height int) *DungeonMap {
 		dMap.addMoreDoors(g.random, 10, 0.8)
 	}
 
-	//dMap.FillDeadEnds(g.random)
+	return dMap, nil
+}
 
-	return dMap
+// MissingRequired names a template the level must contain but the last Generate did not place, or "".
+func (g *AccretionGenerator) MissingRequired() string {
+	for _, name := range slices.Sorted(maps.Keys(g.levelRules.RequireTemplates)) {
+		if !g.placedTemplates[name] {
+			return name
+		}
+	}
+	return ""
 }
 
 func (g *AccretionGenerator) randomRect(width int, height int) geometry.Rect {
@@ -281,7 +294,7 @@ func (g *AccretionGenerator) tryConnectTo(dMap *DungeonMap, newRoom *DungeonRoom
 					newRoom.AddConnectedRoom(relativeNewDoorPos, existingRoom)
 					existingRoom.AddConnectedRoom(relativeConnectionPos, newRoom)
 					return true
-				} else if newRoom.GetPlugsIntoSlotId() > 0 {
+				} else if g.printDebugSteps && newRoom.GetPlugsIntoSlotId() > 0 {
 					println(fmt.Sprintf("=== COULD NOT FIT ==="))
 					println(fmt.Sprintf("> NEW ROOM %d", newRoom.roomId))
 					newRoom.PrintTransformedWithHighlight(relativeNewDoorPos)
@@ -304,12 +317,14 @@ func getSortedKeys(doors map[geometry.Point]RoomConnection) []geometry.Point {
 		keys[i] = k
 		i++
 	}
-	slices.SortStableFunc(keys, func(i, j geometry.Point) int {
-		idxI := util.XYToIndex(i.X, i.Y, 20)
-		idxJ := util.XYToIndex(j.X, j.Y, 20)
-		return cmp.Compare(idxI, idxJ)
-	})
+	slices.SortFunc(keys, comparePoints)
 	return keys
+}
+
+// comparePoints orders points row by row. Map iteration order is random, so anything that feeds the RNG from a
+// map has to go through an order like this to keep a seed reproducible; it must not assume a template width.
+func comparePoints(a, b geometry.Point) int {
+	return cmp.Or(cmp.Compare(a.Y, b.Y), cmp.Compare(a.X, b.X))
 }
 
 

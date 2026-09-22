@@ -155,14 +155,21 @@ func buildAccretion(c AccretionConfig, rnd *rand.Rand, fsys fs.FS) (*DungeonMap,
 	}
 	// The generator grows a level and can grow a stunted one; H&H regrew it until it was big enough. Bounded,
 	// because "keep rolling until it is good" with no bound is a hang waiting for a bad seed.
-	var m *DungeonMap
+	var why string
 	for try := 0; try < 32; try++ {
-		m = g.Generate(c.Width, c.Height)
-		if len(m.AllRooms()) >= c.MinRooms {
+		m, err := g.Generate(c.Width, c.Height)
+		if err != nil {
+			return nil, err
+		}
+		if missing := g.MissingRequired(); missing != "" {
+			why = "never placed required room " + missing
+		} else if n := len(m.AllRooms()); n < c.MinRooms {
+			why = fmt.Sprintf("grew at most %d of min_rooms %d", n, c.MinRooms)
+		} else {
 			return m, nil
 		}
 	}
-	return m, nil
+	return nil, fmt.Errorf("dungen: %s level %s in 32 tries", c.Prefix, why)
 }
 
 func buildMegaDungeon(c MegaDungeonConfig, rnd *rand.Rand) *DungeonMap {
