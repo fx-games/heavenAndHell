@@ -1,5 +1,6 @@
 %rec: default
 
+Mod: heavenandhell
 AudioEnabled: true
 ActorBobbingEnabled: true
 DrawTilesBehindActors: false
