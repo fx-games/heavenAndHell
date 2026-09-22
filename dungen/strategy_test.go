@@ -50,24 +50,21 @@ func hnhLevels(t *testing.T) ([]dungeon.Level, fs.FS) {
 // level that splits in two is one the player can fall into half of and never leave.
 func TestHeavenAndHellLevelsAreWalkable(t *testing.T) {
 	levels, fsys := hnhLevels(t)
-	built, depths := 0, map[int]bool{}
+	built := 0
 	for _, l := range levels {
-		// One level per depth, as before side levels were records like any other: accretion still splits some
-		// seeds of the cave levels (the Poisoned Water Supply's among them), a generator bug of its own.
-		if depths[l.Depth] {
-			continue
-		}
-		depths[l.Depth] = true
 		switch l.Config.(type) {
 		case AccretionConfig, *AccretionConfig, MegaDungeonConfig, *MegaDungeonConfig:
 		default:
 			continue
 		}
-		m, err := Build(l.Config, rand.New(rand.NewSource(int64(l.Depth))), fsys)
-		if err != nil {
-			t.Fatalf("level %s (%s): %v", l.Map, l.Generator, err)
+		// Every level, several seeds: a split shows up on some seeds only (the cave levels' connectors did).
+		for seed := int64(1); seed <= 20; seed++ {
+			m, err := Build(l.Config, rand.New(rand.NewSource(seed)), fsys)
+			if err != nil {
+				t.Fatalf("level %s (%s): %v", l.Map, l.Generator, err)
+			}
+			assertConnected(t, int(seed), l.Map, m)
 		}
-		assertConnected(t, l.Depth, l.Map, m)
 		built++
 	}
 	if built == 0 {
@@ -126,7 +123,7 @@ func TestUnknownGeneratorIsRejected(t *testing.T) {
 }
 
 // assertConnected floods the walkable cells from the first one and insists it reaches all of them.
-func assertConnected(t *testing.T, dlvl int, name string, m *DungeonMap) {
+func assertConnected(t *testing.T, seed int, name string, m *DungeonMap) {
 	t.Helper()
 	w, h := m.GetSize()
 	var start geometry.Point
@@ -142,7 +139,7 @@ func assertConnected(t *testing.T, dlvl int, name string, m *DungeonMap) {
 		}
 	}
 	if total < 50 {
-		t.Errorf("level %d (%s): only %d walkable cells", dlvl, name, total)
+		t.Errorf("seed %d (%s): only %d walkable cells", seed, name, total)
 		return
 	}
 	seen := map[geometry.Point]bool{start: true}
@@ -158,6 +155,6 @@ func assertConnected(t *testing.T, dlvl int, name string, m *DungeonMap) {
 		}
 	}
 	if len(seen) != total {
-		t.Errorf("level %d (%s): %d of %d walkable cells are cut off from the rest", dlvl, name, total-len(seen), total)
+		t.Errorf("seed %d (%s): %d of %d walkable cells are cut off from the rest", seed, name, total-len(seen), total)
 	}
 }

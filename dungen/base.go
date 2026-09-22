@@ -41,10 +41,12 @@ func (m *DungeonMap) AddRoomAndSetTiles(room *DungeonRoom) {
 func (m *DungeonMap) ConnectRoomsOnMap(placeDoor bool) {
 	for _, room := range m.rooms {
 		for _, door := range room.GetUsedAbsoluteDoorTiles() {
-			if _, couldBeDoor := m.CouldBeADoor(door); !couldBeDoor {
+			if m.GetTileAt(door) != Wall {
 				continue
 			}
-			if placeDoor {
+			// Both rooms plugged into this connector, so it has to open whatever the walls around it look like:
+			// irregular (cave) rooms rarely flank it with a straight wall pair, and skipping it cut them off.
+			if _, couldBeDoor := m.CouldBeADoor(door); placeDoor && couldBeDoor {
 				m.SetDoor(door.X, door.Y)
 			} else {
 				m.SetCorridor(door.X, door.Y)
