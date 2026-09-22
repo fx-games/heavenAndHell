@@ -124,7 +124,9 @@ func (f *Factory) runQuestOutcome(do recfile.StringPredicate, speaker string) bo
 	case "sound":
 		f.playD1Sound(do.GetString(0))
 	case "refresh_level":
-		UpdateD1Quests(s, s.GetMap())
+		s.QuestsChanged(s.GetMap())
+	case "place_item": // place_item(item, location): on the level the hero is on; "anywhere" is a random open spot
+		f.placeItem(do.GetString(0), do.GetString(1))
 	case "say": // say(text) speaks as whoever the event is about; say(text, name) names the speaker
 		if do.ParamCount() > 1 {
 			speaker = do.GetString(1)
@@ -187,7 +189,7 @@ func (f *Factory) runQuestOutcome(do recfile.StringPredicate, speaker string) bo
 func QuestOutcomeExists(name string) bool {
 	switch name {
 	case "complete_quest", "activate_quest", "log_quest", "set_quest_var", "set_flag", "hero_sound", "sound",
-		"say", "refresh_level", "end_text", "give_exp", "give_weapon", "spawn_item", "start_quest", "start_town_quest",
+		"say", "refresh_level", "place_item", "end_text", "give_exp", "give_weapon", "spawn_item", "start_quest", "start_town_quest",
 		"or_quest_var", "take_item", "drop_item", "drop_unique":
 		return true
 	}
@@ -210,6 +212,22 @@ func (f *Factory) spawnItemAt(item, mapName, location string) {
 	m := s.Map(mapName)
 	if m == nil {
 		f.Msg(fmt.Sprintf("spawn_item: map %q is not built", mapName))
+		return
+	}
+	m.AddItem(f.NewD1Item(f.Generator.PlainItem(idx)), getDropPos(m, m.GetNamedLocation(location)))
+}
+
+// placeItem lays one plain item of the mod's on the level the hero is on: at a named location, or "anywhere"
+// for a random open spot away from the stairs (ResyncQuests' SpawnQuestItem).
+func (f *Factory) placeItem(item, location string) {
+	idx, ok := f.Generator.D.ItemIdx[item]
+	if !ok {
+		f.Msg(fmt.Sprintf("place_item: this mod has no item %q", item))
+		return
+	}
+	m := f.State.GetMap()
+	if location == "anywhere" {
+		f.spawnD1QuestItem(m, idx)
 		return
 	}
 	m.AddItem(f.NewD1Item(f.Generator.PlainItem(idx)), getDropPos(m, m.GetNamedLocation(location)))

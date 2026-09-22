@@ -326,6 +326,25 @@ when: not flag("d1:dungmsg:9")
 do: set_flag(d1:dungmsg:9)
 do: hero_sound(98)
 
+# ResyncQuests on arrival: the Fungal Tome lies on 9 until Adria has seen it.
+event: on_enter_level
+subject: caves_9
+when: avail("mushroom") and not active("mushroom") and not done("mushroom") and v1("mushroom") == 0
+do: set_quest_var(mushroom, 1, 1)
+do: place_item(fungal_tome, anywhere)
+
+# On 15: the red portal is seen open once Cain has the staff, and Lachdanan's Golden Elixir lies there.
+event: on_enter_level
+subject: hell_15
+when: active("lazarus") and v1("lazarus") == 2
+do: set_quest_var(lazarus, 1, 3)
+
+event: on_enter_level
+subject: hell_15
+when: active("veil") and v1("veil") == 0
+do: set_quest_var(veil, 1, 1)
+do: place_item(golden_elixir, anywhere)
+
 event: on_enter_level
 subject: hell_13
 when: not flag("d1:dungmsg:13")

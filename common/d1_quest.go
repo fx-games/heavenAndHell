@@ -318,10 +318,9 @@ func (f *Factory) d1DoTalk(a *Actor) {
 		}
 	case "AI_SNOTSPIL":
 		if mon.TalkMsg == "TEXT_BANNER10" && s.QuestVar(d1.QLtBanner, 1) < 2 {
-			sp := f.State.mapGen.setPiece(s.GetMap())
-			f.State.mapGen.changeD1Map(s.GetMap(), sp[0], sp[1], sp[2]>>1+sp[0]+2, sp[3]>>1+sp[1]-2)
 			s.SetQuestVar(d1.QLtBanner, 1, 2)
 			s.SetQuestActive(d1.QLtBanner, d1.QuestActive)
+			s.QuestsChanged(s.GetMap()) // levels.rec's patch opens his part of the hall
 		}
 	case "AI_LACHDAN":
 		if mon.TalkMsg == "TEXT_VEIL9" {
@@ -371,7 +370,7 @@ func (f *Factory) D1TalkerTurn(a *Actor, visible bool) bool {
 		}
 		if visible && mon.TalkMsg == "TEXT_BANNER12" && talking {
 			s.SetQuestVar(d1.QLtBanner, 1, 3)
-			UpdateD1Quests(s, s.GetMap())
+			s.QuestsChanged(s.GetMap())
 			quiet()
 		}
 		return visible && s.QuestVar(d1.QLtBanner, 1) == 3 && (mon.Goal == d1GoalNormal || mon.Goal == d1GoalAttack2)
@@ -397,7 +396,7 @@ func (f *Factory) D1TalkerTurn(a *Actor, visible bool) bool {
 			f.d1DoTalk(a)
 		} else if visible && mon.TalkMsg == "TEXT_VILE13" && talking {
 			s.SetQuestVar(d1.QBetrayer, 1, 6)
-			UpdateD1Quests(s, s.GetMap())
+			s.QuestsChanged(s.GetMap())
 			quiet()
 		}
 	case "AI_LAZHELP":
@@ -415,93 +414,6 @@ var (
 	d1RedPortal  = gridmap.Tile{DefinedIcon: 72, DefinedDescription: "a red portal", IsWalkable: true, IsTransparent: true}
 )
 
-// UpdateD1Quests brings a level up to date with the quests. It is idempotent and runs on arrival and whenever
-// something changes: the red portal on 15 once Cain has the staff (CheckQuests) and the stairs down once Lazarus
-// is dead (InitVPTriggers), the portal back from his lair, the map changes that levers, books, the Pedestal of
-// Blood and Snotspill made (ObjChangeMap), and the quest items D1 spawns on arrival (ResyncQuests).
-func UpdateD1Quests(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
-	if m == nil || s.Level(m.GetName()).Town {
-		return
-	}
-	clear(d1GossipSeeds) // the town's towners are rolled anew on the way back
-	f := s.factory
-	f.d1DungMsgs(m)
-	s.wireExits(m) // the red portal on 15, the stairs down once Lazarus is dead, the way out of his lair
-	betrayer := s.QuestActive(d1.QBetrayer)
-	switch m.GetName() {
-	case s.questLevel(d1.QBetrayer):
-		if betrayer == d1.QuestActive && s.QuestVar(d1.QBetrayer, 1) == 2 { // the portal is seen open
-			s.SetQuestVar(d1.QBetrayer, 1, 3)
-		}
-		if q := d1.QVeil; s.QuestActive(q) == d1.QuestActive && s.QuestVar(q, 1) == 0 {
-			s.SetQuestVar(q, 1, 1)
-			f.spawnD1QuestItem(m, d1.IdiGldnElix)
-		}
-	case s.questLevel(d1.QMushroom):
-		if q := d1.QMushroom; s.QuestActive(q) == d1.QuestInit && s.QuestVar(q, 1) == d1.QSInit {
-			s.SetQuestVar(q, 1, d1.QSTomeSpawned)
-			f.spawnD1QuestItem(m, d1.IdiFungalTm)
-		}
-	}
-	replayD1MapChanges(s, m)
-}
-
-// replayD1MapChanges redoes the map changes of UpdateD1Quests. A loaded level runs it before its saved monsters
-// are restored, so none of them (nor the hero) is pushed out of a room a lever or quest had opened.
-func replayD1MapChanges(s *State, m *gridmap.GridMap[*Actor, *Item, Object]) {
-	gen := s.mapGen
-	sp := gen.setPiece(m)
-	if s.questOn(d1.QLtBanner, m) {
-		if v := s.QuestVar(d1.QLtBanner, 1); v == 2 {
-			gen.changeD1Map(m, sp[0], sp[1], sp[2]>>1+sp[0]+2, sp[3]>>1+sp[1]-2)
-		} else if v == 3 {
-			gen.changeD1Map(m, sp[0], sp[1], sp[0]+sp[2]+1, sp[1]+sp[3]+1)
-		}
-	}
-	if s.questOn(d1.QBlood, m) {
-		stages := [3][4]int{{sp[0], sp[1] + 3, sp[0] + 2, sp[1] + 7}, {sp[0] + 6, sp[1] + 3, sp[0] + sp[2], sp[1] + 7}, {sp[0], sp[1], sp[0] + sp[2], sp[1] + sp[3]}}
-		for _, r := range stages[:min(s.QuestVar(d1.QBlood, 2), 3)] {
-			gen.changeD1Map(m, r[0], r[1], r[2], r[3])
-		}
-		if lvl := gen.d1Levels[m.GetName()]; lvl != nil && s.QuestVar(d1.QBlood, 2) >= 3 { // OperatePedistal: Blood2.DUN's torches light the hall
-			for _, o := range s.factory.D1().D.DunObjects("l2/blood2", 2*sp[0], 2*sp[1]) {
-				d1PlaceObject(s.factory, m, lvl, o, toCell(o.X, o.Y))
-			}
-			delete(s.glowCache, m)
-		}
-	}
-	if s.onSetLevelOf(m, d1.QBetrayer) { // ResyncQuests: the way to Lazarus, then to Red Vex and Black Jade
-		if s.QuestVar(d1.QBetrayer, 1) >= 4 || s.QuestActive(d1.QBetrayer) == d1.QuestDone {
-			gen.changeD1Map(m, 1, 11, 20, 18)
-		}
-		if s.QuestVar(d1.QBetrayer, 1) >= 6 || s.QuestActive(d1.QBetrayer) == d1.QuestDone {
-			gen.changeD1Map(m, 1, 18, 20, 24)
-		}
-	}
-	for _, obj := range m.Objects() {
-		o, ok := obj.(*D1Object)
-		if !ok || o.O.Active {
-			continue
-		}
-		switch o.O.Kind {
-		case d1.ObjLEVER, d1.ObjBLINDBOOK, d1.ObjSTEELTOME, d1.ObjBOOK2R:
-			gen.changeD1Map(m, o.O.Var1, o.O.Var2, o.O.Var3, o.O.Var4)
-		case d1.ObjBOOK2L:
-			if s.onSetLevelOf(m, d1.QBetrayer) {
-				gen.changeD1Map(m, o.O.Var1, o.O.Var2, o.O.Var3, o.O.Var4)
-			}
-		}
-	}
-	for _, obj := range m.Objects() {
-		o, ok := obj.(*D1Object)
-		if !ok {
-			continue
-		}
-		if o.O.Kind == d1.ObjSWITCHSKL && d1ObjectGroupUsed(m, isD1Skull, o.O.Var8) || isD1Crux(o.O.Kind) && d1ObjectGroupUsed(m, isD1Crux, o.O.Var8) {
-			gen.changeD1Map(m, o.O.Var1, o.O.Var2, o.O.Var3, o.O.Var4)
-		}
-	}
-}
 
 // Lazarus' lair (Vile2.DUN), in piece coordinates: the magic circles in front of the two Books of Vileness and where
 // they teleport the hero, the central circle and the one in front of Lazarus it leads to, and the return portal.
@@ -528,7 +440,7 @@ func (f *Factory) operateD1VileBook(o *D1Object, player *Actor) {
 	}
 	o.O.Active = false
 	f.d1VileTeleport(player, pieceCell(to))
-	UpdateD1Quests(f.State, f.State.GetMap())
+	f.State.QuestsChanged(f.State.GetMap())
 }
 
 // d1VileTeleport ports MIS_RNDTELEPORT onto a lair circle: the hero lands on it, or next to it when taken
@@ -554,8 +466,7 @@ func (f *Factory) d1MagicCircle(o *D1Object, player *Actor) {
 	if s.QuestActive(d1.QBetrayer) == d1.QuestActive && s.QuestVar(d1.QBetrayer, 1) < 4 {
 		s.SetQuestVar(d1.QBetrayer, 1, 4)
 	}
-	s.mapGen.changeD1Map(m, o.O.Var1, o.O.Var2, o.O.Var3, o.O.Var4)
-	UpdateD1Quests(s, m)
+	s.QuestsChanged(m)
 	f.d1VileTeleport(player, pieceCell(d1VileAltar))
 }
 
@@ -712,7 +623,7 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 					}
 				}
 			}
-			UpdateD1Quests(s, m)
+			s.QuestsChanged(m)
 			if q == d1.QBlind {
 				f.dropD1Item(gen.SpawnUnique(d1.UItemOptAmulet, s.CurrentLevel().Depth), cell(2*sp[0]+16+5, 2*sp[1]+16+5))
 			}
@@ -729,7 +640,7 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 		default:
 			s.SetQuestVar(q, 2, stones+1)
 			f.PlayD1Sfx(map[bool]string{false: "LS_PUDDLE", true: "LS_BLODSTAR"}[stones+1 == 3], o.pos)
-			UpdateD1Quests(s, m)
+			s.QuestsChanged(m)
 			if stones+1 < 3 {
 				f.Msg(fmt.Sprintf("You set a blood stone into the pedestal. %d to go.", 3-(stones+1)))
 				break
@@ -744,7 +655,7 @@ func (f *Factory) operateD1QuestObject(o *D1Object, player *Actor) bool {
 			if s.QuestActive(q) == d1.QuestInit {
 				s.startQuest(q)
 			}
-			UpdateD1Quests(s, m)
+			s.QuestsChanged(m)
 		}
 		f.say(o.Name(), s.QuestDefs()[d1.QSchamb].LogText)
 	case d1.ObjBOOK2L: // OperateBook
@@ -789,8 +700,3 @@ func (f *Factory) D1MonsterGreeting(a *Actor) {
 	}
 }
 
-// d1DungMsgs ports PlayDungMsgs: the mod's on_enter_level triggers, named by the level reached. The "each once"
-// is the triggers' own business -- they set and test a flag.
-func (f *Factory) d1DungMsgs(m *gridmap.GridMap[*Actor, *Item, Object]) {
-	f.fireQuestTriggers(EventEnterLevel, m.GetName(), "")
-}

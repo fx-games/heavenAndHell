@@ -42,10 +42,15 @@ no transition. Quests never invent links, they satisfy conditions.
 
 A quest names its level (`level: cathedral_3`). Everything `UpdateD1Quests` did is declarative:
 - gated exits: `open_when` on the exit;
-- map changes (ObjChangeMap: Leoric's lever, the Bone Chamber book, the Pedestal, Snotspill): `patch` records,
-  applied by `do: apply_patch(<map>, <patch>)`; applied patches are saved and re-applied on arrival;
-- items placed on arrival (ResyncQuests): `on_enter_level` triggers with `do: place_item(<item>, <location>)`,
-  guarded by a flag.
+- map changes (ObjChangeMap: Leoric's lever, the Bone Chamber book, the Pedestal, Snotspill): `patch` records
+  on the level, `patch: <name> = <region>` with an optional `apply_when:` condition and `patch_objects:` (a
+  .DUN whose objects come with it). A region is fixed megatiles (numbers or the set piece's edges, `midx+2`),
+  or `used`/`group`/`range OBJ_...`: the ranges D1's generator rolled into those objects. Decided in the build
+  (2026-09-22): nothing is saved and there is no `apply_patch` outcome; every patch follows from quest vars and
+  object state, which saves already keep, and is re-applied whenever the level is built, loaded or its quests
+  change (`State.QuestsChanged`). ChangeMap is idempotent;
+- items placed on arrival (ResyncQuests): `on_enter_level` triggers with `do: place_item(<item>, <location>)`
+  (`anywhere`: a random open spot), guarded by a quest var.
 `UpdateD1Quests` is deleted.
 
 ## Querying
@@ -90,4 +95,8 @@ does the root test package, instead of following config.rec).
 Steps 4 (music from the record, `D1LevelType` deleted) and 5 (no fallback game, default mod heavenandhell, a
 missing mod stops the game with an error naming it) are done too.
 
-Next: step 3 (patches + place_item, delete `UpdateD1Quests`).
+Step 3 is done as well: `UpdateD1Quests` and `replayD1MapChanges` are gone, arrival is `common.Arrive`
+(on_enter_level, then `QuestsChanged`). `TestEveryMapChangingObjectHasAPatch` walks every D1 level with all
+quests available and fails on a lever, book or switch no patch names. One behaviour difference, accepted: the
+central circle of Lazarus' lair is now re-applied on load as well, so after loading the lair its released
+monsters take their turns in a different order (tiles identical); the playthrough baseline moved for that.

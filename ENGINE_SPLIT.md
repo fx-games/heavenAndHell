@@ -63,7 +63,7 @@ Mod (rec/tsv):
   log text, per-NPC gossip and set-level placement, plus triggers on four named
   events (`on_kill`, `on_item_pickup`, `on_enter_level`, `on_talk`) and nine
   named outcomes. What did NOT move, and why: the town hand-ins, the talking
-  bosses' state machines, `UpdateD1Quests`/`replayD1MapChanges` and the quest
+  bosses' state machines, and the quest
   objects all sequence side effects (take this item, then spawn that reward
   there, then reopen this room) rather than test a condition. Expressing them
   would need a scripting language, which is the thing this rule exists to
@@ -243,8 +243,8 @@ another size lost most of its cells. The stride now travels with the bitmap.
      brain get the general AI), towns and side levels (levels.rec `town:` and
      `map:` records).
    - All dialogue text is `texts.rec`.
-   - `UpdateD1Quests` (set-piece map changes) stays with D1's level family, on
-     its side of the generator seam, like its generators.
+   - Set-piece map changes are levels.rec `patch` records (LEVELS.md); D1's
+     level family only reads their regions (`common/level_patches.go`).
 
 Gameplay changes to D1 are off the table: the D1 mod follows the original 1:1 (user, 2026-09-21).
 

@@ -67,6 +67,15 @@ type Exit struct {
 	OpenWhen, Tile            string
 }
 
+// Patch is a region of a level that changes after it is built (D1's ObjChangeMap: a lever, a book, a quest step
+// opens part of the map). Declared as "patch: <name> = <region>", optionally followed by "apply_when:" (the quest
+// trigger language; it applies once that holds) and "patch_objects:" (a map file whose objects appear with it).
+// The region is the level family's to read; the engine keeps it as written.
+type Patch struct {
+	Name, Region       string
+	ApplyWhen, Objects string
+}
+
 // Level is one level as a mod declared it (LEVELS.md): a town, a dungeon depth, a quest or side level alike.
 // Config is its generator's own business; the rest is the engine's.
 type Level struct {
@@ -78,11 +87,13 @@ type Level struct {
 	Music       string // a music.rec event; empty: no music
 	Town, Start bool
 	Exits       []Exit
+	Patches     []Patch // in file order, which is the order they apply
 }
 
 // commonFields are the fields every level record may carry; a generator may add the ones its Parse reads.
 var commonFields = map[string]bool{"map": true, "name": true, "depth": true, "generator": true, "tiles": true,
-	"music": true, "town": true, "start": true, "exit": true, "open_when": true, "exit_tile": true}
+	"music": true, "town": true, "start": true, "exit": true, "open_when": true, "exit_tile": true,
+	"patch": true, "apply_when": true, "patch_objects": true}
 
 // LoadLevels reads a mod's whole levels.rec and checks it: every record a level with the required fields, known
 // fields only (common ones plus what its generator reads), unique ids, one start, and every exit leading to a
@@ -166,6 +177,27 @@ func parseLevel(r recfile.Record) (Level, error) {
 				return fail("exit %q: want <location> -> <map id>, <arrival location>", v)
 			}
 			l.Exits = append(l.Exits, Exit{Location: strings.TrimSpace(loc), Target: strings.TrimSpace(target), Arrival: strings.TrimSpace(arrival)})
+		case "patch":
+			name, region, ok := strings.Cut(v, "=")
+			if !ok || strings.TrimSpace(name) == "" || strings.TrimSpace(region) == "" {
+				return fail("patch %q: want <name> = <region>", v)
+			}
+			for _, p := range l.Patches {
+				if p.Name == strings.TrimSpace(name) {
+					return fail("patch %q declared twice", p.Name)
+				}
+			}
+			l.Patches = append(l.Patches, Patch{Name: strings.TrimSpace(name), Region: strings.TrimSpace(region)})
+		case "apply_when", "patch_objects":
+			if len(l.Patches) == 0 {
+				return fail("%s before any patch", f.Name)
+			}
+			p := &l.Patches[len(l.Patches)-1]
+			if f.Name == "apply_when" {
+				p.ApplyWhen = v
+			} else {
+				p.Objects = v
+			}
 		case "open_when", "exit_tile":
 			if len(l.Exits) == 0 {
 				return fail("%s before any exit", f.Name)

@@ -26,6 +26,11 @@
 #   set_pieces   false keeps the strategy from laying out its set piece (quest rooms, Diablo's pentagram).
 # D1's levels name their stairs ladder_up and ladder_down, the town warps on 5, 9 and 13 warp, and a quest's
 # entrance its quest key; the set levels name their way out ladder_up (Lazarus' lair: exit).
+#   patch        "<name> = <region>": part of the level that opens later (ObjChangeMap), in the order they apply.
+#                The region is "x1 y1 x2 y2" in megatiles (numbers, or the set piece's left/top/right/bottom/
+#                midx/midy with +n/-n), "used OBJ_..." (each used object opens the range the generator gave it)
+#                or "group OBJ_..." (once its whole lever group is used). "apply_when:" after it holds it back
+#                until the condition is true; "patch_objects:" names a .DUN whose objects appear with it.
 
 map: town
 name: Tristram
@@ -81,6 +86,10 @@ tiles: cathedral
 music: cathedral
 exit: ladder_up -> cathedral_3, ladder_down
 exit: ladder_down -> catacombs_5, ladder_up
+patch: banner_hall = left top midx+2 midy-2
+apply_when: avail("banner") and v1("banner") == 2
+patch: banner_stairs = left top right+1 bottom+1
+apply_when: avail("banner") and v1("banner") == 3
 
 map: catacombs_5
 name: Level 5\nCatacombs
@@ -91,6 +100,13 @@ music: catacombs
 exit: ladder_up -> cathedral_4, ladder_down
 exit: ladder_down -> catacombs_6, ladder_up
 exit: warp -> town, to_catacombs
+patch: blood_1 = left top+3 left+2 top+7
+apply_when: avail("blood") and v2("blood") >= 1
+patch: blood_2 = left+6 top+3 right top+7
+apply_when: avail("blood") and v2("blood") >= 2
+patch: blood_3 = left top right bottom
+apply_when: avail("blood") and v2("blood") >= 3
+patch_objects: l2/blood2
 
 map: catacombs_6
 name: Level 6\nCatacombs
@@ -101,6 +117,7 @@ music: catacombs
 exit: ladder_up -> catacombs_5, ladder_down
 exit: ladder_down -> catacombs_7, ladder_up
 exit: schamb -> bone_chamber, ladder_up
+patch: bone_chamber_book = used OBJ_BOOK2R
 
 map: catacombs_7
 name: Level 7\nCatacombs
@@ -110,6 +127,7 @@ tiles: catacombs
 music: catacombs
 exit: ladder_up -> catacombs_6, ladder_down
 exit: ladder_down -> catacombs_8, ladder_up
+patch: blind_book = used OBJ_BLINDBOOK
 
 map: catacombs_8
 name: Level 8\nCatacombs
@@ -166,6 +184,7 @@ music: hell
 exit: ladder_up -> caves_12, ladder_down
 exit: ladder_down -> hell_14, ladder_up
 exit: warp -> town, to_hell
+patch: steel_tome = used OBJ_STEELTOME
 
 map: hell_14
 name: Level 14\nHell
@@ -197,6 +216,7 @@ generator: d1_hell
 tiles: hell
 music: hell
 exit: ladder_up -> hell_15, ladder_down
+patch: skull_levers = group OBJ_SWITCHSKL
 
 map: leoric_tomb
 name: King Leoric's Tomb
@@ -206,6 +226,8 @@ quest: leoric
 tiles: cathedral
 music: cathedral
 exit: ladder_up -> cathedral_3, leoric
+patch: lever = used OBJ_LEVER
+patch: crucified = group OBJ_CRUX1 OBJ_CRUX2 OBJ_CRUX3
 
 map: dark_passage
 name: A Dark Passage
@@ -224,6 +246,7 @@ quest: schamb
 tiles: catacombs
 music: catacombs
 exit: ladder_up -> catacombs_6, schamb
+patch: skull_levers = group OBJ_SWITCHSKL
 
 map: lazarus_lair
 name: Lazarus' Lair
@@ -235,3 +258,10 @@ music: cathedral
 exit: exit -> hell_15, lazarus
 open_when: done("lazarus")
 exit_tile: red_portal
+patch: central_circle = range OBJ_MCIRCLE2
+apply_when: v1("lazarus") >= 4 or done("lazarus")
+patch: way_to_lazarus = 1 11 20 18
+apply_when: v1("lazarus") >= 4 or done("lazarus")
+patch: helpers_rooms = 1 18 20 24
+apply_when: v1("lazarus") >= 6 or done("lazarus")
+patch: vile_books = used OBJ_BOOK2L

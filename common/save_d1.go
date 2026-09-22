@@ -157,7 +157,7 @@ func (s *LevelSnapshot) apply(f *Factory, m *gridmap.GridMap[*Actor, *Item, Obje
 			}
 		}
 	}
-	replayD1MapChanges(f.State, m)
+	f.State.applyPatches(m)
 	if s.RespawnMonsters { // the level keeps the monsters the generator just placed, and buries its corpses
 		s.RespawnMonsters = false
 		s.Monsters, s.Spawned, s.Corpses = map[int]SavedMonster{}, nil, nil

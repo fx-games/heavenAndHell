@@ -121,7 +121,7 @@ func (g *GameInstance) onD1MapChanged(oldMapName, newMapName string) {
 		h.Reflections = 0 // FreeMissiles: Reflect ends with the level
 	}
 	player.RemoveStatusEffect(common.StatusManaShield)
-	common.UpdateD1Quests(&g.state, g.state.GetMap())
+	common.Arrive(&g.state, g.state.GetMap())
 	g.playLevelMusic()
 	if p := g.state.D1Portal(); p != nil && g.state.Level(oldMapName).Town && newMapName == p.Map &&
 		geometry.DistanceChebyshev(player.MapPosition(), geometry.Point{X: p.X, Y: p.Y}) <= 1 {

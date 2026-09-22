@@ -45,7 +45,7 @@ Three gates, all non-negotiable:
    output at all (`md5 -q` two runs, and against the run before your change). A
    deliberate gameplay change (the user's list below) changes it: diff the output
    and check every changed line is the intended effect, then say so in the commit.
-   Current baseline, after the levels refactor: `160cc8b42230c81723947c7622e44d46`.
+   Current baseline, after LEVELS.md step 3: `94bc8c0528b18358d6823c1daaa744ee`.
 3. Both build tags green, no new test failures.
 
 ## Done
@@ -142,8 +142,8 @@ The plan (user, 2026-09-21):
    game item (`common.Item.SetItemHooks`) from a record field instead. Kirioth
    says nothing after Lucifer (main had no text for it either). The evidence
    notes carry main's placeholder text ("Are you sure about this?").
-3. `UpdateD1Quests` (set-piece map changes) stays engine-side on purpose: it is
-   D1's level family's business, like its generators (the seam in ENGINE_SPLIT.md).
+3. ~~`UpdateD1Quests` stays engine-side~~: superseded (user, 2026-09-22). Map
+   changes are levels.rec patches (LEVELS.md); only reading a region is D1's.
 4. One intermittent failure of the root package under `-tags embedded` was seen
    once and did not reproduce in 25 runs of the new tests or 4 of the package.
    If it recurs, capture the failing test's name before rerunning.

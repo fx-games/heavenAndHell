@@ -47,6 +47,9 @@ func (g *MapGenerator) LoadLevels() error {
 		if l.Tiles == "drawn" && !drawn || l.Tiles != "drawn" && !slices.Contains(defs.TilemapNames(), l.Tiles) {
 			return fmt.Errorf("levels.rec: %s: tiles %q: want one of %v, or drawn for an ldtk level", l.Map, l.Tiles, defs.TilemapNames())
 		}
+		if err := g.factory.checkPatches(l); err != nil {
+			return err
+		}
 		for _, e := range l.Exits {
 			if _, err := compileQuestCondition(e.OpenWhen); e.OpenWhen != "" && err != nil {
 				return fmt.Errorf("levels.rec: %s: exit %s: open_when: %w", l.Map, e.Location, err)

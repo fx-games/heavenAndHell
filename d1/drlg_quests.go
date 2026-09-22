@@ -63,7 +63,7 @@ func (g *gen) drawAlternate(name string, x, y int) {
 }
 
 // resyncQuests ports ResyncQuests for a fresh game: Ogden's sign at qvar1 1 (InitQuests). Later quest states,
-// Lazarus' lair included, open the rest on the built level (common's UpdateD1Quests). DRLG_MRectTrans is skipped: it only
+// Lazarus' lair included, open the rest on the built level (levels.rec patches). DRLG_MRectTrans is skipped: it only
 // marks rooms (dTransVal) for drawing walls see-through and the circling AIs' same-room check, which our grid
 // doesn't need.
 func (g *gen) resyncQuests() {

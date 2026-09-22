@@ -325,7 +325,7 @@ func (f *Factory) operateD1Object(o *D1Object, player *Actor) {
 		msg("The Staff of Lazarus falls from its stand.")
 	case d1.ObjLEVER, d1.ObjSWITCHSKL:
 		msg("You pull the lever. Something rumbles in the distance.")
-		UpdateD1Quests(f.State, f.State.GetMap())
+		f.State.QuestsChanged(f.State.GetMap())
 	case d1.ObjTEARFTN:
 		from := d1Rng.Intn(4)
 		to := d1Rng.Intn(3)
@@ -430,7 +430,7 @@ func (f *Factory) breakD1Crux(o *D1Object) {
 	f.PlayD1Sfx("IS_LEVER", o.pos)
 	if m := f.State.GetMap(); d1ObjectGroupUsed(m, isD1Crux, o.O.Var8) {
 		f.Msg("Something rumbles in the distance.")
-		f.State.mapGen.changeD1Map(m, o.O.Var1, o.O.Var2, o.O.Var3, o.O.Var4)
+		f.State.QuestsChanged(m) // levels.rec's "group" patch opens its range
 	}
 }
 

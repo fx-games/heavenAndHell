@@ -310,17 +310,17 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 		QueueAfterTurn: g.queueAfterTurn,
 	})
 	mapGen := common.NewMapGenerator(g.randomSource)
+	mapGen.SetFactory(g.factory) // LoadLevels checks patches against the mod's D1 objects
 	if err := mapGen.LoadLevels(); err != nil { // every level of the game (LEVELS.md)
 		panic(err)
 	}
-	mapGen.SetFactory(g.factory)
 	mapGen.SetSeed(g.levelSeed)
 	mapGen.SetSnapshots(g.levelSnapshots)
 	g.state.SetMapGenerator(mapGen)
 
 	g.state.SetOnMapChanged(g.onMapChanged)
 	g.state.MapTransition(gridmap.Transition{TargetMap: g.state.StartLevel().Map, TargetLocation: "spawn"})
-	common.UpdateD1Quests(&g.state, g.state.GetMap())
+	common.Arrive(&g.state, g.state.GetMap())
 
 	townSpawn := g.state.GetMap().GetNamedLocation("spawn")
 	g.state.SetTownSpawn(townSpawn)
@@ -505,13 +505,13 @@ func (g *GameInstance) d1DebugItems() []util.MenuItem {
 	for q, def := range g.state.QuestDefs() {
 		quests = append(quests, util.MenuItem{MainText: def.Name, Action: func() {
 			g.state.GetFlags().SetTrue(g.state.QuestFlag(q))
-			common.UpdateD1Quests(&g.state, g.state.GetMap())
+			g.state.QuestsChanged(g.state.GetMap())
 		}})
 	}
 	quests = append(quests, util.MenuItem{MainText: "Cain has the Staff of Lazarus", Action: func() {
 		g.state.SetQuestActive(d1.QBetrayer, d1.QuestActive)
 		g.state.SetQuestVar(d1.QBetrayer, 1, 2)
-		common.UpdateD1Quests(&g.state, g.state.GetMap())
+		g.state.QuestsChanged(g.state.GetMap())
 	}})
 	return []util.MenuItem{
 		{MainText: "Go to level", Action: func() { g.uiController.OpenMenu(levels) }},

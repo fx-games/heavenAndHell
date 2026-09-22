@@ -92,7 +92,7 @@ func playthrough() {
 					fail("run %d dlvl 4: the stairs down are open before Ogden's Sign is done", run)
 				}
 				state.SetQuestVar(d1.QLtBanner, 1, 3)
-				common.UpdateD1Quests(state, m)
+				common.Arrive(state, m)
 				reach = reachable(m, up)
 				if m.GetCell(m.GetNamedLocation("ladder_down")).TileType.Special != gridmap.SpecialTileStairsDown {
 					fail("run %d dlvl 4: opening Snotspill's hall drew over the stairs down", run)
@@ -1050,7 +1050,7 @@ func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
 	cause := func() common.Cause { return common.NewActorCause("playthrough", player()) }
 	travel := func(dlvl int) *gridmap.GridMap[*common.Actor, *common.Item, common.Object] {
 		state.MapTransition(gridmap.Transition{TargetMap: levelAt(state, dlvl), TargetLocation: "ladder_up"})
-		common.UpdateD1Quests(state, state.GetMap())
+		common.Arrive(state, state.GetMap())
 		return state.GetMap()
 	}
 	must := func(ok bool, format string, args ...any) {
