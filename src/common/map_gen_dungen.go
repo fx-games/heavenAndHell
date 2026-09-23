@@ -102,6 +102,10 @@ func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object],
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 			p := geometry.Point{X: x, Y: y}
+			if rec, ok := layout.Art(p); ok {
+				m.SetTile(p, tileFromRecord(rec))
+				continue
+			}
 			switch layout.GetTile(x, y) {
 			case dungen.Wall:
 				m.SetTile(p, wall(tileMap.ChooseWallTile(p)))
@@ -469,4 +473,14 @@ func (g *MapGenerator) drawnTile(m *gridmap.GridMap[*Actor, *Item, Object], ts *
 		return t
 	}
 	return g.lavaTile(m)
+}
+
+// tileFromRecord is a tiles.rec record as a map tile: its name, icon and what its tags block.
+func tileFromRecord(name string) gridmap.Tile {
+	r, ok := defs.TileRecords[name]
+	if !ok {
+		panic(fmt.Sprintf("levels.rec: decoration: tiles.rec has no %s", name))
+	}
+	return gridmap.Tile{DefinedIcon: r.Icon, DefinedDescription: r.Name, IsWalkable: !r.Flags.BlocksMovement,
+		IsTransparent: !r.Flags.BlocksView, IsMissilePassable: !r.Flags.BlocksMissiles}
 }

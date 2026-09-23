@@ -23,6 +23,9 @@ func standIns(t testing.TB) map[int]dungeon.Config {
 		if _, ok := dungeon.Field(r, "population"); !ok {
 			continue
 		}
+		if _, set := dungeon.Field(r, "quest"); set {
+			continue // a quest's set level shares its parent's depth; the playthrough walks those
+		}
 		gen, _ := dungeon.Field(r, "generator")
 		cfg, err := WithPasses(Layouts[gen]).Parse(r)
 		if err != nil {

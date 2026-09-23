@@ -27,11 +27,15 @@ type DungeonMap struct {
 	tiles      []DungeonTile
 	rooms      []*DungeonRoom
 	pathfinder *geometry.PathRange
-	loopDoors  map[geometry.Point]bool // doorways addMoreDoors opened: there is always another way round
-	themeRooms [][4]int                // the theme rooms a pass walled in: x, y, w, h in grid units before scaling
-	scale      int                     // cells per grid unit the passes drew with (0: not drawn by them)
-	pieces     []Stamped               // the set pieces laid into it
+	loopDoors  map[geometry.Point]bool   // doorways addMoreDoors opened: there is always another way round
+	themeRooms [][4]int                  // the theme rooms a pass walled in: x, y, w, h in grid units before scaling
+	scale      int                       // cells per grid unit the passes drew with (0: not drawn by them)
+	pieces     []Stamped                 // the set pieces laid into it
+	art        map[geometry.Point]string // cells drawn as a tiles.rec record of their own (decorate)
 }
+
+// Art is the tiles.rec record a cell is drawn as instead of its tile set's, if any.
+func (m *DungeonMap) Art(p geometry.Point) (string, bool) { r, ok := m.art[p]; return r, ok }
 
 // Pieces are the set pieces laid into the level, for the painter and the population.
 func (m *DungeonMap) Pieces() []Stamped { return m.pieces }

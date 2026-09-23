@@ -7,6 +7,7 @@ import (
 	"slices"
 
 	"rpg/src/dungeon"
+	"rpg/src/geometry"
 	"rpg/src/recfile"
 )
 
@@ -29,6 +30,7 @@ type Passes struct {
 	Themes       *ThemeRooms  // D1's theme rooms, walled in inside open ground once the level is laid out
 	Pieces       []PieceSpec  // the level's set pieces
 	Halls        [3]int       // open_halls: how many open rectangles of min..max cells a side to clear over the level
+	Decor        []Decor      // wall cells facing the floor drawn as another tiles.rec record (decoration:)
 }
 
 // staged is a layout with passes and a population: what a levels.rec record naming any of their knobs builds.
@@ -49,7 +51,7 @@ func PopulationOf(cfg dungeon.Config) (Population, bool) {
 
 // passKnobs are the fields that switch passes on: a record naming none of them builds its layout bare.
 var passKnobs = []string{"grow", "hall_chance", "spine", "mirror", "arch_chance", "loop_chance", "loop_distance",
-	"lava_rivers", "lava_water", "posts", "door_chance", "canvas", "scale", "theme_rooms", "set_piece", "open_halls"}
+	"lava_rivers", "lava_water", "posts", "door_chance", "canvas", "scale", "theme_rooms", "set_piece", "open_halls", "decoration"}
 
 // withPasses parses a layout record, wrapping it in its passes when it names any.
 type withPasses struct{ dungeon.Parser }
@@ -99,6 +101,13 @@ func (w withPasses) Parse(r recfile.Record) (dungeon.Config, error) {
 		if _, err := fmt.Sscan(v, &p.Halls[0], &p.Halls[1], &p.Halls[2]); err != nil || p.Halls[1] < 1 || p.Halls[2] < p.Halls[1] {
 			return nil, fmt.Errorf("levels.rec: open_halls %q: want count min max, 1 <= min <= max", v)
 		}
+	}
+	for _, v := range dungeon.FieldsNamed(r, "decoration") {
+		var d Decor
+		if _, err := fmt.Sscan(v, &d.Record, &d.Percent); err != nil || d.Percent <= 0 || d.Percent > 100 {
+			return nil, fmt.Errorf("levels.rec: decoration %q: want <tiles.rec record> <percent of the walls facing floor>", v)
+		}
+		p.Decor = append(p.Decor, d)
 	}
 	if p.Pieces, err = parsePieces(r); err != nil {
 		return nil, err
@@ -181,7 +190,11 @@ func (s staged) Build(rnd *rand.Rand, fsys fs.FS) (*DungeonMap, error) {
 		out = toCells(m)
 	}
 	out.themeRooms, out.scale = themes, p.Scale
-	return out, stampPieces(out, pieces, fsys, p.Scale)
+	if err := stampPieces(out, pieces, fsys, p.Scale); err != nil {
+		return nil, err
+	}
+	decorate(out, p.Decor, rnd)
+	return out, nil
 }
 
 // Megatile kinds.
@@ -896,5 +909,45 @@ func openHalls(m *mega, h [3]int, rnd *rand.Rand) {
 // bare is whether no pass is switched on.
 func (p Passes) bare() bool {
 	return p.Grow == 0 && !p.Spine && !p.Mirror && p.ArchChance == 0 && p.LoopChance == 0 && p.Lava == nil &&
-		p.Posts == 0 && p.DoorChance < 0 && p.Canvas == 0 && p.Themes == nil && len(p.Pieces) == 0 && p.Halls[0] == 0
+		p.Posts == 0 && p.DoorChance < 0 && p.Canvas == 0 && p.Themes == nil && len(p.Pieces) == 0 && p.Halls[0] == 0 &&
+		len(p.Decor) == 0
+}
+
+// Decor is one decoration: a share of the walls that face the floor drawn as another tiles.rec record (D1's wall
+// pieces that let sight or missiles through, grates, fences), which the painter draws with the record's own tags.
+type Decor struct {
+	Record  string
+	Percent float64
+}
+
+// decorate rolls the decorations, in order, for every wall cell beside the floor outside the set pieces.
+func decorate(dm *DungeonMap, ds []Decor, rnd *rand.Rand) {
+	if len(ds) == 0 {
+		return
+	}
+	inPiece := func(x, y int) bool {
+		for _, p := range dm.pieces {
+			if x >= p.X && y >= p.Y && x < p.X+p.Map.Width && y < p.Y+p.Map.Height {
+				return true
+			}
+		}
+		return false
+	}
+	dm.art = map[geometry.Point]string{}
+	for y := 0; y < dm.height; y++ {
+		for x := 0; x < dm.width; x++ {
+			if dm.GetTile(x, y) != Wall || inPiece(x, y) || !slices.ContainsFunc(dirs4, func(d geometry.Point) bool {
+				n := pt(x+d.X, y+d.Y)
+				return dm.Contains(n) && (dm.GetTileAt(n) == Room || dm.GetTileAt(n) == Corridor)
+			}) {
+				continue
+			}
+			for _, d := range ds {
+				if rnd.Float64()*100 < d.Percent {
+					dm.art[pt(x, y)] = d.Record
+					break
+				}
+			}
+		}
+	}
 }
