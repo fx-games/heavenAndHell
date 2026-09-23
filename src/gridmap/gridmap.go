@@ -424,6 +424,7 @@ func NewEmptyMap[ActorType interface {
 			DefinedDescription: "empty space",
 			IsWalkable:         true,
 			IsTransparent:      true,
+			IsMissilePassable:  true,
 			Special:            SpecialTileNone,
 		},
 		IsExplored: false,
@@ -495,6 +496,17 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsTransparent(p geometry.Poin
 	}
 
 	return m.GetCell(p).TileType.IsTransparent
+}
+
+// IsMissilePassable is IsTransparent for projectiles: a cell they fly through, unless an opaque object stands on it.
+func (m *GridMap[ActorType, ItemType, ObjectType]) IsMissilePassable(p geometry.Point) bool {
+	if !m.Contains(p) {
+		return false
+	}
+	if objectAt, ok := m.TryGetObjectAt(p); ok && !objectAt.IsTransparent() {
+		return false
+	}
+	return m.GetCell(p).TileType.IsMissilePassable
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) IsTileWalkable(point geometry.Point) bool {

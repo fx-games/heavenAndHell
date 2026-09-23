@@ -9,7 +9,7 @@ import (
 // it listed but placeless, which is how two monsters used to look like they shared a tile.
 func TestAddActorIsAllOrNothing(t *testing.T) {
 	m := NewEmptyMap[*stub, *stub, *stub](4, 4)
-	m.Fill(MapCell[*stub, *stub, *stub]{TileType: Tile{IsWalkable: true, IsTransparent: true}})
+	m.Fill(MapCell[*stub, *stub, *stub]{TileType: Tile{IsWalkable: true, IsTransparent: true, IsMissilePassable: true}})
 	at := geometry.Point{X: 1, Y: 1}
 
 	first := &stub{}

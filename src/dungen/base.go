@@ -1,6 +1,7 @@
 package dungen
 
 import (
+	"cmp"
 	"fmt"
 	"math"
 	"math/rand"
@@ -610,3 +611,38 @@ func NewDungeonMap(width, height int) *DungeonMap {
 		pathfinder: geometry.NewPathRange(geometry.NewRect(0, 0, width, height)),
 	}
 }
+
+// addRectRoom lays a plain rectangular room on floor, as rogue.go does; its doors are the corridors dug later.
+func addRectRoom(m *DungeonMap, rnd *rand.Rand, floor geometry.Rect) *DungeonRoom {
+	room := NewDungeonRoomFromRect(rnd, floor)
+	room.SetConnections(map[geometry.Point]RoomConnection{})
+	room.SetId(len(m.rooms))
+	m.AddRoomAndSetTiles(room)
+	return room
+}
+
+func center(r *DungeonRoom) geometry.Point {
+	return r.bounds.Center()
+}
+
+// carveL digs an L-shaped corridor from a to b through rock, turning at a random end.
+func carveL(m *DungeonMap, rnd *rand.Rand, a, b geometry.Point) {
+	corner := geometry.Point{X: b.X, Y: a.Y}
+	if rnd.Intn(2) == 0 {
+		corner = geometry.Point{X: a.X, Y: b.Y}
+	}
+	for _, leg := range [][2]geometry.Point{{a, corner}, {corner, b}} {
+		p, to := leg[0], leg[1]
+		d := geometry.Point{X: sign(to.X - p.X), Y: sign(to.Y - p.Y)}
+		for ; ; p = p.Add(d) {
+			if m.GetTileAt(p) == Wall {
+				m.SetCorridor(p.X, p.Y)
+			}
+			if p == to {
+				break
+			}
+		}
+	}
+}
+
+func sign(v int) int { return cmp.Compare(v, 0) }

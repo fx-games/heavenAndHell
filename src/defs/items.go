@@ -3,7 +3,6 @@ package defs
 import (
 	"fmt"
 	"io/fs"
-	"math/rand"
 	"path"
 	"strings"
 
@@ -30,10 +29,8 @@ type Item struct {
 	ShortName    string // D1's iSName, the name that fits the belt
 	Icon         string // icon ID in the mod's icons/items.rec, e.g. "item.falchion"
 
-	DLvl             int // lowest dungeon level it can appear on
-	MaxLevel         int
-	OutOfDepthChance float64
-	MinLevelForOoD   int
+	DLvl     int // the lowest item level it drops at (= MinMLvl)
+	MaxLevel int // the highest item level it drops at; 0: no limit
 
 	InventoryCategory ItemCategory
 	Armor             ArmorDefinition
@@ -68,16 +65,6 @@ func (d Item) IsPotion() bool      { return d.InventoryCategory == ItemCategoryP
 func (d Item) IsScroll() bool      { return d.InventoryCategory == ItemCategoryScroll }
 func (d Item) IsRing() bool        { return d.InventoryCategory == ItemCategoryRing }
 func (d Item) IsAmulet() bool      { return d.InventoryCategory == ItemCategoryAmulet }
-
-// CanAppearAt is the depth roll: native depth, or a lucky roll above it.
-func (d Item) CanAppearAt(randomSource *rand.Rand, dungeonLevel int) bool {
-	if d.MaxLevel > 0 && dungeonLevel > d.MaxLevel {
-		return false
-	}
-	regular := dungeonLevel >= d.DLvl
-	ood := dungeonLevel >= d.MinLevelForOoD && randomSource.Float64() < d.OutOfDepthChance
-	return regular || ood
-}
 
 // ReadItems loads the active mod's items in file order; rules puts them in roll_order.rec's order.
 func ReadItems(fsys fs.FS) ([]Item, error) {
@@ -165,10 +152,6 @@ func itemFromRecord(rec recfile.Record) (Item, error) {
 			it.DLvl, it.MinMLvl = f.AsInt(), f.AsInt()
 		case "max_level":
 			it.MaxLevel = f.AsInt()
-		case "out_of_depth_chance":
-			it.OutOfDepthChance = f.AsFloat()
-		case "min_level_for_ood":
-			it.MinLevelForOoD = f.AsInt()
 		case "cost":
 			it.Cost, it.Value = f.AsInt(), f.AsInt()
 		case "charges":

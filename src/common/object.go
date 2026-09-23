@@ -164,13 +164,13 @@ func (o *wallLight) ActorBumpedInto(*Actor)          {}
 // pre-spawned sarcophagus/barrel skeleton resolved to its monster type from the level's (still-hidden) monster
 // list, everything else as an interactive Prop.
 func placeObject(f *Factory, m *gridmap.GridMap[*Actor, *Item, Object], lvl *dungen.Level, o *rules.Object, p geometry.Point) {
-	if lvl.CellSolid(p.X, p.Y) && f.Generator.D.Objects[o.Kind].SelFlag == 0 && !f.objectDisplay(o.Kind).WallLight { // hangs on a wall
+	if !m.IsTileWalkable(p) && f.Generator.D.Objects[o.Kind].SelFlag == 0 && !f.objectDisplay(o.Kind).WallLight { // hangs on a wall
 		m.AddDecal(p, defs.Icon(defs.PropIconID(f.Generator.D.Objects[o.Kind].Name)))
 		return
 	}
 	if f.objectDisplay(o.Kind).WallLight {
 		icon := defs.IconBrazier
-		onFloor := !lvl.CellSolid(p.X, p.Y)
+		onFloor := m.IsTileWalkable(p)
 		if o.Kind != rules.ObjL1LIGHT {
 			icon = defs.IconWallTorch
 		}

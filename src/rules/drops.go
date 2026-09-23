@@ -13,8 +13,9 @@ import (
 // DropTable is one of the mod's drops.rec tables. Its drops are rolled in order and the first to hit is the
 // item; when none hits, nothing drops. A mod without the table drops nothing there.
 type DropTable struct {
-	Count util.Interval // how many to roll, for the tables that place several (level)
-	Drops []Drop
+	Count     util.Interval // how many to roll, for the tables that place several (level)
+	ItemLevel int           // monster table: its items roll at this many times the dungeon level; 0: the monster's level (D1)
+	Drops     []Drop
 }
 
 // Drop is one drop: line. Item nil is drops.rec's "random": any droppable base item the roll allows.
@@ -44,6 +45,8 @@ func (d *Data) readDropTables(fsys fs.FS) error {
 				name = f.Value
 			case "count":
 				t.Count = util.NewIntervalFromString(f.Value)
+			case "item_level":
+				t.ItemLevel = f.AsInt()
 			case "drop":
 				w := strings.Fields(f.Value)
 				p, err := 0, errors.New("malformed")

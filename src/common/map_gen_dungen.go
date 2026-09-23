@@ -16,18 +16,18 @@ import (
 	"rpg/src/hhm"
 )
 
-// This is the other half of GenerateMap's dispatch: a level whose generator belongs to the dungen family is
-// carved as a bare dungen.DungeonMap - walls, floors, doors and rooms, no tile art, no actors - and turned into
-// a gridmap here.
-//
-// D1's side does the same job in map_gen_drlg.go and shares nothing with this but the gridmap it writes into,
-// which is exactly the seam docs/ENGINE_SPLIT.md describes: the two families meet at "a name resolved and the knobs
-// parsed", and each builds its own levels its own way past that point.
+// layoutStrategy is the LevelStrategy of every dungen layout generator (dungen.Layouts): the generator carves a
+// bare dungen.DungeonMap - walls, floors, doors and rooms, no tile art, no actors - and it is laid out here.
+type layoutStrategy struct{ dungeon.Parser }
+
+func (layoutStrategy) Generate(g *MapGenerator, lvl dungeon.Level) *gridmap.GridMap[*Actor, *Item, Object] {
+	return g.generateDungenMap(lvl)
+}
 
 // generateDungenMap builds one dungen level and lays it out as a gridmap.
 func (g *MapGenerator) generateDungenMap(lvl dungeon.Level) *gridmap.GridMap[*Actor, *Item, Object] {
 	targetMap, dlvl := lvl.Map, lvl.Depth
-	layout, err := dungen.Build(lvl.Config, g.randomSource, g.fsys())
+	layout, err := lvl.Config.(dungen.Layout).Build(g.randomSource, g.fsys())
 	if err != nil {
 		panic(err)
 	}
@@ -65,7 +65,7 @@ func (g *MapGenerator) dungenTilemap(lvl dungeon.Level, dlvl int, layout *dungen
 }
 
 func dungenFloor(icon int32) gridmap.Tile {
-	return gridmap.Tile{DefinedIcon: icon, DefinedDescription: "a floor", IsWalkable: true, IsTransparent: true}
+	return gridmap.Tile{DefinedIcon: icon, DefinedDescription: "a floor", IsWalkable: true, IsTransparent: true, IsMissilePassable: true}
 }
 
 // secretDoorChance is how many loop doors are secret at depth dlvl: none on the first level, two in three at the
@@ -103,9 +103,9 @@ func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object],
 				m.SetTile(p, floor(tileMap.FloorTile))
 				m.AddObject(NewDoor(tileMap.OpenDoor, tileMap.ClosedDoor), p)
 			case dungen.Lake:
-				m.SetTile(p, gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "deep water", IsTransparent: true, Special: gridmap.SpecialTileWater})
+				m.SetTile(p, gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "deep water", IsTransparent: true, IsMissilePassable: true, Special: gridmap.SpecialTileWater})
 			case dungen.Shallows:
-				m.SetTile(p, gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "shallow water", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileWater})
+				m.SetTile(p, gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "shallow water", IsWalkable: true, IsTransparent: true, IsMissilePassable: true, Special: gridmap.SpecialTileWater})
 			default: // Room, Corridor
 				m.SetTile(p, floor(tileMap.ChooseFloorTile(p)))
 			}
@@ -115,12 +115,12 @@ func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object],
 
 func dungenLadderUp() gridmap.Tile {
 	return gridmap.Tile{DefinedIcon: defs.IconStairsUp, DefinedDescription: "a ladder leading up",
-		IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp}
+		IsWalkable: true, IsTransparent: true, IsMissilePassable: true, Special: gridmap.SpecialTileStairsUp}
 }
 
 func dungenLadderDown() gridmap.Tile {
 	return gridmap.Tile{DefinedIcon: defs.IconStairsDown, DefinedDescription: "a ladder leading down",
-		IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsDown}
+		IsWalkable: true, IsTransparent: true, IsMissilePassable: true, Special: gridmap.SpecialTileStairsDown}
 }
 
 // addDungenStairs places a stairwell for each exit the level declares and names it by the exit's location:

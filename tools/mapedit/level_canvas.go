@@ -75,7 +75,6 @@ func (m *mapEditor) drawCanvas(a *app, dst *ebiten.Image, c image.Rectangle) {
 
 	view := dst.SubImage(c).(*ebiten.Image)
 	p := m.cellPx()
-	ts := m.proj.Tileset
 
 	// the level's own area, so its edges are visible against the backdrop
 	ox, oy := m.screenOf(c, 0, 0)
@@ -87,14 +86,14 @@ func (m *mapEditor) drawCanvas(a *app, dst *ebiten.Image, c image.Rectangle) {
 		for x := max(x0, 0); x <= min(x1, m.cur.Width-1); x++ {
 			id := m.cur.TileAt(x, y)
 			sx, sy := m.screenOf(c, x, y)
-			if id >= 0 && id < len(m.tile) {
+			if pic := int(m.drawn(id).Icon); id >= 0 && pic < len(m.tile) {
 				op := &ebiten.DrawImageOptions{}
 				op.GeoM.Scale(m.cam.zoom, m.cam.zoom)
 				op.GeoM.Translate(sx, sy)
-				view.DrawImage(m.tile[id], op)
+				view.DrawImage(m.tile[pic], op)
 			}
 			if m.showFlags && id >= 0 {
-				if c := flagTint(ts.FlagsFor(id)); c.A > 0 {
+				if c := flagTint(m.drawn(id).Flags); c.A > 0 {
 					fill(view, image.Rect(int(sx), int(sy), int(sx+p), int(sy+p)), c)
 				}
 			}

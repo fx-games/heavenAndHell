@@ -154,7 +154,7 @@ const (
 )
 
 type Affix struct {
-	Name, Power             string
+	ID, Name, Power         string
 	P1, P2, MinLvl, IType   int
 	GOE                     int
 	Double, Ok              bool
@@ -312,13 +312,13 @@ func Load(fsys fs.FS) (*Data, error) {
 func load(fsys fs.FS) (*Data, error) {
 	d := &Data{}
 	var err error
-	// The xl_* tables are Diablo's own: its unique monsters, its affixes, its unique items, its spell slots and
-	// its object list. A mod that is not Diablo ships none of them and has none of those things - no affix table
-	// means items roll plain, no spell table means no spell book - so a missing file is an absent feature here,
+	// The xl_* tables are Diablo's own: its unique monsters, its spell slots and
+	// its object list. A mod that is not Diablo ships none of them and has none of those things - no spell table
+	// means no spell book - so a missing file is an absent feature here,
 	// not an error. Diablo itself ships all of them, so nothing about D1 changes.
 	tables := map[string][]row{}
 	hasD1Tables := true
-	for _, n := range []string{"xl_umon", "xl_ipre", "xl_isuf", "xl_spell", "xl_obj"} {
+	for _, n := range []string{"xl_umon", "xl_spell", "xl_obj"} {
 		rows, err := readTable(fsys, n+".txt")
 		if errors.Is(err, fs.ErrNotExist) {
 			hasD1Tables = false
@@ -369,25 +369,9 @@ func load(fsys fs.FS) (*Data, error) {
 	if len(bad) > 0 {
 		return nil, fmt.Errorf("effects: %s", strings.Join(bad, "; "))
 	}
-	affixes := func(rows []row) (out []Affix) {
-		for _, r := range rows {
-			if r.s("PLPower") == "none" {
-				break
-			}
-			itype := 0
-			for _, p := range strings.Split(r.s("PLIType"), "|") {
-				itype |= pltBits[p]
-			}
-			out = append(out, Affix{
-				Name: r.s("PLName"), Power: r.s("PLPower"), P1: r.i("PLParam1"), P2: r.i("PLParam2"), MinLvl: r.i("PLMinLvl"),
-				IType: itype, GOE: r.i("PLGOE"), Double: r.i("PLDouble") != 0, Ok: r.i("PLOk") != 0,
-				MinVal: r.i("PLMinVal"), MaxVal: r.i("PLMaxVal"), MultVal: r.i("PLMultVal"),
-			})
-		}
-		return
+	if d.Prefixes, d.Suffixes, err = readAffixes(fsys); err != nil {
+		return nil, err
 	}
-	d.Prefixes = affixes(tables["xl_ipre"])
-	d.Suffixes = affixes(tables["xl_isuf"])
 	if d.UniqueItems, err = readUniqueItems(fsys); err != nil {
 		return nil, err
 	}
@@ -397,6 +381,14 @@ func load(fsys fs.FS) (*Data, error) {
 	}
 	if err := sortByRollOrder(d.Items, orders["items"], func(it ItemData) string { return it.InternalName }); err != nil {
 		return nil, fmt.Errorf("items: %w", err)
+	}
+	for _, t := range []struct {
+		name string
+		s    []Affix
+	}{{"prefixes", d.Prefixes}, {"suffixes", d.Suffixes}} {
+		if err := sortByRollOrder(t.s, orders[t.name], func(a Affix) string { return a.ID }); err != nil {
+			return nil, fmt.Errorf("%s: %w", t.name, err)
+		}
 	}
 	if err := sortByRollOrder(d.UniqueItems, orders["unique_items"], func(u UniqueItemData) string { return u.ID }); err != nil {
 		return nil, fmt.Errorf("unique items: %w", err)

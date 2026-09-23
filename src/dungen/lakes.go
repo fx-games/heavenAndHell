@@ -25,7 +25,7 @@ func (m *DungeonMap) addLakes(rnd *rand.Rand, count int) {
 	}
 	for k := 0; k < count; k++ {
 		w, h := max(4, m.width/3-2*k), max(4, m.height/3-k) // Brogue shrinks its canvas by 2x1 per lake
-		blob := caBlob(rnd, w, h)
+		blob := caBlob(rnd, w, h, 55)
 		for try := 0; try < 10; try++ {
 			off := geometry.Point{X: rnd.Intn(m.width - w + 1), Y: rnd.Intn(m.height - h + 1)}
 			var cells []geometry.Point
@@ -95,12 +95,12 @@ func (m *DungeonMap) connectedWithout(cells []geometry.Point) bool {
 	return len(seen) == total
 }
 
-// caBlob grows a cellular-automata blob in a w x h canvas (Brogue's createBlobOnGrid for lakes: 55% seeded, five
+// caBlob grows a cellular-automata blob in a w x h canvas (Brogue's createBlobOnGrid: fill% seeded, 55 for lakes, five
 // rounds, born with 5+ live neighbours, surviving with 4+) and returns its largest connected part.
-func caBlob(rnd *rand.Rand, w, h int) []geometry.Point {
+func caBlob(rnd *rand.Rand, w, h, fill int) []geometry.Point {
 	alive := make([]bool, w*h)
 	for i := range alive {
-		alive[i] = rnd.Intn(100) < 55
+		alive[i] = rnd.Intn(100) < fill
 	}
 	at := func(g []bool, x, y int) bool { return x >= 0 && y >= 0 && x < w && y < h && g[x+y*w] }
 	for round := 0; round < 5; round++ {

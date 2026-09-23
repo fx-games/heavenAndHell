@@ -258,10 +258,10 @@ func (f *Factory) TalkerTurn(a *Actor, visible bool) bool {
 
 // stairsDown is a func, not a var: package vars are set before defs.LoadIcons binds the icon IDs.
 func stairsDown() gridmap.Tile {
-	return gridmap.Tile{DefinedIcon: defs.IconStairsDown, DefinedDescription: "stairs leading down", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsDown}
+	return gridmap.Tile{DefinedIcon: defs.IconStairsDown, DefinedDescription: "stairs leading down", IsWalkable: true, IsTransparent: true, IsMissilePassable: true, Special: gridmap.SpecialTileStairsDown}
 }
 
-var redPortal = gridmap.Tile{DefinedIcon: 72, DefinedDescription: "a red portal", IsWalkable: true, IsTransparent: true}
+var redPortal = gridmap.Tile{DefinedIcon: 72, DefinedDescription: "a red portal", IsWalkable: true, IsTransparent: true, IsMissilePassable: true}
 
 // Lazarus' lair names its places in levels.rec ("location:"): vile_book_N, the magic circle in front of each
 // Book of Vileness, and vile_book_N_to, where it teleports the hero; vile_center, the central circle, and

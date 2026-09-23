@@ -23,3 +23,12 @@ func TestDiceAndIntervalAgreeOnRanges(t *testing.T) {
 		}
 	}
 }
+
+// A single negative number is a value, not a range (affixes.rec's "price: -1000").
+func TestIntervalReadsNegativeNumbers(t *testing.T) {
+	for s, want := range map[string][2]int{"-1000": {-1000, -1000}, "5": {5, 5}, "3-7": {3, 7}, "-5--2": {-5, -2}} {
+		if v := NewIntervalFromString(s); v.Min() != want[0] || v.Max() != want[1] {
+			t.Errorf("%q = %d-%d, want %d-%d", s, v.Min(), v.Max(), want[0], want[1])
+		}
+	}
+}

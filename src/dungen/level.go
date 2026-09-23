@@ -2,12 +2,12 @@ package dungen
 
 import (
 	"fmt"
+	"rpg/src/hhm"
 	"rpg/src/rules"
 )
 
 var (
 	tilFiles = [5]string{"", `Levels\L1Data\L1.TIL`, `Levels\L2Data\L2.TIL`, `Levels\L3Data\L3.TIL`, `Levels\L4Data\L4.TIL`}
-	solFiles = [5]string{"", `Levels\L1Data\L1.SOL`, `Levels\L2Data\L2.SOL`, `Levels\L3Data\L3.SOL`, `Levels\L4Data\L4.SOL`}
 )
 
 // Trigger messages (_tmsg).
@@ -34,8 +34,8 @@ type Level struct {
 	Piece                [112][112]int
 	Trans                [112][112]int8
 	Flags                [112][112]byte
-	SOL                  []byte // per piece: 1 solid, 2 blocks light, 4 blocks missiles, 0x80 wall that can hold a trap
-	View                 [2]int // where the player enters
+	PieceFlags           []hhm.Flags // by piece: what its tile in the level type's megatile map parts blocks
+	View                 [2]int      // where the player enters
 	Triggers             []Trigger
 	SetPiece             [4]int // x, y, w, h in megatiles
 	Monsters             []*Monster
@@ -44,6 +44,7 @@ type Level struct {
 	DiabloQuads          [4][2]int // level 16: megatile origins of diab1-4
 	Uber, Cornerstone    [2]int    // the Crypt: Na-Krul's door (UberRow/UberCol) and the Cornerstone of the World
 	til                  []byte
+	parts                *hhm.Level // the level type's megatile map parts (CellTile)
 }
 
 // OpenNakrulRoom ports SyncNakrulRoom: Na-Krul's door opens. It reports whether anything changed.
@@ -79,20 +80,16 @@ func (l *Level) ChangeMap(x1, y1, x2, y2 int) bool {
 // CellDoor reports a door piece at cell (x, y) (AddL1Objs/AddL2Objs/AddL3Objs).
 func (l *Level) CellDoor(x, y int) bool { return doorKind(l.Type, l.CellPiece(x, y)) >= 0 }
 
-func (l *Level) Solid(x, y int) bool   { return l.sol(x, y)&1 != 0 }
-func (l *Level) Blocks(x, y int) bool  { return l.sol(x, y)&2 != 0 }
-func (l *Level) Missile(x, y int) bool { return l.sol(x, y)&4 != 0 }
+// Solid is D1's nSolidTable at piece (x, y): its map-part tile blocks movement.
+func (l *Level) Solid(x, y int) bool { return l.pieceFlags(x, y).BlocksMovement }
 
-// CellSolid/CellBlocks/CellMissile/CellTrap read the SOL flags by cell (0..79) instead of piece (16..95).
-func (l *Level) CellSolid(x, y int) bool   { return l.Solid(x+CellOrigin, y+CellOrigin) }
-func (l *Level) CellBlocks(x, y int) bool  { return l.Blocks(x+CellOrigin, y+CellOrigin) }
-func (l *Level) CellMissile(x, y int) bool { return l.Missile(x+CellOrigin, y+CellOrigin) }
-func (l *Level) CellTrap(x, y int) bool {
-	px, py := x+CellOrigin, y+CellOrigin
-	if px < 0 || py < 0 || px >= 112 || py >= 112 || l.Piece[px][py] >= len(l.SOL) {
-		return false
-	}
-	return l.SOL[l.Piece[px][py]]&0x80 != 0
+// CellSolid and CellFlags read the piece at cell (x, y) (0..79) instead of piece coordinates (16..95).
+func (l *Level) CellSolid(x, y int) bool      { return l.Solid(x+CellOrigin, y+CellOrigin) }
+func (l *Level) CellFlags(x, y int) hhm.Flags { return l.pieceFlags(x+CellOrigin, y+CellOrigin) }
+
+// CellTile is the tile cell (x, y) is drawn with: its quadrant of its megatile in the level type's map parts.
+func (l *Level) CellTile(x, y int) int {
+	return l.parts.TileAt(megatileCell(int(l.CellMega(x, y)), x%2+2*(y%2)))
 }
 
 // CellPiece is the dPiece value (1-based, 0 = none) at cell (x, y).
@@ -114,11 +111,11 @@ func (l *Level) CellMega(x, y int) byte {
 	return l.Dungeon[mx][my]
 }
 
-func (l *Level) sol(x, y int) byte {
-	if x < 0 || y < 0 || x >= 112 || y >= 112 || l.Piece[x][y] >= len(l.SOL) {
-		return 0
+func (l *Level) pieceFlags(x, y int) hhm.Flags {
+	if x < 0 || y < 0 || x >= 112 || y >= 112 || l.Piece[x][y] >= len(l.PieceFlags) {
+		return hhm.Flags{}
 	}
-	return l.SOL[l.Piece[x][y]]
+	return l.PieceFlags[l.Piece[x][y]]
 }
 
 // CreateLevel builds, with gnr's tables and unique bookkeeping, dungeon level dlvl, or with setLevel the set level entered from it, the way LoadGameLevel does
@@ -149,7 +146,7 @@ func (l *Levels) CreateLevel(gnr *rules.Generator, q *rules.Quests, seeds [rules
 	if g.setlevel {
 		g.ltype = setLevelType(q, setLevel)
 		g.til = g.levels.til[g.ltype]
-		g.sol = g.levels.sol[g.ltype]
+		g.sol = g.levels.pieceFlags[g.ltype]
 		g.loadSetMap(setLevel, seeds)
 		g.getLevelMTypes(setLevel)
 		g.initMonsters(setLevel)
@@ -159,7 +156,7 @@ func (l *Levels) CreateLevel(gnr *rules.Generator, q *rules.Quests, seeds [rules
 		g.createDungeon(seed, entry)
 		g.initTriggers()
 		g.freeUpstairs()
-		g.sol = g.levels.sol[g.ltype]
+		g.sol = g.levels.pieceFlags[g.ltype]
 		g.rng.SetSeed(seed)
 		g.getLevelMTypes(rules.SLNone)
 		g.initThemes()
@@ -228,12 +225,16 @@ func (g *gen) pieceAt(x, y int) int {
 	return 0
 }
 
-func (g *gen) solFlag(x, y int, bit byte) bool {
-	p := g.pieceAt(x, y)
-	return p < len(g.sol) && g.sol[p]&bit != 0
+// tileFlags is what the tile of the piece at (x, y) blocks: nSolidTable, nBlockTable, nMissileTable and nTrapTable
+// read off the megatile map parts.
+func (g *gen) tileFlags(x, y int) hhm.Flags {
+	if p := g.pieceAt(x, y); p < len(g.sol) {
+		return g.sol[p]
+	}
+	return hhm.Flags{}
 }
 
-func (g *gen) solid(x, y int) bool { return g.solFlag(x, y, 1) }
+func (g *gen) solid(x, y int) bool { return g.tileFlags(x, y).BlocksMovement }
 
 // solidLoc ports SolidLoc: positions off the map are not solid.
 func (g *gen) solidLoc(x, y int) bool {
@@ -372,8 +373,8 @@ func (g *gen) doVision(nx, ny, radius int) {
 				if x < 0 || x > 112 || y < 0 || y > 112 {
 					continue
 				}
-				blocked = g.solFlag(x, y, 2)
-				if !g.solFlag(x+x1adj, y+y1adj, 2) || !g.solFlag(x+x2adj, y+y2adj, 2) {
+				blocked = g.tileFlags(x, y).BlocksView
+				if !g.tileFlags(x+x1adj, y+y1adj).BlocksView || !g.tileFlags(x+x2adj, y+y2adj).BlocksView {
 					visible(x, y)
 				}
 			}
@@ -383,7 +384,7 @@ func (g *gen) doVision(nx, ny, radius int) {
 
 func (g *gen) output(setLevel int) *Level {
 	l := &Level{Dlvl: g.currlevel, Type: g.ltype, SetLevel: setLevel, Piece: g.piece, Trans: g.trans, Flags: g.flags,
-		SOL: g.sol, til: g.til, View: [2]int{g.view.x, g.view.y}, Triggers: g.trigs,
+		PieceFlags: g.sol, parts: g.levels.parts[g.ltype], til: g.til, View: [2]int{g.view.x, g.view.y}, Triggers: g.trigs,
 		SetPiece: [4]int{g.setPiece.x, g.setPiece.y, g.setPiece.w, g.setPiece.h}}
 	for i := 0; i < 40; i++ {
 		for j := 0; j < 40; j++ {

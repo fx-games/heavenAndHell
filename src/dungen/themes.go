@@ -38,11 +38,11 @@ func (g *gen) tfitShrine(i int) bool {
 	for xp, yp := 0, 0; ; {
 		found := 0
 		if int(g.transAt(xp, yp)) == tv {
-			if g.solFlag(xp, yp-1, 0x80) && !g.solid(xp-1, yp) && !g.solid(xp+1, yp) && int(g.transAt(xp-1, yp)) == tv &&
+			if g.tileFlags(xp, yp-1).HoldsTrap && !g.solid(xp-1, yp) && !g.solid(xp+1, yp) && int(g.transAt(xp-1, yp)) == tv &&
 				int(g.transAt(xp+1, yp)) == tv && g.dObj(xp-1, yp-1) == 0 && g.dObj(xp+1, yp-1) == 0 {
 				found = 1
 			}
-			if found == 0 && g.solFlag(xp-1, yp, 0x80) && !g.solid(xp, yp-1) && !g.solid(xp, yp+1) &&
+			if found == 0 && g.tileFlags(xp-1, yp).HoldsTrap && !g.solid(xp, yp-1) && !g.solid(xp, yp+1) &&
 				int(g.transAt(xp, yp-1)) == tv && int(g.transAt(xp, yp+1)) == tv && g.dObj(xp-1, yp-1) == 0 && g.dObj(xp-1, yp+1) == 0 {
 				found = 2
 			}

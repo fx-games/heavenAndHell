@@ -3,6 +3,7 @@ package dungen
 import (
 	"rpg/src/defs"
 	"rpg/src/geometry"
+	"rpg/src/hhm"
 	"rpg/src/rules"
 )
 
@@ -56,7 +57,7 @@ type levelMType struct{ mtype, placeFlags int }
 type population struct {
 	data *rules.Data
 	igen *rules.Generator // item rolls on the level RNG
-	sol  []byte
+	sol  []hhm.Flags      // by piece: what the tile each piece is drawn with in the megatile map parts blocks
 
 	trigs       []Trigger
 	dMonster    [112][112]int

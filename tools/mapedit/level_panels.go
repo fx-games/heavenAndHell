@@ -109,21 +109,28 @@ func (m *mapEditor) drawTilePalette(a *app, dst *ebiten.Image, r image.Rectangle
 	label(dst, r.Min.X+padding, y, fmt.Sprintf("TILES - brush %s", tileLabel(m.brush)), colTextDim)
 	y += lineH + 2
 
-	// the markers on the brush tile, which is what the game reads off a drawn tile
-	f := m.proj.Tileset.FlagsFor(m.brush)
-	was := f
-	cw := (r.Dx() - 2*padding) / 2
-	for i, b := range []*bool{&f.BlocksMovement, &f.BlocksView, &f.Water, &f.Damaging} {
-		cr := rect(r.Min.X+padding+(i%2)*cw, y+(i/2)*lineH, cw, lineH)
-		*b = u.checkbox(dst, cr, flagShort[i], *b)
-		u.tip(cr, "the brush tile "+flagHelp[i])
+	// the markers on the brush tile, which is what the game reads off a drawn tile; a tile that stands for a
+	// tiles.rec record takes them from the record's tags instead
+	if rec, ok := m.proj.Tileset.Records[m.brush]; ok {
+		label(dst, r.Min.X+padding, y, rec+": "+m.drawn(m.brush).Name, colText)
+		label(dst, r.Min.X+padding, y+lineH, "tags: "+strings.Join(m.drawn(m.brush).Flags.Names(), ", "), colTextDim)
+		label(dst, r.Min.X+padding, y+2*lineH, "edit them in data/icons/tiles.rec", colTextDim)
+	} else {
+		f := m.proj.Tileset.FlagsFor(m.brush)
+		was := f
+		cw := (r.Dx() - 2*padding) / 2
+		for i, b := range []*bool{&f.BlocksMovement, &f.BlocksView, &f.Water, &f.Damaging, &f.BlocksMissiles, &f.HoldsTrap} {
+			cr := rect(r.Min.X+padding+(i%2)*cw, y+(i/2)*lineH, cw, lineH)
+			*b = u.checkbox(dst, cr, flagShort[i], *b)
+			u.tip(cr, "the brush tile "+flagHelp[i])
+		}
+		if f != was && m.brush >= 0 {
+			m.proj.Tileset.Flags[m.brush] = f
+			m.touch() // the tileset is written with the levels
+			a.say("tile %d: %v", m.brush, f)
+		}
 	}
-	if f != was && m.brush >= 0 {
-		m.proj.Tileset.Flags[m.brush] = f
-		m.touch() // the tileset is written with the levels
-		a.say("tile %d: %v", m.brush, f)
-	}
-	y += 2*lineH + 6
+	y += 3*lineH + 6
 
 	grid := image.Rect(r.Min.X, y, r.Max.X, r.Max.Y)
 	fill(dst, grid, colPanelAlt)
@@ -144,7 +151,7 @@ func (m *mapEditor) drawTilePalette(a *app, dst *ebiten.Image, r image.Rectangle
 		op.GeoM.Translate(float64(cell.Min.X), float64(cell.Min.Y))
 		view.DrawImage(m.tile[i], op)
 		if m.showFlags {
-			if c := flagTint(ts.FlagsFor(i)); c.A > 0 {
+			if c := flagTint(m.drawn(i).Flags); c.A > 0 {
 				fill(view, cell, c)
 			}
 		}
@@ -153,7 +160,10 @@ func (m *mapEditor) drawTilePalette(a *app, dst *ebiten.Image, r image.Rectangle
 		}
 		if u.hit(cell) && u.hit(grid) {
 			stroke(view, cell, colAccent)
-			u.tooltip = fmt.Sprintf("tile %d  %s", i, strings.Join(ts.FlagsFor(i).Names(), ", "))
+			u.tooltip = fmt.Sprintf("tile %d  %s", i, strings.Join(m.drawn(i).Flags.Names(), ", "))
+			if rec, ok := ts.Records[i]; ok {
+				u.tooltip = fmt.Sprintf("tile %d  %s (%s)  %s", i, m.drawn(i).Name, rec, strings.Join(m.drawn(i).Flags.Names(), ", "))
+			}
 			if u.clicked {
 				m.brush = i
 				if m.tool == toolPick {
@@ -164,8 +174,9 @@ func (m *mapEditor) drawTilePalette(a *app, dst *ebiten.Image, r image.Rectangle
 	}
 }
 
-var flagShort = [4]string{"blocks move", "blocks view", "water", "damaging"}
-var flagHelp = [4]string{"stops movement", "stops sight", "counts as water", "hurts who stands on it"}
+var flagShort = [6]string{"blocks move", "blocks view", "water", "damaging", "blocks missiles", "holds trap"}
+var flagHelp = [6]string{"stops movement", "stops sight", "counts as water", "hurts who stands on it",
+	"stops arrows and spells", "is a wall a trap may be set into"}
 
 func (m *mapEditor) drawEntityPalette(a *app, dst *ebiten.Image, r image.Rectangle) {
 	u := &a.u

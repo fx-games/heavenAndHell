@@ -1,0 +1,668 @@
+%rec: default
+# affixes.rec: the magic item affixes, one record each: a prefix goes before the item's name ("Fine Dagger"), a suffix
+# after it ("Dagger of the Leech"). A magic item rolls at most one of each, among those whose min_level lies between
+# half its item level and its item level, so an affix is only found in that band: give a power tiers.
+# Fields:
+#   internal_name     its id; required
+#   name              as it reads in the item's name
+#   slot              prefix or suffix
+#   power             what it grants, a name savePower knows (src/rules/gen.go): to_hit, damage_percent, strength,
+#                     light_radius, thorns, triple_damage, mana_on_kill, ...
+#   values            the power's range "min-max", rolled between them (one number: fixed)
+#   min_level         the item level it starts at
+#   on                the items it may appear on: weapon bow staff armor shield jewelry
+#   alignment         neutral (default), cursed or good; an item never carries a cursed prefix and a good suffix
+#   double            true: it counts twice in the roll
+#   in_good_rolls     false: it never rolls where only good powers are allowed (premium stock, quest rewards)
+#   price             the item's added value at the low and the high end of values, "min-max"
+#   price_multiplier  how strongly it multiplies the item's base value
+
+internal_name: strength
+name: strength
+slot: suffix
+power: strength
+values: 1-3
+min_level: 1
+on: weapon bow staff armor shield jewelry
+price: 100-300
+price_multiplier: 2
+
+internal_name: might
+name: might
+slot: suffix
+power: strength
+values: 3-5
+min_level: 3
+on: weapon bow staff armor shield jewelry
+price: 300-700
+price_multiplier: 2
+
+internal_name: power
+name: power
+slot: suffix
+power: strength
+values: 6-9
+min_level: 6
+on: weapon bow staff armor shield jewelry
+price: 800-1500
+price_multiplier: 2
+
+internal_name: giants
+name: giants
+slot: suffix
+power: strength
+values: 10-14
+min_level: 10
+on: weapon bow staff armor shield jewelry
+price: 1600-3000
+price_multiplier: 2
+
+internal_name: titans
+name: titans
+slot: suffix
+power: strength
+values: 15-20
+min_level: 15
+on: weapon bow staff armor shield jewelry
+price: 3200-5500
+price_multiplier: 2
+
+internal_name: the_colossus
+name: the colossus
+slot: suffix
+power: strength
+values: 21-30
+min_level: 20
+on: weapon bow staff armor shield jewelry
+price: 6000-10000
+price_multiplier: 2
+
+internal_name: dexterity
+name: dexterity
+slot: suffix
+power: dexterity
+values: 1-3
+min_level: 1
+on: weapon bow staff armor shield jewelry
+price: 100-300
+price_multiplier: 2
+
+internal_name: skill
+name: skill
+slot: suffix
+power: dexterity
+values: 3-5
+min_level: 3
+on: weapon bow staff armor shield jewelry
+price: 300-700
+price_multiplier: 2
+
+internal_name: accuracy
+name: accuracy
+slot: suffix
+power: dexterity
+values: 6-9
+min_level: 6
+on: weapon bow staff armor shield jewelry
+price: 800-1500
+price_multiplier: 2
+
+internal_name: precision
+name: precision
+slot: suffix
+power: dexterity
+values: 10-14
+min_level: 10
+on: weapon bow staff armor shield jewelry
+price: 1600-3000
+price_multiplier: 2
+
+internal_name: perfection
+name: perfection
+slot: suffix
+power: dexterity
+values: 15-20
+min_level: 15
+on: weapon bow staff armor shield jewelry
+price: 3200-5500
+price_multiplier: 2
+
+internal_name: the_virtuoso
+name: the virtuoso
+slot: suffix
+power: dexterity
+values: 21-30
+min_level: 20
+on: weapon bow staff armor shield jewelry
+price: 6000-10000
+price_multiplier: 2
+
+internal_name: magic
+name: magic
+slot: suffix
+power: intelligence
+values: 1-3
+min_level: 1
+on: weapon bow staff armor shield jewelry
+price: 100-300
+price_multiplier: 2
+
+internal_name: the_mind
+name: the mind
+slot: suffix
+power: intelligence
+values: 3-5
+min_level: 3
+on: weapon bow staff armor shield jewelry
+price: 300-700
+price_multiplier: 2
+
+internal_name: brilliance
+name: brilliance
+slot: suffix
+power: intelligence
+values: 6-9
+min_level: 6
+on: weapon bow staff armor shield jewelry
+price: 800-1500
+price_multiplier: 2
+
+internal_name: sorcery
+name: sorcery
+slot: suffix
+power: intelligence
+values: 10-14
+min_level: 10
+on: weapon bow staff armor shield jewelry
+price: 1600-3000
+price_multiplier: 2
+
+internal_name: wizardry
+name: wizardry
+slot: suffix
+power: intelligence
+values: 15-20
+min_level: 15
+on: weapon bow staff armor shield jewelry
+price: 3200-5500
+price_multiplier: 2
+
+internal_name: the_arcane
+name: the arcane
+slot: suffix
+power: intelligence
+values: 21-30
+min_level: 20
+on: weapon bow staff armor shield jewelry
+price: 6000-10000
+price_multiplier: 2
+
+internal_name: the_fox
+name: the fox
+slot: suffix
+power: health
+values: 5-10
+min_level: 1
+on: armor shield jewelry
+price: 100-300
+price_multiplier: 2
+
+internal_name: the_jaguar
+name: the jaguar
+slot: suffix
+power: health
+values: 10-16
+min_level: 3
+on: armor shield jewelry
+price: 300-700
+price_multiplier: 2
+
+internal_name: the_eagle
+name: the eagle
+slot: suffix
+power: health
+values: 16-25
+min_level: 6
+on: armor shield jewelry
+price: 800-1500
+price_multiplier: 2
+
+internal_name: the_wolf
+name: the wolf
+slot: suffix
+power: health
+values: 25-35
+min_level: 10
+on: armor shield jewelry
+price: 1600-3000
+price_multiplier: 2
+
+internal_name: the_tiger
+name: the tiger
+slot: suffix
+power: health
+values: 35-50
+min_level: 15
+on: armor shield jewelry
+price: 3200-5500
+price_multiplier: 2
+
+internal_name: the_whale
+name: the whale
+slot: suffix
+power: health
+values: 50-70
+min_level: 20
+on: armor shield jewelry
+price: 6000-10000
+price_multiplier: 2
+
+internal_name: the_spider
+name: the spider
+slot: suffix
+power: mana
+values: 5-10
+min_level: 1
+on: armor shield jewelry staff
+price: 100-300
+price_multiplier: 2
+
+internal_name: the_raven
+name: the raven
+slot: suffix
+power: mana
+values: 10-16
+min_level: 3
+on: armor shield jewelry staff
+price: 300-700
+price_multiplier: 2
+
+internal_name: the_snake
+name: the snake
+slot: suffix
+power: mana
+values: 16-25
+min_level: 6
+on: armor shield jewelry staff
+price: 800-1500
+price_multiplier: 2
+
+internal_name: the_serpent
+name: the serpent
+slot: suffix
+power: mana
+values: 25-35
+min_level: 10
+on: armor shield jewelry staff
+price: 1600-3000
+price_multiplier: 2
+
+internal_name: the_drake
+name: the drake
+slot: suffix
+power: mana
+values: 35-50
+min_level: 15
+on: armor shield jewelry staff
+price: 3200-5500
+price_multiplier: 2
+
+internal_name: the_dragon
+name: the dragon
+slot: suffix
+power: mana
+values: 50-70
+min_level: 20
+on: armor shield jewelry staff
+price: 6000-10000
+price_multiplier: 2
+
+internal_name: quality
+name: quality
+slot: suffix
+power: damage
+values: 1-2
+min_level: 1
+on: weapon bow staff
+price: 100-300
+price_multiplier: 2
+
+internal_name: maiming
+name: maiming
+slot: suffix
+power: damage
+values: 3-5
+min_level: 3
+on: weapon bow staff
+price: 300-700
+price_multiplier: 2
+
+internal_name: slaying
+name: slaying
+slot: suffix
+power: damage
+values: 6-8
+min_level: 6
+on: weapon bow staff
+price: 800-1500
+price_multiplier: 2
+
+internal_name: gore
+name: gore
+slot: suffix
+power: damage
+values: 9-12
+min_level: 10
+on: weapon bow staff
+price: 1600-3000
+price_multiplier: 2
+
+internal_name: carnage
+name: carnage
+slot: suffix
+power: damage
+values: 13-16
+min_level: 15
+on: weapon bow staff
+price: 3200-5500
+price_multiplier: 2
+
+internal_name: ruin
+name: ruin
+slot: suffix
+power: damage
+values: 17-22
+min_level: 20
+on: weapon bow staff
+price: 6000-10000
+price_multiplier: 2
+
+internal_name: sharpness
+name: sharpness
+slot: suffix
+power: damage_percent
+values: 10-20
+min_level: 1
+on: weapon bow staff
+price: 100-300
+price_multiplier: 2
+
+internal_name: cruelty
+name: cruelty
+slot: suffix
+power: damage_percent
+values: 20-35
+min_level: 3
+on: weapon bow staff
+price: 300-700
+price_multiplier: 2
+
+internal_name: savagery
+name: savagery
+slot: suffix
+power: damage_percent
+values: 36-55
+min_level: 6
+on: weapon bow staff
+price: 800-1500
+price_multiplier: 2
+
+internal_name: butchery
+name: butchery
+slot: suffix
+power: damage_percent
+values: 56-80
+min_level: 10
+on: weapon bow staff
+price: 1600-3000
+price_multiplier: 2
+
+internal_name: slaughter
+name: slaughter
+slot: suffix
+power: damage_percent
+values: 81-110
+min_level: 15
+on: weapon bow staff
+price: 3200-5500
+price_multiplier: 2
+
+internal_name: annihilation
+name: annihilation
+slot: suffix
+power: damage_percent
+values: 111-150
+min_level: 20
+on: weapon bow staff
+price: 6000-10000
+price_multiplier: 2
+
+internal_name: sturdiness
+name: sturdiness
+slot: suffix
+power: armor_class
+values: 10-20
+min_level: 1
+on: armor shield
+price: 100-300
+price_multiplier: 2
+
+internal_name: protection
+name: protection
+slot: suffix
+power: armor_class
+values: 21-35
+min_level: 3
+on: armor shield
+price: 300-700
+price_multiplier: 2
+
+internal_name: warding
+name: warding
+slot: suffix
+power: armor_class
+values: 36-50
+min_level: 6
+on: armor shield
+price: 800-1500
+price_multiplier: 2
+
+internal_name: the_bulwark
+name: the bulwark
+slot: suffix
+power: armor_class
+values: 51-70
+min_level: 10
+on: armor shield
+price: 1600-3000
+price_multiplier: 2
+
+internal_name: the_fortress
+name: the fortress
+slot: suffix
+power: armor_class
+values: 71-90
+min_level: 15
+on: armor shield
+price: 3200-5500
+price_multiplier: 2
+
+internal_name: the_citadel
+name: the citadel
+slot: suffix
+power: armor_class
+values: 91-120
+min_level: 20
+on: armor shield
+price: 6000-10000
+price_multiplier: 2
+
+internal_name: the_leech
+name: the leech
+slot: suffix
+power: steal_health
+values: 3
+min_level: 6
+on: weapon
+price: 800-1500
+price_multiplier: 2
+
+internal_name: the_vampire
+name: the vampire
+slot: suffix
+power: steal_health
+values: 5
+min_level: 15
+on: weapon
+price: 3200-5500
+price_multiplier: 2
+
+internal_name: the_bat
+name: the bat
+slot: suffix
+power: steal_mana
+values: 3
+min_level: 6
+on: weapon
+price: 800-1500
+price_multiplier: 2
+
+internal_name: the_night
+name: the night
+slot: suffix
+power: steal_mana
+values: 5
+min_level: 15
+on: weapon
+price: 3200-5500
+price_multiplier: 2
+
+internal_name: light
+name: light
+slot: suffix
+power: light_radius
+values: 1
+min_level: 1
+on: armor jewelry
+price: 100-300
+price_multiplier: 2
+
+internal_name: radiance
+name: radiance
+slot: suffix
+power: light_radius
+values: 2
+min_level: 6
+on: armor jewelry
+price: 800-1500
+price_multiplier: 2
+
+internal_name: speed
+name: speed
+slot: suffix
+power: attack_speed
+values: 1
+min_level: 3
+on: weapon bow
+price: 300-700
+price_multiplier: 2
+
+internal_name: swiftness
+name: swiftness
+slot: suffix
+power: attack_speed
+values: 2
+min_level: 10
+on: weapon bow
+price: 1600-3000
+price_multiplier: 2
+
+internal_name: haste
+name: haste
+slot: suffix
+power: attack_speed
+values: 3
+min_level: 20
+on: weapon bow
+price: 6000-10000
+price_multiplier: 2
+
+internal_name: the_acolyte
+name: the acolyte
+slot: suffix
+power: mana_on_kill
+values: 2-3
+min_level: 1
+on: weapon bow staff armor shield jewelry
+price: 100-300
+price_multiplier: 2
+
+internal_name: the_adept
+name: the adept
+slot: suffix
+power: mana_on_kill
+values: 4-6
+min_level: 6
+on: weapon bow staff armor shield jewelry
+price: 800-1500
+price_multiplier: 2
+
+internal_name: the_archmage
+name: the archmage
+slot: suffix
+power: mana_on_kill
+values: 7-10
+min_level: 15
+on: weapon bow staff armor shield jewelry
+price: 3200-5500
+price_multiplier: 2
+
+internal_name: flame
+name: flame
+slot: suffix
+power: fireball_shot
+values: 8
+min_level: 3
+on: bow
+price: 300-700
+price_multiplier: 2
+
+internal_name: the_inferno
+name: the inferno
+slot: suffix
+power: fireball_shot
+values: 16
+min_level: 15
+on: bow
+price: 3200-5500
+price_multiplier: 2
+
+internal_name: thorns
+name: thorns
+slot: suffix
+power: return_damage
+values: 10
+min_level: 1
+on: armor shield jewelry
+price: 100-300
+price_multiplier: 2
+
+internal_name: spikes
+name: spikes
+slot: suffix
+power: return_damage
+values: 20
+min_level: 10
+on: armor shield jewelry
+price: 1600-3000
+price_multiplier: 2
+
+internal_name: fury
+name: fury
+slot: suffix
+power: triple_damage
+values: 0
+min_level: 6
+on: weapon staff
+price: 800-1500
+price_multiplier: 2

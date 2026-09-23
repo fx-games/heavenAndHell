@@ -6,7 +6,9 @@
 #   internal_name     the icon ID, "kind.snake_case_name"
 #   icon              the tile's number on the mod's sprite sheet (classic_roguelike.png), row by row from 0
 #   same_as           instead of icon: draw it with another record's icon (a trapped chest looks like a chest)
-#   name              a description for the mod author; not read
+#   name              what the game calls it (a map tile's hover text); the remapper lists records by it
+#   tags              a map tile's: blocks_movement, blocks_view, blocks_missiles, trap (a wall a trap may be set
+#                     into), is_damaging. Maps draw it by the number maps/tileset.hht gives it ([tiles])
 #   reference_image   the original graphic it stands in for; not read
 #
 
@@ -33,6 +35,7 @@ name: Dirt
 internal_name: tile.mountain
 icon: 7
 name: Mountain
+tags: blocks_movement, blocks_view, blocks_missiles
 
 internal_name: tile.mountain_with_entrance
 icon: 8
@@ -49,10 +52,12 @@ name: Wooden Bridge
 internal_name: tile.wooden_fence
 icon: 63
 name: Wooden Fence
+tags: blocks_movement
 
 internal_name: tile.lava
 icon: 159
 name: Lava
+tags: blocks_movement
 
 internal_name: tile.wall_torch
 icon: 352
@@ -117,6 +122,7 @@ name: Catacombs Floor
 internal_name: tile.catacombs_wall
 icon: 84
 name: Catacombs Wall
+tags: blocks_movement, blocks_view, blocks_missiles
 
 internal_name: tile.catacombs_wall_with_shading
 icon: 85
@@ -133,26 +139,32 @@ name: Dungeon Red Earth Floor
 internal_name: tile.dungeon_rocky_wall
 icon: 9
 name: Dungeon Rocky Wall
+tags: blocks_movement, blocks_view, blocks_missiles
 
 internal_name: tile.cathedral_wall
 icon: 56
 name: Cathedral Wall
+tags: blocks_movement, blocks_view, blocks_missiles
 
 internal_name: tile.arch
 icon: 181
 name: Arch
+tags: blocks_movement
 
 internal_name: tile.grate
 icon: 345
 name: Grate
+tags: blocks_movement
 
 internal_name: tile.pillar
 icon: 75
 name: Pillar
+tags: blocks_movement, blocks_missiles
 
 internal_name: tile.lamp
 icon: 247
 name: Lamp
+tags: blocks_movement
 
 internal_name: tile.cathedral_wall_with_shading
 icon: 58
@@ -871,3 +883,74 @@ same_as: prop.weaponrack.used
 internal_name: effect.shield
 icon: 203
 name: Effect Shield (flashes over an actor a Shield lands on)
+
+# D1 megatile pieces that look like their neighbours but block differently (maps/l<n>_megatiles.hhm)
+internal_name: tile.catacombs_trap_wall
+name: Catacombs Trap Wall
+same_as: tile.catacombs_wall
+tags: blocks_movement, blocks_view, blocks_missiles, trap
+
+internal_name: tile.cathedral_trap_wall
+name: Cathedral Trap Wall
+same_as: tile.cathedral_wall
+tags: blocks_movement, blocks_view, blocks_missiles, trap
+
+internal_name: tile.hell_wall_sight_passes
+name: Hell Wall (sight passes)
+same_as: tile.dungeon_rocky_wall
+tags: blocks_movement, blocks_missiles
+
+internal_name: tile.cave_wall_see_through
+name: Cave Wall (see-through)
+same_as: tile.mountain
+tags: blocks_movement
+
+internal_name: tile.cathedral_wall_see_through
+name: Cathedral Wall (see-through)
+same_as: tile.cathedral_wall
+tags: blocks_movement
+
+internal_name: tile.catacombs_wall_see_through
+name: Catacombs Wall (see-through)
+same_as: tile.catacombs_wall
+tags: blocks_movement
+
+internal_name: tile.hell_wall_see_through
+name: Hell Wall (see-through)
+same_as: tile.dungeon_rocky_wall
+tags: blocks_movement
+
+internal_name: tile.cave_wall_missiles_pass
+name: Cave Wall (missiles pass)
+same_as: tile.mountain
+tags: blocks_movement, blocks_view
+
+internal_name: tile.cave_floor_blocks_sight
+name: Cave Floor (blocks sight and missiles)
+same_as: tile.dirt
+tags: blocks_view, blocks_missiles
+
+internal_name: tile.cathedral_wall_missiles_pass
+name: Cathedral Wall (missiles pass)
+same_as: tile.cathedral_wall
+tags: blocks_movement, blocks_view
+
+internal_name: tile.catacombs_floor_blocks_sight
+name: Catacombs Floor (blocks sight)
+same_as: tile.catacombs_floor
+tags: blocks_view
+
+internal_name: tile.cathedral_wall_sight_passes
+name: Cathedral Wall (sight passes)
+same_as: tile.cathedral_wall
+tags: blocks_movement, blocks_missiles
+
+internal_name: tile.cathedral_column
+name: Cathedral Column
+same_as: tile.arch
+tags: blocks_movement, blocks_view, blocks_missiles
+
+internal_name: tile.hell_floor_blocks_missiles
+name: Hell Floor (blocks missiles)
+same_as: tile.dungeon_red_earth_floor
+tags: blocks_missiles

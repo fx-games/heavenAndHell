@@ -20,7 +20,7 @@ func TestRogueIsWalkable(t *testing.T) {
 			t.Fatal(err)
 		}
 		for seed := int64(1); seed <= 200; seed++ {
-			m, err := Build(cfg, rand.New(rand.NewSource(seed)), nil)
+			m, err := cfg.(Layout).Build(rand.New(rand.NewSource(seed)), nil)
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -60,6 +60,20 @@ func toCell(px, py int) geometry.Point {
 // d1DoorObjectKinds is repeated from map_gen.go's doorKinds so this file doesn't need to import it twice; see
 // there for why doors are terrain + an H&H Door object, not a Prop.
 
+// d1Strategy is the LevelStrategy of D1's four level builders (dungen.D1), d1SetStrategy of its quest set levels.
+type d1Strategy struct{ dungeon.Parser }
+
+func (d1Strategy) Generate(g *MapGenerator, lvl dungeon.Level) *gridmap.GridMap[*Actor, *Item, Object] {
+	return g.generateMap(lvl, nil)
+}
+
+type d1SetStrategy struct{ dungeon.Parser }
+
+func (d1SetStrategy) Generate(g *MapGenerator, lvl dungeon.Level) *gridmap.GridMap[*Actor, *Item, Object] {
+	set := lvl.Config.(dungen.SetLevelParams)
+	return g.generateMap(lvl, &set)
+}
+
 // generateMap builds a D1 dungeon level, or with set a quest set level (LoadSetMap), with D1's own generators.
 // It places the named locations D1's triggers mark; levels.rec's exits say where they lead.
 func (g *MapGenerator) generateMap(level dungeon.Level, set *dungen.SetLevelParams) *gridmap.GridMap[*Actor, *Item, Object] {
@@ -117,7 +131,7 @@ func (g *MapGenerator) setPiece(m *gridmap.GridMap[*Actor, *Item, Object]) [4]in
 }
 
 func stairsUp() gridmap.Tile {
-	return gridmap.Tile{DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp}
+	return gridmap.Tile{DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, IsMissilePassable: true, Special: gridmap.SpecialTileStairsUp}
 }
 
 // placeTriggers draws the stairs and warp D1's own generator positioned (Level.Triggers) and names them

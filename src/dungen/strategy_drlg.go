@@ -11,13 +11,8 @@ import (
 	"rpg/src/rules"
 )
 
-// Dungeon generation is one subsystem with several named strategies, and the registry is the engine's, in
-// package dungeon. A strategy is an algorithm plus the tile set it draws with; a mod says which strategy builds
-// which dungeon level, and with which parameters, in levels.rec.
-//
-// Everything below is D1's side of that registry: D1's four algorithms and the knobs they take. None of it is in
-// the shared interface, because none of it means anything to another generator family - ltype and fill are D1
-// megatile concepts and build/deco run against D1's 112x112 generator state.
+// D1's four level builders, each an algorithm plus the tile set it draws with. package common registers each as a
+// LevelStrategy under its name (and D1Set as d1_set); the knobs a mod may turn are LevelParams.
 type strategy struct {
 	ltype int                        // the tile set and theme rules the algorithm draws with
 	fill  int                        // lPass3's background megatile
@@ -25,6 +20,11 @@ type strategy struct {
 	deco  func(g *gen, d Decoration) // how this algorithm scatters single-tile decorations
 	name  string
 }
+
+// D1 holds the four strategies by name; D1Set is the quest set levels'.
+var D1 = map[string]dungeon.Parser{}
+
+var D1Set dungeon.Parser = setStrategy{}
 
 func init() {
 	for name, st := range map[string]strategy{
@@ -34,9 +34,8 @@ func init() {
 		"d1_hell":      {rules.DTypeHell, 30 - 1, (*gen).l4GenerateLevel, (*gen).l2PlaceDecoration, ""},
 	} {
 		st.name = name
-		dungeon.Register(name, st)
+		D1[name] = st
 	}
-	dungeon.Register("d1_set", setStrategy{})
 }
 
 // SetLevelParams is a d1_set level: the quest whose set piece it loads (LoadSetMap). The set level number and
@@ -53,15 +52,9 @@ func (setStrategy) Parse(r recfile.Record) (dungeon.Config, error) {
 	return SetLevelParams{Quest: q}, nil
 }
 
-// strategyNamed recovers D1's own strategy from the shared registry. The assertion is the point of the seam: the
-// engine stores the algorithm by name without knowing its shape, and the family that registered it takes its own
-// shape back.
+// strategyNamed is D1's strategy called name, or the zero strategy.
 func strategyNamed(name string) strategy {
-	s, ok := dungeon.Lookup(name)
-	if !ok {
-		return strategy{}
-	}
-	st, _ := s.(strategy)
+	st, _ := D1[name].(strategy)
 	return st
 }
 
@@ -97,7 +90,7 @@ var defaultParams = map[string]LevelParams{
 	"d1_hell": {SetPieces: true, ThemeFreq: 8},
 }
 
-// Parse implements dungeon.Strategy: it turns one levels.rec record into this strategy's LevelParams. Fields the
+// Parse implements dungeon.Parser: it turns one levels.rec record into this strategy's LevelParams. Fields the
 // record leaves out keep the strategy's Diablo defaults.
 func (st strategy) Parse(r recfile.Record) (dungeon.Config, error) {
 	p := defaultParams[st.name]
@@ -135,7 +128,7 @@ type levelConfig struct {
 // levelConfigs is a mod's whole level list, indexed by dungeon level.
 type levelConfigs [rules.NumLevels]levelConfig
 
-// loadLevelConfigs reads levels.rec through the engine's registry. Called from Load, never at package init:
+// loadLevelConfigs reads the D1 levels of levels.rec. Called from Load, never at package init:
 // content only exists after a mod is selected.
 func loadLevelConfigs(fsys fs.FS) (levelConfigs, error) {
 	var cfgs levelConfigs
@@ -144,12 +137,12 @@ func loadLevelConfigs(fsys fs.FS) (levelConfigs, error) {
 		return cfgs, err
 	}
 	// D1's generator reads its knobs by depth: the one D1 dungeon level each depth has. The whole file is checked
-	// by the engine's loader (dungeon.LoadLevels); other generators' levels, d1_set's included (they build with
-	// their parent depth's), are not its business here.
+	// by common's loader (dungeon.LoadLevels); other generators' levels, d1_set's included (they build with their
+	// parent depth's), are not its business here.
 	for _, r := range recs {
 		gen, _ := dungeon.Field(r, "generator")
-		st, ok := dungeon.Lookup(gen)
-		if !ok || !strings.HasPrefix(gen, "d1_") {
+		st, ok := D1[gen]
+		if !ok {
 			continue
 		}
 		cfg, err := st.Parse(r)

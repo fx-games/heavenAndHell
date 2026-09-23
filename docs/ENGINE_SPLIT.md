@@ -91,29 +91,21 @@ A mod is done when you can play it, not when its files parse. For H&H that
 means: generators (`dungen/`), a town, NPCs, vendors and quests. Content
 without the means to reach it is not a finished mod.
 
-## The generator seam: narrow on purpose
+## Level generation: one strategy interface
 
-`dungeon/` holds ONE registry and a deliberately tiny interface:
+Every generator a mod can name in `levels.rec` is a `common.LevelStrategy`, in one registry
+(`levelStrategies`, `common/map_gen.go`):
 
-    type Config any
-    type Strategy interface { Parse(recfile.Record) (Config, error) }
+    type LevelStrategy interface {
+        Parse(recfile.Record) (dungeon.Config, error) // knobs, checked when the mod loads
+        Generate(g *MapGenerator, lvl dungeon.Level) *GridMap // the playable level
+    }
 
-The engine's only generic business with a generator is "does this name resolve,
-and do the knobs the mod declared for it parse" - so a typo in `levels.rec`
-fails when the mod loads, not on the stairs down. Past that, D1's and H&H's
-families share nothing that is not a lie: their intersection (bare terrain)
-throws away everything D1 produces (SOL, set pieces, quest triggers, monsters,
-objects), and their union forces `ltype`, megatile fills and quest set pieces
-into a type H&H would have to carry and never use.
-
-So level building stays on each family's own side (`d1.CreateLevel`,
-`dungen.Build`) and each recovers its own type from `Config` with one type
-assertion. That assertion IS the seam, not a workaround for it. Widening this
-interface to the union of both families is the failure mode to resist.
-
-`rogue.go` did not come back: it places nine rooms and never connects them, so
-every level it builds fails the walkability check. Unfinished code, not a
-generator.
+`GenerateMap` calls `Generate` and nothing else; there is no type switch over families. `drawn` loads a
+hand-drawn map, `d1_*`/`d1_set` run D1's builders (`dungen.D1`, `dungen.D1Set`), and every layout generator
+(`dungen.Layouts`: accretion, megadungeon, rogue, cave, drunkard, bsp, room_graph, noise) carves a
+`dungen.DungeonMap` whose config builds itself (`dungen.Layout`). A new generator is one file in `dungen/` that
+adds itself to `Layouts`. `dungeon/` is only the level table: `LoadLevels` takes the registry's lookup.
 
 ## Terrain: GenerateMap dispatches, it does not assume
 

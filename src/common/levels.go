@@ -82,7 +82,7 @@ func (s *State) IsPlayerInTown() bool { return s.CurrentLevel().Town }
 func exitTiles() map[string]gridmap.Tile {
 	return map[string]gridmap.Tile{
 		"stairs_down": stairsDown(),
-		"stairs_up":   {DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp},
+		"stairs_up":   {DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, IsMissilePassable: true, Special: gridmap.SpecialTileStairsUp},
 		"red_portal":  redPortal,
 	}
 }

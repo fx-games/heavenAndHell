@@ -5,8 +5,9 @@
 #   name / short_name the shown name, and the short one that fits the belt
 #   icon              icons/items.rec id, e.g. item.dagger
 # Where it appears:
-#   dlvl              the shallowest dungeon level it drops on (D1's iMinMLvl); max_level the deepest (0: none)
-#   out_of_depth_chance / min_level_for_ood   chance to drop above its dlvl, from this dungeon level on
+#   dlvl / max_level  the item levels it drops at (D1's iMinMLvl; max_level 0: no limit). Floor items and
+#                     containers roll at 2x the dungeon level, monster drops at the monster's level or at what
+#                     drops.rec's item_level says
 #   drop              IDROP_REGULAR, IDROP_DOUBLE (twice as likely) or IDROP_NEVER (quests and stores only)
 #   hidden            true: unseen and out of reach until the hero has true sight (H&H's evidence)
 #   quest_item        true: a quest item, which no store buys
@@ -52,8 +53,8 @@
 # was already the unified schema -- this schema IS H&H's, which is why D1's table was converted to it
 # and not the other way round.
 #
-# The records are in source-file order; the last block is unique_items.rec. Nothing places uniques
-# differently yet: the engine has no H&H item placement on this branch.
+# Item level runs 1-24 over the twelve dungeon levels (2x depth, drops.rec item_level 2): an item first found on
+# depth D has dlvl 2D-1, and max_level 2E retires it after depth E. Its unique items are in unique_items.rec.
 
 # --- weapons.rec (29 items) ---
 
@@ -61,23 +62,24 @@ name: Dagger
 internal_name: dagger
 icon: item.dagger
 dlvl: 1
-cost: 10
+cost: 30
 category: weapon
 weapon_type: sword
 weapon_damage: 1d4
 weapon_speed: 1.2
 throw_damage: 1-4
 throw_chance_to_break: 0.25
+max_level: 8
 
 name: Main Gauche
 internal_name: main_gauche
 icon: item.main_gauche
 dlvl: 1
-cost: 25
-max_level: 5
+cost: 45
+max_level: 8
 category: weapon
 weapon_type: sword
-weapon_damage: 1d4+1
+weapon_damage: 1d5
 weapon_speed: 1.1
 throw_damage: 1-5
 throw_chance_to_break: 0.25
@@ -85,86 +87,100 @@ throw_chance_to_break: 0.25
 name: Sax
 internal_name: sax
 icon: item.sax
-dlvl: 2
-cost: 45
+dlvl: 3
+cost: 110
 category: weapon
 weapon_type: sword
 weapon_damage: 1d6
 weapon_speed: 1
 throw_damage: 1-6
 throw_chance_to_break: 0.25
+max_level: 10
+requires_strength: 15
 
 name: Short Sword
 internal_name: short_sword
 icon: item.short_sword
-dlvl: 2
-cost: 90
+dlvl: 3
+cost: 140
 category: weapon
 weapon_type: sword
-weapon_damage: 1d5
+weapon_damage: 1d7
 weapon_speed: 1
 throw_damage: 1-7
 throw_chance_to_break: 0.25
+max_level: 12
+requires_strength: 18
 
 name: Long Sword
 internal_name: long_sword
 icon: item.long_sword
-dlvl: 3
-cost: 200
+dlvl: 5
+cost: 300
 category: weapon
 weapon_type: sword
-weapon_damage: 1d6+2
+weapon_damage: 1d8+1
 weapon_speed: 1
 throw_damage: 1-6
 throw_chance_to_break: 0.25
+max_level: 16
+requires_strength: 30
 
 name: Bastard Sword
 internal_name: bastard_sword
 icon: item.bastard_sword
-dlvl: 3
-cost: 350
-category: weapon
-weapon_type: sword
-weapon_damage: 2d4+2
-weapon_speed: 1
-throw_damage: 1-6
-throw_chance_to_break: 0.25
-
-name: Broad Sword
-internal_name: broad_sword
-icon: item.broad_sword
-dlvl: 4
-cost: 450
+dlvl: 9
+cost: 850
 category: weapon
 weapon_type: sword
 weapon_damage: 2d6
 weapon_speed: 1
 throw_damage: 1-6
 throw_chance_to_break: 0.25
+max_level: 20
+requires_strength: 50
+
+name: Broad Sword
+internal_name: broad_sword
+icon: item.broad_sword
+dlvl: 7
+cost: 520
+category: weapon
+weapon_type: sword
+weapon_damage: 2d5
+weapon_speed: 1
+throw_damage: 1-6
+throw_chance_to_break: 0.25
+max_level: 18
+requires_strength: 40
 
 name: Zweihander
 internal_name: zweihander
 icon: item.zweihander
-dlvl: 5
-cost: 1250
+dlvl: 15
+cost: 2800
 category: weapon
 weapon_type: sword
-weapon_damage: 1d7
+weapon_damage: 3d6
 weapon_speed: 1
 throw_damage: 1-7
 throw_chance_to_break: 0.25
+weapon_two_handed: true
+requires_strength: 75
 
 name: Flamberge
 internal_name: flamberge
 icon: item.flamberge
-dlvl: 5
-cost: 1500
+dlvl: 13
+cost: 1900
 category: weapon
 weapon_type: sword
-weapon_damage: 1d7
+weapon_damage: 2d7
 weapon_speed: 1
 throw_damage: 1-7
 throw_chance_to_break: 0.25
+requires_strength: 60
+unique_base: UITYPE_FLAMBERGE
 
 name: Throwing Axe
 internal_name: throwing_axe
@@ -177,184 +193,215 @@ weapon_damage: 1d6
 weapon_speed: 1
 throw_damage: 1-8
 throw_chance_to_break: 0.25
+max_level: 8
 
 name: Hand Axe
 internal_name: hand_axe
 icon: item.hand_axe
-dlvl: 2
-cost: 60
-max_level: 5
+dlvl: 1
+cost: 70
+max_level: 10
 category: weapon
 weapon_type: axe
-weapon_damage: 1d6
+weapon_damage: 1d7
 weapon_speed: 1
 throw_damage: 1-8
 throw_chance_to_break: 0.25
+requires_strength: 22
 
 name: Broad Axe
 internal_name: broad_axe
 icon: item.broad_axe
-dlvl: 3
-cost: 110
+dlvl: 5
+cost: 320
 category: weapon
 weapon_type: axe
-weapon_damage: 2d6
+weapon_damage: 2d5
 weapon_speed: 1
 throw_damage: 1-8
 throw_chance_to_break: 0.25
+max_level: 16
+requires_strength: 40
 
 name: Battle Axe
 internal_name: battle_axe
 icon: item.battle_axe
-dlvl: 4
-cost: 370
+dlvl: 9
+cost: 1100
 category: weapon
 weapon_type: axe
-weapon_damage: 2d8
+weapon_damage: 2d7+2
 weapon_speed: 1
 throw_damage: 1-10
 throw_chance_to_break: 0.25
+max_level: 20
+weapon_two_handed: true
+requires_strength: 60
 
 name: Great Axe
 internal_name: great_axe
 icon: item.great_axe
-dlvl: 5
-cost: 500
+dlvl: 17
+cost: 3600
 category: weapon
 weapon_type: axe
-weapon_damage: 2d8
+weapon_damage: 3d7+2
 weapon_speed: 1
 throw_damage: 1-10
 throw_chance_to_break: 0.25
+weapon_two_handed: true
+requires_strength: 85
 
 name: War Hammer
 internal_name: war_hammer
 icon: item.war_hammer
-dlvl: 3
-cost: 225
+dlvl: 7
+cost: 450
 category: weapon
 weapon_type: mace
 weapon_damage: 2d4+1
 weapon_speed: 1.1
 throw_damage: 1-8
 throw_chance_to_break: 0.25
+max_level: 16
+requires_strength: 40
 
 name: Morning Star
 internal_name: morning_star
 icon: item.morning_star
-dlvl: 3
-cost: 400
+dlvl: 9
+cost: 800
 category: weapon
 weapon_type: mace
-weapon_damage: 2d4
+weapon_damage: 2d5+1
 weapon_speed: 1
 throw_damage: 2-4
 throw_chance_to_break: 0.25
+max_level: 20
+requires_strength: 50
+unique_base: UITYPE_MORNINGSTAR
 
 name: Whip
 internal_name: whip
 icon: item.whip
 dlvl: 1
 cost: 30
-max_level: 4
+max_level: 6
 category: weapon
 weapon_type: whip
-weapon_damage: 1-3
+weapon_damage: 1d4
 weapon_speed: 1
 
 name: Flail
 internal_name: flail
 icon: item.flail
-dlvl: 2
-cost: 350
+dlvl: 3
+cost: 150
 category: weapon
 weapon_type: mace
-weapon_damage: 2d4
+weapon_damage: 2d3
 weapon_speed: 1
 throw_damage: 2-4
 throw_chance_to_break: 0.25
+max_level: 12
+requires_strength: 25
 
 name: Kettenmorgenstern
 internal_name: kettenmorgenstern
 icon: item.kettenmorgenstern
-dlvl: 4
-cost: 450
+dlvl: 15
+cost: 2600
 category: weapon
 weapon_type: mace
-weapon_damage: 2d4
+weapon_damage: 2d6+3
 weapon_speed: 1
 throw_damage: 2-4
 throw_chance_to_break: 0.25
+requires_strength: 65
+unique_base: UITYPE_KETTENMORGENSTERN
 
 name: Quarterstaff
 internal_name: quarterstaff
 icon: item.quarterstaff
 dlvl: 1
-cost: 24
+cost: 35
 category: weapon
 armor_type: defensive_weapon
 armor_class: 2
 weapon_type: spear
-weapon_damage: 1d10
+weapon_damage: 1d8
 weapon_speed: 1
 throw_damage: 1-9
 throw_chance_to_break: 0.25
+max_level: 8
+weapon_two_handed: true
 
 name: Spear
 internal_name: spear
 icon: item.spear
 dlvl: 1
-cost: 36
+cost: 60
 category: weapon
 armor_type: defensive_weapon
 armor_class: 2
 weapon_type: spear
-weapon_damage: 1d6+1
+weapon_damage: 1d7
 weapon_speed: 1
 throw_damage: 1-6
 throw_chance_to_break: 0.25
+max_level: 10
+requires_strength: 20
 
 name: Partisan
 internal_name: partisan
 icon: item.partisan
-dlvl: 4
-cost: 360
+dlvl: 9
+cost: 1000
 category: weapon
-weapon_type: sword
-weapon_damage: 2d4
+weapon_type: spear
+weapon_damage: 2d6+2
 weapon_speed: 1
 throw_damage: 2-4
 throw_chance_to_break: 0.25
+max_level: 20
+weapon_two_handed: true
+requires_strength: 50
+unique_base: UITYPE_PARTISAN
 
 name: Trident
 internal_name: trident
 icon: item.trident
-dlvl: 4
-cost: 120
+dlvl: 5
+cost: 330
 category: weapon
 weapon_type: spear
-weapon_damage: 1d8
+weapon_damage: 2d4
 weapon_speed: 1
 throw_damage: 1-8
 throw_chance_to_break: 0.25
+max_level: 16
+requires_strength: 35
 
 name: Scythe
 internal_name: scythe
 icon: item.scythe
-dlvl: 7
-cost: 1000
+dlvl: 15
+cost: 3000
 category: weapon
 weapon_type: scythe
-weapon_damage: 5d4
+weapon_damage: 4d4+2
 weapon_speed: 0.9
 throw_damage: 1-8
 throw_chance_to_break: 0.7
+weapon_two_handed: true
+requires_strength: 70
+unique_base: UITYPE_SCYTHE
 
 name: Sling
 internal_name: sling
 icon: item.sling
 dlvl: 1
-cost: 37
+cost: 35
 category: weapon
 weapon_type: sling
 weapon_damage: 1d4
@@ -363,15 +410,16 @@ ranged_projectile_icon: 693
 ranged_max_range: 5
 ranged_accuracy_at_min_range: 0.6
 ranged_accuracy_at_max_range: 0.3
+max_level: 6
 
 name: Short Bow
 internal_name: short_bow
 icon: item.short_bow
 dlvl: 1
-cost: 50
+cost: 60
 category: weapon
 weapon_type: bow
-weapon_damage: 1d4
+weapon_damage: 1d5
 weapon_speed: 1.1
 ranged_projectile_icon: 694
 ranged_max_range: 6
@@ -379,15 +427,17 @@ ranged_accuracy_at_min_range: 0.6
 ranged_accuracy_at_max_range: 0.3
 throw_damage: 1-4
 throw_chance_to_break: 0.25
+max_level: 10
+requires_dexterity: 20
 
 name: Long Bow
 internal_name: long_bow
 icon: item.long_bow
-dlvl: 3
-cost: 120
+dlvl: 5
+cost: 320
 category: weapon
 weapon_type: bow
-weapon_damage: 1d4+1
+weapon_damage: 1d7
 weapon_speed: 1
 ranged_projectile_icon: 694
 ranged_max_range: 12
@@ -395,15 +445,17 @@ ranged_accuracy_at_min_range: 0.7
 ranged_accuracy_at_max_range: 0.4
 throw_damage: 1-4
 throw_chance_to_break: 0.25
+max_level: 16
+requires_dexterity: 35
 
 name: Light Crossbow
 internal_name: light_crossbow
 icon: item.light_crossbow
-dlvl: 4
-cost: 140
+dlvl: 9
+cost: 900
 category: weapon
 weapon_type: crossbow
-weapon_damage: 1d6
+weapon_damage: 2d4
 weapon_speed: 0.9
 ranged_projectile_icon: 722
 ranged_max_range: 10
@@ -411,15 +463,18 @@ ranged_accuracy_at_min_range: 0.8
 ranged_accuracy_at_max_range: 0.5
 throw_damage: 1-6
 throw_chance_to_break: 0.25
+max_level: 20
+requires_strength: 25
+requires_dexterity: 45
 
 name: Heavy Crossbow
 internal_name: heavy_crossbow
 icon: item.heavy_crossbow
-dlvl: 5
-cost: 300
+dlvl: 15
+cost: 2600
 category: weapon
 weapon_type: crossbow
-weapon_damage: 1d8
+weapon_damage: 2d6
 weapon_speed: 0.7
 ranged_projectile_icon: 722
 ranged_max_range: 16
@@ -427,6 +482,8 @@ ranged_accuracy_at_min_range: 0.9
 ranged_accuracy_at_max_range: 0.6
 throw_damage: 1-6
 throw_chance_to_break: 0.25
+requires_strength: 40
+requires_dexterity: 60
 
 # --- armor.rec (34 items) ---
 
@@ -434,11 +491,11 @@ name: Pair of Soft Leather Boots
 internal_name: soft_leather_boots
 icon: item.soft_leather_boots
 dlvl: 1
-cost: 7
-max_level: 4
+cost: 15
+max_level: 6
 category: armor
 armor_type: boots
-armor_class: 1
+armor_class: 1-2
 throw_damage: 1-2
 throw_chance_to_break: 0.05
 
@@ -446,220 +503,241 @@ name: Pair of Hard Leather Boots
 internal_name: hard_leather_boots
 icon: item.hard_leather_boots
 dlvl: 1
-cost: 12
-max_level: 4
+cost: 40
+max_level: 10
 category: armor
 armor_type: boots
-armor_class: 1
+armor_class: 2-3
 throw_damage: 1-2
 throw_chance_to_break: 0.05
 
 name: Pair of Steel Shod Boots
 internal_name: steel_boots
 icon: item.steel_boots
-dlvl: 3
-cost: 55
+dlvl: 7
+cost: 450
 category: armor
 armor_type: boots
-armor_class: 2
+armor_class: 4-7
 throw_damage: 1-2
 throw_chance_to_break: 0.05
+requires_strength: 30
+unique_base: UITYPE_STEELBOOTS
 
 name: Cloak
 internal_name: cloak
 icon: item.cloak
 dlvl: 1
-cost: 3
-max_level: 3
+cost: 10
+max_level: 8
 category: armor
 armor_type: cape
-armor_class: 1
+armor_class: 1-2
 
 name: Fur Cloak
 internal_name: fur_cloak
 icon: item.fur_cloak
-dlvl: 4
-cost: 80
+dlvl: 7
+cost: 350
 category: armor
 armor_type: cape
-armor_class: 1
+armor_class: 3-5
+max_level: 18
+unique_base: UITYPE_FURCLOAK
 
 name: Elven Cloak
 internal_name: elven_cloak
 icon: item.elven_cloak
-dlvl: 4
-cost: 125
+dlvl: 13
+cost: 1800
 category: armor
 armor_type: cape
-armor_class: 1
+armor_class: 5-8
+requires_dexterity: 30
+equip_modifier: dexterity
+unique_base: UITYPE_ELVENCLOAK
 
 name: Robe
 internal_name: robe
 icon: item.robe
 dlvl: 1
-cost: 4
-max_level: 3
+cost: 20
+max_level: 8
 category: armor
 armor_type: cuirass
-armor_class: 1
+armor_class: 2-4
 
 name: Ceremonial Robe
 internal_name: ceremonial_robe
 icon: item.ceremonial_robe
-dlvl: 1
-cost: 16
-max_level: 3
+dlvl: 5
+cost: 400
+max_level: 16
 category: armor
 armor_type: cuirass
-armor_class: 1
+armor_class: 5-9
+requires_magic: 30
 
 name: Partial Leather Armour
 internal_name: partial_leather_armour
 icon: item.partial_leather_armour
 dlvl: 1
 cost: 60
-max_level: 4
+max_level: 8
 category: armor
 armor_type: cuirass
-armor_class: 2
+armor_class: 5-8
 throw_damage: 1-2
 throw_chance_to_break: 0.05
 
 name: Full Leather Armour
 internal_name: full_leather_armour
 icon: item.full_leather_armour
-dlvl: 1
-cost: 20
-max_level: 4
+dlvl: 3
+cost: 130
+max_level: 10
 category: armor
 armor_type: cuirass
-armor_class: 3
+armor_class: 7-10
 throw_damage: 1-2
 throw_chance_to_break: 0.05
+requires_strength: 15
 
 name: Leather Brigandine
 internal_name: leather_brigandine
 icon: item.leather_brigandine
-dlvl: 4
-cost: 220
-max_level: 6
+dlvl: 5
+cost: 320
+max_level: 14
 category: armor
 armor_type: cuirass
-armor_class: 2
+armor_class: 9-13
 throw_damage: 1
 throw_chance_to_break: 0.05
+requires_strength: 25
 
 name: Rusty Chain Mail
 internal_name: rusted_chain_mail
 icon: item.rusted_chain_mail
-dlvl: 4
-cost: 390
-max_level: 8
+dlvl: 7
+cost: 550
+max_level: 16
 category: armor
 armor_type: cuirass
-armor_class: 2-3
+armor_class: 12-16
 throw_damage: 2-3
 throw_chance_to_break: 0.05
+requires_strength: 35
 
 name: Scale Mail
 internal_name: scale_mail
 icon: item.scale_mail
-dlvl: 5
-cost: 430
-max_level: 10
+dlvl: 9
+cost: 900
+max_level: 18
 category: armor
 armor_type: cuirass
-armor_class: 3
+armor_class: 16-21
 throw_damage: 2-3
 throw_chance_to_break: 0.05
+requires_strength: 45
 
 name: Chain Mail
 internal_name: chain_mail
 icon: item.chain_mail
-dlvl: 6
-cost: 530
+dlvl: 11
+cost: 1400
 category: armor
 armor_type: cuirass
-armor_class: 4
+armor_class: 20-26
 throw_damage: 2-3
 throw_chance_to_break: 0.05
+max_level: 20
+requires_strength: 55
 
 name: Full Plate Armour
 internal_name: full_plate_armour
 icon: item.full_plate_armour
-dlvl: 7
-cost: 1050
+dlvl: 15
+cost: 3200
 category: armor
 armor_type: cuirass
-armor_class: 5
+armor_class: 30-38
 throw_damage: 2-3
 throw_chance_to_break: 0.05
+requires_strength: 70
+unique_base: UITYPE_FULLPLATE
 
 name: Set of Leather Gloves
 internal_name: leather_gloves
 icon: item.leather_gloves
 dlvl: 1
-cost: 3
-max_level: 4
+cost: 15
+max_level: 8
 category: armor
 armor_type: gloves
-armor_class: 1
+armor_class: 1-2
 throw_damage: 0
 throw_chance_to_break: 0.05
 
 name: Set of Gauntlets
 internal_name: gauntlets
 icon: item.gauntlets
-dlvl: 3
-cost: 35
-max_level: 7
+dlvl: 5
+cost: 250
+max_level: 16
 category: armor
 armor_type: gloves
-armor_class: 2
+armor_class: 3-5
 throw_damage: 0
 throw_chance_to_break: 0.05
+requires_strength: 25
 
 name: Set of Cesti
 internal_name: cesti
 icon: item.cesti
-dlvl: 5
-cost: 110
+dlvl: 11
+cost: 1300
 category: armor
 armor_type: gloves
-armor_class: 2
+armor_class: 5-8
 throw_damage: 1-2
 throw_chance_to_break: 0.05
+requires_strength: 45
+unique_base: UITYPE_CESTI
 
 name: Set of Alchemist's Gloves
 internal_name: alchemists_gloves
 icon: item.alchemists_gloves
-dlvl: 5
-cost: 220
+dlvl: 9
+cost: 1000
 category: armor
 armor_type: gloves
-armor_class: 1-2
+armor_class: 3-5
 throw_damage: 1-2
 throw_chance_to_break: 0.05
+requires_magic: 40
+equip_modifier: intelligence
 
 name: Hood
 internal_name: hood
 icon: item.hood
 dlvl: 1
-cost: 10
-max_level: 3
+cost: 15
+max_level: 6
 category: armor
 armor_type: helmet
-armor_class: 1
+armor_class: 1-2
 
 name: Hard Leather Cap
 internal_name: hard_leather_cap
 icon: item.hard_leather_cap
 dlvl: 1
-cost: 12
-max_level: 3
+cost: 25
+max_level: 6
 category: armor
 armor_type: helmet
-armor_class: 2
+armor_class: 2-3
 throw_damage: 1
 throw_chance_to_break: 0.05
 
@@ -667,91 +745,98 @@ name: Leather Helmet
 internal_name: leather_helmet
 icon: item.leather_helmet
 dlvl: 1
-cost: 26
-max_level: 3
+cost: 40
+max_level: 8
 category: armor
 armor_type: helmet
-armor_class: 3
+armor_class: 3-4
 throw_damage: 1
 throw_chance_to_break: 0.05
 
 name: Metal Cap
 internal_name: metal_cap
 icon: item.metal_cap
-dlvl: 2
-cost: 30
-max_level: 4
+dlvl: 3
+cost: 120
+max_level: 12
 category: armor
 armor_type: helmet
-armor_class: 3
+armor_class: 4-6
 throw_damage: 1
 throw_chance_to_break: 0.05
+requires_strength: 20
 
 name: Chain Coif
 internal_name: chain_coif
 icon: item.chain_coif
-dlvl: 3
-cost: 75
-max_level: 5
+dlvl: 7
+cost: 400
+max_level: 16
 category: armor
 armor_type: helmet
-armor_class: 3
+armor_class: 6-8
 throw_damage: 1
 throw_chance_to_break: 0.05
+requires_strength: 30
 
 name: Steel Helm
 internal_name: steel_helm
 icon: item.steel_helm
-dlvl: 5
-cost: 200
+dlvl: 11
+cost: 1200
 category: armor
 armor_type: helmet
-armor_class: 4
+armor_class: 8-11
 throw_damage: 1-2
 throw_chance_to_break: 0.05
+requires_strength: 45
+unique_base: UITYPE_STEELHELM
 
 name: Iron Crown
 internal_name: iron_crown
 icon: item.iron_crown
-dlvl: 6
-cost: 500
+dlvl: 15
+cost: 2200
 category: armor
 armor_type: helmet
-armor_class: 1
+armor_class: 10-13
 throw_damage: 0
 throw_chance_to_break: 0.05
+requires_strength: 35
 
 name: Golden Crown
 internal_name: golden_crown
 icon: item.golden_crown
-dlvl: 6
-cost: 1000
+dlvl: 17
+cost: 3000
 category: armor
 armor_type: helmet
-armor_class: 1
+armor_class: 11-14
 throw_damage: 1
 throw_chance_to_break: 0.05
+requires_magic: 40
 
 name: Jewel Encrusted Crown
 internal_name: jewel_crown
 icon: item.jewel_crown
-dlvl: 7
-cost: 2000
+dlvl: 19
+cost: 4500
 category: armor
 armor_type: helmet
-armor_class: 1-2
+armor_class: 13-16
 throw_damage: 1
 throw_chance_to_break: 0.05
+requires_magic: 60
 
 name: Leather Buckler
 internal_name: leather_buckler
 icon: item.leather_buckler
-dlvl: 2
+dlvl: 1
 cost: 30
-max_level: 5
+max_level: 8
 category: armor
 armor_type: shield
-armor_class: 1
+armor_class: 2-4
 weapon_type: shield
 weapon_damage: 1-2
 weapon_speed: 0.9
@@ -761,148 +846,168 @@ throw_chance_to_break: 0.05
 name: Metal Buckler
 internal_name: metal_buckler
 icon: item.metal_buckler
-dlvl: 2
-cost: 50
-max_level: 6
+dlvl: 3
+cost: 140
+max_level: 12
 category: armor
 armor_type: shield
-armor_class: 2
+armor_class: 4-7
 weapon_type: shield
 weapon_damage: 1-4
 weapon_speed: 0.9
 throw_damage: 1
 throw_chance_to_break: 0.05
+requires_strength: 15
 
 name: Small Leather Shield
 internal_name: small_leather_shield
 icon: item.small_leather_shield
-dlvl: 2
-cost: 30
-max_level: 6
+dlvl: 1
+cost: 50
+max_level: 10
 category: armor
 armor_type: shield
-armor_class: 1
+armor_class: 3-5
 weapon_type: shield
 weapon_damage: 1-4
 weapon_speed: 0.9
 throw_damage: 0
 throw_chance_to_break: 0.05
+requires_strength: 10
 
 name: Large Leather Shield
 internal_name: large_leather_shield
 icon: item.large_leather_shield
-dlvl: 2
-cost: 120
+dlvl: 5
+cost: 300
 category: armor
 armor_type: shield
-armor_class: 2
+armor_class: 5-8
 weapon_type: shield
 weapon_damage: 1-4
 weapon_speed: 1
 throw_damage: 0
 throw_chance_to_break: 0.05
+max_level: 14
+requires_strength: 25
 
 name: Small Metal Shield
 internal_name: small_metal_shield
 icon: item.small_metal_shield
-dlvl: 4
-cost: 50
-max_level: 8
+dlvl: 9
+cost: 850
+max_level: 18
 category: armor
 armor_type: shield
-armor_class: 2
+armor_class: 8-12
 weapon_type: shield
 weapon_damage: 2-6
 weapon_speed: 1
 throw_damage: 2-3
 throw_chance_to_break: 0.05
+requires_strength: 40
+unique_base: UITYPE_SMALLMETALSHIELD
 
 name: Large Metal Shield
 internal_name: large_metal_shield
 icon: item.large_metal_shield
-dlvl: 4
-cost: 200
+dlvl: 13
+cost: 2200
 category: armor
 armor_type: shield
-armor_class: 3
+armor_class: 12-17
 weapon_type: shield
 weapon_damage: 2-6
 weapon_speed: 1.1
 throw_damage: 2-3
 throw_chance_to_break: 0.05
+requires_strength: 60
+unique_base: UITYPE_LARGEMETALSHIELD
 
 # --- accessory.rec (9 items) ---
 
 name: Amulet of Adornment
 internal_name: amulet_of_adornment
 icon: item.amulet_of_adornment
-dlvl: 1
-cost: 100
+dlvl: 5
+cost: 400
 category: amulet
+misc_id: IMISC_AMULET
+unique_base: UITYPE_AMULET
 
 name: Ring of Protection
 internal_name: ring_of_protection
 icon: item.ring_of_protection
 dlvl: 1
-cost: 100
+cost: 200
 category: ring
-equip_modifier: armor_class
+misc_id: IMISC_RING
+armor_class: 2-6
+unique_base: UITYPE_RINGPROT
 
 name: Ring of Damage
 internal_name: ring_of_damage
 icon: item.ring_of_damage
-dlvl: 1
-cost: 100
+dlvl: 7
+cost: 600
 category: ring
 equip_modifier: damage
+misc_id: IMISC_RING
 
 name: Ring of Strength
 internal_name: ring_of_strength
 icon: item.ring_of_strength
-dlvl: 1
-cost: 100
+dlvl: 3
+cost: 300
 category: ring
 equip_modifier: strength
+misc_id: IMISC_RING
 
 name: Ring of Dexterity
 internal_name: ring_of_dexterity
 icon: item.ring_of_dexterity
-dlvl: 1
-cost: 100
+dlvl: 3
+cost: 300
 category: ring
 equip_modifier: dexterity
+misc_id: IMISC_RING
 
 name: Ring of Intelligence
 internal_name: ring_of_intelligence
 icon: item.ring_of_intelligence
-dlvl: 1
-cost: 100
+dlvl: 3
+cost: 300
 category: ring
 equip_modifier: intelligence
+misc_id: IMISC_RING
+unique_base: UITYPE_RINGINT
 
 name: Ring of Running
 internal_name: ring_of_running
 icon: item.ring_of_running
-dlvl: 1
-cost: 100
+dlvl: 5
+cost: 500
 category: ring
-equip_modifier: move_speed
+misc_id: IMISC_RING
+equip_modifier: move_speed(3)
 
 name: Ring of Fury
 internal_name: ring_of_fury
 icon: item.ring_of_fury
-dlvl: 1
-cost: 100
+dlvl: 11
+cost: 1200
 category: ring
 equip_modifier: attack_speed
+misc_id: IMISC_RING
 
 name: Ring of Speed
 internal_name: ring_of_speed
 icon: item.ring_of_speed
-dlvl: 1
-cost: 100
+dlvl: 15
+cost: 2000
 category: ring
-equip_modifier: speed
+misc_id: IMISC_RING
+equip_modifier: speed(2)
 
 # --- potions.rec (8 items) ---
 
@@ -910,23 +1015,25 @@ name: Potion of Minor Healing
 internal_name: healing_potion
 icon: item.healing_potion
 dlvl: 1
-cost: 50
+cost: 30
 category: potion
 untargeted_action: heal_health(20)
+max_level: 14
 
 name: Potion of Minor Mana
 internal_name: mana_potion
 icon: item.mana_potion
 dlvl: 1
-cost: 50
+cost: 30
 category: potion
 untargeted_action: heal_mana(20)
+max_level: 14
 
 name: Potion of Berserker Rage
 internal_name: berserk_potion
 icon: item.berserk_potion
-dlvl: 1
-cost: 50
+dlvl: 3
+cost: 150
 category: potion
 untargeted_action: apply_berserk_self
 throw_hit_zone: dijkstra_aoe(1)
@@ -938,7 +1045,7 @@ name: Potion of Confusion
 internal_name: confuse_potion
 icon: item.confuse_potion
 dlvl: 1
-cost: 50
+cost: 20
 category: potion
 untargeted_action: apply_status_self(confused | 10 | You feel confused.)
 throw_hit_zone: dijkstra_aoe(1)
@@ -949,24 +1056,24 @@ throw_on_hit_effect: confuse(3-4)
 name: Potion of Speed
 internal_name: speed_potion
 icon: item.speed_potion
-dlvl: 1
-cost: 50
+dlvl: 5
+cost: 200
 category: potion
 untargeted_action: buff_speed(10 | 10)
 
 name: Potion of Strength
 internal_name: strength_potion
 icon: item.strength_potion
-dlvl: 1
-cost: 50
+dlvl: 3
+cost: 150
 category: potion
 untargeted_action: buff_damage(5-10 | 6)
 
 name: Potion of Stoneskin
 internal_name: stoneskin_potion
 icon: item.stoneskin_potion
-dlvl: 1
-cost: 50
+dlvl: 5
+cost: 150
 category: potion
 untargeted_action: stoneskin(5-10)
 
@@ -974,7 +1081,7 @@ name: Potion of Poison
 internal_name: poison_potion
 icon: item.poison_potion
 dlvl: 1
-cost: 50
+cost: 20
 category: potion
 untargeted_action: apply_status_self(poisoned | 10 | You feel sick.)
 throw_hit_zone: dijkstra_aoe(1)
@@ -982,13 +1089,54 @@ throw_damage: 1
 throw_chance_to_break: 1.0
 throw_on_hit_effect: poison(3-4 | 2-4)
 
+name: Ring
+internal_name: ring
+icon: item.ring_of_protection
+dlvl: 1
+cost: 150
+category: ring
+misc_id: IMISC_RING
+unique_base: UITYPE_RING
+
+name: Potion of Healing
+internal_name: greater_healing_potion
+icon: item.healing_potion
+dlvl: 7
+cost: 120
+category: potion
+untargeted_action: heal_health(60)
+
+name: Potion of Mana
+internal_name: greater_mana_potion
+icon: item.mana_potion
+dlvl: 7
+cost: 120
+category: potion
+untargeted_action: heal_mana(60)
+
+name: Potion of Superior Healing
+internal_name: superior_healing_potion
+icon: item.healing_potion
+dlvl: 13
+cost: 350
+category: potion
+untargeted_action: heal_health(150)
+
+name: Potion of Superior Mana
+internal_name: superior_mana_potion
+icon: item.mana_potion
+dlvl: 13
+cost: 350
+category: potion
+untargeted_action: heal_mana(150)
+
 # --- scrolls.rec (8 items) ---
 
 name: Scroll of Phase Door
 internal_name: scroll_of_random_teleport
 icon: item.scroll_of_random_teleport
 dlvl: 1
-cost: 50
+cost: 60
 category: scroll
 untargeted_action: random_near_teleport(7-14)
 
@@ -996,55 +1144,55 @@ name: Scroll of Word of Recall
 internal_name: scroll_of_recall
 icon: item.scroll_of_recall
 dlvl: 1
-cost: 75
+cost: 100
 category: scroll
 untargeted_action: recall
 
 name: Scroll of Blessing
 internal_name: scroll_of_blessing
 icon: item.scroll_of_blessing
-dlvl: 1
-cost: 180
+dlvl: 3
+cost: 200
 category: scroll
 untargeted_action: buff_armor(6)
 
 name: Scroll of Enchant Weapon
 internal_name: scroll_of_enchant_weapon
 icon: item.scroll_of_enchant_weapon
-dlvl: 1
-cost: 4000
+dlvl: 7
+cost: 2500
 category: scroll
 untargeted_action: enchant_weapon
 
 name: Scroll of Enchant Armor
 internal_name: scroll_of_enchant_armor
 icon: item.scroll_of_enchant_armor
-dlvl: 1
-cost: 4000
+dlvl: 7
+cost: 2500
 category: scroll
 untargeted_action: enchant_armor
 
 name: Scroll of Acquirement
 internal_name: scroll_of_acquirement
 icon: item.scroll_of_acquirement
-dlvl: 1
-cost: 10
+dlvl: 11
+cost: 5000
 category: scroll
 untargeted_action: acquirement
 
 name: Scroll of Summoning
 internal_name: scroll_of_summoning
 icon: item.scroll_of_summoning
-dlvl: 1
-cost: 100
+dlvl: 3
+cost: 50
 category: scroll
 targeted_action: summon_monster(1d10)
 
 name: Scroll of Earthquake
 internal_name: scroll_of_earthquake
 icon: item.scroll_of_earthquake
-dlvl: 1
-cost: 5
+dlvl: 5
+cost: 300
 category: scroll
 untargeted_action: earthquake
 
@@ -1054,7 +1202,7 @@ name: a torch
 internal_name: torch
 icon: item.torch
 dlvl: 1
-cost: 2
+cost: 5
 charges: 2500
 category: light
 throw_damage: 1-2
@@ -1066,8 +1214,8 @@ equip_modifier: light_radius(1)
 name: a Brass Lantern
 internal_name: lantern
 icon: item.lantern
-dlvl: 1
-cost: 35
+dlvl: 3
+cost: 150
 charges: 5000
 category: light
 light_color: 255 223 117
@@ -1102,7 +1250,7 @@ name: a flask of oil
 internal_name: flask_of_oil
 icon: item.flask_of_oil
 dlvl: 1
-cost: 12
+cost: 20
 category: potion
 throw_hit_zone: dijkstra_aoe(1)
 throw_damage: 1-4
@@ -1113,81 +1261,16 @@ name: a ration of food
 internal_name: food
 icon: item.food
 dlvl: 1
-cost: 3
+cost: 10
 category: food
 
-# --- unique_items.rec (19 items) ---
-
-name: Scythe of Slicing
-internal_name: scythe_of_slicing
-icon: item.scythe_of_slicing
-dlvl: 7
-cost: 4000
-category: weapon
-weapon_type: scythe
-weapon_damage: 6d4
-weapon_speed: 0.95
-throw_damage: 1-8
-throw_chance_to_break: 0.7
-
-name: Mace of Disruption
-internal_name: mace_of_destruction
-icon: item.mace_of_destruction
-dlvl: 7
-cost: 2500
-category: weapon
-weapon_type: mace
-weapon_damage: 2d8
-weapon_speed: 1
-throw_damage: 2-6
-throw_chance_to_break: 0.25
-
-name: Blade of Chaos
-internal_name: blade_of_chaos
-icon: item.blade_of_chaos
-dlvl: 8
-cost: 4500
-category: weapon
-weapon_type: sword
-weapon_damage: 3d6+1
-weapon_speed: 1
-throw_damage: 1-6
-throw_chance_to_break: 0.25
-
-name: Shadow Cloak
-internal_name: shadow_cloak
-icon: item.shadow_cloak
-dlvl: 7
-cost: 3500
-out_of_depth_chance: 0.1
-min_level_for_ood: 4
-category: armor
-armor_type: cape
-armor_class: 1
-throw_damage: 0
-throw_chance_to_break: 0.05
-
-name: Shield of Deflection
-internal_name: shield_of_deflection
-icon: item.shield_of_deflection
-dlvl: 7
-cost: 6000
-out_of_depth_chance: 0.1
-min_level_for_ood: 4
-category: armor
-armor_type: shield
-armor_class: 4
-weapon_type: shield
-weapon_damage: 3-7
-weapon_speed: 1
-throw_damage: 2-3
-throw_chance_to_break: 0.05
+# --- light sources found in the dungeon ---
 
 name: The Star-Glass
 internal_name: light_star_glass
 icon: item.light_star_glass
-dlvl: 3
-cost: 100
+dlvl: 7
+cost: 800
 charges: -1
 category: light
 light_color: 5 250 255
@@ -1198,151 +1281,14 @@ equip_modifier: light_radius(4)
 name: The Morning Star
 internal_name: light_morning_star
 icon: item.light_morning_star
-dlvl: 7
-cost: 100
+dlvl: 15
+cost: 3000
 charges: -1
 category: light
 light_color: 255 248 207
 light_flicker_pattern: smooth
 light_flicker_frame_delay: 0.500
 equip_modifier: light_radius(12)
-
-name: Boots of the Shadow Dancer
-internal_name: boots_of_the_shadow_dancer
-icon: item.boots_of_the_shadow_dancer
-dlvl: 5
-cost: 7
-max_level: 12
-category: armor
-armor_type: boots
-armor_class: 8
-throw_damage: 1-4
-throw_chance_to_break: 0.03
-
-name: Ancient Nightmare's Hood
-internal_name: ancient_nightmares_hood
-icon: item.ancient_nightmares_hood
-dlvl: 5
-cost: 7
-max_level: 12
-category: armor
-armor_type: helmet
-armor_class: 8
-throw_damage: 1-4
-throw_chance_to_break: 0.03
-
-name: Plate Mail of the Dark Lord
-internal_name: plate_mail_of_the_dark_lord
-icon: item.plate_mail_of_the_dark_lord
-dlvl: 5
-cost: 7
-max_level: 12
-category: armor
-armor_type: cuirass
-armor_class: 40
-throw_damage: 1-4
-throw_chance_to_break: 0.03
-
-name: Wall of Thorns
-internal_name: wall_of_thorns
-icon: item.wall_of_thorns
-dlvl: 5
-cost: 7
-max_level: 12
-category: armor
-armor_type: shield
-armor_class: 30
-throw_damage: 1-4
-throw_chance_to_break: 0.03
-
-name: Veil of Darkness
-internal_name: veil_of_darkness
-icon: item.veil_of_darkness
-dlvl: 5
-cost: 7
-max_level: 12
-category: armor
-armor_type: cape
-armor_class: 10
-throw_damage: 1-4
-throw_chance_to_break: 0.03
-
-name: Black Hands
-internal_name: black_hands
-icon: item.black_hands
-dlvl: 5
-cost: 7
-max_level: 12
-category: armor
-armor_type: gloves
-armor_class: 8
-throw_damage: 1-4
-throw_chance_to_break: 0.03
-
-name: Never-ending Night
-internal_name: never_ending_night
-icon: item.never_ending_night
-dlvl: 5
-cost: 7
-max_level: 12
-category: jewelry
-throw_damage: 1-4
-throw_chance_to_break: 0.03
-
-name: Eternal Darkness
-internal_name: eternal_darkness
-icon: item.eternal_darkness
-dlvl: 5
-cost: 7
-max_level: 12
-category: jewelry
-throw_damage: 1-4
-throw_chance_to_break: 0.03
-
-name: Amulet of Shadows
-internal_name: amulet_of_shadows
-icon: item.amulet_of_shadows
-dlvl: 5
-cost: 7
-max_level: 12
-category: jewelry
-throw_damage: 1-4
-throw_chance_to_break: 0.03
-
-name: Shadow's Embrace
-internal_name: shadows_embrace
-icon: item.shadows_embrace
-dlvl: 5
-cost: 7
-max_level: 12
-category: jewelry
-throw_damage: 1-4
-
-name: Malleus Maleficarum
-internal_name: malleus_maleficarum
-icon: item.malleus_maleficarum
-dlvl: 5
-cost: 7
-max_level: 12
-category: weapon
-weapon_type: mace
-weapon_damage: 3-12
-weapon_speed: 0.9
-throw_damage: 1-4
-throw_chance_to_break: 0.03
-
-name: Soul Reaver
-internal_name: soul_reaver
-icon: item.soul_reaver
-dlvl: 5
-cost: 7
-max_level: 12
-category: weapon
-weapon_type: scythe
-weapon_damage: 3-12
-weapon_speed: 0.9
-throw_damage: 1-4
-throw_chance_to_break: 0.03
 
 # Lucifer leaves it in town when he falls (main's NewPotionOfTrueSight). Never sold or dropped.
 name: Lucifer's gift

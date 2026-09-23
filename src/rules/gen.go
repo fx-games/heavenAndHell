@@ -668,7 +668,7 @@ func (g *Generator) itemBonusSpells(it *Item, minlvl, maxlvl int, onlygood, allo
 	case ITypeLArmor, ITypeHelm, ITypeMArmor, ITypeHArmor:
 		g.itemPower(it, minlvl, maxlvl, PLTArmo, onlygood)
 	case ITypeStaff:
-		if allowSpells {
+		if allowSpells && g.D.SpellCount > 0 { // a mod without a spell table has no staff spells: a power instead
 			g.staffSpell(it, maxlvl, onlygood)
 		} else {
 			g.itemPower(it, minlvl, maxlvl, PLTStaff, onlygood)
@@ -781,12 +781,16 @@ func (g *Generator) SetupAllItems(b *ItemData, seed int32, lvl, dlvl, uper int, 
 	return it
 }
 
-// fixedDrop is the unique item a record's drops names: its uid, or -1.
+// fixedDrop is the unique item a record's drops names: its uid, or -1. One that has dropped already is -1 too: a
+// boss met again (respawns, a side level) drops like any unique monster instead of a second copy.
 func (g *Generator) fixedDrop(m *MonsterData) int {
 	if m == nil || m.Drops == "" || m.Drops == "none" {
 		return -1
 	}
-	return g.D.UniqueItemIdx(m.Drops)
+	if uid := g.D.UniqueItemIdx(m.Drops); uid < 0 || !g.UniqueDropped[uid] {
+		return uid
+	}
+	return -1
 }
 
 // rndItem ports RndItem: a roll of the mod's monster table on dungeon level dlvl, nil for none. A fixed unique comes back as its uid, otherwise -1.
@@ -800,15 +804,20 @@ func (g *Generator) rndItem(m *MonsterData, mlvl, dlvl int) (*ItemData, int) {
 	return g.RollDrop("monster", dlvl, func() *ItemData { return g.anyMonsterDrop(mlvl) }), -1
 }
 
+// dropsAt: item level lvl is within b's dlvl..max_level.
+func dropsAt(b *ItemData, lvl int) bool {
+	return lvl >= b.MinMLvl && (b.MaxLevel == 0 || lvl <= b.MaxLevel)
+}
+
 // anyMonsterDrop is RndItem's pick off the whole table: a base item the monster's level allows.
 func (g *Generator) anyMonsterDrop(mlvl int) *ItemData {
 	var ril []*ItemData
 	for i := range g.D.Items {
 		b := &g.D.Items[i]
-		if b.Drop == "IDROP_DOUBLE" && mlvl >= b.MinMLvl {
+		if b.Drop == "IDROP_DOUBLE" && dropsAt(b, mlvl) {
 			ril = append(ril, b)
 		}
-		if b.Drop != "IDROP_NEVER" && mlvl >= b.MinMLvl {
+		if b.Drop != "IDROP_NEVER" && dropsAt(b, mlvl) {
 			ril = append(ril, b)
 		}
 		if b.Spell == "SPL_RESURRECT" || b.Spell == "SPL_HEALOTHER" { // D1 drops the last entry even when these weren't added
@@ -828,7 +837,7 @@ func (g *Generator) RndUItem(m *MonsterData, mlvl, dlvl int) (*ItemData, int) {
 	for i := range g.D.Items {
 		b := &g.D.Items[i]
 		ok := b.Drop != "IDROP_NEVER"
-		if m != nil && mlvl < b.MinMLvl || m == nil && 2*dlvl < b.MinMLvl {
+		if m != nil && !dropsAt(b, mlvl) || m == nil && !dropsAt(b, 2*dlvl) {
 			ok = false
 		}
 		if b.Type == ITypeMisc || b.Type == ITypeGold || b.Type == ITypeFood {
@@ -858,7 +867,7 @@ func (g *Generator) AnyFloorDrop(dlvl int) *ItemData {
 	var ril []*ItemData
 	for i := range g.D.Items {
 		b := &g.D.Items[i]
-		if b.Drop != "IDROP_NEVER" && 2*dlvl >= b.MinMLvl {
+		if b.Drop != "IDROP_NEVER" && dropsAt(b, 2*dlvl) {
 			ril = append(ril, b)
 		}
 		if b.Spell == "SPL_RESURRECT" || b.Spell == "SPL_HEALOTHER" {
@@ -873,7 +882,7 @@ func (g *Generator) RndTypeItems(itype int, imisc string, dlvl int) *ItemData {
 	var ril []*ItemData
 	for i := range g.D.Items {
 		b := &g.D.Items[i]
-		if b.Drop != "IDROP_NEVER" && dlvl<<1 >= b.MinMLvl && b.Type == itype && (imisc == "" || b.MiscID == imisc) {
+		if b.Drop != "IDROP_NEVER" && dropsAt(b, dlvl<<1) && b.Type == itype && (imisc == "" || b.MiscID == imisc) {
 			ril = append(ril, b)
 		}
 	}
@@ -904,6 +913,10 @@ func (g *Generator) SpawnUnique(uid, dlvl int) *Item {
 // MonsterDrop ports SpawnItem's roll: nil for no drop. mlvl is the monster's level (a unique's is raised), which
 // picks the base item; the item rolls at the monster type's level like D1.
 func (g *Generator) MonsterDrop(m *MonsterData, mlvl int, unique bool, dlvl int, hell bool) *Item {
+	ilvl := m.Level
+	if k := g.D.DropTables["monster"].ItemLevel; k > 0 { // the mod rolls drops by depth, not by monster level
+		mlvl, ilvl = k*dlvl, k*dlvl
+	}
 	var b *ItemData
 	uid := -1
 	onlygood := unique
@@ -922,7 +935,7 @@ func (g *Generator) MonsterDrop(m *MonsterData, mlvl int, unique bool, dlvl int,
 	if unique {
 		uper = 15
 	}
-	return g.SetupAllItems(b, g.R.Seed(), m.Level, dlvl, uper, onlygood, false, false, hell)
+	return g.SetupAllItems(b, g.R.Seed(), ilvl, dlvl, uper, onlygood, false, false, hell)
 }
 
 // FloorItem ports CreateRndItem's roll (containers, theme rooms).
@@ -1022,7 +1035,7 @@ func (g *Generator) TypeItem(dlvl, itype int, imisc string, onlygood bool) *Item
 func (g *Generator) WeaponItem(dlvl int) *Item {
 	var ril []*ItemData
 	for i := range g.D.Items {
-		if b := &g.D.Items[i]; b.Drop != "IDROP_NEVER" && dlvl<<1 >= b.MinMLvl && (b.Class == "ICLASS_WEAPON" || b.IsWeapon()) {
+		if b := &g.D.Items[i]; b.Drop != "IDROP_NEVER" && dropsAt(b, dlvl<<1) && (b.Class == "ICLASS_WEAPON" || b.IsWeapon()) {
 			ril = append(ril, b)
 		}
 	}

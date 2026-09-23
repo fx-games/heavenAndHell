@@ -11,15 +11,15 @@ import (
 	"rpg/src/recfile"
 )
 
-// This is H&H's side of the engine's generation registry (package dungeon). The algorithms below are genuinely
-// different from D1's - they grow a level out of hand-drawn room templates, or carve a maze and knock holes in
-// it - so none of D1's tile sets, megatile fills or quest set pieces appear here, and none of this appears in
-// the shared interface. Both families meet only at "a name resolves, and the knobs a mod declared parse".
+// Layouts are the generators that carve a bare DungeonMap (walls, floor, doors, water, rooms) for common to
+// paint and populate: package common registers each as a LevelStrategy under the same name. Each lives in its
+// own file and adds itself here.
+var Layouts = map[string]dungeon.Parser{"accretion": accretion{}, "megadungeon": megadungeon{}, "rogue": rogue{}}
 
-func init() {
-	dungeon.Register("accretion", accretion{})
-	dungeon.Register("megadungeon", megadungeon{})
-	dungeon.Register("rogue", rogue{})
+// Layout is a layout generator's parsed configuration: it builds its level. fsys is the active mod's file
+// system, for the generators that read room templates from it.
+type Layout interface {
+	Build(rnd *rand.Rand, fsys fs.FS) (*DungeonMap, error)
 }
 
 // scratchSize is the grid an algorithm grows into before it is trimmed. It is a knob, but these are the sizes
@@ -202,26 +202,13 @@ func (rogue) Parse(r recfile.Record) (dungeon.Config, error) {
 	return c, nil
 }
 
-// Build runs whichever of these algorithms a level's configuration names and returns its layout. It is dungen's
-// own entry point, not part of dungeon.Strategy: D1 hands its caller a populated d1.Level and this hands back a
-// bare DungeonMap, and pretending those are the same return type is what the narrow interface avoids.
-//
-// fsys is the active mod's file system, for the generators that read room templates from it.
-func Build(cfg dungeon.Config, rnd *rand.Rand, fsys fs.FS) (*DungeonMap, error) {
-	switch c := cfg.(type) {
-	case AccretionConfig:
-		return buildAccretion(c, rnd, fsys)
-	case MegaDungeonConfig:
-		return buildMegaDungeon(c, rnd)
-	case RogueConfig:
-		g := &RogueGenerator{cols: c.Width, rows: c.Height, maxGone: c.MaxGone, extraPassages: c.ExtraPassages,
-			doors: c.Doors, random: rnd}
-		return g.Generate(), nil
-	}
-	return nil, fmt.Errorf("dungen: %T is not one of this family's configurations", cfg)
+func (c RogueConfig) Build(rnd *rand.Rand, _ fs.FS) (*DungeonMap, error) {
+	g := &RogueGenerator{cols: c.Width, rows: c.Height, maxGone: c.MaxGone, extraPassages: c.ExtraPassages,
+		doors: c.Doors, random: rnd}
+	return g.Generate(), nil
 }
 
-func buildAccretion(c AccretionConfig, rnd *rand.Rand, fsys fs.FS) (*DungeonMap, error) {
+func (c AccretionConfig) Build(rnd *rand.Rand, fsys fs.FS) (*DungeonMap, error) {
 	proj, err := loadTemplates(fsys, c.Templates)
 	if err != nil {
 		return nil, err
@@ -267,7 +254,7 @@ func buildAccretion(c AccretionConfig, rnd *rand.Rand, fsys fs.FS) (*DungeonMap,
 
 const accretionTries = 256
 
-func buildMegaDungeon(c MegaDungeonConfig, rnd *rand.Rand) (*DungeonMap, error) {
+func (c MegaDungeonConfig) Build(rnd *rand.Rand, _ fs.FS) (*DungeonMap, error) {
 	var m *DungeonMap
 	for try := 0; try < 32; try++ {
 		g := &MegaDungeonGenerator{randomSource: rnd, roomTries: c.RoomTries, minRoomSize: c.MinRoomSize,
@@ -301,4 +288,46 @@ func loadTemplates(fsys fs.FS, dir string) (*hhm.Project, error) {
 		return nil, fmt.Errorf("dungen templates: %w", err)
 	}
 	return p, nil
+}
+
+// organicTries bounds every "regrow until it is big enough" loop below.
+const organicTries = 32
+
+type intKnob struct {
+	name string
+	into *int
+}
+
+type floatKnob struct {
+	name string
+	into *float64
+}
+
+func parseKnobs(r recfile.Record, ints []intKnob, floats []floatKnob) error {
+	var err error
+	for _, k := range ints {
+		if *k.into, err = dungeon.Int(r, k.name, *k.into); err != nil {
+			return err
+		}
+	}
+	for _, k := range floats {
+		if *k.into, err = dungeon.Float(r, k.name, *k.into); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func checkSize(gen string, w, h, least int) error {
+	if w < least || h < least {
+		return fmt.Errorf("levels.rec: %s needs width and height >= %d, not %dx%d", gen, least, w, h)
+	}
+	return nil
+}
+
+func checkFraction(gen, name string, v float64) error {
+	if v < 0 || v > 1 {
+		return fmt.Errorf("levels.rec: %s %s must be between 0 and 1", gen, name)
+	}
+	return nil
 }

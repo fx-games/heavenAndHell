@@ -124,7 +124,7 @@ func (c *spellCtx) hitCell(p geometry.Point) *Actor {
 	return c.monsterAt(p)
 }
 
-func (c *spellCtx) open(p geometry.Point) bool { return c.m.Contains(p) && c.m.IsTransparent(p) }
+func (c *spellCtx) open(p geometry.Point) bool { return c.m.Contains(p) && c.m.IsMissilePassable(p) }
 
 // chargedBoltCells lists the cells a charged bolt from o wanders through (rules.ChargedBoltFlight) up to the first wall.
 func (c *spellCtx) chargedBoltCells(o, target geometry.Point, rnd int) []geometry.Point {
@@ -470,7 +470,7 @@ func (c *spellCtx) cast(target geometry.Point) bool {
 	case rules.SplWave: // MI_Wave: a wall of flames across the aim, each rolling on until a wall or the first monster
 		sd := DirTo(c.origin(), target)
 		fwd := geometry.Dirs[sd]
-		blocked := func(p geometry.Point) bool { return !c.m.Contains(p) || !c.m.IsTransparent(p) }
+		blocked := func(p geometry.Point) bool { return !c.m.Contains(p) || !c.m.IsMissilePassable(p) }
 		var cells []geometry.Point
 		roll := func(p geometry.Point) {
 			for n := 0; n < 112 && !blocked(p); n++ {

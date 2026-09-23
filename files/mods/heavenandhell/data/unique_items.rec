@@ -1,0 +1,154 @@
+%rec: default
+# unique_items.rec: Heaven & Hell's unique items, one record each (the fields are D1's, see files/mods/d1/data/
+# unique_items.rec). A magic item whose base has the unique_base below may turn out to be the unique instead
+# (1 in 50, a unique monster's drop 1 in 6), once its item level reaches min_level, and never twice; the bosses
+# in enemies.rec drop theirs outright. Each draws with its own icon, item.<internal_name> in icons/items.rec.
+
+internal_name: soul_reaver
+name: Soul Reaver
+base: UITYPE_PARTISAN
+min_level: 11
+value: 12000
+power: set_damage 8 20
+power: steal_health 3 3
+power: damage_percent 30 30
+
+internal_name: malleus_maleficarum
+name: Malleus Maleficarum
+base: UITYPE_MORNINGSTAR
+min_level: 9
+value: 9000
+power: set_damage 6 16
+power: fire_damage 2 8
+power: strength 5 5
+
+internal_name: blade_of_chaos
+name: Blade of Chaos
+base: UITYPE_FLAMBERGE
+min_level: 15
+value: 20000
+power: set_damage 10 22
+power: lightning_damage 1 20
+power: attack_speed 2 2
+
+internal_name: mace_of_destruction
+name: Mace of Disruption
+base: UITYPE_KETTENMORGENSTERN
+min_level: 17
+value: 18000
+power: damage_percent 60 60
+power: to_hit 20 20
+power: knockback 0 0
+
+internal_name: scythe_of_slicing
+name: Scythe of Slicing
+base: UITYPE_SCYTHE
+min_level: 19
+value: 30000
+power: set_damage 14 30
+power: damage_percent 50 50
+power: steal_mana 3 3
+
+internal_name: shadow_cloak
+name: Shadow Cloak
+base: UITYPE_FURCLOAK
+min_level: 11
+value: 7000
+power: set_base_armor 10 10
+power: dexterity 8 8
+power: light_radius 2 2
+
+internal_name: shield_of_deflection
+name: Shield of Deflection
+base: UITYPE_SMALLMETALSHIELD
+min_level: 13
+value: 14000
+power: set_base_armor 18 18
+power: all_resistances 15 15
+power: block_speed 0 0
+
+internal_name: boots_of_the_shadow_dancer
+name: Boots of the Shadow Dancer
+base: UITYPE_STEELBOOTS
+min_level: 15
+value: 12000
+power: set_base_armor 10 10
+power: dexterity 10 10
+power: hit_recovery 2 2
+
+internal_name: ancient_nightmares_hood
+name: Ancient Nightmare's Hood
+base: UITYPE_STEELHELM
+min_level: 15
+value: 14000
+power: set_base_armor 15 15
+power: intelligence 10 10
+power: mana 20 20
+
+internal_name: black_hands
+name: Black Hands
+base: UITYPE_CESTI
+min_level: 17
+value: 16000
+power: set_base_armor 10 10
+power: to_hit 15 15
+power: steal_health 3 3
+
+internal_name: veil_of_darkness
+name: Veil of Darkness
+base: UITYPE_ELVENCLOAK
+min_level: 19
+value: 22000
+power: set_base_armor 12 12
+power: magic_resistance 30 30
+power: dexterity 8 8
+
+internal_name: plate_mail_of_the_dark_lord
+name: Plate Mail of the Dark Lord
+base: UITYPE_FULLPLATE
+min_level: 21
+value: 40000
+power: set_base_armor 50 50
+power: health 40 40
+power: all_resistances 20 20
+
+internal_name: wall_of_thorns
+name: Wall of Thorns
+base: UITYPE_LARGEMETALSHIELD
+min_level: 21
+value: 30000
+power: set_base_armor 25 25
+power: return_damage 20 20
+power: thorns 0 0
+
+internal_name: never_ending_night
+name: Never-ending Night
+base: UITYPE_RINGINT
+min_level: 11
+value: 10000
+power: intelligence 10 10
+power: mana 25 25
+
+internal_name: amulet_of_shadows
+name: Amulet of Shadows
+base: UITYPE_AMULET
+min_level: 13
+value: 16000
+power: all_attributes 5 5
+power: light_radius 2 2
+
+internal_name: shadows_embrace
+name: Shadow's Embrace
+base: UITYPE_RING
+min_level: 17
+value: 18000
+power: strength 8 8
+power: health 30 30
+
+internal_name: eternal_darkness
+name: Eternal Darkness
+base: UITYPE_RINGPROT
+min_level: 21
+value: 25000
+power: set_base_armor 12 12
+power: all_resistances 25 25

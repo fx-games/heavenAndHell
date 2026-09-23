@@ -168,7 +168,7 @@ func NewInterval(min, max int) Interval {
 }
 
 func NewIntervalFromString(str string) Interval {
-	if !strings.Contains(str, "-") {
+	if !strings.Contains(strings.TrimPrefix(str, "-"), "-") { // a single number, maybe negative
 		minDamg, err := strconv.Atoi(str)
 		if err != nil && str != "" {
 			slog.Warn("mod data: not a number or range, using 0", "value", str)

@@ -84,7 +84,7 @@ func SaveLevel(dir string, l *Level) error {
 
 // ReadTileset parses a tileset.hht.
 func ReadTileset(b []byte) (*Tileset, error) {
-	ts := &Tileset{Flags: map[int]Flags{}}
+	ts := &Tileset{Flags: map[int]Flags{}, Records: map[int]string{}}
 	sec := ""
 	for _, ln := range lines(b) {
 		n, line := ln.n, ln.s
@@ -124,6 +124,15 @@ func ReadTileset(b []byte) (*Tileset, error) {
 				fl.set(name)
 			}
 			ts.Flags[id] = fl
+		case "tiles":
+			if len(f) < 2 {
+				return nil, fmt.Errorf("line %d: tile %q names no record", n, f[0])
+			}
+			id, err := strconv.Atoi(strings.TrimSpace(f[0]))
+			if err != nil {
+				return nil, fmt.Errorf("line %d: tile id %q", n, f[0])
+			}
+			ts.Records[id] = strings.TrimSpace(f[1])
 		}
 	}
 	if ts.Name == "" || ts.Image == "" || ts.GridSize <= 0 || ts.Width <= 0 || ts.Height <= 0 {
@@ -147,6 +156,17 @@ func WriteTileset(ts *Tileset) []byte {
 	sort.Ints(ids)
 	for _, id := range ids {
 		fmt.Fprintf(&b, "%d\t%s\n", id, strings.Join(ts.Flags[id].Names(), ","))
+	}
+	if len(ts.Records) > 0 {
+		b.WriteString("\n# tiles that stand for a record in data/icons/tiles.rec: its name, icon and tags win over [flags]\n[tiles]\n")
+		ids = ids[:0]
+		for id := range ts.Records {
+			ids = append(ids, id)
+		}
+		sort.Ints(ids)
+		for _, id := range ids {
+			fmt.Fprintf(&b, "%d\t%s\n", id, ts.Records[id])
+		}
 	}
 	return []byte(b.String())
 }

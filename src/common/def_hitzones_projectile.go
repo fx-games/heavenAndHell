@@ -135,7 +135,7 @@ func ConeAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.A
 			var result []geometry.Point
 			for step := 1; step <= length; step++ {
 				centre := origin.Add(geometry.Point{X: forward.X * step, Y: forward.Y * step})
-				if !currentMap.Contains(centre) || !currentMap.IsTransparent(centre) {
+				if !currentMap.Contains(centre) || !currentMap.IsMissilePassable(centre) {
 					break
 				}
 				result = append(result, centre)
@@ -143,7 +143,7 @@ func ConeAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.A
 				for _, side := range []geometry.Point{left, right} {
 					for w := 1; w <= spread; w++ {
 						p := centre.Add(geometry.Point{X: side.X * w, Y: side.Y * w})
-						if !currentMap.Contains(p) || !currentMap.IsTransparent(p) {
+						if !currentMap.Contains(p) || !currentMap.IsMissilePassable(p) {
 							break
 						}
 						result = append(result, p)
@@ -194,7 +194,7 @@ func ChainAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.
 
 // projectileLine is the cells a missile from `origin` towards `target` crosses, up to maxLen or the first wall.
 func projectileLine(currentMap *gridmap.GridMap[*Actor, *Item, Object], origin, target geometry.Point, maxLen int) []geometry.Point {
-	open := func(p geometry.Point) bool { return currentMap.Contains(p) && currentMap.IsTransparent(p) }
+	open := func(p geometry.Point) bool { return currentMap.Contains(p) && currentMap.IsMissilePassable(p) }
 	d := target.Sub(origin)
 	n := max(geometry.Abs(d.X), geometry.Abs(d.Y))
 	if n == 0 {
@@ -214,7 +214,7 @@ func projectileLine(currentMap *gridmap.GridMap[*Actor, *Item, Object], origin, 
 
 // lineIsClear: no wall stands between the two cells.
 func lineIsClear(currentMap *gridmap.GridMap[*Actor, *Item, Object], from, to geometry.Point) bool {
-	open := func(p geometry.Point) bool { return currentMap.Contains(p) && currentMap.IsTransparent(p) }
+	open := func(p geometry.Point) bool { return currentMap.Contains(p) && currentMap.IsMissilePassable(p) }
 	los := geometry.LineOfSight(from, to, func(p geometry.Point) bool { return p == from || p == to || open(p) })
 	return len(los) > 0 && los[len(los)-1] == to
 }

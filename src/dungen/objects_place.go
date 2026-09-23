@@ -267,7 +267,7 @@ func (g *gen) addL2Torches() {
 }
 
 func (g *gen) wallTrapLocOk(x, y int) bool {
-	return g.flagAt(x, y)&bflagPopulated == 0 && g.solFlag(x, y, 0x80)
+	return g.flagAt(x, y)&bflagPopulated == 0 && g.tileFlags(x, y).HoldsTrap
 }
 
 // addObjTraps ports AddObjTraps: arrow, fire and lightning traps in the walls aimed at doors and chests.

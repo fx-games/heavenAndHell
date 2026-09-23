@@ -556,7 +556,7 @@ func (b *brain) lineFree() bool {
 func (b *brain) lineClear(p geometry.Point) bool {
 	m := b.g.state.GetMap()
 	line := geometry.LineOfSight(b.pos, p, func(q geometry.Point) bool {
-		return q == b.pos || q == p || m.IsTransparent(q) && !m.IsActorAt(q) && (!m.IsObjectAt(q) || m.IsWalkable(q))
+		return q == b.pos || q == p || m.IsMissilePassable(q) && !m.IsActorAt(q) && (!m.IsObjectAt(q) || m.IsWalkable(q))
 	})
 	return len(line) > 0 && line[len(line)-1] == p
 }

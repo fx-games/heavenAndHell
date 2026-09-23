@@ -28,13 +28,6 @@ func ImportLevels(read func(name string) ([]byte, error), destDir string) error 
 		if err := writeChecked(filepath.Join(dir, "til.tsv"), renderTil(til), til, parseTil); err != nil {
 			return err
 		}
-		sol, err := read(solFiles[lt])
-		if err != nil {
-			return err
-		}
-		if err := writeChecked(filepath.Join(dir, "sol.tsv"), renderSol(sol), sol, parseSol); err != nil {
-			return err
-		}
 		for _, name := range importDuns[lt] {
 			b, err := read(fmt.Sprintf(`Levels\L%dData\%s.DUN`, lt, name))
 			if err != nil {
@@ -189,16 +182,6 @@ func renderTil(til []byte) string {
 		fmt.Fprintf(&sb, "%d\t%d\t%d\t%d\t%d\n", i/8+1,
 			binary.LittleEndian.Uint16(til[i:]), binary.LittleEndian.Uint16(til[i+2:]),
 			binary.LittleEndian.Uint16(til[i+4:]), binary.LittleEndian.Uint16(til[i+6:]))
-	}
-	return sb.String()
-}
-
-func renderSol(sol []byte) string {
-	var sb strings.Builder
-	sb.WriteString("# 0x01 solid  0x02 blocks light  0x04 blocks missiles  0x80 wall that can hold a trap\n")
-	sb.WriteString("piece\tflags\n")
-	for i, f := range sol {
-		fmt.Fprintf(&sb, "%d\t0x%02X\n", i, f)
 	}
 	return sb.String()
 }

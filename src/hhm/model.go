@@ -25,15 +25,17 @@ type Flags struct {
 	BlocksView     bool
 	Water          bool
 	Damaging       bool
+	BlocksMissiles bool
+	HoldsTrap      bool // a wall a trap may be set into, facing the open cell beside it (D1's traps and shrines)
 }
 
 // FlagNames are the markers in the order a tileset file writes them.
-var FlagNames = []string{"IsBlockingMovement", "IsBlockingView", "IsWater", "IsDamaging"}
+var FlagNames = []string{"IsBlockingMovement", "IsBlockingView", "IsWater", "IsDamaging", "IsBlockingMissiles", "CanHoldTrap"}
 
 // Names lists the markers that are on, in the order a tileset file writes them.
 func (f Flags) Names() []string {
 	var out []string
-	for i, on := range [...]bool{f.BlocksMovement, f.BlocksView, f.Water, f.Damaging} {
+	for i, on := range [...]bool{f.BlocksMovement, f.BlocksView, f.Water, f.Damaging, f.BlocksMissiles, f.HoldsTrap} {
 		if on {
 			out = append(out, FlagNames[i])
 		}
@@ -51,6 +53,10 @@ func (f *Flags) set(name string) {
 		f.Water = true
 	case FlagNames[3]:
 		f.Damaging = true
+	case FlagNames[4]:
+		f.BlocksMissiles = true
+	case FlagNames[5]:
+		f.HoldsTrap = true
 	}
 }
 
@@ -64,6 +70,10 @@ type Tileset struct {
 	Width    int // in pixels
 	Height   int
 	Flags    map[int]Flags // by tile index; a tile with no entry is plain walkable floor
+	// Records names the tiles.rec record a drawn tile stands for ("183" -> tile.cathedral_trap_wall): the game
+	// takes its name, icon and what it blocks from the record, not from Flags, so remapping the record reaches
+	// every map that draws it.
+	Records map[int]string
 }
 
 // Columns is how many tiles fit in one row of the image.

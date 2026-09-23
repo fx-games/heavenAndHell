@@ -7,9 +7,9 @@ Design decisions and deferred scope for the D1 rebuild: `docs/D1_PLAN.md`.
 | Path | What it is | Use it for |
 |---|---|---|
 | `reference/devilution-109` | [diasurgical/devilution](https://github.com/diasurgical/devilution): bin-exact reconstruction of Diablo 1.09 (C++, `Source/*.cpp`, `enums.h`, `structs.h`, `defs.h`) | **Ground truth.** Formulas, constants, order of `random_()` calls. Ignore `#ifdef HELLFIRE` / `SPAWN` branches, except for the six player classes: Hellfire's Monk, Bard and Barbarian are in (`docs/D1_PLAN.md`), and their tables come from devilutionX. |
-| `reference/devilution/2020_03_31` | [galaxyhaxz/devilution](https://github.com/galaxyhaxz/devilution): readable rewrite with the original table files in `Source/Data/Excel/xl_*.txt` | Readable second opinion; source of our `files/mods/d1/data/xl_*.txt` (data rows verbatim except item powers, renamed from `IPL_` to snake_case (`to_hit`, `thorns`); `##` comment headers added). `2018_03_14` is an older snapshot, skip it. |
+| `reference/devilution/2020_03_31` | [galaxyhaxz/devilution](https://github.com/galaxyhaxz/devilution): readable rewrite with the original table files in `Source/Data/Excel/xl_*.txt` | Readable second opinion; source of our `files/mods/d1/data/xl_*.txt` (data rows verbatim, `##` comment headers added) and of `affixes.rec` (xl_ipre/xl_isuf as records, item powers renamed from `IPL_` to snake_case: `to_hit`, `thorns`; their roll order in `roll_order.rec`). `2018_03_14` is an older snapshot, skip it. |
 | `reference/devilutionX` | [diasurgical/devilutionX](https://github.com/diasurgical/devilutionX): modern, maintained port | Bug-fixed logic in `Source/` (`levels/`, `monsters/`, `items/`, `quests/`...), data tables as TSV in `assets/txtdata/`, and **test fixtures** in `test/` (see below). It fixes vanilla bugs and adds QoL; when it disagrees with 1.09, 1.09 wins unless `docs/D1_PLAN.md` says otherwise. |
-| `reference/DIABDAT.MPQ` | Diablo's own data archive (bring your own copy, ~500 MB) | Level data the sources don't contain: set pieces (`Levels\L1Data\SklKng1.DUN`...), `.TIL`/`.SOL` tile tables. Read with `mpq.DiabDat()` (`src/cmd/internal/mpq`, looks in `.`, `reference/`, `../reference/`). |
+| `reference/DIABDAT.MPQ` | Diablo's own data archive (bring your own copy, ~500 MB) | Level data the sources don't contain: set pieces (`Levels\L1Data\SklKng1.DUN`...), `.TIL` tile tables. Read with `mpq.DiabDat()` (`src/cmd/internal/mpq`, looks in `.`, `reference/`, `../reference/`). |
 | `reference/diablo-hellfire` | [pvpgn/diablo-hellfire](https://github.com/pvpgn/diablo-hellfire): Synergistic Software's own Hellfire source (VC++ 6, `src/*.CPP`, uppercase filenames) | **Ground truth for Hellfire**, the way `devilution-109` is for D1. `ITEMDAT.CPP`, `MONSTDAT.CPP`, `SPELLDAT.CPP`, `MISDAT.CPP` and `OBJDAT.CPP` hold the real tables with the original comments; `PLAYER.CPP` the class tables. Hellfire's own levels (the Nest and the Crypt), its quests, towners and the monsters that only spawn there are **cut** from this game (`docs/D1_PLAN.md`); its items, affixes, spells, classes and store behaviour are in and always on. |
 | `reference/HELLFIRE.MPQ`, `HFVOICE.MPQ`, `HFMONK.MPQ`, `HFMUSIC.MPQ` | Hellfire's four archives, straight off the expansion's disc (`hdiutil attach Hellfire.iso`, they sit in the root). `hfvoice` holds the expansion's speech at full quality and `hfmonk` the Monk's lines (neither is in `hellfire.mpq`), `hfmusic` the expansion's tracks | Hellfire's item/spell sprites for `cmd/d1sprites`. Its audio is **not** used at all (no `diablo_sfx/`, see Audio), and neither are its items or classes: those are numbers in the tables above, and this game draws them from its own tileset through `files/mods/<mod>/data/icons/*.rec`. Opens with the same `OpenMPQ` as DIABDAT (`src/cmd/internal/mpq`). |
 
@@ -38,6 +38,20 @@ git clone --depth 1 https://github.com/galaxyhaxz/devilution reference/devilutio
 git clone --depth 1 https://github.com/diasurgical/devilutionX reference/devilutionX
 git clone --depth 1 https://github.com/pvpgn/diablo-hellfire reference/diablo-hellfire
 ```
+
+## D1 megatiles are map parts (`files/mods/d1/maps/l<n>_megatiles.hhm`)
+
+What a D1 piece blocks is not a table: every megatile is drawn as a 2x2 map part (sixteen to a row, a blank cell
+between them) and a piece is whatever tile it is drawn with. A drawn tile the tileset lists under `[tiles]` stands
+for a `tiles.rec` record (`183 tile.cathedral_trap_wall`): the game takes its `name:` (hover text), its `icon:`
+(so the remapper reaches every map that draws it) and its `tags:` (`blocks_movement` = D1's `nSolidTable`,
+`blocks_view` = `nBlockTable`, `blocks_missiles` = `nMissileTable`, `trap` = `nTrapTable`, `is_damaging`) from
+it (`hhm.DrawnTile`); a tile that stands for no record is its bare picture with the tileset's own `[flags]`. The
+generator reads them while it builds (`dungen.pieceFlags`), the painter stamps the parts (`setTiles`), and a piece
+drawn with differently tagged tiles in two megatiles fails the mod's load. Pieces that look like a plain wall or
+floor but block differently are their own records (`tile.cathedral_wall_see_through`, `same_as:` the wall) drawn
+with pixel copies in the atlas, so the map editor tells them apart; the plain wall and floor keep the tile set's
+variations (shading, cracked floors).
 
 ## Icons (tileset `files/mods/<mod>/classic_roguelike.png`, 8×8)
 
@@ -177,6 +191,9 @@ static on speech). `go:embed mods` embeds whatever is on disk: build a release f
   (skipped with `-short`). A deliberate gameplay change regenerates it: `go run ./src playthrough 1 > src/app/testdata/playthrough_seed1.txt`
 - Dead code: `go run honnef.co/go/tools/cmd/staticcheck@latest -checks U1000 ./...` (also finds dead methods of
   generic types, which `deadcode` misses)
+- Map editor (`tools/mapedit`, its own Go module, so run it from its folder; README there): `cd tools/mapedit && go run . -mod d1`
+  opens D1's maps (`.hhm` levels and the `l<n>_megatiles.hhm` map parts), `-mode pieces` opens the set pieces
+  (`data/levels/l1..l4`) instead; `F1`/`F2` switch between the two. Without `-mod` it edits `heavenandhell`
 - Print a generated D1 level: `go run ./src dun_gen <dungeon level> [seed]`
 - Import level data: `go run ./src/cmd/d1import`
 - Sprite references for picking icons: `go run ./src/cmd/d1sprites` writes `reference/d1_{monsters,items,skills,tiles}.pdf` (one per icons/*.rec, each sprite labelled with its current icon) and every sprite as a PNG under `reference/d1_sprites/`: monsters and uniques in their TRN recolors, items, spell and skill icons, objects and each level type's megatiles

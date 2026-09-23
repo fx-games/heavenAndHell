@@ -698,6 +698,7 @@ death_string: %s dies.
 name: Lucifer
 tint: 255 110 110
 internal_name: lucifer
+drops: blade_of_chaos
 icon: monster.lucifer
 dlvl: 8
 damage: 14-40
@@ -739,6 +740,7 @@ speed_attack: 10
 
 name: King Zedek
 internal_name: king_zedek
+drops: malleus_maleficarum
 icon: monster.king_zedek
 dlvl: 4
 damage: 7-20
@@ -798,6 +800,7 @@ speed_attack: 12
 name: The Rogue
 tint: 255 190 120
 internal_name: rogue
+drops: shadow_cloak
 icon: monster.rogue
 dlvl: 10
 damage: 14-43
@@ -837,6 +840,7 @@ death_string: %s goes to dog heaven.
 
 name: the true Shekel
 internal_name: evil_shekel
+drops: scythe_of_slicing
 icon: monster.evil_shekel
 dlvl: 13
 damage: 18-55
@@ -856,6 +860,7 @@ speed_attack: 12
 name: the true Kirioth
 tint: 160 200 255
 internal_name: evil_kirioth
+drops: plate_mail_of_the_dark_lord
 icon: monster.evil_kirioth
 dlvl: 12
 damage: 17-51
@@ -873,6 +878,7 @@ death_string: %s dies.
 name: a red knight
 tint: 255 190 120
 internal_name: adventurer_knight
+drops: shield_of_deflection
 icon: monster.adventurer_knight
 dlvl: 9
 damage: 13-39
@@ -892,6 +898,7 @@ speed_attack: 16
 name: a false prophet
 tint: 255 110 110
 internal_name: adventurer_priest
+drops: amulet_of_shadows
 icon: monster.adventurer_priest
 dlvl: 9
 damage: 13-39
@@ -908,6 +915,7 @@ death_string: %s dies.
 
 name: a barbarian
 internal_name: adventurer_barbarian
+drops: mace_of_destruction
 icon: monster.adventurer_barbarian
 dlvl: 9
 damage: 13-39
@@ -927,6 +935,7 @@ speed_attack: 12
 name: an archer in tights
 tint: 160 200 255
 internal_name: adventurer_archer
+drops: black_hands
 icon: monster.adventurer_archer
 dlvl: 9
 damage: 13-39

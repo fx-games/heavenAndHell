@@ -2,6 +2,9 @@ package common
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"rpg/src/defs"
 	"rpg/src/rules"
 	"rpg/src/stats"
@@ -43,6 +46,11 @@ func goldIconName(value int) string {
 func itemIconName(it *rules.Item) string {
 	if it.Type == rules.ITypeGold {
 		return goldIconName(it.Value)
+	}
+	if id := "item." + it.Unique; it.Unique != "" {
+		if _, ok := defs.IconOK(id); ok { // a unique with an icon of its own
+			return id
+		}
 	}
 	familyName := defs.IconID("item", it.Name) // quest items and every weapon/armor family are keyed by base name
 	if it.Magical > 0 {
@@ -515,8 +523,12 @@ func (g *Factory) applyItemRecord(item *Item, b rules.ItemData) {
 		item.SetCharges(b.Charges)
 	}
 	for _, m := range b.Modifiers { // what the hero sheet has no power for, the actor's stats carry while equipped
-		lvl := max(b.DLvl, 1)
-		switch m {
+		name, arg, _ := strings.Cut(strings.TrimSuffix(m, ")"), "(")
+		lvl := max(b.DLvl, 1) // speed(n) rolls up to n, a bare speed up to the item's dlvl
+		if n, err := strconv.Atoi(strings.TrimSpace(arg)); err == nil {
+			lvl = n
+		}
+		switch name {
 		case "speed":
 			item.AddEquippedModifier(defs.AddToBaseAttributeRandomly(g.RandomSource, stats.BaseSpeed, util.NewTuple(1, lvl)))
 		case "move_speed":

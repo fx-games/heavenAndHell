@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"image"
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -39,6 +41,7 @@ type mapEditor struct {
 	dir   string // the mod directory
 	mapsD string // its maps directory
 	proj  *hhm.Project
+	recs  map[string]hhm.TileRecord // data/icons/tiles.rec: the records tiles stand for (Tileset.Records)
 	sheet *ebiten.Image
 	tile  []*ebiten.Image // one sub-image per tile index
 
@@ -78,6 +81,9 @@ func newMapEditor(dir string) (*mapEditor, error) {
 	return m, nil
 }
 
+// drawn is what tile id is in the game: its tiles.rec record (name, icon, tags) or the bare picture's markers.
+func (m *mapEditor) drawn(id int) hhm.TileRecord { return hhm.DrawnTile(m.proj.Tileset, m.recs, id) }
+
 func (m *mapEditor) reload() error {
 	p, err := hhm.Load(os.DirFS(m.dir), "maps")
 	if err != nil {
@@ -87,7 +93,11 @@ func (m *mapEditor) reload() error {
 	if err != nil {
 		return fmt.Errorf("tileset image: %w", err)
 	}
-	m.proj, m.sheet = p, sheet
+	recs, err := hhm.ReadTileRecords(os.DirFS(m.dir), "data")
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	m.proj, m.sheet, m.recs = p, sheet, recs
 	m.tile = m.tile[:0]
 	g, cols := p.Tileset.GridSize, p.Tileset.Columns()
 	for i := 0; i < p.Tileset.Count(); i++ {

@@ -1,7 +1,7 @@
 package dungen
 
 import (
-	"strings"
+	"rpg/src/hhm"
 	"testing"
 )
 
@@ -79,7 +79,7 @@ x	y	id
 	}
 }
 
-func TestParseTilSol(t *testing.T) {
+func TestParseTil(t *testing.T) {
 	til, err := parseTil([]byte("id\tnw\tne\tsw\tse\n1\t10\t11\t12\t13\n2\t20\t21\t22\t23\n"))
 	if err != nil {
 		t.Fatal(err)
@@ -87,26 +87,13 @@ func TestParseTilSol(t *testing.T) {
 	if got := megaPieces(til, 1); got != [4]int{20, 21, 22, 23} {
 		t.Errorf("megatile 2 = %v, want [20 21 22 23]", got)
 	}
-	sol, err := parseSol([]byte("piece\tflags\n0\t0x00\n1\t0x2F\n2\t0x80\n"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if sol[1] != 0x2F || sol[2] != 0x80 {
-		t.Errorf("sol = %v, want [0 0x2F 0x80]", sol)
-	}
 	for _, bad := range []struct{ name, text string }{
 		{"til rows out of order", "id\tnw\tne\tsw\tse\n2\t1\t2\t3\t4\n"},
 		{"til short row", "id\tnw\tne\tsw\tse\n1\t1\t2\t3\n"},
 		{"til wrong header", "id\ta\tb\tc\td\n1\t1\t2\t3\t4\n"},
-		{"sol rows out of order", "piece\tflags\n1\t0x00\n"},
-		{"sol flags too big", "piece\tflags\n0\t0x1FF\n"},
 		{"no header", "1\t2\t3\t4\t5\n"},
 	} {
-		parse := parseTil
-		if strings.HasPrefix(bad.name, "sol") {
-			parse = parseSol
-		}
-		if _, err := parse([]byte(bad.text)); err == nil {
+		if _, err := parseTil([]byte(bad.text)); err == nil {
 			t.Errorf("%s: parsed without error", bad.name)
 		}
 	}
@@ -125,11 +112,32 @@ func TestLevelDataLoads(t *testing.T) {
 		if got := len(ld.til[lt]) / 8; got != want[0] {
 			t.Errorf("L%d: %d megatiles, want %d", lt, got, want[0])
 		}
-		if got := len(ld.sol[lt]); got != want[1] {
-			t.Errorf("L%d: %d pieces in sol, want %d", lt, got, want[1])
+		if got := len(ld.pieceFlags[lt]); got != want[1] {
+			t.Errorf("L%d: %d pieces drawn in the map parts, want %d", lt, got, want[1])
 		}
 	}
 	if d := ld.dun["l1/sklkng1"]; d.w() != 37 || d.h() != 25 {
 		t.Errorf("l1/sklkng1 is %dx%d, want 37x25", d.w(), d.h())
+	}
+}
+
+// TestPieceDrawnTwoWaysIsRejected: a piece two megatiles share must mean the same in both, or D1's generator
+// would read what it blocks off whichever megatile came first.
+func TestPieceDrawnTwoWaysIsRejected(t *testing.T) {
+	til, err := parseTil([]byte("id\tnw\tne\tsw\tse\n1\t0\t1\t2\t3\n2\t0\t1\t2\t4\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	parts := hhm.NewLevel("l1_megatiles", 6, 3)
+	for i := range parts.Tiles {
+		parts.Tiles[i] = 1 // floor
+	}
+	maps := &hhm.Project{Tileset: &hhm.Tileset{Flags: map[int]hhm.Flags{2: {BlocksMovement: true}}}, Levels: []*hhm.Level{parts}}
+	if _, _, err := pieceFlags(maps, nil, 1, til); err != nil {
+		t.Fatalf("agreeing megatiles: %v", err)
+	}
+	parts.SetTile(3, 0, 2) // megatile 2's piece 0 becomes a wall, megatile 1's stays floor
+	if _, _, err := pieceFlags(maps, nil, 1, til); err == nil {
+		t.Fatal("piece 0 drawn as floor and wall loaded")
 	}
 }

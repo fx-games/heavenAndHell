@@ -31,10 +31,10 @@ func TestHeavenAndHellOnHitPowersRollAndFire(t *testing.T) {
 			t.Errorf("H&H's xl_isuf.txt has no suffix with %s: it never rolls", power)
 		}
 	}
-	// the first base item of each kind, given the suffix
+	// the first base item of each kind that needs no stats, given the suffix
 	base := func(types ...int) *rules.Item {
 		for i := range f.Generator.D.Items {
-			if b := &f.Generator.D.Items[i]; slices.Contains(types, b.Type) {
+			if b := &f.Generator.D.Items[i]; slices.Contains(types, b.Type) && b.MinStr+b.MinMag+b.MinDex == 0 { // one any hero wears
 				return f.Generator.PlainItem(b)
 			}
 		}

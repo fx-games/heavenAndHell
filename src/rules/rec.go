@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"io/fs"
 	"slices"
+	"strings"
 
 	"rpg/src/recfile"
+	"rpg/src/util"
 )
 
 // The tables that used to be Go literals live in this mod's own .rec files. ReadRec and readRecMulti are the only
@@ -80,6 +82,71 @@ func fieldsNamed(r recfile.Record, key string) []string {
 		}
 	}
 	return out
+}
+
+// readAffixes reads affixes.rec (the fields are documented there); a mod without one rolls its items plain.
+func readAffixes(fsys fs.FS) (prefixes, suffixes []Affix, err error) {
+	recs, err := ReadRec(fsys, "affixes.rec")
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil, nil
+	}
+	if err != nil {
+		return nil, nil, err
+	}
+	on := map[string]int{"weapon": PLTWeap, "bow": PLTBow, "staff": PLTStaff, "armor": PLTArmo, "shield": PLTShld, "jewelry": PLTMisc}
+	alignment := map[string]int{"neutral": 0, "cursed": 1, "good": 16}
+	for _, r := range recs {
+		a, slot := Affix{Ok: true}, ""
+		for _, f := range r {
+			switch f.Name {
+			case "internal_name":
+				a.ID = f.Value
+			case "name":
+				a.Name = f.Value
+			case "slot":
+				slot = f.Value
+			case "power":
+				a.Power = f.Value
+			case "values":
+				v := util.NewIntervalFromString(f.Value)
+				a.P1, a.P2 = v.Min(), v.Max()
+			case "min_level":
+				a.MinLvl = f.AsInt()
+			case "on":
+				for _, w := range strings.Fields(f.Value) {
+					bit, ok := on[w]
+					if !ok {
+						return nil, nil, fmt.Errorf("affixes.rec %s: on %q: want weapon bow staff armor shield jewelry", a.ID, w)
+					}
+					a.IType |= bit
+				}
+			case "alignment":
+				g, ok := alignment[f.Value]
+				if !ok {
+					return nil, nil, fmt.Errorf("affixes.rec %s: alignment %q: want neutral, cursed or good", a.ID, f.Value)
+				}
+				a.GOE = g
+			case "double":
+				a.Double = f.AsBool()
+			case "in_good_rolls":
+				a.Ok = f.AsBool()
+			case "price":
+				v := util.NewIntervalFromString(f.Value)
+				a.MinVal, a.MaxVal = v.Min(), v.Max()
+			case "price_multiplier":
+				a.MultVal = f.AsInt()
+			}
+		}
+		switch slot {
+		case "prefix":
+			prefixes = append(prefixes, a)
+		case "suffix":
+			suffixes = append(suffixes, a)
+		default:
+			return nil, nil, fmt.Errorf("affixes.rec %s: slot %q: want prefix or suffix", a.ID, slot)
+		}
+	}
+	return prefixes, suffixes, nil
 }
 
 // readUniqueItems reads unique_items.rec; a mod without one has no unique items.

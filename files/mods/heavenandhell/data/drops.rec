@@ -5,6 +5,8 @@
 #   <item>    an internal_name from this mod's items.rec; random: any droppable base item the level allows;
 #             nothing: a hit drops no item
 #   levels    the dungeon levels the line applies on; elsewhere it is skipped without a roll. Default all
+# item_level: n  (monster table) its items roll at n x the dungeon level instead of the monster's own level (D1's);
+#   2 matches containers and the floor, so a depth's monsters and chests find the same items
 # A table the mod leaves out drops nothing.
 #   monster   what a slain monster leaves (after its fixed drops)
 #   floor     containers, sarcophagi and theme rooms
@@ -12,6 +14,7 @@
 #   level     items lying around a new dungeon level; count: how many (a range, both ends included)
 
 internal_name: monster
+item_level: 2
 drop: nothing 59%
 drop: gold 74%
 drop: random 100%
@@ -22,10 +25,18 @@ drop: random 100%
 
 internal_name: useful
 drop: scroll_of_recall 33% levels 2-99
-drop: healing_potion 50%
-drop: mana_potion 100%
+drop: healing_potion 50% levels 1-3
+drop: mana_potion 100% levels 1-3
+drop: greater_healing_potion 50% levels 4-7
+drop: greater_mana_potion 100% levels 4-7
+drop: superior_healing_potion 50% levels 8-99
+drop: superior_mana_potion 100% levels 8-99
 
 internal_name: level
 count: 3-5
-drop: healing_potion 50%
-drop: mana_potion 100%
+drop: healing_potion 50% levels 1-3
+drop: mana_potion 100% levels 1-3
+drop: greater_healing_potion 50% levels 4-7
+drop: greater_mana_potion 100% levels 4-7
+drop: superior_healing_potion 50% levels 8-99
+drop: superior_mana_potion 100% levels 8-99

@@ -13,7 +13,7 @@ import (
 )
 
 // hnhLevels is the whole chain a mod's level declaration goes through: the overlay finds the mod's levels.rec,
-// the engine's registry resolves each generator name, and each algorithm parses its own knobs. Content is read
+// dungen.Layouts resolves each generator name, and each algorithm parses its own knobs. Content is read
 // here, inside the test, never at package init.
 func hnhLevels(t *testing.T) ([]dungeon.Level, fs.FS) {
 	t.Helper()
@@ -30,7 +30,7 @@ func hnhLevels(t *testing.T) ([]dungeon.Level, fs.FS) {
 	var levels []dungeon.Level
 	for _, r := range recfile.ReadMulti(f)["default"] {
 		gen, _ := dungeon.Field(r, "generator")
-		st, ok := dungeon.Lookup(gen)
+		st, ok := Layouts[gen]
 		if !ok {
 			continue
 		}
@@ -46,7 +46,7 @@ func hnhLevels(t *testing.T) ([]dungeon.Level, fs.FS) {
 }
 
 // TestHeavenAndHellLevelsAreWalkable is the check the whole refactor exists for: every generator name Heaven &
-// Hell declares resolves in the engine's registry, builds, and comes out as one connected walkable region. A
+// Hell declares resolves in dungen.Layouts, builds, and comes out as one connected walkable region. A
 // level that splits in two is one the player can fall into half of and never leave.
 func TestHeavenAndHellLevelsAreWalkable(t *testing.T) {
 	levels, fsys := hnhLevels(t)
@@ -59,7 +59,7 @@ func TestHeavenAndHellLevelsAreWalkable(t *testing.T) {
 		}
 		// Every level, several seeds: a split shows up on some seeds only (the cave levels' connectors did).
 		for seed := int64(1); seed <= 100; seed++ {
-			m, err := Build(l.Config, rand.New(rand.NewSource(seed)), fsys)
+			m, err := l.Config.(Layout).Build(rand.New(rand.NewSource(seed)), fsys)
 			if err != nil {
 				t.Fatalf("level %s (%s): %v", l.Map, l.Generator, err)
 			}
@@ -80,7 +80,7 @@ func TestMegaDungeonIsWalkable(t *testing.T) {
 		t.Fatal(err)
 	}
 	for seed := int64(1); seed <= 100; seed++ {
-		m, err := Build(cfg, rand.New(rand.NewSource(seed)), nil)
+		m, err := cfg.(Layout).Build(rand.New(rand.NewSource(seed)), nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -96,7 +96,7 @@ func TestSameSeedSameLevel(t *testing.T) {
 		t.Fatal(err)
 	}
 	build := func() string {
-		m, err := Build(cfg, rand.New(rand.NewSource(7)), nil)
+		m, err := cfg.(Layout).Build(rand.New(rand.NewSource(7)), nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -111,14 +111,6 @@ func TestSameSeedSameLevel(t *testing.T) {
 	}
 	if a, b := build(), build(); a != b {
 		t.Fatal("the same seed built two different levels")
-	}
-}
-
-// TestUnknownGeneratorIsRejected: a typo in a mod's levels.rec fails when the mod loads, not on the stairs down.
-func TestUnknownGeneratorIsRejected(t *testing.T) {
-	_, err := dungeon.LoadLevels([]recfile.Record{{{Name: "map", Value: "a"}, {Name: "depth", Value: "1"}, {Name: "tiles", Value: "caves"}, {Name: "start", Value: "true"}, {Name: "generator", Value: "acretion"}}})
-	if err == nil {
-		t.Fatal("an unknown generator name loaded")
 	}
 }
 
@@ -184,7 +176,7 @@ func TestMegaDungeonWithoutDoors(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	m, err := Build(cfg, rand.New(rand.NewSource(1)), nil)
+	m, err := cfg.(Layout).Build(rand.New(rand.NewSource(1)), nil)
 	if err != nil {
 		t.Fatal(err)
 	}

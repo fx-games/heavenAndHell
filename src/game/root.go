@@ -246,6 +246,9 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 	g.feeds = nil // a new or loaded game rewrites every feed on its first turn
 
 	drawnMaps, err := hhm.Load(files.GetFileSystem(), g.startInfo.MapDir)
+	if err == nil {
+		err = hhm.CheckTileRecords(drawnMaps.Tileset, defs.TileRecords)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

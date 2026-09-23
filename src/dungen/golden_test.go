@@ -20,7 +20,6 @@ func hashLevel(l *Level) string {
 	fmt.Fprintf(h, "%d %d %d %v %v %v %v\n", l.Dlvl, l.Type, l.SetLevel, l.View, l.SetPiece, l.DiabloQuads, l.Triggers)
 	fmt.Fprintf(h, "%v %v\n", l.Dungeon, l.PDungeon)
 	fmt.Fprintf(h, "%v %v %v\n", l.Piece, l.Trans, l.Flags)
-	fmt.Fprintf(h, "%v\n", l.SOL)
 	for _, m := range l.Monsters {
 		if m == nil {
 			io.WriteString(h, "nil\n")

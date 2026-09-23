@@ -4,38 +4,60 @@ image	classic_roguelike.png
 grid	8
 size	224	240
 
-# per-tile markers: IsBlockingMovement, IsBlockingView, IsWater, IsDamaging
+# per-tile markers: IsBlockingMovement, IsBlockingView, IsWater, IsDamaging, IsBlockingMissiles, CanHoldTrap
 [flags]
-4	IsBlockingMovement,IsBlockingView
+4	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
 5	IsBlockingMovement
 6	IsBlockingMovement
-7	IsBlockingMovement,IsBlockingView
-9	IsBlockingMovement,IsBlockingView
 28	IsBlockingMovement,IsWater
 29	IsBlockingMovement,IsWater
-56	IsBlockingMovement,IsBlockingView
-57	IsBlockingMovement,IsBlockingView
-58	IsBlockingMovement,IsBlockingView
-69	IsBlockingMovement,IsBlockingView
-71	IsBlockingMovement,IsBlockingView
-84	IsBlockingMovement,IsBlockingView
-85	IsBlockingMovement,IsBlockingView
-114	IsBlockingMovement,IsBlockingView
-115	IsBlockingMovement,IsBlockingView
-116	IsBlockingMovement,IsBlockingView
-117	IsBlockingMovement,IsBlockingView
-118	IsBlockingMovement,IsBlockingView
-119	IsBlockingMovement,IsBlockingView
-120	IsBlockingMovement,IsBlockingView
+57	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+58	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+69	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+71	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+85	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+114	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+115	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+116	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+117	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+118	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+119	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+120	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
 152	IsBlockingMovement
 153	IsBlockingMovement
-158	IsBlockingMovement,IsBlockingView
-159	IsDamaging
-181	IsBlockingMovement,IsBlockingView
-182	IsBlockingMovement,IsBlockingView
-183	IsBlockingMovement,IsBlockingView
-184	IsBlockingMovement,IsBlockingView
-240	IsBlockingMovement,IsBlockingView
-241	IsBlockingMovement,IsBlockingView
-269	IsBlockingMovement,IsBlockingView
-297	IsBlockingMovement,IsBlockingView
+158	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+240	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+241	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+269	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+297	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+
+# tiles that stand for a record in data/icons/tiles.rec: its name, icon and tags win over [flags]
+[tiles]
+1	tile.dirt
+7	tile.mountain
+9	tile.dungeon_rocky_wall
+56	tile.cathedral_wall
+64	tile.cathedral_floor
+84	tile.catacombs_wall
+86	tile.catacombs_floor
+159	tile.lava
+181	tile.arch
+182	tile.catacombs_trap_wall
+183	tile.cathedral_trap_wall
+184	tile.wooden_fence
+186	tile.dungeon_red_earth_floor
+247	tile.lamp
+345	tile.grate
+816	tile.hell_wall_sight_passes
+817	tile.cave_wall_see_through
+818	tile.cathedral_wall_see_through
+819	tile.catacombs_wall_see_through
+820	tile.hell_wall_see_through
+821	tile.cave_wall_missiles_pass
+822	tile.cave_floor_blocks_sight
+823	tile.cathedral_wall_missiles_pass
+824	tile.catacombs_floor_blocks_sight
+825	tile.cathedral_wall_sight_passes
+826	tile.pillar
+828	tile.cathedral_column
+829	tile.hell_floor_blocks_missiles

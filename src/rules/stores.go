@@ -339,9 +339,15 @@ func (d *Data) VendorsOf(npc string) []Vendor {
 func (g *Generator) ListStock(v Vendor, lvl int) []*Item {
 	count := max(len(v.Always), g.rollCount(v.ItemCount))
 	out := g.always(v)
-	if len(v.Sometimes) > 0 {
+	var pool []*ItemData // what the store level lvl reaches, as the smith's MinMLvl <= lvl
+	for _, name := range v.Sometimes {
+		if b := g.D.Item(name); b.MinMLvl <= lvl {
+			pool = append(pool, b)
+		}
+	}
+	if len(pool) > 0 {
 		for n := max(1, count-len(v.Always)); n > 0; n-- {
-			out = append(out, g.storeItem(g.D.Item(v.Sometimes[g.random(len(v.Sometimes))]), lvl))
+			out = append(out, g.storeItem(pool[g.random(len(pool))], lvl))
 		}
 	}
 	return out

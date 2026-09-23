@@ -8,6 +8,7 @@ import (
 
 type BasicTileMapping struct {
 	FloorTile       int32
+	WallTile        int32 // the plain wall ChooseWallTile varies
 	ChooseWallTile  func(mapPos geometry.Point) int32
 	ChooseFloorTile func(mapPos geometry.Point) int32
 	ClosedDoor      int32
@@ -24,6 +25,7 @@ func getHellTilemap(randomSource *rand.Rand, isWall func(geometry.Point) bool) B
 	}
 
 	return BasicTileMapping{
+		WallTile:        IconDungeonRockyWall,
 		FloorTile:       IconDungeonRedEarthFloor,
 		ChooseWallTile:  chooseWallTile,
 		ChooseFloorTile: chooseFloorTile,
@@ -42,6 +44,7 @@ func getCavesTilemap(randomSource *rand.Rand, isWall func(geometry.Point) bool) 
 	}
 
 	return BasicTileMapping{
+		WallTile:        IconMountain,
 		FloorTile:       IconDirt,
 		ChooseWallTile:  chooseWallTile,
 		ChooseFloorTile: chooseFloorTile,
@@ -69,6 +72,7 @@ func getCathedralTilemap(randomSource *rand.Rand, isWall func(geometry.Point) bo
 	}
 
 	return BasicTileMapping{
+		WallTile:        IconCathedralWall,
 		FloorTile:       IconCathedralFloor,
 		ChooseWallTile:  chooseWallTile,
 		ChooseFloorTile: chooseFloorTile,
@@ -89,6 +93,7 @@ func getCatacombsTilemap(randomSource *rand.Rand, isWall func(geometry.Point) bo
 	}
 
 	return BasicTileMapping{
+		WallTile:        IconCatacombsWall,
 		FloorTile:       IconCatacombsFloor,
 		ChooseWallTile:  chooseWallTile,
 		ChooseFloorTile: chooseFloorTile,

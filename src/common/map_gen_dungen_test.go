@@ -59,7 +59,7 @@ func loadModLevels(t *testing.T) []dungeon.Level {
 		t.Fatalf("levels.rec: %v", err)
 	}
 	defer f.Close()
-	levels, err := dungeon.LoadLevels(recfile.Read(f))
+	levels, err := dungeon.LoadLevels(recfile.Read(f), lookupStrategy)
 	if err != nil {
 		t.Fatalf("levels.rec: %v", err)
 	}
@@ -221,5 +221,13 @@ func TestDungenLevelsAreReproducibleFromTheirSeed(t *testing.T) {
 	}
 	if a, b := build(), build(); a != b {
 		t.Error("the same seed built two different levels")
+	}
+}
+
+// TestUnknownGeneratorIsRejected: a typo in a mod's levels.rec fails when the mod loads, not on the stairs down.
+func TestUnknownGeneratorIsRejected(t *testing.T) {
+	_, err := dungeon.LoadLevels([]recfile.Record{{{Name: "map", Value: "a"}, {Name: "depth", Value: "1"}, {Name: "tiles", Value: "caves"}, {Name: "start", Value: "true"}, {Name: "generator", Value: "acretion"}}}, lookupStrategy)
+	if err == nil {
+		t.Fatal("an unknown generator name loaded")
 	}
 }

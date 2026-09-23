@@ -1,61 +1,23 @@
-// Package dungeon is the engine's one dungeon generation registry: a generator name in, an algorithm out.
-//
-// There is exactly one of these. A mod declares each level in levels.rec (docs/LEVELS.md), naming its generator, and the engine resolves the name here. Nothing in this package knows which mod is loaded, and
-// nothing here is shaped like any one generator family.
+// Package dungeon is a mod's level table (levels.rec, docs/LEVELS.md): which levels exist, how they connect, and
+// which generator builds each with which knobs. The generators themselves are strategies in package common
+// (LevelStrategy), which hands LoadLevels their parsing; nothing here knows which mod is loaded.
 package dungeon
 
 import (
 	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 
 	"rpg/src/recfile"
 )
 
-// Config is one level's parsed generator configuration. The engine stores it and hands it back to the algorithm
-// that produced it; only that algorithm looks inside. This is the deliberate seam: D1's generators need D1's tile
-// sets, megatile fills and quest state, H&H's need a room budget and a corridor style, and neither family has to
-// grow the other's fields to be registered here.
+// Config is one level's parsed generator configuration; only the strategy that parsed it looks inside.
 type Config any
 
-// Strategy is one named dungeon generation algorithm.
-//
-// It is one method wide on purpose. The engine's only generic business with a generator is "does this name
-// resolve, and do the knobs the mod declared for it parse" - so that a bad levels.rec fails when the mod loads,
-// not on the stairs down. Everything past that - what the algorithm draws with, and what it hands back - belongs
-// to its own family behind this interface. Widening this to the union of both families' needs is how one
-// abstraction becomes two in a trenchcoat; if a field only one family understands is wanted, it goes in that
-// family's Config.
-type Strategy interface {
-	// Parse turns one level's record from levels.rec into this algorithm's own configuration. Fields the record
-	// leaves out take the algorithm's defaults, so a record naming only a generator is valid.
+// Parser reads a generator's knobs from its levels.rec record. Fields the record leaves out take the
+// generator's defaults, so a record naming only a generator is valid.
+type Parser interface {
 	Parse(recfile.Record) (Config, error)
-}
-
-var strategies = map[string]Strategy{}
-
-// Register adds an algorithm under the name mods declare it by. Algorithms are code, not content, so they
-// register at init; nothing content-shaped may be read here.
-func Register(name string, s Strategy) {
-	if _, dup := strategies[name]; dup {
-		panic("dungeon: generator " + name + " registered twice")
-	}
-	strategies[name] = s
-}
-
-// Lookup finds the algorithm a mod named.
-func Lookup(name string) (Strategy, bool) { s, ok := strategies[name]; return s, ok }
-
-// Names lists every registered generator, sorted. Sorted because unsorted map iteration is how reproducibility
-// dies, and because it is what an error message shows the mod author.
-func Names() []string {
-	out := make([]string, 0, len(strategies))
-	for n := range strategies {
-		out = append(out, n)
-	}
-	sort.Strings(out)
-	return out
 }
 
 // Exit is one way off a level: stepping on the named location takes you to another level's named location.
@@ -101,12 +63,12 @@ var commonFields = map[string]bool{"map": true, "name": true, "depth": true, "ge
 // LoadLevels reads a mod's whole levels.rec and checks it: every record a level with the required fields, known
 // fields only (common ones plus what its generator reads), unique ids, one start, and every exit leading to a
 // declared level. Called after mod selection, never at package init.
-func LoadLevels(recs []recfile.Record) ([]Level, error) {
+func LoadLevels(recs []recfile.Record, parsers func(generator string) (Parser, bool)) ([]Level, error) {
 	var levels []Level
 	ids := map[string]bool{}
 	starts := 0
 	for _, r := range recs {
-		l, err := parseLevel(r)
+		l, err := parseLevel(r, parsers)
 		if err != nil {
 			return nil, err
 		}
@@ -132,7 +94,7 @@ func LoadLevels(recs []recfile.Record) ([]Level, error) {
 	return levels, nil
 }
 
-func parseLevel(r recfile.Record) (Level, error) {
+func parseLevel(r recfile.Record, parsers func(string) (Parser, bool)) (Level, error) {
 	id, _ := Field(r, "map")
 	fail := func(format string, a ...any) (Level, error) {
 		return Level{}, fmt.Errorf("levels.rec: %s: %s", id, fmt.Sprintf(format, a...))
@@ -143,9 +105,9 @@ func parseLevel(r recfile.Record) (Level, error) {
 		}
 	}
 	gen, _ := Field(r, "generator")
-	s, ok := Lookup(gen)
+	s, ok := parsers(gen)
 	if !ok {
-		return fail("unknown generator %q (have %s)", gen, strings.Join(Names(), ", "))
+		return fail("unknown generator %q", gen)
 	}
 	read = map[string]bool{}
 	cfg, err := s.Parse(r)

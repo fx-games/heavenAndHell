@@ -5,8 +5,9 @@
 #   name / short_name the shown name, and the short one that fits the belt
 #   icon              icons/items.rec id, e.g. item.dagger
 # Where it appears:
-#   dlvl              the shallowest dungeon level it drops on (D1's iMinMLvl); max_level the deepest (0: none)
-#   out_of_depth_chance / min_level_for_ood   chance to drop above its dlvl, from this dungeon level on
+#   dlvl / max_level  the item levels it drops at (D1's iMinMLvl; max_level 0: no limit). Floor items and
+#                     containers roll at 2x the dungeon level, monster drops at the monster's level or at what
+#                     drops.rec's item_level says
 #   drop              IDROP_REGULAR, IDROP_DOUBLE (twice as likely) or IDROP_NEVER (quests and stores only)
 #   hidden            true: unseen and out of reach until the hero has true sight (H&H's evidence)
 #   quest_item        true: a quest item, which no store buys

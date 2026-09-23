@@ -31,6 +31,7 @@ type Tile struct {
 	DefinedDescription string
 	IsWalkable         bool            // this
 	IsTransparent      bool            // this
+	IsMissilePassable  bool            // projectiles fly through it (D1 keeps this apart from sight)
 	Special            SpecialTileType // and this
 }
 
@@ -49,25 +50,27 @@ func (t Tile) ToBinary(out io.Writer) {
 	must(binary.Write(out, binary.LittleEndian, t.DefinedIcon))
 	must(binary.Write(out, binary.LittleEndian, t.IsWalkable))
 	must(binary.Write(out, binary.LittleEndian, t.IsTransparent))
+	must(binary.Write(out, binary.LittleEndian, t.IsMissilePassable))
 	must(binary.Write(out, binary.LittleEndian, t.Special))
 }
 
 func NewTileFromBinary(in io.Reader) Tile {
 	var icon int32
 	var isWalkable bool
-	var isTransparent bool
+	var isTransparent, isMissilePassable bool
 	var special SpecialTileType
 
 	must(binary.Read(in, binary.LittleEndian, &icon))
 	must(binary.Read(in, binary.LittleEndian, &isWalkable))
 	must(binary.Read(in, binary.LittleEndian, &isTransparent))
+	must(binary.Read(in, binary.LittleEndian, &isMissilePassable))
 	must(binary.Read(in, binary.LittleEndian, &special))
 
 	return Tile{
 		DefinedIcon:   icon,
 		IsWalkable:    isWalkable,
-		IsTransparent: isTransparent,
-		Special:       special,
+		IsTransparent: isTransparent, IsMissilePassable: isMissilePassable,
+		Special: special,
 	}
 }
 

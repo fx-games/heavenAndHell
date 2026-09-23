@@ -68,10 +68,10 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 		// a piece that stops missiles; each burns (10 + currlevel)·16 ticks at currlevel·8/64 a tick
 		if lvl := ctx.GameState.mapGen.generated[c.c.m.GetName()]; lvl != nil {
 			for _, p := range ring(a.from, 3) {
-				if !c.c.m.Contains(p) || lvl.CellSolid(p.X, p.Y) || c.c.m.IsObjectAt(p) || !c.c.lineClear(a.from, p) {
+				if !c.c.m.Contains(p) || !c.c.m.IsTileWalkable(p) || c.c.m.IsObjectAt(p) || !c.c.lineClear(a.from, p) {
 					continue
 				}
-				if lvl.CellMissile(p.X, p.Y) {
+				if !c.c.m.IsMissilePassable(p) {
 					break
 				}
 				c.hazard(MisFireRing, p, (10+cl)*16/rules.RefWalkTicks, 8*cl)

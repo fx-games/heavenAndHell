@@ -30,7 +30,7 @@ func parseOne(t *testing.T, rec string) (levelConfig, int) {
 	if len(recs) != 1 {
 		t.Fatalf("want one record, got %d", len(recs))
 	}
-	levels, err := dungeon.LoadLevels(recs)
+	levels, err := dungeon.LoadLevels(recs, func(g string) (dungeon.Parser, bool) { p, ok := D1[g]; return p, ok })
 	if err != nil {
 		t.Fatal(err)
 	}

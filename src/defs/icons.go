@@ -5,6 +5,7 @@ import (
 	"path"
 	"regexp"
 	"rpg/files"
+	"rpg/src/hhm"
 	"rpg/src/recfile"
 	"strings"
 )
@@ -41,12 +42,20 @@ func namedIcon(m map[string]int32, name string) int32 {
 
 // LoadIcons fills every Icon* var from the active mod's icons/*.rec. It fails if the mod is missing any of
 // them, listing the lot, because a half-bound icon table renders tile 0 and says nothing.
+// TileRecords are the active mod's map tiles from icons/tiles.rec, by internal_name; LoadIcons reads them fresh on
+// every start.
+var TileRecords map[string]hhm.TileRecord
+
 func LoadIcons() error {
 	missingIcons = nil
 	loadActorsIcons()
 	loadItemsIcons()
 	loadSkillsIcons()
 	loadTilesIcons()
+	var err error
+	if TileRecords, err = hhm.ReadTileRecords(files.GetFileSystem(), path.Join("assets", "data")); err != nil {
+		return err
+	}
 	if len(missingIcons) > 0 {
 		return fmt.Errorf("mod %q defines no icon named: %s", files.ActiveMod(), strings.Join(missingIcons, ", "))
 	}

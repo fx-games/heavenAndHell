@@ -42,7 +42,7 @@ func (g *MapGenerator) LoadLevels() error {
 		return fmt.Errorf("levels.rec: %w", err)
 	}
 	defer f.Close()
-	levels, err := dungeon.LoadLevels(recfile.Read(f))
+	levels, err := dungeon.LoadLevels(recfile.Read(f), lookupStrategy)
 	if err != nil {
 		return err
 	}
@@ -92,11 +92,7 @@ func (g *MapGenerator) SetFactory(factory *Factory) {
 	g.factory = factory
 }
 
-// GenerateMap builds level id with the generator its record names, then lays its declared exits on it.
-//
-// The dispatch is a type switch on the configuration the generator's own Parse produced, which is the seam
-// dungeon.Strategy exists for: the engine stored a Config it cannot read, and here each generation family takes
-// its own type back. It is deliberately NOT a switch on the generator's name or the mod's.
+// GenerateMap builds level id with the strategy its record names, then lays its declared exits on it.
 func (g *MapGenerator) GenerateMap(id string) *gridmap.GridMap[*Actor, *Item, Object] {
 	lvl, ok := g.levels[id]
 	if !ok {
@@ -107,22 +103,37 @@ func (g *MapGenerator) GenerateMap(id string) *gridmap.GridMap[*Actor, *Item, Ob
 	g.randomSource = g.levelRand(id)
 	defer func() { g.randomSource = shared }()
 	delete(g.rosters, id)
-	var m *gridmap.GridMap[*Actor, *Item, Object]
-	switch cfg := lvl.Config.(type) {
-	case drawnConfig:
-		m = g.factory.State.loadDrawnLevel(lvl, cfg.Template)
-	case dungen.LevelParams:
-		m = g.generateMap(lvl, nil)
-	case dungen.SetLevelParams:
-		m = g.generateMap(lvl, &cfg)
-	default:
-		m = g.generateDungenMap(lvl)
-	}
+	m := levelStrategies[lvl.Generator].Generate(g, lvl)
 	if lvl.Name != "" {
 		m.SetDisplayName(lvl.Name)
 	}
 	g.factory.State.wireExits(m)
 	return m
+}
+
+// LevelStrategy is how a level gets built: every generator a mod may name in levels.rec is one, drawn, D1's and
+// dungen's alike. Parse reads its knobs when the mod loads, so a bad levels.rec fails then and not on the stairs
+// down; Generate builds the playable level from them.
+type LevelStrategy interface {
+	dungeon.Parser
+	Generate(g *MapGenerator, lvl dungeon.Level) *gridmap.GridMap[*Actor, *Item, Object]
+}
+
+// levelStrategies are all of them, by the name levels.rec's generator: field uses.
+var levelStrategies = map[string]LevelStrategy{"drawn": drawnStrategy{}, "d1_set": d1SetStrategy{dungen.D1Set}}
+
+func init() {
+	for name, p := range dungen.D1 {
+		levelStrategies[name] = d1Strategy{p}
+	}
+	for name, p := range dungen.Layouts {
+		levelStrategies[name] = layoutStrategy{p}
+	}
+}
+
+func lookupStrategy(name string) (dungeon.Parser, bool) {
+	s, ok := levelStrategies[name]
+	return s, ok
 }
 
 // drawnConfig is the "drawn" generator's: a level drawn by hand in the mod's map set, under Template.
@@ -138,7 +149,9 @@ func (drawnStrategy) Parse(r recfile.Record) (dungeon.Config, error) {
 	return drawnConfig{Template: t}, nil
 }
 
-func init() { dungeon.Register("drawn", drawnStrategy{}) }
+func (drawnStrategy) Generate(g *MapGenerator, lvl dungeon.Level) *gridmap.GridMap[*Actor, *Item, Object] {
+	return g.factory.State.loadDrawnLevel(lvl, lvl.Config.(drawnConfig).Template)
+}
 
 func minDist(locations []geometry.Point, pos geometry.Point) float64 {
 	minimumDist := math.MaxFloat64
@@ -155,32 +168,6 @@ func minDist(locations []geometry.Point, pos geometry.Point) float64 {
 // an H&H Door object sits on it and swaps its own icon open/closed).
 var doorKinds = map[int]bool{rules.ObjL1LDOOR: true, rules.ObjL1RDOOR: true, rules.ObjL2LDOOR: true, rules.ObjL2RDOOR: true,
 	rules.ObjL3LDOOR: true, rules.ObjL3RDOOR: true}
-
-// d1LavaRange/d1FenceRange are the raw D1 megatile numbers (Level.Dungeon, before lPass3) that River/PoolFix/Fence
-// paint for Caves lava and wooden fences; walls, floors and everything else fall outside them.
-func isLavaMega(v byte) bool  { return v >= 15 && v <= 45 }
-func isFenceMega(v byte) bool { return v >= 121 && v <= 153 }
-
-// cathedralSeeThrough is what the Cathedral megatiles with pieces D1's sight passes are drawn as: arches, fences,
-// the pillar and the lamp (drlg_l1_tiles.go's t1*Arch*, t1*Fence*, t1Pillar, l1LAMPS).
-func cathedralSeeThrough() map[byte]gridmap.Tile {
-	arch := gridmap.Tile{DefinedIcon: defs.IconArch, DefinedDescription: "an arch", IsTransparent: true}
-	grate := gridmap.Tile{DefinedIcon: defs.IconGrate, DefinedDescription: "a grate", IsTransparent: true}
-	return map[byte]gridmap.Tile{5: arch, 8: arch, 9: arch, 10: arch, 11: arch, 12: arch, 14: arch, 33: arch, 34: arch,
-		39: arch, 40: arch, 42: arch, 147: arch, 149: arch, 153: arch,
-		27: grate, 29: grate, 32: grate, 35: grate, 36: grate, 37: grate, 38: grate,
-		15:  {DefinedIcon: defs.IconPillar, DefinedDescription: "a pillar", IsTransparent: true},
-		128: {DefinedIcon: defs.IconLamp, DefinedDescription: "a lamp", IsTransparent: true}}
-}
-
-// cathedralColumns are Cathedral megatiles whose art is a free-standing column, exactly like the arch pieces
-// that stand next to them in an arcade, but whose cell blocks sight in D1's own SOL table - so they fell through
-// to the plain wall icon and a row of arches ended in a wall. t1Corner (3) is the one that shows: an arcade
-// running down a wall corner uses it, while the same arcade mirrored uses t1HArchEnd (8), which does draw as an
-// arch. They keep blocking sight, only the icon changes.
-// ponytail: t1VCorner (16) and t1HCorner (17) look like columns too, but they cap wall runs rather than arcades,
-// so they stay walls; move them here if wall ends should look like arches as well.
-var cathedralColumns = map[byte]bool{3: true}
 
 // addBasicTiles ports the wall/floor/lava/fence/door terrain from a generated dungen.Level (piece coordinates 16..95,
 // exposed as cells 0..79) onto the gridmap. Doors are placed as objects afterward, once Level.Objects is walked.
@@ -207,46 +194,43 @@ func (g *MapGenerator) setTiles(m *gridmap.GridMap[*Actor, *Item, Object], lvl *
 	if !ok {
 		panic(fmt.Sprintf("levels.rec: %s: unknown tile set %q (have %v)", m.GetName(), g.levels[m.GetName()].Tiles, defs.TilemapNames()))
 	}
-	seeThroughTiles := cathedralSeeThrough()
+	tiles := g.factory.State.drawnMaps.Tileset
 	for x := max(x1, 0); x <= min(x2, dungen.LevelSize-1); x++ {
 		for y := max(y1, 0); y <= min(y2, dungen.LevelSize-1); y++ {
 			mapPos := geometry.Point{X: x, Y: y}
 			if _, ok := m.GetTransitionAt(mapPos); ok { // a map change keeps the stairs wireD1Triggers put there
 				continue
 			}
-			seeThroughTile, seeThrough := seeThroughTiles[lvl.CellMega(x, y)]
-			switch {
-			case door(mapPos):
-				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: tileMap.FloorTile, DefinedDescription: "a floor", IsWalkable: true, IsTransparent: true})
+			if door(mapPos) {
+				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: tileMap.FloorTile, DefinedDescription: "a floor", IsWalkable: true, IsTransparent: true, IsMissilePassable: true})
 				if !m.IsObjectAt(mapPos) {
 					m.AddObject(NewDoor(tileMap.OpenDoor, tileMap.ClosedDoor), mapPos)
 				}
-			case lvl.Type == rules.DTypeCaves && isLavaMega(lvl.CellMega(x, y)) && lvl.CellSolid(x, y) && !lvl.CellBlocks(x, y):
-				m.SetTile(mapPos, g.lavaTile(m))
-			case lvl.Type == rules.DTypeCaves && isFenceMega(lvl.CellMega(x, y)) && lvl.CellSolid(x, y) && !lvl.CellBlocks(x, y):
-				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: defs.IconWoodenFence, DefinedDescription: "a wooden fence", IsTransparent: true})
-			case lvl.Type == rules.DTypeCathedral && seeThrough && lvl.CellSolid(x, y) && !lvl.CellBlocks(x, y):
-				m.SetTile(mapPos, seeThroughTile)
-			case lvl.Type == rules.DTypeCathedral && cathedralColumns[lvl.CellMega(x, y)] && lvl.CellSolid(x, y):
-				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: defs.IconArch, DefinedDescription: "an arch"})
-			case lvl.CellSolid(x, y): // opaque unless drawn as something see-through: a see-through plain wall hides that you
-				// can see and shoot into a room
-				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: tileMap.ChooseWallTile(mapPos), DefinedDescription: "a wall"})
-			default:
-				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: tileMap.ChooseFloorTile(mapPos), DefinedDescription: "a floor", IsWalkable: true, IsTransparent: true})
+				continue
 			}
+			// the cell as its megatile's map part draws it; plain walls and floors take the tile set's variations
+			t := TileFromDrawing(tiles, lvl.CellTile(x, y))
+			switch t.DefinedIcon {
+			case defs.IconLava:
+				t = g.lavaTile(m)
+			case tileMap.WallTile:
+				t.DefinedIcon = tileMap.ChooseWallTile(mapPos)
+			case tileMap.FloorTile:
+				t.DefinedIcon = tileMap.ChooseFloorTile(mapPos)
+			}
+			m.SetTile(mapPos, t)
 		}
 	}
 }
 
 func lava() gridmap.Tile {
-	return gridmap.Tile{DefinedIcon: defs.IconLava, DefinedDescription: "lava", IsTransparent: true}
+	return gridmap.Tile{DefinedIcon: defs.IconLava, DefinedDescription: "lava", IsTransparent: true, IsMissilePassable: true}
 }
 func poisonedWater() gridmap.Tile {
-	return gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "poisoned water", IsTransparent: true, Special: gridmap.SpecialTileWater}
+	return gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "poisoned water", IsTransparent: true, IsMissilePassable: true, Special: gridmap.SpecialTileWater}
 }
 func cleanWater() gridmap.Tile {
-	return gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "clean water", IsTransparent: true, Special: gridmap.SpecialTileWater}
+	return gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "clean water", IsTransparent: true, IsMissilePassable: true, Special: gridmap.SpecialTileWater}
 }
 
 // lavaTile is what a cave's lava pieces show: lava, except in the Poisoned Water Supply, where D1's palette
@@ -301,19 +285,22 @@ func (g *MapGenerator) changeMap(m *gridmap.GridMap[*Actor, *Item, Object], x1, 
 	g.walledIn[m.GetName()] = waiting
 }
 
-// TileFromDrawing turns a drawn tile into the map tile it means: what it blocks comes from the tileset's markers.
+// TileFromDrawing turns a drawn tile into the map tile it means: its tiles.rec record's name, icon and tags when
+// the tileset says it stands for one, else the tileset's markers on the bare picture.
 func TileFromDrawing(ts *hhm.Tileset, id int) gridmap.Tile {
-	f := ts.FlagsFor(id)
+	t := hhm.DrawnTile(ts, defs.TileRecords, id)
 	special := gridmap.SpecialTileNone
-	if f.Water {
+	if t.Flags.Water {
 		special = gridmap.SpecialTileWater
-	} else if f.Damaging {
+	} else if t.Flags.Damaging {
 		special = gridmap.SpecialTileDamaging
 	}
 	return gridmap.Tile{
-		DefinedIcon:   int32(id),
-		IsWalkable:    !f.BlocksMovement,
-		IsTransparent: !f.BlocksView,
-		Special:       special,
+		DefinedIcon:        t.Icon,
+		DefinedDescription: t.Name,
+		IsWalkable:         !t.Flags.BlocksMovement,
+		IsTransparent:      !t.Flags.BlocksView,
+		IsMissilePassable:  !t.Flags.BlocksMissiles,
+		Special:            special,
 	}
 }

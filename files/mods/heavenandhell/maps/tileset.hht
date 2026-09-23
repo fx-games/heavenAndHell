@@ -4,38 +4,38 @@ image	classic_roguelike.png
 grid	8
 size	224	224
 
-# per-tile markers: IsBlockingMovement, IsBlockingView, IsWater, IsDamaging
+# per-tile markers: IsBlockingMovement, IsBlockingView, IsWater, IsDamaging, IsBlockingMissiles, CanHoldTrap
 [flags]
-4	IsBlockingMovement,IsBlockingView
+4	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
 5	IsBlockingMovement
 6	IsBlockingMovement
-7	IsBlockingMovement,IsBlockingView
-9	IsBlockingMovement,IsBlockingView
+7	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+9	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
 28	IsBlockingMovement,IsWater
 29	IsBlockingMovement,IsWater
-56	IsBlockingMovement,IsBlockingView
-57	IsBlockingMovement,IsBlockingView
-58	IsBlockingMovement,IsBlockingView
-69	IsBlockingMovement,IsBlockingView
-71	IsBlockingMovement,IsBlockingView
-84	IsBlockingMovement,IsBlockingView
-85	IsBlockingMovement,IsBlockingView
-114	IsBlockingMovement,IsBlockingView
-115	IsBlockingMovement,IsBlockingView
-116	IsBlockingMovement,IsBlockingView
-117	IsBlockingMovement,IsBlockingView
-118	IsBlockingMovement,IsBlockingView
-119	IsBlockingMovement,IsBlockingView
-120	IsBlockingMovement,IsBlockingView
+56	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+57	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+58	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+69	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+71	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+84	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+85	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+114	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+115	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+116	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+117	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+118	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+119	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+120	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
 152	IsBlockingMovement
 153	IsBlockingMovement
-158	IsBlockingMovement,IsBlockingView
+158	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
 159	IsDamaging
-181	IsBlockingMovement,IsBlockingView
-182	IsBlockingMovement,IsBlockingView
-183	IsBlockingMovement,IsBlockingView
-184	IsBlockingMovement,IsBlockingView
-240	IsBlockingMovement,IsBlockingView
-241	IsBlockingMovement,IsBlockingView
-269	IsBlockingMovement,IsBlockingView
-297	IsBlockingMovement,IsBlockingView
+181	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+182	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+183	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+184	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+240	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+241	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+269	IsBlockingMovement,IsBlockingView,IsBlockingMissiles
+297	IsBlockingMovement,IsBlockingView,IsBlockingMissiles

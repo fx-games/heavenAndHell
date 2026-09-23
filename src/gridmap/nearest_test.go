@@ -26,7 +26,7 @@ func (s *stub) IsPassableForProjectile() bool   { return true }
 func corridorMap(t *testing.T) *GridMap[*stub, *stub, *stub] {
 	m := NewEmptyMap[*stub, *stub, *stub](11, 3)
 	wall := Tile{IsWalkable: false}
-	floor := Tile{IsWalkable: true, IsTransparent: true}
+	floor := Tile{IsWalkable: true, IsTransparent: true, IsMissilePassable: true}
 	for x := 0; x < 11; x++ {
 		for y := 0; y < 3; y++ {
 			p := geometry.Point{X: x, Y: y}
@@ -87,7 +87,7 @@ func TestNearestIsDeterministicOnTies(t *testing.T) {
 	answers := map[geometry.Point]bool{}
 	for i := 0; i < 40; i++ {
 		m := NewEmptyMap[*stub, *stub, *stub](40, 40)
-		floor := Tile{IsWalkable: true, IsTransparent: true}
+		floor := Tile{IsWalkable: true, IsTransparent: true, IsMissilePassable: true}
 		for x := 0; x < 40; x++ {
 			for y := 0; y < 40; y++ {
 				m.SetTile(geometry.Point{X: x, Y: y}, floor)
