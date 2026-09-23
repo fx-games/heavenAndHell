@@ -56,6 +56,18 @@ var EntityKinds = []EntityKind{
 	{Name: "Door", Layer: LayerEntities, Doc: "a door the player can open"},
 	{Name: "Stash", Layer: LayerEntities, Doc: "the player's storage chest"},
 	{Name: "Shrine", Layer: LayerEntities, Doc: "a shrine"},
+	{Name: "Monster", Layer: LayerEntities, Doc: "a monster of that type, placed by the level's population", Fields: []FieldDef{
+		{Name: "ID", Type: FString, Doc: "enemies.rec internal_name"},
+	}},
+	{Name: "Object", Layer: LayerEntities, Doc: "a dungeon object, placed by the level's population", Fields: []FieldDef{
+		{Name: "ID", Type: FString, Doc: "the object's id (OBJ_...)"},
+		{Name: "Range", Type: FString, Doc: "x1 y1 x2 y2: the part of the map (in megatiles, from the map's corner) a lever opens"},
+		{Name: "Opens", Type: FString, Doc: "a set piece whose whole area it opens instead of Range (D1's level 16 levers)"},
+		{Name: "Lever", Type: FInt, Default: "0", Doc: "levers sharing a number open their range together"},
+	}},
+	{Name: "Item", Layer: LayerEntities, Doc: "an item lying here, placed by the level's population", Fields: []FieldDef{
+		{Name: "ID", Type: FString, Doc: "items.rec internal_name"},
+	}},
 	{Name: "Location", Layer: LayerMeta, Doc: "a named spot levels.rec can send the player to", Fields: []FieldDef{
 		{Name: "Name", Type: FString},
 		{Name: "TargetMap", Type: FString, Doc: "unused by the engine; levels.rec owns where an exit leads"},

@@ -27,6 +27,8 @@ type Passes struct {
 	Canvas       int          // the layout is centred on a canvas this many cells square; 0: its own size
 	Scale        int          // 2 draws each cell as 2x2 (D1's megatiles); 1 leaves it
 	Themes       *ThemeRooms  // D1's theme rooms, walled in inside open ground once the level is laid out
+	Pieces       []PieceSpec  // the level's set pieces
+	Halls        [3]int       // open_halls: how many open rectangles of min..max cells a side to clear over the level
 }
 
 // staged is a layout with passes and a population: what a levels.rec record naming any of their knobs builds.
@@ -34,6 +36,7 @@ type staged struct {
 	Layout
 	Passes
 	population *Population
+	avail      func(quest string) bool // which quests' set pieces go in (WithQuests)
 }
 
 // PopulationOf is the population a level's configuration names, if any.
@@ -46,7 +49,7 @@ func PopulationOf(cfg dungeon.Config) (Population, bool) {
 
 // passKnobs are the fields that switch passes on: a record naming none of them builds its layout bare.
 var passKnobs = []string{"grow", "hall_chance", "spine", "mirror", "arch_chance", "loop_chance", "loop_distance",
-	"lava_rivers", "lava_water", "posts", "door_chance", "canvas", "scale", "theme_rooms"}
+	"lava_rivers", "lava_water", "posts", "door_chance", "canvas", "scale", "theme_rooms", "set_piece", "open_halls"}
 
 // withPasses parses a layout record, wrapping it in its passes when it names any.
 type withPasses struct{ dungeon.Parser }
@@ -92,6 +95,14 @@ func (w withPasses) Parse(r recfile.Record) (dungeon.Config, error) {
 		}
 		p.Themes = &t
 	}
+	if v, ok := dungeon.Field(r, "open_halls"); ok {
+		if _, err := fmt.Sscan(v, &p.Halls[0], &p.Halls[1], &p.Halls[2]); err != nil || p.Halls[1] < 1 || p.Halls[2] < p.Halls[1] {
+			return nil, fmt.Errorf("levels.rec: open_halls %q: want count min max, 1 <= min <= max", v)
+		}
+	}
+	if p.Pieces, err = parsePieces(r); err != nil {
+		return nil, err
+	}
 	if p.Scale != 1 && p.Scale != 2 {
 		return nil, fmt.Errorf("levels.rec: scale must be 1 or 2")
 	}
@@ -111,25 +122,30 @@ func (s staged) Build(rnd *rand.Rand, fsys fs.FS) (*DungeonMap, error) {
 		return nil, err
 	}
 	p := s.Passes
+	if p.bare() { // a population alone: the layout as it came
+		dm.scale = p.Scale
+		return dm, nil
+	}
 	m := fromDungeon(dm)
 	if p.Grow > 0 {
 		halls(m, growRooms(m, dm, p.Grow, rnd), p.HallChance, rnd)
 	}
+	var chambers [][2]int
 	if p.Spine {
-		spine(m, rnd)
+		chambers = spine(m, rnd)
 	}
 	if p.Mirror {
 		m = mirror(m, rnd)
 	}
 	arches(m, p.ArchChance, rnd)
 	loops(m, p.LoopChance, p.LoopDistance, rnd)
+	openHalls(m, p.Halls, rnd)
 	if p.Lava != nil {
 		p.Lava.Width, p.Lava.Height = m.w, m.h
 		if err := addLava(m, p.Lava, rnd); err != nil {
 			return nil, err
 		}
 	}
-	addPosts(m, p.Posts, rnd)
 	if p.Canvas > 0 {
 		full := newMega(p.Canvas, p.Canvas)
 		ox, oy := (full.w-m.w)/2, (full.h-m.h)/2
@@ -142,11 +158,20 @@ func (s staged) Build(rnd *rand.Rand, fsys fs.FS) (*DungeonMap, error) {
 			}
 		}
 		m = full
+		for i := range chambers {
+			chambers[i][0] += ox
+			chambers[i][1] += oy
+		}
+	}
+	pieces, err := s.placePieces(m, fsys, chambers, rnd)
+	if err != nil {
+		return nil, err
 	}
 	var themes [][4]int
 	if p.Themes != nil {
 		themes = themeRooms(m, *p.Themes, rnd)
 	}
+	addPosts(m, p.Posts, rnd) // after the theme rooms, as D1's substitutions come after them
 	connectMega(m)
 	if p.DoorChance >= 0 {
 		addDoors(m, p.DoorChance, rnd)
@@ -156,7 +181,7 @@ func (s staged) Build(rnd *rand.Rand, fsys fs.FS) (*DungeonMap, error) {
 		out = toCells(m)
 	}
 	out.themeRooms, out.scale = themes, p.Scale
-	return out, nil
+	return out, stampPieces(out, pieces, fsys, p.Scale)
 }
 
 // Megatile kinds.
@@ -166,11 +191,13 @@ const (
 	mCorr
 	mDoor
 	mLava
-	mPost // floor with a pillar in its top-left cell: in a row, an arcade
+	mPost   // floor with a pillar in its top-left cell: in a row, an arcade
+	mPiece  // a set piece's footprint: open ground the passes leave alone
+	mLocked // never carved, never joined (connectCells: a set piece's own cells)
 )
 
 // kindTiles is what each kind is on a DungeonMap drawn at its own scale.
-var kindTiles = [...]DungeonTile{mWall: Wall, mRoom: Room, mCorr: Corridor, mDoor: Door, mLava: Lava, mPost: Pillar}
+var kindTiles = [...]DungeonTile{mWall: Wall, mRoom: Room, mCorr: Corridor, mDoor: Door, mLava: Lava, mPost: Pillar, mPiece: Room, mLocked: Wall}
 
 func (m *mega) dungeonMap() *DungeonMap {
 	dm := NewDungeonMap(m.w, m.h)
@@ -267,7 +294,7 @@ func (m *mega) set(x, y, k int) {
 }
 
 // open is ground one walks on without a door; walkable adds doors.
-func mopen(k int) bool     { return k == mRoom || k == mCorr || k == mPost }
+func mopen(k int) bool     { return k == mRoom || k == mCorr || k == mPost || k == mPiece }
 func mwalkable(k int) bool { return mopen(k) || k == mDoor }
 
 type mrect struct{ x0, y0, x1, y1, cap int } // inclusive floor bounds, and the side it may grow to
@@ -377,7 +404,7 @@ func halls(m *mega, rs []mrect, p float64, rnd *rand.Rand) {
 // a hall six megatiles wide across the level, arcades on its second and fifth rows, and up to three 10x10
 // chambers along it, each with four pillars and arcades where the hall runs into it. Rooms it lands on lose that
 // part; connect joins what is left of them.
-func spine(m *mega, rnd *rand.Rand) {
+func spine(m *mega, rnd *rand.Rand) (chambers [][2]int) {
 	vertical := rnd.Intn(2) == 0
 	ch := [3]bool{rnd.Intn(2) != 0, rnd.Intn(2) != 0, rnd.Intn(2) != 0}
 	if !ch[0] || !ch[2] {
@@ -431,7 +458,13 @@ func spine(m *mega, rnd *rand.Rand) {
 		for _, p := range [4][2]int{{4, 4}, {7, 4}, {4, 7}, {7, 7}} {
 			set(cx+p[0], cy+p[1], mPost)
 		}
+		if vertical {
+			chambers = append(chambers, [2]int{cy, cx})
+		} else {
+			chambers = append(chambers, [2]int{cx, cy})
+		}
 	}
+	return chambers
 }
 
 // mirror doubles a quadrant into a 4-way symmetric level and opens the seams: the quadrant's edge walls meet
@@ -685,7 +718,7 @@ func connectMega(m *mega) {
 				}
 				for _, d := range mdirs {
 					x, y := i%m.w+d[0], i/m.w+d[1]
-					if x < 0 || y < 0 || x >= m.w || y >= m.h {
+					if x < 0 || y < 0 || x >= m.w || y >= m.h || m.t[x+y*m.w] == mLocked {
 						continue
 					}
 					n := x + y*m.w
@@ -749,6 +782,7 @@ type ThemeRooms struct {
 // themeRooms ports DRLG_PlaceThemeRooms, GetSizeForThemeRoom and CreateThemeRoom's walls, and returns the rooms
 // (x, y, w, h: the walls included) so the population can find them.
 func themeRooms(m *mega, t ThemeRooms, rnd *rand.Rand) [][4]int {
+	floor := func(k int) bool { return k == mRoom || k == mCorr } // D1's floor megatile: rooms and halls alike
 	var out [][4]int
 	near := func(x, y int) bool {
 		for _, r := range out {
@@ -770,7 +804,7 @@ func themeRooms(m *mega, t ThemeRooms, rnd *rand.Rand) [][4]int {
 				w = i
 			}
 			if i < maxH {
-				for w < rw && m.at(x+w, y+i) == mRoom {
+				for w < rw && floor(m.at(x+w, y+i)) {
 					w++
 				}
 			}
@@ -778,7 +812,7 @@ func themeRooms(m *mega, t ThemeRooms, rnd *rand.Rand) [][4]int {
 				h = i
 			}
 			if i < maxW {
-				for h < rh && m.at(x+i, y+h) == mRoom {
+				for h < rh && floor(m.at(x+i, y+h)) {
 					h++
 				}
 			}
@@ -794,7 +828,7 @@ func themeRooms(m *mega, t ThemeRooms, rnd *rand.Rand) [][4]int {
 	}
 	for y := 0; y < m.h; y++ {
 		for x := 0; x < m.w; x++ {
-			if m.at(x, y) != mRoom || t.Freq > 0 && rnd.Intn(t.Freq) != 0 {
+			if !floor(m.at(x, y)) || t.Freq > 0 && rnd.Intn(t.Freq) != 0 {
 				continue
 			}
 			w, h, ok := size(x, y)
@@ -837,4 +871,30 @@ func themeRooms(m *mega, t ThemeRooms, rnd *rand.Rand) [][4]int {
 		}
 	}
 	return out
+}
+
+// openHalls clears h[0] rectangles of h[1]..h[2] cells a side to room floor, each centred on floor it opens
+// out: the open halls D1's caves have among their passages (l3CreateBlock's blocks), room for a theme room.
+func openHalls(m *mega, h [3]int, rnd *rand.Rand) {
+	for n := 0; n < h[0]; n++ {
+		w, d := h[1]+rnd.Intn(h[2]-h[1]+1), h[1]+rnd.Intn(h[2]-h[1]+1)
+		for try := 0; try < 100; try++ {
+			x, y := 1+rnd.Intn(max(m.w-w-1, 1)), 1+rnd.Intn(max(m.h-d-1, 1))
+			if !mopen(m.at(x+w/2, y+d/2)) {
+				continue
+			}
+			for j := y; j < y+d; j++ {
+				for i := x; i < x+w; i++ {
+					m.set(i, j, mRoom)
+				}
+			}
+			break
+		}
+	}
+}
+
+// bare is whether no pass is switched on.
+func (p Passes) bare() bool {
+	return p.Grow == 0 && !p.Spine && !p.Mirror && p.ArchChance == 0 && p.LoopChance == 0 && p.Lava == nil &&
+		p.Posts == 0 && p.DoorChance < 0 && p.Canvas == 0 && p.Themes == nil && len(p.Pieces) == 0 && p.Halls[0] == 0
 }

@@ -14,6 +14,7 @@ import (
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
 	"rpg/src/hhm"
+	"rpg/src/rules"
 )
 
 // layoutStrategy is the LevelStrategy of every dungen layout generator (dungen.Layouts): the generator carves a
@@ -27,7 +28,8 @@ func (layoutStrategy) Generate(g *MapGenerator, lvl dungeon.Level) *gridmap.Grid
 // generateDungenMap builds one dungen level and lays it out as a gridmap.
 func (g *MapGenerator) generateDungenMap(lvl dungeon.Level) *gridmap.GridMap[*Actor, *Item, Object] {
 	targetMap, dlvl := lvl.Map, lvl.Depth
-	layout, err := lvl.Config.(dungen.Layout).Build(g.randomSource, g.fsys())
+	cfg := dungen.WithQuests(lvl.Config, func(key string) bool { return g.questHere(key, dlvl) })
+	layout, err := cfg.(dungen.Layout).Build(g.randomSource, g.fsys())
 	if err != nil {
 		panic(err)
 	}
@@ -37,6 +39,7 @@ func (g *MapGenerator) generateDungenMap(lvl dungeon.Level) *gridmap.GridMap[*Ac
 	m.SetMetaString(layout.GetMetaInfo())
 
 	g.addDungenTiles(m, layout, g.dungenTilemap(lvl, dlvl, layout), dlvl, lvl.Tiles)
+	g.paintPieces(m, layout)
 	stairs := g.addDungenStairs(m, layout, lvl)
 	if pop, ok := dungen.PopulationOf(lvl.Config); ok {
 		g.populateD1(m, layout, lvl, pop, stairs)
@@ -113,7 +116,7 @@ func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object],
 			case dungen.Lake:
 				m.SetTile(p, gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "deep water", IsTransparent: true, IsMissilePassable: true, Special: gridmap.SpecialTileWater})
 			case dungen.Lava:
-				m.SetTile(p, gridmap.Tile{DefinedIcon: defs.IconLava, DefinedDescription: "lava", IsTransparent: true, IsMissilePassable: true})
+				m.SetTile(p, g.lavaTile(m))
 			case dungen.Pillar:
 				m.SetTile(p, gridmap.Tile{DefinedIcon: pillar, DefinedDescription: "a pillar", IsTransparent: true})
 			case dungen.Shallows:
@@ -147,6 +150,14 @@ func (g *MapGenerator) addDungenStairs(m *gridmap.GridMap[*Actor, *Item, Object]
 		spots = append(spots, g.dungenFallbackStairs(m, layout)...)
 	}
 	var placed []geometry.Point
+	pieceLocs := map[string]geometry.Point{} // exits a set piece places: its stairs are drawn in it
+	for _, pc := range layout.Pieces() {
+		for _, e := range pc.Map.Entities {
+			if e.Kind == "Location" {
+				pieceLocs[e.Str("Name")] = geometry.Point{X: pc.X + e.X, Y: pc.Y + e.Y}
+			}
+		}
+	}
 	put := func(e dungeon.Exit, p geometry.Point) {
 		tile := dungenLadderDown()
 		if target := g.levels[e.Target]; target.Town || target.Depth < lvl.Depth || e.Location == "ladder_up" {
@@ -166,8 +177,27 @@ func (g *MapGenerator) addDungenStairs(m *gridmap.GridMap[*Actor, *Item, Object]
 		}
 	}
 	entrance := entrances[g.randomSource.Intn(len(entrances))]
+	for _, l := range g.levels { // where other levels' exits arrive (a quest set level's way in)
+		for _, e := range l.Exits {
+			if p, ok := pieceLocs[e.Arrival]; ok && e.Target == lvl.Map {
+				m.AddNamedLocation(e.Arrival, p)
+			}
+		}
+	}
 	var rest []dungeon.Exit
 	for _, e := range lvl.Exits {
+		if p, ok := pieceLocs[e.Location]; ok {
+			m.AddNamedLocation(e.Location, p)
+			spots = removePoint(spots, p)
+			placed = append(placed, p)
+			continue
+		}
+		if g.factory.State.QuestByKey(e.Location) >= 0 {
+			continue // a quest's way in, and its set piece is not on the level
+		}
+		if _, ok := lvl.Locations[e.Location]; ok {
+			continue // levels.rec places it itself
+		}
 		if e.Location == "ladder_up" {
 			put(e, entrance)
 		} else {
@@ -402,4 +432,41 @@ func (g *MapGenerator) populateD1(m *gridmap.GridMap[*Actor, *Item, Object], lay
 			g.factory.initTalk(a)
 		}
 	}
+}
+
+// questHere is whether quest key is available on dungeon level dlvl (D1's QuestStatus).
+func (g *MapGenerator) questHere(key string, dlvl int) bool {
+	q := g.factory.State.QuestByKey(key)
+	if q < 0 || g.questTable() == nil || q >= len(g.questTable()) {
+		return false
+	}
+	qu := g.questTable()[q]
+	return qu.Level == dlvl && qu.Active != rules.QuestNotAvail
+}
+
+// paintPieces draws the level's set pieces over the tile set's walls and floors: each drawn cell as its tile,
+// doors left to the layout's door.
+func (g *MapGenerator) paintPieces(m *gridmap.GridMap[*Actor, *Item, Object], layout *dungen.DungeonMap) {
+	if len(layout.Pieces()) == 0 {
+		return
+	}
+	ts := g.factory.State.drawnMaps.Tileset
+	for _, pc := range layout.Pieces() {
+		for y := 0; y < pc.Map.Height; y++ {
+			for x := 0; x < pc.Map.Width; x++ {
+				p := geometry.Point{X: pc.X + x, Y: pc.Y + y}
+				if id := pc.Map.TileAt(x, y); id != hhm.Empty && m.Contains(p) && layout.GetTileAt(p) != dungen.Door {
+					m.SetTile(p, g.drawnTile(m, ts, id))
+				}
+			}
+		}
+	}
+}
+
+// drawnTile is a drawn tile as the level shows it: lava is foul water in the Poisoned Water Supply (lavaTile).
+func (g *MapGenerator) drawnTile(m *gridmap.GridMap[*Actor, *Item, Object], ts *hhm.Tileset, id int) gridmap.Tile {
+	if t := TileFromDrawing(ts, id); t.DefinedIcon != defs.IconLava {
+		return t
+	}
+	return g.lavaTile(m)
 }

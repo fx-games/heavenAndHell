@@ -11,7 +11,10 @@ import (
 
 // Population is what fills a laid-out level: D1's rules for one of its level types (levels.rec's
 // "population: d1_cathedral", ...), which roll monsters, objects, items and theme rooms on the level's D1 seed.
-type Population struct{ Type int }
+type Population struct {
+	Type     int
+	SetLevel string // the quest whose set level this is (levels.rec's "quest:"), "" for a dungeon level
+}
 
 // populations are the knob's values: the level type whose rules a level is populated by.
 var populations = map[string]int{"d1_cathedral": rules.DTypeCathedral, "d1_catacombs": rules.DTypeCatacombs,
@@ -26,6 +29,7 @@ func ParsePopulation(r recfile.Record) (p Population, ok bool, err error) {
 	if p.Type = populations[v]; p.Type == 0 {
 		return p, false, fmt.Errorf("levels.rec: population %q: want one of d1_cathedral, d1_catacombs, d1_caves, d1_hell", v)
 	}
+	p.SetLevel, _ = dungeon.Field(r, "quest")
 	return p, true, nil
 }
 
@@ -55,10 +59,21 @@ func (l *Levels) Populate(gnr *rules.Generator, q *rules.Quests, seeds [rules.Nu
 	g.initLevelMonsters()
 	g.initTrans()
 	g.floodCells()
+	if p.SetLevel != "" {
+		return g.populateSetLevel(p.SetLevel, trigs), nil
+	}
 	for _, r := range m.themeRooms { // walled in by the passes: rooms of their own, as DRLG_PlaceThemeRooms marks them
 		g.mRectTrans(r[0], r[1], r[0]+r[2]-1, r[1]+r[3]-1)
 		g.themes = append(g.themes, themeLoc{room: rect{r[0], r[1], r[2], r[3]}, ttval: g.transVal - 1})
 	}
+	for i, p := range m.pieces { // Make_SetPC: monsters stay out of the set pieces; the first is D1's setpc
+		r := rect{p.X / 2, p.Y / 2, (p.Map.Width + 1) / 2, (p.Map.Height + 1) / 2}
+		if i == 0 {
+			g.setPiece = r
+		}
+		g.makeSetPC(r)
+	}
+	g.pieceQuests()
 	g.trigs = trigs
 	g.freeUpstairs()
 	g.rng.SetSeed(seed)
@@ -86,12 +101,14 @@ func (g *gen) cellAt(x, y int) DungeonTile {
 	return g.cells.GetTile(x, y)
 }
 
-// cellFlags stands in for D1's piece tables on a laid-out level: walls block everything and may hold a trap,
-// pillars and lava block the way, and everything else is open.
+// cellFlags stands in for D1's piece tables on a laid-out level: walls and closed doors block everything, walls
+// may hold a trap, pillars and lava block the way, and everything else is open.
 func (g *gen) cellFlags(x, y int) hhm.Flags {
 	switch g.cellAt(x, y) {
-	case Wall:
-		return hhm.Flags{BlocksMovement: true, BlocksView: true, BlocksMissiles: true, HoldsTrap: true}
+	case Wall: // D1's trap walls are every other wall piece, and none in the caves
+		return hhm.Flags{BlocksMovement: true, BlocksView: true, BlocksMissiles: true, HoldsTrap: g.ltype != rules.DTypeCaves && (x+y)%2 == 0}
+	case Door: // a closed door's piece is solid in D1: it parts two rooms
+		return hhm.Flags{BlocksMovement: true, BlocksView: true, BlocksMissiles: true}
 	case Pillar:
 		return hhm.Flags{BlocksMovement: true, BlocksMissiles: true}
 	case Lava:
@@ -126,7 +143,7 @@ func (g *gen) floodCells() {
 func (g *gen) addCellObjs(ltype int) {
 	doors := map[int][2]int{rules.DTypeCathedral: {rules.ObjL1LDOOR, rules.ObjL1RDOOR},
 		rules.DTypeCatacombs: {rules.ObjL2LDOOR, rules.ObjL2RDOOR}, rules.DTypeCaves: {rules.ObjL3LDOOR, rules.ObjL3RDOOR}}
-	if ltype == rules.DTypeCathedral {
+	if ltype == rules.DTypeCathedral && !g.setlevel {
 		for n := g.rnd(5) + 5; n > 0; n-- {
 			for try := 0; try < 1000; try++ {
 				x, y := g.rnd(80)+16, g.rnd(80)+16
@@ -168,26 +185,26 @@ func (g *gen) openAround(x, y int) bool {
 }
 
 // addCellTorches ports AddL2Torches on cells. D1 hangs a torch on one wall piece of each wall megatile facing
-// the floor (1 in 3) and stands one in front of another (1 in 10); on cells that is every other wall cell with
-// floor below it (TORCHL2) or to its right (TORCHR2), and a torch on the floor west or north of every other
-// (TORCHL/TORCHR), which hangTorchesOnWalls hangs on the wall.
+// the floor (1 in 3) and stands one in front of another (1 in 10); on cells that is a wall cell every eight along
+// a wall with floor below it (TORCHL2) or to its right (TORCHR2), and a torch on the floor west or north of one
+// (TORCHL/TORCHR), which hangTorchesOnWalls hangs on the wall. The spacing gives D1's count per level.
 func (g *gen) addCellTorches() {
 	for j := 0; j < 112; j++ {
 		for i := 0; i < 112; i++ {
-			if g.flags[i][j]&bflagPopulated != 0 || g.cellAt(i, j) != Wall || (i+j)%2 != 0 {
+			if g.flags[i][j]&bflagPopulated != 0 || g.cellAt(i, j) != Wall {
 				continue
 			}
 			below, right := g.cellFloor(i, j+1), g.cellFloor(i+1, j)
-			if below && !right && g.rnd(3) == 0 {
+			if below && !right && i%8 == 0 && g.rnd(3) == 0 {
 				g.addObject(rules.ObjTORCHL2, i, j)
 			}
-			if right && !below && g.rnd(3) == 0 {
+			if right && !below && j%8 == 0 && g.rnd(3) == 0 {
 				g.addObject(rules.ObjTORCHR2, i, j)
 			}
-			if g.cellFloor(i-1, j) && g.rnd(10) == 0 && g.dObj(i-1, j) == 0 { // hangTorchesOnWalls hangs it back east
+			if g.cellFloor(i-1, j) && j%8 == 0 && g.rnd(10) == 0 && g.dObj(i-1, j) == 0 { // hangTorchesOnWalls hangs it back east
 				g.addObject(rules.ObjTORCHL, i-1, j)
 			}
-			if g.cellFloor(i, j-1) && g.rnd(10) == 0 && g.dObj(i, j-1) == 0 { // and this one back south
+			if g.cellFloor(i, j-1) && i%8 == 0 && g.rnd(10) == 0 && g.dObj(i, j-1) == 0 { // and this one back south
 				g.addObject(rules.ObjTORCHR, i, j-1)
 			}
 		}
@@ -200,15 +217,148 @@ func (g *gen) addCellHookedBodies(freq int) {
 	for j := 0; j < 40; j++ {
 		for i := 0; i < 40; i++ {
 			x, y := 16+2*i, 16+2*j
-			if g.cellAt(x, y) != Wall || g.rnd(freq) != 0 || g.nearThemeRoom(i, j) {
+			if g.cellAt(x, y) != Wall || (i+j)%2 != 0 || g.rnd(freq) != 0 || g.nearThemeRoom(i, j) { // every other: D1's count
 				continue
 			}
-			switch {
-			case g.cellFloor(x+1, y) && g.cellAt(x, y+1) == Wall:
+			switch { // D1's straight walls only (megatiles 1 and 2 beside floor 6)
+			case g.cellFloor(x+1, y) && g.cellAt(x, y+1) == Wall && g.cellAt(x, y-1) == Wall:
 				g.addObject([3]int{rules.ObjTORTURE1, rules.ObjTORTURE2, rules.ObjTORTURE5}[g.rnd(3)], x+1, y)
-			case g.cellFloor(x, y+1) && g.cellAt(x+1, y) == Wall:
+			case g.cellFloor(x, y+1) && g.cellAt(x+1, y) == Wall && g.cellAt(x-1, y) == Wall:
 				g.addObject([2]int{rules.ObjTORTURE3, rules.ObjTORTURE4}[g.rnd(2)], x, y+1)
 			}
 		}
 	}
+}
+
+// pieceEntities calls fn for every entity of kind the level's set pieces carry, at its piece coordinates.
+func (g *gen) pieceEntities(kind string, fn func(p Stamped, e *hhm.Entity, x, y int)) {
+	for _, p := range g.cells.pieces {
+		for _, e := range p.Map.Entities {
+			if e.Kind == kind {
+				fn(p, e, p.X+e.X+CellOrigin, p.Y+e.Y+CellOrigin)
+			}
+		}
+	}
+}
+
+// pieceLoc is where a set piece names a spot (a unique's name, a quest's key), in piece coordinates.
+func (g *gen) pieceLoc(name string) (x, y int, ok bool) {
+	g.pieceEntities("Location", func(_ Stamped, e *hhm.Entity, ex, ey int) {
+		if e.Str("Name") == name {
+			x, y, ok = ex, ey, true
+		}
+	})
+	return
+}
+
+// pieceMonsters ports SetMapMonsters for every set piece: the monsters its map places.
+func (g *gen) pieceMonsters() {
+	g.pieceEntities("Monster", func(_ Stamped, e *hhm.Entity, x, y int) {
+		if t := g.data.MonsterByID(e.Str("ID")); t >= 0 {
+			g.placeMonster(len(g.monsters), g.addMonsterType(t, placeSpecial), x, y)
+		}
+	})
+}
+
+// pieceObjects ports LoadMapObjects for every set piece: its objects, each with the part of the level (in
+// megatiles) and the lever group it opens.
+func (g *gen) pieceObjects() {
+	byName := map[string]int{}
+	for k, o := range g.data.Objects {
+		byName[o.Name] = k
+	}
+	g.initObjFlag = true
+	g.pieceEntities("Object", func(p Stamped, e *hhm.Entity, x, y int) {
+		k, ok := byName[e.Str("ID")]
+		if !ok {
+			panic(fmt.Sprintf("set piece %s: unknown object %q", p.Map.Name, e.Str("ID")))
+		}
+		g.addObject(k, x, y)
+		o := g.objAt(x, y)
+		if o == nil {
+			return
+		}
+		var r [4]int
+		if n, _ := fmt.Sscan(e.Str("Range"), &r[0], &r[1], &r[2], &r[3]); n == 4 {
+			o.Var1, o.Var2, o.Var3, o.Var4 = p.X/2+r[0], p.Y/2+r[1], p.X/2+r[2], p.Y/2+r[3]
+		}
+		for _, q := range g.cells.pieces {
+			if q.Map.Name == e.Str("Opens") {
+				o.Var1, o.Var2, o.Var3, o.Var4 = q.X/2, q.Y/2, (q.X+q.Map.Width)/2, (q.Y+q.Map.Height)/2
+			}
+		}
+		if e.Int("Lever") != 0 {
+			o.Var8 = e.Int("Lever")
+		}
+	})
+	g.initObjFlag = false
+}
+
+// pieceItems ports the quest items a set piece lies with (the Anvil of Fury on its island).
+func (g *gen) pieceItems() {
+	g.pieceEntities("Item", func(_ Stamped, e *hhm.Entity, x, y int) { g.spawnQuestItem(e.Str("ID"), x, y, 1) })
+}
+
+// pieceQuests points each quest a set piece names a spot for (its entrance) at it, as DRLG_CheckQuests does.
+func (g *gen) pieceQuests() {
+	for q, key := range rules.QuestKeys {
+		if x, y, ok := g.pieceLoc(key); ok && q < len(g.quests) {
+			g.quests[q].X, g.quests[q].Y = x, y
+		}
+	}
+}
+
+// populateSetLevel ports LoadSetMap's population of a quest set level laid out whole from its map: the quest
+// steps entering it takes, the map's monsters and uniques and objects with their levers, no random ones.
+func (g *gen) populateSetLevel(quest string, trigs []Trigger) *Level {
+	sl := rules.SLNone
+	for q, key := range rules.QuestKeys {
+		if key == quest && q < len(g.quests) {
+			sl = g.quests[q].SetLevel
+		}
+	}
+	if sl == rules.SLNone {
+		panic(fmt.Sprintf("quest %q has no D1 set level", quest))
+	}
+	g.setlevel, g.setLvlNum = true, sl
+	switch sl {
+	case rules.SLSkelKing:
+		if q := &g.quests[rules.QSkelKing]; q.Active == rules.QuestInit {
+			q.Active, q.Var1 = rules.QuestActive, 1
+		}
+	case rules.SLPoisonWater:
+		if q := &g.quests[rules.QPWater]; q.Active == rules.QuestInit {
+			q.Active = rules.QuestActive
+		}
+	case rules.SLVileBetrayer:
+		if q := &g.quests[rules.QBetrayer]; q.Active == rules.QuestDone {
+			q.Var2 = 4
+		} else if q.Active == rules.QuestActive {
+			q.Var2 = 3
+		}
+	}
+	for i := range trigs {
+		trigs[i].Msg = TrigReturnLevel
+	}
+	g.trigs = trigs
+	g.getLevelMTypes(sl)
+	g.addMonsterType(rules.MtGOLEM, placeSpecial)
+	for i := 0; i < 4; i++ {
+		g.monsters[g.addMonster(1, 0, 0, 0, false)].Reserved = true
+	}
+	if sl == rules.SLVileBetrayer {
+		for _, u := range []int{umtLazarus, umtRedVex, umtBlackJade} {
+			g.addMonsterType(g.uniqueType(u), placeUnique)
+		}
+		for _, u := range []int{umtLazarus, umtRedVex, umtBlackJade} {
+			g.placeUniqueMonst(u, 0, 0)
+		}
+	}
+	g.pieceMonsters()
+	g.initMonsters(sl)
+	g.clrAllObjects()
+	g.pieceObjects()
+	g.addCellObjs(g.ltype)
+	g.initItems()
+	return g.output(sl)
 }

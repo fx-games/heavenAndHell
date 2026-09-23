@@ -1,0 +1,32 @@
+[map] piece_l1_butcher
+DisplayName	piece_l1_butcher
+
+[tiles] 12 12
+ 64  64  64  64  64  64  64  64  64  64  64  64
+ 64  64  64  64  64  64  64  64  64  64  64  64
+ 64  64  56  56  56  56  56  56  56  56  56  64
+ 64  64  56  64  64  64  64  64  64  64 183  64
+ 64  64  56  64  64  64  64  64  64  64  56  64
+ 64  64  56  64  64  64  64  64  64  64 183  64
+ 64  64  56  64  64  64  64  64  64  64  56  64
+ 64  64  56  64  64  64  64  64  64  64  64  64
+ 64  64  56  64  64  64  64  64  64  64  56  64
+ 64  64  56  64  64  64  64  64  64  64 183  64
+ 64  64  56 183  56 183  56 183  56 183 828  64
+ 64  64  64  64  64  64  64  64  64  64  64  64
+
+[entities]
+Object	5	2	ID=OBJ_TORTURE3
+Object	7	2	ID=OBJ_TORTURE4
+Location	3	3	Name=The Butcher
+Object	5	3	ID=OBJ_TNUDEM3
+Object	3	4	ID=OBJ_TORTURE1
+Object	5	4	ID=OBJ_TNUDEW2
+Object	6	5	ID=OBJ_TNUDEM4
+Object	7	5	ID=OBJ_TNUDEW3
+Object	3	6	ID=OBJ_TORTURE2
+Object	4	6	ID=OBJ_TNUDEM1
+Object	5	7	ID=OBJ_TNUDEW1
+Door	10	7
+Object	3	8	ID=OBJ_TORTURE5
+Object	7	8	ID=OBJ_TNUDEM2

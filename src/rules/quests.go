@@ -157,8 +157,8 @@ func (d *Data) InitQuests(seeds [NumLevels]int32) (q Quests) {
 }
 
 // loadQuests reads quests.rec and puts the quests the engine knows at their quest ids, whatever order the file
-// lists them in. Each one's level is the depth of its quests.rec "level"; its set level, if levels.rec has a
-// d1_set record naming the quest, is that record's set piece and tile set.
+// lists them in. Each one's level is the depth of its quests.rec "level"; its set level, if a levels.rec record names the
+// quest, is that record's set piece and tile set.
 func loadQuests(fsys fs.FS, d *Data) error {
 	all, triggers, err := defs.ReadQuests(fsys)
 	if err != nil {
@@ -184,8 +184,8 @@ func loadQuests(fsys fs.FS, d *Data) error {
 	for _, r := range levels {
 		m := r.ToMap("")
 		depth[m.GetStringOrDefault("map", "")] = m.GetIntOrDefault("depth", 0)
-		if m.GetStringOrDefault("generator", "") == "d1_set" {
-			setTiles[m.GetStringOrDefault("quest", "")] = m.GetStringOrDefault("tiles", "")
+		if q := m.GetStringOrDefault("quest", ""); q != "" { // a quest's set level, whatever lays it out
+			setTiles[q] = m.GetStringOrDefault("tiles", "")
 		}
 	}
 	for id, key := range QuestKeys {

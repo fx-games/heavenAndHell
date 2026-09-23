@@ -277,33 +277,14 @@ func (g *gen) placeUniqueMonst(u, minionType, bosspacksize int) {
 			break
 		}
 	}
-	switch u {
-	case umtSnotspil:
-		xp, yp = 2*g.setPiece.x+24, 2*g.setPiece.y+28
-	case umtWarlord:
-		xp, yp = 2*g.setPiece.x+22, 2*g.setPiece.y+23
-	case umtZhar:
-		if g.zharlib >= 0 && g.zharlib < len(g.themes) {
+	if g.cells != nil { // a laid-out level: its set pieces name where their uniques stand
+		if x, y, ok := g.pieceLoc(uniq.Name); ok {
+			xp, yp = x, y
+		} else if u == umtZhar && g.zharlib >= 0 && g.zharlib < len(g.themes) {
 			xp, yp = 2*g.themes[g.zharlib].room.x+20, 2*g.themes[g.zharlib].room.y+20
 		}
-	case umtLazarus:
-		xp, yp = 32, 46
-	case umtRedVex:
-		xp, yp = 40, 45
-	case umtBlackJade:
-		xp, yp = 38, 49
-	case umtSkelKing:
-		xp, yp = 35, 47
-	case umtButcher:
-		if g.cells != nil {
-			break // ponytail: his room is a set piece; until it is stamped he stands where the roll above put him
-		}
-		done := false
-		for yp = 0; yp < 112 && !done; yp++ {
-			for xp = 0; xp < 112 && !done; xp++ {
-				done = g.piece[xp][yp]+1 == 367
-			}
-		}
+	} else {
+		xp, yp = g.fixedUniqueSpot(u, xp, yp)
 	}
 	slot := len(g.monsters)
 	g.placeMonster(slot, uniqtype, xp, yp)
@@ -359,21 +340,26 @@ func (g *gen) placeQuestMonsters(setLevel int) {
 	if g.available(rules.QButcher) {
 		g.placeUniqueMonst(umtButcher, 0, 0)
 	}
+	if g.cells != nil {
+		g.pieceMonsters()
+	}
 	sp := g.setPiece
-	if g.available(rules.QLtBanner) {
+	if g.available(rules.QLtBanner) && g.cells == nil {
 		g.setMapMonsters(g.loadDun("l1/banner1"), 2*sp.x, 2*sp.y)
 	}
-	if g.available(rules.QBlood) {
+	if g.available(rules.QBlood) && g.cells == nil {
 		g.setMapMonsters(g.loadDun("l2/blood2"), 2*sp.x, 2*sp.y)
 	}
-	if g.available(rules.QBlind) {
+	if g.available(rules.QBlind) && g.cells == nil {
 		g.setMapMonsters(g.loadDun("l2/blind2"), 2*sp.x, 2*sp.y)
 	}
-	if g.available(rules.QAnvil) {
+	if g.available(rules.QAnvil) && g.cells == nil {
 		g.setMapMonsters(g.loadDun("l3/anvil"), 2*sp.x+2, 2*sp.y+2)
 	}
 	if g.available(rules.QWarlord) {
-		g.setMapMonsters(g.loadDun("l4/warlord"), 2*sp.x, 2*sp.y)
+		if g.cells == nil {
+			g.setMapMonsters(g.loadDun("l4/warlord"), 2*sp.x, 2*sp.y)
+		}
 		g.addMonsterType(g.uniqueType(umtWarlord), placeScatter)
 	}
 	if g.available(rules.QVeil) {
@@ -452,7 +438,7 @@ func (g *gen) initMonsters(setLevel int) {
 		for i := 0; i < 4; i++ {
 			g.monsters[g.addMonster(1, 0, 0, 0, false)].Reserved = true
 		}
-		if g.currlevel == 16 {
+		if g.currlevel == 16 && g.cells == nil {
 			g.loadDiabMonsts()
 		}
 	}
@@ -533,4 +519,34 @@ func (g *gen) setMapMonsters(d dun, startx, starty int) {
 			}
 		}
 	}
+}
+
+// fixedUniqueSpot is where D1's own generators put a unique: in its set piece, its theme room, its set level.
+func (g *gen) fixedUniqueSpot(u, xp, yp int) (int, int) {
+	switch u {
+	case umtSnotspil:
+		xp, yp = 2*g.setPiece.x+24, 2*g.setPiece.y+28
+	case umtWarlord:
+		xp, yp = 2*g.setPiece.x+22, 2*g.setPiece.y+23
+	case umtZhar:
+		if g.zharlib >= 0 && g.zharlib < len(g.themes) {
+			xp, yp = 2*g.themes[g.zharlib].room.x+20, 2*g.themes[g.zharlib].room.y+20
+		}
+	case umtLazarus:
+		xp, yp = 32, 46
+	case umtRedVex:
+		xp, yp = 40, 45
+	case umtBlackJade:
+		xp, yp = 38, 49
+	case umtSkelKing:
+		xp, yp = 35, 47
+	case umtButcher:
+		done := false
+		for yp = 0; yp < 112 && !done; yp++ {
+			for xp = 0; xp < 112 && !done; xp++ {
+				done = g.piece[xp][yp]+1 == 367
+			}
+		}
+	}
+	return xp, yp
 }

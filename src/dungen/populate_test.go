@@ -5,58 +5,65 @@ import (
 	"strings"
 	"testing"
 
+	"rpg/src/dungeon"
 	"rpg/src/geometry"
-	"rpg/src/recfile"
+	"rpg/src/hhm"
 	"rpg/src/rules"
 )
 
-// standIn is levels.rec's record for D1 level type ltype, as the d1 mod declares it.
-func standIn(t testing.TB, ltype int) Layout {
+// standIns are the d1 mod's dungeon levels by depth, as levels.rec declares them (layout, passes, population).
+func standIns(t testing.TB) map[int]dungeon.Config {
 	t.Helper()
 	recs, err := rules.ReadRec(testFS(), "levels.rec")
 	if err != nil {
 		t.Fatal(err)
 	}
-	pop := map[int]string{1: "d1_cathedral", 2: "d1_catacombs", 3: "d1_caves", 4: "d1_hell"}[ltype]
+	out := map[int]dungeon.Config{}
 	for _, r := range recs {
-		if v, _ := fieldOf(r, "population"); v == pop {
-			gen, _ := fieldOf(r, "generator")
-			cfg, err := WithPasses(Layouts[gen]).Parse(r)
-			if err != nil {
-				t.Fatal(err)
-			}
-			return cfg.(Layout)
+		if _, ok := dungeon.Field(r, "population"); !ok {
+			continue
 		}
+		gen, _ := dungeon.Field(r, "generator")
+		cfg, err := WithPasses(Layouts[gen]).Parse(r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		depth, _ := dungeon.Int(r, "depth", 0)
+		out[depth] = cfg
 	}
-	t.Skipf("levels.rec has no level populated as %s", pop)
-	return nil
+	return out
 }
 
-func fieldOf(r recfile.Record, k string) (string, bool) {
-	for _, f := range r {
-		if f.Name == k {
-			return strings.TrimSpace(f.Value), true
-		}
-	}
-	return "", false
-}
-
-// TestPopulateStandIns lays out each level type's stand-in and populates it by D1's rules: every monster,
-// object and item stands on open ground the stairs reach (wall torches and traps on the wall they hang in).
+// TestPopulateStandIns builds every dungeon level of several games the way the game does (quests rolled from the
+// seed, their set pieces laid in, D1's population) and checks what the player needs: every monster, object and
+// item on ground the stairs reach, unless a set piece walls it in until it opens; every set piece's spots (quest
+// entrances, stairs, uniques) reachable, when they are not in what the piece opens later.
 func TestPopulateStandIns(t *testing.T) {
 	d, err := rules.Load(testFS())
 	if err != nil {
 		t.Fatal(err)
 	}
-	for ltype := 1; ltype <= 4; ltype++ {
-		layout := standIn(t, ltype)
-		for game := int32(1); game <= 8; game++ {
-			dlvl := 4*(ltype-1) + 1 + int(game)%3 // not a level whose set piece fills it
-			seeds := rules.LevelSeeds(game * 7919)
-			q := d.InitQuests(seeds)
-			m, err := layout.Build(rand.New(rand.NewSource(int64(game))), nil)
+	levels := standIns(t)
+	for game := int32(1); game <= 6; game++ {
+		seeds := rules.LevelSeeds(game * 7919)
+		q := d.InitQuests(seeds)
+		for dlvl := 1; dlvl <= 16; dlvl++ {
+			cfg, ok := levels[dlvl]
+			if !ok {
+				t.Fatalf("levels.rec has no populated level %d", dlvl)
+			}
+			pop, _ := PopulationOf(cfg)
+			cfg = WithQuests(cfg, func(key string) bool {
+				for i, k := range rules.QuestKeys {
+					if k == key {
+						return q[i].Level == dlvl && q[i].Active != rules.QuestNotAvail
+					}
+				}
+				return false
+			})
+			m, err := cfg.(Layout).Build(rand.New(rand.NewSource(int64(game)*100+int64(dlvl))), testFS())
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("game %d level %d: %v", game, dlvl, err)
 			}
 			var floor []geometry.Point
 			for y := 0; y < LevelSize; y++ {
@@ -68,9 +75,9 @@ func TestPopulateStandIns(t *testing.T) {
 			}
 			up, down := floor[0], floor[len(floor)-1]
 			trigs := []Trigger{{up.X + CellOrigin, up.Y + CellOrigin, TrigPrevLevel}, {down.X + CellOrigin, down.Y + CellOrigin, TrigNextLevel}}
-			lvl, err := testLevels(t).Populate(rules.NewGenerator(d, game), &q, seeds, dlvl, Population{ltype}, m, trigs)
+			lvl, err := testLevels(t).Populate(rules.NewGenerator(d, game), &q, seeds, dlvl, pop, m, trigs)
 			if err != nil {
-				t.Fatalf("type %d game %d: %v", ltype, game, err)
+				t.Fatalf("game %d level %d: %v", game, dlvl, err)
 			}
 			reach := map[geometry.Point]bool{up: true}
 			for queue := []geometry.Point{up}; len(queue) > 0; queue = queue[1:] {
@@ -81,9 +88,23 @@ func TestPopulateStandIns(t *testing.T) {
 					}
 				}
 			}
+			if !reach[down] {
+				t.Errorf("game %d level %d: the stairs do not reach each other", game, dlvl)
+			}
+			inPiece := func(p geometry.Point) bool {
+				for _, s := range m.Pieces() {
+					if p.X >= s.X && p.Y >= s.Y && p.X < s.X+s.Map.Width && p.Y < s.Y+s.Map.Height {
+						return true
+					}
+				}
+				return false
+			}
 			check := func(x, y int, what string) {
-				if !reach[geometry.Point{X: x - CellOrigin, Y: y - CellOrigin}] {
-					t.Errorf("type %d game %d level %d: %s at %d,%d is not on floor the stairs reach", ltype, game, dlvl, what, x-CellOrigin, y-CellOrigin)
+				if x == 0 && y == 0 {
+					return // Theme_WeaponRack's second tfitObj3 can fail and leave the rack at 0,0, off the map, as in D1
+				}
+				if p := (geometry.Point{X: x - CellOrigin, Y: y - CellOrigin}); !reach[p] && !inPiece(p) {
+					t.Errorf("game %d level %d: %s at %d,%d is not on floor the stairs reach", game, dlvl, what, p.X, p.Y)
 				}
 			}
 			n := 0
@@ -94,16 +115,60 @@ func TestPopulateStandIns(t *testing.T) {
 				}
 			}
 			if n < 20 {
-				t.Errorf("type %d game %d level %d: only %d monsters", ltype, game, dlvl, n)
+				t.Errorf("game %d level %d: only %d monsters", game, dlvl, n)
 			}
 			for _, o := range lvl.Objects {
-				if name := d.Objects[o.Kind].Name; o.Kind != rules.ObjTRAPL && o.Kind != rules.ObjTRAPR && !strings.Contains(name, "TORCH") {
+				if name := d.Objects[o.Kind].Name; o.Kind != rules.ObjTRAPL && o.Kind != rules.ObjTRAPR && !strings.Contains(name, "TORCH") && !o.DoorFlag {
 					check(o.X, o.Y, "object "+name)
 				}
 			}
 			for _, it := range lvl.Items {
 				check(it.X, it.Y, "item")
 			}
+			// every spot a piece names is reached, once the piece has opened (its quest walls it in until then)
+			open := reachable(t, m, up, true)
+			for _, s := range m.Pieces() {
+				for _, e := range s.Map.Entities {
+					if p := (geometry.Point{X: s.X + e.X, Y: s.Y + e.Y}); e.Kind == "Location" && !open[p] {
+						t.Errorf("game %d level %d: %s's %s at %d,%d is out of reach", game, dlvl, s.Map.Name, e.Str("Name"), p.X, p.Y)
+					}
+				}
+			}
 		}
 	}
+}
+
+// reachable is the cells walkable from start, with every set piece opened when opened is set.
+func reachable(t testing.TB, m *DungeonMap, start geometry.Point, opened bool) map[geometry.Point]bool {
+	proj, err := loadTemplates(testFS(), hhm.Dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	recs, err := hhm.ReadTileRecords(testFS(), "assets/data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	walk := func(p geometry.Point) bool {
+		for _, s := range m.Pieces() {
+			if x, y := p.X-s.X, p.Y-s.Y; opened && s.Open != nil && s.Open.TileAt(x, y) != hhm.Empty {
+				door := false
+				for _, e := range s.Open.EntitiesAt(x, y) {
+					door = door || e.Kind == "Door"
+				}
+				k := cellKind(hhm.DrawnTile(proj.Tileset, recs, s.Open.TileAt(x, y)).Flags, door)
+				return k == Room || k == Door
+			}
+		}
+		return m.IsWalkable(p)
+	}
+	reach := map[geometry.Point]bool{start: true}
+	for queue := []geometry.Point{start}; len(queue) > 0; queue = queue[1:] {
+		for _, dir := range geometry.Dirs {
+			if n := queue[0].Add(dir); m.Contains(n) && walk(n) && !reach[n] {
+				reach[n] = true
+				queue = append(queue, n)
+			}
+		}
+	}
+	return reach
 }

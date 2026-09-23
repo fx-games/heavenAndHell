@@ -157,7 +157,11 @@ func (g *gen) addBookLever(x1, y1, x2, y2, msg int) {
 	}
 	if g.available(rules.QBlood) {
 		xp, yp = 2*g.setPiece.x+25, 2*g.setPiece.y+40
-		g.addObject(rules.ObjBLOODBOOK, xp, yp)
+		if g.cells == nil {
+			g.addObject(rules.ObjBLOODBOOK, xp, yp)
+		} else if x, y, ok := g.objectOfKind(rules.ObjBLOODBOOK); ok { // the piece's own
+			xp, yp = x, y
+		}
 	}
 	o := g.objAt(xp, yp)
 	if o == nil {
@@ -485,7 +489,11 @@ func (g *gen) getRndObjLoc(randarea int) (int, int) {
 func (g *gen) initObjects(seeds [rules.NumLevels]int32) {
 	g.clrAllObjects()
 	if g.currlevel == 16 {
-		g.addDiabObjs()
+		if g.cells != nil {
+			g.pieceObjects()
+		} else {
+			g.addDiabObjs()
+		}
 		return
 	}
 	g.initObjFlag = true
@@ -510,15 +518,18 @@ func (g *gen) initObjects(seeds [rules.NumLevels]int32) {
 		g.addStoryBooks(seeds)
 	}
 	sp := g.setPiece
+	if g.cells != nil {
+		g.pieceObjects() // the set pieces' own: the Butcher's tortures, the candles, the sign chest, the levers
+	}
 	switch g.ltype {
 	case rules.DTypeCathedral:
-		if g.available(rules.QButcher) {
+		if g.available(rules.QButcher) && g.cells == nil {
 			g.addTortures()
 		}
-		if g.available(rules.QPWater) {
+		if g.available(rules.QPWater) && g.cells == nil {
 			g.addCandles()
 		}
-		if g.available(rules.QLtBanner) {
+		if g.available(rules.QLtBanner) && g.cells == nil {
 			g.addObject(rules.ObjSIGNCHEST, 2*sp.x+26, 2*sp.y+19)
 		}
 		g.initRndLocBigObj(10, 15, rules.ObjSARC)
@@ -535,11 +546,15 @@ func (g *gen) initObjects(seeds [rules.NumLevels]int32) {
 		g.addL2Torches()
 		if g.available(rules.QBlind) {
 			g.addBookLever(sp.x, sp.y, sp.w+sp.x+1, sp.h+sp.y+1, 0)
-			g.loadMapObjs(g.loadDun("l2/blind2"), 2*sp.x, 2*sp.y)
+			if g.cells == nil {
+				g.loadMapObjs(g.loadDun("l2/blind2"), 2*sp.x, 2*sp.y)
+			}
 		}
 		if g.available(rules.QBlood) {
 			g.addBookLever(sp.x, sp.y+3, sp.x+2, sp.y+7, 0)
-			g.addObject(rules.ObjPEDISTAL, 2*sp.x+25, 2*sp.y+32)
+			if g.cells == nil {
+				g.addObject(rules.ObjPEDISTAL, 2*sp.x+25, 2*sp.y+32)
+			}
 		}
 		g.initRndBarrels()
 	case rules.DTypeCaves:
@@ -548,7 +563,9 @@ func (g *gen) initObjects(seeds [rules.NumLevels]int32) {
 	case rules.DTypeHell:
 		if g.available(rules.QWarlord) {
 			g.addBookLever(sp.x, sp.y, sp.x+sp.w, sp.y+sp.h, 0)
-			g.loadMapObjs(g.loadDun("l4/warlord"), 2*sp.x, 2*sp.y)
+			if g.cells == nil {
+				g.loadMapObjs(g.loadDun("l4/warlord"), 2*sp.x, 2*sp.y)
+			}
 		}
 		if g.available(rules.QBetrayer) {
 			g.addLazStand()
@@ -834,4 +851,14 @@ func objKindOrNone(o *rules.Object) int {
 		return -1
 	}
 	return o.Kind
+}
+
+// objectOfKind is where the first object of that kind stands.
+func (g *gen) objectOfKind(kind int) (int, int, bool) {
+	for _, oi := range g.objectactive[:g.nobjects] {
+		if o := g.objects[oi]; o.Kind == kind {
+			return o.X, o.Y, true
+		}
+	}
+	return 0, 0, false
 }

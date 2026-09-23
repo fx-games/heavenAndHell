@@ -1,0 +1,45 @@
+[map] piece_l4_diab4
+DisplayName	piece_l4_diab4
+
+[tiles] 18 18
+  9   9   9   9   9   9   9   9   9   9   9   9   9   9   9   9   9 186
+  9   9   9   9   9   9   9   9   9   9   9   9   9   9   9   9   9 186
+  9   9   9   9   9   9   9   9   9   9   9   9   9   9   9   9   9 186
+  9   9   9 186 186 186 186 186 186 186 186 186 186 186   9   9   9 186
+  9   9   9 186 186 186 186 186 186 186 186 186 186 186   9   9   9 186
+  9   9   9 186 186 186 186 186 186 186 186 186 186 186   9   9   9 186
+  9   9   9 186 186 186 186 186 186 186 186 186 186 186   9   9   9 186
+  9   9   9   9 186 186 186 186 186 186 186 186 186 186   9   9   9 186
+  9   9   9 186 186 186 186 186 186 186 186 186 186 186   9   9   9 186
+  9   9   9 186 186 186 186 186 186 186 186 186 186 186   9   9   9 186
+  9   9   9 186 186 186 186 186 186 186 186 186 186 186   9   9   9 186
+  9   9   9   9 186 186 186 186 186 186 186 186 186 186   9   9   9   9
+  9   9   9 186 186 186 186 186 186 186 186 186 186 186   9   9   9 186
+  9   9   9 186 186 186 186 186 186 186 186 186 186 186   9   9   9 186
+  9   9   9   9   9   9   9   9   9   9   9   9   9   9   9   9   9 186
+  9   9   9   9   9   9   9   9   9   9   9   9   9   9   9   9   9 186
+  9   9   9   9   9   9   9   9   9   9   9   9   9   9   9   9   9 186
+186 186 186 186 186 186 186 186 186 186 186 186 186 186 186 186 186 186
+
+[entities]
+Monster	4	4	ID=MT_RBLACK
+Monster	8	4	ID=MT_RBLACK
+Monster	10	4	ID=MT_RBLACK
+Monster	12	4	ID=MT_RBLACK
+Monster	4	6	ID=MT_NBLACK
+Monster	6	6	ID=MT_ADVOCATE
+Monster	8	6	ID=MT_ADVOCATE
+Monster	10	6	ID=MT_ADVOCATE
+Monster	4	8	ID=MT_RBLACK
+Monster	6	8	ID=MT_ADVOCATE
+Monster	8	8	ID=MT_DIABLO
+Monster	10	8	ID=MT_ADVOCATE
+Monster	12	8	ID=MT_RBLACK
+Monster	6	10	ID=MT_ADVOCATE
+Monster	8	10	ID=MT_ADVOCATE
+Monster	10	10	ID=MT_ADVOCATE
+Monster	12	10	ID=MT_RBLACK
+Monster	4	12	ID=MT_RBLACK
+Monster	6	12	ID=MT_RBLACK
+Monster	8	12	ID=MT_RBLACK
+Monster	12	12	ID=MT_RBLACK

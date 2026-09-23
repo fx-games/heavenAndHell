@@ -261,16 +261,26 @@ func (g *MapGenerator) cleanWater(m *gridmap.GridMap[*Actor, *Item, Object]) {
 // layout and are redrawn, with the doors AddL1Objs/AddL2Objs add. Nothing happens if they already switched.
 func (g *MapGenerator) changeMap(m *gridmap.GridMap[*Actor, *Item, Object], x1, y1, x2, y2 int) {
 	lvl := g.generated[m.GetName()]
-	if lvl == nil || !lvl.ChangeMap(x1, y1, x2, y2) {
+	if lvl == nil {
 		return
 	}
-	g.setTiles(m, lvl, 2*x1, 2*y1, 2*x2+1, 2*y2+1, func(p geometry.Point) bool {
-		if obj, ok := m.TryGetObjectAt(p); ok { // a door built before the change stays a door, not a wall under its object
-			_, isDoor := obj.(*Door)
-			return isDoor
+	if lvl.Pieces != nil { // a laid-out level: its set pieces open cell by cell
+		cells := lvl.OpenCells(x1, y1, x2, y2)
+		if len(cells) == 0 {
+			return
 		}
-		return lvl.CellDoor(p.X, p.Y)
-	})
+		g.openCells(m, cells)
+	} else if !lvl.ChangeMap(x1, y1, x2, y2) {
+		return
+	} else {
+		g.setTiles(m, lvl, 2*x1, 2*y1, 2*x2+1, 2*y2+1, func(p geometry.Point) bool {
+			if obj, ok := m.TryGetObjectAt(p); ok { // a door built before the change stays a door, not a wall under its object
+				_, isDoor := obj.(*Door)
+				return isDoor
+			}
+			return lvl.CellDoor(p.X, p.Y)
+		})
+	}
 	waiting := g.walledIn[m.GetName()][:0]
 	for _, a := range g.walledIn[m.GetName()] {
 		if p := a.MapPosition(); canPlaceMonster(m, p) {
@@ -302,5 +312,30 @@ func TileFromDrawing(ts *hhm.Tileset, id int) gridmap.Tile {
 		IsTransparent:      !t.Flags.BlocksView,
 		IsMissilePassable:  !t.Flags.BlocksMissiles,
 		Special:            special,
+	}
+}
+
+// openCells redraws the cells a set piece's open layout changed: its tile, or a door on floor.
+func (g *MapGenerator) openCells(m *gridmap.GridMap[*Actor, *Item, Object], cells []dungen.OpenCell) {
+	ts := g.factory.State.drawnMaps.Tileset
+	doors := g.doorTiles[m.GetName()]
+	for _, c := range cells {
+		p := geometry.Point{X: c.X, Y: c.Y}
+		if _, ok := m.GetTransitionAt(p); ok {
+			continue
+		}
+		if c.Object != "" {
+			if k, ok := g.factory.objectKind(c.Object); ok && !m.IsObjectAt(p) {
+				placeObject(g.factory, m, g.generated[m.GetName()], &rules.Object{Kind: k, X: c.X + dungen.CellOrigin, Y: c.Y + dungen.CellOrigin, Index: -1, Active: true}, p)
+			}
+		}
+		if c.Door {
+			m.SetTile(p, dungenFloor(doors[0]))
+			if !m.IsObjectAt(p) {
+				m.AddObject(NewDoor(doors[1], doors[2]), p)
+			}
+			continue
+		}
+		m.SetTile(p, g.drawnTile(m, ts, c.Tile))
 	}
 }

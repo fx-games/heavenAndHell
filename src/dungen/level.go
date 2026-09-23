@@ -45,6 +45,50 @@ type Level struct {
 	Uber, Cornerstone    [2]int    // the Crypt: Na-Krul's door (UberRow/UberCol) and the Cornerstone of the World
 	til                  []byte
 	parts                megaParts // the level type's megatile map parts (CellTile)
+	Pieces               []Stamped // a laid-out level's set pieces (Populate); nil for D1's own generators
+	opened               map[[2]int]bool
+}
+
+// OpenCell is a cell of a set piece that switched to the piece's open layout: its new tile, or a door.
+type OpenCell struct {
+	X, Y, Tile int
+	Door       bool
+	Object     string // an object the open layout places here (Blood2's torches), "" for none
+}
+
+// OpenCells ports ObjChangeMap on a laid-out level: the cells of megatiles (x1, y1)..(x2, y2) that a set piece
+// draws differently in its open layout switch to it. Each cell switches once; the cells that did are returned.
+func (l *Level) OpenCells(x1, y1, x2, y2 int) []OpenCell {
+	var out []OpenCell
+	for _, p := range l.Pieces {
+		if p.Open == nil {
+			continue
+		}
+		doors, objs := map[[2]int]bool{}, map[[2]int]string{}
+		for _, e := range p.Open.Entities {
+			switch e.Kind {
+			case "Door":
+				doors[[2]int{e.X, e.Y}] = true
+			case "Object":
+				objs[[2]int{e.X, e.Y}] = e.Str("ID")
+			}
+		}
+		for y := max(2*y1, p.Y); y <= min(2*y2+1, p.Y+p.Open.Height-1); y++ {
+			for x := max(2*x1, p.X); x <= min(2*x2+1, p.X+p.Open.Width-1); x++ {
+				lx, ly := x-p.X, y-p.Y
+				t, door, obj := p.Open.TileAt(lx, ly), doors[[2]int{lx, ly}], objs[[2]int{lx, ly}]
+				if l.opened[[2]int{x, y}] || t == p.Map.TileAt(lx, ly) && !door && obj == "" {
+					continue
+				}
+				if l.opened == nil {
+					l.opened = map[[2]int]bool{}
+				}
+				l.opened[[2]int{x, y}] = true
+				out = append(out, OpenCell{x, y, t, door, obj})
+			}
+		}
+	}
+	return out
 }
 
 // OpenNakrulRoom ports SyncNakrulRoom: Na-Krul's door opens. It reports whether anything changed.
@@ -396,6 +440,9 @@ func (g *gen) output(setLevel int) *Level {
 	}
 	for i, q := range g.l4.quads {
 		l.DiabloQuads[i] = [2]int{q.x, q.y}
+	}
+	if g.cells != nil {
+		l.Pieces = g.cells.pieces
 	}
 	l.Monsters = g.monsters
 	for _, oi := range g.objectactive[:g.nobjects] {

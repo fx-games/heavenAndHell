@@ -114,10 +114,10 @@ func (f *Factory) completeQuest(q int) {
 	f.Msg(fmt.Sprintf("Quest completed: %s", f.State.QuestDefs()[q].Name))
 }
 
-// setQuest is the quest whose set level (a d1_set record) level id is, -1 for any other level.
+// setQuest is the quest whose set level (a record with population and quest) level id is, -1 for any other level.
 func (s *State) setQuest(id string) int {
-	if cfg, ok := s.Level(id).Config.(dungen.SetLevelParams); ok {
-		return s.QuestByKey(cfg.Quest)
+	if p, ok := dungen.PopulationOf(s.Level(id).Config); ok && p.SetLevel != "" {
+		return s.QuestByKey(p.SetLevel)
 	}
 	return -1
 }

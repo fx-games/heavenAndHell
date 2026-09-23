@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"rpg/src/defs"
-	"rpg/src/dungen"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
 	"rpg/src/rules"
@@ -138,7 +137,7 @@ func (s *State) keepsLevel(id string) bool {
 	if s.dungeonRules.QuestLevelsFollow {
 		return false
 	}
-	if _, set := l.Config.(dungen.SetLevelParams); set {
+	if s.setQuest(id) >= 0 {
 		return true
 	}
 	return slices.ContainsFunc(s.QuestDefs(), func(q defs.Quest) bool { return q.Level == id })

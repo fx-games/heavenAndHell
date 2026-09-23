@@ -30,7 +30,11 @@ type DungeonMap struct {
 	loopDoors  map[geometry.Point]bool // doorways addMoreDoors opened: there is always another way round
 	themeRooms [][4]int                // the theme rooms a pass walled in: x, y, w, h in grid units before scaling
 	scale      int                     // cells per grid unit the passes drew with (0: not drawn by them)
+	pieces     []Stamped               // the set pieces laid into it
 }
+
+// Pieces are the set pieces laid into the level, for the painter and the population.
+func (m *DungeonMap) Pieces() []Stamped { return m.pieces }
 
 // IsLoopDoor reports a door addMoreDoors placed: shutting it cuts no part of the level off.
 func (m *DungeonMap) IsLoopDoor(p geometry.Point) bool {
