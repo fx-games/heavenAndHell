@@ -160,7 +160,7 @@ func isLavaMega(v byte) bool  { return v >= 15 && v <= 45 }
 func isFenceMega(v byte) bool { return v >= 121 && v <= 153 }
 
 // cathedralSeeThrough is what the Cathedral megatiles with pieces D1's sight passes are drawn as: arches, fences,
-// the pillar and the lamp (drlg_l1_data.go's t1*Arch*, t1*Fence*, t1Pillar, l1LAMPS).
+// the pillar and the lamp (drlg_l1_tiles.go's t1*Arch*, t1*Fence*, t1Pillar, l1LAMPS).
 func cathedralSeeThrough() map[byte]gridmap.Tile {
 	arch := gridmap.Tile{DefinedIcon: defs.IconArch, DefinedDescription: "an arch", IsTransparent: true}
 	grate := gridmap.Tile{DefinedIcon: defs.IconGrate, DefinedDescription: "a grate", IsTransparent: true}
