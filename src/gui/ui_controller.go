@@ -1198,7 +1198,7 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 	tileAt := currentMap.GetCell(mapPos).TileType
 	worldIcon, worldTileColor := u.getTileIcon(tileAt)
 	if tileAt.Special == gridmap.SpecialTileWater {
-		worldTileColor = state.GetWaterColor()
+		worldTileColor = state.WaterColorOf(tileAt)
 	}
 
 	// animate the worldIcon

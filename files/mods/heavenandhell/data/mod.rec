@@ -22,6 +22,7 @@
 #                           source that names no light_color. Default 255 255 255
 #   AuraLightFlicker        its flicker: fire, smooth, steady or numbers, as items.rec's light_flicker_pattern.
 #                           Default steady. AuraLightFlickerDelay: seconds per frame, default 1
+#   DamageNotation          dice: damage shows as NdS+B (2d6+1); interval: as min-max (3-13). Default interval
 #   Font                    the UI font, a file in the mod's fonts/ folder. Required. Only a default: the player
 #                           picks another in the menus
 #   TitleImage              optional: a file directly under the mod's folder, shown as a splash screen on startup
@@ -41,3 +42,4 @@ TitleImage: heaven_and_hell_title.png
 AuraLightColor: 255 223 117
 AuraLightFlicker: fire
 AuraLightFlickerDelay: 0.125
+DamageNotation: dice

@@ -1,5 +1,5 @@
 // Package d1 holds Diablo 1's data tables (loaded verbatim from assets/data) and its generation rules.
-// Enum columns stay strings (e.g. "IPL_TOHIT", "AI_ZOMBIE"); only bitfields are numbers.
+// Enum columns stay strings (e.g. "to_hit", "AI_ZOMBIE"); only bitfields are numbers.
 package rules
 
 import (
@@ -371,7 +371,7 @@ func load(fsys fs.FS) (*Data, error) {
 	}
 	affixes := func(rows []row) (out []Affix) {
 		for _, r := range rows {
-			if r.s("PLPower") == "IPL_INVALID" {
+			if r.s("PLPower") == "none" {
 				break
 			}
 			itype := 0

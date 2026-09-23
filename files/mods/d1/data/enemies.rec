@@ -13,14 +13,15 @@
 #   speed_recovery    AUT a hard hit costs it (D1: hit animation minus the attack after the blow); 0 = none
 #   special_one_in    the Fallen's howl: 1 in N per turn it stands around
 #   flee_distance     how far it runs when a comrade dies within 5 cells (AI_FALLEN's fear); 0: it stands
-# Where it spawns:
-#   dlvl              the shallowest level it appears on; max_dlvl the deepest (0: no limit)
-#   level             its monster level (to-hit, experience, drops); defaults to dlvl
-#   random_spawn      false: never rolled at random, only placed by quests, rooms or group_spawn (default true)
+# Where it spawns (both mods: a dungeon level at depth d rolls every record with dlvl <= d <= max_dlvl; a side level's
+# monster lines in levels.rec override that):
+#   dlvl              the shallowest dungeon level it spawns on; max_dlvl the deepest (0: no limit)
+#   monster_level     its level: to-hit against the hero, spell hit chance, experience, drops, flinching, regen;
+#                     defaults to dlvl
+#   random_spawn      false: never rolled at random, only placed by quests, rooms, side levels or group_spawn (default true)
 #   spawn_cost        what the type costs of a level's 4000 spawn budget (D1: its graphics' memory); a level
-#                     draws its monster types at random until the budget is spent; 0 (default): free
-#   spawn_weight      relative odds among the monsters that can appear at a depth (default 1; dungen levels only)
-#   out_of_depth_chance / min_level_for_ood   chance to appear above its dlvl, from this dungeon level on
+#                     draws its monster types at random until the budget is spent, then picks among them evenly;
+#                     0 (default): free, always in. A cheap type makes room for more types, a dear one crowds them out
 #   group_spawn       companions spawned with it: "<internal_name>" or "<internal_name>(<count or min-max>)"; repeatable
 # Combat:
 #   health            hit points: a range "4-7" (a monster with an ai rolls it and halves it, as D1's single player does), dice "1d3+1" or
@@ -68,8 +69,8 @@ internal_name: MT_NZOMBIE
 name: Zombie
 icon: monster.nzombie
 dlvl: 1
-max_dlvl: 3
-level: 1
+max_dlvl: 2
+monster_level: 1
 health: 4-7
 damage: 2-5
 damage2: 0
@@ -92,8 +93,8 @@ name: Ghoul
 tint: 160 200 255
 icon: monster.bzombie
 dlvl: 2
-max_dlvl: 4
-level: 2
+max_dlvl: 3
+monster_level: 2
 health: 7-11
 damage: 3-10
 damage2: 0
@@ -117,8 +118,8 @@ name: Rotting Carcass
 tint: 255 190 120
 icon: monster.gzombie
 dlvl: 2
-max_dlvl: 6
-level: 4
+max_dlvl: 4
+monster_level: 4
 health: 15-25
 damage: 5-15
 damage2: 0
@@ -141,9 +142,9 @@ internal_name: MT_YZOMBIE
 name: Black Death
 tint: 255 110 110
 icon: monster.yzombie
-dlvl: 4
-max_dlvl: 8
-level: 6
+dlvl: 3
+max_dlvl: 5
+monster_level: 6
 health: 25-40
 damage: 6-22
 damage2: 0
@@ -167,8 +168,8 @@ internal_name: MT_RFALLSP
 name: Fallen One
 icon: monster.rfallsp
 dlvl: 1
-max_dlvl: 3
-level: 1
+max_dlvl: 2
+monster_level: 1
 health: 1-4
 damage: 1-3
 damage2: 0
@@ -193,8 +194,8 @@ name: Carver
 tint: 160 200 255
 icon: monster.dfallsp
 dlvl: 2
-max_dlvl: 5
-level: 3
+max_dlvl: 3
+monster_level: 3
 health: 4-8
 damage: 2-5
 damage2: 0
@@ -219,9 +220,9 @@ internal_name: MT_YFALLSP
 name: Devil Kin
 tint: 255 190 120
 icon: monster.yfallsp
-dlvl: 3
-max_dlvl: 7
-level: 5
+dlvl: 2
+max_dlvl: 4
+monster_level: 5
 health: 12-24
 damage: 3-7
 damage2: 0
@@ -246,9 +247,9 @@ internal_name: MT_BFALLSP
 name: Dark One
 tint: 255 110 110
 icon: monster.bfallsp
-dlvl: 5
-max_dlvl: 9
-level: 7
+dlvl: 3
+max_dlvl: 5
+monster_level: 7
 health: 20-36
 damage: 4-8
 damage2: 0
@@ -273,8 +274,8 @@ internal_name: MT_WSKELAX
 name: Skeleton
 icon: monster.wskelax
 dlvl: 1
-max_dlvl: 3
-level: 1
+max_dlvl: 2
+monster_level: 1
 health: 2-4
 damage: 1-4
 damage2: 0
@@ -298,8 +299,8 @@ name: Corpse Axe
 tint: 160 200 255
 icon: monster.tskelax
 dlvl: 2
-max_dlvl: 5
-level: 2
+max_dlvl: 3
+monster_level: 2
 health: 4-7
 damage: 3-5
 damage2: 0
@@ -324,8 +325,8 @@ name: Burning Dead
 tint: 255 190 120
 icon: monster.rskelax
 dlvl: 2
-max_dlvl: 6
-level: 4
+max_dlvl: 4
+monster_level: 4
 health: 8-12
 damage: 3-7
 damage2: 0
@@ -349,9 +350,9 @@ internal_name: MT_XSKELAX
 name: Horror
 tint: 255 110 110
 icon: monster.xskelax
-dlvl: 4
-max_dlvl: 8
-level: 6
+dlvl: 3
+max_dlvl: 5
+monster_level: 6
 health: 12-20
 damage: 4-9
 damage2: 0
@@ -375,8 +376,8 @@ internal_name: MT_RFALLSD
 name: Fallen One
 icon: monster.rfallsd
 dlvl: 1
-max_dlvl: 3
-level: 1
+max_dlvl: 2
+monster_level: 1
 health: 2-5
 damage: 1-4
 damage2: 0
@@ -401,8 +402,8 @@ name: Carver
 tint: 160 200 255
 icon: monster.dfallsd
 dlvl: 2
-max_dlvl: 5
-level: 3
+max_dlvl: 3
+monster_level: 3
 health: 5-9
 damage: 2-7
 damage2: 0
@@ -427,9 +428,9 @@ internal_name: MT_YFALLSD
 name: Devil Kin
 tint: 255 190 120
 icon: monster.yfallsd
-dlvl: 3
-max_dlvl: 7
-level: 5
+dlvl: 2
+max_dlvl: 4
+monster_level: 5
 health: 16-24
 damage: 4-10
 damage2: 0
@@ -454,9 +455,9 @@ internal_name: MT_BFALLSD
 name: Dark One
 tint: 255 110 110
 icon: monster.bfallsd
-dlvl: 5
-max_dlvl: 9
-level: 7
+dlvl: 3
+max_dlvl: 5
+monster_level: 7
 health: 24-36
 damage: 4-12
 damage2: 0
@@ -481,8 +482,8 @@ internal_name: MT_NSCAV
 name: Scavenger
 icon: monster.nscav
 dlvl: 1
-max_dlvl: 4
-level: 2
+max_dlvl: 3
+monster_level: 2
 health: 3-6
 damage: 1-5
 damage2: 0
@@ -505,9 +506,9 @@ internal_name: MT_BSCAV
 name: Plague Eater
 tint: 160 200 255
 icon: monster.bscav
-dlvl: 3
-max_dlvl: 6
-level: 4
+dlvl: 2
+max_dlvl: 4
+monster_level: 4
 health: 12-24
 damage: 1-8
 damage2: 0
@@ -531,9 +532,9 @@ internal_name: MT_WSCAV
 name: Shadow Beast
 tint: 255 190 120
 icon: monster.wscav
-dlvl: 4
-max_dlvl: 8
-level: 6
+dlvl: 3
+max_dlvl: 5
+monster_level: 6
 health: 24-36
 damage: 3-12
 damage2: 0
@@ -557,9 +558,9 @@ internal_name: MT_YSCAV
 name: Bone Gasher
 tint: 255 110 110
 icon: monster.yscav
-dlvl: 6
-max_dlvl: 10
-level: 8
+dlvl: 4
+max_dlvl: 6
+monster_level: 8
 health: 28-40
 damage: 5-15
 damage2: 0
@@ -583,8 +584,8 @@ internal_name: MT_WSKELBW
 name: Skeleton
 icon: monster.wskelbw
 dlvl: 2
-max_dlvl: 5
-level: 3
+max_dlvl: 3
+monster_level: 3
 health: 2-4
 damage: 1-2
 damage2: 0
@@ -607,9 +608,9 @@ internal_name: MT_TSKELBW
 name: Corpse Bow
 tint: 160 200 255
 icon: monster.tskelbw
-dlvl: 3
-max_dlvl: 7
-level: 5
+dlvl: 2
+max_dlvl: 4
+monster_level: 5
 health: 8-16
 damage: 1-4
 damage2: 0
@@ -633,9 +634,9 @@ internal_name: MT_RSKELBW
 name: Burning Dead
 tint: 255 190 120
 icon: monster.rskelbw
-dlvl: 5
-max_dlvl: 9
-level: 7
+dlvl: 3
+max_dlvl: 5
+monster_level: 7
 health: 10-24
 damage: 1-6
 damage2: 0
@@ -659,9 +660,9 @@ internal_name: MT_XSKELBW
 name: Horror
 tint: 255 110 110
 icon: monster.xskelbw
-dlvl: 7
-max_dlvl: 11
-level: 9
+dlvl: 4
+max_dlvl: 6
+monster_level: 9
 health: 15-45
 damage: 2-9
 damage2: 0
@@ -685,8 +686,8 @@ internal_name: MT_WSKELSD
 name: Skeleton Captain
 icon: monster.wskelsd
 dlvl: 1
-max_dlvl: 4
-level: 2
+max_dlvl: 3
+monster_level: 2
 health: 3-6
 damage: 2-7
 damage2: 0
@@ -710,8 +711,8 @@ name: Corpse Captain
 tint: 160 200 255
 icon: monster.tskelsd
 dlvl: 2
-max_dlvl: 6
-level: 4
+max_dlvl: 4
+monster_level: 4
 health: 12-20
 damage: 3-9
 damage2: 0
@@ -735,9 +736,9 @@ internal_name: MT_RSKELSD
 name: Burning Dead Captain
 tint: 255 190 120
 icon: monster.rskelsd
-dlvl: 4
-max_dlvl: 8
-level: 6
+dlvl: 3
+max_dlvl: 5
+monster_level: 6
 health: 16-30
 damage: 4-10
 damage2: 0
@@ -761,9 +762,9 @@ internal_name: MT_XSKELSD
 name: Horror Captain
 tint: 255 110 110
 icon: monster.xskelsd
-dlvl: 6
-max_dlvl: 10
-level: 8
+dlvl: 4
+max_dlvl: 6
+monster_level: 8
 health: 35-50
 damage: 5-14
 damage2: 0
@@ -787,9 +788,9 @@ tags: raisable
 internal_name: MT_INVILORD
 name: Invisible Lord
 icon: monster.invilord
-dlvl: 14
-max_dlvl: 14
-level: 14
+dlvl: 8
+max_dlvl: 8
+monster_level: 14
 random_spawn: false
 health: 278
 damage: 16-30
@@ -813,9 +814,9 @@ speed_recovery: 5
 internal_name: MT_SNEAK
 name: Hidden
 icon: monster.sneak
-dlvl: 3
-max_dlvl: 8
-level: 5
+dlvl: 2
+max_dlvl: 5
+monster_level: 5
 health: 8-24
 damage: 3-6
 damage2: 0
@@ -839,9 +840,9 @@ internal_name: MT_STALKER
 name: Stalker
 tint: 160 200 255
 icon: monster.stalker
-dlvl: 8
-max_dlvl: 12
-level: 9
+dlvl: 5
+max_dlvl: 7
+monster_level: 9
 health: 30-45
 damage: 8-16
 damage2: 0
@@ -866,9 +867,9 @@ internal_name: MT_UNSEEN
 name: Unseen
 tint: 255 190 120
 icon: monster.unseen
-dlvl: 10
-max_dlvl: 14
-level: 11
+dlvl: 6
+max_dlvl: 8
+monster_level: 11
 health: 35-50
 damage: 12-20
 damage2: 0
@@ -893,9 +894,9 @@ internal_name: MT_ILLWEAV
 name: Illusion Weaver
 tint: 255 110 110
 icon: monster.illweav
-dlvl: 14
-max_dlvl: 18
-level: 13
+dlvl: 8
+max_dlvl: 10
+monster_level: 13
 health: 40-60
 damage: 16-24
 damage2: 0
@@ -919,9 +920,9 @@ tags: flinches_at_any_hit | weapon_proof_retreat
 internal_name: MT_LRDSAYTR
 name: Lord Sayter
 icon: monster.lrdsaytr
-dlvl: 13
-max_dlvl: 13
-level: 12
+dlvl: 7
+max_dlvl: 7
+monster_level: 12
 random_spawn: false
 health: 351
 damage: 14-24
@@ -945,9 +946,9 @@ speed_recovery: 4
 internal_name: MT_NGOATMC
 name: Flesh Clan
 icon: monster.ngoatmc
-dlvl: 6
-max_dlvl: 10
-level: 8
+dlvl: 4
+max_dlvl: 6
+monster_level: 8
 health: 30-45
 damage: 4-10
 damage2: 0
@@ -970,9 +971,9 @@ internal_name: MT_BGOATMC
 name: Stone Clan
 tint: 160 200 255
 icon: monster.bgoatmc
-dlvl: 8
-max_dlvl: 12
-level: 10
+dlvl: 5
+max_dlvl: 7
+monster_level: 10
 health: 40-55
 damage: 6-12
 damage2: 0
@@ -996,9 +997,9 @@ internal_name: MT_RGOATMC
 name: Fire Clan
 tint: 255 190 120
 icon: monster.rgoatmc
-dlvl: 10
-max_dlvl: 14
-level: 12
+dlvl: 6
+max_dlvl: 8
+monster_level: 12
 health: 50-65
 damage: 8-16
 damage2: 0
@@ -1022,9 +1023,9 @@ internal_name: MT_GGOATMC
 name: Night Clan
 tint: 255 110 110
 icon: monster.ggoatmc
-dlvl: 12
-max_dlvl: 16
-level: 14
+dlvl: 7
+max_dlvl: 9
+monster_level: 14
 health: 55-70
 damage: 10-20
 damage2: 30
@@ -1048,8 +1049,8 @@ internal_name: MT_FIEND
 name: Fiend
 icon: monster.fiend
 dlvl: 2
-max_dlvl: 5
-level: 3
+max_dlvl: 3
+monster_level: 3
 health: 3-6
 damage: 1-6
 damage2: 0
@@ -1072,9 +1073,9 @@ internal_name: MT_BLINK
 name: Blink
 tint: 160 200 255
 icon: monster.blink
-dlvl: 5
-max_dlvl: 9
-level: 7
+dlvl: 3
+max_dlvl: 5
+monster_level: 7
 health: 12-28
 damage: 1-8
 damage2: 0
@@ -1099,9 +1100,9 @@ internal_name: MT_GLOOM
 name: Gloom
 tint: 255 190 120
 icon: monster.gloom
-dlvl: 7
-max_dlvl: 11
-level: 9
+dlvl: 4
+max_dlvl: 6
+monster_level: 9
 health: 28-36
 damage: 4-12
 damage2: 0
@@ -1127,9 +1128,9 @@ internal_name: MT_FAMILIAR
 name: Familiar
 tint: 255 110 110
 icon: monster.familiar
-dlvl: 11
-max_dlvl: 15
-level: 13
+dlvl: 6
+max_dlvl: 8
+monster_level: 13
 health: 20-35
 damage: 4-16
 damage2: 0
@@ -1154,9 +1155,9 @@ tags: lightning_with_melee
 internal_name: MT_NGOATBW
 name: Flesh Clan
 icon: monster.ngoatbw
-dlvl: 6
-max_dlvl: 10
-level: 8
+dlvl: 4
+max_dlvl: 6
+monster_level: 8
 health: 20-35
 damage: 1-7
 damage2: 0
@@ -1179,9 +1180,9 @@ internal_name: MT_BGOATBW
 name: Stone Clan
 tint: 160 200 255
 icon: monster.bgoatbw
-dlvl: 8
-max_dlvl: 12
-level: 10
+dlvl: 5
+max_dlvl: 7
+monster_level: 10
 health: 30-40
 damage: 2-9
 damage2: 0
@@ -1205,9 +1206,9 @@ internal_name: MT_RGOATBW
 name: Fire Clan
 tint: 255 190 120
 icon: monster.rgoatbw
-dlvl: 10
-max_dlvl: 14
-level: 12
+dlvl: 6
+max_dlvl: 8
+monster_level: 12
 health: 40-50
 damage: 3-11
 damage2: 0
@@ -1231,9 +1232,9 @@ internal_name: MT_GGOATBW
 name: Night Clan
 tint: 255 110 110
 icon: monster.ggoatbw
-dlvl: 12
-max_dlvl: 16
-level: 14
+dlvl: 7
+max_dlvl: 9
+monster_level: 14
 health: 50-65
 damage: 4-13
 damage2: 0
@@ -1256,9 +1257,9 @@ speed_recovery: 4
 internal_name: MT_NACID
 name: Acid Beast
 icon: monster.nacid
-dlvl: 10
-max_dlvl: 14
-level: 11
+dlvl: 6
+max_dlvl: 8
+monster_level: 11
 health: 40-66
 damage: 4-12
 damage2: 0
@@ -1281,9 +1282,9 @@ internal_name: MT_RACID
 name: Poison Spitter
 tint: 160 200 255
 icon: monster.racid
-dlvl: 14
-max_dlvl: 18
-level: 15
+dlvl: 8
+max_dlvl: 10
+monster_level: 15
 health: 60-85
 damage: 4-16
 damage2: 0
@@ -1307,9 +1308,9 @@ internal_name: MT_BACID
 name: Pit Beast
 tint: 255 190 120
 icon: monster.bacid
-dlvl: 18
-max_dlvl: 22
-level: 21
+dlvl: 10
+max_dlvl: 12
+monster_level: 21
 health: 80-110
 damage: 8-18
 damage2: 0
@@ -1333,9 +1334,9 @@ internal_name: MT_XACID
 name: Lava Maw
 tint: 255 110 110
 icon: monster.xacid
-dlvl: 22
-max_dlvl: 27
-level: 25
+dlvl: 12
+max_dlvl: 14
+monster_level: 25
 health: 100-150
 damage: 10-20
 damage2: 0
@@ -1358,9 +1359,9 @@ tags: acid_blood
 internal_name: MT_SKING
 name: Skeleton King
 icon: monster.sking
-dlvl: 6
-max_dlvl: 6
-level: 9
+dlvl: 4
+max_dlvl: 4
+monster_level: 9
 random_spawn: false
 health: 140
 damage: 6-16
@@ -1385,9 +1386,9 @@ internal_name: MT_CLEAVER
 name: The Butcher
 sight_sfx: USFX_CLEAVER
 icon: monster.cleaver
-dlvl: 0
-max_dlvl: 0
-level: 1
+dlvl: 1
+max_dlvl: 1
+monster_level: 1
 random_spawn: false
 health: 320
 damage: 6-12
@@ -1411,9 +1412,9 @@ speed_recovery: 3
 internal_name: MT_FAT
 name: Overlord
 icon: monster.fat
-dlvl: 8
-max_dlvl: 12
-level: 10
+dlvl: 5
+max_dlvl: 7
+monster_level: 10
 health: 60-80
 damage: 6-12
 damage2: 0
@@ -1434,9 +1435,9 @@ internal_name: MT_MUDMAN
 name: Mud Man
 tint: 160 200 255
 icon: monster.mudman
-dlvl: 13
-max_dlvl: 17
-level: 14
+dlvl: 7
+max_dlvl: 9
+monster_level: 14
 health: 100-125
 damage: 8-16
 damage2: 0
@@ -1459,9 +1460,9 @@ internal_name: MT_TOAD
 name: Toad Demon
 tint: 255 190 120
 icon: monster.toad
-dlvl: 15
-max_dlvl: 19
-level: 16
+dlvl: 8
+max_dlvl: 10
+monster_level: 16
 health: 135-160
 damage: 8-16
 damage2: 8-20
@@ -1484,9 +1485,9 @@ internal_name: MT_FLAYED
 name: Flayed One
 tint: 255 110 110
 icon: monster.flayed
-dlvl: 19
-max_dlvl: 23
-level: 20
+dlvl: 10
+max_dlvl: 12
+monster_level: 20
 health: 160-200
 damage: 10-20
 damage2: 0
@@ -1508,9 +1509,9 @@ speed_attack: 19
 internal_name: MT_WYRM
 name: Wyrm
 icon: monster.wyrm
-dlvl: 9
-max_dlvl: 13
-level: 11
+dlvl: 5
+max_dlvl: 7
+monster_level: 11
 random_spawn: false
 health: 60-90
 damage: 4-10
@@ -1533,9 +1534,9 @@ internal_name: MT_CAVSLUG
 name: Cave Slug
 tint: 160 200 255
 icon: monster.cavslug
-dlvl: 11
-max_dlvl: 15
-level: 13
+dlvl: 6
+max_dlvl: 8
+monster_level: 13
 random_spawn: false
 health: 75-110
 damage: 6-13
@@ -1559,9 +1560,9 @@ internal_name: MT_DVLWYRM
 name: Devil Wyrm
 tint: 255 190 120
 icon: monster.dvlwyrm
-dlvl: 13
-max_dlvl: 17
-level: 15
+dlvl: 7
+max_dlvl: 9
+monster_level: 15
 random_spawn: false
 health: 100-140
 damage: 8-16
@@ -1585,9 +1586,9 @@ internal_name: MT_DEVOUR
 name: Devourer
 tint: 255 110 110
 icon: monster.devour
-dlvl: 15
-max_dlvl: 19
-level: 17
+dlvl: 8
+max_dlvl: 10
+monster_level: 17
 random_spawn: false
 health: 125-200
 damage: 10-20
@@ -1610,9 +1611,9 @@ speed_recovery: 8
 internal_name: MT_NMAGMA
 name: Magma Demon
 icon: monster.nmagma
-dlvl: 14
-max_dlvl: 17
-level: 13
+dlvl: 8
+max_dlvl: 9
+monster_level: 13
 health: 50-70
 damage: 2-10
 damage2: 0
@@ -1634,9 +1635,9 @@ internal_name: MT_YMAGMA
 name: Blood Stone
 tint: 160 200 255
 icon: monster.ymagma
-dlvl: 15
-max_dlvl: 19
-level: 14
+dlvl: 8
+max_dlvl: 10
+monster_level: 14
 health: 55-75
 damage: 2-12
 damage2: 0
@@ -1659,9 +1660,9 @@ internal_name: MT_BMAGMA
 name: Hell Stone
 tint: 255 190 120
 icon: monster.bmagma
-dlvl: 16
-max_dlvl: 20
-level: 16
+dlvl: 9
+max_dlvl: 11
+monster_level: 16
 health: 60-80
 damage: 2-20
 damage2: 0
@@ -1684,9 +1685,9 @@ internal_name: MT_WMAGMA
 name: Lava Lord
 tint: 255 110 110
 icon: monster.wmagma
-dlvl: 17
-max_dlvl: 21
-level: 18
+dlvl: 9
+max_dlvl: 11
+monster_level: 18
 health: 70-85
 damage: 4-24
 damage2: 0
@@ -1708,9 +1709,9 @@ speed_attack: 18
 internal_name: MT_HORNED
 name: Horned Demon
 icon: monster.horned
-dlvl: 12
-max_dlvl: 16
-level: 13
+dlvl: 7
+max_dlvl: 9
+monster_level: 13
 health: 40-80
 damage: 2-16
 damage2: 5-32
@@ -1732,9 +1733,9 @@ internal_name: MT_MUDRUN
 name: Mud Runner
 tint: 160 200 255
 icon: monster.mudrun
-dlvl: 14
-max_dlvl: 18
-level: 15
+dlvl: 8
+max_dlvl: 10
+monster_level: 15
 health: 50-90
 damage: 6-18
 damage2: 12-36
@@ -1757,9 +1758,9 @@ internal_name: MT_FROSTC
 name: Frost Charger
 tint: 255 190 120
 icon: monster.frostc
-dlvl: 16
-max_dlvl: 20
-level: 17
+dlvl: 9
+max_dlvl: 11
+monster_level: 17
 health: 60-100
 damage: 8-20
 damage2: 20-40
@@ -1782,9 +1783,9 @@ internal_name: MT_OBLORD
 name: Obsidian Lord
 tint: 255 110 110
 icon: monster.oblord
-dlvl: 18
-max_dlvl: 22
-level: 19
+dlvl: 10
+max_dlvl: 12
+monster_level: 19
 health: 70-110
 damage: 10-22
 damage2: 20-50
@@ -1806,9 +1807,9 @@ speed_attack: 18
 internal_name: MT_BONEDMN
 name: Bone Demon
 icon: monster.bonedmn
-dlvl: 10
-max_dlvl: 14
-level: 12
+dlvl: 6
+max_dlvl: 8
+monster_level: 12
 random_spawn: false
 health: 70
 damage: 6-14
@@ -1829,9 +1830,9 @@ speed_attack: 25
 internal_name: MT_REDDTH
 name: Red Death
 icon: monster.reddth
-dlvl: 14
-max_dlvl: 18
-level: 16
+dlvl: 8
+max_dlvl: 10
+monster_level: 16
 random_spawn: false
 health: 96
 damage: 10-20
@@ -1854,9 +1855,9 @@ internal_name: MT_LTCHDMN
 name: Litch Demon
 tint: 160 200 255
 icon: monster.ltchdmn
-dlvl: 16
-max_dlvl: 20
-level: 18
+dlvl: 9
+max_dlvl: 11
+monster_level: 18
 random_spawn: false
 health: 110
 damage: 10-24
@@ -1879,9 +1880,9 @@ internal_name: MT_UDEDBLRG
 name: Undead Balrog
 tint: 255 190 120
 icon: monster.udedblrg
-dlvl: 20
-max_dlvl: 24
-level: 22
+dlvl: 11
+max_dlvl: 13
+monster_level: 22
 random_spawn: false
 health: 130
 damage: 12-30
@@ -1903,9 +1904,9 @@ speed_attack: 23
 internal_name: MT_INCIN
 name: Incinerator
 icon: monster.incin
-dlvl: 14
-max_dlvl: 18
-level: 16
+dlvl: 8
+max_dlvl: 10
+monster_level: 16
 random_spawn: false
 health: 30-45
 damage: 8-16
@@ -1927,9 +1928,9 @@ internal_name: MT_FLAMLRD
 name: Flame Lord
 tint: 160 200 255
 icon: monster.flamlrd
-dlvl: 16
-max_dlvl: 20
-level: 18
+dlvl: 9
+max_dlvl: 11
+monster_level: 18
 random_spawn: false
 health: 40-55
 damage: 10-20
@@ -1952,9 +1953,9 @@ internal_name: MT_DOOMFIRE
 name: Doom Fire
 tint: 255 190 120
 icon: monster.doomfire
-dlvl: 18
-max_dlvl: 22
-level: 20
+dlvl: 10
+max_dlvl: 12
+monster_level: 20
 random_spawn: false
 health: 50-65
 damage: 12-24
@@ -1977,9 +1978,9 @@ internal_name: MT_HELLBURN
 name: Hell Burner
 tint: 255 110 110
 icon: monster.hellburn
-dlvl: 20
-max_dlvl: 24
-level: 22
+dlvl: 11
+max_dlvl: 13
+monster_level: 22
 random_spawn: false
 health: 60-80
 damage: 15-30
@@ -2002,9 +2003,9 @@ internal_name: MT_STORM
 name: Red Storm
 tint: 255 110 110
 icon: monster.storm
-dlvl: 17
-max_dlvl: 21
-level: 18
+dlvl: 9
+max_dlvl: 11
+monster_level: 18
 health: 55-110
 damage: 8-18
 damage2: 4-16
@@ -2025,9 +2026,9 @@ speed_attack: 23
 internal_name: MT_RSTORM
 name: Storm Rider
 icon: monster.rstorm
-dlvl: 19
-max_dlvl: 23
-level: 20
+dlvl: 10
+max_dlvl: 12
+monster_level: 20
 health: 60-120
 damage: 8-18
 damage2: 4-16
@@ -2050,9 +2051,9 @@ internal_name: MT_STORML
 name: Storm Lord
 tint: 160 200 255
 icon: monster.storml
-dlvl: 21
-max_dlvl: 25
-level: 22
+dlvl: 11
+max_dlvl: 13
+monster_level: 22
 health: 75-135
 damage: 12-24
 damage2: 4-16
@@ -2075,9 +2076,9 @@ internal_name: MT_MAEL
 name: Maelstorm
 tint: 255 190 120
 icon: monster.mael
-dlvl: 23
-max_dlvl: 27
-level: 24
+dlvl: 12
+max_dlvl: 14
+monster_level: 24
 health: 90-150
 damage: 12-28
 damage2: 4-16
@@ -2099,9 +2100,9 @@ speed_attack: 23
 internal_name: MT_BIGFALL
 name: Devil Kin Brute
 icon: monster.bigfall
-dlvl: 20
-max_dlvl: 20
-level: 24
+dlvl: 11
+max_dlvl: 11
+monster_level: 24
 random_spawn: false
 health: 160-220
 damage: 18-24
@@ -2125,9 +2126,9 @@ speed_recovery: 4
 internal_name: MT_WINGED
 name: Winged-Demon
 icon: monster.winged
-dlvl: 8
-max_dlvl: 12
-level: 9
+dlvl: 5
+max_dlvl: 7
+monster_level: 9
 health: 45-60
 damage: 10-16
 damage2: 0
@@ -2150,9 +2151,9 @@ internal_name: MT_GARGOYLE
 name: Gargoyle
 tint: 160 200 255
 icon: monster.gargoyle
-dlvl: 12
-max_dlvl: 16
-level: 13
+dlvl: 7
+max_dlvl: 9
+monster_level: 13
 health: 60-90
 damage: 10-16
 damage2: 0
@@ -2176,9 +2177,9 @@ internal_name: MT_BLOODCLW
 name: Blood Claw
 tint: 255 190 120
 icon: monster.bloodclw
-dlvl: 16
-max_dlvl: 20
-level: 19
+dlvl: 9
+max_dlvl: 11
+monster_level: 19
 health: 75-125
 damage: 14-22
 damage2: 0
@@ -2202,9 +2203,9 @@ internal_name: MT_DEATHW
 name: Death Wing
 tint: 255 110 110
 icon: monster.deathw
-dlvl: 18
-max_dlvl: 22
-level: 23
+dlvl: 10
+max_dlvl: 12
+monster_level: 23
 health: 90-150
 damage: 16-28
 damage2: 0
@@ -2227,9 +2228,9 @@ speed_recovery: 4
 internal_name: MT_MEGA
 name: Slayer
 icon: monster.mega
-dlvl: 19
-max_dlvl: 23
-level: 20
+dlvl: 10
+max_dlvl: 12
+monster_level: 20
 health: 120-140
 damage: 12-20
 damage2: 0
@@ -2251,9 +2252,9 @@ internal_name: MT_GUARD
 name: Guardian
 tint: 160 200 255
 icon: monster.guard
-dlvl: 21
-max_dlvl: 25
-level: 22
+dlvl: 11
+max_dlvl: 13
+monster_level: 22
 health: 140-160
 damage: 14-22
 damage2: 0
@@ -2276,9 +2277,9 @@ internal_name: MT_VTEXLRD
 name: Vortex Lord
 tint: 255 190 120
 icon: monster.vtexlrd
-dlvl: 23
-max_dlvl: 26
-level: 24
+dlvl: 12
+max_dlvl: 14
+monster_level: 24
 health: 160-180
 damage: 18-24
 damage2: 0
@@ -2301,9 +2302,9 @@ internal_name: MT_BALROG
 name: Balrog
 tint: 255 110 110
 icon: monster.balrog
-dlvl: 25
-max_dlvl: 29
-level: 26
+dlvl: 13
+max_dlvl: 15
+monster_level: 26
 health: 180-200
 damage: 22-30
 damage2: 0
@@ -2325,9 +2326,9 @@ speed_attack: 18
 internal_name: MT_NSNAKE
 name: Cave Viper
 icon: monster.nsnake
-dlvl: 20
-max_dlvl: 24
-level: 21
+dlvl: 11
+max_dlvl: 13
+monster_level: 21
 health: 100-150
 damage: 8-20
 damage2: 0
@@ -2349,9 +2350,9 @@ internal_name: MT_RSNAKE
 name: Fire Drake
 tint: 160 200 255
 icon: monster.rsnake
-dlvl: 22
-max_dlvl: 26
-level: 23
+dlvl: 12
+max_dlvl: 14
+monster_level: 23
 health: 120-170
 damage: 12-24
 damage2: 0
@@ -2374,9 +2375,9 @@ internal_name: MT_BSNAKE
 name: Gold Viper
 tint: 255 190 120
 icon: monster.bsnake
-dlvl: 24
-max_dlvl: 27
-level: 25
+dlvl: 13
+max_dlvl: 14
+monster_level: 25
 health: 140-180
 damage: 15-26
 damage2: 0
@@ -2399,9 +2400,9 @@ internal_name: MT_GSNAKE
 name: Azure Drake
 tint: 255 110 110
 icon: monster.gsnake
-dlvl: 28
-max_dlvl: 30
-level: 27
+dlvl: 15
+max_dlvl: 16
+monster_level: 27
 health: 160-200
 damage: 18-30
 damage2: 0
@@ -2423,9 +2424,9 @@ speed_attack: 16
 internal_name: MT_NBLACK
 name: Black Knight
 icon: monster.nblack
-dlvl: 23
-max_dlvl: 27
-level: 24
+dlvl: 12
+max_dlvl: 14
+monster_level: 24
 health: 150
 damage: 15-20
 damage2: 0
@@ -2447,9 +2448,9 @@ internal_name: MT_RTBLACK
 name: Doom Guard
 tint: 160 200 255
 icon: monster.rtblack
-dlvl: 25
-max_dlvl: 29
-level: 26
+dlvl: 13
+max_dlvl: 15
+monster_level: 26
 health: 165
 damage: 18-25
 damage2: 0
@@ -2471,9 +2472,9 @@ internal_name: MT_BTBLACK
 name: Steel Lord
 tint: 255 190 120
 icon: monster.btblack
-dlvl: 27
-max_dlvl: 30
-level: 28
+dlvl: 14
+max_dlvl: 16
+monster_level: 28
 health: 180
 damage: 20-30
 damage2: 0
@@ -2496,9 +2497,9 @@ internal_name: MT_RBLACK
 name: Blood Knight
 tint: 255 110 110
 icon: monster.rblack
-dlvl: 24
-max_dlvl: 26
-level: 30
+dlvl: 13
+max_dlvl: 14
+monster_level: 30
 health: 200
 damage: 25-35
 damage2: 0
@@ -2520,9 +2521,9 @@ speed_attack: 20
 internal_name: MT_UNRAV
 name: Unraveler
 icon: monster.unrav
-dlvl: 26
-max_dlvl: 28
-level: 25
+dlvl: 14
+max_dlvl: 15
+monster_level: 25
 random_spawn: false
 health: 70-150
 damage: 10-20
@@ -2544,9 +2545,9 @@ internal_name: MT_HOLOWONE
 name: Hollow One
 tint: 160 200 255
 icon: monster.holowone
-dlvl: 28
-max_dlvl: 30
-level: 27
+dlvl: 15
+max_dlvl: 16
+monster_level: 27
 random_spawn: false
 health: 135-240
 damage: 12-24
@@ -2569,9 +2570,9 @@ internal_name: MT_PAINMSTR
 name: Pain Master
 tint: 255 190 120
 icon: monster.painmstr
-dlvl: 27
-max_dlvl: 30
-level: 29
+dlvl: 14
+max_dlvl: 16
+monster_level: 29
 random_spawn: false
 health: 110-200
 damage: 16-30
@@ -2594,9 +2595,9 @@ internal_name: MT_REALWEAV
 name: Reality Weaver
 tint: 255 110 110
 icon: monster.realweav
-dlvl: 28
-max_dlvl: 30
-level: 30
+dlvl: 15
+max_dlvl: 16
+monster_level: 30
 random_spawn: false
 health: 135-240
 damage: 20-35
@@ -2618,9 +2619,9 @@ speed_attack: 15
 internal_name: MT_SUCCUBUS
 name: Succubus
 icon: monster.succubus
-dlvl: 22
-max_dlvl: 26
-level: 24
+dlvl: 12
+max_dlvl: 14
+monster_level: 24
 health: 120-150
 damage: 1-20
 damage2: 0
@@ -2643,9 +2644,9 @@ internal_name: MT_SNOWWICH
 name: Snow Witch
 tint: 160 200 255
 icon: monster.snowwich
-dlvl: 25
-max_dlvl: 28
-level: 26
+dlvl: 13
+max_dlvl: 15
+monster_level: 26
 health: 135-175
 damage: 1-24
 damage2: 0
@@ -2669,9 +2670,9 @@ internal_name: MT_HLSPWN
 name: Hell Spawn
 tint: 255 190 120
 icon: monster.hlspwn
-dlvl: 27
-max_dlvl: 30
-level: 28
+dlvl: 14
+max_dlvl: 16
+monster_level: 28
 health: 150-200
 damage: 1-30
 damage2: 0
@@ -2695,9 +2696,9 @@ internal_name: MT_SOLBRNR
 name: Soul Burner
 tint: 255 110 110
 icon: monster.solbrnr
-dlvl: 28
-max_dlvl: 30
-level: 30
+dlvl: 15
+max_dlvl: 16
+monster_level: 30
 health: 140-225
 damage: 1-35
 damage2: 0
@@ -2720,9 +2721,9 @@ speed_recovery: 1
 internal_name: MT_COUNSLR
 name: Counselor
 icon: monster.counslr
-dlvl: 24
-max_dlvl: 26
-level: 25
+dlvl: 13
+max_dlvl: 14
+monster_level: 25
 health: 70
 damage: 8-20
 damage2: 0
@@ -2744,9 +2745,9 @@ internal_name: MT_MAGISTR
 name: Magistrate
 tint: 160 200 255
 icon: monster.magistr
-dlvl: 26
-max_dlvl: 28
-level: 27
+dlvl: 14
+max_dlvl: 15
+monster_level: 27
 health: 85
 damage: 10-24
 damage2: 0
@@ -2769,9 +2770,9 @@ internal_name: MT_CABALIST
 name: Cabalist
 tint: 255 190 120
 icon: monster.cabalist
-dlvl: 28
-max_dlvl: 30
-level: 29
+dlvl: 15
+max_dlvl: 16
+monster_level: 29
 health: 120
 damage: 14-30
 damage2: 0
@@ -2794,9 +2795,9 @@ internal_name: MT_ADVOCATE
 name: Advocate
 tint: 255 110 110
 icon: monster.advocate
-dlvl: 30
-max_dlvl: 30
-level: 30
+dlvl: 16
+max_dlvl: 16
+monster_level: 30
 health: 145
 damage: 15-25
 damage2: 0
@@ -2818,9 +2819,9 @@ speed_attack: 25
 internal_name: MT_GOLEM
 name: Golem
 icon: monster.golem
-dlvl: 0
-max_dlvl: 0
-level: 12
+dlvl: 1
+max_dlvl: 1
+monster_level: 12
 random_spawn: false
 health: 1
 damage: 1
@@ -2843,9 +2844,9 @@ tags: golem
 internal_name: MT_DIABLO
 name: The Dark Lord
 icon: monster.diablo
-dlvl: 50
-max_dlvl: 50
-level: 30
+dlvl: 26
+max_dlvl: 26
+monster_level: 30
 random_spawn: false
 health: 1666
 damage: 30-60
@@ -2858,7 +2859,7 @@ tags: knockback | searches | opens_doors
 ai_level: 3
 magic_res: 78
 magic_res2: 78
-stats_armor_class: 70
+stats_armor_class: 90
 stats_experience: 31666
 graphics_family: Diablo
 spawn_cost: 2000
@@ -2870,9 +2871,9 @@ fixed_health: 1666
 internal_name: MT_DARKMAGE
 name: The Arch-Litch Malignus
 icon: monster.darkmage
-dlvl: 30
-max_dlvl: 30
-level: 30
+dlvl: 16
+max_dlvl: 16
+monster_level: 30
 random_spawn: false
 health: 160
 damage: 20-40

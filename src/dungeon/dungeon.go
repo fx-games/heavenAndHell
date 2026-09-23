@@ -79,31 +79,24 @@ type Patch struct {
 // Level is one level as a mod declared it (docs/LEVELS.md): a town, a dungeon depth, a quest or side level alike.
 // Config is its generator's own business; the rest is the engine's.
 type Level struct {
-	Map, Name    string // Map is the id every other file refers to; never parsed
-	Depth        int    // difficulty and progress only; several levels may share one
-	Generator    string
-	Config       Config
-	Tiles        string
-	Music        string // a music.rec event; empty: no music
-	Glyphs       string // an 8x8 glyph atlas in the mod folder: the level is drawn as text with it; empty: tiles
-	Town, Start  bool
-	Monsters     []LevelMonster // monster lines: who a dungen level rolls, instead of every record whose dlvl fits
-	EnemyPercent int            // chance in 100 that a walkable cell of a dungen level starts with a monster; 0: the default
-	Exits        []Exit
-	Locations    map[string][2]int // named cells the level declares ("location: <name> <x> <y>"), for its quest logic
-	Patches      []Patch           // in file order, which is the order they apply
-}
-
-// LevelMonster is one monster line: a monster's internal_name and its odds against the level's others.
-type LevelMonster struct {
-	ID     string
-	Weight int
+	Map, Name   string // Map is the id every other file refers to; never parsed
+	Depth       int    // difficulty and progress only; several levels may share one
+	Generator   string
+	Config      Config
+	Tiles       string
+	Music       string // a music.rec event; empty: no music
+	Glyphs      string // an 8x8 glyph atlas in the mod folder: the level is drawn as text with it; empty: tiles
+	Town, Start bool
+	Monsters    []string // a side level's monster lines: who it rolls, instead of every record whose dlvl..max_dlvl fits
+	Exits       []Exit
+	Locations   map[string][2]int // named cells the level declares ("location: <name> <x> <y>"), for its quest logic
+	Patches     []Patch           // in file order, which is the order they apply
 }
 
 // commonFields are the fields every level record may carry; a generator may add the ones its Parse reads.
 var commonFields = map[string]bool{"map": true, "name": true, "depth": true, "generator": true, "tiles": true,
 	"music": true, "glyphs": true, "town": true, "start": true, "exit": true, "open_when": true, "exit_tile": true,
-	"patch": true, "location": true, "apply_when": true, "patch_objects": true, "enemy_percent": true, "monster": true}
+	"patch": true, "location": true, "apply_when": true, "patch_objects": true, "monster": true}
 
 // LoadLevels reads a mod's whole levels.rec and checks it: every record a level with the required fields, known
 // fields only (common ones plus what its generator reads), unique ids, one start, and every exit leading to a
@@ -170,9 +163,6 @@ func parseLevel(r recfile.Record) (Level, error) {
 	if l.Depth, err = Int(r, "depth", 0); err != nil {
 		return Level{}, err
 	}
-	if l.EnemyPercent, err = Int(r, "enemy_percent", 0); err != nil {
-		return Level{}, err
-	}
 	l.Name, _ = Field(r, "name")
 	l.Name = strings.ReplaceAll(l.Name, `\n`, "\n") // a level's name is drawn over two lines
 	l.Tiles, _ = Field(r, "tiles")
@@ -185,14 +175,10 @@ func parseLevel(r recfile.Record) (Level, error) {
 		v := strings.TrimSpace(f.Value)
 		switch f.Name {
 		case "monster":
-			id, w, _ := strings.Cut(v, " ")
-			m := LevelMonster{ID: id, Weight: 1}
-			if w = strings.TrimSpace(w); w != "" {
-				if m.Weight, err = strconv.Atoi(w); err != nil || m.Weight < 1 {
-					return fail("monster %q: want <internal_name> [weight >= 1]", v)
-				}
+			if strings.ContainsAny(v, " \t") {
+				return fail("monster %q: want <internal_name> (odds come from spawn_cost now)", v)
 			}
-			l.Monsters = append(l.Monsters, m)
+			l.Monsters = append(l.Monsters, v)
 		case "location":
 			var name string
 			var x, y int

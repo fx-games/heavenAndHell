@@ -194,7 +194,7 @@ do: log_quest(lucifer)
 
 event: on_talk
 subject: kirioth
-when: done("meat_jack") and not flag("killed:king_zedek") and not active("lucifer")
+when: done("meat_jack") and not active("lucifer") and (done("lucifer") or not flag("killed:king_zedek"))
 do: say(TEXT_HH_KIRIOTH_AFTER_MEAT_JACK)
 
 event: on_talk

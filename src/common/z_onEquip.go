@@ -69,31 +69,6 @@ func (d OnEquipHook) After(action Action, context ActionContext) []Action {
 		}
 	}
 
-	for _, itemHook := range item.GetItemHooks() {
-		itemHook.SetItemContext(&ItemContext{
-			Wearer: actor,
-			Item:   item,
-		})
-
-		broker := context.ActionBroker
-
-		if isEquipAction {
-			if itemHook.IsBefore() {
-				broker.RegisterHook(itemHook)
-			}
-			if itemHook.IsAfter() {
-				broker.RegisterHook(itemHook)
-			}
-		} else if isUnequipAction {
-			if itemHook.IsBefore() {
-				broker.RemoveBeforeHook(itemHook)
-			}
-			if itemHook.IsAfter() {
-				broker.RemoveAfterHook(itemHook)
-			}
-		}
-	}
-
 	context.Show(ShowStats{}) // problem, this is a modal in the console UI..
 
 	if item.IsModifyingLight() {

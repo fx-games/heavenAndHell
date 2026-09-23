@@ -7,7 +7,7 @@ Design decisions and deferred scope for the D1 rebuild: `docs/D1_PLAN.md`.
 | Path | What it is | Use it for |
 |---|---|---|
 | `reference/devilution-109` | [diasurgical/devilution](https://github.com/diasurgical/devilution): bin-exact reconstruction of Diablo 1.09 (C++, `Source/*.cpp`, `enums.h`, `structs.h`, `defs.h`) | **Ground truth.** Formulas, constants, order of `random_()` calls. Ignore `#ifdef HELLFIRE` / `SPAWN` branches, except for the six player classes: Hellfire's Monk, Bard and Barbarian are in (`docs/D1_PLAN.md`), and their tables come from devilutionX. |
-| `reference/devilution/2020_03_31` | [galaxyhaxz/devilution](https://github.com/galaxyhaxz/devilution): readable rewrite with the original table files in `Source/Data/Excel/xl_*.txt` | Readable second opinion; source of our `files/assets/data/d1/xl_*.txt` (copied verbatim). `2018_03_14` is an older snapshot, skip it. |
+| `reference/devilution/2020_03_31` | [galaxyhaxz/devilution](https://github.com/galaxyhaxz/devilution): readable rewrite with the original table files in `Source/Data/Excel/xl_*.txt` | Readable second opinion; source of our `files/mods/d1/data/xl_*.txt` (data rows verbatim except item powers, renamed from `IPL_` to snake_case (`to_hit`, `thorns`); `##` comment headers added). `2018_03_14` is an older snapshot, skip it. |
 | `reference/devilutionX` | [diasurgical/devilutionX](https://github.com/diasurgical/devilutionX): modern, maintained port | Bug-fixed logic in `Source/` (`levels/`, `monsters/`, `items/`, `quests/`...), data tables as TSV in `assets/txtdata/`, and **test fixtures** in `test/` (see below). It fixes vanilla bugs and adds QoL; when it disagrees with 1.09, 1.09 wins unless `docs/D1_PLAN.md` says otherwise. |
 | `reference/DIABDAT.MPQ` | Diablo's own data archive (bring your own copy, ~500 MB) | Level data the sources don't contain: set pieces (`Levels\L1Data\SklKng1.DUN`...), `.TIL`/`.SOL` tile tables. Read with `mpq.DiabDat()` (`src/cmd/internal/mpq`, looks in `.`, `reference/`, `../reference/`). |
 | `reference/diablo-hellfire` | [pvpgn/diablo-hellfire](https://github.com/pvpgn/diablo-hellfire): Synergistic Software's own Hellfire source (VC++ 6, `src/*.CPP`, uppercase filenames) | **Ground truth for Hellfire**, the way `devilution-109` is for D1. `ITEMDAT.CPP`, `MONSTDAT.CPP`, `SPELLDAT.CPP`, `MISDAT.CPP` and `OBJDAT.CPP` hold the real tables with the original comments; `PLAYER.CPP` the class tables. Hellfire's own levels (the Nest and the Crypt), its quests, towners and the monsters that only spawn there are **cut** from this game (`docs/D1_PLAN.md`); its items, affixes, spells, classes and store behaviour are in and always on. |
@@ -19,7 +19,7 @@ Design decisions and deferred scope for the D1 rebuild: `docs/D1_PLAN.md`.
    under the same name in Go style (`DRLG_L1Floor` → `drlgL1Floor`) and say which D1 function it ports in the doc comment.
    Keep D1's RNG call order, or seeded results drift.
 2. **Cross-check** with galaxyhaxz for readability and devilutionX for known bugs, then decide per `docs/D1_PLAN.md`.
-3. **Take data, not code, where there's a table.** Values come from `files/assets/data/d1/xl_*.txt`
+3. **Take data, not code, where there's a table.** Values come from `files/mods/d1/data/xl_*.txt`
    (`src/rules/data.go`); the level generators' minisets and lookup tables live in `files/mods/d1/data/levels/generator.txt` (read by `g.mini`/`g.table`/`g.rows`); anything in the MPQ is read
    from the MPQ, not copied into the repo.
 4. **Verify against DevilutionX fixtures**, which were produced by the real game logic:
@@ -73,7 +73,7 @@ Remap visually with `scripts/remap_actors.sh`, `scripts/remap_items.sh`, `script
 the remapper on its rec file: click a name on the left, a tile on the right, `s` saves, `F10` quits). Adding a new
 D1 object/monster family/item type needs one new `internal_name:`/`icon:`/`name:` record in the right rec file —
 remap it same as any other. Tinting is reserved for D1 monster variants, water tiles (`IconWater`, tinted by
-`State.GetWaterColor`: light green in the foul Poisoned Water Supply, blue otherwise) and one fallback: a used D1
+`State.WaterColorOf`: light green in the foul Poisoned Water Supply, blue otherwise, shallows lighter) and one fallback: a used D1
 object whose `prop.<name>.used` icon is the same tile as its fresh `prop.<name>` icon is drawn grayed out
 (`common.UsedTint`); remap `.used` to a different tile to drop the tint. Anything else that needs to look
 different (uniques, magic/unique items) gets its own icon record. Remapper: `remapper` on `$PATH`, source

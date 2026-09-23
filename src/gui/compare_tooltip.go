@@ -90,19 +90,8 @@ func (t *CompareTooltip) layout(u *UIController, mousePos geometry.Point) {
 		Y: max(leftHeight, headerHeight+outer(t.item).Y),
 	}
 
-	// centered above the mouse like a single tooltip, below it if there is no room, clamped to the screen
-	const margin, mouseDist = 10, 50
-	screen := u.GetScreenSize()
-	x := mousePos.X - size.X/2
-	y := mousePos.Y - size.Y - mouseDist
-	if y < margin {
-		y = mousePos.Y + mouseDist
-	}
-	x = max(min(x, screen.X-u.GetUIBarWidth()-20-size.X), margin)
-	// ponytail: a group taller than the screen is cut off at the bottom, add scrolling if D1 tooltips ever get that long
-	y = max(min(y, screen.Y-margin-size.Y), margin)
-
-	pos := geometry.Point{X: x, Y: y}
+	pos := popupTopLeft(u, size, mousePos)
+	x, y := pos.X, pos.Y
 	for _, l := range column {
 		place(l, pos)
 		pos.Y += outer(l).Y + compareTooltipGap
@@ -118,4 +107,20 @@ func (t *CompareTooltip) Draw() {
 		l.Draw()
 	}
 	t.item.Draw()
+}
+
+// popupTopLeft is where every tooltip of the given outer size goes: centered above the mouse, below it if there is
+// no room, clamped inside the drawing area (left of the UI bar).
+func popupTopLeft(u *UIController, size, mousePos geometry.Point) geometry.Point {
+	const margin, mouseDist = 10, 50
+	screen := u.GetScreenSize()
+	x := mousePos.X - size.X/2
+	y := mousePos.Y - size.Y - mouseDist
+	if y < margin {
+		y = mousePos.Y + mouseDist
+	}
+	x = max(min(x, screen.X-u.GetUIBarWidth()-20-size.X), margin)
+	// ponytail: a popup taller than the screen is cut off at the bottom, add scrolling if tooltips ever get that long
+	y = max(min(y, screen.Y-margin-size.Y), margin)
+	return geometry.Point{X: x, Y: y}
 }

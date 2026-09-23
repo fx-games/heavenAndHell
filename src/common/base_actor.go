@@ -412,6 +412,14 @@ func (a *Actor) GetXPForLevel(level int) int {
 	}
 }
 
+// nextLevelXP is the experience total the next character level needs: a hero's from hero.rec's ladder.
+func (a *Actor) nextLevelXP() int {
+	if h := a.hero; h != nil {
+		return h.Rules().ExpLvls[min(h.Level, len(h.Rules().ExpLvls)-1)]
+	}
+	return a.GetXPForLevel(a.GetStats().GetAttribute(stats.Level) + 1)
+}
+
 func (a *Actor) LevelUp(chosenAttribute stats.Name) {
 	if a.hero != nil {
 		attr := map[stats.Name]int{stats.Strength: rules.AttrStr, stats.Magic: rules.AttrMag, stats.Dexterity: rules.AttrDex, stats.Vitality: rules.AttrVit}[chosenAttribute]
@@ -684,7 +692,7 @@ func (a *Actor) GetFullStats() []util.LabelText {
 			TextColor: levelColor,
 		},
 		{
-			Text:      fmt.Sprintf("Next: %d", a.GetXPForLevel(ourStats.GetAttribute(stats.Level)+1)),
+			Text:      fmt.Sprintf("Next: %d", a.nextLevelXP()),
 			TextColor: levelColor,
 		},
 		{

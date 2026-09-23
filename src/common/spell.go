@@ -200,7 +200,7 @@ func (c *spellCtx) emptyFloor(p geometry.Point) bool {
 
 // HasInfravision: the spell, the Murky Pool, or an item with the infravision affix (_pInfraFlag).
 func (a *Actor) HasInfravision() bool {
-	return a.HasStatusEffect(StatusInfravision) || a.hero != nil && a.HeroSheet().Flags&rules.ISplInfravision != 0
+	return a.HasStatusEffect(StatusInfravision) || a.hero != nil && a.HeroSheet().Flags&rules.FlagInfravision != 0
 }
 
 func resistBits(kind int) (resist, immune int) {
@@ -1062,7 +1062,7 @@ func (f *Factory) CastFromMemory(caster *Actor, spell int, target geometry.Point
 	}
 	cost := f.Generator.D.ManaCost(h, s, spell)
 	mana := caster.GetStats().GetResource(stats.Mana)
-	if mana.Value() < rules.Whole(cost) || s.Flags&rules.ISplNoMana != 0 && cost > 0 {
+	if mana.Value() < rules.Whole(cost) || s.Flags&rules.FlagNoMana != 0 && cost > 0 {
 		f.Msg("Not enough mana.")
 		f.PlayHeroSound(35)
 		return
@@ -1207,7 +1207,7 @@ func (s *State) LacksMana(player *Actor, name string) bool {
 			continue
 		}
 		cost := s.factory.Generator.D.ManaCost(h, sheet, spell)
-		return player.GetStats().GetResource(stats.Mana).Value() < rules.Whole(cost) || sheet.Flags&rules.ISplNoMana != 0 && cost > 0
+		return player.GetStats().GetResource(stats.Mana).Value() < rules.Whole(cost) || sheet.Flags&rules.FlagNoMana != 0 && cost > 0
 	}
 	return false
 }

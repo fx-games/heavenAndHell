@@ -58,6 +58,13 @@ func (d OnMoveHook) After(action Action, context ActionContext) []Action {
 		actions = append(actions, NewTransitionAction(action.Cause(), transitionAtLocation))
 	}
 
+	// Walking past a secret door finds it half the time (Brogue searches passively as you go).
+	for _, n := range currentMap.GetFilteredNeighbors(newPos, currentMap.Contains) {
+		if currentMap.IsSecretDoorAt(n) && rng.Float64() < 0.5 {
+			state.mapGen.revealSecretDoor(currentMap, n)
+			context.Msg("You find a secret door.")
+		}
+	}
 	actions = append(actions, []Action{
 		NewUpdateFoVAction(action.Cause(), actor),
 	}...)

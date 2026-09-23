@@ -27,111 +27,171 @@ type AccretionGenerator struct {
 	random          *rand.Rand
 	roomTemplates   []*DungeonRoom
 	maxRoomCount    int
-	printDebugSteps bool
 	currentRoomId   int
 	levelRules      TemplateRules
 	placedTemplates map[string]bool
 	mirror          bool
 	loopDistance    int
 	loopChance      float64
+	lakes           int
 }
 
 func NewAccretionGenerator(randomSource *rand.Rand) *AccretionGenerator {
 	return &AccretionGenerator{
 		random:        randomSource,
 		currentRoomId: 0,
-		loopDistance:  10,
-		loopChance:    0.8,
+		loopDistance:  20,
+		loopChance:    1,
 	}
 }
 
 func (g *AccretionGenerator) getTemplatesForLevel() []*DungeonRoom {
-	var templates []*DungeonRoom
-	for _, room := range g.roomTemplates {
-		if !g.levelRules.ForbidTemplates[room.GetTemplateName()] {
-			templates = append(templates, room)
-		}
-	}
-	return templates
+	return slices.DeleteFunc(slices.Clone(g.roomTemplates), func(r *DungeonRoom) bool {
+		return g.levelRules.ForbidTemplates[r.GetTemplateName()]
+	})
 }
 
-func (g *AccretionGenerator) getNewRoomFromRandomTemplateForSlot(slotID int) (*DungeonRoom, error) {
-	var matchingRooms []*DungeonRoom
-
-	missingTemplates := make(map[string]bool)
-	for reqRoom := range g.levelRules.RequireTemplates {
-		if _, ok := g.placedTemplates[reqRoom]; !ok {
-			missingTemplates[reqRoom] = true
+// pick is a weighted random pick (a template's Weight; 0 counts as 1), nil from none.
+func (g *AccretionGenerator) pick(rooms []*DungeonRoom) *DungeonRoom {
+	total := 0
+	for _, r := range rooms {
+		total += max(1, r.weight)
+	}
+	if total == 0 {
+		return nil
+	}
+	n := g.random.Intn(total)
+	for _, r := range rooms {
+		if n -= max(1, r.weight); n < 0 {
+			return r.Clone()
 		}
 	}
-
-	if len(missingTemplates) > 0 { // force one of the missing templates
-		missingSlotIds := make(map[int]bool)
-		for _, room := range g.getTemplatesForLevel() {
-			if _, ok := missingTemplates[room.GetTemplateName()]; !ok {
-				continue
-			}
-			if room.GetPlugsIntoSlotId() == slotID {
-				matchingRooms = append(matchingRooms, room)
-			} else {
-				missingSlotIds[room.GetPlugsIntoSlotId()] = true
-			}
-		}
-		if len(matchingRooms) == 0 {
-			// probably a missing template is not available for this slot
-			// see what slot we need and try to find a room that provides it
-			for _, room := range g.getTemplatesForLevel() {
-				if _, ok := missingSlotIds[room.GetSlotId()]; !ok {
-					continue
-				}
-				if room.GetPlugsIntoSlotId() == slotID {
-					matchingRooms = append(matchingRooms, room)
-				}
-			}
-		}
-	} else { // otherwise, just pick any room
-		for _, room := range g.getTemplatesForLevel() {
-			if room.GetPlugsIntoSlotId() == slotID {
-				if _, ok := g.placedTemplates[room.GetTemplateName()]; ok {
-					if _, ok := g.levelRules.RequireTemplates[room.GetTemplateName()]; ok {
-						continue
-					}
-				}
-				matchingRooms = append(matchingRooms, room)
-			}
-		}
-	}
-
-	if len(matchingRooms) == 0 {
-		return nil, fmt.Errorf("dungen: no %q template plugs into slot %d", g.levelRules.TemplatePrefix, slotID)
-	}
-
-	randomTemplate := matchingRooms[g.random.Intn(len(matchingRooms))]
-	return randomTemplate.Clone(), nil
+	return nil
 }
 
-// getFirstRoom picks the room a level grows from: one whose connectors take any room (connection ID 0).
+// nextRoom picks a room to grow the level with: any allowed template that plugs into slotID, except the required
+// rooms, which attachRequired adds once the level has grown. Nil when none plugs into that slot.
+func (g *AccretionGenerator) nextRoom(slotID int) *DungeonRoom {
+	var rooms []*DungeonRoom
+	for _, r := range g.getTemplatesForLevel() {
+		if r.GetPlugsIntoSlotId() == slotID && !g.levelRules.RequireTemplates[r.GetTemplateName()] {
+			rooms = append(rooms, r)
+		}
+	}
+	room := g.pick(rooms)
+	if room != nil {
+		room.SetId(g.currentRoomId)
+		g.currentRoomId++
+	}
+	return room
+}
+
+// getFirstRoom picks the room a level grows from: one whose connectors take any room (connection ID 0), not a
+// required room unless nothing else can start the level.
 func (g *AccretionGenerator) getFirstRoom() (*DungeonRoom, error) {
-	var candidates []*DungeonRoom
+	var candidates, required []*DungeonRoom
 	for _, room := range g.getTemplatesForLevel() {
-		if room.HasOnlyZeroIDConnections() {
+		switch {
+		case !room.HasOnlyZeroIDConnections():
+		case g.levelRules.RequireTemplates[room.GetTemplateName()]:
+			required = append(required, room)
+		default:
 			candidates = append(candidates, room)
 		}
 	}
 	if len(candidates) == 0 {
+		candidates = required
+	}
+	if len(candidates) == 0 {
 		return nil, fmt.Errorf("dungen: no %q template has only unnumbered connectors to start a level from", g.levelRules.TemplatePrefix)
 	}
-	return candidates[g.random.Intn(len(candidates))].Clone(), nil
+	return g.pick(candidates), nil
 }
 
-func (g *AccretionGenerator) nextRoomForGenerator(slotID int) (*DungeonRoom, error) {
-	newRoom, err := g.getNewRoomFromRandomTemplateForSlot(slotID)
-	if err != nil {
-		return nil, err
+// attachRequired adds each required room not placed yet, newest rooms first, so a quest room sits far out
+// rather than by the first room. Growth places them from halfway on; this catches what it could not.
+func (g *AccretionGenerator) attachRequired(dMap *DungeonMap) {
+	for _, name := range slices.Sorted(maps.Keys(g.levelRules.RequireTemplates)) {
+		if g.placedTemplates[name] {
+			continue
+		}
+		i := slices.IndexFunc(g.roomTemplates, func(r *DungeonRoom) bool { return r.GetTemplateName() == name })
+		if i < 0 {
+			continue // MissingRequired reports it
+		}
+		room := g.roomTemplates[i].Clone()
+		room.SetId(g.currentRoomId)
+		g.currentRoomId++
+		if !g.attach(dMap, room, dMap.rooms) && room.GetPlugsIntoSlotId() != 0 {
+			// growth spends every slot as it opens: grow a room providing the slot, and hang the room on it
+			var partners []*DungeonRoom
+			for _, r := range g.getTemplatesForLevel() {
+				if r.GetSlotId() == room.GetPlugsIntoSlotId() && r.GetPlugsIntoSlotId() == 0 {
+					partners = append(partners, r)
+				}
+			}
+			if partner := g.pick(partners); partner != nil {
+				partner.SetId(g.currentRoomId)
+				g.currentRoomId++
+				if g.attach(dMap, partner, dMap.rooms) {
+					g.attach(dMap, room, []*DungeonRoom{partner})
+				}
+			}
+		}
 	}
-	newRoom.SetId(g.currentRoomId)
-	g.currentRoomId++
-	return newRoom, nil
+}
+
+// missingFor is a required room not placed yet that plugs into slotID, or nil; into slot 0 only once halfway.
+func (g *AccretionGenerator) missingFor(slotID int, halfway bool) *DungeonRoom {
+	if slotID == 0 && !halfway {
+		return nil
+	}
+	for _, name := range slices.Sorted(maps.Keys(g.levelRules.RequireTemplates)) {
+		i := slices.IndexFunc(g.roomTemplates, func(r *DungeonRoom) bool { return r.GetTemplateName() == name })
+		if !g.placedTemplates[name] && i >= 0 && g.roomTemplates[i].GetPlugsIntoSlotId() == slotID {
+			room := g.roomTemplates[i].Clone()
+			room.SetId(g.currentRoomId)
+			g.currentRoomId++
+			return room
+		}
+	}
+	return nil
+}
+
+// partnerFor is a room providing the slot a missing required room plugs into, or nil.
+func (g *AccretionGenerator) partnerFor() *DungeonRoom {
+	var partners []*DungeonRoom
+	for name := range g.levelRules.RequireTemplates {
+		i := slices.IndexFunc(g.roomTemplates, func(r *DungeonRoom) bool { return r.GetTemplateName() == name })
+		if g.placedTemplates[name] || i < 0 || g.roomTemplates[i].GetPlugsIntoSlotId() == 0 {
+			continue
+		}
+		for _, r := range g.getTemplatesForLevel() {
+			if r.GetSlotId() == g.roomTemplates[i].GetPlugsIntoSlotId() && r.GetPlugsIntoSlotId() == 0 && !slices.Contains(partners, r) {
+				partners = append(partners, r)
+			}
+		}
+	}
+	slices.SortFunc(partners, func(a, b *DungeonRoom) int { return strings.Compare(a.GetTemplateName(), b.GetTemplateName()) })
+	room := g.pick(partners)
+	if room != nil {
+		room.SetId(g.currentRoomId)
+		g.currentRoomId++
+	}
+	return room
+}
+
+// attach connects room to one of rooms, the farthest from the level's first room first, and adds it to the
+// level; false when none fits.
+func (g *AccretionGenerator) attach(dMap *DungeonMap, room *DungeonRoom, rooms []*DungeonRoom) bool {
+	for _, existing := range g.farthestFirst(dMap, rooms) {
+		if g.tryConnectTo(dMap, room, existing) {
+			dMap.AddRoomAndSetTiles(room)
+			g.placedTemplates[room.GetTemplateName()] = true
+			return true
+		}
+	}
+	return false
 }
 
 // Generate grows one level. It fails only on template data that cannot build a level at all; a level that came
@@ -149,69 +209,54 @@ func (g *AccretionGenerator) Generate(width, height int) (*DungeonMap, error) {
 	g.currentRoomId++
 
 	roomSize := firstRoom.GetRelativeBoundingRectIncludingConnectors().Size()
-	centerMapPos := geometry.Point{X: width - roomSize.X, Y: height - roomSize.Y}.Div(2)
-	firstRoom.SetPositionOffset(centerMapPos)
-
+	firstRoom.SetPositionOffset(geometry.Point{X: width - roomSize.X, Y: height - roomSize.Y}.Div(2))
 	if !dMap.CanPlaceRoom(firstRoom) {
 		return nil, fmt.Errorf("dungen: template %s does not fit a %dx%d level", firstRoom.GetTemplateName(), width, height)
 	}
-
 	dMap.AddRoomAndSetTiles(firstRoom)
 	g.placedTemplates[firstRoom.GetTemplateName()] = true
 
-	if g.printDebugSteps {
-		println("=== first room ===")
-		dMap.Print()
-	}
-	maxRooms := g.maxRoomCount
 	repCounter := 0
 	currentSlotID := 0
-	for len(dMap.rooms) < maxRooms && repCounter < 100 {
+	for len(dMap.rooms) < g.maxRoomCount && repCounter < 100 {
+		repCounter++
 		// A slot room whose partner will not fit is given up on rather than retried until the loop gives up on
 		// the whole level.
 		if currentSlotID != 0 && repCounter >= slotPatience {
 			currentSlotID = 0
 		}
-		nextRoom, err := g.nextRoomForGenerator(currentSlotID)
-		if err != nil {
-			return nil, err
+		nextRoom := g.nextRoom(currentSlotID)
+		// Required rooms: one plugging into any room waits for the level to be half grown, so it sits far out; one
+		// needing a slot takes the first that opens (hub rooms only fit early), growing a hub for it if need be.
+		if r := g.missingFor(currentSlotID, len(dMap.rooms) >= g.maxRoomCount/2); r != nil {
+			nextRoom = r
+		} else if currentSlotID == 0 && repCounter <= 3 {
+			if r := g.partnerFor(); r != nil {
+				nextRoom = r // a few tries, then growth goes on without it
+			}
 		}
-		if g.printDebugSteps {
-			println(fmt.Sprintf("=== room %d ===", nextRoom.roomId))
-			nextRoom.PrintUntransformed()
+		order := g.attachOrder(dMap.rooms)
+		if g.levelRules.RequireTemplates[nextRoom.GetTemplateName()] {
+			order = g.farthestFirst(dMap, dMap.rooms) // a quest room goes as far out as it fits
 		}
-		for _, existingRoom := range g.attachOrder(dMap.rooms) {
+		for _, existingRoom := range order {
 			if g.tryConnectTo(dMap, nextRoom, existingRoom) {
 				repCounter = 0
 				dMap.AddRoomAndSetTiles(nextRoom)
 				g.placedTemplates[nextRoom.GetTemplateName()] = true
 				currentSlotID = nextRoom.GetSlotId()
-				if g.printDebugSteps {
-					println(fmt.Sprintf("=== added room %d ===", nextRoom.roomId))
-					dMap.PrintPlannedDoors()
-				}
 				break
 			}
 		}
-
-		repCounter++
 	}
-	if len(dMap.rooms) < maxRooms && g.printDebugSteps {
-		// Not an error: the caller regrows the level if it came out too small, and a library does not print.
-		println("=== COULD NOT PLACE ALL ROOMS ===")
-	}
-
-	if g.printDebugSteps {
-		println("=== BEFORE TRIM ===")
-		dMap.PrintPlannedDoors()
-		dMap.Trim()
-		println("=== AFTER TRIM ===")
-		dMap.PrintPlannedDoors()
-	}
+	g.attachRequired(dMap)
+	dMap.Trim()
 
 	// Growing makes a tree; the extra openings make loops, so the way back is not always the way in.
 	dMap.ConnectRoomsOnMap(!g.levelRules.NoDoors)
 	dMap.addMoreDoors(g.random, g.loopDistance, g.loopChance, !g.levelRules.NoDoors)
+	dMap.openDoorways(g.random, doorChance)
+	dMap.addLakes(g.random, g.lakes)
 
 	return dMap, nil
 }
@@ -225,6 +270,9 @@ func (g *AccretionGenerator) MissingRequired() string {
 	}
 	return ""
 }
+
+// doorChance is how many doorways get a door; the rest stay open (Brogue's digDungeon: 60%).
+const doorChance = 0.6
 
 // slotPatience is how many failed placements a slot's partner room gets before growth moves on without it.
 const slotPatience = 10
@@ -241,10 +289,28 @@ func (g *AccretionGenerator) attachOrder(rooms []*DungeonRoom) []*DungeonRoom {
 	return order
 }
 
-func (g *AccretionGenerator) tryConnectTo(dMap *DungeonMap, newRoom *DungeonRoom, existingRoom *DungeonRoom) bool {
-	if g.printDebugSteps {
-		println(fmt.Sprintf("=== try connect room %d to room %d ===", newRoom.roomId, existingRoom.roomId))
+// farthestFirst orders rooms by how many rooms one walks through from the level's first room to reach them,
+// farthest first, the way Brogue puts its vaults far from the stairs; ties keep attachOrder's weighted shuffle.
+func (g *AccretionGenerator) farthestFirst(dMap *DungeonMap, rooms []*DungeonRoom) []*DungeonRoom {
+	first := dMap.rooms[0]
+	hops := map[*DungeonRoom]int{first: 0}
+	for queue := []*DungeonRoom{first}; len(queue) > 0; queue = queue[1:] {
+		r := queue[0]
+		for _, door := range slices.SortedFunc(maps.Keys(r.connectedRooms), comparePoints) {
+			if n := r.connectedRooms[door]; n != nil {
+				if _, seen := hops[n]; !seen {
+					hops[n] = hops[r] + 1
+					queue = append(queue, n)
+				}
+			}
+		}
 	}
+	order := g.attachOrder(rooms)
+	slices.SortStableFunc(order, func(a, b *DungeonRoom) int { return hops[b] - hops[a] })
+	return order
+}
+
+func (g *AccretionGenerator) tryConnectTo(dMap *DungeonMap, newRoom *DungeonRoom, existingRoom *DungeonRoom) bool {
 	freeConnections := existingRoom.GetFreeConnectionsWithRotatedDirection()
 	relPositions := getSortedKeys(freeConnections)
 	orientations := 4
@@ -253,58 +319,26 @@ func (g *AccretionGenerator) tryConnectTo(dMap *DungeonMap, newRoom *DungeonRoom
 	}
 	for _, orientation := range g.random.Perm(orientations) {
 		newRoom.SetTransform(orientation%4, orientation >= 4)
-		if g.printDebugSteps {
-			println(fmt.Sprintf("=== orientation %d for room %d ===", orientation, newRoom.roomId))
-			newRoom.PrintRotated()
-		}
 		for _, relativeConnectionPos := range relPositions {
-			roomConnection := freeConnections[relativeConnectionPos]
-			if relativeNewDoorPos, ok := newRoom.HasMatchingConnection(roomConnection); ok {
-				rotatedRelativeDoorPos := newRoom.GetRotatedRelativeDoorPosition(relativeNewDoorPos)
-				// both have free doors in opposite directions
-				absoluteDoorPos := existingRoom.GetAbsoluteDoorPosition(relativeConnectionPos)
-
-				// the new room should be placed so that the new door is at the same position as the existing door
-				newRoom.SetPositionOffset(absoluteDoorPos.Sub(rotatedRelativeDoorPos))
-				if g.printDebugSteps {
-					println("=== CONNECTION POSSIBLE ===")
-					println(fmt.Sprintf("> NEW ROOM %d", newRoom.roomId))
-					newRoom.PrintTransformedWithHighlight(relativeNewDoorPos)
-					println(fmt.Sprintf("> EXISTING ROOM %d", existingRoom.roomId))
-					existingRoom.PrintTransformedWithHighlight(relativeConnectionPos)
-				}
-				if dMap.CanPlaceRoomNextTo(newRoom, existingRoom) {
-					if g.printDebugSteps {
-						println("=== CONNECTED ===")
-					}
-					newRoom.AddConnectedRoom(relativeNewDoorPos, existingRoom)
-					existingRoom.AddConnectedRoom(relativeConnectionPos, newRoom)
-					return true
-				} else if g.printDebugSteps && newRoom.GetPlugsIntoSlotId() > 0 {
-					println("=== COULD NOT FIT ===")
-					println(fmt.Sprintf("> NEW ROOM %d", newRoom.roomId))
-					newRoom.PrintTransformedWithHighlight(relativeNewDoorPos)
-					println(fmt.Sprintf("> EXISTING ROOM %d", existingRoom.roomId))
-					existingRoom.PrintTransformedWithHighlight(relativeConnectionPos)
-					println("> MAP")
-					dMap.PrintWithHighlight(absoluteDoorPos)
-				}
+			relativeNewDoorPos, ok := newRoom.HasMatchingConnection(freeConnections[relativeConnectionPos])
+			if !ok {
+				continue
+			}
+			// place the new room so its door lands on the existing room's free door
+			absoluteDoorPos := existingRoom.GetAbsoluteDoorPosition(relativeConnectionPos)
+			newRoom.SetPositionOffset(absoluteDoorPos.Sub(newRoom.GetRotatedRelativeDoorPosition(relativeNewDoorPos)))
+			if dMap.CanPlaceRoomNextTo(newRoom, existingRoom) {
+				newRoom.AddConnectedRoom(relativeNewDoorPos, existingRoom)
+				existingRoom.AddConnectedRoom(relativeConnectionPos, newRoom)
+				return true
 			}
 		}
 	}
-
 	return false
 }
 
 func getSortedKeys(doors map[geometry.Point]RoomConnection) []geometry.Point {
-	keys := make([]geometry.Point, len(doors))
-	i := 0
-	for k := range doors {
-		keys[i] = k
-		i++
-	}
-	slices.SortFunc(keys, comparePoints)
-	return keys
+	return slices.SortedFunc(maps.Keys(doors), comparePoints)
 }
 
 // comparePoints orders points row by row. Map iteration order is random, so anything that feeds the RNG from a
@@ -375,6 +409,7 @@ func templateFromLevel(level *hhm.Level, ids TileIDs) *DungeonRoom {
 	dRoom.SetConnections(connectors)
 	dRoom.SetCanBeLit(level.Props.CanBeLit)
 	dRoom.SetDecorationLevelName(level.Props.UsesDecoration)
+	dRoom.weight = level.Props.Weight
 	return dRoom
 }
 

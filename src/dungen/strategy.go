@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"math/rand"
+	"slices"
 
 	"rpg/src/dungeon"
 	"rpg/src/hhm"
@@ -34,7 +35,7 @@ type AccretionConfig struct {
 	Templates     string   // the maps directory the room templates live in, e.g. assets/maps
 	Prefix        string   // only templates whose name starts with this are used - H&H's tile set per depth
 	Require       []string // templates this level must contain (its quest rooms)
-	Forbid        []string // templates this level must not contain (another level's quest rooms)
+	Forbid        []string // templates this level must not contain: the rooms other levels require (ReserveRequiredRooms)
 	Rooms         int      // how many rooms to grow to
 	MinRooms      int      // regrow the level until it has at least this many
 	Width, Height int
@@ -43,6 +44,7 @@ type AccretionConfig struct {
 	Tiles         TileIDs
 	LoopDistance  int     // a wall between two rooms this far apart on foot (or farther) may open into a loop
 	LoopChance    float64 // how likely each such wall opens
+	Lakes         int     // how many lakes to try to lay over the grown level (Brogue's), 0 for none
 }
 
 type accretion struct{}
@@ -50,7 +52,7 @@ type accretion struct{}
 func (accretion) Parse(r recfile.Record) (dungeon.Config, error) {
 	c := AccretionConfig{Templates: hhm.Dir, Rooms: 16, MinRooms: 10,
 		Width: accretionScratch, Height: accretionScratch, Doors: true, Mirror: true,
-		Tiles: TileIDs{Wall: 56, Floor: 64}, LoopDistance: 10, LoopChance: 0.8}
+		Tiles: TileIDs{Wall: 56, Floor: 64}, LoopDistance: 20, LoopChance: 1}
 	if v, ok := dungeon.Field(r, "templates"); ok {
 		c.Templates = v
 	}
@@ -59,7 +61,6 @@ func (accretion) Parse(r recfile.Record) (dungeon.Config, error) {
 		return nil, fmt.Errorf("levels.rec: accretion needs a template_prefix")
 	}
 	c.Require = dungeon.FieldsNamed(r, "require_room")
-	c.Forbid = dungeon.FieldsNamed(r, "forbid_room")
 	if v, ok := dungeon.Field(r, "doors"); ok {
 		c.Doors = v != "false"
 	}
@@ -76,6 +77,9 @@ func (accretion) Parse(r recfile.Record) (dungeon.Config, error) {
 			return nil, err
 		}
 	}
+	if c.Lakes, err = dungeon.Int(r, "lakes", 0); err != nil {
+		return nil, err
+	}
 	if c.LoopChance, err = dungeon.Float(r, "loop_chance", c.LoopChance); err != nil {
 		return nil, err
 	}
@@ -83,6 +87,23 @@ func (accretion) Parse(r recfile.Record) (dungeon.Config, error) {
 		return nil, fmt.Errorf("levels.rec: accretion loop_chance must be between 0 and 1")
 	}
 	return c, nil
+}
+
+// ReserveRequiredRooms keeps each accretion level's required rooms to itself: every other accretion level is
+// forbidden to grow them, so a quest room turns up on its own level only.
+func ReserveRequiredRooms(levels []dungeon.Level) {
+	var required []string
+	for _, l := range levels {
+		if c, ok := l.Config.(AccretionConfig); ok {
+			required = append(required, c.Require...)
+		}
+	}
+	for i, l := range levels {
+		if c, ok := l.Config.(AccretionConfig); ok {
+			c.Forbid = slices.DeleteFunc(slices.Clone(required), func(r string) bool { return slices.Contains(c.Require, r) })
+			levels[i].Config = c
+		}
+	}
 }
 
 // MegaDungeonConfig is what a mod declares for the maze-and-rooms generator. The knobs were rolled off the
@@ -220,7 +241,7 @@ func buildAccretion(c AccretionConfig, rnd *rand.Rand, fsys fs.FS) (*DungeonMap,
 	g.SetLevelRules(rules)
 	g.SetRoomCount(c.Rooms)
 	g.SetMirroring(c.Mirror)
-	g.loopDistance, g.loopChance = c.LoopDistance, c.LoopChance
+	g.loopDistance, g.loopChance, g.lakes = c.LoopDistance, c.LoopChance, c.Lakes
 	if len(g.roomTemplates) == 0 {
 		return nil, fmt.Errorf("dungen: %s has no room templates with prefix %q", c.Templates, c.Prefix)
 	}

@@ -8,37 +8,37 @@ import (
 	"strings"
 )
 
-// ISPL_ item special-effect bits.
+// Item.Flags: the on/off powers an item carries, set by savePower.
 const (
-	ISplInfravision    = 0x00000001
-	ISplRndStealLife   = 0x00000002
-	ISplRndArrowVel    = 0x00000004
-	ISplFireArrows     = 0x00000008
-	ISplFireDam        = 0x00000010
-	ISplLightDam       = 0x00000020
-	ISplDrainLife      = 0x00000040
-	ISplNoHealPlr      = 0x00000100
-	ISplKnockback      = 0x00000800
-	ISplNoHealMon      = 0x00001000
-	ISplStealMana3     = 0x00002000
-	ISplStealMana5     = 0x00004000
-	ISplStealLife3     = 0x00008000
-	ISplStealLife5     = 0x00010000
-	ISplQuickAttack    = 0x00020000
-	ISplFastAttack     = 0x00040000
-	ISplFasterAttack   = 0x00080000
-	ISplFastestAttack  = 0x00100000
-	ISplFastRecover    = 0x00200000
-	ISplFasterRecover  = 0x00400000
-	ISplFastestRecover = 0x00800000
-	ISplFastBlock      = 0x01000000
-	ISplLightArrows    = 0x02000000
-	ISplMultArrows     = 0x10000000
-	ISplThorns         = 0x04000000
-	ISplNoMana         = 0x08000000
-	ISplAbsHalfTrap    = 0x10000000
-	ISpl3xDamVsDemons  = 0x40000000
-	ISplAllResZero     = 0x80000000
+	FlagInfravision          = 0x00000001
+	FlagRandomStealHealth    = 0x00000002
+	FlagRandomArrowSpeed     = 0x00000004
+	FlagFireArrows           = 0x00000008
+	FlagFireDamage           = 0x00000010
+	FlagLightningDamage      = 0x00000020
+	FlagDrainLife            = 0x00000040
+	FlagNoHealPlayer         = 0x00000100
+	FlagKnockback            = 0x00000800
+	FlagNoHealMonster        = 0x00001000
+	FlagStealMana3           = 0x00002000
+	FlagStealMana5           = 0x00004000
+	FlagStealHealth3         = 0x00008000
+	FlagStealHealth5         = 0x00010000
+	FlagAttackSpeed1         = 0x00020000
+	FlagAttackSpeed2         = 0x00040000
+	FlagAttackSpeed3         = 0x00080000
+	FlagAttackSpeed4         = 0x00100000
+	FlagHitRecovery1         = 0x00200000
+	FlagHitRecovery2         = 0x00400000
+	FlagHitRecovery3         = 0x00800000
+	FlagBlockSpeed           = 0x01000000
+	FlagLightningArrows      = 0x02000000
+	FlagMultipleArrows       = 0x10000000
+	FlagThorns               = 0x04000000
+	FlagNoMana               = 0x08000000
+	FlagHalfTrapDamage       = 0x10000000
+	FlagTripleDamageVsDemons = 0x40000000
+	FlagNoResistances        = 0x80000000
 )
 
 // Item is a rolled D1 item (ItemStruct minus graphics). HP/Mana bonuses are whole points, not D1's <<6.
@@ -67,6 +67,9 @@ type Item struct {
 	SplLvlAdd                          int
 	FMinDam, FMaxDam, LMinDam, LMaxDam int
 	PLEnAc, PLMana, PLHP               int
+	ManaOnKill                         int    // mana back for every kill
+	ReturnDamage                       int    // percent of a melee blow sent back at the attacker, at least 1 point
+	FireballShot                       int    // every shot also bursts a fireball of this damage where it lands
 	DamAcFlags                         uint32 // Hellfire's ItemSpecialEffectHf
 	PrePower, SufPower                 string
 	Unique                             string // unique_items.rec internal_name; "" for none
@@ -211,20 +214,16 @@ func (g *Generator) recordPower(it *Item, modifier string, lvl int) {
 			lo, hi = n, n
 		}
 	}
-	power := map[string]string{
-		"strength": "IPL_STR", "dexterity": "IPL_DEX", "intelligence": "IPL_MAG", "health": "IPL_LIFE", "mana": "IPL_MANA",
-		"damage": "IPL_DAMMOD", "armor_class": "IPL_ACP", "light_radius": "IPL_LIGHT", "attack_speed": "IPL_FASTATTACK",
-		"steal_health": "IPL_STEALLIFE", "steal_mana": "IPL_STEALMANA",
-	}[name]
-	switch power {
-	case "":
+	switch name { // the equip_modifier names that are also savePower names
+	case "strength", "dexterity", "intelligence", "health", "mana", "damage", "light_radius", "steal_health", "steal_mana":
+	default:
 		return // speed and move_speed are no item power: the item carries them as stat modifiers (applyItemRecord)
-	case "IPL_ACP":
+	case "armor_class":
 		lo, hi = 10*lo, 10*hi // percent
-	case "IPL_FASTATTACK":
+	case "attack_speed":
 		lo, hi = 1, 1
 	}
-	g.savePower(it, power, lo, hi, 0, 0, 1)
+	g.savePower(it, name, lo, hi, 0, 0, 1)
 }
 
 func (g *Generator) spellIdx(id string) int {
@@ -234,7 +233,7 @@ func (g *Generator) spellIdx(id string) int {
 
 func (g *Generator) isplFlags(s string) uint32 {
 	if s == "ISPL_RNDSTEALLIFE" {
-		return ISplRndStealLife
+		return FlagRandomStealHealth
 	}
 	return 0
 }
@@ -292,17 +291,17 @@ func plVal(pv, p1, p2, minv, maxv int) int {
 func (g *Generator) savePower(it *Item, power string, p1, p2, minv, maxv, multv int) {
 	r := g.rndPL(p1, p2)
 	switch power {
-	case "IPL_TOHIT":
+	case "to_hit":
 		it.PLToHit += r
-	case "IPL_TOHIT_CURSE":
+	case "to_hit_curse":
 		it.PLToHit -= r
-	case "IPL_DAMP":
+	case "damage_percent":
 		it.PLDam += r
-	case "IPL_DAMP_CURSE":
+	case "damage_percent_curse":
 		it.PLDam -= r
-	case "IPL_DOPPELGANGER", "IPL_TOHIT_DAMP": // Doppelganger's hits are IPL_TOHIT_DAMP that may split the monster
-		if power == "IPL_DOPPELGANGER" {
-			it.DamAcFlags |= IHfDoppelganger
+	case "doppelganger", "to_hit_damage_percent": // Doppelganger's hits are to_hit_damage_percent that may split the monster
+		if power == "doppelganger" {
+			it.DamAcFlags |= FlagDoppelganger
 		}
 		r = g.rndPL(p1, p2)
 		it.PLDam += r
@@ -328,7 +327,7 @@ func (g *Generator) savePower(it *Item, power string, p1, p2, minv, maxv, multv 
 			r2 = g.rndPL(76, 100)
 		}
 		it.PLToHit += r2
-	case "IPL_TOHIT_DAMP_CURSE":
+	case "to_hit_damage_percent_curse":
 		it.PLDam -= r
 		r2 := 0
 		switch p1 {
@@ -338,192 +337,198 @@ func (g *Generator) savePower(it *Item, power string, p1, p2, minv, maxv, multv 
 			r2 = g.rndPL(6, 10)
 		}
 		it.PLToHit -= r2
-	case "IPL_ACP":
+	case "armor_class":
 		it.PLAC += r
-	case "IPL_ACP_CURSE":
+	case "armor_class_curse":
 		it.PLAC -= r
-	case "IPL_SETAC":
+	case "set_base_armor":
 		it.AC = r
-	case "IPL_AC_CURSE":
+	case "base_armor_curse":
 		it.AC -= r
-	case "IPL_FIRERES":
+	case "fire_resistance":
 		it.PLFR += r
-	case "IPL_LIGHTRES":
+	case "lightning_resistance":
 		it.PLLR += r
-	case "IPL_MAGICRES":
+	case "magic_resistance":
 		it.PLMR += r
-	case "IPL_ALLRES":
+	case "all_resistances":
 		it.PLFR = max(it.PLFR+r, 0)
 		it.PLLR = max(it.PLLR+r, 0)
 		it.PLMR = max(it.PLMR+r, 0)
-	case "IPL_SPLLVLADD":
+	case "spell_levels":
 		it.SplLvlAdd = r
-	case "IPL_CHARGES":
+	case "charges":
 		it.Charges *= p1
 		it.MaxCharges = it.Charges
-	case "IPL_SPELL":
+	case "spell":
 		it.Spell = p1
 		it.Charges = p1
 		it.MaxCharges = p2
-	case "IPL_FIREDAM":
-		it.Flags |= ISplFireDam
+	case "fire_damage":
+		it.Flags |= FlagFireDamage
 		it.FMinDam, it.FMaxDam = p1, p2
-	case "IPL_LIGHTDAM":
-		it.Flags |= ISplLightDam
+	case "lightning_damage":
+		it.Flags |= FlagLightningDamage
 		it.LMinDam, it.LMaxDam = p1, p2
-	case "IPL_STR":
+	case "strength":
 		it.PLStr += r
-	case "IPL_STR_CURSE":
+	case "strength_curse":
 		it.PLStr -= r
-	case "IPL_MAG":
+	case "intelligence":
 		it.PLMag += r
-	case "IPL_MAG_CURSE":
+	case "intelligence_curse":
 		it.PLMag -= r
-	case "IPL_DEX":
+	case "dexterity":
 		it.PLDex += r
-	case "IPL_DEX_CURSE":
+	case "dexterity_curse":
 		it.PLDex -= r
-	case "IPL_VIT":
+	case "vitality":
 		it.PLVit += r
-	case "IPL_VIT_CURSE":
+	case "vitality_curse":
 		it.PLVit -= r
-	case "IPL_ATTRIBS":
+	case "all_attributes":
 		it.PLStr += r
 		it.PLMag += r
 		it.PLDex += r
 		it.PLVit += r
-	case "IPL_ATTRIBS_CURSE":
+	case "all_attributes_curse":
 		it.PLStr -= r
 		it.PLMag -= r
 		it.PLDex -= r
 		it.PLVit -= r
-	case "IPL_GETHIT_CURSE":
+	case "damage_reduction_curse":
 		it.PLGetHit += r
-	case "IPL_GETHIT":
+	case "damage_reduction":
 		it.PLGetHit -= r
-	case "IPL_LIFE":
+	case "health":
 		it.PLHP += r
-	case "IPL_LIFE_CURSE":
+	case "health_curse":
 		it.PLHP -= r
-	case "IPL_MANA":
+	case "mana":
 		it.PLMana += r
-	case "IPL_MANA_CURSE":
+	case "mana_curse":
 		it.PLMana -= r
-	case "IPL_DUR":
+	case "durability":
 		r2 := r * it.MaxDur / 100
 		it.MaxDur += r2
 		it.Durability += r2
-	case "IPL_DUR_CURSE":
+	case "durability_curse":
 		it.MaxDur = max(it.MaxDur-r*it.MaxDur/100, 1)
 		it.Durability = it.MaxDur
-	case "IPL_INDESTRUCTIBLE":
+	case "indestructible":
 		it.Durability, it.MaxDur = 255, 255
-	case "IPL_LIGHT":
+	case "light_radius":
 		it.PLLight += p1
-	case "IPL_LIGHT_CURSE":
+	case "light_radius_curse":
 		it.PLLight -= p1
-	case "IPL_FIRE_ARROWS":
-		it.Flags |= ISplFireArrows
+	case "fire_arrows":
+		it.Flags |= FlagFireArrows
 		it.FMinDam, it.FMaxDam = p1, p2
-	case "IPL_LIGHT_ARROWS":
-		it.Flags |= ISplLightArrows
+	case "lightning_arrows":
+		it.Flags |= FlagLightningArrows
 		it.LMinDam, it.LMaxDam = p1, p2
-	case "IPL_THORNS":
-		it.Flags |= ISplThorns
-	case "IPL_NOMANA":
-		it.Flags |= ISplNoMana
-	case "IPL_NOHEALPLR":
-		it.Flags |= ISplNoHealPlr
-	case "IPL_ABSHALFTRAP":
-		it.Flags |= ISplAbsHalfTrap
-	case "IPL_KNOCKBACK":
-		it.Flags |= ISplKnockback
-	case "IPL_3XDAMVDEM":
-		it.Flags |= ISpl3xDamVsDemons
-	case "IPL_ALLRESZERO":
-		it.Flags |= ISplAllResZero
-	case "IPL_NOHEALMON":
-		it.Flags |= ISplNoHealMon
-	case "IPL_STEALMANA":
+	case "mana_on_kill":
+		it.ManaOnKill += r
+	case "return_damage":
+		it.ReturnDamage += r
+	case "fireball_shot":
+		it.FireballShot = max(it.FireballShot, r)
+	case "thorns":
+		it.Flags |= FlagThorns
+	case "no_mana":
+		it.Flags |= FlagNoMana
+	case "no_heal_player":
+		it.Flags |= FlagNoHealPlayer
+	case "half_trap_damage":
+		it.Flags |= FlagHalfTrapDamage
+	case "knockback":
+		it.Flags |= FlagKnockback
+	case "triple_damage_vs_demons":
+		it.Flags |= FlagTripleDamageVsDemons
+	case "no_resistances":
+		it.Flags |= FlagNoResistances
+	case "no_heal_monster":
+		it.Flags |= FlagNoHealMonster
+	case "steal_mana":
 		if p1 == 3 {
-			it.Flags |= ISplStealMana3
+			it.Flags |= FlagStealMana3
 		}
 		if p1 == 5 {
-			it.Flags |= ISplStealMana5
+			it.Flags |= FlagStealMana5
 		}
-	case "IPL_STEALLIFE":
+	case "steal_health":
 		if p1 == 3 {
-			it.Flags |= ISplStealLife3
+			it.Flags |= FlagStealHealth3
 		}
 		if p1 == 5 {
-			it.Flags |= ISplStealLife5
+			it.Flags |= FlagStealHealth5
 		}
-	case "IPL_TARGAC":
+	case "armor_piercing":
 		it.PLEnAc += r
-	case "IPL_FASTATTACK":
-		it.Flags |= [5]uint32{0, ISplQuickAttack, ISplFastAttack, ISplFasterAttack, ISplFastestAttack}[min(max(p1, 0), 4)]
-	case "IPL_FASTRECOVER":
-		it.Flags |= [4]uint32{0, ISplFastRecover, ISplFasterRecover, ISplFastestRecover}[min(max(p1, 0), 3)]
-	case "IPL_FASTBLOCK":
-		it.Flags |= ISplFastBlock
-	case "IPL_DAMMOD":
+	case "attack_speed":
+		it.Flags |= [5]uint32{0, FlagAttackSpeed1, FlagAttackSpeed2, FlagAttackSpeed3, FlagAttackSpeed4}[min(max(p1, 0), 4)]
+	case "hit_recovery":
+		it.Flags |= [4]uint32{0, FlagHitRecovery1, FlagHitRecovery2, FlagHitRecovery3}[min(max(p1, 0), 3)]
+	case "block_speed":
+		it.Flags |= FlagBlockSpeed
+	case "damage":
 		it.PLDamMod += r
-	case "IPL_RNDARROWVEL":
-		it.Flags |= ISplRndArrowVel
-	case "IPL_SETDAM":
+	case "random_arrow_speed":
+		it.Flags |= FlagRandomArrowSpeed
+	case "set_damage":
 		it.MinDam, it.MaxDam = p1, p2
-	case "IPL_SETDUR":
+	case "set_durability":
 		it.Durability, it.MaxDur = p1, p1
-	case "IPL_FASTSWING":
-		it.Flags |= ISplFasterAttack
-	case "IPL_ONEHAND":
+	case "swing_speed":
+		it.Flags |= FlagAttackSpeed3
+	case "one_handed":
 		it.Loc = "ILOC_ONEHAND"
-	case "IPL_DRAINLIFE":
-		it.Flags |= ISplDrainLife
-	case "IPL_RNDSTEALLIFE":
-		it.Flags |= ISplRndStealLife
-	case "IPL_INFRAVISION":
-		it.Flags |= ISplInfravision
-	case "IPL_NOMINSTR":
+	case "drain_life":
+		it.Flags |= FlagDrainLife
+	case "random_steal_health":
+		it.Flags |= FlagRandomStealHealth
+	case "infravision":
+		it.Flags |= FlagInfravision
+	case "no_strength_requirement":
 		it.MinStr = 0
-	case "IPL_MULT_ARROWS":
-		it.Flags |= ISplMultArrows
-	case "IPL_FIREBALL": // Flambeau: arrows that burst like a fireball
-		it.Flags |= ISplLightArrows | ISplFireArrows
+	case "multiple_arrows":
+		it.Flags |= FlagMultipleArrows
+	case "fireball_arrows": // Flambeau: arrows that burst like a fireball
+		it.Flags |= FlagLightningArrows | FlagFireArrows
 		it.FMinDam, it.FMaxDam = p1, p2
 		it.LMinDam, it.LMaxDam = 0, 0
-	case "IPL_ADDACLIFE": // Blitzen: arrows that hit for the wearer's armour class
-		it.Flags |= ISplLightArrows | ISplFireArrows
+	case "armor_arrows": // Blitzen: arrows that hit for the wearer's armour class
+		it.Flags |= FlagLightningArrows | FlagFireArrows
 		it.FMinDam, it.FMaxDam = p1, p2
 		it.LMinDam, it.LMaxDam = 1, 0
-	case "IPL_ADDMANAAC": // Thunderclap: hits that hurt for the wearer's mana
-		it.Flags |= ISplLightDam | ISplFireDam
+	case "mana_hits": // Thunderclap: hits that hurt for the wearer's mana
+		it.Flags |= FlagLightningDamage | FlagFireDamage
 		it.FMinDam, it.FMaxDam = p1, p2
 		it.LMinDam, it.LMaxDam = 2, 0
-	case "IPL_MANATOLIFE":
-		it.DamAcFlags |= IHfManaToLife
-	case "IPL_LIFETOMANA":
-		it.DamAcFlags |= IHfLifeToMana
-	case "IPL_ACDEMON":
-		it.DamAcFlags |= IHfACVsDemons
-	case "IPL_ACUNDEAD":
-		it.DamAcFlags |= IHfACVsUndead
-	case "IPL_DEVASTATION":
-		it.DamAcFlags |= IHfDevastation
-	case "IPL_PERIL":
-		it.DamAcFlags |= IHfPeril
-	case "IPL_JESTERS":
-		it.DamAcFlags |= IHfJesters
-	case "IPL_DECAY":
-		it.DamAcFlags |= IHfDecay
+	case "mana_to_life":
+		it.DamAcFlags |= FlagManaToLife
+	case "life_to_mana":
+		it.DamAcFlags |= FlagLifeToMana
+	case "armor_vs_demons":
+		it.DamAcFlags |= FlagArmorVsDemons
+	case "armor_vs_undead":
+		it.DamAcFlags |= FlagArmorVsUndead
+	case "triple_damage":
+		it.DamAcFlags |= FlagTripleDamage
+	case "peril":
+		it.DamAcFlags |= FlagPeril
+	case "jesters":
+		it.DamAcFlags |= FlagJesters
+	case "decay":
+		it.DamAcFlags |= FlagDecay
 		it.PLDam += r
-	case "IPL_CRYSTALLINE": // as IPL_DUR_CURSE, with a huge damage bonus
+	case "crystalline": // as durability_curse, with a huge damage bonus
 		it.PLDam += 140 + 2*r
 		it.MaxDur = max(it.MaxDur-r*it.MaxDur/100, 1)
 		it.Durability = it.MaxDur
-	case "IPL_INVCURS":
+	case "item_graphic":
 		it.Curs = p1
-		// IPL_ADDACLIFE/ADDMANAAC/FIRERESCLVL aren't ported: in 1.09 only Hellfire's Blitzen and Thunderclap roll the
+		// armor_arrows/ADDMANAAC/FIRERESCLVL aren't ported: in 1.09 only Hellfire's Blitzen and Thunderclap roll the
 		// first two, and no item or affix rolls FIRERESCLVL.
 	}
 	if it.vAdd1 == 0 && it.vMult1 == 0 {
@@ -552,6 +557,13 @@ func (g *Generator) applyPrefix(it *Item, a Affix) {
 	it.PrePower = a.Power
 }
 
+func (g *Generator) ApplySuffix(it *Item, a Affix) {
+	it.IName = it.IName + " of " + a.Name
+	it.Magical = 1
+	g.savePower(it, a.Power, a.P1, a.P2, a.MinVal, a.MaxVal, a.MultVal)
+	it.SufPower = a.Power
+}
+
 // itemPower ports GetItemPower.
 func (g *Generator) itemPower(it *Item, minlvl, maxlvl, flgs int, onlygood bool) {
 	pre, post := g.random(4), g.random(3)
@@ -570,7 +582,7 @@ func (g *Generator) itemPower(it *Item, minlvl, maxlvl, flgs int, onlygood bool)
 	if pre == 0 {
 		var l []int
 		for j, a := range g.D.Prefixes {
-			if a.IType&flgs != 0 && a.MinLvl >= minlvl && a.MinLvl <= maxlvl && (!onlygood || a.Ok) && (flgs != PLTStaff || a.Power != "IPL_CHARGES") {
+			if a.IType&flgs != 0 && a.MinLvl >= minlvl && a.MinLvl <= maxlvl && (!onlygood || a.Ok) && (flgs != PLTStaff || a.Power != "charges") {
 				l = append(l, j)
 				if a.Double {
 					l = append(l, j)
@@ -592,11 +604,7 @@ func (g *Generator) itemPower(it *Item, minlvl, maxlvl, flgs int, onlygood bool)
 			}
 		}
 		if len(l) != 0 {
-			a := g.D.Suffixes[l[g.random(len(l))]]
-			it.IName = it.IName + " of " + a.Name
-			it.Magical = 1
-			g.savePower(it, a.Power, a.P1, a.P2, a.MinVal, a.MaxVal, a.MultVal)
-			it.SufPower = a.Power
+			g.ApplySuffix(it, g.D.Suffixes[l[g.random(len(l))]])
 			magical = true
 		}
 	}
@@ -938,8 +946,7 @@ func (g *Generator) LevelMonsterTypes(dlvl int) []int {
 		if i == MonsterCount-1 {
 			continue
 		}
-		minl, maxl := 15*m.MinDLvl/30+1, 15*m.MaxDLvl/30+1
-		if dlvl >= minl && dlvl <= maxl && m.RandomSpawn {
+		if m.SpawnsAt(dlvl) && m.RandomSpawn { // 1.09's 15*mMinDLvl/30+1, precomputed in enemies.rec
 			list = append(list, i)
 		}
 	}

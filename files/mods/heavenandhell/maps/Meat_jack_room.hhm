@@ -14,3 +14,4 @@ IsDecoration	true
 
 [entities]
 NPC	5	4	Name=Meat Jack	Tile=258	Type=Aggressive	UniqueName=meat_jack
+Door	5	6

@@ -227,3 +227,63 @@ kind: text
 format: indestructible
 better: 1
 
+
+key: manaonkill
+kind: signed
+format: %+d mana for every kill
+better: 1
+
+key: triple_damage
+kind: text
+format: 5% of hits deal triple damage
+better: 1
+
+key: jesters
+kind: text
+format: hits deal a wild 0-600% damage
+better: 0
+
+key: peril
+kind: text
+format: double damage, but hits hurt you too
+better: 0
+
+key: decay
+kind: text
+format: damage fades with every hit
+better: 0
+
+key: doppelganger
+kind: text
+format: hits may split a monster in two
+better: 1
+
+key: armor_vs_demons
+kind: text
+format: +40 armor class against demons
+better: 1
+
+key: armor_vs_undead
+kind: text
+format: +20 armor class against undead
+better: 1
+
+key: mana_to_life
+kind: text
+format: half your mana becomes life
+better: 0
+
+key: life_to_mana
+kind: text
+format: two fifths of your life becomes mana
+better: 0
+
+key: return_damage
+kind: signed
+format: attacker takes %d%% of its melee blow back
+better: 1
+
+key: fireball_shot
+kind: signed
+format: shots burst in a fireball for %d damage
+better: 1

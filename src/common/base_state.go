@@ -505,6 +505,15 @@ func (s *State) GetWaterColor() color.RGBA {
 	return color.RGBA{R: 86, G: 112, B: 194, A: 255}
 }
 
+// WaterColorOf tints one water tile: GetWaterColor, lightened halfway to white for the shallows one wades through.
+func (s *State) WaterColorOf(t gridmap.Tile) color.RGBA {
+	c := s.GetWaterColor()
+	if t.IsWalkable {
+		c = color.RGBA{R: c.R/2 + 128, G: c.G/2 + 128, B: c.B/2 + 128, A: 255}
+	}
+	return c
+}
+
 func (s *State) IsDoorAt(pos geometry.Point) (*Door, bool) {
 	currentMap := s.GetMap()
 	objectAt, ok := currentMap.TryGetObjectAt(pos)
@@ -807,24 +816,32 @@ func (s *State) glowAt(p geometry.Point) lightGlow {
 				if src == church {
 					r, kind = churchLightRadius, glowRed
 				}
-				for dy := -r; dy <= r && r > 0; dy++ {
-					for dx := -r; dx <= r; dx++ {
-						q := src.Add(geometry.Point{X: dx, Y: dy})
-						d := geometry.Distance(src, q)
-						if !m.Contains(q) || d >= float64(r) {
-							continue
-						}
-						los := geometry.LineOfSight(src, q, func(c geometry.Point) bool { return c == src || m.IsTransparent(c) })
-						if len(los) > 0 && los[len(los)-1] == q {
-							if v := 1 - d/float64(r); v > glow[q].v {
-								glow[q] = lightGlow{v: v, kind: kind}
-							}
-						}
+				halo(m, src, r, func(q geometry.Point, v float64) {
+					if v > glow[q].v {
+						glow[q] = lightGlow{v: v, kind: kind}
 					}
-				}
+				})
 			}
 		}
 		s.glowCache[m] = glow
 	}
 	return glow[p]
+}
+
+// halo calls lit for each cell within radius r of a light at src that the light reaches past walls, with its
+// brightness there: 1 at the light, fading to 0 at r.
+func halo(m *gridmap.GridMap[*Actor, *Item, Object], src geometry.Point, r int, lit func(q geometry.Point, v float64)) {
+	for dy := -r; dy <= r && r > 0; dy++ {
+		for dx := -r; dx <= r; dx++ {
+			q := src.Add(geometry.Point{X: dx, Y: dy})
+			d := geometry.Distance(src, q)
+			if !m.Contains(q) || d >= float64(r) {
+				continue
+			}
+			los := geometry.LineOfSight(src, q, func(c geometry.Point) bool { return c == src || m.IsTransparent(c) })
+			if len(los) > 0 && los[len(los)-1] == q {
+				lit(q, 1-d/float64(r))
+			}
+		}
+	}
 }

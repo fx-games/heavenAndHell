@@ -141,12 +141,6 @@ type ActionHook interface {
 	IsAfter() bool
 }
 
-type ItemActionHook interface {
-	ActionHook
-	SetItemContext(context *ItemContext)
-	ToString() string
-}
-
 type Cause interface {
 	Action() ActionName
 	GetActor() *Actor

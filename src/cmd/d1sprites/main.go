@@ -293,10 +293,10 @@ func items(read reader, pal []byte) ([]section, error) {
 		name := m.GetStringOrDefault("name", "")
 		base := baseOf[m.GetStringOrDefault("base", "")]
 		curs := base.i("iCurs")
-		for _, f := range rec { // IPL_INVCURS swaps in its own graphic
+		for _, f := range rec { // item_graphic swaps in its own graphic
 			var power string
 			var p1 int
-			if fmt.Sscan(f.Value, &power, &p1); f.Name == "power" && power == "IPL_INVCURS" {
+			if fmt.Sscan(f.Value, &power, &p1); f.Name == "power" && power == "item_graphic" {
 				curs = p1
 			}
 		}

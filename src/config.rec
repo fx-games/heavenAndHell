@@ -28,6 +28,7 @@ VoiceVolume: 1
 AutoExploreOpenContainers: false
 AutosaveOnLevelChange: true
 Fullscreen: false
+description_max_chars: 45
 Mod: heavenandhell
 SpriteSheet: assets/classic_roguelike.png
 

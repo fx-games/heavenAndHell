@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"path"
 	"slices"
+	"strings"
 	"testing"
 
 	"rpg/files"
@@ -150,9 +151,12 @@ func TestHeavenAndHellLevelsArePopulatedFromItsOwnTables(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ownMonster := map[string]defs.Monster{}
+	ownMonster, companion := map[string]defs.Monster{}, map[string]bool{}
 	for _, mon := range monsters {
 		ownMonster[mon.ID] = mon
+		for _, g := range mon.GroupSpawn {
+			companion[strings.SplitN(g, "(", 2)[0]] = true
+		}
 	}
 
 	totalActors, totalItems := 0, 0
@@ -173,9 +177,9 @@ func TestHeavenAndHellLevelsArePopulatedFromItsOwnTables(t *testing.T) {
 				t.Errorf("%s: %q is not one of this mod's monsters", l.Map, a.GetInternalName())
 				continue
 			}
-			// Nothing may turn up deeper than its record allows. Shallower is legal: that is out-of-depth.
-			if mon.MaxDLvl > 0 && dlvl > mon.MaxDLvl {
-				t.Errorf("%s: %s is capped at dlvl %d", l.Map, mon.ID, mon.MaxDLvl)
+			// A regular level rolls only what its dlvl..max_dlvl allows (group_spawn companions and room uniques aside).
+			if !companion[mon.ID] && !mon.SpawnsAt(dlvl) && len(l.Monsters) == 0 && !slices.Contains(mon.Tags, "unique") {
+				t.Errorf("%s: %s spawns on %d..%d only", l.Map, mon.ID, mon.MinDLvl, mon.MaxDLvl)
 			}
 			if a.GetStats().GetAttribute(stats.MaxHealth) <= 0 {
 				t.Errorf("%s: %s spawned with no hit points", l.Map, mon.ID)

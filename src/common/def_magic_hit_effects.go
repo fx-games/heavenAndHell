@@ -250,7 +250,6 @@ func (g *Factory) randomMonsterTypeOnLevel() int {
 }
 
 func (g *Factory) summonRandomMonster(args util.Arguments) *HitEffect {
-	dlvl := util.ParseDice(args.Get(0)).Roll(rng)
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			for _, hitPos := range hitPositions {
@@ -272,7 +271,7 @@ func (g *Factory) summonRandomMonster(args util.Arguments) *HitEffect {
 			}
 		},
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Summon a random monster from dungeon level %d", dlvl)),
+			util.LabelTextFromString("Summons a monster of this level at the target"),
 		},
 	}
 }
@@ -374,7 +373,7 @@ func (g *Factory) stealItemAndTeleport(args util.Arguments) *HitEffect {
 			currentMap.ApplyToActorsAt(hitPositions, func(hitActor *Actor) {
 				g.ActionBroker.Execute(NewStealItemAction(NewActorCause("Steal", attacker), attacker, hitActor))
 			})
-			teleportAction := g.NewUntargetedActionFromName("teleport")
+			teleportAction := g.NewUntargetedActionFromName(string(ActionNameTeleport))
 			teleportAction.Invoke(attacker, "StealAndTeleport", false)
 			attacker.SetNeutral()
 		},

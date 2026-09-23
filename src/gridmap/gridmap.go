@@ -1045,15 +1045,19 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) ToggleNoClip() bool {
 	return m.noClip
 }
 
+// SetSecretDoorAt marks a hidden door at pos: its tile is a wall until FoundSecretDoorAt.
 func (m *GridMap[ActorType, ItemType, ObjectType]) SetSecretDoorAt(pos geometry.Point) {
 	m.secretDoors[pos] = true
 }
 
-func (m *GridMap[ActorType, ItemType, ObjectType]) IsSecretDoorAt(neighbor geometry.Point) bool {
-	if _, ok := m.secretDoors[neighbor]; ok {
-		return true
-	}
-	return false
+// FoundSecretDoorAt marks the secret door at pos found; SecretDoors keeps it, with false, for saving.
+func (m *GridMap[ActorType, ItemType, ObjectType]) FoundSecretDoorAt(pos geometry.Point) {
+	m.secretDoors[pos] = false
+}
+
+// IsSecretDoorAt reports a secret door not found yet.
+func (m *GridMap[ActorType, ItemType, ObjectType]) IsSecretDoorAt(pos geometry.Point) bool {
+	return m.secretDoors[pos]
 }
 
 func (m *GridMap[ActorType, ItemType, ObjectType]) SetName(name string) {
@@ -1094,6 +1098,7 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) Transitions() map[geometry.Po
 	return m.transitionMap
 }
 
+// SecretDoors are the level's secret doors: true while hidden, false once found.
 func (m *GridMap[ActorType, ItemType, ObjectType]) SecretDoors() map[geometry.Point]bool {
 	return m.secretDoors
 }

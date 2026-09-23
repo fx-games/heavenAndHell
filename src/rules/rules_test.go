@@ -403,7 +403,7 @@ func TestHellfireClasses(t *testing.T) {
 		t.Errorf("monk's fists: %d-%d damage, block=%v, %d frames", fists.MinDam, fists.MaxDam, fists.Block, fists.AttackFrames)
 	}
 	staff := monk.Sheet([]*Item{{Type: ITypeStaff, Class: "ICLASS_WEAPON", Loc: "ILOC_TWOHAND", MinDam: 2, MaxDam: 4}})
-	if !staff.Block || staff.Flags&ISplFastBlock == 0 || staff.AttackFrames != 13 {
+	if !staff.Block || staff.Flags&FlagBlockSpeed == 0 || staff.AttackFrames != 13 {
 		t.Errorf("monk's staff: block=%v flags=%x %d frames", staff.Block, staff.Flags, staff.AttackFrames)
 	}
 }

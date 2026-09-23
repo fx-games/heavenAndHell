@@ -31,6 +31,7 @@ type MapGenerator struct {
 	levelOrder   []string                 // their ids in file order
 	rosters      map[string]*roster       // where each level's generator placed its monsters, for Respawn (respawn.go)
 	generations  map[string]int           // how often each level was forgotten (PersistLevels: false), saved
+	doorTiles    map[string][3]int32      // each dungen level's floor, open and closed door tiles, for its secret doors
 }
 
 // LoadLevels reads the active mod's levels.rec (docs/LEVELS.md). Called after mod selection, never at package init:
@@ -65,6 +66,7 @@ func (g *MapGenerator) LoadLevels() error {
 
 // SetLevels is LoadLevels for a caller that already has the table (tests, and any tool that builds one level).
 func (g *MapGenerator) SetLevels(levels []dungeon.Level) {
+	dungen.ReserveRequiredRooms(levels)
 	g.levels, g.levelOrder = map[string]dungeon.Level{}, nil
 	for _, l := range levels {
 		g.levels[l.Map] = l

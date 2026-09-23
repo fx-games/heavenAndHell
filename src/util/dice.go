@@ -27,7 +27,14 @@ func (r Dice) Min() int {
 	return r.dice + r.bonus
 }
 
+// DiceNotation is the mod's choice (mod.rec DamageNotation: dice) to show damage as NdS+B; otherwise every Dice
+// shows as its min-max interval, like an Interval.
+var DiceNotation bool
+
 func (r Dice) String() string {
+	if !DiceNotation {
+		return NewInterval(r.Min(), r.Max()).ToString()
+	}
 	if r.isFixed() {
 		flatValue := r.Min()
 		return fmt.Sprintf("%d", flatValue)
@@ -43,6 +50,9 @@ func (r Dice) isFixed() bool {
 }
 
 func (r Dice) ShortString() string {
+	if !DiceNotation {
+		return NewInterval(r.Min(), r.Max()).ToString()
+	}
 	if r.isFixed() {
 		flatValue := r.Min()
 		return fmt.Sprintf("%d", flatValue)

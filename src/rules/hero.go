@@ -137,11 +137,11 @@ func loadHeroTables(fsys fs.FS, d *Data) error {
 // HitRecoveryTicks ports PM_DoGotHit: the hit animation, one to three frames shorter with the recovery affixes.
 func (d *Data) HitRecoveryTicks(class string, flags uint32) int {
 	switch {
-	case flags&ISplFastestRecover != 0:
+	case flags&FlagHitRecovery3 != 0:
 		return d.Class(class).HitFrames - 3
-	case flags&ISplFasterRecover != 0:
+	case flags&FlagHitRecovery2 != 0:
 		return d.Class(class).HitFrames - 2
-	case flags&ISplFastRecover != 0:
+	case flags&FlagHitRecovery1 != 0:
 		return d.Class(class).HitFrames - 1
 	}
 	return d.Class(class).HitFrames
@@ -242,23 +242,24 @@ func (d *Data) NewHero(class string) *Hero {
 
 // Sheet is what CalcPlrItemVals derives from the hero and their equipment.
 type Sheet struct {
-	Str, Mag, Dex, Vit                 int
-	MinDam, MaxDam                     int
-	AC, BonusAC, BonusDam, BonusToHit  int
-	BonusDamMod, DamageMod, GetHit     int
-	EnAc, SplLvlAdd                    int
-	SkillAdd                           map[string]int // spell id -> levels the equipment adds to that one spell
-	FR, LR, MR                         int
-	Flags                              uint32
-	DamAcFlags                         uint32 // Hellfire's ItemSpecialEffectHf, see IHf* in oils.go
-	LightRad                           int
-	MaxHP, MaxMana                     int // 1/64 fixed point, includes item bonuses
-	FMinDam, FMaxDam, LMinDam, LMaxDam int
-	Block                              bool
-	WeaponType                         int    // ITYPE of the equipped weapon, ITypeMisc = none (the off hand's wins)
-	WeaponMask                         uint32 // one bit per ITYPE held, for the hands a dual wielder fills separately
-	AttackFrames                       int
-	Active                             []bool // per equipped item: requirements met (_iStatFlag)
+	Str, Mag, Dex, Vit                     int
+	MinDam, MaxDam                         int
+	AC, BonusAC, BonusDam, BonusToHit      int
+	BonusDamMod, DamageMod, GetHit         int
+	ManaOnKill, ReturnDamage, FireballShot int
+	EnAc, SplLvlAdd                        int
+	SkillAdd                               map[string]int // spell id -> levels the equipment adds to that one spell
+	FR, LR, MR                             int
+	Flags                                  uint32
+	DamAcFlags                             uint32 // Hellfire's ItemSpecialEffectHf, see the Flag* list in oils.go
+	LightRad                               int
+	MaxHP, MaxMana                         int // 1/64 fixed point, includes item bonuses
+	FMinDam, FMaxDam, LMinDam, LMaxDam     int
+	Block                                  bool
+	WeaponType                             int    // ITYPE of the equipped weapon, ITypeMisc = none (the off hand's wins)
+	WeaponMask                             uint32 // one bit per ITYPE held, for the hands a dual wielder fills separately
+	AttackFrames                           int
+	Active                                 []bool // per equipped item: requirements met (_iStatFlag)
 }
 
 // Sheet ports CalcSelfItems + CalcPlrItemVals: items whose Str/Mag/Dex requirements aren't met do nothing.
@@ -327,6 +328,9 @@ func (h *Hero) Sheet(equipped []*Item) Sheet {
 		s.MR += it.PLMR
 		s.BonusDamMod += it.PLDamMod
 		s.GetHit += it.PLGetHit
+		s.ManaOnKill += it.ManaOnKill
+		s.ReturnDamage += it.ReturnDamage
+		s.FireballShot = max(s.FireballShot, it.FireballShot)
 		s.LightRad += it.PLLight
 		ihp += it.PLHP << 6
 		imana += it.PLMana << 6
@@ -357,7 +361,7 @@ func (h *Hero) Sheet(equipped []*Item) Sheet {
 		switch {
 		case s.Holds(ITypeStaff):
 			s.Block = true
-			s.Flags |= ISplFastBlock
+			s.Flags |= FlagBlockSpeed
 		case weapons == 0 || weapons == 1 && twoHanders == 0:
 			s.Block = true
 		}
@@ -422,18 +426,18 @@ func (h *Hero) Sheet(equipped []*Item) Sheet {
 	if h.Rage < 0 { // the Rage hangover strips the same again
 		s.FR, s.LR, s.MR = s.FR-h.Level, s.LR-h.Level, s.MR-h.Level
 	}
-	if s.Flags&ISplAllResZero != 0 {
+	if s.Flags&FlagNoResistances != 0 {
 		s.FR, s.LR, s.MR = 0, 0, 0
 	}
 	s.FR, s.LR, s.MR = clamp(s.FR, 0, 75), clamp(s.LR, 0, 75), clamp(s.MR, 0, 75)
 	s.MaxHP = ihp + (vadd*a.ItmLife>>6)<<6 + h.MaxHPBase
 	s.MaxMana = imana + (madd*a.ItmMana>>6)<<6 + h.MaxManaBase
-	// Acolyte's Amulet and Gladiator's Ring trade one pool for the other (IPL_MANATOLIFE / IPL_LIFETOMANA)
-	if s.DamAcFlags&IHfManaToLife != 0 {
+	// Acolyte's Amulet and Gladiator's Ring trade one pool for the other (mana_to_life / life_to_mana)
+	if s.DamAcFlags&FlagManaToLife != 0 {
 		p := (h.MaxManaBase >> 6) * 50 / 100 << 6
 		s.MaxMana, s.MaxHP = s.MaxMana-p, s.MaxHP+p
 	}
-	if s.DamAcFlags&IHfLifeToMana != 0 {
+	if s.DamAcFlags&FlagLifeToMana != 0 {
 		p := (h.MaxHPBase >> 6) * 40 / 100 << 6
 		s.MaxHP, s.MaxMana = s.MaxHP-p, s.MaxMana+p
 	}
@@ -452,7 +456,7 @@ func (h *Hero) Sheet(equipped []*Item) Sheet {
 // MeleeFrames is AttackFrames after PM_DoAttack's frame skips. PM_DoRangeAttack has none, so bows don't speed up.
 func (s Sheet) MeleeFrames() int {
 	n := s.AttackFrames
-	for flag, skip := range map[uint32]int{ISplQuickAttack: 1, ISplFastAttack: 2, ISplFasterAttack: 3, ISplFastestAttack: 4} {
+	for flag, skip := range map[uint32]int{FlagAttackSpeed1: 1, FlagAttackSpeed2: 2, FlagAttackSpeed3: 3, FlagAttackSpeed4: 4} {
 		if s.Flags&flag != 0 {
 			n -= skip
 		}
@@ -497,7 +501,7 @@ func (h *Hero) meleeDamageOf(s Sheet, d int, double bool, monClass string) int {
 	case pct != 0:
 		dam += dam * pct / 100
 	}
-	if s.Flags&ISpl3xDamVsDemons != 0 && monClass == "MC_DEMON" {
+	if s.Flags&FlagTripleDamageVsDemons != 0 && monClass == "MC_DEMON" {
 		dam *= 3
 	}
 	return dam
@@ -566,20 +570,20 @@ func (d *Data) FullMissileDamageBonus(class string) bool {
 // HitLeech ports PlrHitMonst's life/mana steal; dam in whole points, returns gains in 1/64.
 func (h *Hero) HitLeech(rng *rand.Rand, s Sheet, dam int) (hp, mana int) {
 	d := dam << 6
-	if s.Flags&ISplRndStealLife != 0 {
+	if s.Flags&FlagRandomStealHealth != 0 {
 		hp += rng.Intn(max(d>>3, 1))
 	}
-	if s.Flags&ISplNoMana == 0 {
-		if s.Flags&ISplStealMana3 != 0 {
+	if s.Flags&FlagNoMana == 0 {
+		if s.Flags&FlagStealMana3 != 0 {
 			mana = 3 * d / 100
 		}
-		if s.Flags&ISplStealMana5 != 0 {
+		if s.Flags&FlagStealMana5 != 0 {
 			mana = 5 * d / 100
 		}
 	}
-	if s.Flags&ISplStealLife5 != 0 { // the 5% overrides the 3%, as with mana
+	if s.Flags&FlagStealHealth5 != 0 { // the 5% overrides the 3%, as with mana
 		hp += 5 * d / 100
-	} else if s.Flags&ISplStealLife3 != 0 {
+	} else if s.Flags&FlagStealHealth3 != 0 {
 		hp += 3 * d / 100
 	}
 	return
@@ -631,10 +635,10 @@ func (h *Hero) ArrowDamageRange(s Sheet, mind, maxd int) (lo, hi int) {
 // up against the undead and against demons (M_TryH2HHit's ACAgainstUndead/ACAgainstDemons).
 func (s Sheet) ArmorVs(monClass string) int {
 	ac := s.AC + s.BonusAC + s.Dex/5
-	if s.DamAcFlags&IHfACVsDemons != 0 && monClass == "MC_DEMON" {
+	if s.DamAcFlags&FlagArmorVsDemons != 0 && monClass == "MC_DEMON" {
 		ac += 40
 	}
-	if s.DamAcFlags&IHfACVsUndead != 0 && monClass == "MC_UNDEAD" {
+	if s.DamAcFlags&FlagArmorVsUndead != 0 && monClass == "MC_UNDEAD" {
 		ac += 20
 	}
 	return ac
@@ -684,7 +688,7 @@ func TrapDamage64(rng *rand.Rand, s Sheet, mind, maxd int, shift bool) int {
 	} else {
 		dam, getHit = Rnd(rng, (maxd-mind+1)<<6)+mind<<6, s.GetHit<<6
 	}
-	if s.Flags&ISplAbsHalfTrap != 0 {
+	if s.Flags&FlagHalfTrapDamage != 0 {
 		dam >>= 1
 	}
 	return max(dam+getHit, 64)

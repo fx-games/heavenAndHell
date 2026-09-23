@@ -67,6 +67,8 @@ type Configuration struct {
 
 	Fullscreen bool // set in the video menu or with F11
 
+	DescriptionMaxChars int // tooltip lines longer than this are word-wrapped
+
 	// SpriteSheet is the tile atlas the Icon* numbers index. A mod ships its own at assets/, where the overlay
 	// finds it, or names another path here; the engine's default is the fallback.
 	SpriteSheet string
@@ -166,6 +168,7 @@ func (c Configuration) ToRecord() recfile.Record {
 		{Name: "AutoExploreOpenContainers", Value: recfile.BoolStr(c.AutoExploreOpenContainers)},
 		{Name: "AutosaveOnLevelChange", Value: recfile.BoolStr(c.AutosaveOnLevelChange)},
 		{Name: "Fullscreen", Value: recfile.BoolStr(c.Fullscreen)},
+		{Name: "description_max_chars", Value: recfile.IntStr(c.DescriptionMaxChars)},
 		{Name: "Mod", Value: c.Mod},
 		{Name: "SpriteSheet", Value: c.SpriteSheet},
 	}
@@ -227,6 +230,7 @@ func NewConfigurationFromRecFile(recFilename string) Configuration {
 		VoiceVolume:               configMap.GetFloatOrDefault("VoiceVolume", 1),
 		AutoExploreOpenContainers: configMap.GetBoolOrFalse("AutoExploreOpenContainers"),
 		Fullscreen:                configMap.GetBoolOrFalse("Fullscreen"),
+		DescriptionMaxChars:       configMap.GetIntOrDefault("description_max_chars", 45),
 		Mod:                       cmp.Or(configMap["Mod"], DefaultMod), // an empty "Mod:" is no mod named either
 		SpriteSheet:               configMap.GetStringOrDefault("SpriteSheet", DefaultSpriteSheet),
 		MiniMapColors:             parseMiniMapColors(configMap.GetStringOrDefault("MiniMapColor", "")),

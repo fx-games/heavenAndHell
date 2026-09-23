@@ -121,29 +121,40 @@ func (it *Item) PropertyList() []Property {
 	add(it.PLLight != 0, "light", it.PLLight)
 	add(it.SplLvlAdd != 0, "spelllevels", it.SplLvlAdd)
 	add(it.PLEnAc != 0, "enac", 1)
-	addRange(flag(ISplFireDam), "firedam", it.FMinDam, it.FMaxDam)
-	addRange(flag(ISplLightDam), "lightdam", it.LMinDam, it.LMaxDam)
-	addRange(flag(ISplFireArrows), "firearrows", it.FMinDam, it.FMaxDam)
-	addRange(flag(ISplLightArrows), "lightarrows", it.LMinDam, it.LMaxDam)
-	add(flag(ISplStealLife3|ISplStealLife5), "stealslife", []int{0, 3, 5}[tier(ISplStealLife3, ISplStealLife5)])
-	add(flag(ISplStealMana3|ISplStealMana5), "stealsmana", []int{0, 3, 5}[tier(ISplStealMana3, ISplStealMana5)])
-	add(flag(ISplRndStealLife), "rndstealslife", 1)
-	add(flag(ISplDrainLife), "drainlife", 1)
-	add(flag(ISplQuickAttack|ISplFastAttack|ISplFasterAttack|ISplFastestAttack), "attackspeed",
-		tier(ISplQuickAttack, ISplFastAttack, ISplFasterAttack, ISplFastestAttack))
-	add(flag(ISplFastRecover|ISplFasterRecover|ISplFastestRecover), "recovery",
-		tier(ISplFastRecover, ISplFasterRecover, ISplFastestRecover))
-	add(flag(ISplFastBlock), "fastblock", 1)
-	add(flag(ISplKnockback), "knockback", 1)
-	add(flag(ISplThorns), "thorns", 1)
-	add(flag(ISplNoMana), "nomana", 1)
-	add(flag(ISplNoHealPlr), "nohealplr", 1)
-	add(flag(ISplAbsHalfTrap), "abshalftrap", 1)
-	add(flag(ISpl3xDamVsDemons), "3xdemons", 1)
-	add(flag(ISplAllResZero), "allreszero", 1)
-	add(flag(ISplInfravision), "infravision", 1)
-	add(flag(ISplNoHealMon), "nohealmon", 1)
-	add(flag(ISplRndArrowVel), "rndarrowvel", 1)
+	add(it.ManaOnKill != 0, "manaonkill", it.ManaOnKill)
+	add(it.ReturnDamage != 0, "return_damage", it.ReturnDamage)
+	add(it.FireballShot != 0, "fireball_shot", it.FireballShot)
+	addRange(flag(FlagFireDamage), "firedam", it.FMinDam, it.FMaxDam)
+	addRange(flag(FlagLightningDamage), "lightdam", it.LMinDam, it.LMaxDam)
+	addRange(flag(FlagFireArrows), "firearrows", it.FMinDam, it.FMaxDam)
+	addRange(flag(FlagLightningArrows), "lightarrows", it.LMinDam, it.LMaxDam)
+	add(flag(FlagStealHealth3|FlagStealHealth5), "stealslife", []int{0, 3, 5}[tier(FlagStealHealth3, FlagStealHealth5)])
+	add(flag(FlagStealMana3|FlagStealMana5), "stealsmana", []int{0, 3, 5}[tier(FlagStealMana3, FlagStealMana5)])
+	add(flag(FlagRandomStealHealth), "rndstealslife", 1)
+	add(flag(FlagDrainLife), "drainlife", 1)
+	add(flag(FlagAttackSpeed1|FlagAttackSpeed2|FlagAttackSpeed3|FlagAttackSpeed4), "attackspeed",
+		tier(FlagAttackSpeed1, FlagAttackSpeed2, FlagAttackSpeed3, FlagAttackSpeed4))
+	add(flag(FlagHitRecovery1|FlagHitRecovery2|FlagHitRecovery3), "recovery",
+		tier(FlagHitRecovery1, FlagHitRecovery2, FlagHitRecovery3))
+	add(flag(FlagBlockSpeed), "fastblock", 1)
+	add(flag(FlagKnockback), "knockback", 1)
+	add(flag(FlagThorns), "thorns", 1)
+	add(flag(FlagNoMana), "nomana", 1)
+	add(flag(FlagNoHealPlayer), "nohealplr", 1)
+	add(flag(FlagHalfTrapDamage), "abshalftrap", 1)
+	add(flag(FlagTripleDamageVsDemons), "3xdemons", 1)
+	add(flag(FlagNoResistances), "allreszero", 1)
+	add(flag(FlagInfravision), "infravision", 1)
+	add(flag(FlagNoHealMonster), "nohealmon", 1)
+	add(flag(FlagRandomArrowSpeed), "rndarrowvel", 1)
+	for _, hf := range []struct {
+		bit uint32
+		key string
+	}{{FlagTripleDamage, "triple_damage"}, {FlagJesters, "jesters"}, {FlagPeril, "peril"}, {FlagDecay, "decay"},
+		{FlagDoppelganger, "doppelganger"}, {FlagArmorVsDemons, "armor_vs_demons"}, {FlagArmorVsUndead, "armor_vs_undead"},
+		{FlagManaToLife, "mana_to_life"}, {FlagLifeToMana, "life_to_mana"}} {
+		add(it.DamAcFlags&hf.bit != 0, hf.key, 1)
+	}
 	add(it.MaxDur == 255, "indestructible", 1)
 	return p
 }

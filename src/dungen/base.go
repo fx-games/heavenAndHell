@@ -14,6 +14,8 @@ const (
 	Door
 	Room
 	Corridor
+	Lake     // deep water: seen across, never walked (addLakes)
+	Shallows // the water's edge, waded through
 )
 
 type DungeonMap struct {
@@ -22,6 +24,12 @@ type DungeonMap struct {
 	tiles      []DungeonTile
 	rooms      []*DungeonRoom
 	pathfinder *geometry.PathRange
+	loopDoors  map[geometry.Point]bool // doorways addMoreDoors opened: there is always another way round
+}
+
+// IsLoopDoor reports a door addMoreDoors placed: shutting it cuts no part of the level off.
+func (m *DungeonMap) IsLoopDoor(p geometry.Point) bool {
+	return m.loopDoors[p] && m.GetTileAt(p) == Door
 }
 
 func (m *DungeonMap) GetJPSPath(start geometry.Point, end geometry.Point) []geometry.Point {
@@ -49,6 +57,17 @@ func (m *DungeonMap) ConnectRoomsOnMap(placeDoor bool) {
 				m.SetDoor(door.X, door.Y)
 			} else {
 				m.SetCorridor(door.X, door.Y)
+			}
+		}
+	}
+}
+
+// openDoorways leaves each door a door with chance keep and makes the rest open doorways, row by row.
+func (m *DungeonMap) openDoorways(rnd *rand.Rand, keep float64) {
+	for y := 0; y < m.height; y++ {
+		for x := 0; x < m.width; x++ {
+			if m.GetTile(x, y) == Door && rnd.Float64() >= keep {
+				m.SetCorridor(x, y)
 			}
 		}
 	}
@@ -121,7 +140,6 @@ func (m *DungeonMap) GetPotentialStairPositions() []geometry.Point {
 				continue
 			}
 			result = append(result, matchPos)
-			//m.PrintWithHighlight(matchPos)
 		}
 	}
 
@@ -170,24 +188,6 @@ func rotate(matrix [3][3]DungeonTile, rotationCount int) [3][3]DungeonTile {
 }
 func (m *DungeonMap) AllRooms() []*DungeonRoom {
 	return m.rooms
-}
-
-func (m *DungeonMap) Print() {
-	for y := 0; y < m.height; y++ {
-		for x := 0; x < m.width; x++ {
-			switch m.GetTile(x, y) {
-			case Wall:
-				print("#")
-			case Corridor:
-				print(".")
-			case Room:
-				print(".")
-			case Door:
-				print("+")
-			}
-		}
-		println()
-	}
 }
 
 func (m *DungeonMap) SetDoor(x int, y int) {
@@ -261,6 +261,12 @@ func (m *DungeonMap) addMoreDoors(rnd *rand.Rand, minPathDistance int, spawnChan
 			path := m.GetJPSPath(posOne, posTwo)
 			if len(path) == 0 || len(path) > minPathDistance {
 				m.AddDoorAndConnect(mapPos, direction, asDoor)
+				if len(path) > 0 { // a loop, not the only way through
+					if m.loopDoors == nil {
+						m.loopDoors = map[geometry.Point]bool{}
+					}
+					m.loopDoors[mapPos] = true
+				}
 			}
 		}
 	})
@@ -278,7 +284,7 @@ func (m *DungeonMap) IsWalkable(pos geometry.Point) bool {
 		return false
 	}
 	tileAt := m.GetTileAt(pos)
-	return tileAt != Wall
+	return tileAt != Wall && tileAt != Lake
 }
 
 func (m *DungeonMap) AddDoorAndConnect(absoluteDoorPos geometry.Point, direction geometry.CompassDirection, asDoor bool) {
@@ -383,32 +389,6 @@ func (m *DungeonMap) patternMatchRotated(x int, y int, patternOne [3][3]DungeonT
 	}
 	return false
 }
-func (m *DungeonMap) PrintPlannedDoors() {
-	plannedDoors := make(map[geometry.Point]bool)
-	for _, room := range m.rooms {
-		for _, door := range room.GetUsedAbsoluteDoorTiles() {
-			plannedDoors[door] = true
-		}
-	}
-	for y := 0; y < m.height; y++ {
-		for x := 0; x < m.width; x++ {
-			if plannedDoors[geometry.Point{X: x, Y: y}] {
-				print("X")
-				continue
-			}
-			switch m.GetTile(x, y) {
-			case Wall:
-				print("#")
-			case Corridor:
-				print(".")
-			case Room:
-				print(".")
-			}
-		}
-		println()
-	}
-}
-
 func (m *DungeonMap) Trim() {
 	// remove rows and columns that are only walls are adjacent to a row or column that is only walls
 	firstNonWallY := 0
@@ -499,26 +479,6 @@ func (m *DungeonMap) IsWallAt(pos geometry.Point) bool {
 		return false
 	}
 	return m.GetTileAt(pos) == Wall
-}
-
-func (m *DungeonMap) PrintWithHighlight(mapPosition geometry.Point) {
-	for y := 0; y < m.height; y++ {
-		for x := 0; x < m.width; x++ {
-			if mapPosition.X == x && mapPosition.Y == y {
-				print("X")
-				continue
-			}
-			switch m.GetTile(x, y) {
-			case Wall:
-				print("#")
-			case Corridor:
-				print(".")
-			case Room:
-				print(".")
-			}
-		}
-		println()
-	}
 }
 
 func (m *DungeonMap) GetMetaInfo() []string {

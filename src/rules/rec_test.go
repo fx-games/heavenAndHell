@@ -76,8 +76,8 @@ func TestRecTablesMatchTheOldLiterals(t *testing.T) {
 		}
 	}
 
-	if len(d.propertyDefs) != 41 {
-		t.Errorf("propertyDefs = %d, want 41", len(d.propertyDefs))
+	if len(d.propertyDefs) != 53 {
+		t.Errorf("propertyDefs = %d, want 53", len(d.propertyDefs))
 	}
 	// One of each formatter kind, including the light radius, the only property that scales its value.
 	for _, c := range []struct {

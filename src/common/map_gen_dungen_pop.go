@@ -1,7 +1,6 @@
 package common
 
 import (
-	"cmp"
 	"hash/fnv"
 	"log/slog"
 	"math/rand"
@@ -24,16 +23,18 @@ import (
 // read whichever mod's tables are loaded.
 
 const (
-	dungenEnemyPercent = 5 // chance in 100 that a walkable cell starts with a monster on it (levels.rec's enemy_percent overrides)
-	dungenItemPercent  = 1 // and, failing that, with an item
-	dungenStairsClear  = 7 // how far from any stairs both have to stay
+	dungenCellsPerMonster = 30  // D1's InitMonsters: one monster per 30 floor cells
+	dungenMaxMonsters     = 190 // and never more than MAXMONSTERS-10
+	dungenItemPercent     = 1   // chance in 100 that a floor cell starts with an item
+	dungenStairsClear     = 7   // how far from any stairs both have to stay
 )
 
-// populateDungenLevel walks the level's walkable cells in a seeded random order and rolls for a monster or an
-// item on each. The walk is a permutation of a sorted cell list rather than a map iteration, because iterating
-// a Go map is how reproducibility died here twice before.
+// populateDungenLevel places D1's monster count (InitMonsters: floor cells / 30, in groups of one type: always
+// one on level 1, else half the time 2-3 on level 2 and 3-5 deeper) and rolls an item on each floor cell. The
+// walk is a permutation of a sorted cell list rather than a map iteration, because iterating a Go map is how
+// reproducibility died here twice before.
 func (g *MapGenerator) populateDungenLevel(m *gridmap.GridMap[*Actor, *Item, Object], layout *dungen.DungeonMap, lvl dungeon.Level, stairs []geometry.Point) {
-	dlvl, enemyPercent := lvl.Depth, cmp.Or(lvl.EnemyPercent, dungenEnemyPercent)
+	dlvl := lvl.Depth
 	var cells []geometry.Point
 	width, height := layout.GetSize()
 	for y := 0; y < height; y++ {
@@ -44,30 +45,73 @@ func (g *MapGenerator) populateDungenLevel(m *gridmap.GridMap[*Actor, *Item, Obj
 		}
 	}
 	types := g.spawnTypes(lvl)
+	g.placeWanderers(m, lvl, cells, stairs)
+	total, placed := min(len(cells)/dungenCellsPerMonster, dungenMaxMonsters), 0
 	for _, i := range g.randomSource.Perm(len(cells)) {
 		p := cells[i]
 		if minDist(stairs, p) <= dungenStairsClear {
 			continue
 		}
-		switch {
-		case g.randomSource.Intn(100) < enemyPercent && m.CanPlaceActorHere(p):
+		if placed < total && m.CanPlaceActorHere(p) {
 			enemy, companions := g.factory.rollEnemy(lvl, types, false, nil)
 			if enemy == nil {
+				placed = total
 				continue
 			}
+			if n := g.groupSize(dlvl); n > 1 {
+				own, _ := g.factory.monsterByID(enemy.GetInternalName())
+				companions = append(slices.Repeat([]defs.Monster{own}, n-1), companions...)
+			}
+			companions = companions[:min(len(companions), total-placed-1)]
 			enemy.SetDrawPosition(p.ToPointF())
 			enemy.monster.SpawnIndex = -1 // generated with a random source a load can't replay: saved whole
 			m.AddActor(enemy, p)
 			g.addSpawn(m, enemy, nil, nil)
+			placed++
 			for _, c := range g.spawnDungenCompanions(m, p, companions) {
 				c.monster.SpawnIndex = -1
 				g.addSpawn(m, c, nil, nil)
+				placed++
 			}
-		case g.randomSource.Intn(100) < dungenItemPercent && m.CanPlaceItemHere(p):
+			continue
+		}
+		if g.randomSource.Intn(100) < dungenItemPercent && m.CanPlaceItemHere(p) {
 			if it := g.factory.Gen().FloorItem(dlvl, false, false); it != nil {
 				m.AddItem(g.factory.NewRolledItem(it), p)
 			}
 		}
+	}
+}
+
+// placeWanderers gives a regular level at most one of each wander_chance monster its depth allows, at its odds,
+// on a free cell away from the stairs.
+func (g *MapGenerator) placeWanderers(m *gridmap.GridMap[*Actor, *Item, Object], lvl dungeon.Level, cells, stairs []geometry.Point) {
+	for _, mon := range g.factory.Generator.D.Monsters {
+		if len(lvl.Monsters) > 0 || mon.WanderChance == 0 || !mon.SpawnsAt(lvl.Depth) || g.randomSource.Float64() >= mon.WanderChance {
+			continue
+		}
+		for _, i := range g.randomSource.Perm(len(cells)) {
+			if p := cells[i]; minDist(stairs, p) > dungenStairsClear && m.CanPlaceActorHere(p) {
+				a := g.factory.NewMonsterByID(mon.ID)
+				a.SetDrawPosition(p.ToPointF())
+				a.monster.SpawnIndex = -1
+				m.AddActor(a, p)
+				g.addSpawn(m, a, nil, nil)
+				break
+			}
+		}
+	}
+}
+
+// groupSize ports InitMonsters' pack size: one on level 1, else half the time 2-3 on level 2 and 3-5 deeper.
+func (g *MapGenerator) groupSize(dlvl int) int {
+	switch {
+	case dlvl <= 1 || g.randomSource.Intn(2) == 0:
+		return 1
+	case dlvl == 2:
+		return g.randomSource.Intn(2) + 2
+	default:
+		return g.randomSource.Intn(3) + 3
 	}
 }
 
@@ -78,9 +122,7 @@ func (g *MapGenerator) spawnTypes(lvl dungeon.Level) map[int]bool {
 	all := g.factory.Generator.D.Monsters
 	var candidates []int
 	for i, mon := range all {
-		fits := slices.ContainsFunc(lvl.Monsters, func(m dungeon.LevelMonster) bool { return m.ID == mon.ID }) ||
-			len(lvl.Monsters) == 0 && lvl.Depth >= mon.MinDLvl && (mon.MaxDLvl == 0 || lvl.Depth <= mon.MaxDLvl)
-		if fits && mon.RandomSpawn && mon.SpawnCost > 0 && !slices.Contains(mon.Tags, "unique") {
+		if rolls(lvl, mon) && mon.SpawnCost > 0 && !slices.Contains(mon.Tags, "unique") {
 			candidates = append(candidates, i)
 		}
 	}
@@ -117,47 +159,35 @@ func (g *MapGenerator) spawnDungenCompanions(m *gridmap.GridMap[*Actor, *Item, O
 }
 
 // rollEnemy rolls one monster for the level out of the active mod's own table, plus whatever its record says
-// spawns alongside it; it may also roll a unique, except one taken says is already about. A level with monster
-// lines rolls those, at their weights, plus anyone whose out-of-depth roll brings them up from below; one
-// without rolls every record whose depth fits, at its spawn_weight. Nil when nothing can appear.
+// spawns alongside it; it may also roll a unique, except one taken says is already about. Nil when nothing can
+// appear.
 func (g *Factory) rollEnemy(lvl dungeon.Level, types map[int]bool, uniques bool, taken func(id string) bool) (*Actor, []defs.Monster) {
-	all, dlvl := g.Generator.D.Monsters, lvl.Depth
-	var eligible, weights []int
-	total := 0
+	all := g.Generator.D.Monsters
+	var eligible []int
 	for i, mon := range all {
 		unique := slices.Contains(mon.Tags, "unique")
 		if unique && (!uniques || taken(mon.ID)) {
 			continue
 		}
-		if !mon.RandomSpawn || mon.SpawnCost > 0 && !types[i] { // a unique lives in its room
+		if !rolls(lvl, mon) || mon.SpawnCost > 0 && !types[i] {
 			continue
 		}
-		w := mon.SpawnWeight
-		if len(lvl.Monsters) > 0 {
-			k := slices.IndexFunc(lvl.Monsters, func(m dungeon.LevelMonster) bool { return m.ID == mon.ID })
-			switch {
-			case k >= 0:
-				w = lvl.Monsters[k].Weight
-			case dlvl >= mon.MinDLvl || !mon.CanAppearAt(g.RandomSource, dlvl):
-				continue
-			}
-		} else if !mon.CanAppearAt(g.RandomSource, dlvl) {
-			continue
-		}
-		eligible, weights = append(eligible, i), append(weights, w)
-		total += w
+		eligible = append(eligible, i)
 	}
 	if len(eligible) == 0 {
 		return nil, nil
 	}
-	pick, roll := eligible[0], g.RandomSource.Intn(total) // spawn_weight: all 1 rolls exactly as a uniform pick did
-	for k, i := range eligible {
-		if roll -= weights[k]; roll < 0 {
-			pick = i
-			break
-		}
-	}
+	pick := eligible[g.RandomSource.Intn(len(eligible))]
 	return g.NewMonster(pick), g.groupSpawnOf(all[pick])
+}
+
+// rolls reports whether lvl may roll mon: a side level its monster lines, any other level every random_spawn
+// record whose dlvl..max_dlvl takes in its depth.
+func rolls(lvl dungeon.Level, mon defs.Monster) bool {
+	if len(lvl.Monsters) > 0 {
+		return slices.Contains(lvl.Monsters, mon.ID)
+	}
+	return mon.RandomSpawn && mon.WanderChance == 0 && mon.SpawnsAt(lvl.Depth)
 }
 
 // groupSpawnOf reads a record's group_spawn entries: a monster's internal name, optionally with a count or a

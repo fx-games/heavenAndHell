@@ -6,29 +6,6 @@ import (
 	"rpg/src/stats"
 )
 
-type OnDieHook struct {
-	ItemHook
-	effectDescription string
-}
-
-func (d *OnDieHook) ToString() string {
-	return fmt.Sprintf("On Kill: %s", d.effectDescription)
-}
-
-func (d *OnDieHook) Name() string {
-	return "OnDieHook"
-}
-
-func NewOnDieHook(description string, after func(itemContext *ItemContext, action Action, context ActionContext) []Action) *OnDieHook {
-	return &OnDieHook{
-		ItemHook: ItemHook{
-			HookedAction: ActionNameDie,
-			AfterHook:    after,
-		},
-		effectDescription: description,
-	}
-}
-
 type OnKillHook struct {
 	BaseActionHook
 }

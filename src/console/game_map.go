@@ -122,7 +122,7 @@ func (c *Console) tileIcon(pos geometry.Point) textiles.TextIcon {
 	icon := textiles.TextIcon{Char: '#', Fg: defs.OffWhite}
 	switch {
 	case tile.Special == gridmap.SpecialTileWater:
-		icon = textiles.TextIcon{Char: '~', Fg: c.context.GameState().GetWaterColor()}
+		icon = textiles.TextIcon{Char: '~', Fg: c.context.GameState().WaterColorOf(tile)}
 	case tile.Special == gridmap.SpecialTileDamaging:
 		icon = textiles.TextIcon{Char: '~', Fg: defs.Red}
 	case tile.Special == gridmap.SpecialTileForest:

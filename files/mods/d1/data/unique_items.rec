@@ -7,970 +7,970 @@
 #   base              the item it is built on, an items.rec unique_base (UITYPE_ name)
 #   min_level         the lowest item level it drops on
 #   value             its price
-#   power             "IPL_ min max": one of its powers (as in xl_isuf.txt) with its value range; repeatable, up to 6
+#   power             "<power> min max": one of its powers (as in xl_isuf.txt) with its value range; repeatable, up to 6
 
 internal_name: the_butchers_cleaver
 name: The Butcher's Cleaver
 base: UITYPE_CLEAVER
 min_level: 1
 value: 3650
-power: IPL_STR 10 10
-power: IPL_SETDAM 4 24
-power: IPL_SETDUR 10 10
+power: strength 10 10
+power: set_damage 4 24
+power: set_durability 10 10
 
 internal_name: the_undead_crown
 name: The Undead Crown
 base: UITYPE_SKCROWN
 min_level: 1
 value: 16650
-power: IPL_RNDSTEALLIFE 0 0
-power: IPL_SETAC 8 8
-power: IPL_INVCURS 77 0
+power: random_steal_health 0 0
+power: set_base_armor 8 8
+power: item_graphic 77 0
 
 internal_name: empyrean_band
 name: Empyrean Band
 base: UITYPE_INFRARING
 min_level: 1
 value: 8000
-power: IPL_ATTRIBS 2 2
-power: IPL_LIGHT 2 2
-power: IPL_FASTRECOVER 1 1
-power: IPL_ABSHALFTRAP 0 0
+power: all_attributes 2 2
+power: light_radius 2 2
+power: hit_recovery 1 1
+power: half_trap_damage 0 0
 
 internal_name: optic_amulet
 name: Optic Amulet
 base: UITYPE_OPTAMULET
 min_level: 1
 value: 9750
-power: IPL_LIGHT 2 2
-power: IPL_LIGHTRES 20 20
-power: IPL_GETHIT 1 1
-power: IPL_MAG 5 5
-power: IPL_INVCURS 44 0
+power: light_radius 2 2
+power: lightning_resistance 20 20
+power: damage_reduction 1 1
+power: intelligence 5 5
+power: item_graphic 44 0
 
 internal_name: ring_of_truth
 name: Ring of Truth
 base: UITYPE_TRING
 min_level: 1
 value: 9100
-power: IPL_LIFE 10 10
-power: IPL_GETHIT 1 1
-power: IPL_ALLRES 10 10
-power: IPL_INVCURS 10 0
+power: health 10 10
+power: damage_reduction 1 1
+power: all_resistances 10 10
+power: item_graphic 10 0
 
 internal_name: harlequin_crest
 name: Harlequin Crest
 base: UITYPE_HARCREST
 min_level: 1
 value: 4000
-power: IPL_AC_CURSE 3 3
-power: IPL_GETHIT 1 1
-power: IPL_ATTRIBS 2 2
-power: IPL_LIFE 7 7
-power: IPL_MANA 7 7
-power: IPL_INVCURS 81 0
+power: base_armor_curse 3 3
+power: damage_reduction 1 1
+power: all_attributes 2 2
+power: health 7 7
+power: mana 7 7
+power: item_graphic 81 0
 
 internal_name: veil_of_steel
 name: Veil of Steel
 base: UITYPE_STEELVEIL
 min_level: 1
 value: 63800
-power: IPL_ALLRES 50 50
-power: IPL_LIGHT_CURSE 2 2
-power: IPL_ACP 60 60
-power: IPL_MANA_CURSE 30 30
-power: IPL_STR 15 15
-power: IPL_VIT 15 15
+power: all_resistances 50 50
+power: light_radius_curse 2 2
+power: armor_class 60 60
+power: mana_curse 30 30
+power: strength 15 15
+power: vitality 15 15
 
 internal_name: arkaines_valor
 name: Arkaine's Valor
 base: UITYPE_ARMOFVAL
 min_level: 1
 value: 42000
-power: IPL_SETAC 25 25
-power: IPL_VIT 10 10
-power: IPL_GETHIT 3 3
-power: IPL_FASTRECOVER 3 3
+power: set_base_armor 25 25
+power: vitality 10 10
+power: damage_reduction 3 3
+power: hit_recovery 3 3
 
 internal_name: griswolds_edge
 name: Griswold's Edge
 base: UITYPE_GRISWOLD
 min_level: 1
 value: 42000
-power: IPL_FIREDAM 1 10
-power: IPL_TOHIT 25 25
-power: IPL_FASTATTACK 2 2
-power: IPL_KNOCKBACK 0 0
-power: IPL_MANA 20 20
-power: IPL_LIFE_CURSE 20 20
+power: fire_damage 1 10
+power: to_hit 25 25
+power: attack_speed 2 2
+power: knockback 0 0
+power: mana 20 20
+power: health_curse 20 20
 
 internal_name: lightforge
 name: Lightforge
 base: UITYPE_MACE
 min_level: 1
 value: 26675
-power: IPL_LIGHT 4 4
-power: IPL_DAMP 150 150
-power: IPL_TOHIT 25 25
-power: IPL_FIREDAM 10 20
-power: IPL_INDESTRUCTIBLE 0 0
-power: IPL_ATTRIBS 8 8
+power: light_radius 4 4
+power: damage_percent 150 150
+power: to_hit 25 25
+power: fire_damage 10 20
+power: indestructible 0 0
+power: all_attributes 8 8
 
 internal_name: the_rift_bow
 name: The Rift Bow
 base: UITYPE_SHORTBOW
 min_level: 1
 value: 1800
-power: IPL_RNDARROWVEL 0 0
-power: IPL_DAMMOD 2 2
-power: IPL_DEX_CURSE 3 3
+power: random_arrow_speed 0 0
+power: damage 2 2
+power: dexterity_curse 3 3
 
 internal_name: the_needler
 name: The Needler
 base: UITYPE_SHORTBOW
 min_level: 2
 value: 8900
-power: IPL_TOHIT 50 50
-power: IPL_SETDAM 1 3
-power: IPL_FASTATTACK 2 2
-power: IPL_INVCURS 158 0
+power: to_hit 50 50
+power: set_damage 1 3
+power: attack_speed 2 2
+power: item_graphic 158 0
 
 internal_name: the_celestial_bow
 name: The Celestial Bow
 base: UITYPE_LONGBOW
 min_level: 2
 value: 1200
-power: IPL_NOMINSTR 0 0
-power: IPL_DAMMOD 2 2
-power: IPL_SETAC 5 5
-power: IPL_INVCURS 133 0
+power: no_strength_requirement 0 0
+power: damage 2 2
+power: set_base_armor 5 5
+power: item_graphic 133 0
 
 internal_name: deadly_hunter
 name: Deadly Hunter
 base: UITYPE_COMPBOW
 min_level: 3
 value: 8750
-power: IPL_3XDAMVDEM 10 10
-power: IPL_TOHIT 20 20
-power: IPL_MAG_CURSE 5 5
-power: IPL_INVCURS 108 0
+power: triple_damage_vs_demons 10 10
+power: to_hit 20 20
+power: intelligence_curse 5 5
+power: item_graphic 108 0
 
 internal_name: bow_of_the_dead
 name: Bow of the Dead
 base: UITYPE_COMPBOW
 min_level: 5
 value: 2500
-power: IPL_TOHIT 10 10
-power: IPL_DEX 4 4
-power: IPL_VIT_CURSE 3 3
-power: IPL_LIGHT_CURSE 2 2
-power: IPL_SETDUR 30 30
-power: IPL_INVCURS 108 0
+power: to_hit 10 10
+power: dexterity 4 4
+power: vitality_curse 3 3
+power: light_radius_curse 2 2
+power: set_durability 30 30
+power: item_graphic 108 0
 
 internal_name: the_blackoak_bow
 name: The Blackoak Bow
 base: UITYPE_LONGBOW
 min_level: 5
 value: 2500
-power: IPL_DEX 10 10
-power: IPL_VIT_CURSE 10 10
-power: IPL_DAMP 50 50
-power: IPL_LIGHT_CURSE 1 1
+power: dexterity 10 10
+power: vitality_curse 10 10
+power: damage_percent 50 50
+power: light_radius_curse 1 1
 
 internal_name: flamedart
 name: Flamedart
 base: UITYPE_HUNTBOW
 min_level: 10
 value: 14250
-power: IPL_FIRE_ARROWS 0 0
-power: IPL_FIREDAM 1 6
-power: IPL_TOHIT 20 20
-power: IPL_FIRERES 40 40
+power: fire_arrows 0 0
+power: fire_damage 1 6
+power: to_hit 20 20
+power: fire_resistance 40 40
 
 internal_name: fleshstinger
 name: Fleshstinger
 base: UITYPE_LONGBOW
 min_level: 13
 value: 16500
-power: IPL_DEX 15 15
-power: IPL_TOHIT 40 40
-power: IPL_DAMP 80 80
-power: IPL_DUR 6 6
+power: dexterity 15 15
+power: to_hit 40 40
+power: damage_percent 80 80
+power: durability 6 6
 
 internal_name: windforce
 name: Windforce
 base: UITYPE_WARBOW
 min_level: 17
 value: 37750
-power: IPL_STR 5 5
-power: IPL_DAMP 200 200
-power: IPL_KNOCKBACK 0 0
-power: IPL_INVCURS 164 0
+power: strength 5 5
+power: damage_percent 200 200
+power: knockback 0 0
+power: item_graphic 164 0
 
 internal_name: eaglehorn
 name: Eaglehorn
 base: UITYPE_BATTLEBOW
 min_level: 26
 value: 42500
-power: IPL_DEX 20 20
-power: IPL_TOHIT 50 50
-power: IPL_DAMP 100 100
-power: IPL_INDESTRUCTIBLE 0 0
-power: IPL_INVCURS 108 0
+power: dexterity 20 20
+power: to_hit 50 50
+power: damage_percent 100 100
+power: indestructible 0 0
+power: item_graphic 108 0
 
 internal_name: gonnagals_dirk
 name: Gonnagal's Dirk
 base: UITYPE_DAGGER
 min_level: 1
 value: 7040
-power: IPL_DEX_CURSE 5 5
-power: IPL_DAMMOD 4 4
-power: IPL_FASTATTACK 2 2
-power: IPL_FIRERES 25 25
-power: IPL_INVCURS 54 0
+power: dexterity_curse 5 5
+power: damage 4 4
+power: attack_speed 2 2
+power: fire_resistance 25 25
+power: item_graphic 54 0
 
 internal_name: the_defender
 name: The Defender
 base: UITYPE_SABRE
 min_level: 1
 value: 2000
-power: IPL_SETAC 5 5
-power: IPL_VIT 5 5
-power: IPL_TOHIT_CURSE 5 5
+power: set_base_armor 5 5
+power: vitality 5 5
+power: to_hit_curse 5 5
 
 internal_name: gryphons_claw
 name: Gryphons Claw
 base: UITYPE_FALCHION
 min_level: 1
 value: 1000
-power: IPL_DAMP 100 100
-power: IPL_MAG_CURSE 2 2
-power: IPL_DEX_CURSE 5 5
-power: IPL_INVCURS 68 0
+power: damage_percent 100 100
+power: intelligence_curse 2 2
+power: dexterity_curse 5 5
+power: item_graphic 68 0
 
 internal_name: black_razor
 name: Black Razor
 base: UITYPE_DAGGER
 min_level: 1
 value: 2000
-power: IPL_DAMP 150 150
-power: IPL_VIT 2 2
-power: IPL_SETDUR 5 5
-power: IPL_INVCURS 53 0
+power: damage_percent 150 150
+power: vitality 2 2
+power: set_durability 5 5
+power: item_graphic 53 0
 
 internal_name: gibbous_moon
 name: Gibbous Moon
 base: UITYPE_BROADSWR
 min_level: 2
 value: 6660
-power: IPL_ATTRIBS 2 2
-power: IPL_DAMP 25 25
-power: IPL_MANA 15 15
-power: IPL_LIGHT_CURSE 3 3
+power: all_attributes 2 2
+power: damage_percent 25 25
+power: mana 15 15
+power: light_radius_curse 3 3
 
 internal_name: ice_shank
 name: Ice Shank
 base: UITYPE_LONGSWR
 min_level: 3
 value: 5250
-power: IPL_FIRERES 40 40
-power: IPL_SETDUR 15 15
-power: IPL_STR 5 10
+power: fire_resistance 40 40
+power: set_durability 15 15
+power: strength 5 10
 
 internal_name: the_executioners_blade
 name: The Executioner's Blade
 base: UITYPE_FALCHION
 min_level: 3
 value: 7080
-power: IPL_DAMP 150 150
-power: IPL_LIFE_CURSE 10 10
-power: IPL_LIGHT_CURSE 1 1
-power: IPL_DUR 200 200
-power: IPL_INVCURS 58 0
+power: damage_percent 150 150
+power: health_curse 10 10
+power: light_radius_curse 1 1
+power: durability 200 200
+power: item_graphic 58 0
 
 internal_name: the_bonesaw
 name: The Bonesaw
 base: UITYPE_CLAYMORE
 min_level: 6
 value: 4400
-power: IPL_DAMMOD 10 10
-power: IPL_STR 10 10
-power: IPL_MAG_CURSE 5 5
-power: IPL_DEX_CURSE 5 5
-power: IPL_LIFE 10 10
-power: IPL_MANA_CURSE 10 10
+power: damage 10 10
+power: strength 10 10
+power: intelligence_curse 5 5
+power: dexterity_curse 5 5
+power: health 10 10
+power: mana_curse 10 10
 
 internal_name: shadowhawk
 name: Shadowhawk
 base: UITYPE_BROADSWR
 min_level: 8
 value: 13750
-power: IPL_LIGHT_CURSE 2 2
-power: IPL_STEALLIFE 5 5
-power: IPL_TOHIT 15 15
-power: IPL_ALLRES 5 5
+power: light_radius_curse 2 2
+power: steal_health 5 5
+power: to_hit 15 15
+power: all_resistances 5 5
 
 internal_name: wizardspike
 name: Wizardspike
 base: UITYPE_DAGGER
 min_level: 11
 value: 12920
-power: IPL_MAG 15 15
-power: IPL_MANA 35 35
-power: IPL_TOHIT 25 25
-power: IPL_ALLRES 15 15
-power: IPL_INVCURS 50 0
+power: intelligence 15 15
+power: mana 35 35
+power: to_hit 25 25
+power: all_resistances 15 15
+power: item_graphic 50 0
 
 internal_name: lightsabre
 name: Lightsabre
 base: UITYPE_SABRE
 min_level: 13
 value: 19150
-power: IPL_LIGHT 2 2
-power: IPL_LIGHTDAM 1 10
-power: IPL_TOHIT 20 20
-power: IPL_LIGHTRES 50 50
+power: light_radius 2 2
+power: lightning_damage 1 10
+power: to_hit 20 20
+power: lightning_resistance 50 50
 
 internal_name: the_falcons_talon
 name: The Falcon's Talon
 base: UITYPE_SCIMITAR
 min_level: 15
 value: 7867
-power: IPL_FASTATTACK 4 4
-power: IPL_TOHIT 20 20
-power: IPL_DAMP_CURSE 33 33
-power: IPL_DEX 10 10
-power: IPL_INVCURS 68 0
+power: attack_speed 4 4
+power: to_hit 20 20
+power: damage_percent_curse 33 33
+power: dexterity 10 10
+power: item_graphic 68 0
 
 internal_name: inferno
 name: Inferno
 base: UITYPE_LONGSWR
 min_level: 17
 value: 34600
-power: IPL_FIREDAM 2 12
-power: IPL_LIGHT 3 3
-power: IPL_MANA 20 20
-power: IPL_FIRERES 80 80
+power: fire_damage 2 12
+power: light_radius 3 3
+power: mana 20 20
+power: fire_resistance 80 80
 
 internal_name: doombringer
 name: Doombringer
 base: UITYPE_BASTARDSWR
 min_level: 19
 value: 18250
-power: IPL_TOHIT 25 25
-power: IPL_DAMP 250 250
-power: IPL_ATTRIBS_CURSE 5 5
-power: IPL_LIFE_CURSE 25 25
-power: IPL_LIGHT_CURSE 2 2
+power: to_hit 25 25
+power: damage_percent 250 250
+power: all_attributes_curse 5 5
+power: health_curse 25 25
+power: light_radius_curse 2 2
 
 internal_name: the_grizzly
 name: The Grizzly
 base: UITYPE_TWOHANDSWR
 min_level: 23
 value: 50000
-power: IPL_STR 20 20
-power: IPL_VIT_CURSE 5 5
-power: IPL_DAMP 200 200
-power: IPL_KNOCKBACK 0 0
-power: IPL_DUR 100 100
-power: IPL_INVCURS 160 0
+power: strength 20 20
+power: vitality_curse 5 5
+power: damage_percent 200 200
+power: knockback 0 0
+power: durability 100 100
+power: item_graphic 160 0
 
 internal_name: the_grandfather
 name: The Grandfather
 base: UITYPE_GREATSWR
 min_level: 27
 value: 119800
-power: IPL_ONEHAND 0 0
-power: IPL_ATTRIBS 5 5
-power: IPL_TOHIT 20 20
-power: IPL_DAMP 70 70
-power: IPL_LIFE 20 20
-power: IPL_INVCURS 161 0
+power: one_handed 0 0
+power: all_attributes 5 5
+power: to_hit 20 20
+power: damage_percent 70 70
+power: health 20 20
+power: item_graphic 161 0
 
 internal_name: the_mangler
 name: The Mangler
 base: UITYPE_LARGEAXE
 min_level: 2
 value: 2850
-power: IPL_DAMP 200 200
-power: IPL_DEX_CURSE 5 5
-power: IPL_MAG_CURSE 5 5
-power: IPL_MANA_CURSE 10 10
-power: IPL_INVCURS 144 0
+power: damage_percent 200 200
+power: dexterity_curse 5 5
+power: intelligence_curse 5 5
+power: mana_curse 10 10
+power: item_graphic 144 0
 
 internal_name: sharp_beak
 name: Sharp Beak
 base: UITYPE_LARGEAXE
 min_level: 2
 value: 2850
-power: IPL_LIFE 20 20
-power: IPL_MAG_CURSE 10 10
-power: IPL_MANA_CURSE 10 10
-power: IPL_INVCURS 143 0
+power: health 20 20
+power: intelligence_curse 10 10
+power: mana_curse 10 10
+power: item_graphic 143 0
 
 internal_name: bloodslayer
 name: BloodSlayer
 base: UITYPE_BROADAXE
 min_level: 3
 value: 2500
-power: IPL_DAMP 100 100
-power: IPL_3XDAMVDEM 50 50
-power: IPL_ATTRIBS_CURSE 5 5
-power: IPL_SPLLVLADD -1 -1
-power: IPL_INVCURS 144 0
+power: damage_percent 100 100
+power: triple_damage_vs_demons 50 50
+power: all_attributes_curse 5 5
+power: spell_levels -1 -1
+power: item_graphic 144 0
 
 internal_name: the_celestial_axe
 name: The Celestial Axe
 base: UITYPE_BATTLEAXE
 min_level: 4
 value: 14100
-power: IPL_NOMINSTR 0 0
-power: IPL_TOHIT 15 15
-power: IPL_LIFE 15 15
-power: IPL_STR_CURSE 15 15
+power: no_strength_requirement 0 0
+power: to_hit 15 15
+power: health 15 15
+power: strength_curse 15 15
 
 internal_name: wicked_axe
 name: Wicked Axe
 base: UITYPE_LARGEAXE
 min_level: 5
 value: 31150
-power: IPL_TOHIT 30 30
-power: IPL_DEX 10 10
-power: IPL_VIT_CURSE 10 10
-power: IPL_GETHIT 1 6
-power: IPL_INDESTRUCTIBLE 0 0
-power: IPL_INVCURS 143 0
+power: to_hit 30 30
+power: dexterity 10 10
+power: vitality_curse 10 10
+power: damage_reduction 1 6
+power: indestructible 0 0
+power: item_graphic 143 0
 
 internal_name: stonecleaver
 name: Stonecleaver
 base: UITYPE_BROADAXE
 min_level: 7
 value: 23900
-power: IPL_LIFE 30 30
-power: IPL_TOHIT 20 20
-power: IPL_DAMP 50 50
-power: IPL_LIGHTRES 40 40
-power: IPL_INVCURS 104 0
+power: health 30 30
+power: to_hit 20 20
+power: damage_percent 50 50
+power: lightning_resistance 40 40
+power: item_graphic 104 0
 
 internal_name: aguinaras_hatchet
 name: Aguinara's Hatchet
 base: UITYPE_SMALLAXE
 min_level: 12
 value: 24800
-power: IPL_SPLLVLADD 1 1
-power: IPL_MAG 10 10
-power: IPL_MAGICRES 80 80
+power: spell_levels 1 1
+power: intelligence 10 10
+power: magic_resistance 80 80
 
 internal_name: hellslayer
 name: Hellslayer
 base: UITYPE_BATTLEAXE
 min_level: 15
 value: 26200
-power: IPL_STR 8 8
-power: IPL_VIT 8 8
-power: IPL_DAMP 100 100
-power: IPL_LIFE 25 25
-power: IPL_MANA_CURSE 25 25
+power: strength 8 8
+power: vitality 8 8
+power: damage_percent 100 100
+power: health 25 25
+power: mana_curse 25 25
 
 internal_name: messerschmidts_reaver
 name: Messerschmidt's Reaver
 base: UITYPE_GREATAXE
 min_level: 25
 value: 58000
-power: IPL_DAMP 200 200
-power: IPL_DAMMOD 15 15
-power: IPL_ATTRIBS 5 5
-power: IPL_LIFE_CURSE 50 50
-power: IPL_FIREDAM 2 12
-power: IPL_INVCURS 163 0
+power: damage_percent 200 200
+power: damage 15 15
+power: all_attributes 5 5
+power: health_curse 50 50
+power: fire_damage 2 12
+power: item_graphic 163 0
 
 internal_name: crackrust
 name: Crackrust
 base: UITYPE_MACE
 min_level: 1
 value: 11375
-power: IPL_ATTRIBS 2 2
-power: IPL_INDESTRUCTIBLE 0 0
-power: IPL_ALLRES 15 15
-power: IPL_DAMP 50 50
-power: IPL_SPLLVLADD -1 -1
+power: all_attributes 2 2
+power: indestructible 0 0
+power: all_resistances 15 15
+power: damage_percent 50 50
+power: spell_levels -1 -1
 
 internal_name: hammer_of_jholm
 name: Hammer of Jholm
 base: UITYPE_MAUL
 min_level: 1
 value: 8700
-power: IPL_DAMP 4 10
-power: IPL_INDESTRUCTIBLE 0 0
-power: IPL_STR 3 3
-power: IPL_TOHIT 15 15
+power: damage_percent 4 10
+power: indestructible 0 0
+power: strength 3 3
+power: to_hit 15 15
 
 internal_name: civerbs_cudgel
 name: Civerb's Cudgel
 base: UITYPE_MACE
 min_level: 1
 value: 2000
-power: IPL_3XDAMVDEM 35 35
-power: IPL_DEX_CURSE 5 5
-power: IPL_MAG_CURSE 2 2
+power: triple_damage_vs_demons 35 35
+power: dexterity_curse 5 5
+power: intelligence_curse 2 2
 
 internal_name: the_celestial_star
 name: The Celestial Star
 base: UITYPE_FLAIL
 min_level: 2
 value: 7810
-power: IPL_NOMINSTR 0 0
-power: IPL_LIGHT 2 2
-power: IPL_DAMMOD 10 10
-power: IPL_AC_CURSE 8 8
-power: IPL_INVCURS 131 0
+power: no_strength_requirement 0 0
+power: light_radius 2 2
+power: damage 10 10
+power: base_armor_curse 8 8
+power: item_graphic 131 0
 
 internal_name: baranars_star
 name: Baranar's Star
 base: UITYPE_MORNSTAR
 min_level: 5
 value: 6850
-power: IPL_TOHIT 12 12
-power: IPL_DAMP 80 80
-power: IPL_FASTATTACK 1 1
-power: IPL_VIT 4 4
-power: IPL_DEX_CURSE 4 4
-power: IPL_SETDUR 60 60
+power: to_hit 12 12
+power: damage_percent 80 80
+power: attack_speed 1 1
+power: vitality 4 4
+power: dexterity_curse 4 4
+power: set_durability 60 60
 
 internal_name: gnarled_root
 name: Gnarled Root
 base: UITYPE_SPIKCLUB
 min_level: 9
 value: 9820
-power: IPL_TOHIT 20 20
-power: IPL_DAMP 300 300
-power: IPL_DEX 10 10
-power: IPL_MAG 5 5
-power: IPL_ALLRES 10 10
-power: IPL_AC_CURSE 10 10
+power: to_hit 20 20
+power: damage_percent 300 300
+power: dexterity 10 10
+power: intelligence 5 5
+power: all_resistances 10 10
+power: base_armor_curse 10 10
 
 internal_name: the_cranium_basher
 name: The Cranium Basher
 base: UITYPE_MAUL
 min_level: 12
 value: 36500
-power: IPL_DAMMOD 20 20
-power: IPL_STR 15 15
-power: IPL_INDESTRUCTIBLE 0 0
-power: IPL_MANA_CURSE 150 150
-power: IPL_ALLRES 5 5
-power: IPL_INVCURS 122 0
+power: damage 20 20
+power: strength 15 15
+power: indestructible 0 0
+power: mana_curse 150 150
+power: all_resistances 5 5
+power: item_graphic 122 0
 
 internal_name: schaefers_hammer
 name: Schaefer's Hammer
 base: UITYPE_WARHAMMER
 min_level: 16
 value: 56125
-power: IPL_DAMP_CURSE 100 100
-power: IPL_LIGHTDAM 1 50
-power: IPL_LIFE 50 50
-power: IPL_TOHIT 30 30
-power: IPL_LIGHTRES 80 80
-power: IPL_LIGHT 1 1
+power: damage_percent_curse 100 100
+power: lightning_damage 1 50
+power: health 50 50
+power: to_hit 30 30
+power: lightning_resistance 80 80
+power: light_radius 1 1
 
 internal_name: dreamflange
 name: Dreamflange
 base: UITYPE_MACE
 min_level: 26
 value: 26450
-power: IPL_MAG 30 30
-power: IPL_MANA 50 50
-power: IPL_MAGICRES 50 50
-power: IPL_LIGHT 2 2
-power: IPL_SPLLVLADD 1 1
+power: intelligence 30 30
+power: mana 50 50
+power: magic_resistance 50 50
+power: light_radius 2 2
+power: spell_levels 1 1
 
 internal_name: staff_of_shadows
 name: Staff of Shadows
 base: UITYPE_LONGSTAFF
 min_level: 2
 value: 1250
-power: IPL_MAG_CURSE 10 10
-power: IPL_TOHIT 10 10
-power: IPL_DAMP 60 60
-power: IPL_LIGHT_CURSE 2 2
-power: IPL_FASTATTACK 1 1
+power: intelligence_curse 10 10
+power: to_hit 10 10
+power: damage_percent 60 60
+power: light_radius_curse 2 2
+power: attack_speed 1 1
 
 internal_name: immolator
 name: Immolator
 base: UITYPE_LONGSTAFF
 min_level: 4
 value: 3900
-power: IPL_FIRERES 20 20
-power: IPL_FIREDAM 4 4
-power: IPL_MANA 10 10
-power: IPL_VIT_CURSE 5 5
+power: fire_resistance 20 20
+power: fire_damage 4 4
+power: mana 10 10
+power: vitality_curse 5 5
 
 internal_name: storm_spire
 name: Storm Spire
 base: UITYPE_WARSTAFF
 min_level: 8
 value: 22500
-power: IPL_LIGHTRES 50 50
-power: IPL_LIGHTDAM 2 8
-power: IPL_STR 10 10
-power: IPL_MAG_CURSE 10 10
+power: lightning_resistance 50 50
+power: lightning_damage 2 8
+power: strength 10 10
+power: intelligence_curse 10 10
 
 internal_name: gleamsong
 name: Gleamsong
 base: UITYPE_SHORTSTAFF
 min_level: 8
 value: 6520
-power: IPL_MANA 25 25
-power: IPL_STR_CURSE 3 3
-power: IPL_VIT_CURSE 3 3
-power: IPL_SPELL 10 76
+power: mana 25 25
+power: strength_curse 3 3
+power: vitality_curse 3 3
+power: spell 10 76
 
 internal_name: thundercall
 name: Thundercall
 base: UITYPE_COMPSTAFF
 min_level: 14
 value: 22250
-power: IPL_TOHIT 35 35
-power: IPL_LIGHTDAM 1 10
-power: IPL_SPELL 3 76
-power: IPL_LIGHTRES 30 30
-power: IPL_LIGHT 2 2
+power: to_hit 35 35
+power: lightning_damage 1 10
+power: spell 3 76
+power: lightning_resistance 30 30
+power: light_radius 2 2
 
 internal_name: the_protector
 name: The Protector
 base: UITYPE_SHORTSTAFF
 min_level: 16
 value: 17240
-power: IPL_VIT 5 5
-power: IPL_GETHIT 5 5
-power: IPL_SETAC 40 40
-power: IPL_SPELL 2 86
-power: IPL_THORNS 1 3
-power: IPL_INVCURS 162 0
+power: vitality 5 5
+power: damage_reduction 5 5
+power: set_base_armor 40 40
+power: spell 2 86
+power: thorns 1 3
+power: item_graphic 162 0
 
 internal_name: najs_puzzler
 name: Naj's Puzzler
 base: UITYPE_LONGSTAFF
 min_level: 18
 value: 34000
-power: IPL_MAG 20 20
-power: IPL_DEX 10 10
-power: IPL_ALLRES 20 20
-power: IPL_SPELL 23 57
-power: IPL_LIFE_CURSE 25 25
+power: intelligence 20 20
+power: dexterity 10 10
+power: all_resistances 20 20
+power: spell 23 57
+power: health_curse 25 25
 
 internal_name: mindcry
 name: Mindcry
 base: UITYPE_QUARSTAFF
 min_level: 20
 value: 41500
-power: IPL_MAG 15 15
-power: IPL_SPELL 13 69
-power: IPL_ALLRES 15 15
-power: IPL_SPLLVLADD 1 1
+power: intelligence 15 15
+power: spell 13 69
+power: all_resistances 15 15
+power: spell_levels 1 1
 
 internal_name: rod_of_onan
 name: Rod of Onan
 base: UITYPE_WARSTAFF
 min_level: 22
 value: 44167
-power: IPL_SPELL 21 50
-power: IPL_DAMP 100 100
-power: IPL_ATTRIBS 5 5
+power: spell 21 50
+power: damage_percent 100 100
+power: all_attributes 5 5
 
 internal_name: helm_of_sprits
 name: Helm of Sprits
 base: UITYPE_HELM
 min_level: 1
 value: 7525
-power: IPL_STEALLIFE 5 5
-power: IPL_INVCURS 77 0
+power: steal_health 5 5
+power: item_graphic 77 0
 
 internal_name: thinking_cap
 name: Thinking Cap
 base: UITYPE_SKULLCAP
 min_level: 6
 value: 2020
-power: IPL_MANA 30 30
-power: IPL_SPLLVLADD 2 2
-power: IPL_ALLRES 20 20
-power: IPL_SETDUR 1 1
-power: IPL_INVCURS 93 0
+power: mana 30 30
+power: spell_levels 2 2
+power: all_resistances 20 20
+power: set_durability 1 1
+power: item_graphic 93 0
 
 internal_name: overlords_helm
 name: OverLord's Helm
 base: UITYPE_HELM
 min_level: 7
 value: 12500
-power: IPL_STR 20 20
-power: IPL_DEX 15 15
-power: IPL_VIT 5 5
-power: IPL_MAG_CURSE 20 20
-power: IPL_SETDUR 15 15
-power: IPL_INVCURS 99 0
+power: strength 20 20
+power: dexterity 15 15
+power: vitality 5 5
+power: intelligence_curse 20 20
+power: set_durability 15 15
+power: item_graphic 99 0
 
 internal_name: fools_crest
 name: Fool's Crest
 base: UITYPE_HELM
 min_level: 12
 value: 10150
-power: IPL_ATTRIBS_CURSE 4 4
-power: IPL_LIFE 100 100
-power: IPL_GETHIT_CURSE 1 6
-power: IPL_THORNS 1 3
-power: IPL_INVCURS 80 0
+power: all_attributes_curse 4 4
+power: health 100 100
+power: damage_reduction_curse 1 6
+power: thorns 1 3
+power: item_graphic 80 0
 
 internal_name: gotterdamerung
 name: Gotterdamerung
 base: UITYPE_GREATHELM
 min_level: 21
 value: 54900
-power: IPL_ATTRIBS 20 20
-power: IPL_SETAC 60 60
-power: IPL_GETHIT 4 4
-power: IPL_ALLRESZERO 0 0
-power: IPL_LIGHT_CURSE 4 4
-power: IPL_INVCURS 85 0
+power: all_attributes 20 20
+power: set_base_armor 60 60
+power: damage_reduction 4 4
+power: no_resistances 0 0
+power: light_radius_curse 4 4
+power: item_graphic 85 0
 
 internal_name: royal_circlet
 name: Royal Circlet
 base: UITYPE_CROWN
 min_level: 27
 value: 24875
-power: IPL_ATTRIBS 10 10
-power: IPL_MANA 40 40
-power: IPL_SETAC 40 40
-power: IPL_LIGHT 1 1
-power: IPL_INVCURS 79 0
+power: all_attributes 10 10
+power: mana 40 40
+power: set_base_armor 40 40
+power: light_radius 1 1
+power: item_graphic 79 0
 
 internal_name: torn_flesh_of_souls
 name: Torn Flesh of Souls
 base: UITYPE_RAGS
 min_level: 2
 value: 4825
-power: IPL_SETAC 8 8
-power: IPL_VIT 10 10
-power: IPL_GETHIT 1 1
-power: IPL_INDESTRUCTIBLE 0 0
-power: IPL_INVCURS 92 0
+power: set_base_armor 8 8
+power: vitality 10 10
+power: damage_reduction 1 1
+power: indestructible 0 0
+power: item_graphic 92 0
 
 internal_name: the_gladiators_bane
 name: The Gladiator's Bane
 base: UITYPE_STUDARMOR
 min_level: 6
 value: 3450
-power: IPL_SETAC 25 25
-power: IPL_GETHIT 2 2
-power: IPL_DUR 200 200
-power: IPL_ATTRIBS_CURSE 3 3
+power: set_base_armor 25 25
+power: damage_reduction 2 2
+power: durability 200 200
+power: all_attributes_curse 3 3
 
 internal_name: the_rainbow_cloak
 name: The Rainbow Cloak
 base: UITYPE_CLOAK
 min_level: 2
 value: 4900
-power: IPL_SETAC 10 10
-power: IPL_ATTRIBS 1 1
-power: IPL_ALLRES 10 10
-power: IPL_LIFE 5 5
-power: IPL_DUR 50 50
-power: IPL_INVCURS 138 0
+power: set_base_armor 10 10
+power: all_attributes 1 1
+power: all_resistances 10 10
+power: health 5 5
+power: durability 50 50
+power: item_graphic 138 0
 
 internal_name: leather_of_aut
 name: Leather of Aut
 base: UITYPE_LEATHARMOR
 min_level: 4
 value: 10550
-power: IPL_SETAC 15 15
-power: IPL_STR 5 5
-power: IPL_MAG_CURSE 5 5
-power: IPL_DEX 5 5
-power: IPL_INDESTRUCTIBLE 0 0
+power: set_base_armor 15 15
+power: strength 5 5
+power: intelligence_curse 5 5
+power: dexterity 5 5
+power: indestructible 0 0
 
 internal_name: wisdoms_wrap
 name: Wisdom's Wrap
 base: UITYPE_ROBE
 min_level: 5
 value: 6200
-power: IPL_MAG 5 5
-power: IPL_MANA 10 10
-power: IPL_LIGHTRES 25 25
-power: IPL_SETAC 15 15
-power: IPL_GETHIT 1 1
-power: IPL_INVCURS 138 0
+power: intelligence 5 5
+power: mana 10 10
+power: lightning_resistance 25 25
+power: set_base_armor 15 15
+power: damage_reduction 1 1
+power: item_graphic 138 0
 
 internal_name: sparking_mail
 name: Sparking Mail
 base: UITYPE_CHAINMAIL
 min_level: 9
 value: 15750
-power: IPL_SETAC 30 30
-power: IPL_LIGHTDAM 1 10
+power: set_base_armor 30 30
+power: lightning_damage 1 10
 
 internal_name: scavenger_carapace
 name: Scavenger Carapace
 base: UITYPE_BREASTPLATE
 min_level: 13
 value: 14000
-power: IPL_GETHIT 15 15
-power: IPL_AC_CURSE 30 30
-power: IPL_DEX 5 5
-power: IPL_LIGHTRES 40 40
+power: damage_reduction 15 15
+power: base_armor_curse 30 30
+power: dexterity 5 5
+power: lightning_resistance 40 40
 
 internal_name: nightscape
 name: Nightscape
 base: UITYPE_CAPE
 min_level: 16
 value: 11600
-power: IPL_FASTRECOVER 2 2
-power: IPL_LIGHT_CURSE 4 4
-power: IPL_SETAC 15 15
-power: IPL_DEX 3 3
-power: IPL_ALLRES 20 20
-power: IPL_INVCURS 138 0
+power: hit_recovery 2 2
+power: light_radius_curse 4 4
+power: set_base_armor 15 15
+power: dexterity 3 3
+power: all_resistances 20 20
+power: item_graphic 138 0
 
 internal_name: najs_light_plate
 name: Naj's Light Plate
 base: UITYPE_PLATEMAIL
 min_level: 19
 value: 78700
-power: IPL_NOMINSTR 0 0
-power: IPL_MAG 5 5
-power: IPL_MANA 20 20
-power: IPL_ALLRES 20 20
-power: IPL_SPLLVLADD 1 1
-power: IPL_INVCURS 159 0
+power: no_strength_requirement 0 0
+power: intelligence 5 5
+power: mana 20 20
+power: all_resistances 20 20
+power: spell_levels 1 1
+power: item_graphic 159 0
 
 internal_name: demonspike_coat
 name: Demonspike Coat
 base: UITYPE_FULLPLATE
 min_level: 25
 value: 251175
-power: IPL_SETAC 100 100
-power: IPL_GETHIT 6 6
-power: IPL_STR 10 10
-power: IPL_INDESTRUCTIBLE 0 0
-power: IPL_FIRERES 50 50
+power: set_base_armor 100 100
+power: damage_reduction 6 6
+power: strength 10 10
+power: indestructible 0 0
+power: fire_resistance 50 50
 
 internal_name: the_deflector
 name: The Deflector
 base: UITYPE_BUCKLER
 min_level: 1
 value: 1500
-power: IPL_SETAC 7 7
-power: IPL_ALLRES 10 10
-power: IPL_DAMP_CURSE 20 20
-power: IPL_TOHIT_CURSE 5 5
-power: IPL_INVCURS 83 0
+power: set_base_armor 7 7
+power: all_resistances 10 10
+power: damage_percent_curse 20 20
+power: to_hit_curse 5 5
+power: item_graphic 83 0
 
 internal_name: split_skull_shield
 name: Split Skull Shield
 base: UITYPE_BUCKLER
 min_level: 1
 value: 2025
-power: IPL_SETAC 10 10
-power: IPL_LIFE 10 10
-power: IPL_STR 2 2
-power: IPL_LIGHT_CURSE 1 1
-power: IPL_SETDUR 15 15
-power: IPL_INVCURS 116 0
+power: set_base_armor 10 10
+power: health 10 10
+power: strength 2 2
+power: light_radius_curse 1 1
+power: set_durability 15 15
+power: item_graphic 116 0
 
 internal_name: dragons_breach
 name: Dragon's Breach
 base: UITYPE_KITESHIELD
 min_level: 2
 value: 19200
-power: IPL_FIRERES 25 25
-power: IPL_STR 5 5
-power: IPL_SETAC 20 20
-power: IPL_MAG_CURSE 5 5
-power: IPL_INDESTRUCTIBLE 0 0
-power: IPL_INVCURS 117 0
+power: fire_resistance 25 25
+power: strength 5 5
+power: set_base_armor 20 20
+power: intelligence_curse 5 5
+power: indestructible 0 0
+power: item_graphic 117 0
 
 internal_name: blackoak_shield
 name: Blackoak Shield
 base: UITYPE_SMALLSHIELD
 min_level: 4
 value: 5725
-power: IPL_DEX 10 10
-power: IPL_VIT_CURSE 10 10
-power: IPL_SETAC 18 18
-power: IPL_LIGHT_CURSE 1 1
-power: IPL_DUR 150 150
-power: IPL_INVCURS 146 0
+power: dexterity 10 10
+power: vitality_curse 10 10
+power: set_base_armor 18 18
+power: light_radius_curse 1 1
+power: durability 150 150
+power: item_graphic 146 0
 
 internal_name: holy_defender
 name: Holy Defender
 base: UITYPE_LARGESHIELD
 min_level: 10
 value: 13800
-power: IPL_SETAC 15 15
-power: IPL_GETHIT 2 2
-power: IPL_FIRERES 20 20
-power: IPL_DUR 200 200
-power: IPL_FASTBLOCK 1 1
-power: IPL_INVCURS 146 0
+power: set_base_armor 15 15
+power: damage_reduction 2 2
+power: fire_resistance 20 20
+power: durability 200 200
+power: block_speed 1 1
+power: item_graphic 146 0
 
 internal_name: stormshield
 name: Stormshield
 base: UITYPE_GOTHSHIELD
 min_level: 24
 value: 49000
-power: IPL_SETAC 40 40
-power: IPL_GETHIT_CURSE 4 4
-power: IPL_STR 10 10
-power: IPL_INDESTRUCTIBLE 0 0
-power: IPL_FASTBLOCK 1 1
-power: IPL_INVCURS 148 0
+power: set_base_armor 40 40
+power: damage_reduction_curse 4 4
+power: strength 10 10
+power: indestructible 0 0
+power: block_speed 1 1
+power: item_graphic 148 0
 
 internal_name: bramble
 name: Bramble
 base: UITYPE_RING
 min_level: 1
 value: 1000
-power: IPL_ATTRIBS_CURSE 2 2
-power: IPL_DAMMOD 3 3
-power: IPL_MANA 10 10
-power: IPL_INVCURS 9 0
+power: all_attributes_curse 2 2
+power: damage 3 3
+power: mana 10 10
+power: item_graphic 9 0
 
 internal_name: ring_of_regha
 name: Ring of Regha
 base: UITYPE_RING
 min_level: 1
 value: 4175
-power: IPL_MAG 10 10
-power: IPL_MAGICRES 10 10
-power: IPL_LIGHT 1 1
-power: IPL_STR_CURSE 3 3
-power: IPL_DEX_CURSE 3 3
-power: IPL_INVCURS 11 0
+power: intelligence 10 10
+power: magic_resistance 10 10
+power: light_radius 1 1
+power: strength_curse 3 3
+power: dexterity_curse 3 3
+power: item_graphic 11 0
 
 internal_name: the_bleeder
 name: The Bleeder
 base: UITYPE_RING
 min_level: 2
 value: 8500
-power: IPL_MAGICRES 20 20
-power: IPL_MANA 30 30
-power: IPL_LIFE_CURSE 10 10
-power: IPL_INVCURS 8 0
+power: magic_resistance 20 20
+power: mana 30 30
+power: health_curse 10 10
+power: item_graphic 8 0
 
 internal_name: constricting_ring
 name: Constricting Ring
 base: UITYPE_RING
 min_level: 5
 value: 62000
-power: IPL_ALLRES 75 75
-power: IPL_DRAINLIFE 0 0
-power: IPL_INVCURS 14 0
+power: all_resistances 75 75
+power: drain_life 0 0
+power: item_graphic 14 0
 
 internal_name: ring_of_engagement
 name: Ring of Engagement
 base: UITYPE_RING
 min_level: 11
 value: 12476
-power: IPL_GETHIT 1 2
-power: IPL_THORNS 1 3
-power: IPL_SETAC 5 5
-power: IPL_TARGAC 4 12
-power: IPL_INVCURS 13 0
+power: damage_reduction 1 2
+power: thorns 1 3
+power: set_base_armor 5 5
+power: armor_piercing 4 12
+power: item_graphic 13 0

@@ -14,10 +14,10 @@
 #   glyphs     an 8x8 glyph atlas in the mod folder (Bm437_IBM_CGA.png): the level is drawn as text with it.
 #   town       true: a town (town-only spells, shopkeepers restock, the portal comes home to the deepest one).
 #   start      true on the one level a new game starts on.
-#   enemy_percent  chance in 100 that a walkable cell starts with a monster (default 5; dungen levels only).
-#   monster    "<internal_name> [weight]": one monster the level rolls, at these odds against the others (default 1).
-#              Repeatable; a level with any rolls only these (plus out-of-depth arrivals), one without rolls every
-#              enemies.rec record whose dlvl..max_dlvl takes in its depth. Dungen levels only.
+#   monster    "<internal_name>": for a side level that shares its depth with a regular one: it rolls only these,
+#              random_spawn: false or not. Repeatable. Every other level rolls the enemies.rec records whose
+#              dlvl..max_dlvl takes in its depth. Either way D1's rules pick the types (spawn_cost against a budget
+#              of 4000) and the count (a monster per 30 floor cells, in groups). Dungen levels only.
 #   exit       "<location> -> <map id>, <arrival location>": stepping on the location takes you there. An
 #              "open_when:" line after it keeps it shut until the condition (quests.rec's language) holds; an
 #              "exit_tile:" line (stairs_down, stairs_up, red_portal) is what the spot turns into when it opens.
@@ -37,8 +37,8 @@
 #   templates        the maps directory the room templates live in. Defaults to assets/maps, which the mod
 #                    overlay resolves to this mod's own maps.
 #   template_prefix  only templates whose name starts with this are used - which is how a depth gets its look.
-#   require_room     a template this level must contain (its quest room). Repeat the field for more.
-#   forbid_room      a template this level must NOT contain, so another level's quest room cannot turn up here.
+#   require_room     a template this level must contain (its quest room). Repeat the field for more. No other
+#                    level grows a room some level requires.
 #   rooms            how many rooms to grow to (default 16).
 #   min_rooms        regrow the level until it has at least this many (default 10).
 #   width, height    the scratch grid the level grows into before it is trimmed (default 40x40).
@@ -46,7 +46,10 @@
 #   wall_tile, floor_tile  the tile IDs that mean wall and floor in a template's Tiles layer (default 56, 64).
 #   mirror           false keeps rooms as drawn apart from turning them; by default they may also be flipped.
 #   loop_distance, loop_chance  after growing, a wall between two rooms at least loop_distance steps apart on
-#                    foot opens with loop_chance, so the way back is not always the way in (defaults 10, 0.8).
+#                    foot opens with loop_chance, so the way back is not always the way in (defaults 20, 1:
+#                    Brogue's). A doorway, loop or not, gets a door 60% of the time and stays open otherwise.
+#   lakes            how many lakes of deep water to try to lay over the grown level, each ringed with shallows
+#                    and never cutting the level in two (Brogue's; default 0).
 #
 # The knobs megadungeon takes (it carves a maze and knocks rooms into it; no level here uses it):
 #   width, height            the grid it carves (default 60x60)

@@ -169,7 +169,7 @@ func (g *gen) getLevelMTypes(setLevel int) {
 	var typelist []int
 	for i := 0; i < numMTypes; i++ {
 		m := &g.data.Monsters[i]
-		if minl, maxl := 15*m.MinDLvl/30+1, 15*m.MaxDLvl/30+1; g.currlevel >= minl && g.currlevel <= maxl && m.RandomSpawn {
+		if m.SpawnsAt(g.currlevel) && m.RandomSpawn { // 1.09's 15*mMinDLvl/30+1, precomputed in enemies.rec
 			typelist = append(typelist, i)
 		}
 	}

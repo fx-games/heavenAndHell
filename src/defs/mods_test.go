@@ -117,7 +117,7 @@ func TestDefinesItsFurniture(t *testing.T) {
 	}
 }
 
-// D1 stores damage as a min..max range and H&H as dice; both arrive as util.Dice with their own bounds intact.
+// Ranges ("4-7") and dice ("1d8") share the field; both arrive as util.Dice with their own bounds intact.
 // This is the schema convergence, so it gets an assertion rather than a comment.
 func TestBothSchemasSurviveTheSharedDiceField(t *testing.T) {
 	files.SelectMod("d1")
@@ -136,9 +136,9 @@ func TestBothSchemasSurviveTheSharedDiceField(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rat := hh[0] // 1d8 hp, 1d3 damage
-	if rat.ID != "rat" || rat.Health.ShortString() != "1d8" || rat.Damage.ShortString() != "1d3" {
-		t.Errorf("H&H dice lost: %s hp=%s dam=%s, want rat 1d8 1d3", rat.ID, rat.Health.ShortString(), rat.Damage.ShortString())
+	rat := hh[0] // 1-2 hp, 1-3 damage: H&H's stats follow D1's curve, as ranges too
+	if rat.ID != "rat" || rat.MinHP() != 1 || rat.MaxHP() != 2 || rat.MinDam() != 1 || rat.MaxDam() != 3 {
+		t.Errorf("H&H range lost: %s hp %d-%d dam %d-%d, want rat 1-2 and 1-3", rat.ID, rat.MinHP(), rat.MaxHP(), rat.MinDam(), rat.MaxDam())
 	}
 	if len(rat.UntargetedSkills) != 1 || rat.UntargetedSkills[0] != "replicate_with" {
 		t.Errorf("H&H skills did not survive the port: %v", rat.UntargetedSkills)

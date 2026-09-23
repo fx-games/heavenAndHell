@@ -26,6 +26,7 @@ type DungeonRoom struct {
 	slotId                  int
 	plugsIntoSlotId         int
 	canBeLit                bool
+	weight                  int // how often growth picks this template (hhm Weight; 0 counts as 1)
 	bounds                  geometry.Rect
 }
 
@@ -227,6 +228,7 @@ func (r *DungeonRoom) Clone() *DungeonRoom {
 		slotId:                  r.slotId,
 		plugsIntoSlotId:         r.plugsIntoSlotId,
 		canBeLit:                r.canBeLit,
+		weight:                  r.weight,
 	}
 	for point := range r.floorTiles {
 		newRoom.floorTiles[point] = true
@@ -237,23 +239,6 @@ func (r *DungeonRoom) Clone() *DungeonRoom {
 	}
 	newRoom.poiPositions = append(newRoom.poiPositions, r.poiPositions...)
 	return newRoom
-}
-
-func (r *DungeonRoom) PrintUntransformed() {
-	bounds := r.GetRelativeBoundingRectIncludingConnectors()
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			relativeRoomPos := geometry.Point{X: x, Y: y}
-			if _, ok := r.floorTiles[relativeRoomPos]; ok {
-				print(".")
-			} else if _, ok = r.availableConnections[relativeRoomPos]; ok {
-				print("+")
-			} else {
-				print(" ")
-			}
-		}
-		println()
-	}
 }
 
 func (r *DungeonRoom) GetRelativeBoundingRectIncludingConnectors() geometry.Rect {
@@ -290,94 +275,6 @@ func (r *DungeonRoom) GetRelativeBoundingRectIncludingConnectors() geometry.Rect
 		}
 	}
 	return geometry.NewRect(minX, minY, maxX+1, maxY+1)
-}
-
-func (r *DungeonRoom) PrintRotated() {
-	bounds := r.GetRelativeBoundingRectIncludingConnectors()
-	transformedBoundsMin := matrixMul(bounds.Min, r.rotationMatrix)
-	transformedBoundsMax := matrixMul(bounds.Max, r.rotationMatrix)
-	transformedBounds := geometry.NewRect(transformedBoundsMin.X, transformedBoundsMin.Y, transformedBoundsMax.X, transformedBoundsMax.Y)
-	transformedBounds = transformedBounds.Shift(0, 0, 1, 1)
-	zero := geometry.Point{X: 0, Y: 0}
-	for y := transformedBounds.Min.Y; y < transformedBounds.Max.Y; y++ {
-		for x := transformedBounds.Min.X; x < transformedBounds.Max.X; x++ {
-			absTransformedPos := geometry.Point{X: x, Y: y}
-			relativePos := matrixMul(absTransformedPos, r.inverseRotationMatrix)
-			if relativePos == zero {
-				print("0")
-			} else if _, ok := r.floorTiles[relativePos]; ok {
-				print(".")
-			} else if _, ok = r.availableConnections[relativePos]; ok {
-				print("+")
-			} else if _, ok = r.connectedRooms[relativePos]; ok {
-				print("=")
-			} else {
-				print(" ")
-			}
-		}
-		println()
-	}
-}
-func (r *DungeonRoom) PrintTransformed() {
-	bounds := r.GetRelativeBoundingRectIncludingConnectors()
-	transformedBoundsMin := r.ToAbsolutePosition(bounds.Min)
-	transformedBoundsMax := r.ToAbsolutePosition(bounds.Max)
-	transformedBounds := geometry.NewRect(transformedBoundsMin.X, transformedBoundsMin.Y, transformedBoundsMax.X, transformedBoundsMax.Y)
-	transformedBounds = transformedBounds.Shift(0, 0, 1, 1)
-	zero := geometry.Point{X: 0, Y: 0}
-	for y := transformedBounds.Min.Y; y < transformedBounds.Max.Y; y++ {
-		xStart := min(0, transformedBounds.Min.X)
-		for x := xStart; x < transformedBounds.Max.X; x++ {
-			absolutePos := geometry.Point{X: x, Y: y}
-			relativePos := r.ToRelativePosition(absolutePos)
-			if absolutePos == zero {
-				print("0")
-			} else if relativePos == zero {
-				print("Q")
-			} else if _, ok := r.floorTiles[relativePos]; ok {
-				print(".")
-			} else if _, ok = r.availableConnections[relativePos]; ok {
-				print("+")
-			} else if _, ok = r.connectedRooms[relativePos]; ok {
-				print("=")
-			} else {
-				print(" ")
-			}
-		}
-		println()
-	}
-}
-
-func (r *DungeonRoom) PrintTransformedWithHighlight(relativePositionForHighlight geometry.Point) {
-	bounds := r.GetRelativeBoundingRectIncludingConnectors()
-	transformedBoundsMin := r.ToAbsolutePosition(bounds.Min)
-	transformedBoundsMax := r.ToAbsolutePosition(bounds.Max)
-	transformedBounds := geometry.NewRect(transformedBoundsMin.X, transformedBoundsMin.Y, transformedBoundsMax.X, transformedBoundsMax.Y)
-	transformedBounds = transformedBounds.Shift(0, 0, 1, 1)
-	zero := geometry.Point{X: 0, Y: 0}
-	for y := transformedBounds.Min.Y; y < transformedBounds.Max.Y; y++ {
-		xStart := min(0, transformedBounds.Min.X)
-		for x := xStart; x < transformedBounds.Max.X; x++ {
-			absolutePos := geometry.Point{X: x, Y: y}
-			relativePos := r.ToRelativePosition(absolutePos)
-			if relativePos == relativePositionForHighlight {
-				print("X")
-			} else if absolutePos == zero {
-				print("0")
-			} else if relativePos == zero {
-				print("Q")
-			} else if _, ok := r.floorTiles[relativePos]; ok {
-				print(".")
-			} else if _, ok = r.availableConnections[relativePos]; ok {
-				print("+")
-			} else if _, ok = r.connectedRooms[relativePos]; ok {
-				print("=")
-			} else {
-				print(" ")
-			}
-		}
-		println()
-	}
 }
 
 func (r *DungeonRoom) SetId(id int) {

@@ -137,14 +137,4 @@ func TestRestoredEffectsResolveByName(t *testing.T) {
 		}
 	}
 
-	// item hooks: fireball on ranged attack, mana on kill, return damage, chance of triple melee damage
-	hooks := common.NewHooksForItem(factory.RandomSource, 1, 4)
-	if len(hooks) != 4 {
-		t.Fatalf("expected all 4 item hooks, got %d", len(hooks))
-	}
-	for i, h := range hooks {
-		if h == nil {
-			t.Errorf("item hook %d is nil", i)
-		}
-	}
 }

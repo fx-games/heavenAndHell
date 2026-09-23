@@ -1,7 +1,9 @@
 // spawnedit assigns the mod's randomly rolled monsters to its dungeon levels: drag a monster from the right onto
-// a level, click it for more shares of the level's rolls, right-click it off again. It edits levels.rec
-// (monster lines, enemy_percent) and enemies.rec (available, out_of_depth_chance) in place; on a D1 level,
-// which rolls by 1.09's rules, it edits dlvl/max_dlvl instead. A development tool, kept out of the game binary.
+// a level, click it to raise its spawn_cost (shift-click to lower it), right-click it off again. A monster spawns on
+// the depths dlvl..max_dlvl (enemies.rec, with random_spawn and spawn_cost); a side level's monster lines live in
+// levels.rec. Both mods pick types and counts by D1's rules. A unique goes where its room goes: drag it onto an
+// accretion level to require its room (maps/*.hhm) there once it fits, and set its dlvl to that depth; a unique a quest
+// spawns on entering a level (quests.rec) moves its trigger, onto any level. A development tool, kept out of the game binary.
 //
 //	cd tools/spawnedit && go run . -mod heavenandhell
 package main
@@ -13,11 +15,11 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"maps"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"slices"
-	"strconv"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -31,6 +33,7 @@ import (
 	"rpg/src/defs"
 	"rpg/src/dungeon"
 	"rpg/src/geometry"
+	"rpg/src/hhm"
 	"rpg/src/recfile"
 )
 
@@ -53,7 +56,6 @@ var (
 	colDim  = color.RGBA{136, 136, 150, 255}
 	colOn   = color.RGBA{232, 168, 72, 255}
 	colBad  = color.RGBA{206, 88, 72, 255}
-	colOOD  = color.RGBA{110, 84, 50, 255}
 )
 
 // hot is a screen area the last frame drew, and what the mouse does to it.
@@ -74,6 +76,9 @@ type app struct {
 	room                    map[string]*ebiten.Image
 	sheet                   *ebiten.Image
 	colors                  map[string]color.RGBA
+	rooms                   map[string]string // unique id -> the room template that places it
+	spawns                  map[string]*spawn // unique id -> the quest trigger that spawns it
+	questsPath              string
 
 	hots             []hot
 	painted          map[string]bool // the squares this drag already set; nil when not dragging over the matrix
@@ -102,7 +107,8 @@ func main() {
 	}
 	dir := filepath.Join(root, "files", "mods", *mod)
 	a := &app{enemiesPath: filepath.Join(dir, "data", "enemies.rec"), levelsPath: filepath.Join(dir, "data", "levels.rec"),
-		dragging: -1, room: map[string]*ebiten.Image{}, colors: map[string]color.RGBA{}, msg: "editing " + dir}
+		questsPath: filepath.Join(dir, "data", "quests.rec"),
+		dragging:   -1, room: map[string]*ebiten.Image{}, colors: map[string]color.RGBA{}, msg: "editing " + dir}
 	if a.sheet, _, err = ebitenutil.NewImageFromFile(filepath.Join(dir, "classic_roguelike.png")); err != nil {
 		log.Fatal(err)
 	}
@@ -137,12 +143,21 @@ func (a *app) load() error {
 	}
 	for _, m := range mons {
 		icon, _ := defs.IconOK(m.Icon)
-		a.enemies = append(a.enemies, &enemy{id: m.ID, name: m.Name, icon: icon, min: m.MinDLvl, max: m.MaxDLvl, avail: m.Avail,
-			wgt: m.SpawnWeight, ood: m.OutOfDepthChance, oodMin: m.MinLevelForOoD, unique: slices.Contains(m.Tags, "unique"), danger: m.Exp})
+		a.enemies = append(a.enemies, &enemy{id: m.ID, name: m.Name, icon: icon, min: m.MinDLvl, max: m.MaxDLvl, avail: b2i(m.RandomSpawn),
+			cost: m.SpawnCost, unique: slices.Contains(m.Tags, "unique"), danger: m.Exp})
 		if m.Color.A == 0 { // no color field: still visible in the share bar
 			m.Color = colDim
 		}
 		a.colors[m.ID] = m.Color
+	}
+	mapFiles, err := hhm.Load(os.DirFS(filepath.Dir(filepath.Dir(a.levelsPath))), "maps")
+	if err != nil {
+		return err
+	}
+	a.rooms = roomsOf(mapFiles)
+	if b, err := os.ReadFile(a.questsPath); err == nil {
+		m := recfile.ReadMulti(strings.NewReader(string(b)))
+		a.spawns = questSpawns(slices.Concat(m["quest"], m["trigger"]))
 	}
 	f, err := os.Open(a.levelsPath)
 	if err != nil {
@@ -153,42 +168,30 @@ func (a *app) load() error {
 		if town, _ := dungeon.Field(r, "town"); town == "true" {
 			continue
 		}
-		l := &level{}
+		l := &level{rec: r}
 		l.id, _ = dungeon.Field(r, "map")
 		l.name, _ = dungeon.Field(r, "name")
 		l.name = strings.ReplaceAll(l.name, `\n`, " - ")
 		l.tiles, _ = dungeon.Field(r, "tiles")
 		l.depth, _ = dungeon.Int(r, "depth", 0)
-		l.pct, _ = dungeon.Int(r, "enemy_percent", 0)
-		for _, v := range dungeon.FieldsNamed(r, "monster") {
-			id, w, _ := strings.Cut(strings.TrimSpace(v), " ")
-			n, err := strconv.Atoi(strings.TrimSpace(w))
-			if err != nil {
-				n = 1
-			}
-			l.mons = append(l.mons, dungeon.LevelMonster{ID: id, Weight: max(n, 1)})
-		}
-		if gen, _ := dungeon.Field(r, "generator"); strings.HasPrefix(gen, "d1_") {
-			d1Rules = true // D1 places monsters by 1.09's own rules: no density, no weights
+		l.generator, _ = dungeon.Field(r, "generator")
+		l.prefix, _ = dungeon.Field(r, "template_prefix")
+		for _, v := range dungeon.FieldsNamed(r, "require_room") {
+			l.require = append(l.require, strings.TrimSpace(v))
 		}
 		a.levels = append(a.levels, l)
 		if !slices.Contains(a.depths, l.depth) {
 			a.depths = append(a.depths, l.depth)
 		}
 	}
+	// a room counts once a level requires it: a drawn map (Lucifer's TownHell) holds uniques too, but no level grows it
+	maps.DeleteFunc(a.rooms, func(_, room string) bool {
+		return !slices.ContainsFunc(a.levels, func(l *level) bool { return slices.Contains(l.require, room) })
+	})
 	slices.SortStableFunc(a.levels, func(x, y *level) int { return x.depth - y.depth })
 	slices.Sort(a.depths)
 	// ponytail: experience paid stands in for danger; a real threat score (hp x damage x speed) if it misleads
 	slices.SortStableFunc(a.enemies, func(x, y *enemy) int { return cmp.Or(b2i(x.unique)-b2i(y.unique), x.danger-y.danger) })
-	for _, l := range a.levels { // a level without a list rolls by dlvl: start its list from what it rolls now
-		if !d1Rules && len(l.mons) == 0 {
-			for _, e := range a.enemies {
-				if !e.unique && e.spawnsAt(l.depth, a.deepest()) {
-					l.mons = append(l.mons, dungeon.LevelMonster{ID: e.id, Weight: e.wgt})
-				}
-			}
-		}
-	}
 	return nil
 }
 
@@ -199,59 +202,74 @@ func b2i(b bool) int {
 	return 0
 }
 
-// here is who level l rolls, at what weight.
-func (a *app) here(l *level) []dungeon.LevelMonster {
-	if !d1Rules {
-		return l.mons
-	}
-	var out []dungeon.LevelMonster
+// here is who level l may roll: a side level its list, any other everyone whose dlvl..max_dlvl takes in its depth.
+func (a *app) here(l *level) []*enemy {
+	var out []*enemy
 	for _, e := range a.enemies {
-		if !e.unique && e.spawnsAt(l.depth, a.deepest()) {
-			out = append(out, dungeon.LevelMonster{ID: e.id, Weight: 1})
+		if e.unique && (slices.Contains(l.require, a.rooms[e.id]) || a.spawns[e.id] != nil && a.spawns[e.id].to == l.id) ||
+			l.side() && slices.Contains(l.mons, e.id) || !l.side() && !e.unique && e.spawnsAt(l.depth, a.deepest()) {
+			out = append(out, e)
 		}
 	}
 	return out
 }
 
-// onDepth reports whether some level at depth d rolls e.
-func (a *app) onDepth(e *enemy, d int) bool {
-	for _, l := range a.levels {
-		if l.depth == d && (d1Rules && e.spawnsAt(d, a.deepest()) || l.weight(e.id) > 0) {
-			return true
-		}
-	}
-	return false
-}
-
-// toggle puts e on, or takes it off, every level at depth d.
+// toggle puts e on, or takes it off, depth d.
 func (a *app) toggle(e *enemy, d int, on bool) {
-	if d1Rules {
-		if !on {
-			e.add(d, a.deepest())
-		} else if err := e.remove(d, a.deepest()); err != nil {
-			a.msg = err.Error()
-			return
-		}
-	} else {
-		for _, l := range a.levels {
-			if l.depth == d {
-				l.setWeight(e.id, b2i(!on))
-			}
-		}
-		if !on {
-			e.avail = 1
-		}
+	if !on {
+		e.add(d, a.deepest())
+	} else if err := e.remove(d, a.deepest()); err != nil {
+		a.msg = err.Error()
+		return
 	}
 	a.touch("%s on depth %d: %v", e.name, d, !on)
 }
 
-func (a *app) enemyByID(id string) *enemy {
-	for _, e := range a.enemies {
-		if e.id == id {
-			return e
+// moveUnique moves e to level l, with its room or the quest trigger that spawns it; its dlvl (and so its
+// monster level) follows l's depth, and so does every other monster the trigger spawns.
+func (a *app) moveUnique(e *enemy, l *level) bool {
+	if sp := a.spawns[e.id]; sp != nil {
+		sp.to = l.id
+		for _, o := range a.enemies {
+			if a.spawns[o.id] == sp {
+				o.min = l.depth
+			}
+		}
+		a.touch("the trigger spawning %s now fires on %s (with every monster it spawns)", e.name, l.id)
+		return true
+	}
+	room := a.rooms[e.id]
+	if !l.grows(room) {
+		a.msg = fmt.Sprintf("%s's room %s can't grow on %s (an accretion level with template_prefix %q)", e.name, room, l.id, l.prefix)
+		return false
+	}
+	if err := placeable(l, append(slices.Clone(l.require), room)); err != nil {
+		a.msg = fmt.Sprintf("%s's room doesn't fit on %s: %v", e.name, l.id, err)
+		return false
+	}
+	moveRoom(a.levels, room, l)
+	e.min = l.depth
+	a.touch("%s and its room %s now on %s (placement checked)", e.name, room, l.id)
+	return true
+}
+
+// uniqueLevel is the level e is on now: the one requiring its room or firing its trigger; nil when neither.
+func (a *app) uniqueLevel(e *enemy) *level {
+	for _, l := range a.levels {
+		if sp := a.spawns[e.id]; sp != nil && sp.to == l.id || slices.Contains(l.require, a.rooms[e.id]) {
+			return l
 		}
 	}
 	return nil
+}
+
+// moveUniqueTo moves e to the first level of depth d that takes it: a unique's row of the matrix is a radio group.
+func (a *app) moveUniqueTo(e *enemy, d int) {
+	for _, l := range a.levels {
+		if l.depth == d && a.moveUnique(e, l) {
+			return
+		}
+	}
 }
 
 func (a *app) deepest() int { return a.depths[len(a.depths)-1] }
@@ -294,13 +312,16 @@ func (a *app) Update() error {
 	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) && a.dragging >= 0 {
 		if h := at(func(h hot) bool { return h.drop >= 0 }); h != nil {
 			l, e := a.levels[h.drop], a.enemies[a.dragging]
-			if d1Rules {
-				e.add(l.depth, a.deepest())
+			if e.unique {
+				a.moveUnique(e, l)
+			} else if l.side() {
+				l.setOn(e.id, true)
 			} else {
-				l.setWeight(e.id, max(1, l.weight(e.id)))
-				e.avail = 1
+				e.add(l.depth, a.deepest())
 			}
-			a.touch("%s now spawns on %s", e.name, l.id)
+			if !e.unique {
+				a.touch("%s now spawns on %s", e.name, l.id)
+			}
 		}
 		a.dragging = -1
 	}
@@ -317,10 +338,10 @@ func (a *app) Update() error {
 		}
 	}
 	if (ebiten.IsKeyPressed(ebiten.KeyMeta) || ebiten.IsKeyPressed(ebiten.KeyControl)) && inpututil.IsKeyJustPressed(ebiten.KeyS) {
-		if err := save(a.enemiesPath, a.levelsPath, a.enemies, a.levels); err != nil {
+		if err := save(a.enemiesPath, a.levelsPath, a.questsPath, a.enemies, a.levels, a.spawns); err != nil {
 			a.msg = "save failed: " + err.Error()
 		} else {
-			a.dirty, a.msg = false, "saved "+filepath.Base(a.enemiesPath)+" and "+filepath.Base(a.levelsPath)
+			a.dirty, a.msg = false, "saved enemies.rec, levels.rec and quests.rec"
 		}
 	}
 	return nil
@@ -336,11 +357,9 @@ func (a *app) Draw(dst *ebiten.Image) {
 	a.drawEnemies(dst, image.Rect(split+4, top, a.w, a.h-status))
 
 	head := "Levels: drop monsters here, right-click one to take it off"
-	if !d1Rules {
-		head += "; click +1 share, shift-click -1"
-	}
+	head += "; click +100 spawn_cost, shift-click -100"
 	label(dst, 6, 5, head, colDim)
-	label(dst, split+10, 5, "Monsters: drag onto a level; dark cells: out of depth", colDim)
+	label(dst, split+10, 5, "Monsters: drag onto a level; cells: the depths it spawns on", colDim)
 
 	fill(dst, image.Rect(0, a.h-status, a.w, a.h), colRow)
 	msg := a.msg
@@ -377,48 +396,37 @@ func (a *app) drawLevels(dst *ebiten.Image, r image.Rectangle) {
 		view.DrawImage(a.roomOf(l.tiles), geo(row.Min.X+4, row.Min.Y+4, 1))
 		x := row.Min.X + 124
 		label(view, x, row.Min.Y+4, fmt.Sprintf("%d  %s", l.depth, l.name), colText)
-		if !d1Rules {
-			pct := l.pct
-			if pct == 0 {
-				pct = 5
-			}
-			label(view, x, row.Min.Y+20, fmt.Sprintf("%2d%% of floor cells", pct), colDim)
-			a.button(view, image.Rect(x+140, row.Min.Y+19, x+156, row.Min.Y+33), "-", func() { l.pct = max(1, pct-1); a.touch("%s: %d%%", l.id, l.pct) })
-			a.button(view, image.Rect(x+158, row.Min.Y+19, x+174, row.Min.Y+33), "+", func() { l.pct = min(100, pct+1); a.touch("%s: %d%%", l.id, l.pct) })
-		}
-		// who spawns here, and the share of rolls each one gets; then who may come up out of depth
+		// who may spawn here, and what each costs of the budget
 		here := a.here(l)
 		total := 0
-		for _, m := range here {
-			total += m.Weight
+		for _, e := range here {
+			total += e.cost
 		}
+		label(view, x, row.Min.Y+20, fmt.Sprintf("types cost %d of %d", total, defs.SpawnBudget), colDim)
 		cx, cy := x, row.Min.Y+38
-		for _, m := range here {
-			e := a.enemyByID(m.ID)
-			if e == nil || cx+18 > row.Max.X {
+		for _, e := range here {
+			if cx+18 > row.Max.X {
 				continue // ponytail: one line of chips, the bar below still counts them all
 			}
 			a.icon(view, e.icon, cx, cy, 2)
-			tip := e.name
-			if !d1Rules {
-				label(view, cx, cy+16, fmt.Sprint(m.Weight), colDim)
-				tip += fmt.Sprintf(": weight %d, %d%% of this level's monsters (click +1, shift-click -1, right-click remove)", m.Weight, 100*m.Weight/total)
-			}
+			label(view, cx, cy+16, fmt.Sprint(e.cost/100), colDim)
+			tip := fmt.Sprintf("%s: spawn_cost %d (click +100, shift-click -100, right-click remove)", e.name, e.cost)
 			a.hots = append(a.hots, hot{r: image.Rect(cx, cy, cx+16, cy+16).Intersect(r), drag: -1, drop: i, tip: tip,
 				left: func() {
-					if d1Rules {
-						return
-					}
-					w := l.weight(e.id) + 1
 					if ebiten.IsKeyPressed(ebiten.KeyShift) {
-						w = max(1, w-2)
+						e.cost = max(0, e.cost-100)
+					} else {
+						e.cost += 100
 					}
-					l.setWeight(e.id, w)
-					a.touch("%s on %s: weight %d", e.name, l.id, w)
+					a.touch("%s: spawn_cost %d", e.name, e.cost)
 				},
 				right: func() {
-					if !d1Rules {
-						l.setWeight(e.id, 0)
+					if e.unique {
+						a.msg = e.name + " goes where its room goes: drag it onto another level"
+						return
+					}
+					if l.side() {
+						l.setOn(e.id, false)
 					} else if err := e.remove(l.depth, a.deepest()); err != nil {
 						a.msg = err.Error()
 						return
@@ -427,26 +435,13 @@ func (a *app) drawLevels(dst *ebiten.Image, r image.Rectangle) {
 				}})
 			cx += 18
 		}
-		cx += 10
-		for _, e := range a.enemies {
-			if l.weight(e.id) > 0 || !e.oodAt(l.depth) || cx+18 > row.Max.X {
-				continue
-			}
-			op := geo(cx, cy, 2)
-			op.ColorScale.ScaleAlpha(0.35)
-			a.drawIcon(view, e.icon, op)
-			a.hots = append(a.hots, hot{r: image.Rect(cx, cy, cx+16, cy+16).Intersect(r), drag: -1, drop: i,
-				tip: fmt.Sprintf("%s: out of depth, %g%% per roll (native from depth %d)", e.name, 100*e.ood, e.min)})
-			cx += 18
+		bx, bw := float64(x), float64(row.Max.X-x-8)/float64(max(total, defs.SpawnBudget)) // the budget's width: what sticks out won't fit
+		for _, e := range here {
+			w := bw * float64(e.cost)
+			vector.DrawFilledRect(view, float32(bx), float32(row.Min.Y+70), float32(w)-1, 8, a.colors[e.id], false)
+			bx += w
 		}
-		if total > 0 && !d1Rules {
-			bx, bw := float64(x), float64(row.Max.X-x-8)
-			for _, m := range here {
-				w := bw * float64(m.Weight) / float64(total)
-				vector.DrawFilledRect(view, float32(bx), float32(row.Min.Y+70), float32(w)-1, 8, a.colors[m.ID], false)
-				bx += w
-			}
-		}
+		stroke(view, image.Rect(x, row.Min.Y+68, x+int(bw*defs.SpawnBudget), row.Min.Y+80), colDim)
 		if len(here) == 0 {
 			label(view, x, cy, "no monsters", colBad)
 		}
@@ -470,47 +465,52 @@ func (a *app) drawEnemies(dst *ebiten.Image, r image.Rectangle) {
 		}
 		fill(view, row, colRow)
 		a.icon(view, e.icon, row.Min.X+2, row.Min.Y+1, 2)
-		nameR := image.Rect(row.Min.X, row.Min.Y, chart-96, row.Max.Y)
+		nameR := image.Rect(row.Min.X, row.Min.Y, chart-4, row.Max.Y)
 		if e.unique { // read only: its room places it
 			labelClipped(view, row.Min.X+22, row.Min.Y+3, nameR.Dx()-24, e.name+" (unique)", colDim)
-			a.hots = append(a.hots, hot{r: nameR.Intersect(body), drag: -1, drop: -1, tip: fmt.Sprintf("%s: unique, placed by its room; level %d", e.id, e.min)})
+			h := hot{r: nameR.Intersect(body), drag: -1, drop: -1, tip: fmt.Sprintf("%s: unique, placed by its room; level %d", e.id, e.min)}
+			if room := a.rooms[e.id]; room != "" {
+				h.drag, h.tip = j, fmt.Sprintf("%s: unique in room %s, level %d; drag onto a level to move both", e.id, room, e.min)
+			} else if sp := a.spawns[e.id]; sp != nil {
+				h.drag, h.tip = j, fmt.Sprintf("%s: unique spawned by a quest on %s; drag onto a level to move its trigger", e.id, sp.to)
+			}
+			a.hots = append(a.hots, h)
+			cur := a.uniqueLevel(e)
 			for k, d := range a.depths {
-				if d == e.min {
-					stroke(view, image.Rect(chart+k*cellW, row.Min.Y+3, chart+k*cellW+cellW-2, row.Max.Y-3), colDim)
+				cell := image.Rect(chart+k*cellW, row.Min.Y+3, chart+k*cellW+cellW-2, row.Max.Y-3)
+				on := cur != nil && cur.depth == d
+				switch {
+				case on:
+					fill(view, cell, colOn)
+				case h.drag >= 0:
+					fill(view, cell, colLine)
+				default: // no room or trigger to move: read only
+					stroke(view, cell, colLine)
+					continue
 				}
+				a.hots = append(a.hots, hot{r: cell.Intersect(body), drag: -1, drop: -1, tip: fmt.Sprintf("%s on depth %d: click to move it here", e.name, d),
+					left: func() {
+						if !on {
+							a.moveUniqueTo(e, d)
+						}
+					}})
 			}
 			continue
 		}
 		c := colText
-		if !slices.ContainsFunc(a.depths, func(d int) bool { return a.onDepth(e, d) }) {
+		if !slices.ContainsFunc(a.depths, func(d int) bool { return e.spawnsAt(d, a.deepest()) }) {
 			c = colDim
 		}
 		labelClipped(view, row.Min.X+22, row.Min.Y+3, nameR.Dx()-24, e.name, c)
 		a.hots = append(a.hots, hot{r: nameR.Intersect(body), drag: j, drop: -1, tip: e.id + ": drag onto a level"})
-		if !d1Rules {
-			label(view, chart-92, row.Min.Y+3, fmt.Sprintf("ood%3d%%", int(e.ood*100+0.5)), colText)
-			tip := fmt.Sprintf("%s: chance to come up above depth %d, from depth %d on", e.name, e.min, e.oodMin)
-			step := func(d float64) func() {
-				return func() {
-					e.ood = min(1, max(0, float64(int(e.ood*100+0.5)+int(d))/100))
-					a.touch("%s: out of depth %g%%", e.name, 100*e.ood)
-				}
-			}
-			a.button(view, image.Rect(chart-34, row.Min.Y+2, chart-20, row.Max.Y-2), "-", step(-1))
-			a.button(view, image.Rect(chart-18, row.Min.Y+2, chart-4, row.Max.Y-2), "+", step(1))
-			a.hots[len(a.hots)-1].tip, a.hots[len(a.hots)-2].tip = tip, tip
-		}
 		for k, d := range a.depths {
 			cell := image.Rect(chart+k*cellW, row.Min.Y+3, chart+k*cellW+cellW-2, row.Max.Y-3)
-			on := a.onDepth(e, d)
+			on := e.spawnsAt(d, a.deepest())
 			a.hots = append(a.hots, hot{r: cell.Intersect(body), drag: -1, drop: -1, tip: fmt.Sprintf("%s on depth %d: click or drag to toggle", e.name, d), cell: fmt.Sprint(e.id, "@", d), on: on,
 				left: func() { a.toggle(e, d, on) }})
-			switch {
-			case on:
+			if on {
 				fill(view, cell, colOn)
-			case e.oodAt(d):
-				fill(view, cell, colOOD)
-			default:
+			} else {
 				fill(view, cell, colLine)
 			}
 		}

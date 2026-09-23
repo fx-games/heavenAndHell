@@ -11,7 +11,7 @@
 
 internal_name: town
 name: Music - Town
-sound: music/town.ogg
+sound: music/new_town.ogg
 
 internal_name: cathedral
 name: Music - Cathedral levels

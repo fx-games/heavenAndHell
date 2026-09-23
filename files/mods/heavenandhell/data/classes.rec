@@ -49,25 +49,9 @@
 # (warrior / rogue / sorcerer) and carries its OWN display name over it. The Archer plays as the rogue and the
 # Mage as the sorcerer, which is what they always were.
 
-# THESE NUMBERS ARE A DESIGN CHOICE MADE DURING THE PORT. They are not a port of anything and they are meant to
-# be tuned by playing the game.
-#
-# Heaven & Hell never had this table. Its branch used the `stats` package - strength/dexterity/intelligence plus
-# health and mana resources - and it had neither growth curves nor
-# caps nor an experience ladder. So nothing here could be carried over row for row, and copying Diablo's rows
-# would have been a lie dressed as a port.
-#
-# What IS derived, and from what:
-#   - starting str/mag/dex came from this file's old stats_strength / stats_intelligence /
-#     stats_dexterity, doubled: H&H's values run ~5-15 where the engine's formulas expect ~10-30. Each class
-#     keeps its shape - the Warrior stays str-heavy, the Archer dex-heavy, the Mage int-heavy.
-#   - vit has no H&H equivalent, so it is derived from the old resource_health (20/15/10 -> 30/20/15).
-#   - mana follows the old resource_mana (1/1/4): the Warrior is mana-poor, the Mage mana-rich.
-#
-# What is CHOSEN, by the role each class' archetype plays: the caps, the 1/64 life and mana curves, the to-hit
-# numbers and the animation frame counts. Warrior tanky and mana-starved, Archer balanced, Mage mana-rich and
-# fragile. The to-hit and frame columns have no H&H source at all and are set to what the engine's formulas are
-# calibrated against for that archetype.
+# Starting stats, caps and the life/mana curves (adj_/lvl_/chr_) are D1 1.09's for the class' archetype, so a
+# hero grows as in Diablo. Still H&H's own, and a design choice to tune by playing: gold, the kit, mana_cost,
+# the itm_ multipliers, the animation frames, flags and skills.
 
 internal_name: warrior
 name: Warrior
@@ -80,19 +64,19 @@ skill_points: 1
 max_skill_level: 5
 str: 30
 mag: 10
-dex: 10
-vit: 30
-max_str: 240
-max_mag: 40
-max_dex: 70
-max_vit: 120
+dex: 20
+vit: 25
+max_str: 250
+max_mag: 50
+max_dex: 60
+max_vit: 100
 to_blk: 30
-adj_life: 20
-adj_mana: 0
-lvl_life: 2.5
-lvl_mana: 0.5
+adj_life: 18
+adj_mana: -1
+lvl_life: 2
+lvl_mana: 1
 chr_life: 2
-chr_mana: 0.5
+chr_mana: 1
 itm_life: 2
 itm_mana: 0.5
 potion_life: 2
@@ -123,21 +107,21 @@ item: partial_leather_armour
 start_spells: multi_shot=1 blink=1 jump_start=1 arrow_rain=0 trick_shot=0 debilitating_shot=0 man_stopper=0
 skill_points: 1
 max_skill_level: 5
-str: 16
-mag: 10
+str: 20
+mag: 15
 dex: 30
 vit: 20
-max_str: 80
-max_mag: 80
-max_dex: 240
-max_vit: 90
+max_str: 55
+max_mag: 70
+max_dex: 250
+max_vit: 80
 to_blk: 20
-adj_life: 16
-adj_mana: 4
+adj_life: 23
+adj_mana: 5.5
 lvl_life: 2
-lvl_mana: 1.5
-chr_life: 1.5
-chr_mana: 1.5
+lvl_mana: 2
+chr_life: 1
+chr_mana: 1
 itm_life: 1.5
 itm_mana: 1.5
 potion_life: 1.5
@@ -168,21 +152,21 @@ item: robe
 start_spells: heal_health=1 fire_ray=1 black_clouds=0 burning_rain=0 great_thunder=0 eternal_vow=0 bat_out_of_hell=0
 skill_points: 1
 max_skill_level: 5
-str: 10
-mag: 30
-dex: 10
-vit: 15
-max_str: 40
-max_mag: 240
-max_dex: 80
-max_vit: 70
+str: 15
+mag: 35
+dex: 15
+vit: 20
+max_str: 45
+max_mag: 250
+max_dex: 85
+max_vit: 80
 to_blk: 10
-adj_life: 10
-adj_mana: 8
+adj_life: 9
+adj_mana: -2
 lvl_life: 1
-lvl_mana: 2.5
+lvl_mana: 2
 chr_life: 1
-chr_mana: 2.5
+chr_mana: 2
 itm_life: 1
 itm_mana: 2.5
 potion_life: 1

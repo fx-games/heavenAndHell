@@ -8,6 +8,7 @@ import (
 	"rpg/src/gridmap"
 	"rpg/src/rules"
 	"rpg/src/stats"
+	"strings"
 	"time"
 )
 
@@ -30,8 +31,20 @@ func (a *Actor) SetHero(h *rules.Hero) { a.hero = h }
 
 // HeroSheet derives D1's character sheet from the hero and the D1 items they wear.
 func (a *Actor) HeroSheet() rules.Sheet {
-	return a.hero.Sheet(a.equipped())
+	s := a.hero.Sheet(a.equipped())
+	if a.HasStatusEffect(StatusBlessed) { // +5 armor class, or double it from 5 up
+		s.BonusAC += max(5, heroAC(s))
+	}
+	if a.HasStatusEffect(StatusStoneSkin) {
+		s.BonusAC += max(0, StoneSkinAC-heroAC(s))
+	}
+	return s
 }
+
+// StoneSkinAC is the armor class Stoneskin raises the hero to; its other half is MoveCost's slow step.
+const StoneSkinAC = 30
+
+func heroAC(s rules.Sheet) int { return s.AC + s.BonusAC + s.Dex/5 }
 
 // SyncHero copies the D1 character sheet into the stats the UI and energy system read.
 func SyncHero(a *Actor) {
@@ -135,7 +148,8 @@ func (a *Actor) SheetSections() []SheetSection {
 			{"Mana", st.GetResource(stats.Mana).ToString()},
 		}},
 		{Title: "Combat", Rows: append([][2]string{
-			{"Armor class", fmt.Sprintf("%d", s.AC+s.BonusAC+s.Dex/5)},
+			{"Armor class", fmt.Sprintf("%d", heroAC(s)) + a.statusNote(StatusBlessed, StatusStoneSkin)},
+			{"Step", fmt.Sprintf("%d AUT", a.MoveCost()) + a.statusNote(StatusStoneSkin)},
 			{"Chance to block", fmt.Sprintf("%d%% vs. own level", h.BlockChance(s, h.Level))},
 			{"Chance to hit", fmt.Sprintf("%d%%", h.MeleeHitChance(s, 0))},
 			{"Damage", fmt.Sprintf("%d-%d", minD, maxD)},
@@ -148,6 +162,20 @@ func (a *Actor) SheetSections() []SheetSection {
 		}},
 		{Title: "Traits", Rows: a.traitRows()},
 	}
+}
+
+// statusNote names the statuses behind a sheet value, with their turns left: " (Stoneskin, 7 turns)".
+func (a *Actor) statusNote(effects ...StatusEffect) string {
+	var notes []string
+	for _, e := range effects {
+		if a.HasStatusEffect(e) {
+			notes = append(notes, fmt.Sprintf("%s, %d turns", StatusName(e), a.GetStatusEffects().AllEntries()[string(e)]))
+		}
+	}
+	if len(notes) == 0 {
+		return ""
+	}
+	return " (" + strings.Join(notes, "; ") + ")"
 }
 
 // ThreatSection says out loud that the dungeon got harder after Diablo, since nothing else announces it. It
@@ -196,7 +224,7 @@ func (a *Actor) traitRows() [][2]string {
 	if h.Rules().HasClassFlag(h.Class, defs.ClassNaturalResistance) {
 		rows = append(rows, [2]string{"Natural resistance", fmt.Sprintf("+%d%% to every resistance", h.Level)})
 	}
-	if s.Flags&rules.ISplNoMana != 0 {
+	if s.Flags&rules.FlagNoMana != 0 {
 		rows = append(rows, [2]string{"No mana", "cannot cast spells that cost mana"})
 	}
 	if a.HasStatusEffect(StatusManaShield) {
@@ -246,7 +274,7 @@ func UsePotion(user *Actor, miscID string) {
 	}
 	s := user.HeroSheet()
 	hp, mana := user.GetStats().GetResource(stats.Health), user.GetStats().GetResource(stats.Mana)
-	noMana := s.Flags&rules.ISplNoMana != 0
+	noMana := s.Flags&rules.FlagNoMana != 0
 	heal := func() { hp.Increase(float64(rules.Whole(h.PotionHeal(rng, s.MaxHP)))) }
 	restore := func() {
 		if !noMana {
@@ -329,10 +357,10 @@ func resolveAttack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, ex
 		}
 		blast := 0
 		if !ranged { // PM_DoAttack: fire and lightning weapons explode on the swing's target, hit or miss (MI_Weapexp)
-			if s.Flags&rules.ISplFireDam != 0 {
+			if s.Flags&rules.FlagFireDamage != 0 {
 				blast += elementalHit(def, rules.ResistKindFire, h.SpellHitChance(s, mon.Level), func() int { return s.FMinDam + rng.Intn(max(s.FMaxDam-s.FMinDam+1, 1)) })
 			}
-			if s.Flags&rules.ISplLightDam != 0 {
+			if s.Flags&rules.FlagLightningDamage != 0 {
 				blast += elementalHit(def, rules.ResistKindLightning, h.SpellHitChance(s, mon.Level), func() int { return s.LMinDam + rng.Intn(max(s.LMaxDam-s.LMinDam+1, 1)) })
 			}
 		}
@@ -356,9 +384,9 @@ func resolveAttack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, ex
 					NewChangeResourceAction(NewActorCause("Mana steal", att), att, stats.Mana, float64(rules.Whole(lmana))))
 			}
 		}
-		if ranged && s.Flags&(rules.ISplFireArrows|rules.ISplLightArrows) != 0 { // MI_LArrow: the arrow bursts where it hits
+		if ranged && s.Flags&(rules.FlagFireArrows|rules.FlagLightningArrows) != 0 { // MI_LArrow: the arrow bursts where it hits
 			kind, mind, maxd := rules.ResistKindFire, s.FMinDam, s.FMaxDam
-			if s.Flags&rules.ISplLightArrows != 0 {
+			if s.Flags&rules.FlagLightningArrows != 0 {
 				kind, mind, maxd = rules.ResistKindLightning, s.LMinDam, s.LMaxDam
 			}
 			blast = elementalHit(def, kind, h.ArrowHitChance(s, mon.AC, dist), func() int { return h.ArrowBlastDamage(rng, s, mind, maxd) })
@@ -367,10 +395,10 @@ func resolveAttack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, ex
 		dam = max(dam, 0) + blast
 		// D1 stops a monster's healing on melee hits with the "can't heal" bit (0x100) and on hits by fire arrows;
 		// the bit named for monsters (ISPL_NOHEALMON) is never read.
-		if !ranged && s.Flags&rules.ISplNoHealPlr != 0 || ranged && s.Flags&rules.ISplFireArrows != 0 {
+		if !ranged && s.Flags&rules.FlagNoHealPlayer != 0 || ranged && s.Flags&rules.FlagFireArrows != 0 {
 			mon.NoHeal = true
 		}
-		if s.Flags&rules.ISplKnockback != 0 && !def.HasStatusEffect(StatusStone) && def.GetStats().GetResource(stats.Health).Value() > dam { // M_GetKnockback
+		if s.Flags&rules.FlagKnockback != 0 && !def.HasStatusEffect(StatusStone) && def.GetStats().GetResource(stats.Health).Value() > dam { // M_GetKnockback
 			m := state.GetMap()
 			push := def.MapPosition().Add(geometry.Dirs[DirTo(att.MapPosition(), def.MapPosition())])
 			if _, isTransition := m.GetTransitionAt(push); m.IsCurrentlyPassable(push) && !isTransition {
@@ -428,8 +456,11 @@ func resolveAttack(ctx ActionContext, att, def *Actor, ranged bool) (dam int, ex
 				extra = append(extra, NewMoveAction(AbstractCause("Knockback"), def, push, true))
 			}
 		}
-		if !ranged && s.Flags&rules.ISplThorns != 0 {
+		if !ranged && s.Flags&rules.FlagThorns != 0 {
 			extra = append(extra, NewChangeResourceAction(NewActorCause("Thorns", def), att, stats.Health, -float64(rng.Intn(3)+1)))
+		}
+		if !ranged && s.ReturnDamage > 0 {
+			extra = append(extra, NewChangeResourceAction(NewActorCause("Thorns", def), att, stats.Health, -float64(max(1, dam*s.ReturnDamage/100))))
 		}
 		return dam, extra, true
 	case att.monster != nil && def.monster != nil: // the golem and the monsters fighting it: M_TryM2MHit
@@ -466,20 +497,20 @@ func ForecastSection(state *State, player, monster *Actor) (SheetSection, bool) 
 	if s.WeaponType == rules.ITypeBow {
 		chance = h.ArrowHitChance(s, mon.AC, geometry.DistanceChebyshev(player.MapPosition(), monster.MapPosition()))
 		lo, hi = h.ArrowDamageRange(s, s.MinDam, s.MaxDam)
-		if s.Flags&rules.ISplLightArrows != 0 {
+		if s.Flags&rules.FlagLightningArrows != 0 {
 			_, burst := h.ArrowDamageRange(s, s.LMinDam, s.LMaxDam)
 			hi += blastMax(rules.ResistKindLightning, burst)
-		} else if s.Flags&rules.ISplFireArrows != 0 {
+		} else if s.Flags&rules.FlagFireArrows != 0 {
 			_, burst := h.ArrowDamageRange(s, s.FMinDam, s.FMaxDam)
 			hi += blastMax(rules.ResistKindFire, burst)
 		}
 	} else {
 		chance = h.MeleeHitChance(s, mon.AC)
 		lo, hi = h.MeleeDamageRange(s, mon.Data.Class)
-		if s.Flags&rules.ISplFireDam != 0 {
+		if s.Flags&rules.FlagFireDamage != 0 {
 			hi += blastMax(rules.ResistKindFire, s.FMaxDam)
 		}
-		if s.Flags&rules.ISplLightDam != 0 {
+		if s.Flags&rules.FlagLightningDamage != 0 {
 			hi += blastMax(rules.ResistKindLightning, s.LMaxDam)
 		}
 	}
@@ -524,13 +555,13 @@ func whyTheseNumbers(h *rules.Hero, s rules.Sheet, mon *Monster, dist int) []str
 		}
 		why = append(why, line)
 	}
-	if s.Flags&rules.ISpl3xDamVsDemons != 0 && mon.Data.Class == "MC_DEMON" {
+	if s.Flags&rules.FlagTripleDamageVsDemons != 0 && mon.Data.Class == "MC_DEMON" {
 		why = append(why, "Your gear triples melee damage against demons")
 	}
-	if s.DamAcFlags&rules.IHfACVsUndead != 0 && mon.Data.Class == "MC_UNDEAD" {
+	if s.DamAcFlags&rules.FlagArmorVsUndead != 0 && mon.Data.Class == "MC_UNDEAD" {
 		why = append(why, "Your armor is worth +20 AC against the undead")
 	}
-	if s.DamAcFlags&rules.IHfACVsDemons != 0 && mon.Data.Class == "MC_DEMON" {
+	if s.DamAcFlags&rules.FlagArmorVsDemons != 0 && mon.Data.Class == "MC_DEMON" {
 		why = append(why, "Your armor is worth +40 AC against demons")
 	}
 	if crit := h.CriticalStrikeChance(); crit > 0 {
@@ -637,10 +668,14 @@ func ticksToAUT(ticks int) int { return (ticks*10 + rules.RefWalkTicks/2) / rule
 // MoveCost is a step's AUT: a monster's speed_move, anything else its speed factors (a D1 hero's step is
 // RefWalkTicks).
 func (a *Actor) MoveCost() int {
+	cost := 100 / max(a.GetMoveSpeed(), 1)
 	if a.monster != nil {
-		return max(int(float64(a.monster.Data.SpeedMove)/a.stats.GetAttributeAsFloat(stats.MoveSpeedFactor)), 1)
+		cost = max(int(float64(a.monster.Data.SpeedMove)/a.stats.GetAttributeAsFloat(stats.MoveSpeedFactor)), 1)
 	}
-	return 100 / max(a.GetMoveSpeed(), 1)
+	if a.HasStatusEffect(StatusStoneSkin) {
+		cost *= 2
+	}
+	return cost
 }
 
 // AttackCost is an attack's AUT. D1 heroes take their attack animation's ticks (decision 13), monsters their
@@ -762,6 +797,9 @@ func monsterKilled(ctx ActionContext, killer, victim *Actor) []Action {
 	}
 	if killer.hero != nil {
 		state.factory.grantExperience(killer, mon.Level, mon.Exp)
+		if n := killer.HeroSheet().ManaOnKill; n > 0 {
+			killer.GetStats().GetResource(stats.Mana).IncreaseByFloat(float64(n))
+		}
 	}
 	questKill(ctx, mon)
 	fallenFear(state, victim.MapPosition())
@@ -782,16 +820,16 @@ func monsterKilled(ctx ActionContext, killer, victim *Actor) []Action {
 // Decay wears the weapon out one hit at a time and is handled in decayWeapons. A Doppelganger's melee blow splits
 // an ordinary monster in two.
 func hellfireHit(ctx ActionContext, att, def *Actor, ranged bool, s rules.Sheet, dam int, extra *[]Action) int {
-	if s.DamAcFlags&rules.IHfDevastation != 0 && rng.Intn(100) < 5 {
+	if s.DamAcFlags&rules.FlagTripleDamage != 0 && rng.Intn(100) < 5 {
 		dam *= 3
 	}
-	if mon := def.monster; !ranged && s.DamAcFlags&rules.IHfDoppelganger != 0 && !mon.Brain(ctx.GameState.factory.Generator.D).ArchBoss && mon.Unique == nil && rng.Intn(100) < 10 {
+	if mon := def.monster; !ranged && s.DamAcFlags&rules.FlagDoppelganger != 0 && !mon.Brain(ctx.GameState.factory.Generator.D).ArchBoss && mon.Unique == nil && rng.Intn(100) < 10 {
 		ctx.GameState.factory.doppelganger(def)
 	}
-	if s.DamAcFlags&rules.IHfJesters != 0 {
+	if s.DamAcFlags&rules.FlagJesters != 0 {
 		dam = rules.JesterDamage(dam, rng.Intn)
 	}
-	if s.DamAcFlags&rules.IHfPeril != 0 {
+	if s.DamAcFlags&rules.FlagPeril != 0 {
 		if self := s.GetHit; self > 0 {
 			*extra = append(*extra, NewChangeResourceAction(NewActorCause("Peril", att), att, stats.Health, float64(-self)))
 		}
@@ -804,7 +842,7 @@ func hellfireHit(ctx ActionContext, att, def *Actor, ranged bool, s rules.Sheet,
 // decayWeapons ports WeaponDecay: a weapon "of decay" loses 5% damage every swing and crumbles at -100%.
 func decayWeapons(ctx ActionContext, att *Actor) {
 	for _, it := range att.GetEquipment().AllItems() {
-		if it.roll == nil || it.roll.Class != "ICLASS_WEAPON" || it.roll.DamAcFlags&rules.IHfDecay == 0 {
+		if it.roll == nil || it.roll.Class != "ICLASS_WEAPON" || it.roll.DamAcFlags&rules.FlagDecay == 0 {
 			continue
 		}
 		it.roll.PLDam -= 5

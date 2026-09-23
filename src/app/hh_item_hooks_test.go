@@ -11,10 +11,9 @@ import (
 	"rpg/src/stats"
 )
 
-// main's enchantments had two halves: stat modifiers and on-hit hooks. H&H's suffix table carries both; a hook
-// suffix names one of the engine's ItemHookPowers, and the rolled item wears the hook. Each one is played here,
-// not just found: a hook nothing fires is the silent failure this guards against.
-func TestHeavenAndHellItemHooksRollAndFire(t *testing.T) {
+// H&H's on-hit suffixes are item powers like any other. Each must roll, and the two with their own code (thorns
+// back at the attacker, mana for a kill) are played here: a power nothing fires is the silent failure this guards.
+func TestHeavenAndHellOnHitPowersRollAndFire(t *testing.T) {
 	g := newHeavenAndHellGame(t, NewDummyUI())
 	g.SeedRandom(1) // the rolls and the blows below are chance: pinned, so a failure is one to replay
 	common.SeedRandom(1)
@@ -22,17 +21,17 @@ func TestHeavenAndHellItemHooksRollAndFire(t *testing.T) {
 	f, s := g.GetFactory(), g.GetWorldState()
 	player := s.GetPlayer()
 
-	// the suffix table carries every hook, each on an item type that can roll it
-	for power := range common.ItemHookPowers {
+	powers := []string{"return_damage", "mana_on_kill", "triple_damage", "fireball_shot"}
+	for _, power := range powers {
 		rolls := false
 		for _, a := range f.Generator.D.Suffixes {
 			rolls = rolls || a.Power == power && a.IType != 0
 		}
 		if !rolls {
-			t.Errorf("H&H's xl_isuf.txt has no suffix with %s: the hook never rolls", power)
+			t.Errorf("H&H's xl_isuf.txt has no suffix with %s: it never rolls", power)
 		}
 	}
-	// an item with such a suffix wears its hook: the first base item of each kind, given the suffix
+	// the first base item of each kind, given the suffix
 	base := func(types ...int) *rules.Item {
 		for i := range f.Generator.D.Items {
 			if b := &f.Generator.D.Items[i]; slices.Contains(types, b.Type) {
@@ -43,15 +42,19 @@ func TestHeavenAndHellItemHooksRollAndFire(t *testing.T) {
 		return nil
 	}
 	found := map[string]*rules.Item{
-		"HOOK_RETURN_DAMAGE":    base(rules.ITypeMArmor, rules.ITypeLArmor, rules.ITypeHArmor),
-		"HOOK_MANA_ON_KILL":     base(rules.ITypeHelm),
-		"HOOK_TRIPLE_DAMAGE":    base(rules.ITypeSword, rules.ITypeAxe, rules.ITypeMace),
-		"HOOK_FIREBALL_ON_SHOT": base(rules.ITypeBow),
+		"return_damage": base(rules.ITypeMArmor, rules.ITypeLArmor, rules.ITypeHArmor),
+		"mana_on_kill":  base(rules.ITypeHelm),
+		"triple_damage": base(rules.ITypeSword, rules.ITypeAxe, rules.ITypeMace),
+		"fireball_shot": base(rules.ITypeBow),
 	}
 	for power, it := range found {
-		it.SufPower = power
-		if item := f.NewRolledItem(it); len(item.GetItemHooks()) != 1 {
-			t.Fatalf("%s with %s carries %d hooks, want 1", it.Name, power, len(item.GetItemHooks()))
+		for _, a := range f.Generator.D.Suffixes {
+			if a.Power == power {
+				f.Generator.ApplySuffix(it, a)
+			}
+		}
+		if props := it.PropertyList(); len(props) == 0 {
+			t.Errorf("%s with %s shows no power", it.Name, power)
 		}
 	}
 
@@ -87,7 +90,7 @@ func TestHeavenAndHellItemHooksRollAndFire(t *testing.T) {
 	cause := common.NewActorCause("test", player)
 	health := func(a *common.Actor) int { return a.GetStats().GetResource(stats.Health).Value() }
 
-	wear("HOOK_RETURN_DAMAGE")
+	wear("return_damage")
 	monster.GetStats().GetResource(stats.Health).SetToMax()
 	before := health(monster)
 	for i := 0; i < 50 && health(monster) == before; i++ {
@@ -96,18 +99,6 @@ func TestHeavenAndHellItemHooksRollAndFire(t *testing.T) {
 	}
 	if health(monster) == before {
 		t.Error("thorns: fifty blows at the hero and the attacker never took damage back")
-	}
-
-	wear("HOOK_TRIPLE_DAMAGE")
-	tripled := false
-	for i := 0; i < 400 && !tripled; i++ {
-		monster.GetStats().GetResource(stats.Health).SetToMax()
-		attack := common.NewMeleeAttackAction(cause, player, monster)
-		g.GetActionBroker().Execute(attack)
-		tripled = attack.GetDamageFactor() == 3
-	}
-	if !tripled {
-		t.Error("fury: 400 blows and not one tripled (5% each)")
 	}
 
 	// the fireball's blast reaches a second monster beside the one shot at; the arrow alone can't
@@ -137,7 +128,7 @@ func TestHeavenAndHellItemHooksRollAndFire(t *testing.T) {
 	if !placed {
 		t.Fatalf("no room for a second monster within 2 of %v", far)
 	}
-	wear("HOOK_FIREBALL_ON_SHOT")
+	wear("fireball_shot")
 	player.GetStats().SetAttribute(stats.LightRadius, 10) // the blast is aimed at what the hero sees; a torch sees 1
 	g.GetActionBroker().Execute(common.NewUpdateFoVAction(cause, player))
 	bystander.GetStats().GetResource(stats.Health).SetToMax()
@@ -150,7 +141,7 @@ func TestHeavenAndHellItemHooksRollAndFire(t *testing.T) {
 		t.Error("flame: five shots and the fireball never hit the monster beside the target")
 	}
 
-	wear("HOOK_MANA_ON_KILL")
+	wear("mana_on_kill")
 	mana := player.GetStats().GetResource(stats.Mana)
 	mana.SetToMin()
 	g.GetActionBroker().Execute(common.NewDieAction(cause, monster))

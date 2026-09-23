@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image/color"
 	"io/fs"
-	"math/rand"
 	"path"
 	"slices"
 	"strings"
@@ -27,13 +26,11 @@ type Monster struct {
 	Icon string // icon ID in the mod's icons/actors.rec, e.g. "monster.nzombie"
 
 	// Where it spawns.
-	MinDLvl, MaxDLvl int
-	Level            int
-	RandomSpawn      bool // false: only quests, rooms and group_spawn place it
-	SpawnCost        int  // its share of a level's SpawnBudget (D1: graphics memory); 0 = free
-	SpawnWeight      int  // relative odds among the monsters eligible at a depth (dungen levels only); 1 if unset
-	OutOfDepthChance float64
-	MinLevelForOoD   int
+	MinDLvl, MaxDLvl int     // the depths it spawns on; MaxDLvl 0: no limit
+	Level            int     // monster_level: to-hit, spell hit chance, experience, drops; MinDLvl if unset
+	RandomSpawn      bool    // false: only quests, rooms, side levels and group_spawn place it
+	SpawnCost        int     // its share of a level's SpawnBudget (D1: graphics memory); 0 = free, always in
+	WanderChance     float64 // >0: never in the type draw; a level its depth allows gets a single one at these odds
 	GroupSpawn       []string
 
 	// Combat.
@@ -53,8 +50,8 @@ type Monster struct {
 	Class        string // MC_UNDEAD, MC_DEMON, MC_ANIMAL
 	AILevel      int    // D1's mInt, 0-3
 	AggroRange   int
-	SpecialOneIn int // the Fallen's howl: 1 in N per standing turn
-	FleeDistance int // how far it runs when a comrade dies near it (M_FallenFear); 0: it does not
+	SpecialOneIn int    // the Fallen's howl: 1 in N per standing turn
+	FleeDistance int    // how far it runs when a comrade dies near it (M_FallenFear); 0: it does not
 	Tint         string // "R G B" its icon is tinted with; empty: untinted
 	FixedHealth  int    // its hit points whatever Health rolls; 0: the roll
 	SightSfx     string // sfx.rec id it says when it first sees the hero
@@ -105,17 +102,9 @@ func PickSpawnTypes(ms []Monster, candidates []int, rnd func(int) int) []int {
 	return types
 }
 
-// CanAppearAt reports whether this monster may be rolled for dungeon level dlvl: at or below its own depth, or
-// above it on an out-of-depth roll, and never past max_dlvl. The record carries all four knobs, so the rule
-// lives with the record rather than with whichever generator happens to be placing monsters.
-func (m Monster) CanAppearAt(randomSource *rand.Rand, dlvl int) bool {
-	if m.MaxDLvl > 0 && dlvl > m.MaxDLvl {
-		return false
-	}
-	if dlvl >= m.MinDLvl {
-		return true
-	}
-	return dlvl >= m.MinLevelForOoD && randomSource.Float64() < m.OutOfDepthChance
+// SpawnsAt reports whether dlvl..max_dlvl takes in dungeon level dlvl.
+func (m Monster) SpawnsAt(dlvl int) bool {
+	return dlvl >= m.MinDLvl && (m.MaxDLvl == 0 || dlvl <= m.MaxDLvl)
 }
 
 // MinHP/MaxHP/MinDam/MaxDam are the bounds the combat code works in, from the dice the record carries.
@@ -129,20 +118,21 @@ func (m Monster) MaxDam2() int { return m.Damage2.Max() }
 // fillCombatModel gives a record without a D1 brain (H&H's) the to-hit D1's combat reads and its health as
 // stated. The to-hit is a design choice of the port, tunable in play: five per point of dexterity.
 func fillCombatModel(m *Monster) {
-	if m.SpawnWeight <= 0 {
-		m.SpawnWeight = 1
-	}
+	// defaults near D1's median monster (fallen: 14/16/6), so a swing costs about what the hero's does
 	if m.SpeedMove <= 0 {
-		m.SpeedMove = 10
+		m.SpeedMove = 12
 	}
 	if m.SpeedAttack <= 0 {
-		m.SpeedAttack = 10
+		m.SpeedAttack = 16
 	}
 	if m.Level == 0 { // a record that names only its depth fights, drops and pays out at that depth, as items do
 		m.Level = m.MinDLvl
 	}
 	if m.AI != "" {
 		return
+	}
+	if m.SpeedRecovery <= 0 { // without one, the hero's hardest blow never makes it flinch
+		m.SpeedRecovery = 5
 	}
 	m.FullHP = true
 	if m.Hit == 0 {
@@ -188,18 +178,14 @@ func monsterFromRecord(rec recfile.Record) (Monster, error) {
 			m.MinDLvl = f.AsInt()
 		case "max_dlvl":
 			m.MaxDLvl = f.AsInt()
-		case "level":
+		case "monster_level":
 			m.Level = f.AsInt()
+		case "wander_chance":
+			m.WanderChance = f.AsFloat()
 		case "random_spawn":
 			m.RandomSpawn = f.Value != "false"
 		case "spawn_cost":
 			m.SpawnCost = f.AsInt()
-		case "spawn_weight":
-			m.SpawnWeight = f.AsInt()
-		case "out_of_depth_chance":
-			m.OutOfDepthChance = f.AsFloat()
-		case "min_level_for_ood":
-			m.MinLevelForOoD = f.AsInt()
 		case "group_spawn":
 			m.GroupSpawn = append(m.GroupSpawn, f.Value)
 		case "health":

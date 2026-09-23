@@ -6,6 +6,7 @@ import (
 	"rpg/src/geometry"
 	"rpg/src/util"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -225,8 +226,10 @@ func NewCustomLabel(uiController *UIController, layoutFunc func(uiController *UI
 }
 func NewTextTooltip(uiController *UIController, textLines []util.LabelText, mousePosOnScreen geometry.Point) *BasicLabel {
 	b := &BasicLabel{
-		uiController:   uiController,
-		textLines:      textLines,
+		uiController: uiController,
+		textLines: util.WrapLabelText(textLines, uiController.configuration.DescriptionMaxChars, func(s string) (float64, float64) {
+			return float64(utf8.RuneCountInString(s)), 0
+		}),
 		centered:       true,
 		isTooltip:      true,
 		drawBackground: true,
@@ -247,26 +250,7 @@ func (i *BasicLabel) layoutCentered() {
 }
 
 func (i *BasicLabel) layoutFromMousePos(mousePosOnScreen geometry.Point) {
-	var topLeftX, topLeftY int
-	// we want the tooltip's bottom right corner to be at the mousePos
-	posInfo := i.posInfo
-	uiController := i.uiController
-
-	paddingX := uiController.GetUIBarWidth() + 20
-	paddingY := 50
-	topLeftX = mousePosOnScreen.X - posInfo.SizeInPixels.X/2
-	topLeftY = mousePosOnScreen.Y - posInfo.SizeInPixels.Y - paddingY
-
-	// if the tooltip would be offscreen, move it to the left
-	if topLeftX+posInfo.SizeInPixels.X > uiController.GetScreenSize().X-paddingX {
-		topLeftX = uiController.GetScreenSize().X - posInfo.SizeInPixels.X - paddingX
-	}
-
-	// if it is above the screen, move it down
-	if topLeftY < 0 {
-		topLeftY = 10
-	}
-	i.topLeft = geometry.Point{X: topLeftX, Y: topLeftY}
+	place(i, popupTopLeft(i.uiController, outer(i), mousePosOnScreen))
 }
 
 func (i *BasicLabel) layoutFromTopLeftPos(topLeftPos geometry.Point) {

@@ -1345,7 +1345,7 @@ func checkItemEffects(broker *common.Broker, state *common.State, fail func(stri
 			weapon = d
 		}
 	}
-	weapon.Flags |= rules.ISplFireDam | rules.ISplKnockback
+	weapon.Flags |= rules.FlagFireDamage | rules.FlagKnockback
 	weapon.FMinDam, weapon.FMaxDam = 200, 200
 	common.SyncHero(player)
 	var target *common.Actor
@@ -1377,7 +1377,7 @@ func checkItemEffects(broker *common.Broker, state *common.State, fail func(stri
 		fail("item effects: fire damage %v, knockback %v", burned, pushed)
 	}
 
-	weapon.Flags = weapon.Flags&^(rules.ISplFireDam|rules.ISplKnockback) | rules.ISplDrainLife
+	weapon.Flags = weapon.Flags&^(rules.FlagFireDamage|rules.FlagKnockback) | rules.FlagDrainLife
 	common.SyncHero(player)
 	var stoned []*common.Actor // monsters stay out of it
 	for _, a := range m.Actors() {
@@ -1394,7 +1394,7 @@ func checkItemEffects(broker *common.Broker, state *common.State, fail func(stri
 	if lost := hp.GetMax() - hp.Value(); lost < 9 || lost > 11 {
 		fail("item effects: drain life took %d HP in 20 turns (want 10)", lost)
 	}
-	weapon.Flags &^= rules.ISplDrainLife
+	weapon.Flags &^= rules.FlagDrainLife
 	common.SyncHero(player)
 	for _, a := range stoned {
 		a.RemoveStatusEffect(common.StatusStone)

@@ -13,15 +13,17 @@
 #   speed_recovery    AUT a hard hit costs it (D1: hit animation minus the attack after the blow); 0 = none
 #   special_one_in    the Fallen's howl: 1 in N per turn it stands around
 #   flee_distance     how far it runs when a comrade dies within 5 cells (AI_FALLEN's fear); 0: it stands
-# Where it spawns:
-#   dlvl              the shallowest level it appears on; max_dlvl the deepest (0: no limit)
-#   level             its monster level (to-hit, experience, drops); defaults to dlvl
-#   random_spawn      false: never rolled at random, only placed by quests, rooms or group_spawn (default true)
+# Where it spawns (both mods: a dungeon level at depth d rolls every record with dlvl <= d <= max_dlvl; a side level's
+# monster lines in levels.rec override that):
+#   dlvl              the shallowest dungeon level it spawns on; max_dlvl the deepest (0: no limit)
+#   monster_level     its level: to-hit against the hero, spell hit chance, experience, drops, flinching, regen;
+#                     defaults to dlvl
+#   random_spawn      false: never rolled at random, only placed by quests, rooms, side levels or group_spawn (default true)
 #   spawn_cost        what the type costs of a level's 4000 spawn budget (D1: its graphics' memory); a level
-#                     draws its monster types at random until the budget is spent; 0 (default): free
-#   spawn_weight      relative odds among the monsters that can appear at a depth (default 1; dungen levels without
-#                     monster lines only, see levels.rec)
-#   out_of_depth_chance / min_level_for_ood   chance to appear above its dlvl, from this dungeon level on
+#                     draws its monster types at random until the budget is spent, then picks among them evenly;
+#                     0 (default): free, always in. A cheap type makes room for more types, a dear one crowds them out
+#   wander_chance     a loner: never in the type draw; a level its depth allows gets a single one at these odds
+#                     (H&H's dungen levels only; side levels roll their monster lines alone)
 #   group_spawn       companions spawned with it: "<internal_name>" or "<internal_name>(<count or min-max>)"; repeatable
 # Combat:
 #   health            hit points: a range "4-7" (a monster with an ai rolls it and halves it, as D1's single player does), dice "1d3+1" or
@@ -52,6 +54,10 @@
 # Heaven&Hell's monsters in the unified enemies.rec schema every mod uses (see defs.Monster),
 # ported from the game's own enemies/enemies.rec and enemies/unique_enemies.rec. The uniques are
 # the records tagged "unique"; that tag is what told them apart on the old branch too.
+# Combat stats follow D1's median monster at the same depth (floor L plays like D1's dlvl D = 1.6L - 0.6):
+# health ~ 6D-5 (D1's single-player hp), damage ~ 2+1.3D, hit ~ 5+8D, armor class ~ 4+5D, by monster_level;
+# fodder, archers and casters get less, elites and uniques more.
+# Every other record's spawn_cost is 600 + 50 x dlvl of the 4000 budget: six types fit on floor 1, three on floor 10.
 #
 # Converged from the old H&H field names: resource_health -> health, damage_dice -> damage,
 # max_level -> max_dlvl, and the numeric icon -> an icon ID this mod defines in icons/actors.rec.
@@ -64,10 +70,13 @@ cp437: r
 unicode: r
 color: 120 120 120
 dlvl: 1
-damage: 1d3
-health: 1d8
-stats_armor_class: 0
-stats_experience: 5
+max_dlvl: 3
+spawn_cost: 650
+damage: 1-3
+hit: 5
+health: 1-2
+stats_armor_class: 5
+stats_experience: 25
 stats_dexterity: 5
 stats_intelligence: 5
 untargeted_skill: replicate_with
@@ -82,10 +91,13 @@ icon: monster.skeleton
 ascii: u
 color: 200 200 200
 dlvl: 1
-damage: 1d3+1
-health: 1d8
-stats_armor_class: 0
-stats_experience: 10
+max_dlvl: 4
+spawn_cost: 650
+damage: 2-5
+hit: 13
+health: 2-2
+stats_armor_class: 9
+stats_experience: 55
 stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s crumbles to dust.
@@ -100,10 +112,13 @@ icon: monster.skeleton_archer
 ascii: u
 color: 191 169 147
 dlvl: 2
-damage: 1d4
-health: 2d8+2
-stats_armor_class: 0
-stats_experience: 12
+max_dlvl: 4
+spawn_cost: 700
+damage: 2-6
+hit: 26
+health: 6-11
+stats_armor_class: 12
+stats_experience: 140
 stats_strength: 8
 stats_dexterity: 9
 stats_intelligence: 5
@@ -117,13 +132,16 @@ name: a skeleton warrior
 tint: 255 190 120
 internal_name: skeleton_warrior
 icon: monster.skeleton_warrior
-dlvl: 2
+dlvl: 1
+max_dlvl: 1
+spawn_cost: 650
 ascii: u
 color: 247 246 245
-damage: 1d6+1
-health: 2d8+2
-stats_armor_class: 1
-stats_experience: 12
+damage: 2-5
+hit: 13
+health: 2-2
+stats_armor_class: 9
+stats_experience: 55
 stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
@@ -140,10 +158,13 @@ icon: monster.skeleton_captain
 ascii: u
 color: 189 136 136
 dlvl: 3
-damage: 1d8+1
-health: 3d8+3
-stats_armor_class: 2
-stats_experience: 20
+max_dlvl: 4
+spawn_cost: 750
+damage: 5-14
+hit: 49
+health: 21-35
+stats_armor_class: 29
+stats_experience: 540
 stats_strength: 12
 stats_dexterity: 6
 stats_intelligence: 5
@@ -160,10 +181,13 @@ icon: monster.bat
 ascii: b
 color: 147 143 201
 dlvl: 1
-damage: 1d3
-health: 1d8
-stats_armor_class: 0
-stats_experience: 15
+max_dlvl: 2
+spawn_cost: 650
+damage: 1-3
+hit: 5
+health: 1-2
+stats_armor_class: 5
+stats_experience: 30
 stats_strength: 9
 stats_dexterity: 9
 stats_intelligence: 5
@@ -172,17 +196,20 @@ aggro_range: 2
 death_string: %s crumbles to dust.
 death_string: %s falls apart.
 speed_move: 7
-speed_attack: 7
+speed_attack: 12
 
 name: a cave bear
 tint: 160 200 255
 internal_name: caveling_bear
 icon: monster.caveling_bear
 dlvl: 5
-damage: 2d6
-health: 5d8
-stats_armor_class: 1
-stats_experience: 8
+max_dlvl: 6
+spawn_cost: 850
+damage: 7-22
+hit: 74
+health: 41-69
+stats_armor_class: 47
+stats_experience: 775
 stats_strength: 14
 stats_dexterity: 6
 stats_intelligence: 5
@@ -194,10 +221,13 @@ tint: 255 190 120
 internal_name: caveling
 icon: monster.caveling
 dlvl: 5
-damage: 1d6
-health: 5d8
-stats_armor_class: 0
-stats_experience: 8
+max_dlvl: 5
+spawn_cost: 850
+damage: 6-17
+hit: 64
+health: 30-49
+stats_armor_class: 41
+stats_experience: 595
 stats_strength: 9
 stats_dexterity: 6
 stats_intelligence: 5
@@ -211,10 +241,13 @@ icon: monster.fallen
 ascii: i
 color: 219 42 68
 dlvl: 1
-damage: 1d5
-health: 1d8
-stats_armor_class: 0
-stats_experience: 8
+random_spawn: false
+spawn_cost: 650
+damage: 1-3
+hit: 5
+health: 1-2
+stats_armor_class: 5
+stats_experience: 45
 stats_strength: 9
 stats_dexterity: 6
 stats_intelligence: 5
@@ -229,10 +262,13 @@ icon: monster.fiend
 ascii: f
 color: 219 42 68
 dlvl: 7
-damage: 3d4
-health: 7d8
-stats_armor_class: 1
-stats_experience: 20
+max_dlvl: 7
+spawn_cost: 950
+damage: 8-24
+hit: 90
+health: 44-73
+stats_armor_class: 57
+stats_experience: 935
 stats_strength: 12
 stats_dexterity: 12
 stats_intelligence: 5
@@ -246,10 +282,13 @@ icon: monster.fiend_horned
 ascii: f
 color: 214 188 192
 dlvl: 7
-damage: 5d4
-health: 7d8
-stats_armor_class: 1
-stats_experience: 20
+max_dlvl: 7
+spawn_cost: 950
+damage: 10-30
+hit: 100
+health: 62-103
+stats_armor_class: 66
+stats_experience: 1215
 stats_strength: 12
 stats_dexterity: 12
 stats_intelligence: 5
@@ -263,10 +302,13 @@ icon: monster.fiend_armed
 ascii: f
 color: 214 188 192
 dlvl: 7
-damage: 2d6+1
-health: 7d8
-stats_armor_class: 1
-stats_experience: 20
+max_dlvl: 7
+spawn_cost: 950
+damage: 8-24
+hit: 90
+health: 44-73
+stats_armor_class: 57
+stats_experience: 935
 stats_strength: 12
 stats_dexterity: 12
 stats_intelligence: 5
@@ -280,11 +322,14 @@ internal_name: fiend_whip
 icon: monster.fiend_whip
 ascii: f
 color: 214 188 192
-dlvl: 7
-damage: 3d6
-health: 7d8
-stats_armor_class: 1
-stats_experience: 20
+dlvl: 8
+max_dlvl: 8
+spawn_cost: 1000
+damage: 9-27
+hit: 103
+health: 51-85
+stats_armor_class: 65
+stats_experience: 1185
 stats_strength: 12
 stats_dexterity: 12
 stats_intelligence: 5
@@ -297,11 +342,14 @@ internal_name: fiend_glaive
 icon: monster.fiend_glaive
 ascii: f
 color: 214 188 192
-dlvl: 7
-damage: 3d6+1
-health: 7d8
-stats_armor_class: 2
-stats_experience: 20
+dlvl: 8
+max_dlvl: 8
+spawn_cost: 1000
+damage: 11-33
+hit: 113
+health: 72-119
+stats_armor_class: 75
+stats_experience: 1185
 stats_strength: 12
 stats_dexterity: 12
 stats_intelligence: 5
@@ -315,11 +363,14 @@ internal_name: fiend_big
 icon: monster.fiend_big
 ascii: f
 color: 240 2 39
-dlvl: 7
-damage: 3d6+1
-health: 7d8
-stats_armor_class: 2
-stats_experience: 20
+dlvl: 8
+max_dlvl: 8
+spawn_cost: 1000
+damage: 11-33
+hit: 113
+health: 72-119
+stats_armor_class: 75
+stats_experience: 1660
 stats_strength: 12
 stats_dexterity: 12
 stats_intelligence: 5
@@ -333,10 +384,13 @@ icon: monster.fallen_warrior
 ascii: i
 color: 189 47 69
 dlvl: 2
-damage: 1d5
-health: 2d8
-stats_armor_class: 0
-stats_experience: 12
+random_spawn: false
+spawn_cost: 700
+damage: 3-8
+hit: 26
+health: 8-13
+stats_armor_class: 17
+stats_experience: 140
 stats_strength: 9
 stats_dexterity: 6
 stats_intelligence: 5
@@ -353,10 +407,13 @@ icon: monster.fallen_archer
 ascii: i
 color: 189 111 47
 dlvl: 4
-damage: 1d5
-health: 4d8
-stats_armor_class: 0
-stats_experience: 12
+random_spawn: false
+spawn_cost: 800
+damage: 4-11
+hit: 51
+health: 18-30
+stats_armor_class: 23
+stats_experience: 440
 stats_strength: 9
 stats_dexterity: 8
 stats_intelligence: 5
@@ -372,10 +429,13 @@ icon: monster.fallen_shaman
 ascii: i
 color: 38 98 189
 dlvl: 5
-damage: 1d4
-health: 5d8
-stats_armor_class: 0
-stats_experience: 12
+random_spawn: false
+spawn_cost: 850
+damage: 5-14
+hit: 64
+health: 21-34
+stats_armor_class: 20
+stats_experience: 715
 stats_strength: 9
 stats_dexterity: 8
 stats_intelligence: 8
@@ -390,10 +450,13 @@ tint: 160 200 255
 internal_name: caveling_armed
 icon: monster.caveling_armed
 dlvl: 5
-damage: 2d6
-health: 5d8
-stats_armor_class: 0
-stats_experience: 8
+max_dlvl: 5
+spawn_cost: 850
+damage: 6-17
+hit: 64
+health: 30-49
+stats_armor_class: 41
+stats_experience: 595
 stats_strength: 9
 stats_dexterity: 6
 stats_intelligence: 5
@@ -405,11 +468,14 @@ name: a caveling with axes
 tint: 255 190 120
 internal_name: caveling_axe
 icon: monster.caveling_axe
-dlvl: 5
-damage: 2d6+1
-health: 5d8
-stats_armor_class: 0
-stats_experience: 8
+dlvl: 6
+max_dlvl: 6
+spawn_cost: 900
+damage: 7-21
+hit: 77
+health: 37-61
+stats_armor_class: 49
+stats_experience: 660
 stats_strength: 9
 stats_dexterity: 6
 stats_intelligence: 5
@@ -421,11 +487,14 @@ name: a caveling with a big axe
 tint: 255 110 110
 internal_name: caveling_big_axe
 icon: monster.caveling_big_axe
-dlvl: 5
-damage: 2d6+4
-health: 5d8
-stats_armor_class: 1
-stats_experience: 8
+dlvl: 6
+max_dlvl: 6
+spawn_cost: 900
+damage: 9-26
+hit: 87
+health: 51-86
+stats_armor_class: 56
+stats_experience: 860
 stats_strength: 9
 stats_dexterity: 6
 stats_intelligence: 5
@@ -436,11 +505,15 @@ death_string: %s bites the dust.
 name: a possessed thief
 internal_name: thief_possessed
 icon: monster.thief_possessed
-dlvl: 6
-damage: 1d6
-health: 6d8
-stats_armor_class: 0
-stats_experience: 12
+dlvl: 1
+max_dlvl: 5
+monster_level: 6
+wander_chance: 0.1
+damage: 7-21
+hit: 77
+health: 37-61
+stats_armor_class: 49
+stats_experience: 660
 stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
@@ -454,10 +527,13 @@ tint: 160 200 255
 internal_name: skeleton_sorcerer
 icon: monster.skeleton_sorcerer
 dlvl: 4
-damage: 1d4+1
-health: 4d8
-stats_armor_class: 0
-stats_experience: 15
+max_dlvl: 4
+spawn_cost: 800
+damage: 4-11
+hit: 51
+health: 16-26
+stats_armor_class: 16
+stats_experience: 570
 stats_strength: 6
 stats_dexterity: 6
 stats_intelligence: 6
@@ -472,10 +548,13 @@ tint: 255 190 120
 internal_name: rogue_kestrel
 icon: monster.rogue_kestrel
 dlvl: 9
-damage: 1d4
-health: 9d8
-stats_armor_class: 0
-stats_experience: 12
+max_dlvl: 9
+spawn_cost: 1050
+damage: 7-21
+hit: 105
+health: 35-58
+stats_armor_class: 44
+stats_experience: 890
 stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
@@ -486,10 +565,13 @@ tint: 255 110 110
 internal_name: rogue_bat
 icon: monster.rogue_bat
 dlvl: 9
-damage: 1d2
-health: 9d8
-stats_armor_class: 0
-stats_experience: 12
+max_dlvl: 9
+spawn_cost: 1050
+damage: 7-21
+hit: 105
+health: 35-58
+stats_armor_class: 44
+stats_experience: 765
 stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
@@ -499,10 +581,13 @@ name: an emu
 internal_name: rogue_emu
 icon: monster.rogue_emu
 dlvl: 9
-damage: 1d6
-health: 9d8
-stats_armor_class: 0
-stats_experience: 12
+max_dlvl: 9
+spawn_cost: 1050
+damage: 7-21
+hit: 105
+health: 35-58
+stats_armor_class: 44
+stats_experience: 1020
 stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
@@ -512,11 +597,14 @@ name: a jackal
 tint: 160 200 255
 internal_name: rogue_jackal
 icon: monster.rogue_jackal
-dlvl: 9
-damage: 1d6+2
-health: 9d8
-stats_armor_class: 0
-stats_experience: 12
+dlvl: 10
+max_dlvl: 10
+spawn_cost: 1100
+damage: 11-33
+hit: 128
+health: 66-109
+stats_armor_class: 81
+stats_experience: 1510
 stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
@@ -526,11 +614,14 @@ name: an orc
 tint: 255 190 120
 internal_name: rogue_orc
 icon: monster.rogue_orc
-dlvl: 9
-damage: 2d6
-health: 9d8
-stats_armor_class: 1
-stats_experience: 12
+dlvl: 10
+max_dlvl: 10
+spawn_cost: 1100
+damage: 14-41
+hit: 138
+health: 92-153
+stats_armor_class: 93
+stats_experience: 1810
 stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
@@ -540,11 +631,14 @@ name: a snake
 tint: 255 110 110
 internal_name: rogue_snake
 icon: monster.rogue_snake
-dlvl: 9
-damage: 1d8
-health: 9d8
-stats_armor_class: 0
-stats_experience: 12
+dlvl: 10
+max_dlvl: 10
+spawn_cost: 1100
+damage: 11-33
+hit: 128
+health: 66-109
+stats_armor_class: 81
+stats_experience: 1510
 stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
@@ -553,11 +647,15 @@ death_string: %s dies.
 name: a thief
 internal_name: thief_goblin
 icon: monster.thief_goblin
-dlvl: 11
-damage: 1d6+2
-health: 11d8
-stats_armor_class: 0
-stats_experience: 12
+dlvl: 1
+max_dlvl: 10
+monster_level: 11
+wander_chance: 0.1
+damage: 12-36
+hit: 141
+health: 73-121
+stats_armor_class: 89
+stats_experience: 1900
 stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
@@ -567,11 +665,14 @@ name: a goatman
 tint: 160 200 255
 internal_name: goatman
 icon: monster.goatman
-dlvl: 11
-damage: 2d6+3
-health: 11d8
-stats_armor_class: 1
-stats_experience: 12
+dlvl: 5
+max_dlvl: 5
+spawn_cost: 850
+damage: 7-22
+hit: 74
+health: 41-69
+stats_armor_class: 47
+stats_experience: 715
 stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
@@ -581,11 +682,14 @@ name: a goatman archer
 tint: 255 190 120
 internal_name: goatman_archer
 icon: monster.goatman_archer
-dlvl: 11
-damage: 1d6
-health: 11d8
-stats_armor_class: 0
-stats_experience: 12
+dlvl: 6
+max_dlvl: 6
+spawn_cost: 900
+damage: 5-16
+hit: 77
+health: 29-49
+stats_armor_class: 34
+stats_experience: 660
 stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
@@ -596,10 +700,11 @@ tint: 255 110 110
 internal_name: lucifer
 icon: monster.lucifer
 dlvl: 8
-damage: 6d6+6
-health: 10d4+120
-stats_armor_class: 16
-stats_experience: 1200
+damage: 14-40
+hit: 118
+health: 153-256
+stats_armor_class: 78
+stats_experience: 9490
 stats_strength: 18
 stats_dexterity: 18
 stats_intelligence: 18
@@ -630,16 +735,17 @@ death_string: %s is gone.
 death_string: %s disappears.
 death_string: %s has left.
 speed_move: 5
-speed_attack: 5
+speed_attack: 10
 
 name: King Zedek
 internal_name: king_zedek
 icon: monster.king_zedek
 dlvl: 4
-damage: 3d8
-health: 6d4+60
-stats_armor_class: 12
-stats_experience: 200
+damage: 7-20
+hit: 66
+health: 67-112
+stats_armor_class: 40
+stats_experience: 2195
 stats_strength: 14
 stats_dexterity: 9
 stats_intelligence: 10
@@ -660,10 +766,11 @@ tint: 160 200 255
 internal_name: meat_jack
 icon: monster.meat_jack
 dlvl: 2
-damage: 2d6
-health: 5d4+60
-stats_armor_class: 5
-stats_experience: 200
+damage: 4-10
+hit: 41
+health: 54-91
+stats_armor_class: 20
+stats_experience: 700
 stats_strength: 18
 stats_dexterity: 4
 stats_intelligence: 4
@@ -686,17 +793,18 @@ death_string: %s was diced.
 death_string: %s was sliced.
 death_string: %s was cut to pieces.
 speed_move: 6
-speed_attack: 6
+speed_attack: 12
 
 name: The Rogue
 tint: 255 190 120
 internal_name: rogue
 icon: monster.rogue
 dlvl: 10
-damage: 2d8+2
-health: 7d8
-stats_armor_class: 11
-stats_experience: 200
+damage: 14-43
+hit: 143
+health: 197-328
+stats_armor_class: 97
+stats_experience: 7540
 stats_strength: 12
 stats_dexterity: 12
 stats_intelligence: 12
@@ -715,10 +823,11 @@ tint: 255 110 110
 internal_name: rogue_dog
 icon: monster.rogue_dog
 dlvl: 10
-damage: 1d6+2
-health: 3d8
-stats_armor_class: 4
-stats_experience: 200
+damage: 11-33
+hit: 143
+health: 79-131
+stats_armor_class: 97
+stats_experience: 3015
 stats_strength: 10
 stats_dexterity: 9
 stats_intelligence: 9
@@ -730,10 +839,11 @@ name: the true Shekel
 internal_name: evil_shekel
 icon: monster.evil_shekel
 dlvl: 13
-damage: 1d6+2
-health: 12d8
-stats_armor_class: 5
-stats_experience: 200
+damage: 18-55
+hit: 182
+health: 261-436
+stats_armor_class: 126
+stats_experience: 10160
 stats_strength: 14
 stats_dexterity: 12
 stats_intelligence: 16
@@ -741,17 +851,18 @@ tags: unique | no_corpse
 speech_on_sight: Your time has come!
 death_string: %s dies.
 speed_move: 8
-speed_attack: 8
+speed_attack: 12
 
 name: the true Kirioth
 tint: 160 200 255
 internal_name: evil_kirioth
 icon: monster.evil_kirioth
 dlvl: 12
-damage: 1d6
-health: 12d8
-stats_armor_class: 5
-stats_experience: 200
+damage: 17-51
+hit: 169
+health: 240-400
+stats_armor_class: 116
+stats_experience: 8880
 stats_strength: 10
 stats_dexterity: 10
 stats_intelligence: 18
@@ -764,10 +875,11 @@ tint: 255 190 120
 internal_name: adventurer_knight
 icon: monster.adventurer_knight
 dlvl: 9
-damage: 2d6
-health: 9d8
-stats_armor_class: 8
-stats_experience: 200
+damage: 13-39
+hit: 130
+health: 175-292
+stats_armor_class: 88
+stats_experience: 5095
 stats_strength: 9
 stats_dexterity: 10
 stats_intelligence: 9
@@ -782,10 +894,11 @@ tint: 255 110 110
 internal_name: adventurer_priest
 icon: monster.adventurer_priest
 dlvl: 9
-damage: 1d6+1
-health: 9d8
-stats_armor_class: 6
-stats_experience: 200
+damage: 13-39
+hit: 130
+health: 175-292
+stats_armor_class: 88
+stats_experience: 5095
 stats_strength: 10
 stats_dexterity: 10
 stats_intelligence: 9
@@ -797,10 +910,11 @@ name: a barbarian
 internal_name: adventurer_barbarian
 icon: monster.adventurer_barbarian
 dlvl: 9
-damage: 2d6+2
-health: 9d8
-stats_armor_class: 4
-stats_experience: 200
+damage: 13-39
+hit: 130
+health: 175-292
+stats_armor_class: 88
+stats_experience: 5095
 stats_strength: 9
 stats_dexterity: 12
 stats_intelligence: 9
@@ -808,17 +922,18 @@ tags: unique | no_corpse
 speech_on_sight: Your time has come!
 death_string: %s dies.
 speed_move: 7
-speed_attack: 7
+speed_attack: 12
 
 name: an archer in tights
 tint: 160 200 255
 internal_name: adventurer_archer
 icon: monster.adventurer_archer
 dlvl: 9
-damage: 1d5
-health: 9d8
-stats_armor_class: 6
-stats_experience: 200
+damage: 13-39
+hit: 130
+health: 175-292
+stats_armor_class: 88
+stats_experience: 5095
 stats_strength: 10
 stats_dexterity: 16
 stats_intelligence: 9
@@ -826,7 +941,7 @@ tags: unique | no_corpse
 speech_on_sight: Your time has come!
 death_string: %s dies.
 speed_move: 7
-speed_attack: 7
+speed_attack: 12
 
 name: a skeleton warder
 tint: 255 230 140
@@ -834,11 +949,13 @@ internal_name: skeleton_warder
 icon: monster.skeleton_warder
 ascii: u
 color: 230 210 140
-dlvl: 3
-damage: 1d4
-health: 3d8
-stats_armor_class: 1
-stats_experience: 20
+dlvl: 6
+spawn_cost: 900
+damage: 9-26
+hit: 87
+health: 51-86
+stats_armor_class: 56
+stats_experience: 860
 stats_strength: 6
 stats_dexterity: 6
 stats_intelligence: 8

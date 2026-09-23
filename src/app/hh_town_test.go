@@ -257,6 +257,7 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	}
 	talk("kirioth", "")
 	expect("lucifer", rules.QuestDone)
+	talk("kirioth", "Thanks again") // not mute once his quests are done
 
 	// Picking up the four pieces of evidence, in any order, ends the quest once: Lucifer finds the hero, as his
 	// dying words promised, and tells them what the notes mean.

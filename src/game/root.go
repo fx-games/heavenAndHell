@@ -254,6 +254,8 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 
 	g.state = common.NewState(drawnMaps)
 	g.state.SetLighting(common.Lighting())
+	notation, _ := common.ModSetting("DamageNotation")
+	util.DiceNotation = notation == "dice"
 	g.state.SetDungeonRules(common.ReadDungeonRules())
 	g.state.SetPlayerMessage(g.PlayerMessage)
 	g.state.SetTimeKeeper(timeKeeper)
@@ -380,7 +382,7 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 		g.state.GetTimeKeeper().PlayerTakesTurn(lost)
 	}
 	// ISPL_DRAINLIFE (ProcessPlayers): a cursed item drains 4/64 HP per tick outside town
-	if player.IsAlive() && player.Hero() != nil && player.HeroSheet().Flags&rules.ISplDrainLife != 0 && !g.state.IsPlayerInTown() {
+	if player.IsAlive() && player.Hero() != nil && player.HeroSheet().Flags&rules.FlagDrainLife != 0 && !g.state.IsPlayerInTown() {
 		g.actionBroker.Execute(common.NewChangeResourceAction(common.AbstractCause("Drain life"), player, stats.Health, -float64(autUsed*rules.RefWalkTicks*4)/10/64))
 	}
 

@@ -144,17 +144,17 @@ func ApplyOil(oil string, it *Item, intn func(int) int) bool {
 	return true
 }
 
-// Hellfire's extra item effects (ItemSpecialEffectHf), the ones D1's ISPL_ flags have no room for.
+// Item.DamAcFlags: the powers Item.Flags has no bit left for.
 const (
-	IHfDevastation  = 1 << iota // 5% of hits deal triple damage
-	IHfJesters                  // every hit scales by a wild 0-500%
-	IHfPeril                    // hits deal double damage and cost the wielder some life
-	IHfDecay                    // the weapon loses 5% damage per hit until it falls apart
-	IHfDoppelganger             // 10% of hits split an ordinary monster in two
-	IHfACVsDemons               // +40 armour class against demons
-	IHfACVsUndead               // +20 armour class against the undead
-	IHfManaToLife               // half the mana pool becomes life
-	IHfLifeToMana               // two fifths of the life pool becomes mana
+	FlagTripleDamage  = 1 << iota // 5% of hits deal triple damage
+	FlagJesters                   // every hit scales by a wild 0-500%
+	FlagPeril                     // hits deal double damage and cost the wielder some life
+	FlagDecay                     // the weapon loses 5% damage per hit until it falls apart
+	FlagDoppelganger              // 10% of hits split an ordinary monster in two
+	FlagArmorVsDemons             // +40 armour class against demons
+	FlagArmorVsUndead             // +20 armour class against the undead
+	FlagManaToLife                // half the mana pool becomes life
+	FlagLifeToMana                // two fifths of the life pool becomes mana
 )
 
 // JesterDamage ports the Jester's roll: 0-100% of the damage, or 100-600% when the roll goes high.

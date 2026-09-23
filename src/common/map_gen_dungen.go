@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
-	"math"
 	"slices"
 
 	"rpg/files"
@@ -37,7 +36,7 @@ func (g *MapGenerator) generateDungenMap(lvl dungeon.Level) *gridmap.GridMap[*Ac
 	m.SetName(targetMap)
 	m.SetMetaString(layout.GetMetaInfo())
 
-	g.addDungenTiles(m, layout, g.dungenTilemap(lvl, dlvl, layout))
+	g.addDungenTiles(m, layout, g.dungenTilemap(lvl, dlvl, layout), dlvl)
 	stairs := g.addDungenStairs(m, layout, lvl)
 	g.decorateDungenRooms(m, layout, lvl, dlvl)
 	g.populateDungenLevel(m, layout, lvl, stairs)
@@ -46,6 +45,14 @@ func (g *MapGenerator) generateDungenMap(lvl dungeon.Level) *gridmap.GridMap[*Ac
 		snap.apply(g.factory, m)
 	}
 	return m
+}
+
+// revealSecretDoor turns the secret door at p into the door it hid.
+func (g *MapGenerator) revealSecretDoor(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point) {
+	t := g.doorTiles[m.GetName()]
+	m.SetTile(p, dungenFloor(t[0]))
+	m.AddObject(NewDoor(t[1], t[2]), p)
+	m.FoundSecretDoorAt(p)
 }
 
 // dungenTilemap resolves the tile set the level names.
@@ -57,15 +64,29 @@ func (g *MapGenerator) dungenTilemap(lvl dungeon.Level, dlvl int, layout *dungen
 	panic(fmt.Sprintf("levels.rec: %s: unknown tile set %q (have %v)", lvl.Map, lvl.Tiles, defs.TilemapNames()))
 }
 
+func dungenFloor(icon int32) gridmap.Tile {
+	return gridmap.Tile{DefinedIcon: icon, DefinedDescription: "a floor", IsWalkable: true, IsTransparent: true}
+}
+
+// secretDoorChance is how many loop doors are secret at depth dlvl: none on the first level, two in three at the
+// bottom (Brogue's finishDoors).
+func (g *MapGenerator) secretDoorChance(dlvl int) float64 {
+	return min(0.67, max(0, float64(dlvl-1)*0.67/float64(max(g.maxDepth()-1, 1))))
+}
+
 // addDungenTiles paints the layout: a wall cell is a wall, a door cell is floor with a door object standing on
-// it (decision 12, the same rule D1's side follows), and everything else is floor.
-func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object], layout *dungen.DungeonMap, tileMap defs.BasicTileMapping) {
+// it (decision 12, the same rule D1's side follows), and everything else is floor. A loop door may be a secret
+// door instead: a wall until the hero finds it (revealSecretDoor).
+func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object], layout *dungen.DungeonMap, tileMap defs.BasicTileMapping, dlvl int) {
 	wall := func(icon int32) gridmap.Tile {
 		return gridmap.Tile{DefinedIcon: icon, DefinedDescription: "a wall"}
 	}
-	floor := func(icon int32) gridmap.Tile {
-		return gridmap.Tile{DefinedIcon: icon, DefinedDescription: "a floor", IsWalkable: true, IsTransparent: true}
+	floor := dungenFloor
+	if g.doorTiles == nil {
+		g.doorTiles = map[string][3]int32{}
 	}
+	g.doorTiles[m.GetName()] = [3]int32{tileMap.FloorTile, tileMap.OpenDoor, tileMap.ClosedDoor}
+	secret := g.secretDoorChance(dlvl)
 	width, height := layout.GetSize()
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
@@ -74,8 +95,17 @@ func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object],
 			case dungen.Wall:
 				m.SetTile(p, wall(tileMap.ChooseWallTile(p)))
 			case dungen.Door:
+				if layout.IsLoopDoor(p) && g.randomSource.Float64() < secret {
+					m.SetTile(p, wall(tileMap.ChooseWallTile(p)))
+					m.SetSecretDoorAt(p)
+					continue
+				}
 				m.SetTile(p, floor(tileMap.FloorTile))
 				m.AddObject(NewDoor(tileMap.OpenDoor, tileMap.ClosedDoor), p)
+			case dungen.Lake:
+				m.SetTile(p, gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "deep water", IsTransparent: true, Special: gridmap.SpecialTileWater})
+			case dungen.Shallows:
+				m.SetTile(p, gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "shallow water", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileWater})
 			default: // Room, Corridor
 				m.SetTile(p, floor(tileMap.ChooseFloorTile(p)))
 			}
@@ -115,7 +145,15 @@ func (g *MapGenerator) addDungenStairs(m *gridmap.GridMap[*Actor, *Item, Object]
 		spots = removePoint(spots, p)
 		placed = append(placed, p)
 	}
-	entrance := spots[g.randomSource.Intn(len(spots))]
+	// The entrance is in the room the level grew from, when it has a stair spot: the generator puts quest rooms far
+	// from that room, so far from the way in.
+	entrances := spots
+	if rooms := layout.AllRooms(); len(rooms) > 0 {
+		if in := slices.DeleteFunc(slices.Clone(spots), func(p geometry.Point) bool { return !rooms[0].Contains(p) }); len(in) > 0 {
+			entrances = in
+		}
+	}
+	entrance := entrances[g.randomSource.Intn(len(entrances))]
 	var rest []dungeon.Exit
 	for _, e := range lvl.Exits {
 		if e.Location == "ladder_up" {
@@ -171,33 +209,107 @@ func removePoint(ps []geometry.Point, p geometry.Point) []geometry.Point {
 // dungenMaxLit is how much of a level is lit at depth 0; it fades to nothing at the bottom of the dungeon.
 const dungenMaxLit = 0.8
 
-// decorateDungenRooms lights some of the rooms and paints the hand-drawn art over the rooms whose template asked
-// for it. The art is the room template's own tiles, laid over the floor the tile set already painted.
+// decorateDungenRooms paints the hand-drawn art over the rooms whose template asked for it (the room template's
+// own tiles, laid over the floor the tile set already painted), then lights some of the level.
 func (g *MapGenerator) decorateDungenRooms(m *gridmap.GridMap[*Actor, *Item, Object], layout *dungen.DungeonMap, lvl dungeon.Level, dlvl int) {
-	proj, _ := dungen.Templates(lvl.Config, g.fsys()) // nil for a generator that draws no templates
-
-	rooms := layout.AllRooms()
-	litWanted := int(math.Ceil(float64(len(rooms)) * min(dungenMaxLit, max(0, 1.0-float64(dlvl)/float64(max(g.maxDepth(), 1))))))
-	lit := 0
-	for _, i := range g.randomSource.Perm(len(rooms)) {
-		room := rooms[i]
-		if proj != nil && room.HasDecoratedTemplate() {
+	if proj, _ := dungen.Templates(lvl.Config, g.fsys()); proj != nil { // nil for a generator that draws no templates
+		for _, room := range layout.AllRooms() {
+			if !room.HasDecoratedTemplate() {
+				continue
+			}
 			if deco := g.dungenDecoration(proj, room.GetDecorationLevelName()); deco != nil {
 				g.paintDungenDecoration(m, proj, deco, room)
 				m.AddToMetaInfo("DecoRoom: " + deco.Name)
 			}
 		}
-		if lit >= litWanted {
-			continue
+	}
+	// Light whole spaces up to the depth's share of the floor, each by torches on its walls. The space that would
+	// overshoot the share is lit by chance, (share left)/(its size), so a level that is one open cavern is lit as
+	// often as its share says.
+	spaces := dungenSpaces(layout)
+	floor := 0
+	for _, sp := range spaces {
+		floor += len(sp)
+	}
+	want := float64(floor) * min(dungenMaxLit, max(0, 1.0-float64(dlvl)/float64(max(g.maxDepth(), 1))))
+	lit := 0.0
+	for _, i := range g.randomSource.Perm(len(spaces)) {
+		size := float64(len(spaces[i]))
+		if lit+size > want && g.randomSource.Float64() >= (want-lit)/size {
+			break
 		}
-		lit++
-		for _, p := range room.GetAbsoluteRoomTiles() {
-			m.SetLit(p, true)
-			for _, n := range m.GetFilteredNeighbors(p, m.Contains) {
-				m.SetLit(n, true)
+		lit += size
+		g.lightSpace(m, spaces[i])
+		if lit >= want {
+			break
+		}
+	}
+}
+
+// torchSpacing is how far apart the torches lighting one space hang, at least.
+const torchSpacing = 10
+
+// lightSpace lights a space, walls included, and hangs torches on its walls, torchSpacing apart, so its light has
+// a source one can see (their flicker is glowAt's). Lighting only what the torches reach left small dark pockets
+// in lit rooms, the very look this replaces.
+func (g *MapGenerator) lightSpace(m *gridmap.GridMap[*Actor, *Item, Object], space []geometry.Point) {
+	var walls []geometry.Point // wall cells facing the space, in the order the space was found
+	for _, p := range space {
+		m.SetLit(p, true)
+		for _, n := range m.GetFilteredNeighbors(p, m.Contains) {
+			m.SetLit(n, true)
+		}
+		for _, d := range []geometry.Point{{X: 1}, {X: -1}, {Y: 1}, {Y: -1}} {
+			if w := p.Add(d); m.Contains(w) && !m.IsTileWalkable(w) && !m.IsTransparent(w) && !slices.Contains(walls, w) {
+				walls = append(walls, w)
 			}
 		}
 	}
+	var torches []geometry.Point
+	for _, i := range g.randomSource.Perm(len(walls)) {
+		w := walls[i]
+		if m.IsSecretDoorAt(w) || slices.ContainsFunc(torches, func(t geometry.Point) bool { return geometry.Distance(t, w) < torchSpacing }) {
+			continue
+		}
+		torches = append(torches, w)
+		m.AddDecal(w, defs.IconWallTorch)
+	}
+}
+
+// dungenSpaces are the parts of a level that are lit, each as a whole: the room floor one can walk without passing
+// through an opening. Lighting rooms one by one left the rooms that open onto a lit one without a door dark inside it, and
+// the cells no room owns (a knocked-through wall, a passage) dark between lit ones.
+// ponytail: templates' CanBeLit is not read; only the Cathedral's set it, so honouring it would darken the rest.
+func dungenSpaces(layout *dungen.DungeonMap) [][]geometry.Point {
+	// Openings between rooms (doors, and the passages a doorless level cuts instead) bound a space; the ring of
+	// neighbours lit around a lit space lights the opening it looks through.
+	open := func(p geometry.Point) bool {
+		t := layout.GetTile(p.X, p.Y)
+		return t == dungen.Room || t == dungen.Shallows
+	}
+	w, h := layout.GetSize()
+	seen := map[geometry.Point]bool{}
+	var spaces [][]geometry.Point
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			start := geometry.Point{X: x, Y: y}
+			if seen[start] || !open(start) {
+				continue
+			}
+			seen[start] = true
+			space := []geometry.Point{start}
+			for i := 0; i < len(space); i++ {
+				for _, d := range []geometry.Point{{X: 1}, {X: -1}, {Y: 1}, {Y: -1}} {
+					if n := space[i].Add(d); n.X >= 0 && n.Y >= 0 && n.X < w && n.Y < h && !seen[n] && open(n) {
+						seen[n] = true
+						space = append(space, n)
+					}
+				}
+			}
+			spaces = append(spaces, space)
+		}
+	}
+	return spaces
 }
 
 // dungenDecoration picks one of the decoration levels whose name starts with the prefix the room asked for.

@@ -105,9 +105,6 @@ func (g *Factory) NewRolledItem(it *rules.Item) *Item {
 	item.roll, item.data = it, g.Generator.D
 	item.SetInternalName(it.Name)
 	item.SetBaseCost(it.IValue)
-	if hooks := affixHooks(it); len(hooks) > 0 {
-		item.SetItemHooks(hooks)
-	}
 	durability := stats.NewResource(0, flatFunc(it.MaxDur), it.Durability)
 	switch it.Type {
 	case rules.ITypeSword, rules.ITypeAxe, rules.ITypeMace, rules.ITypeBow, rules.ITypeStaff:
@@ -270,6 +267,17 @@ func (i *Item) tooltipLines(cmp map[string]int) []string {
 			}
 		}
 	}
+	// what an H&H potion or scroll does: its effect's own description
+	var desc []util.LabelText
+	if i.targetedAction != nil {
+		desc = i.targetedAction.GetDescription()
+	}
+	if i.untargetedAction != nil {
+		desc = append(desc, i.untargetedAction.GetDescription()...)
+	}
+	for _, l := range desc {
+		lines = append(lines, l.Text)
+	}
 	switch it.MiscID {
 	case "IMISC_OILACC":
 		add("Increases a weapon's chance to hit by 1-2%%")
@@ -300,12 +308,15 @@ func (i *Item) tooltipLines(cmp map[string]int) []string {
 	if it.AC > 0 {
 		add("%s", colored(cmp[rules.KeyArmor], fmt.Sprintf("Armor: %d", it.AC)))
 	}
-	// what the weapon's kind does on its own, before any affix: PlrHitMonst's sword/mace rule
-	switch it.Type {
-	case rules.ITypeSword:
-		add("[:positive]+50%% damage vs. animals[:white], [:negative]-50%% vs. the undead[:white]")
-	case rules.ITypeMace:
-		add("[:positive]+50%% damage vs. the undead[:white], [:negative]-50%% vs. animals[:white]")
+	// what the weapon's kind does on its own, before any affix: the mod's weapon_bonus rules (D1: PlrHitMonst's)
+	for _, b := range i.data.WeaponBonuses {
+		if b.Weapon == it.Type {
+			tone := "[:positive]+"
+			if b.Percent < 0 {
+				tone = "[:negative]"
+			}
+			add("%s%d%% damage vs. %s[:white]", tone, b.Percent, monsterClassName(b.Versus))
+		}
 	}
 	if it.MaxDur > 0 && it.MaxDur < 255 {
 		add("Durability: %d/%d", it.Durability, it.MaxDur)
@@ -517,4 +528,16 @@ func (g *Factory) applyItemRecord(item *Item, b rules.ItemData) {
 		item.Hide()
 		item.ShowNameOnlyInTooltip()
 	}
+}
+
+func monsterClassName(class string) string {
+	switch class {
+	case "MC_UNDEAD":
+		return "the undead"
+	case "MC_ANIMAL":
+		return "animals"
+	case "MC_DEMON":
+		return "demons"
+	}
+	return class
 }

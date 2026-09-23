@@ -110,7 +110,6 @@ type Item struct {
 	isPremiumStock  bool // Griswold's rotating premium stock, shown in its own "Buy premium items" menu
 
 	forcedTooltip     []util.LabelText
-	itemHooks         []ItemActionHook
 	targetedAction    *TargetedAction
 	untargetedAction  *UntargetedAction
 	actionCharges     int
@@ -496,7 +495,6 @@ func (i *Item) Clone() *Item {
 		clonedUntargetedAction = i.untargetedAction.Clone()
 	}
 	clone.forcedTooltip = i.forcedTooltip
-	clone.itemHooks = i.itemHooks
 	clone.targetedAction = i.targetedAction
 	clone.untargetedAction = clonedUntargetedAction
 	clone.actionCharges = i.actionCharges
@@ -568,9 +566,6 @@ func (i *Item) GetTargetedAction() *TargetedAction {
 func (i *Item) GetUntargetedAction() *UntargetedAction {
 	return i.untargetedAction
 }
-func (i *Item) GetItemHooks() []ItemActionHook {
-	return i.itemHooks
-}
 func (i *Item) GetTooltipLines(parseColorCodedText func(string) []util.ColoredTextPart) []util.LabelText {
 	if i.roll != nil {
 		i.Refresh() // durability and charges change during play
@@ -612,12 +607,6 @@ func (i *Item) GetTooltipLines(parseColorCodedText func(string) []util.ColoredTe
 		info = append(info, util.LabelTextFromString(""))
 		for _, m := range i.GetEquippedModifiers() {
 			info = append(info, util.LabelTextFromString(m.ToString()))
-		}
-	}
-	if len(i.GetItemHooks()) > 0 {
-		info = append(info, util.LabelTextFromString(""), util.LabelTextFromString("Effects"))
-		for _, h := range i.GetItemHooks() {
-			info = append(info, util.LabelTextFromString(h.ToString()))
 		}
 	}
 	if i.HasAction() { // wands
@@ -674,9 +663,6 @@ func (i *Item) GetAllEnchantments() []Enchantment {
 	for _, m := range i.GetEquippedModifiers() {
 		result = append(result, m)
 	}
-	for _, h := range i.GetItemHooks() {
-		result = append(result, h)
-	}
 	return result
 }
 
@@ -684,8 +670,6 @@ func (i *Item) RemoveEnchantment(enchantment Enchantment) {
 	switch e := enchantment.(type) {
 	case *stats.Modifier:
 		i.RemoveEquippedModifier(e)
-	case ItemActionHook:
-		i.RemoveItemHook(e)
 	}
 }
 
@@ -693,22 +677,7 @@ func (i *Item) AddEnchantment(enchantment Enchantment) {
 	switch e := enchantment.(type) {
 	case *stats.Modifier:
 		i.AddEquippedModifier(e)
-	case ItemActionHook:
-		i.AddItemhook(e)
 	}
-}
-
-func (i *Item) RemoveItemHook(hookToRemove ItemActionHook) {
-	for index, hook := range i.itemHooks {
-		if hook == hookToRemove {
-			i.itemHooks = append(i.itemHooks[:index], i.itemHooks[index+1:]...)
-			return
-		}
-	}
-}
-
-func (i *Item) AddItemhook(hookToAdd ItemActionHook) {
-	i.itemHooks = append(i.itemHooks, hookToAdd)
 }
 
 func (i *Item) IsEquippable() bool {
@@ -735,10 +704,6 @@ func (i *Item) HasInfiniteCharges() bool {
 
 func (i *Item) SelfDestructs() bool {
 	return i.destroyAfterUse
-}
-
-func (i *Item) SetItemHooks(hooks []ItemActionHook) {
-	i.itemHooks = hooks
 }
 
 func (i *Item) ShowNameOnlyInTooltip() {

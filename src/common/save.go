@@ -46,9 +46,10 @@ type LevelSnapshot struct {
 	RespawnMonsters bool
 	// Spots are where the level's generator put its monsters (respawn.go): a dungen level rolls them with the
 	// factory's own random source, which a rebuild can't replay.
-	Spots     []geometry.Point `json:",omitempty"`
-	OpenDoors []geometry.Point `json:",omitempty"` // open doors that aren't D1's (those are in Doors)
-	Decals    []SavedDecal     `json:",omitempty"` // blood and the like
+	Spots      []geometry.Point `json:",omitempty"`
+	OpenDoors  []geometry.Point `json:",omitempty"` // open doors that aren't D1's (those are in Doors)
+	FoundDoors []geometry.Point `json:",omitempty"` // secret doors the hero found
+	Decals     []SavedDecal     `json:",omitempty"` // blood and the like
 }
 
 type SavedDecal struct {
@@ -111,6 +112,12 @@ func SnapshotLevel(state *State, m *gridmap.GridMap[*Actor, *Item, Object]) *Lev
 			}
 		}
 	}
+	for p, hidden := range m.SecretDoors() {
+		if !hidden {
+			s.FoundDoors = append(s.FoundDoors, p)
+		}
+	}
+	slices.SortFunc(s.FoundDoors, func(a, b geometry.Point) int { return cmp.Or(a.Y-b.Y, a.X-b.X) })
 	if r := state.mapGen.rosters[m.GetName()]; r != nil {
 		s.Spots = r.spots
 	}
@@ -152,6 +159,11 @@ func (s *LevelSnapshot) RestoreExplored(m *gridmap.GridMap[*Actor, *Item, Object
 }
 
 func (s *LevelSnapshot) apply(f *Factory, m *gridmap.GridMap[*Actor, *Item, Object]) {
+	for _, p := range s.FoundDoors { // first: a found door may be open too
+		if m.IsSecretDoorAt(p) {
+			f.State.mapGen.revealSecretDoor(m, p)
+		}
+	}
 	used := map[int]bool{}
 	for _, i := range s.Used {
 		used[i] = true

@@ -176,7 +176,7 @@ func (g *Factory) getSpeedBuff(args util.Arguments) UntargetedEffect {
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Buff speed for %d turns", turnCount)),
+			util.LabelTextFromString(fmt.Sprintf("+%d speed for %d turns", amount, turnCount)),
 		},
 	}
 }
@@ -218,7 +218,7 @@ func (g *Factory) getDamageBuff(args util.Arguments) UntargetedEffect {
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Buff damage for %d turns", turnCount)),
+			util.LabelTextFromString(fmt.Sprintf("+%s damage for %d turns", intervalRange.ToString(), turnCount)),
 		},
 	}
 }
@@ -254,7 +254,7 @@ func (g *Factory) getEnchantWeapon(args util.Arguments) UntargetedEffect {
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString("Enchant weapon damage"),
+			util.LabelTextFromString(fmt.Sprintf("+1 to a weapon's enchantment, up to +%d", maxEnchantLevel)),
 		},
 	}
 }
@@ -290,7 +290,7 @@ func (g *Factory) getEnchantArmor(args util.Arguments) UntargetedEffect {
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString("Enchant armor protection"),
+			util.LabelTextFromString(fmt.Sprintf("+1 to an armor's enchantment, up to +%d", maxEnchantLevel)),
 		},
 	}
 }
@@ -311,7 +311,7 @@ func (g *Factory) getAcquirement(args util.Arguments) UntargetedEffect {
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString("Enchant armor protection"),
+			util.LabelTextFromString(fmt.Sprintf("Drops one good item of item level %d", level)),
 		},
 	}
 }
@@ -345,7 +345,7 @@ func (g *Factory) getHealHealthBy(args util.Arguments) UntargetedEffect {
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Heal health by %s", interval.ToString())),
+			util.LabelTextFromString(fmt.Sprintf("Heals %s life", interval.ToString())),
 		},
 	}
 }
@@ -361,7 +361,7 @@ func (g *Factory) getHealManaBy(args util.Arguments) UntargetedEffect {
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Heal mana by %s", interval.ToString())),
+			util.LabelTextFromString(fmt.Sprintf("Restores %s mana", interval.ToString())),
 		},
 	}
 }
@@ -529,7 +529,7 @@ func (g *Factory) getEarthquake(args util.Arguments) UntargetedEffect {
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString("changes the terrain around the actor"),
+			util.LabelTextFromString(fmt.Sprintf("Reshapes walls within %d steps; creatures caught take 1-%d damage", earthQuakeRadius, earthQuakeDamageRange)),
 		},
 	}
 }
@@ -541,71 +541,32 @@ func (g *Factory) tryEndTurn(user *Actor, autUsed int) {
 }
 
 func (g *Factory) getBlessing(args util.Arguments) UntargetedEffect {
-	//interval := util.NewIntervalFromString(args.Get(0))
 	turnCount := args.GetInt(0)
 	effect := func(user *Actor, source EffectSource, forced bool) {
 
-		currentAC := user.GetStats().GetAttribute(stats.ArmorClass)
-		acBonus := 0
-		if currentAC < 5 {
-			acBonus = 5
-		} else {
-			acBonus = currentAC
-		}
-
-		timeKeeper := g.GetTimeKeeper()
-		RemoveTimedEffectsBySource(timeKeeper, source)
-
-		modifier := defs.AddToBaseAttribute(g.RandomSource, stats.ArmorClass, float64(acBonus))
-		modifier.StackID = string(source)
-
-		timedModifier := NewTimedModifier(string(ActionNameBless), user, modifier, turnCount)
-		timedModifier.Apply()
-		timeKeeper.AddTimed(timedModifier)
-
+		// the status is the whole effect: HeroSheet reads it
+		g.ActionBroker.Execute(NewApplyStatusAction(NewActorCause("ApplyStatusEffect", user), user, StatusBlessed, turnCount))
 		g.logIfPlayer(user, "You feel protected")
 	}
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Increase your Armor Class for %d turns", turnCount)),
+			util.LabelTextFromString(fmt.Sprintf("+5 Armor Class, or doubles it from 5 up, for %d turns", turnCount)),
 		},
 	}
 }
 func (g *Factory) getStoneSkinBuff(args util.Arguments) UntargetedEffect {
-	//amount := args.GetInt(0)
 	turnCount := util.ParseDice(args.Get(0)).Roll(rng)
 	effect := func(user *Actor, source EffectSource, forced bool) {
-		speedMod := &stats.Modifier{
-			Attribute:      stats.BaseSpeed,
-			Description:    "Slowed",
-			Value:          float64(-5),
-			Mode:           stats.ModifyAdditive,
-			IsPercentBased: false,
-			StackID:        string(source),
-		}
-		timeKeeper := g.GetTimeKeeper()
-		RemoveTimedEffectsBySource(timeKeeper, source)
-
-		timedSpeedMod := NewTimedModifier(string(ActionNameStoneSkin), user, speedMod, turnCount)
-		timedSpeedMod.Apply()
-		timeKeeper.AddTimed(timedSpeedMod)
-
-		currentAC := user.GetStats().GetAttribute(stats.ArmorClass)
-		missingToThirty := max(0, 30-currentAC)
-		acMod := defs.AddToBaseAttribute(g.RandomSource, stats.ArmorClass, float64(missingToThirty))
-		acMod.StackID = string(source)
-		timedACMod := NewTimedModifier(string(ActionNameStoneSkin), user, acMod, turnCount)
-		timedACMod.Apply()
-		timeKeeper.AddTimed(timedACMod)
-
+		// the status is the whole effect: HeroSheet and MoveCost read it, so nothing else can outlast it
+		g.ActionBroker.Execute(NewApplyStatusAction(NewActorCause("ApplyStatusEffect", user), user, StatusStoneSkin, turnCount))
 		g.logIfPlayer(user, "Your skin hardens but movement becomes difficult.")
 		g.tryEndTurn(user, 100/user.GetBaseSpeed())
 	}
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Apply Stoneskin for %d turns", turnCount)),
+			util.LabelTextFromString(fmt.Sprintf("Armor class raised to %d, steps take twice as long, for %d turns", StoneSkinAC, turnCount)),
 		},
 	}
 }
@@ -635,7 +596,7 @@ func (g *Factory) getBerserkSelfAction(args util.Arguments) UntargetedEffect {
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Berserker rage for %d turns", turnCount)),
+			util.LabelTextFromString(fmt.Sprintf("Berserk: +%s damage for %d turns", intervalRange.ToString(), turnCount)),
 		},
 	}
 }
@@ -654,7 +615,7 @@ func (g *Factory) getApplyStatusAction(args util.Arguments) UntargetedEffect {
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Apply %s for %d turns", statusEffect, turnCount)),
+			util.LabelTextFromString(fmt.Sprintf("Makes you %s for %d turns", statusEffect, turnCount)),
 		},
 	}
 }
@@ -719,7 +680,7 @@ func (g *Factory) getRandomTeleportAction(args util.Arguments) UntargetedEffect 
 	return UntargetedEffect{
 		Effect: effect,
 		Description: []util.LabelText{
-			util.LabelTextFromString(fmt.Sprintf("Will teleport you %s steps in a random direction", distanceInterval.ToString())),
+			util.LabelTextFromString(fmt.Sprintf("Teleports you %s steps away at random", distanceInterval.ToString())),
 		},
 	}
 }
@@ -743,7 +704,7 @@ func (g *Factory) getPlayerRecallAction(args util.Arguments) UntargetedEffect {
 			g.QueueAfterTurn(recallAction)
 		},
 		Description: []util.LabelText{
-			util.LabelTextFromString("Recall to town"),
+			util.LabelTextFromString("Returns you to town, or from town to your deepest level"),
 		},
 	}
 }

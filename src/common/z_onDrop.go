@@ -1,16 +1,7 @@
 package common
 
-import (
-	"fmt"
-)
-
 type OnDropHook struct {
-	ItemHook
-	hookDescription string
-}
-
-func (d OnDropHook) ToString() string {
-	return fmt.Sprintf("On Drop: %s", d.hookDescription)
+	FuncHook
 }
 
 func (d OnDropHook) Name() string {
@@ -19,9 +10,9 @@ func (d OnDropHook) Name() string {
 
 func NewMainOnDropHook() *OnDropHook {
 	return &OnDropHook{
-		ItemHook: ItemHook{
+		FuncHook: FuncHook{
 			HookedAction: ActionNameDrop,
-			BeforeHook: func(itemContext *ItemContext, action Action, ctx ActionContext) []Action {
+			BeforeHook: func(action Action, ctx ActionContext) []Action {
 				dropAction := action.(*DropAction)
 				dropper := dropAction.GetActor()
 				droppedItem := dropAction.GetItem()
@@ -34,6 +25,5 @@ func NewMainOnDropHook() *OnDropHook {
 				return nil
 			},
 		},
-		hookDescription: "Unequip if equipped",
 	}
 }

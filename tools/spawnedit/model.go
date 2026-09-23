@@ -2,70 +2,158 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
+	"rpg/files"
+	"rpg/src/dungen"
+	"rpg/src/dungeon"
+	"rpg/src/hhm"
+	"rpg/src/recfile"
 	"slices"
 	"strconv"
 	"strings"
-
-	"rpg/src/dungeon"
 )
 
 // enemy is one randomly rolled monster: the four enemies.rec fields this tool edits.
 type enemy struct {
-	id, name             string
-	icon                 int32
-	min, max, avail, wgt int
-	ood                  float64 // out_of_depth_chance: odds to turn up above min, from depth oodMin on
-	oodMin               int
-	unique               bool // placed by its room, never rolled: shown, not edited
-	danger               int  // the experience it pays: the list sorts by it
-}
-
-// oodAt reports whether e can turn up at depth d out of depth: above its own dlvl, from min_level_for_ood on.
-func (e *enemy) oodAt(d int) bool {
-	return !d1Rules && !e.unique && e.avail != 0 && e.ood > 0 && d < e.min && d >= e.oodMin
+	id, name        string
+	icon            int32
+	min, max, avail int
+	cost            int  // spawn_cost
+	unique          bool // placed by its room, never rolled: shown, not edited
+	danger          int  // the experience it pays: the list sorts by it
 }
 
 // level is one non-town levels.rec record.
 type level struct {
 	id, name, tiles string
-	depth, pct      int
-	mons            []dungeon.LevelMonster // its monster lines; d1 levels keep none, 1.09 rolls by dlvl
+	depth           int
+	mons            []string // a side level's monster lines; a regular level has none and rolls by dlvl
+	generator       string
+	prefix          string   // template_prefix: the rooms it may grow from
+	require         []string // require_room
+	rec             recfile.Record
 }
 
-// weight is how many shares of l's rolls e gets, 0 when it isn't on the list.
-func (l *level) weight(id string) int {
-	for _, m := range l.mons {
-		if m.ID == id {
-			return m.Weight
+// grows reports whether room is one of l's templates: accretion levels grow rooms named with their prefix.
+func (l *level) grows(room string) bool {
+	return l.generator == "accretion" && strings.HasPrefix(room, l.prefix)
+}
+
+// moveRoom makes room required on to and on no other level; the game forbids it everywhere else by itself.
+func moveRoom(levels []*level, room string, to *level) {
+	for _, l := range levels {
+		l.require = slices.DeleteFunc(l.require, func(r string) bool { return r == room })
+	}
+	to.require = append(to.require, room)
+}
+
+// placeable grows l once with require as its required rooms: an error when the rooms never fit.
+func placeable(l *level, require []string) error {
+	s, _ := dungeon.Lookup(l.generator)
+	cfg, err := s.Parse(l.rec)
+	if err != nil {
+		return err
+	}
+	c := cfg.(dungen.AccretionConfig)
+	c.Require = require
+	_, err = dungen.Build(c, rand.New(rand.NewSource(1)), files.GetFileSystem())
+	return err
+}
+
+// spawn is a quests.rec trigger that spawns uniques when the hero enters a level: moving one of them moves the
+// trigger, and so every monster it spawns.
+type spawn struct {
+	marker   string // its first spawn_monster line, which finds the record again
+	from, to string // the level it fires on, as read and as edited
+	quests   []string
+}
+
+// questSpawns finds the on_enter_level triggers that spawn_monster, by the monster they spawn. A quest whose
+// level: is the trigger's level and whose key the trigger names moves along.
+func questSpawns(recs []recfile.Record) map[string]*spawn {
+	out := map[string]*spawn{}
+	for _, r := range recs {
+		ev, _ := dungeon.Field(r, "event")
+		if ev != "on_enter_level" {
+			continue
+		}
+		subject, _ := dungeon.Field(r, "subject")
+		when, _ := dungeon.Field(r, "when")
+		var sp *spawn
+		for _, do := range dungeon.FieldsNamed(r, "do") {
+			do = strings.TrimSpace(do)
+			id, ok := strings.CutPrefix(do, "spawn_monster(")
+			if !ok {
+				continue
+			}
+			if sp == nil {
+				sp = &spawn{marker: "do: " + do, from: subject, to: subject}
+				for _, q := range recs {
+					key, _ := dungeon.Field(q, "key")
+					lvl, _ := dungeon.Field(q, "level")
+					if key != "" && lvl == subject && strings.Contains(when, `"`+key+`"`) {
+						sp.quests = append(sp.quests, key)
+					}
+				}
+			}
+			out[strings.TrimSpace(strings.Split(id, ",")[0])] = sp
 		}
 	}
-	return 0
+	return out
 }
 
-// setWeight puts id on l's list at w shares, or takes it off at 0.
-func (l *level) setWeight(id string, w int) {
-	i := slices.IndexFunc(l.mons, func(m dungeon.LevelMonster) bool { return m.ID == id })
-	switch {
-	case i < 0 && w > 0:
-		l.mons = append(l.mons, dungeon.LevelMonster{ID: id, Weight: w})
-	case i >= 0 && w > 0:
-		l.mons[i].Weight = w
-	case i >= 0:
-		l.mons = slices.Delete(l.mons, i, i+1)
+// setSubject rewrites the subject: line of the record holding the line marker.
+func setSubject(text, marker, subject string) string {
+	lines := strings.Split(text, "\n")
+	at := slices.Index(lines, marker)
+	if at < 0 {
+		return text
+	}
+	for i := at; i >= 0 && strings.TrimSpace(lines[i]) != ""; i-- {
+		if strings.HasPrefix(lines[i], "subject:") {
+			lines[i] = "subject: " + subject
+		}
+	}
+	return strings.Join(lines, "\n")
+}
+
+// roomsOf maps each unique to the room template that places it: an NPC entity with its UniqueName, in the
+// template itself or in a decoration the template uses (UsesDecoration is a name prefix).
+func roomsOf(p *hhm.Project) map[string]string {
+	out := map[string]string{}
+	for _, t := range p.Levels {
+		if t.Props.IsDecoration {
+			continue
+		}
+		for _, d := range p.Levels {
+			if d != t && !(d.Props.IsDecoration && t.Props.UsesDecoration != "" && strings.HasPrefix(d.Name, t.Props.UsesDecoration)) {
+				continue
+			}
+			for _, e := range d.Entities {
+				if u := e.F["UniqueName"]; u != "" {
+					out[u] = t.Name
+				}
+			}
+		}
+	}
+	return out
+}
+
+func (l *level) side() bool { return len(l.mons) > 0 }
+
+// setOn puts id on l's list, or takes it off.
+func (l *level) setOn(id string, on bool) {
+	l.mons = slices.DeleteFunc(l.mons, func(m string) bool { return m == id })
+	if on {
+		l.mons = append(l.mons, id)
 	}
 }
-
-// d1Rules: D1's GetLevelMTypes reads dlvl/max_dlvl on a 0-30 scale (15*x/30+1), dungen reads them as depths.
-var d1Rules bool
 
 // span is the first and last depth e spawns on; ok false when it never spawns at random.
 func (e *enemy) span(deepest int) (lo, hi int, ok bool) {
 	if e.avail == 0 {
 		return 0, 0, false
-	}
-	if d1Rules {
-		return 15*e.min/30 + 1, 15*e.max/30 + 1, true
 	}
 	hi = e.max
 	if hi == 0 {
@@ -79,31 +167,16 @@ func (e *enemy) spawnsAt(d, deepest int) bool {
 	return ok && d >= lo && d <= hi
 }
 
-// rawLo/rawHi turn a depth into the dlvl / max_dlvl value that starts or ends a span there.
-func rawLo(d int) int {
-	if d1Rules {
-		return 2 * (d - 1)
-	}
-	return d
-}
-
-func rawHi(d int) int {
-	if d1Rules {
-		return 2*(d-1) + 1
-	}
-	return d
-}
-
 // add stretches e's span to take in depth d; spans are contiguous, so the depths between come along.
 func (e *enemy) add(d, deepest int) {
 	lo, hi, ok := e.span(deepest)
 	switch {
 	case !ok:
-		e.min, e.max, e.avail = rawLo(d), rawHi(d), 1
+		e.min, e.max, e.avail = d, d, 1
 	case d < lo:
-		e.min = rawLo(d)
+		e.min = d
 	case d > hi:
-		e.max = rawHi(d)
+		e.max = d
 	}
 }
 
@@ -116,9 +189,9 @@ func (e *enemy) remove(d, deepest int) error {
 	case lo == hi:
 		e.avail = 0
 	case d == lo:
-		e.min = rawLo(d + 1)
+		e.min = d + 1
 	case d == hi:
-		e.max = rawHi(d - 1)
+		e.max = d - 1
 	default:
 		return fmt.Errorf("%s spawns on %d..%d: take depths off an end, the range can't have holes", e.name, lo, hi)
 	}
@@ -195,7 +268,10 @@ func setFields(text, key, id string, fields [][3]string) string {
 	return strings.Join(lines, "\n")
 }
 
-func save(enemiesPath, levelsPath string, enemies []*enemy, levels []*level) error {
+func save(enemiesPath, levelsPath, questsPath string, enemies []*enemy, levels []*level, spawns map[string]*spawn) error {
+	if err := saveSpawns(questsPath, spawns); err != nil {
+		return err
+	}
 	b, err := os.ReadFile(enemiesPath)
 	if err != nil {
 		return err
@@ -204,7 +280,7 @@ func save(enemiesPath, levelsPath string, enemies []*enemy, levels []*level) err
 	for _, e := range enemies {
 		s = setFields(s, "internal_name", e.id, [][3]string{
 			{"dlvl", strconv.Itoa(e.min), "0"}, {"max_dlvl", strconv.Itoa(e.max), "0"},
-			{"available", strconv.Itoa(e.avail), "0"}, {"out_of_depth_chance", strconv.FormatFloat(e.ood, 'g', -1, 64), "0"}})
+			{"random_spawn", strconv.FormatBool(e.avail != 0), "true"}, {"spawn_cost", strconv.Itoa(e.cost), "0"}})
 	}
 	if err := os.WriteFile(enemiesPath, []byte(s), 0o644); err != nil {
 		return err
@@ -214,14 +290,29 @@ func save(enemiesPath, levelsPath string, enemies []*enemy, levels []*level) err
 	}
 	s = string(b)
 	for _, l := range levels {
-		s = setFields(s, "map", l.id, [][3]string{{"enemy_percent", strconv.Itoa(l.pct), "0"}})
-		if !d1Rules {
-			var lines []string
-			for _, m := range l.mons {
-				lines = append(lines, fmt.Sprintf("%s %d", m.ID, m.Weight))
-			}
-			s = setList(s, "map", l.id, "monster", lines)
+		s = setList(s, "map", l.id, "monster", l.mons)
+		if l.generator == "accretion" {
+			s = setList(s, "map", l.id, "require_room", l.require)
 		}
 	}
 	return os.WriteFile(levelsPath, []byte(s), 0o644)
+}
+
+func saveSpawns(path string, spawns map[string]*spawn) error {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	s := string(b)
+	for _, sp := range spawns {
+		if sp.to == sp.from {
+			continue
+		}
+		s = setSubject(s, sp.marker, sp.to)
+		for _, q := range sp.quests {
+			s = setFields(s, "key", q, [][3]string{{"level", sp.to, ""}})
+		}
+		sp.from = sp.to
+	}
+	return os.WriteFile(path, []byte(s), 0o644)
 }
