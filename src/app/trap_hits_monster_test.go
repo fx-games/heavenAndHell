@@ -2,6 +2,7 @@ package app
 
 import (
 	"rpg/src/common"
+	"rpg/src/geometry"
 	"rpg/src/gridmap"
 	"rpg/src/stats"
 	"testing"
@@ -19,7 +20,7 @@ func TestTrapArrowHitsMonster(t *testing.T) {
 		if a == s.GetPlayer() {
 			continue
 		}
-		for _, d := range common.D1Dirs {
+		for _, d := range geometry.Dirs {
 			from := a.MapPosition().Sub(d).Sub(d)
 			if !m.IsWalkable(from) || !m.IsWalkable(a.MapPosition().Sub(d)) || m.IsActorAt(a.MapPosition().Sub(d)) {
 				continue

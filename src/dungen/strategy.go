@@ -1,15 +1,13 @@
 package dungen
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"io/fs"
 	"math/rand"
 
 	"rpg/src/dungeon"
-	"rpg/src/ldtk"
+	"rpg/src/hhm"
 	"rpg/src/recfile"
-	"sync"
 )
 
 // This is H&H's side of the engine's generation registry (package dungeon). The algorithms below are genuinely
@@ -33,7 +31,7 @@ const (
 // AccretionConfig is what a mod declares for the accretion generator: which hand-drawn room templates it may
 // draw from, which it must place, and how many rooms make a level.
 type AccretionConfig struct {
-	Templates     string   // the LDtk project the room templates live in, e.g. assets/rooms.ldtk
+	Templates     string   // the maps directory the room templates live in, e.g. assets/maps
 	Prefix        string   // only templates whose name starts with this are used - H&H's tile set per depth
 	Require       []string // templates this level must contain (its quest rooms)
 	Forbid        []string // templates this level must not contain (another level's quest rooms)
@@ -50,7 +48,7 @@ type AccretionConfig struct {
 type accretion struct{}
 
 func (accretion) Parse(r recfile.Record) (dungeon.Config, error) {
-	c := AccretionConfig{Templates: "assets/rooms.ldtk", Rooms: 16, MinRooms: 10,
+	c := AccretionConfig{Templates: hhm.Dir, Rooms: 16, MinRooms: 10,
 		Width: accretionScratch, Height: accretionScratch, Doors: true, Mirror: true,
 		Tiles: TileIDs{Wall: 56, Floor: 64}, LoopDistance: 10, LoopChance: 0.8}
 	if v, ok := dungeon.Field(r, "templates"); ok {
@@ -267,7 +265,7 @@ func buildMegaDungeon(c MegaDungeonConfig, rnd *rand.Rand) (*DungeonMap, error) 
 // from none (megadungeon carves its rooms rather than stamping them). The caller wants it to paint the
 // hand-drawn art of a room over the floor the tile set painted, which is the only thing outside this package
 // that needs to see the templates at all.
-func Templates(cfg dungeon.Config, fsys fs.FS) (*ldtk.Project, error) {
+func Templates(cfg dungeon.Config, fsys fs.FS) (*hhm.Project, error) {
 	c, ok := cfg.(AccretionConfig)
 	if !ok {
 		return nil, nil
@@ -275,24 +273,11 @@ func Templates(cfg dungeon.Config, fsys fs.FS) (*ldtk.Project, error) {
 	return loadTemplates(fsys, c.Templates)
 }
 
-// parsedTemplates caches LDtk projects by content, so a level does not re-parse the whole project each time it
-// is built, and a different mod's file of the same name is never mistaken for it. Projects are only read.
-var parsedTemplates sync.Map // [sha256.Size]byte -> *ldtk.Project
-
-// loadTemplates reads an LDtk project out of the active mod.
-func loadTemplates(fsys fs.FS, name string) (*ldtk.Project, error) {
-	b, err := fs.ReadFile(fsys, name)
+// loadTemplates reads a mod's maps; hhm caches the parse.
+func loadTemplates(fsys fs.FS, dir string) (*hhm.Project, error) {
+	p, err := hhm.Load(fsys, dir)
 	if err != nil {
-		return nil, fmt.Errorf("dungen templates %s: %w", name, err)
+		return nil, fmt.Errorf("dungen templates: %w", err)
 	}
-	key := sha256.Sum256(b)
-	if p, ok := parsedTemplates.Load(key); ok {
-		return p.(*ldtk.Project), nil
-	}
-	p, err := ldtk.Read(b)
-	if err != nil {
-		return nil, fmt.Errorf("dungen templates %s: %w", name, err)
-	}
-	parsedTemplates.Store(key, p)
 	return p, nil
 }

@@ -3,7 +3,6 @@ package app
 import (
 	"math/rand"
 	"rpg/src/common"
-	"rpg/src/d1"
 	"rpg/src/util"
 	"strings"
 	"testing"
@@ -73,8 +72,13 @@ func TestRestoredEffectsResolveByName(t *testing.T) {
 	// Phase 5 folded the D1 spells into this same model: each one names a hit zone and an on-hit effect in its
 	// content, and nothing resolves through a spell enum any more. Every mapping the content declares must
 	// produce a zone that answers with positions and a non-nil effect.
-	for spell, declared := range d1.SpellEffect {
-		zoneName := d1.SpellHitZone[spell]
+	declares := 0
+	for spell, sp := range factory.Generator.D.Spells {
+		declared, zoneName := sp.Effect, sp.HitZone
+		if len(declared) == 0 {
+			continue
+		}
+		declares++
 		zone := common.HitZoneFromString(factory.State.GetMap, zoneName)
 		if zone == nil || zone.GetHitPositions == nil {
 			t.Errorf("spell %d: hit zone %q did not resolve", spell, zoneName)
@@ -124,7 +128,7 @@ func TestRestoredEffectsResolveByName(t *testing.T) {
 			}
 		}
 	}
-	if len(d1.SpellEffect) == 0 {
+	if declares == 0 {
 		t.Error("no D1 spell declares an effect; spells.rec did not load")
 	}
 	for name, roll := range common.GetAllDamageRolls() {

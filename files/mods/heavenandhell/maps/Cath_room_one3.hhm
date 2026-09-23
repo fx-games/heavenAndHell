@@ -1,0 +1,17 @@
+[map] Cath_room_one3
+CanBeLit	true
+
+[tiles] 7 6
+251  -1  -1  -1  -1  -1 251
+ -1  64  64  64  64  64  -1
+ -1  64  64  64  64  64  -1
+ -1  64  64  64  64  64  -1
+ -1  64  64  64  64  64  -1
+ -1  -1  -1  -1  -1  -1  -1
+
+[entities]
+NorthConnector	2	0
+EastConnector	6	2
+WestConnector	0	3
+EastConnector	6	4
+SouthConnector	3	5

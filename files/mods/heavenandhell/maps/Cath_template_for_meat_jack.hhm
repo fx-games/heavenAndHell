@@ -1,0 +1,20 @@
+[map] Cath_template_for_meat_jack
+Weight	1
+UsesDecoration	Meat_jack_room
+PlugsIntoSlotID	1
+CanBeLit	true
+
+[tiles] 11 10
+64 64 64 64 64 64 64 64 64 64 64
+64 64 64 64 64 64 64 64 64 64 64
+64 64 64 64 64 64 64 64 64 64 64
+64 64 64 64 64 64 64 64 64 64 64
+64 64 64 64 64 64 64 64 64 64 64
+64 64 64 64 64 64 64 64 64 64 64
+64 64 64 64 64 64 64 64 64 64 64
+64 64 64 64 64 64 64 64 64 64 64
+64 64 64 64 64 64 64 64 64 64 64
+-1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+
+[entities]
+SouthConnector	5	9	ConnectionID=1

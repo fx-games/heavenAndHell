@@ -78,7 +78,7 @@ type UserInterface interface {
 	OpenSettingsMenu(back func())
 	OpenTextWindow(msg []util.LabelText)
 	// OpenInfoWindow lays out titled sections of label/value rows (ActorInfoSections) as a window.
-	OpenInfoWindow(title string, sections []D1SheetSection)
+	OpenInfoWindow(title string, sections []SheetSection)
 	// ShowItemInfo opens the hover tooltip's lines as a text window the player has to close.
 	ShowItemInfo(item *Item)
 
@@ -123,8 +123,7 @@ type UserInterface interface {
 	Confirm(message string, onConfirm func())
 }
 type ActionContext struct {
-	GameState     *State
-	UserInterface func() UserInterface
+	GameState *State
 	// Show hands the frontend something the player has to see or choose (ui_requests.go). Rules use it instead
 	// of opening windows themselves.
 	Show         func(UIRequest)

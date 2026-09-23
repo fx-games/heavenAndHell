@@ -5,6 +5,7 @@
 # Fields:
 #   internal_name     the icon ID, "kind.snake_case_name"
 #   icon              the tile's number on the mod's sprite sheet (classic_roguelike.png), row by row from 0
+#   same_as           instead of icon: draw it with another record's icon (a trapped chest looks like a chest)
 #   name              a description for the mod author; not read
 #   reference_image   the original graphic it stands in for; not read
 #
@@ -636,3 +637,237 @@ reference_image: reference/d1_sprites/tiles/objects/mcirl.frame01.png
 name: Magic Circle
 icon: 215
 
+# Objects drawn with another object's icon (same_as): the same sprite under another id, or another isometric
+# angle of the same thing. Give one its own "icon:" to tell it apart.
+
+internal_name: prop.tchest1
+name: Small Chest (tchest1)
+same_as: prop.chest1
+
+internal_name: prop.tchest1.used
+name: Small Chest (opened) (tchest1.used)
+same_as: prop.chest1.used
+
+internal_name: prop.tchest2
+name: Chest (tchest2)
+same_as: prop.chest2
+
+internal_name: prop.tchest2.used
+name: Chest (opened) (tchest2.used)
+same_as: prop.chest2.used
+
+internal_name: prop.tchest3
+name: Large Chest (tchest3)
+same_as: prop.chest3
+
+internal_name: prop.tchest3.used
+name: Large Chest (opened) (tchest3.used)
+same_as: prop.chest3.used
+
+internal_name: prop.signchest
+name: Large Chest (signchest)
+same_as: prop.chest3
+
+internal_name: prop.signchest.used
+name: Large Chest (opened) (signchest.used)
+same_as: prop.chest3.used
+
+internal_name: prop.shrinel
+name: Shrine (shrinel)
+same_as: prop.shrine
+
+internal_name: prop.shrinel.used
+name: Shrine (used) (shrinel.used)
+same_as: prop.shrine.used
+
+internal_name: prop.shriner
+name: Shrine (shriner)
+same_as: prop.shrine
+
+internal_name: prop.shriner.used
+name: Shrine (used) (shriner.used)
+same_as: prop.shrine.used
+
+internal_name: prop.bookcasel
+name: Bookcase (bookcasel)
+same_as: prop.bookcase
+
+internal_name: prop.bookcasel.used
+name: Bookcase (searched, or plain Bookshelf) (bookcasel.used)
+same_as: prop.bookcase.used
+
+internal_name: prop.bookcaser
+name: Bookcase (bookcaser)
+same_as: prop.bookcase
+
+internal_name: prop.bookcaser.used
+name: Bookcase (searched, or plain Bookshelf) (bookcaser.used)
+same_as: prop.bookcase.used
+
+internal_name: prop.bookshelf
+name: Bookcase (searched, or plain Bookshelf) (bookshelf)
+same_as: prop.bookcase.used
+
+internal_name: prop.bannerl
+name: Banner (bannerl)
+same_as: prop.banner
+
+internal_name: prop.bannerm
+name: Banner (bannerm)
+same_as: prop.banner
+
+internal_name: prop.bannerr
+name: Banner (bannerr)
+same_as: prop.banner
+
+internal_name: prop.crux1
+name: Crucified Skeleton (crux1)
+same_as: prop.crux
+
+internal_name: prop.crux1.used
+name: Crucified Skeleton (broken) (crux1.used)
+same_as: prop.crux.used
+
+internal_name: prop.crux2
+name: Crucified Skeleton (crux2)
+same_as: prop.crux
+
+internal_name: prop.crux2.used
+name: Crucified Skeleton (broken) (crux2.used)
+same_as: prop.crux.used
+
+internal_name: prop.crux3
+name: Crucified Skeleton (crux3)
+same_as: prop.crux
+
+internal_name: prop.crux3.used
+name: Crucified Skeleton (broken) (crux3.used)
+same_as: prop.crux.used
+
+internal_name: prop.blindbook
+name: Book on Stone Lectern (Blind, Blood, Steel Tome, Book Lever) (blindbook)
+same_as: prop.book1
+
+internal_name: prop.blindbook.used
+name: Book on Stone Lectern (read) (blindbook.used)
+same_as: prop.book1.used
+
+internal_name: prop.bloodbook
+name: Book on Stone Lectern (Blind, Blood, Steel Tome, Book Lever) (bloodbook)
+same_as: prop.book1
+
+internal_name: prop.bloodbook.used
+name: Book on Stone Lectern (read) (bloodbook.used)
+same_as: prop.book1.used
+
+internal_name: prop.steeltome
+name: Book on Stone Lectern (Blind, Blood, Steel Tome, Book Lever) (steeltome)
+same_as: prop.book1
+
+internal_name: prop.steeltome.used
+name: Book on Stone Lectern (read) (steeltome.used)
+same_as: prop.book1.used
+
+internal_name: prop.booklvr
+name: Book on Stone Lectern (Blind, Blood, Steel Tome, Book Lever) (booklvr)
+same_as: prop.book1
+
+internal_name: prop.booklvr.used
+name: Book on Stone Lectern (read) (booklvr.used)
+same_as: prop.book1.used
+
+internal_name: prop.book2l
+name: Book on Skull Lectern (Ancient/Mythical Book, Skeleton Tome, Library Book) (book2l)
+same_as: prop.book2
+
+internal_name: prop.book2l.used
+name: Book on Skull Lectern (read) (book2l.used)
+same_as: prop.book2.used
+
+internal_name: prop.book2r
+name: Book on Skull Lectern (Ancient/Mythical Book, Skeleton Tome, Library Book) (book2r)
+same_as: prop.book2
+
+internal_name: prop.book2r.used
+name: Book on Skull Lectern (read) (book2r.used)
+same_as: prop.book2.used
+
+internal_name: prop.skelbook
+name: Book on Skull Lectern (Ancient/Mythical Book, Skeleton Tome, Library Book) (skelbook)
+same_as: prop.book2
+
+internal_name: prop.skelbook.used
+name: Book on Skull Lectern (read) (skelbook.used)
+same_as: prop.book2.used
+
+internal_name: prop.bookstand
+name: Book on Skull Lectern (Ancient/Mythical Book, Skeleton Tome, Library Book) (bookstand)
+same_as: prop.book2
+
+internal_name: prop.bookstand.used
+name: Book on Skull Lectern (read) (bookstand.used)
+same_as: prop.book2.used
+
+internal_name: prop.flamelvr
+name: Lever (incl. Flame Trap Lever) (flamelvr)
+same_as: prop.lever
+
+internal_name: prop.flamelvr.used
+name: Lever (pulled) (flamelvr.used)
+same_as: prop.lever.used
+
+internal_name: prop.bookcandle
+name: Candle (lit) (bookcandle)
+same_as: prop.candle2
+
+internal_name: prop.storycandle
+name: Candle (lit) (storycandle)
+same_as: prop.candle2
+
+internal_name: prop.tbcross
+name: Burning Cross (tbcross)
+same_as: prop.bcross
+
+internal_name: prop.mcircle1
+name: Magic Circle (mcircle1)
+same_as: prop.mcircle
+
+internal_name: prop.mcircle2
+name: Magic Circle (mcircle2)
+same_as: prop.mcircle
+
+internal_name: prop.wararmor
+name: Armor Stand (incl. Warlord's) (wararmor)
+same_as: prop.armorstand
+
+internal_name: prop.wararmor.used
+name: Armor Stand (empty) (wararmor.used)
+same_as: prop.armorstand.used
+
+internal_name: prop.armorstandn
+name: Armor Stand (empty) (armorstandn)
+same_as: prop.armorstand.used
+
+internal_name: prop.warweap
+name: Weapon Rack (incl. Warlord's, Weapon Stand) (warweap)
+same_as: prop.weaponrack
+
+internal_name: prop.warweap.used
+name: Weapon Rack (empty) (warweap.used)
+same_as: prop.weaponrack.used
+
+internal_name: prop.weaprack
+name: Weapon Rack (incl. Warlord's, Weapon Stand) (weaprack)
+same_as: prop.weaponrack
+
+internal_name: prop.weaprack.used
+name: Weapon Rack (empty) (weaprack.used)
+same_as: prop.weaponrack.used
+
+internal_name: prop.weaponrackn
+name: Weapon Rack (empty) (weaponrackn)
+same_as: prop.weaponrack.used
+
+internal_name: effect.shield
+icon: 203
+name: Effect Shield (flashes over an actor a Shield lands on)

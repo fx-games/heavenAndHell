@@ -18,7 +18,7 @@ func TestEachModLoadsItsOwnMonsters(t *testing.T) {
 		absent string
 	}{
 		{"d1", 112, "MT_NZOMBIE", "rat"},
-		{"heavenandhell", 43, "rat", "MT_NZOMBIE"},
+		{"heavenandhell", 44, "rat", "MT_NZOMBIE"},
 	} {
 		t.Run(tc.mod, func(t *testing.T) {
 			files.SelectMod(tc.mod)
@@ -55,8 +55,8 @@ func TestEachModLoadsItsOwnItems(t *testing.T) {
 		want   string
 		absent string
 	}{
-		{"d1", 156, "The Undead Crown", "Potion of Berserker Rage"}, // 1.09's table, its empty slots included
-		{"heavenandhell", 120, "Potion of Berserker Rage", "The Undead Crown"},
+		{"d1", 143, "The Undead Crown", "Potion of Berserker Rage"}, // 1.09's table without its empty slots
+		{"heavenandhell", 121, "Potion of Berserker Rage", "The Undead Crown"},
 	} {
 		t.Run(tc.mod, func(t *testing.T) {
 			files.SelectMod(tc.mod)
@@ -84,7 +84,7 @@ func TestEachModLoadsItsOwnItems(t *testing.T) {
 }
 
 // The D1 mod supplies every icon the engine names; that is the state a finished mod is in.
-func TestD1ModSuppliesEveryIcon(t *testing.T) {
+func TestModSuppliesEveryIcon(t *testing.T) {
 	files.SelectMod("d1")
 	if err := LoadIcons(); err != nil {
 		t.Fatal(err)
@@ -105,12 +105,12 @@ func TestHeavenAndHellModSuppliesEveryIcon(t *testing.T) {
 }
 
 // LoadIcons no longer demands D1's dungeon furniture of every mod, so D1 has to be held to it here.
-func TestD1DefinesItsFurniture(t *testing.T) {
+func TestDefinesItsFurniture(t *testing.T) {
 	files.SelectMod("d1")
 	if err := LoadIcons(); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range D1FurnitureIcons {
+	for _, name := range FurnitureIcons {
 		if _, ok := tilesIcons[name]; !ok {
 			t.Errorf("d1 defines no %s", name)
 		}

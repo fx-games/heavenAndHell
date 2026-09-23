@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	"rpg/files"
-	"rpg/src/d1"
 	"rpg/src/defs"
 	"rpg/src/dungeon"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
 	"rpg/src/recfile"
+	"rpg/src/rules"
 	"rpg/src/stats"
 )
 
@@ -35,7 +35,7 @@ func withMod(t *testing.T, name string) {
 // D1-specific; it is whatever mod withMod selected.
 func modGenerator(t *testing.T, levels []dungeon.Level, seed int64) *MapGenerator {
 	t.Helper()
-	data, err := d1.Load(files.GetFileSystem())
+	data, err := rules.Load(files.GetFileSystem())
 	if err != nil {
 		t.Fatalf("loading %s content: %v", files.ActiveMod(), err)
 	}
@@ -45,7 +45,7 @@ func modGenerator(t *testing.T, levels []dungeon.Level, seed int64) *MapGenerato
 	g.SetSeed(seed)
 	s := NewState(nil)
 	s.SetMapGenerator(g)
-	f := &Factory{RandomSource: rnd, State: &s, Generator: d1.NewGenerator(data, int32(seed))}
+	f := &Factory{RandomSource: rnd, State: &s, Generator: rules.NewGenerator(data, int32(seed))}
 	s.SetFactory(f)
 	g.SetFactory(f)
 	return g
@@ -83,7 +83,7 @@ func TestHeavenAndHellLevelsAreWalkable(t *testing.T) {
 	levels := loadModLevels(t)
 	built := 0
 	for i, l := range levels {
-		if l.Generator == "ldtk" {
+		if l.Generator == "drawn" {
 			continue
 		}
 		built++
@@ -157,7 +157,7 @@ func TestHeavenAndHellLevelsArePopulatedFromItsOwnTables(t *testing.T) {
 
 	totalActors, totalItems := 0, 0
 	for i, l := range levels {
-		if l.Generator == "ldtk" {
+		if l.Generator == "drawn" {
 			continue
 		}
 		dlvl := l.Depth

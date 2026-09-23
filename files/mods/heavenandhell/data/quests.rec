@@ -1,11 +1,16 @@
-# quests.rec: the quests and the triggers that move them. Quest order is content (saves refer to quests by key).
+# quests.rec: the quests and the triggers that move them. Quests are found by key, in any order; the quest log
+# lists them in file order.
 # %rec: quest, one record per quest:
 #   key               the quest's id, used by triggers and saves; required
 #   name              its name in the quest log
 #   level             levels.rec map id of the level it belongs to (its boss, its set piece, its entrance)
 #   log_text          texts.rec id shown in the quest log
+#   new_game_plus     true: finishing it turns the game into new game plus
 #   gossip            "<npc> <text id>": what that townsperson says about it while it is active; repeatable
-# %rec: trigger, one record per trigger; triggers run in file order and later ones see what earlier ones did:
+# %rec: trigger, one record per trigger. Their order in the file never matters: an event runs in rounds, each
+# checking every trigger not fired yet against the same state and running all that hold; the next round sees
+# what they did. A conversation (on_talk, on_approach, on_talker_*) says one thing, so its conditions must rule
+# each other out (TestTalkTriggersAreExclusive checks); it ends with the round its line fired in.
 #   event             on_kill, on_item_pickup, on_item_use, on_enter_level, on_level_cleared, on_talk, on_approach
 #   subject           what the event is about: a monster's internal or unique name (on_kill), an item's internal
 #                     name (on_item_pickup, on_item_use), a level id (on_enter_level, on_level_cleared), an NPC's
@@ -15,18 +20,16 @@
 #   do                an outcome, repeatable, in order: complete_quest(q) activate_quest(q) start_quest(q)
 #                     start_town_quest(q) log_quest(q) set_quest_var(q, n, value) or_quest_var(q, n, bits)
 #                     set_flag(name) say(text [, speaker]) sound(id) hero_sound(n) end_text(text) give_exp(n)
-#                     give_weapon(dlvl) take_item(item) drop_item(item) drop_unique(name) place_item(item, location
+#                     give_weapon(dlvl) take_item(item) drop_item(item) drop_unique(id) place_item(item, location
 #                     or anywhere) spawn_item(item, map, location | here) spawn_monster(monster, location or
 #                     anywhere) add_npc(npc, map, location) remove_npc(npc, map) refresh_level()
-#   pass              true: an on_talk / on_approach trigger that fired still lets the next one speak (normally one
-#                     conversation says one thing)
+#   pass              true: in a conversation, not its line: it may hold alongside the line (a hand-in, a log
+#                     entry), and the conversation goes on to the next round after it
 #
 # Heaven & Hell's quests and the town's dialogue, ported from main's getTextFor* chains in common/def_dialogue.go.
 #
-# Main showed each NPC the furthest step of a fixed chain whose flag was set. Here each step is an on_talk trigger,
-# and an NPC's triggers are listed LATEST STEP FIRST: triggers run in file order and later ones see what earlier
-# ones did, so a step that moves a quest on must come after the steps it moves it into, or one talk would play
-# two of them.
+# Main showed each NPC the furthest step of a fixed chain whose flag was set. Here each step is an on_talk trigger
+# whose condition names its step exactly, so at most one holds at a time.
 #
 # The texts live in text/town.txt. What main rewarded (a random weapon of some depth and 1000 experience) is
 # give_weapon and give_exp.
@@ -73,6 +76,7 @@ log_text: TEXT_HH_LUCIFER_ACT2_OFFER
 key: kirioth
 name: Kill Kirioth
 level: town
+new_game_plus: true
 log_text: TEXT_HH_LUCIFER_KIRIOTH_OFFER
 
 %rec: trigger
@@ -190,12 +194,12 @@ do: log_quest(lucifer)
 
 event: on_talk
 subject: kirioth
-when: done("meat_jack") and not flag("killed:king_zedek")
+when: done("meat_jack") and not flag("killed:king_zedek") and not active("lucifer")
 do: say(TEXT_HH_KIRIOTH_AFTER_MEAT_JACK)
 
 event: on_talk
 subject: kirioth
-when: active("meat_jack") and flag("killed:meat_jack")
+when: active("meat_jack") and flag("killed:meat_jack") and not active("lucifer")
 do: say(TEXT_HH_KIRIOTH_MEAT_JACK_REWARD)
 do: complete_quest(meat_jack)
 do: give_weapon(4)
@@ -203,12 +207,12 @@ do: give_exp(1000)
 
 event: on_talk
 subject: kirioth
-when: active("meat_jack") and not flag("killed:meat_jack")
+when: active("meat_jack") and not flag("killed:meat_jack") and not active("lucifer")
 do: say(TEXT_HH_KIRIOTH_MEAT_JACK)
 
 event: on_talk
 subject: kirioth
-when: not active("meat_jack") and not done("meat_jack")
+when: not active("meat_jack") and not done("meat_jack") and not active("lucifer")
 do: say(TEXT_HH_KIRIOTH_WELCOME)
 do: activate_quest(meat_jack)
 do: log_quest(meat_jack)
@@ -392,12 +396,12 @@ do: give_exp(2000)
 
 event: on_talk
 subject: lucifer_townsman
-when: active("adventurers") or active("skeleton_army") or active("shekel")
+when: (active("adventurers") or active("skeleton_army") or active("shekel")) and not done("kirioth") and not active("kirioth")
 do: say(TEXT_HH_LUCIFER_ACT2_WAITING)
 
 event: on_talk
 subject: lucifer_townsman
-when: done("evidence") and not active("adventurers") and not done("adventurers")
+when: done("evidence") and not active("adventurers") and not done("adventurers") and not done("kirioth") and not active("kirioth") and not (active("adventurers") or active("skeleton_army") or active("shekel"))
 do: say(TEXT_HH_LUCIFER_ACT2_OFFER)
 do: activate_quest(adventurers)
 do: activate_quest(skeleton_army)

@@ -21,6 +21,8 @@ func (d *DamageDealingObject) Name() string {
 	return "fire"
 }
 
+func (d *DamageDealingObject) ID() string { return "fire" }
+
 func (d *DamageDealingObject) ActorBumpedInto(actor *Actor) {
 
 }

@@ -20,6 +20,7 @@ type UntargetedAction struct {
 	monetaryValue          int
 	condition              func(user *Actor) bool
 	effectSource           EffectSource
+	forced                 bool
 	internalName           string
 }
 
@@ -73,7 +74,7 @@ func (a *UntargetedAction) IsAlive() bool {
 func (a *UntargetedAction) Turn() {
 	a.activationDelayInTurns--
 	if a.activationDelayInTurns == 0 {
-		a.Invoke(a.user, a.effectSource)
+		a.Invoke(a.user, a.effectSource, a.forced)
 	}
 }
 
@@ -88,13 +89,14 @@ func (a *UntargetedAction) String() string {
 	return string(a.name)
 }
 
-func (a *UntargetedAction) SetCurrentUserAndSource(user *Actor, source EffectSource) { // only needed for time delayed effects
+func (a *UntargetedAction) SetCurrentUserAndSource(user *Actor, source EffectSource, forced bool) { // only needed for time delayed effects
 	a.user = user
 	a.effectSource = source
+	a.forced = forced
 }
 
-func (a *UntargetedAction) Invoke(actor *Actor, source EffectSource) {
-	a.effect.Invoke(actor, source)
+func (a *UntargetedAction) Invoke(actor *Actor, source EffectSource, forced bool) {
+	a.effect.Invoke(actor, source, forced)
 }
 
 func (a *UntargetedAction) GetDelayInTurns() int {

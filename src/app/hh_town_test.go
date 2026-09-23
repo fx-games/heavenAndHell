@@ -5,10 +5,11 @@ import (
 	"path/filepath"
 	"rpg/files"
 	"rpg/src/common"
-	"rpg/src/d1"
 	"rpg/src/defs"
 	"rpg/src/game"
 	"rpg/src/gridmap"
+	"rpg/src/hhm"
+	"rpg/src/rules"
 	"rpg/src/stats"
 	"rpg/src/util"
 	"slices"
@@ -31,8 +32,8 @@ func TestHeavenAndHellTownIsPlayable(t *testing.T) {
 		for _, a := range s.GetPlayer().GetUntargetedSkills() {
 			skills[a.GetInternalName()] = true
 		}
-		for _, name := range append(append([]string{}, class.TargetedSkills...), class.UntargetedSkills...) {
-			if n, _, _ := strings.Cut(name, "("); !skills[n] {
+		for name, lvl := range class.StartSpells {
+			if lvl > 0 && !skills[name] {
 				t.Errorf("%s lacks its class skill %s (has %v)", class.Name, name, skills)
 			}
 		}
@@ -85,7 +86,7 @@ func newModGame(t *testing.T, mod string, ui common.UserInterface) *game.GameIns
 		}
 	})
 	cfg := common.NewConfigurationFromRecFile(common.ConfigFile)
-	g := game.NewGameInstance(common.StartInfo{ScreenSize: cfg.WindowSize, TileScale: 4, LDTKMapFile: "assets/maps.ldtk",
+	g := game.NewGameInstance(common.StartInfo{ScreenSize: cfg.WindowSize, TileScale: 4, MapDir: hhm.Dir,
 		SpriteSheet: cfg.SpriteSheet, FontInfos: common.FontInfo{TTFFile: cfg.FontFile(), TTFSize: cfg.DefaultFontSize},
 		UserConfiguration: &cfg, FileSystem: files.GetFileSystem()}, ui)
 	g.GetAudio().SetDisablePlayback(true)
@@ -176,21 +177,21 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 
 	talk("mary", "Welcome")
 	talk("abel", "")
-	expect("poisoned_water", d1.QuestInit)
+	expect("poisoned_water", rules.QuestInit)
 	talk("kirioth", "I am Kirioth")
-	expect("meat_jack", d1.QuestActive)
+	expect("meat_jack", rules.QuestActive)
 	talk("kirioth", "still waiting")
 
 	kill(levelAt(s, 2), "meat_jack")
 	items, exp := len(player.GetInventory().Items()), player.Hero().Exp
 	talk("kirioth", "")
-	expect("meat_jack", d1.QuestDone)
+	expect("meat_jack", rules.QuestDone)
 	if len(player.GetInventory().Items()) != items+1 || player.Hero().Exp != exp+1000 {
 		t.Errorf("Meat Jack's reward: %d -> %d items, %d -> %d exp", items, len(player.GetInventory().Items()), exp, player.Hero().Exp)
 	}
 
 	talk("abel", "rivers")
-	expect("poisoned_water", d1.QuestActive)
+	expect("poisoned_water", rules.QuestActive)
 	s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, 3), TargetLocation: "ladder_up"})
 	down, ok := s.GetMap().GetTransitionAt(s.GetMap().GetNamedLocation("to_poisoned_water_supply"))
 	if !ok || down.TargetMap != "poisoned_water_supply" {
@@ -198,16 +199,16 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	}
 	kill("poisoned_water_supply", "")
 	talk("abel", "")
-	expect("poisoned_water", d1.QuestDone)
+	expect("poisoned_water", rules.QuestDone)
 
 	talk("shekel", "Zedek")
-	expect("skeleton_king", d1.QuestActive)
+	expect("skeleton_king", rules.QuestActive)
 	kill(levelAt(s, 4), "king_zedek")
 	talk("shekel", "")
-	expect("skeleton_king", d1.QuestDone)
+	expect("skeleton_king", rules.QuestDone)
 
 	talk("kirioth", "")
-	expect("lucifer", d1.QuestActive)
+	expect("lucifer", rules.QuestActive)
 	for dlvl := 5; dlvl <= 12 && !s.GetFlags().IsSet("killed:lucifer"); dlvl++ {
 		s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, dlvl), TargetLocation: "ladder_up"})
 		for _, a := range slices.Clone(s.GetMap().Actors()) {
@@ -226,9 +227,9 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 		t.Fatal("Lucifer fell and left no gift in town")
 	}
 	ui.texts = nil
-	gift.GetUntargetedAction().Invoke(player, "test")
+	gift.GetUntargetedAction().Invoke(player, "test", false)
 	s.ItemUsed(gift)
-	expect("evidence", d1.QuestActive)
+	expect("evidence", rules.QuestActive)
 	if len(ui.texts) != 1 || !strings.Contains(ui.texts[0], "among the seeing") {
 		t.Errorf("drinking the gift: got %q, want Lucifer's note", ui.texts)
 	}
@@ -255,7 +256,7 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 		}
 	}
 	talk("kirioth", "")
-	expect("lucifer", d1.QuestDone)
+	expect("lucifer", rules.QuestDone)
 
 	// Picking up the four pieces of evidence, in any order, ends the quest once: Lucifer finds the hero, as his
 	// dying words promised, and tells them what the notes mean.
@@ -281,10 +282,10 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	pickUp("town", "Kirioth's schemes")
 	pickUp(levelAt(s, 6), "From K. to S.")
 	pickUp("poisoned_water_supply", "Purity report")
-	expect("evidence", d1.QuestActive)
+	expect("evidence", rules.QuestActive)
 	ui.texts = nil
 	pickUp(levelAt(s, 4), "King Zedek's last will")
-	expect("evidence", d1.QuestDone)
+	expect("evidence", rules.QuestDone)
 	if len(ui.texts) != 1 || !strings.Contains(ui.texts[0], "mankind itself") {
 		t.Errorf("the last piece of evidence: got %q, want Lucifer's rant", ui.texts)
 	}
@@ -308,7 +309,7 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	lucifer := func(want string) { t.Helper(); talkIn(hellTown, "lucifer_townsman", want) }
 	lucifer("settle the town's accounts")
 	for _, q := range []string{"adventurers", "skeleton_army", "shekel"} {
-		expect(q, d1.QuestActive)
+		expect(q, rules.QuestActive)
 	}
 	lucifer("debts are still open")
 
@@ -337,19 +338,18 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	}
 
 	exp = player.Hero().Exp
-	windows = 3
-	lucifer("Four fewer heroes") // all three debts settle in one talk, each in its own window
+	windows = 4
+	lucifer("Four fewer heroes") // all three debts settle in one talk, each in its own window, then Kirioth's offer
 	windows = 1
 	for _, q := range []string{"adventurers", "skeleton_army", "shekel"} {
-		expect(q, d1.QuestDone)
+		expect(q, rules.QuestDone)
 	}
 	if player.Hero().Exp != exp+6000 {
 		t.Errorf("the second act's rewards: %d -> %d exp", exp, player.Hero().Exp)
 	}
-	lucifer("One debt remains")
-	expect("kirioth", d1.QuestActive)
+	expect("kirioth", rules.QuestActive)
 	kill("town", "evil_kirioth")
-	expect("kirioth", d1.QuestDone)
+	expect("kirioth", rules.QuestDone)
 	for _, a := range s.Map("town").Actors() {
 		if n := a.GetInternalName(); n == "shekel" || n == "kirioth" {
 			t.Errorf("%s still stands in town after his true self died", n)
@@ -435,7 +435,7 @@ func TestHeavenAndHellShops(t *testing.T) {
 			t.Errorf("%s: hero healed=%v", npc, healed)
 		}
 		sword := player.GetEquipment().AllItems()[0]
-		if buys := common.D1VendorBuys(who, sword); buys != (npc == "mary") {
+		if buys := common.VendorBuys(who, sword); buys != (npc == "mary") {
 			t.Errorf("%s buys the hero's %s: %v", npc, sword.Name(), buys)
 		}
 	}
@@ -455,7 +455,7 @@ func TestHeavenAndHellCombat(t *testing.T) {
 	m := s.GetMap()
 	var foe *common.Actor
 	for _, a := range m.Actors() {
-		if a != player && a.D1Monster() != nil && len(m.GetFreeCardinalNeighbors(a.MapPosition())) > 0 {
+		if a != player && a.Monster() != nil && len(m.GetFreeCardinalNeighbors(a.MapPosition())) > 0 {
 			foe = a
 			break
 		}
@@ -500,8 +500,9 @@ func TestHeavenAndHellContentResolves(t *testing.T) {
 	known := map[string]bool{"strength": true, "dexterity": true, "intelligence": true, "health": true, "mana": true,
 		"damage": true, "armor_class": true, "light_radius": true, "attack_speed": true, "steal_health": true,
 		"steal_mana": true, "speed": true, "move_speed": true}
-	for idx, b := range data.Items {
-		it := f.NewD1Item(f.Generator.PlainItem(idx))
+	for i := range data.Items {
+		b := &data.Items[i]
+		it := f.NewRolledItem(f.Generator.PlainItem(b))
 		if b.UntargetedAction != "" && !it.HasUntargetedAction() {
 			t.Errorf("item %s: untargeted_action %q does not resolve", b.InternalName, b.UntargetedAction)
 		}
@@ -531,7 +532,7 @@ func TestHeavenAndHellContentResolves(t *testing.T) {
 	}
 	magic := 0
 	for i := 0; i < 400; i++ {
-		if it := f.Generator.FloorItem(1+i%12, false, false); it != nil && it.Magical != 0 && strings.Contains(it.IName, " of ") {
+		if it := f.Generator.FloorItem(1+i%12, true, false); it != nil && it.Magical != 0 && strings.Contains(it.IName, " of ") {
 			magic++
 		}
 	}

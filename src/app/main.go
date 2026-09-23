@@ -10,11 +10,13 @@ import (
 	"rpg/files"
 	"rpg/src/common"
 	"rpg/src/console"
-	"rpg/src/d1"
 	"rpg/src/defs"
+	"rpg/src/dungen"
 	"rpg/src/game"
 	"rpg/src/gui"
+	"rpg/src/hhm"
 	"rpg/src/renderer"
+	"rpg/src/rules"
 	"strconv"
 	"strings"
 
@@ -77,7 +79,7 @@ func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 		Title:       "Of Heaven and Hell",
 		ScreenSize:  userConfig.WindowSize,
 		TileScale:   4.0,
-		LDTKMapFile: "assets/maps.ldtk",
+		MapDir:      hhm.Dir,
 		SpriteSheet: userConfig.SpriteSheet,
 		FontInfos: common.FontInfo{
 			TTFFile: userConfig.FontFile(),
@@ -133,19 +135,23 @@ func maptest() {
 	modName := common.NewConfigurationFromRecFile(common.ConfigFile).Mod
 	files.SelectMod(modName)
 	mustHaveMod(modName)
-	d1Data, err := d1.Load(files.GetFileSystem())
+	data, err := rules.Load(files.GetFileSystem())
 	if err != nil {
 		log.Fatal(err)
 	}
-	seeds := d1.LevelSeeds(int32(seed))
-	quests := d1.InitQuests(seeds)
-	gen := d1.NewGenerator(d1Data, int32(seed))
-	lvl, err := gen.CreateLevel(&quests, seeds, dlvl, d1.SLNone, d1.EntryMain)
+	seeds := rules.LevelSeeds(int32(seed))
+	quests := data.InitQuests(seeds)
+	gen := rules.NewGenerator(data, int32(seed))
+	levels, err := dungen.LoadLevels(files.GetFileSystem())
 	if err != nil {
 		log.Fatal(err)
 	}
-	for y := 0; y < d1.LevelSize; y++ {
-		for x := 0; x < d1.LevelSize; x++ {
+	lvl, err := levels.CreateLevel(gen, &quests, seeds, dlvl, rules.SLNone, dungen.EntryMain)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for y := 0; y < dungen.LevelSize; y++ {
+		for x := 0; x < dungen.LevelSize; x++ {
 			if lvl.CellSolid(x, y) {
 				fmt.Print("#")
 			} else {
@@ -184,6 +190,9 @@ func runGameWithEbiten(theGame *game.GameInstance, context common.UIContext) {
 		host.UIController = newEbitenUI(g, ctx)
 		g.SetModSwitcher(func() { mount(createGameAndUIContext()) })
 		g.ShowStartMenu()
+		if titleImage, ok := gui.LoadTitleImage(); ok {
+			host.UIController.ShowTitleScreen(titleImage)
+		}
 	}
 	mount(theGame, context)
 	uiController := host.UIController

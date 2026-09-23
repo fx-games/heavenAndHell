@@ -98,3 +98,24 @@ func (r *iconRecorder) DrawStringOnMapWithOffset(_, _ geometry.Point, _ string, 
 func (r *iconRecorder) MeasureString(string) (float64, float64)                                { return 0, 0 }
 func (r *iconRecorder) GetScaledTileSize() geometry.PointF                                     { return geometry.PointF{} }
 func (r *iconRecorder) DrawOnMapF(_ geometry.PointF, icon int32, _ color.Color)                { r.icon = icon }
+
+// A monster's swing at the tile the hero is still walking into waits for him to get there.
+func TestMeleeSwingWaitsForPlayerToArrive(t *testing.T) {
+	hero, monster := &Actor{}, &Actor{}
+	b := &Broker{movementAnimations: map[*Actor]*MovementAnimation{
+		hero: {actor: hero, path: []geometry.Point{{}, {X: 1}}, ticksNeeded: 4, isForPlayer: true},
+	}}
+	swing := &MeleeAttackAnimation{actor: monster, origin: geometry.Point{X: 2}, targetPos: geometry.Point{X: 1}, ticksNeeded: 4, ticksLeft: 4}
+	b.startAnimations([]Animation{swing})
+	b.Tick()
+	if swing.ticksLeft != 4 {
+		t.Fatal("swung before the hero arrived")
+	}
+	for !b.movementAnimations[hero].IsDone() {
+		b.Tick()
+	}
+	b.Tick()
+	if swing.ticksLeft == 4 {
+		t.Fatal("swing never started")
+	}
+}

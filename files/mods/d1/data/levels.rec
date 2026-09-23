@@ -7,19 +7,25 @@
 #   depth      difficulty and progress only (seeds, monster and item levels, "deepest"). Town 0; a quest or side
 #              level takes its parent's.
 #   generator  the algorithm that builds it: d1_cathedral, d1_catacombs, d1_caves, d1_hell (Diablo's four level
-#              generators), d1_set (a quest's set piece; names its quest), accretion, megadungeon, rogue, ldtk (drawn
-#              in maps.ldtk; names its template).
-#   tiles      the tile set: cathedral, catacombs, caves, hell, or drawn (an ldtk level's own tiles).
+#              generators), d1_set (a quest's set piece; names its quest), accretion, megadungeon, rogue, drawn (hand-drawn
+#              in the mod's maps; names its template).
+#   tiles      the tile set: cathedral, catacombs, caves, hell, or drawn (a hand-drawn level's own tiles).
 #   music      a music.rec event; a level without one is silent.
 #   glyphs     an 8x8 glyph atlas in the mod folder (Bm437_IBM_CGA.png): the level is drawn as text with it.
 #   town       true: a town (town-only spells, shopkeepers restock, the portal comes home to the deepest one).
 #   start      true on the one level a new game starts on.
+#   enemy_percent  chance in 100 that a walkable cell starts with a monster (default 5; dungen levels only).
+#   monster    "<internal_name> [weight]": one monster the level rolls, at these odds against the others (default 1).
+#              Repeatable; a level with any rolls only these (plus out-of-depth arrivals), one without rolls every
+#              enemies.rec record whose dlvl..max_dlvl takes in its depth. Dungen levels only.
 #   exit       "<location> -> <map id>, <arrival location>": stepping on the location takes you there. An
 #              "open_when:" line after it keeps it shut until the condition (quests.rec's language) holds; an
 #              "exit_tile:" line (stairs_down, stairs_up, red_portal) is what the spot turns into when it opens.
 #              The generator places the locations; this file says where they lead.
-#   template   (ldtk) the maps.ldtk level it is drawn as.
-#   quest      (d1_set) the quests.rec key whose set piece it loads; D1's quest table gives the set level.
+#   location   "<name> <x> <y>": a named map cell the level's quest logic or an exit refers to (Lazarus'
+#              lair: vile_book_N / vile_book_N_to, vile_center, vile_altar, exit). Repeatable.
+#   template   (drawn) the map file it is drawn as.
+#   quest      (d1_set) the quests.rec key whose set piece it loads.
 #
 # Diablo's generators take these knobs, each defaulting to what Diablo does:
 #   decoration   "name, search tile, replace tile, percent" - one single-tile decoration scattered over the
@@ -28,8 +34,8 @@
 #   theme_freq   how often DRLG_PlaceThemeRooms seeds a theme room (0 = the strategy's own rule).
 #   set_pieces   false keeps the strategy from laying out its set piece (quest rooms, Diablo's pentagram).
 # The knobs accretion takes:
-#   templates        the LDtk project the room templates live in. Defaults to assets/rooms.ldtk, which the mod
-#                    overlay resolves to this mod's own rooms.ldtk.
+#   templates        the maps directory the room templates live in. Defaults to assets/maps, which the mod
+#                    overlay resolves to this mod's own maps.
 #   template_prefix  only templates whose name starts with this are used - which is how a depth gets its look.
 #   require_room     a template this level must contain (its quest room). Repeat the field for more.
 #   forbid_room      a template this level must NOT contain, so another level's quest room cannot turn up here.
@@ -70,7 +76,7 @@
 map: town
 name: Tristram
 depth: 0
-generator: ldtk
+generator: drawn
 template: Town
 tiles: drawn
 music: town
@@ -290,6 +296,13 @@ generator: d1_set
 quest: lazarus
 tiles: cathedral
 music: cathedral
+location: vile_book_1 10 30
+location: vile_book_1_to 11 13
+location: vile_book_2 29 31
+location: vile_book_2_to 27 13
+location: vile_center 19 20
+location: vile_altar 19 30
+location: exit 19 16
 exit: exit -> hell_15, lazarus
 open_when: done("lazarus")
 exit_tile: red_portal

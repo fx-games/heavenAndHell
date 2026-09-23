@@ -30,7 +30,6 @@ func NewThrowAction(source Cause, attacker *Actor, thrownItem *Item, targetPos g
 }
 
 func (d *ThrowAction) Execute(context ActionContext) []Action {
-	context.AudioPlayer.PlayCue("bow_fire")
 	context.ActionBroker.Emit(Thrown{Thrower: d.attacker, Item: d.thrownItem, From: d.attacker.MapPosition(), To: d.targetPos})
 
 	throwInfo := d.thrownItem.GetThrowStats()
@@ -49,7 +48,7 @@ func (d *ThrowAction) Execute(context ActionContext) []Action {
 
 	currentMap := context.GameState.GetMap()
 	if defender, ok := currentMap.TryGetActorAt(d.targetPos); !ok {
-		context.GameState.factory.hitD1Object(currentMap, d.targetPos, d.attacker) // a thrown item that hits a barrel breaks it
+		context.GameState.factory.hitObject(currentMap, d.targetPos, d.attacker) // a thrown item that hits a barrel breaks it
 	} else {
 		d.defender = defender
 

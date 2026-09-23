@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"maps"
 	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
@@ -78,7 +79,8 @@ func (g *Factory) NewTargetedActionFromDefinition(definition defs.TargetedAction
 }
 
 func (g *Factory) GetAllHitEffects() map[string]func(args util.Arguments) *HitEffect {
-	return map[string]func(args util.Arguments) *HitEffect{
+	all := g.skillEffects()
+	maps.Copy(all, map[string]func(args util.Arguments) *HitEffect{
 		"confuse":             g.confuseTarget,
 		"berserk":             g.berserkTarget,
 		"poison":              g.poisonTarget,
@@ -100,7 +102,8 @@ func (g *Factory) GetAllHitEffects() map[string]func(args util.Arguments) *HitEf
 		"apply_status":        g.applyStatusEffectToSelection,
 		"on_self":             g.onSelf,
 		"spawn_wall":          g.spawnWall,
-	}
+	})
+	return all
 }
 
 func (g *Factory) NewOnHitEffectFromString(effectName string) *HitEffect {
@@ -231,12 +234,12 @@ func (g *Factory) projectFire(args util.Arguments) *HitEffect {
 	}
 }
 
-// randomD1MonsterTypeOnLevel returns a monster type present on the current level, or -1 if the
+// randomMonsterTypeOnLevel returns a monster type present on the current level, or -1 if the
 // level holds no ordinary d1 monster to copy.
-func (g *Factory) randomD1MonsterTypeOnLevel() int {
+func (g *Factory) randomMonsterTypeOnLevel() int {
 	var types []int
 	for _, a := range g.State.GetMap().Actors() {
-		if mon := a.d1Monster; mon != nil && mon.Unique == nil {
+		if mon := a.monster; mon != nil && mon.Unique == nil {
 			types = append(types, mon.Type)
 		}
 	}
@@ -254,11 +257,11 @@ func (g *Factory) summonRandomMonster(args util.Arguments) *HitEffect {
 				g.ActionBroker.Execute(NewSpawnAction(NewActorCause("Summon monster", attacker), "monster", func() {
 					// ponytail: main rolled from defs.EnemyDefinition by dungeon level; those defs are
 					// content and are gone. Reuse a monster type already on this level instead.
-					mt := g.randomD1MonsterTypeOnLevel()
+					mt := g.randomMonsterTypeOnLevel()
 					if mt < 0 {
 						return
 					}
-					newEnemy := g.NewD1Monster(mt)
+					newEnemy := g.NewMonster(mt)
 					currentMap := g.State.GetMap()
 					currentMap.AddActor(newEnemy, hitPos)
 					newEnemy.SetDrawPosition(hitPos.ToPointF())
@@ -281,7 +284,7 @@ func (g *Factory) jumpStart(args util.Arguments) *HitEffect {
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
 			currentMap := g.State.GetMap()
 			jumpInfo := currentMap.JumpOverPositions(attacker.MapPosition(), target, maxSprint, maxJump)
-			if !jumpInfo.ActorFound {
+			if !jumpInfo.ActorFound || len(jumpInfo.Jump) == 0 { // no free cell behind the enemy to land on
 				return
 			}
 			isPlayer := attacker == g.State.GetPlayer()
@@ -372,7 +375,7 @@ func (g *Factory) stealItemAndTeleport(args util.Arguments) *HitEffect {
 				g.ActionBroker.Execute(NewStealItemAction(NewActorCause("Steal", attacker), attacker, hitActor))
 			})
 			teleportAction := g.NewUntargetedActionFromName("teleport")
-			teleportAction.Invoke(attacker, "StealAndTeleport")
+			teleportAction.Invoke(attacker, "StealAndTeleport", false)
 			attacker.SetNeutral()
 		},
 		Description: []util.LabelText{
@@ -418,9 +421,9 @@ func (g *Factory) spawnWall(args util.Arguments) *HitEffect {
 					continue
 				}
 				if kind == "lightning" {
-					g.spawnD1LightningWall(attacker, p, slvl, attacker.hero.Level, 1)
+					g.spawnLightningWall(attacker, p, slvl, attacker.hero.Level, 1)
 				} else {
-					g.spawnD1FireWall(attacker, p, slvl, 1)
+					g.spawnFireWall(attacker, p, slvl, 1)
 				}
 			}
 		},
@@ -441,7 +444,7 @@ func (g *Factory) onSelf(args util.Arguments) *HitEffect {
 	}
 	return &HitEffect{
 		Activate: func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) {
-			inner.Effect(attacker, EffectSource("Spell"))
+			inner.Effect(attacker, EffectSource("Spell"), false)
 		},
 		Description: inner.Description,
 	}

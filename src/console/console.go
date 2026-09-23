@@ -37,6 +37,7 @@ type Console struct {
 	disableFog      bool
 	ticks           uint64
 	lastTarget      common.TargetInfo
+	objectGlyphs    map[string]objectGlyph // glyphs.rec, by word
 }
 
 func NewConsole(gameContext common.UIContext) *Console {
@@ -45,6 +46,7 @@ func NewConsole(gameContext common.UIContext) *Console {
 		config:  gameContext.StartInfos.UserConfiguration,
 		msg:     func(string) {},
 	}
+	c.objectGlyphs = loadObjectGlyphs()
 	c.ui = textui.NewTextUI(c, textui.Settings{
 		Theme:             mustRead("assets/data/ascii/ui.rec"),
 		Palette:           mustRead("assets/data/ascii/palette.rec"),
@@ -260,7 +262,7 @@ func (c *Console) OpenTextWindow(msg []util.LabelText) {
 }
 
 // OpenInfoWindow renders the sections as plain indented lines in a text window.
-func (c *Console) OpenInfoWindow(title string, sections []common.D1SheetSection) {
+func (c *Console) OpenInfoWindow(title string, sections []common.SheetSection) {
 	c.ui.OpenTextWindow(strings.Join(common.SectionLines(title, sections), "\n"))
 }
 
@@ -385,7 +387,7 @@ func (c *Console) BeginPlayerSellingTo(vendor *common.Actor) {
 		item := stack[0]
 		items = append(items, textui.VendorItem{
 			Name:  itemName(stack, stack.ShopName()),
-			Price: common.D1SellPrice(item),
+			Price: common.SellPrice(item),
 			Buy: func() {
 				c.msg(common.SellItem(player, item))
 				c.BeginPlayerSellingTo(vendor)

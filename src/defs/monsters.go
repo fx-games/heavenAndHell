@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"math/rand"
 	"path"
+	"slices"
 	"strings"
 
 	"rpg/src/recfile"
@@ -28,28 +29,36 @@ type Monster struct {
 	// Where it spawns.
 	MinDLvl, MaxDLvl int
 	Level            int
-	Avail            int // 0 = never spawns at random (D1's MonstAvailTbl)
+	RandomSpawn      bool // false: only quests, rooms and group_spawn place it
+	SpawnCost        int  // its share of a level's SpawnBudget (D1: graphics memory); 0 = free
+	SpawnWeight      int  // relative odds among the monsters eligible at a depth (dungen levels only); 1 if unset
 	OutOfDepthChance float64
 	MinLevelForOoD   int
 	GroupSpawn       []string
 
 	// Combat.
 	Health, Damage, Damage2 util.Dice
-	Hit, AFNum              int
-	Hit2, AFNum2            int
+	Hit, Hit2               int
 	AC                      int
 	MagicRes, MagicRes2     int
-	Treasure, Exp           int
-	BaseSpeed               int
-	Stats                   map[string]int
-	FullHP                  bool // health is the monster's real hit points, not D1's doubled single-player table
+	Drops                   string // "none", a unique item's id, or "" for the usual roll
+	Exp                     int
+	// AUT a step and an attack take (default 10, one turn) and a hard hit costs it (0: none)
+	SpeedMove, SpeedAttack, SpeedRecovery int
+	Stats                                 map[string]int
+	FullHP                                bool // health is the monster's real hit points, not D1's doubled single-player table
 
 	// Behaviour.
-	AI         string // D1 brain name (AI_*); empty for a mod that drives monsters by skills alone
-	Class      string // MC_UNDEAD, MC_DEMON, MC_ANIMAL
-	Flags, Int int
-	AggroRange int
-	Tags       []string
+	AI           string // D1 brain name (AI_*); empty for a mod that drives monsters by skills alone
+	Class        string // MC_UNDEAD, MC_DEMON, MC_ANIMAL
+	AILevel      int    // D1's mInt, 0-3
+	AggroRange   int
+	SpecialOneIn int // the Fallen's howl: 1 in N per standing turn
+	FleeDistance int // how far it runs when a comrade dies near it (M_FallenFear); 0: it does not
+	Tint         string // "R G B" its icon is tinted with; empty: untinted
+	FixedHealth  int    // its hit points whatever Health rolls; 0: the roll
+	SightSfx     string // sfx.rec id it says when it first sees the hero
+	Tags         []string
 
 	TargetedSkills   []string
 	UntargetedSkills []string
@@ -57,16 +66,44 @@ type Monster struct {
 
 	// Presentation.
 	Family                            string // graphics folder, e.g. "Zombie"; variants share it
-	ImgSize                           int    // graphics budget per level
-	Frames, Rate                      [6]int // stand, walk, attack, hit, death, special
 	AsciiIcon, UnicodeIcon, CP437Icon rune
 	Color                             color.RGBA
 	SpeechOnSight, SpeechOnHurt       []string
 	DeathStringFormats                []string
 }
 
-// Available reports whether the monster turns up in random spawns.
-func (m Monster) Available() bool { return m.Avail != 0 }
+// Has reports whether the record carries tag.
+func (m Monster) Has(tag string) bool { return slices.Contains(m.Tags, tag) }
+
+// SpawnBudget is what a level's monster types may cost together (D1's 4000 of graphics memory).
+const SpawnBudget = 4000
+
+// PickSpawnTypes ports GetLevelMTypes' draw: up to 16 of the candidate records, picked at random while their
+// spawn_cost still fits the budget. It returns indices into ms.
+func PickSpawnTypes(ms []Monster, candidates []int, rnd func(int) int) []int {
+	list := slices.Clone(candidates)
+	var types []int
+	budget := SpawnBudget
+	for len(list) > 0 && len(types) < 16 {
+		for i := 0; i < len(list); { // swap-remove, as D1 does: the order decides which type rnd picks
+			if ms[list[i]].SpawnCost > budget {
+				list[i] = list[len(list)-1]
+				list = list[:len(list)-1]
+			} else {
+				i++
+			}
+		}
+		if len(list) == 0 {
+			break
+		}
+		rv := rnd(len(list))
+		types = append(types, list[rv])
+		budget -= ms[list[rv]].SpawnCost
+		list[rv] = list[len(list)-1]
+		list = list[:len(list)-1]
+	}
+	return types
+}
 
 // CanAppearAt reports whether this monster may be rolled for dungeon level dlvl: at or below its own depth, or
 // above it on an out-of-depth roll, and never past max_dlvl. The record carries all four knobs, so the rule
@@ -92,6 +129,15 @@ func (m Monster) MaxDam2() int { return m.Damage2.Max() }
 // fillCombatModel gives a record without a D1 brain (H&H's) the to-hit D1's combat reads and its health as
 // stated. The to-hit is a design choice of the port, tunable in play: five per point of dexterity.
 func fillCombatModel(m *Monster) {
+	if m.SpawnWeight <= 0 {
+		m.SpawnWeight = 1
+	}
+	if m.SpeedMove <= 0 {
+		m.SpeedMove = 10
+	}
+	if m.SpeedAttack <= 0 {
+		m.SpeedAttack = 10
+	}
 	if m.Level == 0 { // a record that names only its depth fights, drops and pays out at that depth, as items do
 		m.Level = m.MinDLvl
 	}
@@ -125,7 +171,7 @@ func ReadMonsters(fsys fs.FS) ([]Monster, error) {
 }
 
 func monsterFromRecord(rec recfile.Record) (Monster, error) {
-	m := Monster{Stats: map[string]int{}, AsciiIcon: -1, UnicodeIcon: -1, CP437Icon: -1}
+	m := Monster{Stats: map[string]int{}, RandomSpawn: true, AsciiIcon: -1, UnicodeIcon: -1, CP437Icon: -1}
 	for _, f := range rec {
 		if stat, ok := strings.CutPrefix(f.Name, "stats_"); ok {
 			m.Stats[stat] = f.AsInt()
@@ -144,8 +190,12 @@ func monsterFromRecord(rec recfile.Record) (Monster, error) {
 			m.MaxDLvl = f.AsInt()
 		case "level":
 			m.Level = f.AsInt()
-		case "available":
-			m.Avail = f.AsInt()
+		case "random_spawn":
+			m.RandomSpawn = f.Value != "false"
+		case "spawn_cost":
+			m.SpawnCost = f.AsInt()
+		case "spawn_weight":
+			m.SpawnWeight = f.AsInt()
 		case "out_of_depth_chance":
 			m.OutOfDepthChance = f.AsFloat()
 		case "min_level_for_ood":
@@ -162,26 +212,18 @@ func monsterFromRecord(rec recfile.Record) (Monster, error) {
 			m.Hit = f.AsInt()
 		case "hit2":
 			m.Hit2 = f.AsInt()
-		case "afnum":
-			m.AFNum = f.AsInt()
-		case "afnum2":
-			m.AFNum2 = f.AsInt()
 		case "magic_res":
 			m.MagicRes = f.AsInt()
 		case "magic_res2":
 			m.MagicRes2 = f.AsInt()
-		case "treasure":
-			m.Treasure = f.AsInt()
-		case "base_speed":
-			m.BaseSpeed = f.AsInt()
+		case "drops":
+			m.Drops = f.Value
 		case "ai":
 			m.AI = f.Value
 		case "class":
 			m.Class = f.Value
-		case "flags":
-			m.Flags = f.AsInt()
-		case "int":
-			m.Int = f.AsInt()
+		case "ai_level":
+			m.AILevel = f.AsInt()
 		case "aggro_range":
 			m.AggroRange = f.AsInt()
 		case "tags":
@@ -199,12 +241,22 @@ func monsterFromRecord(rec recfile.Record) (Monster, error) {
 			m.Equipment = append(m.Equipment, f.Value)
 		case "graphics_family":
 			m.Family = f.Value
-		case "graphics_size":
-			m.ImgSize = f.AsInt()
-		case "frames":
-			m.Frames = six(f.Value)
-		case "rate":
-			m.Rate = six(f.Value)
+		case "speed_move":
+			m.SpeedMove = f.AsInt()
+		case "speed_attack":
+			m.SpeedAttack = f.AsInt()
+		case "speed_recovery":
+			m.SpeedRecovery = f.AsInt()
+		case "special_one_in":
+			m.SpecialOneIn = f.AsInt()
+		case "fixed_health":
+			m.FixedHealth = f.AsInt()
+		case "sight_sfx":
+			m.SightSfx = f.Value
+		case "tint":
+			m.Tint = f.Value
+		case "flee_distance":
+			m.FleeDistance = f.AsInt()
 		case "ascii":
 			m.AsciiIcon = firstRune(f.Value)
 		case "unicode":
@@ -234,14 +286,4 @@ func firstRune(s string) rune {
 		return r
 	}
 	return -1
-}
-
-// six reads "11, 24, 12, 6, 16, 0" -- a fixed-length row of numbers that is one value, not six fields.
-func six(v string) (out [6]int) {
-	for i, p := range strings.Split(v, ",") {
-		if i < 6 {
-			out[i] = recfile.StrInt(strings.TrimSpace(p))
-		}
-	}
-	return
 }

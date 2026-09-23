@@ -2,9 +2,9 @@ package app
 
 import (
 	"rpg/src/common"
-	"rpg/src/d1"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
+	"rpg/src/rules"
 	"testing"
 )
 
@@ -20,7 +20,7 @@ func TestCrawlTableSpells(t *testing.T) {
 	var mon *common.Actor
 	var beside geometry.Point
 	for _, a := range m.Actors() {
-		for _, d := range common.D1Dirs {
+		for _, d := range geometry.Dirs {
 			if p := a.MapPosition().Add(d); a != player && m.IsWalkable(p) && !m.IsActorAt(p) && !m.IsObjectAt(p) {
 				mon, beside = a, p
 			}
@@ -30,18 +30,18 @@ func TestCrawlTableSpells(t *testing.T) {
 		t.Fatal("no monster with a free neighbour on level 1")
 	}
 	var want *common.Actor // the first monster in 1.09's CrawlTable order around the target
-	for _, ring := range d1.CrawlRings[:6] {
+	for _, ring := range rules.CrawlRings[:6] {
 		for _, o := range ring {
 			if a, ok := m.TryGetActorAt(beside.Add(geometry.Point{X: o[0], Y: o[1]})); ok && a != player && want == nil {
 				want = a
 			}
 		}
 	}
-	g.GetActionBroker().Execute(common.NewSpellAction(player, d1.SplStone, 1, beside))
+	g.GetActionBroker().Execute(common.NewSpellAction(player, rules.SplStone, 1, beside))
 	if !want.HasStatusEffect(common.StatusStone) {
 		t.Errorf("Stone Curse beside %v did not petrify the first monster in CrawlTable order, at %v", beside, want.MapPosition())
 	}
-	g.GetActionBroker().Execute(common.NewSpellAction(player, d1.SplTeleport, 1, mon.MapPosition()))
+	g.GetActionBroker().Execute(common.NewSpellAction(player, rules.SplTeleport, 1, mon.MapPosition()))
 	if p := player.MapPosition(); p == mon.MapPosition() || geometry.DistanceChebyshev(p, mon.MapPosition()) > 2 {
 		t.Errorf("Teleport onto the monster at %v landed on %v", mon.MapPosition(), p)
 	}

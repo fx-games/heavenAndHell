@@ -1,0 +1,41 @@
+# the tileset every level draws from
+[tileset] World
+image	classic_roguelike.png
+grid	8
+size	224	224
+
+# per-tile markers: IsBlockingMovement, IsBlockingView, IsWater, IsDamaging
+[flags]
+4	IsBlockingMovement,IsBlockingView
+5	IsBlockingMovement
+6	IsBlockingMovement
+7	IsBlockingMovement,IsBlockingView
+9	IsBlockingMovement,IsBlockingView
+28	IsBlockingMovement,IsWater
+29	IsBlockingMovement,IsWater
+56	IsBlockingMovement,IsBlockingView
+57	IsBlockingMovement,IsBlockingView
+58	IsBlockingMovement,IsBlockingView
+69	IsBlockingMovement,IsBlockingView
+71	IsBlockingMovement,IsBlockingView
+84	IsBlockingMovement,IsBlockingView
+85	IsBlockingMovement,IsBlockingView
+114	IsBlockingMovement,IsBlockingView
+115	IsBlockingMovement,IsBlockingView
+116	IsBlockingMovement,IsBlockingView
+117	IsBlockingMovement,IsBlockingView
+118	IsBlockingMovement,IsBlockingView
+119	IsBlockingMovement,IsBlockingView
+120	IsBlockingMovement,IsBlockingView
+152	IsBlockingMovement
+153	IsBlockingMovement
+158	IsBlockingMovement,IsBlockingView
+159	IsDamaging
+181	IsBlockingMovement,IsBlockingView
+182	IsBlockingMovement,IsBlockingView
+183	IsBlockingMovement,IsBlockingView
+184	IsBlockingMovement,IsBlockingView
+240	IsBlockingMovement,IsBlockingView
+241	IsBlockingMovement,IsBlockingView
+269	IsBlockingMovement,IsBlockingView
+297	IsBlockingMovement,IsBlockingView

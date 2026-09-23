@@ -1,7 +1,7 @@
 Of Heaven and Hell
 by Felix Ruzzoli
 
-Heaven & Hell is a 2D top-down, turn-based, grid-based, single-player dungeon crawler heavily inspired by Angband and the original Diablo.
+Of Heaven and Hell is a 2D top-down, turn-based, grid-based, single-player dungeon crawler heavily inspired by Angband and the original Diablo.
 
 It is using procedural generation to create the dungeons.
 

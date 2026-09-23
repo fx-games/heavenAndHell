@@ -38,16 +38,16 @@ func NewItemTooltip(u *UIController, item *common.Item, mousePos geometry.Point)
 
 // NewItemCompareTooltip returns the plain tooltip if equipping item displaces nothing.
 func NewItemCompareTooltip(u *UIController, item *common.Item, mousePos geometry.Point) Tooltip {
-	equipped, itemCmp := u.context.GameState().GetPlayer().GetEquipment().D1CompareForEquipping(item)
+	equipped, itemCmp := u.context.GameState().GetPlayer().GetEquipment().CompareForEquipping(item)
 	if len(equipped) == 0 {
 		return NewTextTooltip(u, item.GetTooltipLines(u.ParseColorCodedText), mousePos)
 	}
 	t := &CompareTooltip{
 		header: NewTextTooltip(u, []util.LabelText{util.LabelTextFromStringWithColor("Equipped", defs.OffWhite)}, mousePos),
-		item:   NewTextTooltip(u, item.D1TooltipLinesComparedTo(itemCmp, u.ParseColorCodedText), mousePos),
+		item:   NewTextTooltip(u, item.TooltipLinesComparedTo(itemCmp, u.ParseColorCodedText), mousePos),
 	}
 	for _, c := range equipped {
-		lines := c.Item.D1TooltipLinesComparedTo(c.Cmp, u.ParseColorCodedText)
+		lines := c.Item.TooltipLinesComparedTo(c.Cmp, u.ParseColorCodedText)
 		switch c.Note {
 		case "":
 		case common.NoteUnequipped:

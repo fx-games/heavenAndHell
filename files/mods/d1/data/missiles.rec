@@ -1,0 +1,102 @@
+%rec: default
+# missiles.rec: the missiles monsters, traps and shrines fire (misdat), one record each, in any order.
+#   id                its MIS_ name; the engine's missile code picks it by this
+#   resist            the resistance its damage is checked against: none, fire, lightning or magic (default none)
+#   launch_sfx / impact_sfx   sfx.rec ids played when it is fired and where it hits; blank is silent
+#   velocity          AddMissile's velocity, which sets how fast it is drawn flying (default 16)
+
+# counselors
+id: MIS_FIREBOLT
+resist: fire
+launch_sfx: LS_FBOLT1
+impact_sfx: LS_FIRIMP2
+velocity: 26
+
+# magistrates
+id: MIS_FIREBALL
+resist: fire
+launch_sfx: LS_FBOLT1
+impact_sfx: LS_FIRIMP2
+
+# cabalists: a lightning line
+id: MIS_LIGHTCTRL
+resist: lightning
+launch_sfx: LS_LNING1
+velocity: 32
+
+# storm demons; its thin lightnings are silent
+id: MIS_LIGHTCTRL2
+resist: lightning
+velocity: 32
+
+# familiars, and the lightnings a LIGHTCTRL lays
+id: MIS_LIGHTNING
+resist: lightning
+launch_sfx: LS_LNING1
+impact_sfx: LS_ELECIMP1
+
+# counselors in melee
+id: MIS_FLASH
+resist: magic
+launch_sfx: LS_NOVA
+
+id: MIS_MAGMABALL
+resist: fire
+
+# succubi (Blood Star)
+id: MIS_FLARE
+resist: magic
+
+# balrogs: three flames towards the enemy
+id: MIS_FLAMEC
+resist: fire
+launch_sfx: LS_SPOUTSTR
+
+# advocates: three charged bolts
+id: MIS_CBOLT
+resist: lightning
+launch_sfx: LS_CBOLT
+velocity: 8
+
+# acid beasts
+id: MIS_ACID
+resist: magic
+launch_sfx: LS_ACID
+
+# the puddle an acid missile leaves
+id: MIS_ACIDPUD
+resist: magic
+launch_sfx: LS_PUDDLE
+
+# Diablo
+id: MIS_APOCA
+resist: magic
+
+# traps: a plain arrow
+id: MIS_ARROW
+resist: none
+velocity: 32
+
+# trapped chests: a fire arrow
+id: MIS_FARROW
+resist: fire
+velocity: 32
+
+# trapped chests: a ring of lightning balls
+id: MIS_NOVA
+resist: lightning
+launch_sfx: LS_NOVA
+
+# Hellfire's trapped chests: fire walls three cells out
+id: MIS_FIRERING
+resist: fire
+
+# the Oily shrine: a fire wall sent at the hero
+id: MIS_FIREWALL
+resist: fire
+launch_sfx: LS_WALLLOOP
+
+# the Sparkling shrine: a flash around the shrine
+id: MIS_FLASHTRAP
+resist: magic
+launch_sfx: LS_NOVA

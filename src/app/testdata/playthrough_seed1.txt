@@ -1,0 +1,104 @@
+playthrough seed: 1 (replay with: playthrough 1)
+run 1 dlvl 1: 58 objects, 40 used, 17 items dropped
+run 1 (Player) dlvl 1: 114 monsters, 5 kills, 25 damage taken, level 1, 21 D1 items on floor
+run 1 dlvl 2: 97 objects, 51 used, 21 items dropped
+run 1 (Player) dlvl 2: 142 monsters, 5 kills, 22 damage taken, level 3, 39 D1 items on floor
+run 1 dlvl 3: 82 objects, 50 used, 24 items dropped
+run 1 (Player) dlvl 3: 188 monsters, 5 kills, 96 damage taken, level 5, 38 D1 items on floor
+run 1 dlvl 4: 81 objects, 43 used, 24 items dropped
+run 1 (Player) dlvl 4: 181 monsters, 5 kills, 46 damage taken, level 7, 36 D1 items on floor
+run 1 dlvl 5: 49 objects, 23 used, 12 items dropped
+run 1 (Player) dlvl 5: 139 monsters, 5 kills, 170 damage taken, level 9, 17 D1 items on floor
+run 1 dlvl 6: 42 objects, 24 used, 9 items dropped
+run 1 (Player) dlvl 6: 180 monsters, 5 kills, 3995 damage taken, level 11, 16 D1 items on floor
+run 1 dlvl 7: 39 objects, 30 used, 14 items dropped
+run 1 (Player) dlvl 7: 149 monsters, 5 kills, 5950 damage taken, level 13, 19 D1 items on floor
+run 1 dlvl 8: 58 objects, 31 used, 14 items dropped
+run 1 (Player) dlvl 8: 139 monsters, 5 kills, 601 damage taken, level 15, 21 D1 items on floor
+run 1 dlvl 9: 41 objects, 34 used, 14 items dropped
+run 1 (Player) dlvl 9: 91 monsters, 5 kills, 424 damage taken, level 17, 19 D1 items on floor
+run 1 dlvl 10: 38 objects, 34 used, 17 items dropped
+run 1 (Player) dlvl 10: 110 monsters, 5 kills, 285 damage taken, level 19, 25 D1 items on floor
+run 1 dlvl 11: 21 objects, 20 used, 12 items dropped
+run 1 (Player) dlvl 11: 94 monsters, 5 kills, 1963 damage taken, level 21, 17 D1 items on floor
+run 1 dlvl 12: 40 objects, 31 used, 19 items dropped
+run 1 (Player) dlvl 12: 88 monsters, 5 kills, 219 damage taken, level 23, 24 D1 items on floor
+run 1 dlvl 13: 68 objects, 30 used, 11 items dropped
+run 1 (Player) dlvl 13: 115 monsters, 5 kills, 1385 damage taken, level 25, 18 D1 items on floor
+run 1 dlvl 14: 58 objects, 29 used, 18 items dropped
+run 1 (Player) dlvl 14: 125 monsters, 5 kills, 3036 damage taken, level 27, 23 D1 items on floor
+run 1 dlvl 15: 67 objects, 22 used, 14 items dropped
+run 1 (Player) dlvl 15: 122 monsters, 5 kills, 30 damage taken, level 29, 22 D1 items on floor
+run 1 dlvl 16: 4 objects, 0 used, 0 items dropped
+run 1 (Player) dlvl 16: 166 monsters, 5 kills, 4020 damage taken, level 31, 1 D1 items on floor
+run 2 dlvl 1: 55 objects, 45 used, 12 items dropped
+run 2 (Player) dlvl 1: 100 monsters, 5 kills, 61 damage taken, level 1, 18 D1 items on floor
+run 2 dlvl 2: 86 objects, 44 used, 13 items dropped
+run 2 (Player) dlvl 2: 159 monsters, 5 kills, 179 damage taken, level 3, 23 D1 items on floor
+run 2 dlvl 3: 61 objects, 47 used, 17 items dropped
+run 2 (Player) dlvl 3: 136 monsters, 5 kills, 130 damage taken, level 5, 23 D1 items on floor
+run 2 dlvl 4: 55 objects, 42 used, 13 items dropped
+run 2 (Player) dlvl 4: 155 monsters, 5 kills, 255 damage taken, level 7, 29 D1 items on floor
+run 2 dlvl 5: 75 objects, 34 used, 12 items dropped
+run 2 (Player) dlvl 5: 166 monsters, 5 kills, 1793 damage taken, level 9, 18 D1 items on floor
+run 2 dlvl 6: 47 objects, 38 used, 17 items dropped
+run 2 (Player) dlvl 6: 107 monsters, 5 kills, 483 damage taken, level 11, 22 D1 items on floor
+run 2 dlvl 7: 72 objects, 37 used, 14 items dropped
+run 2 (Player) dlvl 7: 153 monsters, 5 kills, 602 damage taken, level 13, 23 D1 items on floor
+run 2 dlvl 8: 64 objects, 24 used, 11 items dropped
+run 2 (Player) dlvl 8: 117 monsters, 5 kills, 465 damage taken, level 15, 17 D1 items on floor
+run 2 dlvl 9: 35 objects, 27 used, 16 items dropped
+run 2 (Player) dlvl 9: 78 monsters, 5 kills, 952 damage taken, level 17, 20 D1 items on floor
+run 2 dlvl 10: 24 objects, 21 used, 16 items dropped
+run 2 (Player) dlvl 10: 132 monsters, 5 kills, 426 damage taken, level 19, 23 D1 items on floor
+run 2 dlvl 11: 30 objects, 27 used, 14 items dropped
+run 2 (Player) dlvl 11: 91 monsters, 5 kills, 818 damage taken, level 21, 24 D1 items on floor
+run 2 dlvl 12: 26 objects, 18 used, 11 items dropped
+run 2 (Player) dlvl 12: 97 monsters, 5 kills, 2408 damage taken, level 23, 17 D1 items on floor
+run 2 dlvl 13: 101 objects, 33 used, 12 items dropped
+run 2 (Player) dlvl 13: 129 monsters, 5 kills, 2421 damage taken, level 25, 18 D1 items on floor
+run 2 dlvl 14: 79 objects, 39 used, 25 items dropped
+run 2 (Player) dlvl 14: 139 monsters, 5 kills, 245 damage taken, level 27, 32 D1 items on floor
+run 2 dlvl 15: 99 objects, 33 used, 14 items dropped
+run 2 (Player) dlvl 15: 120 monsters, 5 kills, 15 damage taken, level 29, 22 D1 items on floor
+run 2 dlvl 16: 4 objects, 0 used, 0 items dropped
+run 2 (Player) dlvl 16: 164 monsters, 5 kills, 1222 damage taken, level 31, 2 D1 items on floor
+run 3 dlvl 1: 70 objects, 52 used, 22 items dropped
+run 3 (Player) dlvl 1: 106 monsters, 5 kills, 54 damage taken, level 1, 26 D1 items on floor
+run 3 dlvl 2: 74 objects, 51 used, 19 items dropped
+run 3 (Player) dlvl 2: 135 monsters, 5 kills, 540 damage taken, level 3, 26 D1 items on floor
+forecast against Plague Eater: [[You 43% to hit, 3-5 hits to kill] [It 58% to hit you, 130-1037 hits to kill]]
+spells: 132 damage, failed casts [cathedral_2: 5], mana shield true
+run 3 dlvl 3: 47 objects, 40 used, 15 items dropped
+run 3 (Player) dlvl 3: 143 monsters, 5 kills, 5 damage taken, level 5, 24 D1 items on floor
+run 3 dlvl 4: 78 objects, 45 used, 13 items dropped
+run 3 (Player) dlvl 4: 179 monsters, 5 kills, 328 damage taken, level 7, 27 D1 items on floor
+run 3 dlvl 5: 51 objects, 18 used, 6 items dropped
+run 3 (Player) dlvl 5: 144 monsters, 5 kills, 301 damage taken, level 9, 13 D1 items on floor
+run 3 dlvl 6: 56 objects, 32 used, 12 items dropped
+run 3 (Player) dlvl 6: 129 monsters, 5 kills, 217 damage taken, level 11, 19 D1 items on floor
+run 3 dlvl 7: 34 objects, 25 used, 15 items dropped
+run 3 (Player) dlvl 7: 142 monsters, 5 kills, 210 damage taken, level 13, 20 D1 items on floor
+run 3 dlvl 8: 69 objects, 27 used, 6 items dropped
+run 3 (Player) dlvl 8: 133 monsters, 5 kills, 395 damage taken, level 15, 10 D1 items on floor
+run 3 dlvl 9: 35 objects, 30 used, 7 items dropped
+run 3 (Player) dlvl 9: 80 monsters, 5 kills, 503 damage taken, level 17, 14 D1 items on floor
+run 3 dlvl 10: 26 objects, 25 used, 16 items dropped
+run 3 (Player) dlvl 10: 109 monsters, 5 kills, 157 damage taken, level 19, 21 D1 items on floor
+run 3 dlvl 11: 30 objects, 27 used, 10 items dropped
+run 3 (Player) dlvl 11: 87 monsters, 5 kills, 456 damage taken, level 21, 17 D1 items on floor
+run 3 dlvl 12: 42 objects, 33 used, 12 items dropped
+run 3 (Player) dlvl 12: 79 monsters, 5 kills, 326 damage taken, level 23, 19 D1 items on floor
+run 3 dlvl 13: 64 objects, 30 used, 15 items dropped
+run 3 (Player) dlvl 13: 116 monsters, 5 kills, 411 damage taken, level 25, 19 D1 items on floor
+run 3 dlvl 14: 78 objects, 38 used, 17 items dropped
+run 3 (Player) dlvl 14: 124 monsters, 5 kills, 3541 damage taken, level 27, 23 D1 items on floor
+run 3 dlvl 15: 91 objects, 30 used, 7 items dropped
+run 3 (Player) dlvl 15: 112 monsters, 5 kills, 519 damage taken, level 29, 12 D1 items on floor
+run 3 dlvl 16: 4 objects, 0 used, 0 items dropped
+run 3 (Player) dlvl 16: 157 monsters, 5 kills, 1059 damage taken, level 31, 3 D1 items on floor
+traps: 38 wall traps and 39 chest traps fired
+monster missiles by AI: map[AI_ACID:104 AI_ACIDUNIQ:22 AI_BAT:224 AI_COUNSLR:457 AI_DIABLO:8 AI_MAGMA:58 AI_MEGA:38 AI_STORM:171 AI_SUCC:448]
+quests: Leoric, staff, Cain, red portal, Lazarus, save/load, levers and Diablo OK
+quest lines: Butcher, Leoric, Ogden's Sign, Gharbad, Magic Rock, Valor, Chamber of Bone, Blind, Zhar, Black Mushroom, Anvil, Warlord, Lachdanan, Poisoned Water OK
+PLAYTHROUGH OK

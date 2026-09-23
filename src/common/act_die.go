@@ -27,9 +27,7 @@ func (d *DieAction) Execute(context ActionContext) []Action {
 	actor := d.actor
 	if actor == state.GetPlayer() {
 		msg(fmt.Sprintf("You die. CoD: %s", d.cause.ToString()))
-		state.factory.PlayD1HeroSound(71)
-		PlayUICue("player_death")
-		PlayUICue("game_over")
+		context.ActionBroker.Emit(Died{Actor: actor, Killed: d.cause != nil && d.cause.GetActor() != nil})
 		context.Show(ShowGameOver{})
 	} else {
 		if actor.VisualsPending() {
@@ -41,6 +39,11 @@ func (d *DieAction) Execute(context ActionContext) []Action {
 			gameMap.AddDownedActor(actor, corpsePos) // write state
 		}
 		msg(fmt.Sprintf(actor.GetDeathStringFormat(), actor.Name()))
+		dropShieldsOf(gameMap.Actors(), actor)
+		if d.cause != nil {
+			state.factory.triumph(d.cause.GetActor())
+		}
+		context.ActionBroker.Emit(Died{Actor: actor, Killed: d.cause != nil && d.cause.GetActor() != nil})
 		//engine.UpdateMiniMap()
 	}
 

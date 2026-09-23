@@ -40,11 +40,10 @@ func (d *Broker) whenShown(p geometry.Point, actor *Actor) func() bool {
 	if actor == nil || actor.DrawPosition().ToPoint() == p {
 		return nil
 	}
-	return func() bool { return actor.DrawPosition().ToPoint() == p }
+	return d.givingUp(func() bool { return actor.DrawPosition().ToPoint() == p }, nil)
 }
 
-// contact is true once the projectile passing closest to p got there, or once the player took another turn, which
-// also ends that flight.
+// contact is true once the projectile passing closest to p got there.
 func (d *Broker) contact(flying []*ProjectileDirectionAnimation, p geometry.Point) func() bool {
 	var by *ProjectileDirectionAnimation
 	at, best := 0.0, 0.0
@@ -53,11 +52,20 @@ func (d *Broker) contact(flying []*ProjectileDirectionAnimation, p geometry.Poin
 			by, at, best = f, along, dist
 		}
 	}
+	return d.givingUp(func() bool { return by.IsDone() || by.flown() >= at }, by.Cancel)
+}
+
+// givingUp is gate, but true anyway once the player has taken another turn, running onGiveUp first. What a gate
+// waits for can stop coming: an actor killed on its way to p never walks the rest of the way, and its blow then
+// waits for a step that will never happen. A gate that never opens is not a delay, it is a leak - the hit never
+// plays, so it never finishes, so the queued actions behind it never run, and the dead actor it gates keeps
+// VisualsPending forever, which draws it standing where it fell for the rest of the level.
+func (d *Broker) givingUp(gate func() bool, onGiveUp func()) func() bool {
 	turns := func() uint64 { return d.context.GameState.timekeeper.turnCounter }
 	born := d.ticks
 	var turn *uint64 // taken once the broker ticked, after the rest of this turn (e.g. the monsters' replies) ran
 	return func() bool {
-		if by.IsDone() || by.flown() >= at {
+		if gate() {
 			return true
 		}
 		if d.ticks == born {
@@ -67,7 +75,9 @@ func (d *Broker) contact(flying []*ProjectileDirectionAnimation, p geometry.Poin
 			t := turns()
 			turn = &t
 		} else if turns() != *turn {
-			by.Cancel()
+			if onGiveUp != nil {
+				onGiveUp()
+			}
 			return true
 		}
 		return false

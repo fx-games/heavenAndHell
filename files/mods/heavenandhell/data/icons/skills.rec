@@ -7,5 +7,92 @@
 #   name              a description for the mod author; not read
 #   reference_image   the original graphic it stands in for; not read
 #
-# Heaven&Hell's skill icons. Its effects are not content on this branch yet, so this is empty:
-# the loader reads the file, and any name it does not find is reported by LoadIcons.
+# Heaven&Hell's skill icons: the engine's skills (src/rules/skills.rec) its classes learn.
+
+internal_name: spell.multi_shot
+icon: 44
+name: Skill: Multi-Shot
+
+internal_name: spell.arrow_rain
+icon: 223
+name: Skill: Arrow Rain
+
+internal_name: spell.trick_shot
+icon: 223
+name: Skill: Trick Shot
+
+internal_name: spell.debilitating_shot
+icon: 223
+name: Skill: Debilitating Shot
+
+internal_name: spell.man_stopper
+icon: 223
+name: Skill: Man Stopper
+
+internal_name: spell.jump_start
+icon: 223
+name: Skill: Jump Start
+
+internal_name: spell.crush
+icon: 223
+name: Skill: Crush
+
+internal_name: spell.shout
+icon: 223
+name: Skill: Shout
+
+internal_name: spell.swing
+icon: 223
+name: Skill: Swing
+
+internal_name: spell.whirlwind_of_doom
+icon: 223
+name: Skill: Whirlwind of Doom
+
+internal_name: spell.earth_shaker
+icon: 223
+name: Skill: Earth Shaker
+
+internal_name: spell.triumph_of_steel
+icon: 223
+name: Skill: Triumph of Steel
+
+internal_name: spell.call_to_odin
+icon: 223
+name: Skill: Call to Odin
+
+internal_name: spell.black_clouds
+icon: 223
+name: Skill: Black Clouds
+
+internal_name: spell.burning_rain
+icon: 223
+name: Skill: Burning Rain
+
+internal_name: spell.great_thunder
+icon: 223
+name: Skill: Great Thunder
+
+internal_name: spell.eternal_vow
+icon: 223
+name: Skill: Eternal Vow
+
+internal_name: spell.bat_out_of_hell
+icon: 223
+name: Skill: Bat out of Hell
+
+internal_name: spell.blink
+icon: 223
+name: Skill: Blink
+
+internal_name: spell.poison_target
+icon: 223
+name: Skill: Poison
+
+internal_name: spell.fire_ray
+icon: 223
+name: Skill: Fire Ray
+
+internal_name: spell.heal_health
+icon: 332
+name: Skill: Heal

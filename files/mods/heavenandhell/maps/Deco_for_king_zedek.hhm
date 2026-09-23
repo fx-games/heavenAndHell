@@ -1,0 +1,13 @@
+[map] Deco_for_king_zedek
+IsDecoration	true
+
+[tiles] 7 6
+ 86  86 152 152 152  86  86
+ 86 152  86  78  86 152  86
+ 86  86  86  86  86  86  86
+ 86  86  86  86  86  86  86
+ 86  86  86  86  86  86  86
+ -1  -1  -1  -1  -1  -1  -1
+
+[entities]
+NPC	3	3	Name=King Zedek	Tile=259	UniqueName=king_zedek

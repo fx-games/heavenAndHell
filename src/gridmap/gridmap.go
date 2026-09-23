@@ -686,6 +686,13 @@ func (m *GridMap[ActorType, ItemType, ObjectType]) IsExplored(pos geometry.Point
 	return m.GetCell(pos).IsExplored
 }
 
+// ForgetExplored marks every cell unexplored again.
+func (m *GridMap[ActorType, ItemType, ObjectType]) ForgetExplored() {
+	for i := range m.cells {
+		m.cells[i].IsExplored = false
+	}
+}
+
 func (m *GridMap[ActorType, ItemType, ObjectType]) SetExplored(pos geometry.Point) {
 	if !m.Contains(pos) {
 		return

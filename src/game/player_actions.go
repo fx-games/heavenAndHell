@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"rpg/src/audio"
 	"rpg/src/common"
-	"rpg/src/d1"
 	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
+	"rpg/src/rules"
 	"rpg/src/stats"
 	"rpg/src/util"
 	"slices"
@@ -90,7 +90,7 @@ func (a *Actions) PickUpItem() {
 		return
 	}
 	if !player.CanPickup(item) {
-		state.Factory().PlayD1HeroSound(14 + common.Random().Intn(3)) // AutoGetItem: "I can't carry any more"
+		state.Factory().PlayHeroSound(14 + common.Random().Intn(3)) // AutoGetItem: "I can't carry any more"
 		return
 	}
 	pickUpAction := common.NewPickUpAction(common.AbstractCause("PickUpAction"), player)
@@ -124,9 +124,9 @@ func NewActions(context PlayerActionsContext) *Actions {
 	}
 }
 func (a *Actions) EquipItem(item *common.Item) {
-	if d := item.D1(); d != nil && !item.MeetsRequirements() {
+	if d := item.Roll(); d != nil && !item.MeetsRequirements() {
 		a.logError(fmt.Sprintf("You can't equip %s: it needs %d Str, %d Mag and %d Dex.", item.Name(), d.MinStr, d.MinMag, d.MinDex))
-		a.state.Factory().PlayD1HeroSound(13)
+		a.state.Factory().PlayHeroSound(13)
 		return
 	}
 	common.PlayUICue("item_equip")
@@ -151,14 +151,14 @@ func (a *Actions) ActivateItemActionForPlayer(itemWithAction *common.Item) {
 		msg(fmt.Sprintf("%s is out of charges", itemWithAction.Name()))
 		return
 	}
-	if d := itemWithAction.D1(); d != nil && d.Type == d1.ITypeStaff {
+	if d := itemWithAction.Roll(); d != nil && d.Type == rules.ITypeStaff {
 		user.SetLastCastItem(itemWithAction)
 	}
 
-	isStaff := itemWithAction.D1() != nil && itemWithAction.D1().Type == d1.ITypeStaff // staves cast, not UseInvItem
+	isStaff := itemWithAction.Roll() != nil && itemWithAction.Roll().Type == rules.ITypeStaff // staves cast, not UseInvItem
 	if itemWithAction.HasTargetedAction() {
 		if !isStaff {
-			a.state.Factory().PlayD1ItemUseSound(itemWithAction, user)
+			a.actionBroker.Emit(common.ItemUsed{Item: itemWithAction, User: user})
 		}
 		a.beginActionTargeting(itemWithAction.GetTargetedAction(), itemWithAction)
 	} else if itemWithAction.HasUntargetedAction() {
@@ -168,7 +168,7 @@ func (a *Actions) ActivateItemActionForPlayer(itemWithAction *common.Item) {
 			return // e.g. a book that needs more magic than the reader has: not consumed
 		}
 		if !isStaff {
-			a.state.Factory().PlayD1ItemUseSound(itemWithAction, user)
+			a.actionBroker.Emit(common.ItemUsed{Item: itemWithAction, User: user})
 		}
 
 		itemWithAction.UseCharge()
@@ -191,15 +191,16 @@ func (a *Actions) ActivateItemActionForPlayer(itemWithAction *common.Item) {
 }
 
 func (a *Actions) activateUntargetedAction(actor *common.Actor, action *common.UntargetedAction, source common.EffectSource) {
+	forced := a.ui().IsPlayerForcingAggression()
 	action.Reset()
 	if action.IsDelayed() {
 		// add to timekeeper
 		a.logError(fmt.Sprintf("%s is delayed for %d turns", action.Name(), action.GetDelayInTurns()))
-		action.SetCurrentUserAndSource(actor, source)
+		action.SetCurrentUserAndSource(actor, source, forced)
 		timeKeeper := a.getTimeKeeper()
 		timeKeeper.AddTimed(action)
 	} else if action.CanActivate(actor) {
-		action.Invoke(actor, source)
+		action.Invoke(actor, source, forced)
 	}
 }
 func (a *Actions) playerThrow(thrownItem *common.Item) func(player *common.Actor, targetPos geometry.Point) {
@@ -262,12 +263,11 @@ func (a *Actions) ManualMovePlayer(direction geometry.Point) {
 
 func (a *Actions) getActionContext() common.ActionContext {
 	return common.ActionContext{
-		GameState:     a.state,
-		UserInterface: a.ui,
-		Show:          func(r common.UIRequest) { show(a.ui(), r) },
-		AudioPlayer:   a.audio,
-		Data:          a.definitions,
-		ActionBroker:  a.actionBroker,
+		GameState:    a.state,
+		Show:         func(r common.UIRequest) { show(a.ui(), r) },
+		AudioPlayer:  a.audio,
+		Data:         a.definitions,
+		ActionBroker: a.actionBroker,
 	}
 }
 
@@ -313,7 +313,7 @@ func (a *Actions) nextStepOnPlayerPath() {
 					a.stopAutoMove()
 					msg(fmt.Sprintf("You bump into %s", objectAt.Name()))
 					objectAt.ActorBumpedInto(state.GetPlayer())
-					if o, ok := objectAt.(*common.D1Object); ok && o.UsesTurn(state.GetPlayer()) {
+					if o, ok := objectAt.(*common.Prop); ok && o.UsesTurn(state.GetPlayer()) {
 						a.actionBroker.QueueForExecution(common.NewEndPlayerTurnAction(common.AbstractCause("Operate"), 10))
 					}
 					return
@@ -468,7 +468,7 @@ func (a *Actions) getNextAutoExploreTarget() (geometry.Point, bool) {
 
 	if a.config.AutoExploreOpenContainers {
 		nearestContainer := state.GetMap().GetNearestExploredObject(playerPos, func(object common.Object) bool {
-			container, ok := object.(*common.D1Object)
+			container, ok := object.(*common.Prop)
 			return ok && container.IsUnlootedContainer()
 		})
 		if nearestContainer != playerPos {
@@ -859,7 +859,7 @@ func (a *Actions) RangedAttackAt(mapPos geometry.Point) bool {
 		if !target.IsVisible() || !target.IsHostileTo(player) || target.IsVendor() {
 			return false
 		}
-	case common.IsD1Barrel(currentMap, mapPos):
+	case common.IsBarrel(currentMap, mapPos):
 	default:
 		return false
 	}
@@ -936,11 +936,11 @@ func (a *Actions) SetQueueAfterTurn(afterTurn func(call func())) {
 // anything that isn't a previewable shrine.
 func (a *Actions) ShowObjectInfoAt(mapPos geometry.Point) {
 	o, _ := a.state.GetMap().TryGetObjectAt(mapPos)
-	obj, ok := o.(*common.D1Object)
+	obj, ok := o.(*common.Prop)
 	if !ok {
 		return
 	}
-	lines, ok := common.D1ShrineInfoText(obj)
+	lines, ok := common.ShrineInfoText(obj)
 	if !ok {
 		return
 	}

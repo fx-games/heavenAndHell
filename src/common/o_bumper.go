@@ -9,6 +9,7 @@ type BumpObject struct {
 	icon       int32
 	activation func(actor *Actor)
 	name       string
+	id         string
 }
 
 func (d *BumpObject) Name() string {
@@ -51,8 +52,11 @@ func (d *BumpObject) IsPassableForProjectile() bool {
 	return true
 }
 
-func NewBumpObject(name string, icon int32, onActivation func(actor *Actor)) *BumpObject {
+func (d *BumpObject) ID() string { return d.id }
+
+func NewBumpObject(id, name string, icon int32, onActivation func(actor *Actor)) *BumpObject {
 	return &BumpObject{
+		id:         id,
 		name:       name,
 		icon:       icon,
 		activation: onActivation,

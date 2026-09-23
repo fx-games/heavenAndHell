@@ -21,7 +21,7 @@ func TestStatusEffectsSurviveSaveLoad(t *testing.T) {
 
 	var stoned *common.Actor
 	for _, a := range state.GetMap().Actors() {
-		if a.D1Monster() != nil {
+		if a.Monster() != nil {
 			stoned = a
 			break
 		}

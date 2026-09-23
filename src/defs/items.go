@@ -49,6 +49,7 @@ type Item struct {
 	// Diablo's own columns. Its generation walks this table by index and reads these directly.
 	Drop, Class, Loc       string // IDROP_, ICLASS_, ILOC_
 	Hidden                 bool   // unseen and out of reach until the hero has true sight
+	QuestItem              bool   // a quest item: no store buys it
 	Curs, Type             int    // cursor graphic, ITYPE_ value
 	UniqueBase             string // UITYPE_ name uniques refer to
 	MinMLvl, Durability    int
@@ -78,8 +79,7 @@ func (d Item) CanAppearAt(randomSource *rand.Rand, dungeonLevel int) bool {
 	return regular || ood
 }
 
-// ReadItems loads the active mod's items, in file order -- order is content: D1 rolls items by walking this
-// table, so a row moving is a gameplay change.
+// ReadItems loads the active mod's items in file order; rules puts them in roll_order.rec's order.
 func ReadItems(fsys fs.FS) ([]Item, error) {
 	f, err := fsys.Open(path.Join("assets", "data", "items.rec"))
 	if err != nil {
@@ -223,6 +223,8 @@ func itemFromRecord(rec recfile.Record) (Item, error) {
 			it.Drop = f.Value
 		case "hidden":
 			it.Hidden = f.AsBool()
+		case "quest_item":
+			it.QuestItem = f.AsBool()
 		case "class":
 			it.Class = f.Value
 		case "location":

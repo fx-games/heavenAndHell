@@ -709,6 +709,10 @@ name: Hero - Death
 sound: sfx/player_death_sfx.ogg
 sound: ang_sfx/pls_man_sob.ogg
 
+internal_name: heartbeat
+name: Hero - Last heartbeat
+sound: sfx/heavy_hit_human.ogg
+
 internal_name: game_over
 name: Game over
 sound: sfx/game_over.ogg

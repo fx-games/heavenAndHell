@@ -99,6 +99,9 @@ func (d *Broker) Execute(action Action) {
 // Emit reports what just happened. During an Execute it is shown when that action finishes, like the action's
 // own animations; outside of one, right away.
 func (d *Broker) Emit(ev Event) {
+	if d == nil { // a factory without a game (some tests)
+		return
+	}
 	if d.depth > 0 {
 		d.events = append(d.events, ev)
 		return
@@ -296,12 +299,10 @@ func (d *Broker) endTargetingOnPlayerAttack(action Action) {
 	default:
 		return
 	}
-	if d.context.GameState == nil || d.context.UserInterface == nil || action.Cause() == nil {
+	if d.context.GameState == nil || d.context.Show == nil || action.Cause() == nil {
 		return
 	}
 	if player := d.context.GameState.GetPlayer(); player != nil && action.Cause().GetActor() == player {
-		if ui := d.context.UserInterface(); ui != nil {
-			ui.CancelTargeting()
-		}
+		d.context.Show(EndTargeting{})
 	}
 }

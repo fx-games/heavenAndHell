@@ -2,7 +2,7 @@ package app
 
 import (
 	"rpg/src/common"
-	"rpg/src/d1"
+	"rpg/src/rules"
 	"rpg/src/stats"
 	"testing"
 )
@@ -19,7 +19,7 @@ func TestBelt(t *testing.T) {
 
 	var potion *common.Item
 	for _, it := range inv.Items() {
-		if it.D1() != nil && it.D1().MiscID == "IMISC_HEAL" {
+		if it.Roll() != nil && it.Roll().MiscID == "IMISC_HEAL" {
 			potion = it
 		}
 	}
@@ -33,14 +33,14 @@ func TestBelt(t *testing.T) {
 	}
 	common.SetBeltEntry(player, 0, stack)
 
-	player.Hero().SpellLevels[d1.SplFirebolt] = 1
-	theGame.GetFactory().RefreshD1Spells(player)
+	player.Hero().SpellLevels[rules.SplFirebolt] = 1
+	theGame.GetFactory().RefreshSpells(player)
 	firebolt := player.GetTargetedSkills()[0]
 	if firebolt.GetInternalName() == "" {
 		t.Fatal("Firebolt has no internal name")
 	}
 	common.SetBeltEntry(player, 1, firebolt)
-	theGame.GetFactory().RefreshD1Spells(player)
+	theGame.GetFactory().RefreshSpells(player)
 	if common.BeltEntry(player, 1) != firebolt {
 		t.Fatal("a refresh replaced the belted spell")
 	}

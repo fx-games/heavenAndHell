@@ -1,0 +1,8 @@
+[map] Dung_corridor2
+
+[tiles] 8 1
+-1 64 64 64 64 64 64 -1
+
+[entities]
+WestConnector	0	0
+EastConnector	7	0

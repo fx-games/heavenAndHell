@@ -12,11 +12,12 @@ import (
 	"rpg/files"
 	"rpg/src/audio"
 	"rpg/src/common"
-	"rpg/src/d1"
 	"rpg/src/defs"
+	"rpg/src/dungen"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
-	"rpg/src/ldtk"
+	"rpg/src/hhm"
+	"rpg/src/rules"
 	"rpg/src/stats"
 	"rpg/src/util"
 	"strings"
@@ -25,7 +26,8 @@ import (
 )
 
 type GameInstance struct {
-	switchMod func() // SetModSwitcher
+	broken    map[int]bool // save slots that failed to load this session; menus skip them
+	switchMod func()       // SetModSwitcher
 	// base infos / config
 	deviceIndependentScreenSize geometry.Point
 	configuration               *common.Configuration
@@ -61,15 +63,16 @@ type GameInstance struct {
 
 	// data definitions
 	dataDefinitions  defs.DataContainer
-	d1Data           *d1.Data
+	data             *rules.Data
+	levels           *dungen.Levels
 	levelSeed        int64
 	levelSnapshots   map[string]*common.LevelSnapshot
 	autosave         bool // on once a game was started or loaded through the menus
 	slot             int  // the save slot this game autosaves into; 0 for the throwaway game behind the start menu
 	refreshThumbnail bool // the slot's screenshot predates this game; the first player turn saves once more
 	permadeath       bool
-	premium          d1.Premium // Griswold's premium stock
-	boyItem          *d1.Item   // Wirt's item
+	premium          rules.Premium // Griswold's premium stock
+	boyItem          *rules.Item   // Wirt's item
 	boyLevel         int
 	storesShown      bool // stores were stocked this session, so missing items were bought
 
@@ -167,7 +170,7 @@ func (g *GameInstance) GetAudio() *audio.Player {
 func (g *GameInstance) SeedRandom(seed int64) { common.SeedRandom(seed) }
 
 func NewGameInstance(startInfo common.StartInfo, uiController common.UserInterface) *GameInstance {
-	g := &GameInstance{
+	g := &GameInstance{broken: map[int]bool{},
 		startInfo:    startInfo,
 		uiController: uiController,
 		randomSource: common.Random(),
@@ -181,12 +184,12 @@ func NewGameInstance(startInfo common.StartInfo, uiController common.UserInterfa
 	g.dataDefinitions = defs.LoadGameData(func(err string) {
 		slog.Warn("game data", "err", err)
 	})
-	d1Data, err := d1.Load(files.GetFileSystem())
+	data, err := rules.Load(files.GetFileSystem())
 	if err != nil {
 		panic(err)
 	}
-	g.d1Data = d1Data
-	if err := common.LoadItemNameTemplates(); err != nil {
+	g.data = data
+	if g.levels, err = dungen.LoadLevels(files.GetFileSystem()); err != nil {
 		panic(err)
 	}
 	g.ResetGame(g.dataDefinitions.ClassDefinitions[0])
@@ -211,12 +214,11 @@ func (g *GameInstance) giveAndEquipItemToActor(actor *common.Actor, item *common
 // g.audioPlayer, g.dataDefinitions, g.state
 func (g *GameInstance) getActionContext() common.ActionContext {
 	return common.ActionContext{
-		GameState:     g.GetWorldState(),
-		UserInterface: g.GetUserInterface,
-		Show:          func(r common.UIRequest) { show(g.GetUserInterface(), r) },
-		AudioPlayer:   g.audioPlayer,
-		Data:          g.dataDefinitions,
-		Msg:           g.PlayerMessage,
+		GameState:   g.GetWorldState(),
+		Show:        func(r common.UIRequest) { show(g.GetUserInterface(), r) },
+		AudioPlayer: g.audioPlayer,
+		Data:        g.dataDefinitions,
+		Msg:         g.PlayerMessage,
 	}
 }
 
@@ -228,7 +230,7 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 	g.levelSeed = seed
 	g.heroLevel = 0
 	g.levelSnapshots = map[string]*common.LevelSnapshot{}
-	g.premium, g.boyItem, g.boyLevel, g.storesShown = d1.Premium{}, nil, 0, false
+	g.premium, g.boyItem, g.boyLevel, g.storesShown = rules.Premium{}, nil, 0, false
 	// we have loaded at this point:
 	// - random source
 	// - audio player
@@ -243,13 +245,14 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 
 	g.feeds = nil // a new or loaded game rewrites every feed on its first turn
 
-	ldtkFileName := g.startInfo.LDTKMapFile
-	ldtkFile, _ := files.ReadFile(ldtkFileName)
-	ldtkProject, _ := ldtk.Open(ldtkFile)
+	drawnMaps, err := hhm.Load(files.GetFileSystem(), g.startInfo.MapDir)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	timeKeeper := common.NewTimeKeeper(g.hasEnergyForAction)
 
-	g.state = common.NewState(ldtkProject)
+	g.state = common.NewState(drawnMaps)
 	g.state.SetLighting(common.Lighting())
 	g.state.SetDungeonRules(common.ReadDungeonRules())
 	g.state.SetPlayerMessage(g.PlayerMessage)
@@ -271,12 +274,12 @@ func (g *GameInstance) resetGame(playerStartDefinition defs.LoadoutDefinition, s
 		ActionBroker:   g.actionBroker,
 		RandomSource:   g.randomSource,
 		State:          g.GetWorldState(),
-		UI:             g.GetUserInterface,
-		Show:           func(r common.UIRequest) { show(g.factory.UI(), r) }, // f.UI, which a test may swap
+		Show:           func(r common.UIRequest) { show(g.GetUserInterface(), r) },
 		GetTimeKeeper:  g.state.GetTimeKeeper,
 		Msg:            g.PlayerMessage,
 		QueueAfterTurn: g.queueAfterTurn,
-		Generator:      d1.NewGenerator(g.gameData(), g.randomSource.Int31()),
+		Generator:      rules.NewGenerator(g.gameData(), g.randomSource.Int31()),
+		Levels:         g.levels,
 		Audio:          g.audioPlayer,
 		Classes:        g.dataDefinitions.ClassDefinitions,
 	}
@@ -377,11 +380,11 @@ func (g *GameInstance) onPlayerTurnTaken(autUsed int) {
 		g.state.GetTimeKeeper().PlayerTakesTurn(lost)
 	}
 	// ISPL_DRAINLIFE (ProcessPlayers): a cursed item drains 4/64 HP per tick outside town
-	if player.IsAlive() && player.Hero() != nil && player.HeroSheet().Flags&d1.ISplDrainLife != 0 && !g.state.IsPlayerInTown() {
-		g.actionBroker.Execute(common.NewChangeResourceAction(common.AbstractCause("Drain life"), player, stats.Health, -float64(autUsed*d1.RefWalkTicks*4)/10/64))
+	if player.IsAlive() && player.Hero() != nil && player.HeroSheet().Flags&rules.ISplDrainLife != 0 && !g.state.IsPlayerInTown() {
+		g.actionBroker.Execute(common.NewChangeResourceAction(common.AbstractCause("Drain life"), player, stats.Health, -float64(autUsed*rules.RefWalkTicks*4)/10/64))
 	}
 
-	common.D1BurningCross(&g.state, player, autUsed)
+	common.BurningCross(&g.state, player, autUsed)
 
 	// execute after turn events, =?
 	for _, event := range g.executeAfterTurn {
@@ -425,11 +428,11 @@ func (g *GameInstance) updateStatsDisplay() {
 
 func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition) *common.Actor {
 	// The hero's per-class numbers - starting attributes, their caps, the life and mana curves, to-hit and the
-	// animation lengths - are content, and they live in the mod's hero.rec. Building a hero without them would
+	// animation lengths - are content, and they live in the mod's classes.rec. Building a hero without them would
 	// give a character sheet of zeroes that looks like a game until you played it, which is exactly the class of
 	// bug this split keeps producing. Stop here instead, naming the file.
-	if !g.d1Data.HeroTablesLoaded() {
-		log.Fatalf("mod %q has no hero: expected files/mods/%s/data/hero.rec with this game's per-class numbers",
+	if !g.data.HeroTablesLoaded() {
+		log.Fatalf("mod %q has no hero: expected files/mods/%s/data/classes.rec and hero.rec with this game's per-class numbers",
 			files.ActiveMod(), files.ActiveMod())
 	}
 	player := common.NewActor(playerStartDefinition.Icon)
@@ -439,12 +442,12 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	player.SetName("Player")
 	g.state.SetPlayer(player)
 
-	hero := g.d1Data.NewHero(g.classIndex(playerStartDefinition))
+	hero := g.data.NewHero(playerStartDefinition.InternalName)
 	player.SetHero(hero)
-	gen := g.factory.D1()
-	idxs, pack := startingItems(playerStartDefinition, gen.D.ItemIdx)
-	for i, idx := range idxs {
-		item := g.factory.NewD1Item(gen.PlainItem(idx))
+	gen := g.factory.Gen()
+	bases, pack := startingItems(playerStartDefinition, gen.D.ItemsByName)
+	for i, b := range bases {
+		item := g.factory.NewRolledItem(gen.PlainItem(b))
 		if item.IsEquippable() && !pack[i] {
 			g.giveAndEquipItemToActor(player, item)
 		} else {
@@ -456,10 +459,10 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	player.GetStats().GetResource(stats.Health).SetToMax()
 	player.GetStats().GetResource(stats.Mana).SetToMax()
 	player.GetStats().SetOnChangeHandler(g.updateStatsDisplay)
-	g.factory.RefreshD1Spells(player)
+	g.factory.RefreshSpells(player)
 	player.GetEquipment().SetOnChangeHandler(func() {
 		common.SyncHero(player)
-		g.factory.RefreshD1Spells(player)
+		g.factory.RefreshSpells(player)
 		g.writeFeeds()
 		g.uiController.RefreshIconBars() // equipping takes no turn and leaves the pack as it is
 	})
@@ -470,7 +473,7 @@ func (g *GameInstance) createPlayer(playerStartDefinition defs.LoadoutDefinition
 	return player
 }
 
-func (g *GameInstance) gameData() *d1.Data { return g.d1Data }
+func (g *GameInstance) gameData() *rules.Data { return g.data }
 
 func (g *GameInstance) GetFactory() *common.Factory { return g.factory }
 
@@ -478,8 +481,8 @@ func (g *GameInstance) GetWorldState() *common.State {
 	return &g.state
 }
 
-// d1DebugItems: go to a level, god mode, complete a quest (decision 16).
-func (g *GameInstance) d1DebugItems() []util.MenuItem {
+// debugItems: go to a level, god mode, complete a quest (decision 16).
+func (g *GameInstance) debugItems() []util.MenuItem {
 	var levels, quests []util.MenuItem
 	for _, l := range g.state.Levels() {
 		if l.Town {
@@ -490,14 +493,17 @@ func (g *GameInstance) d1DebugItems() []util.MenuItem {
 		}})
 	}
 	for q, def := range g.state.QuestDefs() {
+		if def.Key == "" {
+			continue
+		}
 		quests = append(quests, util.MenuItem{MainText: def.Name, Action: func() {
 			g.state.GetFlags().SetTrue(g.state.QuestFlag(q))
 			g.state.QuestsChanged(g.state.GetMap())
 		}})
 	}
 	quests = append(quests, util.MenuItem{MainText: "Cain has the Staff of Lazarus", Action: func() {
-		g.state.SetQuestActive(d1.QBetrayer, d1.QuestActive)
-		g.state.SetQuestVar(d1.QBetrayer, 1, 2)
+		g.state.SetQuestActive(rules.QBetrayer, rules.QuestActive)
+		g.state.SetQuestVar(rules.QBetrayer, 1, 2)
 		g.state.QuestsChanged(g.state.GetMap())
 	}})
 	return []util.MenuItem{
@@ -506,7 +512,7 @@ func (g *GameInstance) d1DebugItems() []util.MenuItem {
 		{MainText: "Complete quest", Action: func() { g.uiController.OpenMenu(quests) }},
 		{MainText: "Spawn random unique", Action: func() {
 			player := g.state.GetPlayer()
-			if a := g.factory.SpawnRandomD1Unique(player.MapPosition()); a != nil {
+			if a := g.factory.SpawnRandomUnique(player.MapPosition()); a != nil {
 				g.uiController.ShowLogMessage(fmt.Sprintf("Spawned %s", a.Name()))
 			} else {
 				g.uiController.ShowLogMessage("No free space to spawn it")
@@ -516,7 +522,7 @@ func (g *GameInstance) d1DebugItems() []util.MenuItem {
 }
 
 func (g *GameInstance) showDebugMenu() {
-	g.uiController.OpenMenu(append(g.d1DebugItems(), []util.MenuItem{
+	g.uiController.OpenMenu(append(g.debugItems(), []util.MenuItem{
 		{
 			MainText: "Toggle Debug Mode",
 			Action: func() {
@@ -606,10 +612,13 @@ func (g *GameInstance) showDebugMenu() {
 				playerStats.GetResource(stats.Mana).Increase(10000)
 				playerStats.SetAttribute(stats.Gold, 200000)
 
-				inv := g.state.GetPlayer().GetInventory()
+				inv, d := g.state.GetPlayer().GetInventory(), g.factory.Gen().D
 				for i := 0; i < 10; i++ {
-					inv.Add(g.factory.NewD1Item(g.factory.D1().PlainItem(d1.IdxHeal)))
-					inv.Add(g.factory.NewD1Item(g.factory.D1().PlainItem(d1.IdxMana)))
+					for _, e := range d.DropTables["useful"].Drops { // what barrels hold: the mod's potions
+						if e.Item != nil {
+							inv.Add(g.factory.NewRolledItem(g.factory.Gen().PlainItem(e.Item)))
+						}
+					}
 				}
 				g.uiController.UpdateStatsLabel()
 			},
@@ -640,8 +649,8 @@ func (g *GameInstance) killLevel() {
 
 // getAIAction returns the action to execute and the cost in AUT associated with it
 func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
-	if actor.D1Monster() != nil && actor.D1Monster().AI != "" { // a D1 brain; a record without one gets the general AI
-		return g.getD1MonsterAction(actor)
+	if actor.Monster() != nil && actor.Monster().AI != "" { // a D1 brain; a record without one gets the general AI
+		return g.getMonsterAction(actor)
 	}
 	autCostMove := actor.MoveCost()
 	autCostMeleeAttack := actor.AttackCost(common.MeleeAttack)
@@ -730,12 +739,13 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 				if !skill.CanActivate(actor) {
 					continue
 				}
-				skillUseChance := g.randomSource.Intn(10) == 0
+				// Shield goes up the moment the hero is seen; the rest only now and then
+				skillUseChance := skill.GetInternalName() == "shield_allies" || g.randomSource.Intn(10) == 0
 				if !skillUseChance {
 					continue
 				}
-				return skill.GetTimeNeededInAut(), func() {
-					skill.Invoke(actor, "ai_skill_usage")
+				return actor.SkillCost(skill.GetTimeNeededInAut()), func() {
+					skill.Invoke(actor, "ai_skill_usage", false)
 				}
 			}
 		}
@@ -752,7 +762,7 @@ func (g *GameInstance) getAIAction(actor *common.Actor) (int, func()) {
 				if !targetInfo.IsValid {
 					continue
 				}
-				return skill.GetTimeNeededInAut(), func() {
+				return actor.SkillCost(skill.GetTimeNeededInAut()), func() {
 					skill.Execute(actor, actor.MapPosition(), playerPosition)
 				}
 			}
@@ -790,8 +800,8 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 	old, now := g.state.Level(oldMapName), g.state.Level(newMapName)
 	if now.Town {
 		currentMap := g.state.GetMap()
-		g.restockD1Town(currentMap) // every town's shopkeepers
-		common.PlaceD1Portal(g.GetWorldState(), currentMap)
+		g.restockTown(currentMap) // every town's shopkeepers
+		common.PlacePortal(g.GetWorldState(), currentMap)
 	} else {
 		g.state.GetFlags().SetTrue(common.FlagBeenUnderground) // town brightens up once the player has been below
 	}
@@ -804,7 +814,7 @@ func (g *GameInstance) onMapChanged(oldMapName string, newMapName string) {
 	default:
 		common.PlayUICue("stairs_down")
 	}
-	g.onD1MapChanged(oldMapName, newMapName)
+	g.onDungeonMapChanged(oldMapName, newMapName)
 
 	g.actions.updateFoV()
 	if g.configuration.AutosavesOnLevelChange() {
@@ -888,34 +898,24 @@ func (g *GameInstance) getDebugActions() common.DebugActions {
 
 // startingItems is the gear a hero starts with, as indices into the active mod's item table, and whether each
 // goes to the pack rather than being equipped ("club pack" in classes.rec).
-func startingItems(def defs.LoadoutDefinition, byName map[string]int) (idx []int, pack []bool) {
+func startingItems(def defs.LoadoutDefinition, byName map[string]*rules.ItemData) (bases []*rules.ItemData, pack []bool) {
 	for _, entry := range def.Items {
 		name, where, _ := strings.Cut(entry, " ")
-		i, ok := byName[name]
+		b, ok := byName[name]
 		if !ok {
 			slog.Warn("class starts with an item the mod's items.rec does not have", "class", def.InternalName, "item", name)
 			continue
 		}
-		idx, pack = append(idx, i), append(pack, strings.TrimSpace(where) == "pack")
+		bases, pack = append(bases, b), append(pack, strings.TrimSpace(where) == "pack")
 	}
-	return idx, pack
-}
-
-// classIndex is the class's row in the mod's roster; hero.rec's record of the same row holds its rules.
-func (g *GameInstance) classIndex(def defs.LoadoutDefinition) int {
-	for i, c := range g.GetGameData().ClassDefinitions {
-		if c.InternalName == def.InternalName {
-			return i
-		}
-	}
-	return 0
+	return bases, pack
 }
 
 func (g *GameInstance) GenerateLoot(dungeonLevel int, count int) []*common.Item {
 	var result []*common.Item
 	for len(result) < count {
-		if it := g.factory.D1().FloorItem(dungeonLevel, true, dungeonLevel > 12); it != nil {
-			result = append(result, g.factory.NewD1Item(it))
+		if it := g.factory.Gen().FloorItem(dungeonLevel, true, dungeonLevel > 12); it != nil {
+			result = append(result, g.factory.NewRolledItem(it))
 		}
 	}
 	return result

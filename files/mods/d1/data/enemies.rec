@@ -4,14 +4,22 @@
 #   internal_name     id (D1's MT_* name, or "rat"); required
 #   name              shown name
 #   icon              icons/actors.rec id, e.g. monster.nzombie
+#   tint              "R G B" its icon is tinted with (variants of one family share an icon); empty: none
 #   ascii / unicode / cp437   the glyph in the text renderers
 #   color             "R G B", the glyph's colour
-#   graphics_family / graphics_size   D1's graphics folder and its memory budget per level (level monster mix)
-#   frames / rate     six numbers each: animation lengths and speeds for stand, walk, attack, hit, death, special
+#   graphics_family   D1's graphics folder (variants share it; some D1 rules read it)
+#   speed_move        AUT a step takes (10 = one normal turn); default 10
+#   speed_attack      AUT an attack takes, divided by an equipped weapon's weapon_speed; default 10
+#   speed_recovery    AUT a hard hit costs it (D1: hit animation minus the attack after the blow); 0 = none
+#   special_one_in    the Fallen's howl: 1 in N per turn it stands around
+#   flee_distance     how far it runs when a comrade dies within 5 cells (AI_FALLEN's fear); 0: it stands
 # Where it spawns:
 #   dlvl              the shallowest level it appears on; max_dlvl the deepest (0: no limit)
 #   level             its monster level (to-hit, experience, drops); defaults to dlvl
-#   available         0 never spawns at random (only placed by quests or rooms); otherwise it may
+#   random_spawn      false: never rolled at random, only placed by quests, rooms or group_spawn (default true)
+#   spawn_cost        what the type costs of a level's 4000 spawn budget (D1: its graphics' memory); a level
+#                     draws its monster types at random until the budget is spent; 0 (default): free
+#   spawn_weight      relative odds among the monsters that can appear at a depth (default 1; dungen levels only)
 #   out_of_depth_chance / min_level_for_ood   chance to appear above its dlvl, from this dungeon level on
 #   group_spawn       companions spawned with it: "<internal_name>" or "<internal_name>(<count or min-max>)"; repeatable
 # Combat:
@@ -19,20 +27,30 @@
 #                     a number; a monster without an ai takes it as stated
 #   damage / damage2  its first and second attack's damage, same notation
 #   hit / hit2        to-hit of each attack (without an ai: defaults to 5 x stats_dexterity)
-#   afnum / afnum2    animation frame on which each attack lands
 #   magic_res / magic_res2   resistance and immunity bits (D1's mMagicRes: IMUNE_/RESIST_ magic, fire, lightning)
-#   treasure          what it drops (D1's mTreasure): 0x4000 never drops anything, 0x8000 + n always drops unique item n
+#   drops             "none": never drops anything; a unique item's id ("the_undead_crown", its name as a slug):
+#                     always drops it;
+#                     unset: the usual roll
 #   stats_<stat>      stats_armor_class and stats_experience are its AC and experience; stats_strength /
 #                     _dexterity / _intelligence feed the skill-driven combat of a monster without an ai
-#   base_speed        how fast it acts, for a monster without an ai
 # Behaviour:
 #   ai                a D1 brain (AI_ZOMBIE, AI_SKELSD, ...; see monsters.rec); empty: skills and aggro_range drive it
 #   class             MC_UNDEAD, MC_DEMON or MC_ANIMAL (hero.rec's weapon bonuses and some spells read it)
-#   flags             bits: 0x01 hidden, 0x10 fights other monsters, 0x20 golem, 0x80 knocks back, 0x100 searches,
-#                     0x200 opens doors, 0x1000 no life steal
-#   int               its intelligence (D1's mInt: how clever its ai plays)
+#   ai_level          0-3, how sharp its D1 ai plays (D1's mInt): more attacks and shots, shorter pauses, reacts
+#                     from farther away
 #   aggro_range       how far it notices the hero, for a monster without an ai
-#   tags              "a | b": unique (never rolled at random, it lives in its room), no_corpse, flying
+#   tags              "a | b": unique (never rolled at random, it lives in its room), no_corpse, flying,
+#                     hidden (invisible), knockback (its melee pushes the hero back), searches (hunts the hero
+#                     down from afar), opens_doors; and Diablo's own behaviours: raisable (the Skeleton King
+#                     raises it), raised_by_default (what he raises when the level has none), acid_blood (dies
+#                     into an acid puddle), flinches_at_any_hit, turns_on_attacker (a hit sends it at the
+#                     attacker), blinks_when_hit (teleports next to the attacker), charges_from_afar,
+#                     lightning_with_melee, erratic_circling, weapon_proof_retreat (weapons miss it while it
+#                     retreats), drains_max_life (its hits take max life for good), stone_immune (runes of stone
+#                     fail), fire_wall_walker (walks into fire walls although immune), golem (what the Golem
+#                     spell summons)
+#   sight_sfx         sfx.rec id it says the first time it sees the hero (the Butcher's "fresh meat")
+#   fixed_health      its hit points, whatever health rolls (the roll still happens, for the RNG)
 #   targeted_skill / untargeted_skill   skills from effects/*.rec it uses; repeatable
 #   equipment         an item it carries, by internal_name; repeatable
 # Words:
@@ -52,111 +70,98 @@ icon: monster.nzombie
 dlvl: 1
 max_dlvl: 3
 level: 1
-available: 1
 health: 4-7
 damage: 2-5
 damage2: 0
 hit: 10
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_ZOMBIE
 class: MC_UNDEAD
-flags: 0
-int: 0
 magic_res: 72
 magic_res2: 72
-treasure: 0
 stats_armor_class: 5
 stats_experience: 54
 graphics_family: Zombie
-graphics_size: 799
-frames: 11, 24, 12, 6, 16, 0
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 799
+speed_move: 30
+speed_attack: 15
+speed_recovery: 3
 
 internal_name: MT_BZOMBIE
 name: Ghoul
+tint: 160 200 255
 icon: monster.bzombie
 dlvl: 2
 max_dlvl: 4
 level: 2
-available: 1
 health: 7-11
 damage: 3-10
 damage2: 0
 hit: 10
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_ZOMBIE
 class: MC_UNDEAD
-flags: 0
-int: 1
+ai_level: 1
 magic_res: 72
 magic_res2: 72
-treasure: 0
 stats_armor_class: 10
 stats_experience: 58
 graphics_family: Zombie
-graphics_size: 799
-frames: 11, 24, 12, 6, 16, 0
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 799
+speed_move: 30
+speed_attack: 15
+speed_recovery: 3
 
 internal_name: MT_GZOMBIE
 name: Rotting Carcass
+tint: 255 190 120
 icon: monster.gzombie
 dlvl: 2
 max_dlvl: 6
 level: 4
-available: 1
 health: 15-25
 damage: 5-15
 damage2: 0
 hit: 25
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_ZOMBIE
 class: MC_UNDEAD
-flags: 0
-int: 2
+ai_level: 2
 magic_res: 72
 magic_res2: 74
-treasure: 0
 stats_armor_class: 15
 stats_experience: 136
 graphics_family: Zombie
-graphics_size: 799
-frames: 11, 24, 12, 6, 16, 0
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 799
+speed_move: 30
+speed_attack: 15
+speed_recovery: 3
 
 internal_name: MT_YZOMBIE
 name: Black Death
+tint: 255 110 110
 icon: monster.yzombie
 dlvl: 4
 max_dlvl: 8
 level: 6
-available: 1
 health: 25-40
 damage: 6-22
 damage2: 0
 hit: 30
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_ZOMBIE
 class: MC_UNDEAD
-flags: 0
-int: 3
+ai_level: 3
 magic_res: 72
 magic_res2: 76
-treasure: 0
 stats_armor_class: 20
 stats_experience: 240
 graphics_family: Zombie
-graphics_size: 799
-frames: 11, 24, 12, 6, 16, 0
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 799
+speed_move: 30
+speed_attack: 15
+speed_recovery: 3
+tags: drains_max_life
 
 internal_name: MT_RFALLSP
 name: Fallen One
@@ -164,111 +169,105 @@ icon: monster.rfallsp
 dlvl: 1
 max_dlvl: 3
 level: 1
-available: 1
 health: 1-4
 damage: 1-3
 damage2: 0
 hit: 15
-afnum: 7
 hit2: 0
-afnum2: 5
 ai: AI_FALLEN
 class: MC_ANIMAL
-flags: 0
-int: 0
 magic_res: 0
 magic_res2: 0
-treasure: 0
 stats_armor_class: 0
 stats_experience: 46
 graphics_family: FalSpear
-graphics_size: 543
-frames: 11, 11, 13, 11, 18, 13
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 543
+speed_move: 14
+speed_attack: 16
+speed_recovery: 6
+special_one_in: 132
+flee_distance: 7
 
 internal_name: MT_DFALLSP
 name: Carver
+tint: 160 200 255
 icon: monster.dfallsp
 dlvl: 2
 max_dlvl: 5
 level: 3
-available: 1
 health: 4-8
 damage: 2-5
 damage2: 0
 hit: 20
-afnum: 7
 hit2: 0
-afnum2: 5
 ai: AI_FALLEN
 class: MC_ANIMAL
-flags: 0
-int: 2
+ai_level: 2
 magic_res: 0
 magic_res2: 0
-treasure: 0
 stats_armor_class: 5
 stats_experience: 80
 graphics_family: FalSpear
-graphics_size: 543
-frames: 11, 11, 13, 11, 18, 13
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 543
+speed_move: 14
+speed_attack: 16
+speed_recovery: 6
+special_one_in: 132
+flee_distance: 5
 
 internal_name: MT_YFALLSP
 name: Devil Kin
+tint: 255 190 120
 icon: monster.yfallsp
 dlvl: 3
 max_dlvl: 7
 level: 5
-available: 1
 health: 12-24
 damage: 3-7
 damage2: 0
 hit: 25
-afnum: 7
 hit2: 0
-afnum2: 5
 ai: AI_FALLEN
 class: MC_ANIMAL
-flags: 0
-int: 2
+ai_level: 2
 magic_res: 0
 magic_res2: 2
-treasure: 0
 stats_armor_class: 10
 stats_experience: 155
 graphics_family: FalSpear
-graphics_size: 543
-frames: 11, 11, 13, 11, 18, 13
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 543
+speed_move: 14
+speed_attack: 16
+speed_recovery: 6
+special_one_in: 132
+flee_distance: 3
 
 internal_name: MT_BFALLSP
 name: Dark One
+tint: 255 110 110
 icon: monster.bfallsp
 dlvl: 5
 max_dlvl: 9
 level: 7
-available: 1
 health: 20-36
 damage: 4-8
 damage2: 0
 hit: 30
-afnum: 7
 hit2: 0
-afnum2: 5
 ai: AI_FALLEN
 class: MC_ANIMAL
-flags: 0
-int: 3
+ai_level: 3
 magic_res: 64
 magic_res2: 68
-treasure: 0
 stats_armor_class: 15
 stats_experience: 255
 graphics_family: FalSpear
-graphics_size: 543
-frames: 11, 11, 13, 11, 18, 13
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 543
+speed_move: 14
+speed_attack: 16
+speed_recovery: 6
+special_one_in: 132
+flee_distance: 2
 
 internal_name: MT_WSKELAX
 name: Skeleton
@@ -276,111 +275,101 @@ icon: monster.wskelax
 dlvl: 1
 max_dlvl: 3
 level: 1
-available: 1
 health: 2-4
 damage: 1-4
 damage2: 0
 hit: 20
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_UNDEAD
-flags: 0
-int: 0
 magic_res: 72
 magic_res2: 72
-treasure: 0
 stats_armor_class: 0
 stats_experience: 64
 graphics_family: SkelAxe
-graphics_size: 553
-frames: 12, 8, 13, 6, 17, 16
-rate: 5, 0, 0, 0, 0, 0
+spawn_cost: 553
+speed_move: 10
+speed_attack: 16
+speed_recovery: 1
+tags: raisable | raised_by_default
 
 internal_name: MT_TSKELAX
 name: Corpse Axe
+tint: 160 200 255
 icon: monster.tskelax
 dlvl: 2
 max_dlvl: 5
 level: 2
-available: 1
 health: 4-7
 damage: 3-5
 damage2: 0
 hit: 25
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_UNDEAD
-flags: 0
-int: 1
+ai_level: 1
 magic_res: 72
 magic_res2: 72
-treasure: 0
 stats_armor_class: 0
 stats_experience: 68
 graphics_family: SkelAxe
-graphics_size: 553
-frames: 12, 8, 13, 6, 17, 16
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 553
+speed_move: 10
+speed_attack: 16
+speed_recovery: 1
+tags: raisable
 
 internal_name: MT_RSKELAX
 name: Burning Dead
+tint: 255 190 120
 icon: monster.rskelax
 dlvl: 2
 max_dlvl: 6
 level: 4
-available: 1
 health: 8-12
 damage: 3-7
 damage2: 0
 hit: 30
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_UNDEAD
-flags: 0
-int: 2
+ai_level: 2
 magic_res: 74
 magic_res2: 88
-treasure: 0
 stats_armor_class: 5
 stats_experience: 154
 graphics_family: SkelAxe
-graphics_size: 553
-frames: 12, 8, 13, 6, 17, 16
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 553
+speed_move: 10
+speed_attack: 16
+speed_recovery: 1
+tags: raisable
 
 internal_name: MT_XSKELAX
 name: Horror
+tint: 255 110 110
 icon: monster.xskelax
 dlvl: 4
 max_dlvl: 8
 level: 6
-available: 1
 health: 12-20
 damage: 4-9
 damage2: 0
 hit: 35
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_UNDEAD
-flags: 0
-int: 3
+ai_level: 3
 magic_res: 76
 magic_res2: 76
-treasure: 0
 stats_armor_class: 15
 stats_experience: 264
 graphics_family: SkelAxe
-graphics_size: 553
-frames: 12, 8, 13, 6, 17, 16
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 553
+speed_move: 10
+speed_attack: 16
+speed_recovery: 1
+tags: raisable
 
 internal_name: MT_RFALLSD
 name: Fallen One
@@ -388,111 +377,105 @@ icon: monster.rfallsd
 dlvl: 1
 max_dlvl: 3
 level: 1
-available: 1
 health: 2-5
 damage: 1-4
 damage2: 0
 hit: 15
-afnum: 8
 hit2: 0
-afnum2: 5
 ai: AI_FALLEN
 class: MC_ANIMAL
-flags: 0
-int: 0
 magic_res: 0
 magic_res2: 0
-treasure: 0
 stats_armor_class: 10
 stats_experience: 52
 graphics_family: FalSword
-graphics_size: 623
-frames: 12, 12, 13, 11, 14, 15
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 623
+speed_move: 15
+speed_attack: 16
+speed_recovery: 8
+special_one_in: 144
+flee_distance: 7
 
 internal_name: MT_DFALLSD
 name: Carver
+tint: 160 200 255
 icon: monster.dfallsd
 dlvl: 2
 max_dlvl: 5
 level: 3
-available: 1
 health: 5-9
 damage: 2-7
 damage2: 0
 hit: 20
-afnum: 8
 hit2: 0
-afnum2: 5
 ai: AI_FALLEN
 class: MC_ANIMAL
-flags: 0
-int: 1
+ai_level: 1
 magic_res: 0
 magic_res2: 0
-treasure: 0
 stats_armor_class: 15
 stats_experience: 90
 graphics_family: FalSword
-graphics_size: 623
-frames: 12, 12, 13, 11, 14, 15
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 623
+speed_move: 15
+speed_attack: 16
+speed_recovery: 8
+special_one_in: 144
+flee_distance: 5
 
 internal_name: MT_YFALLSD
 name: Devil Kin
+tint: 255 190 120
 icon: monster.yfallsd
 dlvl: 3
 max_dlvl: 7
 level: 5
-available: 1
 health: 16-24
 damage: 4-10
 damage2: 0
 hit: 25
-afnum: 8
 hit2: 0
-afnum2: 5
 ai: AI_FALLEN
 class: MC_ANIMAL
-flags: 0
-int: 2
+ai_level: 2
 magic_res: 0
 magic_res2: 2
-treasure: 0
 stats_armor_class: 20
 stats_experience: 180
 graphics_family: FalSword
-graphics_size: 623
-frames: 12, 12, 13, 11, 14, 15
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 623
+speed_move: 15
+speed_attack: 16
+speed_recovery: 8
+special_one_in: 144
+flee_distance: 3
 
 internal_name: MT_BFALLSD
 name: Dark One
+tint: 255 110 110
 icon: monster.bfallsd
 dlvl: 5
 max_dlvl: 9
 level: 7
-available: 1
 health: 24-36
 damage: 4-12
 damage2: 0
 hit: 30
-afnum: 8
 hit2: 0
-afnum2: 5
 ai: AI_FALLEN
 class: MC_ANIMAL
-flags: 0
-int: 3
+ai_level: 3
 magic_res: 64
 magic_res2: 68
-treasure: 0
 stats_armor_class: 25
 stats_experience: 280
 graphics_family: FalSword
-graphics_size: 623
-frames: 12, 12, 13, 11, 14, 15
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 623
+speed_move: 15
+speed_attack: 16
+speed_recovery: 8
+special_one_in: 144
+flee_distance: 2
 
 internal_name: MT_NSCAV
 name: Scavenger
@@ -500,111 +483,101 @@ icon: monster.nscav
 dlvl: 1
 max_dlvl: 4
 level: 2
-available: 1
 health: 3-6
 damage: 1-5
 damage2: 0
 hit: 20
-afnum: 7
 hit2: 0
-afnum2: 0
 ai: AI_SCAV
 class: MC_ANIMAL
-flags: 0
-int: 0
 magic_res: 0
 magic_res2: 2
-treasure: 0
 stats_armor_class: 10
 stats_experience: 80
 graphics_family: Scav
-graphics_size: 410
-frames: 12, 8, 12, 6, 20, 11
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 410
+speed_move: 10
+speed_attack: 15
+speed_recovery: 1
+tags: turns_on_attacker
 
 internal_name: MT_BSCAV
 name: Plague Eater
+tint: 160 200 255
 icon: monster.bscav
 dlvl: 3
 max_dlvl: 6
 level: 4
-available: 1
 health: 12-24
 damage: 1-8
 damage2: 0
 hit: 30
-afnum: 7
 hit2: 0
-afnum2: 0
 ai: AI_SCAV
 class: MC_ANIMAL
-flags: 0
-int: 1
+ai_level: 1
 magic_res: 0
 magic_res2: 4
-treasure: 0
 stats_armor_class: 20
 stats_experience: 188
 graphics_family: Scav
-graphics_size: 410
-frames: 12, 8, 12, 6, 20, 11
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 410
+speed_move: 10
+speed_attack: 15
+speed_recovery: 1
+tags: turns_on_attacker
 
 internal_name: MT_WSCAV
 name: Shadow Beast
+tint: 255 190 120
 icon: monster.wscav
 dlvl: 4
 max_dlvl: 8
 level: 6
-available: 1
 health: 24-36
 damage: 3-12
 damage2: 0
 hit: 35
-afnum: 7
 hit2: 0
-afnum2: 0
 ai: AI_SCAV
 class: MC_ANIMAL
-flags: 0
-int: 2
+ai_level: 2
 magic_res: 64
 magic_res2: 66
-treasure: 0
 stats_armor_class: 25
 stats_experience: 375
 graphics_family: Scav
-graphics_size: 410
-frames: 12, 8, 12, 6, 20, 11
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 410
+speed_move: 10
+speed_attack: 15
+speed_recovery: 1
+tags: turns_on_attacker
 
 internal_name: MT_YSCAV
 name: Bone Gasher
+tint: 255 110 110
 icon: monster.yscav
 dlvl: 6
 max_dlvl: 10
 level: 8
-available: 1
 health: 28-40
 damage: 5-15
 damage2: 0
 hit: 35
-afnum: 7
 hit2: 0
-afnum2: 0
 ai: AI_SCAV
 class: MC_ANIMAL
-flags: 0
-int: 3
+ai_level: 3
 magic_res: 65
 magic_res2: 68
-treasure: 0
 stats_armor_class: 30
 stats_experience: 552
 graphics_family: Scav
-graphics_size: 410
-frames: 12, 8, 12, 6, 20, 11
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 410
+speed_move: 10
+speed_attack: 15
+speed_recovery: 1
+tags: turns_on_attacker
 
 internal_name: MT_WSKELBW
 name: Skeleton
@@ -612,111 +585,101 @@ icon: monster.wskelbw
 dlvl: 2
 max_dlvl: 5
 level: 3
-available: 1
 health: 2-4
 damage: 1-2
 damage2: 0
 hit: 15
-afnum: 12
 hit2: 0
-afnum2: 0
 ai: AI_SKELBOW
 class: MC_UNDEAD
-flags: 0
-int: 0
 magic_res: 72
 magic_res2: 72
-treasure: 0
 stats_armor_class: 0
 stats_experience: 110
 graphics_family: SkelBow
-graphics_size: 567
-frames: 9, 8, 16, 5, 16, 16
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 567
+speed_move: 10
+speed_attack: 20
+speed_recovery: 1
+tags: raisable
 
 internal_name: MT_TSKELBW
 name: Corpse Bow
+tint: 160 200 255
 icon: monster.tskelbw
 dlvl: 3
 max_dlvl: 7
 level: 5
-available: 1
 health: 8-16
 damage: 1-4
 damage2: 0
 hit: 25
-afnum: 12
 hit2: 0
-afnum2: 0
 ai: AI_SKELBOW
 class: MC_UNDEAD
-flags: 0
-int: 1
+ai_level: 1
 magic_res: 72
 magic_res2: 72
-treasure: 0
 stats_armor_class: 0
 stats_experience: 210
 graphics_family: SkelBow
-graphics_size: 567
-frames: 9, 8, 16, 5, 16, 16
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 567
+speed_move: 10
+speed_attack: 20
+speed_recovery: 1
+tags: raisable
 
 internal_name: MT_RSKELBW
 name: Burning Dead
+tint: 255 190 120
 icon: monster.rskelbw
 dlvl: 5
 max_dlvl: 9
 level: 7
-available: 1
 health: 10-24
 damage: 1-6
 damage2: 0
 hit: 30
-afnum: 12
 hit2: 0
-afnum2: 0
 ai: AI_SKELBOW
 class: MC_UNDEAD
-flags: 0
-int: 2
+ai_level: 2
 magic_res: 74
 magic_res2: 88
-treasure: 0
 stats_armor_class: 5
 stats_experience: 364
 graphics_family: SkelBow
-graphics_size: 567
-frames: 9, 8, 16, 5, 16, 16
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 567
+speed_move: 10
+speed_attack: 20
+speed_recovery: 1
+tags: raisable
 
 internal_name: MT_XSKELBW
 name: Horror
+tint: 255 110 110
 icon: monster.xskelbw
 dlvl: 7
 max_dlvl: 11
 level: 9
-available: 1
 health: 15-45
 damage: 2-9
 damage2: 0
 hit: 35
-afnum: 12
 hit2: 0
-afnum2: 0
 ai: AI_SKELBOW
 class: MC_UNDEAD
-flags: 0
-int: 3
+ai_level: 3
 magic_res: 76
 magic_res2: 76
-treasure: 0
 stats_armor_class: 15
 stats_experience: 594
 graphics_family: SkelBow
-graphics_size: 567
-frames: 9, 8, 16, 5, 16, 16
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 567
+speed_move: 10
+speed_attack: 20
+speed_recovery: 1
+tags: raisable
 
 internal_name: MT_WSKELSD
 name: Skeleton Captain
@@ -724,111 +687,102 @@ icon: monster.wskelsd
 dlvl: 1
 max_dlvl: 4
 level: 2
-available: 1
 health: 3-6
 damage: 2-7
 damage2: 0
 hit: 20
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_UNDEAD
-flags: 0
-int: 0
 magic_res: 72
 magic_res2: 72
-treasure: 0
 stats_armor_class: 10
 stats_experience: 90
 graphics_family: SkelSd
-graphics_size: 575
-frames: 13, 8, 12, 7, 15, 16
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 575
+speed_move: 10
+speed_attack: 15
+speed_recovery: 4
+tags: raisable
 
 internal_name: MT_TSKELSD
 name: Corpse Captain
+tint: 160 200 255
 icon: monster.tskelsd
 dlvl: 2
 max_dlvl: 6
 level: 4
-available: 1
 health: 12-20
 damage: 3-9
 damage2: 0
 hit: 30
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_UNDEAD
-flags: 0
-int: 1
+ai_level: 1
 magic_res: 72
 magic_res2: 72
-treasure: 0
 stats_armor_class: 5
 stats_experience: 200
 graphics_family: SkelSd
-graphics_size: 575
-frames: 13, 8, 12, 7, 15, 16
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 575
+speed_move: 10
+speed_attack: 15
+speed_recovery: 4
+tags: raisable
 
 internal_name: MT_RSKELSD
 name: Burning Dead Captain
+tint: 255 190 120
 icon: monster.rskelsd
 dlvl: 4
 max_dlvl: 8
 level: 6
-available: 1
 health: 16-30
 damage: 4-10
 damage2: 0
 hit: 35
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_UNDEAD
-flags: 0
-int: 2
+ai_level: 2
 magic_res: 74
 magic_res2: 88
-treasure: 0
 stats_armor_class: 15
 stats_experience: 393
 graphics_family: SkelSd
-graphics_size: 575
-frames: 13, 8, 12, 7, 15, 16
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 575
+speed_move: 10
+speed_attack: 15
+speed_recovery: 4
+tags: raisable
 
 internal_name: MT_XSKELSD
 name: Horror Captain
+tint: 255 110 110
 icon: monster.xskelsd
 dlvl: 6
 max_dlvl: 10
 level: 8
-available: 1
 health: 35-50
 damage: 5-14
 damage2: 0
 hit: 40
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_UNDEAD
-flags: 256
-int: 3
+tags: searches
+ai_level: 3
 magic_res: 76
 magic_res2: 76
-treasure: 0
 stats_armor_class: 30
 stats_experience: 604
 graphics_family: SkelSd
-graphics_size: 575
-frames: 13, 8, 12, 7, 15, 16
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 575
+speed_move: 10
+speed_attack: 15
+speed_recovery: 4
+tags: raisable
 
 internal_name: MT_INVILORD
 name: Invisible Lord
@@ -836,27 +790,25 @@ icon: monster.invilord
 dlvl: 14
 max_dlvl: 14
 level: 14
-available: 0
+random_spawn: false
 health: 278
 damage: 16-30
 damage2: 0
 hit: 65
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_DEMON
-flags: 256
-int: 3
+tags: searches
+ai_level: 3
 magic_res: 71
 magic_res2: 71
-treasure: 0
 stats_armor_class: 60
 stats_experience: 2000
 graphics_family: TSneak
-graphics_size: 2000
-frames: 13, 13, 15, 11, 16, 0
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 2000
+speed_move: 16
+speed_attack: 19
+speed_recovery: 5
 
 internal_name: MT_SNEAK
 name: Hidden
@@ -864,111 +816,105 @@ icon: monster.sneak
 dlvl: 3
 max_dlvl: 8
 level: 5
-available: 2
 health: 8-24
 damage: 3-6
 damage2: 0
 hit: 35
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SNEAK
 class: MC_DEMON
-flags: 1
-int: 0
+tags: hidden
 magic_res: 0
 magic_res2: 64
-treasure: 0
 stats_armor_class: 25
 stats_experience: 278
 graphics_family: Sneak
-graphics_size: 992
-frames: 16, 8, 12, 8, 24, 15
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 992
+speed_move: 10
+speed_attack: 15
+speed_recovery: 5
+tags: flinches_at_any_hit
 
 internal_name: MT_STALKER
 name: Stalker
+tint: 160 200 255
 icon: monster.stalker
 dlvl: 8
 max_dlvl: 12
 level: 9
-available: 2
 health: 30-45
 damage: 8-16
 damage2: 0
 hit: 40
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SNEAK
 class: MC_DEMON
-flags: 257
-int: 1
+tags: hidden | searches
+ai_level: 1
 magic_res: 0
 magic_res2: 64
-treasure: 0
 stats_armor_class: 30
 stats_experience: 630
 graphics_family: Sneak
-graphics_size: 992
-frames: 16, 8, 12, 8, 24, 15
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 992
+speed_move: 10
+speed_attack: 15
+speed_recovery: 5
+tags: flinches_at_any_hit
 
 internal_name: MT_UNSEEN
 name: Unseen
+tint: 255 190 120
 icon: monster.unseen
 dlvl: 10
 max_dlvl: 14
 level: 11
-available: 2
 health: 35-50
 damage: 12-20
 damage2: 0
 hit: 45
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SNEAK
 class: MC_DEMON
-flags: 257
-int: 2
+tags: hidden | searches
+ai_level: 2
 magic_res: 65
 magic_res2: 72
-treasure: 0
 stats_armor_class: 30
 stats_experience: 935
 graphics_family: Sneak
-graphics_size: 992
-frames: 16, 8, 12, 8, 24, 15
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 992
+speed_move: 10
+speed_attack: 15
+speed_recovery: 5
+tags: flinches_at_any_hit | erratic_circling
 
 internal_name: MT_ILLWEAV
 name: Illusion Weaver
+tint: 255 110 110
 icon: monster.illweav
 dlvl: 14
 max_dlvl: 18
 level: 13
-available: 2
 health: 40-60
 damage: 16-24
 damage2: 0
 hit: 60
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SNEAK
 class: MC_DEMON
-flags: 257
-int: 3
+tags: hidden | searches
+ai_level: 3
 magic_res: 3
 magic_res2: 74
-treasure: 0
 stats_armor_class: 30
 stats_experience: 1500
 graphics_family: Sneak
-graphics_size: 992
-frames: 16, 8, 12, 8, 24, 15
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 992
+speed_move: 10
+speed_attack: 15
+speed_recovery: 5
+tags: flinches_at_any_hit | weapon_proof_retreat
 
 internal_name: MT_LRDSAYTR
 name: Lord Sayter
@@ -976,27 +922,25 @@ icon: monster.lrdsaytr
 dlvl: 13
 max_dlvl: 13
 level: 12
-available: 0
+random_spawn: false
 health: 351
 damage: 14-24
 damage2: 0
 hit: 80
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_DEMON
-flags: 256
-int: 3
+tags: searches
+ai_level: 3
 magic_res: 67
 magic_res2: 67
-treasure: 0
 stats_armor_class: 60
 stats_experience: 1500
 graphics_family: GoatLord
-graphics_size: 2000
-frames: 13, 13, 14, 9, 16, 0
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 2000
+speed_move: 16
+speed_attack: 18
+speed_recovery: 4
 
 internal_name: MT_NGOATMC
 name: Flesh Clan
@@ -1004,111 +948,101 @@ icon: monster.ngoatmc
 dlvl: 6
 max_dlvl: 10
 level: 8
-available: 2
 health: 30-45
 damage: 4-10
 damage2: 0
 hit: 50
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_GOATMC
 class: MC_DEMON
-flags: 768
-int: 0
+tags: searches | opens_doors
 magic_res: 0
 magic_res2: 0
-treasure: 0
 stats_armor_class: 40
 stats_experience: 460
 graphics_family: GoatMace
-graphics_size: 1030
-frames: 12, 8, 12, 6, 20, 12
-rate: 2, 0, 0, 0, 1, 0
+spawn_cost: 1030
+speed_move: 10
+speed_attack: 15
+speed_recovery: 3
 
 internal_name: MT_BGOATMC
 name: Stone Clan
+tint: 160 200 255
 icon: monster.bgoatmc
 dlvl: 8
 max_dlvl: 12
 level: 10
-available: 2
 health: 40-55
 damage: 6-12
 damage2: 0
 hit: 60
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_GOATMC
 class: MC_DEMON
-flags: 768
-int: 1
+tags: searches | opens_doors
+ai_level: 1
 magic_res: 65
 magic_res2: 72
-treasure: 0
 stats_armor_class: 40
 stats_experience: 685
 graphics_family: GoatMace
-graphics_size: 1030
-frames: 12, 8, 12, 6, 20, 12
-rate: 2, 0, 0, 0, 1, 0
+spawn_cost: 1030
+speed_move: 10
+speed_attack: 15
+speed_recovery: 3
 
 internal_name: MT_RGOATMC
 name: Fire Clan
+tint: 255 190 120
 icon: monster.rgoatmc
 dlvl: 10
 max_dlvl: 14
 level: 12
-available: 2
 health: 50-65
 damage: 8-16
 damage2: 0
 hit: 70
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_GOATMC
 class: MC_DEMON
-flags: 768
-int: 2
+tags: searches | opens_doors
+ai_level: 2
 magic_res: 2
 magic_res2: 16
-treasure: 0
 stats_armor_class: 45
 stats_experience: 906
 graphics_family: GoatMace
-graphics_size: 1030
-frames: 12, 8, 12, 6, 20, 12
-rate: 2, 0, 0, 0, 1, 0
+spawn_cost: 1030
+speed_move: 10
+speed_attack: 15
+speed_recovery: 3
 
 internal_name: MT_GGOATMC
 name: Night Clan
+tint: 255 110 110
 icon: monster.ggoatmc
 dlvl: 12
 max_dlvl: 16
 level: 14
-available: 2
 health: 55-70
 damage: 10-20
 damage2: 30
 hit: 80
-afnum: 8
 hit2: 15
-afnum2: 0
 ai: AI_GOATMC
 class: MC_DEMON
-flags: 768
-int: 3
+tags: searches | opens_doors
+ai_level: 3
 magic_res: 65
 magic_res2: 72
-treasure: 0
 stats_armor_class: 50
 stats_experience: 1190
 graphics_family: GoatMace
-graphics_size: 1030
-frames: 12, 8, 12, 6, 20, 12
-rate: 2, 0, 0, 0, 1, 0
+spawn_cost: 1030
+speed_move: 10
+speed_attack: 15
+speed_recovery: 3
 
 internal_name: MT_FIEND
 name: Fiend
@@ -1116,111 +1050,106 @@ icon: monster.fiend
 dlvl: 2
 max_dlvl: 5
 level: 3
-available: 1
 health: 3-6
 damage: 1-6
 damage2: 0
 hit: 35
-afnum: 5
 hit2: 0
-afnum2: 0
 ai: AI_BAT
 class: MC_ANIMAL
-flags: 0
-int: 0
 magic_res: 0
 magic_res2: 0
-treasure: 16384
+drops: none
 stats_armor_class: 0
 stats_experience: 102
 graphics_family: Bat
-graphics_size: 364
-frames: 9, 13, 10, 9, 13, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 364
+speed_move: 16
+speed_attack: 13
+speed_recovery: 5
 
 internal_name: MT_BLINK
 name: Blink
+tint: 160 200 255
 icon: monster.blink
 dlvl: 5
 max_dlvl: 9
 level: 7
-available: 1
 health: 12-28
 damage: 1-8
 damage2: 0
 hit: 45
-afnum: 5
 hit2: 0
-afnum2: 0
 ai: AI_BAT
 class: MC_ANIMAL
-flags: 0
-int: 1
+ai_level: 1
 magic_res: 0
 magic_res2: 0
-treasure: 16384
+drops: none
 stats_armor_class: 15
 stats_experience: 340
 graphics_family: Bat
-graphics_size: 364
-frames: 9, 13, 10, 9, 13, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 364
+speed_move: 16
+speed_attack: 13
+speed_recovery: 5
+tags: blinks_when_hit
 
 internal_name: MT_GLOOM
 name: Gloom
+tint: 255 190 120
 icon: monster.gloom
 dlvl: 7
 max_dlvl: 11
 level: 9
-available: 1
 health: 28-36
 damage: 4-12
 damage2: 0
 hit: 70
-afnum: 5
 hit2: 0
-afnum2: 0
 ai: AI_BAT
 class: MC_ANIMAL
-flags: 256
-int: 2
+tags: searches
+ai_level: 2
 magic_res: 1
 magic_res2: 65
-treasure: 16384
+drops: none
 stats_armor_class: 35
 stats_experience: 509
 graphics_family: Bat
-graphics_size: 364
-frames: 9, 13, 10, 9, 13, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 364
+speed_move: 16
+speed_attack: 13
+speed_recovery: 5
+tags: charges_from_afar
 
 internal_name: MT_FAMILIAR
 name: Familiar
+tint: 255 110 110
 icon: monster.familiar
 dlvl: 11
 max_dlvl: 15
 level: 13
-available: 1
 health: 20-35
 damage: 4-16
 damage2: 0
 hit: 50
-afnum: 5
 hit2: 0
-afnum2: 0
 ai: AI_BAT
 class: MC_DEMON
-flags: 256
-int: 3
+tags: searches
+ai_level: 3
 magic_res: 33
 magic_res2: 97
-treasure: 16384
+drops: none
 stats_armor_class: 35
 stats_experience: 448
 graphics_family: Bat
-graphics_size: 364
-frames: 9, 13, 10, 9, 13, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 364
+speed_move: 16
+speed_attack: 13
+speed_recovery: 5
+tags: lightning_with_melee
 
 internal_name: MT_NGOATBW
 name: Flesh Clan
@@ -1228,111 +1157,101 @@ icon: monster.ngoatbw
 dlvl: 6
 max_dlvl: 10
 level: 8
-available: 2
 health: 20-35
 damage: 1-7
 damage2: 0
 hit: 35
-afnum: 13
 hit2: 0
-afnum2: 0
 ai: AI_GOATBOW
 class: MC_DEMON
-flags: 512
-int: 0
+tags: opens_doors
 magic_res: 0
 magic_res2: 0
-treasure: 0
 stats_armor_class: 35
 stats_experience: 448
 graphics_family: GoatBow
-graphics_size: 1040
-frames: 12, 8, 16, 6, 20, 0
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 1040
+speed_move: 10
+speed_attack: 20
+speed_recovery: 4
 
 internal_name: MT_BGOATBW
 name: Stone Clan
+tint: 160 200 255
 icon: monster.bgoatbw
 dlvl: 8
 max_dlvl: 12
 level: 10
-available: 2
 health: 30-40
 damage: 2-9
 damage2: 0
 hit: 40
-afnum: 13
 hit2: 0
-afnum2: 0
 ai: AI_GOATBOW
 class: MC_DEMON
-flags: 512
-int: 1
+tags: opens_doors
+ai_level: 1
 magic_res: 65
 magic_res2: 72
-treasure: 0
 stats_armor_class: 35
 stats_experience: 645
 graphics_family: GoatBow
-graphics_size: 1040
-frames: 12, 8, 16, 6, 20, 0
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 1040
+speed_move: 10
+speed_attack: 20
+speed_recovery: 4
 
 internal_name: MT_RGOATBW
 name: Fire Clan
+tint: 255 190 120
 icon: monster.rgoatbw
 dlvl: 10
 max_dlvl: 14
 level: 12
-available: 2
 health: 40-50
 damage: 3-11
 damage2: 0
 hit: 45
-afnum: 13
 hit2: 0
-afnum2: 0
 ai: AI_GOATBOW
 class: MC_DEMON
-flags: 768
-int: 2
+tags: searches | opens_doors
+ai_level: 2
 magic_res: 2
 magic_res2: 16
-treasure: 0
 stats_armor_class: 35
 stats_experience: 822
 graphics_family: GoatBow
-graphics_size: 1040
-frames: 12, 8, 16, 6, 20, 0
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 1040
+speed_move: 10
+speed_attack: 20
+speed_recovery: 4
 
 internal_name: MT_GGOATBW
 name: Night Clan
+tint: 255 110 110
 icon: monster.ggoatbw
 dlvl: 12
 max_dlvl: 16
 level: 14
-available: 2
 health: 50-65
 damage: 4-13
 damage2: 0
 hit: 50
-afnum: 13
 hit2: 15
-afnum2: 0
 ai: AI_GOATBOW
 class: MC_DEMON
-flags: 768
-int: 3
+tags: searches | opens_doors
+ai_level: 3
 magic_res: 65
 magic_res2: 72
-treasure: 0
 stats_armor_class: 40
 stats_experience: 1092
 graphics_family: GoatBow
-graphics_size: 1040
-frames: 12, 8, 16, 6, 20, 0
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 1040
+speed_move: 10
+speed_attack: 20
+speed_recovery: 4
 
 internal_name: MT_NACID
 name: Acid Beast
@@ -1340,111 +1259,101 @@ icon: monster.nacid
 dlvl: 10
 max_dlvl: 14
 level: 11
-available: 2
 health: 40-66
 damage: 4-12
 damage2: 0
 hit: 40
-afnum: 8
 hit2: 25
-afnum2: 8
 ai: AI_ACID
 class: MC_ANIMAL
-flags: 0
-int: 0
 magic_res: 128
 magic_res2: 136
-treasure: 0
 stats_armor_class: 30
 stats_experience: 846
 graphics_family: Acid
-graphics_size: 716
-frames: 13, 8, 12, 8, 16, 12
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 716
+speed_move: 10
+speed_attack: 15
+speed_recovery: 5
+tags: acid_blood
 
 internal_name: MT_RACID
 name: Poison Spitter
+tint: 160 200 255
 icon: monster.racid
 dlvl: 14
 max_dlvl: 18
 level: 15
-available: 2
 health: 60-85
 damage: 4-16
 damage2: 0
 hit: 45
-afnum: 8
 hit2: 25
-afnum2: 8
 ai: AI_ACID
 class: MC_ANIMAL
-flags: 0
-int: 1
+ai_level: 1
 magic_res: 128
 magic_res2: 136
-treasure: 0
 stats_armor_class: 30
 stats_experience: 1248
 graphics_family: Acid
-graphics_size: 716
-frames: 13, 8, 12, 8, 16, 12
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 716
+speed_move: 10
+speed_attack: 15
+speed_recovery: 5
+tags: acid_blood
 
 internal_name: MT_BACID
 name: Pit Beast
+tint: 255 190 120
 icon: monster.bacid
 dlvl: 18
 max_dlvl: 22
 level: 21
-available: 2
 health: 80-110
 damage: 8-18
 damage2: 0
 hit: 55
-afnum: 8
 hit2: 35
-afnum2: 8
 ai: AI_ACID
 class: MC_ANIMAL
-flags: 0
-int: 2
+ai_level: 2
 magic_res: 129
 magic_res2: 140
-treasure: 0
 stats_armor_class: 35
 stats_experience: 2060
 graphics_family: Acid
-graphics_size: 716
-frames: 13, 8, 12, 8, 16, 12
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 716
+speed_move: 10
+speed_attack: 15
+speed_recovery: 5
+tags: acid_blood
 
 internal_name: MT_XACID
 name: Lava Maw
+tint: 255 110 110
 icon: monster.xacid
 dlvl: 22
 max_dlvl: 27
 level: 25
-available: 2
 health: 100-150
 damage: 10-20
 damage2: 0
 hit: 65
-afnum: 8
 hit2: 40
-afnum2: 8
 ai: AI_ACID
 class: MC_ANIMAL
-flags: 0
-int: 3
+ai_level: 3
 magic_res: 145
 magic_res2: 152
-treasure: 0
 stats_armor_class: 35
 stats_experience: 2940
 graphics_family: Acid
-graphics_size: 716
-frames: 13, 8, 12, 8, 16, 12
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 716
+speed_move: 10
+speed_attack: 15
+speed_recovery: 5
+tags: acid_blood
 
 internal_name: MT_SKING
 name: Skeleton King
@@ -1452,55 +1361,52 @@ icon: monster.sking
 dlvl: 6
 max_dlvl: 6
 level: 9
-available: 0
+random_spawn: false
 health: 140
 damage: 6-16
 damage2: 0
 hit: 60
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELKING
 class: MC_UNDEAD
-flags: 768
-int: 3
+tags: searches | opens_doors
+ai_level: 3
 magic_res: 78
 magic_res2: 120
-treasure: 32769
+drops: the_undead_crown
 stats_armor_class: 70
 stats_experience: 570
 graphics_family: SKing
-graphics_size: 1010
-frames: 8, 6, 16, 6, 16, 6
-rate: 2, 0, 0, 0, 0, 2
+spawn_cost: 1010
+speed_move: 8
+speed_attack: 20
 
 internal_name: MT_CLEAVER
 name: The Butcher
+sight_sfx: USFX_CLEAVER
 icon: monster.cleaver
 dlvl: 0
 max_dlvl: 0
 level: 1
-available: 0
+random_spawn: false
 health: 320
 damage: 6-12
 damage2: 0
 hit: 50
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_CLEAVER
 class: MC_DEMON
-flags: 0
-int: 3
+ai_level: 3
 magic_res: 6
 magic_res2: 49
-treasure: 32768
+drops: the_butchers_cleaver
 stats_armor_class: 50
 stats_experience: 710
 graphics_family: FatC
-graphics_size: 980
-frames: 10, 8, 12, 6, 16, 0
-rate: 1, 0, 0, 0, 0, 0
+spawn_cost: 980
+speed_move: 10
+speed_attack: 15
+speed_recovery: 3
 
 internal_name: MT_FAT
 name: Overlord
@@ -1508,111 +1414,96 @@ icon: monster.fat
 dlvl: 8
 max_dlvl: 12
 level: 10
-available: 2
 health: 60-80
 damage: 6-12
 damage2: 0
 hit: 55
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_FAT
 class: MC_DEMON
-flags: 0
-int: 0
 magic_res: 0
 magic_res2: 2
-treasure: 0
 stats_armor_class: 55
 stats_experience: 635
 graphics_family: Fat
-graphics_size: 1130
-frames: 8, 10, 15, 6, 16, 10
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 1130
+speed_move: 13
+speed_attack: 19
 
 internal_name: MT_MUDMAN
 name: Mud Man
+tint: 160 200 255
 icon: monster.mudman
 dlvl: 13
 max_dlvl: 17
 level: 14
-available: 2
 health: 100-125
 damage: 8-16
 damage2: 0
 hit: 60
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_FAT
 class: MC_DEMON
-flags: 256
-int: 1
+tags: searches
+ai_level: 1
 magic_res: 0
 magic_res2: 32
-treasure: 0
 stats_armor_class: 60
 stats_experience: 1165
 graphics_family: Fat
-graphics_size: 1130
-frames: 8, 10, 15, 6, 16, 10
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 1130
+speed_move: 13
+speed_attack: 19
 
 internal_name: MT_TOAD
 name: Toad Demon
+tint: 255 190 120
 icon: monster.toad
 dlvl: 15
 max_dlvl: 19
 level: 16
-available: 2
 health: 135-160
 damage: 8-16
 damage2: 8-20
 hit: 70
-afnum: 8
 hit2: 40
-afnum2: 0
 ai: AI_FAT
 class: MC_DEMON
-flags: 256
-int: 2
+tags: searches
+ai_level: 2
 magic_res: 8
 magic_res2: 12
-treasure: 0
 stats_armor_class: 65
 stats_experience: 1380
 graphics_family: Fat
-graphics_size: 1130
-frames: 8, 10, 15, 6, 16, 10
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 1130
+speed_move: 13
+speed_attack: 19
 
 internal_name: MT_FLAYED
 name: Flayed One
+tint: 255 110 110
 icon: monster.flayed
 dlvl: 19
 max_dlvl: 23
 level: 20
-available: 2
 health: 160-200
 damage: 10-20
 damage2: 0
 hit: 85
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_FAT
 class: MC_DEMON
-flags: 256
-int: 3
+tags: searches
+ai_level: 3
 magic_res: 17
 magic_res2: 24
-treasure: 0
 stats_armor_class: 70
 stats_experience: 2058
 graphics_family: Fat
-graphics_size: 1130
-frames: 8, 10, 15, 6, 16, 10
-rate: 4, 0, 0, 0, 0, 0
+spawn_cost: 1130
+speed_move: 13
+speed_attack: 19
 
 internal_name: MT_WYRM
 name: Wyrm
@@ -1620,111 +1511,101 @@ icon: monster.wyrm
 dlvl: 9
 max_dlvl: 13
 level: 11
-available: 0
+random_spawn: false
 health: 60-90
 damage: 4-10
 damage2: 0
 hit: 40
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_ANIMAL
-flags: 0
-int: 0
 magic_res: 1
 magic_res2: 1
-treasure: 0
 stats_armor_class: 25
 stats_experience: 660
 graphics_family: Worm
-graphics_size: 2420
-frames: 13, 13, 13, 11, 19, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 2420
+speed_move: 16
+speed_attack: 16
+speed_recovery: 8
 
 internal_name: MT_CAVSLUG
 name: Cave Slug
+tint: 160 200 255
 icon: monster.cavslug
 dlvl: 11
 max_dlvl: 15
 level: 13
-available: 0
+random_spawn: false
 health: 75-110
 damage: 6-13
 damage2: 0
 hit: 50
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_ANIMAL
-flags: 0
-int: 1
+ai_level: 1
 magic_res: 1
 magic_res2: 1
-treasure: 0
 stats_armor_class: 30
 stats_experience: 994
 graphics_family: Worm
-graphics_size: 2420
-frames: 13, 13, 13, 11, 19, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 2420
+speed_move: 16
+speed_attack: 16
+speed_recovery: 8
 
 internal_name: MT_DVLWYRM
 name: Devil Wyrm
+tint: 255 190 120
 icon: monster.dvlwyrm
 dlvl: 13
 max_dlvl: 17
 level: 15
-available: 0
+random_spawn: false
 health: 100-140
 damage: 8-16
 damage2: 0
 hit: 55
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_ANIMAL
-flags: 0
-int: 2
+ai_level: 2
 magic_res: 3
 magic_res2: 3
-treasure: 0
 stats_armor_class: 30
 stats_experience: 1320
 graphics_family: Worm
-graphics_size: 2420
-frames: 13, 13, 13, 11, 19, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 2420
+speed_move: 16
+speed_attack: 16
+speed_recovery: 8
 
 internal_name: MT_DEVOUR
 name: Devourer
+tint: 255 110 110
 icon: monster.devour
 dlvl: 15
 max_dlvl: 19
 level: 17
-available: 0
+random_spawn: false
 health: 125-200
 damage: 10-20
 damage2: 0
 hit: 60
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_ANIMAL
-flags: 0
-int: 3
+ai_level: 3
 magic_res: 67
 magic_res2: 67
-treasure: 0
 stats_armor_class: 35
 stats_experience: 1827
 graphics_family: Worm
-graphics_size: 2420
-frames: 13, 13, 13, 11, 19, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 2420
+speed_move: 16
+speed_attack: 16
+speed_recovery: 8
 
 internal_name: MT_NMAGMA
 name: Magma Demon
@@ -1732,111 +1613,97 @@ icon: monster.nmagma
 dlvl: 14
 max_dlvl: 17
 level: 13
-available: 2
 health: 50-70
 damage: 2-10
 damage2: 0
 hit: 45
-afnum: 4
 hit2: 50
-afnum2: 13
 ai: AI_MAGMA
 class: MC_DEMON
-flags: 768
-int: 0
+tags: searches | opens_doors
 magic_res: 10
 magic_res2: 24
-treasure: 0
 stats_armor_class: 45
 stats_experience: 1076
 graphics_family: Magma
-graphics_size: 1680
-frames: 8, 10, 14, 7, 18, 18
-rate: 2, 0, 0, 0, 1, 0
+spawn_cost: 1680
+speed_move: 13
+speed_attack: 18
 
 internal_name: MT_YMAGMA
 name: Blood Stone
+tint: 160 200 255
 icon: monster.ymagma
 dlvl: 15
 max_dlvl: 19
 level: 14
-available: 2
 health: 55-75
 damage: 2-12
 damage2: 0
 hit: 50
-afnum: 4
 hit2: 50
-afnum2: 14
 ai: AI_MAGMA
 class: MC_DEMON
-flags: 768
-int: 1
+tags: searches | opens_doors
+ai_level: 1
 magic_res: 24
 magic_res2: 24
-treasure: 0
 stats_armor_class: 45
 stats_experience: 1309
 graphics_family: Magma
-graphics_size: 1680
-frames: 8, 10, 14, 7, 18, 18
-rate: 2, 0, 0, 0, 1, 0
+spawn_cost: 1680
+speed_move: 13
+speed_attack: 18
 
 internal_name: MT_BMAGMA
 name: Hell Stone
+tint: 255 190 120
 icon: monster.bmagma
 dlvl: 16
 max_dlvl: 20
 level: 16
-available: 2
 health: 60-80
 damage: 2-20
 damage2: 0
 hit: 60
-afnum: 4
 hit2: 60
-afnum2: 14
 ai: AI_MAGMA
 class: MC_DEMON
-flags: 768
-int: 2
+tags: searches | opens_doors
+ai_level: 2
 magic_res: 24
 magic_res2: 24
-treasure: 0
 stats_armor_class: 50
 stats_experience: 1680
 graphics_family: Magma
-graphics_size: 1680
-frames: 8, 10, 14, 7, 18, 18
-rate: 2, 0, 0, 0, 1, 0
+spawn_cost: 1680
+speed_move: 13
+speed_attack: 18
 
 internal_name: MT_WMAGMA
 name: Lava Lord
+tint: 255 110 110
 icon: monster.wmagma
 dlvl: 17
 max_dlvl: 21
 level: 18
-available: 2
 health: 70-85
 damage: 4-24
 damage2: 0
 hit: 75
-afnum: 4
 hit2: 60
-afnum2: 14
 ai: AI_MAGMA
 class: MC_DEMON
-flags: 768
-int: 3
+tags: searches | opens_doors
+ai_level: 3
 magic_res: 24
 magic_res2: 24
-treasure: 0
 stats_armor_class: 60
 stats_experience: 2124
 graphics_family: Magma
-graphics_size: 1680
-frames: 8, 10, 14, 7, 18, 18
-rate: 2, 0, 0, 0, 1, 0
+spawn_cost: 1680
+speed_move: 13
+speed_attack: 18
 
 internal_name: MT_HORNED
 name: Horned Demon
@@ -1844,111 +1711,97 @@ icon: monster.horned
 dlvl: 12
 max_dlvl: 16
 level: 13
-available: 2
 health: 40-80
 damage: 2-16
 damage2: 5-32
 hit: 60
-afnum: 7
 hit2: 100
-afnum2: 0
 ai: AI_RHINO
 class: MC_ANIMAL
-flags: 768
-int: 0
+tags: searches | opens_doors
 magic_res: 0
 magic_res2: 2
-treasure: 0
 stats_armor_class: 40
 stats_experience: 1172
 graphics_family: Rhino
-graphics_size: 1630
-frames: 8, 8, 14, 6, 16, 6
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 1630
+speed_move: 10
+speed_attack: 18
 
 internal_name: MT_MUDRUN
 name: Mud Runner
+tint: 160 200 255
 icon: monster.mudrun
 dlvl: 14
 max_dlvl: 18
 level: 15
-available: 2
 health: 50-90
 damage: 6-18
 damage2: 12-36
 hit: 70
-afnum: 7
 hit2: 100
-afnum2: 0
 ai: AI_RHINO
 class: MC_ANIMAL
-flags: 768
-int: 1
+tags: searches | opens_doors
+ai_level: 1
 magic_res: 0
 magic_res2: 2
-treasure: 0
 stats_armor_class: 45
 stats_experience: 1404
 graphics_family: Rhino
-graphics_size: 1630
-frames: 8, 8, 14, 6, 16, 6
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 1630
+speed_move: 10
+speed_attack: 18
 
 internal_name: MT_FROSTC
 name: Frost Charger
+tint: 255 190 120
 icon: monster.frostc
 dlvl: 16
 max_dlvl: 20
 level: 17
-available: 2
 health: 60-100
 damage: 8-20
 damage2: 20-40
 hit: 80
-afnum: 7
 hit2: 100
-afnum2: 0
 ai: AI_RHINO
 class: MC_ANIMAL
-flags: 768
-int: 2
+tags: searches | opens_doors
+ai_level: 2
 magic_res: 12
 magic_res2: 12
-treasure: 0
 stats_armor_class: 50
 stats_experience: 1720
 graphics_family: Rhino
-graphics_size: 1630
-frames: 8, 8, 14, 6, 16, 6
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 1630
+speed_move: 10
+speed_attack: 18
 
 internal_name: MT_OBLORD
 name: Obsidian Lord
+tint: 255 110 110
 icon: monster.oblord
 dlvl: 18
 max_dlvl: 22
 level: 19
-available: 2
 health: 70-110
 damage: 10-22
 damage2: 20-50
 hit: 90
-afnum: 7
 hit2: 100
-afnum2: 0
 ai: AI_RHINO
 class: MC_ANIMAL
-flags: 768
-int: 3
+tags: searches | opens_doors
+ai_level: 3
 magic_res: 12
 magic_res2: 56
-treasure: 0
 stats_armor_class: 55
 stats_experience: 1809
 graphics_family: Rhino
-graphics_size: 1630
-frames: 8, 8, 14, 6, 16, 6
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 1630
+speed_move: 10
+speed_attack: 18
 
 internal_name: MT_BONEDMN
 name: Bone Demon
@@ -1956,27 +1809,22 @@ icon: monster.bonedmn
 dlvl: 10
 max_dlvl: 14
 level: 12
-available: 0
+random_spawn: false
 health: 70
 damage: 6-14
 damage2: 0
 hit: 60
-afnum: 8
 hit2: 12
-afnum2: 0
 ai: AI_STORM
 class: MC_DEMON
-flags: 0
-int: 0
 magic_res: 72
 magic_res2: 72
-treasure: 0
 stats_armor_class: 50
 stats_experience: 1344
 graphics_family: Demskel
-graphics_size: 1740
-frames: 10, 8, 20, 6, 24, 16
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 1740
+speed_move: 10
+speed_attack: 25
 
 internal_name: MT_REDDTH
 name: Red Death
@@ -1984,83 +1832,73 @@ icon: monster.reddth
 dlvl: 14
 max_dlvl: 18
 level: 16
-available: 0
+random_spawn: false
 health: 96
 damage: 10-20
 damage2: 0
 hit: 75
-afnum: 5
 hit2: 0
-afnum2: 0
 ai: AI_STORM
 class: MC_DEMON
-flags: 0
-int: 1
+ai_level: 1
 magic_res: 24
 magic_res2: 24
-treasure: 0
 stats_armor_class: 60
 stats_experience: 2168
 graphics_family: Thin
-graphics_size: 1740
-frames: 8, 8, 18, 4, 17, 14
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 1740
+speed_move: 10
+speed_attack: 23
 
 internal_name: MT_LTCHDMN
 name: Litch Demon
+tint: 160 200 255
 icon: monster.ltchdmn
 dlvl: 16
 max_dlvl: 20
 level: 18
-available: 0
+random_spawn: false
 health: 110
 damage: 10-24
 damage2: 0
 hit: 80
-afnum: 5
 hit2: 0
-afnum2: 0
 ai: AI_STORM
 class: MC_DEMON
-flags: 0
-int: 2
+ai_level: 2
 magic_res: 104
 magic_res2: 104
-treasure: 0
 stats_armor_class: 45
 stats_experience: 2736
 graphics_family: Thin
-graphics_size: 1740
-frames: 8, 8, 18, 4, 17, 14
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 1740
+speed_move: 10
+speed_attack: 23
 
 internal_name: MT_UDEDBLRG
 name: Undead Balrog
+tint: 255 190 120
 icon: monster.udedblrg
 dlvl: 20
 max_dlvl: 24
 level: 22
-available: 0
+random_spawn: false
 health: 130
 damage: 12-30
 damage2: 0
 hit: 85
-afnum: 5
 hit2: 0
-afnum2: 0
 ai: AI_STORM
 class: MC_DEMON
-flags: 0
-int: 3
+ai_level: 3
 magic_res: 78
 magic_res2: 78
-treasure: 0
 stats_armor_class: 65
 stats_experience: 3575
 graphics_family: Thin
-graphics_size: 1740
-frames: 8, 8, 18, 4, 17, 14
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 1740
+speed_move: 10
+speed_attack: 23
 
 internal_name: MT_INCIN
 name: Incinerator
@@ -2068,139 +1906,121 @@ icon: monster.incin
 dlvl: 14
 max_dlvl: 18
 level: 16
-available: 0
+random_spawn: false
 health: 30-45
 damage: 8-16
 damage2: 0
 hit: 75
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_FIREMAN
 class: MC_DEMON
-flags: 0
-int: 0
 magic_res: 24
 magic_res2: 24
-treasure: 0
 stats_armor_class: 25
 stats_experience: 1888
 graphics_family: Fireman
-graphics_size: 1460
-frames: 14, 19, 20, 8, 14, 23
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 1460
+speed_move: 24
+speed_attack: 25
 
 internal_name: MT_FLAMLRD
 name: Flame Lord
+tint: 160 200 255
 icon: monster.flamlrd
 dlvl: 16
 max_dlvl: 20
 level: 18
-available: 0
+random_spawn: false
 health: 40-55
 damage: 10-20
 damage2: 0
 hit: 75
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_FIREMAN
 class: MC_DEMON
-flags: 0
-int: 1
+ai_level: 1
 magic_res: 24
 magic_res2: 24
-treasure: 0
 stats_armor_class: 25
 stats_experience: 2250
 graphics_family: Fireman
-graphics_size: 1460
-frames: 14, 19, 20, 8, 14, 23
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 1460
+speed_move: 24
+speed_attack: 25
 
 internal_name: MT_DOOMFIRE
 name: Doom Fire
+tint: 255 190 120
 icon: monster.doomfire
 dlvl: 18
 max_dlvl: 22
 level: 20
-available: 0
+random_spawn: false
 health: 50-65
 damage: 12-24
 damage2: 0
 hit: 80
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_FIREMAN
 class: MC_DEMON
-flags: 0
-int: 2
+ai_level: 2
 magic_res: 28
 magic_res2: 28
-treasure: 0
 stats_armor_class: 30
 stats_experience: 2740
 graphics_family: Fireman
-graphics_size: 1460
-frames: 14, 19, 20, 8, 14, 23
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 1460
+speed_move: 24
+speed_attack: 25
 
 internal_name: MT_HELLBURN
 name: Hell Burner
+tint: 255 110 110
 icon: monster.hellburn
 dlvl: 20
 max_dlvl: 24
 level: 22
-available: 0
+random_spawn: false
 health: 60-80
 damage: 15-30
 damage2: 0
 hit: 85
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_FIREMAN
 class: MC_DEMON
-flags: 0
-int: 3
+ai_level: 3
 magic_res: 28
 magic_res2: 28
-treasure: 0
 stats_armor_class: 30
 stats_experience: 3355
 graphics_family: Fireman
-graphics_size: 1460
-frames: 14, 19, 20, 8, 14, 23
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 1460
+speed_move: 24
+speed_attack: 25
 
 internal_name: MT_STORM
 name: Red Storm
+tint: 255 110 110
 icon: monster.storm
 dlvl: 17
 max_dlvl: 21
 level: 18
-available: 2
 health: 55-110
 damage: 8-18
 damage2: 4-16
 hit: 80
-afnum: 5
 hit2: 75
-afnum2: 8
 ai: AI_STORM
 class: MC_DEMON
-flags: 768
-int: 0
+tags: searches | opens_doors
 magic_res: 12
 magic_res2: 40
-treasure: 0
 stats_armor_class: 30
 stats_experience: 2160
 graphics_family: Thin
-graphics_size: 1740
-frames: 8, 8, 18, 4, 17, 14
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 1740
+speed_move: 10
+speed_attack: 23
 
 internal_name: MT_RSTORM
 name: Storm Rider
@@ -2208,83 +2028,73 @@ icon: monster.rstorm
 dlvl: 19
 max_dlvl: 23
 level: 20
-available: 2
 health: 60-120
 damage: 8-18
 damage2: 4-16
 hit: 80
-afnum: 5
 hit2: 80
-afnum2: 8
 ai: AI_STORM
 class: MC_DEMON
-flags: 768
-int: 1
+tags: searches | opens_doors
+ai_level: 1
 magic_res: 33
 magic_res2: 40
-treasure: 0
 stats_armor_class: 30
 stats_experience: 2391
 graphics_family: Thin
-graphics_size: 1740
-frames: 8, 8, 18, 4, 17, 14
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 1740
+speed_move: 10
+speed_attack: 23
 
 internal_name: MT_STORML
 name: Storm Lord
+tint: 160 200 255
 icon: monster.storml
 dlvl: 21
 max_dlvl: 25
 level: 22
-available: 2
 health: 75-135
 damage: 12-24
 damage2: 4-16
 hit: 85
-afnum: 5
 hit2: 75
-afnum2: 8
 ai: AI_STORM
 class: MC_DEMON
-flags: 768
-int: 2
+tags: searches | opens_doors
+ai_level: 2
 magic_res: 33
 magic_res2: 40
-treasure: 0
 stats_armor_class: 35
 stats_experience: 2775
 graphics_family: Thin
-graphics_size: 1740
-frames: 8, 8, 18, 4, 17, 14
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 1740
+speed_move: 10
+speed_attack: 23
 
 internal_name: MT_MAEL
 name: Maelstorm
+tint: 255 190 120
 icon: monster.mael
 dlvl: 23
 max_dlvl: 27
 level: 24
-available: 2
 health: 90-150
 damage: 12-28
 damage2: 4-16
 hit: 90
-afnum: 5
 hit2: 75
-afnum2: 8
 ai: AI_STORM
 class: MC_DEMON
-flags: 768
-int: 3
+tags: searches | opens_doors
+ai_level: 3
 magic_res: 97
 magic_res2: 104
-treasure: 0
 stats_armor_class: 40
 stats_experience: 3177
 graphics_family: Thin
-graphics_size: 1740
-frames: 8, 8, 18, 4, 17, 14
-rate: 3, 0, 0, 0, 0, 0
+spawn_cost: 1740
+speed_move: 10
+speed_attack: 23
 
 internal_name: MT_BIGFALL
 name: Devil Kin Brute
@@ -2292,27 +2102,25 @@ icon: monster.bigfall
 dlvl: 20
 max_dlvl: 20
 level: 24
-available: 0
+random_spawn: false
 health: 160-220
 damage: 18-24
 damage2: 0
 hit: 100
-afnum: 6
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_ANIMAL
-flags: 768
-int: 3
+tags: searches | opens_doors
+ai_level: 3
 magic_res: 0
 magic_res2: 0
-treasure: 0
 stats_armor_class: 75
 stats_experience: 2000
 graphics_family: BigFall
-graphics_size: 1650
-frames: 10, 8, 11, 8, 17, 0
-rate: 0, 0, 0, 0, 2, 2
+spawn_cost: 1650
+speed_move: 10
+speed_attack: 14
+speed_recovery: 4
 
 internal_name: MT_WINGED
 name: Winged-Demon
@@ -2320,111 +2128,101 @@ icon: monster.winged
 dlvl: 8
 max_dlvl: 12
 level: 9
-available: 2
 health: 45-60
 damage: 10-16
 damage2: 0
 hit: 50
-afnum: 7
 hit2: 0
-afnum2: 0
 ai: AI_GARG
 class: MC_DEMON
-flags: 512
-int: 0
+tags: opens_doors
 magic_res: 74
 magic_res2: 88
-treasure: 0
 stats_armor_class: 45
 stats_experience: 662
 graphics_family: Gargoyle
-graphics_size: 1650
-frames: 14, 14, 14, 10, 18, 14
-rate: 0, 0, 0, 0, 0, 2
+spawn_cost: 1650
+speed_move: 18
+speed_attack: 18
+speed_recovery: 4
 
 internal_name: MT_GARGOYLE
 name: Gargoyle
+tint: 160 200 255
 icon: monster.gargoyle
 dlvl: 12
 max_dlvl: 16
 level: 13
-available: 2
 health: 60-90
 damage: 10-16
 damage2: 0
 hit: 65
-afnum: 7
 hit2: 0
-afnum2: 0
 ai: AI_GARG
 class: MC_DEMON
-flags: 512
-int: 1
+tags: opens_doors
+ai_level: 1
 magic_res: 76
 magic_res2: 104
-treasure: 0
 stats_armor_class: 45
 stats_experience: 1205
 graphics_family: Gargoyle
-graphics_size: 1650
-frames: 14, 14, 14, 10, 18, 14
-rate: 0, 0, 0, 0, 0, 2
+spawn_cost: 1650
+speed_move: 18
+speed_attack: 18
+speed_recovery: 4
 
 internal_name: MT_BLOODCLW
 name: Blood Claw
+tint: 255 190 120
 icon: monster.bloodclw
 dlvl: 16
 max_dlvl: 20
 level: 19
-available: 2
 health: 75-125
 damage: 14-22
 damage2: 0
 hit: 80
-afnum: 7
 hit2: 0
-afnum2: 0
 ai: AI_GARG
 class: MC_DEMON
-flags: 512
-int: 2
+tags: opens_doors
+ai_level: 2
 magic_res: 88
 magic_res2: 92
-treasure: 0
 stats_armor_class: 50
 stats_experience: 1873
 graphics_family: Gargoyle
-graphics_size: 1650
-frames: 14, 14, 14, 10, 18, 14
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 1650
+speed_move: 18
+speed_attack: 18
+speed_recovery: 4
 
 internal_name: MT_DEATHW
 name: Death Wing
+tint: 255 110 110
 icon: monster.deathw
 dlvl: 18
 max_dlvl: 22
 level: 23
-available: 2
 health: 90-150
 damage: 16-28
 damage2: 0
 hit: 95
-afnum: 7
 hit2: 0
-afnum2: 0
 ai: AI_GARG
 class: MC_DEMON
-flags: 512
-int: 3
+tags: opens_doors
+ai_level: 3
 magic_res: 104
 magic_res2: 106
-treasure: 0
 stats_armor_class: 60
 stats_experience: 2278
 graphics_family: Gargoyle
-graphics_size: 1650
-frames: 14, 14, 14, 10, 18, 14
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 1650
+speed_move: 18
+speed_attack: 18
+speed_recovery: 4
 
 internal_name: MT_MEGA
 name: Slayer
@@ -2432,111 +2230,97 @@ icon: monster.mega
 dlvl: 19
 max_dlvl: 23
 level: 20
-available: 2
 health: 120-140
 damage: 12-20
 damage2: 0
 hit: 100
-afnum: 8
 hit2: 0
-afnum2: 3
 ai: AI_MEGA
 class: MC_DEMON
-flags: 768
-int: 0
+tags: searches | opens_doors
 magic_res: 17
 magic_res2: 17
-treasure: 0
 stats_armor_class: 60
 stats_experience: 2300
 graphics_family: Mega
-graphics_size: 2220
-frames: 6, 7, 14, 1, 24, 5
-rate: 3, 0, 0, 0, 2, 0
+spawn_cost: 2220
+speed_move: 9
+speed_attack: 18
 
 internal_name: MT_GUARD
 name: Guardian
+tint: 160 200 255
 icon: monster.guard
 dlvl: 21
 max_dlvl: 25
 level: 22
-available: 2
 health: 140-160
 damage: 14-22
 damage2: 0
 hit: 110
-afnum: 8
 hit2: 0
-afnum2: 3
 ai: AI_MEGA
 class: MC_DEMON
-flags: 768
-int: 1
+tags: searches | opens_doors
+ai_level: 1
 magic_res: 17
 magic_res2: 17
-treasure: 0
 stats_armor_class: 65
 stats_experience: 2714
 graphics_family: Mega
-graphics_size: 2220
-frames: 6, 7, 14, 1, 24, 5
-rate: 3, 0, 0, 0, 2, 0
+spawn_cost: 2220
+speed_move: 9
+speed_attack: 18
 
 internal_name: MT_VTEXLRD
 name: Vortex Lord
+tint: 255 190 120
 icon: monster.vtexlrd
 dlvl: 23
 max_dlvl: 26
 level: 24
-available: 2
 health: 160-180
 damage: 18-24
 damage2: 0
 hit: 120
-afnum: 8
 hit2: 0
-afnum2: 3
 ai: AI_MEGA
 class: MC_DEMON
-flags: 768
-int: 2
+tags: searches | opens_doors
+ai_level: 2
 magic_res: 81
 magic_res2: 85
-treasure: 0
 stats_armor_class: 70
 stats_experience: 3252
 graphics_family: Mega
-graphics_size: 2220
-frames: 6, 7, 14, 1, 24, 5
-rate: 3, 0, 0, 0, 2, 0
+spawn_cost: 2220
+speed_move: 9
+speed_attack: 18
 
 internal_name: MT_BALROG
 name: Balrog
+tint: 255 110 110
 icon: monster.balrog
 dlvl: 25
 max_dlvl: 29
 level: 26
-available: 2
 health: 180-200
 damage: 22-30
 damage2: 0
 hit: 130
-afnum: 8
 hit2: 0
-afnum2: 3
 ai: AI_MEGA
 class: MC_DEMON
-flags: 768
-int: 3
+tags: searches | opens_doors
+ai_level: 3
 magic_res: 81
 magic_res2: 85
-treasure: 0
 stats_armor_class: 75
 stats_experience: 3643
 graphics_family: Mega
-graphics_size: 2220
-frames: 6, 7, 14, 1, 24, 5
-rate: 3, 0, 0, 0, 2, 0
+spawn_cost: 2220
+speed_move: 9
+speed_attack: 18
 
 internal_name: MT_NSNAKE
 name: Cave Viper
@@ -2544,111 +2328,97 @@ icon: monster.nsnake
 dlvl: 20
 max_dlvl: 24
 level: 21
-available: 2
 health: 100-150
 damage: 8-20
 damage2: 0
 hit: 90
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SNAKE
 class: MC_DEMON
-flags: 256
-int: 0
+tags: searches
 magic_res: 8
 magic_res2: 8
-treasure: 0
 stats_armor_class: 60
 stats_experience: 2725
 graphics_family: Snake
-graphics_size: 1270
-frames: 12, 11, 13, 5, 18, 0
-rate: 2, 0, 0, 0, 1, 0
+spawn_cost: 1270
+speed_move: 14
+speed_attack: 16
 
 internal_name: MT_RSNAKE
 name: Fire Drake
+tint: 160 200 255
 icon: monster.rsnake
 dlvl: 22
 max_dlvl: 26
 level: 23
-available: 2
 health: 120-170
 damage: 12-24
 damage2: 0
 hit: 105
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SNAKE
 class: MC_DEMON
-flags: 256
-int: 1
+tags: searches
+ai_level: 1
 magic_res: 10
 magic_res2: 24
-treasure: 0
 stats_armor_class: 65
 stats_experience: 3139
 graphics_family: Snake
-graphics_size: 1270
-frames: 12, 11, 13, 5, 18, 0
-rate: 2, 0, 0, 0, 1, 0
+spawn_cost: 1270
+speed_move: 14
+speed_attack: 16
 
 internal_name: MT_BSNAKE
 name: Gold Viper
+tint: 255 190 120
 icon: monster.bsnake
 dlvl: 24
 max_dlvl: 27
 level: 25
-available: 2
 health: 140-180
 damage: 15-26
 damage2: 0
 hit: 120
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SNAKE
 class: MC_DEMON
-flags: 256
-int: 2
+tags: searches
+ai_level: 2
 magic_res: 12
 magic_res2: 12
-treasure: 0
 stats_armor_class: 70
 stats_experience: 3540
 graphics_family: Snake
-graphics_size: 1270
-frames: 12, 11, 13, 5, 18, 0
-rate: 2, 0, 0, 0, 1, 0
+spawn_cost: 1270
+speed_move: 14
+speed_attack: 16
 
 internal_name: MT_GSNAKE
 name: Azure Drake
+tint: 255 110 110
 icon: monster.gsnake
 dlvl: 28
 max_dlvl: 30
 level: 27
-available: 2
 health: 160-200
 damage: 18-30
 damage2: 0
 hit: 130
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SNAKE
 class: MC_DEMON
-flags: 256
-int: 3
+tags: searches
+ai_level: 3
 magic_res: 6
 magic_res2: 42
-treasure: 0
 stats_armor_class: 75
 stats_experience: 3791
 graphics_family: Snake
-graphics_size: 1270
-frames: 12, 11, 13, 5, 18, 0
-rate: 2, 0, 0, 0, 1, 0
+spawn_cost: 1270
+speed_move: 14
+speed_attack: 16
 
 internal_name: MT_NBLACK
 name: Black Knight
@@ -2656,111 +2426,96 @@ icon: monster.nblack
 dlvl: 23
 max_dlvl: 27
 level: 24
-available: 2
 health: 150
 damage: 15-20
 damage2: 0
 hit: 110
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_DEMON
-flags: 256
-int: 0
+tags: searches
 magic_res: 69
 magic_res2: 97
-treasure: 0
 stats_armor_class: 75
 stats_experience: 3360
 graphics_family: Black
-graphics_size: 2120
-frames: 8, 8, 16, 4, 24, 0
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 2120
+speed_move: 10
+speed_attack: 20
 
 internal_name: MT_RTBLACK
 name: Doom Guard
+tint: 160 200 255
 icon: monster.rtblack
 dlvl: 25
 max_dlvl: 29
 level: 26
-available: 2
 health: 165
 damage: 18-25
 damage2: 0
 hit: 130
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_DEMON
-flags: 256
-int: 0
+tags: searches
 magic_res: 67
 magic_res2: 81
-treasure: 0
 stats_armor_class: 75
 stats_experience: 3650
 graphics_family: Black
-graphics_size: 2120
-frames: 8, 8, 16, 4, 24, 0
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 2120
+speed_move: 10
+speed_attack: 20
 
 internal_name: MT_BTBLACK
 name: Steel Lord
+tint: 255 190 120
 icon: monster.btblack
 dlvl: 27
 max_dlvl: 30
 level: 28
-available: 2
 health: 180
 damage: 20-30
 damage2: 0
 hit: 120
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_DEMON
-flags: 256
-int: 1
+tags: searches
+ai_level: 1
 magic_res: 85
 magic_res2: 92
-treasure: 0
 stats_armor_class: 80
 stats_experience: 4252
 graphics_family: Black
-graphics_size: 2120
-frames: 8, 8, 16, 4, 24, 0
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 2120
+speed_move: 10
+speed_attack: 20
 
 internal_name: MT_RBLACK
 name: Blood Knight
+tint: 255 110 110
 icon: monster.rblack
 dlvl: 24
 max_dlvl: 26
 level: 30
-available: 2
 health: 200
 damage: 25-35
 damage2: 0
 hit: 130
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_DEMON
-flags: 256
-int: 1
+tags: searches
+ai_level: 1
 magic_res: 106
 magic_res2: 106
-treasure: 0
 stats_armor_class: 85
 stats_experience: 5130
 graphics_family: Black
-graphics_size: 2120
-frames: 8, 8, 16, 4, 24, 0
-rate: 2, 0, 0, 0, 0, 0
+spawn_cost: 2120
+speed_move: 10
+speed_attack: 20
 
 internal_name: MT_UNRAV
 name: Unraveler
@@ -2768,111 +2523,97 @@ icon: monster.unrav
 dlvl: 26
 max_dlvl: 28
 level: 25
-available: 0
+random_spawn: false
 health: 70-150
 damage: 10-20
 damage2: 0
 hit: 75
-afnum: 7
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_UNDEAD
-flags: 0
-int: 0
 magic_res: 106
 magic_res2: 106
-treasure: 0
 stats_armor_class: 70
 stats_experience: 3812
 graphics_family: Unrav
-graphics_size: 484
-frames: 10, 10, 12, 5, 16, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 484
+speed_move: 13
+speed_attack: 15
 
 internal_name: MT_HOLOWONE
 name: Hollow One
+tint: 160 200 255
 icon: monster.holowone
 dlvl: 28
 max_dlvl: 30
 level: 27
-available: 0
+random_spawn: false
 health: 135-240
 damage: 12-24
 damage2: 0
 hit: 75
-afnum: 7
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_UNDEAD
-flags: 0
-int: 1
+ai_level: 1
 magic_res: 92
 magic_res2: 92
-treasure: 0
 stats_armor_class: 75
 stats_experience: 4374
 graphics_family: Unrav
-graphics_size: 484
-frames: 10, 10, 12, 5, 16, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 484
+speed_move: 13
+speed_attack: 15
 
 internal_name: MT_PAINMSTR
 name: Pain Master
+tint: 255 190 120
 icon: monster.painmstr
 dlvl: 27
 max_dlvl: 30
 level: 29
-available: 0
+random_spawn: false
 health: 110-200
 damage: 16-30
 damage2: 0
 hit: 80
-afnum: 7
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_UNDEAD
-flags: 0
-int: 2
+ai_level: 2
 magic_res: 92
 magic_res2: 92
-treasure: 0
 stats_armor_class: 80
 stats_experience: 5147
 graphics_family: Unrav
-graphics_size: 484
-frames: 10, 10, 12, 5, 16, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 484
+speed_move: 13
+speed_attack: 15
 
 internal_name: MT_REALWEAV
 name: Reality Weaver
+tint: 255 110 110
 icon: monster.realweav
 dlvl: 28
 max_dlvl: 30
 level: 30
-available: 0
+random_spawn: false
 health: 135-240
 damage: 20-35
 damage2: 0
 hit: 85
-afnum: 7
 hit2: 0
-afnum2: 0
 ai: AI_SKELSD
 class: MC_UNDEAD
-flags: 0
-int: 3
+ai_level: 3
 magic_res: 113
 magic_res2: 113
-treasure: 0
 stats_armor_class: 85
 stats_experience: 5925
 graphics_family: Unrav
-graphics_size: 484
-frames: 10, 10, 12, 5, 16, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 484
+speed_move: 13
+speed_attack: 15
 
 internal_name: MT_SUCCUBUS
 name: Succubus
@@ -2880,111 +2621,101 @@ icon: monster.succubus
 dlvl: 22
 max_dlvl: 26
 level: 24
-available: 2
 health: 120-150
 damage: 1-20
 damage2: 0
 hit: 100
-afnum: 10
 hit2: 0
-afnum2: 0
 ai: AI_SUCC
 class: MC_DEMON
-flags: 512
-int: 0
+tags: opens_doors
 magic_res: 1
 magic_res2: 10
-treasure: 0
 stats_armor_class: 60
 stats_experience: 3696
 graphics_family: Succ
-graphics_size: 980
-frames: 14, 8, 16, 7, 24, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 980
+speed_move: 10
+speed_attack: 20
+speed_recovery: 1
 
 internal_name: MT_SNOWWICH
 name: Snow Witch
+tint: 160 200 255
 icon: monster.snowwich
 dlvl: 25
 max_dlvl: 28
 level: 26
-available: 2
 health: 135-175
 damage: 1-24
 damage2: 0
 hit: 110
-afnum: 10
 hit2: 0
-afnum2: 0
 ai: AI_SUCC
 class: MC_DEMON
-flags: 512
-int: 1
+tags: opens_doors
+ai_level: 1
 magic_res: 68
 magic_res2: 76
-treasure: 0
 stats_armor_class: 65
 stats_experience: 4084
 graphics_family: Succ
-graphics_size: 980
-frames: 14, 8, 16, 7, 24, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 980
+speed_move: 10
+speed_attack: 20
+speed_recovery: 1
 
 internal_name: MT_HLSPWN
 name: Hell Spawn
+tint: 255 190 120
 icon: monster.hlspwn
 dlvl: 27
 max_dlvl: 30
 level: 28
-available: 2
 health: 150-200
 damage: 1-30
 damage2: 0
 hit: 115
-afnum: 10
 hit2: 0
-afnum2: 0
 ai: AI_SUCC
 class: MC_DEMON
-flags: 768
-int: 2
+tags: searches | opens_doors
+ai_level: 2
 magic_res: 33
 magic_res2: 28
-treasure: 0
 stats_armor_class: 75
 stats_experience: 4480
 graphics_family: Succ
-graphics_size: 980
-frames: 14, 8, 16, 7, 24, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 980
+speed_move: 10
+speed_attack: 20
+speed_recovery: 1
 
 internal_name: MT_SOLBRNR
 name: Soul Burner
+tint: 255 110 110
 icon: monster.solbrnr
 dlvl: 28
 max_dlvl: 30
 level: 30
-available: 2
 health: 140-225
 damage: 1-35
 damage2: 0
 hit: 120
-afnum: 10
 hit2: 0
-afnum2: 0
 ai: AI_SUCC
 class: MC_DEMON
-flags: 768
-int: 3
+tags: searches | opens_doors
+ai_level: 3
 magic_res: 21
 magic_res2: 56
-treasure: 0
 stats_armor_class: 85
 stats_experience: 4644
 graphics_family: Succ
-graphics_size: 980
-frames: 14, 8, 16, 7, 24, 0
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 980
+speed_move: 10
+speed_attack: 20
+speed_recovery: 1
 
 internal_name: MT_COUNSLR
 name: Counselor
@@ -2992,111 +2723,97 @@ icon: monster.counslr
 dlvl: 24
 max_dlvl: 26
 level: 25
-available: 2
 health: 70
 damage: 8-20
 damage2: 0
 hit: 90
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_COUNSLR
 class: MC_DEMON
-flags: 512
-int: 0
+tags: opens_doors
 magic_res: 7
 magic_res2: 7
-treasure: 0
 stats_armor_class: 0
 stats_experience: 4070
 graphics_family: Mage
-graphics_size: 2000
-frames: 12, 1, 20, 8, 28, 20
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 2000
+speed_move: 1
+speed_attack: 25
 
 internal_name: MT_MAGISTR
 name: Magistrate
+tint: 160 200 255
 icon: monster.magistr
 dlvl: 26
 max_dlvl: 28
 level: 27
-available: 2
 health: 85
 damage: 10-24
 damage2: 0
 hit: 100
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_COUNSLR
 class: MC_DEMON
-flags: 512
-int: 1
+tags: opens_doors
+ai_level: 1
 magic_res: 85
 magic_res2: 92
-treasure: 0
 stats_armor_class: 0
 stats_experience: 4478
 graphics_family: Mage
-graphics_size: 2000
-frames: 12, 1, 20, 8, 28, 20
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 2000
+speed_move: 1
+speed_attack: 25
 
 internal_name: MT_CABALIST
 name: Cabalist
+tint: 255 190 120
 icon: monster.cabalist
 dlvl: 28
 max_dlvl: 30
 level: 29
-available: 2
 health: 120
 damage: 14-30
 damage2: 0
 hit: 110
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_COUNSLR
 class: MC_DEMON
-flags: 512
-int: 2
+tags: opens_doors
+ai_level: 2
 magic_res: 99
 magic_res2: 106
-treasure: 0
 stats_armor_class: 0
 stats_experience: 4929
 graphics_family: Mage
-graphics_size: 2000
-frames: 12, 1, 20, 8, 28, 20
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 2000
+speed_move: 1
+speed_attack: 25
 
 internal_name: MT_ADVOCATE
 name: Advocate
+tint: 255 110 110
 icon: monster.advocate
 dlvl: 30
 max_dlvl: 30
 level: 30
-available: 2
 health: 145
 damage: 15-25
 damage2: 0
 hit: 120
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_COUNSLR
 class: MC_DEMON
-flags: 512
-int: 3
+tags: opens_doors
+ai_level: 3
 magic_res: 106
 magic_res2: 120
-treasure: 0
 stats_armor_class: 0
 stats_experience: 4968
 graphics_family: Mage
-graphics_size: 2000
-frames: 12, 1, 20, 8, 28, 20
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 2000
+speed_move: 1
+speed_attack: 25
 
 internal_name: MT_GOLEM
 name: Golem
@@ -3104,27 +2821,24 @@ icon: monster.golem
 dlvl: 0
 max_dlvl: 0
 level: 12
-available: 0
+random_spawn: false
 health: 1
 damage: 1
 damage2: 0
 hit: 0
-afnum: 7
 hit2: 0
-afnum2: 0
 ai: AI_GOLUM
 class: MC_DEMON
-flags: 512
-int: 0
+tags: opens_doors
 magic_res: 0
 magic_res2: 0
-treasure: 0
 stats_armor_class: 1
 stats_experience: 0
 graphics_family: Golem
-graphics_size: 386
-frames: 0, 16, 12, 0, 12, 20
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 386
+speed_move: 20
+speed_attack: 15
+tags: golem
 
 internal_name: MT_DIABLO
 name: The Dark Lord
@@ -3132,27 +2846,26 @@ icon: monster.diablo
 dlvl: 50
 max_dlvl: 50
 level: 30
-available: 0
+random_spawn: false
 health: 1666
 damage: 30-60
 damage2: 0
 hit: 220
-afnum: 4
 hit2: 0
-afnum2: 11
 ai: AI_DIABLO
 class: MC_DEMON
-flags: 896
-int: 3
+tags: knockback | searches | opens_doors
+ai_level: 3
 magic_res: 78
 magic_res2: 78
-treasure: 0
 stats_armor_class: 70
 stats_experience: 31666
 graphics_family: Diablo
-graphics_size: 2000
-frames: 16, 6, 16, 6, 16, 16
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 2000
+speed_move: 8
+speed_attack: 20
+tags: stone_immune | fire_wall_walker
+fixed_health: 1666
 
 internal_name: MT_DARKMAGE
 name: The Arch-Litch Malignus
@@ -3160,24 +2873,21 @@ icon: monster.darkmage
 dlvl: 30
 max_dlvl: 30
 level: 30
-available: 0
+random_spawn: false
 health: 160
 damage: 20-40
 damage2: 0
 hit: 120
-afnum: 8
 hit2: 0
-afnum2: 0
 ai: AI_COUNSLR
 class: MC_DEMON
-flags: 512
-int: 3
+tags: opens_doors
+ai_level: 3
 magic_res: 71
 magic_res2: 120
-treasure: 0
 stats_armor_class: 70
 stats_experience: 4968
 graphics_family: DarkMage
-graphics_size: 1060
-frames: 6, 1, 21, 6, 23, 18
-rate: 0, 0, 0, 0, 0, 0
+spawn_cost: 1060
+speed_move: 1
+speed_attack: 26

@@ -5,6 +5,7 @@ import (
 )
 
 type MeleeAttackAnimation struct {
+	BaseAnimation
 	actor       *Actor
 	targetPos   geometry.Point
 	origin      geometry.Point
@@ -29,7 +30,7 @@ func (m *MeleeAttackAnimation) IsDone() bool {
 }
 
 func (m *MeleeAttackAnimation) Tick() {
-	if m.ticksLeft == 0 {
+	if !m.shouldRunNow() || m.ticksLeft == 0 {
 		return
 	}
 	m.ticksLeft--

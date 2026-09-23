@@ -6,23 +6,20 @@ import (
 	"testing"
 
 	"rpg/files"
-	"rpg/src/d1"
 	"rpg/src/defs"
 	"rpg/src/recfile"
+	"rpg/src/rules"
 )
 
-// tiles.rec and defs.PropIconID agree: every folded object lands on a record, every prop record is some object's.
+// Every prop record in tiles.rec is some object's icon (a same_as target that nothing folds to would be dead).
 func TestPropFolds(t *testing.T) {
-	data, err := d1.Load(files.GetFileSystem())
+	data, err := rules.Load(files.GetFileSystem())
 	if err != nil {
 		t.Fatal(err)
 	}
 	reached := map[string]bool{"prop.debris": true, "prop.portal": true, "prop.portal.2": true}
 	for _, o := range data.Objects {
 		id := defs.PropIconID(o.Name)
-		if _, ok := defs.IconOK(id); !ok && id != defs.IconID("prop", o.Name) {
-			t.Errorf("%s folds to %s, which tiles.rec lacks", o.Name, id)
-		}
 		reached[id], reached[id+".used"] = true, true
 	}
 	f, err := os.Open("files/mods/d1/data/icons/tiles.rec")
@@ -30,7 +27,14 @@ func TestPropFolds(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer f.Close()
-	for _, rec := range recfile.Read(f) {
+	recs := recfile.Read(f)
+	for _, rec := range recs { // a same_as target is reached through the objects drawn with it
+		m := rec.ToMap("")
+		if target := m.GetStringOrDefault("same_as", ""); target != "" && reached[m.GetStringOrDefault("internal_name", "")] {
+			reached[target] = true
+		}
+	}
+	for _, rec := range recs {
 		for _, field := range rec {
 			if field.Name == "internal_name" && strings.HasPrefix(field.Value, "prop.") && !reached[field.Value] {
 				t.Errorf("tiles.rec: %s isn't any object's icon", field.Value)

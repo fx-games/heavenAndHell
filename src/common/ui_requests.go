@@ -55,12 +55,16 @@ type ShowStats struct{}
 // ShowGameOver is the menu after the hero died.
 type ShowGameOver struct{}
 
+// EndTargeting drops the targeting cursor: the hero attacked or cast, however it was aimed.
+type EndTargeting struct{}
+
 func (ChooseOption) uiRequest()            {}
 func (ChooseFromList) uiRequest()          {}
 func (ChooseInventoryItem) uiRequest()     {}
 func (CloseMenus) uiRequest()              {}
 func (ShowStats) uiRequest()               {}
 func (ShowGameOver) uiRequest()            {}
+func (EndTargeting) uiRequest()            {}
 func (ChooseService) uiRequest()           {}
 func (OpenShop) uiRequest()                {}
 func (OpenSelling) uiRequest()             {}

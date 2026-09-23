@@ -1,12 +1,18 @@
-# quests.rec: the quests and the triggers that move them. Quest order is content (saves refer to quests by key).
+# quests.rec: the quests and the triggers that move them. Quests are found by key, in any order; the quest log
+# lists them in file order.
 # %rec: quest, one record per quest:
 #   key               the quest's id, used by triggers and saves; required
 #   name              its name in the quest log
 #   level             levels.rec map id of the level it belongs to (its boss, its set piece, its entrance)
 #   log_text          texts.rec id shown in the quest log
+#   new_game_plus     true: finishing it turns the game into new game plus
 #   gossip            "<npc> <text id>": what that townsperson says about it while it is active; repeatable
-# %rec: trigger, one record per trigger; triggers run in file order and later ones see what earlier ones did:
+# %rec: trigger, one record per trigger. Their order in the file never matters: an event runs in rounds, each
+# checking every trigger not fired yet against the same state and running all that hold; the next round sees
+# what they did. A conversation (on_talk, on_approach, on_talker_*) says one thing, so its conditions must rule
+# each other out (TestTalkTriggersAreExclusive checks); it ends with the round its line fired in.
 #   event             on_kill, on_item_pickup, on_item_use, on_enter_level, on_level_cleared, on_talk, on_approach
+#                     on_talker_spawn/talk/said/turn/disturbed: a talking quest boss (see the end of this file)
 #   subject           what the event is about: a monster's internal or unique name (on_kill), an item's internal
 #                     name (on_item_pickup, on_item_use), a level id (on_enter_level, on_level_cleared), an NPC's
 #                     internal name (on_talk: its dialogue; on_approach: walking up to it)
@@ -15,11 +21,13 @@
 #   do                an outcome, repeatable, in order: complete_quest(q) activate_quest(q) start_quest(q)
 #                     start_town_quest(q) log_quest(q) set_quest_var(q, n, value) or_quest_var(q, n, bits)
 #                     set_flag(name) say(text [, speaker]) sound(id) hero_sound(n) end_text(text) give_exp(n)
-#                     give_weapon(dlvl) take_item(item) drop_item(item) drop_unique(name) place_item(item, location
+#                     give_weapon(dlvl) take_item(item) drop_item(item) drop_unique(id) place_item(item, location
 #                     or anywhere) spawn_item(item, map, location | here) spawn_monster(monster, location or
 #                     anywhere) add_npc(npc, map, location) remove_npc(npc, map) refresh_level()
-#   pass              true: an on_talk / on_approach trigger that fired still lets the next one speak (normally one
-#                     conversation says one thing)
+#                     talkers only: talk(text) silence() quiet() stop_talking() set_goal(inquiring) speak()
+#                     drop_monster_item() drop_misc_item(IMISC_x) kill_talker()
+#   pass              true: in a conversation, not its line: it may hold alongside the line (a hand-in, a log
+#                     entry), and the conversation goes on to the next round after it
 #
 # Diablo's quests: their text, their gossip, where their set levels are, and the triggers that fire them.
 #
@@ -27,7 +35,8 @@
 # on. A trigger is (event, subject, condition, outcomes): the condition is an expr-lang expression over the flag
 # store, compiled once when this file loads; the outcomes are a fixed set the engine implements by name.
 #
-# Quest order is content: the engine indexes quests by their position here, and saves refer to them by "key".
+# The engine carries logic for Diablo's quests by key (rock, mushroom, ... lazarus); a set level is levels.rec's
+# d1_set record naming the quest, and a quest's level is its "level:" map's depth.
 
 %rec: quest
 
@@ -81,6 +90,7 @@ gossip: wirt TEXT_VEIL8
 
 key: diablo
 level: hell_15
+new_game_plus: true
 name: Diablo
 log_text: TEXT_VILE3
 gossip: cain TEXT_VILE3
@@ -393,14 +403,14 @@ do: say(TEXT_INTRO)
 
 event: on_approach
 subject: ogden
-when: deepest >= 2 and avail("leoric") and v2("leoric") == 0
+when: deepest >= 2 and avail("leoric") and v2("leoric") == 0 and (flag("d1:dungmsg:1") or flag("d1:intro"))
 do: set_quest_var(leoric, 2, 1)
 do: start_town_quest(leoric)
 do: say(TEXT_KING2)
 
 event: on_approach
 subject: ogden
-when: deepest >= 2 and avail("leoric") and done("leoric") and v2("leoric") == 1
+when: deepest >= 2 and avail("leoric") and done("leoric") and v2("leoric") == 1 and (flag("d1:dungmsg:1") or flag("d1:intro"))
 do: set_quest_var(leoric, 2, 2)
 do: set_quest_var(leoric, 1, 2)
 do: say(TEXT_KING4)
@@ -408,18 +418,18 @@ do: say(TEXT_KING4)
 # 1.09 asks about Ogden's Sign only inside Leoric's check.
 event: on_approach
 subject: ogden
-when: deepest >= 3 and avail("banner") and not done("banner") and v2("banner") == 0
+when: deepest >= 3 and avail("banner") and not done("banner") and v2("banner") == 0 and (flag("d1:dungmsg:1") or flag("d1:intro")) and not (deepest >= 2 and avail("leoric") and v2("leoric") == 0) and not (deepest >= 2 and avail("leoric") and done("leoric") and v2("leoric") == 1)
 do: set_quest_var(banner, 2, 1)
 do: start_town_quest(banner)
 do: say(TEXT_BANNER2)
 
 event: on_approach
 subject: ogden
-when: deepest >= 3 and avail("banner") and v2("banner") == 1 and has("tavern_sign")
+when: deepest >= 3 and avail("banner") and v2("banner") == 1 and has("tavern_sign") and (flag("d1:dungmsg:1") or flag("d1:intro")) and not (deepest >= 2 and avail("leoric") and v2("leoric") == 0) and not (deepest >= 2 and avail("leoric") and done("leoric") and v2("leoric") == 1)
 do: take_item(tavern_sign)
 do: complete_quest(banner)
 do: set_quest_var(banner, 1, 3)
-do: drop_unique(Harlequin Crest)
+do: drop_unique(harlequin_crest)
 do: say(TEXT_BANNER3)
 
 event: on_approach
@@ -436,24 +446,24 @@ do: take_item(magic_rock)
 do: complete_quest(rock)
 do: set_quest_var(rock, 2, 2)
 do: set_quest_var(rock, 1, 2)
-do: drop_unique(Empyrean Band)
+do: drop_unique(empyrean_band)
 do: say(TEXT_INFRA7)
 
 event: on_approach
 subject: griswold
-when: deepest >= 9 and avail("anvil") and not done("anvil") and v2("anvil") == 0 and (v2("rock") == 2 or active("rock") and v2("rock") == 1)
+when: (deepest >= 9 and avail("anvil") and not done("anvil") and v2("anvil") == 0 and (v2("rock") == 2 or active("rock") and v2("rock") == 1)) and not (deepest >= 4 and avail("rock") and v2("rock") == 1 and has("magic_rock"))
 do: set_quest_var(anvil, 2, 1)
 do: start_town_quest(anvil)
 do: say(TEXT_ANVIL5)
 
 event: on_approach
 subject: griswold
-when: deepest >= 9 and avail("anvil") and v2("anvil") == 1 and has("anvil_of_fury")
+when: deepest >= 9 and avail("anvil") and v2("anvil") == 1 and has("anvil_of_fury") and not (deepest >= 4 and avail("rock") and v2("rock") == 0) and not (deepest >= 4 and avail("rock") and v2("rock") == 1 and has("magic_rock"))
 do: take_item(anvil_of_fury)
 do: complete_quest(anvil)
 do: set_quest_var(anvil, 2, 2)
 do: set_quest_var(anvil, 1, 2)
-do: drop_unique(Griswold's Edge)
+do: drop_unique(griswolds_edge)
 do: say(TEXT_ANVIL7)
 
 event: on_approach
@@ -474,7 +484,7 @@ do: say(TEXT_MUSH10)
 # said once: bit 1 of v2
 event: on_approach
 subject: adria
-when: active("mushroom") and v1("mushroom") >= 2 and v1("mushroom") <= 4 and v2("mushroom") in [0, 2]
+when: active("mushroom") and v1("mushroom") >= 2 and v1("mushroom") <= 4 and v2("mushroom") in [0, 2] and not has("black_mushroom")
 do: or_quest_var(mushroom, 2, 1)
 do: say(TEXT_MUSH9)
 
@@ -487,7 +497,7 @@ do: say(TEXT_MUSH12)
 # said once: bit 2 of v2
 event: on_approach
 subject: adria
-when: active("mushroom") and (v1("mushroom") < 2 or v1("mushroom") > 4) and has("brain") and v2("mushroom") in [0, 1]
+when: active("mushroom") and (v1("mushroom") < 2 or v1("mushroom") > 4) and has("brain") and v2("mushroom") in [0, 1] and not has("spectral_elixir")
 do: or_quest_var(mushroom, 2, 2)
 do: say(TEXT_MUSH11)
 
@@ -504,7 +514,7 @@ subject: pepin
 when: deepest >= 1 and done("pwater") and v1("pwater") != 2
 pass: true
 do: set_quest_var(pwater, 1, 2)
-do: drop_unique(Ring of Truth)
+do: drop_unique(ring_of_truth)
 do: say(TEXT_POISON5)
 
 event: on_approach
@@ -530,3 +540,251 @@ when: done("lazarus") and v1("lazarus") == 7
 do: set_quest_var(lazarus, 1, 8)
 do: log_quest(diablo)
 do: say(TEXT_VILE3)
+
+# The quest bosses who speak before they fight (monsters.rec's talker AIs), ported from 1.09's talk state machines:
+# InitMonsterTalk (on_talker_spawn), TalktoMonster (on_talker_talk), M_DoTalk (on_talker_said) and the MAI_*
+# talk states that run every turn (on_talker_turn). The subject is the monster's AI. Like on_talk, it is one
+# step: the conditions of one event rule each other out, except those that pass (they fire alongside).
+# Conditions also see talk (what it has to say), goal (normal attack2 inquiring talking other) and visible
+# (the hero sees it), plus at(location) and here(quest).
+
+# Gharbad the Weak
+
+event: on_talker_spawn
+subject: AI_GARBUD
+when: v1("garbud") == 0
+do: talk(TEXT_GARBUD1)
+
+event: on_talker_spawn
+subject: AI_GARBUD
+when: v1("garbud") == 1
+do: talk(TEXT_GARBUD2)
+
+event: on_talker_spawn
+subject: AI_GARBUD
+when: v1("garbud") == 2
+do: talk(TEXT_GARBUD3)
+
+event: on_talker_spawn
+subject: AI_GARBUD
+when: v1("garbud") == 3
+do: talk(TEXT_GARBUD4)
+
+event: on_talker_said
+subject: AI_GARBUD
+when: talk == "TEXT_GARBUD1"
+do: activate_quest(garbud)
+pass: true
+
+event: on_talker_said
+subject: AI_GARBUD
+do: log_quest(garbud)
+pass: true
+
+event: on_talker_said
+subject: AI_GARBUD
+when: talk == "TEXT_GARBUD2" and v2("garbud") == 0
+do: drop_monster_item()
+do: set_quest_var(garbud, 2, 1)
+
+event: on_talker_turn
+subject: AI_GARBUD
+when: v1("garbud") == 0 and not visible and goal == "talking"
+do: set_quest_var(garbud, 1, 1)
+do: talk(TEXT_GARBUD2)
+
+event: on_talker_turn
+subject: AI_GARBUD
+when: v1("garbud") == 1 and not visible and goal == "talking"
+do: set_quest_var(garbud, 1, 2)
+do: talk(TEXT_GARBUD3)
+
+event: on_talker_turn
+subject: AI_GARBUD
+when: v1("garbud") == 2 and not visible and goal == "talking"
+do: set_quest_var(garbud, 1, 3)
+do: talk(TEXT_GARBUD4)
+
+event: on_talker_turn
+subject: AI_GARBUD
+when: visible and talk == "TEXT_GARBUD4" and goal == "talking"
+do: set_quest_var(garbud, 1, 4)
+do: quiet()
+
+# Zhar the Mad (reading a bookcase once he knows you makes him say TEXT_ZHAR2 early)
+
+event: on_talker_spawn
+subject: AI_ZHAR
+when: v1("zhar") == 0
+do: talk(TEXT_ZHAR1)
+
+event: on_talker_spawn
+subject: AI_ZHAR
+when: v1("zhar") == 1
+do: talk(TEXT_ZHAR2)
+
+event: on_talker_said
+subject: AI_ZHAR
+when: talk == "TEXT_ZHAR1" and v2("zhar") == 0
+do: start_quest(zhar)
+do: drop_misc_item(IMISC_BOOK)
+do: set_quest_var(zhar, 2, 1)
+
+event: on_talker_turn
+subject: AI_ZHAR
+when: talk == "TEXT_ZHAR1" and not visible and goal == "talking"
+do: set_quest_var(zhar, 1, 1)
+do: talk(TEXT_ZHAR2)
+
+event: on_talker_turn
+subject: AI_ZHAR
+when: visible and talk == "TEXT_ZHAR2" and goal == "talking"
+do: set_quest_var(zhar, 1, 2)
+do: quiet()
+
+event: on_talker_disturbed
+subject: AI_ZHAR
+when: here("zhar")
+do: set_quest_var(zhar, 1, 1)
+do: talk(TEXT_ZHAR2)
+do: speak()
+
+# Snotspill (the Tavern Sign)
+
+event: on_talker_spawn
+subject: AI_SNOTSPIL
+when: v1("banner") < 2
+do: talk(TEXT_BANNER10)
+
+event: on_talker_spawn
+subject: AI_SNOTSPIL
+when: v1("banner") == 2
+do: talk(TEXT_BANNER11)
+
+event: on_talker_talk
+subject: AI_SNOTSPIL
+when: here("banner") and v1("banner") == 2 and has("tavern_sign")
+do: take_item(tavern_sign)
+do: complete_quest(banner)
+do: talk(TEXT_BANNER12)
+
+event: on_talker_said
+subject: AI_SNOTSPIL
+when: talk == "TEXT_BANNER10" and v1("banner") < 2
+do: set_quest_var(banner, 1, 2)
+do: activate_quest(banner)
+do: refresh_level()
+
+event: on_talker_turn
+subject: AI_SNOTSPIL
+when: talk == "TEXT_BANNER10" and not visible and goal == "talking"
+do: talk(TEXT_BANNER11)
+
+event: on_talker_turn
+subject: AI_SNOTSPIL
+when: talk == "TEXT_BANNER11" and v1("banner") == 3
+do: stop_talking()
+
+event: on_talker_turn
+subject: AI_SNOTSPIL
+when: visible and talk == "TEXT_BANNER12" and goal == "talking"
+do: set_quest_var(banner, 1, 3)
+do: refresh_level()
+do: quiet()
+
+# Lachdanan (the Golden Elixir)
+
+event: on_talker_spawn
+subject: AI_LACHDAN
+when: logged("veil")
+do: talk(TEXT_VEIL10)
+
+event: on_talker_spawn
+subject: AI_LACHDAN
+when: not logged("veil")
+do: talk(TEXT_VEIL9)
+
+event: on_talker_talk
+subject: AI_LACHDAN
+when: here("veil") and talk startsWith "TEXT_VEIL" and has("golden_elixir")
+do: take_item(golden_elixir)
+do: talk(TEXT_VEIL11)
+
+event: on_talker_said
+subject: AI_LACHDAN
+when: talk == "TEXT_VEIL9"
+do: start_quest(veil)
+
+event: on_talker_said
+subject: AI_LACHDAN
+when: talk == "TEXT_VEIL11" and v2("veil") == 0
+do: drop_unique(veil_of_steel)
+do: set_quest_var(veil, 2, 1)
+
+event: on_talker_turn
+subject: AI_LACHDAN
+when: talk == "TEXT_VEIL9" and not visible and goal == "talking"
+do: talk(TEXT_VEIL10)
+
+event: on_talker_turn
+subject: AI_LACHDAN
+when: visible and talk == "TEXT_VEIL11" and goal == "talking"
+do: silence()
+do: complete_quest(veil)
+do: kill_talker()
+
+# Warlord of Blood
+
+event: on_talker_spawn
+subject: AI_WARLORD
+when: v1("warlord") < 2
+do: talk(TEXT_WARLRD9)
+
+event: on_talker_said
+subject: AI_WARLORD
+do: set_quest_var(warlord, 1, 2)
+
+event: on_talker_turn
+subject: AI_WARLORD
+when: visible and talk == "TEXT_WARLRD9" and goal == "inquiring"
+do: speak()
+
+event: on_talker_turn
+subject: AI_WARLORD
+when: visible and talk == "TEXT_WARLRD9" and goal == "talking"
+do: quiet()
+
+# Lazarus, who speaks once the hero stands on the circle in front of him, and his helpers
+
+event: on_talker_spawn
+subject: AI_LAZURUS
+when: v1("lazarus") < 6
+do: talk(TEXT_VILE13)
+
+event: on_talker_spawn
+subject: AI_LAZHELP
+when: v1("lazarus") < 6
+do: talk(TEXT_VILE13)
+
+event: on_talker_turn
+subject: AI_LAZURUS
+when: visible and talk == "TEXT_VILE13" and goal == "inquiring" and at("vile_altar")
+do: set_quest_var(lazarus, 1, 5)
+do: speak()
+
+event: on_talker_turn
+subject: AI_LAZURUS
+when: visible and talk == "TEXT_VILE13" and goal == "talking"
+do: set_quest_var(lazarus, 1, 6)
+do: refresh_level()
+do: quiet()
+
+event: on_talker_turn
+subject: AI_LAZHELP
+when: visible and v1("lazarus") <= 5
+do: set_goal(inquiring)
+
+event: on_talker_turn
+subject: AI_LAZHELP
+when: visible and v1("lazarus") > 5
+do: stop_talking()

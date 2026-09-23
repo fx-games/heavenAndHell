@@ -1,0 +1,16 @@
+[map] Cave_piece3
+
+[tiles] 7 7
+-1 -1 64 64 -1 64 -1
+-1 64 64 64 64 64 -1
+64 64 64 64 64 64 64
+-1 64 64 64 64 64 -1
+64 64 64 64 64 64 64
+-1 64 64 64 64 -1 -1
+-1 -1 64 -1 64 -1 -1
+
+[entities]
+WestConnector	1	1
+NorthConnector	4	1
+EastConnector	6	2
+SouthConnector	3	6

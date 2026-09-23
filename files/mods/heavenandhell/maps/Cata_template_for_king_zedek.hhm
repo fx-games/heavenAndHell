@@ -1,0 +1,13 @@
+[map] Cata_template_for_king_zedek
+UsesDecoration	Deco_for_king_zedek
+
+[tiles] 7 6
+64 64 64 64 64 64 64
+64 64 64 64 64 64 64
+64 64 64 64 64 64 64
+64 64 64 64 64 64 64
+64 64 64 64 64 64 64
+-1 -1 -1 -1 -1 -1 -1
+
+[entities]
+SouthConnector	3	5

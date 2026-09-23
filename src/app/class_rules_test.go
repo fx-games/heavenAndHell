@@ -1,20 +1,19 @@
 package app
 
 import (
+	"rpg/src/defs"
 	"testing"
-
-	"rpg/src/d1"
 )
 
-// A class's rules are its hero.rec record: whatever a class does differently is a flag or field any class of any
+// A class's rules are its classes.rec record: whatever a class does differently is a flag or field any class of any
 // mod can take, not its position in the roster.
 func TestClassRulesAreTheirRecords(t *testing.T) {
 	h := newHeavenAndHellGame(t, NewDummyUI())
 	h.NewGame(h.GetGameData().ClassDefinitions[0], false, "")
 	rules := h.GetWorldState().GetPlayer().Hero().Rules()
 	archer, mage := rules.ClassByKey("archer"), rules.ClassByKey("mage")
-	if archer < 0 || mage < 0 || rules.ClassByKey("rogue") >= 0 {
-		t.Fatalf("H&H class keys: archer %d, mage %d, rogue %d", archer, mage, rules.ClassByKey("rogue"))
+	if archer == "" || mage == "" || rules.ClassByKey("rogue") != "" {
+		t.Fatalf("H&H class keys: archer %q, mage %q, rogue %q", archer, mage, rules.ClassByKey("rogue"))
 	}
 	if !rules.FullMissileDamageBonus(archer) || rules.FullMissileDamageBonus(mage) {
 		t.Error("full_missile_bonus: the Archer's flag, not the Mage's")
@@ -28,7 +27,7 @@ func TestClassRulesAreTheirRecords(t *testing.T) {
 	if s := hero.Sheet(nil); s.MaxDam >= 20 {
 		t.Fatalf("Mage's bare hands already hit for %d", s.MaxDam)
 	}
-	rules.SetClassFlagForTest(mage, d1.ClassTrainedFists)
+	rules.SetClassFlagForTest(mage, defs.ClassTrainedFists)
 	if s := hero.Sheet(nil); s.MinDam != 10 || s.MaxDam != 20 {
 		t.Errorf("a Mage with trained_fists: %d-%d, want 10-20", s.MinDam, s.MaxDam)
 	}

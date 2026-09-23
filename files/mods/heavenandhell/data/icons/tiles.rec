@@ -95,3 +95,7 @@ icon: 43
 
 internal_name: effect.arrow
 icon: 41
+
+internal_name: effect.shield
+icon: 203
+name: Effect Shield (flashes over an actor a Shield lands on)

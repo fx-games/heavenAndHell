@@ -18,8 +18,13 @@
 #                           next visit (Angband). Default true
 #   PersistQuestLevels      true / false: true keeps a quest's level (and a set piece) as it is, never rebuilt nor
 #                           respawned; false lets the rules above apply to it too. Default true
+#   AuraLightColor          "R G B" of the hero's own light (aura), of wall torches and braziers, and of a light
+#                           source that names no light_color. Default 255 255 255
+#   AuraLightFlicker        its flicker: fire, smooth, steady or numbers, as items.rec's light_flicker_pattern.
+#                           Default steady. AuraLightFlickerDelay: seconds per frame, default 1
 #   Font                    the UI font, a file in the mod's fonts/ folder. Required. Only a default: the player
 #                           picks another in the menus
+#   TitleImage              optional: a file directly under the mod's folder, shown as a splash screen on startup
 # A light source's color, flicker and radius are its own: items.rec's light_color, light_flicker_pattern
 # (fire, smooth, steady or numbers), light_flicker_frame_delay and equip_modifier light_radius(n).
 #
@@ -31,3 +36,8 @@ Lighting: carried
 LightInTown: true
 LightBurnsInTown: false
 Font: Ac437_EagleSpCGA_Alt3.ttf
+TitleImage: heaven_and_hell_title.png
+# The hero's torch-like light: warm, flickering like fire.
+AuraLightColor: 255 223 117
+AuraLightFlicker: fire
+AuraLightFlickerDelay: 0.125

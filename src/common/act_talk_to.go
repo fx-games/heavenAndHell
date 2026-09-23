@@ -6,9 +6,9 @@ import (
 	"rpg/src/util"
 )
 
-// d1Gossip picks a gossip text id for a town NPC (S_TalkEnter's gossipstart..gossipend: all but the greeting),
+// gossip picks a gossip text id for a town NPC (S_TalkEnter's gossipstart..gossipend: all but the greeting),
 // seeded by the NPC's _tSeed so it repeats until the hero leaves town, or "" if none is available.
-func d1Gossip(gossip map[string][]string, seeds map[VendorType]int64, vendorType VendorType) string {
+func gossip(gossip map[string][]string, seeds map[VendorType]int64, vendorType VendorType) string {
 	ids := gossip[string(vendorType)]
 	if len(ids) < 2 {
 		return ""
@@ -21,25 +21,25 @@ func d1Gossip(gossip map[string][]string, seeds map[VendorType]int64, vendorType
 	return ids[1+rand.New(rand.NewSource(seed)).Intn(len(ids)-1)]
 }
 
-// d1Greeting is the NPC's TownerTalk line (TEXT_GRISWOLD1...), played as speech when the store opens.
-func d1Greeting(gossip map[string][]string, vendorType VendorType) string {
+// greeting is the NPC's TownerTalk line (TEXT_GRISWOLD1...), played as speech when the store opens.
+func greeting(gossip map[string][]string, vendorType VendorType) string {
 	if ids := gossip[string(vendorType)]; len(ids) > 0 {
 		return ids[0]
 	}
 	return ""
 }
 
-// d1TalkTopics ports S_TalkEnter's topic list: the active quests this NPC can discuss (d1QuestTopic), plus Gossip.
-func d1TalkTopics(context ActionContext, npc *Actor) []util.MenuItem {
+// talkTopics ports S_TalkEnter's topic list: the active quests this NPC can discuss (questTopic), plus Gossip.
+func talkTopics(context ActionContext, npc *Actor) []util.MenuItem {
 	var items []util.MenuItem
 	state := context.GameState
 	for q, def := range state.QuestDefs() {
-		if id := state.d1QuestTopic(npc.GetVendorType(), q); id != "" {
+		if id := state.questTopic(npc.GetVendorType(), q); id != "" {
 			items = append(items, util.MenuItem{MainText: def.Name, Action: func() { state.factory.say(npc.Name(), id) }})
 		}
 	}
 	items = append(items, util.MenuItem{MainText: "Gossip", Action: func() {
-		if id := d1Gossip(state.factory.D1().D.Gossip, state.gossipSeeds, npc.GetVendorType()); id != "" {
+		if id := gossip(state.factory.Gen().D.Gossip, state.gossipSeeds, npc.GetVendorType()); id != "" {
 			state.factory.say(npc.Name(), id)
 		}
 	}})
@@ -73,15 +73,15 @@ func (d *TalkToAction) Execute(context ActionContext) []Action {
 	// scripted falls back to the quest topics and gossip menu.
 	talk := func() {
 		if !f.fireQuestTriggers(EventTalk, npc.GetInternalName(), npc.Name()) {
-			context.Show(ChooseOption{d1TalkTopics(context, npc)})
+			context.Show(ChooseOption{talkTopics(context, npc)})
 		}
 	}
-	f.playD1Sound(f.D1().D.TextSfx[d1Greeting(f.D1().D.Gossip, npc.GetVendorType())])
+	f.playSound(f.Gen().D.TextSfx[greeting(f.Gen().D.Gossip, npc.GetVendorType())])
 	if npc.GetVendorType() != "" {
 		PlayUICue("store_enter")
 	}
 	talkItem := util.MenuItem{MainText: fmt.Sprintf("Talk to %s", npc.Name()), Action: talk}
-	options := append([]util.MenuItem{talkItem}, d1VendorOptions(context, npc)...)
+	options := append([]util.MenuItem{talkItem}, vendorOptions(context, npc)...)
 	context.Show(ChooseOption{options})
 	return nil
 }

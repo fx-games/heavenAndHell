@@ -26,6 +26,8 @@ func show(ui common.UserInterface, r common.UIRequest) {
 		ui.ShowFullStats()
 	case common.ShowGameOver:
 		ui.ShowGameOverMenu()
+	case common.EndTargeting:
+		ui.CancelTargeting()
 	case common.ChooseService:
 		ui.OpenServiceMenu(r.Items, r.Price, r.Pick)
 	case common.OpenShop:

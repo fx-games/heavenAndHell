@@ -59,19 +59,34 @@ func loadIconRec(name string) map[string]int32 {
 		panic(err)
 	}
 	defer f.Close()
-	icons := map[string]int32{}
+	icons, sameAs := map[string]int32{}, map[string]string{}
 	for _, rec := range recfile.Read(f) {
-		var n string
+		var n, alias string
 		var icon int32
+		hasIcon := false
 		for _, field := range rec {
 			switch field.Name {
 			case "internal_name":
 				n = field.Value
 			case "icon":
-				icon = field.AsInt32()
+				icon, hasIcon = field.AsInt32(), true
+			case "same_as":
+				alias = field.Value
 			}
 		}
+		if alias != "" && !hasIcon {
+			sameAs[n] = alias
+			continue
+		}
 		icons[n] = icon
+	}
+	// same_as: a record drawn with another's icon (a trapped chest looks like a chest), unless it has its own.
+	for n, target := range sameAs {
+		if icon, ok := icons[target]; ok {
+			icons[n] = icon
+		} else {
+			missingIcons = append(missingIcons, n+" (same_as "+target+")")
+		}
 	}
 	return icons
 }
@@ -93,31 +108,9 @@ func IconID(kind, raw string) string {
 	return kind + "." + slug
 }
 
-// propFolds folds D1 objects into one icon where the top-down view can't tell them apart: the same sprite under
-// another ID (trapped chests, quest copies), or the same thing drawn from another isometric angle (left/right
-// walls). A fold to a ".used" key is an object that looks like another's used state (an empty bookcase).
-var propFolds = map[string]string{
-	"tchest1": "chest1", "tchest2": "chest2", "tchest3": "chest3", "signchest": "chest3",
-	"shrinel": "shrine", "shriner": "shrine",
-	"bookcasel": "bookcase", "bookcaser": "bookcase", "bookshelf": "bookcase.used",
-	"bannerl": "banner", "bannerm": "banner", "bannerr": "banner",
-	"crux1": "crux", "crux2": "crux", "crux3": "crux",
-	"blindbook": "book1", "bloodbook": "book1", "steeltome": "book1", "booklvr": "book1",
-	"book2l": "book2", "book2r": "book2", "skelbook": "book2", "bookstand": "book2",
-	"flamelvr": "lever", "bookcandle": "candle2", "storycandle": "candle2", "tbcross": "bcross",
-	"mcircle1": "mcircle", "mcircle2": "mcircle",
-	"wararmor": "armorstand", "armorstandn": "armorstand.used",
-	"warweap": "weaponrack", "weaprack": "weaponrack", "weaponrackn": "weaponrack.used",
-}
-
-// PropIconID is IconID("prop", obj) after propFolds.
-func PropIconID(obj string) string {
-	id := IconID("prop", obj)
-	if f, ok := propFolds[strings.TrimPrefix(id, "prop.")]; ok {
-		return "prop." + f
-	}
-	return id
-}
+// PropIconID is the icon id of a dungeon object: IconID("prop", obj). Objects the top-down view can't tell apart
+// share an icon through tiles.rec's same_as.
+func PropIconID(obj string) string { return IconID("prop", obj) }
 
 // IconOK looks up a name not exposed as a Go constant (D1's dynamically keyed "monster.<id>", "npc.<name>",
 // "item.<name>", "prop.<name>", "spell.<name>", built with IconID) in all four category files.

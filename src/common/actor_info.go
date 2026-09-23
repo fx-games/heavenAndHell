@@ -8,21 +8,21 @@ import (
 // ActorInfoSections is the right-click description of an actor: who they are, their numbers, what is on them, and
 // - against a monster - how the fight would go. Both UIs read it, the tile UI as a laid out window and the
 // terminal one through SectionLines, so the two can't drift apart.
-func ActorInfoSections(state *State, actor *Actor) (string, []D1SheetSection) {
-	var sections []D1SheetSection
+func ActorInfoSections(state *State, actor *Actor) (string, []SheetSection) {
+	var sections []SheetSection
 	switch {
 	case actor.hero != nil:
-		sections = append(actor.D1SheetSections(), actor.d1AttributeSection())
-	case actor.d1Monster != nil:
-		sections = actor.D1MonsterSections(state.factory.Generator.D)
+		sections = append(actor.SheetSections(), actor.attributeSection())
+	case actor.monster != nil:
+		sections = actor.MonsterSections(state.factory.Generator.D)
 	default:
 		sections = actor.plainActorSections()
 	}
 	if effects := actor.statusEffects.AsStrings(); len(effects) > 0 {
-		sections = append(sections, D1SheetSection{Title: "Afflictions", Notes: effects})
+		sections = append(sections, SheetSection{Title: "Afflictions", Notes: effects})
 	}
 	if player := state.GetPlayer(); actor != player {
-		if forecast, ok := D1ForecastSection(state, player, actor); ok {
+		if forecast, ok := ForecastSection(state, player, actor); ok {
 			sections = append(sections, forecast)
 		}
 	}
@@ -30,7 +30,7 @@ func ActorInfoSections(state *State, actor *Actor) (string, []D1SheetSection) {
 }
 
 // SectionLines flattens an info window into plain lines for the terminal UI.
-func SectionLines(title string, sections []D1SheetSection) []string {
+func SectionLines(title string, sections []SheetSection) []string {
 	lines := []string{title}
 	for _, sec := range sections {
 		if len(sec.Rows) == 0 && len(sec.Notes) == 0 {
@@ -47,11 +47,11 @@ func SectionLines(title string, sections []D1SheetSection) []string {
 	return lines
 }
 
-// d1AttributeSection is the four attributes as a read-only block, for the info window (the character sheet draws
+// attributeSection is the four attributes as a read-only block, for the info window (the character sheet draws
 // them itself, with a "+" per attribute a point can still go into).
-func (a *Actor) d1AttributeSection() D1SheetSection {
-	sec := D1SheetSection{Title: "Attributes"}
-	for _, at := range a.D1SheetAttributes() {
+func (a *Actor) attributeSection() SheetSection {
+	sec := SheetSection{Title: "Attributes"}
+	for _, at := range a.SheetAttributes() {
 		value := fmt.Sprintf("%d / %d", at.Base, at.Max)
 		if at.Total != at.Base {
 			value = fmt.Sprintf("%d (%d) / %d", at.Base, at.Total, at.Max)
@@ -63,7 +63,7 @@ func (a *Actor) d1AttributeSection() D1SheetSection {
 
 // plainActorSections describes an actor that is neither a hero nor a D1 monster: a townsperson, who only has
 // numbers worth reading once they have been provoked into fighting back.
-func (a *Actor) plainActorSections() []D1SheetSection {
+func (a *Actor) plainActorSections() []SheetSection {
 	st := a.GetStats()
 	kind := "Townsperson"
 	if a.IsVendor() {
@@ -79,13 +79,13 @@ func (a *Actor) plainActorSections() []D1SheetSection {
 	if a.GetEquipment().HasRangedWeaponEquipped() {
 		rows = append(rows, [2]string{"Ranged damage", a.GetDamageDice(RangedAttack).String()})
 	}
-	sections := []D1SheetSection{{Title: "Creature", Rows: rows}}
+	sections := []SheetSection{{Title: "Creature", Rows: rows}}
 	var carried []string
 	for _, it := range a.GetEquipment().AllItems() {
 		carried = append(carried, it.Name())
 	}
 	if len(carried) > 0 {
-		sections = append(sections, D1SheetSection{Title: "Equipment", Notes: carried})
+		sections = append(sections, SheetSection{Title: "Equipment", Notes: carried})
 	}
 	return sections
 }

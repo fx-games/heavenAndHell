@@ -6,10 +6,11 @@ import (
 	"slices"
 	"strconv"
 
-	"rpg/src/d1"
 	"rpg/src/defs"
+	"rpg/src/dungen"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
+	"rpg/src/rules"
 )
 
 // mod.rec's dungeon rules, applied as the hero leaves and enters a dungeon level:
@@ -118,10 +119,10 @@ func (g *MapGenerator) levelRand(id string) *rand.Rand {
 	return rand.New(rand.NewSource(g.seed ^ int64(h.Sum64()) ^ int64(uint64(g.generations[id])*0x9E3779B97F4A7C15)))
 }
 
-// d1LevelSeeds is D1's seed table for level id: glSeedTbl as D1 rolled it, the level's depth re-rolled once it
+// levelSeeds is D1's seed table for level id: glSeedTbl as D1 rolled it, the level's depth re-rolled once it
 // has been forgotten.
-func (g *MapGenerator) d1LevelSeeds(id string, depth int) [d1.NumLevels]int32 {
-	seeds := g.d1Seeds
+func (g *MapGenerator) levelSeeds(id string, depth int) [rules.NumLevels]int32 {
+	seeds := g.seeds
 	if g.generations[id] > 0 {
 		seeds[depth] = g.levelRand(id).Int31()
 	}
@@ -137,7 +138,7 @@ func (s *State) keepsLevel(id string) bool {
 	if s.dungeonRules.QuestLevelsFollow {
 		return false
 	}
-	if _, set := l.Config.(d1.SetLevelParams); set {
+	if _, set := l.Config.(dungen.SetLevelParams); set {
 		return true
 	}
 	return slices.ContainsFunc(s.QuestDefs(), func(q defs.Quest) bool { return q.Level == id })
@@ -153,7 +154,7 @@ func (s *State) leaveLevel(id string) {
 		delete(s.maps, id)
 		delete(g.snapshots, id)
 		delete(g.rosters, id)
-		delete(g.d1Levels, id)
+		delete(g.generated, id)
 		if g.generations == nil {
 			g.generations = map[string]int{}
 		}
@@ -195,7 +196,7 @@ func (s *State) respawn(m *gridmap.GridMap[*Actor, *Item, Object], n int) {
 	g, r := s.mapGen, s.mapGen.roster(m.GetName())
 	var alive []*Actor
 	for _, a := range m.Actors() {
-		if a.d1Monster != nil && !a.d1Monster.Golem && a.IsAlive() {
+		if a.monster != nil && !a.monster.Golem && a.IsAlive() {
 			alive = append(alive, a)
 		}
 	}
@@ -216,29 +217,30 @@ func (s *State) respawn(m *gridmap.GridMap[*Actor, *Item, Object], n int) {
 	if s.dungeonRules.Uniques == "same" {
 		for _, u := range r.uniques {
 			if due > 0 && !slices.ContainsFunc(alive, u.is) {
-				if a := u.make(); place(a, u.at) && g.d1Levels[m.GetName()] != nil {
-					s.factory.initD1Talk(a)
+				if a := u.make(); place(a, u.at) && g.generated[m.GetName()] != nil {
+					s.factory.initTalk(a)
 				}
 			}
 		}
 	}
-	depth := s.Level(m.GetName()).Depth
+	lvl := s.Level(m.GetName())
+	types := g.spawnTypes(lvl)
 	for _, i := range g.randomSource.Perm(len(r.spots)) {
 		if due <= 0 {
 			return
 		}
-		a, companions := s.factory.rollEnemy(depth, s.dungeonRules.Uniques == "random", func(id string) bool {
+		a, companions := s.factory.rollEnemy(lvl, types, s.dungeonRules.Uniques == "random", func(id string) bool {
 			return slices.ContainsFunc(alive, sameName(id))
 		})
 		if a == nil {
 			continue
 		}
-		a.d1Monster.SpawnIndex = -1 // saved in LevelSnapshot.Spawned
+		a.monster.SpawnIndex = -1 // saved in LevelSnapshot.Spawned
 		if !place(a, r.spots[i]) {
 			continue
 		}
 		for _, c := range g.spawnDungenCompanions(m, r.spots[i], companions[:min(len(companions), due)]) {
-			c.d1Monster.SpawnIndex = -1
+			c.monster.SpawnIndex = -1
 			alive = append(alive, c)
 			due--
 		}

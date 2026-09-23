@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"path"
+	"slices"
 	"strings"
 
 	"github.com/expr-lang/expr"
@@ -29,6 +30,9 @@ type Quest struct {
 
 	// Gossip is town NPC internal name -> the TEXT_* id it says about this quest while the quest is running.
 	Gossip map[string]string
+
+	// NewGamePlus: finishing this quest turns the game into new game plus (tougher monsters, better loot).
+	NewGamePlus bool
 }
 
 // Trigger fires named outcomes when a named event happens to a named subject and its condition holds.
@@ -68,6 +72,14 @@ type QuestEnv struct {
 	// Deepest is the deepest dungeon level the hero has reached; Has whether the hero carries an item, by name.
 	Deepest int               `expr:"deepest"`
 	Has     func(string) bool `expr:"has"`
+	// At is whether the hero stands on a location the level names; Here whether a quest is on this level.
+	At   func(string) bool `expr:"at"`
+	Here func(string) bool `expr:"here"`
+	// For on_talker_* events: what the quest boss has to say, its goal (normal attack2 inquiring talking
+	// other) and whether the hero sees it.
+	Talk    string `expr:"talk"`
+	Goal    string `expr:"goal"`
+	Visible bool   `expr:"visible"`
 }
 
 // ReadQuests loads the active mod's quests and triggers and compiles every trigger condition.
@@ -95,6 +107,8 @@ func ReadQuests(fsys fs.FS) ([]Quest, []Trigger, error) {
 				q.LogText = fld.Value
 			case "level":
 				q.Level = fld.Value
+			case "new_game_plus":
+				q.NewGamePlus = fld.Value == "true"
 			case "gossip":
 				npc, id, ok := strings.Cut(fld.Value, " ")
 				if !ok {
@@ -107,6 +121,9 @@ func ReadQuests(fsys fs.FS) ([]Quest, []Trigger, error) {
 		}
 		if q.Key == "" {
 			return nil, nil, fmt.Errorf("quests.rec quest %d: no key", i+1)
+		}
+		if slices.ContainsFunc(quests, func(o Quest) bool { return o.Key == q.Key }) {
+			return nil, nil, fmt.Errorf("quests.rec: key %q is used twice", q.Key)
 		}
 		quests = append(quests, q)
 	}

@@ -61,11 +61,11 @@ func (u *UIController) OpenCharacterSheet() {
 }
 
 // columns splits the sections into the left and right column: the attributes sit under the left one.
-func (s *CharacterSheet) columns() (left, right []common.D1SheetSection) {
+func (s *CharacterSheet) columns() (left, right []common.SheetSection) {
 	state := s.u.context.GameState()
-	sections := state.GetPlayer().D1SheetSections()
-	if state.D1NewGamePlus() { // on a first run it only ever says "Normal", which is not worth a heading
-		sections = append(sections, state.D1ThreatSection())
+	sections := state.GetPlayer().SheetSections()
+	if state.NewGamePlus() { // on a first run it only ever says "Normal", which is not worth a heading
+		sections = append(sections, state.ThreatSection())
 	}
 	for _, sec := range sections {
 		switch sec.Title {
@@ -81,8 +81,9 @@ func (s *CharacterSheet) columns() (left, right []common.D1SheetSection) {
 	return left, right
 }
 
-func (s *CharacterSheet) attributes() []common.D1SheetAttribute {
-	return s.u.context.GameState().GetPlayer().D1SheetAttributes()
+func (s *CharacterSheet) attributes() []common.SheetAttribute {
+	state := s.u.context.GameState()
+	return append(state.GetPlayer().SheetAttributes(), state.SkillRows(state.GetPlayer())...)
 }
 
 func (s *CharacterSheet) Layout() {
@@ -101,7 +102,7 @@ func (s *CharacterSheet) Layout() {
 		s.labelW[0] = max(s.labelW[0], width(at.Label)+10)
 		valueW[0] = max(valueW[0], width(s.attrValue(at))+sheetPlusSize+6) // the "+" sits at the right edge
 	}
-	for i, sections := range [2][]common.D1SheetSection{left, right} {
+	for i, sections := range [2][]common.SheetSection{left, right} {
 		height[i] += drawSectionBlock(nil, sections, 0, 0, 0, s.lineH)
 		for _, sec := range sections {
 			if len(sec.Rows) == 0 && len(sec.Notes) == 0 {
@@ -139,13 +140,15 @@ func (s *CharacterSheet) titleH(title string) int {
 
 // pointsTitle heads the attributes only while there are stat points to spend.
 func (s *CharacterSheet) pointsTitle() string {
-	if h := s.u.context.GameState().GetPlayer().Hero(); h != nil && h.StatPts > 0 {
+	if h := s.u.context.GameState().GetPlayer().Hero(); h != nil && h.SkillPts > 0 {
+		return fmt.Sprintf("%d stat, %d skill point(s)", h.StatPts, h.SkillPts)
+	} else if h != nil && h.StatPts > 0 {
 		return fmt.Sprintf("%d point(s) to spend", h.StatPts)
 	}
 	return ""
 }
 
-func (s *CharacterSheet) attrValue(at common.D1SheetAttribute) string {
+func (s *CharacterSheet) attrValue(at common.SheetAttribute) string {
 	if at.Total != at.Base {
 		return fmt.Sprintf("%d (%d) / %d", at.Base, at.Total, at.Max)
 	}
@@ -165,7 +168,7 @@ func (s *CharacterSheet) Draw() {
 }
 
 // drawSections draws one column and returns the y it stopped at.
-func (s *CharacterSheet) drawSections(sections []common.D1SheetSection, x, y, col int) int {
+func (s *CharacterSheet) drawSections(sections []common.SheetSection, x, y, col int) int {
 	return drawSectionBlock(s.u.GetRenderer(), sections, x, y, s.labelW[col], s.lineH)
 }
 

@@ -1,7 +1,7 @@
 package app
 
 import (
-	"rpg/src/d1"
+	"rpg/src/rules"
 	"testing"
 )
 
@@ -13,25 +13,25 @@ func TestCharacterSheetPlusRespectsMaximum(t *testing.T) {
 	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 	player := theGame.GetWorldState().GetPlayer()
 
-	for _, at := range player.D1SheetAttributes() {
+	for _, at := range player.SheetAttributes() {
 		if at.CanRaise {
 			t.Fatalf("%s can be raised with no stat points spent", at.Label)
 		}
 	}
 	player.Hero().StatPts = 500 // more than any class can ever spend
-	for _, at := range player.D1SheetAttributes() {
+	for _, at := range player.SheetAttributes() {
 		if !at.CanRaise {
 			t.Fatalf("%s cannot be raised although 500 points are unspent", at.Label)
 		}
 	}
 	for i := 0; i < 500; i++ {
-		attrs := player.D1SheetAttributes()
+		attrs := player.SheetAttributes()
 		if !attrs[0].CanRaise {
 			break
 		}
 		attrs[0].Raise()
 	}
-	str := player.D1SheetAttributes()[0]
+	str := player.SheetAttributes()[0]
 	if str.Base != str.Max || str.CanRaise {
 		t.Fatalf("strength stopped at %d/%d (canRaise=%v)", str.Base, str.Max, str.CanRaise)
 	}
@@ -47,7 +47,7 @@ func TestCharacterSheetExposesHiddenRules(t *testing.T) {
 	player := state.GetPlayer()
 
 	rows := map[string]string{}
-	for _, sec := range append(player.D1SheetSections(), state.D1ThreatSection()) {
+	for _, sec := range append(player.SheetSections(), state.ThreatSection()) {
 		for _, row := range sec.Rows {
 			rows[row[0]] = row[1]
 		}
@@ -64,8 +64,8 @@ func TestCharacterSheetExposesHiddenRules(t *testing.T) {
 	if rows["Threat"] != "Normal" {
 		t.Errorf("threat is %q before Diablo is beaten", rows["Threat"])
 	}
-	state.SetQuestActive(d1.QDiablo, d1.QuestDone)
-	if got := state.D1ThreatSection().Rows[0][1]; got == "Normal" {
+	state.SetQuestActive(rules.QDiablo, rules.QuestDone)
+	if got := state.ThreatSection().Rows[0][1]; got == "Normal" {
 		t.Errorf("threat is still %q after beating Diablo", got)
 	}
 }

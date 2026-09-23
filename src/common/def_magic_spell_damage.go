@@ -3,9 +3,9 @@ package common
 import (
 	"fmt"
 	"math/rand"
-	"rpg/src/d1"
 	"rpg/src/defs"
 	"rpg/src/geometry"
+	"rpg/src/rules"
 	"rpg/src/stats"
 	"rpg/src/util"
 	"strings"
@@ -35,44 +35,49 @@ type SpellRoll struct {
 	Damage64, Ticks int
 }
 
-func whole(damage, ticks int) SpellRoll { return SpellRoll{Damage64: damage << 6, Ticks: ticks} }
+func whole(damage, ticks int) SpellRoll {
+	return SpellRoll{Damage64: rules.Fixed(damage), Ticks: ticks}
+}
 
 // GetAllDamageRolls is the damage a spell deals, by name. The arithmetic lives in the d1 tables package with the
 // rest of the numbers; this map is only the name each roll answers to, the same way hit zones and targeting rules
 // are reached by name.
 func GetAllDamageRolls() map[string]func(RollContext) SpellRoll {
 	return map[string]func(RollContext) SpellRoll{
-		"firebolt":     func(c RollContext) SpellRoll { return whole(d1.FireboltDamage(c.Rng, c.Mag, c.Slvl), 1) },
-		"holy_bolt":    func(c RollContext) SpellRoll { return whole(d1.HolyBoltDamage(c.Rng, c.Clvl), 1) },
-		"blood_star":   func(c RollContext) SpellRoll { return whole(d1.BloodStarDamage(c.Mag, c.Slvl), 1) },
-		"charged_bolt": func(c RollContext) SpellRoll { return whole(d1.ChargedBoltDamage(c.Rng, c.Mag), 1) },
-		"wave":         func(c RollContext) SpellRoll { return whole(d1.WaveDamage(c.Rng, c.Clvl), 1) },
-		"fireball":     func(c RollContext) SpellRoll { return whole(d1.FireballDamage(c.Rng, c.Clvl, c.Slvl), 1) },
-		"elemental":    func(c RollContext) SpellRoll { return whole(d1.ElementalDamage(c.Rng, c.Clvl, c.Slvl), 1) },
-		"nova":         func(c RollContext) SpellRoll { return whole(d1.NovaDamage(c.Rng, c.Clvl, c.Slvl), 1) },
-		"apocalypse":   func(c RollContext) SpellRoll { return whole(d1.ApocalypseDamage(c.Rng, c.Clvl), 1) },
+		"firebolt":     func(c RollContext) SpellRoll { return whole(rules.FireboltDamage(c.Rng, c.Mag, c.Slvl), 1) },
+		"holy_bolt":    func(c RollContext) SpellRoll { return whole(rules.HolyBoltDamage(c.Rng, c.Clvl), 1) },
+		"blood_star":   func(c RollContext) SpellRoll { return whole(rules.BloodStarDamage(c.Mag, c.Slvl), 1) },
+		"charged_bolt": func(c RollContext) SpellRoll { return whole(rules.ChargedBoltDamage(c.Rng, c.Mag), 1) },
+		"wave":         func(c RollContext) SpellRoll { return whole(rules.WaveDamage(c.Rng, c.Clvl), 1) },
+		"fireball":     func(c RollContext) SpellRoll { return whole(rules.FireballDamage(c.Rng, c.Clvl, c.Slvl), 1) },
+		"elemental":    func(c RollContext) SpellRoll { return whole(rules.ElementalDamage(c.Rng, c.Clvl, c.Slvl), 1) },
+		"nova":         func(c RollContext) SpellRoll { return whole(rules.NovaDamage(c.Rng, c.Clvl, c.Slvl), 1) },
+		"apocalypse":   func(c RollContext) SpellRoll { return whole(rules.ApocalypseDamage(c.Rng, c.Clvl), 1) },
 		"bone_spirit":  func(c RollContext) SpellRoll { return whole(0, 1) }, // drain_third supplies the amount
+		"great_thunder": func(c RollContext) SpellRoll { // the engine's Great Thunder: one and a half Fireballs
+			return whole(rules.FireballDamage(c.Rng, c.Clvl, c.Slvl)*3/2, 1)
+		},
 		"lightning": func(c RollContext) SpellRoll {
-			return whole(d1.LightningDamage(c.Rng, c.Clvl), d1.LightningTicks(c.Slvl))
+			return whole(rules.LightningDamage(c.Rng, c.Clvl), rules.LightningTicks(c.Slvl))
 		},
 		"inferno": func(c RollContext) SpellRoll {
-			return SpellRoll{Damage64: d1.InfernoDamage64(c.Rng, c.Clvl), Ticks: d1.InfernoTicks(c.Cell)}
+			return SpellRoll{Damage64: rules.InfernoDamage64(c.Rng, c.Clvl), Ticks: rules.InfernoTicks(c.Cell)}
 		},
 		"flash": func(c RollContext) SpellRoll {
-			low, _ := d1.FlashDamage64(c.Rng, c.Clvl, c.Slvl)
-			return SpellRoll{Damage64: low, Ticks: d1.FlashTicks}
+			low, _ := rules.FlashDamage64(c.Rng, c.Clvl, c.Slvl)
+			return SpellRoll{Damage64: low, Ticks: rules.FlashTicks}
 		},
 	}
 }
 
 var resistKindByName = map[string]int{
-	"none": d1.ResistNone, "fire": d1.ResistKindFire, "lightning": d1.ResistKindLightning, "magic": d1.ResistKindMagic,
+	"none": rules.ResistNone, "fire": rules.ResistKindFire, "lightning": rules.ResistKindLightning, "magic": rules.ResistKindMagic,
 }
 
 func damageIconByResist() map[int]int32 {
 	return map[int]int32{
-		d1.ResistKindFire: defs.IconEffectFireSmall, d1.ResistKindLightning: defs.IconEffectLightning,
-		d1.ResistNone: defs.IconEffectHit, d1.ResistKindMagic: defs.IconEffectHit,
+		rules.ResistKindFire: defs.IconEffectFireSmall, rules.ResistKindLightning: defs.IconEffectLightning,
+		rules.ResistNone: defs.IconEffectHit, rules.ResistKindMagic: defs.IconEffectHit,
 	}
 }
 
@@ -130,7 +135,7 @@ func (a *SpellDamageAction) Succeeded() bool { return a.landed }
 func (a *SpellDamageAction) Execute(ctx ActionContext) []Action {
 	f := ctx.GameState.factory
 	c := &spellCtx{f: f, ctx: ctx, caster: a.caster, h: a.caster.hero, s: a.caster.HeroSheet(), slvl: a.slvl,
-		m: ctx.GameState.GetMap(), cause: a.cause, dealt: map[*Actor]int{},
+		m: ctx.GameState.GetMap(), cause: a.cause, dealt64: map[*Actor]int{},
 		resist: a.resist, undeadOnly: a.mode == "undead_only", drainThird: a.mode == "drain_third"}
 	if c.h == nil {
 		return nil
@@ -152,6 +157,9 @@ func (a *SpellDamageAction) Execute(ctx ActionContext) []Action {
 		last := a.hitPositions[len(a.hitPositions)-1]
 		c.missile(a.caster, []geometry.Point{a.caster.MapPosition(), last}, 0.03, icon)
 		c.emit(ctx.ActionBroker) // a spell that hit no cell shows nothing
+	}
+	if !a.landed && !c.struckAnything {
+		c.say("Your spell finds nothing to hit.") // the mana is gone either way (UseMana); say where it went
 	}
 	return c.finish()
 }
@@ -180,7 +188,7 @@ func (g *Factory) chargedBolts(args util.Arguments) *HitEffect {
 	}
 }
 
-// ChargedBoltsAction is charged_bolts resolving: d1.ChargedBolts(slvl) sparks, each with its own wander seed,
+// ChargedBoltsAction is charged_bolts resolving: rules.ChargedBolts(slvl) sparks, each with its own wander seed,
 // its own damage roll and its own path animation.
 type ChargedBoltsAction struct {
 	BaseAction
@@ -198,12 +206,12 @@ func (a *ChargedBoltsAction) Succeeded() bool    { return a.landed }
 func (a *ChargedBoltsAction) Execute(ctx ActionContext) []Action {
 	f := ctx.GameState.factory
 	c := &spellCtx{f: f, ctx: ctx, caster: a.caster, h: a.caster.hero, s: a.caster.HeroSheet(), slvl: a.slvl,
-		m: ctx.GameState.GetMap(), cause: a.cause, dealt: map[*Actor]int{}, resist: a.resist}
+		m: ctx.GameState.GetMap(), cause: a.cause, dealt64: map[*Actor]int{}, resist: a.resist}
 	if c.h == nil {
 		return nil
 	}
 	origin := a.caster.MapPosition()
-	for n := d1.ChargedBolts(a.slvl); n > 0; n-- {
+	for n := rules.ChargedBolts(a.slvl); n > 0; n-- {
 		wander := rng.Intn(15) + 1 // drawn before the damage, the order the original missile used
 		roll := GetAllDamageRolls()[a.roll](RollContext{Rng: rng, Mag: c.s.Mag, Clvl: c.h.Level, Slvl: a.slvl})
 		p, path := origin, []geometry.Point{origin}
@@ -229,13 +237,13 @@ func (a *ChargedBoltsAction) Execute(ctx ActionContext) []Action {
 //	effect: restore_resource(<health|mana>, full)
 //
 // Healing, Mana and the Magi are the same curve read three ways, so the dice and the classes each one favours
-// are numbers in the content and the arithmetic sits in d1.ResourceAmount64 beside the damage rolls. The
+// are numbers in the content and the arithmetic sits in rules.ResourceAmount64 beside the damage rolls. The
 // caster's spell level is appended as the last argument where the action is built, as it is for spell_damage.
-// classSet reads a comma separated list of class keys (hero.rec's key). Commas, because the argument list itself splits on '|'.
-func classSet(d *d1.Data, list string) map[int]bool {
-	set := map[int]bool{}
+// classSet reads a comma separated list of class keys (classes.rec's key). Commas, because the argument list itself splits on '|'.
+func classSet(d *rules.Data, list string) map[string]bool {
+	set := map[string]bool{}
 	for _, name := range strings.Split(list, ",") {
-		if class := d.ClassByKey(strings.TrimSpace(name)); class >= 0 {
+		if class := d.ClassByKey(strings.TrimSpace(name)); class != "" {
 			set[class] = true
 		}
 	}
@@ -271,7 +279,7 @@ func (g *Factory) restoreResource(args util.Arguments) *HitEffect {
 					st.GetResource(stats.Health).SetToMax()
 					return
 				}
-				st.GetResource(stats.Health).Increase(float64(d1.ResourceAmount64(rng, base, perClvl, perSlvl, h.Level, slvl, boost) >> 6))
+				st.GetResource(stats.Health).Increase(float64(rules.Whole(rules.ResourceAmount64(rng, base, perClvl, perSlvl, h.Level, slvl, boost))))
 				return
 			}
 			// mana carries hero bookkeeping health does not: the base pool grows with what is restored
@@ -280,8 +288,8 @@ func (g *Factory) restoreResource(args util.Arguments) *HitEffect {
 				st.GetResource(stats.Mana).SetToMax()
 				return
 			}
-			amount := d1.ResourceAmount64(rng, base, perClvl, perSlvl, h.Level, slvl, boost) >> 6
-			h.ManaBase = min(h.ManaBase+amount<<6, h.MaxManaBase)
+			amount := rules.Whole(rules.ResourceAmount64(rng, base, perClvl, perSlvl, h.Level, slvl, boost))
+			h.ManaBase = min(h.ManaBase+rules.Fixed(amount), h.MaxManaBase)
 			st.GetResource(stats.Mana).Increase(float64(amount))
 		},
 		Description: []util.LabelText{util.LabelTextFromString(fmt.Sprintf("Restore the caster's %s", resource))},

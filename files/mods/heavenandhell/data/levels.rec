@@ -7,27 +7,33 @@
 #   depth      difficulty and progress only (seeds, monster and item levels, "deepest"). Town 0; a quest or side
 #              level takes its parent's.
 #   generator  the algorithm that builds it: d1_cathedral, d1_catacombs, d1_caves, d1_hell (Diablo's four level
-#              generators), d1_set (a quest's set piece; names its quest), accretion, megadungeon, rogue, ldtk (drawn
-#              in maps.ldtk; names its template).
-#   tiles      the tile set: cathedral, catacombs, caves, hell, or drawn (an ldtk level's own tiles).
+#              generators), d1_set (a quest's set piece; names its quest), accretion, megadungeon, rogue, drawn (hand-drawn
+#              in the mod's maps; names its template).
+#   tiles      the tile set: cathedral, catacombs, caves, hell, or drawn (a hand-drawn level's own tiles).
 #   music      a music.rec event; a level without one is silent.
 #   glyphs     an 8x8 glyph atlas in the mod folder (Bm437_IBM_CGA.png): the level is drawn as text with it.
 #   town       true: a town (town-only spells, shopkeepers restock, the portal comes home to the deepest one).
 #   start      true on the one level a new game starts on.
+#   enemy_percent  chance in 100 that a walkable cell starts with a monster (default 5; dungen levels only).
+#   monster    "<internal_name> [weight]": one monster the level rolls, at these odds against the others (default 1).
+#              Repeatable; a level with any rolls only these (plus out-of-depth arrivals), one without rolls every
+#              enemies.rec record whose dlvl..max_dlvl takes in its depth. Dungen levels only.
 #   exit       "<location> -> <map id>, <arrival location>": stepping on the location takes you there. An
 #              "open_when:" line after it keeps it shut until the condition (quests.rec's language) holds; an
 #              "exit_tile:" line (stairs_down, stairs_up, red_portal) is what the spot turns into when it opens.
 #              The generator places the locations; this file says where they lead.
-#   template   (ldtk) the maps.ldtk level it is drawn as.
-#   quest      (d1_set) the quests.rec key whose set piece it loads; D1's quest table gives the set level.
+#   location   "<name> <x> <y>": a named map cell the level's quest logic or an exit refers to (Lazarus'
+#              lair: vile_book_N / vile_book_N_to, vile_center, vile_altar, exit). Repeatable.
+#   template   (drawn) the map file it is drawn as.
+#   quest      (d1_set) the quests.rec key whose set piece it loads.
 #   patch      "<name> = <region>": part of a built level that opens later, in the order they apply; the region
 #              is D1's ("x1 y1 x2 y2" megatiles, or used / group / range OBJ_...), so only D1 levels use it. An
 #              "apply_when:" line holds it back until the condition holds; "patch_objects:" names a .DUN whose
 #              objects come with it.
 #
 # The knobs accretion takes:
-#   templates        the LDtk project the room templates live in. Defaults to assets/rooms.ldtk, which the mod
-#                    overlay resolves to this mod's own rooms.ldtk.
+#   templates        the maps directory the room templates live in. Defaults to assets/maps, which the mod
+#                    overlay resolves to this mod's own maps.
 #   template_prefix  only templates whose name starts with this are used - which is how a depth gets its look.
 #   require_room     a template this level must contain (its quest room). Repeat the field for more.
 #   forbid_room      a template this level must NOT contain, so another level's quest room cannot turn up here.
@@ -70,7 +76,7 @@
 map: town
 name: Tristram
 depth: 0
-generator: ldtk
+generator: drawn
 template: Town
 tiles: drawn
 music: town
@@ -88,7 +94,7 @@ tiles: cathedral
 music: cathedral
 exit: ladder_up -> town, to_cathedral
 exit: ladder_down -> cathedral_2, ladder_up
-templates: assets/maps.ldtk
+templates: assets/maps
 template_prefix: Cath
 forbid_room: Cata_template_for_king_zedek
 forbid_room: Hell_template_for_lucifer
@@ -103,7 +109,7 @@ tiles: cathedral
 music: cathedral
 exit: ladder_up -> cathedral_1, ladder_down
 exit: ladder_down -> catacombs_3, ladder_up
-templates: assets/maps.ldtk
+templates: assets/maps
 template_prefix: Cath
 require_room: Cath_template_for_meat_jack
 forbid_room: Cata_template_for_king_zedek
@@ -120,7 +126,7 @@ music: catacombs
 exit: ladder_up -> cathedral_2, ladder_down
 exit: ladder_down -> catacombs_4, ladder_up
 exit: to_poisoned_water_supply -> poisoned_water_supply, ladder_up
-templates: assets/maps.ldtk
+templates: assets/maps
 template_prefix: Cata
 forbid_room: Cath_template_for_meat_jack
 forbid_room: Hell_template_for_lucifer
@@ -136,7 +142,7 @@ music: catacombs
 exit: ladder_up -> catacombs_3, ladder_down
 exit: ladder_down -> caves_5, ladder_up
 exit: to_town -> town, to_catacombs
-templates: assets/maps.ldtk
+templates: assets/maps
 template_prefix: Cata
 require_room: Cata_template_for_king_zedek
 forbid_room: Cath_template_for_meat_jack
@@ -152,7 +158,7 @@ tiles: caves
 music: caves
 exit: ladder_up -> catacombs_4, ladder_down
 exit: ladder_down -> caves_6, ladder_up
-templates: assets/maps.ldtk
+templates: assets/maps
 template_prefix: Cave
 doors: false
 forbid_room: Cath_template_for_meat_jack
@@ -170,7 +176,7 @@ music: caves
 exit: ladder_up -> caves_5, ladder_down
 exit: ladder_down -> hell_7, ladder_up
 exit: to_town -> town, to_caves
-templates: assets/maps.ldtk
+templates: assets/maps
 template_prefix: Cave
 doors: false
 forbid_room: Cath_template_for_meat_jack
@@ -187,7 +193,7 @@ tiles: hell
 music: hell
 exit: ladder_up -> caves_6, ladder_down
 exit: ladder_down -> hell_8, ladder_up
-templates: assets/maps.ldtk
+templates: assets/maps
 template_prefix: Hell
 doors: false
 forbid_room: Cath_template_for_meat_jack
@@ -204,7 +210,7 @@ music: hell
 exit: ladder_up -> hell_7, ladder_down
 exit: ladder_down -> doom_9, ladder_up
 exit: to_hell_town -> hell_town, to_caves
-templates: assets/maps.ldtk
+templates: assets/maps
 template_prefix: Hell
 doors: false
 require_room: Hell_template_for_lucifer
@@ -222,7 +228,7 @@ music: caves
 exit: ladder_up -> hell_8, ladder_down
 exit: ladder_down -> doom_10, ladder_up
 exit: to_hell_town -> hell_town, to_dungeon
-templates: assets/maps.ldtk
+templates: assets/maps
 template_prefix: Dung
 forbid_room: Cath_template_for_meat_jack
 forbid_room: Cata_template_for_king_zedek
@@ -237,7 +243,7 @@ tiles: caves
 music: caves
 exit: ladder_up -> doom_9, ladder_down
 exit: ladder_down -> merchant_11, ladder_up
-templates: assets/maps.ldtk
+templates: assets/maps
 template_prefix: Dung
 require_room: Dung_template_for_rogue
 forbid_room: Cath_template_for_meat_jack
@@ -253,7 +259,7 @@ tiles: cathedral
 music: cathedral
 exit: ladder_up -> doom_10, ladder_down
 exit: ladder_down -> merchant_12, ladder_up
-templates: assets/maps.ldtk
+templates: assets/maps
 template_prefix: Cath
 forbid_room: Cath_template_for_meat_jack
 forbid_room: Cata_template_for_king_zedek
@@ -268,7 +274,7 @@ generator: accretion
 tiles: cathedral
 music: cathedral
 exit: ladder_up -> merchant_11, ladder_down
-templates: assets/maps.ldtk
+templates: assets/maps
 template_prefix: Cath
 forbid_room: Cath_template_for_meat_jack
 forbid_room: Cata_template_for_king_zedek
@@ -276,11 +282,11 @@ forbid_room: Hell_template_for_lucifer
 forbid_room: Dung_template_for_rogue
 forbid_room: Cave_template_for_poisoned_water
 
-# The town in hell, drawn in maps.ldtk: reached from level 8's caves and level 9's dungeon.
+# The town in hell, drawn by hand: reached from level 8's caves and level 9's dungeon.
 map: hell_town
 name: The Town in Hell
 depth: 8
-generator: ldtk
+generator: drawn
 template: TownHell
 tiles: drawn
 music: town
@@ -296,7 +302,7 @@ generator: accretion
 tiles: caves
 music: caves
 exit: ladder_up -> catacombs_3, to_poisoned_water_supply
-templates: assets/maps.ldtk
+templates: assets/maps
 template_prefix: Cave
 doors: false
 require_room: Cave_template_for_poisoned_water

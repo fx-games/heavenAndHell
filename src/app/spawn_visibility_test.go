@@ -19,7 +19,7 @@ func TestSpawnedSkeletonIsVisibleEnemy(t *testing.T) {
 		state.MapTransition(gridmap.Transition{TargetMap: levelAt(state, dlvl), TargetLocation: "ladder_up"})
 		m := state.GetMap()
 		for _, obj := range m.Objects() {
-			o, ok := obj.(*common.D1Object)
+			o, ok := obj.(*common.Prop)
 			if !ok || o.PreSpawnType < 0 {
 				continue
 			}

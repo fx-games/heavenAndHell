@@ -6,13 +6,12 @@ package main
 
 import (
 	"rpg/src/cmd/internal/mpq"
+	"rpg/src/dungen"
 
 	"flag"
 	"fmt"
 	"log"
 	"os"
-
-	"rpg/src/d1"
 )
 
 func main() {
@@ -31,7 +30,7 @@ func main() {
 	if *dest == "" {
 		*dest = "files/mods/d1/data/levels"
 	}
-	if err := d1.ImportLevels(read, *dest); err != nil {
+	if err := dungen.ImportLevels(read, *dest); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Fprintf(os.Stderr, "wrote level data to %s\n", *dest)

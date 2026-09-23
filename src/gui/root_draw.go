@@ -24,7 +24,8 @@ func (u *UIController) Draw(screen *ebiten.Image) {
 
 	u.context.Animator().Draw(u.mapRenderer) // should be some "animator"
 
-	if !u.IsMouseCapturedByUI() {
+	// the cursor square belongs to a running game: not under the title screen or the start menu
+	if !u.IsMouseCapturedByUI() && u.title == nil && !u.sidebarHiddenForMenu {
 		if u.targeter != nil {
 			u.targeter.Draw(u.mapRenderer)
 		} else {
@@ -34,7 +35,17 @@ func (u *UIController) Draw(screen *ebiten.Image) {
 	}
 
 	u.captureThumbnail(screen) // before the UI: a save slot's screenshot shows the world, not the menus
-	u.drawUI()
+
+	// While the ceremony runs it covers the UI too - the sidebar has no business staying bright while the
+	// screen bleeds. Once the menu is up, the same overlay is the backdrop it sits on.
+	if u.death != nil && u.death.menuOpen {
+		u.drawDeathScreen(screen)
+	}
+	if alpha := u.uiFadeAlpha(); alpha < 1 {
+		u.drawUIWithAlpha(screen, alpha)
+	} else {
+		u.drawUI()
+	}
 
 	if u.message.ticksLeft > 0 {
 		const pad = 3.0
@@ -50,6 +61,13 @@ func (u *UIController) Draw(screen *ebiten.Image) {
 		u.currentTooltip.Draw()
 	}
 
+	if u.death != nil && !u.death.menuOpen {
+		u.drawDeathScreen(screen)
+	}
+
+	if u.title != nil {
+		u.drawTitleScreen()
+	}
 }
 
 // uniqueSweepShaderSrc draws a unique monster's sprite with a specular sheen: a diagonal band of light that
@@ -143,7 +161,7 @@ func (u *UIController) drawActors() {
 		}
 
 		actorColor := enemyColor
-		if u.renderingMode != GraphicRendering || actor.D1Monster() != nil { // decision 8: D1 variants are tinted sprites
+		if u.renderingMode != GraphicRendering || actor.Monster() != nil { // decision 8: D1 variants are tinted sprites
 			actorColor = actor.GetColor()
 		}
 		var drawColor color.Color
@@ -155,6 +173,10 @@ func (u *UIController) drawActors() {
 		if actor.IsHurt() && !actor.VisualsPending() {
 			percentage := actor.GetHurtTicksAsPercentage() // goes from 1.0 to 0.0
 			drawColor = util.LerpColor(defs.Red, actorColor, percentage)
+		}
+		if u.death != nil && actor == player { // his death is a scene of its own, not a sprite swap
+			u.drawDyingHero(actor, actorAtlas, drawColor)
+			continue
 		}
 		if actor.HasStatusEffect(common.StatusStone) { // petrified: frozen and colorless
 			screenPos := u.mapRenderer.MapFloatToScreen(actor.DrawPosition())
@@ -175,6 +197,9 @@ func (u *UIController) drawActors() {
 
 	for _, actor := range state.GetMap().Actors() {
 		if !actor.IsVisible() || !visibleMapOnScreen.Contains(actor.MapPosition()) || !player.CanPerceive(actor.MapPosition()) {
+			continue
+		}
+		if u.death != nil && actor == player { // an empty health bar over the corpse spoils the scene
 			continue
 		}
 		if atMax := actor.GetStats().GetResource(stats.Health).IsAtMax(); !atMax && !actor.VisualsPending() || actor.VisualsPending() && actor.ShownHealth() < actor.GetStats().GetAttribute(stats.MaxHealth) {

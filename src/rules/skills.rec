@@ -1,0 +1,220 @@
+%rec: default
+# skills.rec: the engine's own skills, embedded in the game. Every mod can use one by its id alone - in
+# classes.rec's start_spells ("arrow_rain=0"), an item's `spell:` (a scroll, a staff, a book that raises it) - and
+# a mod's own spells.rec record with the same id replaces the whole record here. The fields are spells.rec's
+# (see files/mods/d1/data/spells.rec), plus the ones only a named skill carries:
+#   name / description   what menus and tooltips show
+#   mana / mana_adj / min_mana   a cast's mana: mana - (level-1)*mana_adj, never below min_mana, times the class's
+#                     mana_cost. A sustained skill costs this for every extra arrow it looses instead
+#   min_int           the magic a scroll or book of it needs
+#   targeting         how the hero aims it: direct, melee, ranged, jumpstart(sprint), earthshaker(sprint);
+#                     blank aims like a spell. The skill level is appended to its arguments
+#   sustained         true: casting toggles it on and off instead of casting it (Multi-Shot)
+#   icon              the tile drawn when the mod's icons/skills.rec has no spell.<id>
+#   town              true: it works in town
+# Every effect gets the skill level as its last argument, which is what it scales with.
+
+# The Archer
+
+id: multi_shot
+name: Multi-Shot
+description: While it is up, every shot looses one more arrow per level (2-6) at the nearest enemies, and each extra arrow costs its mana.
+sustained: true
+mana: 2
+icon: 44
+
+id: arrow_rain
+name: Arrow Rain
+description: Arrows fall on an area (3x3, 5x5 from level 3) and strike at random what they find there; whatever cannot move is always hit.
+targeted: true
+targeting: ranged
+effect: arrow_rain
+mana: 8
+icon: 223
+
+id: trick_shot
+name: Trick Shot
+description: One arrow pierces every enemy in its line (2 more per level, all of them at level 5) and bounces off walls (1 bounce per level + 1).
+targeted: true
+targeting: ranged
+effect: trick_shot
+mana: 6
+icon: 223
+
+id: debilitating_shot
+name: Debilitating Shot
+description: A quick action: the next arrow that hits stuns, scares, confuses, enrages or poisons for 1 turn per level + 1, and pins down an enemy standing against a wall.
+effect: debilitating_shot
+mana: 4
+icon: 223
+
+id: man_stopper
+name: Man Stopper
+description: A shot that knocks its target back 1 cell per level; hitting a wall hurts it more.
+targeted: true
+targeting: ranged
+effect: man_stopper
+mana: 5
+icon: 223
+
+id: jump_start
+name: Jump Start
+description: Run up to an enemy, jump over it (farther with each level) and shoot it in the back.
+targeted: true
+targeting: jumpstart(5)
+effect: jumpstart(5)
+mana: 5
+icon: 223
+
+# The Warrior
+
+id: crush
+name: Crush
+description: A blow at 20% more damage per level through two enemies in a line; one against a wall takes half as much again.
+targeted: true
+targeting: melee
+effect: crush
+mana: 5
+icon: 223
+
+id: shout
+name: Shout
+description: Every enemy on the level hears you, and those that see you flee for 1 turn per level + 2.
+effect: shout
+mana: 6
+icon: 223
+
+id: swing
+name: Swing
+description: One blow at every enemy in the three cells in front of you.
+targeted: true
+targeting: melee
+effect: swing
+mana: 5
+icon: 223
+
+id: whirlwind_of_doom
+name: Whirlwind of Doom
+description: Spin up to 1 cell per level in a straight line, striking every enemy you pass; one against a wall takes half as much again.
+targeted: true
+targeting: direct
+effect: whirlwind
+mana: 8
+icon: 223
+
+id: earth_shaker
+name: Earth Shaker
+description: Rush forward and strike every enemy around where you land, pushing them back 1 cell per level.
+targeted: true
+targeting: earthshaker(5)
+hit_zone: neighbors_only(1)
+effect: earthshaker(5)
+mana: 8
+icon: 223
+
+id: triumph_of_steel
+name: Triumph of Steel
+description: For 5 turns per level, every kill heals you and adds to your damage.
+effect: triumph_of_steel
+mana: 10
+icon: 223
+
+id: call_to_odin
+name: Call to Odin
+description: Lightning strikes up to one visible enemy per level + 1.
+resist: lightning
+effect: call_to_odin
+mana: 12
+icon: 223
+
+# The Mage
+
+id: black_clouds
+name: Black Clouds
+description: A choking cloud (3x3, 5x5 from level 3) that poisons and confuses whatever breathes it, for 1 turn per level + 3.
+targeted: true
+effect: black_clouds
+mana: 10
+icon: 223
+
+id: burning_rain
+name: Burning Rain
+description: For 1 turn per level + 2, fire falls on three cells around the target every turn.
+targeted: true
+resist: fire
+effect: burning_rain
+mana: 14
+icon: 223
+
+id: great_thunder
+name: Great Thunder
+description: A thunderbolt on the target, and everything next to it is stunned.
+targeted: true
+resist: lightning
+effect: great_thunder
+mana: 16
+icon: 223
+
+id: eternal_vow
+name: Eternal Vow
+description: For 5 turns per level, the first blow that would kill you leaves you standing with 1 life.
+effect: eternal_vow
+mana: 20
+icon: 223
+
+id: bat_out_of_hell
+name: Bat out of Hell
+description: Fly up to 2 cells + 1 per level in a straight line through enemies, burning each one you pass.
+targeted: true
+targeting: direct
+resist: fire
+effect: bat_out_of_hell
+mana: 10
+icon: 223
+
+# Skills that were class skills before they had levels
+
+id: blink
+name: Blink
+description: Teleport to a cell you can see.
+targeted: true
+targeting: direct
+effect: blink
+mana: 5
+icon: 223
+
+id: poison_target
+name: Poison
+description: Poison a target for 3 turns.
+targeted: true
+targeting: direct
+effect: poison(3|1d3)
+mana: 4
+icon: 223
+
+id: fire_ray
+name: Fire Ray
+description: A ray of fire seven cells long.
+targeted: true
+targeting: ranged
+hit_zone: ray_aoe(7)
+effect: project_fire
+mana: 8
+icon: 223
+
+id: heal_health
+name: Heal
+description: Heal yourself by 20 life.
+effect: on_self(heal_health|20)
+mana: 6
+icon: 332
+
+id: shield
+name: Shield
+description: Wrap yourself or an ally in a shield that absorbs the next 10 damage per level. It vanishes when you die.
+targeted: true
+targeting: direct
+allow_self_target: true
+effect: shield
+mana: 6
+icon: 203

@@ -18,6 +18,7 @@ type HitAnimation struct {
 	ticksAlive       uint64
 	ticksNeeded      uint64
 	onFinished       func()
+	fade             bool
 }
 
 func NewHitAnimation(targetPos geometry.Point, runtimeInSeconds float64, startFrame int32, frameCount int) *HitAnimation {
@@ -39,7 +40,11 @@ func (m *HitAnimation) Draw(renderer TileRenderer) {
 		return
 	}
 	icon := m.firstTile + util.GetLoopingFrameFromTick(m.ticksAlive, m.runTimeInSeconds/float64(m.frameCount), m.frameCount)
-	renderer.DrawOnMap(m.targetPos, icon, color.White)
+	tint := color.Color(color.White)
+	if m.fade {
+		tint = color.NRGBA{R: 255, G: 255, B: 255, A: uint8(255 * (m.ticksNeeded - m.ticksAlive) / m.ticksNeeded)}
+	}
+	renderer.DrawOnMap(m.targetPos, icon, tint)
 }
 func (m *HitAnimation) Tick() {
 	if !m.shouldRunNow() || m.IsDone() {

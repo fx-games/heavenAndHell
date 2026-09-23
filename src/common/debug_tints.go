@@ -18,14 +18,14 @@ type TintedTile struct {
 func (g *Factory) DebugTints() []TintedTile {
 	var out []TintedTile
 	for mt, m := range g.Generator.D.Monsters {
-		if a := g.NewD1Monster(mt); a.GetColor() != defs.White {
+		if a := g.NewMonster(mt); a.GetColor() != defs.White {
 			out = append(out, TintedTile{a.icon, a.GetColor(), defs.IconID("monster", m.ID), m.Name + ": variant tint"})
 		}
 	}
 	for _, o := range g.Generator.D.Objects {
 		fresh, ok := defs.IconOK(defs.PropIconID(o.Name))
 		if used, hasUsed := defs.IconOK(defs.PropIconID(o.Name) + ".used"); ok && hasUsed && fresh == used {
-			out = append(out, TintedTile{used, D1UsedTint, defs.PropIconID(o.Name) + ".used", "used object: same icon as fresh"})
+			out = append(out, TintedTile{used, UsedTint, defs.PropIconID(o.Name) + ".used", "used object: same icon as fresh"})
 		}
 	}
 	return out

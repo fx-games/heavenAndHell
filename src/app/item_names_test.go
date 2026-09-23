@@ -13,13 +13,13 @@ func TestItemNamesFollowTheModsTemplate(t *testing.T) {
 		GetFactory() *common.Factory
 	}, internal string, count int) string {
 		f := g.GetFactory()
-		idx, ok := f.Generator.D.ItemIdx[internal]
+		b, ok := f.Generator.D.ItemsByName[internal]
 		if !ok {
 			t.Fatalf("no item %q", internal)
 		}
 		stack := common.InventoryStack{}
 		for i := 0; i < count; i++ {
-			stack = append(stack, f.NewD1Item(f.Generator.PlainItem(idx)))
+			stack = append(stack, f.NewRolledItem(f.Generator.PlainItem(b)))
 		}
 		return stack.InventoryName()
 	}

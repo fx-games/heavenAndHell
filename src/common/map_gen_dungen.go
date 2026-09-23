@@ -14,14 +14,14 @@ import (
 	"rpg/src/dungeon"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
-	"rpg/src/ldtk"
+	"rpg/src/hhm"
 )
 
 // This is the other half of GenerateMap's dispatch: a level whose generator belongs to the dungen family is
 // carved as a bare dungen.DungeonMap - walls, floors, doors and rooms, no tile art, no actors - and turned into
 // a gridmap here.
 //
-// D1's side does the same job in map_gen_d1.go and shares nothing with this but the gridmap it writes into,
+// D1's side does the same job in map_gen_drlg.go and shares nothing with this but the gridmap it writes into,
 // which is exactly the seam docs/ENGINE_SPLIT.md describes: the two families meet at "a name resolved and the knobs
 // parsed", and each builds its own levels its own way past that point.
 
@@ -40,7 +40,7 @@ func (g *MapGenerator) generateDungenMap(lvl dungeon.Level) *gridmap.GridMap[*Ac
 	g.addDungenTiles(m, layout, g.dungenTilemap(lvl, dlvl, layout))
 	stairs := g.addDungenStairs(m, layout, lvl)
 	g.decorateDungenRooms(m, layout, lvl, dlvl)
-	g.populateDungenLevel(m, layout, dlvl, stairs)
+	g.populateDungenLevel(m, layout, lvl, stairs)
 
 	if snap := g.snapshots[targetMap]; snap != nil {
 		snap.apply(g.factory, m)
@@ -172,7 +172,7 @@ func removePoint(ps []geometry.Point, p geometry.Point) []geometry.Point {
 const dungenMaxLit = 0.8
 
 // decorateDungenRooms lights some of the rooms and paints the hand-drawn art over the rooms whose template asked
-// for it. The art is the room template's own LDtk tiles, laid over the floor the tile set already painted.
+// for it. The art is the room template's own tiles, laid over the floor the tile set already painted.
 func (g *MapGenerator) decorateDungenRooms(m *gridmap.GridMap[*Actor, *Item, Object], layout *dungen.DungeonMap, lvl dungeon.Level, dlvl int) {
 	proj, _ := dungen.Templates(lvl.Config, g.fsys()) // nil for a generator that draws no templates
 
@@ -184,7 +184,7 @@ func (g *MapGenerator) decorateDungenRooms(m *gridmap.GridMap[*Actor, *Item, Obj
 		if proj != nil && room.HasDecoratedTemplate() {
 			if deco := g.dungenDecoration(proj, room.GetDecorationLevelName()); deco != nil {
 				g.paintDungenDecoration(m, proj, deco, room)
-				m.AddToMetaInfo("DecoRoom: " + deco.Identifier)
+				m.AddToMetaInfo("DecoRoom: " + deco.Name)
 			}
 		}
 		if lit >= litWanted {
@@ -201,53 +201,39 @@ func (g *MapGenerator) decorateDungenRooms(m *gridmap.GridMap[*Actor, *Item, Obj
 }
 
 // dungenDecoration picks one of the decoration levels whose name starts with the prefix the room asked for.
-func (g *MapGenerator) dungenDecoration(proj *ldtk.Project, prefix string) *ldtk.Level {
-	var candidates []*ldtk.Level
-	for _, l := range proj.Levels {
-		if len(l.Identifier) >= len(prefix) && l.Identifier[:len(prefix)] == prefix {
-			candidates = append(candidates, l)
-		}
-	}
+func (g *MapGenerator) dungenDecoration(proj *hhm.Project, prefix string) *hhm.Level {
+	candidates := proj.LevelsWithPrefix(prefix)
 	if len(candidates) == 0 {
 		return nil
 	}
 	return candidates[g.randomSource.Intn(len(candidates))]
 }
 
-func (g *MapGenerator) paintDungenDecoration(m *gridmap.GridMap[*Actor, *Item, Object], proj *ldtk.Project, template *ldtk.Level, room *dungen.DungeonRoom) {
-	layer := template.LayerByIdentifier("Tiles")
-	if layer == nil {
-		return
-	}
-	tileSet := proj.TilesetByIdentifier("World")
-	for _, tile := range layer.Tiles {
-		if tile.ID < 0 || tile.ID > 223 {
-			continue
-		}
-		rel, mapTile := MapTileFromLDTK(tileSet, layer, tile)
-		p := room.ToAbsolutePosition(rel)
-		if m.IsTileWalkable(p) && room.Contains(p) {
-			m.SetTile(p, mapTile)
+func (g *MapGenerator) paintDungenDecoration(m *gridmap.GridMap[*Actor, *Item, Object], proj *hhm.Project, template *hhm.Level, room *dungen.DungeonRoom) {
+	for y := 0; y < template.Height; y++ {
+		for x := 0; x < template.Width; x++ {
+			id := template.TileAt(x, y)
+			if id < 0 || id > 223 {
+				continue
+			}
+			p := room.ToAbsolutePosition(geometry.Point{X: x, Y: y})
+			if m.IsTileWalkable(p) && room.Contains(p) {
+				m.SetTile(p, TileFromDrawing(proj.Tileset, id))
+			}
 		}
 	}
 	// A room's own inhabitants: an NPC entity with a UniqueName is the one place that unique turns up.
-	entities := template.LayerByIdentifier("Entities")
-	if entities == nil {
-		return
-	}
-	for _, e := range entities.Entities {
-		name := e.PropertyByIdentifier("UniqueName")
-		if e.Identifier != "NPC" || name.IsNull() {
+	for _, e := range template.Entities {
+		name := e.Str("UniqueName")
+		if e.Kind != "NPC" || name == "" {
 			continue
 		}
-		x, y := entities.ToGridPosition(e.Position[0], e.Position[1])
-		p := room.ToAbsolutePosition(geometry.Point{X: x, Y: y})
-		if a := g.factory.NewMonsterByID(name.AsString()); a != nil && m.CanPlaceActorHere(p) {
-			a.d1Monster.SpawnIndex = -1 // saved whole, like the rest of a dungen level's monsters
+		p := room.ToAbsolutePosition(geometry.Point{X: e.X, Y: e.Y})
+		if a := g.factory.NewMonsterByID(name); a != nil && m.CanPlaceActorHere(p) {
+			a.monster.SpawnIndex = -1 // saved whole, like the rest of a dungen level's monsters
 			a.SetDrawPosition(p.ToPointF())
 			m.AddActor(a, p)
-			id := name.AsString()
-			g.addSpawn(m, a, func() *Actor { return g.factory.NewMonsterByID(id) }, sameName(id))
+			g.addSpawn(m, a, func() *Actor { return g.factory.NewMonsterByID(name) }, sameName(name))
 		}
 	}
 }

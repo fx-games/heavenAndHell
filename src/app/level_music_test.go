@@ -4,7 +4,7 @@ import "testing"
 
 // music_start(leveltype), as data: a set level plays its own type's theme - the Poisoned Water, off level 2, is a
 // cave, and Lazarus' lair on 15 is built from (and sounds like) the cathedral.
-func TestD1LevelMusic(t *testing.T) {
+func TestLevelMusic(t *testing.T) {
 	g, _ := createGameAndUIContext()
 	g.GetAudio().SetDisablePlayback(true)
 	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")

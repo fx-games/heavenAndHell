@@ -1,9 +1,9 @@
 package common
 
 import (
-	"rpg/src/d1"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
+	"rpg/src/rules"
 	"rpg/src/util"
 )
 
@@ -67,7 +67,7 @@ func HomingBoltAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args 
 			if fly(origin, target, true) {
 				return result
 			}
-			for _, ring := range d1.CrawlRings[1:19] {
+			for _, ring := range rules.CrawlRings[1:19] {
 				for _, o := range ring {
 					p := target.Add(geometry.Point{X: o[0], Y: o[1]})
 					if p != origin && m.Contains(p) && m.IsActorAt(p) && lineIsClear(m, target, p) {
@@ -90,7 +90,7 @@ func RingAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.A
 		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
 			currentMap := gridMap()
 			var result []geometry.Point
-			for _, p := range d1Ring(origin, radius) {
+			for _, p := range ring(origin, radius) {
 				if currentMap.Contains(p) && lineIsClear(currentMap, origin, p) {
 					result = append(result, p)
 				}
@@ -130,8 +130,8 @@ func ConeAoE(gridMap func() *gridmap.GridMap[*Actor, *Item, Object], args util.A
 	return &AoEResolver{
 		GetHitPositions: func(origin, target geometry.Point) []geometry.Point {
 			currentMap := gridMap()
-			dir := D1DirTo(origin, target)
-			forward, left, right := D1Dirs[dir], D1Dirs[(dir+2)%8], D1Dirs[(dir+6)%8]
+			dir := DirTo(origin, target)
+			forward, left, right := geometry.Dirs[dir], geometry.Dirs[(dir+2)%8], geometry.Dirs[(dir+6)%8]
 			var result []geometry.Point
 			for step := 1; step <= length; step++ {
 				centre := origin.Add(geometry.Point{X: forward.X * step, Y: forward.Y * step})

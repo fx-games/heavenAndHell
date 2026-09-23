@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"rpg/src/common"
-	"rpg/src/d1"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
+	"rpg/src/rules"
 	"rpg/src/stats"
 )
 
@@ -33,24 +33,24 @@ func TestHeavenAndHellItemHooksRollAndFire(t *testing.T) {
 		}
 	}
 	// an item with such a suffix wears its hook: the first base item of each kind, given the suffix
-	base := func(types ...int) *d1.Item {
-		for idx, it := range f.Generator.D.Items {
-			if slices.Contains(types, it.Type) {
-				return f.Generator.PlainItem(idx)
+	base := func(types ...int) *rules.Item {
+		for i := range f.Generator.D.Items {
+			if b := &f.Generator.D.Items[i]; slices.Contains(types, b.Type) {
+				return f.Generator.PlainItem(b)
 			}
 		}
 		t.Fatalf("H&H has no base item of types %v", types)
 		return nil
 	}
-	found := map[string]*d1.Item{
-		"HOOK_RETURN_DAMAGE":    base(d1.ITypeMArmor, d1.ITypeLArmor, d1.ITypeHArmor),
-		"HOOK_MANA_ON_KILL":     base(d1.ITypeHelm),
-		"HOOK_TRIPLE_DAMAGE":    base(d1.ITypeSword, d1.ITypeAxe, d1.ITypeMace),
-		"HOOK_FIREBALL_ON_SHOT": base(d1.ITypeBow),
+	found := map[string]*rules.Item{
+		"HOOK_RETURN_DAMAGE":    base(rules.ITypeMArmor, rules.ITypeLArmor, rules.ITypeHArmor),
+		"HOOK_MANA_ON_KILL":     base(rules.ITypeHelm),
+		"HOOK_TRIPLE_DAMAGE":    base(rules.ITypeSword, rules.ITypeAxe, rules.ITypeMace),
+		"HOOK_FIREBALL_ON_SHOT": base(rules.ITypeBow),
 	}
 	for power, it := range found {
 		it.SufPower = power
-		if item := f.NewD1Item(it); len(item.GetItemHooks()) != 1 {
+		if item := f.NewRolledItem(it); len(item.GetItemHooks()) != 1 {
 			t.Fatalf("%s with %s carries %d hooks, want 1", it.Name, power, len(item.GetItemHooks()))
 		}
 	}
@@ -76,7 +76,7 @@ func TestHeavenAndHellItemHooksRollAndFire(t *testing.T) {
 	}
 	m.MoveActor(monster, next())
 	wear := func(power string) *common.Item {
-		item := f.NewD1Item(found[power])
+		item := f.NewRolledItem(found[power])
 		player.GetInventory().Add(item)
 		g.GetActionBroker().Execute(common.NewEquipItemAction(common.NewActorCause("test", player), player, item))
 		if !slices.Contains(player.GetEquipment().AllItems(), item) {

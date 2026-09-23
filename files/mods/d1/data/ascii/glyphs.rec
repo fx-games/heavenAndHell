@@ -1,0 +1,366 @@
+# glyphs.rec: how ASCII mode draws an object, by its id: a dungeon object's OBJ_ name (objects.rec), or the
+# engine's own: door, door_open, sign, stash, fire, town_portal. An object with a name but no record draws as the
+# first letter of its name; one without a name draws as its tile.
+#   id                the object's id
+#   glyph             the character drawn
+#   color             "R G B"
+
+id: door
+glyph: +
+color: 209 145 33
+
+id: door_open
+glyph: '
+color: 209 145 33
+
+id: sign
+glyph: "
+color: 209 145 33
+
+id: stash
+glyph: =
+color: 220 180 60
+
+id: fire
+glyph: ^
+color: 255 20 20
+
+id: town_portal
+glyph: O
+color: 80 120 255
+
+id: OBJ_SKFIRE
+glyph: ^
+color: 255 20 20
+
+id: OBJ_LEVER
+glyph: /
+color: 190 190 190
+
+id: OBJ_CHEST1
+glyph: =
+color: 220 180 60
+
+id: OBJ_CHEST2
+glyph: =
+color: 220 180 60
+
+id: OBJ_CHEST3
+glyph: =
+color: 220 180 60
+
+id: OBJ_CANDLE1
+glyph: i
+color: 255 220 120
+
+id: OBJ_CANDLE2
+glyph: i
+color: 255 220 120
+
+id: OBJ_CANDLEO
+glyph: i
+color: 255 220 120
+
+id: OBJ_BANNERL
+glyph: |
+color: 255 20 20
+
+id: OBJ_BANNERM
+glyph: |
+color: 255 20 20
+
+id: OBJ_BANNERR
+glyph: |
+color: 255 20 20
+
+id: OBJ_SKPILE
+glyph: %
+color: 200 200 200
+
+id: OBJ_SKSTICK1
+glyph: %
+color: 200 200 200
+
+id: OBJ_SKSTICK2
+glyph: %
+color: 200 200 200
+
+id: OBJ_SKSTICK3
+glyph: %
+color: 200 200 200
+
+id: OBJ_SKSTICK4
+glyph: %
+color: 200 200 200
+
+id: OBJ_SKSTICK5
+glyph: %
+color: 200 200 200
+
+id: OBJ_CRUX1
+glyph: %
+color: 200 200 200
+
+id: OBJ_CRUX2
+glyph: %
+color: 200 200 200
+
+id: OBJ_CRUX3
+glyph: %
+color: 200 200 200
+
+id: OBJ_STAND
+glyph: |
+color: 190 190 190
+
+id: OBJ_ANGEL
+glyph: &
+color: 190 190 190
+
+id: OBJ_BOOK2L
+glyph: +
+color: 200 80 200
+
+id: OBJ_BCROSS
+glyph: +
+color: 255 20 20
+
+id: OBJ_NUDEW2R
+glyph: %
+color: 255 20 20
+
+id: OBJ_SWITCHSKL
+glyph: /
+color: 190 190 190
+
+id: OBJ_TNUDEM1
+glyph: %
+color: 255 20 20
+
+id: OBJ_TNUDEM2
+glyph: %
+color: 255 20 20
+
+id: OBJ_TNUDEM3
+glyph: %
+color: 255 20 20
+
+id: OBJ_TNUDEM4
+glyph: %
+color: 255 20 20
+
+id: OBJ_TNUDEW1
+glyph: %
+color: 255 20 20
+
+id: OBJ_TNUDEW2
+glyph: %
+color: 255 20 20
+
+id: OBJ_TNUDEW3
+glyph: %
+color: 255 20 20
+
+id: OBJ_TORTURE1
+glyph: %
+color: 255 20 20
+
+id: OBJ_TORTURE2
+glyph: %
+color: 255 20 20
+
+id: OBJ_TORTURE3
+glyph: %
+color: 255 20 20
+
+id: OBJ_TORTURE4
+glyph: %
+color: 255 20 20
+
+id: OBJ_TORTURE5
+glyph: %
+color: 255 20 20
+
+id: OBJ_BOOK2R
+glyph: +
+color: 200 80 200
+
+id: OBJ_SARC
+glyph: &
+color: 190 190 190
+
+id: OBJ_FLAMEHOLE
+glyph: ^
+color: 255 20 20
+
+id: OBJ_FLAMELVR
+glyph: /
+color: 190 190 190
+
+id: OBJ_WATER
+glyph: ~
+color: 80 120 255
+
+id: OBJ_BOOKLVR
+glyph: +
+color: 200 80 200
+
+id: OBJ_BOOKSHELF
+glyph: +
+color: 200 80 200
+
+id: OBJ_WEAPRACK
+glyph: |
+color: 190 190 190
+
+id: OBJ_BARREL
+glyph: 0
+color: 209 145 33
+
+id: OBJ_BARRELEX
+glyph: 0
+color: 209 145 33
+
+id: OBJ_SHRINEL
+glyph: _
+color: 80 220 220
+
+id: OBJ_SHRINER
+glyph: _
+color: 80 220 220
+
+id: OBJ_SKELBOOK
+glyph: +
+color: 200 80 200
+
+id: OBJ_BOOKCASEL
+glyph: +
+color: 200 80 200
+
+id: OBJ_BOOKCASER
+glyph: +
+color: 200 80 200
+
+id: OBJ_BOOKSTAND
+glyph: +
+color: 200 80 200
+
+id: OBJ_BOOKCANDLE
+glyph: i
+color: 255 220 120
+
+id: OBJ_BLOODFTN
+glyph: {
+color: 80 120 255
+
+id: OBJ_DECAP
+glyph: %
+color: 255 20 20
+
+id: OBJ_TCHEST1
+glyph: =
+color: 220 180 60
+
+id: OBJ_TCHEST2
+glyph: =
+color: 220 180 60
+
+id: OBJ_TCHEST3
+glyph: =
+color: 220 180 60
+
+id: OBJ_BLINDBOOK
+glyph: +
+color: 200 80 200
+
+id: OBJ_BLOODBOOK
+glyph: +
+color: 200 80 200
+
+id: OBJ_PEDISTAL
+glyph: _
+color: 255 20 20
+
+id: OBJ_PURIFYINGFTN
+glyph: {
+color: 80 120 255
+
+id: OBJ_ARMORSTAND
+glyph: [
+color: 190 190 190
+
+id: OBJ_ARMORSTANDN
+glyph: |
+color: 190 190 190
+
+id: OBJ_GOATSHRINE
+glyph: _
+color: 80 220 220
+
+id: OBJ_CAULDRON
+glyph: u
+color: 190 190 190
+
+id: OBJ_MURKYFTN
+glyph: {
+color: 80 160 80
+
+id: OBJ_TEARFTN
+glyph: {
+color: 80 120 255
+
+id: OBJ_ALTBOY
+glyph: _
+color: 200 80 200
+
+id: OBJ_MCIRCLE1
+glyph: o
+color: 200 80 200
+
+id: OBJ_MCIRCLE2
+glyph: o
+color: 200 80 200
+
+id: OBJ_STORYCANDLE
+glyph: i
+color: 255 220 120
+
+id: OBJ_STEELTOME
+glyph: +
+color: 200 80 200
+
+id: OBJ_WARARMOR
+glyph: [
+color: 190 190 190
+
+id: OBJ_WARWEAP
+glyph: |
+color: 190 190 190
+
+id: OBJ_TBCROSS
+glyph: +
+color: 255 20 20
+
+id: OBJ_WEAPONRACK
+glyph: |
+color: 190 190 190
+
+id: OBJ_WEAPONRACKN
+glyph: |
+color: 190 190 190
+
+id: OBJ_MUSHPATCH
+glyph: "
+color: 160 120 200
+
+id: OBJ_LAZSTAND
+glyph: |
+color: 190 190 190
+
+id: OBJ_SLAINHERO
+glyph: %
+color: 200 200 200
+
+id: OBJ_SIGNCHEST
+glyph: =
+color: 220 180 60

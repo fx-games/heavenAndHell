@@ -5,15 +5,16 @@ import (
 	"image/color"
 	"log/slog"
 	"math"
-	"rpg/src/d1"
 	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
-	"rpg/src/ldtk"
+	"rpg/src/hhm"
 	"rpg/src/renderer"
+	"rpg/src/rules"
 	"rpg/src/stats"
 	"rpg/src/util"
 	"slices"
+	"strconv"
 )
 
 type PlayerActions interface {
@@ -49,7 +50,7 @@ type State struct {
 	lighting       LightRules // the mod's lighting rules (mod.rec)
 	currentMap     *gridmap.GridMap[*Actor, *Item, Object]
 	maps           map[string]*gridmap.GridMap[*Actor, *Item, Object] // every level built this game, by id
-	d1Portal       *D1Portal
+	portal         *Portal
 	player         *Actor
 	camera         Camera
 	msg            func(string)
@@ -78,14 +79,14 @@ type State struct {
 	factory *Factory
 	mapGen  *MapGenerator
 	// maps
-	ldtkProject *ldtk.Project
+	drawnMaps *hhm.Project // every level the mod draws by hand, templates included
 
 	SelectedClass defs.LoadoutDefinition
 	worldTexture  renderer.TextureAtlas
 
 	gossipSeeds map[VendorType]int64 // each townsperson's _tSeed: rolled on first talk, dropped when the hero reaches the dungeon
 
-	glowCache map[*gridmap.GridMap[*Actor, *Item, Object]]map[geometry.Point]d1Glow // decorative light per map (d1GlowAt)
+	glowCache map[*gridmap.GridMap[*Actor, *Item, Object]]map[geometry.Point]lightGlow // decorative light per map (glowAt)
 }
 
 func (s *State) GetWorldTexture() renderer.TextureAtlas {
@@ -94,13 +95,13 @@ func (s *State) GetWorldTexture() renderer.TextureAtlas {
 func (s *State) GetPlayerStashInTown() *Inventory {
 	return s.playerStashInTown
 }
-func NewState(ldtkProject *ldtk.Project) State {
+func NewState(maps *hhm.Project) State {
 
 	return State{
 		maps:              make(map[string]*gridmap.GridMap[*Actor, *Item, Object]),
 		flags:             NewFlags(),
 		playerStashInTown: NewInventory(32),
-		ldtkProject:       ldtkProject,
+		drawnMaps:         maps,
 		visibility:        NewVisibility(),
 		gossipSeeds:       map[VendorType]int64{},
 	}
@@ -115,10 +116,10 @@ func (s *State) SetMapGenerator(mapGen *MapGenerator) {
 	s.mapGen = mapGen
 }
 
-// D1Quests reports which of D1's quests this game's seed picked (InitQuests): QuestNotAvail for the ones it
+// Quests reports which of D1's quests this game's seed picked (InitQuests): QuestNotAvail for the ones it
 // disabled, so callers can tell an absent quest boss from a missing one.
-func (s *State) D1Quests() *d1.Quests {
-	return s.mapGen.d1Quests
+func (s *State) Quests() *rules.Quests {
+	return s.mapGen.questTable()
 }
 
 func (s *State) GetVisibility() *Visibility {
@@ -222,10 +223,15 @@ func (s *State) PlayerCanSeeNeighbors() bool {
 //	                  what the gear adds to light_radius. Default aura
 //	LightInTown       carried only: whether the light source glows in town too. Default true
 //	LightBurnsInTown  carried only: whether it uses up charges there. Default false
+//	AuraLightColor    "R G B" of the hero's own light under aura, of wall torches and braziers, and of a light
+//	                  source item that names no light_color. Default 255 255 255
+//	AuraLightFlicker  its flicker (fire, smooth, steady or numbers, as items.rec's); AuraLightFlickerDelay seconds
+//	                  per frame. Default steady
 type LightRules struct {
 	Model       string
 	InTown      bool
 	BurnsInTown bool
+	Aura        LightStats
 }
 
 // Lighting reads the mod's LightRules.
@@ -240,7 +246,27 @@ func Lighting() LightRules {
 	if v, _ := ModSetting("LightBurnsInTown"); v == "true" {
 		r.BurnsInTown = true
 	}
+	r.Aura = LightStats{LightColor: color.RGBA{R: 255, G: 255, B: 255, A: 255}, FlickerPattern: []float64{1}, FlickerFrameDelay: 1}
+	if v, ok := ModSetting("AuraLightColor"); ok {
+		r.Aura.LightColor = util.GetColorFromRGBString(v)
+	}
+	if v, ok := ModSetting("AuraLightFlicker"); ok {
+		r.Aura.FlickerPattern = defs.FlickerPattern(v)
+	}
+	if v, ok := ModSetting("AuraLightFlickerDelay"); ok {
+		if d, err := strconv.ParseFloat(v, 64); err == nil && d > 0 {
+			r.Aura.FlickerFrameDelay = d
+		}
+	}
 	return r
+}
+
+// aura is the mod's aura light (LightRules.Aura), read from mod.rec when nothing set the rules yet.
+func (s *State) aura() LightStats {
+	if s.lighting.Aura.FlickerPattern == nil {
+		s.lighting.Aura = Lighting().Aura
+	}
+	return s.lighting.Aura
 }
 
 // carriedLight is the hero's equipped light source while it shines under the mod's rules: it has charges left,
@@ -279,8 +305,8 @@ func (s *State) PlayerLightRadius() int {
 	}
 	radius := actor.GetStats().GetAttribute(stats.LightRadius)
 	for _, it := range actor.GetEquipment().AllItems() {
-		if it.d1 != nil {
-			radius += it.d1.PLLight
+		if it.roll != nil {
+			radius += it.roll.PLLight
 		}
 	}
 	return max(radius, 0)
@@ -350,7 +376,7 @@ func (s *State) applyTownLight(mapPos geometry.Point, base, shaded color.RGBA, w
 // applyPortalLight bathes the cells right around an open town portal in a cold, shimmering light blue, lifted out
 // of the dark like the church's red light.
 func (s *State) applyPortalLight(mapPos geometry.Point, drawColor color.RGBA, worldTick uint64) color.RGBA {
-	glow := s.d1GlowAt(mapPos)
+	glow := s.glowAt(mapPos)
 	if glow.kind != glowPortal || glow.v <= 0 || !s.GetMap().IsExplored(mapPos) {
 		return drawColor
 	}
@@ -367,7 +393,7 @@ func (s *State) applyPortalLight(mapPos geometry.Point, drawColor color.RGBA, wo
 // applyRedLight tints a cell inside the demon-possessed church (and the ground the light falls on outside its
 // door) red, pulsing slowly, and lifts it out of the dark so the glow reads as a light source and not as shadow.
 func (s *State) applyRedLight(mapPos geometry.Point, drawColor color.RGBA, worldTick uint64) color.RGBA {
-	glow := s.d1GlowAt(mapPos)
+	glow := s.glowAt(mapPos)
 	if glow.kind != glowRed || glow.v <= 0 || !s.GetMap().IsExplored(mapPos) {
 		return drawColor
 	}
@@ -429,11 +455,11 @@ func (s *State) applyLighting(mapPos geometry.Point, drawColor color.RGBA, world
 	} else {
 		percentageLightness := float64(distanceToPlayer) / float64(maxDistance)
 		percentageLightness = 1.0 - util.EaseInExpo(percentageLightness)
-		if glow := s.d1GlowAt(mapPos); glow.v > 0 && glow.kind == glowTorch { // wall torches and braziers, each flickering out of step
-			frame := util.GetLoopingFrameFromTick(worldTick+uint64(mapPos.X*7+mapPos.Y*13), d1HeroTorch.FlickerFrameDelay, len(d1HeroTorch.FlickerPattern))
-			if g := glow.v * d1HeroTorch.FlickerPattern[frame]; g > percentageLightness {
+		if glow := s.glowAt(mapPos); glow.v > 0 && glow.kind == glowTorch { // wall torches and braziers, each flickering out of step
+			frame := util.GetLoopingFrameFromTick(worldTick+uint64(mapPos.X*7+mapPos.Y*13), s.aura().FlickerFrameDelay, len(s.aura().FlickerPattern))
+			if g := glow.v * s.aura().FlickerPattern[frame]; g > percentageLightness {
 				percentageLightness = g
-				drawColor = multiplyColors(drawColor, d1HeroTorch.LightColor)
+				drawColor = multiplyColors(drawColor, s.aura().LightColor)
 			}
 		}
 		percentagOfValue := darkPercentage + ((lightPercentage - darkPercentage) * percentageLightness)
@@ -445,14 +471,11 @@ func (s *State) applyLighting(mapPos geometry.Point, drawColor color.RGBA, world
 	return drawColor
 }
 
-// d1HeroTorch is the light every D1 hero carries without an item: H&H's torch color and fire flicker.
-var d1HeroTorch = LightStats{LightColor: color.RGBA{R: 255, G: 223, B: 117, A: 255}, FlickerPattern: defs.GetFireFlickerPattern(), FlickerFrameDelay: 0.125}
-
 func (s *State) mixLightSourceColor(drawColor, noLightSource color.RGBA, worldTick uint64) color.RGBA {
 	state := s
 	if s.lighting.Model != "carried" && s.GetPlayer().hero != nil {
-		flicker := d1HeroTorch.FlickerPattern[util.GetLoopingFrameFromTick(worldTick, d1HeroTorch.FlickerFrameDelay, len(d1HeroTorch.FlickerPattern))]
-		return multiplyColors(drawColor, multiplyColor(d1HeroTorch.LightColor, flicker))
+		flicker := s.aura().FlickerPattern[util.GetLoopingFrameFromTick(worldTick, s.aura().FlickerFrameDelay, len(s.aura().FlickerPattern))]
+		return multiplyColors(drawColor, multiplyColor(s.aura().LightColor, flicker))
 	}
 	equipment := state.GetPlayer().GetEquipment()
 	if equipment.HasLightSourceEquipped() {
@@ -475,8 +498,8 @@ func (s *State) mixLightSourceColor(drawColor, noLightSource color.RGBA, worldTi
 // GetWaterColor tints water tiles: light green in town and in its level while the Poisoned Water Supply was rolled
 // for this game and isn't done yet, blue otherwise.
 func (s *State) GetWaterColor() color.RGBA {
-	name, q := s.GetMap().GetName(), s.QuestActive(d1.QPWater)
-	if (s.Level(name).Town || s.d1SetQuest(name) == d1.QPWater) && q != d1.QuestNotAvail && q != d1.QuestDone {
+	name, q := s.GetMap().GetName(), s.QuestActive(rules.QPWater)
+	if (s.Level(name).Town || s.setQuest(name) == rules.QPWater) && q != rules.QuestNotAvail && q != rules.QuestDone {
 		return color.RGBA{R: 199, G: 251, B: 161, A: 255}
 	}
 	return color.RGBA{R: 86, G: 112, B: 194, A: 255}
@@ -613,9 +636,7 @@ func (s *State) AddItemToMapWithDistribution(item *Item, pos geometry.Point) {
 	if s.dropsFrom.VisualsPending() {
 		item.shownWith = s.dropsFrom
 	}
-	if drop, _ := d1ItemSfx(item); s.factory != nil { // ProcessItems: the item lands after its flip
-		whenVisible(s.actions, s.dropsFrom, func() { s.factory.PlayD1Sfx(drop, dropPos) })
-	}
+	s.actions.Emit(ItemDropped{Item: item, At: dropPos, From: s.dropsFrom})
 }
 
 func (s *State) SetTimeKeeper(keeper *TimeKeeper) {
@@ -725,8 +746,8 @@ type QuestFlags struct {
 	RewardedFlag string
 }
 
-// d1Glow is a light source's reach on one cell: how much of it lands there (0..1) and which kind of light it is.
-type d1Glow struct {
+// lightGlow is a light source's reach on one cell: how much of it lands there (0..1) and which kind of light it is.
+type lightGlow struct {
 	v    float64
 	kind glowKind
 }
@@ -739,52 +760,52 @@ const (
 	glowPortal                 // an open town portal
 )
 
-// d1PortalLightRadius keeps the portal's light to the tiles right around it: full strength on the portal, falling
+// portalLightRadius keeps the portal's light to the tiles right around it: full strength on the portal, falling
 // off over the next two.
-const d1PortalLightRadius = 3
+const portalLightRadius = 3
 
-// d1ChurchLightRadius is how far the red light inside the demon-possessed church reaches. Its source sits inside
+// churchLightRadius is how far the red light inside the demon-possessed church reaches. Its source sits inside
 // the nave, so the light bathes the church and spills back out of the doorway; the line-of-sight check below
 // stops it at the church walls, lighting the windows from the inside.
-const d1ChurchLightRadius = 19
+const churchLightRadius = 19
 
-// d1ChurchLightPos is where the red light burns: inside the cathedral, a few tiles behind its entrance at (41,6).
-var d1ChurchLightPos = geometry.Point{X: 37, Y: 6}
+// churchLightPos is where the red light burns: inside the cathedral, a few tiles behind its entrance at (41,6).
+var churchLightPos = geometry.Point{X: 37, Y: 6}
 
-// D1Lit: some light source's glow reaches p (dLight below lightmax, the hero's own light aside).
-func (s *State) D1Lit(p geometry.Point) bool { return s.d1GlowAt(p).v > 0 }
+// Lit: some light source's glow reaches p (dLight below lightmax, the hero's own light aside).
+func (s *State) Lit(p geometry.Point) bool { return s.glowAt(p).v > 0 }
 
-// d1GlowAt is how much decorative light (wall torches, braziers, the church's red light) falls on a cell, 0..1:
+// glowAt is how much decorative light (wall torches, braziers, the church's red light) falls on a cell, 0..1:
 // brightest at the light, fading to nothing at its radius, only where the light has a clear line. Built once per map.
-func (s *State) d1GlowAt(p geometry.Point) d1Glow {
+func (s *State) glowAt(p geometry.Point) lightGlow {
 	m := s.GetMap()
 	if s.glowCache == nil {
-		s.glowCache = map[*gridmap.GridMap[*Actor, *Item, Object]]map[geometry.Point]d1Glow{}
+		s.glowCache = map[*gridmap.GridMap[*Actor, *Item, Object]]map[geometry.Point]lightGlow{}
 	}
 	glow, ok := s.glowCache[m]
 	if !ok {
-		glow = map[geometry.Point]d1Glow{}
+		glow = map[geometry.Point]lightGlow{}
 		church := geometry.Point{X: -1, Y: -1}
 		if s.Level(m.GetName()).Town {
-			church = d1ChurchLightPos
+			church = churchLightPos
 		}
 		for y := 0; y < m.MapSize().Y; y++ {
 			for x := 0; x < m.MapSize().X; x++ {
 				src := geometry.Point{X: x, Y: y}
 				r, kind := 0, glowTorch
 				if icon, has := m.GetDecal(src); has && icon == defs.IconWallTorch {
-					r = d1LightRadius(icon)
+					r = lightRadius(icon)
 				}
 				switch o, _ := m.TryGetObjectAt(src); o := o.(type) {
-				case *d1WallLight:
-					r = d1LightRadius(o.icon)
-				case *D1Object:
-					r = s.factory.d1ObjectDisplay(o.O.Kind).Light
-				case *d1PortalObject:
-					r, kind = d1PortalLightRadius, glowPortal
+				case *wallLight:
+					r = lightRadius(o.icon)
+				case *Prop:
+					r = s.factory.objectDisplay(o.O.Kind).Light
+				case *portalObject:
+					r, kind = portalLightRadius, glowPortal
 				}
 				if src == church {
-					r, kind = d1ChurchLightRadius, glowRed
+					r, kind = churchLightRadius, glowRed
 				}
 				for dy := -r; dy <= r && r > 0; dy++ {
 					for dx := -r; dx <= r; dx++ {
@@ -796,7 +817,7 @@ func (s *State) d1GlowAt(p geometry.Point) d1Glow {
 						los := geometry.LineOfSight(src, q, func(c geometry.Point) bool { return c == src || m.IsTransparent(c) })
 						if len(los) > 0 && los[len(los)-1] == q {
 							if v := 1 - d/float64(r); v > glow[q].v {
-								glow[q] = d1Glow{v: v, kind: kind}
+								glow[q] = lightGlow{v: v, kind: kind}
 							}
 						}
 					}

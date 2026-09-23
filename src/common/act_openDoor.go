@@ -47,9 +47,7 @@ func (d *OpenDoorAction) Execute(context ActionContext) []Action {
 		NewUpdateFoVAction(d.Cause(), d.actor),
 	}
 
-	if !playD1SfxAt(context, "IS_DOOROPEN", d.doorPos) { // OperateL1RDoor and kin
-		context.AudioPlayer.PlayCue("open_door")
-	}
+	context.ActionBroker.Emit(DoorToggled{At: d.doorPos, Opened: true})
 
 	return actions
 }
@@ -73,9 +71,7 @@ func (d *CloseDoorAction) Execute(context ActionContext) []Action {
 		return nil
 	}
 	door.isOpen = false
-	if !playD1SfxAt(context, "IS_DOORCLOS", d.doorPos) {
-		context.AudioPlayer.PlayCue("close_door")
-	}
+	context.ActionBroker.Emit(DoorToggled{At: d.doorPos})
 	return []Action{NewUpdateFoVAction(d.Cause(), d.actor)}
 }
 

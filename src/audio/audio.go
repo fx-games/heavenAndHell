@@ -31,6 +31,7 @@ type Cue struct {
 type Player struct {
 	context         *audio.Context
 	availableSounds map[string]*Sound
+	silentCues      map[string]bool // defined in a rec file but with no "sound:" assigned yet: play as no-ops, no warning
 	activeSounds    map[string][]*ActiveSound
 	queuedSounds    []string
 	loopVolume      float64
@@ -200,6 +201,7 @@ func NewAudioPlayer(fileSystem fs.ReadDirFS, sampleRate SampleRate) *Player {
 		files:           fileSystem,
 		context:         audioContext,
 		availableSounds: make(map[string]*Sound),
+		silentCues:      make(map[string]bool),
 		activeSounds:    make(map[string][]*ActiveSound),
 		sfxVolume:       1,
 		loopVolume:      1,
@@ -269,6 +271,14 @@ type Handle interface {
 	IsPlaying() bool
 }
 
+// warnMissingCue logs a cue that isn't registered at all, unless it's a known cue a mod simply left
+// without a sound file (silentCues) - those are meant to play as no-ops.
+func (ap *Player) warnMissingCue(cue string) {
+	if !ap.silentCues[cue] {
+		slog.Warn("sound cue not found", "cue", cue)
+	}
+}
+
 func (ap *Player) StartLoop(cue string) Handle {
 	if ap.disablePlayback {
 		return &NullHandle{}
@@ -280,7 +290,7 @@ func (ap *Player) StartLoop(cue string) Handle {
 		sound.IsLooping = true
 		return ap.startPlaying(sound, ap.effectiveMusicVolume(), nil)
 	} else {
-		slog.Warn("sound cue not found", "cue", cue)
+		ap.warnMissingCue(cue)
 	}
 	return &NullHandle{}
 }
@@ -302,7 +312,7 @@ func (ap *Player) StartLoopStream(cue string) Handle {
 		ap.addActiveSound(sound, player, nil)
 		return player
 	} else {
-		slog.Warn("sound cue not found", "cue", cue)
+		ap.warnMissingCue(cue)
 	}
 	return &NullHandle{}
 }
@@ -330,7 +340,7 @@ func (ap *Player) PlayCue(cue string) Handle {
 		}
 		return ap.startPlaying(sound, ap.volumeFor(sound), nil)
 	} else {
-		slog.Warn("sound cue not found", "cue", cue)
+		ap.warnMissingCue(cue)
 	}
 	return &NullHandle{}
 }
@@ -355,7 +365,7 @@ func (ap *Player) PlayCueWithCallback(cue string, callback func()) Handle {
 		}
 		return ap.startPlaying(sound, ap.volumeFor(sound), callback)
 	} else {
-		slog.Warn("sound cue not found", "cue", cue)
+		ap.warnMissingCue(cue)
 	}
 	return &NullHandle{}
 }
@@ -551,6 +561,7 @@ func (ap *Player) registerEvents(recFile string, setup func(s *Sound)) {
 			}
 		}
 		if len(filenames) == 0 { // an event nobody has assigned a file to yet is simply silent
+			ap.silentCues[cue] = true
 			continue
 		}
 		s := &Sound{Cue: cue, Filenames: filenames, Samples: make([][]byte, len(filenames))}

@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 	"rpg/files"
 	"rpg/src/common"
-	"rpg/src/d1"
 	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
+	"rpg/src/rules"
 	"rpg/src/stats"
 	"rpg/src/util"
 	"time"
@@ -48,23 +48,24 @@ func slotThumbPath(slot int) string {
 }
 
 type savedInvItem struct {
-	Item     d1.Item
+	Item     rules.Item
 	Equipped bool
 }
 
 type saveGame struct {
 	Mod            string // the mod the game was played on; empty in saves from before mods, which were D1's
+	Build          string // common.BuildHash of the binary that wrote it
 	Class          string
 	Female         bool
 	Name           string
 	Permadeath     bool
 	Seed           int64
-	Hero           d1.Hero
+	Hero           rules.Hero
 	HP, Mana, Gold int
 	Items          []savedInvItem
 	Belt           [common.BeltSize]common.SavedBeltSlot
-	Stash          []d1.Item // the town stash
-	UniqueDropped  []bool
+	Stash          []rules.Item // the town stash
+	UniqueDropped  []string     // unique_items.rec internal_names of the uniques already found
 	Flags          map[string]int
 	Map            string
 	X, Y           int
@@ -72,13 +73,15 @@ type saveGame struct {
 	Deepest        int    // shown in the slot list
 	DeepestLevel   string // the deepest level and town visited (State.Visit)
 	DeepestTown    string
-	Premium        d1.Premium
-	Boy            *d1.Item
+	Premium        rules.Premium
+	Boy            *rules.Item
 	BoyLevel       int
-	Portal         *common.D1Portal
-	Golem          *common.SavedGolem  // the golem follows the hero (onD1MapChanged)
+	Portal         *common.Portal
+	Golem          *common.SavedGolem  // the golem follows the hero (onDungeonMapChanged)
 	ManaShield     bool                // only in saves from before Status was kept
 	Status         map[string]int      // the hero's status effects and their turns left
+	HeroID         uint64              `json:",omitempty"` // the hero's Actor.ID
+	ShieldBy       uint64              `json:",omitempty"` // the ID of whoever cast the hero's Shield
 	SavedAt        time.Time           // when this slot was last written; zero in saves from before slots
 	Dungeon        common.DungeonClock // mod.rec's respawn timers and each level's generation
 }
@@ -87,34 +90,45 @@ type saveGame struct {
 // counts as empty, so a corrupt file is offered for overwriting rather than blocking the screen.
 // ponytail: parses each slot's whole JSON for its header; write the metadata to its own small file if listing
 // five saves ever becomes noticeable.
-func ListSaveSlots(classNames []string) []common.SaveSlot {
+func ListSaveSlots(rules *rules.Data) []common.SaveSlot {
 	migrateLegacySave()
 	slots := make([]common.SaveSlot, 0, MaxSaveSlots)
 	for slot := 1; slot <= MaxSaveSlots; slot++ {
-		slots = append(slots, readSaveSlot(slot, classNames))
+		info, _ := readSaveSlot(slot, rules)
+		slots = append(slots, info)
 	}
 	return slots
 }
 
-func readSaveSlot(slot int, classNames []string) common.SaveSlot {
+// readSaveSlot reads one slot's metadata. A slot that holds no game of this mod's, or one it can't load, reads as
+// empty; the error says why, nil for a slot with no file.
+func readSaveSlot(slot int, rules *rules.Data) (common.SaveSlot, error) {
 	info := common.SaveSlot{Slot: slot}
 	data, err := os.ReadFile(slotPath(slot))
 	if err != nil {
-		return info
+		return info, nil
 	}
 	var sg saveGame
-	if err := json.Unmarshal(data, &sg); err != nil || !sg.forThisMod() {
-		return info
+	if err := json.Unmarshal(data, &sg); err != nil {
+		return info, fmt.Errorf("save file is corrupt: %w", err)
+	}
+	if !sg.forThisMod() {
+		return info, nil
+	}
+	if rules != nil {
+		if err := sg.check(rules); err != nil { // a save this mod can't load counts as empty, like a corrupt one
+			return info, err
+		}
 	}
 	info.Used, info.Name, info.Level = true, sg.Name, sg.Hero.Level
 	info.Deepest, info.Permadeath, info.SavedAt = sg.Deepest, sg.Permadeath, sg.SavedAt
-	if sg.Hero.Class >= 0 && sg.Hero.Class < len(classNames) {
-		info.Class = classNames[sg.Hero.Class]
+	if rules != nil {
+		info.Class = rules.Class(sg.Class).Name
 	}
 	if _, err := os.Stat(slotThumbPath(slot)); err == nil {
 		info.ThumbPath = slotThumbPath(slot)
 	}
-	return info
+	return info, nil
 }
 
 // migrateLegacySave moves a pre-slots savegame.json into slot 1 when that slot is still free. Only the real
@@ -225,7 +239,7 @@ func (g *GameInstance) writeSlot(slot int) {
 	}
 	for id, m := range g.state.Maps() {
 		if g.state.Level(id).Town {
-			g.forgetBoughtD1Stock(m)
+			g.forgetBoughtStock(m)
 		}
 	}
 	st := player.GetStats()
@@ -234,33 +248,33 @@ func (g *GameInstance) writeSlot(slot int) {
 		Mod: saveMod(), Class: g.state.SelectedClass.InternalName, Female: g.state.SelectedClass.IsFemale(),
 		Name: player.Name(), Permadeath: g.permadeath, Seed: g.levelSeed, Hero: *player.Hero(),
 		HP: max(st.GetResource(stats.Health).Value(), 1), Mana: st.GetResource(stats.Mana).Value(), Gold: st.GetAttribute(stats.Gold),
-		UniqueDropped: g.factory.D1().UniqueDropped, Flags: g.state.GetFlags().AllEntries(),
+		UniqueDropped: g.factory.Gen().DroppedUniques(), Flags: g.state.GetFlags().AllEntries(),
 		Map: g.state.GetMap().GetName(), X: pos.X, Y: pos.Y, Levels: map[string]*common.LevelSnapshot{},
-		Deepest: g.state.Deepest(), DeepestLevel: g.state.DeepestLevel(), DeepestTown: g.state.DeepestTown(), Premium: g.premium, Boy: g.boyItem, BoyLevel: g.boyLevel, Portal: g.state.D1Portal(),
-		Status: maps.Clone(player.GetStatusEffects().AllEntries()), SavedAt: time.Now(), Dungeon: g.state.DungeonClock(),
+		Deepest: g.state.Deepest(), DeepestLevel: g.state.DeepestLevel(), DeepestTown: g.state.DeepestTown(), Premium: g.premium, Boy: g.boyItem, BoyLevel: g.boyLevel, Portal: g.state.Portal(),
+		Status: maps.Clone(player.GetStatusEffects().AllEntries()), HeroID: player.ID(), ShieldBy: player.ShieldedBy(), SavedAt: time.Now(), Build: common.BuildHash(), Dungeon: g.state.DungeonClock(),
 	}
-	if golem := common.D1Golem(g.state.GetMap()); golem != nil {
-		saved := common.SaveD1Golem(golem)
+	if golem := common.LivingGolem(g.state.GetMap()); golem != nil {
+		saved := common.SaveGolem(golem)
 		sg.Golem = &saved
 	}
 	inv, eq := player.GetInventory(), player.GetEquipment()
 	var savedItems []*common.Item // sg.Items' items, for the belt
 	for _, it := range inv.Items() {
-		if it.D1() != nil {
-			sg.Items = append(sg.Items, savedInvItem{Item: *it.D1(), Equipped: eq.IsEquipped(it)})
+		if it.Roll() != nil {
+			sg.Items = append(sg.Items, savedInvItem{Item: *it.Roll(), Equipped: eq.IsEquipped(it)})
 			savedItems = append(savedItems, it)
 		}
 	}
 	for _, it := range eq.AllItems() {
-		if it.D1() != nil && !inv.Has(it) {
-			sg.Items = append(sg.Items, savedInvItem{Item: *it.D1(), Equipped: true})
+		if it.Roll() != nil && !inv.Has(it) {
+			sg.Items = append(sg.Items, savedInvItem{Item: *it.Roll(), Equipped: true})
 			savedItems = append(savedItems, it)
 		}
 	}
 	sg.Belt = common.SaveBelt(player, savedItems)
 	for _, it := range g.state.GetPlayerStashInTown().Items() {
-		if it.D1() != nil {
-			sg.Stash = append(sg.Stash, *it.D1())
+		if it.Roll() != nil {
+			sg.Stash = append(sg.Stash, *it.Roll())
 		}
 	}
 	for name, snap := range g.levelSnapshots {
@@ -318,12 +332,71 @@ func (g *GameInstance) LoadGame() error {
 	if g.slot > 0 {
 		return g.LoadSlot(g.slot)
 	}
-	return g.LoadSlot(LatestSaveSlot())
+	return g.LoadSlot(g.latestSlot())
+}
+
+// latestSlot is LatestSaveSlot among the saves this game can load: what the mod's data rejects, or what failed to
+// load this session, is skipped.
+func (g *GameInstance) latestSlot() int {
+	latest := 0
+	var newest time.Time
+	for _, s := range ListSaveSlots(g.data) {
+		if s.Used && !g.broken[s.Slot] && (latest == 0 || s.SavedAt.After(newest)) {
+			latest, newest = s.Slot, s.SavedAt
+		}
+	}
+	return latest
 }
 
 // LoadSlot restores a save slot: the world is rebuilt from the seed, then hero, items and level snapshots are
 // applied. Autosaving continues into the slot that was loaded.
-func (g *GameInstance) LoadSlot(slot int) error {
+// check reports why the running mod can't load this save: every item must name a base item the mod has. It
+// links them as it goes.
+func (sg *saveGame) check(d *rules.Data) error {
+	for _, it := range sg.items() {
+		if !d.Relink(it) {
+			return fmt.Errorf("its %s names no base item this mod has (a save from an older version?)", it.Name)
+		}
+	}
+	return nil
+}
+
+// items are all the save's items: the hero's, the stash, the stores' and those lying on its levels.
+func (sg *saveGame) items() []*rules.Item {
+	var out []*rules.Item
+	for i := range sg.Items {
+		out = append(out, &sg.Items[i].Item)
+	}
+	for i := range sg.Stash {
+		out = append(out, &sg.Stash[i])
+	}
+	for _, it := range sg.Premium.Items {
+		if it != nil {
+			out = append(out, it)
+		}
+	}
+	if sg.Boy != nil {
+		out = append(out, sg.Boy)
+	}
+	for _, snap := range sg.Levels {
+		if snap != nil {
+			for i := range snap.Items {
+				out = append(out, &snap.Items[i].Item)
+			}
+		}
+	}
+	return out
+}
+
+func (g *GameInstance) LoadSlot(slot int) (err error) {
+	defer func() {
+		if r := recover(); r != nil { // a save that breaks halfway leaves a half-loaded game: start clean instead
+			err = fmt.Errorf("loading slot %d failed: %v", slot, r)
+			g.broken[slot] = true
+			g.ResetGame(g.dataDefinitions.ClassDefinitions[0])
+			g.slot, g.autosave = 0, false
+		}
+	}()
 	data, err := os.ReadFile(slotPath(slot))
 	if err != nil {
 		return err
@@ -334,6 +407,9 @@ func (g *GameInstance) LoadSlot(slot int) error {
 	}
 	if !sg.forThisMod() {
 		return fmt.Errorf("this game was saved with mod %q; load %q to continue it", sg.Mod, sg.Mod)
+	}
+	if err := sg.check(g.data); err != nil {
+		return err
 	}
 	g.autosave = false
 	class := g.classByName(sg.Class)
@@ -348,8 +424,9 @@ func (g *GameInstance) LoadSlot(slot int) error {
 		player.SetName(sg.Name)
 	}
 	*player.Hero() = sg.Hero
-	g.d1Data.Adopt(player.Hero()) // the rules pointer does not travel through JSON
-	copy(g.factory.D1().UniqueDropped, sg.UniqueDropped)
+	player.Hero().Class = class.InternalName // saved once, as the save's Class
+	g.data.Adopt(player.Hero())              // the rules pointer does not travel through JSON
+	g.factory.Gen().SetDroppedUniques(sg.UniqueDropped)
 	for k, v := range sg.Flags {
 		g.state.GetFlags().SetToValue(k, v)
 	}
@@ -363,7 +440,7 @@ func (g *GameInstance) LoadSlot(slot int) error {
 	var loadedItems []*common.Item // sg.Items' items, for the belt
 	for _, si := range sg.Items {
 		d := si.Item
-		item := g.factory.NewD1Item(&d)
+		item := g.factory.NewRolledItem(&d)
 		loadedItems = append(loadedItems, item)
 		inv.Add(item)
 		if si.Equipped {
@@ -371,12 +448,12 @@ func (g *GameInstance) LoadSlot(slot int) error {
 		}
 	}
 	for _, d := range sg.Stash {
-		g.state.GetPlayerStashInTown().Add(g.factory.NewD1Item(&d))
+		g.state.GetPlayerStashInTown().Add(g.factory.NewRolledItem(&d))
 	}
 	st := player.GetStats()
 	st.SetAttribute(stats.Gold, sg.Gold)
 	common.SyncHero(player)
-	g.factory.RefreshD1Spells(player)
+	g.factory.RefreshSpells(player)
 	common.LoadBelt(player, sg.Belt, loadedItems)
 	common.SetResource(st.GetResource(stats.Health), sg.HP)
 	common.SetResource(st.GetResource(stats.Mana), sg.Mana)
@@ -385,7 +462,7 @@ func (g *GameInstance) LoadSlot(slot int) error {
 	}
 	g.state.SetVisited(sg.DeepestLevel, sg.DeepestTown)
 	g.premium, g.boyItem, g.boyLevel = sg.Premium, sg.Boy, sg.BoyLevel
-	g.state.SetD1Portal(sg.Portal)
+	g.state.SetPortal(sg.Portal)
 	g.storesShown = false // the reset stocked the town; keep the saved premium and Wirt items on the next visit
 
 	target := gridmap.Transition{TargetMap: sg.Map, TargetLocation: "ladder_up"}
@@ -400,13 +477,19 @@ func (g *GameInstance) LoadSlot(slot int) error {
 		m.MoveActor(player, p)
 		player.SetDrawPosition(p.ToPointF())
 	}
+	if snap := sg.Levels[sg.Map]; snap != nil {
+		snap.RestoreExplored(m) // the transition's arrival at the stairs saw cells the saved game never had
+	}
+	player.SetID(sg.HeroID)
 	if sg.Golem != nil {
-		g.factory.PlaceD1GolemNear(player, *sg.Golem)
+		g.factory.PlaceGolemNear(player, *sg.Golem)
 	}
 	if sg.ManaShield {
 		player.AddStatusEffect(common.StatusManaShield, -1)
 	}
 	maps.Copy(player.GetStatusEffects().AllEntries(), sg.Status)
+	player.SetShieldedBy(sg.ShieldBy)
+	common.DropOrphanShields(g.state.GetMap(), player)
 	g.actionBroker.Execute(common.NewUpdateFoVAction(common.AbstractCause("Load game"), player))
 	g.uiController.OnPlayerTurnTaken() // the transition drew the UI at the ladder, before the saved position
 	g.slot = slot
@@ -418,7 +501,7 @@ func (g *GameInstance) LoadSlot(slot int) error {
 // confirmed first, so a new hero never silently writes over an old one.
 func (g *GameInstance) NewGame(class defs.LoadoutDefinition, permadeath bool, name string) {
 	back := func() { g.uiController.OpenUncancelableMenu(g.StartMenuItems(false)) }
-	g.uiController.OpenSaveSlots("New game - pick a save slot", ListSaveSlots(g.d1Data.ClassNames),
+	g.uiController.OpenSaveSlots("New game - pick a save slot", ListSaveSlots(g.data),
 		// ownSlot 0: a new hero is nobody's running game, so replacing even the slot that is open right now asks
 		func(slot int) {
 			g.confirmOverwrite(slot, 0, func() { g.startNewGame(class, permadeath, name, slot) })
@@ -443,8 +526,9 @@ func (g *GameInstance) startNewGame(class defs.LoadoutDefinition, permadeath boo
 // confirmOverwrite asks before a save is written over, and never writes on a "no". An empty slot and ownSlot -
 // the slot the game asking is already autosaving into - need no question, since neither loses a hero.
 func (g *GameInstance) confirmOverwrite(slot, ownSlot int, write func()) {
-	info := readSaveSlot(slot, g.d1Data.ClassNames)
-	if !info.Used || slot == ownSlot {
+	info, err := readSaveSlot(slot, g.data)
+	if !info.Used && err == nil || slot == ownSlot { // a save that doesn't load is still somebody's file: ask
+
 		write()
 		return
 	}
@@ -453,7 +537,7 @@ func (g *GameInstance) confirmOverwrite(slot, ownSlot int, write func()) {
 
 // OpenSaveMenu is the pause menu's "Save game": pick a slot, confirm if it holds someone else's game.
 func (g *GameInstance) OpenSaveMenu(back func()) {
-	g.uiController.OpenSaveSlots("Save game", ListSaveSlots(g.d1Data.ClassNames), func(slot int) {
+	g.uiController.OpenSaveSlots("Save game", ListSaveSlots(g.data), func(slot int) {
 		g.confirmOverwrite(slot, g.slot, func() {
 			g.SaveToSlot(slot)
 			g.PlayerMessage(fmt.Sprintf("Game saved to slot %d.", slot))
@@ -463,8 +547,8 @@ func (g *GameInstance) OpenSaveMenu(back func()) {
 
 // OpenLoadMenu is "Load game" in the start and pause menus. An empty slot is simply not loadable.
 func (g *GameInstance) OpenLoadMenu(back func()) {
-	g.uiController.OpenSaveSlots("Load game", ListSaveSlots(g.d1Data.ClassNames), func(slot int) {
-		if !readSaveSlot(slot, nil).Used {
+	g.uiController.OpenSaveSlots("Load game", ListSaveSlots(g.data), func(slot int) {
+		if info, _ := readSaveSlot(slot, g.data); !info.Used {
 			g.OpenLoadMenu(back) // an empty slot holds nothing to load: put the screen back up
 			return
 		}
@@ -492,16 +576,18 @@ func (g *GameInstance) StartMenuItems(afterDeath bool) []util.MenuItem {
 		}
 		back = g.uiController.ShowGameOverMenu
 	}
-	if HasSave() {
-		label := "Continue"
+	if g.latestSlot() > 0 {
 		if afterDeath {
-			label = "Load last save"
+			items = append(items, util.MenuItem{MainText: "Load last save", Action: func() {
+				if err := g.LoadGame(); err != nil {
+					g.PlayerMessage(fmt.Sprintf("Could not load the game: %v", err))
+				}
+			}})
+		} else {
+			// ShowStartMenu already loaded it, so the menu sits over that exact scene: closing is all Continue does.
+			items = append(items, util.MenuItem{MainText: "Continue"})
 		}
-		items = append(items, util.MenuItem{MainText: label, Action: func() {
-			if err := g.LoadGame(); err != nil {
-				g.PlayerMessage(fmt.Sprintf("Could not load the game: %v", err))
-			}
-		}}, util.MenuItem{MainText: "Load game", Action: func() { g.OpenLoadMenu(back) }})
+		items = append(items, util.MenuItem{MainText: "Load game", Action: func() { g.OpenLoadMenu(back) }})
 	}
 	items = append(items, util.MenuItem{MainText: "New game", Action: func() { g.uiController.OpenNewGameScreen(g.NewGame, back) }})
 	if mods := files.Mods(); !afterDeath && len(mods) > 1 {
@@ -544,8 +630,23 @@ func (g *GameInstance) BackToMainMenu() {
 }
 
 // ShowStartMenu opens the start menu when a save exists or there is a mod to pick; without one the default game autosaves right away.
+// A continuable save is loaded first, so the menu comes up over that exact scene: Continue then just closes it.
 func (g *GameInstance) ShowStartMenu() {
-	if !HasSave() && len(files.Mods()) < 2 { // with several mods the menu is where the mod is picked
+	// the newest save that loads; one that doesn't is skipped, with the reason on stderr
+	for slot := 1; slot <= MaxSaveSlots; slot++ {
+		if _, err := readSaveSlot(slot, g.data); err != nil {
+			fmt.Fprintf(os.Stderr, "skipping save slot %d: %v\n", slot, err)
+		}
+	}
+	for slot := g.latestSlot(); slot > 0; slot = g.latestSlot() {
+		err := g.LoadSlot(slot)
+		if err == nil {
+			break
+		}
+		fmt.Fprintf(os.Stderr, "skipping save slot %d: %v\n", slot, err)
+		g.broken[slot] = true
+	}
+	if g.slot == 0 && len(files.Mods()) < 2 && g.latestSlot() == 0 { // with several mods the menu is where the mod is picked
 		g.slot = FirstFreeSaveSlot()
 		g.autosave = true
 		return

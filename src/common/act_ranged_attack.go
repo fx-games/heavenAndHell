@@ -13,6 +13,7 @@ type RangedAttackAction struct {
 	damageAmount           int
 	defender               *Actor
 	targetPos              geometry.Point
+	volley                 bool // one of the extra arrows Multi-Shot looses, which loose none of their own
 	additionalOnHitActions func(attacker *Actor, target geometry.Point, hitPositions []geometry.Point) []Action
 }
 
@@ -32,37 +33,43 @@ func NewRangedAttackAction(source Cause, attacker *Actor, targetPos geometry.Poi
 	}
 }
 
-func (d *RangedAttackAction) Execute(context ActionContext) []Action {
+func (d *RangedAttackAction) Execute(context ActionContext) (actions []Action) {
 	context.ActionBroker.Emit(Shot{Attacker: d.attacker, From: d.attacker.MapPosition(), To: d.targetPos})
-	// the hero's bow twangs (PS_BFIRE, PM_DoRangeAttack); a D1 monster's shot sounds as its mode starts (M_DoRAttack)
-	if d.attacker == context.GameState.GetPlayer() {
-		if !playD1SfxAt(context, "PS_BFIRE", d.attacker.MapPosition()) {
-			context.AudioPlayer.PlayCue("bow_fire")
-		}
-	} else if d.attacker.d1Monster == nil {
-		context.AudioPlayer.PlayCue("bow_fire")
-	}
 
 	currentMap := context.GameState.GetMap()
-	var actions []Action
+	if !d.volley {
+		defer func() {
+			actions = append(actions, context.GameState.factory.multiShotVolley(d.attacker, d.targetPos)...)
+		}()
+	}
 
 	d.damageAmount = 0
 
 	defender, ok := currentMap.TryGetActorAt(d.targetPos)
 	if !ok {
-		context.GameState.factory.hitD1Object(currentMap, d.targetPos, d.attacker) // an arrow shot at a barrel breaks it
+		context.GameState.factory.hitObject(currentMap, d.targetPos, d.attacker) // an arrow shot at a barrel breaks it
 		return actions
 	}
 	d.defender = defender
 
-	if dam, extra, handled := resolveD1Attack(context, d.attacker, d.defender, true); handled {
+	if dam, extra, handled := resolveAttack(context, d.attacker, d.defender, true); handled {
+		if dam > 0 {
+			dam = int(float64(dam) * d.damageFactor * skillDamageFactor(d.attacker))
+		}
 		d.damageAmount = dam
 		actions = append(actions, extra...)
 		if dam <= 0 {
 			return actions
 		}
 		logAttack(context, d.attacker, d.defender, dam)
-		return append(actions, NewChangeResourceAction(NewActorCause(ActionNameRangedAttack, d.attacker), d.defender, stats.Health, float64(-dam)))
+		actions = append(actions, NewChangeResourceAction(NewActorCause(ActionNameRangedAttack, d.attacker), d.defender, stats.Health, float64(-dam)))
+		if d.attacker.HasStatusEffect(StatusDebilitating) {
+			actions = append(actions, context.GameState.factory.debilitate(d.attacker, d.defender)...)
+		}
+		if d.additionalOnHitActions != nil {
+			actions = append(actions, d.additionalOnHitActions(d.attacker, d.defender.MapPosition(), []geometry.Point{d.defender.MapPosition()})...)
+		}
+		return actions
 	}
 
 	hitChance := CalculateRangedWeaponHitChance(d.attacker, d.defender)

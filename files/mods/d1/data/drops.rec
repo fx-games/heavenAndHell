@@ -1,0 +1,32 @@
+%rec: default
+# drops.rec: what the engine drops on its own. Each record is one table; its drop: lines are rolled in order,
+# each with its chance in percent, and the first to hit is the item. When none hits, nothing drops, so a line
+# at 100% ends the table. drop: <item> <chance>% [levels <min>-<max>]
+#   <item>    an internal_name from this mod's items.rec; random: any droppable base item the level allows;
+#             nothing: a hit drops no item
+#   levels    the dungeon levels the line applies on; elsewhere it is skipped without a roll. Default all
+# A table the mod leaves out drops nothing.
+#   monster   what a slain monster leaves (after its fixed drops)
+#   floor     containers, sarcophagi and theme rooms
+#   useful    barrels and small chests
+#   level     items lying around a new dungeon level; count: how many (a range, both ends included)
+# Diablo 1.09: gold three times in four (RndItem, RndAllItems), SetupAllUseful, AddInitItems.
+
+internal_name: monster
+drop: nothing 59%
+drop: gold 74%
+drop: random 100%
+
+internal_name: floor
+drop: gold 74%
+drop: random 100%
+
+internal_name: useful
+drop: scroll_of_town_portal 33% levels 2-99
+drop: potion_of_healing 50%
+drop: potion_of_mana 100%
+
+internal_name: level
+count: 3-5
+drop: potion_of_healing 50%
+drop: potion_of_mana 100%

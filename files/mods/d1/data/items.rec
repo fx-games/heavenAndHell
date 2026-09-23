@@ -1,4 +1,4 @@
-# items.rec: every base item, one record each. Order is content: D1 rolls items by walking this table. One schema
+# items.rec: every base item, one record each. One schema
 # serves every mod; a mod fills in the fields its game uses and leaves the rest out.
 # Identity:
 #   internal_name     id other files use (classes.rec, stores.rec, quests.rec); required
@@ -9,6 +9,7 @@
 #   out_of_depth_chance / min_level_for_ood   chance to drop above its dlvl, from this dungeon level on
 #   drop              IDROP_REGULAR, IDROP_DOUBLE (twice as likely) or IDROP_NEVER (quests and stores only)
 #   hidden            true: unseen and out of reach until the hero has true sight (H&H's evidence)
+#   quest_item        true: a quest item, which no store buys
 #   cost              its value in gold (D1's iValue)
 # What it is (a record names either category or D1's class/item_type):
 #   category          potion scroll wand light weapon armor ammo ring food amulet throwable
@@ -45,7 +46,7 @@
 #
 # Diablo 1's items in the unified items.rec schema every mod uses (see defs.Item).
 # Converted once from Hellfire's own itemdat table; the engine no longer reads xl_item.txt.
-# Order is content: D1 rolls items by walking this table, so a row moving is a gameplay change.
+# The order D1 rolls them in is roll_order.rec's; this file's own order doesn't matter.
 #
 # weapon_damage and armor_class are ranges because that is what D1 stores; Heaven&Hell's dice and
 # intervals go through the same util.ParseDice and stats.NewIntervalFromString.
@@ -178,6 +179,7 @@ spell: SPL_CBOLT
 
 name: Cleaver
 internal_name: cleaver
+quest_item: true
 icon: item.cleaver
 dlvl: 10
 cost: 2000
@@ -199,6 +201,7 @@ spell: SPL_NULL
 
 name: The Undead Crown
 internal_name: the_undead_crown
+quest_item: true
 icon: item.the_undead_crown
 dlvl: 0
 cost: 10000
@@ -220,6 +223,7 @@ spell: SPL_NULL
 
 name: Empyrean Band
 internal_name: empyrean_band
+quest_item: true
 icon: item.empyrean_band
 dlvl: 0
 cost: 8000
@@ -241,6 +245,7 @@ spell: SPL_NULL
 
 name: Magic Rock
 internal_name: magic_rock
+quest_item: true
 icon: item.magic_rock
 dlvl: 0
 cost: 0
@@ -262,6 +267,7 @@ spell: SPL_NULL
 
 name: Optic Amulet
 internal_name: optic_amulet
+quest_item: true
 icon: item.optic_amulet
 dlvl: 0
 cost: 5000
@@ -283,6 +289,7 @@ spell: SPL_NULL
 
 name: Ring of Truth
 internal_name: ring_of_truth
+quest_item: true
 icon: item.ring_of_truth
 dlvl: 0
 cost: 1000
@@ -304,6 +311,7 @@ spell: SPL_NULL
 
 name: Tavern Sign
 internal_name: tavern_sign
+quest_item: true
 icon: item.tavern_sign
 dlvl: 0
 cost: 0
@@ -325,6 +333,7 @@ spell: SPL_NULL
 
 name: Harlequin Crest
 internal_name: harlequin_crest
+quest_item: true
 icon: item.harlequin_crest
 dlvl: 0
 cost: 15
@@ -346,6 +355,7 @@ spell: SPL_NULL
 
 name: Veil of Steel
 internal_name: veil_of_steel
+quest_item: true
 icon: item.veil_of_steel
 dlvl: 0
 cost: 0
@@ -367,6 +377,7 @@ spell: SPL_NULL
 
 name: Golden Elixir
 internal_name: golden_elixir
+quest_item: true
 icon: item.golden_elixir
 dlvl: 15
 cost: 0
@@ -388,6 +399,7 @@ spell: SPL_NULL
 
 name: Anvil of Fury
 internal_name: anvil_of_fury
+quest_item: true
 icon: item.anvil_of_fury
 dlvl: 0
 cost: 0
@@ -409,6 +421,7 @@ spell: SPL_NULL
 
 name: Black Mushroom
 internal_name: black_mushroom
+quest_item: true
 icon: item.black_mushroom
 dlvl: 0
 cost: 0
@@ -430,6 +443,7 @@ spell: SPL_NULL
 
 name: Brain
 internal_name: brain
+quest_item: true
 icon: item.brain
 dlvl: 0
 cost: 0
@@ -451,6 +465,7 @@ spell: SPL_NULL
 
 name: Fungal Tome
 internal_name: fungal_tome
+quest_item: true
 icon: item.fungal_tome
 dlvl: 0
 cost: 0
@@ -472,6 +487,7 @@ spell: SPL_NULL
 
 name: Spectral Elixir
 internal_name: spectral_elixir
+quest_item: true
 icon: item.spectral_elixir
 dlvl: 15
 cost: 0
@@ -493,6 +509,7 @@ spell: SPL_NULL
 
 name: Blood Stone
 internal_name: blood_stone
+quest_item: true
 icon: item.blood_stone
 dlvl: 0
 cost: 0
@@ -514,6 +531,7 @@ spell: SPL_NULL
 
 name: Map of the Stars
 internal_name: map_of_the_stars
+quest_item: true
 icon: item.map_of_the_stars
 dlvl: 0
 cost: 0
@@ -745,6 +763,7 @@ spell: SPL_NULL
 
 name: Staff of Lazarus
 internal_name: staff_of_lazarus
+quest_item: true
 icon: item.staff_of_lazarus
 dlvl: 0
 cost: 0
@@ -784,266 +803,6 @@ requires_dexterity: 0
 flags: ISPL_NONE
 misc_id: IMISC_SCROLLT
 spell: SPL_RESURRECT
-
-name: (unused)
-internal_name: unused_35
-dlvl: 0
-cost: 0
-drop: IDROP_NEVER
-class: ICLASS_NONE
-location: ILOC_NONE
-cursor: 0
-item_type: 0
-unique_base: UITYPE_NONE
-durability: 0
-weapon_damage: 0-0
-armor_class: 0-0
-requires_strength: 0
-requires_magic: 0
-requires_dexterity: 0
-flags: ISPL_NONE
-misc_id: IMISC_NONE
-spell: SPL_NULL
-
-name: (unused)
-internal_name: unused_36
-dlvl: 0
-cost: 0
-drop: IDROP_NEVER
-class: ICLASS_NONE
-location: ILOC_NONE
-cursor: 0
-item_type: 0
-unique_base: UITYPE_NONE
-durability: 0
-weapon_damage: 0-0
-armor_class: 0-0
-requires_strength: 0
-requires_magic: 0
-requires_dexterity: 0
-flags: ISPL_NONE
-misc_id: IMISC_NONE
-spell: SPL_NULL
-
-name: (unused)
-internal_name: unused_37
-dlvl: 0
-cost: 0
-drop: IDROP_NEVER
-class: ICLASS_NONE
-location: ILOC_NONE
-cursor: 0
-item_type: 0
-unique_base: UITYPE_NONE
-durability: 0
-weapon_damage: 0-0
-armor_class: 0-0
-requires_strength: 0
-requires_magic: 0
-requires_dexterity: 0
-flags: ISPL_NONE
-misc_id: IMISC_NONE
-spell: SPL_NULL
-
-name: (unused)
-internal_name: unused_38
-dlvl: 0
-cost: 0
-drop: IDROP_NEVER
-class: ICLASS_NONE
-location: ILOC_NONE
-cursor: 0
-item_type: 0
-unique_base: UITYPE_NONE
-durability: 0
-weapon_damage: 0-0
-armor_class: 0-0
-requires_strength: 0
-requires_magic: 0
-requires_dexterity: 0
-flags: ISPL_NONE
-misc_id: IMISC_NONE
-spell: SPL_NULL
-
-name: (unused)
-internal_name: unused_39
-dlvl: 0
-cost: 0
-drop: IDROP_NEVER
-class: ICLASS_NONE
-location: ILOC_NONE
-cursor: 0
-item_type: 0
-unique_base: UITYPE_NONE
-durability: 0
-weapon_damage: 0-0
-armor_class: 0-0
-requires_strength: 0
-requires_magic: 0
-requires_dexterity: 0
-flags: ISPL_NONE
-misc_id: IMISC_NONE
-spell: SPL_NULL
-
-name: (unused)
-internal_name: unused_40
-dlvl: 0
-cost: 0
-drop: IDROP_NEVER
-class: ICLASS_NONE
-location: ILOC_NONE
-cursor: 0
-item_type: 0
-unique_base: UITYPE_NONE
-durability: 0
-weapon_damage: 0-0
-armor_class: 0-0
-requires_strength: 0
-requires_magic: 0
-requires_dexterity: 0
-flags: ISPL_NONE
-misc_id: IMISC_NONE
-spell: SPL_NULL
-
-name: (unused)
-internal_name: unused_41
-dlvl: 0
-cost: 0
-drop: IDROP_NEVER
-class: ICLASS_NONE
-location: ILOC_NONE
-cursor: 0
-item_type: 0
-unique_base: UITYPE_NONE
-durability: 0
-weapon_damage: 0-0
-armor_class: 0-0
-requires_strength: 0
-requires_magic: 0
-requires_dexterity: 0
-flags: ISPL_NONE
-misc_id: IMISC_NONE
-spell: SPL_NULL
-
-name: (unused)
-internal_name: unused_42
-dlvl: 0
-cost: 0
-drop: IDROP_NEVER
-class: ICLASS_NONE
-location: ILOC_NONE
-cursor: 0
-item_type: 0
-unique_base: UITYPE_NONE
-durability: 0
-weapon_damage: 0-0
-armor_class: 0-0
-requires_strength: 0
-requires_magic: 0
-requires_dexterity: 0
-flags: ISPL_NONE
-misc_id: IMISC_NONE
-spell: SPL_NULL
-
-name: (unused)
-internal_name: unused_43
-dlvl: 0
-cost: 0
-drop: IDROP_NEVER
-class: ICLASS_NONE
-location: ILOC_NONE
-cursor: 0
-item_type: 0
-unique_base: UITYPE_NONE
-durability: 0
-weapon_damage: 0-0
-armor_class: 0-0
-requires_strength: 0
-requires_magic: 0
-requires_dexterity: 0
-flags: ISPL_NONE
-misc_id: IMISC_NONE
-spell: SPL_NULL
-
-name: (unused)
-internal_name: unused_44
-dlvl: 0
-cost: 0
-drop: IDROP_NEVER
-class: ICLASS_NONE
-location: ILOC_NONE
-cursor: 0
-item_type: 0
-unique_base: UITYPE_NONE
-durability: 0
-weapon_damage: 0-0
-armor_class: 0-0
-requires_strength: 0
-requires_magic: 0
-requires_dexterity: 0
-flags: ISPL_NONE
-misc_id: IMISC_NONE
-spell: SPL_NULL
-
-name: (unused)
-internal_name: unused_45
-dlvl: 0
-cost: 0
-drop: IDROP_NEVER
-class: ICLASS_NONE
-location: ILOC_NONE
-cursor: 0
-item_type: 0
-unique_base: UITYPE_NONE
-durability: 0
-weapon_damage: 0-0
-armor_class: 0-0
-requires_strength: 0
-requires_magic: 0
-requires_dexterity: 0
-flags: ISPL_NONE
-misc_id: IMISC_NONE
-spell: SPL_NULL
-
-name: (unused)
-internal_name: unused_46
-dlvl: 0
-cost: 0
-drop: IDROP_NEVER
-class: ICLASS_NONE
-location: ILOC_NONE
-cursor: 0
-item_type: 0
-unique_base: UITYPE_NONE
-durability: 0
-weapon_damage: 0-0
-armor_class: 0-0
-requires_strength: 0
-requires_magic: 0
-requires_dexterity: 0
-flags: ISPL_NONE
-misc_id: IMISC_NONE
-spell: SPL_NULL
-
-name: (unused)
-internal_name: unused_47
-dlvl: 0
-cost: 0
-drop: IDROP_NEVER
-class: ICLASS_NONE
-location: ILOC_NONE
-cursor: 0
-item_type: 0
-unique_base: UITYPE_NONE
-durability: 0
-weapon_damage: 0-0
-armor_class: 0-0
-requires_strength: 0
-requires_magic: 0
-requires_dexterity: 0
-flags: ISPL_NONE
-misc_id: IMISC_NONE
-spell: SPL_NULL
 
 name: Cap
 internal_name: cap
@@ -1552,7 +1311,7 @@ misc_id: IMISC_NONE
 spell: SPL_NULL
 
 name: Buckler
-internal_name: buckler
+internal_name: buckler_drop
 short_name: Shield
 icon: item.buckler
 dlvl: 1
@@ -1684,7 +1443,7 @@ misc_id: IMISC_NONE
 spell: SPL_NULL
 
 name: Potion of Healing
-internal_name: potion_of_healing
+internal_name: potion_of_healing_drop
 icon: item.potion_of_healing
 dlvl: 1
 cost: 50
@@ -1705,7 +1464,7 @@ misc_id: IMISC_HEAL
 spell: SPL_NULL
 
 name: Potion of Full Healing
-internal_name: potion_of_full_healing
+internal_name: potion_of_full_healing_drop
 icon: item.potion_of_full_healing
 dlvl: 1
 cost: 150
@@ -1726,7 +1485,7 @@ misc_id: IMISC_FULLHEAL
 spell: SPL_NULL
 
 name: Potion of Mana
-internal_name: potion_of_mana
+internal_name: potion_of_mana_drop
 icon: item.potion_of_mana
 dlvl: 1
 cost: 50
@@ -1747,7 +1506,7 @@ misc_id: IMISC_MANA
 spell: SPL_NULL
 
 name: Potion of Full Mana
-internal_name: potion_of_full_mana
+internal_name: potion_of_full_mana_drop
 icon: item.potion_of_full_mana
 dlvl: 1
 cost: 150
@@ -1936,7 +1695,7 @@ misc_id: IMISC_SCROLLT
 spell: SPL_LIGHTNING
 
 name: Scroll of Identify
-internal_name: scroll_of_identify
+internal_name: scroll_of_identify_drop
 icon: item.scroll_of_identify
 dlvl: 1
 cost: 100
@@ -1957,7 +1716,7 @@ misc_id: IMISC_SCROLL
 spell: SPL_IDENTIFY
 
 name: Scroll of Resurrect
-internal_name: scroll_of_resurrect
+internal_name: scroll_of_resurrect_drop
 icon: item.scroll_of_resurrect
 dlvl: 1
 cost: 250
@@ -2020,7 +1779,7 @@ misc_id: IMISC_SCROLLT
 spell: SPL_FLAME
 
 name: Scroll of Town Portal
-internal_name: scroll_of_town_portal
+internal_name: scroll_of_town_portal_drop
 icon: item.scroll_of_town_portal
 dlvl: 4
 cost: 200
@@ -2356,7 +2115,7 @@ misc_id: IMISC_SCROLL
 spell: SPL_APOCA
 
 name: Book of
-internal_name: book_of
+internal_name: book_of_2
 icon: item.book_of
 dlvl: 2
 cost: 0
@@ -2377,7 +2136,7 @@ misc_id: IMISC_BOOK
 spell: SPL_NULL
 
 name: Book of
-internal_name: book_of
+internal_name: book_of_8
 icon: item.book_of
 dlvl: 8
 cost: 0
@@ -2398,7 +2157,7 @@ misc_id: IMISC_BOOK
 spell: SPL_NULL
 
 name: Book of
-internal_name: book_of
+internal_name: book_of_14
 icon: item.book_of
 dlvl: 14
 cost: 0
@@ -2419,7 +2178,7 @@ misc_id: IMISC_BOOK
 spell: SPL_NULL
 
 name: Book of
-internal_name: book_of
+internal_name: book_of_20
 icon: item.book_of
 dlvl: 20
 cost: 0
@@ -2462,7 +2221,7 @@ misc_id: IMISC_NONE
 spell: SPL_NULL
 
 name: Short Sword
-internal_name: short_sword
+internal_name: short_sword_drop
 short_name: Sword
 icon: item.short_sword
 dlvl: 1
@@ -2924,7 +2683,7 @@ misc_id: IMISC_NONE
 spell: SPL_NULL
 
 name: Club
-internal_name: club
+internal_name: club_drop
 short_name: Club
 icon: item.club
 dlvl: 1
@@ -2990,7 +2749,7 @@ misc_id: IMISC_NONE
 spell: SPL_NULL
 
 name: Short Bow
-internal_name: short_bow
+internal_name: short_bow_drop
 short_name: Bow
 icon: item.short_bow
 dlvl: 1
@@ -3276,7 +3035,7 @@ misc_id: IMISC_STAFF
 spell: SPL_NULL
 
 name: Ring
-internal_name: ring
+internal_name: ring_5
 short_name: Ring
 icon: item.ring
 dlvl: 5
@@ -3298,7 +3057,7 @@ misc_id: IMISC_RING
 spell: SPL_NULL
 
 name: Ring
-internal_name: ring
+internal_name: ring_10
 short_name: Ring
 icon: item.ring
 dlvl: 10
@@ -3320,7 +3079,7 @@ misc_id: IMISC_RING
 spell: SPL_NULL
 
 name: Ring
-internal_name: ring
+internal_name: ring_15
 short_name: Ring
 icon: item.ring
 dlvl: 15
@@ -3342,7 +3101,7 @@ misc_id: IMISC_RING
 spell: SPL_NULL
 
 name: Amulet
-internal_name: amulet
+internal_name: amulet_8
 short_name: Amulet
 icon: item.amulet
 dlvl: 8
@@ -3364,7 +3123,7 @@ misc_id: IMISC_AMULET
 spell: SPL_NULL
 
 name: Amulet
-internal_name: amulet
+internal_name: amulet_16
 short_name: Amulet
 icon: item.amulet
 dlvl: 16

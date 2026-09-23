@@ -1,16 +1,46 @@
 %rec: default
-# classes.rec: the classes a new hero can pick, one record each, in the order the class menu lists them. Record N is
-# the same class as hero.rec's class record N, which holds its numbers and rules.
+# classes.rec: the classes a new hero can pick, one record each, in the order the class menu lists them.
 # Fields:
 #   internal_name     the class's id; its sprites are icons/actors.rec's class.<internal_name>_male / _female
 #   name              what the class menu shows
 #   gold              gold a new hero starts with
 #   item              an item a new hero starts with, by items.rec internal_name; repeatable. Weapons and armour
 #                     are equipped; "<item> pack" puts it in the pack instead of a hand
-#   targeted_skill    a targeted skill (effects/targeted.rec) the class knows; repeatable
-#   untargeted_skill  an untargeted skill (effects/untargeted.rec) the class knows; repeatable
-#   stats_<stat>      read but not used: the hero's attributes come from hero.rec
-#   resource_<name>   read but not used: life and mana come from hero.rec
+#   str / mag / dex / vit             a new hero's attributes; max_str / max_mag / max_dex / max_vit their caps
+#   to_blk            chance to block with a shield, before dexterity and level
+#   adj_life / adj_mana               the flat part of the starting life and mana
+#   lvl_life / lvl_mana               life and mana gained per character level
+#   chr_life / chr_mana               life per point of vitality, mana per point of magic, when it is raised
+#   itm_life / itm_mana               the same, for vitality and magic that items give
+#   potion_life / potion_mana         multiplier on what a healing / mana potion restores
+#   spell_life        multiplier on the Healing spell; mana_cost multiplier on every spell's mana cost
+#                     (the life/mana/potion/spell numbers are decimals: 1 = normal, 0.5 = half, as in devilutionX)
+#   magic_to_hit / melee_to_hit / ranged_to_hit   the class's to-hit bonus for each kind of attack
+#   spell_to_hit      extra to-hit for its magic missiles (Sorcerer 20, Bard 10)
+#   attack_frames     attack animation length by weapon: "default=16 axe=20" (sword axe bow mace staff)
+#   spell_frames / hit_frames         cast animation length, and hit recovery length
+#   start_spells      the spells and skills the class can learn, by id, at the level a new hero knows them:
+#                     "SPL_FIREBOLT=2 arrow_rain=0 ..." (0: learnable with skill points, not known yet). A skill is
+#                     a D1 SPL_ or any id of the engine's skills (src/rules/skills.rec) or of the mod's spells.rec
+#   skill_points      skill points a hero gains per level, spent on start_spells' skills (none: 0)
+#   max_skill_level   how far skill points raise a skill; books and gear go past it
+#   heal_boost        Healing and potions: 2 doubles the roll, 1 adds half, 0 neither
+#   flags             what the class does differently, any of: critical_strike (level% of swings hit twice),
+#                     trap_sense (sees traps), iron_skin (+level/4 AC), natural_resistance (+level to every
+#                     resistance), dual_wield, trained_fists (bare hands hit level/2..level), parry (blocks with
+#                     a staff, one one-hander or bare hands), full_missile_bonus (missiles get the whole damage
+#                     bonus), half_shield (a shield without a weapon counts half), vitality_damage (+level*vit/100
+#                     melee), shield_slows_bare_hands, flinch_resist (hit recovery needs level/4 more damage), and
+#                     at most one melee damage formula: str_dex_damage, staff_and_fist_damage,
+#                     blade_and_bow_damage, heavy_weapon_damage (none: level*str/100)
+#   key               what spells.rec's effects call the class (default: name, lowercased)
+#   skill             its class skill: repair, disarm, recharge, vision, identify or rage (none: no skill)
+#   voice / female_voice              its PS_<voice>nn sound set (WARR, ROGUE, MAGE, MONK), male and female
+#   death_sound       said on death instead of PS_<voice>71
+#   text_prefix       its version of the quest books' texts: TEXT_<prefix>BONER
+#   oily              what the Oily shrine gives it: "str 2"; repeatable
+#   slain_hero        what the Slain Hero leaves it: an items.rec internal_name (a magic item of its type and
+#                     look) or "book <SPL_>" (a spell book)
 #
 # The three classes this game is played with. Classes are content: the engine keeps no roster of them and reads
 # each class' two sprites from this mod's actors.rec by internal_name (class.<internal_name>_male/_female).
@@ -19,19 +49,70 @@
 # (warrior / rogue / sorcerer) and carries its OWN display name over it. The Archer plays as the rogue and the
 # Mage as the sorcerer, which is what they always were.
 
+# THESE NUMBERS ARE A DESIGN CHOICE MADE DURING THE PORT. They are not a port of anything and they are meant to
+# be tuned by playing the game.
+#
+# Heaven & Hell never had this table. Its branch used the `stats` package - strength/dexterity/intelligence plus
+# health and mana resources - and it had neither growth curves nor
+# caps nor an experience ladder. So nothing here could be carried over row for row, and copying Diablo's rows
+# would have been a lie dressed as a port.
+#
+# What IS derived, and from what:
+#   - starting str/mag/dex came from this file's old stats_strength / stats_intelligence /
+#     stats_dexterity, doubled: H&H's values run ~5-15 where the engine's formulas expect ~10-30. Each class
+#     keeps its shape - the Warrior stays str-heavy, the Archer dex-heavy, the Mage int-heavy.
+#   - vit has no H&H equivalent, so it is derived from the old resource_health (20/15/10 -> 30/20/15).
+#   - mana follows the old resource_mana (1/1/4): the Warrior is mana-poor, the Mage mana-rich.
+#
+# What is CHOSEN, by the role each class' archetype plays: the caps, the 1/64 life and mana curves, the to-hit
+# numbers and the animation frame counts. Warrior tanky and mana-starved, Archer balanced, Mage mana-rich and
+# fragile. The to-hit and frame columns have no H&H source at all and are set to what the engine's formulas are
+# calibrated against for that archetype.
+
 internal_name: warrior
 name: Warrior
 gold: 180
 item: main_gauche
 item: torch
 item: partial_leather_armour
-resource_health: 20
-resource_mana: 1
-stats_strength: 15
-stats_dexterity: 5
-stats_intelligence: 5
-targeted_skill: poison_target
-targeted_skill: earth_shaker
+start_spells: poison_target=1 earth_shaker=1 crush=0 shout=0 swing=0 whirlwind_of_doom=0 triumph_of_steel=0 call_to_odin=0
+skill_points: 1
+max_skill_level: 5
+str: 30
+mag: 10
+dex: 10
+vit: 30
+max_str: 240
+max_mag: 40
+max_dex: 70
+max_vit: 120
+to_blk: 30
+adj_life: 20
+adj_mana: 0
+lvl_life: 2.5
+lvl_mana: 0.5
+chr_life: 2
+chr_mana: 0.5
+itm_life: 2
+itm_mana: 0.5
+potion_life: 2
+potion_mana: 1
+spell_life: 2
+mana_cost: 1.25
+magic_to_hit: 50
+melee_to_hit: 70
+ranged_to_hit: 60
+attack_frames: default=16 axe=20
+spell_frames: 20
+hit_frames: 6
+flags: critical_strike
+key: warrior
+heal_boost: 2
+skill: repair
+voice: WARR
+female_voice: ROGUE
+death_sound: PS_DEAD
+oily: str 2
 
 internal_name: rogue
 name: Archer
@@ -39,14 +120,44 @@ gold: 180
 item: short_bow
 item: torch
 item: partial_leather_armour
-resource_health: 15
-resource_mana: 1
-stats_strength: 8
-stats_dexterity: 15
-stats_intelligence: 5
-untargeted_skill: multi_shot
-targeted_skill: blink
-targeted_skill: jump_start(5 | 5)
+start_spells: multi_shot=1 blink=1 jump_start=1 arrow_rain=0 trick_shot=0 debilitating_shot=0 man_stopper=0
+skill_points: 1
+max_skill_level: 5
+str: 16
+mag: 10
+dex: 30
+vit: 20
+max_str: 80
+max_mag: 80
+max_dex: 240
+max_vit: 90
+to_blk: 20
+adj_life: 16
+adj_mana: 4
+lvl_life: 2
+lvl_mana: 1.5
+chr_life: 1.5
+chr_mana: 1.5
+itm_life: 1.5
+itm_mana: 1.5
+potion_life: 1.5
+potion_mana: 1.5
+spell_life: 1.5
+mana_cost: 1
+magic_to_hit: 50
+melee_to_hit: 50
+ranged_to_hit: 70
+attack_frames: default=18 axe=22 bow=12 staff=16
+spell_frames: 16
+hit_frames: 7
+flags: trap_sense str_dex_damage full_missile_bonus
+key: archer
+heal_boost: 1
+skill: disarm
+voice: WARR
+female_voice: ROGUE
+text_prefix: R
+oily: dex 2
 
 internal_name: sorcerer
 name: Mage
@@ -54,10 +165,41 @@ gold: 180
 item: dagger
 item: torch
 item: robe
-resource_health: 10
-resource_mana: 4
-stats_strength: 5
-stats_dexterity: 5
-stats_intelligence: 15
-untargeted_skill: heal_health
-targeted_skill: fire_ray
+start_spells: heal_health=1 fire_ray=1 black_clouds=0 burning_rain=0 great_thunder=0 eternal_vow=0 bat_out_of_hell=0
+skill_points: 1
+max_skill_level: 5
+str: 10
+mag: 30
+dex: 10
+vit: 15
+max_str: 40
+max_mag: 240
+max_dex: 80
+max_vit: 70
+to_blk: 10
+adj_life: 10
+adj_mana: 8
+lvl_life: 1
+lvl_mana: 2.5
+chr_life: 1
+chr_mana: 2.5
+itm_life: 1
+itm_mana: 2.5
+potion_life: 1
+potion_mana: 2
+spell_life: 1
+mana_cost: 0.75
+magic_to_hit: 70
+melee_to_hit: 50
+ranged_to_hit: 50
+attack_frames: default=20 sword=16 axe=24 mace=16 staff=16
+spell_frames: 12
+hit_frames: 8
+flags: shield_slows_bare_hands
+key: mage
+spell_to_hit: 20
+skill: recharge
+voice: MAGE
+female_voice: ROGUE
+text_prefix: M
+oily: mag 2

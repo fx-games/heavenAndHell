@@ -45,9 +45,9 @@ var (
 
 func tileIcon(name string) int32 { return namedIcon(tilesIcons, name) }
 
-// D1FurnitureIcons are drawn only by D1's own level builders, so a mod whose levels never use them owes the
-// engine nothing for them. TestD1DefinesItsFurniture keeps D1 honest instead of LoadIcons.
-var D1FurnitureIcons = []string{"tile.wooden_fence", "tile.arch", "tile.grate", "tile.pillar", "tile.lamp",
+// FurnitureIcons are drawn only by D1's own level builders, so a mod whose levels never use them owes the
+// engine nothing for them. TestDefinesItsFurniture keeps D1 honest instead of LoadIcons.
+var FurnitureIcons = []string{"tile.wooden_fence", "tile.arch", "tile.grate", "tile.pillar", "tile.lamp",
 	"tile.lava", "tile.wall_torch", "tile.brazier"}
 
 func furnitureIcon(name string) int32 { return tilesIcons[name] }

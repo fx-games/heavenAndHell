@@ -6,6 +6,7 @@ import (
 	"rpg/src/common"
 	"rpg/src/defs"
 	"rpg/src/geometry"
+	"rpg/src/recfile"
 	"rpg/src/textui"
 	"rpg/src/util"
 
@@ -55,7 +56,7 @@ func (c *Console) setupCommands() {
 		"character":  c.ShowFullStats, // the side panel, like the tile UI's character sheet
 		"level_up":   c.openLevelUpMenu,
 		"log":        c.showLog,
-		"quest_log":  func() { c.OpenTextWindow(util.ToLabelText(c.context.GameState().D1QuestLog())) },
+		"quest_log":  func() { c.OpenTextWindow(util.ToLabelText(c.context.GameState().QuestLogEntries())) },
 		"center_map": c.ui.CenterMapOnPlayer,
 		"look":       c.look,
 		"examine":    c.look,
@@ -80,26 +81,17 @@ func (c *Console) setupCommands() {
 	}
 }
 
-var commandNames = map[string]string{
-	"north": "North", "south": "South", "west": "West", "east": "East",
-	"force_north": "Attack north", "force_south": "Attack south", "force_west": "Attack west", "force_east": "Attack east",
-	"wait": "Wait", "pickup": "Pick up", "auto_explore": "Auto explore", "auto_attack": "Attack nearest",
-	"force_auto_attack": "Attack nearest (any)", "rest": "Rest until healed",
-	"aimed_ranged_attack": "Aimed ranged attack", "quick_ranged_attack": "Ranged attack nearest", "throw": "Throw",
-	"spells": "Cast a spell", "recast_spell": "Recast at nearest",
-	"inventory": "Inventory", "character": "Character", "level_up": "Spend stat points", "log": "Message log",
-	"quest_log": "Quest log", "look": "Look", "examine": "Examine", "system_menu": "Pause menu", "help": "Help",
-	"center_map": "Center the map", "scroll_map_up": "Scroll the map", "scroll_map_down": "Scroll the map",
-	"scroll_map_left": "Scroll the map", "scroll_map_right": "Scroll the map",
-	"flags": "Flags", "wiz_kill_level": "Wizard: kill level", "wiz_level_up": "Wizard: level up",
-	"wiz_level_down": "Wizard: level down", "wiz_fog_of_war": "Wizard: fog of war", "wizard": "Wizard menu",
-}
-
 func (c *Console) showHelp() {
-	c.ui.ShowKeyBindings(commandNames,
-		[]string{"north", "south", "west", "east", "force_north", "force_south", "force_west", "force_east", "wait", "rest", "pickup", "auto_explore", "look", "center_map", "scroll_map_up", "system_menu", "help"},
-		[]string{"auto_attack", "force_auto_attack", "aimed_ranged_attack", "quick_ranged_attack", "throw", "spells", "recast_spell", "inventory", "character", "level_up", "log", "quest_log", "flags", "wizard"},
-	)
+	names, columns := map[string]string{}, map[string][]string{}
+	for _, r := range recfile.Read(mustRead("assets/data/ascii/commands.rec")) { // the mod's help texts and layout
+		m := r.ToMap("")
+		command := m.GetStringOrDefault("command", "")
+		names[command] = m.GetStringOrDefault("name", command)
+		if col := m.GetStringOrDefault("help", ""); col != "" {
+			columns[col] = append(columns[col], command)
+		}
+	}
+	c.ui.ShowKeyBindings(names, columns["left"], columns["right"])
 }
 
 func (c *Console) showLog() {
@@ -125,7 +117,7 @@ func (c *Console) openLevelUpMenu() {
 		return
 	}
 	c.ShowFullStats()
-	c.ui.OpenMenuWithTitle("Level up", menuItems(common.LevelUpMenuItems(player, c.openLevelUpMenu, c.ShowFullStats)))
+	c.ui.OpenMenuWithTitle("Level up", menuItems(common.LevelUpMenuItems(c.context.GameState(), player, c.openLevelUpMenu, c.ShowFullStats)))
 }
 
 func (c *Console) openSystemMenu() {
@@ -327,15 +319,15 @@ func (c *Console) useItem(item *common.Item, inventory *textui.TextInventory) {
 func (c *Console) showItemInfo(item *common.Item) {
 	parse := parseColorCodes
 	equipment := c.context.GameState().GetPlayer().GetEquipment()
-	equipped, comparison := equipment.D1CompareForEquipping(item)
+	equipped, comparison := equipment.CompareForEquipping(item)
 	if equipment.IsEquipped(item) || len(equipped) == 0 {
 		c.OpenTextWindow(item.GetTooltipLines(parse))
 		return
 	}
-	lines := item.D1TooltipLinesComparedTo(comparison, parse)
+	lines := item.TooltipLinesComparedTo(comparison, parse)
 	for _, e := range equipped {
 		lines = append(lines, util.LabelTextFromString(""), util.LabelTextFromStringWithColor("Equipped:", defs.OffWhite))
-		lines = append(lines, e.Item.D1TooltipLinesComparedTo(e.Cmp, parse)...)
+		lines = append(lines, e.Item.TooltipLinesComparedTo(e.Cmp, parse)...)
 		if e.Note != "" {
 			lines = append(lines, util.LabelTextFromStringWithColor(e.Note, defs.NegativeHighlightColor))
 		}

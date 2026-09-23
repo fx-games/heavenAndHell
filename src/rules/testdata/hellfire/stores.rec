@@ -1,0 +1,102 @@
+# Hellfire's town vendors (a test fixture): every Hellfire store rule is a stores.rec option, so a mod can
+# recreate them. The D1 mod's own stores.rec is 1.09's.
+# Ports Hellfire's SpawnSmith/SpawnPremium/SpawnWitch/SpawnHealer/SpawnBoy: where Heaven&Hell names the
+# items a vendor sells, Diablo names the criteria and rolls the whole item table through them. Both are the
+# one record; these vendors just use its filter half.
+#
+# npc is who runs it, stock the engine's stock strategy, buys what it takes off the hero, service each entry
+# of the NPC's menu (see defs.VendorServices), when a quest condition for the record to count at all.
+#
+# item_count is the stock roll inclusive of both ends, straight off defs.h's store sizes.
+# max_value is MAX_VENDOR_VALUE, tries is how often SpawnOnePremium/SpawnBoy re-rolls for a shopper.
+
+# Griswold's premium stock rolls before his basic stock (SetupTownStores' order) and is listed after it.
+internal_name: premium
+npc: griswold
+stock: premium
+item_count: 1
+max_value: 200000
+tries: 150
+min_dlvl_divisor: 4
+exclude_types: misc gold
+slot_levels: -1 -1 -1 0 0 0 0 1 1 1 1 2 2 3 3
+rotate_by: 3
+
+internal_name: smith
+npc: griswold
+stock: smith
+buys: hellfire_smith
+service: buy_basic
+service: buy_premium
+service: sell
+service: repair
+item_count: 10-24
+max_value: 200000
+double_drops: true
+exclude_types: misc gold ring amulet
+exclude_charged_types: staff
+
+internal_name: witch
+npc: adria
+stock: witch
+buys: hellfire_witch
+service: buy
+service: sell
+service: recharge
+recharge_uniques: true
+item_count: 10-24
+max_value: 200000
+always: potion_of_mana
+always: potion_of_full_mana
+always: scroll_of_town_portal
+types: misc staff
+featured_misc_id: IMISC_BOOK
+featured_count: 0-3
+exclude_misc_ids: IMISC_MANA IMISC_FULLMANA IMISC_HEAL IMISC_FULLHEAL
+exclude_misc_ids: IMISC_OILOF IMISC_OILACC IMISC_OILMAST IMISC_OILSHARP IMISC_OILDEATH IMISC_OILSKILL
+exclude_misc_ids: IMISC_OILBSMTH IMISC_OILFORT IMISC_OILPERM IMISC_OILHARD IMISC_OILIMP
+exclude_spells: SPL_TOWN SPL_RESURRECT SPL_HEALOTHER
+
+# Hellfire's Pepin heals as you come in (S_StartHealer).
+internal_name: healer
+npc: pepin
+stock: healer
+usable_elixirs_only: true
+service: heal_on_visit
+service: buy
+item_count: 10-19
+always: potion_of_healing
+always: potion_of_full_healing
+types: misc
+misc_ids: IMISC_ELIXSTR IMISC_ELIXMAG IMISC_ELIXDEX IMISC_ELIXVIT IMISC_REJUV IMISC_FULLREJUV
+items: scroll_of_healing
+
+# Wirt. The types he keeps away from each class are Hellfire's SpawnBoy table; he only honours them for his
+# first shun_tries rolls, then takes what he can get.
+internal_name: boy
+npc: wirt
+stock: boy
+service: peek(50)
+item_count: 1
+max_value: 200000
+price_adjust: -1/4
+tries: 250
+shun_tries: 200
+exclude_types: misc gold
+shuns: warrior bow staff
+shuns: rogue sword staff axe mace shield
+shuns: sorcerer staff axe bow mace
+shuns: monk bow marmor shield mace
+shuns: bard axe mace staff
+shuns: barbarian bow staff
+
+# Cain identifies for a flat 100 gold (AddStoreHoldId), and sells nothing.
+internal_name: story
+npc: cain
+service: identify(100)
+
+# Once Diablo is dead Gillian collects 200 gold per explored level for the town, and the dungeon fills back up.
+internal_name: barmaid
+npc: gillian
+when: done("diablo")
+service: donate(200)

@@ -4,9 +4,9 @@ import (
 	"cmp"
 	"fmt"
 	"image/color"
-	"rpg/src/d1"
 	"rpg/src/defs"
 	"rpg/src/geometry"
+	"rpg/src/rules"
 	"rpg/src/stats"
 	"rpg/src/util"
 	"slices"
@@ -118,8 +118,8 @@ type Item struct {
 	nameOnlyInTooltip bool
 	internalName      string
 	isQuestItem       bool
-	d1                *d1.Item
-	d1Data            *d1.Data // the tables the item was made from, for the store rules
+	roll              *rules.Item
+	data              *rules.Data // the tables the item was made from, for the store rules
 }
 
 func NewItem(getPlayerRef func() *Actor, name string, icon int32) *Item {
@@ -197,7 +197,7 @@ func (i *Item) Counter() int {
 	return -1
 }
 func (i *Item) BuyPrice() int {
-	if i.d1 != nil {
+	if i.roll != nil {
 		return i.baseCost // set from D1 prices when stocked
 	}
 	itemPrice := i.baseCost
@@ -237,8 +237,8 @@ func (i *Item) GetLightStats() *LightStats {
 }
 
 func (i *Item) TintColor() color.RGBA {
-	if i.d1 != nil { // D1 text colors: blue for magic, gold for unique
-		switch i.d1.Magical {
+	if i.roll != nil { // D1 text colors: blue for magic, gold for unique
+		switch i.roll.Magical {
 		case 1:
 			return color.RGBA{R: 120, G: 150, B: 255, A: 255}
 		case 2:
@@ -312,11 +312,11 @@ func (i *Item) IsWeapon() bool {
 // DurabilityPercent returns the item's remaining durability (0..1) and whether it has durability at all
 // (rings, potions, scrolls etc. don't).
 func (i *Item) DurabilityPercent() (float64, bool) {
-	if i.d1 != nil { // D1 wear updates the d1 fields, not the Durability resources
-		if i.d1.MaxDur <= 0 || i.d1.MaxDur == 255 {
+	if i.roll != nil { // D1 wear updates the d1 fields, not the Durability resources
+		if i.roll.MaxDur <= 0 || i.roll.MaxDur == 255 {
 			return 1, false
 		}
-		return float64(i.d1.Durability) / float64(i.d1.MaxDur), true
+		return float64(i.roll.Durability) / float64(i.roll.MaxDur), true
 	}
 	if i.IsWeapon() {
 		return i.GetWeaponStats().Durability.AsPercentage(), true
@@ -340,9 +340,9 @@ func (i *Item) IsRangedWeapon() bool {
 }
 
 func (i *Item) SlotName() defs.SlotName {
-	if i.d1 != nil {
+	if i.roll != nil {
 		owner := i.getPlayer()
-		return d1SlotName(i.d1, owner != nil && owner.hero != nil && owner.hero.Rules().HasClassFlag(owner.hero.Class, d1.ClassDualWield))
+		return slotName(i.roll, owner != nil && owner.hero != nil && owner.hero.Rules().HasClassFlag(owner.hero.Class, defs.ClassDualWield))
 	}
 	if i.IsLightSource() {
 		return defs.SlotNameLightSource
@@ -476,7 +476,7 @@ func (i *Item) Clone() *Item {
 		isHidden:          i.isHidden,
 		shouldBeDrawn:     i.shouldBeDrawn,
 		baseCost:          i.baseCost,
-		d1:                i.d1,
+		roll:              i.roll,
 	}
 	if i.weaponComponent != nil {
 		clone.weaponComponent = i.weaponComponent.Clone()
@@ -572,8 +572,8 @@ func (i *Item) GetItemHooks() []ItemActionHook {
 	return i.itemHooks
 }
 func (i *Item) GetTooltipLines(parseColorCodedText func(string) []util.ColoredTextPart) []util.LabelText {
-	if i.d1 != nil {
-		i.RefreshD1() // durability and charges change during play
+	if i.roll != nil {
+		i.Refresh() // durability and charges change during play
 	}
 	info := []util.LabelText{util.LabelTextFromStringWithColor(i.Name(), defs.OffWhite)}
 

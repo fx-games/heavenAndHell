@@ -5,8 +5,8 @@ import (
 	"image/color"
 	"math/rand/v2"
 	"rpg/files"
-	"rpg/src/d1"
 	"rpg/src/defs"
+	"rpg/src/rules"
 	"rpg/src/stats"
 	"rpg/src/util"
 	"slices"
@@ -199,11 +199,11 @@ func SpellMenuItems(state *State, act PlayerActions) []util.MenuItem {
 		items = append(items, util.MenuItem{MainText: prefix + label, MainTextColor: tint, CharIcon: icon, TooltipText: tooltip, Hotkey: key, Action: action})
 	}
 	d1Label := func(it *Item) string {
-		d := it.D1()
-		if d.Type == d1.ITypeStaff {
-			return fmt.Sprintf("%s (Staff, %d charges)", state.D1SpellName(d.Spell), d.Charges)
+		d := it.Roll()
+		if d.Type == rules.ITypeStaff {
+			return fmt.Sprintf("%s (Staff, %d charges)", state.SpellName(d.Spell), d.Charges)
 		}
-		return fmt.Sprintf("%s (Scroll)", state.D1SpellName(d.Spell))
+		return fmt.Sprintf("%s (Scroll)", state.SpellName(d.Spell))
 	}
 	itemTint := func(it *Item) color.RGBA {
 		if !it.HasChargesLeft() {
@@ -219,7 +219,7 @@ func SpellMenuItems(state *State, act PlayerActions) []util.MenuItem {
 	for slot, entry := range bar {
 		switch e := entry.(type) {
 		case *Item:
-			if e.D1() == nil || e.D1().Spell == 0 {
+			if e.Roll() == nil || e.Roll().Spell == 0 {
 				continue
 			}
 			seen[e] = true // every slot is listed, so the bar's hints all work; only the extras skip repeats
@@ -229,15 +229,15 @@ func SpellMenuItems(state *State, act PlayerActions) []util.MenuItem {
 			GetTooltipLines(func(string) []util.ColoredTextPart) []util.LabelText
 		}:
 			tint := defs.White
-			if state.D1LacksMana(player, entry.Name()) {
+			if state.LacksMana(player, entry.Name()) {
 				tint = defs.Red
 			}
 			add(slot, entry.Name(), e.InventoryIcon(), tint, e.GetTooltipLines(nil), func() { entry.Use(act) })
 		}
 	}
 	for _, it := range append(player.GetInventory().Items(), player.GetEquipment().AllItems()...) {
-		d := it.D1()
-		if seen[it] || d == nil || d.Spell == 0 || d.MiscID != "IMISC_SCROLL" && d.MiscID != "IMISC_SCROLLT" && d.Type != d1.ITypeStaff {
+		d := it.Roll()
+		if seen[it] || d == nil || d.Spell == 0 || d.MiscID != "IMISC_SCROLL" && d.MiscID != "IMISC_SCROLLT" && d.Type != rules.ITypeStaff {
 			continue
 		}
 		label := d1Label(it)
@@ -255,17 +255,38 @@ func SpellMenuItems(state *State, act PlayerActions) []util.MenuItem {
 
 // LevelUpMenuItems is the stat point header and one entry per stat with its base value, its value with items when
 // that differs, and the class maximum. Picking a stat spends a point, then calls reopen while points are left, done otherwise.
-func LevelUpMenuItems(player *Actor, reopen, done func()) []util.MenuItem {
-	var items []util.MenuItem
+func LevelUpMenuItems(state *State, player *Actor, reopen, done func()) (items []util.MenuItem) {
 	h, sheet := player.Hero(), player.HeroSheet()
 	if h != nil {
 		items = append(items, util.MenuItem{MainText: fmt.Sprintf("%d stat points to spend", h.StatPts), Action: reopen}, util.MenuItem{})
 	}
+	defer func() { // then the skills the class can learn, with the skill points
+		rows := state.SkillRows(player)
+		if len(rows) == 0 {
+			return
+		}
+		items = append(items, util.MenuItem{}, util.MenuItem{MainText: fmt.Sprintf("%d skill points to spend", h.SkillPts), Action: reopen})
+		for _, row := range rows {
+			label := fmt.Sprintf("%s %d", row.Label, row.Base)
+			if row.Total != row.Base {
+				label += fmt.Sprintf(" (%d)", row.Total)
+			}
+			raise := row.Raise
+			items = append(items, util.MenuItem{MainText: label + fmt.Sprintf(" / %d", row.Max), Action: func() {
+				raise()
+				if player.CanLevelUp() {
+					reopen()
+				} else {
+					done()
+				}
+			}})
+		}
+	}()
 	for _, choice := range []struct {
 		label string
 		stat  stats.Name
 		attr  int
-	}{{"Strength", stats.Strength, d1.AttrStr}, {"Magic", stats.Magic, d1.AttrMag}, {"Dexterity", stats.Dexterity, d1.AttrDex}, {"Vitality", stats.Vitality, d1.AttrVit}} {
+	}{{"Strength", stats.Strength, rules.AttrStr}, {"Magic", stats.Magic, rules.AttrMag}, {"Dexterity", stats.Dexterity, rules.AttrDex}, {"Vitality", stats.Vitality, rules.AttrVit}} {
 		stat := choice.stat
 		label := choice.label
 		if h != nil {
@@ -275,7 +296,7 @@ func LevelUpMenuItems(player *Actor, reopen, done func()) []util.MenuItem {
 			if total != base {
 				label += fmt.Sprintf(" (%d)", total)
 			}
-			label += fmt.Sprintf(" / %d", h.Rules().MaxStats[h.Class][choice.attr])
+			label += fmt.Sprintf(" / %d", h.Rules().Class(h.Class).MaxStats()[choice.attr])
 		}
 		items = append(items, util.MenuItem{MainText: label, Action: func() {
 			player.LevelUp(stat)
@@ -307,7 +328,7 @@ func BuyItem(player, seller *Actor, item *Item) string {
 func SellableStacks(vendor, player *Actor) []InventoryStack {
 	var result []InventoryStack
 	for _, stack := range player.GetInventory().StackedItems() {
-		if D1VendorBuys(vendor, stack[0]) && !player.GetEquipment().IsEquipped(stack[0]) {
+		if VendorBuys(vendor, stack[0]) && !player.GetEquipment().IsEquipped(stack[0]) {
 			result = append(result, stack)
 		}
 	}
@@ -316,7 +337,7 @@ func SellableStacks(vendor, player *Actor) []InventoryStack {
 
 // SellItem sells item from the player's pack and returns the message for the player.
 func SellItem(player *Actor, item *Item) string {
-	price := D1SellPrice(item)
+	price := SellPrice(item)
 	player.GetInventory().Remove(item)
 	player.GetStats().IncrementBy(stats.Gold, price)
 	PlayUICue("vendor_sell")

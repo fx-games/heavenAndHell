@@ -1,18 +1,55 @@
 %rec: default
-# classes.rec: the classes a new hero can pick, one record each, in the order the class menu lists them. Record N is
-# the same class as hero.rec's class record N, which holds its numbers and rules.
+# classes.rec: the classes a new hero can pick, one record each, in the order the class menu lists them.
 # Fields:
 #   internal_name     the class's id; its sprites are icons/actors.rec's class.<internal_name>_male / _female
 #   name              what the class menu shows
 #   gold              gold a new hero starts with
 #   item              an item a new hero starts with, by items.rec internal_name; repeatable. Weapons and armour
 #                     are equipped; "<item> pack" puts it in the pack instead of a hand
-#   targeted_skill    a targeted skill (effects/targeted.rec) the class knows; repeatable
-#   untargeted_skill  an untargeted skill (effects/untargeted.rec) the class knows; repeatable
-#   stats_<stat>      read but not used: the hero's attributes come from hero.rec
-#   resource_<name>   read but not used: life and mana come from hero.rec
+#   str / mag / dex / vit             a new hero's attributes; max_str / max_mag / max_dex / max_vit their caps
+#   to_blk            chance to block with a shield, before dexterity and level
+#   adj_life / adj_mana               the flat part of the starting life and mana
+#   lvl_life / lvl_mana               life and mana gained per character level
+#   chr_life / chr_mana               life per point of vitality, mana per point of magic, when it is raised
+#   itm_life / itm_mana               the same, for vitality and magic that items give
+#   potion_life / potion_mana         multiplier on what a healing / mana potion restores
+#   spell_life        multiplier on the Healing spell; mana_cost multiplier on every spell's mana cost
+#                     (the life/mana/potion/spell numbers are decimals: 1 = normal, 0.5 = half, as in devilutionX)
+#   magic_to_hit / melee_to_hit / ranged_to_hit   the class's to-hit bonus for each kind of attack
+#   spell_to_hit      extra to-hit for its magic missiles (Sorcerer 20, Bard 10)
+#   attack_frames     attack animation length by weapon: "default=16 axe=20" (sword axe bow mace staff)
+#   spell_frames / hit_frames         cast animation length, and hit recovery length
+#   start_spells      the spells and skills the class can learn, by id, at the level a new hero knows them:
+#                     "SPL_FIREBOLT=2 arrow_rain=0 ..." (0: learnable with skill points, not known yet). A skill is
+#                     a D1 SPL_ or any id of the engine's skills (src/rules/skills.rec) or of the mod's spells.rec
+#   skill_points      skill points a hero gains per level, spent on start_spells' skills (none: 0)
+#   max_skill_level   how far skill points raise a skill; books and gear go past it
+#   heal_boost        Healing and potions: 2 doubles the roll, 1 adds half, 0 neither
+#   flags             what the class does differently, any of: critical_strike (level% of swings hit twice),
+#                     trap_sense (sees traps), iron_skin (+level/4 AC), natural_resistance (+level to every
+#                     resistance), dual_wield, trained_fists (bare hands hit level/2..level), parry (blocks with
+#                     a staff, one one-hander or bare hands), full_missile_bonus (missiles get the whole damage
+#                     bonus), half_shield (a shield without a weapon counts half), vitality_damage (+level*vit/100
+#                     melee), shield_slows_bare_hands, flinch_resist (hit recovery needs level/4 more damage), and
+#                     at most one melee damage formula: str_dex_damage, staff_and_fist_damage,
+#                     blade_and_bow_damage, heavy_weapon_damage (none: level*str/100)
+#   key               what spells.rec's effects call the class (default: name, lowercased)
+#   skill             its class skill: repair, disarm, recharge, vision, identify or rage (none: no skill)
+#   voice / female_voice              its PS_<voice>nn sound set (WARR, ROGUE, MAGE, MONK), male and female
+#   death_sound       said on death instead of PS_<voice>71
+#   text_prefix       its version of the quest books' texts: TEXT_<prefix>BONER
+#   oily              what the Oily shrine gives it: "str 2"; repeatable
+#   slain_hero        what the Slain Hero leaves it: an items.rec internal_name (a magic item of its type and
+#                     look) or "book <SPL_>" (a spell book)
 #
 # Row order is archetype order. item is CreatePlrItems' kit; "pack" puts it in the pack instead of a hand.
+
+# Ports devilutionX's txtdata/classes/<class>/attributes.tsv and animations.tsv, which reproduce
+# D1 1.09's player.cpp tables. The life/mana/potion/spell columns are devilutionX's parseFixed6
+# decimals (1/64 multipliers) and are written here as the decimals, not the fixed-point ints.
+# attack_frames is the attack animation length by weapon type; default covers bare hands and
+# anything not listed.
+# start_spells is what a new hero of the class knows: SPL_ id = spell level.
 
 internal_name: warrior
 name: Warrior
@@ -22,6 +59,42 @@ item: buckler
 item: club pack
 item: potion_of_healing
 item: potion_of_healing
+str: 30
+mag: 10
+dex: 20
+vit: 25
+max_str: 250
+max_mag: 50
+max_dex: 60
+max_vit: 100
+to_blk: 30
+adj_life: 18
+adj_mana: -1
+lvl_life: 2
+lvl_mana: 1
+chr_life: 2
+chr_mana: 1
+itm_life: 2
+itm_mana: 1
+potion_life: 2
+potion_mana: 1
+spell_life: 2
+mana_cost: 1
+magic_to_hit: 50
+melee_to_hit: 70
+ranged_to_hit: 60
+attack_frames: default=16 axe=20
+spell_frames: 20
+hit_frames: 6
+flags: critical_strike
+key: warrior
+heal_boost: 2
+skill: repair
+voice: WARR
+female_voice: ROGUE
+death_sound: PS_DEAD
+oily: str 2
+slain_hero: breast_plate
 
 internal_name: rogue
 name: Rogue
@@ -29,6 +102,42 @@ gold: 100
 item: short_bow
 item: potion_of_healing
 item: potion_of_healing
+str: 20
+mag: 15
+dex: 30
+vit: 20
+max_str: 55
+max_mag: 70
+max_dex: 250
+max_vit: 80
+to_blk: 20
+adj_life: 23
+adj_mana: 5.5
+lvl_life: 2
+lvl_mana: 2
+chr_life: 1
+chr_mana: 1
+itm_life: 1.5
+itm_mana: 1.5
+potion_life: 1.5
+potion_mana: 1.5
+spell_life: 1.5
+mana_cost: 0.75
+magic_to_hit: 50
+melee_to_hit: 50
+ranged_to_hit: 70
+attack_frames: default=18 axe=22 bow=12 staff=16
+spell_frames: 16
+hit_frames: 7
+flags: trap_sense str_dex_damage full_missile_bonus
+key: rogue
+heal_boost: 1
+skill: disarm
+voice: WARR
+female_voice: ROGUE
+text_prefix: R
+oily: dex 2
+slain_hero: long_war_bow
 
 internal_name: sorcerer
 name: Sorcerer
@@ -36,3 +145,40 @@ gold: 100
 item: short_staff_of_charged_bolt
 item: potion_of_mana
 item: potion_of_mana
+str: 15
+mag: 35
+dex: 15
+vit: 20
+max_str: 45
+max_mag: 250
+max_dex: 85
+max_vit: 80
+to_blk: 10
+adj_life: 9
+adj_mana: -2
+lvl_life: 1
+lvl_mana: 2
+chr_life: 1
+chr_mana: 2
+itm_life: 1
+itm_mana: 2
+potion_life: 1
+potion_mana: 2
+spell_life: 1
+mana_cost: 1
+magic_to_hit: 70
+melee_to_hit: 50
+ranged_to_hit: 50
+attack_frames: default=20 sword=16 axe=24 mace=16 staff=16
+spell_frames: 12
+hit_frames: 8
+start_spells: SPL_FIREBOLT=2
+flags: shield_slows_bare_hands
+key: sorcerer
+spell_to_hit: 20
+skill: recharge
+voice: MAGE
+female_voice: ROGUE
+text_prefix: M
+oily: mag 2
+slain_hero: book SPL_LIGHTNING

@@ -21,6 +21,7 @@ import (
 
 	"rpg/src/cmd/internal/mpq"
 	"rpg/src/defs"
+	"rpg/src/recfile"
 )
 
 type reader func(string) ([]byte, error)
@@ -260,7 +261,7 @@ func items(read reader, pal []byte) ([]section, error) {
 		if _, ok := baseOf[r.s("iItemId")]; !ok {
 			baseOf[r.s("iItemId")] = r
 		}
-		// the game's d1ItemIconName, minus the magic variants
+		// the game's itemIconName, minus the magic variants
 		key := defs.IconID("item", typ)
 		switch {
 		case icons.has(defs.IconID("item", r.s("iName"))):
@@ -282,15 +283,21 @@ func items(read reader, pal []byte) ([]section, error) {
 		c.lines = []string{r.s("iName"), fmt.Sprintf("curs %d  %s", r.i("iCurs"), r.s("iMiscId")), key, "icon: " + icons.icon(key)}
 		cards[r.i("itype")] = append(cards[r.i("itype")], *c)
 	}
-	for _, r := range table("xl_uitem") {
-		if r.s("UIItemId") == "UITYPE_INVALID" {
-			break
-		}
-		base := baseOf[r.s("UIItemId")]
+	uf, err := os.Open("files/mods/d1/data/unique_items.rec")
+	if err != nil {
+		return nil, err
+	}
+	defer uf.Close()
+	for _, rec := range recfile.Read(uf) {
+		m := rec.ToMap("")
+		name := m.GetStringOrDefault("name", "")
+		base := baseOf[m.GetStringOrDefault("base", "")]
 		curs := base.i("iCurs")
-		for p := 1; p <= 6; p++ { // IPL_INVCURS swaps in its own graphic
-			if r.s(fmt.Sprintf("UIPower%d", p)) == "IPL_INVCURS" {
-				curs = r.i(fmt.Sprintf("UIParam%d", 2*p-1))
+		for _, f := range rec { // IPL_INVCURS swaps in its own graphic
+			var power string
+			var p1 int
+			if fmt.Sscan(f.Value, &power, &p1); f.Name == "power" && power == "IPL_INVCURS" {
+				curs = p1
 			}
 		}
 		key := defs.IconID("item", base.s("iName")) + ".unique"
@@ -299,10 +306,10 @@ func items(read reader, pal []byte) ([]section, error) {
 		}
 		c, err := sprite(curs)
 		if err != nil {
-			return nil, fmt.Errorf("%s: %v", r.s("UIName"), err)
+			return nil, fmt.Errorf("%s: %v", name, err)
 		}
-		c.unique, c.file, c.keys = true, defs.IconID("item", r.s("UIName"))+".unique.png", []string{key}
-		c.lines = []string{r.s("UIName"), fmt.Sprintf("curs %d  unique %s", curs, base.s("iName")), key, "icon: " + icons.icon(key)}
+		c.unique, c.file, c.keys = true, defs.IconID("item", name)+".unique.png", []string{key}
+		c.lines = []string{name, fmt.Sprintf("curs %d  unique %s", curs, base.s("iName")), key, "icon: " + icons.icon(key)}
 		cards[base.i("itype")] = append(cards[base.i("itype")], *c)
 	}
 	var sections []section

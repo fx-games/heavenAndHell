@@ -9,6 +9,7 @@
 #   out_of_depth_chance / min_level_for_ood   chance to drop above its dlvl, from this dungeon level on
 #   drop              IDROP_REGULAR, IDROP_DOUBLE (twice as likely) or IDROP_NEVER (quests and stores only)
 #   hidden            true: unseen and out of reach until the hero has true sight (H&H's evidence)
+#   quest_item        true: a quest item, which no store buys
 #   cost              its value in gold (D1's iValue)
 # What it is (a record names either category or D1's class/item_type):
 #   category          potion scroll wand light weapon armor ammo ring food amulet throwable
@@ -1420,3 +1421,24 @@ category: scroll
 charges: -1
 hidden: true
 untargeted_action: read_message(TEXT_HH_NOTE_EVIDENCE_FOUR)
+
+name: Gold
+internal_name: gold
+icon: item.gold
+dlvl: 1
+cost: 0
+drop: IDROP_REGULAR
+class: ICLASS_GOLD
+location: ILOC_UNEQUIPABLE
+cursor: 168
+item_type: 11
+unique_base: UITYPE_NONE
+durability: 0
+weapon_damage: 0-0
+armor_class: 0-0
+requires_strength: 0
+requires_magic: 0
+requires_dexterity: 0
+flags: ISPL_NONE
+misc_id: IMISC_NONE
+spell: SPL_NULL

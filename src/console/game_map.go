@@ -9,10 +9,11 @@ import (
 	"unicode"
 
 	"rpg/src/common"
-	"rpg/src/d1"
 	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
+	"rpg/src/recfile"
+	"rpg/src/rules"
 	"rpg/src/util"
 
 	mgeom "github.com/memmaker/go/geometry"
@@ -144,7 +145,7 @@ func (c *Console) tileIcon(pos geometry.Point) textiles.TextIcon {
 }
 
 func itemGlyph(item *common.Item) rune {
-	d := item.D1()
+	d := item.Roll()
 	switch {
 	case item.IsGold():
 		return '$'
@@ -158,7 +159,7 @@ func itemGlyph(item *common.Item) rune {
 		return '='
 	case item.IsAmulet():
 		return '"'
-	case d != nil && d.Type == d1.ITypeStaff:
+	case d != nil && d.Type == rules.ITypeStaff:
 		return '_'
 	case item.IsRangedWeapon():
 		return '}'
@@ -170,44 +171,22 @@ func itemGlyph(item *common.Item) rune {
 	return '&'
 }
 
-// objectGlyphs pick an object's glyph and color by a word in its name, first match wins.
-var objectGlyphs = []struct {
-	word  string
+// objectGlyph is a glyphs.rec record: how ASCII mode draws an object of one id.
+type objectGlyph struct {
 	glyph rune
 	color color.RGBA
-}{
-	{"portal", 'O', color.RGBA{R: 80, G: 120, B: 255, A: 255}},
-	{"chest", '=', color.RGBA{R: 220, G: 180, B: 60, A: 255}},
-	{"barrel", '0', defs.Brown},
-	{"sarcophagus", '&', defs.LightGray},
-	{"shrine", '_', color.RGBA{R: 80, G: 220, B: 220, A: 255}},
-	{"altar", '_', color.RGBA{R: 200, G: 80, B: 200, A: 255}},
-	{"book", '+', color.RGBA{R: 200, G: 80, B: 200, A: 255}},
-	{"tome", '+', color.RGBA{R: 200, G: 80, B: 200, A: 255}},
-	{"lever", '/', defs.LightGray},
-	{"fountain", '{', color.RGBA{R: 80, G: 120, B: 255, A: 255}},
-	{"pool", '{', color.RGBA{R: 80, G: 160, B: 80, A: 255}},
-	{"spring", '{', color.RGBA{R: 80, G: 120, B: 255, A: 255}},
-	{"cross", '+', defs.Red},
-	{"fire", '^', defs.Red},
-	{"flame", '^', defs.Red},
-	{"candle", 'i', color.RGBA{R: 255, G: 220, B: 120, A: 255}},
-	{"rack", '|', defs.LightGray},
-	{"stand", '|', defs.LightGray},
-	{"armor", '[', defs.LightGray},
-	{"skull", '%', defs.OffWhite},
-	{"skeleton", '%', defs.OffWhite},
-	{"body", '%', defs.Red},
-	{"hero", '%', defs.OffWhite},
-	{"stash", '=', color.RGBA{R: 220, G: 180, B: 60, A: 255}},
-	{"sign", '"', defs.Brown},
-	{"circle", 'o', color.RGBA{R: 200, G: 80, B: 200, A: 255}},
-	{"water", '~', color.RGBA{R: 80, G: 120, B: 255, A: 255}},
-	{"cauldron", 'u', defs.LightGray},
-	{"banner", '|', defs.Red},
-	{"statue", '&', defs.LightGray},
-	{"mushroom", '"', color.RGBA{R: 160, G: 120, B: 200, A: 255}},
-	{"pedestal", '_', defs.Red},
+}
+
+// loadObjectGlyphs reads the mod's data/ascii/glyphs.rec, by object id.
+func loadObjectGlyphs() map[string]objectGlyph {
+	out := map[string]objectGlyph{}
+	for _, r := range recfile.Read(mustRead("assets/data/ascii/glyphs.rec")) {
+		m := r.ToMap("")
+		if id, g := m.GetStringOrDefault("id", ""), []rune(m.GetStringOrDefault("glyph", "")); id != "" && len(g) > 0 {
+			out[id] = objectGlyph{g[0], util.GetColorFromRGBString(m.GetStringOrDefault("color", ""))}
+		}
+	}
+	return out
 }
 
 func (c *Console) objectIconAt(pos geometry.Point) (textiles.TextIcon, bool) {
@@ -216,24 +195,15 @@ func (c *Console) objectIconAt(pos geometry.Point) (textiles.TextIcon, bool) {
 	if !ok {
 		return textiles.TextIcon{}, false
 	}
-	if door, isDoor := object.(*common.Door); isDoor {
-		if door.IsClosed() {
-			return textiles.TextIcon{Char: '+', Fg: defs.Brown}, true
-		}
-		return textiles.TextIcon{Char: '\'', Fg: defs.Brown}, true
-	}
-	name := strings.ToLower(object.Name())
-	if name == "" { // wall lights and other fixtures without a name draw as their tile
+	icon := textiles.TextIcon{Fg: defs.OffWhite}
+	if g, ok := c.objectGlyphs[object.ID()]; ok {
+		icon = textiles.TextIcon{Char: g.glyph, Fg: g.color}
+	} else if name := strings.ToLower(object.Name()); name != "" {
+		icon.Char = []rune(name)[0]
+	} else { // wall lights and other fixtures without a name draw as their tile
 		return textiles.TextIcon{}, false
 	}
-	icon := textiles.TextIcon{Char: []rune(name)[0], Fg: defs.OffWhite}
-	for _, entry := range objectGlyphs {
-		if strings.Contains(name, entry.word) {
-			icon = textiles.TextIcon{Char: entry.glyph, Fg: entry.color}
-			break
-		}
-	}
-	if d1Object, isD1 := object.(*common.D1Object); isD1 && d1Object.TintColor() != defs.White {
+	if d1Object, isD1 := object.(*common.Prop); isD1 && d1Object.TintColor() != defs.White {
 		icon.Fg = d1Object.TintColor() // opened or used
 	}
 	return icon, true

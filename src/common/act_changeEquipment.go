@@ -71,7 +71,7 @@ func (d *ChangeEquipmentAction) Execute(context ActionContext) []Action {
 	}
 
 	context.Msg(message)
-	playD1ItemInvSfx(context, item, actor)
+	context.ActionBroker.Emit(ItemStowed{Item: item, Holder: actor})
 
 	return nil
 }

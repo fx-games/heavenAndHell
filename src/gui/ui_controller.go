@@ -55,6 +55,7 @@ type UIRenderer interface {
 	DrawColoredRect(topLeftScreen geometry.Point, size geometry.Point, fillColor color.Color)
 	DrawTTFOnScreenWithColorCodes(screenX float64, screenY float64, textWithColorCodes []util.ColoredTextPart)
 	DrawImageOnScreen(screenX int, screenY int, size geometry.Point, image *ebiten.Image)
+	DrawImageOnScreenWithAlpha(screenX int, screenY int, size geometry.Point, image *ebiten.Image, alpha float32)
 
 	ParseColorCodedText(string) []util.ColoredTextPart
 }
@@ -141,6 +142,11 @@ type UIController struct {
 	globalFadeColorTicksStart  int
 	fadeFromBlack              bool
 	keepBlack                  bool
+	title                      *titleScreen
+	death                      *deathScreen  // the hero's death ceremony, and the menu it ends in
+	livingHeroIcon             int32         // his sprite while he still had one: Icon() answers with the corpse the moment he dies
+	uiLayer                    *ebiten.Image // the UI drawn off-screen, to fade it in as one image
+	sidebarHiddenForMenu       bool
 }
 
 func (u *UIController) FadeToBlack() {
@@ -360,8 +366,17 @@ func (u *UIController) OnMouseWheel(x int, y int, dy float64) bool {
 	return u.GetTopModal().OnMouseWheel(x, y, dy)
 }
 
-func (u *UIController) drawUI() {
+func (u *UIController) drawBuildHash() {
+	const pad = 4
+	_, h := u.tileRenderer.MeasureString(common.BuildHash())
+	u.tileRenderer.DrawTTFOnScreen(pad, float64(u.GetScreenSize().Y)-h-pad, common.BuildHash(), color.RGBA{R: 140, G: 140, B: 140, A: 255})
+}
 
+func (u *UIController) drawUI() {
+	if u.sidebarHiddenForMenu { // the start (or death) menu is up: which build this is, small, bottom left; part
+		// of the UI layer, so it fades in with the menu as the title screen fades out
+		defer u.drawBuildHash()
+	}
 	defer u.drawTooltip()
 	defer u.drawDraggedIcon()
 	for _, overlay := range u.visibleOverlays() {
@@ -441,6 +456,8 @@ func (u *UIController) OpenUncancelableMenu(menuItems []util.MenuItem) {
 	)
 	u.PopAll() // nothing to go back to from the start or death menu
 	u.PushWidget(menu)
+	u.sidebarHiddenForMenu = true // the menu looks better over a full-width map; Update puts the bar back
+	u.OnScreenSizeChanged()
 }
 func (u *UIController) GetRenderer() *renderer.TileRenderer {
 	return u.tileRenderer
@@ -585,6 +602,9 @@ func (u *UIController) OnScreenSizeChanged() {
 			overlay.Layout()
 		}
 	}
+	for _, modal := range u.modals {
+		modal.Layout()
+	}
 	screenSizeForMap := newScreenSize
 	if u.HasOverlays() {
 		screenSizeForMap = newScreenSize.Sub(geometry.Point{X: u.GetUIBarWidth(), Y: 0})
@@ -614,9 +634,10 @@ func (u *UIController) HasOverlays() bool {
 	return len(u.overlays) > 0
 }
 
-// sidebarHidden: the player's option, except that the stash needs the pack beside it.
+// sidebarHidden: the player's option, except that the stash needs the pack beside it - and the start/death
+// menu, which always sits over a full-width map, whatever the player's own setting is.
 func (u *UIController) sidebarHidden() bool {
-	return u.configuration.HideSidebar && !u.stashOpen
+	return u.sidebarHiddenForMenu || u.configuration.HideSidebar && !u.stashOpen
 }
 
 // GetUIBarWidth is the room the sidebar takes from the map: none while it is hidden.
@@ -856,7 +877,7 @@ func (u *UIController) BeginPlayerSellingTo(vendor *common.Actor) {
 
 	for _, itemStack := range common.SellableStacks(vendor, player) {
 		typedItem := itemStack[0]
-		sellPrice := common.D1SellPrice(typedItem)
+		sellPrice := common.SellPrice(typedItem)
 		itemName := itemStack.ShopName()
 		if !typedItem.MeetsRequirements() {
 			itemName = fmt.Sprintf("[:red]%s[:white]", itemName)
@@ -1133,6 +1154,7 @@ func (u *UIController) SetFont(file string) {
 }
 
 func (u *UIController) OnMapChanged() {
+	u.death = nil // a loaded or new game is a live hero again, whatever the last one died of
 	loadedMap := u.context.GameState().GetMap()
 	u.useLevelGlyphs(u.context.GameState().CurrentLevel().Glyphs)
 
@@ -1233,7 +1255,7 @@ func (u *UIController) StaticMapLookup(x int, y int, tick uint64) []renderer.Cel
 			Icon:  objIcon,
 			Color: drawColor,
 		}
-		if d1Obj, ok := objectAt.(*common.D1Object); ok && d1Obj.TintColor() != defs.White {
+		if d1Obj, ok := objectAt.(*common.Prop); ok && d1Obj.TintColor() != defs.White {
 			tint := d1Obj.TintColor()
 			if !u.disableFogOfWar {
 				tint = state.ApplyLighting(mapPos, tint, tick)
@@ -1366,10 +1388,6 @@ func (u *UIController) nothingToTarget(rules common.TargetRules) bool {
 	return true
 }
 
-func (u *UIController) ShowGameOverMenu() {
-	u.OpenUncancelableMenu(u.context.StartMenuItems(true))
-}
-
 func (u *UIController) QuitGame() {
 	u.shouldQuitGame = true
 }
@@ -1399,6 +1417,12 @@ func (u *UIController) OnPlayerTurnTaken() {
 	// (The border check below can't do that job - on a map only a little wider than the window, like
 	// the town, scrolling is clamped before the player ever leaves the visible rect.)
 	u.manualScroll = false
+
+	// The sprite to collapse when he dies: by the time the death screen opens, Icon() already answers with the
+	// corpse, so the living one has to be kept from the last turn he was alive for.
+	if player.IsAlive() {
+		u.livingHeroIcon = u.getActorIcon(player, u.worldTicks)
+	}
 
 	if (!u.setToExactFit && !u.configuration.KeepPlayerCentered) || u.configuration.KeepPlayerCentered {
 		distFromBorder := 4

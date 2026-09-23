@@ -16,6 +16,26 @@ func (u *UIController) Update() error {
 		return ebiten.Termination
 	}
 
+	if u.title != nil {
+		u.updateTitleScreen()
+		return nil
+	}
+	// The death ceremony owns the screen until it opens the menu: no input reaches the game during it, and
+	// the world only keeps running long enough for the killing blow to land (see deathScreen).
+	if u.death != nil && !u.death.menuOpen {
+		u.context.AudioPlayer.Update()
+		u.updateDeathScreen()
+		if !u.death.frozen() {
+			u.worldTicks++
+			u.context.Animator().Tick()
+		}
+		return nil
+	}
+	if u.sidebarHiddenForMenu && !u.IsUIModalVisible() { // the menu is gone: the game really begins
+		u.sidebarHiddenForMenu = false
+		u.OnScreenSizeChanged()
+	}
+
 	u.worldTicks++
 	if u.ticksUntilTooltipAppears > 0 {
 		u.ticksUntilTooltipAppears--

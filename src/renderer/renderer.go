@@ -141,6 +141,12 @@ func (g *TileRenderer) DrawDefaultBorder(topLeftScreen geometry.Point, size geom
 	g.currentRenderTarget.DrawImage(ExtractSubImageFromAtlas(g.whiteTile, g.defaultAtlas), g.op)
 }
 func (g *TileRenderer) DrawImageOnScreen(screenX int, screenY int, size geometry.Point, image *ebiten.Image) {
+	g.DrawImageOnScreenWithAlpha(screenX, screenY, size, image, 1)
+}
+
+// DrawImageOnScreenWithAlpha is DrawImageOnScreen faded to alpha (1 opaque, 0 invisible), for a splash image
+// that fades out over the scene behind it.
+func (g *TileRenderer) DrawImageOnScreenWithAlpha(screenX int, screenY int, size geometry.Point, image *ebiten.Image, alpha float32) {
 	drawX := float64(screenX) * g.deviceScale
 	drawY := float64(screenY) * g.deviceScale
 
@@ -154,6 +160,7 @@ func (g *TileRenderer) DrawImageOnScreen(screenX int, screenY int, size geometry
 	scaleY := targetHeight / float64(imgSizeY)
 
 	g.op.ColorScale.Reset()
+	g.op.ColorScale.ScaleAlpha(alpha)
 
 	g.op.GeoM.Reset()
 	g.op.GeoM.Scale(scaleX, scaleY)

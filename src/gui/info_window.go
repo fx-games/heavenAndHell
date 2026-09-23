@@ -16,7 +16,7 @@ import (
 type InfoWindow struct {
 	u           *UIController
 	title       string
-	cols        [][]common.D1SheetSection
+	cols        [][]common.SheetSection
 	shouldClose bool
 	topLeft     geometry.Point
 	size        geometry.Point
@@ -31,11 +31,11 @@ const (
 )
 
 // OpenInfoWindow puts an actor description up. Any click or ESC takes it down again.
-func (u *UIController) OpenInfoWindow(title string, sections []common.D1SheetSection) {
+func (u *UIController) OpenInfoWindow(title string, sections []common.SheetSection) {
 	if len(sections) == 0 {
 		return
 	}
-	w := &InfoWindow{u: u, title: title, cols: [][]common.D1SheetSection{sections}}
+	w := &InfoWindow{u: u, title: title, cols: [][]common.SheetSection{sections}}
 	w.Layout()
 	u.PushWidget(w)
 }
@@ -48,7 +48,7 @@ func (w *InfoWindow) Layout() {
 
 	// notes are prose, so they are wrapped to a third of the screen before anything is measured
 	noteWidth := screen.X / 3
-	sections := append([]common.D1SheetSection(nil), w.cols[0]...)
+	sections := append([]common.SheetSection(nil), w.cols[0]...)
 	for i, sec := range sections {
 		if len(sec.Notes) == 0 {
 			continue
@@ -80,13 +80,13 @@ func (w *InfoWindow) Layout() {
 
 	// one column unless it would run off the screen, then split the sections in half by height.
 	// Heights come from drawSectionBlock itself, so the window always fits exactly what gets drawn.
-	height := func(secs []common.D1SheetSection) int { return drawSectionBlock(nil, secs, 0, 0, 0, w.lineH) }
-	w.cols = [][]common.D1SheetSection{sections}
+	height := func(secs []common.SheetSection) int { return drawSectionBlock(nil, secs, 0, 0, 0, w.lineH) }
+	w.cols = [][]common.SheetSection{sections}
 	blockH := height(sections)
 	if w.lineH+blockH > screen.Y*17/20 {
 		for i := range sections[:len(sections)-1] {
 			if height(sections[:i+1])*2 >= blockH {
-				w.cols = [][]common.D1SheetSection{sections[:i+1], sections[i+1:]}
+				w.cols = [][]common.SheetSection{sections[:i+1], sections[i+1:]}
 				blockH = max(height(w.cols[0]), height(w.cols[1]))
 				break
 			}
@@ -114,7 +114,7 @@ func (w *InfoWindow) Draw() {
 // drawSectionBlock draws titled sections as a column of label/value rows with full-width notes underneath, and
 // returns the y it stopped at. The character sheet and the info window share it, so both read the same.
 // A nil renderer only measures: layout sizes windows with it so size and drawing cannot drift apart.
-func drawSectionBlock(r *renderer.TileRenderer, sections []common.D1SheetSection, x, y, labelW, lineH int) int {
+func drawSectionBlock(r *renderer.TileRenderer, sections []common.SheetSection, x, y, labelW, lineH int) int {
 	for _, sec := range sections {
 		if len(sec.Rows) == 0 && len(sec.Notes) == 0 {
 			continue

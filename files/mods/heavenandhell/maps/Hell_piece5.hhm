@@ -1,0 +1,11 @@
+[map] Hell_piece5
+
+[tiles] 7 4
+-1 64 -1 -1 -1 64 -1
+64 64 64 64 64 64 64
+64 64 64 64 64 64 64
+-1 64 -1 64 -1 -1 64
+
+[entities]
+EastConnector	6	1
+WestConnector	0	2

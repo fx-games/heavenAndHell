@@ -38,7 +38,7 @@ func (g *GameInstance) writeFeeds() {
 		}},
 		{c.FeedVisibleItems, "visible_items", g.visibleItemsFeed},
 		{c.FeedVisibleActors, "visible_actors", g.visibleActorsFeed},
-		{c.FeedQuests, "quests", func() []string { return headings(g.state.D1QuestLog()) }},
+		{c.FeedQuests, "quests", func() []string { return headings(g.state.QuestLogEntries()) }},
 		{c.FeedMinimap, "minimap", g.minimapFeed},
 	}
 	if g.feeds == nil {

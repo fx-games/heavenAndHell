@@ -15,7 +15,7 @@ Common fields, owned by the engine:
 | `map` | required | the level's id: clean, opaque, never parsed (`town`, `cathedral_3`, `leoric_tomb`) |
 | `name` | | display name |
 | `depth` | required | difficulty and progress only: seeds, monster/item levels, "deepest", store stock. Town 0; a quest or side level takes its parent's depth. Several levels may share one |
-| `generator` | required | the algorithm, one name per distinct algorithm in the engine (`d1_cathedral`, `d1_catacombs`, `d1_caves`, `d1_hell`, `d1_set`, `accretion`, `ldtk`, ...) |
+| `generator` | required | the algorithm, one name per distinct algorithm in the engine (`d1_cathedral`, `d1_catacombs`, `d1_caves`, `d1_hell`, `d1_set`, `accretion`, `drawn`, ...) |
 | `tiles` | required | the tile set |
 | `music` | | a `music.rec` event; without it the level has no music |
 | `glyphs` | | an 8x8 glyph atlas in the mod folder; the level is drawn as text with it instead of tiles |
@@ -25,7 +25,7 @@ Common fields, owned by the engine:
 | `patch` | repeatable | `patch: <name> = <map file>, rect x1 y1 x2 y2`: a region stamped onto the level when a trigger applies it |
 
 Each generator declares the extra fields it reads (D1: decorations, set pieces, `quest` for `d1_set`;
-`accretion`: templates, rooms, doors; `ldtk`: `template`). Anything else is a load error, as are a missing
+`accretion`: templates, rooms, doors; `drawn`: `template`). Anything else is a load error, as are a missing
 required field, an unknown generator, a duplicate `map`, an exit to a missing level or location, and zero or
 several `start` records. One test loads every mod through this check.
 

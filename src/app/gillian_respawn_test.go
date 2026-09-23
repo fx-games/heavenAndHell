@@ -2,9 +2,9 @@ package app
 
 import (
 	"rpg/src/common"
-	"rpg/src/d1"
 	"rpg/src/defs"
 	"rpg/src/gridmap"
+	"rpg/src/rules"
 	"rpg/src/stats"
 	"rpg/src/util"
 	"testing"
@@ -37,7 +37,7 @@ func TestGillianDonationRespawnsMonsters(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data := theGame.GetFactory().D1().D
+	data := theGame.GetFactory().Gen().D
 	data.VendorList = append(data.VendorList, vendors...)
 	defer func() { data.VendorList = data.VendorList[:len(data.VendorList)-1] }()
 
@@ -64,7 +64,7 @@ func TestGillianDonationRespawnsMonsters(t *testing.T) {
 	}
 	dungeon := state.GetMap()
 	state.MapTransition(gridmap.Transition{TargetMap: "town", TargetLocation: "to_cathedral"})
-	if levels := state.ExploredD1DungeonLevels(); levels != 2 {
+	if levels := state.ExploredDungeonLevels(); levels != 2 {
 		t.Fatalf("explored 2 dungeon levels, counted %d", levels)
 	}
 	for _, item := range talk() {
@@ -73,7 +73,7 @@ func TestGillianDonationRespawnsMonsters(t *testing.T) {
 		}
 	}
 
-	state.SetQuestActive(d1.QDiablo, d1.QuestDone)
+	state.SetQuestActive(rules.QDiablo, rules.QuestDone)
 	want := "Give her 400 gold." // 200 per explored dungeon level
 	donate := itemNamed(talk(), want)
 	if donate == nil {
@@ -83,7 +83,7 @@ func TestGillianDonationRespawnsMonsters(t *testing.T) {
 	// clear level 2 of everything alive, then let her put it back
 	before := 0
 	for _, a := range append([]*common.Actor(nil), dungeon.Actors()...) {
-		if a.D1Monster() != nil {
+		if a.Monster() != nil {
 			before++
 			dungeon.RemoveActor(a)
 		}
@@ -101,7 +101,7 @@ func TestGillianDonationRespawnsMonsters(t *testing.T) {
 	}
 	after := 0
 	for _, a := range dungeon.Actors() {
-		if a.D1Monster() != nil {
+		if a.Monster() != nil {
 			after++
 		}
 	}
@@ -110,8 +110,8 @@ func TestGillianDonationRespawnsMonsters(t *testing.T) {
 	}
 	// and they arrived on Nightmare footing: level is up by D1's own bonus
 	for _, a := range dungeon.Actors() {
-		if mon := a.D1Monster(); mon != nil {
-			if mon.Level < d1.NightmareLevelBonus {
+		if mon := a.Monster(); mon != nil {
+			if mon.Level < rules.NightmareLevelBonus {
 				t.Fatalf("%s respawned at level %d, below the Nightmare bonus", a.Name(), mon.Level)
 			}
 			break

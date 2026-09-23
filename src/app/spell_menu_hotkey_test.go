@@ -2,8 +2,8 @@ package app
 
 import (
 	"rpg/src/common"
-	"rpg/src/d1"
 	"rpg/src/defs"
+	"rpg/src/rules"
 	"rpg/src/stats"
 	"testing"
 )
@@ -14,10 +14,10 @@ func TestSpellMenuHotkeys(t *testing.T) {
 	theGame.GetAudio().SetDisablePlayback(true)
 	theGame.NewGame(theGame.GetGameData().ClassDefinitions[0], false, "")
 	player := theGame.GetWorldState().GetPlayer()
-	player.Hero().SpellLevels[d1.SplFirebolt] = 1
-	player.Hero().SpellLevels[d1.SplHeal] = 1
-	theGame.GetFactory().RefreshD1Spells(player)
-	staff := theGame.GetFactory().NewD1Item(&d1.Item{Name: "Staff of Infravision", Type: d1.ITypeStaff, Spell: d1.SplInfra, Charges: 5, MaxCharges: 5})
+	player.Hero().SpellLevels[rules.SplFirebolt] = 1
+	player.Hero().SpellLevels[rules.SplHeal] = 1
+	theGame.GetFactory().RefreshSpells(player)
+	staff := theGame.GetFactory().NewRolledItem(&rules.Item{Name: "Staff of Infravision", Type: rules.ITypeStaff, Spell: rules.SplInfra, Charges: 5, MaxCharges: 5})
 	player.GetInventory().Add(staff)
 
 	menu := func() (labels []string) {
@@ -41,8 +41,8 @@ func TestSpellMenuHotkeys(t *testing.T) {
 	check("1) Firebolt", "2) Item Repair", "3) Healing", "4) Vision (Staff, 5 charges)")
 	common.MoveSkill(player, 3, 0) // drag the staff to the front
 	check("1) Vision (Staff, 5 charges)", "2) Firebolt", "3) Item Repair", "4) Healing")
-	player.Hero().SpellLevels[d1.SplLightning] = 1 // a newly learned spell goes last, the others keep their keys
-	theGame.GetFactory().RefreshD1Spells(player)
+	player.Hero().SpellLevels[rules.SplLightning] = 1 // a newly learned spell goes last, the others keep their keys
+	theGame.GetFactory().RefreshSpells(player)
 	check("1) Vision (Staff, 5 charges)", "2) Firebolt", "3) Item Repair", "4) Healing", "5) Lightning")
 
 	color := func(i int) any {

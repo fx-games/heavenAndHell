@@ -2,11 +2,10 @@ package main
 
 import (
 	"rpg/src/cmd/internal/mpq"
+	"rpg/src/dungen"
 
 	"encoding/binary"
 	"testing"
-
-	"rpg/src/d1"
 )
 
 // TestMPQ reads each level type's tile tables and checks they agree: every megatile points at pieces the
@@ -52,7 +51,7 @@ func TestImportRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Skip(err)
 	}
-	if err := d1.ImportLevels(a.ReadFile, t.TempDir()); err != nil {
+	if err := dungen.ImportLevels(a.ReadFile, t.TempDir()); err != nil {
 		t.Fatal(err)
 	}
 }

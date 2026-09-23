@@ -1,8 +1,8 @@
 package common
 
 import (
-	"rpg/src/d1"
 	"rpg/src/geometry"
+	"rpg/src/rules"
 )
 
 type Door struct {
@@ -12,8 +12,8 @@ type Door struct {
 	openIcon   int32
 
 	isOpen   bool
-	onOpen   func()     // D1: the wall traps aimed at this door fire (Obj_Trap)
-	D1       *d1.Object // the D1 door object, nil outside D1 levels
+	onOpen   func()        // D1: the wall traps aimed at this door fire (Obj_Trap)
+	Prop     *rules.Object // the D1 door object, nil outside D1 levels
 	rogue    func() bool
 	Disarmed bool // the rogue disarmed its trap (TryDisarm), kept in saves
 }
@@ -21,8 +21,17 @@ type Door struct {
 func (d *Door) Turn() {
 
 }
+
+// ID is "door" or, open, "door_open".
+func (d *Door) ID() string {
+	if d.IsClosed() {
+		return "door"
+	}
+	return "door_open"
+}
+
 func (d *Door) Name() string {
-	if d.D1 != nil && d.D1.TrapFlag && d.rogue != nil && d.rogue() {
+	if d.Prop != nil && d.Prop.TrapFlag && d.rogue != nil && d.rogue() {
 		return "a trapped door" // GetObjectStr: only a rogue sees the trap
 	}
 	return "a door"

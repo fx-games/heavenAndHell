@@ -1,0 +1,15 @@
+[map] Dung_room2
+
+[tiles] 8 6
+-1 -1 -1 -1 -1 -1 -1 -1
+-1 64 64 64 64 64 64 -1
+-1 64 64 64 64 64 64 -1
+-1 64 64 64 64 64 64 -1
+-1 64 64 64 64 64 64 -1
+-1 -1 -1 -1 -1 -1 -1 -1
+
+[entities]
+NorthConnector	5	0
+WestConnector	0	3
+EastConnector	7	3
+SouthConnector	5	5

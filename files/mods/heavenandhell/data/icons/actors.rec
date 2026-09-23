@@ -163,3 +163,6 @@ icon: 49
 
 internal_name: corpse.default
 icon: 135
+
+internal_name: monster.skeleton_warder
+icon: 402

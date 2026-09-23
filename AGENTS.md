@@ -9,23 +9,23 @@ Design decisions and deferred scope for the D1 rebuild: `docs/D1_PLAN.md`.
 | `reference/devilution-109` | [diasurgical/devilution](https://github.com/diasurgical/devilution): bin-exact reconstruction of Diablo 1.09 (C++, `Source/*.cpp`, `enums.h`, `structs.h`, `defs.h`) | **Ground truth.** Formulas, constants, order of `random_()` calls. Ignore `#ifdef HELLFIRE` / `SPAWN` branches, except for the six player classes: Hellfire's Monk, Bard and Barbarian are in (`docs/D1_PLAN.md`), and their tables come from devilutionX. |
 | `reference/devilution/2020_03_31` | [galaxyhaxz/devilution](https://github.com/galaxyhaxz/devilution): readable rewrite with the original table files in `Source/Data/Excel/xl_*.txt` | Readable second opinion; source of our `files/assets/data/d1/xl_*.txt` (copied verbatim). `2018_03_14` is an older snapshot, skip it. |
 | `reference/devilutionX` | [diasurgical/devilutionX](https://github.com/diasurgical/devilutionX): modern, maintained port | Bug-fixed logic in `Source/` (`levels/`, `monsters/`, `items/`, `quests/`...), data tables as TSV in `assets/txtdata/`, and **test fixtures** in `test/` (see below). It fixes vanilla bugs and adds QoL; when it disagrees with 1.09, 1.09 wins unless `docs/D1_PLAN.md` says otherwise. |
-| `reference/DIABDAT.MPQ` | Diablo's own data archive (bring your own copy, ~500 MB) | Level data the sources don't contain: set pieces (`Levels\L1Data\SklKng1.DUN`...), `.TIL`/`.SOL` tile tables. Read with `d1.DiabDat()` / `mustReadMPQ` (`src/d1/mpq.go`, looks in `.`, `reference/`, `../reference/`). |
+| `reference/DIABDAT.MPQ` | Diablo's own data archive (bring your own copy, ~500 MB) | Level data the sources don't contain: set pieces (`Levels\L1Data\SklKng1.DUN`...), `.TIL`/`.SOL` tile tables. Read with `mpq.DiabDat()` (`src/cmd/internal/mpq`, looks in `.`, `reference/`, `../reference/`). |
 | `reference/diablo-hellfire` | [pvpgn/diablo-hellfire](https://github.com/pvpgn/diablo-hellfire): Synergistic Software's own Hellfire source (VC++ 6, `src/*.CPP`, uppercase filenames) | **Ground truth for Hellfire**, the way `devilution-109` is for D1. `ITEMDAT.CPP`, `MONSTDAT.CPP`, `SPELLDAT.CPP`, `MISDAT.CPP` and `OBJDAT.CPP` hold the real tables with the original comments; `PLAYER.CPP` the class tables. Hellfire's own levels (the Nest and the Crypt), its quests, towners and the monsters that only spawn there are **cut** from this game (`docs/D1_PLAN.md`); its items, affixes, spells, classes and store behaviour are in and always on. |
 | `reference/HELLFIRE.MPQ`, `HFVOICE.MPQ`, `HFMONK.MPQ`, `HFMUSIC.MPQ` | Hellfire's four archives, straight off the expansion's disc (`hdiutil attach Hellfire.iso`, they sit in the root). `hfvoice` holds the expansion's speech at full quality and `hfmonk` the Monk's lines (neither is in `hellfire.mpq`), `hfmusic` the expansion's tracks | Hellfire's item/spell sprites for `cmd/d1sprites`. Its audio is **not** used at all (no `diablo_sfx/`, see Audio), and neither are its items or classes: those are numbers in the tables above, and this game draws them from its own tileset through `files/mods/<mod>/data/icons/*.rec`. Opens with the same `OpenMPQ` as DIABDAT (`src/cmd/internal/mpq`). |
 
 ### How to port with them
 
-1. **Find the function in 1.09** (`grep -rn 'void DRLG_L1Floor' reference/devilution-109/Source`), port it 1:1 into `d1/`
+1. **Find the function in 1.09** (`grep -rn 'void DRLG_L1Floor' reference/devilution-109/Source`), port it 1:1 into the engine
    under the same name in Go style (`DRLG_L1Floor` → `drlgL1Floor`) and say which D1 function it ports in the doc comment.
    Keep D1's RNG call order, or seeded results drift.
 2. **Cross-check** with galaxyhaxz for readability and devilutionX for known bugs, then decide per `docs/D1_PLAN.md`.
 3. **Take data, not code, where there's a table.** Values come from `files/assets/data/d1/xl_*.txt`
-   (`src/d1/data.go`); big static arrays that aren't in a table go into a `d1/*_data.go` file; anything in the MPQ is read
+   (`src/rules/data.go`); the level generators' minisets and lookup tables live in `files/mods/d1/data/levels/generator.txt` (read by `g.mini`/`g.table`/`g.rows`); anything in the MPQ is read
    from the MPQ, not copied into the repo.
 4. **Verify against DevilutionX fixtures**, which were produced by the real game logic:
    - `test/fixtures/diablo/<dlvl>-<seed>.dun`: the level D1 builds from that seed; `test/drlg_l*_test.cpp` shows the
-     quest flags and expected entry positions. Ported in `src/d1/drlg_test.go` / `src/d1/drlg_fixtures_test.go`.
-   - `test/fixtures/levels/l*data/*.dun`: set pieces, used to check our MPQ reader (`src/d1/mpq_test.go`).
+     quest flags and expected entry positions. Ported in `src/dungen/drlg_test.go` / `src/dungen/drlg_fixtures_test.go`.
+   - `test/fixtures/levels/l*data/*.dun`: set pieces, used to check our MPQ reader (`src/cmd/d1import/mpq_test.go`).
    - Other `test/*_test.cpp` (items, stores, player, missiles, random, path) hold expected values worth copying into Go
      tests when porting that area.
 5. Tests that need `reference/` must `t.Skip` when it's missing, so `go test ./...` still passes on a fresh clone.
@@ -63,11 +63,11 @@ same-category items clustered together when picking icons.
 The handful of always-present H&H icons (`IconGrass`, `IconCharacterWarriorMale`, ...) are still `defs.IconXxx`
 package vars (`src/defs/icons_actors.go` / `icons_tiles.go`), read directly; their rec key now just follows the same
 convention. Everything else has no Go identifier; look it up with `defs.Icon(defs.IconID("monster", m.ID))`
-(panics on a typo) or `defs.IconOK(id)` when the name is optional (`common/d1_item.go`'s IMISC fallback).
-D1 objects go through `defs.PropIconID`, which folds objects our top-down view can't tell apart (same sprite
+(panics on a typo) or `defs.IconOK(id)` when the name is optional (`common/item.go`'s IMISC fallback).
+Dungeon objects are `prop.<name>` (`defs.PropIconID`). Objects our top-down view can't tell apart (same sprite
 under another ID: trapped/quest chests, Warlord's racks; or another isometric angle: left/right shrines,
-bookcases, banners, crux skeletons, lectern books) into one `prop.*` record via `propFolds` in `src/defs/icons.go`;
-`src/app/prop_folds_test.go` keeps it and `tiles.rec` in sync.
+bookcases, banners, crux skeletons, lectern books) are records with `same_as: prop.<other>` instead of `icon:`;
+give one its own `icon:` to tell it apart. `src/app/prop_folds_test.go` checks every prop record is some object's.
 
 Remap visually with `scripts/remap_actors.sh`, `scripts/remap_items.sh`, `scripts/remap_tiles.sh`, `scripts/remap_skills.sh` (each opens
 the remapper on its rec file: click a name on the left, a tile on the right, `s` saves, `F10` quits). Adding a new
@@ -75,10 +75,20 @@ D1 object/monster family/item type needs one new `internal_name:`/`icon:`/`name:
 remap it same as any other. Tinting is reserved for D1 monster variants, water tiles (`IconWater`, tinted by
 `State.GetWaterColor`: light green in the foul Poisoned Water Supply, blue otherwise) and one fallback: a used D1
 object whose `prop.<name>.used` icon is the same tile as its fresh `prop.<name>` icon is drawn grayed out
-(`common.D1UsedTint`); remap `.used` to a different tile to drop the tint. Anything else that needs to look
+(`common.UsedTint`); remap `.used` to a different tile to drop the tint. Anything else that needs to look
 different (uniques, magic/unique items) gets its own icon record. Remapper: `remapper` on `$PATH`, source
 `~/Projects/remapper`. It shows an entry's `reference_image:` (a D1 sprite under the gitignored `reference/`) beside
 the atlas; `go run ./src/cmd/d1sprites` writes those fields into all four rec files.
+
+## Skills (`src/rules/skills.rec`)
+
+Class skills are spells: D1's `SPL_` slots come first, then the engine's named skills from the embedded
+`src/rules/skills.rec` (Arrow Rain, Crush, Black Clouds...), usable by any mod by id alone. A mod's `spells.rec`
+record with the same id replaces the engine's. They share the spell machinery: levels (saved by id), mana, books
+that raise them, scrolls/staffs that cast them (`spell: arrow_rain`, at level 1 + item level/5), gear bonuses
+(`equip_modifier: skill(arrow_rain|2)`). A class lists what it can learn in `start_spells` (`arrow_rain=0` is
+learnable, not known) and gains `skill_points` per level up to `max_skill_level`. The effects are in
+`src/common/def_skills.go`; each gets the skill level as its last argument. Icons: `spell.<id>` in `icons/skills.rec`.
 
 ## Audio (`files/assets/`)
 
@@ -92,7 +102,7 @@ callers fall back.
 |---|---|---|---|
 | `data/sounds.rec` | `scripts/remap_sounds.sh` | sound effects, one record per event: `internal_name` = the cue `PlayCue` takes (`open_door`), D1's effects as `sfx.<_sfx_id>` (`sfx.IS_CAST2`, `sfx.PS_SWING`), monsters as `monster.<id>.attack\|hit\|death\|special`. Several `sound:` lines = one picked at random | `RegisterSoundEvents` |
 | `data/voices.rec` | `scripts/remap_voices.sh` | D1's speech, one record per `_sfx_id` (`TSFX_BMAID1`, `PS_WARR8`, `USFX_GARBUD1`). `text:` is what the original line said, so you know what to record in its place | `RegisterVoiceEvents` (voice volume) |
-| `data/music.rec` | `scripts/remap_music.sh` | the five area themes `town`/`cathedral`/`catacombs`/`caves`/`hell` that `d1AreaMusic` (`game/town_d1.go`) switches between | `RegisterMusicEvents` (looped, listed in the Music Player) |
+| `data/music.rec` | `scripts/remap_music.sh` | the five area themes `town`/`cathedral`/`catacombs`/`caves`/`hell` that `d1AreaMusic` (`game/town.go`) switches between | `RegisterMusicEvents` (looped, listed in the Music Player) |
 
 Every rec above is the mod's own (`files/mods/<mod>/data/`); the scripts take the mod, default `d1`
 (`scripts/remap_sounds.sh heavenandhell`), and the file browser shows only that mod's folder.
@@ -104,8 +114,8 @@ D1: `IS_TITLEMOV`/`IS_TITLSLCT`), `store_enter`, `vendor_buy`, `vendor_sell`, `s
 `game_over`, `you_win`, `teleport`, `earthquake`, `melee_attack`, `bow_fire`, `open_door`, `close_door`,
 `level_up`, and `monster.<id>.attack|hit|death|special`. The shared D1 code plays D1's ids as `sfx.<id>`, whatever
 the mod. A new sound event = one `PlayCue("<name>")` call + one record in `sounds.rec`. D1's effects go through
-`playD1SfxAt` / `Factory.PlayD1Sfx` with D1's distance fade and pan (`common/d1_sound.go`), its speech through
-`playD1Sound`; `TestD1SfxHaveSoundEvents` and `TestD1SpeechHaveVoiceEvents` fail when a record is missing.
+`playSfxAt` / `Factory.PlaySfx` with D1's distance fade and pan (`common/sound.go`), its speech through
+`playSound`; `TestSfxHaveSoundEvents` and `TestSpeechHaveVoiceEvents` fail when a record is missing.
 
 Heaven & Hell's folders:
 
@@ -142,8 +152,10 @@ static on speech). `go:embed mods` embeds whatever is on disk: build a release f
   inventory, key maps, map drawing and targeting. It knows nothing about this game — keep game logic and graphics out.
 - `console/` implements `common.UserInterface` on top of it: game glyphs and colors, commands, shops, stash, inventory.
 - Data in each mod's `data/ascii/`: `keymap.txt` (key -> command, two layers: `% main` and `% targeting`),
-  `ui.rec` (theme colors by palette name and border runes) and `palette.rec` (contractor's palette).
-  A new command = one line in `keymap.txt` + one entry in `setupCommands` (`src/console/commands.go`).
+  `ui.rec` (theme colors by palette name and border runes), `palette.rec` (contractor's palette), `glyphs.rec`
+  (object glyphs by object id) and `commands.rec` (the help's command names and columns).
+  A new command = one line in `keymap.txt` + one record in `commands.rec` + one entry in `setupCommands`
+  (`src/console/commands.go`).
 - Menu contents and shop transactions both UIs share live in `src/common/ui_shared.go`, so the two can't drift apart.
 - Keys and mouse buttons match the tile UI (`src/gui/input.go`), including Shift to attack what isn't hostile, the arrow
   keys scrolling the map, `x` centering it and right clicking an inventory line to drop it. No terminal equivalent:
@@ -159,8 +171,12 @@ static on speech). `go:embed mods` embeds whatever is on disk: build a release f
   its `data/mod.rec` (`common.ModSetting`): the mod's value wins and the menu shows it locked. D1 fixes
   `AutosaveOnLevelChange: false`, as 1.09 only saves on "Save Game" and on quitting
 - ASCII mode: `go run ./src ascii` (needs a real terminal, F1 lists the keys)
-- D1 unit tests: `go test ./src/d1`
+- Rules and level generation tests: `go test ./src/rules ./src/dungen`
 - Headless smoke test: `go run ./src playthrough` (must print `PLAYTHROUGH OK`)
+- Its seed-1 output is a golden file: `TestPlaythroughSeed1` diffs against `src/app/testdata/playthrough_seed1.txt`
+  (skipped with `-short`). A deliberate gameplay change regenerates it: `go run ./src playthrough 1 > src/app/testdata/playthrough_seed1.txt`
+- Dead code: `go run honnef.co/go/tools/cmd/staticcheck@latest -checks U1000 ./...` (also finds dead methods of
+  generic types, which `deadcode` misses)
 - Print a generated D1 level: `go run ./src dun_gen <dungeon level> [seed]`
 - Import level data: `go run ./src/cmd/d1import`
 - Sprite references for picking icons: `go run ./src/cmd/d1sprites` writes `reference/d1_{monsters,items,skills,tiles}.pdf` (one per icons/*.rec, each sprite labelled with its current icon) and every sprite as a PNG under `reference/d1_sprites/`: monsters and uniques in their TRN recolors, items, spell and skill icons, objects and each level type's megatiles

@@ -1,16 +1,20 @@
 package common
 
-import "rpg/src/geometry"
+import (
+	"rpg/src/geometry"
+	"rpg/src/rules"
+)
 
 // An Event is something that happened, as the rules report it through Broker.Emit. The rules never build an
 // animation: the broker's presenter (present.go) turns each event into what the player sees and hears, at the
 // point the action that emitted it finishes, which is where the action's own animations used to start.
 type Event interface{ event() }
 
-// MeleeSwing is a melee blow from From at To.
+// MeleeSwing is a melee blow from From at To. Quiet: heard, not drawn (a blow folded into a bigger effect).
 type MeleeSwing struct {
 	Attacker *Actor
 	From, To geometry.Point
+	Quiet    bool
 }
 
 // HealthChanged is a change to an actor's health (Amount < 0: damage). Before is the health it had, to draw
@@ -88,6 +92,7 @@ type Flash struct {
 	At      geometry.Point
 	Seconds float64
 	Icon    int32
+	Fade    bool // one frame fading out instead of two frames looping
 }
 
 // Said is a line an actor calls out on coming into view.
@@ -96,14 +101,58 @@ type Said struct {
 	Line  string
 }
 
-func (Missile) event()       {}
-func (Flash) event()         {}
-func (Said) event()          {}
-func (KnockedBack) event()   {}
-func (Shot) event()          {}
-func (Thrown) event()        {}
-func (Fireball) event()      {}
-func (Moved) event()         {}
-func (Swapped) event()       {}
-func (MeleeSwing) event()    {}
-func (HealthChanged) event() {}
+// Died is an actor's death. Killed: something killed it (a monster that just vanishes makes no cry).
+type Died struct {
+	Actor  *Actor
+	Killed bool
+}
+
+// DoorToggled is the door at At opening (Opened) or closing.
+type DoorToggled struct {
+	At     geometry.Point
+	Opened bool
+}
+
+// ItemUsed is User using Item from the pack (not a staff's cast).
+type ItemUsed struct {
+	Item *Item
+	User *Actor
+}
+
+// ItemBroke is one of Owner's items wearing out.
+type ItemBroke struct{ Owner *Actor }
+
+// ItemIdentified is Item's magic coming to light.
+type ItemIdentified struct{ Item *rules.Item }
+
+// ItemDropped is Item landing on At; From is the monster whose death dropped it, or nil.
+type ItemDropped struct {
+	Item *Item
+	At   geometry.Point
+	From *Actor
+}
+
+// ItemStowed is Item going into Holder's pack or onto them.
+type ItemStowed struct {
+	Item   *Item
+	Holder *Actor
+}
+
+func (Died) event()           {}
+func (DoorToggled) event()    {}
+func (ItemUsed) event()       {}
+func (ItemBroke) event()      {}
+func (ItemIdentified) event() {}
+func (ItemDropped) event()    {}
+func (ItemStowed) event()     {}
+func (Missile) event()        {}
+func (Flash) event()          {}
+func (Said) event()           {}
+func (KnockedBack) event()    {}
+func (Shot) event()           {}
+func (Thrown) event()         {}
+func (Fireball) event()       {}
+func (Moved) event()          {}
+func (Swapped) event()        {}
+func (MeleeSwing) event()     {}
+func (HealthChanged) event()  {}

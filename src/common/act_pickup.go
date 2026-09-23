@@ -32,17 +32,17 @@ func (d *PickUpAction) Execute(context ActionContext) []Action {
 
 	gameMap.RemoveItem(item)
 
-	playD1ItemInvSfx(context, item, actor)
+	context.ActionBroker.Emit(ItemStowed{Item: item, Holder: actor})
 	if item.IsGold() {
-		actor.GetStats().IncrementBy(stats.Gold, item.d1.Value)
-		context.Msg(fmt.Sprintf("You pick up %d gold", item.d1.Value))
+		actor.GetStats().IncrementBy(stats.Gold, item.roll.Value)
+		context.Msg(fmt.Sprintf("You pick up %d gold", item.roll.Value))
 		return nil
 	}
 
 	inventory := actor.GetInventory()
 	inventory.Add(item)
-	if item.d1 != nil && actor == state.GetPlayer() {
-		state.factory.d1QuestItemPickedUp(item.d1)
+	if item.roll != nil && actor == state.GetPlayer() {
+		state.factory.questItemPickedUp(item.roll)
 	}
 
 	name := actor.Name()

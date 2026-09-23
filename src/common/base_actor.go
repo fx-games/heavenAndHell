@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"image/color"
 	"math/rand"
-	"rpg/src/d1"
 	"rpg/src/defs"
 	"rpg/src/geometry"
+	"rpg/src/rules"
 	"rpg/src/stats"
 	"rpg/src/util"
+	"sync/atomic"
 )
 
 type VendorType string
@@ -58,11 +59,13 @@ type Actor struct {
 	untargetedSkills   []*UntargetedAction
 	lastCastTargeted   *TargetedAction
 	lastCastUntargeted *UntargetedAction
+	id                 uint64 // unique in a game and kept in saves (ID)
+	shieldedBy         uint64 // the id of who cast the Shield it wears; the shield goes when they die
 	lastCastItem       *Item
 	damageDice         util.Dice
 	color              color.RGBA
-	d1Monster          *D1Monster
-	hero               *d1.Hero
+	monster            *Monster
+	hero               *rules.Hero
 	visualGate         func() bool   // see VisualsPending
 	shownHealth        int           // health drawn while VisualsPending
 	moveHold           *HitAnimation // a projectile hit still to be shown where a stands; its next move waits for it
@@ -106,10 +109,27 @@ func (a *Actor) AddEnergy(energy int) {
 	a.timeEnergy += energy
 }
 
+// nextActorID is the last id handed out; SetID keeps it past every id a save brings back.
+var nextActorID atomic.Uint64
+
+// ID is the actor's unique id: what refers to it across a save (the caster of a Shield).
+func (a *Actor) ID() uint64 { return a.id }
+
+// SetID gives a loaded actor back its saved id; ids handed out later stay above it.
+func (a *Actor) SetID(id uint64) {
+	if id == 0 {
+		return
+	}
+	a.id = id
+	for n := nextActorID.Load(); n < id && !nextActorID.CompareAndSwap(n, id); n = nextActorID.Load() {
+	}
+}
+
 func NewActor(icon int32) *Actor {
 	actorStats := stats.NewAttributeHolder()
 	visionRange := actorStats.GetAttribute(stats.VisionRange)
 	return &Actor{
+		id:            nextActorID.Add(1),
 		icon:          icon,
 		stats:         actorStats,
 		inventory:     NewInventory(32),
@@ -373,7 +393,7 @@ func (a *Actor) GetVendorType() VendorType {
 
 func (a *Actor) CanLevelUp() bool {
 	if a.hero != nil {
-		return a.hero.StatPts > 0
+		return a.hero.StatPts > 0 || a.hero.SkillPts > 0
 	}
 	currentLevel := a.GetStats().GetAttribute(stats.Level)
 	currentXP := a.GetStats().GetAttribute(stats.Experience)
@@ -394,7 +414,7 @@ func (a *Actor) GetXPForLevel(level int) int {
 
 func (a *Actor) LevelUp(chosenAttribute stats.Name) {
 	if a.hero != nil {
-		attr := map[stats.Name]int{stats.Strength: d1.AttrStr, stats.Magic: d1.AttrMag, stats.Dexterity: d1.AttrDex, stats.Vitality: d1.AttrVit}[chosenAttribute]
+		attr := map[stats.Name]int{stats.Strength: rules.AttrStr, stats.Magic: rules.AttrMag, stats.Dexterity: rules.AttrDex, stats.Vitality: rules.AttrVit}[chosenAttribute]
 		st := a.GetStats()
 		maxHP, maxMana := st.GetAttribute(stats.MaxHealth), st.GetAttribute(stats.MaxMana)
 		if a.hero.SpendStatPoint(attr) {
@@ -743,6 +763,7 @@ func (a *Actor) Clone() *Actor {
 	actorStats := stats.NewAttributeHolder()
 	visionRange := actorStats.GetAttribute(stats.VisionRange)
 	clonedActor := &Actor{
+		id:             nextActorID.Add(1),
 		mapPosition:    a.mapPosition,
 		drawPosition:   a.drawPosition,
 		icon:           a.icon,

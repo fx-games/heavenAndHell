@@ -1,0 +1,152 @@
+# commands.rec: what the ASCII help (F1) calls each command of keymap.txt.
+#   command           a keymap.txt command
+#   name              what the help shows
+#   help              left or right: the help column it is listed in, in this file's order; absent: not listed
+
+command: north
+name: North
+help: left
+
+command: south
+name: South
+help: left
+
+command: west
+name: West
+help: left
+
+command: east
+name: East
+help: left
+
+command: force_north
+name: Attack north
+help: left
+
+command: force_south
+name: Attack south
+help: left
+
+command: force_west
+name: Attack west
+help: left
+
+command: force_east
+name: Attack east
+help: left
+
+command: wait
+name: Wait
+help: left
+
+command: rest
+name: Rest until healed
+help: left
+
+command: pickup
+name: Pick up
+help: left
+
+command: auto_explore
+name: Auto explore
+help: left
+
+command: look
+name: Look
+help: left
+
+command: center_map
+name: Center the map
+help: left
+
+command: scroll_map_up
+name: Scroll the map
+help: left
+
+command: system_menu
+name: Pause menu
+help: left
+
+command: help
+name: Help
+help: left
+
+command: auto_attack
+name: Attack nearest
+help: right
+
+command: force_auto_attack
+name: Attack nearest (any)
+help: right
+
+command: aimed_ranged_attack
+name: Aimed ranged attack
+help: right
+
+command: quick_ranged_attack
+name: Ranged attack nearest
+help: right
+
+command: throw
+name: Throw
+help: right
+
+command: spells
+name: Cast a spell
+help: right
+
+command: recast_spell
+name: Recast at nearest
+help: right
+
+command: inventory
+name: Inventory
+help: right
+
+command: character
+name: Character
+help: right
+
+command: level_up
+name: Spend stat points
+help: right
+
+command: log
+name: Message log
+help: right
+
+command: quest_log
+name: Quest log
+help: right
+
+command: flags
+name: Flags
+help: right
+
+command: wizard
+name: Wizard menu
+help: right
+
+command: examine
+name: Examine
+
+command: scroll_map_down
+name: Scroll the map
+
+command: scroll_map_left
+name: Scroll the map
+
+command: scroll_map_right
+name: Scroll the map
+
+command: wiz_kill_level
+name: Wizard: kill level
+
+command: wiz_level_up
+name: Wizard: level up
+
+command: wiz_level_down
+name: Wizard: level down
+
+command: wiz_fog_of_war
+name: Wizard: fog of war

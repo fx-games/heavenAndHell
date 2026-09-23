@@ -25,16 +25,13 @@ func NewMeleeAttackAction(source Cause, attacker *Actor, defender *Actor) *Melee
 
 func (d *MeleeAttackAction) Execute(context ActionContext) []Action {
 	var actions []Action
-	if !d.disableAnimation {
-		context.ActionBroker.Emit(MeleeSwing{Attacker: d.attacker, From: d.attacker.MapPosition(), To: d.defender.MapPosition()})
-	}
+	context.ActionBroker.Emit(MeleeSwing{Attacker: d.attacker, From: d.attacker.MapPosition(), To: d.defender.MapPosition(), Quiet: d.disableAnimation})
 
-	if dam, extra, handled := resolveD1Attack(context, d.attacker, d.defender, false); handled {
+	if dam, extra, handled := resolveAttack(context, d.attacker, d.defender, false); handled {
 		d.defender.SetLookDirFromPoI(d.attacker.MapPosition())
 		d.attacker.SetLookDirFromPoI(d.defender.MapPosition())
-		d.playSound(context)
-		if d.damageFactor != 1 && dam > 0 { // an item hook's multiplier (H&H's "of fury")
-			dam = int(float64(dam) * d.damageFactor)
+		if dam > 0 { // an item hook's multiplier (H&H's "of fury"), a skill's
+			dam = int(float64(dam) * d.damageFactor * skillDamageFactor(d.attacker))
 		}
 		d.totalDamageDealt = dam
 		if dam <= 0 {
@@ -67,21 +64,7 @@ func (d *MeleeAttackAction) Execute(context ActionContext) []Action {
 	d.defender.SetLookDirFromPoI(d.attacker.MapPosition())
 	d.attacker.SetLookDirFromPoI(d.defender.MapPosition())
 
-	d.playSound(context)
-
 	return actions
-}
-
-// playSound: the hero's swing (PS_SWING, PM_DoAttack) or the monster's attack sound (M_DoAttack), where they stand.
-func (d *MeleeAttackAction) playSound(context ActionContext) {
-	p := d.attacker.MapPosition()
-	if d.attacker == context.GameState.GetPlayer() {
-		if !playD1SfxAt(context, "PS_SWING", p) {
-			context.AudioPlayer.PlayCue("melee_attack")
-		}
-	} else {
-		playCueAt(context, d.attacker.MonsterSoundCue("attack"), p)
-	}
 }
 
 func RollMeleeDamage(attacker, defender *Actor, damageFactor float64) int {

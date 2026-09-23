@@ -69,8 +69,8 @@ func TestTownPortalGlowsBlue(t *testing.T) {
 	before := state.ApplyLighting(next, white, 0)
 	farBefore := state.ApplyLighting(far, white, 0)
 
-	state.SetD1Portal(&common.D1Portal{Map: "cathedral_1", Town: town.GetName(), X: 10, Y: 10})
-	common.PlaceD1Portal(state, town)
+	state.SetPortal(&common.Portal{Map: "cathedral_1", Town: town.GetName(), X: 10, Y: 10})
+	common.PlacePortal(state, town)
 	if lit := state.ApplyLighting(next, white, 0); lit.B <= before.B || lit.B <= lit.R {
 		t.Fatalf("next to the portal: %v before, %v with it open: no blue light", before, lit)
 	}
@@ -78,7 +78,7 @@ func TestTownPortalGlowsBlue(t *testing.T) {
 		t.Fatalf("4 tiles from the portal the light changed from %v to %v: it reaches too far", farBefore, got)
 	}
 
-	state.CloseD1Portal()
+	state.ClosePortal()
 	if got := state.ApplyLighting(next, white, 0); got != before {
 		t.Fatalf("after closing the portal the cell next to it draws %v, was %v", got, before)
 	}

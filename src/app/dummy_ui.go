@@ -89,7 +89,7 @@ func (d DummyUI) OpenSettingsMenu(back func()) {
 
 func (d DummyUI) ShowItemInfo(item *common.Item) {}
 
-func (d DummyUI) OpenInfoWindow(title string, sections []common.D1SheetSection) {}
+func (d DummyUI) OpenInfoWindow(title string, sections []common.SheetSection) {}
 
 // OpenSaveSlots can't ask anyone, so it answers with the slot a player asked to replace one would most likely
 // pick: the first free one, or the least recently played game. Headless runs never stall on the question.

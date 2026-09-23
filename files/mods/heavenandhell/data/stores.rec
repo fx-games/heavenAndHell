@@ -25,7 +25,7 @@
 #   double_drops      true: IDROP_DOUBLE items count twice
 #   slot_levels       a premium stock's fixed slots, each an item level offset; rotate_by: slots it shifts each level
 #   featured_misc_id / featured_count   a kind of item put out first, and how many
-#   shuns "<class> <type> ..." types it keeps away from a class (repeatable); shun_tries how long it tries
+#   shuns "<class internal_name> <type> ..." types it keeps away from a class (repeatable); shun_tries how long it tries
 #   usable_elixirs_only   only elixirs of a stat still under the class maximum
 #   recharge_uniques  recharges unique items too
 #   price_adjust      +1/n or -1/n: sells at value plus or minus value/n

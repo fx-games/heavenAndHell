@@ -1,0 +1,10 @@
+[map] Cata_room_one5
+
+[tiles] 10 3
+-1 64 64 -1 -1 -1 -1 64 64 -1
+-1 64 64 64 64 64 64 64 64 -1
+-1 64 64 -1 -1 -1 -1 64 64 -1
+
+[entities]
+WestConnector	0	1
+EastConnector	9	1

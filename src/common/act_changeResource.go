@@ -28,6 +28,14 @@ func (d *ChangeResourceAction) Execute(context ActionContext) []Action {
 	hp := receiver.GetStats().GetResource(stats.Health)
 	before := hp.Value()
 	wasOK := hp.Value()*4 >= hp.GetMax()
+	if d.resourceName == stats.Health && d.changedByAmount < 0 {
+		d.changedByAmount += absorbShield(receiver, -d.changedByAmount)
+	}
+	if d.resourceName == stats.Health && receiver.HasStatusEffect(StatusEternalVow) && float64(before)+d.changedByAmount < 1 && before > 0 {
+		receiver.GetStatusEffects().SetFalse(string(StatusEternalVow)) // the vow holds once
+		d.changedByAmount = float64(1 - before)
+		context.Msg("Your vow holds you on your feet!")
+	}
 	receiver.GetStats().IncrementResourceBy(d.resourceName, d.changedByAmount)
 	if d.resourceName == stats.Health && wasOK && hp.Value()*4 < hp.GetMax() && receiver.IsAlive() && receiver == context.GameState.GetPlayer() {
 		PlayUICue("low_health") // a quarter of the hero's life left
@@ -36,7 +44,7 @@ func (d *ChangeResourceAction) Execute(context ActionContext) []Action {
 	if d.changedByAmount < 0 {
 		receiver.SetHurt()
 		if d.resourceName == stats.Health && receiver.IsAlive() {
-			d1HitRecovery(context.GameState.factory, receiver, int(-d.changedByAmount), d.cause.GetActor())
+			monsterHitRecovery(context.GameState.factory, receiver, int(-d.changedByAmount), d.cause.GetActor())
 		}
 	}
 

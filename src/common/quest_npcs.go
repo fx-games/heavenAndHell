@@ -5,12 +5,12 @@ import (
 	"strings"
 
 	"rpg/src/gridmap"
-	"rpg/src/ldtk"
+	"rpg/src/hhm"
 )
 
 // Quests add and remove townspeople by flag, so the change survives the map being rebuilt from its drawing (a
 // load, a new visit): "npc_removed:<map>:<npc>" and "npc_added:<map>:<npc>:<location>". An added NPC is drawn
-// somewhere in the mod's maps.ldtk; add_npc copies that entity.
+// somewhere in the mod's maps; add_npc copies that entity.
 
 func (f *Factory) addNPC(npc, mapName, location string) {
 	flags := f.State.GetFlags()
@@ -38,7 +38,7 @@ func (s *State) applyNPCChanges(m *gridmap.GridMap[*Actor, *Item, Object]) {
 	}
 	npcOn := func(name string) *Actor {
 		for _, a := range m.Actors() {
-			if a.d1Monster == nil && a.GetInternalName() == name {
+			if a.monster == nil && a.GetInternalName() == name {
 				return a
 			}
 		}
@@ -60,25 +60,23 @@ func (s *State) applyNPCChanges(m *gridmap.GridMap[*Actor, *Item, Object]) {
 		if npcOn(npc) != nil {
 			continue
 		}
-		entity := npcEntity(s.ldtkProject, npc)
+		entity := npcEntity(s.drawnMaps, npc)
 		if entity == nil {
-			s.factory.Msg("add_npc: maps.ldtk draws no NPC " + npc)
+			s.factory.Msg("add_npc: no map draws an NPC " + npc)
 			continue
 		}
 		if cells := freeCellsNear(m, m.GetNamedLocation(location), 1, m.CanPlaceActorHere); len(cells) > 0 {
-			addActorFromEntity(s.ldtkProject, m, entity, cells[0])
+			addActorFromEntity(m, entity, cells[0])
 		}
 	}
 }
 
-// npcEntity finds the NPC with that internal name wherever the mod's maps.ldtk draws it.
-func npcEntity(p *ldtk.Project, npc string) *ldtk.Entity {
+// npcEntity finds the NPC with that internal name wherever the mod's maps draw it.
+func npcEntity(p *hhm.Project, npc string) *hhm.Entity {
 	for _, level := range p.Levels {
-		for _, layer := range level.Layers {
-			for _, e := range layer.Entities {
-				if name := e.PropertyByIdentifier("InternalName"); e.Identifier == "NPC" && !name.IsNull() && name.AsString() == npc {
-					return e
-				}
+		for _, e := range level.Entities {
+			if e.Kind == "NPC" && e.Str("InternalName") == npc {
+				return e
 			}
 		}
 	}

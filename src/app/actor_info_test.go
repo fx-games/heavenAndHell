@@ -27,7 +27,7 @@ func TestActorInfoSections(t *testing.T) {
 	state.MapTransition(gridmap.Transition{TargetMap: levelAt(state, 1), TargetLocation: "ladder_up"})
 	var monster *common.Actor
 	for _, a := range state.GetMap().Actors() {
-		if a != player && a.D1Monster() != nil && a.IsAlive() {
+		if a != player && a.Monster() != nil && a.IsAlive() {
 			monster = a
 			break
 		}
@@ -50,7 +50,7 @@ func TestActorInfoSections(t *testing.T) {
 	}
 }
 
-func section(sections []common.D1SheetSection, title string) *common.D1SheetSection {
+func section(sections []common.SheetSection, title string) *common.SheetSection {
 	for i := range sections {
 		if sections[i].Title == title {
 			return &sections[i]
@@ -59,7 +59,7 @@ func section(sections []common.D1SheetSection, title string) *common.D1SheetSect
 	return nil
 }
 
-func titles(sections []common.D1SheetSection) []string {
+func titles(sections []common.SheetSection) []string {
 	var out []string
 	for _, sec := range sections {
 		out = append(out, sec.Title)

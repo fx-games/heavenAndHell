@@ -28,7 +28,7 @@ type StartInfo struct {
 	ScreenSize        geometry.Point
 	TileScale         float64
 	Title             string
-	LDTKMapFile       string
+	MapDir            string
 	SpriteSheet       string
 	UserConfiguration *Configuration
 	FileSystem        fs.ReadDirFS
@@ -177,11 +177,13 @@ func (c Configuration) ToRecord() recfile.Record {
 	return record
 }
 
+// SaveToRecFile writes the whole configuration. A failed write is logged, not fatal: the settings stay in effect
+// for this session.
 func (c Configuration) SaveToRecFile(recFilename string) {
 	var buf bytes.Buffer
 	recfile.Write(&buf, []recfile.Record{c.ToRecord()})
 	if err := util.WriteFileAtomic(recFilename, buf.Bytes()); err != nil {
-		panic(err)
+		slog.Error("saving configuration", "file", recFilename, "err", err)
 	}
 }
 func NewConfigurationFromRecFile(recFilename string) Configuration {
@@ -337,6 +339,15 @@ func (c *Configuration) FontName() string {
 
 // FontFile is FontName's path for files.Open.
 func (c *Configuration) FontFile() string { return path.Join("assets", "fonts", c.FontName()) }
+
+// TitleImagePath is the active mod's splash image (mod.rec's TitleImage) for files.Open, and whether it has one.
+func TitleImagePath() (string, bool) {
+	name, fixed := ModSetting("TitleImage")
+	if !fixed || name == "" {
+		return "", false
+	}
+	return path.Join("assets", name), true
+}
 
 // FontMenu lists the mod's fonts; picking one saves it to config.rec, hands it to setFont and calls reopen.
 func FontMenu(cfg *Configuration, setFont func(file string), reopen, back func()) []util.MenuItem {

@@ -5,6 +5,7 @@ import (
 
 	"rpg/src/defs"
 	"rpg/src/dungeon"
+	"rpg/src/geometry"
 	"rpg/src/gridmap"
 )
 
@@ -80,9 +81,9 @@ func (s *State) IsPlayerInTown() bool { return s.CurrentLevel().Town }
 // exitTiles are what an exit's spot turns into when it opens (exit_tile).
 func exitTiles() map[string]gridmap.Tile {
 	return map[string]gridmap.Tile{
-		"stairs_down": d1StairsDown(),
+		"stairs_down": stairsDown(),
 		"stairs_up":   {DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, Special: gridmap.SpecialTileStairsUp},
-		"red_portal":  d1RedPortal,
+		"red_portal":  redPortal,
 	}
 }
 
@@ -90,6 +91,9 @@ func exitTiles() map[string]gridmap.Tile {
 // a level is built and whenever the quests change, and is idempotent. An exit whose location the level lacks
 // (a quest entrance on a game that rolled the quest away) is skipped.
 func (s *State) wireExits(m *gridmap.GridMap[*Actor, *Item, Object]) {
+	for name, p := range s.Level(m.GetName()).Locations {
+		m.AddNamedLocation(name, geometry.Point{X: p[0], Y: p[1]})
+	}
 	for _, e := range s.Level(m.GetName()).Exits {
 		p := m.GetNamedLocation(e.Location)
 		if m.GetNamedLocationByPos(p) != e.Location {

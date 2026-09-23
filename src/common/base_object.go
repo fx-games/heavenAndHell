@@ -15,4 +15,5 @@ type Object interface {
 	ActorWalkedOn(actor *Actor)
 	ActorBumpedInto(actor *Actor)
 	Name() string
+	ID() string // what data files call this kind of object (a prop's OBJ_ name); "" for none
 }

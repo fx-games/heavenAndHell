@@ -75,7 +75,7 @@ Mod (rec/tsv):
 - Content loads only AFTER mod selection. No package-level `var x = load...()`.
   This has caused three silent bugs already (zeroed class tables, two vacuous
   test suites); treat init-time content binding as a defect on sight.
-- Dungeon generation output must stay byte-identical: `src/d1/testdata/levels.golden`
+- Dungeon generation output must stay byte-identical: `src/dungen/testdata/levels.golden`
   is the referee. A golden diff is a bug, never a regeneration.
   Its scope is wide: `hashLevel` hashes tiles, flags, AND every monster, object
   and item as a full struct dump, over 6 game seeds x 20 levels. So migrating D1
@@ -117,10 +117,10 @@ generator.
 
 ## Terrain: GenerateMap dispatches, it does not assume
 
-`common.GenerateMap` used to call `generateD1Map` unconditionally. It now
+`common.GenerateMap` used to call `generateMap` unconditionally. It now
 type-switches on the `dungeon.Config` the level's own generator parsed, so each
 family takes back the type it produced. No generator name and no mod name is
-tested anywhere in that path. D1's side stays in `map_gen_d1.go`, dungen's in
+tested anywhere in that path. D1's side stays in `map_gen_drlg.go`, dungen's in
 `map_gen_dungen.go`, and they share only the gridmap they write into.
 
 Three knobs belong to a LEVEL rather than to any generator, and so live on
@@ -206,7 +206,7 @@ because the same mistakes are easy to make again:
 4. `Equipment.AllItems()` ranged the slots MAP, so save order and which item a
    durability roll reached first varied. Walked in name order now.
 
-Still open, deliberately: `common/d1_object.go` branches on `time.Now().Hour()`,
+Still open, deliberately: `common/object.go` branches on `time.Now().Hour()`,
 so a run can differ across an hour boundary.
 
 Two real save defects were hiding behind that variance, now fixed and pinned by

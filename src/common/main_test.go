@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"rpg/files"
-	"rpg/src/d1"
 	"rpg/src/defs"
+	"rpg/src/rules"
 )
 
 // D1's tables are loaded from the mod, not compiled in, so the tests that walk them (the sound and speech
@@ -16,8 +16,8 @@ import (
 // testMod is the game this package's tests load: D1's tables are what they walk.
 const testMod = "d1"
 
-// testD1 is the test mod's rules, for the tests that read its tables directly.
-var testD1 *d1.Data
+// test is the test mod's rules, for the tests that read its tables directly.
+var test *rules.Data
 
 func TestMain(m *testing.M) {
 	files.SelectMod(testMod)
@@ -25,8 +25,8 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 	var err error
-	if testD1, err = d1.Load(files.GetFileSystem()); err != nil {
-		fmt.Println("d1.Load:", err)
+	if test, err = rules.Load(files.GetFileSystem()); err != nil {
+		fmt.Println("rules.Load:", err)
 		os.Exit(1)
 	}
 	os.Exit(m.Run())

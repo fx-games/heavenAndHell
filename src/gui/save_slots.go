@@ -82,8 +82,16 @@ func (s *SaveSlotScreen) Layout() {
 			}
 		}
 	}
+	width := slotThumbW + slotTextGap + s.labelW + textW + 20
+	for _, slot := range s.slots { // an empty slot draws its one-line summary instead of rows
+		if len(slot.Rows()) == 0 {
+			w, _ := r.MeasureString(slot.Summary())
+			width = max(width, slotThumbW+slotTextGap+int(w)+20)
+		}
+	}
+	titleW, _ := r.MeasureString(s.title)
 	s.size = geometry.Point{
-		X: slotThumbW + slotTextGap + s.labelW + textW + 20,
+		X: max(width, int(titleW)+20),
 		Y: 2*s.lineH + len(s.slots)*(s.rowH+slotGap),
 	}
 	screen := s.u.GetScreenSize()

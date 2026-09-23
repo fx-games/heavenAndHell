@@ -1,0 +1,246 @@
+# classes.rec: D1 and Hellfire's six classes, their numbers only (a test fixture: no kit, no skills).
+
+# One row per player class, in PC_ order: D1's three, then Hellfire's Monk, Bard and Barbarian.
+# Ports devilutionX's txtdata/classes/<class>/attributes.tsv and animations.tsv, which reproduce
+# D1 1.09's player.cpp tables. The life/mana/potion/spell columns are devilutionX's parseFixed6
+# decimals (1/64 multipliers) and are written here as the decimals, not the fixed-point ints.
+# attack_frames is the attack animation length by weapon type; default covers bare hands and
+# anything not listed.
+# start_spells is what a new hero of the class knows: SPL_ id = spell level.
+
+internal_name: warrior
+name: Warrior
+str: 30
+mag: 10
+dex: 20
+vit: 25
+max_str: 250
+max_mag: 50
+max_dex: 60
+max_vit: 100
+to_blk: 30
+adj_life: 18
+adj_mana: -1
+lvl_life: 2
+lvl_mana: 1
+chr_life: 2
+chr_mana: 1
+itm_life: 2
+itm_mana: 1
+potion_life: 2
+potion_mana: 1
+spell_life: 2
+mana_cost: 1
+magic_to_hit: 50
+melee_to_hit: 70
+ranged_to_hit: 60
+attack_frames: default=16 axe=20
+spell_frames: 20
+hit_frames: 6
+flags: critical_strike
+key: warrior
+heal_boost: 2
+skill: repair
+voice: WARR
+female_voice: ROGUE
+death_sound: PS_DEAD
+oily: str 2
+slain_hero: breast_plate
+
+internal_name: rogue
+name: Rogue
+str: 20
+mag: 15
+dex: 30
+vit: 20
+max_str: 55
+max_mag: 70
+max_dex: 250
+max_vit: 80
+to_blk: 20
+adj_life: 23
+adj_mana: 5.5
+lvl_life: 2
+lvl_mana: 2
+chr_life: 1
+chr_mana: 1
+itm_life: 1.5
+itm_mana: 1.5
+potion_life: 1.5
+potion_mana: 1.5
+spell_life: 1.5
+mana_cost: 0.75
+magic_to_hit: 50
+melee_to_hit: 50
+ranged_to_hit: 70
+attack_frames: default=18 axe=22 bow=12 staff=16
+spell_frames: 16
+hit_frames: 7
+flags: trap_sense str_dex_damage full_missile_bonus
+key: rogue
+heal_boost: 1
+skill: disarm
+voice: WARR
+female_voice: ROGUE
+text_prefix: R
+oily: dex 2
+slain_hero: long_war_bow
+
+internal_name: sorcerer
+name: Sorcerer
+str: 15
+mag: 35
+dex: 15
+vit: 20
+max_str: 45
+max_mag: 250
+max_dex: 85
+max_vit: 80
+to_blk: 10
+adj_life: 9
+adj_mana: -2
+lvl_life: 1
+lvl_mana: 2
+chr_life: 1
+chr_mana: 2
+itm_life: 1
+itm_mana: 2
+potion_life: 1
+potion_mana: 2
+spell_life: 1
+mana_cost: 1
+magic_to_hit: 70
+melee_to_hit: 50
+ranged_to_hit: 50
+attack_frames: default=20 sword=16 axe=24 mace=16 staff=16
+spell_frames: 12
+hit_frames: 8
+start_spells: SPL_FIREBOLT=2
+flags: shield_slows_bare_hands
+key: sorcerer
+spell_to_hit: 20
+skill: recharge
+voice: MAGE
+female_voice: ROGUE
+text_prefix: M
+oily: mag 2
+slain_hero: book SPL_LIGHTNING
+
+internal_name: monk
+name: Monk
+str: 25
+mag: 15
+dex: 25
+vit: 20
+max_str: 150
+max_mag: 80
+max_dex: 150
+max_vit: 80
+to_blk: 25
+adj_life: 23
+adj_mana: 5.5
+lvl_life: 2
+lvl_mana: 2
+chr_life: 1
+chr_mana: 1
+itm_life: 1.5
+itm_mana: 1.5
+potion_life: 1.5
+potion_mana: 1.5
+spell_life: 2
+mana_cost: 0.75
+magic_to_hit: 50
+melee_to_hit: 50
+ranged_to_hit: 50
+attack_frames: default=12 sword=16 axe=23 bow=20 mace=16 staff=13
+spell_frames: 18
+hit_frames: 6
+flags: trained_fists parry staff_and_fist_damage
+key: monk
+heal_boost: 2
+skill: vision
+voice: MONK
+female_voice: ROGUE
+text_prefix: H
+oily: str 1
+oily: dex 1
+slain_hero: war_staff
+
+internal_name: bard
+name: Bard
+str: 20
+mag: 20
+dex: 25
+vit: 20
+max_str: 120
+max_mag: 120
+max_dex: 120
+max_vit: 100
+to_blk: 25
+adj_life: 23
+adj_mana: 3
+lvl_life: 2
+lvl_mana: 2
+chr_life: 1
+chr_mana: 1.5
+itm_life: 1.5
+itm_mana: 1.75
+potion_life: 1.5
+potion_mana: 1.5
+spell_life: 1.5
+mana_cost: 0.75
+magic_to_hit: 60
+melee_to_hit: 50
+ranged_to_hit: 60
+attack_frames: default=18 axe=22 bow=12 staff=16
+spell_frames: 16
+hit_frames: 7
+flags: dual_wield blade_and_bow_damage full_missile_bonus
+key: bard
+spell_to_hit: 10
+heal_boost: 1
+skill: identify
+voice: WARR
+female_voice: ROGUE
+text_prefix: B
+oily: dex 1
+oily: mag 1
+slain_hero: bastard_sword
+
+internal_name: barbarian
+name: Barbarian
+str: 40
+mag: 0
+dex: 20
+vit: 25
+max_str: 255
+max_mag: 0
+max_dex: 55
+max_vit: 150
+to_blk: 30
+adj_life: 18
+adj_mana: 0
+lvl_life: 2
+lvl_mana: 0
+chr_life: 2
+chr_mana: 1
+itm_life: 2.5
+itm_mana: 1
+potion_life: 2
+potion_mana: 1
+spell_life: 2
+mana_cost: 1
+magic_to_hit: 50
+melee_to_hit: 50
+ranged_to_hit: 50
+attack_frames: default=16 axe=20
+spell_frames: 20
+hit_frames: 6
+flags: critical_strike iron_skin natural_resistance heavy_weapon_damage vitality_damage half_shield flinch_resist
+key: barbarian
+heal_boost: 2
+skill: rage
+voice: WARR
+female_voice: ROGUE
+oily: vit 2
+slain_hero: battle_axe

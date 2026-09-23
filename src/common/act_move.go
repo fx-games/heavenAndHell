@@ -48,7 +48,7 @@ func (d *MoveAction) Execute(context ActionContext) []Action {
 	d.originPos = actor.MapPosition()
 	gameMap.MoveActor(actor, d.targetPos) // write state
 	if d.Step {
-		playD1SfxAt(context, "PS_WALK1", d.targetPos)
+		playSfxAt(context, "PS_WALK1", d.targetPos)
 	}
 
 	context.ActionBroker.Emit(Moved{Actor: actor, From: d.originPos, To: d.targetPos, Delay: d.animationDelay,
@@ -81,7 +81,7 @@ func PlayerMoveToAttack(actor *Actor, relativeDirection geometry.Point, forceAtt
 			return NewOpenDoorAction(NewActorCause("Open door", actor), actor, targetPos)
 		} else {
 			objectAtPos.ActorBumpedInto(actor)
-			if o, ok := objectAtPos.(*D1Object); ok && o.UsesTurn(actor) {
+			if o, ok := objectAtPos.(*Prop); ok && o.UsesTurn(actor) {
 				state.factory.ActionBroker.Execute(NewEndPlayerTurnAction(NewActorCause("Operate", actor), 10))
 				return nil
 			}
@@ -93,10 +93,10 @@ func PlayerMoveToAttack(actor *Actor, relativeDirection geometry.Point, forceAtt
 	if isActorAt {
 		if actorAtPos.IsVendor() && !forceAttack {
 			return NewTalkToAction(NewActorCause("Talk to", actor), actorAtPos)
-		} else if mon := actorAtPos.d1Monster; mon != nil && mon.TalkMsg != "" && actor.hero != nil && !forceAttack {
-			state.factory.TalkToD1Monster(actorAtPos) // TalktoMonster: a monster with something to say is talked to, not hit
+		} else if mon := actorAtPos.monster; mon != nil && mon.TalkMsg != "" && actor.hero != nil && !forceAttack {
+			state.factory.TalkToMonster(actorAtPos) // TalktoMonster: a monster with something to say is talked to, not hit
 			return nil
-		} else if actorAtPos.d1Monster != nil && actorAtPos.d1Monster.Golem && !forceAttack {
+		} else if actorAtPos.monster != nil && actorAtPos.monster.Golem && !forceAttack {
 			return NewSwapPositionsAction(NewActorCause("Swap", actor), actor, actorAtPos, true)
 		} else if actor.hero != nil && actor.GetEquipment().GetWeapon(RangedAttack) != nil { // D1 bows shoot point-blank
 			return NewRangedAttackAction(NewActorCause("Ranged attack", actor), actor, targetPos)

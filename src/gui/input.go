@@ -195,7 +195,7 @@ func (u *UIController) handleKeyboardInput() {
 		u.ShowLog()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		u.OpenTextWindow(util.ToLabelText(u.context.GameState().D1QuestLog()))
+		u.OpenTextWindow(util.ToLabelText(u.context.GameState().QuestLogEntries()))
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyZ) {
 		act.RestUntilHealed()
@@ -310,6 +310,9 @@ func (u *UIController) handleMouseInput() {
 			u.updateMapTileHoverInfo(newMapPos)
 		}
 
+	}
+	if _, wheelY := ebiten.Wheel(); wheelY != 0 {
+		u.OnMouseWheel(mousePosInPixelsX, mousePosInPixelsY, wheelY)
 	}
 	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 		u.endIconDrag(mousePosInPixelsX, mousePosInPixelsY)

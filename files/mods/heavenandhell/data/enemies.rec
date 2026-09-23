@@ -4,14 +4,23 @@
 #   internal_name     id (D1's MT_* name, or "rat"); required
 #   name              shown name
 #   icon              icons/actors.rec id, e.g. monster.nzombie
+#   tint              "R G B" its icon is tinted with (variants of one family share an icon); empty: none
 #   ascii / unicode / cp437   the glyph in the text renderers
 #   color             "R G B", the glyph's colour
-#   graphics_family / graphics_size   D1's graphics folder and its memory budget per level (level monster mix)
-#   frames / rate     six numbers each: animation lengths and speeds for stand, walk, attack, hit, death, special
+#   graphics_family   D1's graphics folder (variants share it; some D1 rules read it)
+#   speed_move        AUT a step takes (10 = one normal turn); default 10
+#   speed_attack      AUT an attack takes, divided by an equipped weapon's weapon_speed; default 10
+#   speed_recovery    AUT a hard hit costs it (D1: hit animation minus the attack after the blow); 0 = none
+#   special_one_in    the Fallen's howl: 1 in N per turn it stands around
+#   flee_distance     how far it runs when a comrade dies within 5 cells (AI_FALLEN's fear); 0: it stands
 # Where it spawns:
 #   dlvl              the shallowest level it appears on; max_dlvl the deepest (0: no limit)
 #   level             its monster level (to-hit, experience, drops); defaults to dlvl
-#   available         0 never spawns at random (only placed by quests or rooms); otherwise it may
+#   random_spawn      false: never rolled at random, only placed by quests, rooms or group_spawn (default true)
+#   spawn_cost        what the type costs of a level's 4000 spawn budget (D1: its graphics' memory); a level
+#                     draws its monster types at random until the budget is spent; 0 (default): free
+#   spawn_weight      relative odds among the monsters that can appear at a depth (default 1; dungen levels without
+#                     monster lines only, see levels.rec)
 #   out_of_depth_chance / min_level_for_ood   chance to appear above its dlvl, from this dungeon level on
 #   group_spawn       companions spawned with it: "<internal_name>" or "<internal_name>(<count or min-max>)"; repeatable
 # Combat:
@@ -19,20 +28,21 @@
 #                     a number; a monster without an ai takes it as stated
 #   damage / damage2  its first and second attack's damage, same notation
 #   hit / hit2        to-hit of each attack (without an ai: defaults to 5 x stats_dexterity)
-#   afnum / afnum2    animation frame on which each attack lands
 #   magic_res / magic_res2   resistance and immunity bits (D1's mMagicRes: IMUNE_/RESIST_ magic, fire, lightning)
-#   treasure          what it drops (D1's mTreasure): 0x4000 never drops anything, 0x8000 + n always drops unique item n
+#   drops             "none": never drops anything; a unique item's id ("the_undead_crown", its name as a slug):
+#                     always drops it;
+#                     unset: the usual roll
 #   stats_<stat>      stats_armor_class and stats_experience are its AC and experience; stats_strength /
 #                     _dexterity / _intelligence feed the skill-driven combat of a monster without an ai
-#   base_speed        how fast it acts, for a monster without an ai
 # Behaviour:
 #   ai                a D1 brain (AI_ZOMBIE, AI_SKELSD, ...; see monsters.rec); empty: skills and aggro_range drive it
 #   class             MC_UNDEAD, MC_DEMON or MC_ANIMAL (hero.rec's weapon bonuses and some spells read it)
-#   flags             bits: 0x01 hidden, 0x10 fights other monsters, 0x20 golem, 0x80 knocks back, 0x100 searches,
-#                     0x200 opens doors, 0x1000 no life steal
-#   int               its intelligence (D1's mInt: how clever its ai plays)
+#   ai_level          0-3, how sharp its D1 ai plays (D1's mInt): more attacks and shots, shorter pauses, reacts
+#                     from farther away
 #   aggro_range       how far it notices the hero, for a monster without an ai
-#   tags              "a | b": unique (never rolled at random, it lives in its room), no_corpse, flying
+#   tags              "a | b": unique (never rolled at random, it lives in its room), no_corpse, flying,
+#                     hidden (invisible), knockback (its melee pushes the hero back), searches (hunts the hero
+#                     down from afar), opens_doors
 #   targeted_skill / untargeted_skill   skills from effects/*.rec it uses; repeatable
 #   equipment         an item it carries, by internal_name; repeatable
 # Words:
@@ -54,7 +64,6 @@ cp437: r
 unicode: r
 color: 120 120 120
 dlvl: 1
-base_speed: 10
 damage: 1d3
 health: 1d8
 stats_armor_class: 0
@@ -66,7 +75,6 @@ group_spawn: rat(0-1)
 aggro_range: 4
 death_string: %s squeaks in agony and dies.
 death_string: %s meets the Death of Rats.
-available: 1
 
 name: a skeleton
 internal_name: skeleton
@@ -74,7 +82,6 @@ icon: monster.skeleton
 ascii: u
 color: 200 200 200
 dlvl: 1
-base_speed: 9
 damage: 1d3+1
 health: 1d8
 stats_armor_class: 0
@@ -83,15 +90,16 @@ stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s crumbles to dust.
 death_string: %s falls apart.
-available: 1
+speed_move: 12
+speed_attack: 12
 
 name: a skeleton archer
+tint: 160 200 255
 internal_name: skeleton_archer
 icon: monster.skeleton_archer
 ascii: u
 color: 191 169 147
 dlvl: 2
-base_speed: 9
 damage: 1d4
 health: 2d8+2
 stats_armor_class: 0
@@ -102,15 +110,16 @@ stats_intelligence: 5
 equipment: short_bow
 death_string: %s crumbles to dust.
 death_string: %s falls apart.
-available: 1
+speed_move: 12
+speed_attack: 12
 
 name: a skeleton warrior
+tint: 255 190 120
 internal_name: skeleton_warrior
 icon: monster.skeleton_warrior
 dlvl: 2
 ascii: u
 color: 247 246 245
-base_speed: 9
 damage: 1d6+1
 health: 2d8+2
 stats_armor_class: 1
@@ -121,15 +130,16 @@ stats_intelligence: 5
 equipment: dagger
 death_string: %s crumbles to dust.
 death_string: %s falls apart.
-available: 1
+speed_move: 12
+speed_attack: 12
 
 name: a skeleton captain
+tint: 255 110 110
 internal_name: skeleton_captain
 icon: monster.skeleton_captain
 ascii: u
 color: 189 136 136
 dlvl: 3
-base_speed: 9
 damage: 1d8+1
 health: 3d8+3
 stats_armor_class: 2
@@ -141,7 +151,8 @@ equipment: dagger
 equipment: hard_leather_cap
 death_string: %s crumbles to dust.
 death_string: %s falls apart.
-available: 1
+speed_move: 12
+speed_attack: 12
 
 name: a bat
 internal_name: bat
@@ -149,7 +160,6 @@ icon: monster.bat
 ascii: b
 color: 147 143 201
 dlvl: 1
-base_speed: 12
 damage: 1d3
 health: 1d8
 stats_armor_class: 0
@@ -161,13 +171,14 @@ tags: flying
 aggro_range: 2
 death_string: %s crumbles to dust.
 death_string: %s falls apart.
-available: 1
+speed_move: 7
+speed_attack: 7
 
 name: a cave bear
+tint: 160 200 255
 internal_name: caveling_bear
 icon: monster.caveling_bear
 dlvl: 5
-base_speed: 10
 damage: 2d6
 health: 5d8
 stats_armor_class: 1
@@ -177,13 +188,12 @@ stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s dies a bloody death.
 death_string: %s bites the dust.
-available: 1
 
 name: a caveling
+tint: 255 190 120
 internal_name: caveling
 icon: monster.caveling
 dlvl: 5
-base_speed: 10
 damage: 1d6
 health: 5d8
 stats_armor_class: 0
@@ -193,15 +203,14 @@ stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s dies a bloody death.
 death_string: %s bites the dust.
-available: 1
 
 name: an imp
+tint: 255 110 110
 internal_name: fallen
 icon: monster.fallen
 ascii: i
 color: 219 42 68
 dlvl: 1
-base_speed: 8
 damage: 1d5
 health: 1d8
 stats_armor_class: 0
@@ -211,7 +220,8 @@ stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s stops existing.
 death_string: %s bursts into pieces.
-available: 1
+speed_move: 16
+speed_attack: 16
 
 name: a fiend
 internal_name: fiend
@@ -219,7 +229,6 @@ icon: monster.fiend
 ascii: f
 color: 219 42 68
 dlvl: 7
-base_speed: 10
 damage: 3d4
 health: 7d8
 stats_armor_class: 1
@@ -229,15 +238,14 @@ stats_dexterity: 12
 stats_intelligence: 5
 death_string: %s bursts into flames.
 death_string: %s violently explodes.
-available: 1
 
 name: a horned fiend
+tint: 160 200 255
 internal_name: fiend_horned
 icon: monster.fiend_horned
 ascii: f
 color: 214 188 192
 dlvl: 7
-base_speed: 10
 damage: 5d4
 health: 7d8
 stats_armor_class: 1
@@ -247,15 +255,14 @@ stats_dexterity: 12
 stats_intelligence: 5
 death_string: %s bursts into flames.
 death_string: %s violently explodes.
-available: 1
 
 name: a horned fiend with knife
+tint: 255 190 120
 internal_name: fiend_armed
 icon: monster.fiend_armed
 ascii: f
 color: 214 188 192
 dlvl: 7
-base_speed: 10
 damage: 2d6+1
 health: 7d8
 stats_armor_class: 1
@@ -266,15 +273,14 @@ stats_intelligence: 5
 equipment: dagger
 death_string: %s bursts into flames.
 death_string: %s violently explodes.
-available: 1
 
 name: a horned fiend with whip
+tint: 255 110 110
 internal_name: fiend_whip
 icon: monster.fiend_whip
 ascii: f
 color: 214 188 192
 dlvl: 7
-base_speed: 10
 damage: 3d6
 health: 7d8
 stats_armor_class: 1
@@ -285,7 +291,6 @@ stats_intelligence: 5
 equipment: dagger
 death_string: %s bursts into flames.
 death_string: %s violently explodes.
-available: 1
 
 name: a horned fiend with glaive
 internal_name: fiend_glaive
@@ -293,7 +298,6 @@ icon: monster.fiend_glaive
 ascii: f
 color: 214 188 192
 dlvl: 7
-base_speed: 10
 damage: 3d6+1
 health: 7d8
 stats_armor_class: 2
@@ -304,15 +308,14 @@ stats_intelligence: 5
 equipment: dagger
 death_string: %s bursts into flames.
 death_string: %s violently explodes.
-available: 1
 
 name: a big horned fiend
+tint: 160 200 255
 internal_name: fiend_big
 icon: monster.fiend_big
 ascii: f
 color: 240 2 39
 dlvl: 7
-base_speed: 10
 damage: 3d6+1
 health: 7d8
 stats_armor_class: 2
@@ -322,15 +325,14 @@ stats_dexterity: 12
 stats_intelligence: 5
 death_string: %s bursts into flames.
 death_string: %s violently explodes.
-available: 1
 
 name: a fallen warrior
+tint: 255 190 120
 internal_name: fallen_warrior
 icon: monster.fallen_warrior
 ascii: i
 color: 189 47 69
 dlvl: 2
-base_speed: 8
 damage: 1d5
 health: 2d8
 stats_armor_class: 0
@@ -341,15 +343,16 @@ stats_intelligence: 5
 equipment: dagger
 death_string: %s stops existing.
 death_string: %s bursts into pieces.
-available: 1
+speed_move: 16
+speed_attack: 16
 
 name: a fallen archer
+tint: 255 110 110
 internal_name: fallen_archer
 icon: monster.fallen_archer
 ascii: i
 color: 189 111 47
 dlvl: 4
-base_speed: 8
 damage: 1d5
 health: 4d8
 stats_armor_class: 0
@@ -360,7 +363,8 @@ stats_intelligence: 5
 equipment: short_bow
 death_string: %s stops existing.
 death_string: %s bursts into pieces.
-available: 1
+speed_move: 16
+speed_attack: 16
 
 name: a fallen shaman
 internal_name: fallen_shaman
@@ -368,7 +372,6 @@ icon: monster.fallen_shaman
 ascii: i
 color: 38 98 189
 dlvl: 5
-base_speed: 8
 damage: 1d4
 health: 5d8
 stats_armor_class: 0
@@ -379,13 +382,14 @@ stats_intelligence: 8
 targeted_skill: fire_bresen
 death_string: %s stops existing.
 death_string: %s bursts into pieces.
-available: 1
+speed_move: 16
+speed_attack: 16
 
 name: a caveling with weapon
+tint: 160 200 255
 internal_name: caveling_armed
 icon: monster.caveling_armed
 dlvl: 5
-base_speed: 10
 damage: 2d6
 health: 5d8
 stats_armor_class: 0
@@ -396,13 +400,12 @@ stats_intelligence: 5
 equipment: dagger
 death_string: %s dies a bloody death.
 death_string: %s bites the dust.
-available: 1
 
 name: a caveling with axes
+tint: 255 190 120
 internal_name: caveling_axe
 icon: monster.caveling_axe
 dlvl: 5
-base_speed: 10
 damage: 2d6+1
 health: 5d8
 stats_armor_class: 0
@@ -413,13 +416,12 @@ stats_intelligence: 5
 equipment: dagger
 death_string: %s dies a bloody death.
 death_string: %s bites the dust.
-available: 1
 
 name: a caveling with a big axe
+tint: 255 110 110
 internal_name: caveling_big_axe
 icon: monster.caveling_big_axe
 dlvl: 5
-base_speed: 10
 damage: 2d6+4
 health: 5d8
 stats_armor_class: 1
@@ -430,13 +432,11 @@ stats_intelligence: 5
 equipment: dagger
 death_string: %s dies a bloody death.
 death_string: %s bites the dust.
-available: 1
 
 name: a possessed thief
 internal_name: thief_possessed
 icon: monster.thief_possessed
 dlvl: 6
-base_speed: 10
 damage: 1d6
 health: 6d8
 stats_armor_class: 0
@@ -448,13 +448,12 @@ equipment: dagger
 targeted_skill: steal_item_vanish
 death_string: %s dies.
 death_string: %s has stolen his last piece of gold.
-available: 1
 
 name: a skeleton sorcerer
+tint: 160 200 255
 internal_name: skeleton_sorcerer
 icon: monster.skeleton_sorcerer
 dlvl: 4
-base_speed: 9
 damage: 1d4+1
 health: 4d8
 stats_armor_class: 0
@@ -465,13 +464,14 @@ stats_intelligence: 6
 targeted_skill: mind_push
 death_string: %s crumbles to dust.
 death_string: %s falls apart.
-available: 1
+speed_move: 12
+speed_attack: 12
 
 name: a kestrel
+tint: 255 190 120
 internal_name: rogue_kestrel
 icon: monster.rogue_kestrel
 dlvl: 9
-base_speed: 10
 damage: 1d4
 health: 9d8
 stats_armor_class: 0
@@ -480,13 +480,12 @@ stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s dies.
-available: 1
 
 name: a bat
+tint: 255 110 110
 internal_name: rogue_bat
 icon: monster.rogue_bat
 dlvl: 9
-base_speed: 10
 damage: 1d2
 health: 9d8
 stats_armor_class: 0
@@ -495,13 +494,11 @@ stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s dies.
-available: 1
 
 name: an emu
 internal_name: rogue_emu
 icon: monster.rogue_emu
 dlvl: 9
-base_speed: 10
 damage: 1d6
 health: 9d8
 stats_armor_class: 0
@@ -510,13 +507,12 @@ stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s dies.
-available: 1
 
 name: a jackal
+tint: 160 200 255
 internal_name: rogue_jackal
 icon: monster.rogue_jackal
 dlvl: 9
-base_speed: 10
 damage: 1d6+2
 health: 9d8
 stats_armor_class: 0
@@ -525,13 +521,12 @@ stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s dies.
-available: 1
 
 name: an orc
+tint: 255 190 120
 internal_name: rogue_orc
 icon: monster.rogue_orc
 dlvl: 9
-base_speed: 10
 damage: 2d6
 health: 9d8
 stats_armor_class: 1
@@ -540,13 +535,12 @@ stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s dies.
-available: 1
 
 name: a snake
+tint: 255 110 110
 internal_name: rogue_snake
 icon: monster.rogue_snake
 dlvl: 9
-base_speed: 10
 damage: 1d8
 health: 9d8
 stats_armor_class: 0
@@ -555,13 +549,11 @@ stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s dies.
-available: 1
 
 name: a thief
 internal_name: thief_goblin
 icon: monster.thief_goblin
 dlvl: 11
-base_speed: 10
 damage: 1d6+2
 health: 11d8
 stats_armor_class: 0
@@ -570,13 +562,12 @@ stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s dies.
-available: 1
 
 name: a goatman
+tint: 160 200 255
 internal_name: goatman
 icon: monster.goatman
 dlvl: 11
-base_speed: 10
 damage: 2d6+3
 health: 11d8
 stats_armor_class: 1
@@ -585,13 +576,12 @@ stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s dies.
-available: 1
 
 name: a goatman archer
+tint: 255 190 120
 internal_name: goatman_archer
 icon: monster.goatman_archer
 dlvl: 11
-base_speed: 10
 damage: 1d6
 health: 11d8
 stats_armor_class: 0
@@ -600,13 +590,12 @@ stats_strength: 10
 stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s dies.
-available: 1
 
 name: Lucifer
+tint: 255 110 110
 internal_name: lucifer
 icon: monster.lucifer
 dlvl: 8
-base_speed: 14
 damage: 6d6+6
 health: 10d4+120
 stats_armor_class: 16
@@ -640,13 +629,13 @@ death_string: %s disappears in a flash of light.
 death_string: %s is gone.
 death_string: %s disappears.
 death_string: %s has left.
-available: 1
+speed_move: 5
+speed_attack: 5
 
 name: King Zedek
 internal_name: king_zedek
 icon: monster.king_zedek
 dlvl: 4
-base_speed: 9
 damage: 3d8
 health: 6d4+60
 stats_armor_class: 12
@@ -663,13 +652,14 @@ death_string: %s crumbles to legendary dust.
 death_string: %s falls apart into royal pieces.
 death_string: %s is gone from the throne.
 death_string: %s dies again.
-available: 1
+speed_move: 12
+speed_attack: 12
 
 name: Meat Jack
+tint: 160 200 255
 internal_name: meat_jack
 icon: monster.meat_jack
 dlvl: 2
-base_speed: 13
 damage: 2d6
 health: 5d4+60
 stats_armor_class: 5
@@ -695,13 +685,14 @@ death_string: %s was chopped.
 death_string: %s was diced.
 death_string: %s was sliced.
 death_string: %s was cut to pieces.
-available: 1
+speed_move: 6
+speed_attack: 6
 
 name: The Rogue
+tint: 255 190 120
 internal_name: rogue
 icon: monster.rogue
 dlvl: 10
-base_speed: 10
 damage: 2d8+2
 health: 7d8
 stats_armor_class: 11
@@ -718,13 +709,12 @@ death_string: %s ascends forever.
 death_string: %s descends forever.
 death_string: %s quaffed his last potion.
 death_string: %s dies again.
-available: 1
 
 name: a rogue dog
+tint: 255 110 110
 internal_name: rogue_dog
 icon: monster.rogue_dog
 dlvl: 10
-base_speed: 10
 damage: 1d6+2
 health: 3d8
 stats_armor_class: 4
@@ -735,13 +725,11 @@ stats_intelligence: 9
 tags: unique | no_corpse
 speech_on_sight: f
 death_string: %s goes to dog heaven.
-available: 1
 
 name: the true Shekel
 internal_name: evil_shekel
 icon: monster.evil_shekel
 dlvl: 13
-base_speed: 11
 damage: 1d6+2
 health: 12d8
 stats_armor_class: 5
@@ -752,13 +740,14 @@ stats_intelligence: 16
 tags: unique | no_corpse
 speech_on_sight: Your time has come!
 death_string: %s dies.
-available: 1
+speed_move: 8
+speed_attack: 8
 
 name: the true Kirioth
+tint: 160 200 255
 internal_name: evil_kirioth
 icon: monster.evil_kirioth
 dlvl: 12
-base_speed: 10
 damage: 1d6
 health: 12d8
 stats_armor_class: 5
@@ -769,13 +758,12 @@ stats_intelligence: 18
 tags: unique | no_corpse
 speech_on_sight: Your time has come!
 death_string: %s dies.
-available: 1
 
 name: a red knight
+tint: 255 190 120
 internal_name: adventurer_knight
 icon: monster.adventurer_knight
 dlvl: 9
-base_speed: 8
 damage: 2d6
 health: 9d8
 stats_armor_class: 8
@@ -786,13 +774,14 @@ stats_intelligence: 9
 tags: unique | no_corpse
 speech_on_sight: Your time has come!
 death_string: %s dies.
-available: 1
+speed_move: 16
+speed_attack: 16
 
 name: a false prophet
+tint: 255 110 110
 internal_name: adventurer_priest
 icon: monster.adventurer_priest
 dlvl: 9
-base_speed: 10
 damage: 1d6+1
 health: 9d8
 stats_armor_class: 6
@@ -803,13 +792,11 @@ stats_intelligence: 9
 tags: unique | no_corpse
 speech_on_sight: Your time has come!
 death_string: %s dies.
-available: 1
 
 name: a barbarian
 internal_name: adventurer_barbarian
 icon: monster.adventurer_barbarian
 dlvl: 9
-base_speed: 12
 damage: 2d6+2
 health: 9d8
 stats_armor_class: 4
@@ -820,13 +807,14 @@ stats_intelligence: 9
 tags: unique | no_corpse
 speech_on_sight: Your time has come!
 death_string: %s dies.
-available: 1
+speed_move: 7
+speed_attack: 7
 
 name: an archer in tights
+tint: 160 200 255
 internal_name: adventurer_archer
 icon: monster.adventurer_archer
 dlvl: 9
-base_speed: 12
 damage: 1d5
 health: 9d8
 stats_armor_class: 6
@@ -837,4 +825,25 @@ stats_intelligence: 9
 tags: unique | no_corpse
 speech_on_sight: Your time has come!
 death_string: %s dies.
-available: 1
+speed_move: 7
+speed_attack: 7
+
+name: a skeleton warder
+tint: 255 230 140
+internal_name: skeleton_warder
+icon: monster.skeleton_warder
+ascii: u
+color: 230 210 140
+dlvl: 3
+damage: 1d4
+health: 3d8
+stats_armor_class: 1
+stats_experience: 20
+stats_strength: 6
+stats_dexterity: 6
+stats_intelligence: 8
+untargeted_skill: shield_allies(2)
+group_spawn: skeleton(3)
+death_string: %s crumbles to dust, and its wards with it.
+speed_move: 12
+speed_attack: 12

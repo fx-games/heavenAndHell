@@ -3,19 +3,22 @@ package common
 import (
 	"io/fs"
 	"path"
+	"regexp"
 	"slices"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/expr-lang/expr"
 
 	"rpg/files"
-	"rpg/src/d1"
 	"rpg/src/defs"
+	"rpg/src/rules"
 )
 
-func loadQuestData(t *testing.T) *d1.Data {
+func loadQuestData(t *testing.T) *rules.Data {
 	t.Helper()
-	data, err := d1.Load(files.GetFileSystem())
+	data, err := rules.Load(files.GetFileSystem())
 	if err != nil {
 		t.Skipf("no mod loaded: %v", err)
 	}
@@ -26,7 +29,7 @@ func loadQuestData(t *testing.T) *d1.Data {
 }
 
 // forEachMod runs a content check against every mod's quests, not just the one TestMain selected.
-func forEachMod(t *testing.T, check func(t *testing.T, data *d1.Data)) {
+func forEachMod(t *testing.T, check func(t *testing.T, data *rules.Data)) {
 	for _, mod := range []string{"d1", "heavenandhell"} {
 		t.Run(mod, func(t *testing.T) {
 			withMod(t, mod)
@@ -37,10 +40,12 @@ func forEachMod(t *testing.T, check func(t *testing.T, data *d1.Data)) {
 
 // Every quest the mod declares is usable: a key nothing else uses, a name, and a log text.
 func TestQuestRecordsAreWellFormed(t *testing.T) {
-	forEachMod(t, func(t *testing.T, data *d1.Data) {
+	forEachMod(t, func(t *testing.T, data *rules.Data) {
 		seen := map[string]bool{}
 		for i, q := range data.QuestDefs {
 			switch {
+			case q.Key == "" && i < rules.NumQuests: // an engine quest this mod does not declare
+				continue
 			case q.Key == "":
 				t.Errorf("quest %d: no key", i)
 			case seen[q.Key]:
@@ -57,7 +62,7 @@ func TestQuestRecordsAreWellFormed(t *testing.T) {
 
 // Every trigger names an event the engine fires, a condition that compiled, and outcomes the engine has.
 func TestTriggersResolve(t *testing.T) {
-	forEachMod(t, func(t *testing.T, data *d1.Data) {
+	forEachMod(t, func(t *testing.T, data *rules.Data) {
 		keys := map[string]bool{}
 		for _, q := range data.QuestDefs {
 			keys[q.Key] = true
@@ -79,11 +84,11 @@ func TestTriggersResolve(t *testing.T) {
 				// the outcomes that name a quest must name one that exists
 				switch do.Name() {
 				case "take_item", "drop_item", "spawn_item":
-					if _, ok := data.ItemIdx[do.GetString(0)]; !ok {
+					if _, ok := data.ItemsByName[do.GetString(0)]; !ok {
 						t.Errorf("trigger %d (%s %s): %s names unknown item %q", i, tr.Event, tr.Subject, do.Name(), do.GetString(0))
 					}
 				case "drop_unique":
-					if !slices.ContainsFunc(data.UniqueItems, func(u d1.UniqueItemData) bool { return u.Name == do.GetString(0) }) {
+					if !slices.ContainsFunc(data.UniqueItems, func(u rules.UniqueItemData) bool { return u.ID == do.GetString(0) }) {
 						t.Errorf("trigger %d (%s %s): no unique item %q", i, tr.Event, tr.Subject, do.GetString(0))
 					}
 				case "say":
@@ -103,7 +108,7 @@ func TestTriggersResolve(t *testing.T) {
 // A condition may only ask about quests the mod declares: a typo in a key is a condition that is quietly always
 // false, which is the worst kind of content bug.
 func TestConditionsNameKnownQuests(t *testing.T) {
-	forEachMod(t, func(t *testing.T, data *d1.Data) {
+	forEachMod(t, func(t *testing.T, data *rules.Data) {
 		keys := map[string]bool{}
 		for _, q := range data.QuestDefs {
 			keys[q.Key] = true
@@ -112,7 +117,7 @@ func TestConditionsNameKnownQuests(t *testing.T) {
 		probe := func(key string) bool { asked[key] = true; return false }
 		probeInt := func(key string) int { asked[key] = true; return 0 }
 		env := defs.QuestEnv{Done: probe, Active: probe, Avail: probe, Logged: probe, V1: probeInt, V2: probeInt,
-			Flag: func(string) bool { return false }, Has: no}
+			Flag: func(string) bool { return false }, Has: no, Here: probe, At: no}
 		for i, tr := range data.QuestTriggers {
 			if tr.Cond() == nil {
 				continue
@@ -133,7 +138,7 @@ func TestConditionsNameKnownQuests(t *testing.T) {
 
 // selected is the triggers the engine would run for an event and subject, in order -- the matching half of
 // fireQuestTriggers, without a running game.
-func selected(data *d1.Data, event, subject string) (out []defs.Trigger) {
+func selected(data *rules.Data, event, subject string) (out []defs.Trigger) {
 	for _, tr := range data.QuestTriggers {
 		if tr.Event == event && tr.Subject == subject {
 			out = append(out, tr)
@@ -224,16 +229,16 @@ func TestDeadGuyDialogueIsExclusive(t *testing.T) {
 		wantSpeaks bool
 		wantGroans bool
 	}{
-		{"not yet started", d1.QuestInit, 0, true, false},
-		{"started, not yet spoken", d1.QuestActive, 0, true, false},
-		{"already spoken", d1.QuestActive, 1, false, true},
-		{"butcher dead", d1.QuestDone, 1, false, false},
-		{"not in this game", d1.QuestNotAvail, 0, false, false},
+		{"not yet started", rules.QuestInit, 0, true, false},
+		{"started, not yet spoken", rules.QuestActive, 0, true, false},
+		{"already spoken", rules.QuestActive, 1, false, true},
+		{"butcher dead", rules.QuestDone, 1, false, false},
+		{"not in this game", rules.QuestNotAvail, 0, false, false},
 	} {
 		env := defs.QuestEnv{
-			Done:   func(k string) bool { return k == "butcher" && c.state == d1.QuestDone },
-			Active: func(k string) bool { return k == "butcher" && c.state == d1.QuestActive },
-			Avail:  func(k string) bool { return k == "butcher" && c.state != d1.QuestNotAvail },
+			Done:   func(k string) bool { return k == "butcher" && c.state == rules.QuestDone },
+			Active: func(k string) bool { return k == "butcher" && c.state == rules.QuestActive },
+			Avail:  func(k string) bool { return k == "butcher" && c.state != rules.QuestNotAvail },
 			Has:    no,
 			Logged: no,
 			V1:     func(string) int { return c.v1 },
@@ -266,7 +271,7 @@ func zero(string) int { return 0 }
 
 // Every mod says when its game is won: some trigger ends it with end_text(text), and the text exists.
 func TestEveryModEnds(t *testing.T) {
-	forEachMod(t, func(t *testing.T, data *d1.Data) {
+	forEachMod(t, func(t *testing.T, data *rules.Data) {
 		for _, tr := range data.QuestTriggers {
 			for _, do := range tr.Do {
 				if do.Name() == "end_text" {
@@ -284,7 +289,7 @@ func TestEveryModEnds(t *testing.T) {
 // Every mod brings its own UI files: a default font from its fonts/ folder, the terminal UI's settings and the
 // hero name lists, so nothing is read from outside the mod.
 func TestEveryModHasItsUIFiles(t *testing.T) {
-	forEachMod(t, func(t *testing.T, _ *d1.Data) {
+	forEachMod(t, func(t *testing.T, _ *rules.Data) {
 		name, ok := ModSetting("Font")
 		if !ok || !slices.Contains(ModFonts(), name) {
 			t.Errorf("mod.rec's Font %q is not in the mod's fonts/ (%v)", name, ModFonts())
@@ -296,4 +301,115 @@ func TestEveryModHasItsUIFiles(t *testing.T) {
 			}
 		}
 	})
+}
+
+// A conversation says one thing, so the lines of one (event, subject) must rule each other out whatever order the
+// file lists them in. For each conversation this tries every combination of what its conditions ask about: each
+// quest's state (not available, available, active, done) and log, each flag, item and place as true or false, and
+// each number and name as every literal the conditions compare it with, one either side of each number, and
+// 0 or "". Conditions only compare against literals, so these values reach every case a condition can tell apart.
+func TestTalkTriggersAreExclusive(t *testing.T) {
+	forEachMod(t, func(t *testing.T, data *rules.Data) {
+		groups := map[string][]int{}
+		for i, tr := range data.QuestTriggers {
+			if !tr.Pass && conversationEvent(tr.Event) {
+				groups[tr.Event+" "+tr.Subject] = append(groups[tr.Event+" "+tr.Subject], i)
+			}
+		}
+		for g, lines := range groups {
+			for x, a := range lines {
+				for _, b := range lines[x+1:] {
+					checkExclusive(t, g, data.QuestTriggers[a], data.QuestTriggers[b])
+				}
+			}
+		}
+	})
+}
+
+var (
+	condCall   = regexp.MustCompile(`\b(done|active|avail|logged|v1|v2|flag|has|at|here)\("([^"]*)"\)`)
+	condBare   = regexp.MustCompile(`\b(depth|deepest|map|talk|goal|visible)\b`)
+	condNumber = regexp.MustCompile(`\b\d+\b`)
+	condQuoted = regexp.MustCompile(`"([^"]*)"`)
+)
+
+// checkExclusive tries every combination of what two lines' conditions ask about and fails if both hold in one.
+func checkExclusive(t *testing.T, g string, a, b defs.Trigger) {
+	t.Helper()
+	ints, strs := []int{0}, []string{""}
+	var vars []string
+	for _, when := range []string{a.When, b.When} {
+		for _, m := range condNumber.FindAllString(when, -1) {
+			n, _ := strconv.Atoi(m)
+			ints = append(ints, n-1, n, n+1)
+		}
+		for _, m := range condQuoted.FindAllStringSubmatch(when, -1) {
+			strs = append(strs, m[1])
+		}
+		for _, m := range condCall.FindAllStringSubmatch(when, -1) {
+			switch m[1] {
+			case "done", "active", "avail":
+				vars = append(vars, "state "+m[2])
+			default:
+				vars = append(vars, m[1]+" "+m[2])
+			}
+		}
+		vars = append(vars, condBare.FindAllString(when, -1)...)
+	}
+	slices.Sort(vars)
+	vars = slices.Compact(vars)
+	domain := func(v string) int {
+		switch kind, _, _ := strings.Cut(v, " "); kind {
+		case "state":
+			return 4
+		case "v1", "v2", "depth", "deepest":
+			return len(ints)
+		case "map", "talk":
+			return len(strs)
+		case "goal":
+			return 5
+		}
+		return 2
+	}
+	pick := make([]int, len(vars))
+	at := func(v string) int { // an input neither condition reads keeps its first value
+		if i, ok := slices.BinarySearch(vars, v); ok {
+			return pick[i]
+		}
+		return 0
+	}
+	state := func(k string) int { return at("state " + k) } // 0 not available, 1 available, 2 active, 3 done
+	coin := func(kind string) func(string) bool { return func(k string) bool { return at(kind+" "+k) == 1 } }
+	num := func(kind string) func(string) int { return func(k string) int { return ints[at(kind+" "+k)] } }
+	holds := func(tr defs.Trigger, env defs.QuestEnv) bool {
+		p := tr.Cond()
+		if p == nil {
+			return true
+		}
+		out, err := expr.Run(p, env)
+		return err == nil && out == true
+	}
+	for {
+		env := defs.QuestEnv{
+			Done: func(k string) bool { return state(k) == 3 }, Active: func(k string) bool { return state(k) == 2 },
+			Avail: func(k string) bool { return state(k) != 0 }, Logged: coin("logged"), Flag: coin("flag"),
+			V1: num("v1"), V2: num("v2"), Has: coin("has"), At: coin("at"), Here: coin("here"),
+			Depth: ints[at("depth")], Deepest: ints[at("deepest")], Map: strs[at("map")], Talk: strs[at("talk")],
+			Goal: []string{"normal", "attack2", "inquiring", "talking", "other"}[at("goal")], Visible: at("visible") == 1,
+		}
+		if holds(a, env) && holds(b, env) {
+			t.Errorf("%s: %q and %q hold together", g, a.When, b.When)
+			return
+		}
+		k := 0 // next combination (mixed radix)
+		for ; k < len(vars); k++ {
+			if pick[k]++; pick[k] < domain(vars[k]) {
+				break
+			}
+			pick[k] = 0
+		}
+		if k == len(vars) {
+			return
+		}
+	}
 }

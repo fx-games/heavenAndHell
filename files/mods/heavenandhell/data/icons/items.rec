@@ -351,3 +351,15 @@ icon: 497
 
 internal_name: item.note
 icon: 139
+
+internal_name: item.gold_small
+name: Gold (small pile)
+icon: 271
+
+internal_name: item.gold_medium
+name: Gold (medium pile)
+icon: 272
+
+internal_name: item.gold_large
+name: Gold (large pile)
+icon: 273

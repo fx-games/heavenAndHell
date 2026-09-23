@@ -7,7 +7,7 @@ import (
 	"math"
 	"math/rand"
 	"rpg/src/geometry"
-	"rpg/src/ldtk"
+	"rpg/src/hhm"
 	"slices"
 	"strings"
 )
@@ -319,16 +319,16 @@ type TileIDs struct{ Wall, Floor int }
 // LoadTemplatesFrom adds every non-decoration template whose name starts with prefix. A template whose
 // connectors do not sit on the edge of its floor is refused: placed, it would open onto nothing, and that is
 // what cut levels in two.
-func (g *AccretionGenerator) LoadTemplatesFrom(templates *ldtk.Project, prefix string, ids TileIDs) error {
+func (g *AccretionGenerator) LoadTemplatesFrom(templates *hhm.Project, prefix string, ids TileIDs) error {
 	for _, level := range templates.Levels {
-		if !strings.HasPrefix(level.Identifier, prefix) || level.PropertyByIdentifier("IsDecoration").AsBool() {
+		if !strings.HasPrefix(level.Name, prefix) || level.Props.IsDecoration {
 			continue
 		}
 		room := templateFromLevel(level, ids)
 		for _, pos := range getSortedKeys(room.availableConnections) {
 			c := room.availableConnections[pos]
 			if !room.floorTiles[pos.Sub(c.OutwardDirection.ToPoint())] {
-				return fmt.Errorf("dungen: template %s: connector at %v faces %v, away from no floor tile", level.Identifier, pos, c.OutwardDirection)
+				return fmt.Errorf("dungen: template %s: connector at %v faces %v, away from no floor tile", level.Name, pos, c.OutwardDirection)
 			}
 		}
 		g.roomTemplates = append(g.roomTemplates, room)
@@ -336,58 +336,45 @@ func (g *AccretionGenerator) LoadTemplatesFrom(templates *ldtk.Project, prefix s
 	return nil
 }
 
-func templateFromLevel(level *ldtk.Level, ids TileIDs) *DungeonRoom {
-	tileLayer := level.LayerByIdentifier("Tiles")
-	metaLayer := level.LayerByIdentifier("Meta")
-
+func templateFromLevel(level *hhm.Level, ids TileIDs) *DungeonRoom {
 	var floorTiles []geometry.Point
 	var wallTiles []geometry.Point
-	for _, tile := range tileLayer.Tiles {
-		posX, posY := tileLayer.ToGridPosition(tile.Position[0], tile.Position[1])
-		pos := geometry.Point{X: posX, Y: posY}
-		if tile.ID == ids.Floor {
-			floorTiles = append(floorTiles, pos)
-		} else if tile.ID == ids.Wall {
-			wallTiles = append(wallTiles, pos)
-		}
-	}
-
-	var connectors = make(map[geometry.Point]RoomConnection)
-
-	var exposedPoints []geometry.Point
-	for _, entity := range metaLayer.Entities {
-		posX, posY := metaLayer.ToGridPosition(entity.Position[0], entity.Position[1])
-		pos := geometry.Point{X: posX, Y: posY}
-
-		if strings.HasPrefix(entity.Identifier, "POI") {
-			exposedPoints = append(exposedPoints, pos)
-		}
-		if strings.HasSuffix(entity.Identifier, "Connector") {
-			direction := compassDirectionFromId(entity.Identifier)
-			idProp := entity.PropertyByIdentifier("ConnectionID").AsInt()
-			connectors[pos] = RoomConnection{
-				OutwardDirection: direction,
-				ConnectionID:     idProp,
+	for y := 0; y < level.Height; y++ {
+		for x := 0; x < level.Width; x++ {
+			pos := geometry.Point{X: x, Y: y}
+			switch level.TileAt(x, y) {
+			case ids.Floor:
+				floorTiles = append(floorTiles, pos)
+			case ids.Wall:
+				wallTiles = append(wallTiles, pos)
 			}
 		}
 	}
 
-	slotId := level.PropertyByIdentifier("SlotID").AsInt()
-	plugsIn := level.PropertyByIdentifier("PlugsIntoSlotID").AsInt()
-	canBeLit := level.PropertyByIdentifier("CanBeLit").AsBool()
-	dRoom := NewDungeonRoomFromTemplate(level.Identifier)
-	dRoom.SetSlotId(slotId)
-	dRoom.SetPlugsIntoSlotId(plugsIn)
+	var connectors = make(map[geometry.Point]RoomConnection)
+	var exposedPoints []geometry.Point
+	for _, entity := range level.Entities {
+		pos := geometry.Point{X: entity.X, Y: entity.Y}
+		if strings.HasPrefix(entity.Kind, "POI") {
+			exposedPoints = append(exposedPoints, pos)
+		}
+		if strings.HasSuffix(entity.Kind, "Connector") {
+			connectors[pos] = RoomConnection{
+				OutwardDirection: compassDirectionFromId(entity.Kind),
+				ConnectionID:     entity.Int("ConnectionID"),
+			}
+		}
+	}
+
+	dRoom := NewDungeonRoomFromTemplate(level.Name)
+	dRoom.SetSlotId(level.Props.SlotID)
+	dRoom.SetPlugsIntoSlotId(level.Props.PlugsIntoSlotID)
 	dRoom.SetFloorTiles(floorTiles)
 	dRoom.SetIncludedWallTiles(wallTiles)
 	dRoom.SetPOIPositions(exposedPoints)
 	dRoom.SetConnections(connectors)
-	dRoom.SetCanBeLit(canBeLit)
-
-	if !level.PropertyByIdentifier("UsesDecoration").IsNull() {
-		dRoom.SetDecorationLevelName(level.PropertyByIdentifier("UsesDecoration").AsString())
-	}
-
+	dRoom.SetCanBeLit(level.Props.CanBeLit)
+	dRoom.SetDecorationLevelName(level.Props.UsesDecoration)
 	return dRoom
 }
 
