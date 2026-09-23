@@ -954,3 +954,23 @@ internal_name: tile.hell_floor_blocks_missiles
 name: Hell Floor (blocks missiles)
 same_as: tile.dungeon_red_earth_floor
 tags: blocks_missiles
+
+internal_name: tile.cathedral_pillar
+name: Cathedral Pillar
+same_as: tile.pillar
+tags: blocks_movement, blocks_missiles
+
+internal_name: tile.catacombs_pillar
+name: Catacombs Pillar
+same_as: tile.pillar
+tags: blocks_movement, blocks_missiles
+
+internal_name: tile.caves_pillar
+name: Caves Pillar
+same_as: tile.pillar
+tags: blocks_movement, blocks_missiles
+
+internal_name: tile.hell_pillar
+name: Hell Pillar
+same_as: tile.pillar
+tags: blocks_movement, blocks_missiles

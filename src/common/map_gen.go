@@ -127,7 +127,7 @@ func init() {
 		levelStrategies[name] = d1Strategy{p}
 	}
 	for name, p := range dungen.Layouts {
-		levelStrategies[name] = layoutStrategy{p}
+		levelStrategies[name] = layoutStrategy{dungen.WithPasses(p)}
 	}
 }
 

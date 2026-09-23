@@ -1,25 +1,257 @@
-package main
+package dungen
 
 import (
+	"fmt"
+	"io/fs"
 	"math/rand"
+	"slices"
 
-	"rpg/src/dungen"
+	"rpg/src/dungeon"
+	"rpg/src/recfile"
 )
+
+// Passes are what any layout may run over the level it carved, each switched on by its own levels.rec knob.
+// They work on the layout's grid; with scale 2 that grid is drawn two by two cells (D1's megatiles, toCells),
+// which is how D1's level types are laid out at their own scale. Every level they touch ends connected.
+type Passes struct {
+	Grow         int         // grow rectangular rooms up to this side until single walls part them; 0: off
+	HallChance   float64     // a grown room at least 6 wide and 8 long becomes a pillared hall (two arcades)
+	Spine        bool        // D1's first cathedral room: up to three pillared chambers on a long pillared hall
+	Mirror       bool        // mirror the layout left-right and top-bottom (D1 L4 builds a quadrant and mirrors it)
+	ArchChance   float64     // a straight wall between two rooms becomes an arcade (`#.#.#`)
+	LoopChance   float64     // chance each wall between two spots farther than LoopDistance apart on foot opens
+	LoopDistance int         // on foot, in grid cells
+	Lava         *NoiseConfig // its lakes and rivers become lava, ringed with floor; fords keep the level whole
+	Posts        float64     // chance a room cell with only room or wall round it gets a pillar
+	DoorChance   float64     // chance each doorway (a 1-wide gap, or a door the layout made) is a door; <0: leave doors be
+	Canvas       int         // the layout is centred on a canvas this many cells square; 0: its own size
+	Scale        int         // 2 draws each cell as 2x2 (D1's megatiles); 1 leaves it
+}
+
+// staged is a layout with passes: what a levels.rec record naming any pass knob builds.
+type staged struct {
+	Layout
+	Passes
+}
+
+// passKnobs are the fields that switch passes on: a record naming none of them builds its layout bare.
+var passKnobs = []string{"grow", "hall_chance", "spine", "mirror", "arch_chance", "loop_chance", "loop_distance",
+	"lava_rivers", "lava_water", "posts", "door_chance", "canvas", "scale"}
+
+// withPasses parses a layout record, wrapping it in its passes when it names any.
+type withPasses struct{ dungeon.Parser }
+
+// WithPasses lets a layout generator's records turn the passes on.
+func WithPasses(p dungeon.Parser) dungeon.Parser { return withPasses{p} }
+
+func (w withPasses) Parse(r recfile.Record) (dungeon.Config, error) {
+	cfg, err := w.Parser.Parse(r)
+	if err != nil || !slices.ContainsFunc(passKnobs, func(k string) bool { _, ok := dungeon.Field(r, k); return ok }) {
+		return cfg, err
+	}
+	l, ok := cfg.(Layout)
+	if !ok {
+		return nil, fmt.Errorf("levels.rec: passes need a layout generator")
+	}
+	p := Passes{LoopDistance: 8, DoorChance: -1, Scale: 1}
+	var lavaRivers int
+	lava := NoiseConfig{Scale: 6, Rock: 0.99, Water: 0.26, RiverWidth: 1, RiverMeander: 0.35}
+	if err := parseKnobs(r, []intKnob{{"grow", &p.Grow}, {"loop_distance", &p.LoopDistance}, {"canvas", &p.Canvas},
+		{"scale", &p.Scale}, {"lava_rivers", &lavaRivers}},
+		[]floatKnob{{"hall_chance", &p.HallChance}, {"arch_chance", &p.ArchChance}, {"loop_chance", &p.LoopChance},
+			{"posts", &p.Posts}, {"door_chance", &p.DoorChance}, {"lava_water", &lava.Water}}); err != nil {
+		return nil, err
+	}
+	p.Spine = boolField(r, "spine")
+	p.Mirror = boolField(r, "mirror")
+	if _, ok := dungeon.Field(r, "lava_water"); ok || lavaRivers > 0 {
+		lava.Rivers = lavaRivers
+		p.Lava = &lava
+	}
+	if p.Scale != 1 && p.Scale != 2 {
+		return nil, fmt.Errorf("levels.rec: scale must be 1 or 2")
+	}
+	return staged{l, p}, nil
+}
+
+func boolField(r recfile.Record, k string) bool { v, _ := dungeon.Field(r, k); return v == "true" }
+
+// Build carves the layout and runs the passes the record switched on, in the order Passes lists them.
+func (s staged) Build(rnd *rand.Rand, fsys fs.FS) (*DungeonMap, error) {
+	dm, err := s.Layout.Build(rnd, fsys)
+	if err != nil {
+		return nil, err
+	}
+	p := s.Passes
+	m := fromDungeon(dm)
+	if p.Grow > 0 {
+		halls(m, growRooms(m, dm, p.Grow, rnd), p.HallChance, rnd)
+	}
+	if p.Spine {
+		spine(m, rnd)
+	}
+	if p.Mirror {
+		m = mirror(m, rnd)
+	}
+	arches(m, p.ArchChance, rnd)
+	loops(m, p.LoopChance, p.LoopDistance, rnd)
+	if p.Lava != nil {
+		p.Lava.Width, p.Lava.Height = m.w, m.h
+		if err := addLava(m, p.Lava, rnd); err != nil {
+			return nil, err
+		}
+	}
+	addPosts(m, p.Posts, rnd)
+	if p.Canvas > 0 {
+		full := newMega(p.Canvas, p.Canvas)
+		ox, oy := (full.w-m.w)/2, (full.h-m.h)/2
+		if ox < 0 || oy < 0 {
+			return nil, fmt.Errorf("dungen: layout %dx%d is larger than canvas %d", m.w, m.h, p.Canvas)
+		}
+		for y := 0; y < m.h; y++ {
+			for x := 0; x < m.w; x++ {
+				full.set(x+ox, y+oy, m.at(x, y))
+			}
+		}
+		m = full
+	}
+	connectMega(m)
+	if p.DoorChance >= 0 {
+		addDoors(m, p.DoorChance, rnd)
+	}
+	if p.Scale == 2 {
+		return toCells(m), nil
+	}
+	return m.dungeonMap(), nil
+}
+
+// Megatile kinds.
+const (
+	mWall = iota
+	mRoom
+	mCorr
+	mDoor
+	mLava
+	mPost // floor with a pillar in its top-left cell: in a row, an arcade
+)
+
+// kindTiles is what each kind is on a DungeonMap drawn at its own scale.
+var kindTiles = [...]DungeonTile{mWall: Wall, mRoom: Room, mCorr: Corridor, mDoor: Door, mLava: Lava, mPost: Pillar}
+
+func (m *mega) dungeonMap() *DungeonMap {
+	dm := NewDungeonMap(m.w, m.h)
+	for i, k := range m.t {
+		dm.tiles[i] = kindTiles[k]
+	}
+	return dm
+}
+
+func fromDungeon(dm *DungeonMap) *mega {
+	w, h := dm.GetSize()
+	m := newMega(w, h)
+	for i, t := range dm.tiles {
+		switch t {
+		case Room:
+			m.t[i] = mRoom
+		case Corridor, Shallows:
+			m.t[i] = mCorr
+		case Door:
+			m.t[i] = mDoor
+		case Lake, Lava: // ponytail: water becomes lava once passes run; keep an mLake when a watery level wants passes
+			m.t[i] = mLava
+		case Pillar:
+			m.t[i] = mPost
+		}
+	}
+	return m
+}
+
+// toCells draws megatiles as D1 draws them, two by two cells: a wall megatile keeps its wall on its top and left
+// cells and gives its bottom and right cells to the floor beside it, so walls are one cell thick and a corridor
+// one megatile wide is three cells wide. A door is one door cell in that wall line; it counts as wall for the
+// cells around it, so nothing slips past it. A post is a floor megatile with a pillar in its top-left cell.
+func toCells(m *mega) *DungeonMap {
+	g := NewDungeonMap(2*m.w, 2*m.h)
+	floorLike := func(k int) bool { return k != mWall && k != mDoor }
+	for y := 0; y < g.height; y++ {
+		for x := 0; x < g.width; x++ {
+			i, j, a, b := x/2, y/2, x%2, y%2
+			switch k := m.at(i, j); {
+			case k == mPost && a == 0 && b == 0:
+				g.tiles[x+y*g.width] = Pillar
+			case mopen(k):
+				g.SetRoom(x, y)
+			case k == mLava:
+				g.tiles[x+y*g.width] = Lava
+			default: // wall or door: the cell is floor where it borders open ground on its right or bottom
+				right, below, diag := floorLike(m.at(i+1, j)), floorLike(m.at(i, j+1)), floorLike(m.at(i+1, j+1))
+				if a == 1 && right || b == 1 && below || a == 1 && b == 1 && diag {
+					g.tiles[x+y*g.width] = lavaOr(m, i, j, a, b)
+				} else if k == mDoor && a == 0 && b == 0 {
+					g.SetDoor(x, y)
+				}
+			}
+		}
+	}
+	return g
+}
+
+// lavaOr is what a wall megatile's given-away cell shows: the ground beside it that it was given to (right,
+// else below, else diagonally), lava when that is lava.
+func lavaOr(m *mega, i, j, a, b int) DungeonTile {
+	next := m.at(i+1, j+1)
+	switch floorLike := func(k int) bool { return k != mWall && k != mDoor }; {
+	case a == 1 && floorLike(m.at(i+1, j)):
+		next = m.at(i+1, j)
+	case b == 1 && floorLike(m.at(i, j+1)):
+		next = m.at(i, j+1)
+	}
+	if next == mLava {
+		return Lava
+	}
+	return Room
+}
+
+type mega struct {
+	w, h int
+	t    []int
+}
+func newMega(w, h int) *mega { return &mega{w: w, h: h, t: make([]int, w*h)} }
+
+func (m *mega) at(x, y int) int {
+	if x < 0 || y < 0 || x >= m.w || y >= m.h {
+		return mWall
+	}
+	return m.t[x+y*m.w]
+}
+
+func (m *mega) set(x, y, k int) {
+	if x >= 0 && y >= 0 && x < m.w && y < m.h {
+		m.t[x+y*m.w] = k
+	}
+}
+
+// open is ground one walks on without a door; walkable adds doors.
+func mopen(k int) bool     { return k == mRoom || k == mCorr || k == mPost }
+func mwalkable(k int) bool { return mopen(k) || k == mDoor }
+
+type mrect struct{ x0, y0, x1, y1, cap int } // inclusive floor bounds, and the side it may grow to
+
 
 // growRooms widens each room (to a side between maxSide/2 and maxSide, rolled per room) one row or column at a
 // time, in turns, while the strip it takes holds no other room's floor and the strip beyond (its new wall) holds no room floor and at most two corridor cells: rooms end
 // up one wall apart, and the corridors that crossed the gap between them become openings in that wall.
-func growRooms(m *mega, dm *dungen.DungeonMap, maxSide int, rnd *rand.Rand) []rect {
-	var rs []rect
+func growRooms(m *mega, dm *DungeonMap, maxSide int, rnd *rand.Rand) []mrect {
+	var rs []mrect
 	for _, r := range dm.AllRooms() {
-		b := rect{m.w, m.h, -1, -1, maxSide/2 + rnd.Intn(maxSide-maxSide/2+1)}
+		b := mrect{m.w, m.h, -1, -1, maxSide/2 + rnd.Intn(maxSide-maxSide/2+1)}
 		for _, p := range r.GetAbsoluteFloorTiles() {
 			b.x0, b.y0, b.x1, b.y1 = min(b.x0, p.X), min(b.y0, p.Y), max(b.x1, p.X), max(b.y1, p.Y)
 		}
 		rs = append(rs, b)
 	}
 	// strip counts room and corridor cells on the line at offset d beyond side s of r, one longer at each end.
-	strip := func(r rect, s, d int) (rooms, corrs int, inside bool) {
+	strip := func(r mrect, s, d int) (rooms, corrs int, inside bool) {
 		inside = true
 		cellAt := func(x, y int) {
 			if x < 1 || y < 1 || x >= m.w-1 || y >= m.h-1 {
@@ -91,7 +323,7 @@ func growRooms(m *mega, dm *dungen.DungeonMap, maxSide int, rnd *rand.Rand) []re
 
 // halls turns, with chance p, a grown room at least 6 wide and 8 long into a pillared hall: an arcade one
 // megatile in from each long wall, as D1's l1GenerateHall draws its arch walls.
-func halls(m *mega, rs []rect, p float64, rnd *rand.Rand) {
+func halls(m *mega, rs []mrect, p float64, rnd *rand.Rand) {
 	for _, r := range rs {
 		w, h := r.x1-r.x0+1, r.y1-r.y0+1
 		if min(w, h) < 6 || max(w, h) < 8 || rnd.Float64() >= p {
@@ -183,12 +415,12 @@ func mirror(q *mega, rnd *rand.Rand) *mega {
 	}
 	var rows, cols []int // where floor meets the right and bottom edges of the quadrant
 	for y := 0; y < q.h; y++ {
-		if open(q.at(q.w-2, y)) {
+		if mopen(q.at(q.w-2, y)) {
 			rows = append(rows, y)
 		}
 	}
 	for x := 0; x < q.w; x++ {
-		if open(q.at(x, q.h-2)) {
+		if mopen(q.at(x, q.h-2)) {
 			cols = append(cols, x)
 		}
 	}
@@ -264,9 +496,9 @@ func loops(m *mega, p float64, dist int, rnd *rand.Rand) {
 		}
 		var a, b [2]int
 		switch {
-		case walkable(m.at(x-1, y)) && walkable(m.at(x+1, y)) && m.at(x, y-1) == mWall && m.at(x, y+1) == mWall:
+		case mwalkable(m.at(x-1, y)) && mwalkable(m.at(x+1, y)) && m.at(x, y-1) == mWall && m.at(x, y+1) == mWall:
 			a, b = [2]int{x - 1, y}, [2]int{x + 1, y}
-		case walkable(m.at(x, y-1)) && walkable(m.at(x, y+1)) && m.at(x-1, y) == mWall && m.at(x+1, y) == mWall:
+		case mwalkable(m.at(x, y-1)) && mwalkable(m.at(x, y+1)) && m.at(x-1, y) == mWall && m.at(x+1, y) == mWall:
 			a, b = [2]int{x, y - 1}, [2]int{x, y + 1}
 		default:
 			continue
@@ -288,9 +520,9 @@ func walk(m *mega, a, b [2]int) int {
 		if c == b {
 			return dist[c]
 		}
-		for _, d := range dirs {
+		for _, d := range mdirs {
 			n := [2]int{c[0] + d[0], c[1] + d[1]}
-			if _, seen := dist[n]; !seen && walkable(m.at(n[0], n[1])) {
+			if _, seen := dist[n]; !seen && mwalkable(m.at(n[0], n[1])) {
 				dist[n] = dist[c] + 1
 				q = append(q, n)
 			}
@@ -299,17 +531,17 @@ func walk(m *mega, a, b [2]int) int {
 	return -1
 }
 
-var dirs = [4][2]int{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}
+var mdirs = [4][2]int{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}
 
 // addLava turns the lakes and rivers of a noise map into lava, rock and floor alike, each lake that reaches the
 // cave ringed with floor so the cave runs round it. Where lava cuts the level apart, connect lays a ford.
-func addLava(m *mega, cfg *dungen.NoiseConfig, rnd *rand.Rand) error {
+func addLava(m *mega, cfg *NoiseConfig, rnd *rand.Rand) error {
 	nm, err := cfg.Build(rnd, nil)
 	if err != nil {
 		return err
 	}
 	lake := func(x, y int) bool {
-		return x >= 1 && y >= 1 && x < m.w-1 && y < m.h-1 && nm.GetTile(x, y) == dungen.Lake
+		return x >= 1 && y >= 1 && x < m.w-1 && y < m.h-1 && nm.GetTile(x, y) == Lake
 	}
 	seen := make([]bool, len(m.t))
 	for i := range m.t {
@@ -320,7 +552,7 @@ func addLava(m *mega, cfg *dungen.NoiseConfig, rnd *rand.Rand) error {
 		seen[i] = true
 		for q := []int{i}; len(q) > 0; q = q[1:] {
 			pool = append(pool, q[0])
-			for _, d := range dirs {
+			for _, d := range mdirs {
 				nx, ny := q[0]%m.w+d[0], q[0]/m.w+d[1]
 				if lake(nx, ny) && !seen[nx+ny*m.w] {
 					seen[nx+ny*m.w] = true
@@ -330,8 +562,8 @@ func addLava(m *mega, cfg *dungen.NoiseConfig, rnd *rand.Rand) error {
 		}
 		touches := false
 		for _, c := range pool {
-			touches = touches || open(m.t[c]) || open(m.at(c%m.w+1, c/m.w)) || open(m.at(c%m.w-1, c/m.w)) ||
-				open(m.at(c%m.w, c/m.w+1)) || open(m.at(c%m.w, c/m.w-1))
+			touches = touches || mopen(m.t[c]) || mopen(m.at(c%m.w+1, c/m.w)) || mopen(m.at(c%m.w-1, c/m.w)) ||
+				mopen(m.at(c%m.w, c/m.w+1)) || mopen(m.at(c%m.w, c/m.w-1))
 		}
 		if !touches {
 			continue
@@ -355,7 +587,7 @@ func addLava(m *mega, cfg *dungen.NoiseConfig, rnd *rand.Rand) error {
 // posts puts a pillar, with chance p, on room floor with only room floor or walls round it (so pillars never
 // touch each other, a doorway or a corridor, and stand a cell off any wall): D1's floor-tile variants with a
 // pillar or a stub in them (l1Substitution, l2Substitution, l4Substitution's 95-97).
-func posts(m *mega, p float64, rnd *rand.Rand) {
+func addPosts(m *mega, p float64, rnd *rand.Rand) {
 	if p <= 0 {
 		return
 	}
@@ -378,11 +610,11 @@ func posts(m *mega, p float64, rnd *rand.Rand) {
 // connect makes every walkable megatile reachable from every other: from the part holding the first one, the
 // cheapest way to the next part (walking free, a ford across lava 1, a hole through a wall 3) is opened, until
 // nothing is left out. It is the guarantee behind every pass above.
-func connect(m *mega) {
+func connectMega(m *mega) {
 	for {
 		start := -1
 		for i, k := range m.t {
-			if walkable(k) {
+			if mwalkable(k) {
 				start = i
 				break
 			}
@@ -392,7 +624,7 @@ func connect(m *mega) {
 		}
 		cost := func(k int) int {
 			switch {
-			case walkable(k):
+			case mwalkable(k):
 				return 0
 			case k == mLava:
 				return 1
@@ -413,11 +645,11 @@ func connect(m *mega) {
 				if dist[i] != c {
 					continue
 				}
-				if c > 0 && walkable(m.t[i]) {
+				if c > 0 && mwalkable(m.t[i]) {
 					end = i
 					break
 				}
-				for _, d := range dirs {
+				for _, d := range mdirs {
 					x, y := i%m.w+d[0], i/m.w+d[1]
 					if x < 0 || y < 0 || x >= m.w || y >= m.h {
 						continue
@@ -436,7 +668,7 @@ func connect(m *mega) {
 		if end < 0 {
 			return
 		}
-		for i := from[end]; i >= 0 && !walkable(m.t[i]); i = from[i] {
+		for i := from[end]; i >= 0 && !mwalkable(m.t[i]); i = from[i] {
 			if m.t[i] == mLava {
 				m.t[i] = mRoom // a ford
 			} else {
@@ -462,8 +694,8 @@ func addDoors(m *mega, p float64, rnd *rand.Rand) {
 				continue
 			}
 			n, s, w, e := m.at(x, y-1), m.at(x, y+1), m.at(x-1, y), m.at(x+1, y)
-			ns := n == mWall && s == mWall && open(w) && open(e) && (w == mRoom || e == mRoom)
-			we := w == mWall && e == mWall && open(n) && open(s) && (n == mRoom || s == mRoom)
+			ns := n == mWall && s == mWall && mopen(w) && mopen(e) && (w == mRoom || e == mRoom)
+			we := w == mWall && e == mWall && mopen(n) && mopen(s) && (n == mRoom || s == mRoom)
 			if (ns || we) && rnd.Float64() < p {
 				m.set(x, y, mDoor)
 			}

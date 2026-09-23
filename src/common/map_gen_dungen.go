@@ -36,7 +36,7 @@ func (g *MapGenerator) generateDungenMap(lvl dungeon.Level) *gridmap.GridMap[*Ac
 	m.SetName(targetMap)
 	m.SetMetaString(layout.GetMetaInfo())
 
-	g.addDungenTiles(m, layout, g.dungenTilemap(lvl, dlvl, layout), dlvl)
+	g.addDungenTiles(m, layout, g.dungenTilemap(lvl, dlvl, layout), dlvl, lvl.Tiles)
 	stairs := g.addDungenStairs(m, layout, lvl)
 	g.decorateDungenRooms(m, layout, lvl, dlvl)
 	g.populateDungenLevel(m, layout, lvl, stairs)
@@ -77,7 +77,7 @@ func (g *MapGenerator) secretDoorChance(dlvl int) float64 {
 // addDungenTiles paints the layout: a wall cell is a wall, a door cell is floor with a door object standing on
 // it (decision 12, the same rule D1's side follows), and everything else is floor. A loop door may be a secret
 // door instead: a wall until the hero finds it (revealSecretDoor).
-func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object], layout *dungen.DungeonMap, tileMap defs.BasicTileMapping, dlvl int) {
+func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object], layout *dungen.DungeonMap, tileMap defs.BasicTileMapping, dlvl int, tiles string) {
 	wall := func(icon int32) gridmap.Tile {
 		return gridmap.Tile{DefinedIcon: icon, DefinedDescription: "a wall"}
 	}
@@ -87,6 +87,10 @@ func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object],
 	}
 	g.doorTiles[m.GetName()] = [3]int32{tileMap.FloorTile, tileMap.OpenDoor, tileMap.ClosedDoor}
 	secret := g.secretDoorChance(dlvl)
+	pillar, ok := defs.IconOK("tile." + tiles + "_pillar") // each tile set's own, so a remap tells them apart
+	if !ok {
+		pillar = tileMap.WallTile
+	}
 	width, height := layout.GetSize()
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
@@ -104,6 +108,10 @@ func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object],
 				m.AddObject(NewDoor(tileMap.OpenDoor, tileMap.ClosedDoor), p)
 			case dungen.Lake:
 				m.SetTile(p, gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "deep water", IsTransparent: true, IsMissilePassable: true, Special: gridmap.SpecialTileWater})
+			case dungen.Lava:
+				m.SetTile(p, gridmap.Tile{DefinedIcon: defs.IconLava, DefinedDescription: "lava", IsTransparent: true, IsMissilePassable: true})
+			case dungen.Pillar:
+				m.SetTile(p, gridmap.Tile{DefinedIcon: pillar, DefinedDescription: "a pillar", IsTransparent: true})
 			case dungen.Shallows:
 				m.SetTile(p, gridmap.Tile{DefinedIcon: defs.IconWater, DefinedDescription: "shallow water", IsWalkable: true, IsTransparent: true, IsMissilePassable: true, Special: gridmap.SpecialTileWater})
 			default: // Room, Corridor

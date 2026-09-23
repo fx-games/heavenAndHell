@@ -17,6 +17,8 @@ const (
 	Corridor
 	Lake     // deep water: seen across, never walked (addLakes)
 	Shallows // the water's edge, waded through
+	Lava     // seen across, never walked, burns (the passes' lava)
+	Pillar   // a lone column: blocks like a wall, stands on floor
 )
 
 type DungeonMap struct {
@@ -285,7 +287,7 @@ func (m *DungeonMap) IsWalkable(pos geometry.Point) bool {
 		return false
 	}
 	tileAt := m.GetTileAt(pos)
-	return tileAt != Wall && tileAt != Lake
+	return tileAt != Wall && tileAt != Lake && tileAt != Lava && tileAt != Pillar
 }
 
 func (m *DungeonMap) AddDoorAndConnect(absoluteDoorPos geometry.Point, direction geometry.CompassDirection, asDoor bool) {
