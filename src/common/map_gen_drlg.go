@@ -1,10 +1,8 @@
 package common
 
 import (
-	"fmt"
 	"rpg/src/defs"
 	"rpg/src/dungen"
-	"rpg/src/dungeon"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
 	"rpg/src/rules"
@@ -42,9 +40,6 @@ func (g *MapGenerator) quest(q int) rules.Quest {
 // does in GenerateMap, where a level without an entry is D1's.
 func (g *MapGenerator) buildsLevels() bool {
 	for _, l := range g.levels {
-		if _, ok := l.Config.(dungen.LevelParams); ok {
-			return true
-		}
 		if _, ok := dungen.PopulationOf(l.Config); ok {
 			return true
 		}
@@ -60,137 +55,12 @@ func toCell(px, py int) geometry.Point {
 	return geometry.Point{X: px - dungen.CellOrigin, Y: py - dungen.CellOrigin}
 }
 
-// d1DoorObjectKinds is repeated from map_gen.go's doorKinds so this file doesn't need to import it twice; see
-// there for why doors are terrain + an H&H Door object, not a Prop.
-
-// d1Strategy is the LevelStrategy of D1's four level builders (dungen.D1), d1SetStrategy of its quest set levels.
-type d1Strategy struct{ dungeon.Parser }
-
-func (d1Strategy) Generate(g *MapGenerator, lvl dungeon.Level) *gridmap.GridMap[*Actor, *Item, Object] {
-	return g.generateMap(lvl, nil)
-}
-
-type d1SetStrategy struct{ dungeon.Parser }
-
-func (d1SetStrategy) Generate(g *MapGenerator, lvl dungeon.Level) *gridmap.GridMap[*Actor, *Item, Object] {
-	set := lvl.Config.(dungen.SetLevelParams)
-	return g.generateMap(lvl, &set)
-}
-
-// generateMap builds a D1 dungeon level, or with set a quest set level (LoadSetMap), with D1's own generators.
-// It places the named locations D1's triggers mark; levels.rec's exits say where they lead.
-func (g *MapGenerator) generateMap(level dungeon.Level, set *dungen.SetLevelParams) *gridmap.GridMap[*Actor, *Item, Object] {
-	targetMap, dlvl := level.Map, level.Depth
-	sl := rules.SLNone
-	if set != nil {
-		if q := g.factory.State.QuestByKey(set.Quest); q >= 0 {
-			sl = g.questTable()[q].SetLevel
-		}
-		if sl == rules.SLNone {
-			panic(fmt.Sprintf("levels.rec: %s: quest %q has no D1 set level", targetMap, set.Quest))
-		}
-	}
-	lvl, err := g.factory.Levels.CreateLevel(g.factory.Gen(), g.questTable(), g.levelSeeds(targetMap, dlvl), dlvl, sl, dungen.EntryMain)
-	if err != nil {
-		panic(err)
-	}
-	if g.generated == nil {
-		g.generated = map[string]*dungen.Level{}
-	}
-	g.generated[targetMap] = lvl
-
-	m := gridmap.NewEmptyMap[*Actor, *Item, Object](dungen.LevelSize, dungen.LevelSize)
-	m.SetName(targetMap)
-	g.addBasicTiles(m, lvl)
-
-	if set == nil {
-		g.placeTriggers(m, lvl, dlvl)
-	} else {
-		g.placeSetLevelReturn(m, lvl, sl)
-	}
-
-	g.placeMonsters(m, lvl)
-	g.placeObjects(m, lvl)
-	g.placeItems(m, lvl)
-
-	if snap := g.snapshots[targetMap]; snap != nil {
-		snap.apply(g.factory, m)
-	}
-	for _, a := range append(append([]*Actor(nil), m.Actors()...), g.walledIn[targetMap]...) {
-		if a.monster != nil {
-			g.factory.initTalk(a)
-		}
-	}
-	PlacePortal(g.factory.State, m)
-	return m
-}
-
 // setPiece is the level's quest set piece in megatiles: x, y, w, h (D1's setpc_*).
 func (g *MapGenerator) setPiece(m *gridmap.GridMap[*Actor, *Item, Object]) [4]int {
 	if lvl := g.generated[m.GetName()]; lvl != nil {
 		return lvl.SetPiece
 	}
 	return [4]int{}
-}
-
-func stairsUp() gridmap.Tile {
-	return gridmap.Tile{DefinedIcon: defs.IconStairsUp, DefinedDescription: "stairs leading up", IsWalkable: true, IsTransparent: true, IsMissilePassable: true, Special: gridmap.SpecialTileStairsUp}
-}
-
-// placeTriggers draws the stairs and warp D1's own generator positioned (Level.Triggers) and names them
-// ladder_up, ladder_down and warp, plus each available quest's entrance on its level (CheckQuests), named by the
-// quest's key. Lazarus' spot is only named: its red portal opens when levels.rec's exit condition holds.
-func (g *MapGenerator) placeTriggers(m *gridmap.GridMap[*Actor, *Item, Object], lvl *dungen.Level, dlvl int) {
-	for _, t := range lvl.Triggers {
-		p := toCell(t.X, t.Y)
-		switch t.Msg {
-		case dungen.TrigPrevLevel:
-			m.AddNamedLocation("ladder_up", p)
-			m.SetTile(p, stairsUp())
-		case dungen.TrigNextLevel:
-			m.AddNamedLocation("ladder_down", p)
-			m.SetTile(p, stairsDown())
-		case dungen.TrigTownWarpUp:
-			m.AddNamedLocation("warp", p)
-			warpTile := stairsDown()
-			warpTile.DefinedDescription = "a way back to town"
-			m.SetTile(p, warpTile)
-		}
-	}
-	for q, def := range g.factory.State.QuestDefs() {
-		if q >= len(g.questTable()) {
-			break
-		}
-		qu := g.questTable()[q]
-		if qu.SetLevel == rules.SLNone || qu.Level != dlvl || qu.Active == rules.QuestNotAvail {
-			continue
-		}
-		p := toCell(qu.X, qu.Y)
-		m.AddNamedLocation(def.Key, p)
-		if qu.SetLevel == rules.SLVileBetrayer {
-			m.AddNamedLocation("ladder_down", toCell(qu.X+3, qu.Y+3)) // L4PENTA2's stairs piece (370), InitL4Triggers
-			continue
-		}
-		tile := stairsDown()
-		tile.DefinedDescription = "a way further down"
-		m.SetTile(p, tile)
-	}
-}
-
-// placeSetLevelReturn names where the player arrives in a quest set level, its way back out (SetReturnLvlPos),
-// and for Lazarus' Lair the portal spot (exit) whose way home opens once he is dead.
-func (g *MapGenerator) placeSetLevelReturn(m *gridmap.GridMap[*Actor, *Item, Object], lvl *dungen.Level, sl int) {
-	for _, t := range lvl.Triggers {
-		if t.Msg != dungen.TrigReturnLevel {
-			continue
-		}
-		p := toCell(t.X, t.Y)
-		m.AddNamedLocation("ladder_up", p)
-		m.SetTile(p, stairsUp())
-	}
-	if sl == rules.SLVileBetrayer {
-		m.AddNamedLocation("ladder_up", toCell(lvl.View[0], lvl.View[1]))
-	}
 }
 
 // placeMonsters ports the actor side of InitMonsters: everything D1's generator placed, except the four reserved

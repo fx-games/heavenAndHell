@@ -8,20 +8,20 @@ own directory:
 cd tools/mapedit
 go run .                      # the heavenandhell mod
 go run . -mod d1              # another mod under files/mods
-go run . -mod d1 -mode pieces
 ```
 
 It finds the repo by walking up from wherever it is started, so `-mod` takes a
 plain mod name; pass a path to edit a mod somewhere else.
 
-It edits the two kinds of map this engine has, and replaces the LDtk toolchain,
-which could only do the first one.
+It replaces the LDtk toolchain.
 
-## Maps (F1)
+## Maps
 
 The levels in `files/mods/<mod>/maps`: one `.hhm` per level, plus `tileset.hht`.
-These are what the `drawn` generator stamps out whole (the towns), and what
-`accretion` stamps out room by room (every dungeon template and decoration).
+These are what the `drawn` generator stamps out whole (the towns), what
+`accretion` stamps out room by room (every dungeon template and decoration), and
+the set pieces and set levels (`set_piece:`, the `map` generator): a piece's
+open layout, which a quest or a lever switches it to, is `<name>_open`.
 
 - **Tools** `1` brush, `2` rect (Shift outlines), `3` fill, `4` pick, `5` erase,
   `6` entity, `7` select.
@@ -30,8 +30,8 @@ These are what the `drawn` generator stamps out whole (the towns), and what
   is water, whether it hurts. They belong to the tile, not to the level, so a
   change there is saved into `tileset.hht` with the levels.
 - **Entities** are the engine's whole vocabulary, `src/hhm`'s schema: NPC, Sign,
-  Door, Stash, Shrine on the Entities layer; Location, POI and the four
-  Connectors on the Meta layer. Selecting one opens its fields.
+  Door, Stash, Shrine, Monster, Object, Item on the Entities layer; Location,
+  POI and the four Connectors on the Meta layer. Selecting one opens its fields.
 - **Level fields** (`DisplayName`, `Weight`, `IsDecoration`, `UsesDecoration`,
   `SlotID`, `PlugsIntoSlotID`, `CanBeLit`) are in the same inspector when
   nothing is selected. The dungeon generators read every one of them.
@@ -39,26 +39,9 @@ These are what the `drawn` generator stamps out whole (the towns), and what
   file and deletes the old one; `levels.rec` still names the old one, so fix it
   there too.
 
-## Set pieces (F2)
-
-Diablo's `.DUN` rooms, as the text files in `files/mods/<mod>/data/levels/l1..l4`.
-LDtk could not touch these at all.
-
-A megatile has no art in this game: the engine reads the `til`/`sol` tables and
-paints a wall or a floor, so that is what the editor draws - each megatile as
-its four quarters, coloured by what they block. The palette is every megatile
-the level type has.
-
-The four overlays (`transparency`, `items`, `monsters`, `objects`) sit at twice
-the megatile resolution, the way a `.DUN` does. Pick one in the tool bar, put
-the id you want in the field on the right, and paint.
-
-The writer produces the files byte for byte as they already are: re-saving every
-shipped set piece changes nothing, which is what `dun_test.go` checks.
-
 ## Everywhere
 
 Wheel zooms, middle-drag or Space-drag pans, arrows scroll. `Ctrl+S` saves,
 `Ctrl+Z` / `Ctrl+Shift+Z` undo and redo, `G` grid, `F` the flag tint, `N` entity
-names, `I` the set-piece numbers. The bar at the bottom says what the thing
+names. The bar at the bottom says what the thing
 under the pointer is and what the current tool does.

@@ -34,7 +34,6 @@ var (
 	colAccentDim = color.RGBA{96, 72, 36, 255}
 	colHover     = color.RGBA{54, 54, 64, 255}
 	colDanger    = color.RGBA{206, 88, 72, 255}
-	colOK        = color.RGBA{112, 184, 112, 255}
 	colGrid      = color.RGBA{255, 255, 255, 28}
 )
 

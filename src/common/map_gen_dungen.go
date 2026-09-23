@@ -38,7 +38,8 @@ func (g *MapGenerator) generateDungenMap(lvl dungeon.Level) *gridmap.GridMap[*Ac
 	m.SetName(targetMap)
 	m.SetMetaString(layout.GetMetaInfo())
 
-	g.addDungenTiles(m, layout, g.dungenTilemap(lvl, dlvl, layout), dlvl, lvl.Tiles)
+	_, trapWalls := dungen.PopulationOf(lvl.Config)
+	g.addDungenTiles(m, layout, g.dungenTilemap(lvl, dlvl, layout), dlvl, lvl.Tiles, trapWalls)
 	g.paintPieces(m, layout)
 	stairs := g.addDungenStairs(m, layout, lvl)
 	if pop, ok := dungen.PopulationOf(lvl.Config); ok {
@@ -84,11 +85,19 @@ func (g *MapGenerator) secretDoorChance(dlvl int) float64 {
 // addDungenTiles paints the layout: a wall cell is a wall, a door cell is floor with a door object standing on
 // it (decision 12, the same rule D1's side follows), and everything else is floor. A loop door may be a secret
 // door instead: a wall until the hero finds it (revealSecretDoor).
-func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object], layout *dungen.DungeonMap, tileMap defs.BasicTileMapping, dlvl int, tiles string) {
+func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object], layout *dungen.DungeonMap, tileMap defs.BasicTileMapping, dlvl int, tiles string, trapWalls bool) {
+	// the tile set's own records name its plain cells ("Cathedral Wall"), and its trap walls are the wall cells a
+	// D1 population may set a trap in (dungen's cellFlags)
+	named := func(t gridmap.Tile, rec string) gridmap.Tile {
+		if r, ok := defs.TileRecords["tile."+tiles+"_"+rec]; ok {
+			t.DefinedDescription = r.Name
+		}
+		return t
+	}
 	wall := func(icon int32) gridmap.Tile {
 		return gridmap.Tile{DefinedIcon: icon, DefinedDescription: "a wall"}
 	}
-	floor := dungenFloor
+	floor := func(icon int32) gridmap.Tile { return named(dungenFloor(icon), "floor") }
 	if g.doorTiles == nil {
 		g.doorTiles = map[string][3]int32{}
 	}
@@ -108,7 +117,11 @@ func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object],
 			}
 			switch layout.GetTile(x, y) {
 			case dungen.Wall:
-				m.SetTile(p, wall(tileMap.ChooseWallTile(p)))
+				if trapWalls && (x+y)%2 == 0 {
+					m.SetTile(p, named(named(wall(tileMap.ChooseWallTile(p)), "wall"), "trap_wall"))
+				} else {
+					m.SetTile(p, named(wall(tileMap.ChooseWallTile(p)), "wall"))
+				}
 			case dungen.Door:
 				if layout.IsLoopDoor(p) && g.randomSource.Float64() < secret {
 					m.SetTile(p, wall(tileMap.ChooseWallTile(p)))

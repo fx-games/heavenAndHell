@@ -1,9 +1,6 @@
-package main
+package mpq
 
 import (
-	"rpg/src/cmd/internal/mpq"
-	"rpg/src/dungen"
-
 	"encoding/binary"
 	"testing"
 )
@@ -11,7 +8,7 @@ import (
 // TestMPQ reads each level type's tile tables and checks they agree: every megatile points at pieces the
 // .SOL and .MIN describe, which fails if decompression or decryption is off.
 func TestMPQ(t *testing.T) {
-	a, err := mpq.DiabDat()
+	a, err := DiabDat()
 	if err != nil {
 		t.Skip(err)
 	}
@@ -41,17 +38,5 @@ func TestMPQ(t *testing.T) {
 	}
 	if w, h := binary.LittleEndian.Uint16(b), binary.LittleEndian.Uint16(b[2:]); w != 37 || h != 25 {
 		t.Errorf("SklKng2.DUN: %dx%d", w, h)
-	}
-}
-
-// TestImportRoundTrip re-runs the import into a scratch directory. ImportLevels parses back everything it writes
-// and compares it to the MPQ's bytes, so this fails if the text encoding ever stops being lossless.
-func TestImportRoundTrip(t *testing.T) {
-	a, err := mpq.DiabDat()
-	if err != nil {
-		t.Skip(err)
-	}
-	if err := dungen.ImportLevels(a.ReadFile, t.TempDir()); err != nil {
-		t.Fatal(err)
 	}
 }

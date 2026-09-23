@@ -69,7 +69,13 @@ type placed struct {
 // placePieces lays the level's pieces' footprints onto the grid (as mPiece, which the passes after it leave
 // alone and connect joins up). chambers are the spine's, in the grid's coordinates.
 func (s staged) placePieces(m *mega, fsys fs.FS, chambers [][2]int, rnd *rand.Rand) ([]placed, error) {
-	if len(s.Pieces) == 0 {
+	var specs []PieceSpec
+	for _, spec := range s.Pieces {
+		if spec.Quest == "" || s.avail != nil && s.avail(spec.Quest) {
+			specs = append(specs, spec)
+		}
+	}
+	if len(specs) == 0 {
 		return nil, nil
 	}
 	proj, err := loadTemplates(fsys, hhm.Dir)
@@ -79,10 +85,7 @@ func (s staged) placePieces(m *mega, fsys fs.FS, chambers [][2]int, rnd *rand.Ra
 	sc := s.Scale
 	var out []placed
 	hold := 3 + rnd.Intn(3) // D1's level 16 first room corner (l4FirstRoom: 14x14 somewhere in 3..5)
-	for _, spec := range s.Pieces {
-		if spec.Quest != "" && (s.avail == nil || !s.avail(spec.Quest)) {
-			continue
-		}
+	for _, spec := range specs {
 		lv := proj.Level(spec.Map)
 		if lv == nil {
 			return nil, fmt.Errorf("set_piece: the maps have no %s", spec.Map)

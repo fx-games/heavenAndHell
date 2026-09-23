@@ -102,9 +102,9 @@ Every generator a mod can name in `levels.rec` is a `common.LevelStrategy`, in o
     }
 
 `GenerateMap` calls `Generate` and nothing else; there is no type switch over families. `drawn` loads a
-hand-drawn map, `d1_*`/`d1_set` run D1's builders (`dungen.D1`, `dungen.D1Set`), and every layout generator
-(`dungen.Layouts`: accretion, megadungeon, rogue, cave, drunkard, bsp, room_graph, noise) carves a
-`dungen.DungeonMap` whose config builds itself (`dungen.Layout`). A new generator is one file in `dungen/` that
+hand-drawn map, and every layout generator (`dungen.Layouts`: accretion, megadungeon, rogue, cave, drunkard, bsp,
+room_graph, noise, map) carves a `dungen.DungeonMap` whose config builds itself (`dungen.Layout`), with the passes,
+set pieces and population its record names (`dungen.WithPasses`); D1's levels are such layouts. A new generator is one file in `dungen/` that
 adds itself to `Layouts`. `dungeon/` is only the level table: `LoadLevels` takes the registry's lookup.
 
 ## Terrain: GenerateMap dispatches, it does not assume
@@ -125,7 +125,7 @@ ladder down rather than carrying a constant.
 ## A mod may not have a Diablo feature
 
 `d1.Load` used to refuse anything that was not Diablo. The `xl_*` tables, the
-megatile/set-piece data under `levels/`, and six rec tables (`oils`,
+set-piece maps, and six rec tables (`oils`,
 `item_sounds`, `sfx`, `objects`, `spells`, `properties`, plus `monsters`' AI
 glossary) each describe a Diablo FEATURE. A mod that has none of them ships no
 file and gets the feature empty - no affix table means items roll plain, no
@@ -172,10 +172,10 @@ effect model is: it is already declarative, names effects by string, and uses
 dice notation. D1's native `xl_*.txt` tables are an IMPORT SOURCE, not a second
 content model.
 
-    Diablo's own files --[cmd/d1import, offline dev tool]--> mods/d1/**.rec
+    Diablo's own files --[offline dev tools]--> mods/d1/**.rec, maps
     mods/<any>/**.rec  --[engine, one loader]-->              game
 
-`cmd/d1import` and `cmd/d1sprites` are offline developer tools and may know
+`cmd/d1sprites` and the like are offline developer tools and may know
 about Diablo's formats. The ENGINE may not: it reads one schema, whichever mod
 supplied it.
 

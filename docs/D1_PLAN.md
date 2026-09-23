@@ -7,7 +7,7 @@ From D1: loot, enemies, dungeon generation. Kept from H&H: graphics, UI, time ma
 
 1. **World structure: D1 replaces H&H.** Tristram + 16 levels (Cathedral 1–4, Catacombs 5–8, Caves 9–12, Hell 13–16), Diablo on 16. H&H story (Meat Jack, Zedek, Lucifer, hell town, 12-level layout) is removed.
 2. **Quests: every D1 single-player quest** (see "All quests" below), including the critical path Lazarus (15, own level) → Diablo (16).
-3. **Dungeon gen: byte-exact port of D1 1.09's generator** (see "Exact dungeon generation" below), down to the floor/wall/door grid. Set pieces and set levels load from the real `DIABDAT.MPQ`. Skip isometric shadow/dirt passes.
+3. **Dungeon gen: D1's level experience, not its seeds** (2026-09-24, replacing the byte-exact port; see "Dungeon generation" below). Players can't pick seeds, so the layouts are roguelike stand-ins tuned to look and play like D1's four level types, populated by D1's own rules; set pieces and set levels are `.hhm` maps placed where D1 places them. No isometric cruft (megatiles as data, wall/shadow fix-up passes).
 4. **Combat: D1 formulas inside H&H's turn/energy system.** D1 to-hit (Dex/clvl/item to-hit vs AC), D1 damage (weapon min–max + Str/level bonus + dmg% affixes), damage types physical/fire/lightning/magic, monster resist/immunity from `xl_monst`, player resists capped 75%, shield block chance. Attack-speed affixes → action time cost. H&H armor-as-reduction, armor penetration, weapon quality factor removed.
 5. **Character: D1 sheet.** Warrior/Rogue/Sorcerer with D1 starting stats, gear, stat caps. Str/Mag/Dex/Vit. D1 XP table to clvl 50, 5 points/level, D1 per-class HP/mana growth. Item Str/Mag/Dex requirements enforced. H&H classes, class skills, Int removed.
 6. **Spells: all 26 SP spells with D1 spell levels.** Books raise spell level; D1 per-level damage/mana; scrolls & staves (charges) cast at D1 levels. Turn-based: missiles resolve instantly along a line (`fire_bresen` pattern); AoE/chain instant; Fire Wall/Flame Wave/Guardian/Golem are per-turn actors/objects in the energy system; Mana Shield/Infravision/Stone Curse are status effects; Town Portal = two-way town transition (replaces `recall`). Excluded: monster-only/unused, class skills, MP-only (Resurrect, Heal Other). Unused H&H effects deleted unless monsters need them.
@@ -20,7 +20,7 @@ From D1: loot, enemies, dungeon generation. Kept from H&H: graphics, UI, time ma
 13. **One D1 clock: RefWalkTicks (8) ticks = one 10-AUT turn.** Every action costs its animation's ticks via `ticksToAUT`, so D1's walk/attack ratio holds (a sword swing is two steps): the hero's step is 10, hero attacks come from D1 class×weapon frames (`PlrGFXAnimLens`) minus PM_DoAttack's frame skips for the attack-speed affixes (melee only, bows skip none), monster walks and attacks from their frames×(rate+1), casts from the class's spell frames, hit recovery from its ticks. 1 AUT is 0.8 ticks, so every frame count gets its own cost.
 14. **Data: D1 TSV tables verbatim in `files/assets/data/d1/`, parsed with `encoding/csv` (tab).** `xl_monst`, `xl_umon`, `xl_item`, `xl_uitem`, `xl_ipre`, `xl_isuf`, `xl_spell`, `xl_obj` (+ `xl_quest` for reference). Enum names → Go constants via `map[string]`. H&H enemy/item/effect/class rec files + loaders removed (`recfile` stays for config). Non-table values (formulas, class stats, speed tiers, icon mapping) in Go or one small rec file.
 15. **Critical path as D1 progresses it** (see "All quests" below): Staff of Lazarus → Cain → red portal on 15 → Lazarus' Lair → stairs down on 15 → level 16, where D1's skull levers open the sealed quads → Diablo death → end screen (`endMessage.txt`, reworded).
-16. **Done = smoke test + debug run + real run.** `go run ./src playthrough` (next to `dun_gen`/`loot`), for several seeds: generate town, levels 1–16 + set levels; D1 tables load; stairs up/down reachable (existing pathfinding); quest bosses spawn; level-16 levers make Diablo reachable; loot + store stock are valid D1 items; Lazarus → portal → stairs → Diablo flags step through; fail loudly. Debug menu: go to level N, god mode, gold/XP, set quest flags. Done when smoke test passes + one debug run town → Diablo death → end screen + one honest normal run through the Cathedral.
+16. **Done = smoke test + debug run + real run.** `go run ./src playthrough` (next to `loot`), for several seeds: generate town, levels 1–16 + set levels; D1 tables load; stairs up/down reachable (existing pathfinding); quest bosses spawn; level-16 levers make Diablo reachable; loot + store stock are valid D1 items; Lazarus → portal → stairs → Diablo flags step through; fail loudly. Debug menu: go to level N, god mode, gold/XP, set quest flags. Done when smoke test passes + one debug run town → Diablo death → end screen + one honest normal run through the Cathedral.
 17. **Build order: Cathedral slice first, then widen.** Branch `d1-rebuild`, one commit per milestone, `playthrough` grows each milestone.
 
 ## Milestones
@@ -54,16 +54,25 @@ From D1: loot, enemies, dungeon generation. Kept from H&H: graphics, UI, time ma
 - The level-up sound plays once per new character level; loot is drawn above corpses; looting a container that gives nothing says it's empty.
 - Checked against D1 and unchanged: starting HP/mana, to-hit, damage, block, monster HP (halved in single player), action speeds (decision 13; walk animations have no delay, so frames are ticks).
 
-## Exact dungeon generation
+## Dungeon generation
 
-A byte-exact port of D1 1.09's own generator: real `DIABDAT.MPQ` read by a from-scratch MPQ/PKWARE reader (`src/cmd/internal/mpq/mpq.go`), D1's own Borland LCG RNG (`src/rules/rng.go`), and `Generator.CreateLevel` (`src/dungen/level.go`) driving the same `CreateDungeon`/`InitMonsters`/`InitObjects`/`InitItems`/`CreateThemeRooms` pipeline D1 uses, verified against DevilutionX's fixture tests (`src/dungen/drlg_fixtures_test.go`) and against real quest set levels loaded straight from the MPQ. `common/map_gen_drlg.go`, `common/object.go` and `common/quest.go` place monsters/objects/items/triggers at the exact coordinates D1's generator chose. Unreachable stairs found via `go run ./src playthrough`, all fixed:
+Until 2026-09 this was a byte-exact port of 1.09's generators (in git before the `feat/d1-alt-generators` deletion
+commit). Now every D1 level goes through the engine's one level pipeline (AGENTS.md, "D1 levels"): a layout generator
+plus passes (`dungen.Passes`, knobs in the d1 `levels.rec`), set pieces as `.hhm` maps (`set_piece:`), and
+`population: d1_<type>`, which ports InitMonsters/InitObjects/InitItems/InitThemes/CreateThemeRooms onto cells in
+D1's RNG order. What is kept from D1, and how it was checked:
 
-- **Quest rooms D1 opens with a trigger we don't port** (`resyncQuests` in `src/dungen/drlg_quests.go`, run after population): D1 keeps them sealed in `dungeon` and swaps in `pdungeon` later. With talks skipped (decision 15) they start open: Ogden's sign on 4 (Banner2.DUN walls in the stairs down until the banner is handed over, ResyncQuests' qvar1 3), the Warlord's hall on 13 (Steel Tome, OperateBookLever; the sealed look was D1-correct data, not a SOL misread). Lazarus, Red Vex and Black Jade are placed in the lair (SetMapMonsters' SL_VILEBETRAYER block); the lair itself now starts sealed, as in D1 (see "Traps, decoration and Lazarus' lair").
-- **Caves lava/fence:** `addBasicTiles` painted the walkable (SOL 0) pieces of lava/fence megatiles as lava/fence and the solid ones as walls; now lava/fence = solid but see-through pieces.
-- **Level 15:** `ladder_down` sits on L4PENTA2's stairs piece (portal +3,+3) so its levels.rec exit can open it.
-- **Level 16:** D1's own skull levers (AddDiabObjs) open the sealed quads group by group (ObjChangeMap); the random 3×3 seal + 4 levers is gone.
+- **Where things go.** Every set piece is placed as D1 places it: the cathedral's quest rooms in a spine chamber
+  (l1SelectChamber), the catacombs' and the Warlord's in a room of their own, the Anvil and the stairs minisets in open
+  ground, Diablo's quads mirrored round level 16's centre. The Warlord's piece holds the stairs down, so his hall is
+  the way on (l4PlaceStairs). Uniques stand where their piece says, quest entrances are the piece's spots.
+- **How much.** Knobs were tuned against the old port over 20 seeds: monsters, barrels, chests, sarcophagi, lamps,
+  torches, traps, shrines, theme rooms and hooked bodies are within D1's range per level. D1's closed doors are solid,
+  which is what parts rooms for its theme rooms.
+- **Tests.** `TestPopulateStandIns` (six games, all 16 levels: everything reachable, every piece's spot reachable once
+  it opens, torches on walls, story books), `TestAltConnected` (200 seeds per type), and the playthrough's quest lines.
 
-## All quests (after the exact generator)
+## All quests
 
 Every D1 single-player quest runs as D1 1.09 progresses it (`common/quest.go`):
 - **State:** InitQuests' availability still comes from the seed; `_qactive`/`_qlog`/`_qvar1`/`_qvar2` live in the saved flags (`quest:<key>`, `.active`, `.log`, `.v1`, `.v2`). The quest log lists the active, logged quests with their `_qdmsg` text. Quest, book and gossip texts are D1's own (`files/assets/data/d1/text`, `gossip`).
@@ -139,3 +148,7 @@ Every D1 single-player quest runs as D1 1.09 progresses it (`common/quest.go`):
 
 - Town: rebuilding Tristram's D1 layout in LDtk.
 - Difficulty levels (Nightmare/Hell).
+- Levels, what the stand-ins don't do yet (`docs/D1_PLAN.md` "Dungeon generation"): D1's cave fences (l3Fence: wooden
+  fence lines across passages with fence doors, ~4 doors a level) are only a wall decoration; the cathedral has about
+  twice D1's doors, because a shared wall keeps every opening the layout cut (one opening per wall would bring it down
+  without losing theme rooms); the stairs are the layouts' stair nooks, not D1's stairs minisets.

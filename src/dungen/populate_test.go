@@ -1,6 +1,7 @@
 package dungen
 
 import (
+	"fmt"
 	"math/rand"
 	"strings"
 	"testing"
@@ -47,6 +48,12 @@ func TestPopulateStandIns(t *testing.T) {
 		t.Fatal(err)
 	}
 	levels := standIns(t)
+	books, heroes, torches := 0, 0, 0
+	defer func() {
+		if books == 0 || heroes == 0 || torches == 0 {
+			t.Errorf("%d story books, %d slain heroes, %d wall torches", books, heroes, torches)
+		}
+	}()
 	for game := int32(1); game <= 6; game++ {
 		seeds := rules.LevelSeeds(game * 7919)
 		q := d.InitQuests(seeds)
@@ -121,8 +128,28 @@ func TestPopulateStandIns(t *testing.T) {
 				t.Errorf("game %d level %d: only %d monsters", game, dlvl, n)
 			}
 			for _, o := range lvl.Objects {
-				if name := d.Objects[o.Kind].Name; o.Kind != rules.ObjTRAPL && o.Kind != rules.ObjTRAPR && !strings.Contains(name, "TORCH") && !o.DoorFlag {
+				name := d.Objects[o.Kind].Name
+				switch {
+				case strings.Contains(name, "TORCH"): // a wall torch hangs on the wall (hangTorchesOnWalls)
+					torches++
+					if m.GetTile(o.X-CellOrigin, o.Y-CellOrigin) != Wall {
+						t.Errorf("game %d level %d: %s at %d,%d is not on a wall", game, dlvl, name, o.X-CellOrigin, o.Y-CellOrigin)
+					}
+				case o.Kind == rules.ObjSTORYBOOK:
+					books++
+					if o.Var1 < 0 || o.Var1 > 2 || o.Var2 != dlvl/4-1 || o.Var3 < 0 || o.Var3 > 8 || d.Texts[fmt.Sprintf("TEXT_BOOK%d%d", o.Var1+1, o.Var2+1)] == "" {
+						t.Errorf("game %d level %d: story book vars %d %d %d", game, dlvl, o.Var1, o.Var2, o.Var3)
+					}
+				case o.Kind == rules.ObjSLAINHERO:
+					heroes++
+				}
+				if o.Kind != rules.ObjTRAPL && o.Kind != rules.ObjTRAPR && !strings.Contains(name, "TORCH") && !o.DoorFlag {
 					check(o.X, o.Y, "object "+name)
+				}
+				for _, mon := range lvl.Monsters { // moveMonstersOffObjects
+					if mon != nil && !mon.Reserved && !mon.Hidden && o.X == mon.X && o.Y == mon.Y && (o.Solid || o.DoorFlag) {
+						t.Errorf("game %d level %d: a monster stands in %s at %d,%d", game, dlvl, name, o.X, o.Y)
+					}
 				}
 			}
 			for _, it := range lvl.Items {
@@ -174,4 +201,23 @@ func reachable(t testing.TB, m *DungeonMap, start geometry.Point, opened bool) m
 		}
 	}
 	return reach
+}
+
+// TestSlainHeroRewards: what OperateSlainHero rolls for each class.
+func TestSlainHeroRewards(t *testing.T) {
+	d, err := rules.Load(testFS())
+	if err != nil {
+		t.Fatal(err)
+	}
+	gnr := rules.NewGenerator(d, 1)
+	const breastPlate, longWarBow = 153, 119 // their ICURS_ graphics
+	if it := gnr.MagicItemWithCurs(9, rules.ITypeHArmor, breastPlate); it.Curs != breastPlate || it.Magical == 0 {
+		t.Errorf("warrior reward %+v", it.Name)
+	}
+	if it := gnr.MagicItemWithCurs(9, rules.ITypeBow, longWarBow); it.Curs != longWarBow || it.Magical == 0 {
+		t.Errorf("rogue reward %+v", it.Name)
+	}
+	if it := gnr.SpellBook(9, rules.SplLightning); it.Spell != rules.SplLightning {
+		t.Errorf("sorcerer reward %+v", it.Name)
+	}
 }

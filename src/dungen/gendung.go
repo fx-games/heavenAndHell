@@ -1,32 +1,6 @@
 package dungen
 
-import (
-	"encoding/binary"
-	"fmt"
-	"rpg/src/rules"
-)
-
-// Entry is how the player enters a level (lvl_entry); it decides where D1 puts them.
-type Entry int
-
-const (
-	EntryMain    Entry = iota // from the level above
-	EntryPrev                 // from the level below
-	EntrySetLvl               // into a set level
-	EntryRtnLvl               // back from a set level
-	EntryLoad                 // loading a save
-	EntryWarpLvl              // through a portal
-	EntryTWarpDn              // from town through a warp
-	EntryTWarpUp              // up to town through a warp
-)
-
-// LevelType is the tile set dungeon level dlvl is built from, as the active mod's levels.rec declares it.
-func (l *Levels) LevelType(dlvl int) int {
-	if dlvl <= 0 || dlvl >= rules.NumLevels {
-		return rules.DTypeTown
-	}
-	return strategyNamed(l.cfg[dlvl].strategy).ltype
-}
+import "rpg/src/rules"
 
 type point struct{ x, y int }
 
@@ -39,163 +13,28 @@ type themeLoc struct {
 	ttval int8
 }
 
-// miniset is a tile pattern and its replacement, indexed [y][x].
-type miniset struct {
-	w, h            int
-	search, replace [6][6]byte
-}
-
-// mini is generator.txt's miniset of that name.
-func (g *gen) mini(name string) *miniset {
-	m := g.levels.minisets[name]
-	if m == nil {
-		panic("generator.txt has no [miniset " + name + "]")
-	}
-	return m
-}
-
-// rows is generator.txt's table of that name, row by row.
-func (g *gen) rows(name string) [][]int {
-	t, ok := g.levels.rows[name]
-	if !ok {
-		panic("generator.txt has no [table " + name + "]")
-	}
-	return t
-}
-
-// table is generator.txt's table of that name, its rows concatenated.
-func (g *gen) table(name string) []int {
-	t, ok := g.levels.tables[name]
-	if !ok {
-		panic("generator.txt has no [table " + name + "]")
-	}
-	return t
-}
-
-// gen holds gendung.cpp's globals while one level is built. D1 levels are 40×40 megatiles (dungeon) and
-// 112×112 pieces (dPiece etc.), megatile (i, j) covering pieces 16+2i..17+2i.
+// gen holds gendung.cpp's globals while a laid-out level is populated: 112x112 pieces (dMonster etc.), the
+// playable cells at 16..95, and D1's 40x40 megatiles as the 2x2 cells they cover.
 type gen struct {
-	levels    *Levels
 	rng       rules.Rng
 	quests    *rules.Quests
 	currlevel int
 	ltype     int
 	setlevel  bool
 	setLvlNum int
-	strat     strategy
-	params    LevelParams
-	cells     *DungeonMap // a level laid out by the passes (Populate); nil: D1's own generators built it
+	cells     *DungeonMap // the level as the passes laid it out
 
 	population
 
-	// dungeon and pdungeon share one block like D1's globals, so the generators' reads one past an edge see
-	// what D1 sees (dungeon[40][y] is pdungeon[0][y]).
-	mem       [3200]byte
-	protected [1600]bool // Protected / L*dflags, index y*40+x
-	mask      [1600]bool // DungeonMask, index y*40+x
-
-	piece    [112][112]int // dPiece: 0-based micro index
 	trans    [112][112]int8
 	flags    [112][112]byte
 	transVal int8
 
-	setPiece, setPieceRoom rect
-	view                   point
-	themes                 []themeLoc
-	til                    []byte
-
-	l1 struct {
-		vertical, ch1, ch2, ch3 bool
-		chamber                 [1600]bool
-	}
-	l2 struct {
-		rooms    [81]struct{ tl, br point }
-		nRoomCnt int
-		halls    []l2Hall
-		pre      [40][40]byte
-	}
-	l3 struct{ lockoutcnt int }
-	l4 struct {
-		hallok [20]bool
-		hold   point
-		quads  [4]point
-	}
+	setPiece rect
+	themes   []themeLoc
 }
 
-func (g *gen) d(x, y int) byte {
-	if i := x*40 + y; i >= 0 && i < len(g.mem) {
-		return g.mem[i]
-	}
-	return 0
-}
-
-func (g *gen) sd(x, y int, v byte) {
-	if i := x*40 + y; i >= 0 && i < len(g.mem) {
-		g.mem[i] = v
-	}
-}
-
-func (g *gen) pd(x, y int) byte { return g.d(x+40, y) }
-
-func (g *gen) setPD(x, y int, v byte) {
-	if x >= 0 && x < 40 {
-		g.sd(x+40, y, v)
-	}
-}
-
-func (g *gen) fillDungeon(v byte) {
-	for i := 0; i < 1600; i++ {
-		g.mem[i] = v
-	}
-}
-
-func (g *gen) savePdungeon() { copy(g.mem[1600:], g.mem[:1600]) }
-
-func bitIndex(x, y int) int {
-	if x < 0 || y < 0 || x >= 40 || y >= 40 {
-		return -1
-	}
-	return y*40 + x
-}
-
-func (g *gen) prot(x, y int) bool { i := bitIndex(x, y); return i >= 0 && g.protected[i] }
-
-func (g *gen) setProt(x, y int) {
-	if i := bitIndex(x, y); i >= 0 {
-		g.protected[i] = true
-	}
-}
-
-func (g *gen) masked(x, y int) bool { i := bitIndex(x, y); return i >= 0 && g.mask[i] }
-
-func (g *gen) setMask(x, y int, v bool) {
-	if i := bitIndex(x, y); i >= 0 {
-		g.mask[i] = v
-	}
-}
-
-func (g *gen) maskCount() (n int) {
-	for _, b := range g.mask {
-		if b {
-			n++
-		}
-	}
-	return
-}
-
-func (g *gen) rnd(v int) int   { return g.rng.Random(v) }
-func (g *gen) flip(f int) bool { return g.rnd(f) == 0 }
-func (g *gen) discard(n int) {
-	for ; n > 0; n-- {
-		g.rng.Seed()
-	}
-}
-func (g *gen) pick(a, b int) int {
-	if g.rnd(2) == 0 {
-		return a
-	}
-	return b
-}
+func (g *gen) rnd(v int) int { return g.rng.Random(v) }
 
 func (g *gen) setTrans(x, y int, v int8) {
 	if x >= 0 && y >= 0 && x < 112 && y < 112 {
@@ -230,202 +69,6 @@ func (g *gen) mRectTrans(x1, y1, x2, y2 int) {
 	g.rectTrans(2*x1+17, 2*y1+17, 2*x2+16, 2*y2+16)
 }
 
-func (g *gen) copyTrans(sx, sy, dx, dy int) { g.setTrans(dx, dy, g.getTrans(sx, sy)) }
-
-func (m *miniset) matches(g *gen, x, y int, respectProtected bool) bool {
-	for yy := 0; yy < m.h; yy++ {
-		for xx := 0; xx < m.w; xx++ {
-			if s := m.search[yy][xx]; s != 0 && g.d(xx+x, yy+y) != s {
-				return false
-			}
-			if respectProtected && g.prot(xx+x, yy+y) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-func (m *miniset) place(g *gen, x, y int, protect bool) {
-	for yy := 0; yy < m.h; yy++ {
-		for xx := 0; xx < m.w; xx++ {
-			if r := m.replace[yy][xx]; r != 0 {
-				g.sd(xx+x, yy+y, r)
-				if protect {
-					g.setProt(xx+x, yy+y)
-				}
-			}
-		}
-	}
-}
-
-// placeMiniSet ports PlaceMiniSet (gendung.cpp); ok is false when it doesn't fit anywhere. drlg1Quirk is
-// DRLG_L1's own variant, which keeps out of the top-left corner and gets more tries to make up for it.
-func (g *gen) placeMiniSet(m *miniset, drlg1Quirk bool) (x, y int, ok bool) {
-	tries := 199
-	if drlg1Quirk {
-		tries = 1600
-	}
-	sw, sh := m.w, m.h
-	x, y = g.rnd(40-sw), g.rnd(40-sh)
-	for i := 0; i < tries; i, x = i+1, x+1 {
-		if x == 40-sw {
-			x = 0
-			if y++; y == 40-sh {
-				y = 0
-			}
-		}
-		if drlg1Quirk {
-			valid := true
-			if x <= 12 {
-				x++
-				valid = false
-			}
-			if y <= 12 {
-				y++
-				valid = false
-			}
-			if !valid {
-				continue
-			}
-		}
-		if g.setPieceRoom.contains(x, y) || !m.matches(g, x, y, true) {
-			continue
-		}
-		m.place(g, x, y, false)
-		return x, y, true
-	}
-	return 0, 0, false
-}
-
-// roomRules are the two things DRLG_L1's and DRLG_L4's identical room splitter disagree on: the size of the grid
-// rooms are masked into, and which way the recursion and the rotation coin flip go.
-type roomRules struct {
-	bound        int  // 40 for L1's megatile grid, 20 for L4's quarter-grid
-	rotate       bool // the sense of the 1-in-4 rotation flip
-	flipChildren bool // L1 alternates the split axis on the way down, L4 keeps it
-}
-
-var (
-	l1Rooms = roomRules{bound: 40, rotate: true, flipChildren: true}
-	l4Rooms = roomRules{bound: 20, rotate: false}
-)
-
-func (g *gen) mapRoom(r rect, p roomRules) {
-	for y := 0; y < r.h && y+r.y < p.bound; y++ {
-		for x := 0; x < r.w && x+r.x < p.bound; x++ {
-			g.setMask(r.x+x, r.y+y, true)
-		}
-	}
-}
-
-func (g *gen) checkRoom(r rect, p roomRules) bool {
-	if p.bound == 20 && (r.x <= 0 || r.y <= 0) {
-		return false
-	}
-	for y := 0; y < r.h; y++ {
-		for x := 0; x < r.w; x++ {
-			if x+r.x < 0 || x+r.x >= p.bound || y+r.y < 0 || y+r.y >= p.bound || g.masked(r.x+x, r.y+y) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-// generateRoom ports DRLG_L1CreateRoom / L4CreateRoom, which are the same recursive splitter.
-func (g *gen) generateRoom(area rect, vertical bool, p roomRules) {
-	rotate := g.flip(4) == p.rotate
-	vertical = !vertical && rotate || vertical && !rotate
-	var room1 rect
-	place1 := false
-	for num := 0; num < 20; num++ {
-		room1.w = (g.rnd(5) + 2) &^ 1
-		room1.h = (g.rnd(5) + 2) &^ 1
-		if vertical {
-			room1.x, room1.y = area.x-room1.w, area.y+area.h/2-room1.h/2
-			place1 = g.checkRoom(rect{room1.x - 1, room1.y - 1, room1.h + 2, room1.w + 1}, p) // D1 bug: width and height swapped
-		} else {
-			room1.x, room1.y = area.x+area.w/2-room1.w/2, area.y-room1.h
-			place1 = g.checkRoom(rect{room1.x - 1, room1.y - 1, room1.w + 2, room1.h + 1}, p)
-		}
-		if place1 {
-			break
-		}
-	}
-	if place1 {
-		g.mapRoom(rect{room1.x, room1.y, min(40-room1.x, room1.w), min(40-room1.y, room1.h)}, p)
-	}
-	room2 := room1
-	var place2 bool
-	if vertical {
-		room2.x = area.x + area.w
-		place2 = g.checkRoom(rect{room2.x, room2.y - 1, room2.w + 1, room2.h + 2}, p)
-	} else {
-		room2.y = area.y + area.h
-		place2 = g.checkRoom(rect{room2.x - 1, room2.y, room2.w + 2, room2.h + 1}, p)
-	}
-	if place2 {
-		g.mapRoom(room2, p)
-	}
-	next := vertical != p.flipChildren
-	if place1 {
-		g.generateRoom(room1, next, p)
-	}
-	if place2 {
-		g.generateRoom(room2, next, p)
-	}
-}
-
-// dun is a .DUN file: size, then layers of little-endian words (tiles; items, monsters, objects and
-// transparency at double resolution).
-type dun []uint16
-
-func (d dun) w() int { return int(d[0]) }
-func (d dun) h() int { return int(d[1]) }
-
-func (d dun) tile(i, j int) byte { return byte(d[2+j*d.w()+i]) }
-
-// layer returns a double-resolution layer value: 1 monsters, 2 objects, 3 transparency (items are layer 0).
-func (d dun) layer(n, i, j int) int {
-	off := 2 + d.w()*d.h() + n*4*d.w()*d.h()
-	if idx := off + j*2*d.w() + i; idx < len(d) {
-		return int(d[idx])
-	}
-	return 0
-}
-
-// loadDun returns a set piece by its name under assets/data/levels, e.g. "l1/sklkng1".
-func (g *gen) loadDun(name string) dun {
-	if readDunHook != nil {
-		if b := readDunHook(name); b != nil {
-			return binDun(b)
-		}
-	}
-	d, ok := g.levels.dun[name]
-	if !ok {
-		panic(fmt.Errorf("D1 level data: no set piece %q", name))
-	}
-	return d
-}
-
-// readDunHook lets tests supply set pieces as raw .DUN bytes; nil or a nil result uses the imported text.
-var readDunHook func(name string) []byte
-
-// placeDunTiles ports PlaceDunTiles: a set piece's tiles, protected; empty cells become floorID if set.
-func (g *gen) placeDunTiles(d dun, x, y int, floorID byte) {
-	for j := 0; j < d.h(); j++ {
-		for i := 0; i < d.w(); i++ {
-			if t := d.tile(i, j); t != 0 {
-				g.sd(x+i, y+j, t)
-				g.setProt(x+i, y+j)
-			} else if floorID != 0 {
-				g.sd(x+i, y+j, floorID)
-			}
-		}
-	}
-}
-
 // makeSetPC ports Make_SetPC: mark a megatile rectangle populated (monsters stay out).
 func (g *gen) makeSetPC(r rect) {
 	for j := 0; j < 2*r.h; j++ {
@@ -448,46 +91,6 @@ const (
 	bflagExplored  = 0x80
 )
 
-// sizeForThemeRoom ports GetSizeForThemeRoom (DRLG_WillThemeRoomFit, with its broken bounds check).
-func (g *gen) sizeForThemeRoom(floor byte, x, y, minSize, maxSize int) (int, int, bool) {
-	if x+maxSize > 40 && y+maxSize > 40 {
-		return 0, 0, false
-	}
-	if g.nearThemeRoom(x, y) {
-		return 0, 0, false
-	}
-	maxWidth, maxHeight := min(maxSize, 40-x), min(maxSize, 40-y)
-	rw, rh := maxWidth, maxHeight
-	for i := 0; i < maxSize; i++ {
-		width := 0
-		if i < rh {
-			width = i
-		}
-		if i < maxHeight {
-			for width < rw && g.d(x+width, y+i) == floor {
-				width++
-			}
-		}
-		height := 0
-		if i < rw {
-			height = i
-		}
-		if i < maxWidth {
-			for height < rh && g.d(x+i, y+height) == floor {
-				height++
-			}
-		}
-		if width < minSize || height < minSize {
-			if i < minSize {
-				return 0, 0, false
-			}
-			break
-		}
-		rw, rh = min(rw, width), min(rh, height)
-	}
-	return rw - 2, rh - 2, true
-}
-
 func (g *gen) nearThemeRoom(x, y int) bool {
 	for _, t := range g.themes {
 		if (rect{t.room.x - 2, t.room.y - 2, t.room.w + 5, t.room.h + 5}).contains(x, y) {
@@ -495,108 +98,6 @@ func (g *gen) nearThemeRoom(x, y int) bool {
 		}
 	}
 	return false
-}
-
-// createThemeRoom ports CreateThemeRoom.
-func (g *gen) createThemeRoom(t themeLoc) {
-	lx, ly := t.room.x, t.room.y
-	hx, hy := lx+t.room.w, ly+t.room.h
-	wall := map[int][3]byte{rules.DTypeCatacombs: {2, 1, 3}, rules.DTypeCaves: {134, 137, 7}, rules.DTypeHell: {2, 1, 6}}[g.ltype]
-	for yy := ly; yy < hy; yy++ {
-		for xx := lx; xx < hx; xx++ {
-			switch {
-			case yy == ly || yy == hy-1:
-				g.sd(xx, yy, wall[0])
-			case xx == lx || xx == hx-1:
-				g.sd(xx, yy, wall[1])
-			default:
-				g.sd(xx, yy, wall[2])
-			}
-		}
-	}
-	switch g.ltype {
-	case rules.DTypeCatacombs:
-		g.sd(lx, ly, 8)
-		g.sd(hx-1, ly, 7)
-		g.sd(lx, hy-1, 9)
-		g.sd(hx-1, hy-1, 6)
-		if g.flip(2) {
-			g.sd(hx-1, (ly+hy)/2, 4)
-		} else {
-			g.sd((lx+hx)/2, hy-1, 5)
-		}
-	case rules.DTypeCaves:
-		g.sd(lx, ly, 150)
-		g.sd(hx-1, ly, 151)
-		g.sd(lx, hy-1, 152)
-		g.sd(hx-1, hy-1, 138)
-		if g.flip(2) {
-			g.sd(hx-1, (ly+hy)/2, 147)
-		} else {
-			g.sd((lx+hx)/2, hy-1, 146)
-		}
-	case rules.DTypeHell:
-		g.sd(lx, ly, 9)
-		g.sd(hx-1, ly, 16)
-		g.sd(lx, hy-1, 15)
-		g.sd(hx-1, hy-1, 12)
-		if g.flip(2) {
-			yy := (ly + hy) / 2
-			g.sd(hx-1, yy-1, 53)
-			g.sd(hx-1, yy, 6)
-			g.sd(hx-1, yy+1, 52)
-			g.sd(hx-2, yy-1, 54)
-		} else {
-			xx := (lx + hx) / 2
-			g.sd(xx-1, hy-1, 57)
-			g.sd(xx, hy-1, 6)
-			g.sd(xx+1, hy-1, 56)
-			g.sd(xx, hy-2, 59)
-			g.sd(xx-1, hy-2, 58)
-		}
-	}
-}
-
-// placeDecorations scatters the mod's decoration tiles, in the order it declared them, the way this level's
-// strategy places them. The default list per strategy is Diablo's own, so a mod that says nothing changes nothing.
-func (g *gen) placeDecorations() {
-	for _, d := range g.params.Decorations {
-		g.strat.deco(g, d)
-	}
-}
-
-// placeThemeRooms ports DRLG_PlaceThemeRooms.
-func (g *gen) placeThemeRooms(minSize, maxSize int, floor byte, freq int, rndSize bool) {
-	g.themes = nil
-	for j := 0; j < 40; j++ {
-		for i := 0; i < 40; i++ {
-			if g.d(i, j) != floor || !g.flip(freq) {
-				continue
-			}
-			w, h, ok := g.sizeForThemeRoom(floor, i, j, minSize, maxSize)
-			if !ok {
-				continue
-			}
-			if rndSize {
-				lo, hi := minSize-2, maxSize-2
-				if w = lo + g.rnd(g.rnd(w-lo+1)); w < lo || w > hi {
-					w = lo
-				}
-				if h = lo + g.rnd(g.rnd(h-lo+1)); h < lo || h > hi {
-					h = lo
-				}
-			}
-			t := themeLoc{room: rect{i + 1, j + 1, w, h}}
-			if g.ltype == rules.DTypeCaves {
-				g.rectTrans(2*i+20, 2*j+20, 2*(i+w)+15, 2*(j+h)+15)
-			} else {
-				g.mRectTrans(i+1, j+1, i+w, j+h)
-			}
-			t.ttval = g.transVal - 1
-			g.createThemeRoom(t)
-			g.themes = append(g.themes, t)
-		}
-	}
 }
 
 // holdThemeRooms ports DRLG_HoldThemeRooms.
@@ -614,69 +115,14 @@ func (g *gen) holdThemeRooms() {
 	}
 }
 
-// lPass3 ports DRLG_LPass3: megatiles to pieces through the level type's .TIL (lv = the fill megatile).
-func (g *gen) lPass3(lv int) {
-	m := g.mega(lv)
-	for j := 0; j < 112; j += 2 {
-		for i := 0; i < 112; i += 2 {
-			g.piece[i][j], g.piece[i+1][j], g.piece[i][j+1], g.piece[i+1][j+1] = m[0], m[1], m[2], m[3]
-		}
-	}
-	for j := 0; j < 40; j++ {
-		for i := 0; i < 40; i++ {
-			if g.d(i, j) == 0 {
-				continue // D1's assembly skips tile 0 and keeps the fill megatile
-			}
-			m := g.mega(int(g.d(i, j)) - 1)
-			xx, yy := 16+2*i, 16+2*j
-			g.piece[xx][yy], g.piece[xx+1][yy], g.piece[xx][yy+1], g.piece[xx+1][yy+1] = m[0], m[1], m[2], m[3]
-		}
-	}
-}
-
-// mega is megatile t's four pieces from the level type's .TIL.
-func (g *gen) mega(t int) [4]int { return megaPieces(g.til, t) }
-
-func megaPieces(til []byte, t int) [4]int {
-	o := 8 * t
-	if t < 0 || o+8 > len(til) {
-		return [4]int{}
-	}
-	return [4]int{int(binary.LittleEndian.Uint16(til[o:])), int(binary.LittleEndian.Uint16(til[o+2:])),
-		int(binary.LittleEndian.Uint16(til[o+4:])), int(binary.LittleEndian.Uint16(til[o+6:]))}
-}
-
-func (g *gen) isFloor(x, y int, floor byte) bool {
-	if g.cells != nil {
-		return g.cellFloor(x, y)
-	}
-	i, j := (x-16)/2, (y-16)/2
-	if x < 16 || y < 16 || i >= 40 || j >= 40 {
-		return false
-	}
-	return g.d(i, j) == floor
-}
-
-// floodTrans ports FloodTransparencyValues (DRLG_L*FloodTVal): one room region per connected floor area.
-func (g *gen) floodTrans(floor byte) {
-	for j := 0; j < 40; j++ {
-		for i := 0; i < 40; i++ {
-			if xx, yy := 16+2*i, 16+2*j; g.d(i, j) == floor && g.trans[xx][yy] == 0 {
-				g.findTrans(xx, yy, floor)
-				g.transVal++
-			}
-		}
-	}
-}
-
 // findTrans ports FindTransparencyValues' span fill.
-func (g *gen) findTrans(fx, fy int, floor byte) {
+func (g *gen) findTrans(fx, fy int) {
 	type seed struct{ scanStart, scanEnd, y, dy int }
 	stack := []seed{{fx, fx + 1, fy, 1}}
-	inside := func(x, y int) bool { return g.getTrans(x, y) == 0 && g.isFloor(x, y, floor) }
+	inside := func(x, y int) bool { return g.getTrans(x, y) == 0 && g.cellFloor(x, y) }
 	set := func(x, y int) {
 		for _, d := range [8]point{{0, 1}, {0, -1}, {1, 0}, {-1, 0}, {1, -1}, {-1, -1}, {1, 1}, {-1, 1}} {
-			if !g.isFloor(x+d.x, y+d.y, floor) {
+			if !g.cellFloor(x+d.x, y+d.y) {
 				g.setTrans(x+d.x, y+d.y, g.transVal)
 			}
 		}

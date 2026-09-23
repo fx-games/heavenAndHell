@@ -136,12 +136,6 @@ func (s *State) applyPatches(m *gridmap.GridMap[*Actor, *Item, Object]) {
 				}
 			}
 		}
-		if p.Objects != "" && lvl.Pieces == nil { // e.g. Blood2.DUN's torches lighting the hall (OperatePedistal)
-			for _, o := range s.factory.Levels.DunObjects(s.factory.Gen().D, p.Objects, 2*sp[0], 2*sp[1]) {
-				placeObject(s.factory, m, lvl, o, toCell(o.X, o.Y))
-			}
-			delete(s.glowCache, m)
-		}
 	}
 }
 

@@ -11,12 +11,10 @@ import (
 	"rpg/src/common"
 	"rpg/src/console"
 	"rpg/src/defs"
-	"rpg/src/dungen"
 	"rpg/src/game"
 	"rpg/src/gui"
 	"rpg/src/hhm"
 	"rpg/src/renderer"
-	"rpg/src/rules"
 	"strconv"
 	"strings"
 
@@ -34,8 +32,6 @@ func Main() {
 		case "loot":
 			theGame, _ := createGameAndUIContext()
 			genLoot(theGame)
-		case "dun_gen":
-			maptest()
 		case "ascii":
 			runGameWithConsole(createGameAndUIContext())
 		case "playthrough":
@@ -120,45 +116,6 @@ func genLoot(theGame *game.GameInstance) {
 	items := theGame.GenerateLoot(dungeonLevel, 10)
 	for _, item := range items {
 		fmt.Println(item.InventoryName())
-	}
-}
-
-// maptest prints D1 levels: dun_gen [dungeon level] [seed].
-func maptest() {
-	dlvl, seed := 1, int64(42)
-	if len(os.Args) > 2 {
-		dlvl, _ = strconv.Atoi(os.Args[2])
-	}
-	if len(os.Args) > 3 {
-		seed, _ = strconv.ParseInt(os.Args[3], 10, 64)
-	}
-	modName := common.NewConfigurationFromRecFile(common.ConfigFile).Mod
-	files.SelectMod(modName)
-	mustHaveMod(modName)
-	data, err := rules.Load(files.GetFileSystem())
-	if err != nil {
-		log.Fatal(err)
-	}
-	seeds := rules.LevelSeeds(int32(seed))
-	quests := data.InitQuests(seeds)
-	gen := rules.NewGenerator(data, int32(seed))
-	levels, err := dungen.LoadLevels(files.GetFileSystem())
-	if err != nil {
-		log.Fatal(err)
-	}
-	lvl, err := levels.CreateLevel(gen, &quests, seeds, dlvl, rules.SLNone, dungen.EntryMain)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for y := 0; y < dungen.LevelSize; y++ {
-		for x := 0; x < dungen.LevelSize; x++ {
-			if lvl.CellSolid(x, y) {
-				fmt.Print("#")
-			} else {
-				fmt.Print(".")
-			}
-		}
-		fmt.Println()
 	}
 }
 

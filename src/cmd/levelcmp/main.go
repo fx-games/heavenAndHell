@@ -1,10 +1,8 @@
-// Command levelcmp shows D1's level generators next to roguelike stand-ins built from package dungen's layout
-// generators, one level at a time and at the same scale (one character = one D1 map cell, 80x80), so the two can
-// be compared by eye before D1's generators are replaced.
+// Command levelcmp shows the d1 mod's dungeon levels as levels.rec lays them out (layout and passes, set pieces
+// left out), one level at a time, one character a map cell, for tuning the knobs by eye.
 //
-//	go run ./src/cmd/levelcmp -d1              interactive: 1-4 level type, same key or space rerolls, q quits
-//	go run ./src/cmd/levelcmp -alt
-//	go run ./src/cmd/levelcmp -alt -type 3 -seed 42   print one level and exit
+//	go run ./src/cmd/levelcmp                   interactive: 1-4 level type, same key or space rerolls, q quits
+//	go run ./src/cmd/levelcmp -type 3 -seed 42  print one level and exit
 //
 // # wall   . floor   + door   ~ water/lava   (blank: rock no floor touches)
 package main
@@ -18,17 +16,11 @@ import (
 	"strings"
 
 	"golang.org/x/term"
-
-	"rpg/files"
-	"rpg/src/defs"
-	"rpg/src/dungen"
-	"rpg/src/rules"
 )
 
 var typeNames = [5]string{"", "cathedral", "catacombs", "caves", "hell"}
 
-// d1Dlvl is the dungeon level -d1 builds for each type: the second of each four, which holds no set piece that
-// fills the map (quests are rolled from the seed as in a new game, so a quest room can still turn up).
+// d1Dlvl is the dungeon level shown for each type: the second of each four.
 var d1Dlvl = [5]int{0, 2, 6, 10, 14}
 
 // cell is what the printout shows at one map cell.
@@ -189,79 +181,13 @@ func (g *grid) floorPct() float64 {
 	return 100 * float64(n) / float64(len(g.c))
 }
 
-// ---- D1 ----
-
-type d1 struct {
-	data   *rules.Data
-	levels *dungen.Levels
-}
-
-func loadD1() *d1 {
-	files.SelectMod("d1")
-	if err := defs.LoadIcons(); err != nil { // defs.IconLava: L3's lava pieces are drawn with it
-		log.Fatal(err)
-	}
-	data, err := rules.Load(files.GetFileSystem())
-	if err != nil {
-		log.Fatal(err)
-	}
-	levels, err := dungen.LoadLevels(files.GetFileSystem())
-	if err != nil {
-		log.Fatal(err)
-	}
-	return &d1{data: data, levels: levels}
-}
-
-// build is src/app's maptest (dun_gen) path: a new game's seeds and quests, then the level.
-func (d *d1) build(ltype int, seed int64) (*grid, error) {
-	seeds := rules.LevelSeeds(int32(seed))
-	quests := d.data.InitQuests(seeds)
-	gen := rules.NewGenerator(d.data, int32(seed))
-	lvl, err := d.levels.CreateLevel(gen, &quests, seeds, d1Dlvl[ltype], rules.SLNone, dungen.EntryMain)
-	if err != nil {
-		return nil, err
-	}
-	g := newGrid(dungen.LevelSize, dungen.LevelSize)
-	doors := map[[2]int]bool{} // the door objects the game puts on its door pieces (common/map_gen.go)
-	for _, o := range lvl.Objects {
-		switch o.Kind {
-		case rules.ObjL1LDOOR, rules.ObjL1RDOOR, rules.ObjL2LDOOR, rules.ObjL2RDOOR, rules.ObjL3LDOOR, rules.ObjL3RDOOR:
-			doors[[2]int{o.X - dungen.CellOrigin, o.Y - dungen.CellOrigin}] = true
-		}
-	}
-	for y := 0; y < dungen.LevelSize; y++ {
-		for x := 0; x < dungen.LevelSize; x++ {
-			f := lvl.CellFlags(x, y)
-			switch {
-			case doors[[2]int{x, y}] || lvl.CellDoor(x, y):
-				g.set(x, y, cDoor)
-			case f.Water || f.Damaging || lvl.CellTile(x, y) == int(defs.IconLava):
-				g.set(x, y, cWater)
-			case !lvl.CellSolid(x, y):
-				g.set(x, y, cFloor)
-			}
-		}
-	}
-	return g, nil
-}
-
 // ---- main loop ----
 
 func main() {
-	useD1 := flag.Bool("d1", false, "show D1's own generators")
-	useAlt := flag.Bool("alt", false, "show the roguelike stand-ins")
 	once := flag.Int("type", 0, "print level type 1-4 once and exit")
 	seedFlag := flag.Int64("seed", 0, "seed for -type (0: random)")
 	flag.Parse()
-	if *useD1 == *useAlt {
-		fmt.Fprintln(os.Stderr, "levelcmp: pass exactly one of -d1 or -alt")
-		os.Exit(2)
-	}
-	mode := "alt"
-	var build func(ltype int, seed int64) (*grid, error) = buildAlt
-	if *useD1 {
-		mode, build = "d1", loadD1().build
-	}
+	mode, build := "d1", buildAlt
 	show := func(ltype int, seed int64, nl string) {
 		g, err := build(ltype, seed)
 		if err != nil {

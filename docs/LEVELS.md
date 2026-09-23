@@ -15,7 +15,7 @@ Common fields, owned by the engine:
 | `map` | required | the level's id: clean, opaque, never parsed (`town`, `cathedral_3`, `leoric_tomb`) |
 | `name` | | display name |
 | `depth` | required | difficulty and progress only: seeds, monster/item levels, "deepest", store stock. Town 0; a quest or side level takes its parent's depth. Several levels may share one |
-| `generator` | required | the algorithm, one name per distinct algorithm in the engine (`d1_cathedral`, `d1_catacombs`, `d1_caves`, `d1_hell`, `d1_set`, `accretion`, `drawn`, ...) |
+| `generator` | required | the layout algorithm (`bsp`, `megadungeon`, `drunkard`, `accretion`, `map`, `drawn`, ...); every one but `drawn` takes the passes, set pieces and a population (the d1 `levels.rec` documents them) |
 | `tiles` | required | the tile set |
 | `music` | | a `music.rec` event; without it the level has no music |
 | `glyphs` | | an 8x8 glyph atlas in the mod folder; the level is drawn as text with it instead of tiles |
@@ -24,14 +24,13 @@ Common fields, owned by the engine:
 | `exit` | repeatable | `exit: <location> -> <map id>, <arrival location>`, with an optional `open_when: <condition>` in the quest trigger language |
 | `patch` | repeatable | `patch: <name> = <map file>, rect x1 y1 x2 y2`: a region stamped onto the level when a trigger applies it |
 
-Each generator declares the extra fields it reads (D1: decorations, set pieces, `quest` for `d1_set`;
-`accretion`: templates, rooms, doors; `drawn`: `template`). Anything else is a load error, as are a missing
+Each generator declares the extra fields it reads (`accretion`: templates, rooms, doors; `map`, `drawn`:
+`template`), and every layout the passes' (`set_piece`, `decoration`, `population`, `quest` for a set level...). Anything else is a load error, as are a missing
 required field, an unknown generator, a duplicate `map`, an exit to a missing level or location, and zero or
 several `start` records. One test loads every mod through this check.
 
-There is no `type:`. D1's leveltype belongs to D1's generators (the cathedral algorithm is leveltype 1; `d1_set`
-names its quest, and 1.09's quest table gives the set level and its `_qlvltype`). The engine has no notion of
-level type.
+There is no `type:`. D1's leveltype belongs to its population (`population: d1_cathedral` is leveltype 1; a set
+level names its quest, and 1.09's quest table gives the set level). The engine has no notion of level type.
 
 ## Links
 
@@ -44,8 +43,8 @@ no transition. Quests never invent links, they satisfy conditions.
 A quest names its level (`level: cathedral_3`). Everything `UpdateD1Quests` did is declarative:
 - gated exits: `open_when` on the exit;
 - map changes (ObjChangeMap: Leoric's lever, the Bone Chamber book, the Pedestal, Snotspill): `patch` records
-  on the level, `patch: <name> = <region>` with an optional `apply_when:` condition and `patch_objects:` (a
-  .DUN whose objects come with it). A region is fixed megatiles (numbers or the set piece's edges, `midx+2`),
+  on the level, `patch: <name> = <region>` with an optional `apply_when:` condition: the level's set pieces'
+  cells in the region switch to their open layout (`<map>_open`), whose objects come with it. A region is fixed megatiles (numbers or the set piece's edges, `midx+2`),
   or `used`/`group`/`range OBJ_...`: the ranges D1's generator rolled into those objects. Decided in the build
   (2026-09-22): nothing is saved and there is no `apply_patch` outcome; every patch follows from quest vars and
   object state, which saves already keep, and is re-applied whenever the level is built, loaded or its quests

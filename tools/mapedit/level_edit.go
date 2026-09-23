@@ -61,7 +61,7 @@ type mapEditor struct {
 	dirty                          map[string]bool
 	undo, redo                     []*hhm.Level
 
-	levels, palette, inspect scroller
+	levels, palette scroller
 	filter                   string
 	popup                    string // "" or the name of the open dialog
 	form                     map[string]string

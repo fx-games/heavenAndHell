@@ -20,12 +20,10 @@ Design decisions and deferred scope for the D1 rebuild: `docs/D1_PLAN.md`.
    Keep D1's RNG call order, or seeded results drift.
 2. **Cross-check** with galaxyhaxz for readability and devilutionX for known bugs, then decide per `docs/D1_PLAN.md`.
 3. **Take data, not code, where there's a table.** Values come from `files/mods/d1/data/xl_*.txt`
-   (`src/rules/data.go`); the level generators' minisets and lookup tables live in `files/mods/d1/data/levels/generator.txt` (read by `g.mini`/`g.table`/`g.rows`); anything in the MPQ is read
-   from the MPQ, not copied into the repo.
+   (`src/rules/data.go`); anything in the MPQ is read from the MPQ, not copied into the repo.
 4. **Verify against DevilutionX fixtures**, which were produced by the real game logic:
-   - `test/fixtures/diablo/<dlvl>-<seed>.dun`: the level D1 builds from that seed; `test/drlg_l*_test.cpp` shows the
-     quest flags and expected entry positions. Ported in `src/dungen/drlg_test.go` / `src/dungen/drlg_fixtures_test.go`.
-   - `test/fixtures/levels/l*data/*.dun`: set pieces, used to check our MPQ reader (`src/cmd/d1import/mpq_test.go`).
+   - Levels are not seed-exact (see "D1 levels" below), so `test/fixtures/diablo/*.dun` and `test/drlg_l*_test.cpp`
+     don't apply.
    - Other `test/*_test.cpp` (items, stores, player, missiles, random, path) hold expected values worth copying into Go
      tests when porting that area.
 5. Tests that need `reference/` must `t.Skip` when it's missing, so `go test ./...` still passes on a fresh clone.
@@ -39,21 +37,29 @@ git clone --depth 1 https://github.com/diasurgical/devilutionX reference/devilut
 git clone --depth 1 https://github.com/pvpgn/diablo-hellfire reference/diablo-hellfire
 ```
 
-## D1 megatiles are map parts (`files/mods/d1/maps/l<n>_megatiles.hhm`)
+## D1 levels (`files/mods/d1/data/levels.rec`)
 
-What a D1 piece blocks is not a table: every megatile is drawn as a 2x2 map part (sixteen to a row, a blank cell
-between them) and a piece is whatever tile it is drawn with. The file holds each distinct 2x2 picture once;
-`generator.txt`'s `[table l<n>MegatileParts]` says which part (1-based, by megatile id) each id is drawn with, so
-ids that look alike share a part but stay distinct ids for the generator. A drawn tile the tileset lists under `[tiles]` stands
-for a `tiles.rec` record (`183 tile.cathedral_trap_wall`): the game takes its `name:` (hover text), its `icon:`
-(so the remapper reaches every map that draws it) and its `tags:` (`blocks_movement` = D1's `nSolidTable`,
-`blocks_view` = `nBlockTable`, `blocks_missiles` = `nMissileTable`, `trap` = `nTrapTable`, `is_damaging`) from
-it (`hhm.DrawnTile`); a tile that stands for no record is its bare picture with the tileset's own `[flags]`. The
-generator reads them while it builds (`dungen.pieceFlags`), the painter stamps the parts (`setTiles`), and a piece
-drawn with differently tagged tiles in two megatiles fails the mod's load. Pieces that look like a plain wall or
-floor but block differently are their own records (`tile.cathedral_wall_see_through`, `same_as:` the wall) drawn
-with pixel copies in the atlas, so the map editor tells them apart; the plain wall and floor keep the tile set's
-variations (shading, cracked floors).
+Seed-exact 1.09 levels don't matter (players can't pick seeds); D1's level *experience* does. Every level goes
+through the one pipeline every mod uses (`common.generateDungenMap`): a layout (`bsp`, `megadungeon`, `drunkard`...)
+plus the passes that give it a D1 level type's look (`dungen.Passes`: spine, grow, mirror, arches, lava, theme
+rooms, posts, doors, `scale: 2` for D1's megatile scale), then `population: d1_<type>`, which runs D1's
+InitMonsters/InitObjects/InitItems/themes on the cells (`dungen.Populate`, D1's own RNG order from the level seed).
+The knobs are documented at the top of the d1 `levels.rec`; they were tuned so object, theme room, torch and
+monster counts match 1.09's (measured against the old port, which is in git before this branch's deletion
+commit). Browse the layouts with `scripts/levels.sh`.
+
+Set pieces and quest set levels are `.hhm` maps in `files/mods/d1/maps` (`piece_l*_*`, `set_l*_*`), drawn with
+the game's tiles and carrying their `Monster`/`Object`/`Item`/`Door`/`Location` entities: a `Location` is a named
+spot (stairs, a quest's entrance by its key, where a unique stands by its name), an `Object` may carry `Range`/`Lever`
+(what it opens). `<name>_open` is the layout a quest step or lever switches it to (levels.rec's `patch:`). A level
+lays them in with `set_piece: <map> <placement> [quest]`; a set level is `generator: map` with `quest:`.
+
+A drawn tile the tileset lists under `[tiles]` stands for a `tiles.rec` record (`183 tile.cathedral_trap_wall`):
+the game takes its `name:` (hover text), its `icon:` (so the remapper reaches every map that draws it) and its
+`tags:` (`blocks_movement`, `blocks_view`, `blocks_missiles`, `trap`, `is_damaging`) from it (`hhm.DrawnTile`); a
+tile that stands for no record is its bare picture with the tileset's own `[flags]`. Wall variants that block
+differently (`tile.cathedral_wall_see_through`, `same_as:` the wall) are scattered by `decoration:` at D1's shares;
+pillars are `tile.<tiles>_pillar`.
 
 ## Icons (tileset `files/mods/<mod>/classic_roguelike.png`, 8×8)
 
@@ -194,8 +200,6 @@ static on speech). `go:embed mods` embeds whatever is on disk: build a release f
 - Dead code: `go run honnef.co/go/tools/cmd/staticcheck@latest -checks U1000 ./...` (also finds dead methods of
   generic types, which `deadcode` misses)
 - Map editor (`tools/mapedit`, its own Go module, so run it from its folder; README there): `cd tools/mapedit && go run . -mod d1`
-  opens D1's maps (`.hhm` levels and the `l<n>_megatiles.hhm` map parts), `-mode pieces` opens the set pieces
-  (`data/levels/l1..l4`) instead; `F1`/`F2` switch between the two. Without `-mod` it edits `heavenandhell`
-- Print a generated D1 level: `go run ./src dun_gen <dungeon level> [seed]`
-- Import level data: `go run ./src/cmd/d1import`
+  opens D1's maps, set pieces included. Without `-mod` it edits `heavenandhell`
+- Browse D1's level layouts: `scripts/levels.sh` (`go run ./src/cmd/levelcmp -type 1 -seed 3` prints one)
 - Sprite references for picking icons: `go run ./src/cmd/d1sprites` writes `reference/d1_{monsters,items,skills,tiles}.pdf` (one per icons/*.rec, each sprite labelled with its current icon) and every sprite as a PNG under `reference/d1_sprites/`: monsters and uniques in their TRN recolors, items, spell and skill icons, objects and each level type's megatiles

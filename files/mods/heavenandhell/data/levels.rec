@@ -25,11 +25,11 @@
 #   location   "<name> <x> <y>": a named map cell the level's quest logic or an exit refers to (Lazarus'
 #              lair: vile_book_N / vile_book_N_to, vile_center, vile_altar, exit). Repeatable.
 #   template   (drawn) the map file it is drawn as.
-#   quest      (d1_set) the quests.rec key whose set piece it loads.
+#   quest      the quests.rec key whose set level this is (a map laid out whole with population: D1's quest levels).
 #   patch      "<name> = <region>": part of a built level that opens later, in the order they apply; the region
-#              is D1's ("x1 y1 x2 y2" megatiles, or used / group / range OBJ_...), so only D1 levels use it. An
-#              "apply_when:" line holds it back until the condition holds; "patch_objects:" names a .DUN whose
-#              objects come with it.
+#              is D1's ("x1 y1 x2 y2" megatiles, or used / group / range OBJ_...): where the level's set pieces
+#              switch to their open layout (<map>_open). An "apply_when:" line holds it back until the condition
+#              holds.
 #
 # The knobs accretion takes:
 #   templates        the maps directory the room templates live in. Defaults to assets/maps, which the mod

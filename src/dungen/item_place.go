@@ -169,11 +169,7 @@ func (g *gen) initItems() {
 			}
 		}
 	}
-	if g.cells != nil {
-		g.pieceItems()
-	} else if g.available(rules.QAnvil) {
-		g.spawnQuestItem(rules.ItemAnvil, 2*g.setPiece.x+27, 2*g.setPiece.y+27, 1)
-	}
+	g.pieceItems() // the Anvil of Fury on its island
 	if g.currlevel > 0 && g.currlevel < 16 {
 		g.addInitItems()
 	}

@@ -144,8 +144,6 @@ const (
 	PLTArmo  = 0x100000
 )
 
-var pltBits = map[string]int{"PLT_MISC": PLTMisc, "PLT_BOW": PLTBow, "PLT_STAFF": PLTStaff, "PLT_WEAP": PLTWeap, "PLT_SHLD": PLTShld, "PLT_ARMO": PLTArmo}
-
 // PrefixCount, SuffixCount and UniqueItemCount are how many D1 1.09 has; the rest are Hellfire's, appended.
 const (
 	PrefixCount     = 83

@@ -1,5 +1,5 @@
-// mapedit is Heaven & Hell's map editor: it draws the levels the game reads (.hhm) and the Diablo set pieces
-// its megatile generators read (.txt), and nothing else. It is a development tool, kept out of the game binary.
+// mapedit is Heaven & Hell's map editor: it draws the levels the game reads (.hhm), set pieces included, and
+// nothing else. It is a development tool, kept out of the game binary.
 //
 //	go run ./tools/mapedit              # the default mod
 //	go run ./tools/mapedit -mod d1      # another mod under files/mods
@@ -15,7 +15,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 const (
@@ -25,28 +24,19 @@ const (
 	statusH = 20
 )
 
-// mode is which kind of file the editor is showing.
-const (
-	modeMaps = iota
-	modePieces
-)
-
 type app struct {
 	u      ui
 	modDir string // files/mods/<mod>
 	status string
 	err    string
 
-	maps   *mapEditor
-	pieces *pieceEditor
-	mode   int
+	maps *mapEditor
 
 	w, h int
 }
 
 func main() {
 	mod := flag.String("mod", "heavenandhell", "the mod to edit, a name under files/mods or a path")
-	start := flag.String("mode", "maps", "which editor to open first: maps or pieces")
 	flag.Parse()
 
 	dir, err := modDir(*mod)
@@ -56,10 +46,6 @@ func main() {
 	a := &app{modDir: dir}
 	if a.maps, err = newMapEditor(dir); err != nil {
 		log.Fatal(err)
-	}
-	a.pieces = newPieceEditor(dir)
-	if *start == "pieces" {
-		a.mode = modePieces
 	}
 	a.status = "editing " + dir
 
@@ -102,14 +88,6 @@ func (a *app) Layout(w, h int) (int, int) { a.w, a.h = w, h; return w, h }
 
 func (a *app) Update() error {
 	a.u.update() // every edge the widgets react to is collected here, and read in Draw
-	if !a.u.typing() {
-		if inpututil.IsKeyJustPressed(ebiten.KeyF1) {
-			a.mode = modeMaps
-		}
-		if inpututil.IsKeyJustPressed(ebiten.KeyF2) {
-			a.mode = modePieces
-		}
-	}
 	return nil
 }
 
@@ -118,12 +96,7 @@ func (a *app) Draw(screen *ebiten.Image) {
 	screen.Fill(colBG)
 
 	body := image.Rect(0, topH, a.w, a.h-statusH)
-	switch a.mode {
-	case modeMaps:
-		a.maps.draw(a, screen, body)
-	case modePieces:
-		a.pieces.draw(a, screen, body)
-	}
+	a.maps.draw(a, screen, body)
 	a.drawTopBar(screen)
 	a.drawStatus(screen)
 	a.u.endFrame()
@@ -139,22 +112,7 @@ func (a *app) drawTopBar(dst *ebiten.Image) {
 	fill(dst, r, colPanel)
 	fill(dst, rect(0, topH-1, a.w, 1), colLine)
 
-	x := padding
-	for i, name := range []string{"Maps  F1", "Set pieces  F2"} {
-		w := textWidth(name) + 2*padding + 6
-		br := rect(x, 3, w, topH-7)
-		if a.u.toggle(dst, br, name, a.mode == i) {
-			a.mode = i
-		}
-		x += w + 2
-	}
-	x += 10
-	switch a.mode {
-	case modeMaps:
-		a.maps.topBar(a, dst, x, a.w)
-	case modePieces:
-		a.pieces.topBar(a, dst, x, a.w)
-	}
+	a.maps.topBar(a, dst, padding, a.w)
 }
 
 func (a *app) drawStatus(dst *ebiten.Image) {
@@ -181,7 +139,3 @@ func (a *app) fail(format string, args ...any) {
 	a.err = fmt.Sprintf(format, args...)
 }
 
-func fileExists(p string) bool {
-	_, err := os.Stat(p)
-	return err == nil
-}

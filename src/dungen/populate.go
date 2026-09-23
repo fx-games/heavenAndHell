@@ -46,7 +46,7 @@ func (l *Levels) Populate(gnr *rules.Generator, q *rules.Quests, seeds [rules.Nu
 	if w, h := m.GetSize(); w != LevelSize || h != LevelSize || m.scale != 2 {
 		return nil, fmt.Errorf("population: level %d is %dx%d at scale %d, want %dx%d at scale 2", dlvl, w, h, m.scale, LevelSize, LevelSize)
 	}
-	g := &gen{quests: q, currlevel: dlvl, ltype: p.Type, cells: m, levels: l}
+	g := &gen{quests: q, currlevel: dlvl, ltype: p.Type, cells: m}
 	g.data = gnr.D
 	g.igen = &rules.Generator{D: gnr.D, R: &g.rng, UniqueDropped: make([]bool, len(gnr.UniqueDropped))}
 	defer func() {
@@ -131,7 +131,7 @@ func (g *gen) floodCells() {
 	for y := CellOrigin; y < CellOrigin+LevelSize; y++ {
 		for x := CellOrigin; x < CellOrigin+LevelSize; x++ {
 			if g.cellFloor(x, y) && g.trans[x][y] == 0 {
-				g.findTrans(x, y, 0)
+				g.findTrans(x, y)
 				g.transVal++
 			}
 		}
@@ -201,10 +201,10 @@ func (g *gen) addCellTorches() {
 			if right && !below && j%8 == 0 && g.rnd(3) == 0 {
 				g.addObject(rules.ObjTORCHR2, i, j)
 			}
-			if g.cellFloor(i-1, j) && j%8 == 0 && g.rnd(10) == 0 && g.dObj(i-1, j) == 0 { // hangTorchesOnWalls hangs it back east
+			if g.cellFloor(i-1, j) && j%8 == 0 && g.rnd(10) == 0 && g.dObj(i-1, j) == 0 && g.dObj(i, j) == 0 { // hangTorchesOnWalls hangs it back east
 				g.addObject(rules.ObjTORCHL, i-1, j)
 			}
-			if g.cellFloor(i, j-1) && i%8 == 0 && g.rnd(10) == 0 && g.dObj(i, j-1) == 0 { // and this one back south
+			if g.cellFloor(i, j-1) && i%8 == 0 && g.rnd(10) == 0 && g.dObj(i, j-1) == 0 && g.dObj(i, j) == 0 { // and this one back south
 				g.addObject(rules.ObjTORCHR, i, j-1)
 			}
 		}
@@ -361,4 +361,10 @@ func (g *gen) populateSetLevel(quest string, trigs []Trigger) *Level {
 	g.addCellObjs(g.ltype)
 	g.initItems()
 	return g.output(sl)
+}
+
+// available ports QuestStatus.
+func (g *gen) available(i int) bool {
+	q := &g.quests[i]
+	return !g.setlevel && g.currlevel == q.Level && q.Active != rules.QuestNotAvail
 }

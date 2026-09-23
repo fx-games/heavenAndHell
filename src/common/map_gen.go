@@ -120,12 +120,9 @@ type LevelStrategy interface {
 }
 
 // levelStrategies are all of them, by the name levels.rec's generator: field uses.
-var levelStrategies = map[string]LevelStrategy{"drawn": drawnStrategy{}, "d1_set": d1SetStrategy{dungen.D1Set}}
+var levelStrategies = map[string]LevelStrategy{"drawn": drawnStrategy{}}
 
 func init() {
-	for name, p := range dungen.D1 {
-		levelStrategies[name] = d1Strategy{p}
-	}
 	for name, p := range dungen.Layouts {
 		levelStrategies[name] = layoutStrategy{dungen.WithPasses(p)}
 	}
@@ -169,60 +166,6 @@ func minDist(locations []geometry.Point, pos geometry.Point) float64 {
 var doorKinds = map[int]bool{rules.ObjL1LDOOR: true, rules.ObjL1RDOOR: true, rules.ObjL2LDOOR: true, rules.ObjL2RDOOR: true,
 	rules.ObjL3LDOOR: true, rules.ObjL3RDOOR: true}
 
-// addBasicTiles ports the wall/floor/lava/fence/door terrain from a generated dungen.Level (piece coordinates 16..95,
-// exposed as cells 0..79) onto the gridmap. Doors are placed as objects afterward, once Level.Objects is walked.
-
-func (g *MapGenerator) addBasicTiles(emptyMap *gridmap.GridMap[*Actor, *Item, Object], lvl *dungen.Level) {
-	doorAt := map[geometry.Point]bool{}
-	for _, o := range lvl.Objects {
-		if doorKinds[o.Kind] {
-			doorAt[geometry.Point{X: o.X - dungen.CellOrigin, Y: o.Y - dungen.CellOrigin}] = true
-		}
-	}
-	g.setTiles(emptyMap, lvl, 0, 0, dungen.LevelSize-1, dungen.LevelSize-1, func(p geometry.Point) bool { return doorAt[p] })
-}
-
-// setTiles draws cells (x1, y1)..(x2, y2) from the level, with an H&H door where door says so.
-func (g *MapGenerator) setTiles(m *gridmap.GridMap[*Actor, *Item, Object], lvl *dungen.Level, x1, y1, x2, y2 int, door func(geometry.Point) bool) {
-	isWall := func(p geometry.Point) bool {
-		if p.X < 0 || p.Y < 0 || p.X >= dungen.LevelSize || p.Y >= dungen.LevelSize {
-			return true
-		}
-		return lvl.CellSolid(p.X, p.Y) && !door(p)
-	}
-	tileMap, ok := defs.Tilemap(g.levels[m.GetName()].Tiles, g.randomSource, isWall)
-	if !ok {
-		panic(fmt.Sprintf("levels.rec: %s: unknown tile set %q (have %v)", m.GetName(), g.levels[m.GetName()].Tiles, defs.TilemapNames()))
-	}
-	tiles := g.factory.State.drawnMaps.Tileset
-	for x := max(x1, 0); x <= min(x2, dungen.LevelSize-1); x++ {
-		for y := max(y1, 0); y <= min(y2, dungen.LevelSize-1); y++ {
-			mapPos := geometry.Point{X: x, Y: y}
-			if _, ok := m.GetTransitionAt(mapPos); ok { // a map change keeps the stairs wireD1Triggers put there
-				continue
-			}
-			if door(mapPos) {
-				m.SetTile(mapPos, gridmap.Tile{DefinedIcon: tileMap.FloorTile, DefinedDescription: "a floor", IsWalkable: true, IsTransparent: true, IsMissilePassable: true})
-				if !m.IsObjectAt(mapPos) {
-					m.AddObject(NewDoor(tileMap.OpenDoor, tileMap.ClosedDoor), mapPos)
-				}
-				continue
-			}
-			// the cell as its megatile's map part draws it; plain walls and floors take the tile set's variations
-			t := TileFromDrawing(tiles, lvl.CellTile(x, y))
-			switch t.DefinedIcon {
-			case defs.IconLava:
-				t = g.lavaTile(m)
-			case tileMap.WallTile:
-				t.DefinedIcon = tileMap.ChooseWallTile(mapPos)
-			case tileMap.FloorTile:
-				t.DefinedIcon = tileMap.ChooseFloorTile(mapPos)
-			}
-			m.SetTile(mapPos, t)
-		}
-	}
-}
-
 func lava() gridmap.Tile {
 	return gridmap.Tile{DefinedIcon: defs.IconLava, DefinedDescription: "lava", IsTransparent: true, IsMissilePassable: true}
 }
@@ -264,23 +207,11 @@ func (g *MapGenerator) changeMap(m *gridmap.GridMap[*Actor, *Item, Object], x1, 
 	if lvl == nil {
 		return
 	}
-	if lvl.Pieces != nil { // a laid-out level: its set pieces open cell by cell
-		cells := lvl.OpenCells(x1, y1, x2, y2)
-		if len(cells) == 0 {
-			return
-		}
-		g.openCells(m, cells)
-	} else if !lvl.ChangeMap(x1, y1, x2, y2) {
+	cells := lvl.OpenCells(x1, y1, x2, y2)
+	if len(cells) == 0 {
 		return
-	} else {
-		g.setTiles(m, lvl, 2*x1, 2*y1, 2*x2+1, 2*y2+1, func(p geometry.Point) bool {
-			if obj, ok := m.TryGetObjectAt(p); ok { // a door built before the change stays a door, not a wall under its object
-				_, isDoor := obj.(*Door)
-				return isDoor
-			}
-			return lvl.CellDoor(p.X, p.Y)
-		})
 	}
+	g.openCells(m, cells)
 	waiting := g.walledIn[m.GetName()][:0]
 	for _, a := range g.walledIn[m.GetName()] {
 		if p := a.MapPosition(); canPlaceMonster(m, p) {

@@ -1,7 +1,6 @@
 package dungen
 
 import (
-	"fmt"
 	"rpg/src/geometry"
 	"rpg/src/rules"
 )
@@ -14,8 +13,6 @@ const (
 	misLightCtrl = 23
 	misFlameC    = 44
 )
-
-func clamp(v, lo, hi int) int { return min(max(v, lo), hi) }
 
 func (g *gen) clrAllObjects() {
 	g.objects = [maxObjects]*rules.Object{}
@@ -46,11 +43,7 @@ func (g *gen) setDObject(x, y, v int) {
 
 // rndLocOk ports RndLocOk.
 func (g *gen) rndLocOk(x, y int) bool {
-	if g.dMon(x, y) != 0 || g.dObj(x, y) != 0 || g.flagAt(x, y)&bflagPopulated != 0 || g.solid(x, y) {
-		return false
-	}
-	p := g.pieceAt(x, y) + 1
-	return g.ltype != rules.DTypeCathedral || p <= 126 || p >= 144
+	return g.dMon(x, y) == 0 && g.dObj(x, y) == 0 && g.flagAt(x, y)&bflagPopulated == 0 && !g.solid(x, y)
 }
 
 func (g *gen) initRndLocObj(min, max, kind int) {
@@ -120,29 +113,6 @@ func (g *gen) initRndLocObj5x5(min, max, kind int) {
 	}
 }
 
-func (g *gen) addTortures() {
-	for oy := 0; oy < 112; oy++ {
-		for ox := 0; ox < 112; ox++ {
-			if g.piece[ox][oy]+1 != 367 {
-				continue
-			}
-			for _, o := range [...][3]int{{rules.ObjTORTURE1, 0, 1}, {rules.ObjTORTURE3, 2, -1}, {rules.ObjTORTURE2, 0, 3}, {rules.ObjTORTURE4, 4, -1},
-				{rules.ObjTORTURE5, 0, 5}, {rules.ObjTNUDEM1, 1, 3}, {rules.ObjTNUDEM2, 4, 5}, {rules.ObjTNUDEM3, 2, 0}, {rules.ObjTNUDEM4, 3, 2},
-				{rules.ObjTNUDEW1, 2, 4}, {rules.ObjTNUDEW2, 2, 1}, {rules.ObjTNUDEW3, 4, 2}} {
-				g.addObject(o[0], ox+o[1], oy+o[2])
-			}
-		}
-	}
-}
-
-func (g *gen) addCandles() {
-	tx, ty := g.quests[rules.QPWater].X, g.quests[rules.QPWater].Y
-	g.addObject(rules.ObjSTORYCANDLE, tx-2, ty+1)
-	g.addObject(rules.ObjSTORYCANDLE, tx+3, ty+1)
-	g.addObject(rules.ObjSTORYCANDLE, tx-1, ty+2)
-	g.addObject(rules.ObjSTORYCANDLE, tx+2, ty+2)
-}
-
 // addBookLever ports AddBookLever: the book that opens a quest set piece (x1..y2 in megatiles).
 func (g *gen) addBookLever(x1, y1, x2, y2, msg int) {
 	xp, yp, ok := g.findLoc(-2, -2, 2, 2, 20000)
@@ -155,11 +125,8 @@ func (g *gen) addBookLever(x1, y1, x2, y2, msg int) {
 	if g.available(rules.QWarlord) {
 		g.addObject(rules.ObjSTEELTOME, xp, yp)
 	}
-	if g.available(rules.QBlood) {
-		xp, yp = 2*g.setPiece.x+25, 2*g.setPiece.y+40
-		if g.cells == nil {
-			g.addObject(rules.ObjBLOODBOOK, xp, yp)
-		} else if x, y, ok := g.objectOfKind(rules.ObjBLOODBOOK); ok { // the piece's own
+	if g.available(rules.QBlood) { // the book is its set piece's own
+		if x, y, ok := g.objectOfKind(rules.ObjBLOODBOOK); ok {
 			xp, yp = x, y
 		}
 	}
@@ -209,71 +176,6 @@ func (g *gen) initRndBarrels() {
 				c++
 			}
 			p = c >> 1
-		}
-	}
-}
-
-// addLevelObjs ports AddL1Objs/AddL2Objs/AddL3Objs: lights and doors on their pieces.
-func (g *gen) addLevelObjs(ltype int) {
-	if g.cells != nil {
-		g.addCellObjs(ltype)
-		return
-	}
-	for j := 0; j < 112; j++ {
-		for i := 0; i < 112; i++ {
-			pn := g.piece[i][j] + 1
-			if ltype == rules.DTypeCathedral && pn == 270 {
-				g.addObject(rules.ObjL1LIGHT, i, j)
-			}
-			if k := doorKind(ltype, pn); k >= 0 {
-				g.addObject(k, i, j)
-			}
-		}
-	}
-}
-
-// doorKind is the door object AddL1Objs/AddL2Objs/AddL3Objs put on D1 piece pn, or -1.
-func doorKind(ltype, pn int) int {
-	switch {
-	case ltype == rules.DTypeCathedral && (pn == 44 || pn == 51 || pn == 214):
-		return rules.ObjL1LDOOR
-	case ltype == rules.DTypeCathedral && (pn == 46 || pn == 56):
-		return rules.ObjL1RDOOR
-	case ltype == rules.DTypeCatacombs && (pn == 13 || pn == 541):
-		return rules.ObjL2LDOOR
-	case ltype == rules.DTypeCatacombs && (pn == 17 || pn == 542):
-		return rules.ObjL2RDOOR
-	case ltype == rules.DTypeCaves && pn == 531:
-		return rules.ObjL3LDOOR
-	case ltype == rules.DTypeCaves && pn == 534:
-		return rules.ObjL3RDOOR
-	}
-	return -1
-}
-
-func (g *gen) addL2Torches() {
-	if g.cells != nil {
-		g.addCellTorches()
-		return
-	}
-	for j := 0; j < 112; j++ {
-		for i := 0; i < 112; i++ {
-			if g.flags[i][j]&bflagPopulated != 0 {
-				continue
-			}
-			pn := g.piece[i][j] + 1
-			if pn == 1 && g.rnd(3) == 0 {
-				g.addObject(rules.ObjTORCHL2, i, j)
-			}
-			if pn == 5 && g.rnd(3) == 0 {
-				g.addObject(rules.ObjTORCHR2, i, j)
-			}
-			if pn == 37 && g.rnd(10) == 0 && g.dObj(i-1, j) == 0 {
-				g.addObject(rules.ObjTORCHL, i-1, j)
-			}
-			if pn == 41 && g.rnd(10) == 0 && g.dObj(i, j-1) == 0 {
-				g.addObject(rules.ObjTORCHR, i, j-1)
-			}
 		}
 	}
 }
@@ -354,62 +256,6 @@ func (g *gen) addChestTraps() {
 	}
 }
 
-// loadMapObjects ports LoadMapObjects: a .DUN's objects, each with the megatile range (x1, y1, w, h) and lever id
-// it controls.
-func (g *gen) loadMapObjects(d dun, startx, starty, x1, y1, w, h, leveridx int) {
-	g.initObjFlag = true
-	for j := 0; j < 2*d.h(); j++ {
-		for i := 0; i < 2*d.w(); i++ {
-			if v := d.layer(2, i, j); v != 0 {
-				x, y := startx+16+i, starty+16+j
-				g.addObject(g.table("objTypeConv")[v], x, y)
-				if o := g.objAt(x, y); o != nil {
-					o.Var1, o.Var2, o.Var3, o.Var4, o.Var8 = x1, y1, x1+w, y1+h, leveridx
-				}
-			}
-		}
-	}
-	g.initObjFlag = false
-}
-
-// DunObjects lists the objects a set piece file places when D1 loads it into a built level (LoadMapObjs without
-// AddObject's bookkeeping), at piece coordinates from megatile (startx, starty) doubled, as D1 passes them.
-func (l *Levels) DunObjects(data *rules.Data, name string, startx, starty int) []*rules.Object {
-	d, ok := l.dun[name]
-	if !ok {
-		panic(fmt.Errorf("D1 level data: no set piece %q", name))
-	}
-	var objs []*rules.Object
-	for j := 0; j < 2*d.h(); j++ {
-		for i := 0; i < 2*d.w(); i++ {
-			if v := d.layer(2, i, j); v != 0 {
-				objs = append(objs, &rules.Object{Kind: l.tables["objTypeConv"][v], X: startx + 16 + i, Y: starty + 16 + j, Index: -1, Active: true})
-			}
-		}
-	}
-	return objs
-}
-
-// loadMapObjs ports LoadMapObjs.
-func (g *gen) loadMapObjs(d dun, startx, starty int) {
-	g.initObjFlag = true
-	for j := 0; j < 2*d.h(); j++ {
-		for i := 0; i < 2*d.w(); i++ {
-			if v := d.layer(2, i, j); v != 0 {
-				g.addObject(g.table("objTypeConv")[v], startx+16+i, starty+16+j)
-			}
-		}
-	}
-	g.initObjFlag = false
-}
-
-func (g *gen) addDiabObjs() {
-	q := g.l4.quads
-	g.loadMapObjects(g.loadDun("l4/diab1"), 2*q[0].x, 2*q[0].y, q[1].x, q[1].y, 11, 12, 1)
-	g.loadMapObjects(g.loadDun("l4/diab2a"), 2*q[1].x, 2*q[1].y, q[2].x, q[2].y, 11, 11, 2)
-	g.loadMapObjects(g.loadDun("l4/diab3a"), 2*q[2].x, 2*q[2].y, q[3].x, q[3].y, 9, 9, 3)
-}
-
 func (g *gen) addStoryBooks(seeds [rules.NumLevels]int32) {
 	xp, yp, ok := g.findLoc(-3, -2, 3, 2, 20000)
 	if !ok {
@@ -421,31 +267,8 @@ func (g *gen) addStoryBooks(seeds [rules.NumLevels]int32) {
 	}
 }
 
-func (g *gen) addHookedBodies(freq int) {
-	if g.cells != nil {
-		g.addCellHookedBodies(freq)
-		return
-	}
-	for j := 0; j < 40; j++ {
-		jj := 16 + 2*j
-		for i := 0; i < 40; i++ {
-			ii := 16 + 2*i
-			if g.d(i, j) != 1 && g.d(i, j) != 2 || g.rnd(freq) != 0 || g.nearThemeRoom(i, j) {
-				continue
-			}
-			if g.d(i, j) == 1 && g.d(i+1, j) == 6 {
-				g.addObject([3]int{rules.ObjTORTURE1, rules.ObjTORTURE2, rules.ObjTORTURE5}[g.rnd(3)], ii+1, jj)
-				continue
-			}
-			if g.d(i, j) == 2 && g.d(i, j+1) == 6 {
-				g.addObject([2]int{rules.ObjTORTURE3, rules.ObjTORTURE4}[g.rnd(2)], ii, jj)
-			}
-		}
-	}
-}
-
 func (g *gen) addL4Goodies() {
-	g.addHookedBodies(6)
+	g.addCellHookedBodies(6)
 	for _, k := range []int{rules.ObjTNUDEM1, rules.ObjTNUDEM2, rules.ObjTNUDEM3, rules.ObjTNUDEM4, rules.ObjTNUDEW1, rules.ObjTNUDEW2, rules.ObjTNUDEW3, rules.ObjDECAP} {
 		g.initRndLocObj(2, 6, k)
 	}
@@ -489,11 +312,7 @@ func (g *gen) getRndObjLoc(randarea int) (int, int) {
 func (g *gen) initObjects(seeds [rules.NumLevels]int32) {
 	g.clrAllObjects()
 	if g.currlevel == 16 {
-		if g.cells != nil {
-			g.pieceObjects()
-		} else {
-			g.addDiabObjs()
-		}
+		g.pieceObjects()
 		return
 	}
 	g.initObjFlag = true
@@ -518,22 +337,11 @@ func (g *gen) initObjects(seeds [rules.NumLevels]int32) {
 		g.addStoryBooks(seeds)
 	}
 	sp := g.setPiece
-	if g.cells != nil {
-		g.pieceObjects() // the set pieces' own: the Butcher's tortures, the candles, the sign chest, the levers
-	}
+	g.pieceObjects() // the set pieces' own: the Butcher's tortures, the candles, the sign chest, the levers
 	switch g.ltype {
 	case rules.DTypeCathedral:
-		if g.available(rules.QButcher) && g.cells == nil {
-			g.addTortures()
-		}
-		if g.available(rules.QPWater) && g.cells == nil {
-			g.addCandles()
-		}
-		if g.available(rules.QLtBanner) && g.cells == nil {
-			g.addObject(rules.ObjSIGNCHEST, 2*sp.x+26, 2*sp.y+19)
-		}
 		g.initRndLocBigObj(10, 15, rules.ObjSARC)
-		g.addLevelObjs(rules.DTypeCathedral)
+		g.addCellObjs(rules.DTypeCathedral)
 		g.initRndBarrels()
 	case rules.DTypeCatacombs:
 		if g.available(rules.QRock) {
@@ -542,30 +350,21 @@ func (g *gen) initObjects(seeds [rules.NumLevels]int32) {
 		if g.available(rules.QSchamb) {
 			g.initRndLocObj5x5(1, 1, rules.ObjBOOK2R)
 		}
-		g.addLevelObjs(rules.DTypeCatacombs)
-		g.addL2Torches()
+		g.addCellObjs(rules.DTypeCatacombs)
+		g.addCellTorches()
 		if g.available(rules.QBlind) {
 			g.addBookLever(sp.x, sp.y, sp.w+sp.x+1, sp.h+sp.y+1, 0)
-			if g.cells == nil {
-				g.loadMapObjs(g.loadDun("l2/blind2"), 2*sp.x, 2*sp.y)
-			}
 		}
 		if g.available(rules.QBlood) {
 			g.addBookLever(sp.x, sp.y+3, sp.x+2, sp.y+7, 0)
-			if g.cells == nil {
-				g.addObject(rules.ObjPEDISTAL, 2*sp.x+25, 2*sp.y+32)
-			}
 		}
 		g.initRndBarrels()
 	case rules.DTypeCaves:
-		g.addLevelObjs(rules.DTypeCaves)
+		g.addCellObjs(rules.DTypeCaves)
 		g.initRndBarrels()
 	case rules.DTypeHell:
 		if g.available(rules.QWarlord) {
 			g.addBookLever(sp.x, sp.y, sp.x+sp.w, sp.y+sp.h, 0)
-			if g.cells == nil {
-				g.loadMapObjs(g.loadDun("l4/warlord"), 2*sp.x, 2*sp.y)
-			}
 		}
 		if g.available(rules.QBetrayer) {
 			g.addLazStand()
@@ -582,14 +381,6 @@ func (g *gen) initObjects(seeds [rules.NumLevels]int32) {
 	if g.ltype > rules.DTypeCathedral {
 		g.addChestTraps()
 	}
-	g.initObjFlag = false
-}
-
-// setMapObjects ports SetMapObjects: a set level's objects.
-func (g *gen) setMapObjects(d dun, startx, starty int) {
-	g.clrAllObjects()
-	g.initObjFlag = true
-	g.loadMapObjs(d, startx, starty)
 	g.initObjFlag = false
 }
 
@@ -612,31 +403,8 @@ func (g *gen) addObject(kind, ox, oy int) {
 		o.AnimFrame = d.AnimDelay
 	}
 	switch kind {
-	case rules.ObjL1LDOOR, rules.ObjL1RDOOR:
+	case rules.ObjL1LDOOR, rules.ObjL1RDOOR, rules.ObjL2LDOOR, rules.ObjL2RDOOR, rules.ObjL3LDOOR, rules.ObjL3RDOOR:
 		o.DoorFlag = true
-		o.Var1 = g.pieceAt(ox, oy) + 1
-		if kind == rules.ObjL1LDOOR {
-			o.Var2 = g.pieceAt(ox, oy-1) + 1
-		} else {
-			o.Var2 = g.pieceAt(ox-1, oy) + 1
-		}
-		o.Var4 = 0
-	case rules.ObjL2LDOOR, rules.ObjL2RDOOR:
-		o.DoorFlag = true
-		if kind == rules.ObjL2LDOOR {
-			g.objSetMicro(ox, oy, 538)
-		} else {
-			g.objSetMicro(ox, oy, 540)
-		}
-		o.Var4 = 0
-	case rules.ObjL3LDOOR, rules.ObjL3RDOOR:
-		o.DoorFlag = true
-		if kind == rules.ObjL3LDOOR {
-			g.objSetMicro(ox, oy, 531)
-		} else {
-			g.objSetMicro(ox, oy, 534)
-		}
-		o.Var4 = 0
 	case rules.ObjBOOK2R:
 		o.Var1, o.Var2, o.Var3, o.Var4 = g.setPiece.x, g.setPiece.y, g.setPiece.w+g.setPiece.x+1, g.setPiece.h+g.setPiece.y+1
 		o.Var6 = o.AnimFrame + 1
@@ -756,13 +524,6 @@ func (g *gen) addStoryBook(x, y int, seeds [rules.NumLevels]int32) {
 	o.Var3 = g.currlevel>>2 + 3*o.Var1 - 1 // StoryBookName index
 	o.AnimFrame = 5 - 2*o.Var1
 	o.Var4 = o.AnimFrame + 1
-}
-
-// objSetMicro ports ObjSetMicro's piece change (D1 piece number pn).
-func (g *gen) objSetMicro(x, y, pn int) {
-	if x, y, ok := flat(x, y); ok {
-		g.piece[x][y] = pn - 1
-	}
 }
 
 // preSpawnSkeleton ports PreSpawnSkeleton: a skeleton kept off the map for a sarcophagus or barrel.

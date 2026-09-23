@@ -6,9 +6,9 @@
 #   name       what it calls itself on arrival. \n breaks the line.
 #   depth      difficulty and progress only (seeds, monster and item levels, "deepest"). Town 0; a quest or side
 #              level takes its parent's.
-#   generator  the algorithm that builds it: d1_cathedral, d1_catacombs, d1_caves, d1_hell (Diablo's four level
-#              generators), d1_set (a quest's set piece; names its quest), accretion, megadungeon, rogue, drawn (hand-drawn
-#              in the mod's maps; names its template).
+#   generator  the layout that builds it: bsp, megadungeon, drunkard, noise, cave, room_graph, accretion, rogue, map
+#              (one of the mod's maps laid down whole; names its template), or drawn (a hand-drawn level played as
+#              drawn; names its template). Any layout but drawn takes the passes and a population below.
 #   tiles      the tile set: cathedral, catacombs, caves, hell, or drawn (a hand-drawn level's own tiles).
 #   music      a music.rec event; a level without one is silent.
 #   glyphs     an 8x8 glyph atlas in the mod folder (Bm437_IBM_CGA.png): the level is drawn as text with it.
@@ -24,8 +24,36 @@
 #              The generator places the locations; this file says where they lead.
 #   location   "<name> <x> <y>": a named map cell the level's quest logic or an exit refers to (Lazarus'
 #              lair: vile_book_N / vile_book_N_to, vile_center, vile_altar, exit). Repeatable.
-#   template   (drawn) the map file it is drawn as.
-#   quest      (d1_set) the quests.rec key whose set piece it loads.
+#   template   (drawn, map) the map file it is drawn as.
+#   quest      the quests.rec key whose set level this is: population then runs D1's LoadSetMap (its map's own
+#              monsters, objects and uniques, no random ones).
+#
+# The passes a layout may run over what it carved (dungen.Passes), in this order; each is off unless named:
+#   grow             grow rectangular rooms up to this side until single walls part them (hall_chance: a grown
+#                    room of 6x8 or more becomes a pillared hall)
+#   spine            true: D1's first cathedral room, a pillared hall across the level with up to three chambers
+#   mirror           true: mirror the layout both ways (D1's hell builds a quadrant)
+#   arch_chance      a straight wall between two rooms becomes an arcade
+#   loop_chance, loop_distance  a wall between spots farther apart on foot opens (default distance 8)
+#   open_halls       "<count> <min> <max>": clear open rectangles over the level (D1's cave blocks)
+#   lava_water, lava_rivers  a noise map's lakes and rivers become lava, fords keep the level whole
+#   canvas           centre the layout on a canvas this many units square
+#   set_piece        "<map> <placement> [quest]": lay one of the mod's maps in (with its <map>_open layout),
+#                    only while the quest is available here when one is named. Placements: chamber (a spine
+#                    chamber), room (a room of its own), open (in open ground), quad0-quad3 (D1's level 16).
+#                    Its Location entities are the level's named spots (stairs, quest entrances, where uniques
+#                    stand), its Monster, Object and Item entities are placed by the population. Repeatable.
+#   theme_rooms      "<min> <max> <freq>": D1's theme rooms walled into open ground (theme_room_doors: a door,
+#                    not a gap; theme_room_random_size: shrunk at random, as in hell)
+#   posts            chance a room cell with room or wall all round it gets a pillar
+#   door_chance      chance each doorway is a door (unset: the layout's doors stay as they are)
+#   scale            2 draws every unit as 2x2 cells, D1's megatiles (a D1 population needs 80x80 cells at 2)
+#   decoration       "<tiles.rec record> <percent>": that share of the walls facing floor drawn as the record
+#                    (and blocking as its tags say). Repeatable, rolled in order.
+#   population       d1_cathedral, d1_catacombs, d1_caves, d1_hell: D1's monsters, objects, items and theme
+#                    rooms by that level type's rules, rolled from the level's D1 seed
+#
+# The knobs bsp takes: width, height, min_leaf, min_room. drunkard: width, height, cover, walk_length, dla.
 #
 # The knobs accretion takes:
 #   templates        the maps directory the room templates live in. Defaults to assets/maps, which the mod
@@ -68,8 +96,9 @@
 #   patch        "<name> = <region>": part of the level that opens later (ObjChangeMap), in the order they apply.
 #                The region is "x1 y1 x2 y2" in megatiles (numbers, or the set piece's left/top/right/bottom/
 #                midx/midy with +n/-n), "used OBJ_..." (each used object opens the range the generator gave it)
-#                or "group OBJ_..." (once its whole lever group is used). "apply_when:" after it holds it back
-#                until the condition is true; "patch_objects:" names a .DUN whose objects appear with it.
+#                or "group OBJ_..." (once its whole lever group is used): the set pieces' cells in it switch to their
+#                open layout (<map>_open), whose objects come with it. "apply_when:" after it holds it back until
+#                the condition is true.
 
 map: town
 name: Tristram
@@ -245,7 +274,6 @@ patch: blood_2 = left+6 top+3 right top+7
 apply_when: avail("blood") and v2("blood") >= 2
 patch: blood_3 = left top right bottom
 apply_when: avail("blood") and v2("blood") >= 3
-patch_objects: l2/blood2
 
 map: catacombs_6
 name: Level 6\nCatacombs
