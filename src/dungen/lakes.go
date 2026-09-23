@@ -142,3 +142,116 @@ func caBlob(rnd *rand.Rand, w, h, fill int) []geometry.Point {
 	}
 	return best
 }
+
+// addRivers runs count rivers out of the level's lakes, D1's lava rivers for water: each leaves a random lake cell
+// for the map edge or another lake, stepping toward its goal or, with chance meander, sideways, and turns a
+// width x width square at every step into Lake. Rock it crosses turns to water too. Where a river cuts the
+// walkable ground apart, ford lays shallows across it.
+func (m *DungeonMap) addRivers(rnd *rand.Rand, count, width int, meander float64) {
+	var lakes []geometry.Point
+	for i, t := range m.tiles {
+		if t == Lake {
+			lakes = append(lakes, geometry.Point{X: i % m.width, Y: i / m.width})
+		}
+	}
+	if len(lakes) == 0 || count <= 0 {
+		return
+	}
+	for r := 0; r < count; r++ {
+		p := lakes[rnd.Intn(len(lakes))]
+		goal := [4]geometry.Point{{X: rnd.Intn(m.width)}, {X: rnd.Intn(m.width), Y: m.height - 1},
+			{Y: rnd.Intn(m.height)}, {X: m.width - 1, Y: rnd.Intn(m.height)}}[rnd.Intn(4)]
+		if rnd.Intn(2) == 0 { // another lake, if one lies far enough off
+			if o := lakes[rnd.Intn(len(lakes))]; o.ManhattanDistanceTo(p) > (m.width+m.height)/4 {
+				goal = o
+			}
+		}
+		left := false // off the lake it started in: meeting water again ends the river
+		for step := 0; p != goal && step < 4*(m.width+m.height); step++ {
+			d := geometry.Point{X: sign(goal.X - p.X)}
+			if dy := sign(goal.Y - p.Y); dy != 0 && (d.X == 0 || rnd.Intn(abs(goal.X-p.X)+abs(goal.Y-p.Y)) < abs(goal.Y-p.Y)) {
+				d = geometry.Point{Y: dy}
+			}
+			if rnd.Float64() < meander {
+				d = geometry.Point{X: d.Y, Y: d.X} // a quarter turn, either way
+				if rnd.Intn(2) == 0 {
+					d = geometry.Point{X: -d.X, Y: -d.Y}
+				}
+			}
+			if n := p.Add(d); m.Contains(n) {
+				p = n
+			}
+			if left && m.GetTileAt(p) == Lake {
+				break
+			}
+			left = left || m.GetTileAt(p) != Lake
+			for y := p.Y - (width-1)/2; y <= p.Y+width/2; y++ {
+				for x := p.X - (width-1)/2; x <= p.X+width/2; x++ {
+					if m.Contains(geometry.Point{X: x, Y: y}) {
+						m.tiles[x+y*m.width] = Lake
+					}
+				}
+			}
+		}
+	}
+	m.ford()
+}
+
+func abs(v int) int { return max(v, -v) }
+
+// ford lays shallows across water that cuts the walkable ground apart: from the part the first walkable cell is
+// in, the way to the next part that crosses the fewest water cells has those cells turned to shallows, until
+// every walkable cell is reachable.
+func (m *DungeonMap) ford() {
+	for {
+		reached := make([]bool, len(m.tiles))
+		var frontier []int
+		for i := range m.tiles {
+			if m.IsWalkable(geometry.Point{X: i % m.width, Y: i / m.width}) {
+				frontier = []int{i}
+				reached[i] = true
+				break
+			}
+		}
+		for j := 0; j < len(frontier); j++ { // the part it is in
+			for _, d := range dirs4 {
+				if n := (geometry.Point{X: frontier[j] % m.width, Y: frontier[j] / m.width}).Add(d); m.IsWalkable(n) && !reached[n.X+n.Y*m.width] {
+					reached[n.X+n.Y*m.width] = true
+					frontier = append(frontier, n.X+n.Y*m.width)
+				}
+			}
+		}
+		// breadth first across water, one ring of lake cells at a time, until another part turns up
+		from := make([]int, len(m.tiles))
+		for i := range from {
+			from[i] = -1
+		}
+		end := -1
+		for ring := frontier; len(ring) > 0 && end < 0; {
+			var next []int
+			for j := 0; j < len(ring) && end < 0; j++ {
+				for _, d := range dirs4 {
+					n := (geometry.Point{X: ring[j] % m.width, Y: ring[j] / m.width}).Add(d)
+					if !m.Contains(n) || reached[n.X+n.Y*m.width] {
+						continue
+					}
+					k := n.X + n.Y*m.width
+					if m.tiles[k] == Lake {
+						reached[k], from[k] = true, ring[j]
+						next = append(next, k)
+					} else if m.IsWalkable(n) {
+						end, from[k] = k, ring[j]
+						break
+					}
+				}
+			}
+			ring = next
+		}
+		if end < 0 {
+			return
+		}
+		for k := from[end]; k >= 0 && m.tiles[k] == Lake; k = from[k] {
+			m.tiles[k] = Shallows
+		}
+	}
+}

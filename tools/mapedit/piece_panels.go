@@ -170,19 +170,14 @@ func (p *pieceEditor) drawMegaPalette(a *app, dst *ebiten.Image, r image.Rectang
 			fill(view, cell.Inset(1), colNoMega)
 			label(view, cell.Min.X+8, cell.Min.Y+8, "0", colTextDim)
 		} else {
-			q := t.quarters(i)
-			for k, piece := range q {
-				qx := cell.Min.X + (k%2)*(size/2)
-				qy := cell.Min.Y + (k/2)*(size/2)
-				fill(view, image.Rect(qx+1, qy+1, qx+size/2, qy+size/2), quarterColor(t.pieceFlags(piece)))
-			}
+			p.drawMega(a, view, t, p.cur.levelType, i, float64(cell.Min.X+1), float64(cell.Min.Y+1), size-2)
 		}
 		if i == p.brush {
 			stroke(view, cell, color.White)
 		}
 		if u.hit(cell) && u.hit(r) {
 			stroke(view, cell, colAccent)
-			u.tooltip = fmt.Sprintf("megatile %d  pieces %v", i, t.quarters(i))
+			u.tooltip = fmt.Sprintf("megatile %d  %s  pieces %v", i, p.megaNames(a, p.cur.levelType, i), t.quarters(i))
 			if u.clicked {
 				p.brush = i
 			}

@@ -21,18 +21,25 @@ type NoiseConfig struct {
 	Scale         int     // noise cell size: larger gives broader features
 	Rock, Water   float64 // heights above Rock are wall, below Water lake
 	MinFloor      float64
+	Rivers        int     // rivers run out of the lakes to the map edge or another lake (addRivers)
+	RiverWidth    int     // their width in cells (default 2)
+	RiverMeander  float64 // chance each step of a river turns aside instead of heading for its goal
 }
 
 type noise struct{}
 
 func (noise) Parse(r recfile.Record) (dungeon.Config, error) {
-	c := NoiseConfig{Width: 80, Height: 50, Scale: 10, Rock: 0.6, Water: 0.3, MinFloor: 0.3}
-	if err := parseKnobs(r, []intKnob{{"width", &c.Width}, {"height", &c.Height}, {"scale", &c.Scale}},
-		[]floatKnob{{"rock", &c.Rock}, {"water", &c.Water}, {"min_floor", &c.MinFloor}}); err != nil {
+	c := NoiseConfig{Width: 80, Height: 50, Scale: 10, Rock: 0.6, Water: 0.3, MinFloor: 0.3, RiverWidth: 2, RiverMeander: 0.3}
+	if err := parseKnobs(r, []intKnob{{"width", &c.Width}, {"height", &c.Height}, {"scale", &c.Scale},
+		{"rivers", &c.Rivers}, {"river_width", &c.RiverWidth}},
+		[]floatKnob{{"rock", &c.Rock}, {"water", &c.Water}, {"min_floor", &c.MinFloor}, {"river_meander", &c.RiverMeander}}); err != nil {
 		return nil, err
 	}
 	if c.Scale < 2 || c.Water >= c.Rock {
 		return nil, fmt.Errorf("levels.rec: noise needs scale >= 2 and water below rock")
+	}
+	if c.Rivers < 0 || c.RiverWidth < 1 {
+		return nil, fmt.Errorf("levels.rec: noise needs rivers >= 0 and river_width >= 1")
 	}
 	if err := checkSize("noise", c.Width, c.Height, 10); err != nil {
 		return nil, err
@@ -40,7 +47,7 @@ func (noise) Parse(r recfile.Record) (dungeon.Config, error) {
 	for _, f := range []struct {
 		n string
 		v float64
-	}{{"rock", c.Rock}, {"water", c.Water}, {"min_floor", c.MinFloor}} {
+	}{{"rock", c.Rock}, {"water", c.Water}, {"min_floor", c.MinFloor}, {"river_meander", c.RiverMeander}} {
 		if err := checkFraction("noise", f.n, f.v); err != nil {
 			return nil, err
 		}
@@ -65,6 +72,7 @@ func (c NoiseConfig) Build(rnd *rand.Rand, _ fs.FS) (*DungeonMap, error) {
 		if float64(m.keepLargestFloor()) < c.MinFloor*float64(c.Width*c.Height) {
 			continue
 		}
+		m.addRivers(rnd, c.Rivers, c.RiverWidth, c.RiverMeander)
 		for i, t := range m.tiles { // shallows around the water
 			p := geometry.Point{X: i % c.Width, Y: i / c.Width}
 			if t == Room && slices.ContainsFunc(dirs8, func(d geometry.Point) bool {

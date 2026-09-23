@@ -44,7 +44,7 @@ type Level struct {
 	DiabloQuads          [4][2]int // level 16: megatile origins of diab1-4
 	Uber, Cornerstone    [2]int    // the Crypt: Na-Krul's door (UberRow/UberCol) and the Cornerstone of the World
 	til                  []byte
-	parts                *hhm.Level // the level type's megatile map parts (CellTile)
+	parts                megaParts // the level type's megatile map parts (CellTile)
 }
 
 // OpenNakrulRoom ports SyncNakrulRoom: Na-Krul's door opens. It reports whether anything changed.
@@ -89,7 +89,7 @@ func (l *Level) CellFlags(x, y int) hhm.Flags { return l.pieceFlags(x+CellOrigin
 
 // CellTile is the tile cell (x, y) is drawn with: its quadrant of its megatile in the level type's map parts.
 func (l *Level) CellTile(x, y int) int {
-	return l.parts.TileAt(megatileCell(int(l.CellMega(x, y)), x%2+2*(y%2)))
+	return l.parts.tile(int(l.CellMega(x, y)), x%2+2*(y%2))
 }
 
 // CellPiece is the dPiece value (1-based, 0 = none) at cell (x, y).

@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"os"
+	"path/filepath"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-// A megatile has no art here: the game never draws Diablo's own tiles, it reads the pieces' sol flags and
-// paints a wall or a floor. So the editor shows exactly that, a quarter at a time, which is the thing being
-// designed.
+// A megatile is drawn with the tiles the game draws it with: its map part in maps/<lt>_megatiles.hhm. A mod
+// without those falls back to what each quarter blocks (sol flags), which is what the generator reads.
 var (
 	colFloor   = color.RGBA{58, 62, 70, 255}
 	colSolid   = color.RGBA{150, 120, 88, 255}
@@ -87,12 +90,7 @@ func (p *pieceEditor) drawCanvas(a *app, dst *ebiten.Image, c image.Rectangle) {
 			if mega == 0 || t == nil {
 				fill(view, image.Rect(int(sx), int(sy), int(sx+s), int(sy+s)), colNoMega)
 			} else {
-				q := t.quarters(mega)
-				// nw ne / sw se, as the generator lays them out
-				for i, piece := range q {
-					qx, qy := sx+float64(i%2)*s/2, sy+float64(i/2)*s/2
-					fill(view, image.Rect(int(qx), int(qy), int(qx+s/2)+1, int(qy+s/2)+1), quarterColor(t.pieceFlags(piece)))
-				}
+				p.drawMega(a, view, t, p.cur.levelType, mega, sx, sy, s)
 			}
 			vector.StrokeRect(view, float32(sx), float32(sy), float32(s), float32(s), 1, colLine, false)
 			if p.showIDs && s >= 26 && mega != 0 {
@@ -299,4 +297,95 @@ func (p *pieceEditor) zoomAndPan(u *ui, c image.Rectangle, over bool) {
 	} else {
 		p.panning = false
 	}
+}
+
+// partTiles is the four tile ids the game draws megatile mega with: its map part in maps/<lt>_megatiles.hhm,
+// picked by generator.txt's <lt>MegatileParts table. ok is false when the mod has neither.
+func (p *pieceEditor) partTiles(m *mapEditor, lt string, mega int) (q [4]int, ok bool) {
+	if p.parts == nil {
+		p.parts = map[string][]int{}
+	}
+	tbl, seen := p.parts[lt]
+	if !seen {
+		tbl = readPartTable(filepath.Join(p.levels, "generator.txt"), lt+"MegatileParts")
+		p.parts[lt] = tbl
+	}
+	if mega < 1 || mega > len(tbl) || m == nil || m.proj == nil {
+		return q, false
+	}
+	for _, l := range m.proj.Levels {
+		if l.Name != lt+"_megatiles" {
+			continue
+		}
+		slot := tbl[mega-1] - 1
+		x, y := slot%16*3, slot/16*3
+		return [4]int{l.TileAt(x, y), l.TileAt(x+1, y), l.TileAt(x, y+1), l.TileAt(x+1, y+1)}, true
+	}
+	return q, false
+}
+
+// readPartTable reads one [table name] of generator.txt: whitespace-separated numbers up to the next section.
+func readPartTable(path, name string) []int {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	var out []int
+	in := false
+	for _, line := range strings.Split(string(b), "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "[") {
+			if in {
+				break
+			}
+			in = line == "[table "+name+"]"
+			continue
+		}
+		if !in || strings.HasPrefix(line, "#") {
+			continue
+		}
+		for _, f := range strings.Fields(line) {
+			if n, err := strconv.Atoi(f); err == nil {
+				out = append(out, n)
+			}
+		}
+	}
+	return out
+}
+
+// drawMega draws megatile mega at (x, y), size pixels square: the game's own tiles when the mod draws its map
+// parts, else each quarter's sol flags.
+func (p *pieceEditor) drawMega(a *app, dst *ebiten.Image, t *megaTable, lt string, mega int, x, y, size float64) {
+	m := a.maps
+	if q, ok := p.partTiles(m, lt, mega); ok {
+		g := float64(m.proj.Tileset.GridSize)
+		for i, id := range q {
+			if pic := int(m.drawn(id).Icon); id >= 0 && pic < len(m.tile) {
+				op := &ebiten.DrawImageOptions{}
+				op.GeoM.Scale(size/2/g, size/2/g)
+				op.GeoM.Translate(x+float64(i%2)*size/2, y+float64(i/2)*size/2)
+				dst.DrawImage(m.tile[pic], op)
+			}
+		}
+		return
+	}
+	for i, piece := range t.quarters(mega) { // nw ne / sw se, as the generator lays them out
+		qx, qy := x+float64(i%2)*size/2, y+float64(i/2)*size/2
+		fill(dst, image.Rect(int(qx), int(qy), int(qx+size/2)+1, int(qy+size/2)+1), quarterColor(t.pieceFlags(piece)))
+	}
+}
+
+// megaNames is the tile names megatile mega is drawn with, for tooltips.
+func (p *pieceEditor) megaNames(a *app, lt string, mega int) string {
+	q, ok := p.partTiles(a.maps, lt, mega)
+	if !ok {
+		return ""
+	}
+	var names []string
+	for _, id := range q {
+		if n := a.maps.drawn(id).Name; n != "" && !slices.Contains(names, n) {
+			names = append(names, n)
+		}
+	}
+	return strings.Join(names, ", ")
 }

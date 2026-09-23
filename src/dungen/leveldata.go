@@ -17,7 +17,7 @@ import (
 // per set piece (D1's .DUN) and a til table per level type. The parsed shapes match the MPQ's byte layouts
 // exactly, so the generators read them the way they always did. What each piece blocks is not a table: it is the
 // tileset flags of the tile the piece is drawn with in its level type's megatile map parts (maps/l<n>_megatiles.hhm,
-// megatileCell), which the map editor edits like any other map.
+// megaParts), which the map editor edits like any other map.
 //
 // A .txt holds sections. "[tiles] w h" and "[transparency] w h" are grids of decimal megatile numbers, one
 // dungeon row per line; "[items]", "[monsters]" and "[objects]" are TSVs of the layer's non-zero cells, which are
@@ -27,7 +27,7 @@ import (
 type Levels struct {
 	dun        map[string]dun                  // "l1/sklkng1" -> set piece
 	til        [len(levelTypeDirs)][]byte      // by level type (DType*)
-	parts      [len(levelTypeDirs)]*hhm.Level  // the megatile map parts
+	parts      [len(levelTypeDirs)]megaParts   // the megatile map parts
 	pieceFlags [len(levelTypeDirs)][]hhm.Flags // by piece: its map-part tile's flags
 	cfg        levelConfigs                    // which strategy builds each dungeon level, from levels.rec
 	minisets   map[string]*miniset             // generator.txt's [miniset name] sections
@@ -88,11 +88,6 @@ func LoadLevels(fsys fs.FS) (*Levels, error) {
 	if err := hhm.CheckTileRecords(maps.Tileset, recs); err != nil {
 		return ld, err
 	}
-	for lt := 1; lt < len(levelTypeDirs); lt++ {
-		if ld.parts[lt], ld.pieceFlags[lt], err = pieceFlags(maps, recs, lt, ld.til[lt]); err != nil {
-			return ld, err
-		}
-	}
 	b, err := fs.ReadFile(fsys, rules.DataPath(levelDir, "generator.txt"))
 	if err != nil {
 		return ld, fmt.Errorf("level data: %w", err)
@@ -103,6 +98,11 @@ func LoadLevels(fsys fs.FS) (*Levels, error) {
 	ld.tables = map[string][]int{}
 	for name, rows := range ld.rows {
 		ld.tables[name] = slices.Concat(rows...)
+	}
+	for lt := 1; lt < len(levelTypeDirs); lt++ {
+		if ld.parts[lt], ld.pieceFlags[lt], err = pieceFlags(maps, recs, lt, ld.til[lt], ld.tables[levelTypeDirs[lt]+"MegatileParts"]); err != nil {
+			return ld, err
+		}
 	}
 	cfg, err := loadLevelConfigs(fsys)
 	if err != nil {
@@ -389,34 +389,53 @@ func parseTil(b []byte) ([]byte, error) {
 	return out, nil
 }
 
-// megatileCell is where quadrant q (nw, ne, sw, se) of megatile m sits in its map parts: sixteen 2x2 megatiles to
-// a row, one empty cell between them.
-func megatileCell(m, q int) (int, int) { return (m-1)%16*3 + q%2, (m-1)/16*3 + q/2 }
+// megaParts is a level type's megatile map parts: each distinct 2x2 picture once, sixteen to a row with one empty
+// cell between them, and which picture each megatile id is drawn with (generator.txt's [table l<n>MegatileParts]).
+// Ids sharing a picture stay distinct ids: the generator's passes tell them apart.
+type megaParts struct {
+	lvl    *hhm.Level
+	partOf []int // by megatile id - 1: its map part, 1-based
+}
+
+// tile is the tile quadrant q (nw, ne, sw, se) of megatile m is drawn with.
+func (mp megaParts) tile(m, q int) int {
+	if m < 1 || m > len(mp.partOf) {
+		return hhm.Empty
+	}
+	x, y := partCell(mp.partOf[m-1], q)
+	return mp.lvl.TileAt(x, y)
+}
+
+// partCell is where quadrant q of map part k sits.
+func partCell(k, q int) (int, int) { return (k-1)%16*3 + q%2, (k-1)/16*3 + q/2 }
 
 // pieceFlags reads level type lt's megatile map parts and what each piece's tile blocks (its tiles.rec record's
 // tags). A piece is drawn in every megatile that uses it, and all its tiles must agree, or two megatiles would
 // disagree about the same piece.
-func pieceFlags(maps *hhm.Project, recs map[string]hhm.TileRecord, lt int, til []byte) (*hhm.Level, []hhm.Flags, error) {
+func pieceFlags(maps *hhm.Project, recs map[string]hhm.TileRecord, lt int, til []byte, partOf []int) (megaParts, []hhm.Flags, error) {
 	name := fmt.Sprintf("%s_megatiles", levelTypeDirs[lt])
-	parts := maps.Level(name)
-	if parts == nil {
-		return nil, nil, fmt.Errorf("level data: the maps have no %s", name)
+	parts := megaParts{maps.Level(name), partOf}
+	if parts.lvl == nil {
+		return parts, nil, fmt.Errorf("level data: the maps have no %s", name)
+	}
+	if len(partOf) != len(til)/8 {
+		return parts, nil, fmt.Errorf("generator.txt: [table %sMegatileParts] has %d entries for %d megatiles", levelTypeDirs[lt], len(partOf), len(til)/8)
 	}
 	var flags []hhm.Flags
 	seen := map[int]int{} // piece -> the megatile it was first read from
 	for m := 1; 8*m <= len(til); m++ {
 		for q, p := range megaPieces(til, m-1) {
-			x, y := megatileCell(m, q)
-			tile := parts.TileAt(x, y)
+			tile := parts.tile(m, q)
 			if tile == hhm.Empty {
-				return nil, nil, fmt.Errorf("%s: megatile %d has nothing drawn at %d,%d", name, m, x, y)
+				x, y := partCell(partOf[m-1], q)
+				return parts, nil, fmt.Errorf("%s: megatile %d (part %d) has nothing drawn at %d,%d", name, m, partOf[m-1], x, y)
 			}
 			f := hhm.DrawnTile(maps.Tileset, recs, tile).Flags
 			for len(flags) <= p {
 				flags = append(flags, hhm.Flags{})
 			}
 			if first, ok := seen[p]; ok && flags[p] != f {
-				return nil, nil, fmt.Errorf("%s: piece %d is drawn as %v in megatile %d but %v in megatile %d",
+				return parts, nil, fmt.Errorf("%s: piece %d is drawn as %v in megatile %d but %v in megatile %d",
 					name, p, flags[p].Names(), first, f.Names(), m)
 			} else if !ok {
 				seen[p], flags[p] = m, f

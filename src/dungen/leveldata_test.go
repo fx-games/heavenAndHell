@@ -133,11 +133,11 @@ func TestPieceDrawnTwoWaysIsRejected(t *testing.T) {
 		parts.Tiles[i] = 1 // floor
 	}
 	maps := &hhm.Project{Tileset: &hhm.Tileset{Flags: map[int]hhm.Flags{2: {BlocksMovement: true}}}, Levels: []*hhm.Level{parts}}
-	if _, _, err := pieceFlags(maps, nil, 1, til); err != nil {
+	if _, _, err := pieceFlags(maps, nil, 1, til, []int{1, 2}); err != nil {
 		t.Fatalf("agreeing megatiles: %v", err)
 	}
 	parts.SetTile(3, 0, 2) // megatile 2's piece 0 becomes a wall, megatile 1's stays floor
-	if _, _, err := pieceFlags(maps, nil, 1, til); err == nil {
+	if _, _, err := pieceFlags(maps, nil, 1, til, []int{1, 2}); err == nil {
 		t.Fatal("piece 0 drawn as floor and wall loaded")
 	}
 }

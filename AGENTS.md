@@ -42,7 +42,9 @@ git clone --depth 1 https://github.com/pvpgn/diablo-hellfire reference/diablo-he
 ## D1 megatiles are map parts (`files/mods/d1/maps/l<n>_megatiles.hhm`)
 
 What a D1 piece blocks is not a table: every megatile is drawn as a 2x2 map part (sixteen to a row, a blank cell
-between them) and a piece is whatever tile it is drawn with. A drawn tile the tileset lists under `[tiles]` stands
+between them) and a piece is whatever tile it is drawn with. The file holds each distinct 2x2 picture once;
+`generator.txt`'s `[table l<n>MegatileParts]` says which part (1-based, by megatile id) each id is drawn with, so
+ids that look alike share a part but stay distinct ids for the generator. A drawn tile the tileset lists under `[tiles]` stands
 for a `tiles.rec` record (`183 tile.cathedral_trap_wall`): the game takes its `name:` (hover text), its `icon:`
 (so the remapper reaches every map that draws it) and its `tags:` (`blocks_movement` = D1's `nSolidTable`,
 `blocks_view` = `nBlockTable`, `blocks_missiles` = `nMissileTable`, `trap` = `nTrapTable`, `is_damaging`) from

@@ -30,6 +30,7 @@ type pieceEditor struct {
 
 	files  []pieceFile
 	tables map[string]*megaTable
+	parts  map[string][]int // <lt>MegatileParts, read on first use
 
 	cur        *setPiece
 	layer      int

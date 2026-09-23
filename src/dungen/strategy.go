@@ -119,8 +119,9 @@ type MegaDungeonConfig struct {
 	DoorDistance           int
 	RemoveDeadEnds         bool
 	MinRooms               int
-	RoomSizeSpread         int  // a room's side is min_room_size plus up to this much less one
-	Doors                  bool // false leaves the connectors as bare openings
+	RoomSizeSpread         int     // a room's side is min_room_size plus up to this much less one
+	Doors                  bool    // false leaves the connectors as bare openings
+	InnerRoomChance        float64 // chance a room of 7x7 or more gets a room walled inside it (D1's catacombs)
 }
 
 type megadungeon struct{}
@@ -144,7 +145,8 @@ func (megadungeon) Parse(r recfile.Record) (dungeon.Config, error) {
 		name string
 		into *float64
 	}{{"straight_passage_chance", &c.StraightPassageChance},
-		{"imperfect_connect_chance", &c.ImperfectConnectChance}, {"room_ratio", &c.RoomRatioInterval}} {
+		{"imperfect_connect_chance", &c.ImperfectConnectChance}, {"room_ratio", &c.RoomRatioInterval},
+		{"inner_room_chance", &c.InnerRoomChance}} {
 		if *k.into, err = dungeon.Float(r, k.name, *k.into); err != nil {
 			return nil, err
 		}
@@ -160,7 +162,8 @@ func (megadungeon) Parse(r recfile.Record) (dungeon.Config, error) {
 		return nil, fmt.Errorf("levels.rec: megadungeon needs min_room_size >= 3 and width, height >= min_room_size+4")
 	case c.RoomTries < 1 || c.RoomSizeSpread < 1 || c.DoorDistance < 0 || c.RoomRatioInterval < 0:
 		return nil, fmt.Errorf("levels.rec: megadungeon room_tries, room_size_spread must be >= 1, door_distance and room_ratio >= 0")
-	case c.StraightPassageChance < 0 || c.StraightPassageChance > 1 || c.ImperfectConnectChance < 0 || c.ImperfectConnectChance > 1:
+	case c.StraightPassageChance < 0 || c.StraightPassageChance > 1 || c.ImperfectConnectChance < 0 || c.ImperfectConnectChance > 1 ||
+		c.InnerRoomChance < 0 || c.InnerRoomChance > 1:
 		return nil, fmt.Errorf("levels.rec: megadungeon chances must be between 0 and 1")
 	}
 	return c, nil
@@ -260,7 +263,8 @@ func (c MegaDungeonConfig) Build(rnd *rand.Rand, _ fs.FS) (*DungeonMap, error) {
 		g := &MegaDungeonGenerator{randomSource: rnd, roomTries: c.RoomTries, minRoomSize: c.MinRoomSize,
 			straightPassageChance: c.StraightPassageChance, imperfectConnectChance: c.ImperfectConnectChance,
 			roomRatioInterval: c.RoomRatioInterval, doorDistance: c.DoorDistance,
-			removeDeadEnds: c.RemoveDeadEnds, roomSizeSpread: c.RoomSizeSpread, doors: c.Doors}
+			removeDeadEnds: c.RemoveDeadEnds, roomSizeSpread: c.RoomSizeSpread, doors: c.Doors,
+			innerRoomChance: c.InnerRoomChance}
 		m = g.Generate(c.Width, c.Height)
 		if len(m.AllRooms()) >= c.MinRooms {
 			return m, nil

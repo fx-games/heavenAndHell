@@ -41,6 +41,7 @@ type MegaDungeonGenerator struct {
 	optionalConnections    []geometry.Point
 	roomSizeSpread         int
 	doors                  bool
+	innerRoomChance        float64 // chance a room big enough gets a room walled inside it (addInnerRooms)
 }
 
 // sortPoints puts points in coordinate order, so a list gathered out of a map has an order at all.
@@ -70,6 +71,7 @@ func (c *MegaDungeonGenerator) Generate(width, height int) *DungeonMap {
 	if c.removeDeadEnds {
 		emptyMap.FillDeadEnds(c.randomSource)
 	}
+	c.addInnerRooms(emptyMap)
 	//emptyMap.addMoreDoors(c.randomSource, 50, 0.3)
 
 	return emptyMap
@@ -447,4 +449,47 @@ func makeOdd(rnd *rand.Rand, value int) int {
 		}
 	}
 	return value
+}
+
+// addInnerRooms nests rooms the way D1's catacombs do: a room at least 7x7 gets, with chance innerRoomChance, a
+// wall ring one cell in from its own walls, so a corridor runs round a room inside it, entered by one doorway
+// in the middle stretch of one of the ring's sides. The ring leaves the outer room's floor.
+func (c *MegaDungeonGenerator) addInnerRooms(m *DungeonMap) {
+	if c.innerRoomChance <= 0 {
+		return
+	}
+	for _, r := range m.rooms {
+		floor := r.GetAbsoluteFloorTiles()
+		lo, hi := floor[0], floor[0]
+		for _, p := range floor {
+			lo = geometry.Point{X: min(lo.X, p.X), Y: min(lo.Y, p.Y)}
+			hi = geometry.Point{X: max(hi.X, p.X), Y: max(hi.Y, p.Y)}
+		}
+		if hi.X-lo.X < 6 || hi.Y-lo.Y < 6 || c.randomSource.Float64() >= c.innerRoomChance {
+			continue
+		}
+		lo, hi = lo.Add(geometry.Point{X: 1, Y: 1}), hi.Sub(geometry.Point{X: 1, Y: 1}) // the ring
+		onRing := func(p geometry.Point) bool {
+			return p.X >= lo.X && p.X <= hi.X && p.Y >= lo.Y && p.Y <= hi.Y && (p.X == lo.X || p.X == hi.X || p.Y == lo.Y || p.Y == hi.Y)
+		}
+		var keep []geometry.Point
+		for _, p := range floor {
+			if onRing(p) {
+				m.SetWall(p.X, p.Y)
+			} else {
+				keep = append(keep, r.ToRelativePosition(p))
+			}
+		}
+		// the doorway: a side, then a spot on it away from the corners
+		side := c.randomSource.Intn(4)
+		along := func(a, b int) int { return a + 1 + c.randomSource.Intn(b-a-1) }
+		door := [4]geometry.Point{{X: along(lo.X, hi.X), Y: lo.Y}, {X: along(lo.X, hi.X), Y: hi.Y},
+			{X: lo.X, Y: along(lo.Y, hi.Y)}, {X: hi.X, Y: along(lo.Y, hi.Y)}}[side]
+		if c.doors {
+			m.SetDoor(door.X, door.Y)
+		} else {
+			m.SetCorridor(door.X, door.Y)
+		}
+		r.SetFloorTiles(append(keep, r.ToRelativePosition(door)))
+	}
 }

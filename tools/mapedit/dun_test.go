@@ -77,3 +77,20 @@ func TestMegaTables(t *testing.T) {
 		}
 	}
 }
+
+// TestPartTiles checks every D1 megatile resolves to a map part the game draws.
+func TestPartTiles(t *testing.T) {
+	dir := filepath.Join("..", "..", "files", "mods", "d1")
+	m, err := newMapEditor(dir)
+	if err != nil {
+		t.Skip("no d1 maps:", err)
+	}
+	p := newPieceEditor(dir)
+	for lt, n := range map[string]int{"l1": 206, "l2": 160, "l3": 156, "l4": 137} {
+		for mega := 1; mega <= n; mega++ {
+			if q, ok := p.partTiles(m, lt, mega); !ok || q == [4]int{-1, -1, -1, -1} {
+				t.Fatalf("%s megatile %d: no map part (%v)", lt, mega, q)
+			}
+		}
+	}
+}

@@ -347,8 +347,11 @@ func (m *DungeonMap) FillDeadEnds(random *rand.Rand) {
 	}
 }
 
+// IsDeadEnd reports floor with wall on three sides, and the side it opens to. A door counts as floor: when the
+// corridor behind a door is filled in, the door goes too, rather than stand in the room's wall facing rock.
 func (m *DungeonMap) IsDeadEnd(pos geometry.Point) (geometry.CompassDirection, bool) {
-	if !m.IsEmptySpace(pos) {
+	passable := func(p geometry.Point) bool { return m.IsEmptySpace(p) || m.Contains(p) && m.GetTileAt(p) == Door }
+	if !passable(pos) {
 		return 0, false
 	}
 
@@ -361,7 +364,7 @@ func (m *DungeonMap) IsDeadEnd(pos geometry.Point) (geometry.CompassDirection, b
 	cardinalDirs := []geometry.CompassDirection{geometry.North, geometry.South, geometry.East, geometry.West}
 
 	for _, dir := range cardinalDirs {
-		if m.IsEmptySpace(pos.Add(dir.ToPoint())) {
+		if passable(pos.Add(dir.ToPoint())) {
 			openDirection = dir
 			break
 		}

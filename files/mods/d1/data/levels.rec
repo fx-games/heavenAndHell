@@ -62,6 +62,7 @@
 #   room_size_spread         a room's side is min_room_size plus 0 to room_size_spread-1 (default 5)
 #   doors                    false leaves the connectors as bare openings
 #   dead_ends                true keeps the maze's dead ends; by default they are filled in
+#   inner_room_chance        chance a room of 7x7 or more gets a room walled inside it, one doorway in (default 0)
 #
 # The knobs rogue takes (Rogue's nine rooms in a 3x3 grid, joined by passages; no level here uses it):
 #   width, height    the map (default 80x24, Rogue's screen; at least 30x15)

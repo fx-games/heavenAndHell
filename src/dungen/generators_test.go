@@ -24,6 +24,8 @@ func TestGeneratorsAreWalkable(t *testing.T) {
 		{roomGraph{}, nil},
 		{roomGraph{}, recfile.Record{{Name: "loops", Value: "1"}}},
 		{noise{}, nil},
+		{noise{}, recfile.Record{{Name: "rivers", Value: "3"}, {Name: "river_width", Value: "3"}, {Name: "river_meander", Value: "0.5"}}},
+		{megadungeon{}, recfile.Record{{Name: "inner_room_chance", Value: "1"}}},
 	} {
 		cfg, err := tc.s.Parse(tc.knobs)
 		if err != nil {
