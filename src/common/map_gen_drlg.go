@@ -45,6 +45,9 @@ func (g *MapGenerator) buildsLevels() bool {
 		if _, ok := l.Config.(dungen.LevelParams); ok {
 			return true
 		}
+		if _, ok := dungen.PopulationOf(l.Config); ok {
+			return true
+		}
 	}
 	return false
 }

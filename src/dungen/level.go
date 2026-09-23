@@ -228,6 +228,9 @@ func (g *gen) pieceAt(x, y int) int {
 // tileFlags is what the tile of the piece at (x, y) blocks: nSolidTable, nBlockTable, nMissileTable and nTrapTable
 // read off the megatile map parts.
 func (g *gen) tileFlags(x, y int) hhm.Flags {
+	if g.cells != nil {
+		return g.cellFlags(x, y)
+	}
 	if p := g.pieceAt(x, y); p < len(g.sol) {
 		return g.sol[p]
 	}

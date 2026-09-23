@@ -38,8 +38,12 @@ func (g *MapGenerator) generateDungenMap(lvl dungeon.Level) *gridmap.GridMap[*Ac
 
 	g.addDungenTiles(m, layout, g.dungenTilemap(lvl, dlvl, layout), dlvl, lvl.Tiles)
 	stairs := g.addDungenStairs(m, layout, lvl)
-	g.decorateDungenRooms(m, layout, lvl, dlvl)
-	g.populateDungenLevel(m, layout, lvl, stairs)
+	if pop, ok := dungen.PopulationOf(lvl.Config); ok {
+		g.populateD1(m, layout, lvl, pop, stairs)
+	} else {
+		g.decorateDungenRooms(m, layout, lvl, dlvl)
+		g.populateDungenLevel(m, layout, lvl, stairs)
+	}
 
 	if snap := g.snapshots[targetMap]; snap != nil {
 		snap.apply(g.factory, m)
@@ -367,4 +371,35 @@ func (g *MapGenerator) maxDepth() (d int) {
 		d = max(d, l.Depth)
 	}
 	return
+}
+
+// populateD1 fills a laid-out level by D1's rules for the population's level type (dungen.Populate): its
+// monsters, objects, items and theme rooms, rolled from the level's D1 seed. The stairs placed so far are its
+// triggers, which D1 keeps clear.
+func (g *MapGenerator) populateD1(m *gridmap.GridMap[*Actor, *Item, Object], layout *dungen.DungeonMap, level dungeon.Level, pop dungen.Population, stairs []geometry.Point) {
+	msgs := map[string]int{"ladder_up": dungen.TrigPrevLevel, "ladder_down": dungen.TrigNextLevel, "warp": dungen.TrigTownWarpUp}
+	var trigs []dungen.Trigger
+	for _, p := range stairs {
+		msg, ok := msgs[m.GetNamedLocationByPos(p)]
+		if !ok {
+			msg = dungen.TrigNextLevel // a quest's way in
+		}
+		trigs = append(trigs, dungen.Trigger{X: p.X + dungen.CellOrigin, Y: p.Y + dungen.CellOrigin, Msg: msg})
+	}
+	lvl, err := g.factory.Levels.Populate(g.factory.Gen(), g.questTable(), g.levelSeeds(level.Map, level.Depth), level.Depth, pop, layout, trigs)
+	if err != nil {
+		panic(err)
+	}
+	if g.generated == nil {
+		g.generated = map[string]*dungen.Level{}
+	}
+	g.generated[level.Map] = lvl
+	g.placeMonsters(m, lvl)
+	g.placeObjects(m, lvl)
+	g.placeItems(m, lvl)
+	for _, a := range append(append([]*Actor(nil), m.Actors()...), g.walledIn[level.Map]...) {
+		if a.monster != nil {
+			g.factory.initTalk(a)
+		}
+	}
 }

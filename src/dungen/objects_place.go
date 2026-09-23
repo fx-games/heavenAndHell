@@ -211,6 +211,10 @@ func (g *gen) initRndBarrels() {
 
 // addLevelObjs ports AddL1Objs/AddL2Objs/AddL3Objs: lights and doors on their pieces.
 func (g *gen) addLevelObjs(ltype int) {
+	if g.cells != nil {
+		g.addCellObjs(ltype)
+		return
+	}
 	for j := 0; j < 112; j++ {
 		for i := 0; i < 112; i++ {
 			pn := g.piece[i][j] + 1
@@ -244,6 +248,10 @@ func doorKind(ltype, pn int) int {
 }
 
 func (g *gen) addL2Torches() {
+	if g.cells != nil {
+		g.addCellTorches()
+		return
+	}
 	for j := 0; j < 112; j++ {
 		for i := 0; i < 112; i++ {
 			if g.flags[i][j]&bflagPopulated != 0 {
@@ -410,6 +418,10 @@ func (g *gen) addStoryBooks(seeds [rules.NumLevels]int32) {
 }
 
 func (g *gen) addHookedBodies(freq int) {
+	if g.cells != nil {
+		g.addCellHookedBodies(freq)
+		return
+	}
 	for j := 0; j < 40; j++ {
 		jj := 16 + 2*j
 		for i := 0; i < 40; i++ {

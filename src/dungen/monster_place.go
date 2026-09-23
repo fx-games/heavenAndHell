@@ -295,6 +295,9 @@ func (g *gen) placeUniqueMonst(u, minionType, bosspacksize int) {
 	case umtSkelKing:
 		xp, yp = 35, 47
 	case umtButcher:
+		if g.cells != nil {
+			break // ponytail: his room is a set piece; until it is stamped he stands where the roll above put him
+		}
 		done := false
 		for yp = 0; yp < 112 && !done; yp++ {
 			for xp = 0; xp < 112 && !done; xp++ {

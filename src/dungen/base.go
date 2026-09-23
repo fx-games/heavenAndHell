@@ -28,6 +28,8 @@ type DungeonMap struct {
 	rooms      []*DungeonRoom
 	pathfinder *geometry.PathRange
 	loopDoors  map[geometry.Point]bool // doorways addMoreDoors opened: there is always another way round
+	themeRooms [][4]int                // the theme rooms a pass walled in: x, y, w, h in grid units before scaling
+	scale      int                     // cells per grid unit the passes drew with (0: not drawn by them)
 }
 
 // IsLoopDoor reports a door addMoreDoors placed: shutting it cuts no part of the level off.
@@ -498,8 +500,10 @@ func (m *DungeonMap) GetMetaInfo() []string {
 		fmt.Sprintf("Walkable tiles: %d (%.2f%%)", walkableTiles, float64(walkableTiles)/float64(totalTileCount)*100),
 		fmt.Sprintf("Wall tiles: %d (%.2f%%)", wallTiles, float64(wallTiles)/float64(totalTileCount)*100),
 		fmt.Sprintf("Rooms: %d", len(m.rooms)),
-		fmt.Sprintf("Smallest room: %d tiles", smallestRoom.GetFloorTileCount()),
-		fmt.Sprintf("Biggest room: %d tiles", biggestRoom.GetFloorTileCount()),
+	}
+	if len(m.rooms) > 0 { // the passes leave no rooms
+		info = append(info, fmt.Sprintf("Smallest room: %d tiles", smallestRoom.GetFloorTileCount()),
+			fmt.Sprintf("Biggest room: %d tiles", biggestRoom.GetFloorTileCount()))
 	}
 
 	return info

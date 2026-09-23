@@ -97,7 +97,22 @@ open_when: deepest >= 13
 map: cathedral_1
 name: Level 1\nCathedral
 depth: 1
-generator: d1_cathedral
+generator: bsp
+width: 40
+height: 40
+min_leaf: 9
+min_room: 3
+grow: 8
+hall_chance: 0.15
+spine: true
+arch_chance: 0.12
+loop_chance: 0.6
+loop_distance: 8
+posts: 0.02
+door_chance: 0.55
+canvas: 40
+scale: 2
+population: d1_cathedral
 tiles: cathedral
 music: cathedral
 exit: ladder_up -> town, to_cathedral
@@ -106,7 +121,22 @@ exit: ladder_down -> cathedral_2, ladder_up
 map: cathedral_2
 name: Level 2\nCathedral
 depth: 2
-generator: d1_cathedral
+generator: bsp
+width: 40
+height: 40
+min_leaf: 9
+min_room: 3
+grow: 8
+hall_chance: 0.15
+spine: true
+arch_chance: 0.12
+loop_chance: 0.6
+loop_distance: 8
+posts: 0.02
+door_chance: 0.55
+canvas: 40
+scale: 2
+population: d1_cathedral
 tiles: cathedral
 music: cathedral
 exit: ladder_up -> cathedral_1, ladder_down
@@ -116,7 +146,22 @@ exit: pwater -> dark_passage, ladder_up
 map: cathedral_3
 name: Level 3\nCathedral
 depth: 3
-generator: d1_cathedral
+generator: bsp
+width: 40
+height: 40
+min_leaf: 9
+min_room: 3
+grow: 8
+hall_chance: 0.15
+spine: true
+arch_chance: 0.12
+loop_chance: 0.6
+loop_distance: 8
+posts: 0.02
+door_chance: 0.55
+canvas: 40
+scale: 2
+population: d1_cathedral
 tiles: cathedral
 music: cathedral
 exit: ladder_up -> cathedral_2, ladder_down
@@ -126,7 +171,22 @@ exit: leoric -> leoric_tomb, ladder_up
 map: cathedral_4
 name: Level 4\nCathedral
 depth: 4
-generator: d1_cathedral
+generator: bsp
+width: 40
+height: 40
+min_leaf: 9
+min_room: 3
+grow: 8
+hall_chance: 0.15
+spine: true
+arch_chance: 0.12
+loop_chance: 0.6
+loop_distance: 8
+posts: 0.02
+door_chance: 0.55
+canvas: 40
+scale: 2
+population: d1_cathedral
 tiles: cathedral
 music: cathedral
 exit: ladder_up -> cathedral_3, ladder_down
@@ -139,7 +199,25 @@ apply_when: avail("banner") and v1("banner") == 3
 map: catacombs_5
 name: Level 5\nCatacombs
 depth: 5
-generator: d1_catacombs
+generator: megadungeon
+width: 35
+height: 35
+room_tries: 25
+min_room_size: 3
+room_size_spread: 8
+straight_passage_chance: 0.7
+imperfect_connect_chance: 0.6
+room_ratio: 0.6
+door_distance: 4
+min_rooms: 8
+inner_room_chance: 0.45
+posts: 0.03
+door_chance: 0.5
+theme_rooms: 6 10 0
+theme_room_doors: true
+canvas: 40
+scale: 2
+population: d1_catacombs
 tiles: catacombs
 music: catacombs
 exit: ladder_up -> cathedral_4, ladder_down
@@ -156,7 +234,25 @@ patch_objects: l2/blood2
 map: catacombs_6
 name: Level 6\nCatacombs
 depth: 6
-generator: d1_catacombs
+generator: megadungeon
+width: 35
+height: 35
+room_tries: 25
+min_room_size: 3
+room_size_spread: 8
+straight_passage_chance: 0.7
+imperfect_connect_chance: 0.6
+room_ratio: 0.6
+door_distance: 4
+min_rooms: 8
+inner_room_chance: 0.45
+posts: 0.03
+door_chance: 0.5
+theme_rooms: 6 10 0
+theme_room_doors: true
+canvas: 40
+scale: 2
+population: d1_catacombs
 tiles: catacombs
 music: catacombs
 exit: ladder_up -> catacombs_5, ladder_down
@@ -167,7 +263,25 @@ patch: bone_chamber_book = used OBJ_BOOK2R
 map: catacombs_7
 name: Level 7\nCatacombs
 depth: 7
-generator: d1_catacombs
+generator: megadungeon
+width: 35
+height: 35
+room_tries: 25
+min_room_size: 3
+room_size_spread: 8
+straight_passage_chance: 0.7
+imperfect_connect_chance: 0.6
+room_ratio: 0.6
+door_distance: 4
+min_rooms: 8
+inner_room_chance: 0.45
+posts: 0.03
+door_chance: 0.5
+theme_rooms: 6 10 0
+theme_room_doors: true
+canvas: 40
+scale: 2
+population: d1_catacombs
 tiles: catacombs
 music: catacombs
 exit: ladder_up -> catacombs_6, ladder_down
@@ -177,7 +291,25 @@ patch: blind_book = used OBJ_BLINDBOOK
 map: catacombs_8
 name: Level 8\nCatacombs
 depth: 8
-generator: d1_catacombs
+generator: megadungeon
+width: 35
+height: 35
+room_tries: 25
+min_room_size: 3
+room_size_spread: 8
+straight_passage_chance: 0.7
+imperfect_connect_chance: 0.6
+room_ratio: 0.6
+door_distance: 4
+min_rooms: 8
+inner_room_chance: 0.45
+posts: 0.03
+door_chance: 0.5
+theme_rooms: 6 10 0
+theme_room_doors: true
+canvas: 40
+scale: 2
+population: d1_catacombs
 tiles: catacombs
 music: catacombs
 exit: ladder_up -> catacombs_7, ladder_down
@@ -186,7 +318,19 @@ exit: ladder_down -> caves_9, ladder_up
 map: caves_9
 name: Level 9\nCaves
 depth: 9
-generator: d1_caves
+generator: drunkard
+width: 36
+height: 36
+cover: 0.38
+walk_length: 1
+dla: true
+lava_water: 0.26
+lava_rivers: 2
+door_chance: 0
+theme_rooms: 5 10 0
+canvas: 40
+scale: 2
+population: d1_caves
 tiles: caves
 music: caves
 exit: ladder_up -> catacombs_8, ladder_down
@@ -196,7 +340,19 @@ exit: warp -> town, to_caves
 map: caves_10
 name: Level 10\nCaves
 depth: 10
-generator: d1_caves
+generator: drunkard
+width: 36
+height: 36
+cover: 0.38
+walk_length: 1
+dla: true
+lava_water: 0.26
+lava_rivers: 2
+door_chance: 0
+theme_rooms: 5 10 0
+canvas: 40
+scale: 2
+population: d1_caves
 tiles: caves
 music: caves
 exit: ladder_up -> caves_9, ladder_down
@@ -205,7 +361,19 @@ exit: ladder_down -> caves_11, ladder_up
 map: caves_11
 name: Level 11\nCaves
 depth: 11
-generator: d1_caves
+generator: drunkard
+width: 36
+height: 36
+cover: 0.38
+walk_length: 1
+dla: true
+lava_water: 0.26
+lava_rivers: 2
+door_chance: 0
+theme_rooms: 5 10 0
+canvas: 40
+scale: 2
+population: d1_caves
 tiles: caves
 music: caves
 exit: ladder_up -> caves_10, ladder_down
@@ -214,7 +382,19 @@ exit: ladder_down -> caves_12, ladder_up
 map: caves_12
 name: Level 12\nCaves
 depth: 12
-generator: d1_caves
+generator: drunkard
+width: 36
+height: 36
+cover: 0.38
+walk_length: 1
+dla: true
+lava_water: 0.26
+lava_rivers: 2
+door_chance: 0
+theme_rooms: 5 10 0
+canvas: 40
+scale: 2
+population: d1_caves
 tiles: caves
 music: caves
 exit: ladder_up -> caves_11, ladder_down
@@ -223,7 +403,20 @@ exit: ladder_down -> hell_13, ladder_up
 map: hell_13
 name: Level 13\nHell
 depth: 13
-generator: d1_hell
+generator: bsp
+width: 19
+height: 19
+min_leaf: 6
+min_room: 3
+grow: 14
+mirror: true
+posts: 0.16
+door_chance: 0
+theme_rooms: 7 10 8
+theme_room_random_size: true
+canvas: 40
+scale: 2
+population: d1_hell
 tiles: hell
 music: hell
 exit: ladder_up -> caves_12, ladder_down
@@ -234,7 +427,20 @@ patch: steel_tome = used OBJ_STEELTOME
 map: hell_14
 name: Level 14\nHell
 depth: 14
-generator: d1_hell
+generator: bsp
+width: 19
+height: 19
+min_leaf: 6
+min_room: 3
+grow: 14
+mirror: true
+posts: 0.16
+door_chance: 0
+theme_rooms: 7 10 8
+theme_room_random_size: true
+canvas: 40
+scale: 2
+population: d1_hell
 tiles: hell
 music: hell
 exit: ladder_up -> hell_13, ladder_down
@@ -243,7 +449,20 @@ exit: ladder_down -> hell_15, ladder_up
 map: hell_15
 name: Level 15\nHell
 depth: 15
-generator: d1_hell
+generator: bsp
+width: 19
+height: 19
+min_leaf: 6
+min_room: 3
+grow: 14
+mirror: true
+posts: 0.16
+door_chance: 0
+theme_rooms: 7 10 8
+theme_room_random_size: true
+canvas: 40
+scale: 2
+population: d1_hell
 tiles: hell
 music: hell
 exit: ladder_up -> hell_14, ladder_down
@@ -257,7 +476,20 @@ exit_tile: red_portal
 map: hell_16
 name: Level 16\nHell
 depth: 16
-generator: d1_hell
+generator: bsp
+width: 19
+height: 19
+min_leaf: 6
+min_room: 3
+grow: 14
+mirror: true
+posts: 0.16
+door_chance: 0
+theme_rooms: 7 10 8
+theme_room_random_size: true
+canvas: 40
+scale: 2
+population: d1_hell
 tiles: hell
 music: hell
 exit: ladder_up -> hell_15, ladder_down

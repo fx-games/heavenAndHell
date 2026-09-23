@@ -14,29 +14,39 @@ import (
 // They work on the layout's grid; with scale 2 that grid is drawn two by two cells (D1's megatiles, toCells),
 // which is how D1's level types are laid out at their own scale. Every level they touch ends connected.
 type Passes struct {
-	Grow         int         // grow rectangular rooms up to this side until single walls part them; 0: off
-	HallChance   float64     // a grown room at least 6 wide and 8 long becomes a pillared hall (two arcades)
-	Spine        bool        // D1's first cathedral room: up to three pillared chambers on a long pillared hall
-	Mirror       bool        // mirror the layout left-right and top-bottom (D1 L4 builds a quadrant and mirrors it)
-	ArchChance   float64     // a straight wall between two rooms becomes an arcade (`#.#.#`)
-	LoopChance   float64     // chance each wall between two spots farther than LoopDistance apart on foot opens
-	LoopDistance int         // on foot, in grid cells
+	Grow         int          // grow rectangular rooms up to this side until single walls part them; 0: off
+	HallChance   float64      // a grown room at least 6 wide and 8 long becomes a pillared hall (two arcades)
+	Spine        bool         // D1's first cathedral room: up to three pillared chambers on a long pillared hall
+	Mirror       bool         // mirror the layout left-right and top-bottom (D1 L4 builds a quadrant and mirrors it)
+	ArchChance   float64      // a straight wall between two rooms becomes an arcade (`#.#.#`)
+	LoopChance   float64      // chance each wall between two spots farther than LoopDistance apart on foot opens
+	LoopDistance int          // on foot, in grid cells
 	Lava         *NoiseConfig // its lakes and rivers become lava, ringed with floor; fords keep the level whole
-	Posts        float64     // chance a room cell with only room or wall round it gets a pillar
-	DoorChance   float64     // chance each doorway (a 1-wide gap, or a door the layout made) is a door; <0: leave doors be
-	Canvas       int         // the layout is centred on a canvas this many cells square; 0: its own size
-	Scale        int         // 2 draws each cell as 2x2 (D1's megatiles); 1 leaves it
+	Posts        float64      // chance a room cell with only room or wall round it gets a pillar
+	DoorChance   float64      // chance each doorway (a 1-wide gap, or a door the layout made) is a door; <0: leave doors be
+	Canvas       int          // the layout is centred on a canvas this many cells square; 0: its own size
+	Scale        int          // 2 draws each cell as 2x2 (D1's megatiles); 1 leaves it
+	Themes       *ThemeRooms  // D1's theme rooms, walled in inside open ground once the level is laid out
 }
 
-// staged is a layout with passes: what a levels.rec record naming any pass knob builds.
+// staged is a layout with passes and a population: what a levels.rec record naming any of their knobs builds.
 type staged struct {
 	Layout
 	Passes
+	population *Population
+}
+
+// PopulationOf is the population a level's configuration names, if any.
+func PopulationOf(cfg dungeon.Config) (Population, bool) {
+	if s, ok := cfg.(staged); ok && s.population != nil {
+		return *s.population, true
+	}
+	return Population{}, false
 }
 
 // passKnobs are the fields that switch passes on: a record naming none of them builds its layout bare.
 var passKnobs = []string{"grow", "hall_chance", "spine", "mirror", "arch_chance", "loop_chance", "loop_distance",
-	"lava_rivers", "lava_water", "posts", "door_chance", "canvas", "scale"}
+	"lava_rivers", "lava_water", "posts", "door_chance", "canvas", "scale", "theme_rooms"}
 
 // withPasses parses a layout record, wrapping it in its passes when it names any.
 type withPasses struct{ dungeon.Parser }
@@ -46,8 +56,15 @@ func WithPasses(p dungeon.Parser) dungeon.Parser { return withPasses{p} }
 
 func (w withPasses) Parse(r recfile.Record) (dungeon.Config, error) {
 	cfg, err := w.Parser.Parse(r)
-	if err != nil || !slices.ContainsFunc(passKnobs, func(k string) bool { _, ok := dungeon.Field(r, k); return ok }) {
-		return cfg, err
+	if err != nil {
+		return nil, err
+	}
+	pop, populated, err := ParsePopulation(r)
+	if err != nil {
+		return nil, err
+	}
+	if !populated && !slices.ContainsFunc(passKnobs, func(k string) bool { _, ok := dungeon.Field(r, k); return ok }) {
+		return cfg, nil
 	}
 	l, ok := cfg.(Layout)
 	if !ok {
@@ -68,10 +85,21 @@ func (w withPasses) Parse(r recfile.Record) (dungeon.Config, error) {
 		lava.Rivers = lavaRivers
 		p.Lava = &lava
 	}
+	if v, ok := dungeon.Field(r, "theme_rooms"); ok {
+		t := ThemeRooms{RandomSize: boolField(r, "theme_room_random_size"), Doors: boolField(r, "theme_room_doors")}
+		if _, err := fmt.Sscan(v, &t.Min, &t.Max, &t.Freq); err != nil || t.Min < 3 || t.Max < t.Min || t.Freq < 0 {
+			return nil, fmt.Errorf("levels.rec: theme_rooms %q: want min max freq, 3 <= min <= max, freq >= 0", v)
+		}
+		p.Themes = &t
+	}
 	if p.Scale != 1 && p.Scale != 2 {
 		return nil, fmt.Errorf("levels.rec: scale must be 1 or 2")
 	}
-	return staged{l, p}, nil
+	st := staged{Layout: l, Passes: p}
+	if populated {
+		st.population = &pop
+	}
+	return st, nil
 }
 
 func boolField(r recfile.Record, k string) bool { v, _ := dungeon.Field(r, k); return v == "true" }
@@ -115,14 +143,20 @@ func (s staged) Build(rnd *rand.Rand, fsys fs.FS) (*DungeonMap, error) {
 		}
 		m = full
 	}
+	var themes [][4]int
+	if p.Themes != nil {
+		themes = themeRooms(m, *p.Themes, rnd)
+	}
 	connectMega(m)
 	if p.DoorChance >= 0 {
 		addDoors(m, p.DoorChance, rnd)
 	}
+	out := m.dungeonMap()
 	if p.Scale == 2 {
-		return toCells(m), nil
+		out = toCells(m)
 	}
-	return m.dungeonMap(), nil
+	out.themeRooms, out.scale = themes, p.Scale
+	return out, nil
 }
 
 // Megatile kinds.
@@ -216,6 +250,7 @@ type mega struct {
 	w, h int
 	t    []int
 }
+
 func newMega(w, h int) *mega { return &mega{w: w, h: h, t: make([]int, w*h)} }
 
 func (m *mega) at(x, y int) int {
@@ -236,7 +271,6 @@ func mopen(k int) bool     { return k == mRoom || k == mCorr || k == mPost }
 func mwalkable(k int) bool { return mopen(k) || k == mDoor }
 
 type mrect struct{ x0, y0, x1, y1, cap int } // inclusive floor bounds, and the side it may grow to
-
 
 // growRooms widens each room (to a side between maxSide/2 and maxSide, rolled per room) one row or column at a
 // time, in turns, while the strip it takes holds no other room's floor and the strip beyond (its new wall) holds no room floor and at most two corridor cells: rooms end
@@ -701,4 +735,106 @@ func addDoors(m *mega, p float64, rnd *rand.Rand) {
 			}
 		}
 	}
+}
+
+// ThemeRooms is D1's DRLG_PlaceThemeRooms on the grid: every Freq-th (0: every) room cell with an open square of
+// Min..Max room cells from it gets a walled room inside that square, with a door (Doors) or a gap in its east or
+// south wall. RandomSize shrinks each to a random size first, as D1's hell does.
+type ThemeRooms struct {
+	Min, Max, Freq int
+	RandomSize     bool
+	Doors          bool
+}
+
+// themeRooms ports DRLG_PlaceThemeRooms, GetSizeForThemeRoom and CreateThemeRoom's walls, and returns the rooms
+// (x, y, w, h: the walls included) so the population can find them.
+func themeRooms(m *mega, t ThemeRooms, rnd *rand.Rand) [][4]int {
+	var out [][4]int
+	near := func(x, y int) bool {
+		for _, r := range out {
+			if x >= r[0]-2 && x < r[0]+r[2]+3 && y >= r[1]-2 && y < r[1]+r[3]+3 {
+				return true
+			}
+		}
+		return false
+	}
+	size := func(x, y int) (int, int, bool) {
+		if near(x, y) {
+			return 0, 0, false
+		}
+		maxW, maxH := min(t.Max, m.w-x), min(t.Max, m.h-y)
+		rw, rh := maxW, maxH
+		for i := 0; i < t.Max; i++ {
+			w, h := 0, 0
+			if i < rh {
+				w = i
+			}
+			if i < maxH {
+				for w < rw && m.at(x+w, y+i) == mRoom {
+					w++
+				}
+			}
+			if i < rw {
+				h = i
+			}
+			if i < maxW {
+				for h < rh && m.at(x+i, y+h) == mRoom {
+					h++
+				}
+			}
+			if w < t.Min || h < t.Min {
+				if i < t.Min {
+					return 0, 0, false
+				}
+				break
+			}
+			rw, rh = min(rw, w), min(rh, h)
+		}
+		return rw - 2, rh - 2, true
+	}
+	for y := 0; y < m.h; y++ {
+		for x := 0; x < m.w; x++ {
+			if m.at(x, y) != mRoom || t.Freq > 0 && rnd.Intn(t.Freq) != 0 {
+				continue
+			}
+			w, h, ok := size(x, y)
+			if !ok {
+				continue
+			}
+			if t.RandomSize {
+				lo, hi := t.Min-2, t.Max-2
+				r := func(n int) int { // D1's random_(n), 0 for n <= 0
+					if n <= 0 {
+						return 0
+					}
+					return rnd.Intn(n)
+				}
+				if w = lo + r(r(w-lo+1)); w > hi {
+					w = lo
+				}
+				if h = lo + r(r(h-lo+1)); h > hi {
+					h = lo
+				}
+			}
+			lx, ly, hx, hy := x+1, y+1, x+1+w, y+1+h
+			for yy := ly; yy < hy; yy++ {
+				for xx := lx; xx < hx; xx++ {
+					if yy == ly || yy == hy-1 || xx == lx || xx == hx-1 {
+						m.set(xx, yy, mWall)
+					}
+				}
+			}
+			way := mCorr
+			if t.Doors {
+				way = mDoor
+			}
+			if rnd.Intn(2) == 0 {
+				m.set(hx-1, (ly+hy)/2, way)
+			} else {
+				m.set((lx+hx)/2, hy-1, way)
+			}
+			out = append(out, [4]int{lx, ly, w, h})
+		}
+	}
+	return out
 }

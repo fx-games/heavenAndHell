@@ -84,6 +84,7 @@ type gen struct {
 	setLvlNum int
 	strat     strategy
 	params    LevelParams
+	cells     *DungeonMap // a level laid out by the passes (Populate); nil: D1's own generators built it
 
 	population
 
@@ -646,6 +647,9 @@ func megaPieces(til []byte, t int) [4]int {
 }
 
 func (g *gen) isFloor(x, y int, floor byte) bool {
+	if g.cells != nil {
+		return g.cellFloor(x, y)
+	}
 	i, j := (x-16)/2, (y-16)/2
 	if x < 16 || y < 16 || i >= 40 || j >= 40 {
 		return false
