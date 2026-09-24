@@ -52,8 +52,8 @@ func autoplay() {
 	g, _ := createGameAndUIContext()
 	g.GetAudio().SetDisablePlayback(true)
 	common.Clock = func() time.Time { return time.Date(2026, 1, 1, 10, 0, 0, 0, time.UTC) }
-	fmt.Printf("autoplay %s, %s, tactical %v, seeds %d..%d\n%5s %4s %4s %6s %5s %6s %5s %5s %5s %5s %5s %5s %5s %5s %6s\n", mod, g.GetGameData().ClassDefinitions[class].Name, tactical, seed, seed+int64(runs)-1,
-		"seed", "dlvl", "clvl", "turns", "kills", "exp", "pots", "home", "equip", "casts", "items", "books", "open", "light", "gold")
+	fmt.Printf("autoplay %s, %s, tactical %v, seeds %d..%d\n%5s %4s %4s %6s %5s %6s %5s %5s %5s %5s %5s %5s %5s %5s %5s %6s\n", mod, g.GetGameData().ClassDefinitions[class].Name, tactical, seed, seed+int64(runs)-1,
+		"seed", "dlvl", "clvl", "turns", "kills", "exp", "pots", "home", "equip", "casts", "items", "books", "open", "kite", "light", "gold")
 	for r := int64(0); r < int64(runs); r++ {
 		g.SeedRandom(seed + r)
 		g.NewGame(g.GetGameData().ClassDefinitions[class], false, "")
@@ -67,7 +67,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 	player := func() *common.Actor { return s.GetPlayer() }
 	hp := func() *stats.Resource { return player().GetStats().GetResource(stats.Health) }
 	cause := common.AbstractCause("autoplay")
-	turns, kills, pots, home, equips, casts, itemCasts, books, opened := 0, 0, 0, 0, 0, 0, 0, 0, 0
+	turns, kills, pots, home, equips, casts, itemCasts, books, opened, kites := 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	potion := func(it *common.Item, kind string) bool { return it.IsPotion() && strings.Contains(it.Name(), kind) }
 	tick := func() {
 		for i := 0; i < 20; i++ {
@@ -175,6 +175,20 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 	mana := func() float64 {
 		m := player().GetStats().GetResource(stats.Mana)
 		return float64(m.Value()) / float64(max(m.GetMax(), 1))
+	}
+	// canCast: mana for a spell, a charged spell item, or a mana potion to get there
+	canCast := func() bool {
+		for _, e := range common.SkillBar(player()) {
+			if t, ok := e.(*common.TargetedAction); ok && !s.LacksMana(player(), t.Name()) {
+				return true
+			}
+		}
+		for _, it := range append(player().GetInventory().Items(), player().GetEquipment().AllItems()...) {
+			if offensive(it) || potion(it, "Mana") {
+				return true
+			}
+		}
+		return false
 	}
 	// weak: a monster the hero's weapon kills in two average blows, not worth a spell (tactical)
 	weak := func(target *common.Actor) bool {
@@ -403,7 +417,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 			}
 			fmt.Println(byType)
 		}
-		clvl, e0, t0, k0, p0, h0, q0, c0, i0, b0, o0 := player().Hero().Level, player().Hero().Exp, turns, kills, pots, home, equips, casts, itemCasts, books, opened
+		clvl, e0, t0, k0, p0, h0, q0, c0, i0, b0, o0, x0 := player().Hero().Level, player().Hero().Exp, turns, kills, pots, home, equips, casts, itemCasts, books, opened, kites
 		skip := map[*common.Item]bool{}     // items the bot gave up on
 		skipObj := map[common.Object]bool{} // containers opened or out of reach
 		goal := player().MapPosition()      // the explore target, kept until reached: re-picking every step oscillates
@@ -427,6 +441,29 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 				for _, e := range enemies[1:] {
 					if geometry.DistanceChebyshev(e.MapPosition(), player().MapPosition()) < geometry.DistanceChebyshev(target.MapPosition(), player().MapPosition()) {
 						target = e
+					}
+				}
+				if tactical && caster() && !weak(target) && reachers(enemies, player().MapPosition()) > 0 && canCast() {
+					// kite: a caster steps out of reach first, then casts (monsters that close in lose their swing)
+					m, best, bestD := s.GetMap(), player().MapPosition(), 0
+					for _, n := range m.GetFilteredNeighborsForMovement(player().MapPosition(), m.CanPlaceActorHere) {
+						if reachers(enemies, n) > 0 {
+							continue
+						}
+						d := 99
+						for _, e := range enemies {
+							d = min(d, geometry.DistanceChebyshev(e.MapPosition(), n))
+						}
+						if d > bestD {
+							best, bestD = n, d
+						}
+					}
+					if best != player().MapPosition() {
+						mv := common.NewMoveAction(cause, player(), best, true)
+						mv.Step = true
+						act(mv)
+						kites++
+						continue
 					}
 				}
 				if tactical {
@@ -565,7 +602,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 				return
 			}()*100/max(len(reach), 1))
 		}
-		fmt.Printf("%5d %4d %4d %6d %5d %6d %5d %5d %5d %5d %5d %5d %5d %5d %6d\n", seed, dlvl, clvl, turns-t0, kills-k0, player().Hero().Exp-e0, pots-p0, home-h0, equips-q0, casts-c0, itemCasts-i0, books-b0, opened-o0, s.PlayerLightRadius(), player().GetStats().GetAttribute(stats.Gold))
+		fmt.Printf("%5d %4d %4d %6d %5d %6d %5d %5d %5d %5d %5d %5d %5d %5d %5d %6d\n", seed, dlvl, clvl, turns-t0, kills-k0, player().Hero().Exp-e0, pots-p0, home-h0, equips-q0, casts-c0, itemCasts-i0, books-b0, opened-o0, kites-x0, s.PlayerLightRadius(), player().GetStats().GetAttribute(stats.Gold))
 		if !player().IsAlive() {
 			fmt.Printf("%5d died on depth %d at character level %d\n", seed, dlvl, player().Hero().Level)
 			return
