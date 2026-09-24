@@ -6,6 +6,7 @@ import (
 	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
+	"rpg/src/rules"
 	"rpg/src/stats"
 	"rpg/src/util"
 )
@@ -316,7 +317,13 @@ func (g *Factory) spawnFireAt(location geometry.Point) {
 	fire := NewFire(3)
 	procFireAtLocation := func(location geometry.Point) {
 		if actor, ok := g.State.GetMap().TryGetActorAt(location); ok {
-			g.ActionBroker.Execute(NewChangeResourceAction(AbstractCause("Fire"), actor, stats.Health, -3))
+			dam := 3.0
+			if mon := actor.monster; mon != nil && mon.MagicRes&rules.ImmuneFire != 0 {
+				return
+			} else if mon != nil && mon.MagicRes&rules.ResistFire != 0 {
+				dam = 1
+			}
+			g.ActionBroker.Execute(NewChangeResourceAction(AbstractCause("Fire"), actor, stats.Health, -dam))
 		}
 	}
 	onTurn := func() {
