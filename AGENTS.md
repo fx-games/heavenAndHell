@@ -1,6 +1,7 @@
 # AGENTS.md
 
 Design decisions and deferred scope for the D1 rebuild: `docs/D1_PLAN.md`.
+Game design review guidelines (H&H vs. the D1 baseline): `REVIEW.md`.
 
 ## Reference material (`reference/`, gitignored, never commit)
 
