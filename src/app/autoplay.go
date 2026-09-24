@@ -296,6 +296,14 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 				player().GetInventory().Remove(it)
 			}
 		}
+		reserve := 0 // under carried light: the price of the cheapest light in town
+		for _, v := range s.GetMap().Actors() {
+			for _, it := range v.GetInventory().Items() {
+				if s.CarriedLighting() && v.IsVendor() && it.IsLightSource() && (reserve == 0 || it.BuyPrice() < reserve) {
+					reserve = it.BuyPrice()
+				}
+			}
+		}
 		for _, v := range s.GetMap().Actors() {
 			if !v.IsVendor() {
 				continue
@@ -315,6 +323,9 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 			slices.SortStableFunc(stock, func(a, b *common.Item) int { return rank(a) - rank(b) })
 			for _, it := range stock {
 				gold := player().GetStats().GetAttribute(stats.Gold)
+				if !betterLight(it) {
+					gold -= reserve // the next light is paid for before anything else
+				}
 				gear := (isUpgrade(it) || isBook(it) && it.MeetsRequirements()) && it.BuyPrice() <= gold/2 // keep potion money
 				if (betterLight(it) || gear || potion(it, "Healing") || caster() && potion(it, "Mana")) && it.BuyPrice() <= gold {
 					common.BuyItem(player(), v, it)
@@ -444,7 +455,15 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 					}
 				}
 				if tactical && caster() && !weak(target) && reachers(enemies, player().MapPosition()) > 0 && canCast() {
-					// kite: a caster steps out of reach first, then casts (monsters that close in lose their swing)
+					// kite: a caster falls back along a path to a corridor farther from them, where they come single
+					// file, and casts from there; with no such corridor near, one step out of reach
+					if step, ok := retreat(s.GetMap(), player().MapPosition(), enemies); ok {
+						mv := common.NewMoveAction(cause, player(), step, true)
+						mv.Step = true
+						act(mv)
+						kites++
+						continue
+					}
 					m, best, bestD := s.GetMap(), player().MapPosition(), 0
 					for _, n := range m.GetFilteredNeighborsForMovement(player().MapPosition(), m.CanPlaceActorHere) {
 						if reachers(enemies, n) > 0 {
@@ -608,6 +627,49 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 			return
 		}
 	}
+}
+
+// retreat is the first step toward the nearest corridor cell (two or fewer open cardinal neighbors) within 10
+// steps that no enemy stands next to and that is farther from the nearest enemy than from; false when there is none.
+func retreat(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], from geometry.Point, enemies []*common.Actor) (geometry.Point, bool) {
+	nearest := func(p geometry.Point) int {
+		d := 99
+		for _, e := range enemies {
+			d = min(d, geometry.DistanceChebyshev(e.MapPosition(), p))
+		}
+		return d
+	}
+	corridor := func(p geometry.Point) bool {
+		return len(m.GetFilteredNeighbors(p, func(n geometry.Point) bool {
+			return (n.X == p.X || n.Y == p.Y) && m.IsTileWalkable(n)
+		})) <= 2
+	}
+	first := map[geometry.Point]geometry.Point{} // each cell reached: the first step on the way there
+	queue := []geometry.Point{from}
+	dist := map[geometry.Point]int{from: 0}
+	for len(queue) > 0 {
+		p := queue[0]
+		queue = queue[1:]
+		if p != from && corridor(p) && reachers(enemies, p) == 0 && nearest(p) > nearest(from) {
+			return first[p], true
+		}
+		if dist[p] >= 10 {
+			continue
+		}
+		for _, n := range m.GetFilteredNeighborsForMovement(p, m.CanPlaceActorHere) {
+			if _, seen := dist[n]; seen || reachers(enemies, n) > 0 && dist[p] == 0 {
+				continue // the first step must leave their reach, or it takes a free blow
+			}
+			dist[n] = dist[p] + 1
+			if p == from {
+				first[n] = n
+			} else {
+				first[n] = first[p]
+			}
+			queue = append(queue, n)
+		}
+	}
+	return geometry.Point{}, false
 }
 
 // reachers counts the enemies standing next to p.
