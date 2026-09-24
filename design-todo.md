@@ -14,9 +14,10 @@ Issues from the game design review against `REVIEW.md`, in priority order. Check
 ## 2. Measurable progression (criterion 2)
 
 - [ ] `playthrough` is hard-wired to D1; let it run H&H so level/depth/char-level can be compared to D1's golden run.
-- [ ] 44 monster types vs D1's 112, clustered at depths 1 and 17-18; depths 2-8 add one or two each.
-- [ ] `skeleton_warrior` stops at `max_dlvl: 2`.
-- [ ] `fallen_shaman` gives 889 exp from depth 1 (a depth 9 goatman's); check early levelling isn't ahead of D1.
+- [ ] Variety: a level's type draw has 4 candidates at every depth (plus the two thieves as 10% loners); D1 has
+      15-24 on depths 2-14. Every cathedral level offers the same rat/skeleton/bat mix. Needs new families.
+- [x] ~~`skeleton_warrior` stops at `max_dlvl: 2`~~: it is the depth 1-2 dagger variant, fine.
+- [x] ~~`fallen_shaman` 889 exp from depth 1~~: misread, it is `dlvl: 9`, quest-placed only; on par with a goatman.
 - [ ] Depths 17-20 plus the second act: fine only if the total stays within D1's 16 ±4.
 
 ## 3. Mid-game quests (criterion 3)
