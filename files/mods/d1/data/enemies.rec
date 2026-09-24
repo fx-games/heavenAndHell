@@ -48,7 +48,7 @@
 #                     attacker), blinks_when_hit (teleports next to the attacker), charges_from_afar,
 #                     lightning_with_melee, erratic_circling, weapon_proof_retreat (weapons miss it while it
 #                     retreats), drains_max_life (its hits take max life for good), stone_immune (runes of stone
-#                     fail), fire_wall_walker (walks into fire walls although immune), golem (what the Golem
+#                     fail), poison_immune (poison does it no harm), fire_wall_walker (walks into fire walls although immune), golem (what the Golem
 #                     spell summons)
 #   sight_sfx         sfx.rec id it says the first time it sees the hero (the Butcher's "fresh meat")
 #   fixed_health      its hit points, whatever health rolls (the roll still happens, for the RNG)

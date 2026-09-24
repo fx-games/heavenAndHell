@@ -7,7 +7,7 @@ Issues from the game design review against `REVIEW.md`, in priority order. Check
 - [x] Every family has a `class` (hero.rec now has D1's sword/mace bonuses) and a resistance: skeletons want
       maces, caves swords and no fire, hell's fiends are fire immune (lightning or steel), human bosses resist
       by armour or faith. Threats as tags: knockback, turns_on_attacker. Fire on the ground honours immunity.
-- [ ] No poison resistance exists; undead should shrug off Black Clouds / Poison.
+- [x] `poison_immune` tag; H&H's undead shrug off Black Clouds and Poison.
 - [ ] Only 5 of 44 monsters have a skill; `ai` stays empty (D1 brains halve stated health, so adopting one is a
       per-monster rebalance). Give each family one behaviour of its own.
 

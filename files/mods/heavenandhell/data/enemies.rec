@@ -44,7 +44,8 @@
 #   aggro_range       how far it notices the hero, for a monster without an ai
 #   tags              "a | b": unique (never rolled at random, it lives in its room), no_corpse, flying,
 #                     hidden (invisible), knockback (its melee pushes the hero back), searches (hunts the hero
-#                     down from afar), opens_doors
+#                     down from afar), opens_doors, turns_on_attacker (a hit sends it at the attacker),
+#                     poison_immune (poison does it no harm)
 #   targeted_skill / untargeted_skill   skills from effects/*.rec it uses; repeatable
 #   equipment         an item it carries, by internal_name; repeatable
 # Words:
@@ -90,6 +91,7 @@ death_string: %s meets the Death of Rats.
 name: a skeleton
 internal_name: skeleton
 class: MC_UNDEAD
+tags: poison_immune
 icon: monster.skeleton
 ascii: u
 color: 200 200 200
@@ -112,6 +114,7 @@ name: a skeleton archer
 tint: 160 200 255
 internal_name: skeleton_archer
 class: MC_UNDEAD
+tags: poison_immune
 icon: monster.skeleton_archer
 ascii: u
 color: 191 169 147
@@ -136,6 +139,7 @@ name: a skeleton warrior
 tint: 255 190 120
 internal_name: skeleton_warrior
 class: MC_UNDEAD
+tags: poison_immune
 icon: monster.skeleton_warrior
 dlvl: 1
 max_dlvl: 2
@@ -160,7 +164,7 @@ name: a skeleton captain
 tint: 255 110 110
 internal_name: skeleton_captain
 class: MC_UNDEAD
-tags: knockback
+tags: knockback | poison_immune
 icon: monster.skeleton_captain
 ascii: u
 color: 189 136 136
@@ -567,6 +571,7 @@ name: a skeleton sorcerer
 tint: 160 200 255
 internal_name: skeleton_sorcerer
 class: MC_UNDEAD
+tags: poison_immune
 magic_res: 1
 icon: monster.skeleton_sorcerer
 dlvl: 7
@@ -812,7 +817,7 @@ stats_experience: 3167
 stats_strength: 14
 stats_dexterity: 9
 stats_intelligence: 10
-tags: unique | no_corpse | knockback
+tags: unique | no_corpse | knockback | poison_immune
 speech_on_sight: We've all sworn the eternal vow!
 speech_on_sight: Your time to die is now!
 speech_on_sight: Still brave, beyond the grave!
@@ -1029,6 +1034,7 @@ name: a skeleton warder
 tint: 255 230 140
 internal_name: skeleton_warder
 class: MC_UNDEAD
+tags: poison_immune
 magic_res: 6
 icon: monster.skeleton_warder
 ascii: u

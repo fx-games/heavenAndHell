@@ -81,6 +81,9 @@ func (g *Factory) NewStash() *BumpObject {
 
 func (g *Factory) NewPoisonedEffect(turnsLeft int, damagePerRound int) *ParametrizedStatusEffect {
 	return NewParametrizedStatusEffect(StatusDamageOverTime, func(a *Actor) {
+		if a.monster != nil && a.monster.Data.Has("poison_immune") {
+			return
+		}
 		g.ActionBroker.Execute(NewChangeResourceAction(AbstractCause("poison"), a, stats.Health, float64(-damagePerRound)))
 	}, turnsLeft)
 }
