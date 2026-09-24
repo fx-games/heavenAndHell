@@ -847,6 +847,7 @@ death_string: %s goes to dog heaven.
 
 name: the true Shekel
 internal_name: evil_shekel
+random_spawn: false
 drops: scythe_of_slicing
 icon: monster.evil_shekel
 dlvl: 21
@@ -867,6 +868,7 @@ speed_attack: 12
 name: the true Kirioth
 tint: 160 200 255
 internal_name: evil_kirioth
+random_spawn: false
 drops: plate_mail_of_the_dark_lord
 icon: monster.evil_kirioth
 dlvl: 20
@@ -885,6 +887,7 @@ death_string: %s dies.
 name: a red knight
 tint: 255 190 120
 internal_name: adventurer_knight
+random_spawn: false
 drops: shield_of_deflection
 icon: monster.adventurer_knight
 dlvl: 17
@@ -905,6 +908,7 @@ speed_attack: 16
 name: a false prophet
 tint: 255 110 110
 internal_name: adventurer_priest
+random_spawn: false
 drops: amulet_of_shadows
 icon: monster.adventurer_priest
 dlvl: 17
@@ -922,6 +926,7 @@ death_string: %s dies.
 
 name: a barbarian
 internal_name: adventurer_barbarian
+random_spawn: false
 drops: mace_of_destruction
 icon: monster.adventurer_barbarian
 dlvl: 17
@@ -942,6 +947,7 @@ speed_attack: 12
 name: an archer in tights
 tint: 160 200 255
 internal_name: adventurer_archer
+random_spawn: false
 drops: black_hands
 icon: monster.adventurer_archer
 dlvl: 17

@@ -205,6 +205,9 @@ sound: sfx/human_hit/player_hit_sfx_1.ogg
 sound: sfx/human_hit/plc_hit_grunt.ogg
 sound: sfx/human_hit/plc_hit_grunt2.ogg
 
+internal_name: sfx.PS_WALK1
+name: Hero - Footstep (none yet: no footstep in the Angband pack)
+
 internal_name: sfx.PS_SWING
 name: Hero - Swing
 sound: ang_sfx/plc_miss_swish.ogg
