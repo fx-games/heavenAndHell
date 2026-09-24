@@ -612,7 +612,7 @@ internal_name: thief_possessed
 class: MC_DEMON
 magic_res: 1
 icon: monster.thief_possessed
-dlvl: 1
+dlvl: 6
 max_dlvl: 10
 monster_level: 11
 wander_chance: 0.1
@@ -790,7 +790,7 @@ ai: AI_SNEAK
 ai_level: 0
 speed_recovery: 5
 icon: monster.thief_goblin
-dlvl: 1
+dlvl: 12
 max_dlvl: 16
 monster_level: 21
 wander_chance: 0.1

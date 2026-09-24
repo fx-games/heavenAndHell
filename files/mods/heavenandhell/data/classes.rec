@@ -92,7 +92,6 @@ hit_frames: 6
 flags: critical_strike
 key: warrior
 heal_boost: 2
-skill: repair
 voice: WARR
 female_voice: ROGUE
 death_sound: PS_DEAD
@@ -137,7 +136,6 @@ hit_frames: 7
 flags: trap_sense str_dex_damage full_missile_bonus
 key: archer
 heal_boost: 1
-skill: disarm
 voice: WARR
 female_voice: ROGUE
 text_prefix: R
@@ -182,7 +180,6 @@ hit_frames: 8
 flags: shield_slows_bare_hands
 key: mage
 spell_to_hit: 20
-skill: recharge
 voice: MAGE
 female_voice: ROGUE
 text_prefix: M

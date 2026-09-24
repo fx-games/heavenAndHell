@@ -14,7 +14,12 @@ Issues from the game design review against `REVIEW.md`, in priority order. Check
 
 ## 2. Measurable progression (criterion 2)
 
-- [ ] `playthrough` is hard-wired to D1; let it run H&H so level/depth/char-level can be compared to D1's golden run.
+- [x] `playthrough` is hard-wired to D1; let it run H&H so level/depth/char-level can be compared to D1's golden run.
+  → `go run ./src autoplay <mod> [seed] [runs]`: a bot plays class 0 down the dungeon, one row per depth. First
+  read (seeds 1–2): D1 clears ~135 monsters on depth 1 in ~900 turns and reaches clvl 6 by depth 3; H&H ~60–120 in
+  2–4k turns, clvl 3–4 by depth 3 (slower XP, more walking). The bot keeps its starting gear, so both die on 3–4.
+  Found on the way: the possessed thief (mlvl 11) and the thief (mlvl 21) spawned from depth 1; now 6 and 12.
+- [ ] Autoplay bot: equip found gear, buy potions in town, cast spells, so its depth curve means more than relative pacing.
 - [x] Variety: the type draw had 4 candidates at every depth (D1: 15-24). Now 6-15, from 42 monsters in 11
       families borrowed from D1 (sprite, brain and numbers; H&H names), see the end of H&H's enemies.rec:
       | depth | family (D1 source) | role |
@@ -58,7 +63,7 @@ Issues from the game design review against `REVIEW.md`, in priority order. Check
 
 - [x] Starting skills: Warrior starts with `crush`, Mage with `black_clouds` (the old ones stay learnable).
 - [ ] Archer uses `voice: WARR`; ids still `rogue`/`sorcerer`.
-- [ ] Class skills repair/disarm/recharge are D1's leftovers, not H&H's.
+- [x] Class skills repair/disarm/recharge are D1's leftovers, not H&H's. → removed; H&H classes have no class skill.
 
 ## 6. Focus (criterion 5)
 

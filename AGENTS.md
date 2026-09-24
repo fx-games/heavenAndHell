@@ -196,6 +196,7 @@ static on speech). `go:embed mods` embeds whatever is on disk: build a release f
 - ASCII mode: `go run ./src ascii` (needs a real terminal, F1 lists the keys)
 - Rules and level generation tests: `go test ./src/rules ./src/dungen`
 - Headless smoke test: `go run ./src playthrough` (must print `PLAYTHROUGH OK`)
+- Pacing bot: `go run ./src autoplay <mod> [seed] [runs]` plays class 0 down the dungeon and prints, per depth, character level on arrival, turns, kills, potions and trips home (`AUTOPLAY_DEBUG=1` traces every turn). Compare `d1` against `heavenandhell`
 - Its seed-1 output is a golden file: `TestPlaythroughSeed1` diffs against `src/app/testdata/playthrough_seed1.txt`
   (skipped with `-short`). A deliberate gameplay change regenerates it: `go run ./src playthrough 1 > src/app/testdata/playthrough_seed1.txt`
 - Dead code: `go run honnef.co/go/tools/cmd/staticcheck@latest -checks U1000 ./...` (also finds dead methods of

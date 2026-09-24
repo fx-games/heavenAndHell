@@ -36,6 +36,8 @@ func Main() {
 			runGameWithConsole(createGameAndUIContext())
 		case "playthrough":
 			playthrough()
+		case "autoplay":
+			autoplay()
 		}
 	} else {
 		runGameWithEbiten(createGameAndUIContext())
