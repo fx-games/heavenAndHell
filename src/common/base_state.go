@@ -315,6 +315,9 @@ func (s *State) PlayerLightRadius() int {
 
 // SetLighting picks the mod's lighting rules (Lighting) for this game.
 func (s *State) SetLighting(rules LightRules) { s.lighting = rules }
+
+// CarriedLighting: the mod lights the dungeon only where the hero's light and the level's lights reach.
+func (s *State) CarriedLighting() bool { return s.lighting.Model == "carried" }
 func (s *State) IsDaylight() bool {
 	return s.IsPlayerInTown() && !s.GetFlags().IsSet("town_changed_to_night")
 }

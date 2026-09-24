@@ -26,6 +26,9 @@ Issues from the game design review against `REVIEW.md`, in priority order. Check
   monsters stood on cells the hero had passed and never fought. The torch (2500 turns) burns out on depth 2–3.
   With shops and gear H&H catches up by depth 5–6. Options: torch radius 2, monsters that hear the hero within a
   few cells, depth-1 experience at D1's floor, longer-burning torches.
+  → Monsters now see a carried light in their line of sight within 10 cells and hear the hero within 4: depth 2
+  went from 39 of 143 monsters fought to 143, seed 2's bot reached depth 10 at clvl 16. Still open: rat/bat
+  experience, torch life.
 - [x] Variety: the type draw had 4 candidates at every depth (D1: 15-24). Now 6-15, from 42 monsters in 11
       families borrowed from D1 (sprite, brain and numbers; H&H names), see the end of H&H's enemies.rec:
       | depth | family (D1 source) | role |

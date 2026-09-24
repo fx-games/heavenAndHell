@@ -73,7 +73,7 @@ func (g *GameInstance) monsterAction(a *common.Actor) (int, func()) {
 	switch {
 	case b.target != player: // ProcessMonsters: a monster fighting the golem always knows where it is
 		mon.Last = b.enemy
-	case player.CanSee(b.pos):
+	case b.noticesHero():
 		if mon.Squelch == 0 {
 			g.factory.MonsterGreeting(a)
 		}
@@ -101,6 +101,35 @@ func (g *GameInstance) monsterAction(a *common.Actor) (int, func()) {
 	}
 	return b.commit(act)
 }
+
+// noticesHero is D1's BFLAG_VISIBLE test: a monster wakes when the hero sees its cell. Under D1's aura light the hero
+// sees as far as any monster does. Under carried light the hero sees only a torch's reach, so a monster also sees a
+// hero who carries light (or stands in a lit spot) in its line of sight within D1's light radius, and hears one
+// walking within hearingRange, through walls too.
+func (b *brain) noticesHero() bool {
+	s, player := b.g.state, b.g.state.GetPlayer()
+	if player.CanSee(b.pos) {
+		return true
+	}
+	if !s.CarriedLighting() {
+		return false
+	}
+	hero := player.MapPosition()
+	d := geometry.DistanceChebyshev(b.pos, hero)
+	if d <= hearingRange {
+		return true
+	}
+	if d > sightRange || s.PlayerLightRadius() == 0 && !s.PlayerStandsInLitArea() {
+		return false
+	}
+	m := s.GetMap()
+	los := geometry.LineOfSight(b.pos, hero, func(p geometry.Point) bool { return p == b.pos || p == hero || m.IsTransparent(p) })
+	return los[len(los)-1] == hero
+}
+
+// sightRange is how far a monster sees a light in the dark (D1's hero light radius); hearingRange how far it hears
+// the hero walk.
+const sightRange, hearingRange = 10, 4
 
 // chooseEnemy ports M_Enemy for a monster that isn't a golem: the player, or the golem when it stands right next to
 // the monster (any golem, for the ranged AIs). The one in the monster's own room wins, then the closer one.
@@ -609,7 +638,7 @@ func (b *brain) pathStep() (act, bool) {
 
 func (b *brain) zombie() (act, bool) {
 	mon := b.mon
-	if !b.g.state.GetPlayer().CanSee(b.pos) {
+	if !b.noticesHero() {
 		return noAct, false
 	}
 	v := b.rnd(100)
