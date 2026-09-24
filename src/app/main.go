@@ -67,6 +67,9 @@ func createGameAndUIContext() (*game.GameInstance, common.UIContext) {
 	if modOverride != "" {
 		userConfig.Mod = modOverride
 	}
+	if !files.ModAvailable(userConfig.Mod) && modOverride == "" {
+		userConfig.Mod = common.DefaultMod // config names a mod this build lacks (d1 left out): H&H it is
+	}
 	files.SelectMod(userConfig.Mod) // before anything reads content: assets/ resolves to the mod first from here on
 	mustHaveMod(userConfig.Mod)
 	// and before any Icon* is read: the numbers come from the mod's icon rec files

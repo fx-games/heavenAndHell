@@ -22,7 +22,6 @@ import (
 	"rpg/src/util"
 	"strings"
 
-	"github.com/flopp/go-findfont"
 )
 
 type GameInstance struct {
@@ -610,17 +609,6 @@ func (g *GameInstance) showDebugMenu() {
 			Action: func() {
 				visibleMap := g.uiController.GetVisibleMap()
 				g.PlayerMessage(fmt.Sprintf("Visible map: (%d, %d) - (%d, %d)", visibleMap.Min.X, visibleMap.Min.Y, visibleMap.Max.X, visibleMap.Max.Y))
-			},
-		},
-		{
-			MainText: "Test Font Loading",
-			Action: func() {
-				foundFonts := findfont.List()
-				for _, fontFile := range foundFonts {
-					if strings.HasSuffix(fontFile, ".ttf") {
-						g.PlayerMessage(fontFile)
-					}
-				}
 			},
 		},
 		{

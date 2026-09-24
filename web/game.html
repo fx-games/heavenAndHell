@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Of Heaven and Hell</title></head>
+<body style="margin:0;background:#000">
+<script src="fs.js"></script>
+<script src="wasm_exec.js"></script>
+<script>
+fsReady.then(async () => {
+	const go = new Go();
+	const { instance } = await WebAssembly.instantiateStreaming(fetch("hh.wasm"), go.importObject);
+	parent.hhLoaded?.();
+	go.run(instance);
+});
+</script>
+</body></html>
