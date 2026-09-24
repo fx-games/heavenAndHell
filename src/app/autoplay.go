@@ -498,6 +498,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 		clvl, e0, t0, k0, p0, h0, q0, c0, i0, b0, o0, x0, y0 := player().Hero().Level, player().Hero().Exp, turns, kills, pots, home, equips, casts, itemCasts, books, opened, kites, shots
 		waited := map[*common.Actor]int{}   // turns waited for a monster to step in
 		kited := map[*common.Actor]int{}    // steps backed away from a monster: at most 8, then it's fought
+		chased := map[*common.Actor]int{}   // steps taken toward a monster
 		fled := 0                           // danger bailouts on this level
 		skip := map[*common.Item]bool{}     // items the bot gave up on
 		skipObj := map[common.Object]bool{} // containers opened or out of reach
@@ -508,7 +509,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 		}
 		budget := 6000
 		for ; budget > 0 && player().IsAlive(); budget-- {
-			enemies := s.GetVisibility().GetVisibleEnemies()
+			enemies := slices.DeleteFunc(s.GetVisibility().GetVisibleEnemies(), func(e *common.Actor) bool { return chased[e] > 60 })
 			if tactical && len(enemies) > 0 && danger(enemies, player().MapPosition()) >= hp().Value() && !drink("Healing") {
 				// the Borg's rule: when the next turn could kill, leave; back by the stairs, not into the same fight
 				if fled++; fled > 10 { // this level beats the hero: the run ends here, not with a dive past it
@@ -620,8 +621,8 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 					act(common.NewEndPlayerTurnAction(cause, 0))
 					continue
 				}
-				if stepToward(target.MapPosition()) {
-					continue
+				if chased[target]++; stepToward(target.MapPosition()) {
+					continue // 60 steps after one monster without reaching it (a shooter across a gap): it's left be
 				}
 				act(common.NewEndPlayerTurnAction(cause, 0)) // an archer out of reach: wait for it
 				continue
