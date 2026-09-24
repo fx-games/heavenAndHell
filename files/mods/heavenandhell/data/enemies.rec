@@ -53,6 +53,10 @@
 #   speech_on_sight / speech_on_hurt   lines it may say on first sight / when hurt; repeatable
 #   death_string      a death message format (%s is its name); repeatable
 #
+# Every family fights under one D1 brain (ai:), whose health is halved as D1's single player does, so their
+# health ranges are doubled. The few driven by their skills instead (rat, skeleton sorcerer and warder, fallen
+# shaman, possessed thief, the false prophet) keep no ai.
+#
 # Heaven&Hell's monsters in the unified enemies.rec schema every mod uses (see defs.Monster),
 # ported from the game's own enemies/enemies.rec and enemies/unique_enemies.rec. The uniques are
 # the records tagged "unique"; that tag is what told them apart on the old branch too.
@@ -91,6 +95,9 @@ death_string: %s meets the Death of Rats.
 
 name: a skeleton
 internal_name: skeleton
+ai: AI_SKELSD
+ai_level: 0
+speed_recovery: 5
 class: MC_UNDEAD
 tags: poison_immune | raisable | raised_by_default
 icon: monster.skeleton
@@ -101,7 +108,7 @@ max_dlvl: 8
 spawn_cost: 650
 damage: 2-5
 hit: 13
-health: 2-2
+health: 4-4
 stats_armor_class: 9
 stats_experience: 55
 stats_dexterity: 6
@@ -114,6 +121,9 @@ speed_attack: 12
 name: a skeleton archer
 tint: 160 200 255
 internal_name: skeleton_archer
+ai: AI_SKELBOW
+ai_level: 0
+speed_recovery: 5
 class: MC_UNDEAD
 tags: poison_immune | raisable
 icon: monster.skeleton_archer
@@ -124,7 +134,7 @@ max_dlvl: 8
 spawn_cost: 700
 damage: 2-7
 hit: 29
-health: 7-13
+health: 14-26
 stats_armor_class: 13
 stats_experience: 172
 stats_strength: 8
@@ -139,6 +149,9 @@ speed_attack: 12
 name: a skeleton warrior
 tint: 255 190 120
 internal_name: skeleton_warrior
+ai: AI_SKELSD
+ai_level: 0
+speed_recovery: 5
 class: MC_UNDEAD
 tags: poison_immune | raisable
 icon: monster.skeleton_warrior
@@ -149,7 +162,7 @@ ascii: u
 color: 247 246 245
 damage: 2-5
 hit: 13
-health: 2-2
+health: 4-4
 stats_armor_class: 9
 stats_experience: 55
 stats_strength: 10
@@ -164,6 +177,9 @@ speed_attack: 12
 name: a skeleton captain
 tint: 255 110 110
 internal_name: skeleton_captain
+ai: AI_SKELSD
+ai_level: 1
+speed_recovery: 5
 class: MC_UNDEAD
 tags: knockback | poison_immune | raisable
 icon: monster.skeleton_captain
@@ -174,7 +190,7 @@ max_dlvl: 8
 spawn_cost: 750
 damage: 6-16
 hit: 57
-health: 26-43
+health: 52-86
 stats_armor_class: 34
 stats_experience: 668
 stats_strength: 12
@@ -189,6 +205,9 @@ speed_attack: 12
 
 name: a bat
 internal_name: bat
+ai: AI_BAT
+ai_level: 0
+speed_recovery: 5
 class: MC_ANIMAL
 icon: monster.bat
 ascii: b
@@ -198,7 +217,7 @@ max_dlvl: 4
 spawn_cost: 650
 damage: 1-3
 hit: 5
-health: 1-2
+health: 2-4
 stats_armor_class: 5
 stats_experience: 30
 stats_strength: 9
@@ -214,6 +233,9 @@ speed_attack: 12
 name: a cave bear
 tint: 160 200 255
 internal_name: caveling_bear
+ai: AI_RHINO
+ai_level: 2
+speed_recovery: 5
 class: MC_ANIMAL
 magic_res: 2
 tags: turns_on_attacker | knockback
@@ -223,7 +245,7 @@ max_dlvl: 12
 spawn_cost: 850
 damage: 8-26
 hit: 89
-health: 51-86
+health: 102-172
 stats_armor_class: 56
 stats_experience: 964
 stats_strength: 14
@@ -235,6 +257,9 @@ death_string: %s bites the dust.
 name: a caveling
 tint: 255 190 120
 internal_name: caveling
+ai: AI_FALLEN
+ai_level: 2
+speed_recovery: 5
 class: MC_ANIMAL
 magic_res: 2
 icon: monster.caveling
@@ -243,7 +268,7 @@ max_dlvl: 10
 spawn_cost: 850
 damage: 7-20
 hit: 77
-health: 37-61
+health: 74-122
 stats_armor_class: 49
 stats_experience: 740
 stats_strength: 9
@@ -255,6 +280,9 @@ death_string: %s bites the dust.
 name: an imp
 tint: 255 110 110
 internal_name: fallen
+ai: AI_FALLEN
+ai_level: 0
+speed_recovery: 5
 class: MC_DEMON
 icon: monster.fallen
 ascii: i
@@ -264,7 +292,7 @@ random_spawn: false
 spawn_cost: 650
 damage: 1-3
 hit: 5
-health: 1-2
+health: 2-4
 stats_armor_class: 5
 stats_experience: 45
 stats_strength: 9
@@ -277,6 +305,9 @@ speed_attack: 16
 
 name: a fiend
 internal_name: fiend
+ai: AI_SKELSD
+ai_level: 3
+speed_recovery: 5
 class: MC_DEMON
 magic_res: 16
 icon: monster.fiend
@@ -287,7 +318,7 @@ max_dlvl: 14
 spawn_cost: 950
 damage: 10-29
 hit: 109
-health: 55-91
+health: 110-182
 stats_armor_class: 69
 stats_experience: 1165
 stats_strength: 12
@@ -299,6 +330,9 @@ death_string: %s violently explodes.
 name: a horned fiend
 tint: 160 200 255
 internal_name: fiend_horned
+ai: AI_RHINO
+ai_level: 3
+speed_recovery: 5
 class: MC_DEMON
 magic_res: 16
 icon: monster.fiend_horned
@@ -309,7 +343,7 @@ max_dlvl: 14
 spawn_cost: 950
 damage: 12-36
 hit: 121
-health: 77-128
+health: 154-256
 stats_armor_class: 80
 stats_experience: 1514
 stats_strength: 12
@@ -321,6 +355,9 @@ death_string: %s violently explodes.
 name: a horned fiend with knife
 tint: 255 190 120
 internal_name: fiend_armed
+ai: AI_SKELSD
+ai_level: 3
+speed_recovery: 5
 class: MC_DEMON
 magic_res: 16
 icon: monster.fiend_armed
@@ -331,7 +368,7 @@ max_dlvl: 14
 spawn_cost: 950
 damage: 10-29
 hit: 109
-health: 55-91
+health: 110-182
 stats_armor_class: 69
 stats_experience: 1165
 stats_strength: 12
@@ -344,6 +381,9 @@ death_string: %s violently explodes.
 name: a horned fiend with whip
 tint: 255 110 110
 internal_name: fiend_whip
+ai: AI_GOATMC
+ai_level: 3
+speed_recovery: 5
 class: MC_DEMON
 magic_res: 16
 tags: turns_on_attacker
@@ -355,7 +395,7 @@ max_dlvl: 16
 spawn_cost: 1000
 damage: 11-33
 hit: 125
-health: 64-106
+health: 128-212
 stats_armor_class: 79
 stats_experience: 1477
 stats_strength: 12
@@ -367,6 +407,9 @@ death_string: %s violently explodes.
 
 name: a horned fiend with glaive
 internal_name: fiend_glaive
+ai: AI_MEGA
+ai_level: 3
+speed_recovery: 5
 class: MC_DEMON
 magic_res: 20
 icon: monster.fiend_glaive
@@ -377,7 +420,7 @@ max_dlvl: 16
 spawn_cost: 1000
 damage: 13-40
 hit: 138
-health: 90-148
+health: 180-296
 stats_armor_class: 91
 stats_experience: 1477
 stats_strength: 12
@@ -390,6 +433,9 @@ death_string: %s violently explodes.
 name: a big horned fiend
 tint: 160 200 255
 internal_name: fiend_big
+ai: AI_RHINO
+ai_level: 3
+speed_recovery: 5
 class: MC_DEMON
 magic_res: 16
 tags: knockback
@@ -401,7 +447,7 @@ max_dlvl: 16
 spawn_cost: 1000
 damage: 13-40
 hit: 138
-health: 90-148
+health: 180-296
 stats_armor_class: 91
 stats_experience: 2069
 stats_strength: 12
@@ -413,6 +459,9 @@ death_string: %s violently explodes.
 name: a fallen warrior
 tint: 255 190 120
 internal_name: fallen_warrior
+ai: AI_FALLEN
+ai_level: 0
+speed_recovery: 5
 class: MC_DEMON
 icon: monster.fallen_warrior
 ascii: i
@@ -422,7 +471,7 @@ random_spawn: false
 spawn_cost: 700
 damage: 3-9
 hit: 29
-health: 10-16
+health: 20-32
 stats_armor_class: 19
 stats_experience: 172
 stats_strength: 9
@@ -437,6 +486,9 @@ speed_attack: 16
 name: a fallen archer
 tint: 255 110 110
 internal_name: fallen_archer
+ai: AI_GOATBOW
+ai_level: 1
+speed_recovery: 5
 class: MC_DEMON
 icon: monster.fallen_archer
 ascii: i
@@ -446,7 +498,7 @@ random_spawn: false
 spawn_cost: 800
 damage: 5-13
 hit: 61
-health: 22-37
+health: 44-74
 stats_armor_class: 27
 stats_experience: 546
 stats_strength: 9
@@ -485,6 +537,9 @@ speed_attack: 16
 name: a caveling with weapon
 tint: 160 200 255
 internal_name: caveling_armed
+ai: AI_FALLEN
+ai_level: 2
+speed_recovery: 5
 class: MC_ANIMAL
 magic_res: 2
 icon: monster.caveling_armed
@@ -493,7 +548,7 @@ max_dlvl: 10
 spawn_cost: 850
 damage: 7-20
 hit: 77
-health: 37-61
+health: 74-122
 stats_armor_class: 49
 stats_experience: 740
 stats_strength: 9
@@ -506,6 +561,9 @@ death_string: %s bites the dust.
 name: a caveling with axes
 tint: 255 190 120
 internal_name: caveling_axe
+ai: AI_FALLEN
+ai_level: 2
+speed_recovery: 5
 class: MC_ANIMAL
 magic_res: 2
 icon: monster.caveling_axe
@@ -514,7 +572,7 @@ max_dlvl: 12
 spawn_cost: 900
 damage: 8-25
 hit: 93
-health: 46-76
+health: 92-152
 stats_armor_class: 59
 stats_experience: 822
 stats_strength: 9
@@ -527,6 +585,9 @@ death_string: %s bites the dust.
 name: a caveling with a big axe
 tint: 255 110 110
 internal_name: caveling_big_axe
+ai: AI_FALLEN
+ai_level: 2
+speed_recovery: 5
 class: MC_ANIMAL
 magic_res: 2
 tags: knockback
@@ -536,7 +597,7 @@ max_dlvl: 12
 spawn_cost: 900
 damage: 11-31
 hit: 105
-health: 63-107
+health: 126-214
 stats_armor_class: 67
 stats_experience: 1071
 stats_strength: 9
@@ -595,6 +656,9 @@ speed_attack: 12
 name: a kestrel
 tint: 255 190 120
 internal_name: rogue_kestrel
+ai: AI_BAT
+ai_level: 3
+speed_recovery: 5
 class: MC_ANIMAL
 random_spawn: false
 icon: monster.rogue_kestrel
@@ -603,7 +667,7 @@ max_dlvl: 17
 spawn_cost: 1050
 damage: 8-25
 hit: 128
-health: 44-72
+health: 88-144
 stats_armor_class: 54
 stats_experience: 1110
 stats_strength: 10
@@ -614,6 +678,9 @@ death_string: %s dies.
 name: a bat
 tint: 255 110 110
 internal_name: rogue_bat
+ai: AI_BAT
+ai_level: 3
+speed_recovery: 5
 class: MC_ANIMAL
 random_spawn: false
 icon: monster.rogue_bat
@@ -622,7 +689,7 @@ max_dlvl: 17
 spawn_cost: 1050
 damage: 8-25
 hit: 128
-health: 44-72
+health: 88-144
 stats_armor_class: 54
 stats_experience: 954
 stats_strength: 10
@@ -632,6 +699,9 @@ death_string: %s dies.
 
 name: an emu
 internal_name: rogue_emu
+ai: AI_RHINO
+ai_level: 3
+speed_recovery: 5
 class: MC_ANIMAL
 random_spawn: false
 icon: monster.rogue_emu
@@ -640,7 +710,7 @@ max_dlvl: 17
 spawn_cost: 1050
 damage: 8-25
 hit: 128
-health: 44-72
+health: 88-144
 stats_armor_class: 54
 stats_experience: 1272
 stats_strength: 10
@@ -651,6 +721,9 @@ death_string: %s dies.
 name: a jackal
 tint: 160 200 255
 internal_name: rogue_jackal
+ai: AI_FALLEN
+ai_level: 3
+speed_recovery: 5
 class: MC_ANIMAL
 random_spawn: false
 icon: monster.rogue_jackal
@@ -659,7 +732,7 @@ max_dlvl: 18
 spawn_cost: 1100
 damage: 13-38
 hit: 149
-health: 78-128
+health: 156-256
 stats_armor_class: 94
 stats_experience: 1780
 stats_strength: 10
@@ -670,6 +743,9 @@ death_string: %s dies.
 name: an orc
 tint: 255 190 120
 internal_name: rogue_orc
+ai: AI_SKELSD
+ai_level: 3
+speed_recovery: 5
 random_spawn: false
 icon: monster.rogue_orc
 dlvl: 18
@@ -677,7 +753,7 @@ max_dlvl: 18
 spawn_cost: 1100
 damage: 16-47
 hit: 160
-health: 108-180
+health: 216-360
 stats_armor_class: 108
 stats_experience: 2133
 stats_strength: 10
@@ -688,6 +764,9 @@ death_string: %s dies.
 name: a snake
 tint: 255 110 110
 internal_name: rogue_snake
+ai: AI_SNAKE
+ai_level: 3
+speed_recovery: 5
 class: MC_ANIMAL
 magic_res: 4
 random_spawn: false
@@ -697,7 +776,7 @@ max_dlvl: 18
 spawn_cost: 1100
 damage: 13-38
 hit: 149
-health: 78-128
+health: 156-256
 stats_armor_class: 94
 stats_experience: 1780
 stats_strength: 10
@@ -707,6 +786,9 @@ death_string: %s dies.
 
 name: a thief
 internal_name: thief_goblin
+ai: AI_SNEAK
+ai_level: 0
+speed_recovery: 5
 icon: monster.thief_goblin
 dlvl: 1
 max_dlvl: 16
@@ -714,7 +796,7 @@ monster_level: 21
 wander_chance: 0.1
 damage: 15-44
 hit: 173
-health: 91-151
+health: 182-302
 stats_armor_class: 109
 stats_experience: 2370
 stats_strength: 10
@@ -725,6 +807,9 @@ death_string: %s dies.
 name: a goatman
 tint: 160 200 255
 internal_name: goatman
+ai: AI_GOATMC
+ai_level: 2
+speed_recovery: 5
 class: MC_ANIMAL
 icon: monster.goatman
 dlvl: 9
@@ -732,7 +817,7 @@ max_dlvl: 10
 spawn_cost: 850
 damage: 8-26
 hit: 89
-health: 51-86
+health: 102-172
 stats_armor_class: 56
 stats_experience: 889
 stats_strength: 10
@@ -743,6 +828,9 @@ death_string: %s dies.
 name: a goatman archer
 tint: 255 190 120
 internal_name: goatman_archer
+ai: AI_GOATBOW
+ai_level: 2
+speed_recovery: 5
 class: MC_ANIMAL
 icon: monster.goatman_archer
 dlvl: 11
@@ -750,7 +838,7 @@ max_dlvl: 12
 spawn_cost: 900
 damage: 6-19
 hit: 93
-health: 36-61
+health: 72-122
 stats_armor_class: 41
 stats_experience: 822
 stats_strength: 10

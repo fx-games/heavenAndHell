@@ -513,7 +513,7 @@ func TestHeavenAndHellCombat(t *testing.T) {
 	broker, cause := g.GetActionBroker(), common.NewActorCause("test", player)
 	exp, full := player.Hero().Exp, player.GetStats().GetResource(stats.Health).Value()
 	broker.Execute(common.NewUpdateFoVAction(cause, player))
-	for turn := 0; turn < 30; turn++ { // let it have its go first
+	for turn := 0; turn < 90; turn++ { // let it have its go first
 		broker.Execute(common.NewEndPlayerTurnAction(cause, 10))
 	}
 	hurt := player.GetStats().GetResource(stats.Health).Value() < full

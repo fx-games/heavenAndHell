@@ -8,8 +8,9 @@ Issues from the game design review against `REVIEW.md`, in priority order. Check
       maces, caves swords and no fire, hell's fiends are fire immune (lightning or steel), human bosses resist
       by armour or faith. Threats as tags: knockback, turns_on_attacker. Fire on the ground honours immunity.
 - [x] `poison_immune` tag; H&H's undead shrug off Black Clouds and Poison.
-- [ ] Only 5 of 44 monsters have a skill; `ai` stays empty (D1 brains halve stated health, so adopting one is a
-      per-monster rebalance). Give each family one behaviour of its own.
+- [x] Every H&H family fights under a D1 brain now (health doubled for D1's halving): skeletons as D1's
+      skeletons, cavelings, fallen and jackals as packs that flee when one dies, bears, emus and horned
+      fiends charge, bats hit and run, goatmen circle, the thief stalks unseen. Skill-driven ones keep no ai.
 
 ## 2. Measurable progression (criterion 2)
 
