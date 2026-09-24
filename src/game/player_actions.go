@@ -28,7 +28,6 @@ type Actions struct {
 	logError        func(message string)
 	autoExplore     bool
 	playerPath      []geometry.Point
-	isResting       bool
 	queueAfterTurn  func(call func())
 	lastSpellTarget *common.Actor // recast prefers it while it stays a valid target
 }
@@ -143,6 +142,10 @@ func (a *Actions) UnequipItem(item *common.Item) {
 func (a *Actions) ActivateItemActionForPlayer(itemWithAction *common.Item) {
 	msg := a.logError
 	user := a.player // an AI actor needs to provide a target pos for targeted common.. handle this elsewhere..
+	if itemWithAction.IsFood() && user.CanUseItems() {
+		a.eat(itemWithAction)
+		return
+	}
 	if !user.CanUseItems() || !itemWithAction.HasAction() {
 		return
 	}
@@ -213,6 +216,9 @@ func (a *Actions) playerThrow(thrownItem *common.Item) func(player *common.Actor
 func (a *Actions) GetContextActionsForItem(item *common.Item) []util.MenuItem {
 	// TODO:-..
 	var menuForActions []util.MenuItem
+	if item.IsFood() {
+		menuForActions = append(menuForActions, util.MenuItem{MainText: "Eat", Action: func() { a.ActivateItemActionForPlayer(item) }})
+	}
 	if item.HasUntargetedAction() {
 		menuForActions = append(menuForActions, util.MenuItem{
 			MainText: item.GetUntargetedAction().Name(),
@@ -890,44 +896,33 @@ func (a *Actions) RestUntilHealed() {
 		a.logError("You can't rest with enemies nearby")
 		return
 	}
-	/*
-		hpRegenRate := state.GetPlayer().GetStats().GetAttributeAsFloat(stats.HealthRegeneration)
-		if hpRegenRate <= 0 {
-			a.isResting = false
-			a.logError("You won't heal through resting")
-			return
-		}
-	*/
 	healthResource := state.GetPlayer().GetStats().GetResource(stats.Health)
 	if healthResource.IsAtMax() {
-		a.isResting = false
-		if a.isResting {
-			a.logError("Your spirits have been restored")
-		} else {
-			a.logError("You are already at full health")
-		}
+		a.logError("You are already at full health")
 		return
 	}
 
-	playerInventory := state.GetPlayer().GetInventory()
-	if !playerInventory.HasFood() {
-		a.isResting = false
-		a.logError("You have no food to eat")
+	player := state.GetPlayer()
+	rests := -player.GetStatusEffects().AllEntries()[string(common.StatusSatiatedRests)]
+	if !player.HasStatusEffect(common.StatusSatiated) || rests <= 0 {
+		a.logError("You are too hungry to rest: eat something first")
 		return
 	}
-
-	playerInventory.UseFood()
-
-	a.isResting = true
-	userInterface := a.ui()
-	userInterface.FadeToBlack()
-	a.queueAfterTurn(func() {
-		a.isResting = false
-		userInterface.FadeFromBlack()
-		a.actionBroker.QueueForExecution(common.NewChangeResourceAction(common.AbstractCause("Resting"), state.GetPlayer(), stats.Health, float64(healthResource.GetMax())))
-	})
-	a.actionBroker.QueueForExecution(common.NewEndPlayerTurnAction(common.AbstractCause("Resting"), 10))
+	player.AddStatusEffect(common.StatusSatiatedRests, -(rests - 1))
+	a.actionBroker.Execute(common.NewChangeResourceAction(common.AbstractCause("Resting"), player, stats.Health, float64(healthResource.GetMax())/10))
+	a.actionBroker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("Resting"), 10))
 }
+
+// eat consumes food: Satiated for 20 turns, during which each turn rested heals 10% of max health, 5 times at most.
+func (a *Actions) eat(food *common.Item) {
+	a.actionBroker.Emit(common.ItemUsed{Item: food, User: a.player})
+	a.player.GetInventory().Remove(food)
+	a.player.AddStatusEffect(common.StatusSatiated, 20)
+	a.player.AddStatusEffect(common.StatusSatiatedRests, -5)
+	a.logError("You feel satiated.")
+	a.actionBroker.Execute(common.NewEndPlayerTurnAction(common.AbstractCause("Eat"), 10))
+}
+
 func (a *Actions) SetQueueAfterTurn(afterTurn func(call func())) {
 	a.queueAfterTurn = afterTurn
 }

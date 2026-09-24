@@ -41,6 +41,7 @@ const (
 	SplElemental   = 29
 	SplChargedBolt = 30
 	SplHolyBolt    = 31
+	SplResurrect   = 32 // multiplayer only: casting it does nothing
 	SplTelekinesis = 33
 	SplBloodStar   = 35
 	SplBoneSpirit  = 36
@@ -103,7 +104,7 @@ var spellIDByName = map[string]int{
 	"SPL_ELEMENT":     SplElemental,
 	"SPL_CBOLT":       SplChargedBolt,
 	"SPL_HBOLT":       SplHolyBolt,
-	"SPL_RESURRECT":   SplTelekinesis,
+	"SPL_RESURRECT":   SplResurrect,
 	"SPL_BLODSTAR":    SplBloodStar,
 	"SPL_BONESPIRIT":  SplBoneSpirit,
 	"SPL_MANA":        SplMana,

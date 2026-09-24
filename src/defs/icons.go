@@ -14,7 +14,7 @@ import (
 // the sprite sheet named by common.Configuration.SpriteSheet), one ID convention throughout: "kind.snake_case_name", e.g. "class.warrior_male",
 // "monster.nzombie", "unique.gharbad_the_weak", "npc.wirt", "corpse.default" (actors.rec); "item.falchion",
 // "item.falchion.magic"/".unique" (per weapon/armor family), "item.heal" (potions/scrolls, keyed by IMISC_*) etc.
-// (items.rec); "tile.grass", "prop.chest1"(+".used"), "decal.blood1", "effect.fire_small" (tiles.rec);
+// (items.rec); "tile.grass", "prop.chest"(+".used"), "decal.blood1", "effect.fire_small" (tiles.rec);
 // "spell.firebolt" (skills.rec). IDs built from D1's own enum names (MT_*, OBJ_*, SPL_*, ITYPE_*, IMISC_*) go
 // through IconID, which strips the enum prefix and lowercases the rest. Remap them with scripts/remap_actors.sh,
 // scripts/remap_items.sh, scripts/remap_tiles.sh, scripts/remap_skills.sh — each rec file is read fresh on every game start, no
@@ -118,7 +118,7 @@ func IconID(kind, raw string) string {
 }
 
 // PropIconID is the icon id of a dungeon object: IconID("prop", obj). Objects the top-down view can't tell apart
-// share an icon through tiles.rec's same_as.
+// name one shared icon in objects.rec instead (rules.Data.PropIcon).
 func PropIconID(obj string) string { return IconID("prop", obj) }
 
 // IconOK looks up a name not exposed as a Go constant (D1's dynamically keyed "monster.<id>", "npc.<name>",

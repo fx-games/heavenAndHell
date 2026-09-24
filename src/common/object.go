@@ -63,8 +63,8 @@ func (o *Prop) broken() bool {
 func isCrux(kind int) bool { return kind >= rules.ObjCRUX1 && kind <= rules.ObjCRUX3 }
 
 func (o *Prop) iconName() string {
-	name := defs.PropIconID(o.f.Generator.D.Objects[o.O.Kind].Name)
-	if !o.O.Active && o.O.Kind != rules.ObjBLOODFTN && o.O.Kind != rules.ObjPURIFYINGFTN { // used objects have their own icon
+	name := o.f.Generator.D.PropIcon(o.O.Kind)
+	if _, hasUsed := defs.IconOK(name + ".used"); hasUsed && !o.O.Active && o.O.Kind != rules.ObjBLOODFTN && o.O.Kind != rules.ObjPURIFYINGFTN { // used objects have their own icon
 		return name + ".used"
 	}
 	return name
@@ -132,9 +132,9 @@ func objectAt(m *gridmap.GridMap[*Actor, *Item, Object], p geometry.Point) *Prop
 	return o
 }
 
-// lightRadius is D1's decorative light radius for braziers vs. torches (used by glowAt).
+// lightRadius is D1's decorative light radius for braziers vs. torches and lamps (used by glowAt).
 func lightRadius(icon int32) int {
-	if icon == defs.IconWallTorch {
+	if icon == defs.IconWallTorch || icon == defs.IconLamp {
 		return 8
 	}
 	return 5
@@ -165,18 +165,15 @@ func (o *wallLight) ActorBumpedInto(*Actor)          {}
 // list, everything else as an interactive Prop.
 func placeObject(f *Factory, m *gridmap.GridMap[*Actor, *Item, Object], lvl *dungen.Level, o *rules.Object, p geometry.Point) {
 	if !m.IsTileWalkable(p) && f.Generator.D.Objects[o.Kind].SelFlag == 0 && !f.objectDisplay(o.Kind).WallLight { // hangs on a wall
-		m.AddDecal(p, defs.Icon(defs.PropIconID(f.Generator.D.Objects[o.Kind].Name)))
+		m.AddDecal(p, defs.Icon(f.Generator.D.PropIcon(o.Kind)))
+		return
+	}
+	if o.Kind == rules.ObjL1LIGHT { // AddL1Objs' light on a lamp: the lamp tile is its picture, this its light
+		m.AddObject(&wallLight{pos: p, icon: defs.IconLamp}, p)
 		return
 	}
 	if f.objectDisplay(o.Kind).WallLight {
-		icon, ok := defs.IconOK(defs.PropIconID(f.Generator.D.Objects[o.Kind].Name)) // its own record, for the remapper
-		switch {
-		case ok:
-		case o.Kind == rules.ObjL1LIGHT:
-			icon = defs.IconBrazier
-		default:
-			icon = defs.IconWallTorch
-		}
+		icon := defs.Icon(f.Generator.D.PropIcon(o.Kind))
 		onFloor := m.IsTileWalkable(p)
 		if onFloor {
 			if !m.CanPlaceActorHere(p) || m.IsItemAt(p) {

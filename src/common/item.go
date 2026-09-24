@@ -275,12 +275,12 @@ func (i *Item) tooltipLines(cmp map[string]int) []string {
 			}
 		}
 	}
-	// what an H&H potion or scroll does: its effect's own description
+	// what an H&H potion or scroll does: its effect's own description (a spell's action repeats the spell's, shown above)
 	var desc []util.LabelText
-	if i.targetedAction != nil {
+	if i.targetedAction != nil && it.Spell == 0 {
 		desc = i.targetedAction.GetDescription()
 	}
-	if i.untargetedAction != nil {
+	if i.untargetedAction != nil && it.Spell == 0 {
 		desc = append(desc, i.untargetedAction.GetDescription()...)
 	}
 	for _, l := range desc {

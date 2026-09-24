@@ -31,6 +31,7 @@ func Present(b *Broker, ev Event) []Animation {
 		return OneAnimation(&MeleeAttackAnimation{actor: ev.Attacker, targetPos: ev.To, origin: ev.From, ticksNeeded: ticks, ticksLeft: ticks})
 	case Moved:
 		if ev.Quiet || !sees(b, ev.ByPlayer, ev.From, ev.To) {
+			delete(b.movementAnimations, ev.Actor) // a walk still queued would drag the sprite back to where it was
 			ev.Actor.SetDrawPosition(ev.To.ToPointF())
 			return nil
 		}

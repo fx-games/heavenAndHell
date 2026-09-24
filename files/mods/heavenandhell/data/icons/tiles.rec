@@ -99,3 +99,41 @@ icon: 41
 internal_name: effect.shield
 icon: 203
 name: Effect Shield (flashes over an actor a Shield lands on)
+
+internal_name: tile.wooden_fence
+icon: 63
+name: Wooden Fence
+tags: blocks_movement
+
+internal_name: tile.arch
+icon: 181
+name: Arch
+tags: blocks_movement
+
+internal_name: tile.grate
+icon: 345
+name: Grate
+tags: blocks_movement
+
+internal_name: tile.pillar
+icon: 75
+name: Pillar
+tags: blocks_movement, blocks_missiles
+
+internal_name: tile.lamp
+icon: 247
+name: Lamp
+tags: blocks_movement
+
+internal_name: tile.lava
+icon: 159
+name: Lava
+tags: blocks_movement
+
+internal_name: tile.wall_torch
+icon: 352
+name: Wall Torch
+
+internal_name: tile.brazier
+icon: 32
+name: Brazier

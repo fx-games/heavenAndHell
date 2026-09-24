@@ -54,6 +54,8 @@ const (
 	StatusRage           StatusEffect = "rage"             // the Barbarian's Rage, and the hangover after it
 	StatusStoneSkin      StatusEffect = "stoneskin"        // HeroSheet and MoveCost read it
 	StatusBlessed        StatusEffect = "blessed"          // HeroSheet reads it
+	StatusSatiated       StatusEffect = "satiated"         // resting heals (RestUntilHealed)
+	StatusSatiatedRests  StatusEffect = "satiated_rests"   // value -rests the last meal still heals
 )
 
 type ParametrizedStatusEffect struct {
@@ -101,6 +103,7 @@ var StatusInfo = map[StatusEffect][2]string{
 	StatusHasted:         {"Hasted", "You act more often."},
 	StatusDamageOverTime: {"Bleeding", "You lose health each turn."},
 	StatusRage:           {"Rage", "Your blows land harder."},
+	StatusSatiated:       {"Satiated", "Each turn you rest heals 10% of your health."},
 	StatusBlessed:        {"Blessed", "Your armor class is raised: +5, or doubled from 5 up."},
 	StatusStoneSkin:      {"Stoneskin", "Your armor is hard as stone, your steps slow."},
 	StatusStone:          {"Petrified", "You are stone: unable to act, unable to be hurt."},

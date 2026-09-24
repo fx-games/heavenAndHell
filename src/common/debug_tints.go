@@ -22,10 +22,11 @@ func (g *Factory) DebugTints() []TintedTile {
 			out = append(out, TintedTile{a.icon, a.GetColor(), defs.IconID("monster", m.ID), m.Name + ": variant tint"})
 		}
 	}
-	for _, o := range g.Generator.D.Objects {
-		fresh, ok := defs.IconOK(defs.PropIconID(o.Name))
-		if used, hasUsed := defs.IconOK(defs.PropIconID(o.Name) + ".used"); ok && hasUsed && fresh == used {
-			out = append(out, TintedTile{used, UsedTint, defs.PropIconID(o.Name) + ".used", "used object: same icon as fresh"})
+	for kind := range g.Generator.D.Objects {
+		id := g.Generator.D.PropIcon(kind)
+		fresh, ok := defs.IconOK(id)
+		if used, hasUsed := defs.IconOK(id + ".used"); ok && hasUsed && fresh == used {
+			out = append(out, TintedTile{used, UsedTint, id + ".used", "used object: same icon as fresh"})
 		}
 	}
 	return out

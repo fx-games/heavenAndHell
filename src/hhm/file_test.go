@@ -102,7 +102,7 @@ func TestTileRecords(t *testing.T) {
 		t.Fatal(err)
 	}
 	ts := &Tileset{Flags: map[int]Flags{5: {Water: true}}, Records: map[int]string{183: "tile.trap_wall"}}
-	if got := DrawnTile(ts, recs, 183); got.Name != "Trap Wall" || got.Icon != 56 || got.Flags != (Flags{BlocksMovement: true, HoldsTrap: true}) {
+	if got := DrawnTile(ts, recs, 183); got.Name != "Wall" || got.Icon != 56 || got.Flags != (Flags{BlocksMovement: true, HoldsTrap: true}) {
 		t.Errorf("tile 183 = %+v", got)
 	}
 	if got := DrawnTile(ts, recs, 5); got.Icon != 5 || !got.Flags.Water || got.Name != "" {

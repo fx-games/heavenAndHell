@@ -744,6 +744,7 @@ func teleport(m *gridmap.GridMap[*Actor, *Item, Object], victim *Actor, enemy ge
 				continue
 			}
 			m.MoveActor(victim, p)
+			victim.SetDrawPosition(p.ToPointF())
 			victim.monster.Dir = DirTo(p, enemy)
 			return
 		}

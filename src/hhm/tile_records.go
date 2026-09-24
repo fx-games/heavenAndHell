@@ -67,6 +67,9 @@ func ReadTileRecords(fsys fs.FS, dataDir string) (map[string]TileRecord, error) 
 	for id, target := range sameAs {
 		t := recs[id]
 		t.Icon = recs[target].Icon
+		if t.Flags.HoldsTrap { // a wall a trap may hide in goes by the plain wall's name, or hovering gives it away
+			t.Name = recs[target].Name
+		}
 		recs[id] = t
 	}
 	return recs, nil

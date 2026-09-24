@@ -1201,9 +1201,11 @@ func questLines(theGame *game.GameInstance, fail func(string, ...any)) {
 	pickUp(rules.ItemOptAmulet)
 	done(rules.QBlind)
 
-	travel(8) // Zhar the Mad
-	f.TalkToMonster(monster("AI_ZHAR"))
-	log(rules.QZhar)
+	travel(8)                                                  // Zhar the Mad
+	if state.QuestActive(rules.QZhar) != rules.QuestNotAvail { // InitMonsters drops him when no library theme room fits, as in D1
+		f.TalkToMonster(monster("AI_ZHAR"))
+		log(rules.QZhar)
+	}
 
 	travel(9) // Black Mushroom
 	pickUp(rules.ItemFungalTm)

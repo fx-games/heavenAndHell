@@ -210,6 +210,7 @@ func (s *CharacterSheet) raise(i int) {
 	}
 	attrs[i].Raise()
 	s.Layout()
+	s.u.RefreshIconBars() // a skill raised from 0 joins the skill bar now, not next turn
 }
 
 func (s *CharacterSheet) OnCommand(command CommandType) bool {

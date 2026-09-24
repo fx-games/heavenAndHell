@@ -5,7 +5,8 @@
 # Fields:
 #   internal_name     the icon ID, "kind.snake_case_name"
 #   icon              the tile's number on the mod's sprite sheet (classic_roguelike.png), row by row from 0
-#   same_as           instead of icon: draw it with another record's icon (a trapped chest looks like a chest)
+#   same_as           instead of icon: draw it with another record's icon (a wall variant looks like the wall);
+#                     objects that look alike share one record through defs.PropFolds instead
 #   name              what the game calls it (a map tile's hover text); the remapper lists records by it
 #   tags              a map tile's: blocks_movement, blocks_view, blocks_missiles, trap (a wall a trap may be set
 #                     into), is_damaging. Maps draw it by the number maps/tileset.hht gives it ([tiles])
@@ -186,10 +187,6 @@ internal_name: tile.stairs_down
 icon: 74
 name: Stairs Down
 
-internal_name: tile.shrine
-icon: 75
-name: Shrine
-
 internal_name: tile.sign
 icon: 154
 name: Sign
@@ -234,39 +231,14 @@ internal_name: effect.arrow
 icon: 41
 name: Effect Arrow (every arrow shot without a weapon item, e.g. the Fire Clan's bows)
 
-internal_name: prop.l1light
-reference_image: reference/d1_sprites/tiles/objects/l1braz.frame01.png
-name: Cathedral Candelabra (wall light)
-icon: 109
-
-internal_name: prop.chest1
-reference_image: reference/d1_sprites/tiles/objects/chest1.frame01.png
-name: Small Chest
-icon: 128
-
-internal_name: prop.chest1.used
-reference_image: reference/d1_sprites/tiles/objects/chest1.frame02.png
-name: Small Chest (opened)
-icon: 127
-
-internal_name: prop.chest2
+internal_name: prop.chest
 reference_image: reference/d1_sprites/tiles/objects/chest2.frame01.png
 name: Chest
 icon: 128
 
-internal_name: prop.chest2.used
+internal_name: prop.chest.used
 reference_image: reference/d1_sprites/tiles/objects/chest2.frame02.png
 name: Chest (opened)
-icon: 127
-
-internal_name: prop.chest3
-reference_image: reference/d1_sprites/tiles/objects/chest3.frame01.png
-name: Large Chest
-icon: 128
-
-internal_name: prop.chest3.used
-reference_image: reference/d1_sprites/tiles/objects/chest3.frame02.png
-name: Large Chest (opened)
 icon: 127
 
 internal_name: prop.sarc
@@ -500,33 +472,9 @@ internal_name: prop.candle1
 name: Candle
 icon: 110
 
-internal_name: prop.torchl
-reference_image: reference/d1_sprites/tiles/objects/wtorch4.frame01.png
-name: Wall Torch (torchl, facing east)
-same_as: tile.wall_torch
-
-internal_name: prop.torchr
-reference_image: reference/d1_sprites/tiles/objects/wtorch3.frame01.png
-name: Wall Torch (torchr, facing south)
-same_as: tile.wall_torch
-
-internal_name: prop.torchl2
-reference_image: reference/d1_sprites/tiles/objects/wtorch1.frame01.png
-name: Wall Torch (torchl2, hung, facing east)
-same_as: tile.wall_torch
-
-internal_name: prop.torchr2
-reference_image: reference/d1_sprites/tiles/objects/wtorch2.frame01.png
-name: Wall Torch (torchr2, hung, facing south)
-same_as: tile.wall_torch
-
 internal_name: prop.candle2
 reference_image: reference/d1_sprites/tiles/objects/candle2.frame01.png
 name: Candle (lit)
-icon: 110
-
-internal_name: prop.candleo
-name: Candle
 icon: 110
 
 internal_name: prop.banner
@@ -654,11 +602,6 @@ reference_image: reference/d1_sprites/tiles/objects/flame1.frame01.png
 name: Flame Hole
 icon: 32
 
-internal_name: prop.water
-reference_image: reference/d1_sprites/tiles/objects/miniwatr.frame01.png
-name: Water
-icon: 28
-
 internal_name: prop.altboy
 reference_image: reference/d1_sprites/tiles/objects/altboy.frame01.png
 name: Altar (Lazarus' lair)
@@ -669,239 +612,8 @@ reference_image: reference/d1_sprites/tiles/objects/mcirl.frame01.png
 name: Magic Circle
 icon: 215
 
-# Objects drawn with another object's icon (same_as): the same sprite under another id, or another isometric
-# angle of the same thing. Give one its own "icon:" to tell it apart.
-
-internal_name: prop.tchest1
-name: Small Chest (tchest1)
-same_as: prop.chest1
-
-internal_name: prop.tchest1.used
-name: Small Chest (opened) (tchest1.used)
-same_as: prop.chest1.used
-
-internal_name: prop.tchest2
-name: Chest (tchest2)
-same_as: prop.chest2
-
-internal_name: prop.tchest2.used
-name: Chest (opened) (tchest2.used)
-same_as: prop.chest2.used
-
-internal_name: prop.tchest3
-name: Large Chest (tchest3)
-same_as: prop.chest3
-
-internal_name: prop.tchest3.used
-name: Large Chest (opened) (tchest3.used)
-same_as: prop.chest3.used
-
-internal_name: prop.signchest
-name: Large Chest (signchest)
-same_as: prop.chest3
-
-internal_name: prop.signchest.used
-name: Large Chest (opened) (signchest.used)
-same_as: prop.chest3.used
-
-internal_name: prop.shrinel
-name: Shrine (shrinel)
-same_as: prop.shrine
-
-internal_name: prop.shrinel.used
-name: Shrine (used) (shrinel.used)
-same_as: prop.shrine.used
-
-internal_name: prop.shriner
-name: Shrine (shriner)
-same_as: prop.shrine
-
-internal_name: prop.shriner.used
-name: Shrine (used) (shriner.used)
-same_as: prop.shrine.used
-
-internal_name: prop.bookcasel
-name: Bookcase (bookcasel)
-same_as: prop.bookcase
-
-internal_name: prop.bookcasel.used
-name: Bookcase (searched, or plain Bookshelf) (bookcasel.used)
-same_as: prop.bookcase.used
-
-internal_name: prop.bookcaser
-name: Bookcase (bookcaser)
-same_as: prop.bookcase
-
-internal_name: prop.bookcaser.used
-name: Bookcase (searched, or plain Bookshelf) (bookcaser.used)
-same_as: prop.bookcase.used
-
-internal_name: prop.bookshelf
-name: Bookcase (searched, or plain Bookshelf) (bookshelf)
-same_as: prop.bookcase.used
-
-internal_name: prop.bannerl
-name: Banner (bannerl)
-same_as: prop.banner
-
-internal_name: prop.bannerm
-name: Banner (bannerm)
-same_as: prop.banner
-
-internal_name: prop.bannerr
-name: Banner (bannerr)
-same_as: prop.banner
-
-internal_name: prop.crux1
-name: Crucified Skeleton (crux1)
-same_as: prop.crux
-
-internal_name: prop.crux1.used
-name: Crucified Skeleton (broken) (crux1.used)
-same_as: prop.crux.used
-
-internal_name: prop.crux2
-name: Crucified Skeleton (crux2)
-same_as: prop.crux
-
-internal_name: prop.crux2.used
-name: Crucified Skeleton (broken) (crux2.used)
-same_as: prop.crux.used
-
-internal_name: prop.crux3
-name: Crucified Skeleton (crux3)
-same_as: prop.crux
-
-internal_name: prop.crux3.used
-name: Crucified Skeleton (broken) (crux3.used)
-same_as: prop.crux.used
-
-internal_name: prop.blindbook
-name: Book on Stone Lectern (Blind, Blood, Steel Tome, Book Lever) (blindbook)
-same_as: prop.book1
-
-internal_name: prop.blindbook.used
-name: Book on Stone Lectern (read) (blindbook.used)
-same_as: prop.book1.used
-
-internal_name: prop.bloodbook
-name: Book on Stone Lectern (Blind, Blood, Steel Tome, Book Lever) (bloodbook)
-same_as: prop.book1
-
-internal_name: prop.bloodbook.used
-name: Book on Stone Lectern (read) (bloodbook.used)
-same_as: prop.book1.used
-
-internal_name: prop.steeltome
-name: Book on Stone Lectern (Blind, Blood, Steel Tome, Book Lever) (steeltome)
-same_as: prop.book1
-
-internal_name: prop.steeltome.used
-name: Book on Stone Lectern (read) (steeltome.used)
-same_as: prop.book1.used
-
-internal_name: prop.booklvr
-name: Book on Stone Lectern (Blind, Blood, Steel Tome, Book Lever) (booklvr)
-same_as: prop.book1
-
-internal_name: prop.booklvr.used
-name: Book on Stone Lectern (read) (booklvr.used)
-same_as: prop.book1.used
-
-internal_name: prop.book2l
-name: Book on Skull Lectern (Ancient/Mythical Book, Skeleton Tome, Library Book) (book2l)
-same_as: prop.book2
-
-internal_name: prop.book2l.used
-name: Book on Skull Lectern (read) (book2l.used)
-same_as: prop.book2.used
-
-internal_name: prop.book2r
-name: Book on Skull Lectern (Ancient/Mythical Book, Skeleton Tome, Library Book) (book2r)
-same_as: prop.book2
-
-internal_name: prop.book2r.used
-name: Book on Skull Lectern (read) (book2r.used)
-same_as: prop.book2.used
-
-internal_name: prop.skelbook
-name: Book on Skull Lectern (Ancient/Mythical Book, Skeleton Tome, Library Book) (skelbook)
-same_as: prop.book2
-
-internal_name: prop.skelbook.used
-name: Book on Skull Lectern (read) (skelbook.used)
-same_as: prop.book2.used
-
-internal_name: prop.bookstand
-name: Book on Skull Lectern (Ancient/Mythical Book, Skeleton Tome, Library Book) (bookstand)
-same_as: prop.book2
-
-internal_name: prop.bookstand.used
-name: Book on Skull Lectern (read) (bookstand.used)
-same_as: prop.book2.used
-
-internal_name: prop.flamelvr
-name: Lever (incl. Flame Trap Lever) (flamelvr)
-same_as: prop.lever
-
-internal_name: prop.flamelvr.used
-name: Lever (pulled) (flamelvr.used)
-same_as: prop.lever.used
-
-internal_name: prop.bookcandle
-name: Candle (lit) (bookcandle)
-same_as: prop.candle2
-
-internal_name: prop.storycandle
-name: Candle (lit) (storycandle)
-same_as: prop.candle2
-
-internal_name: prop.tbcross
-name: Burning Cross (tbcross)
-same_as: prop.bcross
-
-internal_name: prop.mcircle1
-name: Magic Circle (mcircle1)
-same_as: prop.mcircle
-
-internal_name: prop.mcircle2
-name: Magic Circle (mcircle2)
-same_as: prop.mcircle
-
-internal_name: prop.wararmor
-name: Armor Stand (incl. Warlord's) (wararmor)
-same_as: prop.armorstand
-
-internal_name: prop.wararmor.used
-name: Armor Stand (empty) (wararmor.used)
-same_as: prop.armorstand.used
-
-internal_name: prop.armorstandn
-name: Armor Stand (empty) (armorstandn)
-same_as: prop.armorstand.used
-
-internal_name: prop.warweap
-name: Weapon Rack (incl. Warlord's, Weapon Stand) (warweap)
-same_as: prop.weaponrack
-
-internal_name: prop.warweap.used
-name: Weapon Rack (empty) (warweap.used)
-same_as: prop.weaponrack.used
-
-internal_name: prop.weaprack
-name: Weapon Rack (incl. Warlord's, Weapon Stand) (weaprack)
-same_as: prop.weaponrack
-
-internal_name: prop.weaprack.used
-name: Weapon Rack (empty) (weaprack.used)
-same_as: prop.weaponrack.used
-
-internal_name: prop.weaponrackn
-name: Weapon Rack (empty) (weaponrackn)
-same_as: prop.weaponrack.used
-
 internal_name: effect.shield
-icon: 203
+icon: 410
 name: Effect Shield (flashes over an actor a Shield lands on)
 
 # D1 megatile pieces that look like their neighbours but block differently (maps/l<n>_megatiles.hhm)
@@ -909,68 +621,82 @@ internal_name: tile.catacombs_trap_wall
 name: Catacombs Trap Wall
 same_as: tile.catacombs_wall
 tags: blocks_movement, blocks_view, blocks_missiles, trap
+icon: 84
 
 internal_name: tile.cathedral_trap_wall
 name: Cathedral Trap Wall
 same_as: tile.cathedral_wall
 tags: blocks_movement, blocks_view, blocks_missiles, trap
+icon: 56
 
 internal_name: tile.hell_wall_sight_passes
 name: Hell Wall (sight passes)
 same_as: tile.dungeon_rocky_wall
 tags: blocks_movement, blocks_missiles
+icon: 9
 
 internal_name: tile.cave_wall_see_through
 name: Cave Wall (see-through)
 same_as: tile.mountain
 tags: blocks_movement
+icon: 7
 
 internal_name: tile.cathedral_wall_see_through
 name: Cathedral Wall (see-through)
 same_as: tile.cathedral_wall
 tags: blocks_movement
+icon: 57
 
 internal_name: tile.catacombs_wall_see_through
 name: Catacombs Wall (see-through)
 same_as: tile.catacombs_wall
 tags: blocks_movement
+icon: 84
 
 internal_name: tile.hell_wall_see_through
 name: Hell Wall (see-through)
 same_as: tile.dungeon_rocky_wall
 tags: blocks_movement
+icon: 9
 
 internal_name: tile.cave_wall_missiles_pass
 name: Cave Wall (missiles pass)
 same_as: tile.mountain
 tags: blocks_movement, blocks_view
+icon: 7
 
 internal_name: tile.cave_floor_blocks_sight
 name: Cave Floor (blocks sight and missiles)
 same_as: tile.dirt
 tags: blocks_view, blocks_missiles
+icon: 1
 
 internal_name: tile.cathedral_wall_missiles_pass
 name: Cathedral Wall (missiles pass)
 same_as: tile.cathedral_wall
 tags: blocks_movement, blocks_view
+icon: 57
 
 internal_name: tile.catacombs_floor_blocks_sight
 name: Catacombs Floor (blocks sight)
 same_as: tile.catacombs_floor
 tags: blocks_view
+icon: 86
 
 internal_name: tile.cathedral_wall_sight_passes
 name: Cathedral Wall (sight passes)
 same_as: tile.cathedral_wall
 tags: blocks_movement, blocks_missiles
+icon: 57
 
 internal_name: tile.cathedral_column
 name: Cathedral Column
 same_as: tile.arch
 tags: blocks_movement, blocks_view, blocks_missiles
+icon: 828
 
 internal_name: tile.hell_floor_blocks_missiles
 name: Hell Floor (blocks missiles)
 same_as: tile.dungeon_red_earth_floor
 tags: blocks_missiles
+icon: 186

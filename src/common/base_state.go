@@ -87,6 +87,7 @@ type State struct {
 	gossipSeeds map[VendorType]int64 // each townsperson's _tSeed: rolled on first talk, dropped when the hero reaches the dungeon
 
 	glowCache map[*gridmap.GridMap[*Actor, *Item, Object]]map[geometry.Point]lightGlow // decorative light per map (glowAt)
+	iconNames map[int32]string                                                         // what each map picture stands for (iconName)
 }
 
 func (s *State) GetWorldTexture() renderer.TextureAtlas {
@@ -433,13 +434,27 @@ func (s *State) applyLighting(mapPos geometry.Point, drawColor color.RGBA, world
 	playerStandsInLitArea := state.PlayerStandsInLitArea()
 	isInFieldOfView := state.GetPlayer().CanSee(mapPos)
 
+	// the player's own light and every light the dungeon's objects give (wall torches, braziers, lamps, candles,
+	// skull fires: glowAt, each flickering out of step) add up where they overlap instead of the brighter one
+	// hiding the other; an object's light shows wherever the player sees it, not only within the player's own
+	playerLight, torchLight := 0.0, 0.0
+	if isInFieldOfView {
+		if distanceToPlayer <= maxDistance {
+			playerLight = 1.0 - util.EaseInExpo(distanceToPlayer/maxDistance)
+		}
+		if glow := s.glowAt(mapPos); glow.v > 0 && glow.kind == glowTorch {
+			frame := util.GetLoopingFrameFromTick(worldTick+uint64(mapPos.X*7+mapPos.Y*13), s.aura().FlickerFrameDelay, len(s.aura().FlickerPattern))
+			torchLight = glow.v * s.aura().FlickerPattern[frame]
+		}
+	}
+
 	if !state.IsDaylight() {
 		if currentMap.IsTileLit(mapPos) && currentMap.IsExplored(mapPos) {
 			dungeonLitRoomLightPercentage := 0.75
 			if !isInFieldOfView {
 				dungeonLitRoomLightPercentage = 0.5
 			}
-			return multiplyColor(drawColor, dungeonLitRoomLightPercentage)
+			return multiplyColor(drawColor, mergeLight(dungeonLitRoomLightPercentage, playerLight, torchLight))
 		}
 
 		if playerStandsInLitArea && !currentMap.IsTileLit(mapPos) && currentMap.IsExplored(mapPos) {
@@ -447,21 +462,16 @@ func (s *State) applyLighting(mapPos geometry.Point, drawColor color.RGBA, world
 			if !isInFieldOfView {
 				dungeonUnLitRoomLightPercentage = 0.1
 			}
-			return multiplyColor(drawColor, dungeonUnLitRoomLightPercentage)
+			return multiplyColor(drawColor, mergeLight(dungeonUnLitRoomLightPercentage, playerLight, torchLight))
 		}
 	}
-	if distanceToPlayer > maxDistance || !isInFieldOfView {
+	if playerLight == 0 && torchLight == 0 {
 		drawColor = multiplyColor(drawColor, darkPercentage)
 	} else {
-		percentageLightness := float64(distanceToPlayer) / float64(maxDistance)
-		percentageLightness = 1.0 - util.EaseInExpo(percentageLightness)
-		if glow := s.glowAt(mapPos); glow.v > 0 && glow.kind == glowTorch { // wall torches and braziers, each flickering out of step
-			frame := util.GetLoopingFrameFromTick(worldTick+uint64(mapPos.X*7+mapPos.Y*13), s.aura().FlickerFrameDelay, len(s.aura().FlickerPattern))
-			if g := glow.v * s.aura().FlickerPattern[frame]; g > percentageLightness {
-				percentageLightness = g
-				drawColor = multiplyColors(drawColor, s.aura().LightColor)
-			}
+		if torchLight > playerLight {
+			drawColor = multiplyColors(drawColor, s.aura().LightColor)
 		}
+		percentageLightness := mergeLight(playerLight, torchLight)
 		percentagOfValue := darkPercentage + ((lightPercentage - darkPercentage) * percentageLightness)
 		if !playerStandsInLitArea {
 			drawColor = s.mixLightSourceColor(drawColor, color.RGBA{127, 127, 127, 255}, worldTick)
@@ -469,6 +479,15 @@ func (s *State) applyLighting(mapPos geometry.Point, drawColor color.RGBA, world
 		drawColor = multiplyColor(drawColor, percentagOfValue)
 	}
 	return drawColor
+}
+
+// mergeLight adds lights of 0..1 the way light adds up: each one lightens what the others left dark.
+func mergeLight(lights ...float64) float64 {
+	dark := 1.0
+	for _, l := range lights {
+		dark *= 1 - l
+	}
+	return 1 - dark
 }
 
 func (s *State) mixLightSourceColor(drawColor, noLightSource color.RGBA, worldTick uint64) color.RGBA {

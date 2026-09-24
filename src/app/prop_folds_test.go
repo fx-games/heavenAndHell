@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"rpg/files"
-	"rpg/src/defs"
 	"rpg/src/recfile"
 	"rpg/src/rules"
 )
@@ -18,8 +17,8 @@ func TestPropFolds(t *testing.T) {
 		t.Fatal(err)
 	}
 	reached := map[string]bool{"prop.debris": true, "prop.portal": true, "prop.portal.2": true}
-	for _, o := range data.Objects {
-		id := defs.PropIconID(o.Name)
+	for kind := range data.Objects {
+		id := data.PropIcon(kind)
 		reached[id], reached[id+".used"] = true, true
 	}
 	f, err := os.Open("files/mods/d1/data/icons/tiles.rec")

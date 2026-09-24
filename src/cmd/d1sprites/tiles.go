@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
+	"log"
 	"math"
+	"os"
 	"strings"
 
 	"rpg/src/defs"
@@ -43,12 +45,16 @@ func objects(read reader) ([]section, error) {
 	var sections []section
 	byFile := map[string]int{}
 	placeholders := section{title: "Objects without graphics (no width; their ofindex is a placeholder)"}
+	propIcons := objectIcons()
 	for _, r := range table("xl_obj") {
 		file := strings.TrimPrefix(r.s("ofindex"), "OFILE_")
 		if file == "0" {
 			continue
 		}
-		key := defs.PropIconID(r.s(""))
+		key := propIcons[r.s("")]
+		if key == "" {
+			key = defs.PropIconID(r.s(""))
+		}
 		note := fmt.Sprintf("%s: icon %s", key, icons.icon(key))
 		if icons.has(key + ".used") {
 			note += ", used " + icons.icon(key+".used")
@@ -219,4 +225,24 @@ func decodeMicro(f []byte, typ int) []int {
 		row(y, 30-2*(y-16), y%2 == 0)
 	}
 	return px
+}
+
+// objectIcons is objects.rec's icon by OBJ_ id: look-alike objects share one icon record.
+func objectIcons() map[string]string {
+	b, err := os.ReadFile("files/mods/d1/data/objects.rec")
+	if err != nil {
+		log.Fatal(err)
+	}
+	m := map[string]string{}
+	var id string
+	for _, l := range strings.Split(string(b), "\n") {
+		k, v, _ := strings.Cut(l, ": ")
+		switch k {
+		case "id":
+			id = v
+		case "icon":
+			m[id] = v
+		}
+	}
+	return m
 }

@@ -63,6 +63,8 @@
 #                    column (a spine chamber's), lamp, fence. Repeatable.
 #   population       d1_cathedral, d1_catacombs, d1_caves, d1_hell: D1's monsters, objects, items and theme
 #                    rooms by that level type's rules, rolled from the level's D1 seed
+#   library_stands   chance in percent that a free cell of a library theme room gets a bookstand (80% of its
+#                    scroll or book drops). Unset: D1's 1 in 1/2/2/5 cells by level type
 #
 # The knobs bsp takes: width, height, min_leaf, min_room. drunkard: width, height, cover, walk_length, dla.
 #
@@ -149,6 +151,7 @@ room_doors: 12 1
 canvas: 40
 scale: 2
 population: d1_cathedral
+library_stands: 65
 decoration: tile.grate 26 thin
 decoration: tile.cathedral_wall_missiles_pass 21 corner
 decoration: tile.cathedral_wall_see_through 1.3 face
@@ -183,6 +186,7 @@ room_doors: 12 1
 canvas: 40
 scale: 2
 population: d1_cathedral
+library_stands: 65
 decoration: tile.grate 26 thin
 decoration: tile.cathedral_wall_missiles_pass 21 corner
 decoration: tile.cathedral_wall_see_through 1.3 face
@@ -220,6 +224,7 @@ room_doors: 12 1
 canvas: 40
 scale: 2
 population: d1_cathedral
+library_stands: 65
 decoration: tile.grate 26 thin
 decoration: tile.cathedral_wall_missiles_pass 21 corner
 decoration: tile.cathedral_wall_see_through 1.3 face
@@ -256,6 +261,7 @@ room_doors: 12 1
 canvas: 40
 scale: 2
 population: d1_cathedral
+library_stands: 65
 decoration: tile.grate 26 thin
 decoration: tile.cathedral_wall_missiles_pass 21 corner
 decoration: tile.cathedral_wall_see_through 1.3 face
@@ -295,6 +301,7 @@ theme_room_doors: true
 canvas: 40
 scale: 2
 population: d1_catacombs
+library_stands: 40
 decoration: tile.catacombs_wall_see_through 1
 set_piece: piece_l2_blood room blood
 tiles: catacombs
@@ -330,6 +337,7 @@ theme_room_doors: true
 canvas: 40
 scale: 2
 population: d1_catacombs
+library_stands: 40
 decoration: tile.catacombs_wall_see_through 1
 set_piece: piece_l2_bonechamber room schamb
 tiles: catacombs
@@ -360,6 +368,7 @@ theme_room_doors: true
 canvas: 40
 scale: 2
 population: d1_catacombs
+library_stands: 40
 decoration: tile.catacombs_wall_see_through 1
 set_piece: piece_l2_blind room blind
 tiles: catacombs
@@ -389,6 +398,7 @@ theme_room_doors: true
 canvas: 40
 scale: 2
 population: d1_catacombs
+library_stands: 40
 decoration: tile.catacombs_wall_see_through 1
 tiles: catacombs
 music: catacombs

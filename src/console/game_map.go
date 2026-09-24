@@ -225,8 +225,8 @@ func (c *Console) describe(loc mgeom.Point) string {
 	if item, ok := currentMap.TryGetItemAt(pos); ok {
 		return item.Name()
 	}
-	if object, ok := currentMap.TryGetObjectAt(pos); ok && object.Name() != "" {
-		return object.Name()
+	if name := c.context.GameState().SceneryAt(pos); name != "" {
+		return name
 	}
 	return " "
 }

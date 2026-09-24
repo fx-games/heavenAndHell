@@ -74,7 +74,7 @@ func (g *Factory) NewSign(inscription []string) *BumpObject {
 }
 
 func (g *Factory) NewStash() *BumpObject {
-	return NewBumpObject("stash", "your stash", defs.Icon("prop.chest1"), func(actor *Actor) {
+	return NewBumpObject("stash", "your stash", defs.Icon("prop.chest"), func(actor *Actor) {
 		g.Show(OpenStash{})
 	})
 }

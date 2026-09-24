@@ -662,3 +662,16 @@ func (fov *FOV) SSCLightMap(srcs []Point, maxDepth int, passable func(p Point) b
 	}
 	return fov.Visibles
 }
+
+// Keep drops from the last SSCVisionMap every visible position keep rejects.
+func (fov *FOV) Keep(keep func(p Point) bool) {
+	kept := fov.Visibles[:0]
+	for _, p := range fov.Visibles {
+		if keep(p) {
+			kept = append(kept, p)
+		} else {
+			fov.ShadowCasting[fov.idx(p)] = false
+		}
+	}
+	fov.Visibles = kept
+}

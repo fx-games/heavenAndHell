@@ -1020,7 +1020,7 @@ func (u *UIController) UseBeltSlot(i int) {
 }
 
 // RefreshIconBars rebuilds the sidebar's icon overlays, and any icon window open over them (the stash).
-// ponytail: refreshed on turns, pack and gear changes, clicks and drags; anything else (debug menu) shows a turn late.
+// ponytail: refreshed on turns, pack and gear changes, clicks and drags, points spent on the sheet; anything else (debug menu) shows a turn late.
 func (u *UIController) RefreshIconBars() {
 	for _, o := range []*IconOverlay{u.inventory, u.skills, u.belt, u.timer} {
 		if o != nil {
@@ -1839,15 +1839,14 @@ func (u *UIController) updateMapTileHoverInfo(mapPos geometry.Point) {
 	var name string
 	actor, isActor := m.TryGetActorAt(mapPos)
 	item, isItem := m.TryGetItemAt(mapPos)
-	object, isObject := m.TryGetObjectAt(mapPos)
 	switch { // infravision reveals the monster, not the floor it stands on
 	case isActor && actor.IsVisible():
 		name = actor.Name()
 	case !player.CanSee(mapPos):
 	case isItem:
 		name = item.Name()
-	case isObject:
-		name = object.Name()
+	default:
+		name = u.context.GameState().SceneryAt(mapPos)
 	}
 	if name == "" {
 		u.inventory.infoLabel.ClearText()

@@ -16,13 +16,14 @@ type themeLoc struct {
 // gen holds gendung.cpp's globals while a laid-out level is populated: 112x112 pieces (dMonster etc.), the
 // playable cells at 16..95, and D1's 40x40 megatiles as the 2x2 cells they cover.
 type gen struct {
-	rng       rules.Rng
-	quests    *rules.Quests
-	currlevel int
-	ltype     int
-	setlevel  bool
-	setLvlNum int
-	cells     *DungeonMap // the level as the passes laid it out
+	rng           rules.Rng
+	quests        *rules.Quests
+	currlevel     int
+	ltype         int
+	libraryStands int // Population.LibraryStands
+	setlevel      bool
+	setLvlNum     int
+	cells         *DungeonMap // the level as the passes laid it out
 
 	population
 

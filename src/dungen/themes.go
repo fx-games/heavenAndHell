@@ -488,7 +488,7 @@ func (g *gen) createThemeRooms() {
 			lib := [4]int{1, 2, 2, 5}[lt]
 			for yp := 1; yp < 111; yp++ {
 				for xp := 1; xp < 111; xp++ {
-					if g.checkThemeObj3(xp, yp, i, -1) && g.dMonster[xp][yp] == 0 && g.rnd(lib) == 0 {
+					if g.checkThemeObj3(xp, yp, i, -1) && g.dMonster[xp][yp] == 0 && g.libraryStand(lib) {
 						g.addObject(rules.ObjBOOKSTAND, xp, yp)
 						if g.rnd(2*lib) != 0 {
 							if o := g.objAt(xp, yp); o != nil {
@@ -577,4 +577,12 @@ func (g *gen) createThemeRooms() {
 	if g.ltype == rules.DTypeHell && len(g.themes) > 0 {
 		g.updateL4Trans()
 	}
+}
+
+// libraryStand rolls whether a free library cell gets a bookstand: D1's 1 in lib, or the level's library_stands percent.
+func (g *gen) libraryStand(lib int) bool {
+	if g.libraryStands > 0 {
+		return g.rnd(100) < g.libraryStands
+	}
+	return g.rnd(lib) == 0
 }

@@ -374,8 +374,7 @@ func (g *Factory) stealItemAndTeleport(args util.Arguments) *HitEffect {
 				g.ActionBroker.Execute(NewStealItemAction(NewActorCause("Steal", attacker), attacker, hitActor))
 			})
 			teleportAction := g.NewUntargetedActionFromName(string(ActionNameTeleport))
-			teleportAction.Invoke(attacker, "StealAndTeleport", false)
-			attacker.SetNeutral()
+			teleportAction.Invoke(attacker, "StealAndTeleport", false) // stays hostile: the player hunts it down for the item
 		},
 		Description: []util.LabelText{
 			util.LabelTextFromString("Steal item and teleport"),

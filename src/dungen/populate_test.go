@@ -49,7 +49,15 @@ func TestPopulateStandIns(t *testing.T) {
 	}
 	levels := standIns(t)
 	books, heroes, torches := 0, 0, 0
+	placed := map[string]int{}
 	defer func() {
+		// the rest (crux, lever, magic circle) only stand in quest set levels, which the playthrough walks
+		for _, icon := range []string{"prop.chest", "prop.shrine", "prop.book1", "prop.book2", "prop.bookcase", "prop.armorstand",
+			"prop.weaponrack", "prop.banner", "prop.bcross", "prop.candle2", "tile.wall_torch"} {
+			if placed[icon] == 0 {
+				t.Errorf("no level placed a %s", icon)
+			}
+		}
 		if books == 0 || heroes == 0 || torches == 0 {
 			t.Errorf("%d story books, %d slain heroes, %d wall torches", books, heroes, torches)
 		}
@@ -129,6 +137,7 @@ func TestPopulateStandIns(t *testing.T) {
 			}
 			for _, o := range lvl.Objects {
 				name := d.Objects[o.Kind].Name
+				placed[d.PropIcon(o.Kind)]++
 				switch {
 				case strings.Contains(name, "TORCH"): // a wall torch hangs on the wall (hangTorchesOnWalls)
 					torches++

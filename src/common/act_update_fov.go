@@ -2,6 +2,9 @@ package common
 
 import (
 	"fmt"
+
+	"rpg/src/geometry"
+	"rpg/src/stats"
 )
 
 type UpdateFoVAction struct {
@@ -28,8 +31,17 @@ func (d *UpdateFoVAction) Execute(context ActionContext) []Action {
 	}
 
 	visionRange := context.GameState.GetPlayerVisionRange()
-
-	currentMap.UpdateFieldOfView(actor.GetFOV(), actor.MapPosition(), visionRange)
+	pos, far := actor.MapPosition(), actor.GetStats().GetAttribute(stats.VisionRange)
+	if actor == state.GetPlayer() && !state.IsPlayerInTown() && far > visionRange && !currentMap.IsTileLit(pos) {
+		// in the dark the player sees as far as their own light, and beyond it whatever a light lights: the glow of
+		// a torch, lamp or candle (glowAt) and the lit rooms, as far as they could see by daylight
+		currentMap.UpdateFieldOfView(actor.GetFOV(), pos, far)
+		actor.GetFOV().Keep(func(p geometry.Point) bool {
+			return geometry.DistanceSquared(p, pos) <= visionRange*visionRange || currentMap.IsTileLit(p) || state.glowAt(p).v > 0
+		})
+	} else {
+		currentMap.UpdateFieldOfView(actor.GetFOV(), pos, visionRange)
+	}
 
 	updatePlayerKnowledge(context)
 

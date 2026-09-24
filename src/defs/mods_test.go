@@ -105,18 +105,6 @@ func TestHeavenAndHellModSuppliesEveryIcon(t *testing.T) {
 }
 
 // LoadIcons no longer demands D1's dungeon furniture of every mod, so D1 has to be held to it here.
-func TestDefinesItsFurniture(t *testing.T) {
-	files.SelectMod("d1")
-	if err := LoadIcons(); err != nil {
-		t.Fatal(err)
-	}
-	for _, name := range FurnitureIcons {
-		if _, ok := tilesIcons[name]; !ok {
-			t.Errorf("d1 defines no %s", name)
-		}
-	}
-}
-
 // Ranges ("4-7") and dice ("1d8") share the field; both arrive as util.Dice with their own bounds intact.
 // This is the schema convergence, so it gets an assertion rather than a comment.
 func TestBothSchemasSurviveTheSharedDiceField(t *testing.T) {

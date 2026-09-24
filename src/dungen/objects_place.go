@@ -290,8 +290,11 @@ func (g *gen) addLazStand() {
 	}
 }
 
-// getRndObjLoc ports GetRndObjLoc (random area of randarea×randarea free cells, anywhere on the map).
+// getRndObjLoc ports GetRndObjLoc (random area of randarea×randarea free cells, anywhere on the map). D1 shrinks
+// the area from its corner after 1000 tries, leaving the centre its callers place on unchecked (a slain hero in a
+// wall); here it shrinks towards the centre.
 func (g *gen) getRndObjLoc(randarea int) (int, int) {
+	full := randarea
 	for tries := 0; ; {
 		if tries++; tries > 1000 && randarea > 1 {
 			randarea--
@@ -300,7 +303,7 @@ func (g *gen) getRndObjLoc(randarea int) (int, int) {
 		failed := false
 		for i := 0; i < randarea && !failed; i++ {
 			for j := 0; j < randarea && !failed; j++ {
-				failed = !g.rndLocOk(i+xx, j+yy)
+				failed = !g.rndLocOk(i+xx+(full-randarea)/2, j+yy+(full-randarea)/2)
 			}
 		}
 		if !failed {

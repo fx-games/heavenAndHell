@@ -47,7 +47,9 @@ func (u *UIController) Draw(screen *ebiten.Image) {
 		u.drawUI()
 	}
 
-	if u.message.ticksLeft > 0 {
+	if u.message.ticksLeft > 0 && u.title != nil {
+		u.message.ticksLeft-- // hidden behind the title screen, but still runs out
+	} else if u.message.ticksLeft > 0 {
 		const pad = 3.0
 		w, h := u.tileRenderer.MeasureString(u.message.GetText())
 		u.tileRenderer.DrawColoredRect(geometry.Point{X: 0, Y: int(u.message.GetHeight() - h - pad)},

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"rpg/src/defs"
 	"slices"
 )
 
@@ -53,6 +54,7 @@ type ObjectDisplay struct {
 	Container bool   // looted by opening or breaking, and may give nothing
 	WallLight bool   // a decorative light D1 places directly
 	Sfx       string // the sound it makes as it is used
+	Icon      string // its tiles.rec icon id (".used" appended once used); look-alikes share one
 }
 
 func loadObjectTables(fsys fs.FS, d *Data) error {
@@ -83,6 +85,7 @@ func loadObjectTables(fsys fs.FS, d *Data) error {
 			Container: m.GetBoolOrFalse("container"),
 			WallLight: m.GetBoolOrFalse("wall_light"),
 			Sfx:       m.GetStringOrDefault("sfx", ""),
+			Icon:      m.GetStringOrDefault("icon", ""),
 		}
 	}
 	d.ShrineNames, d.ShrineMessages = nil, nil
@@ -102,4 +105,12 @@ func loadObjectTables(fsys fs.FS, d *Data) error {
 		d.StoryBookNames = append(d.StoryBookNames, r.ToMap("").GetStringOrDefault("name", ""))
 	}
 	return nil
+}
+
+// PropIcon is the tiles.rec icon id object kind draws with: its objects.rec icon, else prop.<its OBJ_ name>.
+func (d *Data) PropIcon(kind int) string {
+	if icon := d.ObjectDisplays[kind].Icon; icon != "" {
+		return icon
+	}
+	return defs.PropIconID(d.Objects[kind].Name)
 }

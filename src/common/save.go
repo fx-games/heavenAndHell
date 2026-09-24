@@ -271,11 +271,21 @@ func (s *LevelSnapshot) apply(f *Factory, m *gridmap.GridMap[*Actor, *Item, Obje
 		}
 		DropOrphanShields(m, f.State.GetPlayer())
 		for _, c := range s.Corpses {
+			p := geometry.Point{X: c.X, Y: c.Y}
+			// the level is rebuilt from its seed: if the layout changed since the save, the corpse moves off the
+			// wall it would lie in, like a monster does
+			if !m.Contains(p) || !m.IsWalkable(p) {
+				near := freeCellsNear(m, p, 1, m.IsWalkable)
+				if len(near) == 0 {
+					continue
+				}
+				p = near[0]
+			}
 			a := f.NewMonster(c.Type)
 			SetResource(a.GetStats().GetResource(stats.Health), 0)
-			a.SetDrawPosition(geometry.Point{X: c.X, Y: c.Y}.ToPointF())
-			a.SetMapPosition(geometry.Point{X: c.X, Y: c.Y})
-			m.AddDownedActor(a, geometry.Point{X: c.X, Y: c.Y})
+			a.SetDrawPosition(p.ToPointF())
+			a.SetMapPosition(p)
+			m.AddDownedActor(a, p)
 		}
 	}
 	s.RestoreExplored(m)

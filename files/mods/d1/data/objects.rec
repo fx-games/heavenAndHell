@@ -12,6 +12,8 @@
 #   light             the radius it glows with; wall_light true: a decorative light D1 hangs itself
 #   container         true: it is looted (it may hold nothing)
 #   sfx               sfx.rec id it plays when used
+#   icon              its icons/tiles.rec id (default prop.<id without OBJ_>, "." + used once used); objects that
+#                     look alike from above name one icon
 #
 # D1's 26 shrines (shrinestrs and their MsgStrings), in shrine order: the index is the shrine's Var1.
 # max_lvl is D1's shrineMax, the deepest dungeon level the shrine may be generated on; avail is shrineAvail,
@@ -188,37 +190,46 @@ name: Lever
 sfx: IS_LEVER
 
 id: OBJ_CHEST1
-name: Small Chest
+icon: prop.chest
+name: Chest
 container: true
 sfx: IS_CHEST
 
 id: OBJ_CHEST2
+icon: prop.chest
 name: Chest
 container: true
 sfx: IS_CHEST
 
 id: OBJ_CHEST3
-name: Large Chest
+icon: prop.chest
+name: Chest
 container: true
 sfx: IS_CHEST
 
 id: OBJ_CANDLE1
 name: Candle
+light: 8
 
 id: OBJ_CANDLE2
 name: Candle
-light: 5
+light: 8
 
 id: OBJ_CANDLEO
+icon: prop.candle1
 name: Candle
+light: 8
 
 id: OBJ_BANNERL
+icon: prop.banner
 name: Banner
 
 id: OBJ_BANNERM
+icon: prop.banner
 name: Banner
 
 id: OBJ_BANNERR
+icon: prop.banner
 name: Banner
 
 id: OBJ_SKPILE
@@ -240,12 +251,15 @@ id: OBJ_SKSTICK5
 name: Skull on a Stick
 
 id: OBJ_CRUX1
+icon: prop.crux
 name: Crucified Skeleton
 
 id: OBJ_CRUX2
+icon: prop.crux
 name: Crucified Skeleton
 
 id: OBJ_CRUX3
+icon: prop.crux
 name: Crucified Skeleton
 
 id: OBJ_STAND
@@ -255,6 +269,7 @@ id: OBJ_ANGEL
 name: Angel Statue
 
 id: OBJ_BOOK2L
+icon: prop.book2
 name: Ancient Tome
 
 id: OBJ_BCROSS
@@ -305,18 +320,23 @@ id: OBJ_TORTURE5
 name: Hooked Body
 
 id: OBJ_BOOK2R
+icon: prop.book2
 name: Mythical Book
 
 id: OBJ_TORCHL
+icon: tile.wall_torch
 wall_light: true
 
 id: OBJ_TORCHR
+icon: tile.wall_torch
 wall_light: true
 
 id: OBJ_TORCHL2
+icon: tile.wall_torch
 wall_light: true
 
 id: OBJ_TORCHR2
+icon: tile.wall_torch
 wall_light: true
 
 id: OBJ_SARC
@@ -328,18 +348,23 @@ id: OBJ_FLAMEHOLE
 name: Flame Hole
 
 id: OBJ_FLAMELVR
+icon: prop.lever
 name: Lever
 
 id: OBJ_WATER
+icon: tile.water
 name: Water
 
 id: OBJ_BOOKLVR
+icon: prop.book1
 name: Book
 
 id: OBJ_BOOKSHELF
+icon: prop.bookcase.used
 name: Bookshelf
 
 id: OBJ_WEAPRACK
+icon: prop.weaponrack
 name: Weapon Stand
 
 id: OBJ_BARREL
@@ -350,36 +375,43 @@ id: OBJ_BARRELEX
 name: Barrel
 
 id: OBJ_SHRINEL
+icon: prop.shrine
 name: Shrine
 sfx: IS_MAGIC
 
 id: OBJ_SHRINER
+icon: prop.shrine
 name: Shrine
 sfx: IS_MAGIC
 
 id: OBJ_SKELBOOK
+icon: prop.book2
 name: Skeleton Tome
 container: true
 sfx: IS_ISCROL
 
 id: OBJ_BOOKCASEL
+icon: prop.bookcase
 name: Bookcase
 container: true
 sfx: IS_ISCROL
 
 id: OBJ_BOOKCASER
+icon: prop.bookcase
 name: Bookcase
 container: true
 sfx: IS_ISCROL
 
 id: OBJ_BOOKSTAND
+icon: prop.book2
 name: Library Book
 container: true
 sfx: IS_ISCROL
 
 id: OBJ_BOOKCANDLE
+icon: prop.candle2
 name: Candle
-light: 5
+light: 8
 
 id: OBJ_BLOODFTN
 name: Blood Fountain
@@ -389,24 +421,29 @@ name: Decapitated Body
 container: true
 
 id: OBJ_TCHEST1
-name: Small Chest
+icon: prop.chest
+name: Chest
 container: true
 sfx: IS_CHEST
 
 id: OBJ_TCHEST2
+icon: prop.chest
 name: Chest
 container: true
 sfx: IS_CHEST
 
 id: OBJ_TCHEST3
-name: Large Chest
+icon: prop.chest
+name: Chest
 container: true
 sfx: IS_CHEST
 
 id: OBJ_BLINDBOOK
+icon: prop.book1
 name: Book of the Blind
 
 id: OBJ_BLOODBOOK
+icon: prop.book1
 name: Book of Blood
 
 id: OBJ_PEDISTAL
@@ -420,6 +457,7 @@ name: Armor
 container: true
 
 id: OBJ_ARMORSTANDN
+icon: prop.armorstand.used
 name: Armor Stand
 
 id: OBJ_GOATSHRINE
@@ -442,27 +480,34 @@ id: OBJ_ALTBOY
 name: Altar
 
 id: OBJ_MCIRCLE1
+icon: prop.mcircle
 name: Magic Circle
 
 id: OBJ_MCIRCLE2
+icon: prop.mcircle
 name: Magic Circle
 
 id: OBJ_STORYCANDLE
+icon: prop.candle2
 name: Candle
-light: 3
+light: 8
 
 id: OBJ_STEELTOME
+icon: prop.book1
 name: Steel Tome
 
 id: OBJ_WARARMOR
+icon: prop.armorstand
 name: Armor
 container: true
 
 id: OBJ_WARWEAP
+icon: prop.weaponrack
 name: Weapon Rack
 container: true
 
 id: OBJ_TBCROSS
+icon: prop.bcross
 name: Burning Cross
 light: 10
 
@@ -471,6 +516,7 @@ name: Weapon Rack
 container: true
 
 id: OBJ_WEAPONRACKN
+icon: prop.weaponrack.used
 name: Weapon Rack
 
 id: OBJ_MUSHPATCH
@@ -483,4 +529,5 @@ id: OBJ_SLAINHERO
 name: Slain Hero
 
 id: OBJ_SIGNCHEST
-name: Large Chest
+icon: prop.chest
+name: Chest

@@ -14,6 +14,9 @@ import (
 type Population struct {
 	Type     int
 	SetLevel string // the quest whose set level this is (levels.rec's "quest:"), "" for a dungeon level
+	// LibraryStands is the chance in percent that a free cell of a library theme room gets a bookstand
+	// (levels.rec's "library_stands:"); 0 keeps D1's 1 in 1/2/2/5 by level type.
+	LibraryStands int
 }
 
 // populations are the knob's values: the level type whose rules a level is populated by.
@@ -30,6 +33,9 @@ func ParsePopulation(r recfile.Record) (p Population, ok bool, err error) {
 		return p, false, fmt.Errorf("levels.rec: population %q: want one of d1_cathedral, d1_catacombs, d1_caves, d1_hell", v)
 	}
 	p.SetLevel, _ = dungeon.Field(r, "quest")
+	if p.LibraryStands, err = dungeon.Int(r, "library_stands", 0); err != nil {
+		return p, false, err
+	}
 	return p, true, nil
 }
 
@@ -46,7 +52,7 @@ func (l *Levels) Populate(gnr *rules.Generator, q *rules.Quests, seeds [rules.Nu
 	if w, h := m.GetSize(); w != LevelSize || h != LevelSize || m.scale != 2 {
 		return nil, fmt.Errorf("population: level %d is %dx%d at scale %d, want %dx%d at scale 2", dlvl, w, h, m.scale, LevelSize, LevelSize)
 	}
-	g := &gen{quests: q, currlevel: dlvl, ltype: p.Type, cells: m}
+	g := &gen{quests: q, currlevel: dlvl, ltype: p.Type, cells: m, libraryStands: p.LibraryStands}
 	g.data = gnr.D
 	g.igen = &rules.Generator{D: gnr.D, R: &g.rng, UniqueDropped: make([]bool, len(gnr.UniqueDropped))}
 	defer func() {

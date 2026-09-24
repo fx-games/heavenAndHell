@@ -88,8 +88,8 @@ convention. Everything else has no Go identifier; look it up with `defs.Icon(def
 (panics on a typo) or `defs.IconOK(id)` when the name is optional (`common/item.go`'s IMISC fallback).
 Dungeon objects are `prop.<name>` (`defs.PropIconID`). Objects our top-down view can't tell apart (same sprite
 under another ID: trapped/quest chests, Warlord's racks; or another isometric angle: left/right shrines,
-bookcases, banners, crux skeletons, lectern books) are records with `same_as: prop.<other>` instead of `icon:`;
-give one its own `icon:` to tell it apart. `src/app/prop_folds_test.go` checks every prop record is some object's.
+bookcases, banners, crux skeletons, lectern books) name one shared record with `icon:` in `objects.rec`
+(`rules.Data.PropIcon`), so the remapper lists each look once. `src/app/prop_folds_test.go` checks every prop record is some object's.
 
 Remap visually with `scripts/remap_actors.sh`, `scripts/remap_items.sh`, `scripts/remap_tiles.sh`, `scripts/remap_skills.sh` (each opens
 the remapper on its rec file: click a name on the left, a tile on the right, `s` saves, `F10` quits). Adding a new

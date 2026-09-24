@@ -571,6 +571,26 @@ func (g *GameInstance) showDebugMenu() {
 			Action:   g.actions.goOneLevelDown,
 		},
 		{
+			MainText: "Gain 100 skill points",
+			Action: func() {
+				if h := g.state.GetPlayer().Hero(); h != nil {
+					h.SkillPts += 100
+				}
+			},
+		},
+		{
+			MainText: "Set max and current values of mana and hp to 999",
+			Action: func() {
+				player := g.state.GetPlayer()
+				if h := player.Hero(); h != nil {
+					h.HPBase, h.MaxHPBase, h.ManaBase, h.MaxManaBase = 999<<6, 999<<6, 999<<6, 999<<6
+					common.SyncHero(player)
+					player.GetStats().GetResource(stats.Health).SetToMax()
+					player.GetStats().GetResource(stats.Mana).SetToMax()
+				}
+			},
+		},
+		{
 			MainText: "Enchant Stash to +10",
 			Action: func() {
 				stash := g.state.GetPlayerStashInTown()

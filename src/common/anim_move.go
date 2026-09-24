@@ -78,6 +78,9 @@ func (m *MovementAnimation) GetActor() *Actor {
 }
 
 func (m *MovementAnimation) Merge(animation *MovementAnimation) *MovementAnimation {
+	if m.IsDone() { // finished but not yet removed: a merge would never tick, leaving the sprite behind
+		return animation
+	}
 	// just combine the paths
 	return &MovementAnimation{
 		actor:       m.actor,
