@@ -14,7 +14,7 @@ import (
 )
 
 // PieceSpec is one of a level's set pieces (levels.rec's "set_piece: <map> <placement> [quest]"): a map from the
-// mod's maps laid into the level, only while the quest is available on it when one is named. Placements:
+// mod's maps (or one of several, "a|b|c", picked per level) laid into the level, only while the quest is available on it when one is named. Placements:
 //
 //	chamber   one of the spine's chambers (D1's cathedral quest rooms, l1SelectChamber)
 //	room      a room of its own, where it breaks the least floor; corridors join it (D1's reserved rooms)
@@ -86,6 +86,9 @@ func (s staged) placePieces(m *mega, fsys fs.FS, chambers [][2]int, rnd *rand.Ra
 	var out []placed
 	hold := 3 + rnd.Intn(3) // D1's level 16 first room corner (l4FirstRoom: 14x14 somewhere in 3..5)
 	for _, spec := range specs {
+		if alts := strings.Split(spec.Map, "|"); len(alts) > 1 { // variants: one per level
+			spec.Map = alts[rnd.Intn(len(alts))]
+		}
 		lv := proj.Level(spec.Map)
 		if lv == nil {
 			return nil, fmt.Errorf("set_piece: the maps have no %s", spec.Map)

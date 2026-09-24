@@ -38,7 +38,8 @@
 #   open_halls       "<count> <min> <max>": clear open rectangles over the level (D1's cave blocks)
 #   lava_water, lava_rivers  a noise map's lakes and rivers become lava, fords keep the level whole
 #   canvas           centre the layout on a canvas this many units square
-#   set_piece        "<map> <placement> [quest]": lay one of the mod's maps in (with its <map>_open layout),
+#   set_piece        "<map> <placement> [quest]": lay one of the mod's maps in (with its <map>_open layout; "a|b|c"
+#                    lays one of them, picked per level),
 #                    only while the quest is available here when one is named. Placements: chamber (a spine
 #                    chamber), room (a room of its own), open (in open ground), quad0-quad3 (D1's level 16).
 #                    Its Location entities are the level's named spots (stairs, quest entrances, where uniques
@@ -195,7 +196,7 @@ tile: column tile.cathedral_column
 tile: pillar tile.pillar
 tile: lamp tile.lamp
 lamps: 5 9
-set_piece: piece_hh_meat_jack room
+set_piece: piece_hh_meat_jack|piece_hh_meat_jack2|piece_hh_meat_jack3 room
 
 map: cathedral_3
 name: Level 3\nCathedral
