@@ -19,7 +19,13 @@ Issues from the game design review against `REVIEW.md`, in priority order. Check
   read (seeds 1–2): D1 clears ~135 monsters on depth 1 in ~900 turns and reaches clvl 6 by depth 3; H&H ~60–120 in
   2–4k turns, clvl 3–4 by depth 3 (slower XP, more walking). The bot keeps its starting gear, so both die on 3–4.
   Found on the way: the possessed thief (mlvl 11) and the thief (mlvl 21) spawned from depth 1; now 6 and 12.
-- [ ] Autoplay bot: equip found gear, buy potions in town, cast spells, so its depth curve means more than relative pacing.
+- [x] Autoplay bot: equip found gear, buy potions in town, cast spells, so its depth curve means more than relative pacing.
+- [ ] H&H's slow start (autoplay, seed 1, Warrior): same monster count and level size as D1 on depth 1, but 25%
+  less experience (rats 25, bats 30 against D1's 46–90) in twice the turns. The torch's radius 1 (D1: 10) means the
+  hero must walk every corridor to see anything, and monsters in the dark never come: on depth 2, 60 of 143
+  monsters stood on cells the hero had passed and never fought. The torch (2500 turns) burns out on depth 2–3.
+  With shops and gear H&H catches up by depth 5–6. Options: torch radius 2, monsters that hear the hero within a
+  few cells, depth-1 experience at D1's floor, longer-burning torches.
 - [x] Variety: the type draw had 4 candidates at every depth (D1: 15-24). Now 6-15, from 42 monsters in 11
       families borrowed from D1 (sprite, brain and numbers; H&H names), see the end of H&H's enemies.rec:
       | depth | family (D1 source) | role |
