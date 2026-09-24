@@ -48,6 +48,11 @@ key: skeleton_king
 name: Kill King Zedek
 log_text: TEXT_HH_SHEKEL_SKELETON_KING_QUEST
 
+key: lost_pilgrims
+name: The lost pilgrims
+level: caves_10
+log_text: TEXT_HH_MARY_PILGRIMS_QUEST
+
 key: lucifer
 name: Kill Lucifer
 log_text: TEXT_HH_KIRIOTH_LUCIFER_QUEST
@@ -281,11 +286,48 @@ subject: shekel
 when: not flag("cleared:poisoned_water_supply") and not active("skeleton_king") and not done("skeleton_king")
 do: say(TEXT_HH_SHEKEL_WELCOME)
 
-# Sister Mary only ever welcomes you.
+# Sister Mary: her lost pilgrims, once King Zedek is dead and the way to the caves is open. A fetch quest on
+# caves 10; the rosary lies among the Forsaken, who are the pilgrims.
 
 event: on_talk
 subject: mary
+when: not flag("killed:king_zedek") and not active("lost_pilgrims") and not done("lost_pilgrims")
 do: say(TEXT_HH_MARY_WELCOME)
+
+event: on_talk
+subject: mary
+when: flag("killed:king_zedek") and not active("lost_pilgrims") and not done("lost_pilgrims")
+do: say(TEXT_HH_MARY_PILGRIMS_QUEST)
+do: activate_quest(lost_pilgrims)
+do: log_quest(lost_pilgrims)
+
+event: on_talk
+subject: mary
+when: active("lost_pilgrims") and not has("pilgrim_rosary")
+do: say(TEXT_HH_MARY_PILGRIMS_WAITING)
+
+event: on_talk
+subject: mary
+when: active("lost_pilgrims") and has("pilgrim_rosary")
+do: say(TEXT_HH_MARY_PILGRIMS_REWARD)
+do: take_item(pilgrim_rosary)
+do: complete_quest(lost_pilgrims)
+do: give_weapon(10)
+do: give_exp(1500)
+
+event: on_talk
+subject: mary
+when: done("lost_pilgrims")
+do: say(TEXT_HH_MARY_AFTER_PILGRIMS)
+
+event: on_enter_level
+subject: caves_10
+when: active("lost_pilgrims") and not flag("placed:pilgrim_rosary")
+do: set_flag(placed:pilgrim_rosary)
+do: place_item(pilgrim_rosary, anywhere)
+do: spawn_monster(rotting_pilgrim, anywhere)
+do: spawn_monster(rotting_pilgrim, anywhere)
+do: spawn_monster(black_death, anywhere)
 
 # The second act. Its bosses turn up the first time the hero enters their level while the quest is active; the
 # four adventurers each set one bit of the quest's v1, so all four dead is 15.

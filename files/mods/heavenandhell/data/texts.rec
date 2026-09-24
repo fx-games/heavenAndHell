@@ -243,3 +243,34 @@ id: TEXT_HH_END
 text: Kirioth is dead, and the last of the men who ruled the town in hell with him. You have won.
 +
 + Lucifer waits in the town. He has a few words left for you.
+
+# Sister Mary's pilgrims (the lost_pilgrims quest). An early clue: the Forsaken below are the town's own poor.
+
+id: TEXT_HH_MARY_PILGRIMS_QUEST
+text: You came back from the catacombs. Then perhaps you can help me.
++
++ Twelve of our poor from the lower quarter went down to the old cathedral to pray for the sick. Elder Kirioth led them himself. He came back. They did not.
++
++ He says they fled into the caves. I say someone must look for them.
++
++ If you find any of them, bring me something of theirs. Every one of them carried my rosary.
+
+id: TEXT_HH_MARY_PILGRIMS_WAITING
+text: Please, look for them in the caves. Anything they carried.
+
+id: TEXT_HH_PILGRIM_ROSARY
+text: A wooden rosary, worn smooth. One of Sister Mary's.
++
++ The hand that held it was still closed around it, and the hand was grey with the plague.
+
+id: TEXT_HH_MARY_PILGRIMS_REWARD
+text: That is mine. I carved it for old Tobiah.
++
++ Those creatures down there, the walking dead... They were never strangers, were they? They are ours.
++
++ Kirioth told us the plague came up from the caves. Now I wonder who carried it down.
++
++ Take this, and say nothing to the Elder. Not yet.
+
+id: TEXT_HH_MARY_AFTER_PILGRIMS
+text: I pray for them every night. I no longer pray for the Elder.

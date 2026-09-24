@@ -37,7 +37,9 @@ Issues from the game design review against `REVIEW.md`, in priority order. Check
 
 ## 3. Mid-game quests (criterion 3)
 
-- [ ] Act 1 has four quests (D1: ~16); depths 9-15 have none.
+- [x] Sister Mary's "The lost pilgrims" (caves 10, fetch; early clue). Proposed, not chosen: Where is Jim? (Abel,
+      caves 11), Seal of the Church (Kirioth, hell 14 boss), Consecrate the Dead (item use, needs engine hook).
+- [ ] Act 1 still thin at depths 11-15.
 - [ ] Nearly all are "kill X"; add fetch/lever/rule-changing set pieces like the evidence hunt.
 
 ## 4. Bosses

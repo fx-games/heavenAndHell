@@ -207,6 +207,30 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	talk("shekel", "")
 	expect("skeleton_king", rules.QuestDone)
 
+	// Sister Mary's lost pilgrims: the rosary waits among the Forsaken on caves 10 once she has asked
+	talk("mary", "Twelve of our poor")
+	expect("lost_pilgrims", rules.QuestActive)
+	talk("mary", "look for them")
+	s.MapTransition(gridmap.Transition{TargetMap: "caves_10", TargetLocation: "ladder_up"})
+	var rosary *common.Item
+	for _, it := range s.GetMap().Items() {
+		if it.Name() == "A pilgrim's rosary" {
+			rosary = it
+		}
+	}
+	if rosary == nil {
+		t.Fatal("no rosary on caves 10 while the lost pilgrims are sought")
+	}
+	s.GetMap().MoveActor(player, rosary.MapPosition())
+	g.GetActionBroker().Execute(common.NewPickUpAction(cause, player))
+	items, exp = len(player.GetInventory().Items()), player.Hero().Exp
+	talk("mary", "They are ours")
+	expect("lost_pilgrims", rules.QuestDone)
+	if len(player.GetInventory().Items()) != items || player.Hero().Exp != exp+1500 { // the rosary for a weapon
+		t.Errorf("the pilgrims' reward: %d -> %d items, %d -> %d exp", items, len(player.GetInventory().Items()), exp, player.Hero().Exp)
+	}
+	talk("mary", "no longer pray for the Elder")
+
 	talk("kirioth", "")
 	expect("lucifer", rules.QuestActive)
 	for dlvl := 5; dlvl <= 16 && !s.GetFlags().IsSet("killed:lucifer"); dlvl++ {

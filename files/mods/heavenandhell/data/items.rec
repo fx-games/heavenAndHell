@@ -1322,6 +1322,17 @@ category: scroll
 charges: -1
 untargeted_action: read_message(TEXT_HH_ZEDEK_CROWN)
 
+# Sister Mary's pilgrims (the lost_pilgrims quest): lies among the Forsaken on caves 10 while the quest is active.
+name: A pilgrim's rosary
+internal_name: pilgrim_rosary
+icon: item.amulet_of_adornment
+dlvl: 1
+cost: 0
+drop: IDROP_NEVER
+category: scroll
+charges: -1
+untargeted_action: read_message(TEXT_HH_PILGRIM_ROSARY)
+
 # The evidence against the town (main's NewEvidence*): hidden until Lucifer's gift opens the hero's eyes.
 
 name: Purity report
