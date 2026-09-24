@@ -66,8 +66,11 @@ D1's RNG order. What is kept from D1, and how it was checked:
   (l1SelectChamber), the catacombs' and the Warlord's in a room of their own, the Anvil and the stairs minisets in open
   ground, Diablo's quads mirrored round level 16's centre. The Warlord's piece holds the stairs down, so his hall is
   the way on (l4PlaceStairs). Uniques stand where their piece says, quest entrances are the piece's spots.
-- **How much.** Knobs were tuned against the old port over 20 seeds: monsters, barrels, chests, sarcophagi, lamps,
-  torches, traps, shrines, theme rooms and hooked bodies are within D1's range per level. D1's closed doors are solid,
+- **How much, and where.** Knobs were tuned against the old port over 20 seeds, per level and by the shape of the
+  cells round each thing (which sides are floor): monsters, barrels, chests, sarcophagi, lamps, torches (hung on
+  the wall facing east or south, standing ones on walls open west or north only), traps, shrines, theme rooms,
+  hooked bodies, doors, cave fences and fence doors, arches (arcades), pillars, and the wall variants (grates in thin
+  walls, missile-passing stubs at corners, hell's and the caves' see-through pillars) are within D1's range. D1's closed doors are solid,
   which is what parts rooms for its theme rooms.
 - **Tests.** `TestPopulateStandIns` (six games, all 16 levels: everything reachable, every piece's spot reachable once
   it opens, torches on walls, story books), `TestAltConnected` (200 seeds per type), and the playthrough's quest lines.
@@ -148,7 +151,7 @@ Every D1 single-player quest runs as D1 1.09 progresses it (`common/quest.go`):
 
 - Town: rebuilding Tristram's D1 layout in LDtk.
 - Difficulty levels (Nightmare/Hell).
-- Levels, what the stand-ins don't do yet (`docs/D1_PLAN.md` "Dungeon generation"): D1's cave fences (l3Fence: wooden
-  fence lines across passages with fence doors, ~4 doors a level) are only a wall decoration; the cathedral has about
-  twice D1's doors, because a shared wall keeps every opening the layout cut (one opening per wall would bring it down
-  without losing theme rooms); the stairs are the layouts' stair nooks, not D1's stairs minisets.
+- Levels, what the stand-ins don't do yet (`docs/D1_PLAN.md` "Dungeon generation"): the stairs are the layouts'
+  stair nooks, not D1's stairs minisets; the cathedral has ~13 doors and ~4.4 theme rooms a level against D1's ~11
+  and ~5.2; D1's fences that line cave walls (l3Fence's first loop) are left out, only the lines across passages are
+  built.

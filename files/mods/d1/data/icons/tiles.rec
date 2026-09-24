@@ -500,6 +500,26 @@ internal_name: prop.candle1
 name: Candle
 icon: 110
 
+internal_name: prop.torchl
+reference_image: reference/d1_sprites/tiles/objects/wtorch4.frame01.png
+name: Wall Torch (torchl, facing east)
+same_as: tile.wall_torch
+
+internal_name: prop.torchr
+reference_image: reference/d1_sprites/tiles/objects/wtorch3.frame01.png
+name: Wall Torch (torchr, facing south)
+same_as: tile.wall_torch
+
+internal_name: prop.torchl2
+reference_image: reference/d1_sprites/tiles/objects/wtorch1.frame01.png
+name: Wall Torch (torchl2, hung, facing east)
+same_as: tile.wall_torch
+
+internal_name: prop.torchr2
+reference_image: reference/d1_sprites/tiles/objects/wtorch2.frame01.png
+name: Wall Torch (torchr2, hung, facing south)
+same_as: tile.wall_torch
+
 internal_name: prop.candle2
 reference_image: reference/d1_sprites/tiles/objects/candle2.frame01.png
 name: Candle (lit)
@@ -954,23 +974,3 @@ internal_name: tile.hell_floor_blocks_missiles
 name: Hell Floor (blocks missiles)
 same_as: tile.dungeon_red_earth_floor
 tags: blocks_missiles
-
-internal_name: tile.cathedral_pillar
-name: Cathedral Pillar
-same_as: tile.pillar
-tags: blocks_movement, blocks_missiles
-
-internal_name: tile.catacombs_pillar
-name: Catacombs Pillar
-same_as: tile.pillar
-tags: blocks_movement, blocks_missiles
-
-internal_name: tile.caves_pillar
-name: Caves Pillar
-same_as: tile.pillar
-tags: blocks_movement, blocks_missiles
-
-internal_name: tile.hell_pillar
-name: Hell Pillar
-same_as: tile.pillar
-tags: blocks_movement, blocks_missiles

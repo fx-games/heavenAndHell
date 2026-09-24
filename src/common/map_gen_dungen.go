@@ -103,10 +103,7 @@ func (g *MapGenerator) addDungenTiles(m *gridmap.GridMap[*Actor, *Item, Object],
 	}
 	g.doorTiles[m.GetName()] = [3]int32{tileMap.FloorTile, tileMap.OpenDoor, tileMap.ClosedDoor}
 	secret := g.secretDoorChance(dlvl)
-	pillar, ok := defs.IconOK("tile." + tiles + "_pillar") // each tile set's own, so a remap tells them apart
-	if !ok {
-		pillar = tileMap.WallTile
-	}
+	pillar := tileMap.WallTile // a pillar levels.rec's "tile:" names no record for
 	width, height := layout.GetSize()
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {

@@ -111,6 +111,8 @@ func (g *gen) cellFlags(x, y int) hhm.Flags {
 		return hhm.Flags{BlocksMovement: true, BlocksView: true, BlocksMissiles: true}
 	case Pillar:
 		return hhm.Flags{BlocksMovement: true, BlocksMissiles: true}
+	case Fence:
+		return hhm.Flags{BlocksMovement: true}
 	case Lava:
 		return hhm.Flags{BlocksMovement: true, Damaging: true}
 	case Lake:
@@ -138,19 +140,16 @@ func (g *gen) floodCells() {
 	}
 }
 
-// addCellObjs ports AddL1Objs/AddL2Objs/AddL3Objs on cells: a door object on every door, turned the way its
-// wall runs, and on the cathedral the 5-9 lamps l1LAMPS stands in open floor (DRLG_L1's lamp minisets).
+// addCellObjs ports AddL1Objs/AddL2Objs/AddL3Objs on cells: a light on each of the cathedral's lamps, and a door
+// object on every door, turned the way its wall runs.
 func (g *gen) addCellObjs(ltype int) {
+	// [0] in a wall running north-south (the way through runs east-west), [1] across it; the caves' are the other way
 	doors := map[int][2]int{rules.DTypeCathedral: {rules.ObjL1LDOOR, rules.ObjL1RDOOR},
-		rules.DTypeCatacombs: {rules.ObjL2LDOOR, rules.ObjL2RDOOR}, rules.DTypeCaves: {rules.ObjL3LDOOR, rules.ObjL3RDOOR}}
-	if ltype == rules.DTypeCathedral && !g.setlevel {
-		for n := g.rnd(5) + 5; n > 0; n-- {
-			for try := 0; try < 1000; try++ {
-				x, y := g.rnd(80)+16, g.rnd(80)+16
-				if g.openAround(x, y) && g.dObj(x, y) == 0 {
-					g.addObject(rules.ObjL1LIGHT, x, y)
-					break
-				}
+		rules.DTypeCatacombs: {rules.ObjL2LDOOR, rules.ObjL2RDOOR}, rules.DTypeCaves: {rules.ObjL3RDOOR, rules.ObjL3LDOOR}}
+	for y := 0; y < LevelSize; y++ { // AddL1Objs: a light on each lamp (piece 270)
+		for x := 0; x < LevelSize; x++ {
+			if ltype == rules.DTypeCathedral && g.cells.Role(pt(x, y)) == "lamp" {
+				g.addObject(rules.ObjL1LIGHT, x+CellOrigin, y+CellOrigin)
 			}
 		}
 	}
@@ -186,25 +185,25 @@ func (g *gen) openAround(x, y int) bool {
 
 // addCellTorches ports AddL2Torches on cells. D1 hangs a torch on one wall piece of each wall megatile facing
 // the floor (1 in 3) and stands one in front of another (1 in 10); on cells that is a wall cell every eight along
-// a wall with floor below it (TORCHL2) or to its right (TORCHR2), and a torch on the floor west or north of one
-// (TORCHL/TORCHR), which hangTorchesOnWalls hangs on the wall. The spacing gives D1's count per level.
+// a wall with floor east of it (TORCHL2) or south of it (TORCHR2), and a torch on the floor west or north of one
+// (TORCHL/TORCHR), which hangTorchesOnWalls hangs on the wall. Sides and spacing are D1's.
 func (g *gen) addCellTorches() {
 	for j := 0; j < 112; j++ {
 		for i := 0; i < 112; i++ {
 			if g.flags[i][j]&bflagPopulated != 0 || g.cellAt(i, j) != Wall {
 				continue
 			}
-			below, right := g.cellFloor(i, j+1), g.cellFloor(i+1, j)
-			if below && !right && i%8 == 0 && g.rnd(3) == 0 {
+			n, e, so, w := g.cellFloor(i, j-1), g.cellFloor(i+1, j), g.cellFloor(i, j+1), g.cellFloor(i-1, j)
+			if e && !n && !so && j%8 == 0 && g.rnd(3) == 0 { // D1's piece 1: floor east (and maybe west)
 				g.addObject(rules.ObjTORCHL2, i, j)
 			}
-			if right && !below && j%8 == 0 && g.rnd(3) == 0 {
+			if so && !e && !w && i%8 == 0 && g.rnd(3) == 0 { // piece 5: floor south (and maybe north)
 				g.addObject(rules.ObjTORCHR2, i, j)
 			}
-			if g.cellFloor(i-1, j) && j%8 == 0 && g.rnd(10) == 0 && g.dObj(i-1, j) == 0 && g.dObj(i, j) == 0 { // hangTorchesOnWalls hangs it back east
+			if w && !n && !e && !so && j%4 == 0 && g.rnd(10) == 0 && g.dObj(i-1, j) == 0 && g.dObj(i, j) == 0 { // floor west only: hung back east
 				g.addObject(rules.ObjTORCHL, i-1, j)
 			}
-			if g.cellFloor(i, j-1) && i%8 == 0 && g.rnd(10) == 0 && g.dObj(i, j-1) == 0 && g.dObj(i, j) == 0 { // and this one back south
+			if n && !e && !so && !w && i%4 == 0 && g.rnd(10) == 0 && g.dObj(i, j-1) == 0 && g.dObj(i, j) == 0 { // floor north only: hung back south
 				g.addObject(rules.ObjTORCHR, i, j-1)
 			}
 		}
@@ -224,7 +223,7 @@ func (g *gen) addCellHookedBodies(freq int) {
 			case g.cellFloor(x+1, y) && g.cellAt(x, y+1) == Wall && g.cellAt(x, y-1) == Wall:
 				g.addObject([3]int{rules.ObjTORTURE1, rules.ObjTORTURE2, rules.ObjTORTURE5}[g.rnd(3)], x+1, y)
 			case g.cellFloor(x, y+1) && g.cellAt(x+1, y) == Wall && g.cellAt(x-1, y) == Wall:
-				g.addObject([2]int{rules.ObjTORTURE3, rules.ObjTORTURE4}[g.rnd(2)], x, y+1)
+				g.addObject([2]int{rules.ObjTORTURE3, rules.ObjTORTURE4}[g.rnd(2)], x, y) // hung on the wall itself
 			}
 		}
 	}

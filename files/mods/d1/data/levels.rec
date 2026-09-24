@@ -46,10 +46,21 @@
 #   theme_rooms      "<min> <max> <freq>": D1's theme rooms walled into open ground (theme_room_doors: a door,
 #                    not a gap; theme_room_random_size: shrunk at random, as in hell)
 #   posts            chance a room cell with room or wall all round it gets a pillar
+#   fences           "<chance> <door chance>": D1's cave fences, lines across passages from wall to wall, one gap
+#                    each, a fence door with the door chance
+#   one_opening      true: two rooms meet through one doorway, the others walled up (D1's walls)
 #   door_chance      chance each doorway is a door (unset: the layout's doors stay as they are)
+#   room_doors       "<max size> <chance>": every doorway of a room of at most that many units becomes a door with
+#                    the chance (D1's side rooms behind doors, its theme rooms)
 #   scale            2 draws every unit as 2x2 cells, D1's megatiles (a D1 population needs 80x80 cells at 2)
-#   decoration       "<tiles.rec record> <percent>": that share of the walls facing floor drawn as the record
-#                    (and blocking as its tags say). Repeatable, rolled in order.
+#   lamps            "<min> <max>": free-standing lamps in open floor (role lamp; a D1 cathedral population hangs its
+#                    light on each)
+#   decoration       "<tiles.rec record> <percent> [where]": that share of the walls beside the floor drawn as the
+#                    record (and blocking as its tags say). where: face (any, the default), thin (floor on two
+#                    opposite sides), corner (two neighbouring sides, or three), end (three or four), free (four).
+#                    Repeatable, rolled in order.
+#   tile             "<role> <tiles.rec record>": what a kind of cell is drawn as: pillar (posts), arch (an arcade's),
+#                    column (a spine chamber's), lamp, fence. Repeatable.
 #   population       d1_cathedral, d1_catacombs, d1_caves, d1_hell: D1's monsters, objects, items and theme
 #                    rooms by that level type's rules, rolled from the level's D1 seed
 #
@@ -128,18 +139,24 @@ min_room: 2
 grow: 4
 hall_chance: 0.15
 spine: true
-arch_chance: 0.12
+arch_chance: 0.2
 loop_chance: 0.6
 loop_distance: 8
 posts: 0.02
-door_chance: 0.55
+one_opening: true
+door_chance: 0
+room_doors: 12 1
 canvas: 40
 scale: 2
 population: d1_cathedral
-decoration: tile.arch 3.3
-decoration: tile.grate 2.1
-decoration: tile.cathedral_wall_missiles_pass 2
-decoration: tile.cathedral_wall_see_through 1.5
+decoration: tile.grate 26 thin
+decoration: tile.cathedral_wall_missiles_pass 21 corner
+decoration: tile.cathedral_wall_see_through 1.3 face
+tile: arch tile.arch
+tile: column tile.cathedral_column
+tile: pillar tile.pillar
+tile: lamp tile.lamp
+lamps: 5 9
 tiles: cathedral
 music: cathedral
 exit: ladder_up -> town, to_cathedral
@@ -156,18 +173,24 @@ min_room: 2
 grow: 4
 hall_chance: 0.15
 spine: true
-arch_chance: 0.12
+arch_chance: 0.2
 loop_chance: 0.6
 loop_distance: 8
 posts: 0.02
-door_chance: 0.55
+one_opening: true
+door_chance: 0
+room_doors: 12 1
 canvas: 40
 scale: 2
 population: d1_cathedral
-decoration: tile.arch 3.3
-decoration: tile.grate 2.1
-decoration: tile.cathedral_wall_missiles_pass 2
-decoration: tile.cathedral_wall_see_through 1.5
+decoration: tile.grate 26 thin
+decoration: tile.cathedral_wall_missiles_pass 21 corner
+decoration: tile.cathedral_wall_see_through 1.3 face
+tile: arch tile.arch
+tile: column tile.cathedral_column
+tile: pillar tile.pillar
+tile: lamp tile.lamp
+lamps: 5 9
 set_piece: piece_l1_butcher chamber butcher
 set_piece: piece_l1_pwater open pwater
 tiles: cathedral
@@ -187,18 +210,24 @@ min_room: 2
 grow: 4
 hall_chance: 0.15
 spine: true
-arch_chance: 0.12
+arch_chance: 0.2
 loop_chance: 0.6
 loop_distance: 8
 posts: 0.02
-door_chance: 0.55
+one_opening: true
+door_chance: 0
+room_doors: 12 1
 canvas: 40
 scale: 2
 population: d1_cathedral
-decoration: tile.arch 3.3
-decoration: tile.grate 2.1
-decoration: tile.cathedral_wall_missiles_pass 2
-decoration: tile.cathedral_wall_see_through 1.5
+decoration: tile.grate 26 thin
+decoration: tile.cathedral_wall_missiles_pass 21 corner
+decoration: tile.cathedral_wall_see_through 1.3 face
+tile: arch tile.arch
+tile: column tile.cathedral_column
+tile: pillar tile.pillar
+tile: lamp tile.lamp
+lamps: 5 9
 set_piece: piece_l1_leoric chamber leoric
 tiles: cathedral
 music: cathedral
@@ -217,18 +246,24 @@ min_room: 2
 grow: 4
 hall_chance: 0.15
 spine: true
-arch_chance: 0.12
+arch_chance: 0.2
 loop_chance: 0.6
 loop_distance: 8
 posts: 0.02
-door_chance: 0.55
+one_opening: true
+door_chance: 0
+room_doors: 12 1
 canvas: 40
 scale: 2
 population: d1_cathedral
-decoration: tile.arch 3.3
-decoration: tile.grate 2.1
-decoration: tile.cathedral_wall_missiles_pass 2
-decoration: tile.cathedral_wall_see_through 1.5
+decoration: tile.grate 26 thin
+decoration: tile.cathedral_wall_missiles_pass 21 corner
+decoration: tile.cathedral_wall_see_through 1.3 face
+tile: arch tile.arch
+tile: column tile.cathedral_column
+tile: pillar tile.pillar
+tile: lamp tile.lamp
+lamps: 5 9
 set_piece: piece_l1_banner chamber banner
 tiles: cathedral
 music: cathedral
@@ -254,7 +289,6 @@ room_ratio: 0.6
 door_distance: 4
 min_rooms: 8
 inner_room_chance: 0
-posts: 0.03
 door_chance: 0.5
 theme_rooms: 6 10 0
 theme_room_doors: true
@@ -290,7 +324,6 @@ room_ratio: 0.6
 door_distance: 4
 min_rooms: 8
 inner_room_chance: 0
-posts: 0.03
 door_chance: 0.5
 theme_rooms: 6 10 0
 theme_room_doors: true
@@ -321,7 +354,6 @@ room_ratio: 0.6
 door_distance: 4
 min_rooms: 8
 inner_room_chance: 0
-posts: 0.03
 door_chance: 0.5
 theme_rooms: 6 10 0
 theme_room_doors: true
@@ -351,7 +383,6 @@ room_ratio: 0.6
 door_distance: 4
 min_rooms: 8
 inner_room_chance: 0
-posts: 0.03
 door_chance: 0.5
 theme_rooms: 6 10 0
 theme_room_doors: true
@@ -381,8 +412,11 @@ theme_rooms: 5 10 0
 canvas: 40
 scale: 2
 population: d1_caves
-decoration: tile.wooden_fence 8.8
-decoration: tile.cave_wall_see_through 1.5
+fences: 0.2 0.45
+tile: fence tile.wooden_fence
+decoration: tile.cave_wall_see_through 100 free
+decoration: tile.cave_wall_see_through 25 end
+decoration: tile.cave_wall_missiles_pass 1.2 corner
 tiles: caves
 music: caves
 exit: ladder_up -> catacombs_8, ladder_down
@@ -406,8 +440,11 @@ theme_rooms: 5 10 0
 canvas: 40
 scale: 2
 population: d1_caves
-decoration: tile.wooden_fence 8.8
-decoration: tile.cave_wall_see_through 1.5
+fences: 0.2 0.45
+tile: fence tile.wooden_fence
+decoration: tile.cave_wall_see_through 100 free
+decoration: tile.cave_wall_see_through 25 end
+decoration: tile.cave_wall_missiles_pass 1.2 corner
 set_piece: piece_l3_anvil open anvil
 tiles: caves
 music: caves
@@ -431,8 +468,11 @@ theme_rooms: 5 10 0
 canvas: 40
 scale: 2
 population: d1_caves
-decoration: tile.wooden_fence 8.8
-decoration: tile.cave_wall_see_through 1.5
+fences: 0.2 0.45
+tile: fence tile.wooden_fence
+decoration: tile.cave_wall_see_through 100 free
+decoration: tile.cave_wall_see_through 25 end
+decoration: tile.cave_wall_missiles_pass 1.2 corner
 tiles: caves
 music: caves
 exit: ladder_up -> caves_10, ladder_down
@@ -455,8 +495,11 @@ theme_rooms: 5 10 0
 canvas: 40
 scale: 2
 population: d1_caves
-decoration: tile.wooden_fence 8.8
-decoration: tile.cave_wall_see_through 1.5
+fences: 0.2 0.45
+tile: fence tile.wooden_fence
+decoration: tile.cave_wall_see_through 100 free
+decoration: tile.cave_wall_see_through 25 end
+decoration: tile.cave_wall_missiles_pass 1.2 corner
 tiles: caves
 music: caves
 exit: ladder_up -> caves_11, ladder_down
@@ -479,8 +522,8 @@ theme_room_random_size: true
 canvas: 40
 scale: 2
 population: d1_hell
-decoration: tile.hell_wall_see_through 7.5
-decoration: tile.hell_wall_sight_passes 2.5
+decoration: tile.hell_wall_sight_passes 30 corner
+tile: pillar tile.hell_wall_see_through
 set_piece: piece_l4_warlord room warlord
 tiles: hell
 music: hell
@@ -506,8 +549,8 @@ theme_room_random_size: true
 canvas: 40
 scale: 2
 population: d1_hell
-decoration: tile.hell_wall_see_through 7.5
-decoration: tile.hell_wall_sight_passes 2.5
+decoration: tile.hell_wall_sight_passes 30 corner
+tile: pillar tile.hell_wall_see_through
 tiles: hell
 music: hell
 exit: ladder_up -> hell_13, ladder_down
@@ -530,8 +573,8 @@ theme_room_random_size: true
 canvas: 40
 scale: 2
 population: d1_hell
-decoration: tile.hell_wall_see_through 7.5
-decoration: tile.hell_wall_sight_passes 2.5
+decoration: tile.hell_wall_sight_passes 30 corner
+tile: pillar tile.hell_wall_see_through
 set_piece: piece_l4_pentagram open
 tiles: hell
 music: hell
@@ -560,8 +603,8 @@ theme_room_random_size: true
 canvas: 40
 scale: 2
 population: d1_hell
-decoration: tile.hell_wall_see_through 7.5
-decoration: tile.hell_wall_sight_passes 2.5
+decoration: tile.hell_wall_sight_passes 30 corner
+tile: pillar tile.hell_wall_see_through
 set_piece: piece_l4_diab1 quad0
 set_piece: piece_l4_diab2 quad1
 set_piece: piece_l4_diab3 quad2

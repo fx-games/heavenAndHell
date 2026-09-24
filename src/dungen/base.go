@@ -19,6 +19,7 @@ const (
 	Shallows // the water's edge, waded through
 	Lava     // seen across, never walked, burns (the passes' lava)
 	Pillar   // a lone column: blocks like a wall, stands on floor
+	Fence    // blocks the way, not the view (D1's cave fences)
 )
 
 type DungeonMap struct {
@@ -31,8 +32,12 @@ type DungeonMap struct {
 	themeRooms [][4]int                  // the theme rooms a pass walled in: x, y, w, h in grid units before scaling
 	scale      int                       // cells per grid unit the passes drew with (0: not drawn by them)
 	pieces     []Stamped                 // the set pieces laid into it
-	art        map[geometry.Point]string // cells drawn as a tiles.rec record of their own (decorate)
+	art        map[geometry.Point]string // cells drawn as a tiles.rec record of their own (decorate, roles)
+	role       map[geometry.Point]string // what a pillar is: pillar, arch, column, lamp
 }
+
+// Role is what the pillar at p is (pillar, arch, column, lamp), "" for none.
+func (m *DungeonMap) Role(p geometry.Point) string { return m.role[p] }
 
 // Art is the tiles.rec record a cell is drawn as instead of its tile set's, if any.
 func (m *DungeonMap) Art(p geometry.Point) (string, bool) { r, ok := m.art[p]; return r, ok }
@@ -297,7 +302,7 @@ func (m *DungeonMap) IsWalkable(pos geometry.Point) bool {
 		return false
 	}
 	tileAt := m.GetTileAt(pos)
-	return tileAt != Wall && tileAt != Lake && tileAt != Lava && tileAt != Pillar
+	return tileAt != Wall && tileAt != Lake && tileAt != Lava && tileAt != Pillar && tileAt != Fence
 }
 
 func (m *DungeonMap) AddDoorAndConnect(absoluteDoorPos geometry.Point, direction geometry.CompassDirection, asDoor bool) {
@@ -626,6 +631,8 @@ func NewDungeonMap(width, height int) *DungeonMap {
 		tiles:      make([]DungeonTile, width*height),
 		rooms:      make([]*DungeonRoom, 0),
 		pathfinder: geometry.NewPathRange(geometry.NewRect(0, 0, width, height)),
+		art:        map[geometry.Point]string{},
+		role:       map[geometry.Point]string{},
 	}
 }
 

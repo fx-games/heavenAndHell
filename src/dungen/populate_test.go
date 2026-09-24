@@ -143,7 +143,8 @@ func TestPopulateStandIns(t *testing.T) {
 				case o.Kind == rules.ObjSLAINHERO:
 					heroes++
 				}
-				if o.Kind != rules.ObjTRAPL && o.Kind != rules.ObjTRAPR && !strings.Contains(name, "TORCH") && !o.DoorFlag {
+				hung := d.Objects[o.Kind].SelFlag == 0 && !m.IsWalkable(geometry.Point{X: o.X - CellOrigin, Y: o.Y - CellOrigin}) // a lamp's light, a hooked body
+				if o.Kind != rules.ObjTRAPL && o.Kind != rules.ObjTRAPR && !strings.Contains(name, "TORCH") && !o.DoorFlag && !hung {
 					check(o.X, o.Y, "object "+name)
 				}
 				for _, mon := range lvl.Monsters { // moveMonstersOffObjects

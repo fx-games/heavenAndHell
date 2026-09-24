@@ -181,7 +181,8 @@ func (g *gen) initRndBarrels() {
 }
 
 func (g *gen) wallTrapLocOk(x, y int) bool {
-	return g.flagAt(x, y)&bflagPopulated == 0 && g.tileFlags(x, y).HoldsTrap
+	return g.flagAt(x, y)&bflagPopulated == 0 && g.tileFlags(x, y).HoldsTrap &&
+		objKindOrNone(g.objAt(x-1, y)) != rules.ObjTORCHL && objKindOrNone(g.objAt(x, y-1)) != rules.ObjTORCHR // hangTorchesOnWalls' wall
 }
 
 // addObjTraps ports AddObjTraps: arrow, fire and lightning traps in the walls aimed at doors and chests.

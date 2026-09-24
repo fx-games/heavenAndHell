@@ -169,11 +169,15 @@ func placeObject(f *Factory, m *gridmap.GridMap[*Actor, *Item, Object], lvl *dun
 		return
 	}
 	if f.objectDisplay(o.Kind).WallLight {
-		icon := defs.IconBrazier
-		onFloor := m.IsTileWalkable(p)
-		if o.Kind != rules.ObjL1LIGHT {
+		icon, ok := defs.IconOK(defs.PropIconID(f.Generator.D.Objects[o.Kind].Name)) // its own record, for the remapper
+		switch {
+		case ok:
+		case o.Kind == rules.ObjL1LIGHT:
+			icon = defs.IconBrazier
+		default:
 			icon = defs.IconWallTorch
 		}
+		onFloor := m.IsTileWalkable(p)
 		if onFloor {
 			if !m.CanPlaceActorHere(p) || m.IsItemAt(p) {
 				return

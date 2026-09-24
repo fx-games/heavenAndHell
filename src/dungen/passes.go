@@ -15,22 +15,30 @@ import (
 // They work on the layout's grid; with scale 2 that grid is drawn two by two cells (D1's megatiles, toCells),
 // which is how D1's level types are laid out at their own scale. Every level they touch ends connected.
 type Passes struct {
-	Grow         int          // grow rectangular rooms up to this side until single walls part them; 0: off
-	HallChance   float64      // a grown room at least 6 wide and 8 long becomes a pillared hall (two arcades)
-	Spine        bool         // D1's first cathedral room: up to three pillared chambers on a long pillared hall
-	Mirror       bool         // mirror the layout left-right and top-bottom (D1 L4 builds a quadrant and mirrors it)
-	ArchChance   float64      // a straight wall between two rooms becomes an arcade (`#.#.#`)
-	LoopChance   float64      // chance each wall between two spots farther than LoopDistance apart on foot opens
-	LoopDistance int          // on foot, in grid cells
-	Lava         *NoiseConfig // its lakes and rivers become lava, ringed with floor; fords keep the level whole
-	Posts        float64      // chance a room cell with only room or wall round it gets a pillar
-	DoorChance   float64      // chance each doorway (a 1-wide gap, or a door the layout made) is a door; <0: leave doors be
-	Canvas       int          // the layout is centred on a canvas this many cells square; 0: its own size
-	Scale        int          // 2 draws each cell as 2x2 (D1's megatiles); 1 leaves it
-	Themes       *ThemeRooms  // D1's theme rooms, walled in inside open ground once the level is laid out
-	Pieces       []PieceSpec  // the level's set pieces
-	Halls        [3]int       // open_halls: how many open rectangles of min..max cells a side to clear over the level
-	Decor        []Decor      // wall cells facing the floor drawn as another tiles.rec record (decoration:)
+	Grow         int               // grow rectangular rooms up to this side until single walls part them; 0: off
+	HallChance   float64           // a grown room at least 6 wide and 8 long becomes a pillared hall (two arcades)
+	Spine        bool              // D1's first cathedral room: up to three pillared chambers on a long pillared hall
+	Mirror       bool              // mirror the layout left-right and top-bottom (D1 L4 builds a quadrant and mirrors it)
+	ArchChance   float64           // a straight wall between two rooms becomes an arcade (`#.#.#`)
+	LoopChance   float64           // chance each wall between two spots farther than LoopDistance apart on foot opens
+	LoopDistance int               // on foot, in grid cells
+	Lava         *NoiseConfig      // its lakes and rivers become lava, ringed with floor; fords keep the level whole
+	Posts        float64           // chance a room cell with only room or wall round it gets a pillar
+	DoorChance   float64           // chance each doorway (a 1-wide gap, or a door the layout made) is a door; <0: leave doors be
+	Canvas       int               // the layout is centred on a canvas this many cells square; 0: its own size
+	Scale        int               // 2 draws each cell as 2x2 (D1's megatiles); 1 leaves it
+	Themes       *ThemeRooms       // D1's theme rooms, walled in inside open ground once the level is laid out
+	Pieces       []PieceSpec       // the level's set pieces
+	Halls        [3]int            // open_halls: how many open rectangles of min..max cells a side to clear over the level
+	Decor        []Decor           // wall cells facing the floor drawn as another tiles.rec record (decoration:)
+	Tiles        map[string]string // tile: <role> <record>: what each kind of pillar is drawn as
+	Lamps        [2]int            // lamps: <min> <max> free-standing lamps in open floor (D1's l1LAMPS)
+	Fences       [2]float64        // fences: <chance> <door chance>: D1's cave fences across passages (l3Fence)
+	OneOpening   bool              // one_opening: two rooms meet through one opening, the rest walled (D1's walls)
+	RoomDoors    struct {
+		Max    int
+		Chance float64
+	} // room_doors: <max room size> <chance>: small rooms' doorways become doors
 }
 
 // staged is a layout with passes and a population: what a levels.rec record naming any of their knobs builds.
@@ -51,7 +59,7 @@ func PopulationOf(cfg dungeon.Config) (Population, bool) {
 
 // passKnobs are the fields that switch passes on: a record naming none of them builds its layout bare.
 var passKnobs = []string{"grow", "hall_chance", "spine", "mirror", "arch_chance", "loop_chance", "loop_distance",
-	"lava_rivers", "lava_water", "posts", "door_chance", "canvas", "scale", "theme_rooms", "set_piece", "open_halls", "decoration"}
+	"lava_rivers", "lava_water", "posts", "door_chance", "canvas", "scale", "theme_rooms", "set_piece", "open_halls", "decoration", "tile", "lamps", "fences", "one_opening", "room_doors"}
 
 // withPasses parses a layout record, wrapping it in its passes when it names any.
 type withPasses struct{ dungeon.Parser }
@@ -85,6 +93,12 @@ func (w withPasses) Parse(r recfile.Record) (dungeon.Config, error) {
 		return nil, err
 	}
 	p.Spine = boolField(r, "spine")
+	p.OneOpening = boolField(r, "one_opening")
+	if v, ok := dungeon.Field(r, "room_doors"); ok {
+		if _, err := fmt.Sscan(v, &p.RoomDoors.Max, &p.RoomDoors.Chance); err != nil || p.RoomDoors.Max < 1 || p.RoomDoors.Chance < 0 || p.RoomDoors.Chance > 1 {
+			return nil, fmt.Errorf("levels.rec: room_doors %q: want <max room size> <chance 0..1>", v)
+		}
+	}
 	p.Mirror = boolField(r, "mirror")
 	if _, ok := dungeon.Field(r, "lava_water"); ok || lavaRivers > 0 {
 		lava.Rivers = lavaRivers
@@ -103,11 +117,29 @@ func (w withPasses) Parse(r recfile.Record) (dungeon.Config, error) {
 		}
 	}
 	for _, v := range dungeon.FieldsNamed(r, "decoration") {
-		var d Decor
-		if _, err := fmt.Sscan(v, &d.Record, &d.Percent); err != nil || d.Percent <= 0 || d.Percent > 100 {
-			return nil, fmt.Errorf("levels.rec: decoration %q: want <tiles.rec record> <percent of the walls facing floor>", v)
+		d := Decor{Where: "face"}
+		if n, _ := fmt.Sscan(v, &d.Record, &d.Percent, &d.Where); n < 2 || d.Percent <= 0 || d.Percent > 100 || wallPlaces[d.Where] == nil {
+			return nil, fmt.Errorf("levels.rec: decoration %q: want <tiles.rec record> <percent> [face|thin|corner|end|free]", v)
 		}
 		p.Decor = append(p.Decor, d)
+	}
+	p.Tiles = map[string]string{}
+	for _, v := range dungeon.FieldsNamed(r, "tile") {
+		var role, rec string
+		if n, _ := fmt.Sscan(v, &role, &rec); n != 2 {
+			return nil, fmt.Errorf("levels.rec: tile %q: want <role: pillar, arch, column or lamp> <tiles.rec record>", v)
+		}
+		p.Tiles[role] = rec
+	}
+	if v, ok := dungeon.Field(r, "fences"); ok {
+		if _, err := fmt.Sscan(v, &p.Fences[0], &p.Fences[1]); err != nil || p.Fences[0] <= 0 || p.Fences[0] > 1 || p.Fences[1] < 0 || p.Fences[1] > 1 {
+			return nil, fmt.Errorf("levels.rec: fences %q: want <chance> <door chance>, each 0..1", v)
+		}
+	}
+	if v, ok := dungeon.Field(r, "lamps"); ok {
+		if _, err := fmt.Sscan(v, &p.Lamps[0], &p.Lamps[1]); err != nil || p.Lamps[0] < 0 || p.Lamps[1] < p.Lamps[0] {
+			return nil, fmt.Errorf("levels.rec: lamps %q: want min max", v)
+		}
 	}
 	if p.Pieces, err = parsePieces(r); err != nil {
 		return nil, err
@@ -181,9 +213,16 @@ func (s staged) Build(rnd *rand.Rand, fsys fs.FS) (*DungeonMap, error) {
 		themes = themeRooms(m, *p.Themes, rnd)
 	}
 	addPosts(m, p.Posts, rnd) // after the theme rooms, as D1's substitutions come after them
+	fences(m, p.Fences, themes, rnd)
 	connectMega(m)
+	if p.OneOpening {
+		oneOpening(m, rnd)
+	}
 	if p.DoorChance >= 0 {
 		addDoors(m, p.DoorChance, rnd)
+	}
+	if p.RoomDoors.Max > 0 {
+		roomDoors(m, p.RoomDoors.Max, p.RoomDoors.Chance, rnd)
 	}
 	out := m.dungeonMap()
 	if p.Scale == 2 {
@@ -193,7 +232,14 @@ func (s staged) Build(rnd *rand.Rand, fsys fs.FS) (*DungeonMap, error) {
 	if err := stampPieces(out, pieces, fsys, p.Scale); err != nil {
 		return nil, err
 	}
+	fixDoors(out)
+	addLamps(out, p.Lamps, rnd)
 	decorate(out, p.Decor, rnd)
+	for c, role := range out.role {
+		if rec, ok := p.Tiles[role]; ok {
+			out.art[c] = rec
+		}
+	}
 	return out, nil
 }
 
@@ -204,21 +250,33 @@ const (
 	mCorr
 	mDoor
 	mLava
-	mPost   // floor with a pillar in its top-left cell: in a row, an arcade
+	mPost   // floor with a pillar in its top-left cell (role pillar)
+	mArch   // the same, one of an arcade's (role arch)
+	mColumn // the same, a chamber's column (role column)
+	mFence  // a fence across a passage (role fence)
+	mGate   // a gap in a fence (a fence door where it becomes one)
 	mPiece  // a set piece's footprint: open ground the passes leave alone
 	mLocked // never carved, never joined (connectCells: a set piece's own cells)
 )
 
 // kindTiles is what each kind is on a DungeonMap drawn at its own scale.
-var kindTiles = [...]DungeonTile{mWall: Wall, mRoom: Room, mCorr: Corridor, mDoor: Door, mLava: Lava, mPost: Pillar, mPiece: Room, mLocked: Wall}
+var kindTiles = [...]DungeonTile{mWall: Wall, mRoom: Room, mCorr: Corridor, mDoor: Door, mLava: Lava, mPost: Pillar, mArch: Pillar, mColumn: Pillar, mFence: Fence, mGate: Door, mPiece: Room, mLocked: Wall}
 
 func (m *mega) dungeonMap() *DungeonMap {
 	dm := NewDungeonMap(m.w, m.h)
 	for i, k := range m.t {
 		dm.tiles[i] = kindTiles[k]
+		if isPost(k) {
+			dm.role[pt(i%m.w, i/m.w)] = postRoles[k]
+		} else if k == mFence || k == mGate {
+			dm.role[pt(i%m.w, i/m.w)] = "fence"
+		}
 	}
 	return dm
 }
+
+// postRoles are what each kind of post is, for levels.rec's "tile: <role> <record>".
+var postRoles = map[int]string{mPost: "pillar", mArch: "arch", mColumn: "column"}
 
 func fromDungeon(dm *DungeonMap) *mega {
 	w, h := dm.GetSize()
@@ -246,23 +304,28 @@ func fromDungeon(dm *DungeonMap) *mega {
 // cells around it, so nothing slips past it. A post is a floor megatile with a pillar in its top-left cell.
 func toCells(m *mega) *DungeonMap {
 	g := NewDungeonMap(2*m.w, 2*m.h)
-	floorLike := func(k int) bool { return k != mWall && k != mDoor }
+	floorLike := func(k int) bool { return k != mWall && k != mDoor && k != mFence && k != mGate }
 	for y := 0; y < g.height; y++ {
 		for x := 0; x < g.width; x++ {
 			i, j, a, b := x/2, y/2, x%2, y%2
 			switch k := m.at(i, j); {
-			case k == mPost && a == 0 && b == 0:
+			case isPost(k) && a == 0 && b == 0:
 				g.tiles[x+y*g.width] = Pillar
+				g.role[pt(x, y)] = postRoles[k]
 			case mopen(k):
 				g.SetRoom(x, y)
 			case k == mLava:
 				g.tiles[x+y*g.width] = Lava
-			default: // wall or door: the cell is floor where it borders open ground on its right or bottom
+			default: // wall, fence or door: the cell is floor where it borders open ground on its right or bottom
 				right, below, diag := floorLike(m.at(i+1, j)), floorLike(m.at(i, j+1)), floorLike(m.at(i+1, j+1))
-				if a == 1 && right || b == 1 && below || a == 1 && b == 1 && diag {
+				switch {
+				case a == 1 && right || b == 1 && below || a == 1 && b == 1 && diag:
 					g.tiles[x+y*g.width] = lavaOr(m, i, j, a, b)
-				} else if k == mDoor && a == 0 && b == 0 {
+				case (k == mDoor || k == mGate) && a == 0 && b == 0:
 					g.SetDoor(x, y)
+				case k == mFence || k == mGate:
+					g.tiles[x+y*g.width] = Fence
+					g.role[pt(x, y)] = "fence"
 				}
 			}
 		}
@@ -274,7 +337,7 @@ func toCells(m *mega) *DungeonMap {
 // else below, else diagonally), lava when that is lava.
 func lavaOr(m *mega, i, j, a, b int) DungeonTile {
 	next := m.at(i+1, j+1)
-	switch floorLike := func(k int) bool { return k != mWall && k != mDoor }; {
+	switch floorLike := func(k int) bool { return k != mWall && k != mDoor && k != mFence && k != mGate }; {
 	case a == 1 && floorLike(m.at(i+1, j)):
 		next = m.at(i+1, j)
 	case b == 1 && floorLike(m.at(i, j+1)):
@@ -307,8 +370,9 @@ func (m *mega) set(x, y, k int) {
 }
 
 // open is ground one walks on without a door; walkable adds doors.
-func mopen(k int) bool     { return k == mRoom || k == mCorr || k == mPost || k == mPiece }
-func mwalkable(k int) bool { return mopen(k) || k == mDoor }
+func mopen(k int) bool     { return k == mRoom || k == mCorr || isPost(k) || k == mPiece }
+func isPost(k int) bool    { return k == mPost || k == mArch || k == mColumn }
+func mwalkable(k int) bool { return mopen(k) || k == mDoor || k == mGate }
 
 type mrect struct{ x0, y0, x1, y1, cap int } // inclusive floor bounds, and the side it may grow to
 
@@ -406,7 +470,7 @@ func halls(m *mega, rs []mrect, p float64, rnd *rand.Rand) {
 		for y := r.y0; y <= r.y1; y++ {
 			for x := r.x0; x <= r.x1; x++ {
 				if w <= h && (x == r.x0+1 || x == r.x1-1) || w > h && (y == r.y0+1 || y == r.y1-1) {
-					m.set(x, y, mPost)
+					m.set(x, y, mArch)
 				}
 			}
 		}
@@ -443,7 +507,7 @@ func spine(m *mega, rnd *rand.Rand) (chambers [][2]int) {
 			case 16, 23:
 				k = mWall
 			case 18, 21:
-				k = mPost
+				k = mArch
 			}
 			set(x, y, k)
 		}
@@ -459,7 +523,7 @@ func spine(m *mega, rnd *rand.Rand) (chambers [][2]int) {
 				if x == cx || x == cx+11 || y == cy || y == cy+11 {
 					k = mWall
 					if hall := x == cx && x0 < cx || x == cx+11 && x1 > cx+11; hall && y >= cy+2 && y <= cy+9 {
-						k = mPost // the arcade the hall runs in through, open across its middle aisle
+						k = mArch // the arcade the hall runs in through, open across its middle aisle
 						if y == cy+5 || y == cy+6 {
 							k = mRoom
 						}
@@ -469,7 +533,7 @@ func spine(m *mega, rnd *rand.Rand) (chambers [][2]int) {
 			}
 		}
 		for _, p := range [4][2]int{{4, 4}, {7, 4}, {4, 7}, {7, 7}} {
-			set(cx+p[0], cy+p[1], mPost)
+			set(cx+p[0], cy+p[1], mColumn)
 		}
 		if vertical {
 			chambers = append(chambers, [2]int{cy, cx})
@@ -548,9 +612,9 @@ func arches(m *mega, p float64, rnd *rand.Rand) {
 				if a-start >= 3 && rnd.Float64() < p {
 					for i := start; i < a; i++ {
 						if vertical {
-							m.set(b, i, mPost)
+							m.set(b, i, mArch)
 						} else {
-							m.set(i, b, mPost)
+							m.set(i, b, mArch)
 						}
 					}
 				}
@@ -910,14 +974,26 @@ func openHalls(m *mega, h [3]int, rnd *rand.Rand) {
 func (p Passes) bare() bool {
 	return p.Grow == 0 && !p.Spine && !p.Mirror && p.ArchChance == 0 && p.LoopChance == 0 && p.Lava == nil &&
 		p.Posts == 0 && p.DoorChance < 0 && p.Canvas == 0 && p.Themes == nil && len(p.Pieces) == 0 && p.Halls[0] == 0 &&
-		len(p.Decor) == 0
+		len(p.Decor) == 0 && p.Lamps[1] == 0 && p.Fences[0] == 0 && !p.OneOpening && p.RoomDoors.Max == 0
 }
 
-// Decor is one decoration: a share of the walls that face the floor drawn as another tiles.rec record (D1's wall
-// pieces that let sight or missiles through, grates, fences), which the painter draws with the record's own tags.
+// Decor is one decoration: a share of the walls beside the floor, of one shape, drawn as another tiles.rec record
+// (D1's wall pieces that let sight or missiles through, grates), which the painter draws with its own tags.
 type Decor struct {
 	Record  string
 	Percent float64
+	Where   string // which walls: wallPlaces
+}
+
+// wallPlaces are the wall cells a decoration may take, by which of their four sides are floor: any (face), two
+// opposite ones (thin: a wall one cell thick between two floors, D1's grates), two neighbouring ones or three (corner:
+// where a wall turns, its missile-passing stubs), three (end: a wall's end), all four (free: a lone pillar).
+var wallPlaces = map[string]func(open [4]bool, n int) bool{
+	"face":   func(_ [4]bool, n int) bool { return n > 0 },
+	"thin":   func(o [4]bool, n int) bool { return n == 2 && o[0] == o[2] },
+	"corner": func(o [4]bool, n int) bool { return n == 3 || n == 2 && o[0] != o[2] },
+	"end":    func(_ [4]bool, n int) bool { return n >= 3 },
+	"free":   func(_ [4]bool, n int) bool { return n == 4 },
 }
 
 // decorate rolls the decorations, in order, for every wall cell beside the floor outside the set pieces.
@@ -925,28 +1001,229 @@ func decorate(dm *DungeonMap, ds []Decor, rnd *rand.Rand) {
 	if len(ds) == 0 {
 		return
 	}
-	inPiece := func(x, y int) bool {
-		for _, p := range dm.pieces {
-			if x >= p.X && y >= p.Y && x < p.X+p.Map.Width && y < p.Y+p.Map.Height {
+	for y := 0; y < dm.height; y++ {
+		for x := 0; x < dm.width; x++ {
+			if dm.GetTile(x, y) != Wall || dm.inPiece(x, y) {
+				continue
+			}
+			var open [4]bool // north, east, south, west
+			n := 0
+			for i, d := range [4]geometry.Point{{Y: -1}, {X: 1}, {Y: 1}, {X: -1}} {
+				q := pt(x+d.X, y+d.Y)
+				if open[i] = dm.Contains(q) && (dm.GetTileAt(q) == Room || dm.GetTileAt(q) == Corridor); open[i] {
+					n++
+				}
+			}
+			for _, d := range ds {
+				if wallPlaces[d.Where](open, n) && rnd.Float64()*100 < d.Percent {
+					dm.art[pt(x, y)] = d.Record
+					break
+				}
+			}
+		}
+	}
+}
+
+// inPiece is whether a set piece covers the cell.
+func (m *DungeonMap) inPiece(x, y int) bool {
+	for _, p := range m.pieces {
+		if x >= p.X && y >= p.Y && x < p.X+p.Map.Width && y < p.Y+p.Map.Height {
+			return true
+		}
+	}
+	return false
+}
+
+// addLamps stands lamp[0]..lamp[1] lamps (role lamp: a pillar the population hangs D1's L1LIGHT on) on floor with
+// floor all round, outside the set pieces: D1's l1LAMPS minisets.
+func addLamps(dm *DungeonMap, lamps [2]int, rnd *rand.Rand) {
+	if lamps[1] == 0 {
+		return
+	}
+	for n := lamps[0] + rnd.Intn(lamps[1]-lamps[0]+1); n > 0; n-- {
+		for try := 0; try < 1000; try++ {
+			x, y := 1+rnd.Intn(dm.width-2), 1+rnd.Intn(dm.height-2)
+			ok := !dm.inPiece(x, y)
+			for dy := -1; dy <= 1 && ok; dy++ {
+				for dx := -1; dx <= 1 && ok; dx++ {
+					t := dm.GetTile(x+dx, y+dy)
+					ok = (t == Room || t == Corridor) && dm.role[pt(x+dx, y+dy)] == ""
+				}
+			}
+			if ok {
+				dm.tiles[x+y*dm.width] = Pillar
+				dm.role[pt(x, y)] = "lamp"
+				break
+			}
+		}
+	}
+}
+
+// fences ports l3Fence's lines: from each open megatile, with chance f[0], a fence runs across open ground, up and
+// down or left and right (a coin flip), from wall to wall across a passage (at most five long, its gap where the
+// passage goes on on both sides), never beside another fence and never by a theme room; one
+// megatile of it stays open, a fence door with chance f[1] (l3AddFenceDoors, l3FenceDoorFix) and a gap otherwise.
+func fences(m *mega, f [2]float64, themes [][4]int, rnd *rand.Rand) {
+	if f[0] <= 0 {
+		return
+	}
+	nearTheme := func(x, y int) bool {
+		for _, r := range themes {
+			if x >= r[0]-2 && x < r[0]+r[2]+3 && y >= r[1]-2 && y < r[1]+r[3]+3 {
 				return true
 			}
 		}
 		return false
 	}
-	dm.art = map[geometry.Point]string{}
-	for y := 0; y < dm.height; y++ {
-		for x := 0; x < dm.width; x++ {
-			if dm.GetTile(x, y) != Wall || inPiece(x, y) || !slices.ContainsFunc(dirs4, func(d geometry.Point) bool {
-				n := pt(x+d.X, y+d.Y)
-				return dm.Contains(n) && (dm.GetTileAt(n) == Room || dm.GetTileAt(n) == Corridor)
-			}) {
+	for y := 1; y < m.h-1; y++ {
+		for x := 1; x < m.w-1; x++ {
+			if (m.at(x, y) != mRoom && m.at(x, y) != mCorr) || nearTheme(x, y) || rnd.Float64() >= f[0] {
 				continue
 			}
-			for _, d := range ds {
-				if rnd.Float64()*100 < d.Percent {
-					dm.art[pt(x, y)] = d.Record
-					break
+			dx, dy := 1, 0 // the line's direction
+			if rnd.Intn(2) == 0 {
+				dx, dy = 0, 1
+			}
+			along := func(i int) (int, int) { return x + i*dx, y + i*dy }
+			fenced := func(k int) bool { return k == mFence || k == mGate }
+			ok := func(i int) bool { // open, and no fence beside it across the line
+				cx, cy := along(i)
+				k := m.at(cx, cy)
+				return (k == mRoom || k == mCorr) && !fenced(m.at(cx+dy, cy+dx)) && !fenced(m.at(cx-dy, cy-dx))
+			}
+			through := func(i int) bool { // the way on crosses the line here: open ground on both sides
+				cx, cy := along(i)
+				return mopen(m.at(cx+dy, cy+dx)) && mopen(m.at(cx-dy, cy-dx))
+			}
+			lo, hi := 0, 0
+			for ok(lo - 1) {
+				lo--
+			}
+			for ok(hi + 1) {
+				hi++
+			}
+			ex1, ey1 := along(lo - 1)
+			ex2, ey2 := along(hi + 1)
+			if m.at(ex1, ey1) != mWall || m.at(ex2, ey2) != mWall || hi-lo < 1 || hi-lo > 4 {
+				continue // across a passage, wall to wall, leaving some fence beside its gap
+			}
+			var gaps []int
+			for i := lo; i <= hi; i++ {
+				if through(i) {
+					gaps = append(gaps, i)
 				}
+			}
+			if len(gaps) == 0 {
+				continue // it would run along the passage, not across it
+			}
+			gap := gaps[rnd.Intn(len(gaps))]
+			for i := lo; i <= hi; i++ {
+				cx, cy := along(i)
+				if i != gap {
+					m.set(cx, cy, mFence)
+				} else if rnd.Float64() < f[1] {
+					m.set(cx, cy, mGate)
+				}
+			}
+		}
+	}
+}
+
+// rooms finds the level's rooms and doorways: a doorway is a one-wide opening (or door) through a wall one thick
+// into a room (not between two stretches of corridor); a room is the open ground doorways part, a corridor too. room[i] is 0 off open ground.
+func rooms(m *mega) (room, size []int, doorway func(i int) (a, b int, ok bool)) {
+	doorway = func(i int) (a, b int, ok bool) {
+		x, y := i%m.w, i/m.w
+		if k := m.t[i]; k != mCorr && k != mDoor {
+			return 0, 0, false
+		}
+		wide := func(x1, y1, x2, y2 int) bool { return mopen(m.at(x1, y1)) || mopen(m.at(x2, y2)) }
+		switch n, s, w, e := m.at(x, y-1), m.at(x, y+1), m.at(x-1, y), m.at(x+1, y); {
+		case n == mWall && s == mWall && mopen(w) && mopen(e) && (wide(x-1, y-1, x-1, y+1) || wide(x+1, y-1, x+1, y+1)):
+			return i - 1, i + 1, true
+		case w == mWall && e == mWall && mopen(n) && mopen(s) && (wide(x-1, y-1, x+1, y-1) || wide(x-1, y+1, x+1, y+1)):
+			return i - m.w, i + m.w, true
+		}
+		return 0, 0, false
+	}
+	room, size = make([]int, len(m.t)), []int{0}
+	for i := range m.t {
+		if _, _, dw := doorway(i); room[i] != 0 || dw || !mopen(m.t[i]) {
+			continue
+		}
+		id := len(size)
+		room[i] = id
+		n := 0
+		for q := []int{i}; len(q) > 0; q = q[1:] {
+			n++
+			for _, d := range mdirs {
+				x, y := q[0]%m.w+d[0], q[0]/m.w+d[1]
+				if x < 0 || y < 0 || x >= m.w || y >= m.h {
+					continue
+				}
+				if j := x + y*m.w; room[j] == 0 && mopen(m.t[j]) {
+					if _, _, dw := doorway(j); !dw {
+						room[j] = id
+						q = append(q, j)
+					}
+				}
+			}
+		}
+		size = append(size, n)
+	}
+	return room, size, doorway
+}
+
+// oneOpening leaves each two rooms one way between them, as D1's walls have one door or arch each: a doorway whose
+// two rooms already meet through another, or that joins a room to itself, is walled up. Nothing is cut off.
+func oneOpening(m *mega, rnd *rand.Rand) {
+	room, _, doorway := rooms(m)
+	kept := map[[2]int]bool{}
+	for _, i := range rnd.Perm(len(m.t)) {
+		a, b, ok := doorway(i)
+		if !ok || room[a] == 0 || room[b] == 0 {
+			continue
+		}
+		pair := [2]int{min(room[a], room[b]), max(room[a], room[b])}
+		if pair[0] == pair[1] || kept[pair] {
+			m.t[i] = mWall
+			continue
+		}
+		kept[pair] = true
+	}
+}
+
+// roomDoors makes, with chance p, each doorway of a room of at most maxSize units a door: D1's small side rooms
+// behind doors (its theme rooms), where its halls meet through arches.
+func roomDoors(m *mega, maxSize int, p float64, rnd *rand.Rand) {
+	room, size, doorway := rooms(m)
+	wide := make([]bool, len(size)) // a room, not a corridor: it holds a 2x2 of open ground
+	for i, r := range room {
+		x, y := i%m.w, i/m.w
+		if r != 0 && x+1 < m.w && y+1 < m.h && room[i+1] == r && room[i+m.w] == r && room[i+m.w+1] == r {
+			wide[r] = true
+		}
+	}
+	small := func(r int) bool { return wide[r] && size[r] <= maxSize }
+	for i := range m.t {
+		if a, b, ok := doorway(i); ok && m.t[i] == mCorr && (small(room[a]) || small(room[b])) && rnd.Float64() < p {
+			m.t[i] = mDoor
+		}
+	}
+}
+
+// fixDoors opens every door outside the set pieces that the drawing left out of a wall between two floors (a fence
+// gate beside a pillar, say): a door stands in a wall, the way through it walkable on both sides.
+func fixDoors(dm *DungeonMap) {
+	walk := func(x, y int) bool { return dm.IsWalkable(pt(x, y)) }
+	solid := func(x, y int) bool { return dm.Contains(pt(x, y)) && !dm.IsWalkable(pt(x, y)) }
+	for y := 0; y < dm.height; y++ {
+		for x := 0; x < dm.width; x++ {
+			if dm.GetTile(x, y) != Door || dm.inPiece(x, y) {
+				continue
+			}
+			if !(walk(x-1, y) && walk(x+1, y) && solid(x, y-1) && solid(x, y+1)) && !(walk(x, y-1) && walk(x, y+1) && solid(x-1, y) && solid(x+1, y)) {
+				dm.tiles[x+y*dm.width] = Room
 			}
 		}
 	}
