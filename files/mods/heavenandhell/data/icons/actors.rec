@@ -166,3 +166,215 @@ icon: 135
 
 internal_name: monster.skeleton_warder
 icon: 402
+
+# Families borrowed from D1: the same tiles as d1's actors.rec.
+
+internal_name: monster.plague_corpse
+reference_image: reference/d1_sprites/monsters/monster.nzombie.png
+name: Plague Corpse
+icon: 480
+
+internal_name: monster.ghoul
+reference_image: reference/d1_sprites/monsters/monster.bzombie.png
+name: Ghoul
+icon: 368
+
+internal_name: monster.rotting_pilgrim
+reference_image: reference/d1_sprites/monsters/monster.gzombie.png
+name: Rotting Pilgrim
+icon: 554
+
+internal_name: monster.black_death
+reference_image: reference/d1_sprites/monsters/monster.yzombie.png
+name: Black Death
+icon: 680
+
+internal_name: monster.carrion_hound
+reference_image: reference/d1_sprites/monsters/monster.nscav.png
+name: Carrion Hound
+icon: 404
+
+internal_name: monster.plague_eater
+reference_image: reference/d1_sprites/monsters/monster.bscav.png
+name: Plague Eater
+icon: 405
+
+internal_name: monster.shadow_hound
+reference_image: reference/d1_sprites/monsters/monster.wscav.png
+name: Shadow Hound
+icon: 593
+
+internal_name: monster.bone_gnawer
+reference_image: reference/d1_sprites/monsters/monster.yscav.png
+name: Bone Gnawer
+icon: 594
+
+internal_name: monster.penitent
+reference_image: reference/d1_sprites/monsters/monster.stalker.png
+name: Penitent
+icon: 434
+
+internal_name: monster.flagellant
+reference_image: reference/d1_sprites/monsters/monster.unseen.png
+name: Flagellant
+icon: 435
+
+internal_name: monster.blink
+reference_image: reference/d1_sprites/monsters/monster.blink.png
+name: Blink
+icon: 442
+
+internal_name: monster.gloom
+reference_image: reference/d1_sprites/monsters/monster.gloom.png
+name: Gloom
+icon: 436
+
+internal_name: monster.familiar
+reference_image: reference/d1_sprites/monsters/monster.familiar.png
+name: Familiar
+icon: 707
+
+internal_name: monster.winged_saint
+reference_image: reference/d1_sprites/monsters/monster.winged.png
+name: Winged Saint
+icon: 503
+
+internal_name: monster.stone_saint
+reference_image: reference/d1_sprites/monsters/monster.gargoyle.png
+name: Stone Saint
+icon: 719
+
+internal_name: monster.glutton
+reference_image: reference/d1_sprites/monsters/monster.fat.png
+name: Glutton
+icon: 452
+
+internal_name: monster.mud_man
+reference_image: reference/d1_sprites/monsters/monster.mudman.png
+name: Mud Man
+icon: 443
+
+internal_name: monster.toad_demon
+reference_image: reference/d1_sprites/monsters/monster.toad.png
+name: Toad Demon
+icon: 466
+
+internal_name: monster.flayed_one
+reference_image: reference/d1_sprites/monsters/monster.flayed.png
+name: Flayed One
+icon: 470
+
+internal_name: monster.acid_hound
+reference_image: reference/d1_sprites/monsters/monster.nacid.png
+name: Acid Hound
+icon: 445
+
+internal_name: monster.poison_spitter
+reference_image: reference/d1_sprites/monsters/monster.racid.png
+name: Poison Spitter
+icon: 446
+
+internal_name: monster.pit_beast
+reference_image: reference/d1_sprites/monsters/monster.bacid.png
+name: Pit Beast
+icon: 527
+
+internal_name: monster.lava_maw
+reference_image: reference/d1_sprites/monsters/monster.xacid.png
+name: Lava Maw
+icon: 447
+
+internal_name: monster.horned_beast
+reference_image: reference/d1_sprites/monsters/monster.horned.png
+name: Horned Beast
+icon: 472
+
+internal_name: monster.mud_runner
+reference_image: reference/d1_sprites/monsters/monster.mudrun.png
+name: Mud Runner
+icon: 553
+
+internal_name: monster.frost_charger
+reference_image: reference/d1_sprites/monsters/monster.frostc.png
+name: Frost Charger
+icon: 519
+
+internal_name: monster.obsidian_lord
+reference_image: reference/d1_sprites/monsters/monster.oblord.png
+name: Obsidian Lord
+icon: 424
+
+internal_name: monster.magma_demon
+reference_image: reference/d1_sprites/monsters/monster.nmagma.png
+name: Magma Demon
+icon: 471
+
+internal_name: monster.blood_stone
+reference_image: reference/d1_sprites/monsters/monster.ymagma.png
+name: Blood Stone
+icon: 711
+
+internal_name: monster.hell_stone
+reference_image: reference/d1_sprites/monsters/monster.bmagma.png
+name: Hell Stone
+icon: 712
+
+internal_name: monster.lava_lord
+reference_image: reference/d1_sprites/monsters/monster.wmagma.png
+name: Lava Lord
+icon: 713
+
+internal_name: monster.cave_viper
+reference_image: reference/d1_sprites/monsters/monster.nsnake.png
+name: Cave Viper
+icon: 494
+
+internal_name: monster.fire_drake
+reference_image: reference/d1_sprites/monsters/monster.rsnake.png
+name: Fire Drake
+icon: 499
+
+internal_name: monster.gold_viper
+reference_image: reference/d1_sprites/monsters/monster.bsnake.png
+name: Gold Viper
+icon: 720
+
+internal_name: monster.azure_drake
+reference_image: reference/d1_sprites/monsters/monster.gsnake.png
+name: Azure Drake
+icon: 528
+
+internal_name: monster.templar
+reference_image: reference/d1_sprites/monsters/monster.nblack.png
+name: Templar
+icon: 721
+
+internal_name: monster.crusader
+reference_image: reference/d1_sprites/monsters/monster.rtblack.png
+name: Crusader
+icon: 501
+
+internal_name: monster.blood_knight
+reference_image: reference/d1_sprites/monsters/monster.rblack.png
+name: Blood Knight
+icon: 517
+
+internal_name: monster.inquisitor
+reference_image: reference/d1_sprites/monsters/monster.counslr.png
+name: Inquisitor
+icon: 512
+
+internal_name: monster.magistrate
+reference_image: reference/d1_sprites/monsters/monster.magistr.png
+name: Magistrate
+icon: 513
+
+internal_name: monster.cabalist
+reference_image: reference/d1_sprites/monsters/monster.cabalist.png
+name: Cabalist
+icon: 728
+
+internal_name: monster.advocate
+reference_image: reference/d1_sprites/monsters/monster.advocate.png
+name: Advocate
+icon: 514

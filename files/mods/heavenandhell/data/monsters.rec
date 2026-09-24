@@ -1,0 +1,143 @@
+%rec: ai
+# monsters.rec: a plain-English description of each monster brain, shown in the monster info popup.
+# %rec: ai
+#   id                an AI_ name, as enemies.rec's ai field uses it
+#   description       what that brain does, one sentence
+#   talker            true: a quest monster that speaks before it fights (M_Talker)
+#   needs_quest       true: only fights once its quest has set it up (the random-unique debug spawn skips it)
+#   ranged            true: M_Ranged, goes after a golem anywhere, not only next to it
+#   pack              true: a fallen one, answers a howl and flees when one of its pack dies
+#   dormant           true: starts as a statue; the first blow only wakes it
+#   evasive           true: can't be hit while off its normal goal
+#   arch_boss         true: holy bolt hurts it though it isn't undead; stone, doppelgangers and berserk leave it be
+#   fights_when       a talker's condition, in quests.rec's trigger language, for fighting this turn; default:
+#                     goal != "inquiring" and goal != "talking" (quests.rec's on_talker_* triggers move its talk)
+#
+# A plain-English gloss of each AI_* brain, shown in the actor description popup. Not shared with the AI
+# itself (game/ai_d1.go's think()): if a brain's behaviour changes, update its line here too.
+
+id: AI_ZOMBIE
+description: Shambles slowly toward you.
+
+id: AI_FALLEN
+pack: true
+description: Weak alone but rallies in packs; flees and may mutate when panicked.
+
+id: AI_SCAV
+description: Feeds on nearby corpses to heal itself.
+
+id: AI_SKELBOW
+ranged: true
+description: Keeps its distance and fires arrows.
+
+id: AI_GOATBOW
+ranged: true
+description: Keeps its distance and fires arrows.
+
+id: AI_SNEAK
+description: Lurks at the edge of sight and strikes from stealth.
+
+id: AI_GOATMC
+description: Charges in for melee.
+
+id: AI_BAT
+description: Flies erratically.
+
+id: AI_SUCC
+ranged: true
+description: Keeps its distance, hurling magic bolts.
+
+id: AI_ACIDUNIQ
+description: Keeps its distance, spitting acid.
+
+id: AI_LICH
+description: Keeps its distance, hurling magic bolts.
+
+id: AI_ARCHLICH
+description: Keeps its distance, hurling magic bolts.
+
+id: AI_PSYCHORB
+description: Keeps its distance, hurling magic bolts.
+
+id: AI_NECROMORB
+description: Keeps its distance, hurling magic bolts.
+
+id: AI_FIREBAT
+description: Flies at range, firing bolts of fire.
+
+id: AI_HELLBAT
+description: Flies at range, hurling fireballs.
+
+id: AI_HORKDEMON
+description: Fights in melee.
+
+id: AI_BONED
+description: Circles at range, launching bone-spirit bolts with an occasional special attack.
+
+id: AI_MAGMA
+description: Circles at range, hurling magma balls.
+
+id: AI_STORM
+description: Circles at range, casting lightning.
+
+id: AI_ACID
+description: Circles at range, spitting corrosive acid.
+
+id: AI_MEGA
+description: Circles at range, breathing gouts of flame.
+
+id: AI_GARG
+dormant: true
+description: Lies dormant until approached, then takes flight to attack.
+
+id: AI_RHINO
+description: Charges in a straight line.
+
+id: AI_COUNSLR
+evasive: true
+description: Keeps its distance, casting spells.
+
+id: AI_CLEAVER
+description: Waits until provoked, then charges relentlessly.
+
+id: AI_SKELKING
+description: Occasionally raises a skeleton from the ground; otherwise fights in melee.
+
+id: AI_ZHAR
+talker: true
+description: Speaks first, then fights as a spellcaster.
+
+id: AI_LAZURUS
+talker: true
+description: Speaks first, then fights as a spellcaster.
+
+id: AI_LAZHELP
+ranged: true
+talker: true
+needs_quest: true
+description: Joins the fight as a ranged caster once Lazarus has spoken.
+
+id: AI_WARLORD
+talker: true
+description: Speaks first, then attacks with a blade.
+
+id: AI_GARBUD
+talker: true
+description: Speaks first, then charges in for melee.
+
+id: AI_SNOTSPIL
+talker: true
+needs_quest: true
+fights_when: visible and v1("banner") == 3 and (goal == "normal" or goal == "attack2")
+description: Speaks first, then fights like a Fallen One.
+
+id: AI_LACHDAN
+talker: true
+needs_quest: true
+fights_when: false
+description: Never fights.
+
+id: AI_DIABLO
+arch_boss: true
+description: Unleashes devastating Apocalypse spells from a distance.
+

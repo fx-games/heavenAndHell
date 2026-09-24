@@ -1054,3 +1054,1094 @@ group_spawn: skeleton(3)
 death_string: %s crumbles to dust, and its wards with it.
 speed_move: 12
 speed_attack: 12
+
+# ---- Families borrowed from D1 (sprites, brains and numbers are D1's; names and roles are H&H's). ----
+# D1's numbers fit as they are: floor L plays like D1's dlvl L. With an ai, health is halved as D1 does.
+# spawn_cost follows this file's 600 + 50 x dlvl.
+
+
+# The Forsaken: plague victims the church walled in to die
+
+name: a plague corpse
+internal_name: plague_corpse
+icon: monster.plague_corpse
+dlvl: 1
+max_dlvl: 2
+monster_level: 1
+health: 4-7
+damage: 2-5
+damage2: 0
+hit: 10
+hit2: 0
+ai: AI_ZOMBIE
+class: MC_UNDEAD
+magic_res: 72
+magic_res2: 72
+stats_armor_class: 5
+stats_experience: 54
+speed_move: 30
+speed_attack: 15
+speed_recovery: 3
+tags: poison_immune
+spawn_cost: 650
+ascii: z
+color: 135 69 126
+
+name: a ghoul
+internal_name: ghoul
+icon: monster.ghoul
+dlvl: 2
+max_dlvl: 3
+monster_level: 2
+health: 7-11
+damage: 3-10
+damage2: 0
+hit: 10
+hit2: 0
+ai: AI_ZOMBIE
+class: MC_UNDEAD
+ai_level: 1
+magic_res: 72
+magic_res2: 72
+stats_armor_class: 10
+stats_experience: 58
+speed_move: 30
+speed_attack: 15
+speed_recovery: 3
+tags: poison_immune
+spawn_cost: 700
+ascii: z
+color: 98 69 90
+
+name: a rotting pilgrim
+internal_name: rotting_pilgrim
+icon: monster.rotting_pilgrim
+dlvl: 2
+max_dlvl: 4
+monster_level: 4
+health: 15-25
+damage: 5-15
+damage2: 0
+hit: 25
+hit2: 0
+ai: AI_ZOMBIE
+class: MC_UNDEAD
+ai_level: 2
+magic_res: 72
+magic_res2: 74
+stats_armor_class: 15
+stats_experience: 136
+speed_move: 30
+speed_attack: 15
+speed_recovery: 3
+tags: poison_immune
+spawn_cost: 700
+ascii: z
+color: 95 110 106
+
+name: a black death
+internal_name: black_death
+icon: monster.black_death
+dlvl: 3
+max_dlvl: 5
+monster_level: 6
+health: 25-40
+damage: 6-22
+damage2: 0
+hit: 30
+hit2: 0
+ai: AI_ZOMBIE
+class: MC_UNDEAD
+ai_level: 3
+magic_res: 72
+magic_res2: 76
+stats_armor_class: 20
+stats_experience: 240
+speed_move: 30
+speed_attack: 15
+speed_recovery: 3
+tags: drains_max_life | poison_immune
+spawn_cost: 750
+ascii: z
+color: 77 39 78
+
+
+# Carrion hounds: they feed on the Forsaken and heal on corpses
+
+name: a carrion hound
+internal_name: carrion_hound
+icon: monster.carrion_hound
+dlvl: 1
+max_dlvl: 3
+monster_level: 2
+health: 3-6
+damage: 1-5
+damage2: 0
+hit: 20
+hit2: 0
+ai: AI_SCAV
+class: MC_ANIMAL
+magic_res: 0
+magic_res2: 2
+stats_armor_class: 10
+stats_experience: 80
+speed_move: 10
+speed_attack: 15
+speed_recovery: 1
+tags: turns_on_attacker
+spawn_cost: 650
+ascii: C
+color: 88 72 111
+
+name: a plague eater
+internal_name: plague_eater
+icon: monster.plague_eater
+dlvl: 2
+max_dlvl: 4
+monster_level: 4
+health: 12-24
+damage: 1-8
+damage2: 0
+hit: 30
+hit2: 0
+ai: AI_SCAV
+class: MC_ANIMAL
+ai_level: 1
+magic_res: 0
+magic_res2: 4
+stats_armor_class: 20
+stats_experience: 188
+speed_move: 10
+speed_attack: 15
+speed_recovery: 1
+tags: turns_on_attacker
+spawn_cost: 700
+ascii: C
+color: 216 126 42
+
+name: a shadow hound
+internal_name: shadow_hound
+icon: monster.shadow_hound
+dlvl: 3
+max_dlvl: 5
+monster_level: 6
+health: 24-36
+damage: 3-12
+damage2: 0
+hit: 35
+hit2: 0
+ai: AI_SCAV
+class: MC_ANIMAL
+ai_level: 2
+magic_res: 64
+magic_res2: 66
+stats_armor_class: 25
+stats_experience: 375
+speed_move: 10
+speed_attack: 15
+speed_recovery: 1
+tags: turns_on_attacker
+spawn_cost: 750
+ascii: C
+color: 80 58 100
+
+name: a bone gnawer
+internal_name: bone_gnawer
+icon: monster.bone_gnawer
+dlvl: 4
+max_dlvl: 6
+monster_level: 8
+health: 28-40
+damage: 5-15
+damage2: 0
+hit: 35
+hit2: 0
+ai: AI_SCAV
+class: MC_ANIMAL
+ai_level: 3
+magic_res: 65
+magic_res2: 68
+stats_armor_class: 30
+stats_experience: 552
+speed_move: 10
+speed_attack: 15
+speed_recovery: 1
+tags: turns_on_attacker
+spawn_cost: 800
+ascii: C
+color: 172 194 220
+
+
+# Penitents: the Inquisition's hidden killers, unseen until they strike
+
+name: a penitent
+internal_name: penitent
+icon: monster.penitent
+dlvl: 5
+max_dlvl: 7
+monster_level: 9
+health: 30-45
+damage: 8-16
+damage2: 0
+hit: 40
+hit2: 0
+ai: AI_SNEAK
+ai_level: 1
+magic_res: 0
+magic_res2: 64
+stats_armor_class: 30
+stats_experience: 630
+speed_move: 10
+speed_attack: 15
+speed_recovery: 5
+tags: hidden | searches | flinches_at_any_hit
+spawn_cost: 850
+ascii: p
+color: 176 90 81
+
+name: a flagellant
+internal_name: flagellant
+icon: monster.flagellant
+dlvl: 6
+max_dlvl: 8
+monster_level: 11
+health: 35-50
+damage: 12-20
+damage2: 0
+hit: 45
+hit2: 0
+ai: AI_SNEAK
+ai_level: 2
+magic_res: 65
+magic_res2: 72
+stats_armor_class: 30
+stats_experience: 935
+speed_move: 10
+speed_attack: 15
+speed_recovery: 5
+tags: hidden | searches | flinches_at_any_hit | erratic_circling
+spawn_cost: 900
+ascii: p
+color: 104 136 69
+
+
+# Bat demons: hit and run
+
+name: a blink
+internal_name: blink
+icon: monster.blink
+dlvl: 3
+max_dlvl: 5
+monster_level: 7
+health: 12-28
+damage: 1-8
+damage2: 0
+hit: 45
+hit2: 0
+ai: AI_BAT
+class: MC_ANIMAL
+ai_level: 1
+magic_res: 0
+magic_res2: 0
+drops: none
+stats_armor_class: 15
+stats_experience: 340
+speed_move: 16
+speed_attack: 13
+speed_recovery: 5
+tags: blinks_when_hit | flying
+spawn_cost: 750
+ascii: b
+color: 93 48 26
+
+name: a gloom
+internal_name: gloom
+icon: monster.gloom
+dlvl: 4
+max_dlvl: 6
+monster_level: 9
+health: 28-36
+damage: 4-12
+damage2: 0
+hit: 70
+hit2: 0
+ai: AI_BAT
+class: MC_ANIMAL
+ai_level: 2
+magic_res: 1
+magic_res2: 65
+drops: none
+stats_armor_class: 35
+stats_experience: 509
+speed_move: 16
+speed_attack: 13
+speed_recovery: 5
+tags: searches | charges_from_afar | flying
+spawn_cost: 800
+ascii: b
+color: 195 32 47
+
+name: a familiar
+internal_name: familiar
+icon: monster.familiar
+dlvl: 6
+max_dlvl: 8
+monster_level: 13
+health: 20-35
+damage: 4-16
+damage2: 0
+hit: 50
+hit2: 0
+ai: AI_BAT
+class: MC_DEMON
+ai_level: 3
+magic_res: 33
+magic_res2: 97
+drops: none
+stats_armor_class: 35
+stats_experience: 448
+speed_move: 16
+speed_attack: 13
+speed_recovery: 5
+tags: searches | lightning_with_melee | flying
+spawn_cost: 900
+ascii: b
+color: 190 122 126
+
+
+# Stone saints: church statues that wake when you pass
+
+name: a winged saint
+internal_name: winged_saint
+icon: monster.winged_saint
+dlvl: 5
+max_dlvl: 7
+monster_level: 9
+health: 45-60
+damage: 10-16
+damage2: 0
+hit: 50
+hit2: 0
+ai: AI_GARG
+class: MC_DEMON
+magic_res: 74
+magic_res2: 88
+stats_armor_class: 45
+stats_experience: 662
+speed_move: 18
+speed_attack: 18
+speed_recovery: 4
+tags: opens_doors
+spawn_cost: 850
+ascii: g
+color: 170 145 131
+
+name: a stone saint
+internal_name: stone_saint
+icon: monster.stone_saint
+dlvl: 7
+max_dlvl: 9
+monster_level: 13
+health: 60-90
+damage: 10-16
+damage2: 0
+hit: 65
+hit2: 0
+ai: AI_GARG
+class: MC_DEMON
+ai_level: 1
+magic_res: 76
+magic_res2: 104
+stats_armor_class: 45
+stats_experience: 1205
+speed_move: 18
+speed_attack: 18
+speed_recovery: 4
+tags: opens_doors
+spawn_cost: 950
+ascii: g
+color: 166 137 72
+
+
+# Gluttons: slow brutes that hit hard
+
+name: a glutton
+internal_name: glutton
+icon: monster.glutton
+dlvl: 5
+max_dlvl: 7
+monster_level: 10
+health: 60-80
+damage: 6-12
+damage2: 0
+hit: 55
+hit2: 0
+ai: AI_FAT
+class: MC_DEMON
+magic_res: 0
+magic_res2: 2
+stats_armor_class: 55
+stats_experience: 635
+speed_move: 13
+speed_attack: 19
+spawn_cost: 850
+ascii: O
+color: 186 37 69
+
+name: a mud man
+internal_name: mud_man
+icon: monster.mud_man
+dlvl: 7
+max_dlvl: 9
+monster_level: 14
+health: 100-125
+damage: 8-16
+damage2: 0
+hit: 60
+hit2: 0
+ai: AI_FAT
+class: MC_DEMON
+ai_level: 1
+magic_res: 0
+magic_res2: 32
+stats_armor_class: 60
+stats_experience: 1165
+speed_move: 13
+speed_attack: 19
+tags: searches
+spawn_cost: 950
+ascii: O
+color: 128 84 54
+
+name: a toad demon
+internal_name: toad_demon
+icon: monster.toad_demon
+dlvl: 8
+max_dlvl: 10
+monster_level: 16
+health: 135-160
+damage: 8-16
+damage2: 8-20
+hit: 70
+hit2: 40
+ai: AI_FAT
+class: MC_DEMON
+ai_level: 2
+magic_res: 8
+magic_res2: 12
+stats_armor_class: 65
+stats_experience: 1380
+speed_move: 13
+speed_attack: 19
+tags: searches
+spawn_cost: 1000
+ascii: O
+color: 121 135 63
+
+name: a flayed one
+internal_name: flayed_one
+icon: monster.flayed_one
+dlvl: 10
+max_dlvl: 12
+monster_level: 20
+health: 160-200
+damage: 10-20
+damage2: 0
+hit: 85
+hit2: 0
+ai: AI_FAT
+class: MC_DEMON
+ai_level: 3
+magic_res: 17
+magic_res2: 24
+stats_armor_class: 70
+stats_experience: 2058
+speed_move: 13
+speed_attack: 19
+tags: searches
+spawn_cost: 1100
+ascii: O
+color: 161 74 95
+
+
+# Acid beasts: spit from afar, bleed acid
+
+name: an acid hound
+internal_name: acid_hound
+icon: monster.acid_hound
+dlvl: 6
+max_dlvl: 8
+monster_level: 11
+health: 40-66
+damage: 4-12
+damage2: 0
+hit: 40
+hit2: 25
+ai: AI_ACID
+class: MC_ANIMAL
+magic_res: 128
+magic_res2: 136
+stats_armor_class: 30
+stats_experience: 846
+speed_move: 10
+speed_attack: 15
+speed_recovery: 5
+tags: acid_blood
+spawn_cost: 900
+ascii: a
+color: 118 71 36
+
+name: a poison spitter
+internal_name: poison_spitter
+icon: monster.poison_spitter
+dlvl: 8
+max_dlvl: 10
+monster_level: 15
+health: 60-85
+damage: 4-16
+damage2: 0
+hit: 45
+hit2: 25
+ai: AI_ACID
+class: MC_ANIMAL
+ai_level: 1
+magic_res: 128
+magic_res2: 136
+stats_armor_class: 30
+stats_experience: 1248
+speed_move: 10
+speed_attack: 15
+speed_recovery: 5
+tags: acid_blood
+spawn_cost: 1000
+ascii: a
+color: 143 168 171
+
+name: a pit beast
+internal_name: pit_beast
+icon: monster.pit_beast
+dlvl: 10
+max_dlvl: 12
+monster_level: 21
+health: 80-110
+damage: 8-18
+damage2: 0
+hit: 55
+hit2: 35
+ai: AI_ACID
+class: MC_ANIMAL
+ai_level: 2
+magic_res: 129
+magic_res2: 140
+stats_armor_class: 35
+stats_experience: 2060
+speed_move: 10
+speed_attack: 15
+speed_recovery: 5
+tags: acid_blood
+spawn_cost: 1100
+ascii: a
+color: 26 45 46
+
+name: a lava maw
+internal_name: lava_maw
+icon: monster.lava_maw
+dlvl: 12
+max_dlvl: 14
+monster_level: 25
+health: 100-150
+damage: 10-20
+damage2: 0
+hit: 65
+hit2: 40
+ai: AI_ACID
+class: MC_ANIMAL
+ai_level: 3
+magic_res: 145
+magic_res2: 152
+stats_armor_class: 35
+stats_experience: 2940
+speed_move: 10
+speed_attack: 15
+speed_recovery: 5
+tags: acid_blood
+spawn_cost: 1200
+ascii: a
+color: 191 27 52
+
+
+# Chargers: circle, then charge from afar
+
+name: a horned beast
+internal_name: horned_beast
+icon: monster.horned_beast
+dlvl: 7
+max_dlvl: 9
+monster_level: 13
+health: 40-80
+damage: 2-16
+damage2: 5-32
+hit: 60
+hit2: 100
+ai: AI_RHINO
+class: MC_ANIMAL
+magic_res: 0
+magic_res2: 2
+stats_armor_class: 40
+stats_experience: 1172
+speed_move: 10
+speed_attack: 18
+tags: searches | opens_doors
+spawn_cost: 950
+ascii: H
+color: 93 97 130
+
+name: a mud runner
+internal_name: mud_runner
+icon: monster.mud_runner
+dlvl: 8
+max_dlvl: 10
+monster_level: 15
+health: 50-90
+damage: 6-18
+damage2: 12-36
+hit: 70
+hit2: 100
+ai: AI_RHINO
+class: MC_ANIMAL
+ai_level: 1
+magic_res: 0
+magic_res2: 2
+stats_armor_class: 45
+stats_experience: 1404
+speed_move: 10
+speed_attack: 18
+tags: searches | opens_doors
+spawn_cost: 1000
+ascii: H
+color: 193 141 118
+
+name: a frost charger
+internal_name: frost_charger
+icon: monster.frost_charger
+dlvl: 9
+max_dlvl: 11
+monster_level: 17
+health: 60-100
+damage: 8-20
+damage2: 20-40
+hit: 80
+hit2: 100
+ai: AI_RHINO
+class: MC_ANIMAL
+ai_level: 2
+magic_res: 12
+magic_res2: 12
+stats_armor_class: 50
+stats_experience: 1720
+speed_move: 10
+speed_attack: 18
+tags: searches | opens_doors
+spawn_cost: 1050
+ascii: H
+color: 77 55 76
+
+name: an obsidian lord
+internal_name: obsidian_lord
+icon: monster.obsidian_lord
+dlvl: 10
+max_dlvl: 12
+monster_level: 19
+health: 70-110
+damage: 10-22
+damage2: 20-50
+hit: 90
+hit2: 100
+ai: AI_RHINO
+class: MC_ANIMAL
+ai_level: 3
+magic_res: 12
+magic_res2: 56
+stats_armor_class: 55
+stats_experience: 1809
+speed_move: 10
+speed_attack: 18
+tags: searches | opens_doors
+spawn_cost: 1100
+ascii: H
+color: 191 20 49
+
+
+# Magma demons: fire immune, burst into the ground to throw magma
+
+name: a magma demon
+internal_name: magma_demon
+icon: monster.magma_demon
+dlvl: 8
+max_dlvl: 9
+monster_level: 13
+health: 50-70
+damage: 2-10
+damage2: 0
+hit: 45
+hit2: 50
+ai: AI_MAGMA
+class: MC_DEMON
+magic_res: 10
+magic_res2: 24
+stats_armor_class: 45
+stats_experience: 1076
+speed_move: 13
+speed_attack: 18
+tags: searches | opens_doors
+spawn_cost: 1000
+ascii: E
+color: 112 155 114
+
+name: a blood stone
+internal_name: blood_stone
+icon: monster.blood_stone
+dlvl: 8
+max_dlvl: 10
+monster_level: 14
+health: 55-75
+damage: 2-12
+damage2: 0
+hit: 50
+hit2: 50
+ai: AI_MAGMA
+class: MC_DEMON
+ai_level: 1
+magic_res: 24
+magic_res2: 24
+stats_armor_class: 45
+stats_experience: 1309
+speed_move: 13
+speed_attack: 18
+tags: searches | opens_doors
+spawn_cost: 1000
+ascii: E
+color: 164 112 64
+
+name: a hell stone
+internal_name: hell_stone
+icon: monster.hell_stone
+dlvl: 9
+max_dlvl: 11
+monster_level: 16
+health: 60-80
+damage: 2-20
+damage2: 0
+hit: 60
+hit2: 60
+ai: AI_MAGMA
+class: MC_DEMON
+ai_level: 2
+magic_res: 24
+magic_res2: 24
+stats_armor_class: 50
+stats_experience: 1680
+speed_move: 13
+speed_attack: 18
+tags: searches | opens_doors
+spawn_cost: 1050
+ascii: E
+color: 150 169 215
+
+name: a lava lord
+internal_name: lava_lord
+icon: monster.lava_lord
+dlvl: 9
+max_dlvl: 11
+monster_level: 18
+health: 70-85
+damage: 4-24
+damage2: 0
+hit: 75
+hit2: 60
+ai: AI_MAGMA
+class: MC_DEMON
+ai_level: 3
+magic_res: 24
+magic_res2: 24
+stats_armor_class: 60
+stats_experience: 2124
+speed_move: 13
+speed_attack: 18
+tags: searches | opens_doors
+spawn_cost: 1050
+ascii: E
+color: 119 119 157
+
+
+# Vipers: lunge through a gap to strike
+
+name: a cave viper
+internal_name: cave_viper
+icon: monster.cave_viper
+dlvl: 11
+max_dlvl: 13
+monster_level: 21
+health: 100-150
+damage: 8-20
+damage2: 0
+hit: 90
+hit2: 0
+ai: AI_SNAKE
+class: MC_DEMON
+magic_res: 8
+magic_res2: 8
+stats_armor_class: 60
+stats_experience: 2725
+speed_move: 14
+speed_attack: 16
+tags: searches
+spawn_cost: 1150
+ascii: S
+color: 198 112 122
+
+name: a fire drake
+internal_name: fire_drake
+icon: monster.fire_drake
+dlvl: 12
+max_dlvl: 14
+monster_level: 23
+health: 120-170
+damage: 12-24
+damage2: 0
+hit: 105
+hit2: 0
+ai: AI_SNAKE
+class: MC_DEMON
+ai_level: 1
+magic_res: 10
+magic_res2: 24
+stats_armor_class: 65
+stats_experience: 3139
+speed_move: 14
+speed_attack: 16
+tags: searches
+spawn_cost: 1200
+ascii: S
+color: 125 181 110
+
+name: a gold viper
+internal_name: gold_viper
+icon: monster.gold_viper
+dlvl: 13
+max_dlvl: 14
+monster_level: 25
+health: 140-180
+damage: 15-26
+damage2: 0
+hit: 120
+hit2: 0
+ai: AI_SNAKE
+class: MC_DEMON
+ai_level: 2
+magic_res: 12
+magic_res2: 12
+stats_armor_class: 70
+stats_experience: 3540
+speed_move: 14
+speed_attack: 16
+tags: searches
+spawn_cost: 1250
+ascii: S
+color: 187 132 82
+
+name: an azure drake
+internal_name: azure_drake
+icon: monster.azure_drake
+dlvl: 15
+max_dlvl: 16
+monster_level: 27
+health: 160-200
+damage: 18-30
+damage2: 0
+hit: 130
+hit2: 0
+ai: AI_SNAKE
+class: MC_DEMON
+ai_level: 3
+magic_res: 6
+magic_res2: 42
+stats_armor_class: 75
+stats_experience: 3791
+speed_move: 14
+speed_attack: 16
+tags: searches
+spawn_cost: 1350
+ascii: S
+color: 193 34 55
+
+
+# Templars: the church's knights, heavily armoured
+
+name: a templar
+internal_name: templar
+icon: monster.templar
+dlvl: 12
+max_dlvl: 14
+monster_level: 24
+health: 150
+damage: 15-20
+damage2: 0
+hit: 110
+hit2: 0
+ai: AI_SKELSD
+magic_res: 69
+magic_res2: 97
+stats_armor_class: 75
+stats_experience: 3360
+speed_move: 10
+speed_attack: 20
+tags: searches
+spawn_cost: 1200
+ascii: K
+color: 79 58 94
+
+name: a crusader
+internal_name: crusader
+icon: monster.crusader
+dlvl: 13
+max_dlvl: 15
+monster_level: 26
+health: 165
+damage: 18-25
+damage2: 0
+hit: 130
+hit2: 0
+ai: AI_SKELSD
+magic_res: 67
+magic_res2: 81
+stats_armor_class: 75
+stats_experience: 3650
+speed_move: 10
+speed_attack: 20
+tags: searches
+spawn_cost: 1250
+ascii: K
+color: 171 115 76
+
+name: a blood knight
+internal_name: blood_knight
+icon: monster.blood_knight
+dlvl: 13
+max_dlvl: 14
+monster_level: 30
+health: 200
+damage: 25-35
+damage2: 0
+hit: 130
+hit2: 0
+ai: AI_SKELSD
+ai_level: 1
+magic_res: 106
+magic_res2: 106
+stats_armor_class: 85
+stats_experience: 5130
+speed_move: 10
+speed_attack: 20
+tags: searches
+spawn_cost: 1250
+ascii: K
+color: 130 128 108
+
+
+# Inquisitors: the church's mages, they blink away and cast
+
+name: an inquisitor
+internal_name: inquisitor
+icon: monster.inquisitor
+dlvl: 13
+max_dlvl: 14
+monster_level: 25
+health: 70
+damage: 8-20
+damage2: 0
+hit: 90
+hit2: 0
+ai: AI_COUNSLR
+magic_res: 7
+magic_res2: 7
+stats_armor_class: 0
+stats_experience: 4070
+speed_move: 1
+speed_attack: 25
+tags: opens_doors
+spawn_cost: 1250
+ascii: I
+color: 190 104 74
+
+name: a magistrate
+internal_name: magistrate
+icon: monster.magistrate
+dlvl: 14
+max_dlvl: 15
+monster_level: 27
+health: 85
+damage: 10-24
+damage2: 0
+hit: 100
+hit2: 0
+ai: AI_COUNSLR
+ai_level: 1
+magic_res: 85
+magic_res2: 92
+stats_armor_class: 0
+stats_experience: 4478
+speed_move: 1
+speed_attack: 25
+tags: opens_doors
+spawn_cost: 1300
+ascii: I
+color: 205 170 86
+
+name: a cabalist
+internal_name: cabalist
+icon: monster.cabalist
+dlvl: 15
+max_dlvl: 16
+monster_level: 29
+health: 120
+damage: 14-30
+damage2: 0
+hit: 110
+hit2: 0
+ai: AI_COUNSLR
+ai_level: 2
+magic_res: 99
+magic_res2: 106
+stats_armor_class: 0
+stats_experience: 4929
+speed_move: 1
+speed_attack: 25
+tags: opens_doors
+spawn_cost: 1350
+ascii: I
+color: 150 91 81
+
+name: an advocate
+internal_name: advocate
+icon: monster.advocate
+dlvl: 16
+max_dlvl: 16
+monster_level: 30
+health: 145
+damage: 15-25
+damage2: 0
+hit: 120
+hit2: 0
+ai: AI_COUNSLR
+ai_level: 3
+magic_res: 106
+magic_res2: 120
+stats_armor_class: 0
+stats_experience: 4968
+speed_move: 1
+speed_attack: 25
+tags: opens_doors
+spawn_cost: 1400
+ascii: I
+color: 206 161 152

@@ -18,7 +18,7 @@ func TestEachModLoadsItsOwnMonsters(t *testing.T) {
 		absent string
 	}{
 		{"d1", 112, "MT_NZOMBIE", "rat"},
-		{"heavenandhell", 44, "rat", "MT_NZOMBIE"},
+		{"heavenandhell", 86, "rat", "MT_NZOMBIE"},
 	} {
 		t.Run(tc.mod, func(t *testing.T) {
 			files.SelectMod(tc.mod)

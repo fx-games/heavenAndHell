@@ -59,7 +59,7 @@ gold: 180
 item: main_gauche
 item: torch
 item: partial_leather_armour
-start_spells: poison_target=1 earth_shaker=1 crush=0 shout=0 swing=0 whirlwind_of_doom=0 triumph_of_steel=0 call_to_odin=0
+start_spells: crush=1 earth_shaker=1 poison_target=0 shout=0 swing=0 whirlwind_of_doom=0 triumph_of_steel=0 call_to_odin=0
 skill_points: 1
 max_skill_level: 5
 str: 30
@@ -149,7 +149,7 @@ gold: 180
 item: dagger
 item: torch
 item: robe
-start_spells: heal_health=1 fire_ray=1 black_clouds=0 burning_rain=0 great_thunder=0 eternal_vow=0 bat_out_of_hell=0
+start_spells: black_clouds=1 fire_ray=1 heal_health=0 burning_rain=0 great_thunder=0 eternal_vow=0 bat_out_of_hell=0
 skill_points: 1
 max_skill_level: 5
 str: 15

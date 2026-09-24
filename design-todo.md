@@ -14,8 +14,23 @@ Issues from the game design review against `REVIEW.md`, in priority order. Check
 ## 2. Measurable progression (criterion 2)
 
 - [ ] `playthrough` is hard-wired to D1; let it run H&H so level/depth/char-level can be compared to D1's golden run.
-- [ ] Variety: a level's type draw has 4 candidates at every depth (plus the two thieves as 10% loners); D1 has
-      15-24 on depths 2-14. Every cathedral level offers the same rat/skeleton/bat mix. Needs new families.
+- [x] Variety: the type draw had 4 candidates at every depth (D1: 15-24). Now 6-15, from 42 monsters in 11
+      families borrowed from D1 (sprite, brain and numbers; H&H names), see the end of H&H's enemies.rec:
+      | depth | family (D1 source) | role |
+      |---|---|---|
+      | 1-5 | The Forsaken (zombies) | plague victims the church walled in; slow, poison immune |
+      | 1-6 | Carrion hounds (scavengers) | eat corpses to heal |
+      | 3-8 | Bat demons (blink/gloom/familiar) | hit and run |
+      | 5-8 | Penitents (stalker/unseen) | the Inquisition's invisible killers; humans |
+      | 5-9 | Stone saints (gargoyles) | church statues that wake |
+      | 5-12 | Gluttons (overlord family) | slow, hard hitting |
+      | 6-14 | Acid beasts | spit from afar, acid blood |
+      | 7-12 | Chargers (horned demons) | circle, then charge |
+      | 8-11 | Magma demons | fire immune casters |
+      | 11-16 | Vipers (snakes) | lunge through gaps |
+      | 12-16 | Templars (black knights) | the church's knights; humans |
+      | 13-16 | Inquisitors (counselors) | the church's mages, blink and cast; humans |
+- [ ] Playtest the borrowed families' balance and remap odd sprite picks (frost charger, mud runner, penitent).
 - [x] ~~`skeleton_warrior` stops at `max_dlvl: 2`~~: it is the depth 1-2 dagger variant, fine.
 - [x] ~~`fallen_shaman` 889 exp from depth 1~~: misread, it is `dlvl: 9`, quest-placed only; on par with a goatman.
 - [ ] Depths 17-20 plus the second act: fine only if the total stays within D1's 16 ±4.
@@ -31,11 +46,11 @@ Issues from the game design review against `REVIEW.md`, in priority order. Check
 
 ## 5. Classes (criterion 1)
 
-- [ ] Starting skills are weak identities: Warrior `poison_target`, Mage `heal_health` (flat 20, useless later).
+- [x] Starting skills: Warrior starts with `crush`, Mage with `black_clouds` (the old ones stay learnable).
 - [ ] Archer uses `voice: WARR`; ids still `rogue`/`sorcerer`.
 - [ ] Class skills repair/disarm/recharge are D1's leftovers, not H&H's.
 
 ## 6. Focus (criterion 5)
 
-- [ ] Carried light: meaningful only if light is scarce; otherwise cut it.
+- [x] Carried light: kept (decision 2026-09-24).
 - [ ] TODO.md's "Bring back" list (black horse, switching sides, easter eggs...) must each pass criterion 5 first.
