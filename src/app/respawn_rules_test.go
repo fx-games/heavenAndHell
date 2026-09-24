@@ -161,7 +161,7 @@ func TestPersistLevels(t *testing.T) {
 		t.Error("PersistLevels false kept the level")
 	}
 
-	quest := gridmap.Transition{TargetMap: "catacombs_4", TargetLocation: "to_town"}
+	quest := gridmap.Transition{TargetMap: "catacombs_8", TargetLocation: "ladder_up"}
 	state.MapTransition(quest)
 	killAll(state)
 	kept := levelState(state)

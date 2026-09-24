@@ -1,16 +1,38 @@
 package common
 
 import (
+	"io"
+	"path"
+	"regexp"
+	"strings"
 	"testing"
+
+	"rpg/files"
+
+	"rpg/src/dungeon"
+	"rpg/src/recfile"
 
 	"rpg/src/geometry"
 )
 
-// Deep dungen levels hide some loop doors behind a wall; a found one is a door, and stays one when the level is
-// rebuilt from its snapshot.
+// Deep accretion levels hide some loop doors behind a wall; a found one is a door, and stays one when the level is
+// rebuilt from its snapshot. No level declares accretion now (and the passes drop loop doors), so the test swaps
+// the Doom levels' layout for a bare accretion one.
 func TestSecretDoorsAreFoundAndSaved(t *testing.T) {
 	withMod(t, "heavenandhell")
-	levels := loadModLevels(t)
+	f, err := files.Open(path.Join("assets", "data", "levels.rec"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text, _ := io.ReadAll(f)
+	f.Close()
+	doom := regexp.MustCompile(`(?m)^generator: rogue\n(?:(?:width|height|max_gone_rooms|extra_passages|scale|decoration): .*\n)*`) // the Doom levels' rogue layout
+	src := doom.ReplaceAllString(string(text), "generator: accretion\ntemplate_prefix: Dung\n")
+	src = strings.ReplaceAll(src, "set_piece: piece_hh_rogue room\n", "") // any pass rebuilds the map without its loop doors
+	levels, err := dungeon.LoadLevels(recfile.Read(strings.NewReader(src)), lookupStrategy)
+	if err != nil {
+		t.Fatal(err)
+	}
 	for seed := int64(1); seed <= 20; seed++ {
 		g := modGenerator(t, levels, seed)
 		m := g.GenerateMap("doom_10")

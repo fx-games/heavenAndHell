@@ -12,6 +12,7 @@ import (
 	"rpg/src/dungeon"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
+	"rpg/src/hhm"
 	"rpg/src/recfile"
 	"rpg/src/rules"
 	"rpg/src/stats"
@@ -44,7 +45,11 @@ func modGenerator(t *testing.T, levels []dungeon.Level, seed int64) *MapGenerato
 	g := NewMapGenerator(rnd)
 	g.SetLevels(levels)
 	g.SetSeed(seed)
-	s := NewState(nil)
+	maps, err := hhm.Load(files.GetFileSystem(), hhm.Dir) // set pieces are painted with the mod's tileset
+	if err != nil {
+		t.Fatalf("loading %s maps: %v", files.ActiveMod(), err)
+	}
+	s := NewState(maps)
 	s.SetMapGenerator(g)
 	f := &Factory{RandomSource: rnd, State: &s, Generator: rules.NewGenerator(data, int32(seed))}
 	s.SetFactory(f)
@@ -135,8 +140,8 @@ func TestHeavenAndHellLevelsAreWalkable(t *testing.T) {
 			t.Errorf("%s declares no way down but has one", dlvl)
 		}
 	}
-	if built != 13 {
-		t.Errorf("built %d generated levels, want 13 (twelve deep and the poisoned water supply)", built)
+	if built != 21 {
+		t.Errorf("built %d generated levels, want 21 (sixteen deep, four in the act-two branch, the poisoned water supply)", built)
 	}
 }
 
@@ -187,12 +192,12 @@ func TestHeavenAndHellLevelsArePopulatedFromItsOwnTables(t *testing.T) {
 		}
 	}
 	if totalActors == 0 {
-		t.Error("twelve levels and not one monster on any of them")
+		t.Error("the levels and not one monster on any of them")
 	}
 	if totalItems == 0 {
-		t.Error("twelve levels and not one item on any of them")
+		t.Error("the levels and not one item on any of them")
 	}
-	t.Logf("twelve levels: %d monsters, %d floor items, all from this mod's tables", totalActors, totalItems)
+	t.Logf("%d monsters, %d floor items, all from this mod's tables", totalActors, totalItems)
 }
 
 // Same seed, same level: a dungeon that differs run to run cannot be saved, reloaded or reasoned about, and
@@ -203,7 +208,7 @@ func TestDungenLevelsAreReproducibleFromTheirSeed(t *testing.T) {
 
 	build := func() string {
 		g := modGenerator(t, levels, 4242)
-		m := g.GenerateMap("catacombs_3")
+		m := g.GenerateMap("catacombs_5")
 		out := make([]byte, 0, m.GetWidth()*m.GetHeight())
 		for y := 0; y < m.GetHeight(); y++ {
 			for x := 0; x < m.GetWidth(); x++ {

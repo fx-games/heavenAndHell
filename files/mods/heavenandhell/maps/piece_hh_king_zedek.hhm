@@ -1,0 +1,12 @@
+[map] piece_hh_king_zedek
+DisplayName	piece_hh_king_zedek
+
+[tiles] 7 5
+ 86  86 152 152 152  86  86
+ 86 152  86  78  86 152  86
+ 86  86  86  86  86  86  86
+ 86  86  86  86  86  86  86
+ 86  86  86  86  86  86  86
+
+[entities]
+NPC	3	3	Name=King Zedek	Tile=259	UniqueName=king_zedek

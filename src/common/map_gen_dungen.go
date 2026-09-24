@@ -46,6 +46,9 @@ func (g *MapGenerator) generateDungenMap(lvl dungeon.Level) *gridmap.GridMap[*Ac
 		g.populateD1(m, layout, lvl, pop, stairs)
 	} else {
 		g.decorateDungenRooms(m, layout, lvl, dlvl)
+		for _, pc := range layout.Pieces() { // D1's population places its pieces' creatures itself
+			g.spawnDrawnUniques(m, pc.Map.Entities, func(e *hhm.Entity) geometry.Point { return geometry.Point{X: pc.X + e.X, Y: pc.Y + e.Y} })
+		}
 		g.populateDungenLevel(m, layout, lvl, stairs)
 	}
 
@@ -390,13 +393,18 @@ func (g *MapGenerator) paintDungenDecoration(m *gridmap.GridMap[*Actor, *Item, O
 			}
 		}
 	}
-	// A room's own inhabitants: an NPC entity with a UniqueName is the one place that unique turns up.
-	for _, e := range template.Entities {
+	g.spawnDrawnUniques(m, template.Entities, func(e *hhm.Entity) geometry.Point { return room.ToAbsolutePosition(geometry.Point{X: e.X, Y: e.Y}) })
+}
+
+// spawnDrawnUniques places a drawn room's own inhabitants (a decoration's or a set piece's): an NPC entity with a
+// UniqueName is the one place that unique turns up.
+func (g *MapGenerator) spawnDrawnUniques(m *gridmap.GridMap[*Actor, *Item, Object], entities []*hhm.Entity, at func(*hhm.Entity) geometry.Point) {
+	for _, e := range entities {
 		name := e.Str("UniqueName")
 		if e.Kind != "NPC" || name == "" {
 			continue
 		}
-		p := room.ToAbsolutePosition(geometry.Point{X: e.X, Y: e.Y})
+		p := at(e)
 		if a := g.factory.NewMonsterByID(name); a != nil && m.CanPlaceActorHere(p) {
 			a.monster.SpawnIndex = -1 // saved whole, like the rest of a dungen level's monsters
 			a.SetDrawPosition(p.ToPointF())

@@ -65,7 +65,7 @@ log_text: TEXT_HH_LUCIFER_ACT2_OFFER
 
 key: skeleton_army
 name: Bring peace to the skeleton army
-level: catacombs_4
+level: catacombs_8
 log_text: TEXT_HH_ZEDEK_CROWN
 
 key: shekel
@@ -121,7 +121,7 @@ do: log_quest(evidence)
 do: spawn_item(evidence_three, town, shekels_house)
 
 event: on_enter_level
-subject: caves_6
+subject: caves_12
 when: not flag("placed:evidence_four")
 do: set_flag(placed:evidence_four)
 do: spawn_item(evidence_four, here)
@@ -317,7 +317,7 @@ do: or_quest_var(adventurers, 1, 8)
 
 event: on_item_use
 subject: zedeks_crown
-when: map == "catacombs_4"
+when: map == "catacombs_8"
 do: say(TEXT_HH_ZEDEK_CROWN_BURIED, King Zedek's crown)
 do: take_item(zedeks_crown)
 do: set_flag(buried:zedeks_crown)

@@ -136,13 +136,13 @@ func (c *MegaDungeonGenerator) connectRegions(emptyMap *DungeonMap) {
 		availableConnectors := c.getConnectors(emptyMap)
 		connectorsToOther, exists := availableConnectors[mainRegion]
 		if !exists {
-			return
+			break
 		}
 
 		connectingRegion, connectorPos := c.chooseRandom(connectorsToOther)
 		if connectingRegion == nil {
 			slog.Error("no connecting region")
-			return
+			break
 		}
 		c.requiredConnections = append(c.requiredConnections, connectorPos)
 		c.allConnections = append(c.allConnections, connectorPos)
@@ -162,6 +162,25 @@ func (c *MegaDungeonGenerator) connectRegions(emptyMap *DungeonMap) {
 
 		mainRegion = c.mergeRegions(mainRegion, connectingRegion, connectorPos)
 	}
+	c.sealUnconnected(emptyMap, mainRegion)
+}
+
+// sealUnconnected walls up every region the main one could not reach (no single wall parts them, e.g. a room
+// packed into a corner), so a level is one walkable whole and nothing (stairs, loot) lands where no one can go.
+func (c *MegaDungeonGenerator) sealUnconnected(m *DungeonMap, main Region) {
+	for _, region := range c.allRegions {
+		if region == main {
+			continue
+		}
+		for _, p := range region.GetAbsoluteFloorTiles() {
+			m.SetWall(p.X, p.Y)
+			delete(c.regionLookup, p)
+		}
+		if room, isRoom := region.(*DungeonRoom); isRoom {
+			m.rooms = slices.DeleteFunc(m.rooms, func(r *DungeonRoom) bool { return r == room })
+		}
+	}
+	c.allRegions = []Region{main}
 }
 
 func (c *MegaDungeonGenerator) chooseRandomConnector(regionOne Region, connectors map[Region]map[Region][]geometry.Point) (bool, geometry.Point) {

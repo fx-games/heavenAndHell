@@ -137,3 +137,51 @@ name: Wall Torch
 internal_name: tile.brazier
 icon: 32
 name: Brazier
+
+internal_name: tile.catacombs_wall_see_through
+name: Catacombs Wall (see-through)
+same_as: tile.catacombs_wall
+tags: blocks_movement
+icon: 84
+
+internal_name: tile.cathedral_column
+name: Cathedral Column
+same_as: tile.arch
+tags: blocks_movement, blocks_view, blocks_missiles
+icon: 828
+
+internal_name: tile.cathedral_wall_missiles_pass
+name: Cathedral Wall (missiles pass)
+same_as: tile.cathedral_wall
+tags: blocks_movement, blocks_view
+icon: 57
+
+internal_name: tile.cathedral_wall_see_through
+name: Cathedral Wall (see-through)
+same_as: tile.cathedral_wall
+tags: blocks_movement
+icon: 57
+
+internal_name: tile.cave_wall_missiles_pass
+name: Cave Wall (missiles pass)
+same_as: tile.mountain
+tags: blocks_movement, blocks_view
+icon: 7
+
+internal_name: tile.cave_wall_see_through
+name: Cave Wall (see-through)
+same_as: tile.mountain
+tags: blocks_movement
+icon: 7
+
+internal_name: tile.hell_wall_see_through
+name: Hell Wall (see-through)
+same_as: tile.dungeon_rocky_wall
+tags: blocks_movement
+icon: 9
+
+internal_name: tile.hell_wall_sight_passes
+name: Hell Wall (sight passes)
+same_as: tile.dungeon_rocky_wall
+tags: blocks_movement, blocks_missiles
+icon: 9

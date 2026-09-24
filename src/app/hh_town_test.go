@@ -192,10 +192,10 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 
 	talk("abel", "rivers")
 	expect("poisoned_water", rules.QuestActive)
-	s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, 3), TargetLocation: "ladder_up"})
+	s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, 5), TargetLocation: "ladder_up"})
 	down, ok := s.GetMap().GetTransitionAt(s.GetMap().GetNamedLocation("to_poisoned_water_supply"))
 	if !ok || down.TargetMap != "poisoned_water_supply" {
-		t.Fatalf("level 3 has no way to the poisoned water supply: %+v", down)
+		t.Fatalf("level 5 has no way to the poisoned water supply: %+v", down)
 	}
 	kill("poisoned_water_supply", "")
 	talk("abel", "")
@@ -203,13 +203,13 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 
 	talk("shekel", "Zedek")
 	expect("skeleton_king", rules.QuestActive)
-	kill(levelAt(s, 4), "king_zedek")
+	kill(levelAt(s, 8), "king_zedek")
 	talk("shekel", "")
 	expect("skeleton_king", rules.QuestDone)
 
 	talk("kirioth", "")
 	expect("lucifer", rules.QuestActive)
-	for dlvl := 5; dlvl <= 12 && !s.GetFlags().IsSet("killed:lucifer"); dlvl++ {
+	for dlvl := 5; dlvl <= 16 && !s.GetFlags().IsSet("killed:lucifer"); dlvl++ {
 		s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, dlvl), TargetLocation: "ladder_up"})
 		for _, a := range slices.Clone(s.GetMap().Actors()) {
 			if a.GetInternalName() == "lucifer" {
@@ -244,8 +244,8 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 		t.Error("the gift did not open the hero's eyes")
 	}
 	for note, where := range map[string]string{"Purity report": "poisoned_water_supply",
-		"King Zedek's last will": levelAt(s, 4), "Kirioth's schemes": "town",
-		"From K. to S.": levelAt(s, 6)} {
+		"King Zedek's last will": levelAt(s, 8), "Kirioth's schemes": "town",
+		"From K. to S.": levelAt(s, 12)} {
 		m := s.Map(where)
 		found := false
 		for _, it := range m.Items() {
@@ -281,11 +281,11 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	}
 	exp = player.Hero().Exp
 	pickUp("town", "Kirioth's schemes")
-	pickUp(levelAt(s, 6), "From K. to S.")
+	pickUp(levelAt(s, 12), "From K. to S.")
 	pickUp("poisoned_water_supply", "Purity report")
 	expect("evidence", rules.QuestActive)
 	ui.texts = nil
-	pickUp(levelAt(s, 4), "King Zedek's last will")
+	pickUp(levelAt(s, 8), "King Zedek's last will")
 	expect("evidence", rules.QuestDone)
 	if len(ui.texts) != 1 || !strings.Contains(ui.texts[0], "mankind itself") {
 		t.Errorf("the last piece of evidence: got %q, want Lucifer's rant", ui.texts)
@@ -315,9 +315,9 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	lucifer("debts are still open")
 
 	for _, adventurer := range []string{"adventurer_knight", "adventurer_priest", "adventurer_barbarian", "adventurer_archer"} {
-		kill(levelAt(s, 9), adventurer)
+		kill(levelAt(s, 17), adventurer)
 	}
-	kill(levelAt(s, 12), "evil_shekel")
+	kill(levelAt(s, 20), "evil_shekel")
 
 	crownIn := func() *common.Item {
 		for _, it := range player.GetInventory().Items() {
@@ -332,7 +332,7 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	if crownIn() == nil {
 		t.Fatal("the crown was buried in town")
 	}
-	s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, 4), TargetLocation: "ladder_up"})
+	s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, 8), TargetLocation: "ladder_up"})
 	s.ItemUsed(crownIn())
 	if crownIn() != nil {
 		t.Fatal("the crown was not buried in King Zedek's tomb")
@@ -552,13 +552,13 @@ func TestHeavenAndHellContentResolves(t *testing.T) {
 	}
 }
 
-// The town in hell, main's second town: level 8's caves and level 9's dungeon both lead there and back, and its
+// The town in hell, main's second town: Hell 16 and the Dungeon of Doom's first level (17) both lead there and back, and its
 // four shopkeepers keep the same stock lists as their kind upstairs.
 func TestHeavenAndHellHellTown(t *testing.T) {
 	g := newHeavenAndHellGame(t, NewDummyUI())
 	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
 	s := g.GetWorldState()
-	for dlvl, door := range map[int]string{8: "to_caves", 9: "to_dungeon"} {
+	for dlvl, door := range map[int]string{16: "to_caves", 17: "to_dungeon"} {
 		s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, dlvl), TargetLocation: "ladder_up"})
 		d := s.GetMap()
 		there, ok := d.GetTransitionAt(d.GetNamedLocation("to_hell_town"))

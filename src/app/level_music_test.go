@@ -22,7 +22,7 @@ func TestHHLevelMusic(t *testing.T) {
 	g := newModGame(t, "heavenandhell", NewDummyUI())
 	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
 	s := g.GetWorldState()
-	for dlvl, want := range map[int]string{1: "cathedral", 3: "catacombs", 5: "caves", 7: "hell", 11: "cathedral"} {
+	for dlvl, want := range map[int]string{1: "cathedral", 5: "catacombs", 9: "caves", 13: "hell", 19: "cathedral"} {
 		if got := s.Level(levelAt(s, dlvl)).Music; got != want {
 			t.Errorf("level %d: music %q, want %q", dlvl, got, want)
 		}
