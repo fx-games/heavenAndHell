@@ -14,6 +14,7 @@ import (
 	"rpg/src/game"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
+	"rpg/src/rules"
 	"rpg/src/stats"
 )
 
@@ -47,8 +48,8 @@ func autoplay() {
 	g, _ := createGameAndUIContext()
 	g.GetAudio().SetDisablePlayback(true)
 	common.Clock = func() time.Time { return time.Date(2026, 1, 1, 10, 0, 0, 0, time.UTC) }
-	fmt.Printf("autoplay %s, %s, seeds %d..%d\n%5s %4s %4s %6s %5s %6s %5s %5s %5s %5s %6s\n", mod, g.GetGameData().ClassDefinitions[class].Name, seed, seed+int64(runs)-1,
-		"seed", "dlvl", "clvl", "turns", "kills", "exp", "pots", "home", "equip", "casts", "gold")
+	fmt.Printf("autoplay %s, %s, seeds %d..%d\n%5s %4s %4s %6s %5s %6s %5s %5s %5s %5s %5s %5s %5s %6s\n", mod, g.GetGameData().ClassDefinitions[class].Name, seed, seed+int64(runs)-1,
+		"seed", "dlvl", "clvl", "turns", "kills", "exp", "pots", "home", "equip", "casts", "items", "books", "light", "gold")
 	for r := int64(0); r < int64(runs); r++ {
 		g.SeedRandom(seed + r)
 		g.NewGame(g.GetGameData().ClassDefinitions[class], false, "")
@@ -62,7 +63,7 @@ func botRun(g *game.GameInstance, seed int64) {
 	player := func() *common.Actor { return s.GetPlayer() }
 	hp := func() *stats.Resource { return player().GetStats().GetResource(stats.Health) }
 	cause := common.AbstractCause("autoplay")
-	turns, kills, pots, home, equips, casts := 0, 0, 0, 0, 0, 0
+	turns, kills, pots, home, equips, casts, itemCasts, books := 0, 0, 0, 0, 0, 0, 0, 0
 	potion := func(it *common.Item, kind string) bool { return it.IsPotion() && strings.Contains(it.Name(), kind) }
 	tick := func() {
 		for i := 0; i < 20; i++ {
@@ -103,8 +104,52 @@ func botRun(g *game.GameInstance, seed int64) {
 		}
 		return better && !worse
 	}
+	// lightOf is how far a light source shines: its roll's light_radius, as PlayerLightRadius reads it
+	lightOf := func(it *common.Item) int {
+		if it == nil || it.Roll() == nil {
+			return 0
+		}
+		return it.Roll().PLLight
+	}
+	// betterLight: a brighter light, or a fresh one when the worn one is burning down
+	betterLight := func(it *common.Item) bool {
+		cur := player().GetEquipment().GetLightSource()
+		return it.IsLightSource() && (cur == nil || lightOf(it) > lightOf(cur) ||
+			cur.GetCharges() < 500 && lightOf(it) == lightOf(cur) && it.GetCharges() > cur.GetCharges())
+	}
+	failed := map[*common.Item]bool{} // spell items whose cast was refunded (the spell couldn't go off)
+	lightLow := func() bool {
+		l := player().GetEquipment().GetLightSource()
+		return s.CarriedLighting() && !s.IsPlayerInTown() && (l == nil || l.GetCharges() >= 0 && l.GetCharges() < 300)
+	}
+	isBook := func(it *common.Item) bool { return it.Roll() != nil && it.Roll().MiscID == "IMISC_BOOK" }
+	// offensive is a spell item worth aiming at a monster: D1's scrolls and staves with a targeted spell
+	offensive := func(it *common.Item) bool {
+		t := it.GetTargetedAction()
+		if t == nil || !it.HasChargesLeft() || !it.MeetsRequirements() || failed[it] {
+			return false
+		}
+		for _, harmless := range []string{"Heal", "Teleport", "Telekinesis", "Identify", "Infravision", "Recharge", "Repair", "Disarm", "Resurrect", "Portal", "Phasing"} {
+			if strings.Contains(t.Name(), harmless) {
+				return false
+			}
+		}
+		return true
+	}
 	upgrade := func() {
 		for _, it := range player().GetInventory().Items() {
+			if isBook(it) && it.MeetsRequirements() { // read: learns its spell or raises it
+				actions.ActivateItemActionForPlayer(it)
+				tick()
+				books++
+				continue
+			}
+			if betterLight(it) {
+				actions.EquipItem(it)
+				tick()
+				equips++
+				continue
+			}
 			if isUpgrade(it) {
 				if os.Getenv("AUTOPLAY_DEBUG") != "" {
 					fmt.Printf("  equip %s\n", it.Name())
@@ -132,6 +177,32 @@ func botRun(g *game.GameInstance, seed int64) {
 			casts++
 			return true
 		}
+		for _, it := range append(player().GetInventory().Items(), player().GetEquipment().AllItems()...) {
+			if !offensive(it) {
+				continue
+			}
+			t := it.GetTargetedAction()
+			if !slices.Contains(t.GetTargetingRules(player(), s.GetMap()).Targets(), target.MapPosition()) {
+				continue
+			}
+			if it.Roll() == nil || it.Roll().Type != rules.ITypeStaff { // a scroll is used up (ActivateItemActionForPlayer)
+				broker.Emit(common.ItemUsed{Item: it, User: player()})
+			}
+			it.UseCharge() // as the targeting UI does (beginActionTargeting)
+			if !it.HasChargesLeft() && it.SelfDestructs() {
+				player().GetInventory().Remove(it)
+			}
+			charges := it.GetCharges()
+			t.OnSelected(player(), target.MapPosition(), t.GetHitPositions(player().MapPosition(), target.MapPosition()))
+			if it.GetCharges() > charges {
+				failed[it] = true
+				continue
+			}
+			tick()
+			turns++
+			itemCasts++
+			return true
+		}
 		return false
 	}
 	// goHome is a trip to town: healed, then the healing potions and a fresh light the gold buys
@@ -140,14 +211,13 @@ func botRun(g *game.GameInstance, seed int64) {
 		s.MapTransition(gridmap.Transition{TargetMap: s.DeepestTown(), TargetLocation: "spawn"}) // the shops restock
 		hp().SetToMax()                                                                          // ponytail: the portal and the walk to the healer are free
 		home++
-		light := player().GetEquipment().GetLightSource()
 		for _, v := range s.GetMap().Actors() {
 			if !v.IsVendor() {
 				continue
 			}
 			for _, stack := range common.SellableStacks(v, player()) { // everything it doesn't wear or drink
 				for _, it := range stack {
-					if !potion(it, "Healing") && !potion(it, "Mana") {
+					if !potion(it, "Healing") && !potion(it, "Mana") && !offensive(it) {
 						common.SellItem(player(), it)
 					}
 				}
@@ -157,19 +227,16 @@ func botRun(g *game.GameInstance, seed int64) {
 			if !v.IsVendor() {
 				continue
 			}
-			for _, it := range v.GetInventory().Items() {
-				needLight := it.IsLightSource() && (light == nil || light.GetCharges() < 500)
-				gear := isUpgrade(it) && it.BuyPrice() <= player().GetStats().GetAttribute(stats.Gold)/2 // keep potion money
-				if (needLight || gear || potion(it, "Healing") || casts > 0 && potion(it, "Mana")) && it.BuyPrice() <= player().GetStats().GetAttribute(stats.Gold) {
+			stock := slices.Clone(v.GetInventory().Items())
+			slices.SortStableFunc(stock, func(a, b *common.Item) int { // the light first: gear can wait, the dark can't
+				return boolInt(betterLight(b)) - boolInt(betterLight(a))
+			})
+			for _, it := range stock {
+				gold := player().GetStats().GetAttribute(stats.Gold)
+				gear := (isUpgrade(it) || isBook(it) && it.MeetsRequirements()) && it.BuyPrice() <= gold/2 // keep potion money
+				if (betterLight(it) || gear || potion(it, "Healing") || casts > 0 && potion(it, "Mana")) && it.BuyPrice() <= gold {
 					common.BuyItem(player(), v, it)
-					if gear {
-						upgrade()
-					}
-					if needLight {
-						actions.EquipItem(it)
-						tick()
-						light = it
-					}
+					upgrade()
 				}
 			}
 		}
@@ -268,7 +335,7 @@ func botRun(g *game.GameInstance, seed int64) {
 			}
 			fmt.Println(byType)
 		}
-		clvl, e0, t0, k0, p0, h0, q0, c0 := player().Hero().Level, player().Hero().Exp, turns, kills, pots, home, equips, casts
+		clvl, e0, t0, k0, p0, h0, q0, c0, i0, b0 := player().Hero().Level, player().Hero().Exp, turns, kills, pots, home, equips, casts, itemCasts, books
 		skip := map[*common.Item]bool{} // items the bot gave up on
 		goal := player().MapPosition()  // the explore target, kept until reached: re-picking every step oscillates
 		hasUnexplored := func(p geometry.Point) bool {
@@ -277,7 +344,7 @@ func botRun(g *game.GameInstance, seed int64) {
 		}
 		for budget := 4000; budget > 0 && player().IsAlive(); budget-- {
 			enemies := s.GetVisibility().GetVisibleEnemies()
-			if fraction() < 0.5 && !drink("Healing") && (len(enemies) > 0 || fraction() < 0.3) || s.PlayerLightRadius() == 0 {
+			if fraction() < 0.5 && !drink("Healing") && (len(enemies) > 0 || fraction() < 0.3) || lightLow() {
 				goHome()
 				if s.PlayerLightRadius() == 0 {
 					fmt.Printf("%5d stranded on depth %d at character level %d: no light and no gold for one\n", seed, dlvl, player().Hero().Level)
@@ -372,10 +439,17 @@ func botRun(g *game.GameInstance, seed int64) {
 				return
 			}()*100/max(len(reach), 1))
 		}
-		fmt.Printf("%5d %4d %4d %6d %5d %6d %5d %5d %5d %5d %6d\n", seed, dlvl, clvl, turns-t0, kills-k0, player().Hero().Exp-e0, pots-p0, home-h0, equips-q0, casts-c0, player().GetStats().GetAttribute(stats.Gold))
+		fmt.Printf("%5d %4d %4d %6d %5d %6d %5d %5d %5d %5d %5d %5d %5d %6d\n", seed, dlvl, clvl, turns-t0, kills-k0, player().Hero().Exp-e0, pots-p0, home-h0, equips-q0, casts-c0, itemCasts-i0, books-b0, s.PlayerLightRadius(), player().GetStats().GetAttribute(stats.Gold))
 		if !player().IsAlive() {
 			fmt.Printf("%5d died on depth %d at character level %d\n", seed, dlvl, player().Hero().Level)
 			return
 		}
 	}
+}
+
+func boolInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }

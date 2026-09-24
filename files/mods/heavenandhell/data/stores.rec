@@ -60,7 +60,7 @@ sometimes: greater_mana_potion
 sometimes: superior_healing_potion
 sometimes: superior_mana_potion
 sometimes: stoneskin_potion
-sometimes: lantern
+always: lantern
 sometimes: ring_of_protection
 sometimes: ring_of_strength
 sometimes: ring_of_dexterity
