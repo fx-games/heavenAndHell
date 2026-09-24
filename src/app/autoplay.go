@@ -52,8 +52,8 @@ func autoplay() {
 	g, _ := createGameAndUIContext()
 	g.GetAudio().SetDisablePlayback(true)
 	common.Clock = func() time.Time { return time.Date(2026, 1, 1, 10, 0, 0, 0, time.UTC) }
-	fmt.Printf("autoplay %s, %s, tactical %v, seeds %d..%d\n%5s %4s %4s %6s %5s %6s %5s %5s %5s %5s %5s %5s %5s %6s\n", mod, g.GetGameData().ClassDefinitions[class].Name, tactical, seed, seed+int64(runs)-1,
-		"seed", "dlvl", "clvl", "turns", "kills", "exp", "pots", "home", "equip", "casts", "items", "books", "light", "gold")
+	fmt.Printf("autoplay %s, %s, tactical %v, seeds %d..%d\n%5s %4s %4s %6s %5s %6s %5s %5s %5s %5s %5s %5s %5s %5s %6s\n", mod, g.GetGameData().ClassDefinitions[class].Name, tactical, seed, seed+int64(runs)-1,
+		"seed", "dlvl", "clvl", "turns", "kills", "exp", "pots", "home", "equip", "casts", "items", "books", "open", "light", "gold")
 	for r := int64(0); r < int64(runs); r++ {
 		g.SeedRandom(seed + r)
 		g.NewGame(g.GetGameData().ClassDefinitions[class], false, "")
@@ -67,7 +67,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 	player := func() *common.Actor { return s.GetPlayer() }
 	hp := func() *stats.Resource { return player().GetStats().GetResource(stats.Health) }
 	cause := common.AbstractCause("autoplay")
-	turns, kills, pots, home, equips, casts, itemCasts, books := 0, 0, 0, 0, 0, 0, 0, 0
+	turns, kills, pots, home, equips, casts, itemCasts, books, opened := 0, 0, 0, 0, 0, 0, 0, 0, 0
 	potion := func(it *common.Item, kind string) bool { return it.IsPotion() && strings.Contains(it.Name(), kind) }
 	tick := func() {
 		for i := 0; i < 20; i++ {
@@ -141,6 +141,10 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 		}
 		return true
 	}
+	// keep is what the pack holds on to: healing and mana potions, spell items it can aim, a spare light it'd wear
+	keep := func(it *common.Item) bool {
+		return potion(it, "Healing") || potion(it, "Mana") || offensive(it) || betterLight(it) || isUpgrade(it)
+	}
 	upgrade := func() {
 		for _, it := range player().GetInventory().Items() {
 			if isBook(it) && it.MeetsRequirements() { // read: learns its spell or raises it
@@ -166,13 +170,40 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 			}
 		}
 	}
+	// caster: a hero that has cast a spell from its mana (mana potions are worth its gold)
+	caster := func() bool { return casts > 0 }
+	mana := func() float64 {
+		m := player().GetStats().GetResource(stats.Mana)
+		return float64(m.Value()) / float64(max(m.GetMax(), 1))
+	}
+	// weak: a monster the hero's weapon kills in two average blows, not worth a spell (tactical)
+	weak := func(target *common.Actor) bool {
+		h, mon := player().Hero(), target.Monster()
+		if !tactical || h == nil || mon == nil {
+			return false
+		}
+		lo, hi := h.MeleeDamageRange(player().HeroSheet(), mon.Data.Class)
+		return target.GetStats().GetResource(stats.Health).Value() <= lo+hi
+	}
 	// worthIt: a tactical bot casts nothing its target resists or is immune to (it swings instead)
 	worthIt := func(target *common.Actor, spell int) bool {
 		resisted, immune := s.SpellResisted(target, spell)
 		return !tactical || !resisted && !immune
 	}
 	// cast fires the first skill with the mana for it that can reach target; false when none can
+	var castSpell, castItem func(target *common.Actor) bool
+	// cast picks what to throw at target: nothing at a weak one (the blade saves the mana), spells while the mana
+	// lasts, and below 40% mana (tactical) the staves' charges and scrolls first
 	cast := func(target *common.Actor) bool {
+		if weak(target) && geometry.DistanceChebyshev(target.MapPosition(), player().MapPosition()) <= 1 {
+			return false
+		}
+		if tactical && mana() < 0.4 {
+			return castItem(target) || castSpell(target)
+		}
+		return castSpell(target) || castItem(target)
+	}
+	castSpell = func(target *common.Actor) bool {
 		for _, e := range common.SkillBar(player()) {
 			t, ok := e.(*common.TargetedAction)
 			if !ok || s.LacksMana(player(), t.Name()) || !worthIt(target, s.SpellByName(t.Name())) {
@@ -187,6 +218,9 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 			casts++
 			return true
 		}
+		return false
+	}
+	castItem = func(target *common.Actor) bool {
 		for _, it := range append(player().GetInventory().Items(), player().GetEquipment().AllItems()...) {
 			if !offensive(it) || !worthIt(target, it.Roll().Spell) {
 				continue
@@ -225,12 +259,27 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 			if !v.IsVendor() {
 				continue
 			}
-			for _, stack := range common.SellableStacks(v, player()) { // everything it doesn't wear or drink
+			for _, stack := range common.SellableStacks(v, player()) { // everything it doesn't wear or use
 				for _, it := range stack {
-					if !potion(it, "Healing") && !potion(it, "Mana") && !offensive(it) {
+					if !keep(it) {
 						common.SellItem(player(), it)
 					}
 				}
+			}
+		}
+		d := s.Factory().Gen().D // the witch recharges staves (a caster's second mana pool)
+		for _, it := range append(player().GetInventory().Items(), player().GetEquipment().AllItems()...) {
+			gold := player().GetStats().GetAttribute(stats.Gold)
+			if r := it.Roll(); r != nil && d.CanRecharge(r) && d.RechargeCost(r) <= gold {
+				player().GetStats().DecrementBy(stats.Gold, d.RechargeCost(r))
+				r.Charges = r.MaxCharges
+				it.Refresh()
+				failed[it] = false
+			}
+		}
+		for _, it := range player().GetInventory().Items() { // what no shop buys and the bot won't use: left in town
+			if !keep(it) {
+				player().GetInventory().Remove(it)
 			}
 		}
 		for _, v := range s.GetMap().Actors() {
@@ -238,13 +287,22 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 				continue
 			}
 			stock := slices.Clone(v.GetInventory().Items())
-			slices.SortStableFunc(stock, func(a, b *common.Item) int { // the light first: gear can wait, the dark can't
-				return boolInt(betterLight(b)) - boolInt(betterLight(a))
-			})
+			rank := func(it *common.Item) int { // the light first (the dark can't wait), then potions, then gear
+				switch {
+				case betterLight(it):
+					return 0
+				case caster() && potion(it, "Mana"):
+					return 1
+				case potion(it, "Healing"):
+					return 2
+				}
+				return 3
+			}
+			slices.SortStableFunc(stock, func(a, b *common.Item) int { return rank(a) - rank(b) })
 			for _, it := range stock {
 				gold := player().GetStats().GetAttribute(stats.Gold)
 				gear := (isUpgrade(it) || isBook(it) && it.MeetsRequirements()) && it.BuyPrice() <= gold/2 // keep potion money
-				if (betterLight(it) || gear || potion(it, "Healing") || casts > 0 && potion(it, "Mana")) && it.BuyPrice() <= gold {
+				if (betterLight(it) || gear || potion(it, "Healing") || caster() && potion(it, "Mana")) && it.BuyPrice() <= gold {
 					common.BuyItem(player(), v, it)
 					upgrade()
 				}
@@ -345,9 +403,10 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 			}
 			fmt.Println(byType)
 		}
-		clvl, e0, t0, k0, p0, h0, q0, c0, i0, b0 := player().Hero().Level, player().Hero().Exp, turns, kills, pots, home, equips, casts, itemCasts, books
-		skip := map[*common.Item]bool{} // items the bot gave up on
-		goal := player().MapPosition()  // the explore target, kept until reached: re-picking every step oscillates
+		clvl, e0, t0, k0, p0, h0, q0, c0, i0, b0, o0 := player().Hero().Level, player().Hero().Exp, turns, kills, pots, home, equips, casts, itemCasts, books, opened
+		skip := map[*common.Item]bool{}     // items the bot gave up on
+		skipObj := map[common.Object]bool{} // containers opened or out of reach
+		goal := player().MapPosition()      // the explore target, kept until reached: re-picking every step oscillates
 		hasUnexplored := func(p geometry.Point) bool {
 			m := s.GetMap()
 			return len(m.GetFilteredNeighbors(p, func(n geometry.Point) bool { return m.IsTileWalkable(n) && !m.IsExplored(n) })) > 0
@@ -395,7 +454,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 						}
 					}
 				}
-				if alive := target.IsAlive(); cast(target) || casts > 0 && drink("Mana") && cast(target) {
+				if alive := target.IsAlive(); cast(target) || caster() && !weak(target) && drink("Mana") && cast(target) {
 					if alive && !target.IsAlive() {
 						kills++
 					}
@@ -416,6 +475,36 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 				continue
 			}
 			m := s.GetMap()
+			// containers it has seen get opened: chests, sarcophagi, bookcases...
+			if p := m.GetNearestExploredObject(player().MapPosition(), func(o common.Object) bool {
+				c, ok := o.(*common.Prop)
+				return ok && c.IsUnlootedContainer() && m.IsExplored(c.MapPosition()) && !skipObj[o]
+			}); p != player().MapPosition() {
+				o, _ := m.TryGetObjectAt(p)
+				if geometry.DistanceChebyshev(p, player().MapPosition()) <= 1 {
+					o.ActorBumpedInto(player())
+					broker.Execute(common.NewEndPlayerTurnAction(cause, 10))
+					tick()
+					turns++
+					opened++
+					skipObj[o] = true // opened, or it won't open
+				} else if !stepToward(p) {
+					skipObj[o] = true
+				}
+				continue
+			}
+			// a full pack goes home to sell, then comes back for the rest
+			if player().GetInventory().IsFull() && m.GetNearestExploredItem(player().MapPosition(), func(it *common.Item) bool {
+				return !skip[it] && m.IsExplored(it.MapPosition()) && !player().CanPickup(it)
+			}) != player().MapPosition() {
+				goHome()
+				if player().GetInventory().IsFull() { // nothing to sell: leave what doesn't fit
+					for _, it := range m.Items() {
+						skip[it] = skip[it] || !player().CanPickup(it)
+					}
+				}
+				continue
+			}
 			// items it has seen come first: loot is how the bot gears up and pays for potions
 			wanted := func(it *common.Item) bool {
 				return !skip[it] && m.IsExplored(it.MapPosition()) && player().CanPickup(it)
@@ -442,7 +531,8 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 			if goal == player().MapPosition() || !m.IsTileWalkable(goal) || !hasUnexplored(goal) {
 				goal = m.GetNearestUnexploredWalkablePosition(player().MapPosition())
 				if goal == player().MapPosition() {
-					break // explored all it can reach
+					goHome() // explored all it can reach: sell the loot and stock up before the next depth
+					break
 				}
 			}
 			if !stepToward(goal) { // out of the bot's reach (behind an object): give its frontier up
@@ -475,7 +565,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 				return
 			}()*100/max(len(reach), 1))
 		}
-		fmt.Printf("%5d %4d %4d %6d %5d %6d %5d %5d %5d %5d %5d %5d %5d %6d\n", seed, dlvl, clvl, turns-t0, kills-k0, player().Hero().Exp-e0, pots-p0, home-h0, equips-q0, casts-c0, itemCasts-i0, books-b0, s.PlayerLightRadius(), player().GetStats().GetAttribute(stats.Gold))
+		fmt.Printf("%5d %4d %4d %6d %5d %6d %5d %5d %5d %5d %5d %5d %5d %5d %6d\n", seed, dlvl, clvl, turns-t0, kills-k0, player().Hero().Exp-e0, pots-p0, home-h0, equips-q0, casts-c0, itemCasts-i0, books-b0, opened-o0, s.PlayerLightRadius(), player().GetStats().GetAttribute(stats.Gold))
 		if !player().IsAlive() {
 			fmt.Printf("%5d died on depth %d at character level %d\n", seed, dlvl, player().Hero().Level)
 			return
