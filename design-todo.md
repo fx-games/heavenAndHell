@@ -33,7 +33,7 @@ Issues from the game design review against `REVIEW.md`, in priority order. Check
 - [ ] Torch radius 2, lantern 3: H&H 1680 turns per level against D1's 1160 (was ~2200), 13.5 turns per kill against
   8.7. Still 1.45x D1's walking.
 - [ ] Criterion 4 (autoplay, 5 seeds): the tactical bot (no spell into a resistance, corridors, weakest first)
-  helps the D1 Warrior (median death depth 5 → 6, much steadier) and the H&H Warrior (7 → 7, same spread), and
+  helps the D1 Warrior (median death depth 5 → 6, much steadier) and the H&H Warrior (6 → 7, same spread), and
   neither Mage. Tactics that don't pay are a warning sign: monster weaknesses barely matter yet.
 - [ ] autoplay: the same seed doesn't always replay the same (D1 seed 1 depth 1 once took 4000 turns for 48 kills,
   then 1200 for 137); something outside the seeded RNG (map iteration?) steers the run.
