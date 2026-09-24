@@ -171,18 +171,6 @@ func (g *gen) addCellObjs(ltype int) {
 	}
 }
 
-// openAround is floor with floor all round it.
-func (g *gen) openAround(x, y int) bool {
-	for dy := -1; dy <= 1; dy++ {
-		for dx := -1; dx <= 1; dx++ {
-			if !g.cellFloor(x+dx, y+dy) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 // addCellTorches ports AddL2Torches on cells. D1 hangs a torch on one wall piece of each wall megatile facing
 // the floor (1 in 3) and stands one in front of another (1 in 10); on cells that is a wall cell every eight along
 // a wall with floor east of it (TORCHL2) or south of it (TORCHR2), and a torch on the floor west or north of one
