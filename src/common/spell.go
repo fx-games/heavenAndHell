@@ -1195,6 +1195,25 @@ func manaShield(def *Actor, dam int) int {
 // SpellName is a spell's name for menus.
 func (s *State) SpellName(spell int) string { return s.factory.Generator.D.Spells[spell].Name }
 
+// SpellResisted says how target meets spell's damage: resisted (a quarter), immune (none), or neither.
+func (s *State) SpellResisted(target *Actor, spell int) (resisted, immune bool) {
+	if target.monster == nil || spell <= 0 || spell >= len(s.factory.Generator.D.Spells) {
+		return false, false
+	}
+	resist, imm := resistBits(s.factory.Generator.D.Spells[spell].Resist)
+	return target.monster.MagicRes&resist != 0, target.monster.MagicRes&imm != 0
+}
+
+// SpellByName is the spell named name (as a skill bar entry shows it), or 0.
+func (s *State) SpellByName(name string) int {
+	for i, sd := range s.factory.Generator.D.Spells {
+		if sd.Name == name {
+			return i
+		}
+	}
+	return 0
+}
+
 // LacksMana: the player's memorized spell of that name costs more mana than he has (CastFromMemory's check).
 func (s *State) LacksMana(player *Actor, name string) bool {
 	h := player.hero

@@ -26,6 +26,9 @@ import (
 //
 //	go run ./src autoplay <mod> [seed] [runs] [class index]
 //
+// AUTOPLAY_TACTICAL=1 plays smarter: no spell into a resistance, back into a corridor when surrounded, the weakest
+// monster in reach first. Criterion 4 of REVIEW.md wants that to beat the plain bot clearly.
+//
 // The healer in town heals for free (D1's Pepin, H&H's Kirioth), so the trip home only skips the walk.
 // ponytail: the portal is free and the bot never identifies; model them when they start to matter.
 func autoplay() {
@@ -42,23 +45,24 @@ func autoplay() {
 	if len(os.Args) > 5 {
 		class, _ = strconv.Atoi(os.Args[5])
 	}
+	tactical := os.Getenv("AUTOPLAY_TACTICAL") != "" // plays to monster weaknesses and fights from corridors
 	game.SaveDir = filepath.Join(os.TempDir(), fmt.Sprintf("heavenAndHell_autoplay_%d", os.Getpid()))
 	defer os.RemoveAll(game.SaveDir)
 	modOverride = mod
 	g, _ := createGameAndUIContext()
 	g.GetAudio().SetDisablePlayback(true)
 	common.Clock = func() time.Time { return time.Date(2026, 1, 1, 10, 0, 0, 0, time.UTC) }
-	fmt.Printf("autoplay %s, %s, seeds %d..%d\n%5s %4s %4s %6s %5s %6s %5s %5s %5s %5s %5s %5s %5s %6s\n", mod, g.GetGameData().ClassDefinitions[class].Name, seed, seed+int64(runs)-1,
+	fmt.Printf("autoplay %s, %s, tactical %v, seeds %d..%d\n%5s %4s %4s %6s %5s %6s %5s %5s %5s %5s %5s %5s %5s %6s\n", mod, g.GetGameData().ClassDefinitions[class].Name, tactical, seed, seed+int64(runs)-1,
 		"seed", "dlvl", "clvl", "turns", "kills", "exp", "pots", "home", "equip", "casts", "items", "books", "light", "gold")
 	for r := int64(0); r < int64(runs); r++ {
 		g.SeedRandom(seed + r)
 		g.NewGame(g.GetGameData().ClassDefinitions[class], false, "")
-		botRun(g, seed+r)
+		botRun(g, seed+r, tactical)
 	}
 }
 
 // botRun plays one hero from depth 1 until it dies or the dungeon ends, printing a line per depth.
-func botRun(g *game.GameInstance, seed int64) {
+func botRun(g *game.GameInstance, seed int64, tactical bool) {
 	s, broker := g.GetWorldState(), g.GetActionBroker()
 	player := func() *common.Actor { return s.GetPlayer() }
 	hp := func() *stats.Resource { return player().GetStats().GetResource(stats.Health) }
@@ -118,6 +122,7 @@ func botRun(g *game.GameInstance, seed int64) {
 			cur.GetCharges() < 500 && lightOf(it) == lightOf(cur) && it.GetCharges() > cur.GetCharges())
 	}
 	failed := map[*common.Item]bool{} // spell items whose cast was refunded (the spell couldn't go off)
+	broke := false
 	lightLow := func() bool {
 		l := player().GetEquipment().GetLightSource()
 		return s.CarriedLighting() && !s.IsPlayerInTown() && (l == nil || l.GetCharges() >= 0 && l.GetCharges() < 300)
@@ -161,11 +166,16 @@ func botRun(g *game.GameInstance, seed int64) {
 			}
 		}
 	}
+	// worthIt: a tactical bot casts nothing its target resists or is immune to (it swings instead)
+	worthIt := func(target *common.Actor, spell int) bool {
+		resisted, immune := s.SpellResisted(target, spell)
+		return !tactical || !resisted && !immune
+	}
 	// cast fires the first skill with the mana for it that can reach target; false when none can
 	cast := func(target *common.Actor) bool {
 		for _, e := range common.SkillBar(player()) {
 			t, ok := e.(*common.TargetedAction)
-			if !ok || s.LacksMana(player(), t.Name()) {
+			if !ok || s.LacksMana(player(), t.Name()) || !worthIt(target, s.SpellByName(t.Name())) {
 				continue
 			}
 			if !slices.Contains(t.GetTargetingRules(player(), s.GetMap()).Targets(), target.MapPosition()) {
@@ -178,7 +188,7 @@ func botRun(g *game.GameInstance, seed int64) {
 			return true
 		}
 		for _, it := range append(player().GetInventory().Items(), player().GetEquipment().AllItems()...) {
-			if !offensive(it) {
+			if !offensive(it) || !worthIt(target, it.Roll().Spell) {
 				continue
 			}
 			t := it.GetTargetedAction()
@@ -344,8 +354,9 @@ func botRun(g *game.GameInstance, seed int64) {
 		}
 		for budget := 4000; budget > 0 && player().IsAlive(); budget-- {
 			enemies := s.GetVisibility().GetVisibleEnemies()
-			if fraction() < 0.5 && !drink("Healing") && (len(enemies) > 0 || fraction() < 0.3) || lightLow() {
+			if fraction() < 0.5 && !drink("Healing") && (len(enemies) > 0 || fraction() < 0.3) || lightLow() && !broke {
 				goHome()
+				broke = lightLow() // no gold for a light: burn this one down, go home again when hurt
 				if s.PlayerLightRadius() == 0 {
 					fmt.Printf("%5d stranded on depth %d at character level %d: no light and no gold for one\n", seed, dlvl, player().Hero().Level)
 					return
@@ -357,6 +368,31 @@ func botRun(g *game.GameInstance, seed int64) {
 				for _, e := range enemies[1:] {
 					if geometry.DistanceChebyshev(e.MapPosition(), player().MapPosition()) < geometry.DistanceChebyshev(target.MapPosition(), player().MapPosition()) {
 						target = e
+					}
+				}
+				if tactical {
+					// several on the hero: back into a spot fewer can reach (a corridor, a doorway)
+					here := reachers(enemies, player().MapPosition())
+					if here >= 2 {
+						best, bestN := player().MapPosition(), here
+						for _, n := range s.GetMap().GetFreeCardinalNeighbors(player().MapPosition()) {
+							if c := reachers(enemies, n); c < bestN {
+								best, bestN = n, c
+							}
+						}
+						if best != player().MapPosition() {
+							mv := common.NewMoveAction(cause, player(), best, true)
+							mv.Step = true
+							act(mv)
+							continue
+						}
+					}
+					// the weakest one in reach first: one dead monster hits back less than two hurt ones
+					for _, e := range enemies {
+						if geometry.DistanceChebyshev(e.MapPosition(), player().MapPosition()) <= 1 && (geometry.DistanceChebyshev(target.MapPosition(), player().MapPosition()) > 1 ||
+							e.GetStats().GetResource(stats.Health).Value() < target.GetStats().GetResource(stats.Health).Value()) {
+							target = e
+						}
 					}
 				}
 				if alive := target.IsAlive(); cast(target) || casts > 0 && drink("Mana") && cast(target) {
@@ -445,6 +481,16 @@ func botRun(g *game.GameInstance, seed int64) {
 			return
 		}
 	}
+}
+
+// reachers counts the enemies standing next to p.
+func reachers(enemies []*common.Actor, p geometry.Point) (n int) {
+	for _, e := range enemies {
+		if geometry.DistanceChebyshev(e.MapPosition(), p) <= 1 {
+			n++
+		}
+	}
+	return n
 }
 
 func boolInt(b bool) int {

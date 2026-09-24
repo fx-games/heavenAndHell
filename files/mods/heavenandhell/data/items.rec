@@ -1209,7 +1209,7 @@ throw_damage: 1-2
 light_color: 255 223 117
 light_flicker_pattern: fire
 light_flicker_frame_delay: 0.125
-equip_modifier: light_radius(1)
+equip_modifier: light_radius(2)
 
 name: a Brass Lantern
 internal_name: lantern
@@ -1221,7 +1221,7 @@ category: light
 light_color: 255 223 117
 light_flicker_pattern: fire
 light_flicker_frame_delay: 0.125
-equip_modifier: light_radius(2)
+equip_modifier: light_radius(3)
 
 # --- misc.rec (4 items) ---
 
