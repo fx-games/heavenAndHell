@@ -68,7 +68,19 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 	hp := func() *stats.Resource { return player().GetStats().GetResource(stats.Health) }
 	cause := common.AbstractCause("autoplay")
 	turns, kills, pots, home, equips, casts, itemCasts, books, opened, kites := 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	potion := func(it *common.Item, kind string) bool { return it.IsPotion() && strings.Contains(it.Name(), kind) }
+	// potion: a healing or mana potion by name (H&H) or by D1's IMISC_ kind (full ones and rejuvenation count too)
+	potion := func(it *common.Item, kind string) bool {
+		if !it.IsPotion() {
+			return false
+		}
+		if r := it.Roll(); r != nil && strings.HasPrefix(r.MiscID, "IMISC_") {
+			heals := r.MiscID == "IMISC_HEAL" || r.MiscID == "IMISC_FULLHEAL"
+			mana := r.MiscID == "IMISC_MANA" || r.MiscID == "IMISC_FULLMANA"
+			both := r.MiscID == "IMISC_REJUV" || r.MiscID == "IMISC_FULLREJUV"
+			return kind == "Healing" && (heals || both) || kind == "Mana" && (mana || both)
+		}
+		return strings.Contains(it.Name(), kind)
+	}
 	tick := func() {
 		for i := 0; i < 20; i++ {
 			broker.Tick()
@@ -147,6 +159,12 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 	}
 	upgrade := func() {
 		for _, it := range player().GetInventory().Items() {
+			if r := it.Roll(); r != nil && strings.HasPrefix(r.MiscID, "IMISC_ELIX") || r != nil && r.MiscID == "IMISC_SPECELIX" {
+				actions.ActivateItemActionForPlayer(it) // an elixir: a permanent stat point, drunk at once
+				tick()
+				pots++
+				continue
+			}
 			if isBook(it) && it.MeetsRequirements() { // read: learns its spell or raises it
 				actions.ActivateItemActionForPlayer(it)
 				tick()
@@ -281,9 +299,39 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 				}
 			}
 		}
+		reserve := 0 // under carried light: the price of the cheapest light in town
+		for _, v := range s.GetMap().Actors() {
+			for _, it := range v.GetInventory().Items() {
+				if s.CarriedLighting() && v.IsVendor() && it.IsLightSource() && (reserve == 0 || it.BuyPrice() < reserve) {
+					reserve = it.BuyPrice()
+				}
+			}
+		}
+		// identify magic gear first (D1's Cain): only then can it be judged against what the hero wears
+		for _, v := range s.GetMap().Actors() {
+			for _, rec := range s.Factory().Gen().D.VendorsOf(v.GetInternalName()) {
+				for _, sv := range rec.Services {
+					var fee int
+					if _, err := fmt.Sscanf(sv, "identify(%d)", &fee); err != nil {
+						continue
+					}
+					for _, it := range player().GetInventory().Items() {
+						r := it.Roll()
+						if r == nil || r.Magical == 0 || r.Identified || !it.IsEquippable() || player().GetStats().GetAttribute(stats.Gold)-reserve < fee {
+							continue
+						}
+						player().GetStats().DecrementBy(stats.Gold, fee)
+						r.Identified = true
+						broker.Emit(common.ItemIdentified{Item: r})
+						it.Refresh()
+					}
+				}
+			}
+		}
+		upgrade()
 		d := s.Factory().Gen().D // the witch recharges staves (a caster's second mana pool)
 		for _, it := range append(player().GetInventory().Items(), player().GetEquipment().AllItems()...) {
-			gold := player().GetStats().GetAttribute(stats.Gold)
+			gold := player().GetStats().GetAttribute(stats.Gold) - reserve
 			if r := it.Roll(); r != nil && d.CanRecharge(r) && d.RechargeCost(r) <= gold {
 				player().GetStats().DecrementBy(stats.Gold, d.RechargeCost(r))
 				r.Charges = r.MaxCharges
@@ -294,14 +342,6 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 		for _, it := range player().GetInventory().Items() { // what no shop buys and the bot won't use: left in town
 			if !keep(it) {
 				player().GetInventory().Remove(it)
-			}
-		}
-		reserve := 0 // under carried light: the price of the cheapest light in town
-		for _, v := range s.GetMap().Actors() {
-			for _, it := range v.GetInventory().Items() {
-				if s.CarriedLighting() && v.IsVendor() && it.IsLightSource() && (reserve == 0 || it.BuyPrice() < reserve) {
-					reserve = it.BuyPrice()
-				}
 			}
 		}
 		for _, v := range s.GetMap().Actors() {
@@ -429,6 +469,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 			fmt.Println(byType)
 		}
 		clvl, e0, t0, k0, p0, h0, q0, c0, i0, b0, o0, x0 := player().Hero().Level, player().Hero().Exp, turns, kills, pots, home, equips, casts, itemCasts, books, opened, kites
+		waited := map[*common.Actor]int{}   // turns waited for a monster to step in
 		skip := map[*common.Item]bool{}     // items the bot gave up on
 		skipObj := map[common.Object]bool{} // containers opened or out of reach
 		goal := player().MapPosition()      // the explore target, kept until reached: re-picking every step oscillates
@@ -438,6 +479,10 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 		}
 		for budget := 4000; budget > 0 && player().IsAlive(); budget-- {
 			enemies := s.GetVisibility().GetVisibleEnemies()
+			if tactical && len(enemies) > 0 && danger(enemies, player().MapPosition()) >= hp().Value() && !drink("Healing") {
+				goHome() // the Borg's rule: when the next turn could kill, leave (a town portal)
+				continue
+			}
 			if fraction() < 0.5 && !drink("Healing") && (len(enemies) > 0 || fraction() < 0.3) || lightLow() && !broke {
 				goHome()
 				broke = lightLow() // no gold for a light: burn this one down, go home again when hurt
@@ -486,12 +531,13 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 					}
 				}
 				if tactical {
-					// several on the hero: back into a spot fewer can reach (a corridor, a doorway)
-					here := reachers(enemies, player().MapPosition())
-					if here >= 2 {
+					// the Borg's "back away": when half the hero's health is at stake here, step to the neighbor
+					// where the least damage can reach (out of a crowd, into a corridor or doorway)
+					here := danger(enemies, player().MapPosition())
+					if here*2 >= hp().Value() {
 						best, bestN := player().MapPosition(), here
-						for _, n := range s.GetMap().GetFreeCardinalNeighbors(player().MapPosition()) {
-							if c := reachers(enemies, n); c < bestN {
+						for _, n := range s.GetMap().GetFilteredNeighborsForMovement(player().MapPosition(), s.GetMap().CanPlaceActorHere) {
+							if c := danger(enemies, n); c < bestN {
 								best, bestN = n, c
 							}
 						}
@@ -522,6 +568,11 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 					if alive && !target.IsAlive() {
 						kills++
 					}
+					continue
+				}
+				if tactical && geometry.DistanceChebyshev(target.MapPosition(), player().MapPosition()) == 2 && !shooter(target) && waited[target] < 2 {
+					waited[target]++ // let it step in: the hero swings first instead of walking into its blow
+					act(common.NewEndPlayerTurnAction(cause, 0))
 					continue
 				}
 				if stepToward(target.MapPosition()) {
@@ -670,6 +721,28 @@ func retreat(m *gridmap.GridMap[*common.Actor, *common.Item, common.Object], fro
 		}
 	}
 	return geometry.Point{}, false
+}
+
+// danger is the Borg's danger of standing at p, cut down: the most every monster within two steps (one to close
+// in, one to strike) can deal in a blow.
+func danger(enemies []*common.Actor, p geometry.Point) (sum int) {
+	for _, e := range enemies {
+		if mon := e.Monster(); mon != nil && geometry.DistanceChebyshev(e.MapPosition(), p) <= 2 {
+			sum += mon.Data.Damage.Max()
+		}
+	}
+	return sum
+}
+
+// shooter: a monster that attacks from afar (D1's archers and casters); waiting for it to come is a free shot.
+func shooter(a *common.Actor) bool {
+	ai := a.Monster().Data.AI
+	for _, r := range []string{"BOW", "MAGE", "COUNSLR", "SUCC", "LAZ", "ACID", "MEGA", "SNOT"} {
+		if strings.Contains(ai, r) {
+			return true
+		}
+	}
+	return false
 }
 
 // reachers counts the enemies standing next to p.
