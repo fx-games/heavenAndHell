@@ -1,7 +1,10 @@
 package app
 
 import (
+	"cmp"
+	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"slices"
@@ -14,8 +17,11 @@ import (
 	"rpg/src/game"
 	"rpg/src/geometry"
 	"rpg/src/gridmap"
+	"rpg/src/gui"
 	"rpg/src/rules"
 	"rpg/src/stats"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // autoplay is a bot that plays a mod's class down the dungeon to measure its pacing: per depth, the hero's level on
@@ -49,14 +55,29 @@ func autoplay() {
 	game.SaveDir = filepath.Join(os.TempDir(), fmt.Sprintf("heavenAndHell_autoplay_%d", os.Getpid()))
 	defer os.RemoveAll(game.SaveDir)
 	modOverride = mod
-	g, _ := createGameAndUIContext()
-	g.GetAudio().SetDisablePlayback(true)
+	watch := os.Getenv("AUTOPLAY_WATCH") != "" // in the game's window, one bot turn every AUTOPLAY_SPEED frames
+	g, ctx := createGameAndUIContext()
+	if !watch {
+		g.GetAudio().SetDisablePlayback(true)
+	}
 	common.Clock = func() time.Time { return time.Date(2026, 1, 1, 10, 0, 0, 0, time.UTC) }
+	play := func() {
+		playRuns(g, mod, seed, runs, class, tactical)
+	}
+	if !watch {
+		play()
+		return
+	}
+	watchBot(g, ctx, play)
+}
+
+// playRuns plays runs heroes of the class, one seed each, printing the report.
+func playRuns(g *game.GameInstance, mod string, seed int64, runs, class int, tactical bool) {
 	fmt.Printf("autoplay %s, %s, tactical %v, seeds %d..%d\n%5s %4s %4s %6s %5s %6s %5s %5s %5s %5s %5s %5s %5s %5s %5s %5s %6s\n", mod, g.GetGameData().ClassDefinitions[class].Name, tactical, seed, seed+int64(runs)-1,
 		"seed", "dlvl", "clvl", "turns", "kills", "exp", "pots", "home", "equip", "casts", "items", "books", "open", "kite", "shots", "light", "gold")
 	for r := int64(0); r < int64(runs); r++ {
 		g.SeedRandom(seed + r)
-		g.NewGame(g.GetGameData().ClassDefinitions[class], false, "")
+		g.NewUnsavedGame(g.GetGameData().ClassDefinitions[class])
 		botRun(g, seed+r, tactical)
 	}
 }
@@ -84,6 +105,9 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 	tick := func() {
 		for i := 0; i < 20; i++ {
 			broker.Tick()
+		}
+		if botPace != nil {
+			botPace() // watched: hand the frame back to the window until the next turn
 		}
 	}
 	// spendPoints puts stat points where the class's caps are highest (the lowest share of its cap first) and skill
@@ -385,9 +409,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 	act := func(a common.Action) {
 		broker.Execute(a)
 		broker.Execute(common.NewEndPlayerTurnAction(cause, 10))
-		for i := 0; i < 20; i++ {
-			broker.Tick()
-		}
+		tick()
 		turns++
 		if os.Getenv("AUTOPLAY_DEBUG") != "" {
 			fmt.Printf("turn %d hp %d/%d at %v %T\n", turns, hp().Value(), hp().GetMax(), player().MapPosition(), a)
@@ -797,4 +819,57 @@ func boolInt(b bool) int {
 		return 1
 	}
 	return 0
+}
+
+// botPace, when set, pauses the bot after every turn until the window lets it take the next (watchBot).
+var botPace func()
+
+// watchHost is the game's window with the bot at the controls: every speed frames it lets the bot take one turn
+// before the frame is updated and drawn. The bot runs in its own goroutine but only while Update waits for it,
+// so it never touches the game while a frame is drawn.
+type watchHost struct {
+	*gui.UIController
+	step          func()
+	speed, frames int
+}
+
+func (h *watchHost) Update() error {
+	if h.frames++; h.frames >= h.speed {
+		h.frames = 0
+		h.step()
+	}
+	return h.UIController.Update()
+}
+
+// watchBot opens the game's window and lets the bot play in it (AUTOPLAY_WATCH=1; AUTOPLAY_SPEED frames per turn,
+// default 3, at 60 frames a second).
+func watchBot(g *game.GameInstance, ctx common.UIContext, play func()) {
+	ui := newEbitenUI(g, ctx)
+	speed, _ := strconv.Atoi(os.Getenv("AUTOPLAY_SPEED"))
+	resume, yield, done := make(chan struct{}), make(chan struct{}), make(chan struct{})
+	botPace = func() { yield <- struct{}{}; <-resume }
+	go func() {
+		<-resume
+		play()
+		close(done)
+	}()
+	finished := false
+	host := &watchHost{UIController: ui, speed: cmp.Or(speed, 3), step: func() {
+		if finished {
+			return
+		}
+		resume <- struct{}{}
+		select {
+		case <-yield:
+		case <-done:
+			finished = true
+		}
+	}}
+	size := ui.GetDeviceIndependentScreenSize()
+	ebiten.SetWindowTitle("Of Heaven and Hell - autoplay")
+	ebiten.SetWindowSize(size.X, size.Y)
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	if err := ebiten.RunGame(host); err != nil && !errors.Is(err, ebiten.Termination) {
+		log.Fatal(err)
+	}
 }

@@ -508,6 +508,12 @@ func (g *GameInstance) NewGame(class defs.LoadoutDefinition, permadeath bool, na
 		}, back)
 }
 
+// NewUnsavedGame starts a hero in no save slot, without asking: the autoplay bot's games are never written.
+func (g *GameInstance) NewUnsavedGame(class defs.LoadoutDefinition) {
+	g.autosave, g.slot = false, 0
+	g.resetGame(class, g.randomSource.Int63())
+}
+
 func (g *GameInstance) startNewGame(class defs.LoadoutDefinition, permadeath bool, name string, slot int) {
 	g.autosave = false
 	g.resetGame(class, g.randomSource.Int63())
