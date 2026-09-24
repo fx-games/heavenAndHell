@@ -9,7 +9,6 @@ require (
 	github.com/memmaker/go v0.0.0-20260914173848-285120b22147
 	golang.org/x/image v0.46.0
 	golang.org/x/term v0.46.0
-	golang.org/x/text v0.42.0
 	modernc.org/tk9.0 v1.80.0
 )
 
@@ -40,6 +39,7 @@ require (
 	golang.org/x/net v0.50.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
 	modernc.org/fileutil v1.4.0 // indirect
 	modernc.org/fsm v1.3.2 // indirect
 	modernc.org/gc/v3 v3.1.5 // indirect

@@ -6,9 +6,6 @@ import (
 	"log/slog"
 	"math"
 	"strings"
-
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 type Name string
@@ -66,10 +63,17 @@ type Modifier struct {
 	IsPercentBased bool
 }
 
+// NiceName is the attribute as a title: "max_health" -> "Max Health".
+func (n Name) NiceName() string {
+	words := strings.Fields(strings.ReplaceAll(string(n), "_", " "))
+	for i, w := range words {
+		words[i] = strings.ToUpper(w[:1]) + strings.ToLower(w[1:])
+	}
+	return strings.Join(words, " ")
+}
+
 func (m Modifier) ToString() string {
-	attributeName := strings.Replace(string(m.Attribute), "_", " ", -1)
-	caser := cases.Title(language.English)
-	niceName := caser.String(attributeName)
+	niceName := m.Attribute.NiceName()
 	if m.Mode == ModifyAdditive {
 		sign := "+"
 		if m.Value < 0 {

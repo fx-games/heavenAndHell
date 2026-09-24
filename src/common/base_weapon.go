@@ -6,10 +6,6 @@ import (
 	"rpg/src/defs"
 	"rpg/src/stats"
 	"rpg/src/util"
-	"strings"
-
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 type ThrowStats struct {
@@ -71,7 +67,6 @@ func (s WeaponStats) ToString(forActor *Actor) []util.LabelText {
 	}
 
 	var requirementsInfo []util.LabelText
-	caser := cases.Title(language.English)
 	if len(s.Requirements) > 0 {
 		for attr, value := range s.Requirements {
 			var reqColor color.Color
@@ -79,7 +74,7 @@ func (s WeaponStats) ToString(forActor *Actor) []util.LabelText {
 			if forActor.GetStats().GetAttribute(attr) < value {
 				reqColor = defs.NegativeHighlightColor
 			}
-			niceNameForAttribute := caser.String(strings.Replace(string(attr), "_", " ", -1))
+			niceNameForAttribute := attr.NiceName()
 			requirementsInfo = append(requirementsInfo, util.LabelText{
 				Text:      fmt.Sprintf("%s: %d", niceNameForAttribute, value),
 				TextColor: reqColor,
