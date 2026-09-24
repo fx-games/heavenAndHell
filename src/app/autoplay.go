@@ -282,7 +282,10 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 		return false
 	}
 	// goHome is a trip to town: healed, then the healing potions and a fresh light the gold buys
-	goHome := func() {
+	// goHome is a trip to town; back to the same spot (a town portal), or with toStairs down the level's stairs
+	var goHomeVia func(toStairs bool)
+	goHome := func() { goHomeVia(false) }
+	goHomeVia = func(toStairs bool) {
 		level, at := s.GetMap().GetName(), player().MapPosition()                                // a town portal: back to this spot afterwards
 		s.MapTransition(gridmap.Transition{TargetMap: s.DeepestTown(), TargetLocation: "spawn"}) // the shops restock
 		hp().SetToMax()                                                                          // ponytail: the portal and the walk to the healer are free
@@ -374,8 +377,10 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 			}
 		}
 		s.MapTransition(gridmap.Transition{TargetMap: level, TargetLocation: "ladder_up"})
-		s.GetMap().MoveActor(player(), at)
-		broker.Execute(common.NewUpdateFoVAction(cause, player()))
+		if !toStairs {
+			s.GetMap().MoveActor(player(), at)
+			broker.Execute(common.NewUpdateFoVAction(cause, player()))
+		}
 	}
 	act := func(a common.Action) {
 		broker.Execute(a)
@@ -470,6 +475,8 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 		}
 		clvl, e0, t0, k0, p0, h0, q0, c0, i0, b0, o0, x0 := player().Hero().Level, player().Hero().Exp, turns, kills, pots, home, equips, casts, itemCasts, books, opened, kites
 		waited := map[*common.Actor]int{}   // turns waited for a monster to step in
+		kited := map[*common.Actor]int{}    // steps backed away from a monster: at most 8, then it's fought
+		fled := 0                           // danger bailouts on this level
 		skip := map[*common.Item]bool{}     // items the bot gave up on
 		skipObj := map[common.Object]bool{} // containers opened or out of reach
 		goal := player().MapPosition()      // the explore target, kept until reached: re-picking every step oscillates
@@ -480,7 +487,12 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 		for budget := 4000; budget > 0 && player().IsAlive(); budget-- {
 			enemies := s.GetVisibility().GetVisibleEnemies()
 			if tactical && len(enemies) > 0 && danger(enemies, player().MapPosition()) >= hp().Value() && !drink("Healing") {
-				goHome() // the Borg's rule: when the next turn could kill, leave (a town portal)
+				// the Borg's rule: when the next turn could kill, leave; back by the stairs, not into the same fight
+				if fled++; fled > 10 { // this level beats the hero: the run ends here, not with a dive past it
+					fmt.Printf("%5d gave up on depth %d at character level %d\n", seed, dlvl, player().Hero().Level)
+					return
+				}
+				goHomeVia(true)
 				continue
 			}
 			if fraction() < 0.5 && !drink("Healing") && (len(enemies) > 0 || fraction() < 0.3) || lightLow() && !broke {
@@ -499,7 +511,8 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 						target = e
 					}
 				}
-				if tactical && caster() && !weak(target) && reachers(enemies, player().MapPosition()) > 0 && canCast() {
+				if tactical && caster() && !weak(target) && reachers(enemies, player().MapPosition()) > 0 && canCast() && kited[target] < 8 {
+					kited[target]++
 					// kite: a caster falls back along a path to a corridor farther from them, where they come single
 					// file, and casts from there; with no such corridor near, one step out of reach
 					if step, ok := retreat(s.GetMap(), player().MapPosition(), enemies); ok {
