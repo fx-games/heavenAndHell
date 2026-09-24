@@ -12,6 +12,7 @@ cp go.mod go.sum "$STAGE/" && cp -R src "$STAGE/" && cp files/*.go "$STAGE/files
 cp -R files/mods/heavenandhell "$STAGE/files/mods/"
 (cd "$STAGE" && GOOS=js GOARCH=wasm go build -tags embedded -trimpath -ldflags="-s -w" -o "../web/hh.wasm" ./src)
 rm -rf "$STAGE"
+gzip -9kf "$OUT/hh.wasm" # served as is by nginx gzip_static
 
 cp web/index.html web/game.html web/fs.js "$(go env GOROOT)/lib/wasm/wasm_exec.js" "$OUT/"
 # A first visit's config.rec: the repo's, with every feed the multi window mode shows switched on
