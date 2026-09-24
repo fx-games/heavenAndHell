@@ -243,6 +243,8 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	if !s.GetFlags().IsSet(string(common.FlagHasTrueSight)) {
 		t.Error("the gift did not open the hero's eyes")
 	}
+	// the last piece of evidence waits on Caves 12 for a hero who is looking for it
+	s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, 12), TargetLocation: "ladder_up"})
 	for note, where := range map[string]string{"Purity report": "poisoned_water_supply",
 		"King Zedek's last will": levelAt(s, 8), "Kirioth's schemes": "town",
 		"From K. to S.": levelAt(s, 12)} {
@@ -552,12 +554,17 @@ func TestHeavenAndHellContentResolves(t *testing.T) {
 	}
 }
 
-// The town in hell, main's second town: Hell 16 and the Dungeon of Doom's first level (17) both lead there and back, and its
+// The town in hell, main's second town: once Lucifer is dead, Hell 16 and the Dungeon of Doom's first level (17) both lead there and back, and its
 // four shopkeepers keep the same stock lists as their kind upstairs.
 func TestHeavenAndHellHellTown(t *testing.T) {
 	g := newHeavenAndHellGame(t, NewDummyUI())
 	g.NewGame(g.GetGameData().ClassDefinitions[0], false, "")
 	s := g.GetWorldState()
+	s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, 17), TargetLocation: "ladder_up"})
+	if there, ok := s.GetMap().GetTransitionAt(s.GetMap().GetNamedLocation("to_hell_town")); ok {
+		t.Fatalf("the hell town is open before Lucifer fell: %+v", there)
+	}
+	s.GetFlags().Set("killed:lucifer", true)
 	for dlvl, door := range map[int]string{16: "to_caves", 17: "to_dungeon"} {
 		s.MapTransition(gridmap.Transition{TargetMap: levelAt(s, dlvl), TargetLocation: "ladder_up"})
 		d := s.GetMap()

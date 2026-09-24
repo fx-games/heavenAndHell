@@ -122,7 +122,7 @@ do: spawn_item(evidence_three, town, shekels_house)
 
 event: on_enter_level
 subject: caves_12
-when: not flag("placed:evidence_four")
+when: active("evidence") and not flag("placed:evidence_four")
 do: set_flag(placed:evidence_four)
 do: spawn_item(evidence_four, here)
 

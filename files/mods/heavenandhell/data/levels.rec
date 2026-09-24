@@ -571,6 +571,8 @@ tiles: hell
 music: hell
 exit: ladder_up -> hell_15, ladder_down
 exit: to_hell_town -> hell_town, to_caves
+open_when: flag("killed:lucifer")
+exit_tile: stairs_down
 generator: bsp
 width: 19
 height: 19
@@ -589,7 +591,8 @@ decoration: tile.hell_wall_sight_passes 30 corner
 tile: pillar tile.hell_wall_see_through
 set_piece: piece_hh_lucifer room
 
-# The town in hell, drawn by hand: reached from Hell 16 and from the Dungeon of Doom.
+# The town in hell, drawn by hand: reached from Hell 16 and from the Dungeon of Doom, once Lucifer is dead
+# (the Lucifer who lives there is the one who survived him).
 map: hell_town
 name: The Town in Hell
 depth: 16
@@ -610,6 +613,8 @@ music: caves
 exit: ladder_up -> catacombs_8, to_doom
 exit: ladder_down -> doom_10, ladder_up
 exit: to_hell_town -> hell_town, to_dungeon
+open_when: flag("killed:lucifer")
+exit_tile: stairs_down
 generator: rogue
 width: 40
 height: 40
