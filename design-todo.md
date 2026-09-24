@@ -44,7 +44,14 @@ Issues from the game design review against `REVIEW.md`, in priority order. Check
 
 ## 4. Bosses
 
-- [ ] Lucifer, Zedek, Shekel, Kirioth: each needs one mechanic that demands a different plan, not more HP.
+- [x] Each boss fights under one D1 brain (see the "Boss mechanic" comments in H&H's enemies.rec):
+      Meat Jack eats corpses to heal (scavenger), Zedek raises skeletons from afar (Skeleton King), Lucifer
+      keeps away and calls Apocalypse (Diablo), the Rogue is unseen outside your light (stalker) and his dog
+      charges (horned demon), the adventurers are a party (knight wall, barbarian charger, archer, priest who
+      shields the rest), Shekel lobs poison behind two hired templars (acid beast), Kirioth blinks and casts
+      behind two inquisitors (counselor). Zedek's tomb and Lucifer's hall got candles: with a radius 1 torch
+      a boss in the dark only notices you next to it. spawn_monster now brings a boss's group_spawn escort.
+- [ ] Playtest the boss fights; the priest's shield and Meat Jack's corpse eating are untested in play.
 
 ## 5. Classes (criterion 1)
 

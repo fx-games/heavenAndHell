@@ -371,6 +371,17 @@ func (f *Factory) spawnMonster(id, location string) {
 	a.SetDrawPosition(p.ToPointF())
 	m.AddActor(a, p)
 	f.State.OnActorSpawned(a)
+	// its group_spawn escort comes along, as it does for a monster the level was built with
+	data, _ := f.monsterByID(id)
+	companions := f.groupSpawnOf(data, rng)
+	for i, spot := range freeCellsNear(m, p, len(companions), m.CanPlaceActorHere) {
+		if c := f.NewMonsterByID(companions[i].ID); c != nil {
+			c.monster.SpawnIndex = -1
+			c.SetDrawPosition(spot.ToPointF())
+			m.AddActor(c, spot)
+			f.State.OnActorSpawned(c)
+		}
+	}
 }
 
 // placeItem lays one plain item of the mod's on the level the hero is on: at a named location, or "anywhere"

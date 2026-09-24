@@ -343,6 +343,24 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 	for _, adventurer := range []string{"adventurer_knight", "adventurer_priest", "adventurer_barbarian", "adventurer_archer"} {
 		kill(levelAt(s, 17), adventurer)
 	}
+	escort := func(where, boss, guard string, want int) { // a quest boss brings its group_spawn along
+		t.Helper()
+		if where == "town" {
+			s.MapTransition(town)
+		} else {
+			s.MapTransition(gridmap.Transition{TargetMap: where, TargetLocation: "ladder_up"})
+		}
+		n := 0
+		for _, a := range s.GetMap().Actors() {
+			if a.GetInternalName() == guard && a.IsAlive() {
+				n++
+			}
+		}
+		if n < want {
+			t.Errorf("%s came with %d %s, want %d", boss, n, guard, want)
+		}
+	}
+	escort(levelAt(s, 20), "the true Shekel", "templar", 2)
 	kill(levelAt(s, 20), "evil_shekel")
 
 	crownIn := func() *common.Item {
@@ -375,6 +393,7 @@ func TestHeavenAndHellQuestsPlayThrough(t *testing.T) {
 		t.Errorf("the second act's rewards: %d -> %d exp", exp, player.Hero().Exp)
 	}
 	expect("kirioth", rules.QuestActive)
+	escort("town", "the true Kirioth", "inquisitor", 2)
 	kill("town", "evil_kirioth")
 	expect("kirioth", rules.QuestDone)
 	for _, a := range s.Map("town").Actors() {

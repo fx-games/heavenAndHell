@@ -45,7 +45,8 @@
 #   tags              "a | b": unique (never rolled at random, it lives in its room), no_corpse, flying,
 #                     hidden (invisible), knockback (its melee pushes the hero back), searches (hunts the hero
 #                     down from afar), opens_doors, turns_on_attacker (a hit sends it at the attacker),
-#                     poison_immune (poison does it no harm)
+#                     poison_immune (poison does it no harm), raisable (a boss with AI_SKELKING raises it),
+#                     raised_by_default (what he raises when the level has none)
 #   targeted_skill / untargeted_skill   skills from effects/*.rec it uses; repeatable
 #   equipment         an item it carries, by internal_name; repeatable
 # Words:
@@ -91,7 +92,7 @@ death_string: %s meets the Death of Rats.
 name: a skeleton
 internal_name: skeleton
 class: MC_UNDEAD
-tags: poison_immune
+tags: poison_immune | raisable | raised_by_default
 icon: monster.skeleton
 ascii: u
 color: 200 200 200
@@ -114,7 +115,7 @@ name: a skeleton archer
 tint: 160 200 255
 internal_name: skeleton_archer
 class: MC_UNDEAD
-tags: poison_immune
+tags: poison_immune | raisable
 icon: monster.skeleton_archer
 ascii: u
 color: 191 169 147
@@ -139,7 +140,7 @@ name: a skeleton warrior
 tint: 255 190 120
 internal_name: skeleton_warrior
 class: MC_UNDEAD
-tags: poison_immune
+tags: poison_immune | raisable
 icon: monster.skeleton_warrior
 dlvl: 1
 max_dlvl: 2
@@ -164,7 +165,7 @@ name: a skeleton captain
 tint: 255 110 110
 internal_name: skeleton_captain
 class: MC_UNDEAD
-tags: knockback | poison_immune
+tags: knockback | poison_immune | raisable
 icon: monster.skeleton_captain
 ascii: u
 color: 189 136 136
@@ -757,9 +758,12 @@ stats_dexterity: 6
 stats_intelligence: 5
 death_string: %s dies.
 
+# Boss mechanic: Keeps his distance and calls down Apocalypse; close the gap or break his line of sight (D1 Diablo).
 name: Lucifer
 tint: 255 110 110
 internal_name: lucifer
+ai: AI_DIABLO
+ai_level: 3
 class: MC_DEMON
 magic_res: 17
 drops: blade_of_chaos
@@ -767,7 +771,7 @@ icon: monster.lucifer
 dlvl: 16
 damage: 18-51
 hit: 153
-health: 204-342
+health: 408-684
 stats_armor_class: 101
 stats_experience: 12663
 stats_strength: 18
@@ -802,8 +806,11 @@ death_string: %s has left.
 speed_move: 5
 speed_attack: 10
 
+# Boss mechanic: Raises skeletons from afar and circles away; close in fast, bring a mace (D1 Skeleton King).
 name: King Zedek
 internal_name: king_zedek
+ai: AI_SKELKING
+ai_level: 2
 class: MC_UNDEAD
 magic_res: 6
 drops: malleus_maleficarum
@@ -811,7 +818,7 @@ icon: monster.king_zedek
 dlvl: 8
 damage: 9-26
 hit: 89
-health: 97-162
+health: 194-324
 stats_armor_class: 53
 stats_experience: 3167
 stats_strength: 14
@@ -829,15 +836,18 @@ death_string: %s dies again.
 speed_move: 12
 speed_attack: 12
 
+# Boss mechanic: Always hungry: once hurt below half he breaks off to eat a corpse and heal (D1 scavenger). Kill his company away from him, or chase him down.
 name: Meat Jack
 tint: 160 200 255
 internal_name: meat_jack
+ai: AI_SCAV
+ai_level: 2
 class: MC_DEMON
 icon: monster.meat_jack
 dlvl: 2
 damage: 3-9
 hit: 33
-health: 36-60
+health: 72-120
 stats_armor_class: 16
 stats_experience: 462
 stats_strength: 18
@@ -864,21 +874,24 @@ death_string: %s was cut to pieces.
 speed_move: 6
 speed_attack: 12
 
+# Boss mechanic: Unseen outside your light: strikes from the dark and slips away (D1 stalker). Carry a strong light.
 name: The Rogue
 tint: 255 190 120
 internal_name: rogue
+ai: AI_SNEAK
+ai_level: 3
 drops: shadow_cloak
 icon: monster.rogue
 dlvl: 18
 damage: 16-50
 hit: 166
-health: 232-387
+health: 464-774
 stats_armor_class: 113
 stats_experience: 8886
 stats_strength: 12
 stats_dexterity: 12
 stats_intelligence: 12
-tags: unique | no_corpse
+tags: unique | no_corpse | hidden
 speech_on_sight: qf
 speech_on_sight: za
 speech_on_sight: rb
@@ -888,26 +901,33 @@ death_string: %s descends forever.
 death_string: %s quaffed his last potion.
 death_string: %s dies again.
 
+# Boss mechanic: Circles, then charges from afar and knocks you down (D1 horned demon).
 name: a rogue dog
 tint: 255 110 110
 internal_name: rogue_dog
+ai: AI_RHINO
+ai_level: 3
 class: MC_ANIMAL
 icon: monster.rogue_dog
 dlvl: 18
 damage: 13-38
 hit: 166
-health: 93-154
+health: 186-308
 stats_armor_class: 113
 stats_experience: 3553
 stats_strength: 10
 stats_dexterity: 9
 stats_intelligence: 9
-tags: unique | no_corpse | turns_on_attacker
+tags: unique | no_corpse | turns_on_attacker | knockback
 speech_on_sight: f
 death_string: %s goes to dog heaven.
 
+# Boss mechanic: Lobs his potion works' poison from afar (D1 acid beast) while his hired templars hold you.
 name: the true Shekel
 internal_name: evil_shekel
+ai: AI_ACID
+ai_level: 3
+group_spawn: templar(2)
 magic_res: 1
 random_spawn: false
 drops: scythe_of_slicing
@@ -915,7 +935,7 @@ icon: monster.evil_shekel
 dlvl: 21
 damage: 19-57
 hit: 189
-health: 272-454
+health: 544-908
 stats_armor_class: 131
 stats_experience: 10580
 stats_strength: 14
@@ -927,9 +947,13 @@ death_string: %s dies.
 speed_move: 8
 speed_attack: 12
 
+# Boss mechanic: Blinks away when you close in and casts; his inquisitors guard him (D1 counselor).
 name: the true Kirioth
 tint: 160 200 255
 internal_name: evil_kirioth
+ai: AI_COUNSLR
+ai_level: 3
+group_spawn: inquisitor(2)
 magic_res: 2
 random_spawn: false
 drops: plate_mail_of_the_dark_lord
@@ -937,7 +961,7 @@ icon: monster.evil_kirioth
 dlvl: 20
 damage: 18-55
 hit: 181
-health: 259-432
+health: 518-864
 stats_armor_class: 124
 stats_experience: 9580
 stats_strength: 10
@@ -947,9 +971,12 @@ tags: unique | no_corpse
 speech_on_sight: Your time has come!
 death_string: %s dies.
 
+# Boss mechanic: The party's wall: heavy armour, resists fire and lightning.
 name: a red knight
 tint: 255 190 120
 internal_name: adventurer_knight
+ai: AI_SKELSD
+ai_level: 3
 magic_res: 6
 random_spawn: false
 drops: shield_of_deflection
@@ -957,7 +984,7 @@ icon: monster.adventurer_knight
 dlvl: 17
 damage: 16-47
 hit: 159
-health: 218-364
+health: 436-728
 stats_armor_class: 107
 stats_experience: 6352
 stats_strength: 9
@@ -969,9 +996,11 @@ death_string: %s dies.
 speed_move: 16
 speed_attack: 16
 
+# Boss mechanic: Shields his allies (a skill, no D1 brain): kill him first, or blows on the others are wasted.
 name: a false prophet
 tint: 255 110 110
 internal_name: adventurer_priest
+untargeted_skill: shield_allies(3)
 magic_res: 9
 random_spawn: false
 drops: amulet_of_shadows
@@ -989,15 +1018,18 @@ tags: unique | no_corpse
 speech_on_sight: Your time has come!
 death_string: %s dies.
 
+# Boss mechanic: Circles, then charges from afar.
 name: a barbarian
 internal_name: adventurer_barbarian
+ai: AI_RHINO
+ai_level: 3
 random_spawn: false
 drops: mace_of_destruction
 icon: monster.adventurer_barbarian
 dlvl: 17
 damage: 16-47
 hit: 159
-health: 218-364
+health: 436-728
 stats_armor_class: 107
 stats_experience: 6352
 stats_strength: 9
@@ -1009,16 +1041,19 @@ death_string: %s dies.
 speed_move: 7
 speed_attack: 12
 
+# Boss mechanic: Shoots from behind the others (D1 skeleton archer).
 name: an archer in tights
 tint: 160 200 255
 internal_name: adventurer_archer
+ai: AI_SKELBOW
+ai_level: 3
 random_spawn: false
 drops: black_hands
 icon: monster.adventurer_archer
 dlvl: 17
 damage: 16-47
 hit: 159
-health: 218-364
+health: 436-728
 stats_armor_class: 107
 stats_experience: 6352
 stats_strength: 10

@@ -10,3 +10,5 @@ DisplayName	piece_hh_king_zedek
 
 [entities]
 NPC	3	3	Name=King Zedek	Tile=259	UniqueName=king_zedek
+Object	2	1	ID=OBJ_CANDLE2
+Object	4	1	ID=OBJ_CANDLE2
