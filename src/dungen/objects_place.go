@@ -257,12 +257,12 @@ func (g *gen) addChestTraps() {
 	}
 }
 
-func (g *gen) addStoryBooks(seeds [rules.NumLevels]int32) {
+func (g *gen) addStoryBooks(storySeed int32) {
 	xp, yp, ok := g.findLoc(-3, -2, 3, 2, 20000)
 	if !ok {
 		return
 	}
-	g.addStoryBook(xp, yp, seeds)
+	g.addStoryBook(xp, yp, storySeed)
 	for _, c := range [][2]int{{-2, 1}, {-2, 0}, {-1, -1}, {1, -1}, {2, 0}, {2, 1}} {
 		g.addObject(rules.ObjSTORYCANDLE, xp+c[0], yp+c[1])
 	}
@@ -313,9 +313,9 @@ func (g *gen) getRndObjLoc(randarea int) (int, int) {
 }
 
 // initObjects ports InitObjects.
-func (g *gen) initObjects(seeds [rules.NumLevels]int32) {
+func (g *gen) initObjects(storySeed int32) {
 	g.clrAllObjects()
-	if g.currlevel == 16 {
+	if g.diabloLevel() { // only its set pieces' objects
 		g.pieceObjects()
 		return
 	}
@@ -337,8 +337,8 @@ func (g *gen) initObjects(seeds [rules.NumLevels]int32) {
 			o.ExtraCells = extra
 		}
 	}
-	if g.currlevel == 4 || g.currlevel == 8 || g.currlevel == 12 {
-		g.addStoryBooks(seeds)
+	if (g.currlevel == 4 || g.currlevel == 8 || g.currlevel == 12) && len(g.data.StoryBookNames) > 0 { // a mod with story books
+		g.addStoryBooks(storySeed)
 	}
 	sp := g.setPiece
 	g.pieceObjects() // the set pieces' own: the Butcher's tortures, the candles, the sign chest, the levers
@@ -460,6 +460,9 @@ func (g *gen) addObject(kind, ox, oy int) {
 		}
 	case rules.ObjSHRINEL, rules.ObjSHRINER:
 		o.PreFlag = true
+		if !g.anyShrineHere() { // D1 rerolls until one fits; past every shrine's max_lvl none ever would
+			break
+		}
 		for {
 			v := g.rnd(len(g.data.ShrineNames))
 			if g.currlevel <= g.data.ShrineMax[v] && g.data.ShrineAvail[v] != 2 {
@@ -516,13 +519,13 @@ func (g *gen) addObject(kind, ox, oy int) {
 }
 
 // addStoryBook ports AddObject(OBJ_STORYBOOK) with AddStoryBook, which reseeds the RNG from level 16's seed.
-func (g *gen) addStoryBook(x, y int, seeds [rules.NumLevels]int32) {
+func (g *gen) addStoryBook(x, y int, storySeed int32) {
 	g.addObject(rules.ObjSTORYBOOK, x, y)
 	o := g.objAt(x, y)
 	if o == nil {
 		return
 	}
-	g.rng.SetSeed(seeds[16])
+	g.rng.SetSeed(storySeed)
 	o.Var1 = g.rnd(3)                      // which of the three narrations (StoryText row)
 	o.Var2 = g.currlevel/4 - 1             // StoryText column: the Cathedral, Catacombs or Caves book
 	o.Var3 = g.currlevel>>2 + 3*o.Var1 - 1 // StoryBookName index
@@ -534,7 +537,7 @@ func (g *gen) addStoryBook(x, y int, seeds [rules.NumLevels]int32) {
 func (g *gen) preSpawnSkeleton() int {
 	j := 0
 	for _, t := range g.mtypes {
-		if isSkel(t.mtype) {
+		if g.isSkel(t.mtype) {
 			j++
 		}
 	}
@@ -544,7 +547,7 @@ func (g *gen) preSpawnSkeleton() int {
 	skeltypes := g.rnd(j)
 	i := 0
 	for j = 0; i < len(g.mtypes) && j <= skeltypes; i++ {
-		if isSkel(g.mtypes[i].mtype) {
+		if g.isSkel(g.mtypes[i].mtype) {
 			j++
 		}
 	}
@@ -626,4 +629,14 @@ func (g *gen) objectOfKind(kind int) (int, int, bool) {
 		}
 	}
 	return 0, 0, false
+}
+
+// anyShrineHere is whether some shrine may be generated on this level (shrineMax, shrineAvail).
+func (g *gen) anyShrineHere() bool {
+	for v := range g.data.ShrineNames {
+		if g.currlevel <= g.data.ShrineMax[v] && g.data.ShrineAvail[v] != 2 {
+			return true
+		}
+	}
+	return false
 }

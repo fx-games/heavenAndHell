@@ -185,3 +185,315 @@ name: Hell Wall (sight passes)
 same_as: tile.dungeon_rocky_wall
 tags: blocks_movement, blocks_missiles
 icon: 9
+
+internal_name: prop.chest
+name: Chest
+icon: 128
+
+internal_name: prop.chest.used
+name: Chest (opened)
+icon: 127
+
+internal_name: prop.sarc
+name: Sarcophagus
+icon: 264
+
+internal_name: prop.sarc.used
+name: Sarcophagus (opened)
+icon: 265
+
+internal_name: prop.barrel
+name: Barrel
+icon: 125
+
+internal_name: prop.barrelex
+name: Explosive Barrel
+icon: 320
+
+internal_name: prop.shrine
+name: Shrine
+icon: 75
+
+internal_name: prop.shrine.used
+name: Shrine (used)
+icon: 75
+
+internal_name: prop.book2
+name: Book on Skull Lectern (Ancient/Mythical Book, Skeleton Tome, Library Book)
+icon: 321
+
+internal_name: prop.book2.used
+name: Book on Skull Lectern (read)
+icon: 322
+
+internal_name: prop.bookcase
+name: Bookcase
+icon: 321
+
+internal_name: prop.bookcase.used
+name: Bookcase (searched, or plain Bookshelf)
+icon: 322
+
+internal_name: prop.bloodftn
+name: Blood Fountain
+icon: 293
+
+internal_name: prop.decap
+name: Decapitated Body
+icon: 836
+
+internal_name: prop.decap.used
+name: Decapitated Body (searched)
+icon: 836
+
+internal_name: prop.purifyingftn
+name: Purifying Spring
+icon: 292
+
+internal_name: prop.armorstand
+name: Armor Stand (incl. Warlord's)
+icon: 348
+
+internal_name: prop.armorstand.used
+name: Armor Stand (empty)
+icon: 349
+
+internal_name: prop.goatshrine
+name: Goat Shrine
+icon: 75
+
+internal_name: prop.goatshrine.used
+name: Goat Shrine (used)
+icon: 75
+
+internal_name: prop.cauldron
+name: Cauldron
+icon: 75
+
+internal_name: prop.cauldron.used
+name: Cauldron (used)
+icon: 75
+
+internal_name: prop.murkyftn
+name: Murky Pool
+icon: 292
+
+internal_name: prop.murkyftn.used
+name: Murky Pool (used)
+icon: 292
+
+internal_name: prop.tearftn
+name: Fountain of Tears
+icon: 292
+
+internal_name: prop.tearftn.used
+name: Fountain of Tears (used)
+icon: 292
+
+internal_name: prop.weaponrack
+name: Weapon Rack (incl. Warlord's, Weapon Stand)
+icon: 376
+
+internal_name: prop.weaponrack.used
+name: Weapon Rack (empty)
+icon: 377
+
+internal_name: prop.lever
+name: Lever (incl. Flame Trap Lever)
+icon: 266
+
+internal_name: prop.lever.used
+name: Lever (pulled)
+icon: 267
+
+internal_name: prop.lazstand
+name: Staff of Lazarus Stand (with staff)
+icon: 347
+
+internal_name: prop.lazstand.used
+name: Staff of Lazarus Stand (empty)
+icon: 349
+
+internal_name: prop.switchskl
+name: Skull Lever
+icon: 266
+
+internal_name: prop.switchskl.used
+name: Skull Lever (pulled)
+icon: 267
+
+internal_name: prop.mushpatch
+name: Mushroom Patch (Black Mushroom quest)
+icon: 34
+
+internal_name: prop.mushpatch.used
+name: Mushroom Patch (searched)
+icon: 46
+
+internal_name: prop.book1
+name: Book on Stone Lectern (Blind, Blood, Steel Tome, Book Lever)
+icon: 321
+
+internal_name: prop.book1.used
+name: Book on Stone Lectern (read)
+icon: 322
+
+internal_name: prop.pedistal
+name: Pedestal of Blood (Valor quest)
+icon: 39
+
+internal_name: prop.pedistal.used
+name: Pedestal of Blood (stones placed)
+icon: 40
+
+internal_name: prop.storybook
+name: Story Book (levels 4, 8, 12)
+icon: 321
+
+internal_name: prop.storybook.used
+name: Story Book (read)
+icon: 322
+
+internal_name: prop.slainhero
+name: Slain Hero (level 9)
+icon: 135
+
+internal_name: prop.slainhero.used
+name: Slain Hero (searched)
+icon: 135
+
+internal_name: prop.debris
+name: Debris (broken object)
+icon: 11
+
+internal_name: prop.portal
+name: Town Portal (frame 1)
+icon: 72
+
+internal_name: prop.portal.2
+name: Town Portal (frame 2)
+icon: 294
+
+internal_name: prop.skfire
+name: Skull Fire
+icon: 32
+
+internal_name: prop.candle1
+name: Candle
+icon: 110
+
+internal_name: prop.candle2
+name: Candle (lit)
+icon: 110
+
+internal_name: prop.banner
+name: Banner
+icon: 832
+
+internal_name: prop.skpile
+name: Skull Pile
+icon: 250
+
+internal_name: prop.skstick1
+name: Skull on a Stick 1
+icon: 251
+
+internal_name: prop.skstick2
+name: Skull on a Stick 2
+icon: 251
+
+internal_name: prop.skstick3
+name: Skull on a Stick 3
+icon: 251
+
+internal_name: prop.skstick4
+name: Skull on a Stick 4
+icon: 251
+
+internal_name: prop.skstick5
+name: Skull on a Stick 5
+icon: 251
+
+internal_name: prop.crux
+name: Crucified Skeleton
+icon: 240
+
+internal_name: prop.crux.used
+name: Crucified Skeleton (broken)
+icon: 250
+
+internal_name: prop.stand
+name: Magic Rock Stand
+icon: 347
+
+internal_name: prop.angel
+name: Angel Statue
+icon: 106
+
+internal_name: prop.bcross
+name: Burning Cross
+icon: 827
+
+internal_name: prop.nudew2r
+name: Tortured Body (woman)
+icon: 838
+
+internal_name: prop.tnudem1
+name: Tortured Body (man 1)
+icon: 837
+
+internal_name: prop.tnudem2
+name: Tortured Body (man 2)
+icon: 837
+
+internal_name: prop.tnudem3
+name: Tortured Body (man 3)
+icon: 837
+
+internal_name: prop.tnudem4
+name: Tortured Body (man 4)
+icon: 837
+
+internal_name: prop.tnudew1
+name: Tortured Body (woman 1)
+icon: 838
+
+internal_name: prop.tnudew2
+name: Tortured Body (woman 2)
+icon: 838
+
+internal_name: prop.tnudew3
+name: Tortured Body (woman 3)
+icon: 838
+
+internal_name: prop.torture1
+name: Hooked Body 1
+icon: 835
+
+internal_name: prop.torture2
+name: Hooked Body 2
+icon: 835
+
+internal_name: prop.torture3
+name: Hooked Body 3
+icon: 835
+
+internal_name: prop.torture4
+name: Hooked Body 4
+icon: 835
+
+internal_name: prop.torture5
+name: Hooked Body 5
+icon: 835
+
+internal_name: prop.flamehole
+name: Flame Hole
+icon: 32
+
+internal_name: prop.altboy
+name: Altar (Lazarus' lair)
+icon: 347
+
+internal_name: prop.mcircle
+name: Magic Circle
+icon: 215

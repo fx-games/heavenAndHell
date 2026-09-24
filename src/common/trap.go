@@ -88,7 +88,7 @@ func (a *TrapMissileAction) Execute(ctx ActionContext) []Action {
 		}
 		c.c.missile(nil, []geometry.Point{a.from, player.MapPosition()}, c.secPerTile(a.mis), defs.IconEffectFireBig)
 	case MisFlashTrap: // AddFlash for the players: monster[0]'s level (the golem slot) ·2, on the six cells below
-		dam := 2 * ctx.GameState.factory.Generator.D.Monsters[rules.MtGOLEM].Level
+		dam := 2 * golemLevel(ctx.GameState.factory.Generator.D)
 		for _, d := range []geometry.Point{{X: -1}, {}, {X: 1}, {X: -1, Y: 1}, {Y: 1}, {X: 1, Y: 1}} {
 			c.hit(a.mis, a.from.Add(d), a.from, dam, dam, true, rules.FlashTicks)
 		}
@@ -256,4 +256,13 @@ func BurningCross(s *State, player *Actor, autUsed int) {
 	}
 	ticks := autUsed * rules.RefWalkTicks / 10
 	s.factory.ActionBroker.Execute(NewChangeResourceAction(AbstractCause("a burning cross"), player, stats.Health, -float64(dam*ticks)/64))
+}
+
+// golemLevel is monster[0]'s level, the golem slot's, which the flash trap's damage goes by; a mod without a golem
+// has no slot, so its traps flash at level 1.
+func golemLevel(d *rules.Data) int {
+	if i := d.MonsterByID("MT_GOLEM"); i >= 0 {
+		return d.Monsters[i].Level
+	}
+	return 1
 }

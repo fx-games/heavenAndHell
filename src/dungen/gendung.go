@@ -20,7 +20,8 @@ type gen struct {
 	quests        *rules.Quests
 	currlevel     int
 	ltype         int
-	libraryStands int // Population.LibraryStands
+	libraryStands int      // Population.LibraryStands
+	only          []string // Population.Monsters
 	setlevel      bool
 	setLvlNum     int
 	cells         *DungeonMap // the level as the passes laid it out

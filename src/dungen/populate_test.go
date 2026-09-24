@@ -93,7 +93,7 @@ func TestPopulateStandIns(t *testing.T) {
 			}
 			up, down := floor[0], floor[len(floor)-1]
 			trigs := []Trigger{{up.X + CellOrigin, up.Y + CellOrigin, TrigPrevLevel}, {down.X + CellOrigin, down.Y + CellOrigin, TrigNextLevel}}
-			lvl, err := testLevels(t).Populate(rules.NewGenerator(d, game), &q, seeds, dlvl, pop, m, trigs)
+			lvl, err := testLevels(t).Populate(rules.NewGenerator(d, game), &q, seeds[dlvl], seeds[16], dlvl, pop, m, trigs)
 			if err != nil {
 				t.Fatalf("game %d level %d: %v", game, dlvl, err)
 			}

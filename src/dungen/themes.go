@@ -100,7 +100,7 @@ func (g *gen) tfitSkelRoom(t int) bool {
 		return false
 	}
 	for i, mt := range g.mtypes {
-		if isSkel(mt.mtype) {
+		if g.isSkel(mt.mtype) {
 			g.themeVar1 = i
 			return g.tfitObj5(t)
 		}
@@ -110,7 +110,7 @@ func (g *gen) tfitSkelRoom(t int) bool {
 
 func (g *gen) tfitGoatShrine(t int) bool {
 	for i, mt := range g.mtypes {
-		if isGoat(mt.mtype) {
+		if g.isGoat(mt.mtype) {
 			g.themeVar1 = i
 			return g.tfitObj5(t)
 		}
@@ -244,7 +244,7 @@ func (g *gen) initThemes() {
 	g.rooms = nil
 	g.armorFlag, g.bFountain, g.cauldron, g.mFountain, g.pFountain, g.tFountain, g.treasr = true, true, true, true, true, true, true
 	g.weaponFlag = true
-	if g.currlevel == 16 {
+	if g.diabloLevel() {
 		return
 	}
 	pick := func(i int) {
@@ -284,7 +284,7 @@ func (g *gen) initThemes() {
 
 // holdThemes ports HoldThemeRooms.
 func (g *gen) holdThemes() {
-	if g.currlevel == 16 {
+	if g.diabloLevel() {
 		return
 	}
 	if g.ltype != rules.DTypeCathedral {
@@ -385,7 +385,7 @@ func (g *gen) posOkMonst(x, y int) bool {
 
 // createThemeRooms ports CreateThemeRooms and the Theme_* functions.
 func (g *gen) createThemeRooms() {
-	if g.currlevel == 16 {
+	if g.diabloLevel() {
 		return
 	}
 	g.initObjFlag = true

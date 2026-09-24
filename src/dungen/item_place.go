@@ -170,7 +170,7 @@ func (g *gen) initItems() {
 		}
 	}
 	g.pieceItems() // the Anvil of Fury on its island
-	if g.currlevel > 0 && g.currlevel < 16 {
+	if g.currlevel > 0 && !g.diabloLevel() {
 		g.addInitItems()
 	}
 }

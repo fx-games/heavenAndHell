@@ -17,6 +17,9 @@ type Population struct {
 	// LibraryStands is the chance in percent that a free cell of a library theme room gets a bookstand
 	// (levels.rec's "library_stands:"); 0 keeps D1's 1 in 1/2/2/5 by level type.
 	LibraryStands int
+	// Monsters are the only types a side level rolls (levels.rec's "monster:" lines), random_spawn or not; none:
+	// every random_spawn type its depth allows.
+	Monsters []string
 }
 
 // populations are the knob's values: the level type whose rules a level is populated by.
@@ -41,8 +44,9 @@ func ParsePopulation(r recfile.Record) (p Population, ok bool, err error) {
 
 // Populate runs D1's LoadGameLevel after the layout, on a level laid out by the passes: the triggers are the
 // stairs the caller placed (piece coordinates), the rest is D1's own order of rolls from the level's seed. The
-// map must be D1's 80x80 cells drawn at scale 2, so its grid is D1's 40x40 megatiles.
-func (l *Levels) Populate(gnr *rules.Generator, q *rules.Quests, seeds [rules.NumLevels]int32, dlvl int, p Population,
+// map must be D1's 80x80 cells drawn at scale 2, so its grid is D1's 40x40 megatiles. seed is the level's own
+// (D1's glSeedTbl[dlvl]), storySeed level 16's, which a story book's rolls are reseeded from.
+func (l *Levels) Populate(gnr *rules.Generator, q *rules.Quests, seed, storySeed int32, dlvl int, p Population,
 	m *DungeonMap, trigs []Trigger) (lvl *Level, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -52,7 +56,7 @@ func (l *Levels) Populate(gnr *rules.Generator, q *rules.Quests, seeds [rules.Nu
 	if w, h := m.GetSize(); w != LevelSize || h != LevelSize || m.scale != 2 {
 		return nil, fmt.Errorf("population: level %d is %dx%d at scale %d, want %dx%d at scale 2", dlvl, w, h, m.scale, LevelSize, LevelSize)
 	}
-	g := &gen{quests: q, currlevel: dlvl, ltype: p.Type, cells: m, libraryStands: p.LibraryStands}
+	g := &gen{quests: q, currlevel: dlvl, ltype: p.Type, cells: m, libraryStands: p.LibraryStands, only: p.Monsters}
 	g.data = gnr.D
 	g.igen = &rules.Generator{D: gnr.D, R: &g.rng, UniqueDropped: make([]bool, len(gnr.UniqueDropped))}
 	defer func() {
@@ -60,7 +64,6 @@ func (l *Levels) Populate(gnr *rules.Generator, q *rules.Quests, seeds [rules.Nu
 			gnr.UniqueDropped[u] = gnr.UniqueDropped[u] || d
 		}
 	}()
-	seed := seeds[dlvl]
 	g.rng.SetSeed(seed)
 	g.initLevelMonsters()
 	g.initTrans()
@@ -90,7 +93,7 @@ func (l *Levels) Populate(gnr *rules.Generator, q *rules.Quests, seeds [rules.Nu
 	g.rng.Seed()
 	g.initMonsters(rules.SLNone)
 	g.rng.Seed()
-	g.initObjects(seeds)
+	g.initObjects(storySeed)
 	g.hangTorchesOnWalls()
 	g.moveMonstersOffObjects()
 	g.initItems()
@@ -335,10 +338,7 @@ func (g *gen) populateSetLevel(quest string, trigs []Trigger) *Level {
 	}
 	g.trigs = trigs
 	g.getLevelMTypes(sl)
-	g.addMonsterType(rules.MtGOLEM, placeSpecial)
-	for i := 0; i < 4; i++ {
-		g.monsters[g.addMonster(1, 0, 0, 0, false)].Reserved = true
-	}
+	g.reserveGolems()
 	if sl == rules.SLVileBetrayer {
 		for _, u := range []int{umtLazarus, umtRedVex, umtBlackJade} {
 			g.addMonsterType(g.uniqueType(u), placeUnique)

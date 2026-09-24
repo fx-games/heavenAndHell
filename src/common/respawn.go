@@ -128,6 +128,14 @@ func (g *MapGenerator) levelSeeds(id string, depth int) [rules.NumLevels]int32 {
 	return seeds
 }
 
+// levelSeed is level id's own seed: D1's for its depth, and past D1's sixteen levels one drawn from the id.
+func (g *MapGenerator) levelSeed(id string, depth int) int32 {
+	if depth < rules.NumLevels {
+		return g.levelSeeds(id, depth)[depth]
+	}
+	return g.levelRand(id).Int31()
+}
+
 // keepsLevel: level id is exempt from the rules (a town, or a quest level the mod keeps).
 func (s *State) keepsLevel(id string) bool {
 	l := s.Level(id)

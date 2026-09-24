@@ -150,6 +150,8 @@ door_chance: 0
 room_doors: 12 1
 canvas: 40
 scale: 2
+population: d1_cathedral
+library_stands: 65
 decoration: tile.grate 26 thin
 decoration: tile.cathedral_wall_missiles_pass 21 corner
 decoration: tile.cathedral_wall_see_through 1.3 face
@@ -183,6 +185,8 @@ door_chance: 0
 room_doors: 12 1
 canvas: 40
 scale: 2
+population: d1_cathedral
+library_stands: 65
 decoration: tile.grate 26 thin
 decoration: tile.cathedral_wall_missiles_pass 21 corner
 decoration: tile.cathedral_wall_see_through 1.3 face
@@ -217,6 +221,8 @@ door_chance: 0
 room_doors: 12 1
 canvas: 40
 scale: 2
+population: d1_cathedral
+library_stands: 65
 decoration: tile.grate 26 thin
 decoration: tile.cathedral_wall_missiles_pass 21 corner
 decoration: tile.cathedral_wall_see_through 1.3 face
@@ -250,6 +256,8 @@ door_chance: 0
 room_doors: 12 1
 canvas: 40
 scale: 2
+population: d1_cathedral
+library_stands: 65
 decoration: tile.grate 26 thin
 decoration: tile.cathedral_wall_missiles_pass 21 corner
 decoration: tile.cathedral_wall_see_through 1.3 face
@@ -285,6 +293,8 @@ theme_rooms: 6 10 0
 theme_room_doors: true
 canvas: 40
 scale: 2
+population: d1_catacombs
+library_stands: 40
 decoration: tile.catacombs_wall_see_through 1
 
 map: catacombs_6
@@ -311,6 +321,8 @@ theme_rooms: 6 10 0
 theme_room_doors: true
 canvas: 40
 scale: 2
+population: d1_catacombs
+library_stands: 40
 decoration: tile.catacombs_wall_see_through 1
 
 map: catacombs_7
@@ -337,6 +349,8 @@ theme_rooms: 6 10 0
 theme_room_doors: true
 canvas: 40
 scale: 2
+population: d1_catacombs
+library_stands: 40
 decoration: tile.catacombs_wall_see_through 1
 
 map: catacombs_8
@@ -364,6 +378,8 @@ theme_rooms: 6 10 0
 theme_room_doors: true
 canvas: 40
 scale: 2
+population: d1_catacombs
+library_stands: 40
 decoration: tile.catacombs_wall_see_through 1
 set_piece: piece_hh_king_zedek room
 
@@ -388,6 +404,7 @@ open_halls: 1 5 7
 theme_rooms: 5 10 0
 canvas: 40
 scale: 2
+population: d1_caves
 fences: 0.2 0.45
 tile: fence tile.wooden_fence
 decoration: tile.cave_wall_see_through 100 free
@@ -414,6 +431,7 @@ open_halls: 1 5 7
 theme_rooms: 5 10 0
 canvas: 40
 scale: 2
+population: d1_caves
 fences: 0.2 0.45
 tile: fence tile.wooden_fence
 decoration: tile.cave_wall_see_through 100 free
@@ -440,6 +458,7 @@ open_halls: 1 5 7
 theme_rooms: 5 10 0
 canvas: 40
 scale: 2
+population: d1_caves
 fences: 0.2 0.45
 tile: fence tile.wooden_fence
 decoration: tile.cave_wall_see_through 100 free
@@ -466,6 +485,7 @@ open_halls: 1 5 7
 theme_rooms: 5 10 0
 canvas: 40
 scale: 2
+population: d1_caves
 fences: 0.2 0.45
 tile: fence tile.wooden_fence
 decoration: tile.cave_wall_see_through 100 free
@@ -492,6 +512,7 @@ theme_rooms: 7 10 8
 theme_room_random_size: true
 canvas: 40
 scale: 2
+population: d1_hell
 decoration: tile.hell_wall_sight_passes 30 corner
 tile: pillar tile.hell_wall_see_through
 
@@ -515,6 +536,7 @@ theme_rooms: 7 10 8
 theme_room_random_size: true
 canvas: 40
 scale: 2
+population: d1_hell
 decoration: tile.hell_wall_sight_passes 30 corner
 tile: pillar tile.hell_wall_see_through
 
@@ -538,6 +560,7 @@ theme_rooms: 7 10 8
 theme_room_random_size: true
 canvas: 40
 scale: 2
+population: d1_hell
 decoration: tile.hell_wall_sight_passes 30 corner
 tile: pillar tile.hell_wall_see_through
 
@@ -561,6 +584,7 @@ theme_rooms: 7 10 8
 theme_room_random_size: true
 canvas: 40
 scale: 2
+population: d1_hell
 decoration: tile.hell_wall_sight_passes 30 corner
 tile: pillar tile.hell_wall_see_through
 set_piece: piece_hh_lucifer room
@@ -592,6 +616,7 @@ height: 40
 max_gone_rooms: 2
 extra_passages: 3
 scale: 2
+population: d1_caves
 decoration: tile.cave_wall_see_through 25 end
 decoration: tile.cave_wall_missiles_pass 1.2 corner
 monster: rogue_kestrel
@@ -612,6 +637,7 @@ height: 40
 max_gone_rooms: 2
 extra_passages: 3
 scale: 2
+population: d1_caves
 decoration: tile.cave_wall_see_through 25 end
 decoration: tile.cave_wall_missiles_pass 1.2 corner
 set_piece: piece_hh_rogue room
@@ -640,6 +666,7 @@ door_chance: 1
 room_doors: 60 1
 canvas: 40
 scale: 2
+population: d1_cathedral
 decoration: tile.cathedral_wall_see_through 1.3 face
 tile: pillar tile.pillar
 tile: lamp tile.lamp
@@ -665,6 +692,7 @@ door_chance: 1
 room_doors: 60 1
 canvas: 40
 scale: 2
+population: d1_cathedral
 decoration: tile.cathedral_wall_see_through 1.3 face
 tile: pillar tile.pillar
 tile: lamp tile.lamp
@@ -691,6 +719,7 @@ open_halls: 1 5 7
 theme_rooms: 5 10 0
 canvas: 40
 scale: 2
+population: d1_caves
 fences: 0.2 0.45
 tile: fence tile.wooden_fence
 decoration: tile.cave_wall_see_through 100 free

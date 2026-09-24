@@ -178,7 +178,7 @@ func (g *Factory) rollEnemy(lvl dungeon.Level, types map[int]bool, uniques bool,
 		return nil, nil
 	}
 	pick := eligible[g.RandomSource.Intn(len(eligible))]
-	return g.NewMonster(pick), g.groupSpawnOf(all[pick])
+	return g.NewMonster(pick), g.groupSpawnOf(all[pick], rng)
 }
 
 // rolls reports whether lvl may roll mon: a side level its monster lines, any other level every random_spawn
@@ -192,13 +192,13 @@ func rolls(lvl dungeon.Level, mon defs.Monster) bool {
 
 // groupSpawnOf reads a record's group_spawn entries: a monster's internal name, optionally with a count or a
 // range in brackets ("rat(0-1)", "skeleton(2)").
-func (g *Factory) groupSpawnOf(mon defs.Monster) []defs.Monster {
+func (g *Factory) groupSpawnOf(mon defs.Monster, rnd *rand.Rand) []defs.Monster {
 	var out []defs.Monster
 	for _, entry := range mon.GroupSpawn {
 		name, count := entry, 1
 		if util.LooksLikeAFunction(entry) {
 			n, args := util.GetNameAndArgs(entry)
-			name, count = n, util.NewIntervalFromString(args.Get(0)).Roll(rng)
+			name, count = n, util.NewIntervalFromString(args.Get(0)).Roll(rnd)
 		}
 		companion, ok := g.monsterByID(name)
 		if !ok {

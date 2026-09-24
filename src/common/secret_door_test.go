@@ -26,7 +26,7 @@ func TestSecretDoorsAreFoundAndSaved(t *testing.T) {
 	}
 	text, _ := io.ReadAll(f)
 	f.Close()
-	doom := regexp.MustCompile(`(?m)^generator: rogue\n(?:(?:width|height|max_gone_rooms|extra_passages|scale|decoration): .*\n)*`) // the Doom levels' rogue layout
+	doom := regexp.MustCompile(`(?m)^generator: rogue\n(?:(?:width|height|max_gone_rooms|extra_passages|scale|population|decoration): .*\n)*`) // the Doom levels' rogue layout
 	src := doom.ReplaceAllString(string(text), "generator: accretion\ntemplate_prefix: Dung\n")
 	src = strings.ReplaceAll(src, "set_piece: piece_hh_rogue room\n", "") // any pass rebuilds the map without its loop doors
 	levels, err := dungeon.LoadLevels(recfile.Read(strings.NewReader(src)), lookupStrategy)

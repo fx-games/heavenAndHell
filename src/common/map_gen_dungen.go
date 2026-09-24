@@ -438,7 +438,8 @@ func (g *MapGenerator) populateD1(m *gridmap.GridMap[*Actor, *Item, Object], lay
 		}
 		trigs = append(trigs, dungen.Trigger{X: p.X + dungen.CellOrigin, Y: p.Y + dungen.CellOrigin, Msg: msg})
 	}
-	lvl, err := g.factory.Levels.Populate(g.factory.Gen(), g.questTable(), g.levelSeeds(level.Map, level.Depth), level.Depth, pop, layout, trigs)
+	pop.Monsters = level.Monsters
+	lvl, err := g.factory.Levels.Populate(g.factory.Gen(), g.questTable(), g.levelSeed(level.Map, level.Depth), g.seeds[16], level.Depth, pop, layout, trigs)
 	if err != nil {
 		panic(err)
 	}
@@ -447,6 +448,7 @@ func (g *MapGenerator) populateD1(m *gridmap.GridMap[*Actor, *Item, Object], lay
 	}
 	g.generated[level.Map] = lvl
 	g.placeMonsters(m, lvl)
+	g.addModSpawns(m, layout, level, stairs)
 	g.placeObjects(m, lvl)
 	g.placeItems(m, lvl)
 	for _, a := range append(append([]*Actor(nil), m.Actors()...), g.walledIn[level.Map]...) {
@@ -454,6 +456,42 @@ func (g *MapGenerator) populateD1(m *gridmap.GridMap[*Actor, *Item, Object], lay
 			g.factory.initTalk(a)
 		}
 	}
+}
+
+// addModSpawns adds what a mod's enemies.rec asks for beyond D1's placement: its set pieces' uniques, each
+// group_spawn leader's companions, and the level's wanderers. D1's own records and pieces have none of them, so its
+// levels roll nothing more here.
+func (g *MapGenerator) addModSpawns(m *gridmap.GridMap[*Actor, *Item, Object], layout *dungen.DungeonMap, level dungeon.Level, stairs []geometry.Point) {
+	for _, pc := range layout.Pieces() {
+		g.spawnDrawnUniques(m, pc.Map.Entities, func(e *hhm.Entity) geometry.Point { return geometry.Point{X: pc.X + e.X, Y: pc.Y + e.Y} })
+	}
+	// A leader's companions stand in for the next monsters of its type D1 placed, so the level keeps D1's count.
+	replace := map[string]int{}
+	rnd := g.levelRand(level.Map) // a reload rebuilds the level: the same companions must stand in for the same monsters
+	for _, a := range slices.Clone(m.Actors()) {
+		id := a.GetInternalName()
+		if replace[id] > 0 {
+			replace[id]--
+			m.RemoveActor(a)
+			continue
+		}
+		if mon, ok := g.factory.monsterByID(id); ok && len(mon.GroupSpawn) > 0 {
+			for _, c := range g.spawnDungenCompanions(m, a.MapPosition(), g.factory.groupSpawnOf(mon, rnd)) {
+				c.monster.SpawnIndex = -1 // it takes the spawn spot of the monster it stands in for
+				replace[id]++
+			}
+		}
+	}
+	var cells []geometry.Point
+	width, height := layout.GetSize()
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			if p := (geometry.Point{X: x, Y: y}); layout.IsEmptySpace(p) {
+				cells = append(cells, p)
+			}
+		}
+	}
+	g.placeWanderers(m, level, cells, stairs)
 }
 
 // questHere is whether quest key is available on dungeon level dlvl (D1's QuestStatus).

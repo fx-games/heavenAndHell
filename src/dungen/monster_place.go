@@ -4,6 +4,7 @@ import (
 	"rpg/src/defs"
 	"rpg/src/geometry"
 	"rpg/src/rules"
+	"slices"
 )
 
 // monster.cpp: monster types and placement on level creation.
@@ -109,12 +110,37 @@ func (g *gen) dIt(x, y int) int8 {
 	return 0
 }
 
-func isSkel(mt int) bool {
-	return mt >= rules.MtWSKELAX && mt <= rules.MtXSKELAX || mt >= rules.MtWSKELBW && mt <= rules.MtXSKELBW || mt >= rules.MtWSKELSD && mt <= rules.MtXSKELSD
+// isSkel is D1's IsSkel: the skeletons a sarcophagus or a skeleton theme raises, by their graphics family (D1: the
+// MT_WSKELAX..MT_XSKELSD ranges, which are exactly these three families).
+func (g *gen) isSkel(mt int) bool {
+	f := g.data.Monsters[mt].Family
+	return f == "SkelAxe" || f == "SkelBow" || f == "SkelSd"
 }
 
-func isGoat(mt int) bool {
-	return mt >= rules.MtNGOATMC && mt <= rules.MtGGOATMC || mt >= rules.MtNGOATBW && mt <= rules.MtGGOATBW
+// isGoat is D1's IsGoat (MT_NGOATMC..MT_GGOATBW's two families).
+func (g *gen) isGoat(mt int) bool {
+	f := g.data.Monsters[mt].Family
+	return f == "GoatMace" || f == "GoatBow"
+}
+
+// mt is the mod's monster type D1's code names by id (MT_GOLEM), -1 when the mod has none: a rule about a monster
+// the mod lacks does not apply.
+func (g *gen) mt(id string) int { return g.data.MonsterByID(id) }
+
+// diabloLevel is D1's level 16, which its rules keep for Diablo's lair (no random objects, theme rooms or floor
+// items); in a mod without Diablo it is a level like the others.
+func (g *gen) diabloLevel() bool { return g.currlevel == 16 && g.mt("MT_DIABLO") >= 0 }
+
+// reserveGolems adds the golem type and D1's four reserved monster slots, the players' golems (InitMonsters and
+// LoadSetMap), when the mod has a golem.
+func (g *gen) reserveGolems() {
+	if g.mt("MT_GOLEM") < 0 {
+		return
+	}
+	g.addMonsterType(g.mt("MT_GOLEM"), placeSpecial)
+	for i := 0; i < 4; i++ {
+		g.monsters[g.addMonster(1, 0, 0, 0, false)].Reserved = true
+	}
 }
 
 // initLevelMonsters ports InitLevelMonsters; ClrAllMonsters rolls a direction and an enemy for all 200 slots.
@@ -144,21 +170,23 @@ func (g *gen) uniqueType(u int) int { return g.data.MonsterByID(g.data.UniqueMon
 
 // getLevelMTypes ports GetLevelMTypes.
 func (g *gen) getLevelMTypes(setLevel int) {
-	g.addMonsterType(rules.MtGOLEM, placeSpecial)
-	if g.currlevel == 16 {
-		g.addMonsterType(rules.MtADVOCATE, placeScatter)
-		g.addMonsterType(rules.MtRBLACK, placeScatter)
-		g.addMonsterType(rules.MtDIABLO, placeSpecial)
+	if g.mt("MT_GOLEM") >= 0 {
+		g.addMonsterType(g.mt("MT_GOLEM"), placeSpecial)
+	}
+	if g.diabloLevel() {
+		g.addMonsterType(g.mt("MT_ADVOCATE"), placeScatter)
+		g.addMonsterType(g.mt("MT_RBLACK"), placeScatter)
+		g.addMonsterType(g.mt("MT_DIABLO"), placeSpecial)
 		return
 	}
 	if g.setlevel {
-		if setLevel == rules.SLSkelKing {
-			g.addMonsterType(rules.MtSKING, placeUnique)
+		if setLevel == rules.SLSkelKing && g.mt("MT_SKING") >= 0 {
+			g.addMonsterType(g.mt("MT_SKING"), placeUnique)
 		}
 		return
 	}
-	if g.available(rules.QButcher) {
-		g.addMonsterType(rules.MtCLEAVER, placeSpecial)
+	if g.available(rules.QButcher) && g.mt("MT_CLEAVER") >= 0 {
+		g.addMonsterType(g.mt("MT_CLEAVER"), placeSpecial)
 	}
 	for _, qu := range [][2]int{{rules.QGarbud, umtGarbud}, {rules.QZhar, umtZhar}, {rules.QLtBanner, umtSnotspil}, {rules.QVeil, umtLachdanan}, {rules.QWarlord, umtWarlord}} {
 		if g.available(qu[0]) {
@@ -166,9 +194,12 @@ func (g *gen) getLevelMTypes(setLevel int) {
 		}
 	}
 	var typelist []int
-	for i := 0; i < numMTypes; i++ {
+	for i := 0; i < min(numMTypes, len(g.data.Monsters)); i++ {
 		m := &g.data.Monsters[i]
-		if m.SpawnsAt(g.currlevel) && m.RandomSpawn { // 1.09's 15*mMinDLvl/30+1, precomputed in enemies.rec
+		if m.Has("unique") { // it lives in its room (a mod's quest unique; D1's are placed by quest)
+			continue
+		}
+		if len(g.only) > 0 && slices.Contains(g.only, m.ID) || len(g.only) == 0 && m.SpawnsAt(g.currlevel) && m.RandomSpawn { // 1.09's 15*mMinDLvl/30+1, precomputed in enemies.rec
 			typelist = append(typelist, i)
 		}
 	}
@@ -194,7 +225,7 @@ func (g *gen) getLevelMTypes(setLevel int) {
 func (g *gen) initMonster(slot, dir, mt, x, y int) *Monster {
 	d := &g.data.Monsters[g.mtypes[mt].mtype]
 	var hp int
-	if g.mtypes[mt].mtype == rules.MtDIABLO {
+	if g.mtypes[mt].mtype == g.mt("MT_DIABLO") {
 		hp = (g.rnd(1) + 1666) << 6
 	} else {
 		hp = (d.MinHP() + g.rnd(d.MaxHP()-d.MinHP()+1)) << 6
@@ -403,7 +434,7 @@ func (g *gen) placeGroup(mt, num, leaderf, leader int) {
 
 // initMonsters ports InitMonsters.
 func (g *gen) initMonsters(setLevel int) {
-	if !g.setlevel {
+	if !g.setlevel && g.mt("MT_GOLEM") >= 0 {
 		for i := 0; i < 4; i++ {
 			g.monsters[g.addMonster(1, 0, 0, 0, false)].Reserved = true
 		}
