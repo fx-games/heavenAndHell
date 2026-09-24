@@ -856,10 +856,10 @@ func (a *Actions) RangedAttackAt(mapPos geometry.Point) bool {
 	if !player.CanSee(mapPos) {
 		return false
 	}
-	if currentMap.MoveDistance(player.MapPosition(), mapPos) <= 1 {
-		return false // adjacent: let the normal click-to-move-into-melee handling take it
-	}
 	target, isActor := currentMap.TryGetActorAt(mapPos)
+	if currentMap.MoveDistance(player.MapPosition(), mapPos) <= 1 && !isActor {
+		return false // an adjacent barrel: bumping into it breaks it anyway (a bow shoots a monster point blank, as in D1)
+	}
 	switch {
 	case isActor:
 		if !target.IsVisible() || !target.IsHostileTo(player) || target.IsVendor() {

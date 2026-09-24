@@ -52,8 +52,8 @@ func autoplay() {
 	g, _ := createGameAndUIContext()
 	g.GetAudio().SetDisablePlayback(true)
 	common.Clock = func() time.Time { return time.Date(2026, 1, 1, 10, 0, 0, 0, time.UTC) }
-	fmt.Printf("autoplay %s, %s, tactical %v, seeds %d..%d\n%5s %4s %4s %6s %5s %6s %5s %5s %5s %5s %5s %5s %5s %5s %5s %6s\n", mod, g.GetGameData().ClassDefinitions[class].Name, tactical, seed, seed+int64(runs)-1,
-		"seed", "dlvl", "clvl", "turns", "kills", "exp", "pots", "home", "equip", "casts", "items", "books", "open", "kite", "light", "gold")
+	fmt.Printf("autoplay %s, %s, tactical %v, seeds %d..%d\n%5s %4s %4s %6s %5s %6s %5s %5s %5s %5s %5s %5s %5s %5s %5s %5s %6s\n", mod, g.GetGameData().ClassDefinitions[class].Name, tactical, seed, seed+int64(runs)-1,
+		"seed", "dlvl", "clvl", "turns", "kills", "exp", "pots", "home", "equip", "casts", "items", "books", "open", "kite", "shots", "light", "gold")
 	for r := int64(0); r < int64(runs); r++ {
 		g.SeedRandom(seed + r)
 		g.NewGame(g.GetGameData().ClassDefinitions[class], false, "")
@@ -67,7 +67,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 	player := func() *common.Actor { return s.GetPlayer() }
 	hp := func() *stats.Resource { return player().GetStats().GetResource(stats.Health) }
 	cause := common.AbstractCause("autoplay")
-	turns, kills, pots, home, equips, casts, itemCasts, books, opened, kites := 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	turns, kills, pots, home, equips, casts, itemCasts, books, opened, kites, shots := 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	// potion: a healing or mana potion by name (H&H) or by D1's IMISC_ kind (full ones and rejuvenation count too)
 	potion := func(it *common.Item, kind string) bool {
 		if !it.IsPotion() {
@@ -108,10 +108,15 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 		common.SyncHero(player())
 	}
 	actions := g.GetActions().(*game.Actions)
+	// archer: a hero with a bow in hand shoots instead of swinging
+	archer := func() bool { return player().GetEquipment().HasRangedWeaponEquipped() }
 	// upgrade equips what beats what the hero wears on every value the item tooltip compares, or fills an empty slot
 	isUpgrade := func(it *common.Item) bool {
 		if slot := it.SlotName(); !it.IsEquippable() || !it.MeetsRequirements() || it.IsLightSource() || slot == defs.SlotNameNotEquippable || slot == defs.SlotNameQuiver || slot >= defs.SlotNameQuickSlot1 { // throwables and belt items are no upgrade
 			return false
+		}
+		if it.IsWeapon() && archer() && (it.Roll() == nil || it.Roll().Type != rules.ITypeBow) {
+			return false // an archer keeps a bow in hand
 		}
 		displaced, cmp := player().GetEquipment().CompareForEquipping(it)
 		better, worse := len(displaced) == 0, false
@@ -146,12 +151,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 		if t == nil || !it.HasChargesLeft() || !it.MeetsRequirements() || failed[it] {
 			return false
 		}
-		for _, harmless := range []string{"Heal", "Teleport", "Telekinesis", "Identify", "Infravision", "Recharge", "Repair", "Disarm", "Resurrect", "Portal", "Phasing"} {
-			if strings.Contains(t.Name(), harmless) {
-				return false
-			}
-		}
-		return true
+		return !harmless(t.Name())
 	}
 	// keep is what the pack holds on to: healing and mana potions, spell items it can aim, a spare light it'd wear
 	keep := func(it *common.Item) bool {
@@ -238,7 +238,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 	castSpell = func(target *common.Actor) bool {
 		for _, e := range common.SkillBar(player()) {
 			t, ok := e.(*common.TargetedAction)
-			if !ok || s.LacksMana(player(), t.Name()) || !worthIt(target, s.SpellByName(t.Name())) {
+			if !ok || harmless(t.Name()) || s.LacksMana(player(), t.Name()) || !worthIt(target, s.SpellByName(t.Name())) {
 				continue
 			}
 			if !slices.Contains(t.GetTargetingRules(player(), s.GetMap()).Targets(), target.MapPosition()) {
@@ -473,7 +473,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 			}
 			fmt.Println(byType)
 		}
-		clvl, e0, t0, k0, p0, h0, q0, c0, i0, b0, o0, x0 := player().Hero().Level, player().Hero().Exp, turns, kills, pots, home, equips, casts, itemCasts, books, opened, kites
+		clvl, e0, t0, k0, p0, h0, q0, c0, i0, b0, o0, x0, y0 := player().Hero().Level, player().Hero().Exp, turns, kills, pots, home, equips, casts, itemCasts, books, opened, kites, shots
 		waited := map[*common.Actor]int{}   // turns waited for a monster to step in
 		kited := map[*common.Actor]int{}    // steps backed away from a monster: at most 8, then it's fought
 		fled := 0                           // danger bailouts on this level
@@ -484,7 +484,8 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 			m := s.GetMap()
 			return len(m.GetFilteredNeighbors(p, func(n geometry.Point) bool { return m.IsTileWalkable(n) && !m.IsExplored(n) })) > 0
 		}
-		for budget := 4000; budget > 0 && player().IsAlive(); budget-- {
+		budget := 6000
+		for ; budget > 0 && player().IsAlive(); budget-- {
 			enemies := s.GetVisibility().GetVisibleEnemies()
 			if tactical && len(enemies) > 0 && danger(enemies, player().MapPosition()) >= hp().Value() && !drink("Healing") {
 				// the Borg's rule: when the next turn could kill, leave; back by the stairs, not into the same fight
@@ -511,7 +512,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 						target = e
 					}
 				}
-				if tactical && caster() && !weak(target) && reachers(enemies, player().MapPosition()) > 0 && canCast() && kited[target] < 8 {
+				if tactical && (caster() && !weak(target) && canCast() || archer()) && reachers(enemies, player().MapPosition()) > 0 && kited[target] < 8 {
 					kited[target]++
 					// kite: a caster falls back along a path to a corridor farther from them, where they come single
 					// file, and casts from there; with no such corridor near, one step out of reach
@@ -573,6 +574,15 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 					if alive && !target.IsAlive() {
 						kills++
 					}
+					continue
+				}
+				if archer() && clearLine(s.GetMap(), player().MapPosition(), target.MapPosition()) {
+					alive := target.IsAlive() // an archer shoots, point blank too
+					act(common.NewRangedAttackAction(common.NewActorCause("Ranged attack", player()), player(), target.MapPosition()))
+					if alive && !target.IsAlive() {
+						kills++
+					}
+					shots++
 					continue
 				}
 				if geometry.DistanceChebyshev(target.MapPosition(), player().MapPosition()) <= 1 {
@@ -662,6 +672,10 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 				goal = player().MapPosition()
 			}
 		}
+		if budget == 0 && player().IsAlive() { // it couldn't finish the level: that ends the run, never a dive past it
+			fmt.Printf("%5d gave up on depth %d at character level %d (out of steps)\n", seed, dlvl, player().Hero().Level)
+			return
+		}
 		if os.Getenv("AUTOPLAY_DEBUG") != "" {
 			reach := reachable(s.GetMap(), player().MapPosition())
 			left, inReach, seen := 0, 0, 0
@@ -685,7 +699,7 @@ func botRun(g *game.GameInstance, seed int64, tactical bool) {
 				return
 			}()*100/max(len(reach), 1))
 		}
-		fmt.Printf("%5d %4d %4d %6d %5d %6d %5d %5d %5d %5d %5d %5d %5d %5d %5d %6d\n", seed, dlvl, clvl, turns-t0, kills-k0, player().Hero().Exp-e0, pots-p0, home-h0, equips-q0, casts-c0, itemCasts-i0, books-b0, opened-o0, kites-x0, s.PlayerLightRadius(), player().GetStats().GetAttribute(stats.Gold))
+		fmt.Printf("%5d %4d %4d %6d %5d %6d %5d %5d %5d %5d %5d %5d %5d %5d %5d %5d %6d\n", seed, dlvl, clvl, turns-t0, kills-k0, player().Hero().Exp-e0, pots-p0, home-h0, equips-q0, casts-c0, itemCasts-i0, books-b0, opened-o0, kites-x0, shots-y0, s.PlayerLightRadius(), player().GetStats().GetAttribute(stats.Gold))
 		if !player().IsAlive() {
 			fmt.Printf("%5d died on depth %d at character level %d\n", seed, dlvl, player().Hero().Level)
 			return
@@ -752,6 +766,16 @@ func shooter(a *common.Actor) bool {
 	ai := a.Monster().Data.AI
 	for _, r := range []string{"BOW", "MAGE", "COUNSLR", "SUCC", "LAZ", "ACID", "MEGA", "SNOT"} {
 		if strings.Contains(ai, r) {
+			return true
+		}
+	}
+	return false
+}
+
+// harmless: a spell or skill that doesn't hurt what it's aimed at (a class skill like Trap Disarm among them)
+func harmless(name string) bool {
+	for _, h := range []string{"Heal", "Teleport", "Telekinesis", "Identify", "Infravision", "Recharge", "Repair", "Disarm", "Resurrect", "Portal", "Phasing"} {
+		if strings.Contains(name, h) {
 			return true
 		}
 	}
