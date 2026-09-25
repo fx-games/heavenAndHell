@@ -7,7 +7,6 @@
 fsReady.then(async () => {
 	const go = new Go();
 	const { instance } = await WebAssembly.instantiateStreaming(fetch("hh.wasm"), go.importObject);
-	parent.hhLoaded?.();
 	go.run(instance);
 });
 </script>

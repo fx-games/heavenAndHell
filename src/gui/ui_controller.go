@@ -8,6 +8,7 @@ import (
 	"math"
 	"path"
 	"rpg/files"
+	"rpg/src/audio"
 	"rpg/src/common"
 	"rpg/src/defs"
 	"rpg/src/geometry"
@@ -1312,6 +1313,8 @@ func (u *UIController) LayoutF(outsideWidth, outsideHeight float64) (screenWidth
 	}
 	return outsideWidth * u.deviceDPIScale, outsideHeight * u.deviceDPIScale
 }
+
+func (u *UIController) Audio() *audio.Player { return u.context.AudioPlayer }
 
 func (u *UIController) GetTileScaleFactor() float64 {
 	return u.tileScale

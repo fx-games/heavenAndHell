@@ -42,6 +42,8 @@ type Player struct {
 	masterVolume    float64
 	files           fs.ReadDirFS
 	disablePlayback bool
+	muteMusic       bool // the web page's Music / Sound buttons
+	muteSound       bool
 }
 
 func (ap *Player) SetDisablePlayback(disable bool) {
@@ -73,19 +75,31 @@ func (ap *Player) volumeFor(s *Sound) float64 {
 	switch {
 	case s.IsLooping:
 		return ap.effectiveMusicVolume()
-	case s.IsVoice:
+	case s.IsVoice && !ap.muteSound:
 		return ap.voiceVolume * ap.masterVolume
+	case s.IsVoice:
+		return 0
 	}
 	return ap.effectiveSoundVolume()
 }
 
 func (ap *Player) effectiveMusicVolume() float64 {
+	if ap.muteMusic {
+		return 0
+	}
 	return ap.loopVolume * ap.masterVolume
 }
 
 func (ap *Player) effectiveSoundVolume() float64 {
+	if ap.muteSound {
+		return 0
+	}
 	return ap.sfxVolume * ap.masterVolume
 }
+
+// MuteMusic / MuteSound silence a category without touching the volumes the audio menu shows (voice counts as sound).
+func (ap *Player) MuteMusic(mute bool) { ap.muteMusic = mute; ap.updateVolume() }
+func (ap *Player) MuteSound(mute bool) { ap.muteSound = mute; ap.updateVolume() }
 
 func (ap *Player) SetMasterVolume(volume float64) {
 	ap.masterVolume = Clamp(volume, 0, 1)

@@ -138,6 +138,7 @@ func runGameWithEbiten(theGame *game.GameInstance, context common.UIContext) {
 		}
 	}
 	mount(theGame, context)
+	webBridge(host)
 	uiController := host.UIController
 	screenSize := uiController.GetDeviceIndependentScreenSize()
 

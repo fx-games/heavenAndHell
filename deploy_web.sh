@@ -1,7 +1,7 @@
 #!/bin/sh
 # Build Heaven & Hell for the browser (Go js/wasm, H&H mod only, embedded) and upload it to
 # https://ruzzoli.de/roguelikes/of-heaven-and-hell/. The page is web/: index.html (top bar, one/multi window),
-# game.html (runs the wasm), fs.js (saves in IndexedDB, feeds to the page). `./deploy_web.sh build` skips the upload.
+# game.html (runs the wasm), fs.js (saves in IndexedDB, feeds to the page), rvip-wm.js (~/Games/rvip-tools, windows). `./deploy_web.sh build` skips the upload.
 set -e
 cd "$(dirname "$0")"
 OUT=builds/web STAGE=builds/web-stage
@@ -19,7 +19,7 @@ rm -rf "$STAGE"
 wasm-opt -Oz --enable-bulk-memory --enable-sign-ext --enable-nontrapping-float-to-int -o "$OUT/hh.wasm" "$OUT/hh.wasm" # brew install binaryen
 gzip -9kf "$OUT/hh.wasm" # served as is by nginx gzip_static
 
-cp web/index.html web/game.html web/fs.js "$(go env GOROOT)/lib/wasm/wasm_exec.js" "$OUT/"
+cp web/index.html web/game.html web/fs.js ~/Games/rvip-tools/web/rvip-wm.js "$(go env GOROOT)/lib/wasm/wasm_exec.js" "$OUT/"
 # A first visit's config.rec: the repo's, with every feed the multi window mode shows switched on
 sed -E -e 's/^(Feed(Inventory|Equipment|Character|VisibleItems|VisibleActors|Log)): .*/\1: true/' \
 	-e 's/^Mod: .*/Mod: heavenandhell/' config.rec > "$OUT/defaults.rec"
