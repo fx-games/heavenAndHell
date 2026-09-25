@@ -12,6 +12,7 @@
 	#bar { display: flex; align-items: center; gap: 6px; padding: 4px 8px; background: var(--panel);
 		border-bottom: 1px solid var(--line); height: 32px; white-space: nowrap; }
 	#bar h1 { font-size: 14px; margin: 0 8px 0 0; color: var(--accent); letter-spacing: .04em; }
+#bar h1 a { color: inherit; text-decoration: none; }
 	#bar .sp { flex: 1; }
 	#bar .hint { color: var(--dim); overflow: hidden; text-overflow: ellipsis; }
 	button { background: #22222a; color: var(--text); border: 1px solid var(--line); border-radius: 4px;
@@ -56,7 +57,7 @@
 </head>
 <body>
 <div id="bar">
-	<h1>Of Heaven and Hell</h1>
+	<h1><a href="../shrine/of-heaven-and-hell.html">Of Heaven and Hell</a></h1>
 	<button id="mode" title="Show inventory, equipment, what you see and the message log next to the map">Multi window</button>
 	<button id="reset" title="Put every window back where it started">Reset windows</button>
 	<span class="sp"></span>
